@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // 等待swiper完全初始化后再跳转
       setTimeout(function() {
         if (swiper && typeof swiper.slideTo === 'function') {
-          swiper.slideTo(slideIndex, 0); // 第二个参数0表示不使用动画效果，立即跳转
+          swiper.slideTo(slideIndex, 0); // 第二个参数0表示不使用动画效果，立即跳转1
         }
       }, 100);
     }
