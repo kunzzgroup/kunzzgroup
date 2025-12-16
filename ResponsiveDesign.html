@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Value Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            font-size: 36px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 16px;
+            font-style: italic;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: white;
+            padding: 10px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px 25px;
+            border: none;
+            background: #ecf0f1;
+            color: #7f8c8d;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            background: #d5dbdb;
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* 修改后的输入框样式 */
+        input[type="number"].modified {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        /* 修改标记 */
+        .modified-indicator {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 20px;
+            height: 20px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: help;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+            animation: popIn 0.3s ease;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        /* 状态提示条 */
+        .status-bar {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            color: #16a34a;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            border: 2px solid #bbf7d0;
+        }
+
+        .status-bar.custom-active {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+            border-color: #93c5fd;
+        }
+
+        /* 高级设置区域 */
+        .advanced-settings {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 2px dashed #dee2e6;
+        }
+
+        /* 单位切换器 */
+        .unit-switcher {
+            position: absolute;
+            right: 50px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 5px;
+            background: white;
+            border-radius: 6px;
+            padding: 2px;
+            border: 1px solid #d1d5db;
+        }
+
+        .unit-btn {
+            padding: 4px 10px;
+            border: none;
+            background: transparent;
+            color: #6c757d;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .unit-btn:hover {
+            background: #f8f9fa;
+        }
+
+        .unit-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .unit-label {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #95a5a6;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .result-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 25px;
+        }
+
+        .result-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-size: 14px;
+            color: #6c757d;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .result-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .copy-btn {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+            transform: scale(1.05);
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+
+        .screen-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .screen-table th,
+        .screen-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .screen-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .screen-table td {
+            font-family: 'Courier New', monospace;
+            color: #212529;
+        }
+
+        .screen-table tr:hover {
+            background: #f1f3f5;
+        }
+
+        .clamp-info {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .clamp-info p {
+            margin: 5px 0;
+            color: #856404;
+            font-weight: 600;
+        }
+
+        .converter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .conversion-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+        }
+
+        .conversion-title {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .conversion-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* ==================== Live Preview 样式 ==================== */
+        .live-preview-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-top: 20px;
+        }
+
+        .preview-controls {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .viewport-slider {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .viewport-slider label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #495057;
+            white-space: nowrap;
+        }
+
+        .viewport-slider input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 5px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .viewport-slider input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+        }
+
+        .viewport-slider input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+        }
+
+        .viewport-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .preview-container {
+            background: #f9fafb;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-text {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: #2c3e50;
+            font-weight: 600;
+            line-height: 1.4;
+            transition: font-size 0.3s ease;
+        }
+
+        .preview-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e8f4fd;
+            border-left: 4px solid #667eea;
+            border-radius: 8px;
+        }
+
+        .preview-info p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #495057;
+            font-family: 'Courier New', monospace;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
+            }
+
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tab-btn {
+                min-width: 100%;
+            }
+
+            .result-value {
+                font-size: 18px;
+            }
+
+            .viewport-slider {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .viewport-value {
+                text-align: center;
+            }
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            margin-left: 5px;
+            color: #95a5a6;
+            cursor: help;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Responsive Value Calculator</h1>
+            <p class="subtitle">Easily calculate clamp(), vw, rem, and responsive ratios for frontend design.</p>
+            <div class="status-bar" id="statusBar">✓ All values are default</div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('clamp')">Clamp Calculator</button>
+            <button class="tab-btn" onclick="switchTab('vw')">VW Calculator</button>
+            <button class="tab-btn" onclick="switchTab('converter')">Unit Converter</button>
+        </div>
+
+        <!-- Clamp 计算模式 -->
+        <div id="clamp" class="content-section active">
+            <div class="card">
+                <h2 class="card-title">Clamp() Value Calculator</h2>
+                
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label>最小值 (Min Value)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="clampMin" value="1" step="0.1" data-default="1" data-unit="rem" oninput="calculateClamp(); checkModified(this)">
+                            <div class="unit-switcher">
+                                <button class="unit-btn active" onclick="switchMinUnit('rem')">rem</button>
+                                <button class="unit-btn" onclick="switchMinUnit('px')">px</button>
+                            </div>
+                            <span class="unit-label" id="minUnitLabel">rem</span>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>最大值 (Max Value)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="clampMax" value="2" step="0.1" data-default="2" data-unit="rem" oninput="calculateClamp(); checkModified(this)">
+                            <div class="unit-switcher">
+                                <button class="unit-btn active" onclick="switchMaxUnit('rem')">rem</button>
+                                <button class="unit-btn" onclick="switchMaxUnit('px')">px</button>
+                            </div>
+                            <span class="unit-label" id="maxUnitLabel">rem</span>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>最小屏幕宽度 (Min Viewport)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="minViewport" value="768" data-default="768" oninput="calculateClamp(); checkModified(this)">
+                            <span class="unit-label">px</span>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>最大屏幕宽度 (Max Viewport)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="maxViewport" value="1920" data-default="1920" oninput="calculateClamp(); checkModified(this)">
+                            <span class="unit-label">px</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Root Font Size 与单位切换区域 -->
+                <div class="advanced-settings">
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>HTML Root Font Size</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="rootFontSize" value="16" data-default="16" oninput="calculateClamp(); checkModified(this)">
+                                <span class="unit-label">px</span>
+                            </div>
+                            <small style="color: #6c757d; margin-top: 5px; font-size: 12px;">用于计算 rem 转换。若你的项目根字体大小为 62.5%，请填入 10。</small>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>Clamp Output Unit</label>
+                            <select id="clampUnit" style="width: 100%; padding: 12px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 16px; transition: all 0.2s ease;" onchange="calculateClamp()">
+                                <option value="rem">rem</option>
+                                <option value="px">px</option>
+                            </select>
+                            <small style="color: #6c757d; margin-top: 5px; font-size: 12px;">选择 clamp() 函数的输出单位</small>
+                        </div>
+                    </div>
+
+                    <!-- 中间项模式切换 -->
+                    <div style="margin-top: 20px; padding: 15px; background: white; border-radius: 10px; border: 2px solid #e0e0e0;">
+                        <label style="display: block; margin-bottom: 10px; font-size: 14px; font-weight: 600; color: #34495e;">
+                            中间项修正模式 (Preferred Value Correction)
+                        </label>
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="radio" name="preferredMode" value="auto-correct" checked onchange="calculateClamp()" style="width: 18px; height: 18px; cursor: pointer;">
+                                <span style="font-size: 14px; color: #495057;">✅ 自动修正（推荐）</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="radio" name="preferredMode" value="pure-vw" onchange="calculateClamp()" style="width: 18px; height: 18px; cursor: pointer;">
+                                <span style="font-size: 14px; color: #495057;">🔲 关闭修正（纯 VW）</span>
+                            </label>
+                        </div>
+                        <div style="margin-top: 10px; padding: 10px; background: #f0f9ff; border-left: 3px solid #3b82f6; border-radius: 5px;">
+                            <p style="font-size: 12px; color: #1e40af; line-height: 1.6; margin: 0;">
+                                💡 <strong>自动修正模式:</strong> 使用线性插值公式 <code style="background: white; padding: 2px 6px; border-radius: 3px;">font-size = A×vw + B</code>，确保在最小/最大视口时精确等于设定值。当 B≈0 时自动输出纯 VW，当 B≠0 时输出 <code style="background: white; padding: 2px 6px; border-radius: 3px;">vw ± rem</code><br>
+                                💡 <strong>纯 VW 模式:</strong> 强制使用 <code style="background: white; padding: 2px 6px; border-radius: 3px;">clamp(min, Xvw, max)</code>，仅在最大视口时精确等于最大值，其他视口会有偏差<br>
+                                💡 <strong>提示:</strong> 若中间值含 "- rem"，代表系统自动加上负偏移以确保最小宽度时精确等于最小值
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <div class="result-item">
+                        <div class="result-label">计算公式说明</div>
+                        <div style="color: #6c757d; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.6;" id="formulaExplanation">-</div>
+                    </div>
+
+                    <div class="result-item">
+                        <div class="result-label">完整 CSS Clamp 字串</div>
+                        <div class="result-value">
+                            <span id="clampCssResult">-</span>
+                            <button class="copy-btn" onclick="copyToClipboard('clampCssResult')">复制</button>
+                        </div>
+                    </div>
+
+                    <div class="result-item">
+                        <div class="result-label">不同屏幕宽度下的实际大小</div>
+                        <table class="screen-table">
+                            <thead>
+                                <tr>
+                                    <th>屏幕宽度</th>
+                                    <th>计算值</th>
+                                    <th>实际显示</th>
+                                    <th>状态</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clampTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="clamp-info" id="clampInfoBox">
+                        <p id="clampFloorInfo">🔻 卡底: -</p>
+                        <p id="clampCeilInfo">🔺 卡顶: -</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Preview 区域 -->
+            <div class="live-preview-section">
+                <h2 class="card-title">🎨 Live Preview - 实时视觉预览</h2>
+                
+                <div class="preview-controls">
+                    <div class="viewport-slider">
+                        <label>Viewport Width:</label>
+                        <input type="range" id="viewportSlider" min="320" max="2560" value="1920" oninput="updatePreview()">
+                        <span class="viewport-value" id="viewportValue">1920px</span>
+                    </div>
+                </div>
+
+                <div class="preview-container">
+                    <div class="preview-text" id="previewText">
+                        Responsive Design Preview
+                    </div>
+                </div>
+
+                <div class="preview-info">
+                    <p>📏 当前模拟宽度: <span id="currentWidth">1920px</span></p>
+                    <p>🎯 实际字体大小: <span id="actualFontSize">-</span></p>
+                    <p>💡 应用的 CSS: <span id="appliedCss">-</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- VW 计算模式 -->
+        <div id="vw" class="content-section">
+            <div class="card">
+                <h2 class="card-title">VW ↔ PX Calculator</h2>
+                
+                <div style="margin-bottom: 30px;">
+                    <h3 style="font-size: 18px; color: #495057; margin-bottom: 15px;">PX → VW</h3>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>屏幕宽度 (Screen Width)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="vwScreenWidth" value="1920" data-default="1920" oninput="calculateVwToPx(); checkModified(this)">
+                                <span class="unit-label">px</span>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>目标像素 (Target Pixel)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="vwTargetPx" value="86" data-default="86" oninput="calculateVwToPx(); checkModified(this)">
+                                <span class="unit-label">px</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-item">
+                            <div class="result-label">VW 值</div>
+                            <div class="result-value">
+                                <span id="vwResult">-</span>
+                                <button class="copy-btn" onclick="copyToClipboard('vwResult')">复制</button>
+                            </div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">计算公式</div>
+                            <div style="color: #6c757d; font-family: 'Courier New', monospace;" id="vwFormula">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 style="font-size: 18px; color: #495057; margin-bottom: 15px;">VW → PX (反向计算)</h3>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>VW 值</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="pxVwValue" value="4.48" step="0.01" data-default="4.48" oninput="calculatePxToVw(); checkModified(this)">
+                                <span class="unit-label">vw</span>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>屏幕宽度 (Screen Width)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="pxScreenWidth" value="1920" data-default="1920" oninput="calculatePxToVw(); checkModified(this)">
+                                <span class="unit-label">px</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-section">
+                        <div class="result-item">
+                            <div class="result-label">实际像素值</div>
+                            <div class="result-value">
+                                <span id="pxResult">-</span>
+                                <button class="copy-btn" onclick="copyToClipboard('pxResult')">复制</button>
+                            </div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">计算公式</div>
+                            <div style="color: #6c757d; font-family: 'Courier New', monospace;" id="pxFormula">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unit Converter 模式 -->
+        <div id="converter" class="content-section">
+            <div class="card">
+                <h2 class="card-title">Unit Converter (Rem ↔ Px ↔ Vw)</h2>
+                
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label>输入值</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="converterValue" value="2" step="0.1" data-default="2" oninput="convertUnits(); checkModified(this)">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>输入单位</label>
+                        <select id="converterUnit" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;" onchange="convertUnits()">
+                            <option value="rem">rem</option>
+                            <option value="px">px</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <div class="converter-grid">
+                        <div class="conversion-card">
+                            <div class="conversion-title">Rem 值</div>
+                            <div class="conversion-value" id="convRem">-</div>
+                        </div>
+                        
+                        <div class="conversion-card">
+                            <div class="conversion-title">Pixel 值</div>
+                            <div class="conversion-value" id="convPx">-</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <div class="result-label">在常见屏幕宽度下的 VW 值</div>
+                        <table class="screen-table">
+                            <thead>
+                                <tr>
+                                    <th>屏幕宽度</th>
+                                    <th>VW 值</th>
+                                    <th>设备类型</th>
+                                </tr>
+                            </thead>
+                            <tbody id="converterTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 单位切换功能 ====================
+        
+        // 切换 Min Value 单位
+        function switchMinUnit(unit) {
+            const input = document.getElementById('clampMin');
+            const currentUnit = input.dataset.unit || 'rem';
+            const currentValue = parseFloat(input.value) || 0;
+            const rootFontSize = parseFloat(document.getElementById('rootFontSize').value) || 16;
+            
+            // 如果单位没有变化，不做处理
+            if (currentUnit === unit) return;
+            
+            // 转换数值
+            let newValue;
+            if (unit === 'px' && currentUnit === 'rem') {
+                // rem → px
+                newValue = currentValue * rootFontSize;
+            } else if (unit === 'rem' && currentUnit === 'px') {
+                // px → rem
+                newValue = currentValue / rootFontSize;
+            } else {
+                newValue = currentValue;
+            }
+            
+            // 更新输入框
+            input.value = newValue.toFixed(unit === 'rem' ? 4 : 2);
+            input.dataset.unit = unit;
+            
+            // 更新 UI
+            document.getElementById('minUnitLabel').textContent = unit;
+            
+            // 更新按钮状态
+            const wrapper = input.closest('.input-wrapper');
+            wrapper.querySelectorAll('.unit-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 重新计算
+            calculateClamp();
+        }
+        
+        // 切换 Max Value 单位
+        function switchMaxUnit(unit) {
+            const input = document.getElementById('clampMax');
+            const currentUnit = input.dataset.unit || 'rem';
+            const currentValue = parseFloat(input.value) || 0;
+            const rootFontSize = parseFloat(document.getElementById('rootFontSize').value) || 16;
+            
+            // 如果单位没有变化，不做处理
+            if (currentUnit === unit) return;
+            
+            // 转换数值
+            let newValue;
+            if (unit === 'px' && currentUnit === 'rem') {
+                // rem → px
+                newValue = currentValue * rootFontSize;
+            } else if (unit === 'rem' && currentUnit === 'px') {
+                // px → rem
+                newValue = currentValue / rootFontSize;
+            } else {
+                newValue = currentValue;
+            }
+            
+            // 更新输入框
+            input.value = newValue.toFixed(unit === 'rem' ? 4 : 2);
+            input.dataset.unit = unit;
+            
+            // 更新 UI
+            document.getElementById('maxUnitLabel').textContent = unit;
+            
+            // 更新按钮状态
+            const wrapper = input.closest('.input-wrapper');
+            wrapper.querySelectorAll('.unit-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 重新计算
+            calculateClamp();
+        }
+        
+        // ==================== 预设值变化侦测 ====================
+        
+        // 检查输入框是否被修改
+        function checkModified(input) {
+            const currentValue = parseFloat(input.value) || 0;
+            const defaultValue = parseFloat(input.dataset.default) || 0;
+            const wrapper = input.closest('.input-wrapper');
+            
+            // 移除旧的提示标记
+            const oldIndicator = wrapper.querySelector('.modified-indicator');
+            if (oldIndicator) {
+                oldIndicator.remove();
+            }
+            
+            // 判断是否被修改
+            if (currentValue !== defaultValue) {
+                // 添加修改样式
+                input.classList.add('modified');
+                
+                // 添加修改提示标记
+                const indicator = document.createElement('span');
+                indicator.className = 'modified-indicator';
+                indicator.innerHTML = '✳️';
+                indicator.title = 'Custom value';
+                wrapper.appendChild(indicator);
+            } else {
+                // 恢复默认样式
+                input.classList.remove('modified');
+            }
+            
+            // 更新状态栏
+            updateStatusBar();
+        }
+        
+        // 更新状态栏
+        function updateStatusBar() {
+            const statusBar = document.getElementById('statusBar');
+            const allInputs = document.querySelectorAll('input[type="number"][data-default]');
+            
+            // 检查是否有任何输入被修改
+            let hasModified = false;
+            allInputs.forEach(input => {
+                const currentValue = parseFloat(input.value) || 0;
+                const defaultValue = parseFloat(input.dataset.default) || 0;
+                if (currentValue !== defaultValue) {
+                    hasModified = true;
+                }
+            });
+            
+            // 更新状态栏显示
+            if (hasModified) {
+                statusBar.textContent = '⚙️ Custom settings active';
+                statusBar.classList.add('custom-active');
+            } else {
+                statusBar.textContent = '✓ All values are default';
+                statusBar.classList.remove('custom-active');
+            }
+        }
+        
+        // ==================== Clamp 计算器 ====================
+        function calculateClamp() {
+            // 获取输入值
+            const minInput = document.getElementById('clampMin');
+            const maxInput = document.getElementById('clampMax');
+            const minUnit = minInput.dataset.unit || 'rem';
+            const maxUnit = maxInput.dataset.unit || 'rem';
+            const rootFontSize = parseFloat(document.getElementById('rootFontSize').value) || 16;
+            
+            // 获取原始输入值
+            let minValue = parseFloat(minInput.value) || 0;
+            let maxValue = parseFloat(maxInput.value) || 0;
+            
+            // 统一转换为 px 进行计算
+            const minPx = minUnit === 'rem' ? minValue * rootFontSize : minValue;
+            const maxPx = maxUnit === 'rem' ? maxValue * rootFontSize : maxValue;
+            
+            const minViewport = parseFloat(document.getElementById('minViewport').value) || 768;
+            const maxViewport = parseFloat(document.getElementById('maxViewport').value) || 1920;
+            const clampUnit = document.getElementById('clampUnit').value;
+            
+            // 获取中间项模式
+            const preferredMode = document.querySelector('input[name="preferredMode"]:checked').value;
+
+            // 验证输入有效性
+            if (minPx >= maxPx) {
+                document.getElementById('clampCssResult').textContent = '错误: 最小值必须小于最大值';
+                document.getElementById('formulaExplanation').textContent = '请确保 Min < Max';
+                return;
+            }
+
+            if (minViewport >= maxViewport) {
+                document.getElementById('clampCssResult').textContent = '错误: 最小视口必须小于最大视口';
+                document.getElementById('formulaExplanation').textContent = '请确保 Min Viewport < Max Viewport';
+                return;
+            }
+
+            let clampCss, formulaExplanation, vwCoefficient, constantTerm;
+
+            if (preferredMode === 'auto-correct') {
+                // ========== 自动修正模式（线性插值） ==========
+                // 使用标准 fluid typography 公式: font-size = A×vw + B
+                // 其中:
+                // A = (max - min) / ((maxWidth - minWidth) / 100)
+                // B = min - (A × minWidth / 100)
+                
+                // 计算 A (VW 系数)
+                const A = (maxPx - minPx) / ((maxViewport - minViewport) / 100);
+                
+                // 计算 B (常数项，px)
+                const B_px = minPx - (A * minViewport / 100);
+                
+                vwCoefficient = A;
+                constantTerm = B_px;
+                
+                // 生成计算公式说明
+                let minDisplay = minUnit === 'rem' ? `${minValue}rem (${minPx.toFixed(2)}px)` : `${minPx.toFixed(2)}px`;
+                let maxDisplay = maxUnit === 'rem' ? `${maxValue}rem (${maxPx.toFixed(2)}px)` : `${maxPx.toFixed(2)}px`;
+                
+                // 验证公式正确性
+                const checkMin = (A * minViewport / 100) + B_px;
+                const checkMax = (A * maxViewport / 100) + B_px;
+                
+                formulaExplanation = `
+自动修正模式 - 线性插值公式:
+• 在 ${minViewport}px 视口: ${minDisplay}
+• 在 ${maxViewport}px 视口: ${maxDisplay}
+• VW 系数 A = (${maxPx.toFixed(2)} - ${minPx.toFixed(2)}) / ((${maxViewport} - ${minViewport}) / 100) = ${A.toFixed(4)}
+• 常数项 B = ${minPx.toFixed(2)} - (${A.toFixed(4)} × ${minViewport} / 100) = ${B_px.toFixed(4)}px
+• 验证: 在 ${minViewport}px → ${checkMin.toFixed(2)}px ✓
+• 验证: 在 ${maxViewport}px → ${checkMax.toFixed(2)}px ✓
+                `.trim();
+
+                // 根据选择的单位生成 CSS clamp 字串
+                let preferredValue;
+                const threshold = 0.001; // B 的阈值，小于此值视为 0
+                
+                if (clampUnit === 'rem') {
+                    const minRem = minPx / rootFontSize;
+                    const maxRem = maxPx / rootFontSize;
+                    const B_rem = B_px / rootFontSize;
+                    
+                    // 判断 B 是否接近 0
+                    if (Math.abs(B_rem) < threshold) {
+                        // B ≈ 0，输出纯 VW
+                        preferredValue = `${A.toFixed(4)}vw`;
+                        formulaExplanation += `\n• 中间值公式: ${A.toFixed(4)}vw (常数项 ≈ 0，已省略)`;
+                    } else {
+                        // B ≠ 0，输出 VW ± REM
+                        if (B_rem >= 0) {
+                            preferredValue = `${A.toFixed(4)}vw + ${B_rem.toFixed(4)}rem`;
+                            formulaExplanation += `\n• 中间值公式: ${A.toFixed(4)}vw + ${B_rem.toFixed(4)}rem`;
+                        } else {
+                            preferredValue = `${A.toFixed(4)}vw - ${Math.abs(B_rem).toFixed(4)}rem`;
+                            formulaExplanation += `\n• 中间值公式: ${A.toFixed(4)}vw - ${Math.abs(B_rem).toFixed(4)}rem`;
+                        }
+                    }
+                    
+                    clampCss = `clamp(${minRem.toFixed(4)}rem, ${preferredValue}, ${maxRem.toFixed(4)}rem)`;
+                } else {
+                    // px 模式
+                    // 判断 B 是否接近 0
+                    if (Math.abs(B_px) < threshold) {
+                        // B ≈ 0，输出纯 VW
+                        preferredValue = `${A.toFixed(4)}vw`;
+                        formulaExplanation += `\n• 中间值公式: ${A.toFixed(4)}vw (常数项 ≈ 0，已省略)`;
+                    } else {
+                        // B ≠ 0，输出 VW ± PX
+                        if (B_px >= 0) {
+                            preferredValue = `${A.toFixed(4)}vw + ${B_px.toFixed(4)}px`;
+                            formulaExplanation += `\n• 中间值公式: ${A.toFixed(4)}vw + ${B_px.toFixed(4)}px`;
+                        } else {
+                            preferredValue = `${A.toFixed(4)}vw - ${Math.abs(B_px).toFixed(4)}px`;
+                            formulaExplanation += `\n• 中间值公式: ${A.toFixed(4)}vw - ${Math.abs(B_px).toFixed(4)}px`;
+                        }
+                    }
+                    
+                    clampCss = `clamp(${minPx.toFixed(2)}px, ${preferredValue}, ${maxPx.toFixed(2)}px)`;
+                }
+
+            } else {
+                // ========== 纯 VW 模式（关闭修正） ==========
+                // 公式: X = (max - min) / ((maxViewport - minViewport) / 100)
+                // 注意: 此模式下只在 maxViewport 时精确等于 max
+                
+                const vwValue = ((maxPx - minPx) * 100) / (maxViewport - minViewport);
+                vwCoefficient = vwValue;
+                constantTerm = 0;
+                
+                // 生成计算公式说明
+                let minDisplay = minUnit === 'rem' ? `${minValue}rem (${minPx.toFixed(2)}px)` : `${minPx.toFixed(2)}px`;
+                let maxDisplay = maxUnit === 'rem' ? `${maxValue}rem (${maxPx.toFixed(2)}px)` : `${maxPx.toFixed(2)}px`;
+                
+                // 计算在 minViewport 的实际值（会有偏差）
+                const actualAtMin = (vwValue * minViewport / 100);
+                
+                formulaExplanation = `
+纯 VW 模式（未修正）:
+• 在 ${minViewport}px 视口: ${minDisplay} (目标)
+• 在 ${maxViewport}px 视口: ${maxDisplay}
+• VW 系数: (${maxPx.toFixed(2)} - ${minPx.toFixed(2)}) × 100 / (${maxViewport} - ${minViewport}) = ${vwValue.toFixed(4)}
+• 中间值公式: ${vwValue.toFixed(4)}vw
+• ⚠️ 注意: 在 ${minViewport}px 时实际为 ${actualAtMin.toFixed(2)}px，与目标值 ${minPx.toFixed(2)}px 有偏差
+                `.trim();
+
+                // 根据选择的单位生成 CSS clamp 字串
+                if (clampUnit === 'rem') {
+                    const minRem = minPx / rootFontSize;
+                    const maxRem = maxPx / rootFontSize;
+                    clampCss = `clamp(${minRem.toFixed(4)}rem, ${vwValue.toFixed(4)}vw, ${maxRem.toFixed(4)}rem)`;
+                } else {
+                    clampCss = `clamp(${minPx.toFixed(2)}px, ${vwValue.toFixed(4)}vw, ${maxPx.toFixed(2)}px)`;
+                }
+            }
+
+            document.getElementById('formulaExplanation').innerHTML = formulaExplanation.replace(/\n/g, '<br>');
+            document.getElementById('clampCssResult').textContent = clampCss;
+
+            // 计算不同屏幕宽度下的实际大小
+            const screenWidths = [375, 768, 1024, 1366, 1920, 2560];
+            const tableBody = document.getElementById('clampTableBody');
+            tableBody.innerHTML = '';
+
+            screenWidths.forEach(width => {
+                let calculatedValue;
+                
+                if (preferredMode === 'auto-correct') {
+                    // 自动修正模式: value = A×vw + B
+                    const A = (maxPx - minPx) / ((maxViewport - minViewport) / 100);
+                    const B_px = minPx - (A * minViewport / 100);
+                    calculatedValue = (A * width / 100) + B_px;
+                } else {
+                    // 纯 VW 模式: value = vw × width / 100
+                    const vwValue = ((maxPx - minPx) * 100) / (maxViewport - minViewport);
+                    calculatedValue = (vwValue * width) / 100;
+                }
+                
+                // 应用 clamp 逻辑
+                let actualValue;
+                let status;
+                
+                if (calculatedValue < minPx) {
+                    actualValue = minPx;
+                    status = '🔻 卡底';
+                } else if (calculatedValue > maxPx) {
+                    actualValue = maxPx;
+                    status = '🔺 卡顶';
+                } else {
+                    actualValue = calculatedValue;
+                    status = '✅ 正常';
+                }
+
+                // 根据选择的单位显示
+                let displayValue;
+                if (clampUnit === 'rem') {
+                    displayValue = `${(actualValue / rootFontSize).toFixed(4)}rem (${actualValue.toFixed(2)}px)`;
+                } else {
+                    displayValue = `${actualValue.toFixed(2)}px`;
+                }
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${width}px</td>
+                    <td>${calculatedValue.toFixed(2)}px</td>
+                    <td>${displayValue}</td>
+                    <td>${status}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // 更新卡底卡顶信息
+            const floorWidth = minViewport;
+            const ceilWidth = maxViewport;
+
+            // 显示信息时根据单位选择格式化
+            let floorDisplay, ceilDisplay;
+            if (clampUnit === 'rem') {
+                floorDisplay = `${(minPx / rootFontSize).toFixed(4)}rem (${minPx.toFixed(2)}px)`;
+                ceilDisplay = `${(maxPx / rootFontSize).toFixed(4)}rem (${maxPx.toFixed(2)}px)`;
+            } else {
+                floorDisplay = `${minPx.toFixed(2)}px`;
+                ceilDisplay = `${maxPx.toFixed(2)}px`;
+            }
+
+            document.getElementById('clampFloorInfo').textContent = 
+                `🔻 卡底: 屏幕宽度 ≤ ${floorWidth}px 时,字体固定为 ${floorDisplay}`;
+            document.getElementById('clampCeilInfo').textContent = 
+                `🔺 卡顶: 屏幕宽度 ≥ ${ceilWidth}px 时,字体固定为 ${ceilDisplay}`;
+
+            // 更新 Live Preview
+            updatePreview();
+        }
+
+        // ==================== Live Preview 更新函数 ====================
+        function updatePreview() {
+            // 获取当前滑动条的视口宽度
+            const viewportWidth = parseInt(document.getElementById('viewportSlider').value);
+            document.getElementById('viewportValue').textContent = `${viewportWidth}px`;
+            document.getElementById('currentWidth').textContent = `${viewportWidth}px`;
+
+            // 获取 clamp 参数
+            const minPx = parseFloat(document.getElementById('clampMin').value) || 0;
+            const maxPx = parseFloat(document.getElementById('clampMax').value) || 0;
+            const minViewport = parseFloat(document.getElementById('minViewport').value) || 768;
+            const maxViewport = parseFloat(document.getElementById('maxViewport').value) || 1920;
+            const rootFontSize = parseFloat(document.getElementById('rootFontSize').value) || 16;
+            const clampUnit = document.getElementById('clampUnit').value;
+
+            // 验证输入
+            if (minPx >= maxPx || minViewport >= maxViewport) {
+                return;
+            }
+
+            // 计算线性插值
+            const slope = (maxPx - minPx) / (maxViewport - minViewport);
+            const intercept = minPx - (slope * minViewport);
+            
+            // 计算当前视口宽度下的理想值
+            const calculatedValue = slope * viewportWidth + intercept;
+
+            // 应用 clamp 逻辑
+            let actualFontSize;
+            if (calculatedValue < minPx) {
+                actualFontSize = minPx;
+            } else if (calculatedValue > maxPx) {
+                actualFontSize = maxPx;
+            } else {
+                actualFontSize = calculatedValue;
+            }
+
+            // 更新预览文字的字体大小（始终用 px 设置）
+            const previewText = document.getElementById('previewText');
+            
+            // 生成 CSS 字串用于显示
+            const vwCoefficient = slope * 100;
+            const constantTerm = intercept;
+            
+            let clampCss;
+            if (clampUnit === 'rem') {
+                const minRem = minPx / rootFontSize;
+                const maxRem = maxPx / rootFontSize;
+                const constantRem = constantTerm / rootFontSize;
+                
+                let preferredValue;
+                if (constantRem >= 0) {
+                    preferredValue = `${vwCoefficient.toFixed(4)}vw + ${constantRem.toFixed(4)}rem`;
+                } else {
+                    preferredValue = `${vwCoefficient.toFixed(4)}vw - ${Math.abs(constantRem).toFixed(4)}rem`;
+                }
+                
+                clampCss = `clamp(${minRem.toFixed(4)}rem, ${preferredValue}, ${maxRem.toFixed(4)}rem)`;
+            } else {
+                let preferredValue;
+                if (constantTerm >= 0) {
+                    preferredValue = `${vwCoefficient.toFixed(4)}vw + ${constantTerm.toFixed(4)}px`;
+                } else {
+                    preferredValue = `${vwCoefficient.toFixed(4)}vw - ${Math.abs(constantTerm).toFixed(4)}px`;
+                }
+                
+                clampCss = `clamp(${minPx.toFixed(2)}px, ${preferredValue}, ${maxPx.toFixed(2)}px)`;
+            }
+            
+            // 直接设置像素值
+            previewText.style.fontSize = `${actualFontSize}px`;
+
+            // 更新信息显示
+            let actualDisplay;
+            if (clampUnit === 'rem') {
+                actualDisplay = `${(actualFontSize / rootFontSize).toFixed(4)}rem (${actualFontSize.toFixed(2)}px)`;
+            } else {
+                actualDisplay = `${actualFontSize.toFixed(2)}px`;
+            }
+
+            document.getElementById('actualFontSize').textContent = actualDisplay;
+            document.getElementById('appliedCss').textContent = `font-size: ${clampCss}`;
+        }
+
+        // ==================== VW 计算器 ====================
+        // PX → VW
+        function calculateVwToPx() {
+            const screenWidth = parseFloat(document.getElementById('vwScreenWidth').value) || 0;
+            const targetPx = parseFloat(document.getElementById('vwTargetPx').value) || 0;
+
+            if (screenWidth === 0) {
+                document.getElementById('vwResult').textContent = '-';
+                document.getElementById('vwFormula').textContent = '-';
+                return;
+            }
+
+            // 公式: (targetPx / screenWidth) * 100
+            const vw = (targetPx / screenWidth * 100).toFixed(2);
+
+            document.getElementById('vwResult').textContent = `${vw}vw`;
+            document.getElementById('vwFormula').textContent = 
+                `${targetPx}px ÷ ${screenWidth}px × 100 = ${vw}vw`;
+        }
+
+        // VW → PX
+        function calculatePxToVw() {
+            const vwValue = parseFloat(document.getElementById('pxVwValue').value) || 0;
+            const screenWidth = parseFloat(document.getElementById('pxScreenWidth').value) || 0;
+
+            if (screenWidth === 0) {
+                document.getElementById('pxResult').textContent = '-';
+                document.getElementById('pxFormula').textContent = '-';
+                return;
+            }
+
+            // 公式: (vwValue * screenWidth) / 100
+            const px = (vwValue * screenWidth / 100).toFixed(2);
+
+            document.getElementById('pxResult').textContent = `${px}px`;
+            document.getElementById('pxFormula').textContent = 
+                `${vwValue}vw × ${screenWidth}px ÷ 100 = ${px}px`;
+        }
+
+        // ==================== Unit Converter ====================
+        function convertUnits() {
+            const value = parseFloat(document.getElementById('converterValue').value) || 0;
+            const unit = document.getElementById('converterUnit').value;
+
+            let pxValue, remValue;
+
+            // 转换为 px 和 rem (假设 1rem = 16px)
+            if (unit === 'rem') {
+                remValue = value;
+                pxValue = value * 16;
+            } else { // px
+                pxValue = value;
+                remValue = value / 16;
+            }
+
+            // 显示 rem 和 px
+            document.getElementById('convRem').textContent = `${remValue.toFixed(4)} rem`;
+            document.getElementById('convPx').textContent = `${pxValue.toFixed(2)} px`;
+
+            // 计算在不同屏幕宽度下的 VW 值
+            const screenData = [
+                { width: 768, device: '平板 (Tablet)' },
+                { width: 1024, device: '小桌机 (Small Desktop)' },
+                { width: 1366, device: '笔电 (Laptop)' },
+                { width: 1920, device: '桌机 (Desktop)' }
+            ];
+
+            const tableBody = document.getElementById('converterTableBody');
+            tableBody.innerHTML = '';
+
+            screenData.forEach(data => {
+                // 公式: (pxValue / width) * 100
+                const vw = (pxValue / data.width * 100).toFixed(4);
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${data.width}px</td>
+                    <td>${vw}vw</td>
+                    <td>${data.device}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // ==================== 工具函数 ====================
+        // 切换 Tab
+        function switchTab(tabName) {
+            // 移除所有激活状态
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // 激活选中的 tab
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // 复制到剪贴板
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+
+            // 使用 Clipboard API
+            navigator.clipboard.writeText(text).then(() => {
+                // 显示复制成功提示
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '已复制!';
+                btn.style.background = '#27ae60';
+
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#667eea';
+                }, 1500);
+            }).catch(err => {
+                alert('复制失败,请手动复制');
+            });
+        }
+
+        // ==================== 初始化计算 ====================
+        // 页面加载时执行所有计算
+        window.addEventListener('DOMContentLoaded', () => {
+            // 初始化所有输入框的默认值检测
+            const allInputs = document.querySelectorAll('input[type="number"][data-default]');
+            allInputs.forEach(input => {
+                checkModified(input);
+            });
+            
+            // 执行初始计算
+            calculateClamp();
+            calculateVwToPx();
+            calculatePxToVw();
+            convertUnits();
+        });
+    </script>
+</body>
+</html>

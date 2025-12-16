@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <link rel="icon" type="image/png" href="images/images/tokyo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOKYO JAPANESE CUISINE</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="tokyo.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="navbar">
+  <div class="logo-section">
+    <img src="images/images/tokyologo1.png" alt="Logo" class="logo">
+  </div>
+
+  <nav class="nav-links" id="navMenu">
+    <div class="nav-item"><a href="index.php">首页</a></div>
+    <div class="nav-item"><a href="tokyo-japanese-cuisine-about.html">关于我们</a></div>
+    <div class="nav-item"><a href="tokyo-japanese-cuisine.html">旗下品牌</a></div>
+    <div class="nav-item"><a href="tokyo-japanese-cuisine-joinus.html">加入我们</a></div>
+  </nav>
+
+  <div class="right-section">
+    <a href="tokyologin.html" class="login-btn">登入</a>
+
+    <!-- 语言切换 -->
+    <div class="language-switch">
+      <a href="#" class="lang">EN | CN</a>
+    </div>
+    <!-- 汉堡菜单按钮 -->
+    <button class="hamburger" id="hamburger">&#9776;</button>
+  </div>
+</header>
+
+  <section id="joinus" class="joinus">
+    <div class="joinus-content">
+      <h1>加入我们</h1>
+      <p>
+        在这里，你的努力不止换来薪资，更参与到品牌建设的每一步，一起迈向更大的舞台。
+      </p>
+    </div>
+  </section>
+
+  <!-- 员工福利部分 -->
+  <div id="benefit" class="benefits">
+    <h2>公司福利</h2>
+    <div class="benefits-grid">
+      <div class="benefit-item">
+        <img src="images/images/带薪假期.png" alt="带薪假期">
+        <p>带薪假期</p>
+      </div>
+      <div class="benefit-item">
+        <img src="images/images/旅游奖励.png" alt="旅游奖励">
+        <p>旅游奖励</p>
+      </div>
+      <div class="benefit-item">
+        <img src="images/images/汽车奖励.png" alt="汽车奖励">
+        <p>汽车奖励</p>
+      </div>
+      <div class="benefit-item">
+        <img src="images/images/房子奖励.png" alt="房子奖励">
+        <p>房子奖励</p>
+      </div>
+      <div class="benefit-item">
+        <img src="images/images/年度绩效奖励.png" alt="年度绩效奖励">
+        <p>年度绩效奖励</p>
+      </div>
+      <div class="benefit-item">
+        <img src="images/images/专业培训与学习机会.png" alt="专业培训与学习机会">
+        <p>专业培训与学习机会</p>
+      </div>
+    </div>
+  </div>  
+
+    <!-- Swiper 环境模块 -->
+<section id="environment" class="environment-section">
+  <h2 class="environment-heading">工作环境</h2>
+  <div class="swiper environment-wrapper">
+    <ul class="environment-list swiper-wrapper">
+      <li class="environment-item swiper-slide">
+        <div class="environment-link">
+          <img src="images/images/tokyo价值观.png" alt="会议室" class="environment-image">
+          <h2 class="environment-title">会议室</h2>
+        </div>
+      </li>
+      <li class="environment-item swiper-slide">
+        <div class="environment-link">
+          <img src="images/images/tokyo封面.jpg" alt="办公区" class="environment-image">
+          <h2 class="environment-title">办公区</h2>
+        </div>
+      </li>
+      <li class="environment-item swiper-slide">
+        <div class="environment-link">
+          <img src="images/images/tokyo使命.png" alt="2023发展" class="environment-image">
+          <h2 class="environment-title">员工餐厅</h2>
+        </div>
+      </li>
+      <li class="environment-item swiper-slide">
+        <div class="environment-link">
+          <img src="images/images/2024发展.jpg" alt="2024发展" class="environment-image">
+          <h2 class="environment-title">公司办公室</h2>
+        </div>
+      </li>
+      <li class="environment-item swiper-slide">
+        <div class="environment-link">
+          <img src="images/images/2023发展.jpg" alt="2025发展" class="environment-image">
+          <h2 class="environment-title">新安大厦</h2>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Swiper 导航与分页 -->
+    <div class="swiper-pagination"></div>
+    <div class="swiper-button-prev"></div>
+    <div class="swiper-button-next"></div>
+  </div>
+</section>
+
+  <h2 id="job-table-title" class="job-table-title">目前在招聘的职位</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>职位名称</th>
+        <th>人数</th>
+        <th>学历</th>
+        <th>发布时间</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>员</td>
+        <td>1</td>
+        <td>博士</td>
+        <td>2025-04-26</td>
+        <td><span class="expand-icon" onclick="toggleDetail(this)">▼</span></td>
+      </tr>
+      <tr class="detail-row">
+        <td colspan="5">
+          <div class="detail-content">
+            <div><strong>职位详情：</strong>负责sdwdw，能吃苦耐劳，服从安排。</div>
+            <button class="apply-btn" onclick="openForm('员')">申请</button>
+          </div>
+        </td>
+      </tr>
+
+      <tr>
+        <td>员</td>
+        <td>2</td>
+        <td>硕士</td>
+        <td>2025-04-30</td>
+        <td><span class="expand-icon" onclick="toggleDetail(this)">▼</span></td>
+      </tr>
+      <tr class="detail-row">
+        <td colspan="5">
+          <div class="detail-content">
+            <div><strong>职位详情：</strong>协助行政事务处理，整理文件资料，沟通协调。</div>
+            <button class="apply-btn" onclick="openForm('行政助理')">申请</button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <!-- 弹窗表单 -->
+  <div id="formModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeForm()">&times;</span>
+      <form id="jobApplicationForm" action="https://formsubmit.co/joeytan801@gmail.com" method="POST" enctype="multipart/form-data">
+        
+        <input type="hidden" name="_redirect" value="https://kunzzgroup.com/tokyo-japanese-cuisine-success.html">
+        <input type="hidden" name="_captcha" value="false">
+  
+        <h2>申请职位</h2>
+  
+        <label>职位名称：</label>
+        <input type="text" id="formPosition" name="position" readonly>
+  
+        <label>中文姓名：</label>
+        <input type="text" name="chinese_name" required 
+               pattern="[\u4e00-\u9fa5]{2,}" 
+               title="请输入中文姓名（至少两个汉字）">
+  
+        <label>英文姓名：</label>
+        <input type="text" name="english_name" required 
+               pattern="[A-Za-z ]{2,}" 
+               title="请输入英文姓名（只限英文字母）">
+  
+        <label>电子邮箱：</label>
+        <input type="email" name="email" required>
+  
+        <label>电话号码：</label>
+        <div class="phone-group">
+          <select name="country_code" required>
+            <option value="+60">马来西亚 (+60)</option>
+            <option value="+65">新加坡 (+65)</option>
+            <option value="+86">中国 (+86)</option>
+            <option value="+852">香港 (+852)</option>
+            <option value="+81">日本 (+81)</option>
+          </select>
+          <input type="tel" name="phone" required 
+                 pattern="\d{1,10}" maxlength="10" 
+                 title="请输入最多10位数字的电话号码">
+        </div>
+  
+        <label>性别：</label>
+        <select name="gender" required>
+          <option value="">请选择</option>
+          <option value="male">男</option>
+          <option value="female">女</option>
+          <option value="other">其他</option>
+        </select>
+  
+        <label>上传简历（PDF，≤3MB）：</label>
+        <input type="file" name="resume" id="resume" accept=".pdf" required>
+  
+        <button type="submit" class="submit-btn">提交申请</button>
+      </form>
+    </div>
+  </div>  
+
+  <!-- 意见表格 -->
+  <section class="join-us-form"> 
+    <h2>请提供您宝贵的意见</h2>
+    <form id="jobApplicationForm" action="https://api.web3forms.com/submit" method="POST" enctype="multipart/form-data">
+
+      <!-- 中文姓名 + 性别 -->
+      <div class="form-group-row">
+        <div class="half-width">
+          <label for="chineseName">中文姓名*</label>
+          <input type="hidden" name="access_key" value="a18bc4c6-2f16-4861-8d10-a3de747cab50">
+          <input type="hidden" name="redirect" value="https://kunzzgroup.com/tokyo-japanese-cuisine-success.html">
+          <input type="text" id="chineseName" name="chineseName" placeholder="请输入中文姓名" required pattern="[\u4e00-\u9fa5]{2,}" title="请输入中文姓名（至少两个汉字）">
+        </div>
+
+        <div class="half-width">
+          <label>性别*</label>
+          <div class="gender-options">
+            <label><input type="radio" name="gender" value="male" required> 男</label>
+            <label><input type="radio" name="gender" value="female" required> 女</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 英文姓名 + 职位类别 -->
+      <div class="form-group-row">
+        <div class="half-width">
+          <label for="englishName">英文姓名*</label>
+          <input type="text" id="englishName" name="englishName" placeholder="请输入英文姓名" required pattern="[A-Za-z ]{2,}" title="请输入英文姓名（只限字母）">
+        </div>
+
+        <div class="half-width">
+          <label for="jobCategory">职位类别*</label>
+          <select id="jobCategory" name="jobCategory" required>
+            <option value="developer">开发人员</option>
+            <option value="designer">设计师</option>
+            <option value="manager">经理</option>
+            <option value="marketing">市场营销</option>
+            <option value="sales">销售</option>
+            <!-- 可以根据需求添加更多选项 -->
+          </select>
+        </div>
+      </div>
+
+      <!-- 手机号码 -->
+      <div class="form-group">
+        <label for="phone">手机号码*</label>
+        <div class="phone-input">
+          <select id="countryCode" name="countryCode" required>
+            <option value="+60">马来西亚 (+60)</option>
+            <option value="+65">新加坡 (+65)</option>
+            <option value="+86">中国 (+86)</option>
+            <option value="+852">香港 (+852)</option>
+            <option value="+81">日本 (+81)</option>
+            <!-- 可以加更多国家 -->
+          </select>
+          <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="请输入电话号码" required pattern="\d{1,10}" maxlength="10" inputmode="numeric" title="请输入正确手机号">
+        </div>
+      </div>
+
+      <!-- 电子邮箱 -->
+      <div class="form-group">
+        <label for="email">电子邮箱*</label>
+        <input type="email" id="email" name="email" placeholder="请输入邮箱地址" required pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$" title="请输入正确邮箱地址">
+      </div>
+
+      <!-- 信息 -->
+      <div class="form-group">
+        <label for="message">信息*</label>
+        <textarea id="message" name="message" rows="5" required></textarea>
+      </div>
+
+      <!-- 提交按钮 -->
+      <div class="form-group">
+        <button type="submit" class="submit-btn">提交</button>
+      </div>
+    </form>
+</section>  
+
+<footer class="footer">
+    <div class="footer-logo">
+      <img src="images/images/tokyologo.png" alt="Tokyo Logo" class="footer-logo-img" />
+      <p>1）T-042 Level 3, Mid Valley, The Mall, Southkey, <br />
+        81100 Johor Bahru, Johor Darul Ta'zim.</p>
+      <p>2）Lot UG-25, Upper Ground Floor, Paradigm Mall, Lbh <br />
+        Skudai, Taman Bukit Mewah, 81200 Johor Bahru, <br />
+        Johor Darul Ta'zim.</p>
+      <p>📞&nbsp; +60 123-456 789<br />
+        <span style="white-space: nowrap;">📧&nbsp; kunzzholdings@gmail.com</span></p>
+    </div>
+
+    <div class="footer-section">
+      <h4><a href="tokyo-japanese-cuisine.html">首页</a></h4>
+      <ul>
+        <li><a href="tokyo-japanese-cuisine.html#tokyoabout">关于我们</a></li>
+        <li><a href="tokyo-japanese-cuisine.html#mission">使命愿景价值观</a></li>
+        <li><a href="tokyo-japanese-cuisine.html#cuisine">美食</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h4><a href="#">关于我们</a></h4>
+      <ul>
+        <li><a href="tokto-japanese-cuisine-about.html#intro">集团简介</a></li>
+        <li><a href="tokyo-japanese-cuisine-about.html#vision">信念与方向</a></li>
+        <li><a href="tokyo-japanese-cuisine-about.html#values">核心价值观</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-section">
+      <h4><a href="tokyo-japanese-cuisine-joinus.html">加入我们</a></h4>
+      <ul>
+        <li><a href="#benefit">公司福利</a></li>
+        <li><a href="#environment">公司环境</a></li>
+        <li><a href="#job-table-title">招聘</a></li>
+        <li><a href="#contact">联系我们</a></li>
+        <li>
+          <span style="font-size: 16px; font-weight: bold; color: white;">关注我们</span>
+          <div class="social-icons">
+            <a href="#" target="_blank">
+              <img src="images/images/fbicon.png" alt="Facebook" />
+            </a>
+            <a href="#" target="_blank">
+              <img src="images/images/igicon.png" alt="Instagram" />
+            </a>
+            <a href="#" target="_blank">
+              <img src="images/images/wsicon.png" alt="WhatsApp" />
+            </a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </footer>
+
+  <button id="backToTop" onclick="scrollToTop()">&#8673;</button>
+
+  <div class="footer-bottom">
+    © 2025 Kunzz Holdings Sdn. Bhd. All rights reserved.
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script src="app.js"></script>
+  <script>
+  const hamburger = document.getElementById('hamburger');
+const navMenu = document.getElementById('navMenu');
+const loginBtn = document.querySelector('.login-btn');
+
+function moveLoginBtn() {
+  if (window.innerWidth <= 768) {
+    if (!navMenu.contains(loginBtn)) {
+      navMenu.appendChild(loginBtn);
+    }
+  } else {
+    // 如果宽度大于768，确保loginBtn在right-section中
+    const rightSection = document.querySelector('.right-section');
+    if (rightSection && !rightSection.contains(loginBtn)) {
+      rightSection.insertBefore(loginBtn, rightSection.firstChild);
+    }
+  }
+}
+
+// 点击汉堡切换菜单
+hamburger.addEventListener('click', () => {
+  navMenu.classList.toggle('active');
+});
+
+// 页面加载时处理
+window.addEventListener('DOMContentLoaded', moveLoginBtn);
+
+// 窗口大小改变时也处理，防止resize后login位置错乱
+window.addEventListener('resize', moveLoginBtn);
+
+</script>
+</body>
+</html>
