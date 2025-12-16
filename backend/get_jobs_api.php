@@ -11,9 +11,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
 // 数据库配置
 $host = 'localhost';
-$dbname = 'u857194726_kunzzgroup';
-$dbuser = 'u857194726_kunzzgroup';
-$dbpass = 'Kholdings1688@';
+$dbname = 'u690174784_kunzz';
+$dbuser = 'u690174784_kunzz';
+$dbpass = 'Kunzz1688';
 
 // 获取语言参数，默认为中文
 $language = isset($_GET['lang']) ? $_GET['lang'] : 'zh';

@@ -104,9 +104,9 @@ $submenuVisibility = [
 ];
 if (isset($_SESSION['user_id'])) {
     $host = 'localhost';
-    $dbname = 'u857194726_kunzzgroup';
-    $dbuser = 'u857194726_kunzzgroup';
-    $dbpass = 'Kholdings1688@';
+    $dbname = 'u690174784_kunzz';
+    $dbuser = 'u690174784_kunzz';
+    $dbpass = 'Kunzz1688';
     
     try {
         $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);

@@ -5,9 +5,9 @@ header('Content-Type: application/json');
 
 // 数据库配置
 $host = 'localhost';
-$dbname = 'u857194726_kunzzgroup';
-$username = 'u857194726_kunzzgroup';
-$password = 'Kholdings1688@';
+$dbname = 'u690174784_kunzz';
+$username = 'u690174784_kunzz';
+$password = 'Kunzz1688';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);

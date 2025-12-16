@@ -16,9 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 $host = 'localhost';
-$dbname = 'u857194726_kunzzgroup';
-$dbuser = 'u857194726_kunzzgroup';
-$dbpass = 'Kholdings1688@';
+$dbname = 'u690174784_kunzz';
+$dbuser = 'u690174784_kunzz';
+$dbpass = 'Kunzz1688';
 
 $system = strtolower(trim($_GET['system'] ?? ''));
 $startDate = trim($_GET['start_date'] ?? '');

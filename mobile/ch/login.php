@@ -6,9 +6,9 @@ error_reporting(E_ALL);
 
 // 数据库连接信息
 $host = 'localhost';
-$dbname = 'u857194726_kunzzgroup';
-$dbuser = 'u857194726_kunzzgroup';
-$dbpass = 'Kholdings1688@';
+$dbname = 'u690174784_kunzz';
+$dbuser = 'u690174784_kunzz';
+$dbpass = 'Kunzz1688';
 
 // 创建连接
 $conn = new mysqli($host, $dbuser, $dbpass, $dbname);

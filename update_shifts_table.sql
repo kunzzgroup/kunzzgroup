@@ -1,9 +1,9 @@
 -- 更新班次表，移除 shift_name, color 和 is_active 字段
 -- 如果你已经手动删除了这些字段，可以忽略此文件
 
-USE u857194726_kunzzgroup;
+USE u690174784_kunzz;
 
-SET @dbname = 'u857194726_kunzzgroup';
+SET @dbname = 'u690174784_kunzz';
 SET @tablename = 'schedule_shifts';
 
 -- 删除 shift_name 字段

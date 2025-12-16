@@ -7,9 +7,9 @@ echo "<h2>碗碟破损记录系统测试</h2>";
 // 测试数据库连接
 try {
     $host = 'localhost';
-    $dbname = 'u857194726_kunzzgroup';
-    $dbuser = 'u857194726_kunzzgroup';
-    $dbpass = 'Kholdings1688@';
+    $dbname = 'u690174784_kunzz';
+    $dbuser = 'u690174784_kunzz';
+    $dbpass = 'Kunzz1688';
     
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

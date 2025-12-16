@@ -56,11 +56,11 @@
 ```sql
 -- 在执行任何更新前，请先备份整个数据库
 -- 使用 phpMyAdmin 或命令行：
-mysqldump -u u857194726_kunzzgroup -p u857194726_kunzzgroup > backup_$(date +%Y%m%d_%H%M%S).sql
+mysqldump -u u690174784_kunzz -p u690174784_kunzz > backup_$(date +%Y%m%d_%H%M%S).sql
 ```
 
 或者在 **phpMyAdmin** 中：
-1. 选择数据库 `u857194726_kunzzgroup`
+1. 选择数据库 `u690174784_kunzz`
 2. 点击"导出"
 3. 选择"快速"导出方法
 4. 点击"执行"保存备份文件
@@ -72,7 +72,7 @@ mysqldump -u u857194726_kunzzgroup -p u857194726_kunzzgroup > backup_$(date +%Y%
 #### 方法A：使用 phpMyAdmin（推荐）
 
 1. 登录到你的 **phpMyAdmin**
-2. 选择数据库 `u857194726_kunzzgroup`
+2. 选择数据库 `u690174784_kunzz`
 3. 点击顶部的 **"SQL"** 标签
 4. 打开文件 `update_historical_type_data.sql`
 5. 复制整个SQL脚本内容
@@ -83,7 +83,7 @@ mysqldump -u u857194726_kunzzgroup -p u857194726_kunzzgroup > backup_$(date +%Y%
 #### 方法B：使用命令行
 
 ```bash
-mysql -u u857194726_kunzzgroup -p u857194726_kunzzgroup < update_historical_type_data.sql
+mysql -u u690174784_kunzz -p u690174784_kunzz < update_historical_type_data.sql
 ```
 
 ---

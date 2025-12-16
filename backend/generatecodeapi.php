@@ -13,9 +13,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
 // 数据库配置
 $host = 'localhost';
-$dbname = 'u857194726_kunzzgroup';
-$username = 'u857194726_kunzzgroup';
-$password = 'Kholdings1688@';
+$dbname = 'u690174784_kunzz';
+$username = 'u690174784_kunzz';
+$password = 'Kunzz1688';
 
 try {
     // 创建PDO连接
