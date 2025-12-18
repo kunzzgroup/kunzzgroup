@@ -1432,77 +1432,48 @@ header('Expires: 0');
             border-radius: 4px;
         }
 
-        /* 表头在左侧竖排（用 td[data-label] 显示字段名）：全屏生效 */
-        .table-scroll-container { overflow-x: hidden !important; }
-
-        .stock-table {
-            min-width: 0 !important;
+        /* 转置表格：表头在左侧，内容向右横向滚动（仅用于总库存表 #stock-table） */
+        #stock-table.transposed {
             table-layout: auto !important;
+            width: max-content !important;
+            min-width: 100% !important;
         }
 
-        .stock-table thead {
-            display: none !important;
-        }
-
-        .stock-table,
-        .stock-table tbody,
-        .stock-table tr {
-            display: block !important;
-            width: 100% !important;
-        }
-
-        .stock-table tr {
-            margin: 10px 10px 12px !important;
-            border: 1px solid #e5e7eb !important;
-            border-radius: 10px !important;
-            overflow: hidden !important;
-            background: white !important;
-        }
-
-        .stock-table td {
-            display: flex !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-            gap: 12px !important;
-            text-align: right !important;
-            border: none !important;
-            border-bottom: 1px solid #f1f1f1 !important;
-            padding: 10px 12px !important;
-        }
-
-        .stock-table td::before {
-            content: attr(data-label) !important;
-            flex: 0 0 auto !important;
-            color: #583e04 !important;
-            font-weight: 700 !important;
-            text-align: left !important;
-            white-space: nowrap !important;
-        }
-
-        .stock-table td:last-child {
-            border-bottom: none;
-        }
-
-        /* 空数据/加载行（colspan）避免被 flex 撑坏 */
-        .stock-table td[colspan] {
-            display: block !important;
-            text-align: center !important;
-        }
-
-        .stock-table td[colspan]::before {
-            content: '';
+        #stock-table.transposed thead {
             display: none;
         }
 
-        .product-photo,
-        .no-photo {
-            margin: 0;
+        /* 覆盖原本的固定列宽规则，避免 nth-child 影响转置表 */
+        #stock-table.transposed th,
+        #stock-table.transposed td {
+            width: auto !important;
+            min-width: 140px;
+            white-space: nowrap;
         }
 
-        .action-btn {
-            width: 34px;
-            height: 34px;
+        /* 左侧“表头列”固定 */
+        #stock-table.transposed th.row-header {
+            position: sticky !important;
+            left: 0;
+            top: unset !important;
+            z-index: 300;
+            background: #636363;
+            color: #fff;
+            text-align: center;
+            min-width: 110px;
+            border: 1px solid #d1d5db;
         }
+
+        /* 内容单元格 */
+        #stock-table.transposed td {
+            text-align: center;
+            border: 1px solid #d1d5db;
+            background: white;
+        }
+
+        /* 特殊行：照片/操作稍窄些 */
+        #stock-table.transposed tr[data-row="照片"] td { min-width: 90px; }
+        #stock-table.transposed tr[data-row="操作"] td { min-width: 110px; }
 
     </style>
 </head>
@@ -3305,11 +3276,33 @@ header('Expires: 0');
              console.log(`统计信息更新 - 页面: ${currentPage}, 显示记录: ${displayedRecords}, 总记录: ${totalRecords}`);
          }
 
-        // 渲染库存表格
+        // 渲染库存表格（转置：表头在左，内容向右横向滚动）
         function renderStockTable() {
+            const table = document.getElementById('stock-table');
             const tbody = document.getElementById('stock-tbody');
-            
-            if (filteredData.length === 0) {
+            if (!table || !tbody) return;
+
+            // 先把 filteredData 展平为“展示行”（原本表格的一行）数组
+            const displayRows = [];
+            let rowIndex = 1;
+
+            function currencyHtml(val) {
+                return `
+                    <div class="currency-display">
+                        <span class="currency-symbol">RM</span>
+                        <span class="currency-amount">${formatCurrency(val)}</span>
+                    </div>
+                `;
+            }
+
+            function photoHtmlFrom(path, altText, iconClass = 'fa-image') {
+                return path
+                    ? `<img src="${path}" alt="${altText || ''}" class="product-photo">`
+                    : `<div class="no-photo"><i class="fas ${iconClass}"></i></div>`;
+            }
+
+            if (!filteredData || filteredData.length === 0) {
+                table.classList.remove('transposed');
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="14" class="no-data">
@@ -3320,158 +3313,138 @@ header('Expires: 0');
                 `;
                 return;
             }
-            
-            // 调试信息：检查套装数据
-            const setsInData = filteredData.filter(item => item.item_type === 'set');
-            console.log('渲染表格 - 套装数量:', setsInData.length);
-            setsInData.forEach(set => {
-                console.log('套装数据:', {
-                    id: set.id,
-                    code_number: set.code_number,
-                    product_name: set.product_name,
-                    items_count: set.items ? set.items.length : 0,
-                    has_items: !!(set.items && set.items.length > 0)
-                });
-            });
-            
-            let tableRows = '';
-            let rowIndex = 1;
-            
+
             filteredData.forEach((item) => {
                 if (item.item_type === 'set') {
                     const set = item;
-                    const setPrice = typeof set.set_price !== 'undefined' ? set.set_price : set.unit_price || 0;
+                    const setPrice = typeof set.set_price !== 'undefined' ? set.set_price : (set.unit_price || 0);
                     const displayIndex = rowIndex++;
-                    
-                    // 检查套装是否有items且items不为空
+
                     if (set.items && Array.isArray(set.items) && set.items.length > 0) {
-                        // 为套装中的每个item创建一行
-                        set.items.forEach((setItem, itemIndex) => {
-                            const itemStockQuantity = parseInt(setItem.total_quantity) || 0;
-                            const itemStockClass = itemStockQuantity > 0 ? 'positive-value' : 'zero-value';
-                            
-                            const photoHtml = setItem.photo_path ?
-                                `<img src="${setItem.photo_path}" alt="${setItem.product_name || ''}" class="product-photo">` :
-                                `<div class="no-photo"><i class="fas fa-image"></i></div>`;
-                            
-                            tableRows += `
-                                <tr data-id="${set.id}" data-type="set" data-item-id="${setItem.id}">
-                                    <td data-label="NO" class="text-center">${displayIndex}</td>
-                                    <td data-label="照片" class="text-center">${photoHtml}</td>
-                                    <td data-label="产品名称"><strong>${setItem.product_name || '-'}</strong></td>
-                                    <td data-label="编号" class="text-center">${setItem.code_number || '-'}</td>
-                                    <td data-label="分类" class="text-center">${setItem.category || set.category || '-'}</td>
-                                    <td data-label="尺寸" class="text-center">${setItem.size || '-'}</td>
-                                    <td data-label="单价" class="text-center">
-                                        <div class="currency-display">
-                                            <span class="currency-symbol">RM</span>
-                                            <span class="currency-amount">${formatCurrency(setPrice)}</span>
-                                        </div>
-                                    </td>
-                                    <td data-label="文化楼" class="text-center">${setItem.wenhua_quantity || 0}</td>
-                                    <td data-label="中央" class="text-center">${setItem.central_quantity || 0}</td>
-                                    <td data-label="J1" class="text-center">${setItem.j1_quantity || 0}</td>
-                                    <td data-label="J2" class="text-center">${setItem.j2_quantity || 0}</td>
-                                    <td data-label="J3" class="text-center">${setItem.j3_quantity || 0}</td>
-                                    <td data-label="总数" class="text-center ${itemStockClass}">${setItem.total_quantity || 0}</td>
-                                    <td data-label="操作" class="text-center">
-                                        <button class="action-btn edit-btn" onclick="openEditModal(${setItem.id})" title="编辑碗碟">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="action-btn delete-btn" onclick="deleteDishwareFromSet(${setItem.id}, ${set.id})" title="删除碗碟">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            `;
-                        });
-                    } else {
-                        // 套装没有items或items为空，显示套装基本信息
-                        // 使用套装自己的库存信息（如果存在）
-                        let wenhuaQuantity = parseInt(set.wenhua_quantity) || 0;
-                        let centralQuantity = parseInt(set.central_quantity) || 0;
-                        let j1Quantity = parseInt(set.j1_quantity) || 0;
-                        let j2Quantity = parseInt(set.j2_quantity) || 0;
-                        let j3Quantity = parseInt(set.j3_quantity) || 0;
-                        let totalQuantity = parseInt(set.total_quantity) || (wenhuaQuantity + centralQuantity + j1Quantity + j2Quantity + j3Quantity);
-                        
-                        const stockClass = totalQuantity > 0 ? 'positive-value' : 'zero-value';
-                        const photoHtml = set.photo_path ?
-                            `<img src="${set.photo_path}" alt="${set.product_name || ''}" class="product-photo">` :
-                            `<div class="no-photo"><i class="fas fa-box"></i></div>`;
-                        
-                        tableRows += `
-                            <tr data-id="${set.id}" data-type="set">
-                                <td data-label="NO" class="text-center">${displayIndex}</td>
-                                <td data-label="照片" class="text-center">${photoHtml}</td>
-                                <td data-label="产品名称"><strong>${set.product_name || set.set_name || '-'}</strong></td>
-                                <td data-label="编号" class="text-center">${set.code_number || set.set_code || '-'}</td>
-                                <td data-label="分类" class="text-center">${set.category || 'SET'}</td>
-                                <td data-label="尺寸" class="text-center">-</td>
-                                <td data-label="单价" class="text-center">
-                                    <div class="currency-display">
-                                        <span class="currency-symbol">RM</span>
-                                        <span class="currency-amount">${formatCurrency(setPrice)}</span>
-                                    </div>
-                                </td>
-                                <td data-label="文化楼" class="text-center">${wenhuaQuantity}</td>
-                                <td data-label="中央" class="text-center">${centralQuantity}</td>
-                                <td data-label="J1" class="text-center">${j1Quantity}</td>
-                                <td data-label="J2" class="text-center">${j2Quantity}</td>
-                                <td data-label="J3" class="text-center">${j3Quantity}</td>
-                                <td data-label="总数" class="text-center ${stockClass}">${totalQuantity}</td>
-                                <td data-label="操作" class="text-center">
-                                    <button class="action-btn edit-btn" onclick="editSet(${set.id})" title="编辑套装">
+                        set.items.forEach((setItem) => {
+                            const totalQty = parseInt(setItem.total_quantity) || 0;
+                            const totalClass = totalQty > 0 ? 'positive-value' : 'zero-value';
+
+                            displayRows.push({
+                                no: String(displayIndex),
+                                photo: photoHtmlFrom(setItem.photo_path, setItem.product_name || '', 'fa-image'),
+                                product_name: `<strong>${setItem.product_name || '-'}</strong>`,
+                                code_number: setItem.code_number || '-',
+                                category: setItem.category || set.category || '-',
+                                size: setItem.size || '-',
+                                unit_price: currencyHtml(setPrice),
+                                wenhua: String(setItem.wenhua_quantity || 0),
+                                central: String(setItem.central_quantity || 0),
+                                j1: String(setItem.j1_quantity || 0),
+                                j2: String(setItem.j2_quantity || 0),
+                                j3: String(setItem.j3_quantity || 0),
+                                total: `<span class="${totalClass}">${totalQty}</span>`,
+                                actions: `
+                                    <button class="action-btn edit-btn" onclick="openEditModal(${setItem.id})" title="编辑">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="action-btn delete-btn" onclick="deleteSet(${set.id})" title="删除套装">
+                                    <button class="action-btn delete-btn" onclick="deleteDishwareFromSet(${setItem.id}, ${set.id})" title="删除">
                                         <i class="fas fa-trash"></i>
                                     </button>
-                                </td>
-                            </tr>
-                        `;
-                    }
-                } else {
-                    const stockQuantity = parseInt(item.total_quantity) || 0;
-                    const stockClass = stockQuantity > 0 ? 'positive-value' : 'zero-value';
-                    const photoHtml = item.photo_path ? 
-                        `<img src="${item.photo_path}" alt="${item.product_name}" class="product-photo">` :
-                        `<div class="no-photo"><i class="fas fa-image"></i></div>`;
-                    
-                    tableRows += `
-                        <tr data-id="${item.id}" data-type="individual">
-                            <td data-label="NO" class="text-center">${rowIndex++}</td>
-                            <td data-label="照片" class="text-center">${photoHtml}</td>
-                            <td data-label="产品名称"><strong>${item.product_name}</strong></td>
-                            <td data-label="编号" class="text-center">${item.code_number || '-'}</td>
-                            <td data-label="分类" class="text-center">${item.category}</td>
-                            <td data-label="尺寸" class="text-center">${item.size || '-'}</td>
-                            <td data-label="单价" class="text-center">
-                                <div class="currency-display">
-                                    <span class="currency-symbol">RM</span>
-                                    <span class="currency-amount">${formatCurrency(item.unit_price)}</span>
-                                </div>
-                            </td>
-                            <td data-label="文化楼" class="text-center">${item.wenhua_quantity || 0}</td>
-                            <td data-label="中央" class="text-center">${item.central_quantity || 0}</td>
-                            <td data-label="J1" class="text-center">${item.j1_quantity || 0}</td>
-                            <td data-label="J2" class="text-center">${item.j2_quantity || 0}</td>
-                            <td data-label="J3" class="text-center">${item.j3_quantity || 0}</td>
-                            <td data-label="总数" class="text-center ${stockClass}">${item.total_quantity || 0}</td>
-                            <td data-label="操作" class="text-center">
-                                <button class="action-btn edit-btn" onclick="openEditModal(${item.id})" title="编辑">
+                                `
+                            });
+                        });
+                    } else {
+                        const wenhuaQuantity = parseInt(set.wenhua_quantity) || 0;
+                        const centralQuantity = parseInt(set.central_quantity) || 0;
+                        const j1Quantity = parseInt(set.j1_quantity) || 0;
+                        const j2Quantity = parseInt(set.j2_quantity) || 0;
+                        const j3Quantity = parseInt(set.j3_quantity) || 0;
+                        const totalQty = parseInt(set.total_quantity) || (wenhuaQuantity + centralQuantity + j1Quantity + j2Quantity + j3Quantity);
+                        const totalClass = totalQty > 0 ? 'positive-value' : 'zero-value';
+
+                        displayRows.push({
+                            no: String(displayIndex),
+                            photo: photoHtmlFrom(set.photo_path, set.product_name || set.set_name || '', 'fa-box'),
+                            product_name: `<strong>${set.product_name || set.set_name || '-'}</strong>`,
+                            code_number: set.code_number || set.set_code || '-',
+                            category: set.category || 'SET',
+                            size: '-',
+                            unit_price: currencyHtml(setPrice),
+                            wenhua: String(wenhuaQuantity),
+                            central: String(centralQuantity),
+                            j1: String(j1Quantity),
+                            j2: String(j2Quantity),
+                            j3: String(j3Quantity),
+                            total: `<span class="${totalClass}">${totalQty}</span>`,
+                            actions: `
+                                <button class="action-btn edit-btn" onclick="editSet(${set.id})" title="编辑">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="action-btn delete-btn" onclick="deleteDishware(${item.id})" title="删除">
+                                <button class="action-btn delete-btn" onclick="deleteSet(${set.id})" title="删除">
                                     <i class="fas fa-trash"></i>
                                 </button>
-                            </td>
-                        </tr>
-                    `;
+                            `
+                        });
+                    }
+                } else {
+                    const totalQty = parseInt(item.total_quantity) || 0;
+                    const totalClass = totalQty > 0 ? 'positive-value' : 'zero-value';
+
+                    displayRows.push({
+                        no: String(rowIndex++),
+                        photo: photoHtmlFrom(item.photo_path, item.product_name || '', 'fa-image'),
+                        product_name: `<strong>${item.product_name || '-'}</strong>`,
+                        code_number: item.code_number || '-',
+                        category: item.category || '-',
+                        size: item.size || '-',
+                        unit_price: currencyHtml(item.unit_price || 0),
+                        wenhua: String(item.wenhua_quantity || 0),
+                        central: String(item.central_quantity || 0),
+                        j1: String(item.j1_quantity || 0),
+                        j2: String(item.j2_quantity || 0),
+                        j3: String(item.j3_quantity || 0),
+                        total: `<span class="${totalClass}">${totalQty}</span>`,
+                        actions: `
+                            <button class="action-btn edit-btn" onclick="openEditModal(${item.id})" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteDishware(${item.id})" title="删除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        `
+                    });
                 }
             });
-            
-            tbody.innerHTML = tableRows;
+
+            // 转置渲染：左侧是“字段名”，右侧每一列是一个“展示行”
+            table.classList.add('transposed');
+            const thead = table.querySelector('thead');
+            if (thead) thead.innerHTML = '';
+
+            const fieldDefs = [
+                { label: 'NO', key: 'no' },
+                { label: '照片', key: 'photo' },
+                { label: '产品名称', key: 'product_name' },
+                { label: '编号', key: 'code_number' },
+                { label: '分类', key: 'category' },
+                { label: '尺寸', key: 'size' },
+                { label: '单价', key: 'unit_price' },
+                { label: '文化楼', key: 'wenhua' },
+                { label: '中央', key: 'central' },
+                { label: 'J1', key: 'j1' },
+                { label: 'J2', key: 'j2' },
+                { label: 'J3', key: 'j3' },
+                { label: '总数', key: 'total' },
+                { label: '操作', key: 'actions' }
+            ];
+
+            let html = '';
+            fieldDefs.forEach((f) => {
+                html += `<tr data-row="${f.label}"><th class="row-header">${f.label}</th>`;
+                displayRows.forEach((r) => {
+                    const cell = (r && typeof r[f.key] !== 'undefined') ? r[f.key] : '-';
+                    html += `<td>${cell}</td>`;
+                });
+                html += `</tr>`;
+            });
+
+            tbody.innerHTML = html;
         }
 
         // 打开编辑模态框
