@@ -1425,6 +1425,80 @@
             border-radius: 4px;
         }
 
+        /* 表头在左侧竖排（用 td[data-label] 显示字段名）：全屏生效 */
+        .table-scroll-container {
+            overflow-x: hidden;
+        }
+
+        .stock-table {
+            min-width: 0;
+            table-layout: auto;
+        }
+
+        .stock-table thead {
+            display: none;
+        }
+
+        .stock-table,
+        .stock-table tbody,
+        .stock-table tr {
+            display: block;
+            width: 100%;
+        }
+
+        .stock-table tr {
+            margin: 10px 10px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .stock-table td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            text-align: right;
+            border: none;
+            border-bottom: 1px solid #f1f1f1;
+            padding: 10px 12px;
+        }
+
+        .stock-table td::before {
+            content: attr(data-label);
+            flex: 0 0 auto;
+            color: #583e04;
+            font-weight: 700;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .stock-table td:last-child {
+            border-bottom: none;
+        }
+
+        /* 空数据/加载行（colspan）避免被 flex 撑坏 */
+        .stock-table td[colspan] {
+            display: block !important;
+            text-align: center !important;
+        }
+
+        .stock-table td[colspan]::before {
+            content: '';
+            display: none;
+        }
+
+        .product-photo,
+        .no-photo {
+            margin: 0;
+        }
+
+        .action-btn {
+            width: 34px;
+            height: 34px;
+        }
+
     </style>
 </head>
 <body>
@@ -2279,36 +2353,36 @@
                 // 照片显示
                 tableRows += `
                     <tr data-id="${record.id}">
-                        <td class="text-center">${formatDate(record.break_date || record.created_at)}</td>
-                        <td class="text-center">${index + 1}</td>
-                        <td><strong>${record.product_name}</strong></td>
-                        <td class="text-center">${record.code_number || '-'}</td>
-                        <td class="text-center">${record.category}</td>
-                        <td class="text-center">${record.size || '-'}</td>
-                        <td class="text-center">
+                        <td data-label="日期" class="text-center">${formatDate(record.break_date || record.created_at)}</td>
+                        <td data-label="NO" class="text-center">${index + 1}</td>
+                        <td data-label="产品名称"><strong>${record.product_name}</strong></td>
+                        <td data-label="编号" class="text-center">${record.code_number || '-'}</td>
+                        <td data-label="分类" class="text-center">${record.category}</td>
+                        <td data-label="尺寸" class="text-center">${record.size || '-'}</td>
+                        <td data-label="当前库存" class="text-center">
                             <input type="number" class="quantity-input" 
                                    value="${record.current_stock || 0}" 
                                    readonly style="background: #f3f4f6;">
                         </td>
-                        <td class="text-center">
+                        <td data-label="破损数量" class="text-center">
                             <input type="number" class="quantity-input" 
                                    value="${record.break_quantity}" 
                                    onchange="updateBreakQuantity(${record.id}, this.value)"
                                    min="0">
                         </td>
-                        <td class="text-center">
+                        <td data-label="单价" class="text-center">
                             <div class="currency-display">
                                 <span class="currency-symbol">RM</span>
                                 <span class="currency-amount">${formatCurrency(record.unit_price || 0)}</span>
                             </div>
                         </td>
-                        <td class="text-center">
+                        <td data-label="总价" class="text-center">
                             <div class="currency-display">
                                 <span class="currency-symbol">RM</span>
                                 <span class="currency-amount">${formatCurrency(record.total_price || 0)}</span>
                             </div>
                         </td>
-                        <td class="text-center">
+                        <td data-label="操作" class="text-center">
                             <button class="action-btn edit-btn" onclick="editBreakRecord(${record.id})" title="编辑">
                                 <i class="fas fa-edit"></i>
                             </button>
@@ -3277,27 +3351,25 @@
                             
                             tableRows += `
                                 <tr data-id="${set.id}" data-type="set" data-item-id="${setItem.id}">
-                                    ${itemIndex === 0 ? `<td class="text-center set-shared-cell" rowspan="${set.items.length}">${displayIndex}</td>` : ''}
-                                    <td class="text-center">${photoHtml}</td>
-                                    <td><strong>${setItem.product_name || '-'}</strong></td>
-                                    <td class="text-center">${setItem.code_number || '-'}</td>
-                                    <td class="text-center">${setItem.category || set.category || '-'}</td>
-                                    <td class="text-center">${setItem.size || '-'}</td>
-                                    ${itemIndex === 0 ? `
-                                        <td class="text-center set-shared-cell" rowspan="${set.items.length}">
-                                            <div class="currency-display">
-                                                <span class="currency-symbol">RM</span>
-                                                <span class="currency-amount">${formatCurrency(setPrice)}</span>
-                                            </div>
-                                        </td>
-                                    ` : ''}
-                                    <td class="text-center">${setItem.wenhua_quantity || 0}</td>
-                                    <td class="text-center">${setItem.central_quantity || 0}</td>
-                                    <td class="text-center">${setItem.j1_quantity || 0}</td>
-                                    <td class="text-center">${setItem.j2_quantity || 0}</td>
-                                    <td class="text-center">${setItem.j3_quantity || 0}</td>
-                                    <td class="text-center ${itemStockClass}">${setItem.total_quantity || 0}</td>
-                                    <td class="text-center">
+                                    <td data-label="NO" class="text-center">${displayIndex}</td>
+                                    <td data-label="照片" class="text-center">${photoHtml}</td>
+                                    <td data-label="产品名称"><strong>${setItem.product_name || '-'}</strong></td>
+                                    <td data-label="编号" class="text-center">${setItem.code_number || '-'}</td>
+                                    <td data-label="分类" class="text-center">${setItem.category || set.category || '-'}</td>
+                                    <td data-label="尺寸" class="text-center">${setItem.size || '-'}</td>
+                                    <td data-label="单价" class="text-center">
+                                        <div class="currency-display">
+                                            <span class="currency-symbol">RM</span>
+                                            <span class="currency-amount">${formatCurrency(setPrice)}</span>
+                                        </div>
+                                    </td>
+                                    <td data-label="文化楼" class="text-center">${setItem.wenhua_quantity || 0}</td>
+                                    <td data-label="中央" class="text-center">${setItem.central_quantity || 0}</td>
+                                    <td data-label="J1" class="text-center">${setItem.j1_quantity || 0}</td>
+                                    <td data-label="J2" class="text-center">${setItem.j2_quantity || 0}</td>
+                                    <td data-label="J3" class="text-center">${setItem.j3_quantity || 0}</td>
+                                    <td data-label="总数" class="text-center ${itemStockClass}">${setItem.total_quantity || 0}</td>
+                                    <td data-label="操作" class="text-center">
                                         <button class="action-btn edit-btn" onclick="openEditModal(${setItem.id})" title="编辑碗碟">
                                             <i class="fas fa-edit"></i>
                                         </button>
@@ -3325,25 +3397,25 @@
                         
                         tableRows += `
                             <tr data-id="${set.id}" data-type="set">
-                                <td class="text-center">${displayIndex}</td>
-                                <td class="text-center">${photoHtml}</td>
-                                <td><strong>${set.product_name || set.set_name || '-'}</strong></td>
-                                <td class="text-center">${set.code_number || set.set_code || '-'}</td>
-                                <td class="text-center">${set.category || 'SET'}</td>
-                                <td class="text-center">-</td>
-                                <td class="text-center">
+                                <td data-label="NO" class="text-center">${displayIndex}</td>
+                                <td data-label="照片" class="text-center">${photoHtml}</td>
+                                <td data-label="产品名称"><strong>${set.product_name || set.set_name || '-'}</strong></td>
+                                <td data-label="编号" class="text-center">${set.code_number || set.set_code || '-'}</td>
+                                <td data-label="分类" class="text-center">${set.category || 'SET'}</td>
+                                <td data-label="尺寸" class="text-center">-</td>
+                                <td data-label="单价" class="text-center">
                                     <div class="currency-display">
                                         <span class="currency-symbol">RM</span>
                                         <span class="currency-amount">${formatCurrency(setPrice)}</span>
                                     </div>
                                 </td>
-                                <td class="text-center">${wenhuaQuantity}</td>
-                                <td class="text-center">${centralQuantity}</td>
-                                <td class="text-center">${j1Quantity}</td>
-                                <td class="text-center">${j2Quantity}</td>
-                                <td class="text-center">${j3Quantity}</td>
-                                <td class="text-center ${stockClass}">${totalQuantity}</td>
-                                <td class="text-center">
+                                <td data-label="文化楼" class="text-center">${wenhuaQuantity}</td>
+                                <td data-label="中央" class="text-center">${centralQuantity}</td>
+                                <td data-label="J1" class="text-center">${j1Quantity}</td>
+                                <td data-label="J2" class="text-center">${j2Quantity}</td>
+                                <td data-label="J3" class="text-center">${j3Quantity}</td>
+                                <td data-label="总数" class="text-center ${stockClass}">${totalQuantity}</td>
+                                <td data-label="操作" class="text-center">
                                     <button class="action-btn edit-btn" onclick="editSet(${set.id})" title="编辑套装">
                                         <i class="fas fa-edit"></i>
                                     </button>
@@ -3363,25 +3435,25 @@
                     
                     tableRows += `
                         <tr data-id="${item.id}" data-type="individual">
-                            <td class="text-center">${rowIndex++}</td>
-                            <td class="text-center">${photoHtml}</td>
-                            <td><strong>${item.product_name}</strong></td>
-                            <td class="text-center">${item.code_number || '-'}</td>
-                            <td class="text-center">${item.category}</td>
-                            <td class="text-center">${item.size || '-'}</td>
-                            <td class="text-center">
+                            <td data-label="NO" class="text-center">${rowIndex++}</td>
+                            <td data-label="照片" class="text-center">${photoHtml}</td>
+                            <td data-label="产品名称"><strong>${item.product_name}</strong></td>
+                            <td data-label="编号" class="text-center">${item.code_number || '-'}</td>
+                            <td data-label="分类" class="text-center">${item.category}</td>
+                            <td data-label="尺寸" class="text-center">${item.size || '-'}</td>
+                            <td data-label="单价" class="text-center">
                                 <div class="currency-display">
                                     <span class="currency-symbol">RM</span>
                                     <span class="currency-amount">${formatCurrency(item.unit_price)}</span>
                                 </div>
                             </td>
-                            <td class="text-center">${item.wenhua_quantity || 0}</td>
-                            <td class="text-center">${item.central_quantity || 0}</td>
-                            <td class="text-center">${item.j1_quantity || 0}</td>
-                            <td class="text-center">${item.j2_quantity || 0}</td>
-                            <td class="text-center">${item.j3_quantity || 0}</td>
-                            <td class="text-center ${stockClass}">${item.total_quantity || 0}</td>
-                            <td class="text-center">
+                            <td data-label="文化楼" class="text-center">${item.wenhua_quantity || 0}</td>
+                            <td data-label="中央" class="text-center">${item.central_quantity || 0}</td>
+                            <td data-label="J1" class="text-center">${item.j1_quantity || 0}</td>
+                            <td data-label="J2" class="text-center">${item.j2_quantity || 0}</td>
+                            <td data-label="J3" class="text-center">${item.j3_quantity || 0}</td>
+                            <td data-label="总数" class="text-center ${stockClass}">${item.total_quantity || 0}</td>
+                            <td data-label="操作" class="text-center">
                                 <button class="action-btn edit-btn" onclick="openEditModal(${item.id})" title="编辑">
                                     <i class="fas fa-edit"></i>
                                 </button>
@@ -4233,23 +4305,23 @@
             sortedSetsData.forEach((set, index) => {
                 tableRows += `
                     <tr>
-                        <td>${index + 1}</td>
-                        <td>
+                        <td data-label="序号">${index + 1}</td>
+                        <td data-label="套装名称">
                             <button class="set-expand-btn" onclick="toggleSetExpansion(${set.id})" title="展开/折叠">
                                 <i class="fas fa-chevron-right" id="expand-icon-${set.id}"></i>
                             </button>
                             ${set.set_name}
                         </td>
-                        <td>${set.set_code || '-'}</td>
-                        <td>${set.items_list || '-'}</td>
-                        <td>RM ${set.formatted_price}</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>
+                        <td data-label="套装编号">${set.set_code || '-'}</td>
+                        <td data-label="包含项目">${set.items_list || '-'}</td>
+                        <td data-label="单价 (RM)">RM ${set.formatted_price}</td>
+                        <td data-label="文华楼">0</td>
+                        <td data-label="中央">0</td>
+                        <td data-label="J1">0</td>
+                        <td data-label="J2">0</td>
+                        <td data-label="J3">0</td>
+                        <td data-label="总库存">0</td>
+                        <td data-label="操作">
                             <button class="action-btn edit-btn" onclick="editSet(${set.id})" title="编辑">
                                 <i class="fas fa-edit"></i>
                             </button>

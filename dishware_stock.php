@@ -1425,80 +1425,78 @@
             border-radius: 4px;
         }
 
-        /* 小屏：表头在左侧竖排（用 td[data-label] 显示字段名） */
-        @media (max-width: 900px) {
-            .table-scroll-container {
-                overflow-x: hidden;
-            }
+        /* 表头在左侧竖排（用 td[data-label] 显示字段名）：全屏生效 */
+        .table-scroll-container {
+            overflow-x: hidden;
+        }
 
-            .stock-table {
-                min-width: 0;
-                table-layout: auto;
-            }
+        .stock-table {
+            min-width: 0;
+            table-layout: auto;
+        }
 
-            .stock-table thead {
-                display: none;
-            }
+        .stock-table thead {
+            display: none;
+        }
 
-            .stock-table,
-            .stock-table tbody,
-            .stock-table tr {
-                display: block;
-                width: 100%;
-            }
+        .stock-table,
+        .stock-table tbody,
+        .stock-table tr {
+            display: block;
+            width: 100%;
+        }
 
-            .stock-table tr {
-                margin: 10px 10px 12px;
-                border: 1px solid #e5e7eb;
-                border-radius: 10px;
-                overflow: hidden;
-                background: white;
-            }
+        .stock-table tr {
+            margin: 10px 10px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            background: white;
+        }
 
-            .stock-table td {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                gap: 12px;
-                text-align: right;
-                border: none;
-                border-bottom: 1px solid #f1f1f1;
-                padding: 10px 12px;
-            }
+        .stock-table td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            text-align: right;
+            border: none;
+            border-bottom: 1px solid #f1f1f1;
+            padding: 10px 12px;
+        }
 
-            .stock-table td::before {
-                content: attr(data-label);
-                flex: 0 0 auto;
-                color: #583e04;
-                font-weight: 700;
-                text-align: left;
-                white-space: nowrap;
-            }
+        .stock-table td::before {
+            content: attr(data-label);
+            flex: 0 0 auto;
+            color: #583e04;
+            font-weight: 700;
+            text-align: left;
+            white-space: nowrap;
+        }
 
-            .stock-table td:last-child {
-                border-bottom: none;
-            }
+        .stock-table td:last-child {
+            border-bottom: none;
+        }
 
-            /* 空数据/加载行（colspan）避免被 flex 撑坏 */
-            .stock-table td[colspan] {
-                display: block !important;
-                text-align: center !important;
-            }
+        /* 空数据/加载行（colspan）避免被 flex 撑坏 */
+        .stock-table td[colspan] {
+            display: block !important;
+            text-align: center !important;
+        }
 
-            .stock-table td[colspan]::before {
-                content: '';
-                display: none;
-            }
+        .stock-table td[colspan]::before {
+            content: '';
+            display: none;
+        }
 
-            .product-photo,
-            .no-photo {
-                margin: 0;
-            }
+        .product-photo,
+        .no-photo {
+            margin: 0;
+        }
 
-            .action-btn {
-                width: 34px;
-                height: 34px;
-            }
+        .action-btn {
+            width: 34px;
+            height: 34px;
         }
 
     </style>
@@ -3353,20 +3351,18 @@
                             
                             tableRows += `
                                 <tr data-id="${set.id}" data-type="set" data-item-id="${setItem.id}">
-                                    ${itemIndex === 0 ? `<td data-label="NO" class="text-center set-shared-cell" rowspan="${set.items.length}">${displayIndex}</td>` : ''}
+                                    <td data-label="NO" class="text-center">${displayIndex}</td>
                                     <td data-label="照片" class="text-center">${photoHtml}</td>
                                     <td data-label="产品名称"><strong>${setItem.product_name || '-'}</strong></td>
                                     <td data-label="编号" class="text-center">${setItem.code_number || '-'}</td>
                                     <td data-label="分类" class="text-center">${setItem.category || set.category || '-'}</td>
                                     <td data-label="尺寸" class="text-center">${setItem.size || '-'}</td>
-                                    ${itemIndex === 0 ? `
-                                        <td data-label="单价" class="text-center set-shared-cell" rowspan="${set.items.length}">
-                                            <div class="currency-display">
-                                                <span class="currency-symbol">RM</span>
-                                                <span class="currency-amount">${formatCurrency(setPrice)}</span>
-                                            </div>
-                                        </td>
-                                    ` : ''}
+                                    <td data-label="单价" class="text-center">
+                                        <div class="currency-display">
+                                            <span class="currency-symbol">RM</span>
+                                            <span class="currency-amount">${formatCurrency(setPrice)}</span>
+                                        </div>
+                                    </td>
                                     <td data-label="文化楼" class="text-center">${setItem.wenhua_quantity || 0}</td>
                                     <td data-label="中央" class="text-center">${setItem.central_quantity || 0}</td>
                                     <td data-label="J1" class="text-center">${setItem.j1_quantity || 0}</td>
