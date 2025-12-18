@@ -2154,7 +2154,9 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                         
                         try {
                             let result;
-                            if (monthData[day]) {
+                            // 只有存在数据库记录ID时才执行更新（PUT）
+                            // 某些日期可能只有从KPI同步来的销售额（客户端临时数据），此时 monthData[day] 存在但没有 id
+                            if (monthData[day] && monthData[day].id) {
                                 recordData.id = monthData[day].id;
                                 result = await apiCall('', {
                                     method: 'PUT',
@@ -2286,10 +2288,21 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                     inputFirstClickMap.set(inputKey, true);
                 }
                 
-                if (input.value) {
-                    input.select();
-                } else {
-                    input.setSelectionRange(0, 0);
+                // 注意：type="number" 的 input 在部分浏览器（如 Chrome）不支持 selection API，
+                // 调用 select()/setSelectionRange() 会抛 InvalidStateError，导致后续逻辑中断。
+                const inputType = (input.getAttribute('type') || input.type || '').toLowerCase();
+                if (inputType === 'number') {
+                    return;
+                }
+
+                try {
+                    if (input.value) {
+                        input.select();
+                    } else if (typeof input.setSelectionRange === 'function') {
+                        input.setSelectionRange(0, 0);
+                    }
+                } catch (err) {
+                    // 忽略 selection 相关异常，确保不影响保存/计算等其它功能
                 }
             }, 0);
         }
@@ -2547,7 +2560,9 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                     };
                     
                     let result;
-                    if (monthData[day]) {
+                    // 只有存在数据库记录ID时才执行更新（PUT）
+                    // monthData[day] 可能来自 KPI 同步的临时数据，没有 id，必须走 POST 插入
+                    if (monthData[day] && monthData[day].id) {
                         recordData.id = monthData[day].id;
                         result = await apiCall('', {
                             method: 'PUT',
