@@ -2,6 +2,13 @@
 // 包含会话验证
 require_once 'session_check.php';
 
+// 防止浏览器缓存旧版 JS/HTML，避免修复已上线但用户端仍加载旧代码导致持续报错
+// 注意：必须在任何输出之前设置 header
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+header('Expires: 0');
+
 $reportPermissions = ['kpi', 'cost'];
 $restaurantPermissions = ['j1', 'j2', 'j3'];
 $reportLabelMap = [
@@ -2116,6 +2123,10 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
             
             const evt = (typeof event !== 'undefined') ? event : null;
             const saveBtn = evt && evt.target ? (evt.target.closest('button') || evt.target) : null;
+            if (!saveBtn) {
+                showAlert('未能识别保存按钮事件，请刷新页面后重试', 'warning');
+                return;
+            }
             const originalText = saveBtn.innerHTML;
             saveBtn.innerHTML = '<div class="loading"></div> 保存中...';
             saveBtn.disabled = true;
