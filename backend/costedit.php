@@ -2301,7 +2301,11 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                 const dateStr = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
 
                 // 保留销售额（从KPI自动获取/或数据库中已有的 sales）
-                const sales = parseFloat(getInputValue('sales', day)) || 0;
+                const salesFromMemory = (monthData[day] && monthData[day].sales !== undefined && monthData[day].sales !== null)
+                    ? parseFloat(monthData[day].sales)
+                    : NaN;
+                const salesFromInput = parseFloat(getInputValue('sales', day));
+                const sales = (!isNaN(salesFromMemory) ? salesFromMemory : (!isNaN(salesFromInput) ? salesFromInput : 0));
 
                 // 只清空成本字段
                 const recordData = {
@@ -2325,10 +2329,17 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                 }
 
                 if (id) {
-                    recordData.id = id;
+                    // 清空成本：PUT 时不传 sales，避免任何情况下把销售额覆盖成 0
+                    const payload = {
+                        id,
+                        date: dateStr,
+                        c_beverage: 0,
+                        c_kitchen: 0,
+                        restaurant: currentRestaurant
+                    };
                     result = await apiCall('', {
                         method: 'PUT',
-                        body: JSON.stringify(recordData)
+                        body: JSON.stringify(payload)
                     });
                 } else {
                     // 数据库确实没有记录时，插入一条 0 成本记录（sales 取当前页面值）

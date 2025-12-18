@@ -560,15 +560,34 @@ function handlePut() {
     }
     
     try {
+        // 先读取数据库现有记录，用于“缺省字段保持原值”（避免前端清空成本时误把 sales 覆盖成 0）
+        $stmt = $pdo->prepare("SELECT * FROM " . $config['data_table'] . " WHERE id = ?");
+        $stmt->execute([$data['id']]);
+        $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$existing) {
+            sendResponse(false, "记录不存在");
+        }
+
+        // 若字段未提供（或为空/null），则保持数据库原值
+        $salesValue = (array_key_exists('sales', $data) && $data['sales'] !== null && $data['sales'] !== '')
+            ? $data['sales']
+            : ($existing['sales'] ?? 0);
+        $beverageValue = (array_key_exists('c_beverage', $data) && $data['c_beverage'] !== null && $data['c_beverage'] !== '')
+            ? $data['c_beverage']
+            : ($existing['c_beverage'] ?? 0);
+        $kitchenValue = (array_key_exists('c_kitchen', $data) && $data['c_kitchen'] !== null && $data['c_kitchen'] !== '')
+            ? $data['c_kitchen']
+            : ($existing['c_kitchen'] ?? 0);
+
         // 添加日志记录
         error_log("=== PUT 请求调试 ===");
         error_log("餐厅: " . $restaurant);
         error_log("表名: " . $config['data_table']);
         error_log("记录ID: " . $data['id']);
         error_log("日期: " . $data['date']);
-        error_log("销售额: " . ($data['sales'] ?? 0));
-        error_log("饮料成本: " . ($data['c_beverage'] ?? 0));
-        error_log("厨房成本: " . ($data['c_kitchen'] ?? 0));
+        error_log("销售额: " . $salesValue);
+        error_log("饮料成本: " . $beverageValue);
+        error_log("厨房成本: " . $kitchenValue);
         
         $sql = "UPDATE " . $config['data_table'] . " 
                 SET date = ?, day_name = ?, sales = ?, c_beverage = ?, c_kitchen = ?
@@ -580,9 +599,9 @@ function handlePut() {
         $result = $stmt->execute([
             $data['date'],
             $dayName,
-            $data['sales'] ?? 0,
-            $data['c_beverage'] ?? 0,
-            $data['c_kitchen'] ?? 0,
+            $salesValue,
+            $beverageValue,
+            $kitchenValue,
             $data['id']
         ]);
         
