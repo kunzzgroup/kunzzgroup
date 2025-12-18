@@ -1067,7 +1067,7 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
     <div class="container">
         <div class="header">
             <div>
-                <h1>TOKYO JAPANESE CUISINE 成本后台1</h1>
+                <h1>TOKYO JAPANESE CUISINE 成本后台</h1>
                 <div style="margin-top:6px; font-size:12px; color:#6b7280;">
                     页面版本: <span id="page-build-id" style="font-weight:700;">loading...</span>
                 </div>
