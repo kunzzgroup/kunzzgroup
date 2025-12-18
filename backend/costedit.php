@@ -1613,7 +1613,7 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                         <button class="edit-btn" id="edit-btn-${day}" onclick="toggleEdit(${day})" title="编辑${day}日数据">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="delete-day-btn" onclick="clearDayData(${day})" title="清空${day}日数据">
+                        <button class="delete-day-btn" onclick="clearDayData(${day})" title="清空${day}日成本（保留销售额）">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </td>
@@ -2286,9 +2286,9 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
             }
         }
 
-        // 清空单日数据
+        // 清空单日“成本”数据（只清空饮料/厨房成本，保留销售额）
         async function clearDayData(day) {
-            if (!confirm(`确定要清空${day}日的所有数据吗？此操作不可恢复！`)) {
+            if (!confirm(`确定要清空${day}日的饮料成本/厨房成本吗？销售额将保留（从KPI自动获取）。`)) {
                 return;
             }
             
@@ -2298,32 +2298,65 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
             deleteBtn.disabled = true;
             
             try {
-                if (monthData[day] && monthData[day].id) {
-                    const result = await apiCall(`?action=delete&id=${monthData[day].id}&restaurant=${currentRestaurant}`, {
-                        method: 'DELETE'
-                    });
-                    
-                    if (result.success) {
-                        delete monthData[day];
-                        showAlert(`${day}日数据已从数据库删除`, 'success');
-                    } else {
-                        throw new Error(result.message || '删除失败');
+                const dateStr = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+
+                // 保留销售额（从KPI自动获取/或数据库中已有的 sales）
+                const sales = parseFloat(getInputValue('sales', day)) || 0;
+
+                // 只清空成本字段
+                const recordData = {
+                    date: dateStr,
+                    sales: sales,
+                    c_beverage: 0,
+                    c_kitchen: 0,
+                    restaurant: currentRestaurant
+                };
+
+                let result = null;
+                let id = monthData[day] && monthData[day].id ? monthData[day].id : null;
+
+                // 如果前端没有 id，尝试按日期获取数据库记录（例如 KPI 触发器已提前写入 cost）
+                if (!id) {
+                    const existing = await getExistingCostRecordByDate(dateStr);
+                    if (existing && existing.id) {
+                        monthData[day] = { ...(monthData[day] || {}), ...existing };
+                        id = existing.id;
                     }
-                } else {
-                    showAlert(`${day}日数据已清空`, 'info');
                 }
-                
-                const inputs = document.querySelectorAll(`input[data-day="${day}"]`);
-                inputs.forEach(input => {
-                    input.value = '';
+
+                if (id) {
+                    recordData.id = id;
+                    result = await apiCall('', {
+                        method: 'PUT',
+                        body: JSON.stringify(recordData)
+                    });
+                } else {
+                    // 数据库确实没有记录时，插入一条 0 成本记录（sales 取当前页面值）
+                    result = await apiCall('', {
+                        method: 'POST',
+                        body: JSON.stringify(recordData)
+                    });
+                }
+
+                if (result && result.success === false) {
+                    throw new Error(result.message || '清空成本失败');
+                }
+
+                // 清空输入框（仅成本字段），销售额保持
+                const costFields = ['c_beverage', 'c_kitchen'];
+                costFields.forEach(field => {
+                    const input = document.querySelector(`input[data-field="${field}"][data-day="${day}"]`);
+                    if (input) input.value = '';
                 });
-                
+
                 updateCalculations(day);
                 updateInputColors();
+
+                showAlert(`${day}日成本已清空（销售额保留）`, 'success');
                 
             } catch (error) {
-                showAlert(`删除${day}日数据失败: ${error.message}`, 'error');
-                console.error('删除数据失败:', error);
+                showAlert(`清空${day}日成本失败: ${error.message}`, 'error');
+                console.error('清空成本失败:', error);
             } finally {
                 deleteBtn.innerHTML = originalHTML;
                 deleteBtn.disabled = false;
