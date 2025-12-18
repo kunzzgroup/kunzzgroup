@@ -732,6 +732,58 @@ function impactAt(targetEl, tone, mainText){
   if(mainText) floatText(c.x, c.y, mainText, tone);
 }
 
+function randInt(min, max){
+  return Math.floor(Math.random()*(max-min+1))+min;
+}
+function weightedPick(items){
+  const total = items.reduce((s, it)=> s + (it.w || 0), 0);
+  let r = Math.random() * (total || 1);
+  for(const it of items){
+    r -= (it.w || 0);
+    if(r <= 0) return it.v;
+  }
+  return items[items.length-1]?.v;
+}
+
+function ensureEnemyFields(){
+  state.enemy.block = state.enemy.block ?? 0;
+  state.enemy.strength = state.enemy.strength ?? 0;
+  state.enemy.baseDamage = state.enemy.baseDamage ?? state.enemy.damage ?? 8;
+  state.enemy.lastIntentType = state.enemy.lastIntentType ?? null;
+}
+
+function rollEnemyIntent(force=false){
+  if(state.gameOver) return;
+  ensureEnemyFields();
+  const e = state.enemy;
+  if(!force && e.intentData && e.intentData.turnPlanned === state.turn) return;
+
+  const t = state.turn;
+  const baseAtk = e.baseDamage ?? 8;
+  const str = e.strength ?? 0;
+
+  // scale a bit with turns
+  const atkDmg = baseAtk + str;
+  const multiHits = randInt(2, t >= 6 ? 4 : 3);
+  const multiEach = Math.max(2, Math.floor(baseAtk * 0.55)) + Math.max(0, Math.floor(str * 0.7));
+  const defendBlock = 7 + Math.floor(t/2);
+  const buffStr = 1 + (t >= 5 ? 1 : 0);
+
+  const last = e.lastIntentType;
+  const avoidRepeat = (type) => (last === type ? 0.35 : 1);
+
+  const choice = weightedPick([
+    { w: (t <= 2 ? 5 : 3) * avoidRepeat('attack'), v: { type:'attack', dmg: atkDmg } },
+    { w: (t >= 3 ? 3 : 1.5) * avoidRepeat('multi'), v: { type:'multi', hits: multiHits, each: multiEach } },
+    { w: (t >= 2 ? 2.6 : 1.6) * avoidRepeat('defend'), v: { type:'defend', block: defendBlock } },
+    { w: (t >= 4 ? 2.2 : 0.8) * avoidRepeat('buff'), v: { type:'buff', str: buffStr } },
+  ]);
+
+  e.intentData = { ...choice, turnPlanned: state.turn };
+  e.intent = choice.type;
+  e.lastIntentType = choice.type;
+}
+
 // --- Game Flow ---
 function draw(n=5){
   for(let i=0;i<n;i++){
@@ -745,6 +797,7 @@ function startTurn(){
   state.player.energy = state.player.maxEnergy ?? 3;
   state.player.block = 0;
   draw(5);
+  rollEnemyIntent();
   log(`Turn ${state.turn} begins.`, 'good');
   setTip('Your turn: spend Energy to play cards.');
   render();
@@ -787,19 +840,62 @@ function playCard(idx){
 function endTurn(){
   if(state.gameOver) return;
   // Enemy action
-  if(state.enemy.intent==='attack'){
-    const dmg = Math.max(0, state.enemy.damage - state.player.block);
-    state.player.hp = Math.max(0, state.player.hp - dmg);
-    log(`Enemy attacks for <b>${state.enemy.damage}</b> (${dmg} taken).`, dmg>0 ? 'bad' : 'good');
+  ensureEnemyFields();
+  // Enemy's block falls off at start of its turn (like most card battlers)
+  state.enemy.block = 0;
+
+  const e = state.enemy;
+  const intent = e.intentData || { type: e.intent || 'attack', dmg: (e.baseDamage ?? e.damage ?? 8) + (e.strength ?? 0) };
+
+  if(intent.type === 'attack'){
+    const dmgEach = Math.max(0, intent.dmg ?? 0);
+    let remainingBlock = state.player.block ?? 0;
+    const taken = Math.max(0, dmgEach - remainingBlock);
+    remainingBlock = Math.max(0, remainingBlock - dmgEach);
+    state.player.block = remainingBlock;
+    state.player.hp = Math.max(0, state.player.hp - taken);
+    log(`Enemy attacks for <b>${dmgEach}</b> (${taken} taken).`, taken>0 ? 'bad' : 'good');
     flash($('playerUnit'), 'shake');
-    if(dmg>0) flash($('playerUnit'), 'glowBad');
-    setTip('Enemy acted. New turn started.');
-    if(state.player.hp <= 0){
-      state.gameOver = true;
-      render();
-      return;
+    if(taken>0) flash($('playerUnit'), 'glowBad');
+    impactAt($('playerUnit'), taken>0 ? 'bad' : 'good', taken>0 ? `-${taken}` : 'Blocked');
+  } else if(intent.type === 'multi'){
+    const hits = intent.hits ?? 2;
+    const each = Math.max(0, intent.each ?? 0);
+    let remainingBlock = state.player.block ?? 0;
+    let totalTaken = 0;
+    for(let i=0;i<hits;i++){
+      const taken = Math.max(0, each - remainingBlock);
+      remainingBlock = Math.max(0, remainingBlock - each);
+      state.player.hp = Math.max(0, state.player.hp - taken);
+      totalTaken += taken;
+      if(state.player.hp <= 0) break;
     }
+    state.player.block = remainingBlock;
+    log(`Enemy strikes <b>${hits}x</b> for <b>${each}</b> each (${totalTaken} taken).`, totalTaken>0 ? 'bad' : 'good');
+    flash($('playerUnit'), 'shake');
+    if(totalTaken>0) flash($('playerUnit'), 'glowBad');
+    impactAt($('playerUnit'), totalTaken>0 ? 'bad' : 'good', totalTaken>0 ? `-${totalTaken}` : 'Blocked');
+  } else if(intent.type === 'defend'){
+    const b = Math.max(0, intent.block ?? 0);
+    state.enemy.block = (state.enemy.block ?? 0) + b;
+    log(`Enemy gains <b>${b}</b> Block.`, 'bad');
+    flash($('enemyUnit'), 'glowGood');
+    impactAt($('enemyUnit'), 'good', `+${b} Block`);
+  } else if(intent.type === 'buff'){
+    const s = Math.max(0, intent.str ?? 0);
+    state.enemy.strength = (state.enemy.strength ?? 0) + s;
+    log(`Enemy gains <b>+${s}</b> Strength.`, 'bad');
+    flash($('enemyUnit'), 'glowGood');
+    impactAt($('enemyUnit'), 'good', `+${s} STR`);
   }
+
+  setTip('Enemy acted. New turn started.');
+  if(state.player.hp <= 0){
+    state.gameOver = true;
+    render();
+    return;
+  }
+
   state.hand.forEach(c=>state.discard.push(c));
   state.hand=[];
   state.turn++;
@@ -812,8 +908,9 @@ function checkEnemy(){
     state.player.gold += 20;
     // new enemy
     const hp = 50 + state.turn*5;
-    state.enemy = { hp, maxHp: hp, intent:'attack', damage:8+state.turn };
+    state.enemy = { hp, maxHp: hp, intent:'attack', damage:8+state.turn, baseDamage:8+state.turn, block:0, strength:0, intentData:null, lastIntentType:null };
     setTip('A new enemy appears!');
+    rollEnemyIntent(true);
   }
 }
 
@@ -833,6 +930,11 @@ function normalizeLoadedState(s){
   s.enemy.hp = s.enemy.hp ?? s.enemy.maxHp;
   s.enemy.intent = s.enemy.intent ?? 'attack';
   s.enemy.damage = s.enemy.damage ?? 8;
+  s.enemy.baseDamage = s.enemy.baseDamage ?? s.enemy.damage ?? 8;
+  s.enemy.block = s.enemy.block ?? 0;
+  s.enemy.strength = s.enemy.strength ?? 0;
+  s.enemy.lastIntentType = s.enemy.lastIntentType ?? null;
+  s.enemy.intentData = s.enemy.intentData ?? null;
   s.deck = Array.isArray(s.deck) ? s.deck : [];
   s.hand = Array.isArray(s.hand) ? s.hand : [];
   s.discard = Array.isArray(s.discard) ? s.discard : [];
@@ -850,6 +952,7 @@ $('load').onclick = ()=>{
   if(s){
     try{
       state = normalizeLoadedState(JSON.parse(s));
+      rollEnemyIntent(true);
       log('Loaded.', 'good');
       setTip('Loaded from localStorage.');
       render();
@@ -871,8 +974,26 @@ function cardTypeLabel(type){
   return 'Card';
 }
 function intentText(){
-  if(state.enemy.intent==='attack') return `Attack (${state.enemy.damage})`;
-  return state.enemy.intent;
+  const e = state.enemy;
+  const i = e.intentData || { type: e.intent || 'attack' };
+  if(i.type === 'attack'){
+    const dmg = i.dmg ?? ((e.baseDamage ?? e.damage ?? 8) + (e.strength ?? 0));
+    return `Attack (${dmg})`;
+  }
+  if(i.type === 'multi'){
+    const hits = i.hits ?? 2;
+    const each = i.each ?? Math.max(2, Math.floor((e.baseDamage ?? e.damage ?? 8) * 0.55)) + Math.max(0, Math.floor((e.strength ?? 0) * 0.7));
+    return `Multi (${hits}x${each})`;
+  }
+  if(i.type === 'defend'){
+    const b = i.block ?? (7 + Math.floor((state.turn ?? 1)/2));
+    return `Defend (+${b} Block)`;
+  }
+  if(i.type === 'buff'){
+    const s = i.str ?? 1;
+    return `Buff (+${s} STR)`;
+  }
+  return String(i.type || e.intent || 'attack');
 }
 function renderPreview(cardId){
   const c = cardsDB[cardId];
@@ -918,7 +1039,11 @@ function render(){
   $('ehpMax').textContent = emax;
   $('ehpBar').style.width = `${pct(state.enemy.hp, emax)}%`;
   $('intent').textContent = intentText();
-  $('intentTag').textContent = state.enemy.intent==='attack' ? 'ATTACK' : String(state.enemy.intent).toUpperCase();
+  const it = state.enemy.intentData?.type ?? state.enemy.intent ?? 'attack';
+  $('intentTag').textContent = String(it).toUpperCase();
+  $('eblock').textContent = state.enemy.block ?? 0;
+  $('eblockBar').style.width = `${pct(state.enemy.block ?? 0, 40)}%`;
+  $('estr').textContent = state.enemy.strength ?? 0;
 
   // Energy pips
   const maxEnergy = state.player.maxEnergy ?? 3;
