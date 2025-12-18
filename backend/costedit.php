@@ -1392,6 +1392,24 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
             }
         }
 
+        // 根据日期获取已存在的成本记录（用于“已存在但前端没有id”的兜底更新）
+        async function getExistingCostRecordByDate(dateStr) {
+            try {
+                const query = new URLSearchParams({
+                    action: 'list',
+                    restaurant: currentRestaurant,
+                    search_date: dateStr
+                });
+                const res = await apiCall(`?${query.toString()}`);
+                if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+                    return res.data[0];
+                }
+            } catch (e) {
+                console.warn('按日期查询成本记录失败:', e);
+            }
+            return null;
+        }
+
         // 加载月度数据
         async function loadMonthData(preserveEditingState = false) {
             if (isLoading) return;
@@ -2096,7 +2114,8 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
         async function saveAllData() {
             if (isLoading) return;
             
-            const saveBtn = event.target;
+            const evt = (typeof event !== 'undefined') ? event : null;
+            const saveBtn = evt && evt.target ? (evt.target.closest('button') || evt.target) : null;
             const originalText = saveBtn.innerHTML;
             saveBtn.innerHTML = '<div class="loading"></div> 保存中...';
             saveBtn.disabled = true;
@@ -2167,6 +2186,20 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                                     method: 'POST',
                                     body: JSON.stringify(recordData)
                                 });
+
+                                // 如果后端提示“该日期已存在”，说明数据库已有记录但前端没有拿到 id
+                                // 这常见于：KPI 触发器先插入了 cost 记录，或 cost 记录是其它流程生成的
+                                if (result && result.success === false && String(result.message || '').includes('已存在')) {
+                                    const existing = await getExistingCostRecordByDate(dateStr);
+                                    if (existing && existing.id) {
+                                        monthData[day] = { ...(monthData[day] || {}), ...existing };
+                                        recordData.id = existing.id;
+                                        result = await apiCall('', {
+                                            method: 'PUT',
+                                            body: JSON.stringify(recordData)
+                                        });
+                                    }
+                                }
                             }
                             
                             if (result.success === true) {
@@ -2573,6 +2606,19 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                             method: 'POST',
                             body: JSON.stringify(recordData)
                         });
+
+                        // 如果提示“已存在”，则按日期查出 id，再改为 PUT 更新一次
+                        if (result && result.success === false && String(result.message || '').includes('已存在')) {
+                            const existing = await getExistingCostRecordByDate(dateStr);
+                            if (existing && existing.id) {
+                                monthData[day] = { ...(monthData[day] || {}), ...existing };
+                                recordData.id = existing.id;
+                                result = await apiCall('', {
+                                    method: 'PUT',
+                                    body: JSON.stringify(recordData)
+                                });
+                            }
+                        }
                     }
                     
                     if (result.success === true || result.success !== false) {
