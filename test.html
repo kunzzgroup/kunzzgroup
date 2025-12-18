@@ -3,70 +3,734 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Strategy Card Prototype</title>
+  <title>Card Battle Prototype</title>
   <style>
-    body { margin: 0; background:#0f1220; color:#eaeaf0; font-family: system-ui, -apple-system, Segoe UI, Roboto; }
-    #app { display:flex; height:100vh; }
-    .panel { padding:16px; box-sizing:border-box; }
-    #left { width:260px; background:#151936; }
-    #center { flex:1; background:#0f1220; }
-    #right { width:320px; background:#151936; }
-    .card { border:1px solid #3a3f7a; border-radius:8px; padding:8px; margin:6px 0; cursor:pointer; background:#1b2050; }
-    .card:hover { background:#23297a; }
-    .btn { padding:8px 12px; border-radius:6px; border:1px solid #3a3f7a; background:#1b2050; color:#fff; cursor:pointer; }
-    .btn:disabled { opacity:.5; cursor:not-allowed; }
-    .row { display:flex; gap:8px; }
-    .stat { font-size:14px; margin:4px 0; }
-    h3 { margin:0 0 8px 0; }
+    :root{
+      --bg0:#070A14;
+      --bg1:#0B1024;
+      --panel:#0E1433CC;
+      --panel2:#0B1024CC;
+      --stroke:#2B3577;
+      --stroke2:#3B48A6;
+      --text:#EAF0FF;
+      --muted:#A8B3E6;
+      --good:#4EE6A8;
+      --warn:#FFCE5C;
+      --bad:#FF6B8B;
+      --mana:#7CC3FF;
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --shadow2: 0 10px 30px rgba(0,0,0,.45);
+      --radius: 14px;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      color:var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(1200px 800px at 70% 10%, rgba(124,195,255,.18), transparent 55%),
+        radial-gradient(900px 700px at 15% 85%, rgba(255,107,139,.14), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow:hidden;
+    }
+
+    /* subtle stars */
+    body:before{
+      content:"";
+      position:fixed; inset:-40px;
+      background-image:
+        radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,.18), transparent 55%),
+        radial-gradient(2px 2px at 140px 90px, rgba(255,255,255,.12), transparent 55%),
+        radial-gradient(1px 1px at 60px 160px, rgba(255,255,255,.12), transparent 55%),
+        radial-gradient(1px 1px at 220px 210px, rgba(255,255,255,.10), transparent 55%),
+        radial-gradient(1px 1px at 300px 70px, rgba(255,255,255,.10), transparent 55%);
+      background-size: 360px 260px;
+      opacity:.7;
+      filter: blur(.2px);
+      animation: drift 18s linear infinite;
+      pointer-events:none;
+    }
+    @keyframes drift{ from{ transform:translate3d(0,0,0);} to{ transform:translate3d(-120px,40px,0);} }
+
+    /* FX layer */
+    #fxLayer{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index: 9999;
+    }
+    .cardGhost{
+      position:fixed;
+      transform-origin:center;
+      animation: flyCard .42s cubic-bezier(.2,.9,.2,1) forwards;
+      filter: drop-shadow(0 18px 30px rgba(0,0,0,.55));
+      will-change: transform, opacity;
+    }
+    @keyframes flyCard{
+      0%{ transform: translate3d(0,0,0) rotate(0deg) scale(1); opacity: .95; }
+      70%{ opacity: 1; }
+      100%{ transform: translate3d(var(--dx), var(--dy), 0) rotate(var(--rot)) scale(.22); opacity: 0; }
+    }
+    .floatText{
+      position:fixed;
+      transform: translate(-50%, -50%);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 900;
+      letter-spacing: .2px;
+      border:1px solid rgba(59,72,166,.35);
+      background: rgba(11,16,36,.65);
+      box-shadow: 0 16px 40px rgba(0,0,0,.45);
+      animation: floatUp .72s ease-out forwards;
+      will-change: transform, opacity;
+      white-space: nowrap;
+    }
+    .floatText.bad{
+      border-color: rgba(255,107,139,.40);
+      background: rgba(60,10,20,.30);
+      color: rgba(255,222,230,.98);
+    }
+    .floatText.good{
+      border-color: rgba(78,230,168,.35);
+      background: rgba(10,45,30,.28);
+      color: rgba(219,255,242,.98);
+    }
+    @keyframes floatUp{
+      0%{ transform: translate(-50%, -50%) scale(.95); opacity: 0; }
+      12%{ opacity: 1; }
+      100%{ transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.05); opacity: 0; }
+    }
+    .burst{
+      position:fixed;
+      width:0; height:0;
+      transform: translate(-50%, -50%);
+      animation: burstFade .46s ease-out forwards;
+      will-change: transform, opacity;
+    }
+    .burst i{
+      position:absolute;
+      width: 7px; height: 7px;
+      border-radius: 999px;
+      background: rgba(124,195,255,.85);
+      box-shadow: 0 0 0 3px rgba(124,195,255,.12);
+      transform: translate3d(0,0,0) scale(var(--s));
+      animation: particle .46s ease-out forwards;
+      will-change: transform, opacity;
+    }
+    .burst.bad i{
+      background: rgba(255,107,139,.9);
+      box-shadow: 0 0 0 3px rgba(255,107,139,.14);
+    }
+    .burst.good i{
+      background: rgba(78,230,168,.9);
+      box-shadow: 0 0 0 3px rgba(78,230,168,.14);
+    }
+    @keyframes particle{
+      0%{ transform: translate3d(0,0,0) scale(var(--s)); opacity: 1; }
+      100%{ transform: translate3d(var(--dx), var(--dy), 0) scale(calc(var(--s) * .2)); opacity: 0; }
+    }
+    @keyframes burstFade{
+      0%{ opacity: 1; }
+      100%{ opacity: 0; }
+    }
+
+    #app{
+      height:100vh;
+      display:grid;
+      grid-template-columns: 300px 1fr 360px;
+      gap:14px;
+      padding:14px;
+    }
+
+    .panel{
+      border:1px solid rgba(59,72,166,.55);
+      background: linear-gradient(180deg, var(--panel), rgba(10,14,40,.62));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .panelHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:12px 14px;
+      border-bottom:1px solid rgba(59,72,166,.35);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0));
+    }
+    .panelHeader h3{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.8px;
+      text-transform:uppercase;
+      color:rgba(234,240,255,.92);
+    }
+    .panelBody{ padding:14px; }
+
+    /* left stats */
+    .kv{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin:10px 0; }
+    .k{ color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.6px; }
+    .v{ font-variant-numeric: tabular-nums; font-weight:650; }
+
+    .bar{
+      height:10px;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(59,72,166,.35);
+      border-radius:999px;
+      overflow:hidden;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.35);
+    }
+    .bar > i{
+      display:block; height:100%;
+      width: 50%;
+      background: linear-gradient(90deg, rgba(124,195,255,.95), rgba(78,230,168,.85));
+      border-radius:999px;
+      transition: width .25s ease;
+    }
+    .bar.hp > i{ background: linear-gradient(90deg, rgba(255,107,139,.95), rgba(255,206,92,.85)); }
+    .bar.block > i{ background: linear-gradient(90deg, rgba(124,195,255,.95), rgba(155,124,255,.85)); }
+
+    .pills{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid rgba(59,72,166,.45);
+      background: rgba(11,16,36,.7);
+      color:rgba(234,240,255,.92);
+      font-size:12px;
+    }
+    .dot{ width:8px; height:8px; border-radius:999px; background: rgba(255,255,255,.25); box-shadow: 0 0 0 3px rgba(255,255,255,.06); }
+    .dot.mana{ background: rgba(124,195,255,.95); box-shadow: 0 0 0 3px rgba(124,195,255,.12); }
+    .dot.gold{ background: rgba(255,206,92,.95); box-shadow: 0 0 0 3px rgba(255,206,92,.12); }
+    .dot.turn{ background: rgba(78,230,168,.95); box-shadow: 0 0 0 3px rgba(78,230,168,.12); }
+
+    /* buttons */
+    .row{ display:flex; gap:10px; flex-wrap:wrap; }
+    .btn{
+      user-select:none;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(59,72,166,.55);
+      background: linear-gradient(180deg, rgba(27,32,80,.9), rgba(12,16,45,.95));
+      color: rgba(234,240,255,.95);
+      cursor:pointer;
+      box-shadow: 0 10px 26px rgba(0,0,0,.35);
+      transition: transform .12s ease, filter .12s ease, border-color .12s ease;
+      font-weight:650;
+      font-size:13px;
+      letter-spacing:.3px;
+    }
+    .btn:hover{ transform: translateY(-1px); border-color: rgba(124,195,255,.85); filter: brightness(1.05); }
+    .btn:active{ transform: translateY(0); filter: brightness(0.98); }
+    .btn:disabled{ opacity:.45; cursor:not-allowed; transform:none; filter:none; }
+    .btn.primary{
+      border-color: rgba(124,195,255,.75);
+      background: linear-gradient(180deg, rgba(124,195,255,.22), rgba(27,32,80,.92));
+    }
+
+    /* center battlefield + hand */
+    #center{
+      display:flex;
+      flex-direction:column;
+      min-width: 0;
+    }
+    .battlefield{
+      flex: 1;
+      display:grid;
+      grid-template-rows: auto 1fr auto;
+      gap:12px;
+      padding:14px;
+    }
+    .topHUD{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .energyPips{ display:flex; gap:6px; align-items:center; }
+    .pip{
+      width:14px; height:14px; border-radius:999px;
+      background: rgba(255,255,255,.10);
+      border:1px solid rgba(59,72,166,.5);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.35);
+    }
+    .pip.on{
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.65), rgba(124,195,255,.9));
+      border-color: rgba(124,195,255,.85);
+      box-shadow: 0 0 0 3px rgba(124,195,255,.12);
+    }
+
+    .arena{
+      position:relative;
+      border-radius: var(--radius);
+      border:1px solid rgba(59,72,166,.35);
+      background:
+        radial-gradient(900px 420px at 50% 40%, rgba(124,195,255,.12), transparent 60%),
+        radial-gradient(700px 360px at 70% 75%, rgba(255,107,139,.10), transparent 60%),
+        linear-gradient(180deg, rgba(8,10,20,.35), rgba(8,10,20,.60));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      min-height: 340px;
+    }
+    .arena:before{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(255,255,255,.02) 1px, transparent 1px);
+      background-size: 46px 46px;
+      opacity:.35;
+      pointer-events:none;
+    }
+
+    .unit{
+      position:absolute;
+      width: 240px;
+      border-radius: 18px;
+      border:1px solid rgba(59,72,166,.35);
+      background: linear-gradient(180deg, rgba(14,20,51,.62), rgba(8,10,20,.55));
+      box-shadow: 0 18px 70px rgba(0,0,0,.55);
+      overflow:hidden;
+    }
+    .unitHeader{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:10px 12px;
+      border-bottom:1px solid rgba(59,72,166,.25);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0));
+    }
+    .unitName{ font-weight:800; letter-spacing:.4px; }
+    .unitTag{
+      font-size:11px; color:rgba(234,240,255,.85);
+      padding:4px 8px; border-radius:999px;
+      border:1px solid rgba(59,72,166,.35);
+      background: rgba(11,16,36,.55);
+      white-space:nowrap;
+    }
+    .unitBody{ padding:12px; }
+    .portrait{
+      height:96px;
+      border-radius:14px;
+      border:1px solid rgba(59,72,166,.25);
+      background:
+        radial-gradient(110px 90px at 30% 20%, rgba(255,255,255,.10), transparent 60%),
+        linear-gradient(135deg, rgba(124,195,255,.14), rgba(255,107,139,.10));
+      position:relative;
+      overflow:hidden;
+    }
+    .portrait:after{
+      content:"";
+      position:absolute; inset:-40px;
+      background: radial-gradient(300px 160px at 30% 30%, rgba(124,195,255,.18), transparent 70%);
+      transform: rotate(8deg);
+    }
+
+    .unitStats{ margin-top:10px; display:grid; gap:8px; }
+    .mini{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      font-size:12px; color:rgba(234,240,255,.9);
+    }
+    .mini span{ color:var(--muted); }
+
+    .unit.player{ left: 18px; bottom: 18px; }
+    .unit.enemy{ right: 18px; top: 18px; width: 280px; }
+
+    .shake{ animation: shake .22s ease; }
+    @keyframes shake{
+      0%{ transform: translate3d(0,0,0); }
+      25%{ transform: translate3d(-3px,1px,0); }
+      50%{ transform: translate3d(3px,-1px,0); }
+      75%{ transform: translate3d(-2px,0,0); }
+      100%{ transform: translate3d(0,0,0); }
+    }
+    .glowBad{ box-shadow: 0 0 0 2px rgba(255,107,139,.35), 0 18px 70px rgba(0,0,0,.55); }
+    .glowGood{ box-shadow: 0 0 0 2px rgba(78,230,168,.28), 0 18px 70px rgba(0,0,0,.55); }
+
+    /* battle log */
+    .logWrap{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-height: 160px;
+    }
+    #log{
+      height: 200px;
+      overflow:auto;
+      padding-right:8px;
+      scrollbar-gutter: stable;
+    }
+    #log::-webkit-scrollbar{ width:10px; }
+    #log::-webkit-scrollbar-thumb{ background: rgba(124,195,255,.16); border-radius:999px; border:1px solid rgba(59,72,166,.35); }
+    .logItem{
+      padding:10px 10px;
+      margin:8px 0;
+      border:1px solid rgba(59,72,166,.28);
+      background: rgba(11,16,36,.55);
+      border-radius: 12px;
+      color: rgba(234,240,255,.92);
+      line-height: 1.25;
+    }
+    .logItem small{ color: var(--muted); }
+
+    /* hand + cards */
+    .handDock{
+      border-radius: var(--radius);
+      border:1px solid rgba(59,72,166,.35);
+      background: linear-gradient(180deg, rgba(14,20,51,.55), rgba(8,10,20,.62));
+      box-shadow: var(--shadow2);
+      padding: 12px;
+    }
+    #hand{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:stretch;
+    }
+
+    .card{
+      width: 170px;
+      border-radius: 16px;
+      border:1px solid rgba(59,72,166,.55);
+      background:
+        radial-gradient(160px 120px at 30% 20%, rgba(255,255,255,.09), transparent 60%),
+        linear-gradient(180deg, rgba(27,32,80,.95), rgba(12,16,45,.96));
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+      cursor:pointer;
+      position:relative;
+      overflow:hidden;
+      transform: translateY(0);
+      transition: transform .14s ease, filter .14s ease, border-color .14s ease;
+      user-select:none;
+    }
+    .card:hover{
+      transform: translateY(-6px);
+      border-color: rgba(124,195,255,.90);
+      filter: brightness(1.04);
+    }
+    .card:active{ transform: translateY(-2px) scale(.99); }
+    .card.disabled{
+      opacity:.55;
+      cursor:not-allowed;
+      transform:none;
+      filter:none;
+    }
+    .cardTop{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:10px 10px 0 10px;
+    }
+    .cost{
+      width:28px; height:28px; border-radius:999px;
+      display:grid; place-items:center;
+      font-weight:900;
+      color: rgba(8,10,20,.95);
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.85), rgba(124,195,255,.95));
+      border:1px solid rgba(255,255,255,.25);
+      box-shadow: 0 10px 24px rgba(0,0,0,.25);
+      flex:0 0 auto;
+    }
+    .typeTag{
+      font-size:11px;
+      letter-spacing:.5px;
+      text-transform:uppercase;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid rgba(59,72,166,.35);
+      background: rgba(11,16,36,.55);
+      color: rgba(234,240,255,.88);
+    }
+    .cardName{
+      padding:8px 10px 0 10px;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    .cardText{
+      padding:10px;
+      color: rgba(234,240,255,.88);
+      font-size:12px;
+      line-height:1.25;
+    }
+    .cardMeta{
+      padding:10px;
+      border-top:1px solid rgba(59,72,166,.20);
+      display:flex;
+      justify-content:space-between;
+      color: var(--muted);
+      font-size:11px;
+    }
+
+    /* right preview */
+    .preview{
+      border-radius: var(--radius);
+      border:1px solid rgba(59,72,166,.35);
+      background: rgba(11,16,36,.50);
+      padding:12px;
+    }
+    .previewTitle{
+      margin:0 0 8px 0;
+      font-size:12px;
+      color: rgba(234,240,255,.90);
+      letter-spacing:.7px;
+      text-transform:uppercase;
+    }
+    .previewHint{ color: var(--muted); font-size:12px; }
+    .previewCard{ margin-top:10px; }
+
+    /* responsive */
+    @media (max-width: 980px){
+      body{ overflow:auto; }
+      #app{ grid-template-columns: 1fr; height:auto; }
+      .arena{ min-height: 380px; }
+      .unit.enemy{ position:relative; right:auto; top:auto; width:auto; margin:14px; }
+      .unit.player{ position:relative; left:auto; bottom:auto; width:auto; margin:14px; }
+    }
   </style>
 </head>
 <body>
 <div id="app">
+  <!-- LEFT: PLAYER HUD -->
   <div id="left" class="panel">
-    <h3>Player</h3>
-    <div class="stat">HP: <span id="php"></span></div>
-    <div class="stat">Energy: <span id="energy"></span></div>
-    <div class="stat">Gold: <span id="gold"></span></div>
-    <h3>Hand</h3>
-    <div id="hand"></div>
-    <div class="row">
-      <button class="btn" id="endTurn">End Turn</button>
-      <button class="btn" id="save">Save</button>
-      <button class="btn" id="load">Load</button>
+    <div class="panelHeader">
+      <h3>Player</h3>
+      <div class="unitTag" id="turnTag">Turn 1</div>
+    </div>
+    <div class="panelBody">
+      <div class="kv">
+        <div>
+          <div class="k">HP</div>
+          <div class="v"><span id="php"></span> / <span id="phpMax"></span></div>
+        </div>
+        <div style="min-width:140px; flex:1">
+          <div class="bar hp"><i id="phpBar"></i></div>
+        </div>
+      </div>
+
+      <div class="kv">
+        <div>
+          <div class="k">Block</div>
+          <div class="v"><span id="pblock"></span></div>
+        </div>
+        <div style="min-width:140px; flex:1">
+          <div class="bar block"><i id="pblockBar"></i></div>
+        </div>
+      </div>
+
+      <div class="pills">
+        <div class="pill"><span class="dot mana"></span>Energy <b id="energy"></b></div>
+        <div class="pill"><span class="dot gold"></span>Gold <b id="gold"></b></div>
+        <div class="pill"><span class="dot turn"></span>Deck <b id="deckCount"></b> · Discard <b id="discardCount"></b></div>
+      </div>
+
+      <div style="height:12px"></div>
+      <div class="row">
+        <button class="btn primary" id="endTurn">End Turn</button>
+        <button class="btn" id="save">Save</button>
+        <button class="btn" id="load">Load</button>
+      </div>
     </div>
   </div>
+
+  <!-- CENTER: ARENA + LOG + HAND -->
   <div id="center" class="panel">
-    <h3>Battle Log</h3>
-    <div id="log"></div>
+    <div class="battlefield">
+      <div class="topHUD">
+        <div class="pill" title="当前回合能量">
+          <span class="dot mana"></span>Energy
+          <div class="energyPips" id="energyPips" style="margin-left:8px"></div>
+        </div>
+        <div class="pill" title="快速提示" id="tipPill">
+          <span class="dot"></span><span id="tipText">Play a card or end your turn.</span>
+        </div>
+      </div>
+
+      <div class="arena" id="arena">
+        <div class="unit enemy" id="enemyUnit">
+          <div class="unitHeader">
+            <div class="unitName">Enemy</div>
+            <div class="unitTag" id="intentTag">Intent</div>
+          </div>
+          <div class="unitBody">
+            <div class="portrait"></div>
+            <div class="unitStats">
+              <div class="mini"><span>HP</span><b><span id="ehp"></span> / <span id="ehpMax"></span></b></div>
+              <div class="bar hp"><i id="ehpBar"></i></div>
+            <div class="mini"><span>Block</span><b><span id="eblock"></span></b></div>
+            <div class="bar block"><i id="eblockBar"></i></div>
+            <div class="mini"><span>Strength</span><b id="estr"></b></div>
+              <div class="mini"><span>Intent</span><b id="intent"></b></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="unit player" id="playerUnit">
+          <div class="unitHeader">
+            <div class="unitName">You</div>
+            <div class="unitTag" id="statusTag">Ready</div>
+          </div>
+          <div class="unitBody">
+            <div class="portrait"></div>
+            <div class="unitStats">
+              <div class="mini"><span>HP</span><b id="php2"></b></div>
+              <div class="mini"><span>Block</span><b id="pblock2"></b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="logWrap">
+        <div class="panelHeader" style="padding:10px 0 0 0; border-bottom:none; background:none">
+          <h3>Battle Log</h3>
+          <div class="unitTag" id="logTag">Latest</div>
+        </div>
+        <div id="log" aria-live="polite"></div>
+      </div>
+
+      <div class="handDock">
+        <div class="panelHeader" style="padding:0 0 10px 0; border-bottom:none; background:none">
+          <h3>Hand</h3>
+          <div class="unitTag" id="handTag">0 cards</div>
+        </div>
+        <div id="hand"></div>
+      </div>
+    </div>
   </div>
+
+  <!-- RIGHT: PREVIEW / HELP -->
   <div id="right" class="panel">
-    <h3>Enemy</h3>
-    <div class="stat">HP: <span id="ehp"></span></div>
-    <div class="stat">Intent: <span id="intent"></span></div>
+    <div class="panelHeader">
+      <h3>Card Preview</h3>
+      <div class="unitTag" id="previewTag">Hover a card</div>
+    </div>
+    <div class="panelBody">
+      <div class="preview">
+        <div class="previewTitle">Tip</div>
+        <div class="previewHint">
+          - Hover a card to preview<br/>
+          - Click a card to play<br/>
+          - Block reduces incoming damage
+        </div>
+        <div class="previewCard" id="previewCard"></div>
+      </div>
+    </div>
   </div>
 </div>
+
+<!-- FX Layer -->
+<div id="fxLayer" aria-hidden="true"></div>
 
 <script>
 // --- Core Data ---
 const cardsDB = {
-  strike: { id:'strike', name:'Strike', cost:1, type:'attack', value:6 },
-  defend: { id:'defend', name:'Defend', cost:1, type:'block', value:5 },
-  bash: { id:'bash', name:'Bash', cost:2, type:'attack', value:10 }
+  strike: { id:'strike', name:'Strike', cost:1, type:'attack', value:6, text:'Deal 6 damage.' },
+  defend: { id:'defend', name:'Defend', cost:1, type:'block', value:5, text:'Gain 5 Block.' },
+  bash: { id:'bash', name:'Bash', cost:2, type:'attack', value:10, text:'Deal 10 damage.' }
 };
 
 let state = {
-  player: { hp: 60, energy: 3, gold: 50, block: 0 },
-  enemy: { hp: 45, intent: 'attack', damage: 8 },
+  player: { hp: 60, maxHp: 60, energy: 3, maxEnergy: 3, gold: 50, block: 0 },
+  enemy: { hp: 45, maxHp: 45, intent: 'attack', damage: 8, block: 0, strength: 0 },
   deck: ['strike','strike','strike','defend','defend','bash'],
   hand: [],
   discard: [],
-  turn: 1
+  turn: 1,
+  gameOver: false
 };
 
 // --- Utilities ---
 const $ = id => document.getElementById(id);
-const log = msg => { const d=document.createElement('div'); d.textContent=msg; $('log').prepend(d); };
-const shuffle = a => a.sort(()=>Math.random()-0.5);
+const nowTime = () => new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+const log = (msg, tone='') => {
+  const d=document.createElement('div');
+  d.className = 'logItem';
+  d.innerHTML = `<div>${msg}</div><small>${nowTime()}</small>`;
+  if(tone==='good') d.style.borderColor = 'rgba(78,230,168,.35)';
+  if(tone==='bad') d.style.borderColor = 'rgba(255,107,139,.35)';
+  $('log').prepend(d);
+};
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
+function pct(cur,max){ if(!max) return 0; return clamp((cur/max)*100, 0, 100); }
+function flash(el, cls){
+  if(!el) return;
+  el.classList.add(cls);
+  setTimeout(()=>el.classList.remove(cls), 240);
+}
+function setTip(text){
+  $('tipText').textContent = text;
+}
+
+function makeFxEl(className, html=''){
+  const el = document.createElement('div');
+  el.className = className;
+  if(html) el.innerHTML = html;
+  $('fxLayer').appendChild(el);
+  return el;
+}
+
+function rectCenter(r){ return { x: r.left + r.width/2, y: r.top + r.height/2, w:r.width, h:r.height }; }
+
+function animateCardFly(fromEl, toEl){
+  if(!fromEl || !toEl) return;
+  const fr = fromEl.getBoundingClientRect();
+  const tr = toEl.getBoundingClientRect();
+  const a = rectCenter(fr);
+  const b = rectCenter(tr);
+
+  const ghost = fromEl.cloneNode(true);
+  ghost.classList.add('cardGhost');
+  ghost.style.width = `${fr.width}px`;
+  ghost.style.height = `${fr.height}px`;
+  ghost.style.left = `${fr.left}px`;
+  ghost.style.top = `${fr.top}px`;
+  ghost.style.setProperty('--dx', `${b.x - a.x}px`);
+  ghost.style.setProperty('--dy', `${b.y - a.y}px`);
+  ghost.style.setProperty('--rot', `${(Math.random()*10 - 5).toFixed(1)}deg`);
+  $('fxLayer').appendChild(ghost);
+  ghost.addEventListener('animationend', ()=> ghost.remove(), { once:true });
+}
+
+function floatText(x, y, text, tone=''){
+  const el = makeFxEl('floatText ' + (tone || ''), text);
+  el.style.left = `${x}px`;
+  el.style.top = `${y}px`;
+  el.style.setProperty('--dx', `${(Math.random()*24 - 12).toFixed(0)}px`);
+  el.style.setProperty('--dy', `${(-44 - Math.random()*26).toFixed(0)}px`);
+  el.addEventListener('animationend', ()=> el.remove(), { once:true });
+}
+
+function burstParticles(x, y, tone=''){
+  const wrap = makeFxEl('burst ' + (tone || ''));
+  wrap.style.left = `${x}px`;
+  wrap.style.top = `${y}px`;
+  const n = 12;
+  for(let i=0;i<n;i++){
+    const p = document.createElement('i');
+    const ang = Math.random()*Math.PI*2;
+    const dist = 26 + Math.random()*38;
+    const dx = Math.cos(ang)*dist;
+    const dy = Math.sin(ang)*dist;
+    p.style.setProperty('--dx', `${dx.toFixed(1)}px`);
+    p.style.setProperty('--dy', `${dy.toFixed(1)}px`);
+    p.style.setProperty('--s', `${(0.7 + Math.random()*0.7).toFixed(2)}`);
+    wrap.appendChild(p);
+  }
+  wrap.addEventListener('animationend', ()=> wrap.remove(), { once:true });
+}
+
+function impactAt(targetEl, tone, mainText){
+  if(!targetEl) return;
+  const r = targetEl.getBoundingClientRect();
+  const c = rectCenter(r);
+  burstParticles(c.x, c.y, tone);
+  if(mainText) floatText(c.x, c.y, mainText, tone);
+}
 
 // --- Game Flow ---
 function draw(n=5){
@@ -77,23 +741,43 @@ function draw(n=5){
 }
 
 function startTurn(){
-  state.player.energy = 3;
+  if(state.gameOver) return;
+  state.player.energy = state.player.maxEnergy ?? 3;
   state.player.block = 0;
   draw(5);
+  log(`Turn ${state.turn} begins.`, 'good');
+  setTip('Your turn: spend Energy to play cards.');
   render();
 }
 
 function playCard(idx){
+  if(state.gameOver) return;
   const id = state.hand[idx];
   const c = cardsDB[id];
-  if(c.cost > state.player.energy) return;
+  if(!c) return;
+  if(c.cost > state.player.energy) { setTip('Not enough Energy.'); return; }
+
+  // FX: fly card to target before state mutates
+  const cardEl = $('hand').children[idx];
+  const targetEl = c.type === 'attack' ? $('enemyUnit') : $('playerUnit');
+  animateCardFly(cardEl, targetEl);
+
   state.player.energy -= c.cost;
   if(c.type==='attack'){
-    state.enemy.hp -= c.value;
-    log(`You used ${c.name} for ${c.value}`);
+    const raw = c.value;
+    const blocked = Math.min(state.enemy.block || 0, raw);
+    const dealt = Math.max(0, raw - blocked);
+    state.enemy.block = Math.max(0, (state.enemy.block || 0) - raw);
+    state.enemy.hp = Math.max(0, state.enemy.hp - dealt);
+    log(`You used <b>${c.name}</b> and dealt <b>${dealt}</b> damage.`, 'good');
+    flash($('enemyUnit'), 'shake');
+    flash($('enemyUnit'), 'glowBad');
+    impactAt($('enemyUnit'), 'bad', dealt > 0 ? `-${dealt}` : 'Blocked');
   } else if(c.type==='block'){
     state.player.block += c.value;
-    log(`You gained ${c.value} Block`);
+    log(`You gained <b>${c.value}</b> Block.`, 'good');
+    flash($('playerUnit'), 'glowGood');
+    impactAt($('playerUnit'), 'good', `+${c.value} Block`);
   }
   state.discard.push(state.hand.splice(idx,1)[0]);
   checkEnemy();
@@ -101,11 +785,20 @@ function playCard(idx){
 }
 
 function endTurn(){
+  if(state.gameOver) return;
   // Enemy action
   if(state.enemy.intent==='attack'){
     const dmg = Math.max(0, state.enemy.damage - state.player.block);
-    state.player.hp -= dmg;
-    log(`Enemy attacks for ${state.enemy.damage} (${dmg} taken)`);
+    state.player.hp = Math.max(0, state.player.hp - dmg);
+    log(`Enemy attacks for <b>${state.enemy.damage}</b> (${dmg} taken).`, dmg>0 ? 'bad' : 'good');
+    flash($('playerUnit'), 'shake');
+    if(dmg>0) flash($('playerUnit'), 'glowBad');
+    setTip('Enemy acted. New turn started.');
+    if(state.player.hp <= 0){
+      state.gameOver = true;
+      render();
+      return;
+    }
   }
   state.hand.forEach(c=>state.discard.push(c));
   state.hand=[];
@@ -115,38 +808,176 @@ function endTurn(){
 
 function checkEnemy(){
   if(state.enemy.hp<=0){
-    log('Enemy defeated! +20 gold');
+    log('Enemy defeated! <b>+20 gold</b>.', 'good');
     state.player.gold += 20;
     // new enemy
-    state.enemy = { hp: 50+state.turn*5, intent:'attack', damage:8+state.turn };
+    const hp = 50 + state.turn*5;
+    state.enemy = { hp, maxHp: hp, intent:'attack', damage:8+state.turn };
+    setTip('A new enemy appears!');
   }
 }
 
 // --- Persistence ---
-$('save').onclick = ()=> localStorage.setItem('card-proto', JSON.stringify(state));
-$('load').onclick = ()=>{ const s=localStorage.getItem('card-proto'); if(s){ state=JSON.parse(s); render(); } };
+function normalizeLoadedState(s){
+  // be tolerant to older saves
+  s.player = s.player || {};
+  s.enemy = s.enemy || {};
+  s.gameOver = !!s.gameOver;
+  s.player.maxHp = s.player.maxHp ?? 60;
+  s.player.maxEnergy = s.player.maxEnergy ?? 3;
+  s.player.hp = s.player.hp ?? s.player.maxHp;
+  s.player.energy = s.player.energy ?? s.player.maxEnergy;
+  s.player.gold = s.player.gold ?? 0;
+  s.player.block = s.player.block ?? 0;
+  s.enemy.maxHp = s.enemy.maxHp ?? s.enemy.hp ?? 45;
+  s.enemy.hp = s.enemy.hp ?? s.enemy.maxHp;
+  s.enemy.intent = s.enemy.intent ?? 'attack';
+  s.enemy.damage = s.enemy.damage ?? 8;
+  s.deck = Array.isArray(s.deck) ? s.deck : [];
+  s.hand = Array.isArray(s.hand) ? s.hand : [];
+  s.discard = Array.isArray(s.discard) ? s.discard : [];
+  s.turn = s.turn ?? 1;
+  return s;
+}
+
+$('save').onclick = ()=>{
+  localStorage.setItem('card-proto', JSON.stringify(state));
+  log('Saved.', 'good');
+  setTip('Saved to localStorage.');
+};
+$('load').onclick = ()=>{
+  const s=localStorage.getItem('card-proto');
+  if(s){
+    try{
+      state = normalizeLoadedState(JSON.parse(s));
+      log('Loaded.', 'good');
+      setTip('Loaded from localStorage.');
+      render();
+    }catch{
+      log('Load failed (invalid save).', 'bad');
+      setTip('Load failed.');
+    }
+  }else{
+    log('No save found.', 'bad');
+    setTip('No save found.');
+  }
+};
 $('endTurn').onclick = endTurn;
 
 // --- Render ---
+function cardTypeLabel(type){
+  if(type==='attack') return 'Attack';
+  if(type==='block') return 'Skill';
+  return 'Card';
+}
+function intentText(){
+  if(state.enemy.intent==='attack') return `Attack (${state.enemy.damage})`;
+  return state.enemy.intent;
+}
+function renderPreview(cardId){
+  const c = cardsDB[cardId];
+  const host = $('previewCard');
+  if(!c){ host.innerHTML = `<div class="previewHint">Hover a card to preview.</div>`; return; }
+  host.innerHTML = `
+    <div class="card" style="width:100%; cursor:default" aria-hidden="true">
+      <div class="cardTop">
+        <div class="cost">${c.cost}</div>
+        <div class="typeTag">${cardTypeLabel(c.type)}</div>
+      </div>
+      <div class="cardName">${c.name}</div>
+      <div class="cardText">${c.text || (c.type==='attack' ? `Deal ${c.value} damage.` : `Gain ${c.value} Block.`)}</div>
+      <div class="cardMeta">
+        <span>Value</span><b style="color:rgba(234,240,255,.92)">${c.value}</b>
+      </div>
+    </div>
+  `;
+}
+
 function render(){
+  // Left panel stats
+  $('turnTag').textContent = `Turn ${state.turn}`;
+
+  const pmax = state.player.maxHp ?? 60;
   $('php').textContent = state.player.hp;
+  $('php2').textContent = `${state.player.hp} / ${pmax}`;
+  $('phpMax').textContent = pmax;
+  $('phpBar').style.width = `${pct(state.player.hp, pmax)}%`;
+
+  $('pblock').textContent = state.player.block;
+  $('pblock2').textContent = `${state.player.block}`;
+  $('pblockBar').style.width = `${pct(state.player.block, 40)}%`;
+
   $('energy').textContent = state.player.energy;
   $('gold').textContent = state.player.gold;
+  $('deckCount').textContent = state.deck.length;
+  $('discardCount').textContent = state.discard.length;
+
+  // Enemy
+  const emax = state.enemy.maxHp ?? state.enemy.hp ?? 1;
   $('ehp').textContent = state.enemy.hp;
-  $('intent').textContent = state.enemy.intent;
-  $('hand').innerHTML='';
+  $('ehpMax').textContent = emax;
+  $('ehpBar').style.width = `${pct(state.enemy.hp, emax)}%`;
+  $('intent').textContent = intentText();
+  $('intentTag').textContent = state.enemy.intent==='attack' ? 'ATTACK' : String(state.enemy.intent).toUpperCase();
+
+  // Energy pips
+  const maxEnergy = state.player.maxEnergy ?? 3;
+  const pips = $('energyPips');
+  pips.innerHTML = '';
+  for(let i=0;i<maxEnergy;i++){
+    const d=document.createElement('div');
+    d.className = 'pip' + (i < state.player.energy ? ' on' : '');
+    pips.appendChild(d);
+  }
+
+  // Hand
+  $('handTag').textContent = `${state.hand.length} cards`;
+  const hand = $('hand');
+  hand.innerHTML='';
   state.hand.forEach((id,i)=>{
     const c=cardsDB[id];
     const d=document.createElement('div');
-    d.className='card';
-    d.innerHTML=`<b>${c.name}</b><br/>Cost: ${c.cost}<br/>${c.type==='attack'?'Damage':'Block'}: ${c.value}`;
-    d.onclick=()=>playCard(i);
-    $('hand').appendChild(d);
+    const canPlay = c && c.cost <= state.player.energy;
+    d.className = 'card' + (canPlay ? '' : ' disabled');
+    d.innerHTML = `
+      <div class="cardTop">
+        <div class="cost">${c?.cost ?? '?'}</div>
+        <div class="typeTag">${cardTypeLabel(c?.type)}</div>
+      </div>
+      <div class="cardName">${c?.name ?? 'Unknown'}</div>
+      <div class="cardText">${c?.text || (c?.type==='attack' ? `Deal ${c?.value ?? 0} damage.` : `Gain ${c?.value ?? 0} Block.`)}</div>
+      <div class="cardMeta">
+        <span>${c?.type==='attack' ? 'Damage' : 'Block'}</span>
+        <b style="color:rgba(234,240,255,.92)">${c?.value ?? 0}</b>
+      </div>
+    `;
+    d.onmouseenter = ()=> renderPreview(id);
+    d.onmouseleave = ()=> {}; // keep last preview
+    d.onclick = ()=> { if(canPlay) playCard(i); else setTip('Not enough Energy to play that card.'); };
+    hand.appendChild(d);
   });
+
+  // Buttons / state
+  $('endTurn').disabled = state.player.hp <= 0 || state.gameOver;
+  $('statusTag').textContent = (state.player.hp <= 0 || state.gameOver) ? 'Defeated' : 'Ready';
+
+  // Basic defeat handling
+  if(state.player.hp <= 0 && !state.gameOver){
+    state.gameOver = true;
+  }
+  if(state.gameOver){
+    setTip('You were defeated. Refresh to restart.');
+    // don't spam log
+    if(!$('log').dataset.gameOverLogged){
+      $('log').dataset.gameOverLogged = '1';
+      log('You were defeated.', 'bad');
+    }
+  }
 }
 
 // --- Boot ---
 shuffle(state.deck);
+renderPreview(null);
 startTurn();
 </script>
 </body>
