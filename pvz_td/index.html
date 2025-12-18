@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lane TD（PVZ 风格）</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="topbar">
+        <div class="title">
+          <div class="h1">Lane TD（PVZ 风格）</div>
+          <div class="sub">5 条路线｜格子放置｜敌人右→左｜同行攻击｜HP 战斗｜资源放塔</div>
+        </div>
+        <div class="hud" id="hud">
+          <div class="hudItem"><span class="k">资源</span><span class="v" id="resVal">0</span></div>
+          <div class="hudItem"><span class="k">波次计时</span><span class="v" id="spawnVal">0.0s</span></div>
+          <div class="hudItem"><span class="k">击杀</span><span class="v" id="killVal">0</span></div>
+        </div>
+      </header>
+
+      <main class="main">
+        <section class="panel">
+          <div class="card">
+            <div class="cardTitle">塔（点击格子放置）</div>
+            <button id="placePea" class="btn primary">
+              豌豆塔 <span class="badge">25</span>
+            </button>
+            <div class="hint">
+              - 同一行有敌人时自动射击<br />
+              - 资源会随时间增长，击杀也会奖励资源<br />
+              - 敌人走到最左侧会扣基地生命（演示用）
+            </div>
+            <div class="divider"></div>
+            <div class="cardTitle">基地</div>
+            <div class="baseRow">
+              <div class="baseHP">
+                <div class="label">生命</div>
+                <div class="bar"><div id="baseBar" class="fill"></div></div>
+                <div id="baseHpText" class="hpText">100/100</div>
+              </div>
+              <button id="restart" class="btn">重新开始</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="stage">
+          <canvas id="game" width="960" height="540"></canvas>
+        </section>
+      </main>
+
+      <footer class="footer">
+        操作：移动鼠标选择格子，点击放置。你也可以在代码里改行数/列数/塔属性。
+      </footer>
+    </div>
+
+    <script src="./game.js"></script>
+  </body>
+</html>
+
+
