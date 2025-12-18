@@ -2013,6 +2013,39 @@ header('Expires: 0');
     </div>
 
     <script>
+        // 兜底：动态注入“竖排表头在左”样式，确保一定生效（即便被后续样式覆盖）
+        function ensureVerticalStockCSS() {
+            const styleId = 'vertical-stock-css';
+            if (document.getElementById(styleId)) return;
+
+            const style = document.createElement('style');
+            style.id = styleId;
+            style.textContent = `
+                /* injected: vertical stock mode */
+                .table-scroll-container{overflow-x:hidden !important;}
+                .stock-table{min-width:0 !important;table-layout:auto !important;}
+                .stock-table thead{display:none !important;}
+                .stock-table,.stock-table tbody,.stock-table tr{display:block !important;width:100% !important;}
+                .stock-table tr{margin:10px 10px 12px !important;border:1px solid #e5e7eb !important;border-radius:10px !important;overflow:hidden !important;background:#fff !important;}
+                .stock-table td{display:flex !important;justify-content:space-between !important;align-items:center !important;gap:12px !important;text-align:right !important;border:none !important;border-bottom:1px solid #f1f1f1 !important;padding:10px 12px !important;}
+                .stock-table td::before{content:attr(data-label) !important;flex:0 0 auto !important;color:#583e04 !important;font-weight:700 !important;text-align:left !important;white-space:nowrap !important;}
+                .stock-table td:last-child{border-bottom:none !important;}
+                .stock-table td[colspan]{display:block !important;text-align:center !important;}
+                .stock-table td[colspan]::before{content:'' !important;display:none !important;}
+            `;
+            document.head.appendChild(style);
+        }
+
+        // 版本标记：用于确认页面确实跑到最新代码（不影响功能）
+        function showBuildBadge() {
+            if (document.getElementById('build-badge')) return;
+            const badge = document.createElement('div');
+            badge.id = 'build-badge';
+            badge.textContent = '竖排模式已启用（build 2025-12-18）';
+            badge.style.cssText = 'position:fixed;left:10px;bottom:10px;z-index:99999;background:rgba(0,0,0,0.55);color:#fff;font-size:12px;padding:6px 10px;border-radius:10px;pointer-events:none;';
+            document.body.appendChild(badge);
+        }
+
         // API 配置
         const API_BASE_URL = 'dishware_api.php';
         
@@ -4189,7 +4222,11 @@ header('Expires: 0');
         }
 
         // 页面加载完成后初始化
-        document.addEventListener('DOMContentLoaded', initApp);
+        document.addEventListener('DOMContentLoaded', function() {
+            ensureVerticalStockCSS();
+            showBuildBadge();
+            initApp();
+        });
 
         // 键盘快捷键支持
         document.addEventListener('keydown', function(e) {
