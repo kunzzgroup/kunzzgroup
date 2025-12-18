@@ -15,6 +15,7 @@
         </div>
         <div class="hud" id="hud">
           <div class="hudItem"><span class="k">资源</span><span class="v" id="resVal">0</span></div>
+          <div class="hudItem"><span class="k">关卡</span><span class="v" id="levelVal">1</span></div>
           <div class="hudItem"><span class="k">波次计时</span><span class="v" id="spawnVal">0.0s</span></div>
           <div class="hudItem"><span class="k">击杀</span><span class="v" id="killVal">0</span></div>
         </div>
@@ -24,9 +25,51 @@
         <section class="panel">
           <div class="card">
             <div class="cardTitle">塔（点击格子放置）</div>
-            <button id="placePea" class="btn primary">
-              豌豆塔 <span class="badge">25</span>
-            </button>
+            <div class="towerList" id="towerList">
+              <button class="btn primary towerBtn" data-tower="pea" id="btnPea">
+                <span class="left">
+                  <span class="name">豌豆塔</span>
+                  <span class="desc">均衡</span>
+                </span>
+                <span class="right">
+                  <span class="lock" id="lockPea"></span>
+                  <span class="badge" id="costPea">25</span>
+                </span>
+              </button>
+
+              <button class="btn towerBtn" data-tower="rapid" id="btnRapid">
+                <span class="left">
+                  <span class="name">双发塔</span>
+                  <span class="desc">更快射速</span>
+                </span>
+                <span class="right">
+                  <span class="lock" id="lockRapid">Lv2 解锁</span>
+                  <span class="badge" id="costRapid">40</span>
+                </span>
+              </button>
+
+              <button class="btn towerBtn" data-tower="sniper" id="btnSniper">
+                <span class="left">
+                  <span class="name">狙击塔</span>
+                  <span class="desc">高伤低速</span>
+                </span>
+                <span class="right">
+                  <span class="lock" id="lockSniper">Lv3 解锁</span>
+                  <span class="badge" id="costSniper">55</span>
+                </span>
+              </button>
+
+              <button class="btn towerBtn" data-tower="ice" id="btnIce">
+                <span class="left">
+                  <span class="name">冰豌豆</span>
+                  <span class="desc">命中减速</span>
+                </span>
+                <span class="right">
+                  <span class="lock" id="lockIce">Lv4 解锁</span>
+                  <span class="badge" id="costIce">60</span>
+                </span>
+              </button>
+            </div>
             <div class="hint">
               - 同一行有敌人时自动射击<br />
               - 资源会随时间增长，击杀也会奖励资源<br />
