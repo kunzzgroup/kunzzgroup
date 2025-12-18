@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>弹弓抛射小游戏（Canvas）</title>
+    <meta
+      name="description"
+      content="原生 JavaScript + Canvas：弹弓拖拽瞄准、重力抛体、简单碰撞与可破坏方块（HP）。"
+    />
+    <link rel="stylesheet" href="./projectile_game.css" />
+  </head>
+  <body>
+    <main class="app" aria-label="弹弓抛射小游戏">
+      <header class="topbar">
+        <div class="brand">
+          <div class="title">弹弓抛射（原生 Canvas）</div>
+          <div class="subtitle">拖拽小球瞄准，松手发射；击碎方块（HP）</div>
+        </div>
+
+        <div class="controls" role="group" aria-label="控制按钮">
+          <button id="btnResetShot" class="btn">重置小球</button>
+          <button id="btnResetLevel" class="btn primary">重置关卡</button>
+          <button id="btnToggleDebug" class="btn ghost" aria-pressed="false">调试</button>
+        </div>
+      </header>
+
+      <section class="stage" aria-label="游戏画布区域">
+        <canvas id="game" class="canvas" aria-label="游戏画布"></canvas>
+        <div class="hud" aria-live="polite">
+          <div class="hud-row">
+            <span class="hud-label">状态</span>
+            <span id="hudState" class="hud-value">idle</span>
+          </div>
+          <div class="hud-row">
+            <span class="hud-label">拉力</span>
+            <span id="hudPower" class="hud-value">0%</span>
+          </div>
+          <div class="hud-row">
+            <span class="hud-label">速度</span>
+            <span id="hudSpeed" class="hud-value">0</span>
+          </div>
+          <div class="hud-row">
+            <span class="hud-label">方块</span>
+            <span id="hudBlocks" class="hud-value">0</span>
+          </div>
+          <div class="hud-row">
+            <span class="hud-label">已摧毁</span>
+            <span id="hudDestroyed" class="hud-value">0</span>
+          </div>
+          <div class="hud-row">
+            <span class="hud-label">发射次数</span>
+            <span id="hudShots" class="hud-value">0</span>
+          </div>
+          <div class="tips">
+            <div class="tip">
+              <span class="dot" aria-hidden="true"></span>
+              <span>按住小球拖拽瞄准，松开发射</span>
+            </div>
+            <div class="tip">
+              <span class="dot" aria-hidden="true"></span>
+              <span>拖拽时会显示轨迹预览</span>
+            </div>
+            <div class="tip">
+              <span class="dot" aria-hidden="true"></span>
+              <span>点击“调试”显示碰撞/包围盒等</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="foot">
+        <span class="muted">
+          技术栈：HTML + Canvas + Vanilla JS（无依赖）。文件位置：<code>public/projectile_game.html</code>
+        </span>
+      </footer>
+    </main>
+
+    <script src="./projectile_game.js"></script>
+  </body>
+</html>
+
+

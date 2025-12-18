@@ -1,5 +1,8 @@
 kunzzweb/
 │
+├── public/projectile_game.html        # Canvas 弹弓抛射小游戏（拖拽瞄准/重力/碰撞/方块HP）
+│                                    # 直接用浏览器打开即可运行
+│
 ├── public/                          # 公共资源
 │   ├── css/
 │   │   ├── global.css
