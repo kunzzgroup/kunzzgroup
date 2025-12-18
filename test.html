@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Card Battle Prototype</title>
+  <title>赛马竞猜小游戏</title>
   <style>
     :root{
       --bg0:#070A14;
@@ -477,140 +477,277 @@
     .previewHint{ color: var(--muted); font-size:12px; }
     .previewCard{ margin-top:10px; }
 
+    /* Horse race */
+    .field{ margin-top:12px; }
+    .hint{ margin-top:6px; color: var(--muted); font-size:12px; line-height:1.2; }
+    .input{
+      width:100%;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(59,72,166,.45);
+      background: rgba(11,16,36,.55);
+      color: rgba(234,240,255,.95);
+      outline:none;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.25);
+      font-weight:700;
+      font-variant-numeric: tabular-nums;
+    }
+    .input:focus{ border-color: rgba(124,195,255,.75); }
+
+    .horseGrid{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:8px;
+    }
+    .horseBtn{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(59,72,166,.45);
+      background: rgba(11,16,36,.55);
+      color: rgba(234,240,255,.92);
+      cursor:pointer;
+      transition: transform .12s ease, border-color .12s ease, filter .12s ease;
+      font-weight:800;
+      font-size:12px;
+      user-select:none;
+    }
+    .horseBtn:hover{ transform: translateY(-1px); border-color: rgba(124,195,255,.75); filter: brightness(1.04); }
+    .horseBtn.active{
+      border-color: rgba(124,195,255,.85);
+      box-shadow: 0 0 0 3px rgba(124,195,255,.12);
+    }
+    .miniDot{
+      width:12px; height:12px; border-radius:999px;
+      background: var(--c, rgba(124,195,255,.9));
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 18%, transparent);
+      flex:0 0 auto;
+    }
+
+    .trackWrap{ display:flex; flex-direction:column; gap:12px; }
+    .trackTop{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+    .track{
+      --pad: 14px;
+      --labelW: 58px;
+      position:relative;
+      border-radius: var(--radius);
+      border:1px solid rgba(59,72,166,.35);
+      background:
+        radial-gradient(900px 420px at 50% 35%, rgba(124,195,255,.10), transparent 60%),
+        linear-gradient(180deg, rgba(8,10,20,.30), rgba(8,10,20,.62));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      padding: var(--pad);
+      min-height: 460px;
+    }
+    .track:before{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(255,255,255,.02) 1px, transparent 1px);
+      background-size: 46px 46px;
+      opacity:.28;
+      pointer-events:none;
+    }
+    .startLine, .finishLine{
+      position:absolute;
+      top: var(--pad);
+      bottom: var(--pad);
+      width: 2px;
+      background: rgba(255,255,255,.18);
+      box-shadow: 0 0 0 1px rgba(0,0,0,.35);
+      pointer-events:none;
+    }
+    .startLine{ left: calc(var(--pad) + var(--labelW)); background: rgba(124,195,255,.35); }
+    .finishLine{ right: var(--pad); background: rgba(255,206,92,.45); }
+    .markers{
+      position:absolute;
+      top: var(--pad);
+      bottom: var(--pad);
+      left: calc(var(--pad) + var(--labelW));
+      right: var(--pad);
+      pointer-events:none;
+      opacity:.25;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.22) 1px, transparent 1px);
+      background-size: 25% 100%;
+    }
+    .lanes{
+      position:relative;
+      display:grid;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .lane{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      height: 44px;
+    }
+    .laneLabel{
+      width: var(--labelW);
+      color: rgba(234,240,255,.85);
+      font-weight:900;
+      font-variant-numeric: tabular-nums;
+      letter-spacing:.2px;
+      text-align:right;
+      padding-right: 6px;
+    }
+    .laneLine{
+      position:relative;
+      flex:1;
+      height: 100%;
+      border-radius: 12px;
+      border:1px solid rgba(59,72,166,.20);
+      background: rgba(11,16,36,.35);
+      overflow:hidden;
+    }
+    .laneLine:after{
+      content:"";
+      position:absolute; inset:0;
+      background: linear-gradient(90deg, rgba(255,255,255,.06), transparent 40%, rgba(255,255,255,.05));
+      opacity:.5;
+      pointer-events:none;
+    }
+    .horseDot{
+      position:absolute;
+      left:0;
+      top:50%;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      transform: translate3d(var(--x, 0px), -50%, 0);
+      display:grid;
+      place-items:center;
+      font-weight: 1000;
+      font-size: 12px;
+      color: rgba(8,10,20,.95);
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.85), color-mix(in srgb, var(--c) 85%, #000));
+      border:1px solid rgba(255,255,255,.25);
+      box-shadow: 0 16px 36px rgba(0,0,0,.35), 0 0 0 3px color-mix(in srgb, var(--c) 18%, transparent);
+      will-change: transform;
+    }
+    .horseDot.finished{
+      box-shadow: 0 18px 48px rgba(0,0,0,.40), 0 0 0 5px rgba(255,206,92,.14);
+    }
+
+    .oddsBox{
+      border-radius: var(--radius);
+      border:1px solid rgba(59,72,166,.35);
+      background: rgba(11,16,36,.50);
+      padding:12px;
+    }
+    .oddsList{ display:flex; flex-direction:column; gap:8px; }
+    .oddsRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 10px;
+      border-radius: 12px;
+      border:1px solid rgba(59,72,166,.28);
+      background: rgba(11,16,36,.50);
+      cursor:pointer;
+      user-select:none;
+      transition: transform .12s ease, border-color .12s ease;
+    }
+    .oddsRow:hover{ transform: translateY(-1px); border-color: rgba(124,195,255,.60); }
+    .oddsRow.active{ border-color: rgba(124,195,255,.85); box-shadow: 0 0 0 3px rgba(124,195,255,.12); }
+    .oddsLeft{ display:flex; align-items:center; gap:10px; }
+    .oddsName{ font-weight:900; }
+    .oddsMeta{ color: var(--muted); font-size:12px; }
+    .oddsVal{ font-weight:1000; font-variant-numeric: tabular-nums; }
+
     /* responsive */
     @media (max-width: 980px){
       body{ overflow:auto; }
       #app{ grid-template-columns: 1fr; height:auto; }
-      .arena{ min-height: 380px; }
-      .unit.enemy{ position:relative; right:auto; top:auto; width:auto; margin:14px; }
-      .unit.player{ position:relative; left:auto; bottom:auto; width:auto; margin:14px; }
+      .track{ min-height: 520px; }
     }
   </style>
 </head>
 <body>
 <div id="app">
-  <!-- LEFT: PLAYER HUD -->
+  <!-- LEFT: BETTING -->
   <div id="left" class="panel">
     <div class="panelHeader">
-      <h3>Player</h3>
-      <div class="unitTag" id="turnTag">Turn 1</div>
+      <h3>玩家</h3>
+      <div class="unitTag" id="sessionTag">第 1 场</div>
     </div>
     <div class="panelBody">
-      <div class="kv">
-        <div>
-          <div class="k">HP</div>
-          <div class="v"><span id="php"></span> / <span id="phpMax"></span></div>
-        </div>
-        <div style="min-width:140px; flex:1">
-          <div class="bar hp"><i id="phpBar"></i></div>
-        </div>
-      </div>
-
-      <div class="kv">
-        <div>
-          <div class="k">Block</div>
-          <div class="v"><span id="pblock"></span></div>
-        </div>
-        <div style="min-width:140px; flex:1">
-          <div class="bar block"><i id="pblockBar"></i></div>
-        </div>
-      </div>
-
       <div class="pills">
-        <div class="pill"><span class="dot mana"></span>Energy <b id="energy"></b></div>
-        <div class="pill"><span class="dot gold"></span>Gold <b id="gold"></b></div>
-        <div class="pill"><span class="dot turn"></span>Deck <b id="deckCount"></b> · Discard <b id="discardCount"></b></div>
+        <div class="pill"><span class="dot gold"></span>金币 <b id="gold"></b></div>
+        <div class="pill"><span class="dot turn"></span>已选 <b id="picked"></b></div>
+        <div class="pill"><span class="dot mana"></span>赔率 <b id="pickedOdds"></b></div>
+      </div>
+
+      <div class="field">
+        <div class="k">下注金额</div>
+        <input class="input" id="betAmount" type="number" min="1" step="1" />
+        <div class="hint" id="betHint">提示：下注会先扣金币，赢了按赔率返还。</div>
+      </div>
+
+      <div class="field">
+        <div class="k">选择马匹（8 匹）</div>
+        <div class="horseGrid" id="horsePick"></div>
       </div>
 
       <div style="height:12px"></div>
-      <div class="row">
-        <button class="btn primary" id="endTurn">End Turn</button>
-        <button class="btn" id="save">Save</button>
-        <button class="btn" id="load">Load</button>
+    <div class="row">
+        <button class="btn primary" id="startRace">开始比赛</button>
+        <button class="btn" id="newRace">新一局</button>
+        <button class="btn" id="save">保存</button>
+        <button class="btn" id="load">读取</button>
+        <button class="btn" id="reset">重置</button>
       </div>
     </div>
   </div>
 
-  <!-- CENTER: ARENA + LOG + HAND -->
+  <!-- CENTER: TRACK -->
   <div id="center" class="panel">
-    <div class="battlefield">
-      <div class="topHUD">
-        <div class="pill" title="当前回合能量">
-          <span class="dot mana"></span>Energy
-          <div class="energyPips" id="energyPips" style="margin-left:8px"></div>
-        </div>
-        <div class="pill" title="快速提示" id="tipPill">
-          <span class="dot"></span><span id="tipText">Play a card or end your turn.</span>
-        </div>
-      </div>
-
-      <div class="arena" id="arena">
-        <div class="unit enemy" id="enemyUnit">
-          <div class="unitHeader">
-            <div class="unitName">Enemy</div>
-            <div class="unitTag" id="intentTag">Intent</div>
-          </div>
-          <div class="unitBody">
-            <div class="portrait"></div>
-            <div class="unitStats">
-              <div class="mini"><span>HP</span><b><span id="ehp"></span> / <span id="ehpMax"></span></b></div>
-              <div class="bar hp"><i id="ehpBar"></i></div>
-            <div class="mini"><span>Block</span><b><span id="eblock"></span></b></div>
-            <div class="bar block"><i id="eblockBar"></i></div>
-            <div class="mini"><span>Strength</span><b id="estr"></b></div>
-              <div class="mini"><span>Intent</span><b id="intent"></b></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="unit player" id="playerUnit">
-          <div class="unitHeader">
-            <div class="unitName">You</div>
-            <div class="unitTag" id="statusTag">Ready</div>
-          </div>
-          <div class="unitBody">
-            <div class="portrait"></div>
-            <div class="unitStats">
-              <div class="mini"><span>HP</span><b id="php2"></b></div>
-              <div class="mini"><span>Block</span><b id="pblock2"></b></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="logWrap">
-        <div class="panelHeader" style="padding:10px 0 0 0; border-bottom:none; background:none">
-          <h3>Battle Log</h3>
-          <div class="unitTag" id="logTag">Latest</div>
-        </div>
-        <div id="log" aria-live="polite"></div>
-      </div>
-
-      <div class="handDock">
-        <div class="panelHeader" style="padding:0 0 10px 0; border-bottom:none; background:none">
-          <h3>Hand</h3>
-          <div class="unitTag" id="handTag">0 cards</div>
-        </div>
-        <div id="hand"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- RIGHT: PREVIEW / HELP -->
-  <div id="right" class="panel">
     <div class="panelHeader">
-      <h3>Card Preview</h3>
-      <div class="unitTag" id="previewTag">Hover a card</div>
+      <h3>跑道</h3>
+      <div class="unitTag" id="raceStatus">待机</div>
     </div>
     <div class="panelBody">
-      <div class="preview">
-        <div class="previewTitle">Tip</div>
-        <div class="previewHint">
-          - Hover a card to preview<br/>
-          - Click a card to play<br/>
-          - Block reduces incoming damage
+      <div class="trackWrap">
+        <div class="trackTop">
+          <div class="pill"><span class="dot"></span><span id="raceTip">选一匹马并下注，然后点击开始比赛。</span></div>
+          <div class="pill"><span class="dot turn"></span>领先：<b id="leader">-</b></div>
         </div>
-        <div class="previewCard" id="previewCard"></div>
+        <div class="track" id="track">
+          <div class="startLine"></div>
+          <div class="finishLine"></div>
+          <div class="markers"></div>
+          <div class="lanes" id="lanes"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: ODDS + LOG -->
+  <div id="right" class="panel">
+    <div class="panelHeader">
+      <h3>赔率 / 赛况</h3>
+      <div class="unitTag" id="resultTag">-</div>
+    </div>
+    <div class="panelBody">
+      <div class="oddsBox">
+        <div class="previewTitle" style="margin-top:0">本场赔率</div>
+        <div class="oddsList" id="oddsList"></div>
+      </div>
+
+      <div style="height:12px"></div>
+      <div class="logWrap">
+        <div class="panelHeader" style="padding:10px 0 0 0; border-bottom:none; background:none">
+          <h3>赛况日志</h3>
+          <div class="unitTag">最新</div>
+        </div>
+        <div id="log" aria-live="polite"></div>
       </div>
     </div>
   </div>
@@ -620,51 +757,21 @@
 <div id="fxLayer" aria-hidden="true"></div>
 
 <script>
-// --- Core Data ---
-const cardsDB = {
-  strike: { id:'strike', name:'Strike', cost:1, type:'attack', value:6, text:'Deal 6 damage.' },
-  defend: { id:'defend', name:'Defend', cost:1, type:'block', value:5, text:'Gain 5 Block.' },
-  bash: { id:'bash', name:'Bash', cost:2, type:'attack', value:10, text:'Deal 10 damage.' }
-};
+// 赛马竞猜（8 匹马 + 跑道圆点移动 + 下注结算）
 
-let state = {
-  player: { hp: 60, maxHp: 60, energy: 3, maxEnergy: 3, gold: 50, block: 0 },
-  enemy: { hp: 45, maxHp: 45, intent: 'attack', damage: 8, block: 0, strength: 0 },
-  deck: ['strike','strike','strike','defend','defend','bash'],
-  hand: [],
-  discard: [],
-  turn: 1,
-  gameOver: false
-};
-
-// --- Utilities ---
-const $ = id => document.getElementById(id);
+const $ = (id) => document.getElementById(id);
 const nowTime = () => new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
 const log = (msg, tone='') => {
-  const d=document.createElement('div');
+  const d = document.createElement('div');
   d.className = 'logItem';
   d.innerHTML = `<div>${msg}</div><small>${nowTime()}</small>`;
   if(tone==='good') d.style.borderColor = 'rgba(78,230,168,.35)';
   if(tone==='bad') d.style.borderColor = 'rgba(255,107,139,.35)';
   $('log').prepend(d);
 };
-function shuffle(a){
-  for(let i=a.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+
 function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
-function pct(cur,max){ if(!max) return 0; return clamp((cur/max)*100, 0, 100); }
-function flash(el, cls){
-  if(!el) return;
-  el.classList.add(cls);
-  setTimeout(()=>el.classList.remove(cls), 240);
-}
-function setTip(text){
-  $('tipText').textContent = text;
-}
+function rand(min,max){ return Math.random()*(max-min)+min; }
 
 function makeFxEl(className, html=''){
   const el = document.createElement('div');
@@ -673,38 +780,15 @@ function makeFxEl(className, html=''){
   $('fxLayer').appendChild(el);
   return el;
 }
-
-function rectCenter(r){ return { x: r.left + r.width/2, y: r.top + r.height/2, w:r.width, h:r.height }; }
-
-function animateCardFly(fromEl, toEl){
-  if(!fromEl || !toEl) return;
-  const fr = fromEl.getBoundingClientRect();
-  const tr = toEl.getBoundingClientRect();
-  const a = rectCenter(fr);
-  const b = rectCenter(tr);
-
-  const ghost = fromEl.cloneNode(true);
-  ghost.classList.add('cardGhost');
-  ghost.style.width = `${fr.width}px`;
-  ghost.style.height = `${fr.height}px`;
-  ghost.style.left = `${fr.left}px`;
-  ghost.style.top = `${fr.top}px`;
-  ghost.style.setProperty('--dx', `${b.x - a.x}px`);
-  ghost.style.setProperty('--dy', `${b.y - a.y}px`);
-  ghost.style.setProperty('--rot', `${(Math.random()*10 - 5).toFixed(1)}deg`);
-  $('fxLayer').appendChild(ghost);
-  ghost.addEventListener('animationend', ()=> ghost.remove(), { once:true });
-}
-
+function rectCenter(r){ return { x: r.left + r.width/2, y: r.top + r.height/2 }; }
 function floatText(x, y, text, tone=''){
   const el = makeFxEl('floatText ' + (tone || ''), text);
   el.style.left = `${x}px`;
   el.style.top = `${y}px`;
   el.style.setProperty('--dx', `${(Math.random()*24 - 12).toFixed(0)}px`);
-  el.style.setProperty('--dy', `${(-44 - Math.random()*26).toFixed(0)}px`);
+  el.style.setProperty('--dy', `${(-50 - Math.random()*28).toFixed(0)}px`);
   el.addEventListener('animationend', ()=> el.remove(), { once:true });
 }
-
 function burstParticles(x, y, tone=''){
   const wrap = makeFxEl('burst ' + (tone || ''));
   wrap.style.left = `${x}px`;
@@ -714,396 +798,452 @@ function burstParticles(x, y, tone=''){
     const p = document.createElement('i');
     const ang = Math.random()*Math.PI*2;
     const dist = 26 + Math.random()*38;
-    const dx = Math.cos(ang)*dist;
-    const dy = Math.sin(ang)*dist;
-    p.style.setProperty('--dx', `${dx.toFixed(1)}px`);
-    p.style.setProperty('--dy', `${dy.toFixed(1)}px`);
+    p.style.setProperty('--dx', `${(Math.cos(ang)*dist).toFixed(1)}px`);
+    p.style.setProperty('--dy', `${(Math.sin(ang)*dist).toFixed(1)}px`);
     p.style.setProperty('--s', `${(0.7 + Math.random()*0.7).toFixed(2)}`);
     wrap.appendChild(p);
   }
   wrap.addEventListener('animationend', ()=> wrap.remove(), { once:true });
 }
-
-function impactAt(targetEl, tone, mainText){
-  if(!targetEl) return;
-  const r = targetEl.getBoundingClientRect();
-  const c = rectCenter(r);
+function impactAt(el, tone, text){
+  if(!el) return;
+  const c = rectCenter(el.getBoundingClientRect());
   burstParticles(c.x, c.y, tone);
-  if(mainText) floatText(c.x, c.y, mainText, tone);
+  if(text) floatText(c.x, c.y, text, tone);
 }
 
-function randInt(min, max){
-  return Math.floor(Math.random()*(max-min+1))+min;
-}
-function weightedPick(items){
-  const total = items.reduce((s, it)=> s + (it.w || 0), 0);
-  let r = Math.random() * (total || 1);
-  for(const it of items){
-    r -= (it.w || 0);
-    if(r <= 0) return it.v;
-  }
-  return items[items.length-1]?.v;
-}
+const HORSE_COUNT = 8;
+const COLORS = ['#FF6B8B', '#7CC3FF', '#4EE6A8', '#FFCE5C', '#9B7CFF', '#FF8FD6', '#7CFFEA', '#FFA86B'];
+const SAVE_KEY = 'kunzz-horse-race-v1';
 
-function ensureEnemyFields(){
-  state.enemy.block = state.enemy.block ?? 0;
-  state.enemy.strength = state.enemy.strength ?? 0;
-  state.enemy.baseDamage = state.enemy.baseDamage ?? state.enemy.damage ?? 8;
-  state.enemy.lastIntentType = state.enemy.lastIntentType ?? null;
-}
+let state = {
+  gold: 500,
+  picked: 1,
+  bet: 50,
+  raceNo: 1,
+  phase: 'idle', // idle | countdown | running | result
+  running: false,
+  horses: [],
+  winner: null,
+  winnerTs: null,
+  lastTs: null,
+  countdownTimer: null
+};
 
-function rollEnemyIntent(force=false){
-  if(state.gameOver) return;
-  ensureEnemyFields();
-  const e = state.enemy;
-  if(!force && e.intentData && e.intentData.turnPlanned === state.turn) return;
-
-  const t = state.turn;
-  const baseAtk = e.baseDamage ?? 8;
-  const str = e.strength ?? 0;
-
-  // scale a bit with turns
-  const atkDmg = baseAtk + str;
-  const multiHits = randInt(2, t >= 6 ? 4 : 3);
-  const multiEach = Math.max(2, Math.floor(baseAtk * 0.55)) + Math.max(0, Math.floor(str * 0.7));
-  const defendBlock = 7 + Math.floor(t/2);
-  const buffStr = 1 + (t >= 5 ? 1 : 0);
-
-  const last = e.lastIntentType;
-  const avoidRepeat = (type) => (last === type ? 0.35 : 1);
-
-  const choice = weightedPick([
-    { w: (t <= 2 ? 5 : 3) * avoidRepeat('attack'), v: { type:'attack', dmg: atkDmg } },
-    { w: (t >= 3 ? 3 : 1.5) * avoidRepeat('multi'), v: { type:'multi', hits: multiHits, each: multiEach } },
-    { w: (t >= 2 ? 2.6 : 1.6) * avoidRepeat('defend'), v: { type:'defend', block: defendBlock } },
-    { w: (t >= 4 ? 2.2 : 0.8) * avoidRepeat('buff'), v: { type:'buff', str: buffStr } },
-  ]);
-
-  e.intentData = { ...choice, turnPlanned: state.turn };
-  e.intent = choice.type;
-  e.lastIntentType = choice.type;
+function calcOdds(rating){
+  // rating 越高越强，赔率越低
+  const base = (1.75 / rating) * rand(0.92, 1.08);
+  return clamp(Number(base.toFixed(2)), 1.2, 3.8);
 }
 
-// --- Game Flow ---
-function draw(n=5){
-  for(let i=0;i<n;i++){
-    if(!state.deck.length){ state.deck = shuffle(state.discard); state.discard=[]; }
-    if(state.deck.length) state.hand.push(state.deck.pop());
-  }
+function freshHorses(){
+  state.horses = Array.from({length: HORSE_COUNT}, (_,i)=>{
+    const id = i+1;
+    const rating = Number(rand(0.92, 1.10).toFixed(3));
+    const odds = calcOdds(rating);
+    return {
+      id,
+      color: COLORS[i % COLORS.length],
+      rating,
+      odds,
+      progress: 0,
+      finished: false,
+      finishTs: null
+    };
+  });
 }
 
-function startTurn(){
-  if(state.gameOver) return;
-  state.player.energy = state.player.maxEnergy ?? 3;
-  state.player.block = 0;
-  draw(5);
-  rollEnemyIntent();
-  log(`Turn ${state.turn} begins.`, 'good');
-  setTip('Your turn: spend Energy to play cards.');
-  render();
+function buildUI(){
+  // horse pick buttons
+  const pick = $('horsePick');
+  pick.innerHTML = '';
+  state.horses.forEach(h=>{
+    const b = document.createElement('button');
+    b.className = 'horseBtn';
+    b.type = 'button';
+    b.innerHTML = `<span class="miniDot" style="--c:${h.color}"></span>#${h.id}`;
+    b.onclick = ()=> { if(state.running || state.phase==='countdown') return; state.picked = h.id; render(); };
+    pick.appendChild(b);
+  });
+
+  // lanes
+  const lanes = $('lanes');
+  lanes.innerHTML = '';
+  state.horses.forEach(h=>{
+    const lane = document.createElement('div');
+    lane.className = 'lane';
+    lane.innerHTML = `
+      <div class="laneLabel">#${h.id}</div>
+      <div class="laneLine" data-lane="${h.id}">
+        <div class="horseDot" id="dot-${h.id}" style="--c:${h.color}">${h.id}</div>
+      </div>
+    `;
+    lanes.appendChild(lane);
+  });
+
+  // odds list
+  const odds = $('oddsList');
+  odds.innerHTML = '';
+  state.horses.forEach(h=>{
+    const row = document.createElement('div');
+    row.className = 'oddsRow';
+    row.dataset.id = String(h.id);
+    row.innerHTML = `
+      <div class="oddsLeft">
+        <span class="miniDot" style="--c:${h.color}"></span>
+        <div>
+          <div class="oddsName">马 #${h.id}</div>
+          <div class="oddsMeta">强度 ${h.rating}</div>
+        </div>
+      </div>
+      <div class="oddsVal">x${h.odds.toFixed(2)}</div>
+    `;
+    row.onclick = ()=> { if(state.running || state.phase==='countdown') return; state.picked = h.id; render(); };
+    odds.appendChild(row);
+  });
 }
 
-function playCard(idx){
-  if(state.gameOver) return;
-  const id = state.hand[idx];
-  const c = cardsDB[id];
-  if(!c) return;
-  if(c.cost > state.player.energy) { setTip('Not enough Energy.'); return; }
-
-  // FX: fly card to target before state mutates
-  const cardEl = $('hand').children[idx];
-  const targetEl = c.type === 'attack' ? $('enemyUnit') : $('playerUnit');
-  animateCardFly(cardEl, targetEl);
-
-  state.player.energy -= c.cost;
-  if(c.type==='attack'){
-    const raw = c.value;
-    const blocked = Math.min(state.enemy.block || 0, raw);
-    const dealt = Math.max(0, raw - blocked);
-    state.enemy.block = Math.max(0, (state.enemy.block || 0) - raw);
-    state.enemy.hp = Math.max(0, state.enemy.hp - dealt);
-    log(`You used <b>${c.name}</b> and dealt <b>${dealt}</b> damage.`, 'good');
-    flash($('enemyUnit'), 'shake');
-    flash($('enemyUnit'), 'glowBad');
-    impactAt($('enemyUnit'), 'bad', dealt > 0 ? `-${dealt}` : 'Blocked');
-  } else if(c.type==='block'){
-    state.player.block += c.value;
-    log(`You gained <b>${c.value}</b> Block.`, 'good');
-    flash($('playerUnit'), 'glowGood');
-    impactAt($('playerUnit'), 'good', `+${c.value} Block`);
-  }
-  state.discard.push(state.hand.splice(idx,1)[0]);
-  checkEnemy();
-  render();
-}
-
-function endTurn(){
-  if(state.gameOver) return;
-  // Enemy action
-  ensureEnemyFields();
-  // Enemy's block falls off at start of its turn (like most card battlers)
-  state.enemy.block = 0;
-
-  const e = state.enemy;
-  const intent = e.intentData || { type: e.intent || 'attack', dmg: (e.baseDamage ?? e.damage ?? 8) + (e.strength ?? 0) };
-
-  if(intent.type === 'attack'){
-    const dmgEach = Math.max(0, intent.dmg ?? 0);
-    let remainingBlock = state.player.block ?? 0;
-    const taken = Math.max(0, dmgEach - remainingBlock);
-    remainingBlock = Math.max(0, remainingBlock - dmgEach);
-    state.player.block = remainingBlock;
-    state.player.hp = Math.max(0, state.player.hp - taken);
-    log(`Enemy attacks for <b>${dmgEach}</b> (${taken} taken).`, taken>0 ? 'bad' : 'good');
-    flash($('playerUnit'), 'shake');
-    if(taken>0) flash($('playerUnit'), 'glowBad');
-    impactAt($('playerUnit'), taken>0 ? 'bad' : 'good', taken>0 ? `-${taken}` : 'Blocked');
-  } else if(intent.type === 'multi'){
-    const hits = intent.hits ?? 2;
-    const each = Math.max(0, intent.each ?? 0);
-    let remainingBlock = state.player.block ?? 0;
-    let totalTaken = 0;
-    for(let i=0;i<hits;i++){
-      const taken = Math.max(0, each - remainingBlock);
-      remainingBlock = Math.max(0, remainingBlock - each);
-      state.player.hp = Math.max(0, state.player.hp - taken);
-      totalTaken += taken;
-      if(state.player.hp <= 0) break;
+function resetPositions(){
+  state.horses.forEach(h=>{
+    h.progress = 0;
+    h.finished = false;
+    h.finishTs = null;
+    const dot = $(`dot-${h.id}`);
+    if(dot){
+      dot.classList.remove('finished');
+      dot.style.setProperty('--x', `0px`);
     }
-    state.player.block = remainingBlock;
-    log(`Enemy strikes <b>${hits}x</b> for <b>${each}</b> each (${totalTaken} taken).`, totalTaken>0 ? 'bad' : 'good');
-    flash($('playerUnit'), 'shake');
-    if(totalTaken>0) flash($('playerUnit'), 'glowBad');
-    impactAt($('playerUnit'), totalTaken>0 ? 'bad' : 'good', totalTaken>0 ? `-${totalTaken}` : 'Blocked');
-  } else if(intent.type === 'defend'){
-    const b = Math.max(0, intent.block ?? 0);
-    state.enemy.block = (state.enemy.block ?? 0) + b;
-    log(`Enemy gains <b>${b}</b> Block.`, 'bad');
-    flash($('enemyUnit'), 'glowGood');
-    impactAt($('enemyUnit'), 'good', `+${b} Block`);
-  } else if(intent.type === 'buff'){
-    const s = Math.max(0, intent.str ?? 0);
-    state.enemy.strength = (state.enemy.strength ?? 0) + s;
-    log(`Enemy gains <b>+${s}</b> Strength.`, 'bad');
-    flash($('enemyUnit'), 'glowGood');
-    impactAt($('enemyUnit'), 'good', `+${s} STR`);
-  }
+  });
+  $('leader').textContent = '-';
+  $('resultTag').textContent = '-';
+  state.winner = null;
+  state.winnerTs = null;
+}
 
-  setTip('Enemy acted. New turn started.');
-  if(state.player.hp <= 0){
-    state.gameOver = true;
-    render();
+function laneMaxX(id){
+  const laneLine = document.querySelector(`.laneLine[data-lane="${id}"]`);
+  const dot = $(`dot-${id}`);
+  if(!laneLine || !dot) return 0;
+  return Math.max(0, laneLine.clientWidth - dot.offsetWidth - 2);
+}
+
+function updatePositions(){
+  state.horses.forEach(h=>{
+    const dot = $(`dot-${h.id}`);
+    if(!dot) return;
+    const x = laneMaxX(h.id) * h.progress;
+    dot.style.setProperty('--x', `${x.toFixed(1)}px`);
+    if(h.finished) dot.classList.add('finished');
+  });
+}
+
+function updateLeader(){
+  const finished = state.horses.filter(h=>h.finished).sort((a,b)=>a.finishTs-b.finishTs);
+  if(finished.length){
+    $('leader').textContent = `#${finished[0].id}（已冲线）`;
     return;
   }
-
-  state.hand.forEach(c=>state.discard.push(c));
-  state.hand=[];
-  state.turn++;
-  startTurn();
+  const lead = state.horses.slice().sort((a,b)=>b.progress-a.progress)[0];
+  $('leader').textContent = lead ? `#${lead.id}` : '-';
 }
 
-function checkEnemy(){
-  if(state.enemy.hp<=0){
-    log('Enemy defeated! <b>+20 gold</b>.', 'good');
-    state.player.gold += 20;
-    // new enemy
-    const hp = 50 + state.turn*5;
-    state.enemy = { hp, maxHp: hp, intent:'attack', damage:8+state.turn, baseDamage:8+state.turn, block:0, strength:0, intentData:null, lastIntentType:null };
-    setTip('A new enemy appears!');
-    rollEnemyIntent(true);
-  }
+function setStatus(text){
+  $('raceStatus').textContent = text;
 }
 
-// --- Persistence ---
-function normalizeLoadedState(s){
-  // be tolerant to older saves
-  s.player = s.player || {};
-  s.enemy = s.enemy || {};
-  s.gameOver = !!s.gameOver;
-  s.player.maxHp = s.player.maxHp ?? 60;
-  s.player.maxEnergy = s.player.maxEnergy ?? 3;
-  s.player.hp = s.player.hp ?? s.player.maxHp;
-  s.player.energy = s.player.energy ?? s.player.maxEnergy;
-  s.player.gold = s.player.gold ?? 0;
-  s.player.block = s.player.block ?? 0;
-  s.enemy.maxHp = s.enemy.maxHp ?? s.enemy.hp ?? 45;
-  s.enemy.hp = s.enemy.hp ?? s.enemy.maxHp;
-  s.enemy.intent = s.enemy.intent ?? 'attack';
-  s.enemy.damage = s.enemy.damage ?? 8;
-  s.enemy.baseDamage = s.enemy.baseDamage ?? s.enemy.damage ?? 8;
-  s.enemy.block = s.enemy.block ?? 0;
-  s.enemy.strength = s.enemy.strength ?? 0;
-  s.enemy.lastIntentType = s.enemy.lastIntentType ?? null;
-  s.enemy.intentData = s.enemy.intentData ?? null;
-  s.deck = Array.isArray(s.deck) ? s.deck : [];
-  s.hand = Array.isArray(s.hand) ? s.hand : [];
-  s.discard = Array.isArray(s.discard) ? s.discard : [];
-  s.turn = s.turn ?? 1;
-  return s;
+function setTip(text){
+  $('raceTip').textContent = text;
 }
 
-$('save').onclick = ()=>{
-  localStorage.setItem('card-proto', JSON.stringify(state));
-  log('Saved.', 'good');
-  setTip('Saved to localStorage.');
-};
-$('load').onclick = ()=>{
-  const s=localStorage.getItem('card-proto');
-  if(s){
-    try{
-      state = normalizeLoadedState(JSON.parse(s));
-      rollEnemyIntent(true);
-      log('Loaded.', 'good');
-      setTip('Loaded from localStorage.');
-      render();
-    }catch{
-      log('Load failed (invalid save).', 'bad');
-      setTip('Load failed.');
-    }
-  }else{
-    log('No save found.', 'bad');
-    setTip('No save found.');
+function validateBet(showHint=true){
+  const bet = Number.parseInt($('betAmount').value || '0', 10);
+  const ok = Number.isFinite(bet) && bet >= 1 && bet <= state.gold;
+  if(showHint){
+    $('betHint').textContent = ok ? '提示：下注会先扣金币，赢了按赔率返还。' : `下注必须在 1 ~ ${state.gold} 之间`;
+    $('betHint').style.color = ok ? 'var(--muted)' : 'rgba(255,107,139,.9)';
   }
-};
-$('endTurn').onclick = endTurn;
-
-// --- Render ---
-function cardTypeLabel(type){
-  if(type==='attack') return 'Attack';
-  if(type==='block') return 'Skill';
-  return 'Card';
-}
-function intentText(){
-  const e = state.enemy;
-  const i = e.intentData || { type: e.intent || 'attack' };
-  if(i.type === 'attack'){
-    const dmg = i.dmg ?? ((e.baseDamage ?? e.damage ?? 8) + (e.strength ?? 0));
-    return `Attack (${dmg})`;
-  }
-  if(i.type === 'multi'){
-    const hits = i.hits ?? 2;
-    const each = i.each ?? Math.max(2, Math.floor((e.baseDamage ?? e.damage ?? 8) * 0.55)) + Math.max(0, Math.floor((e.strength ?? 0) * 0.7));
-    return `Multi (${hits}x${each})`;
-  }
-  if(i.type === 'defend'){
-    const b = i.block ?? (7 + Math.floor((state.turn ?? 1)/2));
-    return `Defend (+${b} Block)`;
-  }
-  if(i.type === 'buff'){
-    const s = i.str ?? 1;
-    return `Buff (+${s} STR)`;
-  }
-  return String(i.type || e.intent || 'attack');
-}
-function renderPreview(cardId){
-  const c = cardsDB[cardId];
-  const host = $('previewCard');
-  if(!c){ host.innerHTML = `<div class="previewHint">Hover a card to preview.</div>`; return; }
-  host.innerHTML = `
-    <div class="card" style="width:100%; cursor:default" aria-hidden="true">
-      <div class="cardTop">
-        <div class="cost">${c.cost}</div>
-        <div class="typeTag">${cardTypeLabel(c.type)}</div>
-      </div>
-      <div class="cardName">${c.name}</div>
-      <div class="cardText">${c.text || (c.type==='attack' ? `Deal ${c.value} damage.` : `Gain ${c.value} Block.`)}</div>
-      <div class="cardMeta">
-        <span>Value</span><b style="color:rgba(234,240,255,.92)">${c.value}</b>
-      </div>
-    </div>
-  `;
+  return ok ? bet : null;
 }
 
 function render(){
-  // Left panel stats
-  $('turnTag').textContent = `Turn ${state.turn}`;
+  $('gold').textContent = state.gold;
+  $('sessionTag').textContent = `第 ${state.raceNo} 场`;
 
-  const pmax = state.player.maxHp ?? 60;
-  $('php').textContent = state.player.hp;
-  $('php2').textContent = `${state.player.hp} / ${pmax}`;
-  $('phpMax').textContent = pmax;
-  $('phpBar').style.width = `${pct(state.player.hp, pmax)}%`;
+  const pickedHorse = state.horses.find(h=>h.id===state.picked);
+  $('picked').textContent = `#${state.picked}`;
+  $('pickedOdds').textContent = pickedHorse ? `x${pickedHorse.odds.toFixed(2)}` : '-';
 
-  $('pblock').textContent = state.player.block;
-  $('pblock2').textContent = `${state.player.block}`;
-  $('pblockBar').style.width = `${pct(state.player.block, 40)}%`;
+  $('betAmount').value = String(state.bet);
 
-  $('energy').textContent = state.player.energy;
-  $('gold').textContent = state.player.gold;
-  $('deckCount').textContent = state.deck.length;
-  $('discardCount').textContent = state.discard.length;
-
-  // Enemy
-  const emax = state.enemy.maxHp ?? state.enemy.hp ?? 1;
-  $('ehp').textContent = state.enemy.hp;
-  $('ehpMax').textContent = emax;
-  $('ehpBar').style.width = `${pct(state.enemy.hp, emax)}%`;
-  $('intent').textContent = intentText();
-  const it = state.enemy.intentData?.type ?? state.enemy.intent ?? 'attack';
-  $('intentTag').textContent = String(it).toUpperCase();
-  $('eblock').textContent = state.enemy.block ?? 0;
-  $('eblockBar').style.width = `${pct(state.enemy.block ?? 0, 40)}%`;
-  $('estr').textContent = state.enemy.strength ?? 0;
-
-  // Energy pips
-  const maxEnergy = state.player.maxEnergy ?? 3;
-  const pips = $('energyPips');
-  pips.innerHTML = '';
-  for(let i=0;i<maxEnergy;i++){
-    const d=document.createElement('div');
-    d.className = 'pip' + (i < state.player.energy ? ' on' : '');
-    pips.appendChild(d);
-  }
-
-  // Hand
-  $('handTag').textContent = `${state.hand.length} cards`;
-  const hand = $('hand');
-  hand.innerHTML='';
-  state.hand.forEach((id,i)=>{
-    const c=cardsDB[id];
-    const d=document.createElement('div');
-    const canPlay = c && c.cost <= state.player.energy;
-    d.className = 'card' + (canPlay ? '' : ' disabled');
-    d.innerHTML = `
-      <div class="cardTop">
-        <div class="cost">${c?.cost ?? '?'}</div>
-        <div class="typeTag">${cardTypeLabel(c?.type)}</div>
-      </div>
-      <div class="cardName">${c?.name ?? 'Unknown'}</div>
-      <div class="cardText">${c?.text || (c?.type==='attack' ? `Deal ${c?.value ?? 0} damage.` : `Gain ${c?.value ?? 0} Block.`)}</div>
-      <div class="cardMeta">
-        <span>${c?.type==='attack' ? 'Damage' : 'Block'}</span>
-        <b style="color:rgba(234,240,255,.92)">${c?.value ?? 0}</b>
-      </div>
-    `;
-    d.onmouseenter = ()=> renderPreview(id);
-    d.onmouseleave = ()=> {}; // keep last preview
-    d.onclick = ()=> { if(canPlay) playCard(i); else setTip('Not enough Energy to play that card.'); };
-    hand.appendChild(d);
+  // active highlight
+  document.querySelectorAll('.horseBtn').forEach((b, idx)=>{
+    const id = idx+1;
+    b.classList.toggle('active', id === state.picked);
+  });
+  document.querySelectorAll('.oddsRow').forEach(row=>{
+    row.classList.toggle('active', Number(row.dataset.id) === state.picked);
   });
 
-  // Buttons / state
-  $('endTurn').disabled = state.player.hp <= 0 || state.gameOver;
-  $('statusTag').textContent = (state.player.hp <= 0 || state.gameOver) ? 'Defeated' : 'Ready';
+  const lock = state.running || state.phase === 'countdown';
+  $('startRace').disabled = lock;
+  $('newRace').disabled = lock;
+  $('save').disabled = lock;
+  $('load').disabled = lock;
+  $('reset').disabled = lock;
+  $('betAmount').disabled = lock;
+  updatePositions();
+  updateLeader();
+}
 
-  // Basic defeat handling
-  if(state.player.hp <= 0 && !state.gameOver){
-    state.gameOver = true;
-  }
-  if(state.gameOver){
-    setTip('You were defeated. Refresh to restart.');
-    // don't spam log
-    if(!$('log').dataset.gameOverLogged){
-      $('log').dataset.gameOverLogged = '1';
-      log('You were defeated.', 'bad');
+function countdownThenStart(){
+  state.phase = 'countdown';
+  setStatus('倒计时');
+  setTip('准备起跑…');
+
+  let t = 3;
+  const track = $('track');
+  const c = rectCenter(track.getBoundingClientRect());
+  const tick = ()=>{
+    if(t > 0){
+      floatText(c.x, c.y, String(t), 'good');
+      t--;
+      return;
     }
+    floatText(c.x, c.y, 'GO!', 'good');
+    clearInterval(state.countdownTimer);
+    state.countdownTimer = null;
+    beginRun();
+  };
+  tick();
+  state.countdownTimer = setInterval(tick, 1000);
+}
+
+function beginRun(){
+  state.phase = 'running';
+  state.running = true;
+  state.lastTs = null;
+  state.winner = null;
+  state.winnerTs = null;
+  setStatus('比赛中');
+  setTip('比赛进行中…看谁先到终点！');
+  log(`比赛开始：你下注了 <b>#${state.picked}</b>（${state.bet} 金币）`, '');
+  requestAnimationFrame(loop);
+  render();
+}
+
+function finishRace(){
+  state.running = false;
+  state.phase = 'result';
+  setStatus('结束');
+
+  const order = state.horses
+    .slice()
+    .sort((a,b)=>{
+      if(a.finished && b.finished) return a.finishTs - b.finishTs;
+      if(a.finished) return -1;
+      if(b.finished) return 1;
+      return b.progress - a.progress;
+    });
+  const winner = order[0];
+  state.winner = winner?.id ?? null;
+  $('resultTag').textContent = winner ? `冠军：#${winner.id}` : '-';
+
+  if(winner){
+    const pickedHorse = state.horses.find(h=>h.id===state.picked);
+    if(state.picked === winner.id){
+      const payout = Math.floor(state.bet * (pickedHorse?.odds ?? 1));
+      state.gold += payout;
+      log(`你赢了！冠军是 <b>#${winner.id}</b>，获得 <b>+${payout}</b> 金币`, 'good');
+      impactAt($(`dot-${winner.id}`), 'good', `+${payout}`);
+    }else{
+      log(`你输了：冠军是 <b>#${winner.id}</b>，你选择的是 <b>#${state.picked}</b>（-${state.bet}）`, 'bad');
+      impactAt($(`dot-${winner.id}`), 'bad', `#${winner.id} 冠军`);
+    }
+  }
+
+  setTip('比赛结束：可以新一局或继续下注。');
+  render();
+}
+
+function loop(ts){
+  if(!state.running) return;
+  if(state.lastTs == null) state.lastTs = ts;
+  const dt = Math.min(0.05, (ts - state.lastTs) / 1000);
+  state.lastTs = ts;
+
+  // update progress
+  for(const h of state.horses){
+    if(h.finished) continue;
+
+    // 基础速度由 rating 决定，加入波动和冲刺
+    const base = 0.11 + (h.rating - 0.92) * 0.06; // ~0.11..0.12+
+    const wobble = rand(-0.022, 0.022);
+    const surge = Math.random() < 0.028 ? rand(0.03, 0.065) : 0;
+    const fatigue = h.progress > 0.82 ? -0.03 : 0;
+    const v = Math.max(0.03, base + wobble + surge + fatigue);
+
+    h.progress = clamp(h.progress + v * dt, 0, 1);
+    if(h.progress >= 1){
+      h.finished = true;
+      h.finishTs = ts;
+      const dot = $(`dot-${h.id}`);
+      dot?.classList.add('finished');
+      impactAt(dot, 'good', `#${h.id} 冲线`);
+      log(`马 <b>#${h.id}</b> 冲线！`, '');
+
+      if(state.winner == null){
+        state.winner = h.id;
+        state.winnerTs = ts;
+        $('resultTag').textContent = `领先：#${h.id}`;
+      }
+    }
+  }
+
+  updatePositions();
+  updateLeader();
+
+  const allFinished = state.horses.every(h=>h.finished);
+  if(allFinished){
+    finishRace();
+    return;
+  }
+  if(state.winnerTs != null && ts - state.winnerTs > 3500){
+    // 让大家再跑一会儿就结算，避免拖太久
+    finishRace();
+    return;
+  }
+
+  requestAnimationFrame(loop);
+}
+
+function startRace(){
+  if(state.running || state.phase==='countdown') return;
+  const bet = validateBet(true);
+  if(bet == null) return;
+  state.bet = bet;
+  if(state.gold < bet) return;
+
+  // reset race positions before starting
+  resetPositions();
+  updatePositions();
+
+  // take bet
+  state.gold -= bet;
+  $('resultTag').textContent = '-';
+  render();
+  countdownThenStart();
+}
+
+function newRace(){
+  if(state.running || state.phase==='countdown') return;
+  state.raceNo += 1;
+  freshHorses();
+  buildUI();
+  resetPositions();
+  setStatus('待机');
+  setTip('新一局已生成：重新选择马匹并下注。');
+  log(`新一局：第 ${state.raceNo} 场已生成（赔率已更新）`, '');
+  render();
+}
+
+function resetAll(){
+  if(state.running || state.phase==='countdown') return;
+  state.gold = 500;
+  state.bet = 50;
+  state.picked = 1;
+  state.raceNo = 1;
+  state.phase = 'idle';
+  state.running = false;
+  state.winner = null;
+  state.winnerTs = null;
+  $('log').innerHTML = '';
+  freshHorses();
+  buildUI();
+  resetPositions();
+  setStatus('待机');
+  setTip('已重置。');
+  log('已重置为初始状态。', '');
+  render();
+}
+
+function normalizeLoaded(s){
+  const out = {};
+  out.gold = Number.isFinite(s.gold) ? Math.max(0, Math.floor(s.gold)) : 500;
+  out.bet = Number.isFinite(s.bet) ? Math.max(1, Math.floor(s.bet)) : 50;
+  out.picked = Number.isFinite(s.picked) ? clamp(Math.floor(s.picked), 1, HORSE_COUNT) : 1;
+  out.raceNo = Number.isFinite(s.raceNo) ? Math.max(1, Math.floor(s.raceNo)) : 1;
+  out.horses = Array.isArray(s.horses) && s.horses.length === HORSE_COUNT ? s.horses : null;
+  return out;
+}
+
+function save(){
+  const payload = {
+    gold: state.gold,
+    bet: state.bet,
+    picked: state.picked,
+    raceNo: state.raceNo,
+    horses: state.horses.map(h=>({ id:h.id, color:h.color, rating:h.rating, odds:h.odds }))
+  };
+  localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
+  log('已保存到本地。', 'good');
+}
+
+function load(){
+  const raw = localStorage.getItem(SAVE_KEY);
+  if(!raw){
+    log('没有找到存档。', 'bad');
+    return;
+  }
+  try{
+    const s = normalizeLoaded(JSON.parse(raw));
+    state.gold = s.gold;
+    state.bet = s.bet;
+    state.picked = s.picked;
+    state.raceNo = s.raceNo;
+
+    if(s.horses){
+      state.horses = s.horses.map((h, i)=>({
+        id: i+1,
+        color: h.color || COLORS[i%COLORS.length],
+        rating: Number(h.rating) || Number(rand(0.92, 1.10).toFixed(3)),
+        odds: Number(h.odds) || calcOdds(Number(h.rating) || 1),
+        progress: 0, finished:false, finishTs:null
+      }));
+    }else{
+      freshHorses();
+    }
+
+    buildUI();
+    resetPositions();
+    setStatus('待机');
+    setTip('已读取存档：可以直接开始比赛。');
+    log('已读取存档。', 'good');
+    render();
+  }catch{
+    log('读取失败：存档损坏。', 'bad');
   }
 }
 
-// --- Boot ---
-shuffle(state.deck);
-renderPreview(null);
-startTurn();
+// Wire up
+$('startRace').onclick = startRace;
+$('newRace').onclick = newRace;
+$('reset').onclick = resetAll;
+$('save').onclick = save;
+$('load').onclick = load;
+$('betAmount').addEventListener('input', ()=>{
+  const bet = validateBet(true);
+  if(bet != null) state.bet = bet;
+});
+window.addEventListener('resize', ()=> updatePositions());
+
+// Boot
+freshHorses();
+buildUI();
+resetPositions();
+setStatus('待机');
+setTip('选一匹马并下注，然后点击开始比赛。');
+log('欢迎来到赛马竞猜：请选择 1~8 号马并下注。', '');
+render();
 </script>
 </body>
 </html>
