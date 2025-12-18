@@ -14,13 +14,14 @@
   const GRID_H = LANES * CELL_H;
 
   // ====== 资源 / 基地 ======
-  const TOWER_COST = 25;
   const RESOURCE_PER_SEC = 6;
   const KILL_REWARD = 8;
 
   const base = { hp: 100, maxHp: 100 };
   let resources = 50;
   let kills = 0;
+  let level = 1;
+  let nextLevelKills = 8; // 达到该击杀数升级
 
   // ====== 输入状态 ======
   const mouse = { x: 0, y: 0, inside: false };
@@ -43,16 +44,30 @@
 
   // ====== DOM HUD ======
   const resVal = document.getElementById("resVal");
+  const levelVal = document.getElementById("levelVal");
   const spawnVal = document.getElementById("spawnVal");
   const killVal = document.getElementById("killVal");
-  const placePeaBtn = document.getElementById("placePea");
+  const btnPea = document.getElementById("btnPea");
+  const btnRapid = document.getElementById("btnRapid");
+  const btnSniper = document.getElementById("btnSniper");
+  const btnIce = document.getElementById("btnIce");
+  const lockPea = document.getElementById("lockPea");
+  const lockRapid = document.getElementById("lockRapid");
+  const lockSniper = document.getElementById("lockSniper");
+  const lockIce = document.getElementById("lockIce");
+  const costPea = document.getElementById("costPea");
+  const costRapid = document.getElementById("costRapid");
+  const costSniper = document.getElementById("costSniper");
+  const costIce = document.getElementById("costIce");
   const restartBtn = document.getElementById("restart");
   const baseBar = document.getElementById("baseBar");
   const baseHpText = document.getElementById("baseHpText");
 
-  placePeaBtn.addEventListener("click", () => {
-    selectedTowerType = "pea";
-  });
+  // 兼容：如果某些元素不存在，不要让游戏直接崩
+  btnPea?.addEventListener("click", () => (selectedTowerType = "pea"));
+  btnRapid?.addEventListener("click", () => (selectedTowerType = "rapid"));
+  btnSniper?.addEventListener("click", () => (selectedTowerType = "sniper"));
+  btnIce?.addEventListener("click", () => (selectedTowerType = "ice"));
 
   restartBtn.addEventListener("click", () => resetGame());
 
@@ -84,6 +99,7 @@
    * @property {number} cooldown
    * @property {number} damage
    * @property {number} projectileSpeed
+   * @property {number} slow
    */
   /**
    * @typedef {Object} Enemy
@@ -95,6 +111,8 @@
    * @property {number} speed
    * @property {number} hp
    * @property {number} maxHp
+   * @property {number} slowTimer
+   * @property {number} slowFactor
    */
   /**
    * @typedef {Object} Projectile
@@ -104,6 +122,7 @@
    * @property {number} vx
    * @property {number} r
    * @property {number} damage
+   * @property {number} slow
    */
 
   // ====== Step 1: 网格系统 + 放置 ======
@@ -126,24 +145,71 @@
 
   function tryPlaceTower(r, c) {
     if (towers[r][c]) return;
-    if (resources < TOWER_COST) return;
+    const cfg = TOWER_TYPES[selectedTowerType];
+    if (!cfg) return;
+    if (level < cfg.unlockLevel) return;
+    if (resources < cfg.cost) return;
     // 允许放置范围：整个格子区
     const p = cellToWorldCenter(r, c);
-    towers[r][c] = makePeaTower(r, c, p.x, p.y);
-    resources -= TOWER_COST;
+    towers[r][c] = makeTowerFromCfg(r, c, p.x, p.y, cfg);
+    resources -= cfg.cost;
   }
 
-  function makePeaTower(r, c, x, y) {
+  const TOWER_TYPES = {
+    pea: {
+      key: "pea",
+      name: "豌豆塔",
+      unlockLevel: 1,
+      cost: 25,
+      fireRate: 1.0,
+      damage: 18,
+      projectileSpeed: 420,
+      slow: 0,
+    },
+    rapid: {
+      key: "rapid",
+      name: "双发塔",
+      unlockLevel: 2,
+      cost: 40,
+      fireRate: 2.0,
+      damage: 12,
+      projectileSpeed: 460,
+      slow: 0,
+    },
+    sniper: {
+      key: "sniper",
+      name: "狙击塔",
+      unlockLevel: 3,
+      cost: 55,
+      fireRate: 0.6,
+      damage: 46,
+      projectileSpeed: 520,
+      slow: 0,
+    },
+    ice: {
+      key: "ice",
+      name: "冰豌豆",
+      unlockLevel: 4,
+      cost: 60,
+      fireRate: 1.0,
+      damage: 14,
+      projectileSpeed: 420,
+      slow: 0.45, // 命中后减速比例（0.45=降低45%）
+    },
+  };
+
+  function makeTowerFromCfg(r, c, x, y, cfg) {
     /** @type {Tower} */
     const t = {
       r,
       c,
       x,
       y,
-      fireRate: 1.0, // 每秒 1 发
+      fireRate: cfg.fireRate,
       cooldown: 0,
-      damage: 18,
-      projectileSpeed: 420,
+      damage: cfg.damage,
+      projectileSpeed: cfg.projectileSpeed,
+      slow: cfg.slow || 0,
     };
     return t;
   }
@@ -154,7 +220,7 @@
     const y = GRID_Y + lane * CELL_H + CELL_H / 2;
     const w = 44;
     const h = 58;
-    const hp = 70 + Math.floor(Math.random() * 35);
+    const hp = Math.round(70 + Math.random() * 35 + (level - 1) * 14);
     /** @type {Enemy} */
     const e = {
       lane,
@@ -162,9 +228,11 @@
       y,
       w,
       h,
-      speed: 34 + Math.random() * 18, // px/s
+      speed: 34 + Math.random() * 18 + (level - 1) * 3.2, // px/s
       hp,
       maxHp: hp,
+      slowTimer: 0,
+      slowFactor: 1,
     };
     enemies.push(e);
   }
@@ -172,7 +240,15 @@
   function updateEnemies(dt) {
     for (let i = enemies.length - 1; i >= 0; i--) {
       const e = enemies[i];
-      e.x -= e.speed * dt;
+      // 减速衰减
+      if (e.slowTimer > 0) {
+        e.slowTimer -= dt;
+        if (e.slowTimer <= 0) {
+          e.slowTimer = 0;
+          e.slowFactor = 1;
+        }
+      }
+      e.x -= e.speed * e.slowFactor * dt;
       // 到基地：扣血并移除
       if (e.x - e.w / 2 <= 18) {
         base.hp = Math.max(0, base.hp - 10);
@@ -219,6 +295,7 @@
       vx: tower.projectileSpeed,
       r: 6,
       damage: tower.damage,
+      slow: tower.slow || 0,
     };
     projectiles.push(p);
   }
@@ -242,6 +319,10 @@
       if (hitIndex !== -1) {
         const e = enemies[hitIndex];
         e.hp -= p.damage;
+        if (p.slow && p.slow > 0) {
+          e.slowFactor = Math.min(e.slowFactor, 1 - p.slow);
+          e.slowTimer = Math.max(e.slowTimer, 1.25);
+        }
         projectiles.splice(i, 1);
         if (e.hp <= 0) {
           enemies.splice(hitIndex, 1);
@@ -444,6 +525,11 @@
         spawnEvery = Math.max(0.85, spawnEvery * 0.985);
       }
 
+      // 升级：用击杀数触发（简单直观）
+      if (kills >= nextLevelKills) {
+        levelUp();
+      }
+
       updateTowers(dt);
       updateProjectiles(dt);
       updateEnemies(dt);
@@ -456,14 +542,52 @@
 
   function updateHud() {
     resVal.textContent = String(resources);
+    if (levelVal) levelVal.textContent = String(level);
     spawnVal.textContent = `${spawnEvery.toFixed(2)}s`;
     killVal.textContent = String(kills);
 
-    placePeaBtn.disabled = resources < TOWER_COST || gameOver;
+    // 按钮状态：未解锁/资源不足/游戏结束 => disabled
+    setTowerBtnState(btnPea, TOWER_TYPES.pea);
+    setTowerBtnState(btnRapid, TOWER_TYPES.rapid);
+    setTowerBtnState(btnSniper, TOWER_TYPES.sniper);
+    setTowerBtnState(btnIce, TOWER_TYPES.ice);
+    syncTowerUiText();
 
     const pct = base.hp / base.maxHp;
     baseBar.style.width = `${Math.max(0, Math.min(1, pct)) * 100}%`;
     baseHpText.textContent = `${base.hp}/${base.maxHp}`;
+  }
+
+  function setTowerBtnState(btn, cfg) {
+    if (!btn || !cfg) return;
+    const unlocked = level >= cfg.unlockLevel;
+    const affordable = resources >= cfg.cost;
+    btn.disabled = gameOver || !unlocked || !affordable;
+    btn.classList.toggle("primary", selectedTowerType === cfg.key);
+    btn.style.opacity = unlocked ? "1" : "0.55";
+  }
+
+  function syncTowerUiText() {
+    // 价格
+    if (costPea) costPea.textContent = String(TOWER_TYPES.pea.cost);
+    if (costRapid) costRapid.textContent = String(TOWER_TYPES.rapid.cost);
+    if (costSniper) costSniper.textContent = String(TOWER_TYPES.sniper.cost);
+    if (costIce) costIce.textContent = String(TOWER_TYPES.ice.cost);
+
+    // 解锁文案：解锁后清空，否则显示 LvX
+    if (lockPea) lockPea.textContent = level >= TOWER_TYPES.pea.unlockLevel ? "" : `Lv${TOWER_TYPES.pea.unlockLevel} 解锁`;
+    if (lockRapid)
+      lockRapid.textContent = level >= TOWER_TYPES.rapid.unlockLevel ? "" : `Lv${TOWER_TYPES.rapid.unlockLevel} 解锁`;
+    if (lockSniper)
+      lockSniper.textContent = level >= TOWER_TYPES.sniper.unlockLevel ? "" : `Lv${TOWER_TYPES.sniper.unlockLevel} 解锁`;
+    if (lockIce) lockIce.textContent = level >= TOWER_TYPES.ice.unlockLevel ? "" : `Lv${TOWER_TYPES.ice.unlockLevel} 解锁`;
+  }
+
+  function levelUp() {
+    level += 1;
+    nextLevelKills = nextLevelKills + 10 + Math.floor(level * 2.5);
+    // 关卡上升时，稍微让刷怪节奏回弹，然后继续加速
+    spawnEvery = Math.max(0.75, spawnEvery * 0.92);
   }
 
   function resetGame() {
@@ -474,11 +598,14 @@
     }
     resources = 50;
     kills = 0;
+    level = 1;
+    nextLevelKills = 8;
     base.hp = base.maxHp;
     spawnTimer = 0;
     spawnEvery = 1.8;
     resourceAcc = 0;
     gameOver = false;
+    selectedTowerType = "pea";
   }
 
   // 启动
