@@ -1068,6 +1068,9 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
         <div class="header">
             <div>
                 <h1>TOKYO JAPANESE CUISINE 成本后台</h1>
+                <div style="margin-top:6px; font-size:12px; color:#6b7280;">
+                    页面版本: <span id="page-build-id" style="font-weight:700;">loading...</span>
+                </div>
             </div>
             <div class="controls">
                 <!-- 报表类型选择器 -->
@@ -1225,6 +1228,16 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
     <script>
         // API 配置
         const API_BASE_URL = 'costapi.php';
+
+        // ===== 页面版本标识（用于确认是否加载到最新代码，排查缓存/OPcache）=====
+        const COSTEDIT_BUILD_ID = '2025-12-18_02';
+        (function () {
+            try {
+                console.log('[costedit] build:', COSTEDIT_BUILD_ID);
+                const el = document.getElementById('page-build-id');
+                if (el) el.textContent = COSTEDIT_BUILD_ID;
+            } catch (e) {}
+        })();
         
         const availableReportTypes = <?php echo json_encode($reportPermissions); ?>;
         const reportDropdownEnabled = <?php echo $showReportDropdown ? 'true' : 'false'; ?>;
