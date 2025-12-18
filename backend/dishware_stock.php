@@ -945,8 +945,8 @@ header('Expires: 0');
 
         /* 照片样式 */
         .product-photo {
-            width: clamp(30px, 3.13vw, 60px);
-            height: clamp(30px, 3.13vw, 60px);
+            width: clamp(120px, 3.13vw, 150px);
+            height: clamp(120px, 3.13vw, 150px);
             object-fit: cover;
             border-radius: clamp(4px, 0.42vw, 8px);
             border: 1px solid #e5e7eb;
