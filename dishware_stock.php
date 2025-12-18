@@ -1,3 +1,10 @@
+<?php
+// 防止浏览器/代理缓存，确保修改能立刻生效
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+header('Expires: 0');
+?>
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -1426,52 +1433,50 @@
         }
 
         /* 表头在左侧竖排（用 td[data-label] 显示字段名）：全屏生效 */
-        .table-scroll-container {
-            overflow-x: hidden;
-        }
+        .table-scroll-container { overflow-x: hidden !important; }
 
         .stock-table {
-            min-width: 0;
-            table-layout: auto;
+            min-width: 0 !important;
+            table-layout: auto !important;
         }
 
         .stock-table thead {
-            display: none;
+            display: none !important;
         }
 
         .stock-table,
         .stock-table tbody,
         .stock-table tr {
-            display: block;
-            width: 100%;
+            display: block !important;
+            width: 100% !important;
         }
 
         .stock-table tr {
-            margin: 10px 10px 12px;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            overflow: hidden;
-            background: white;
+            margin: 10px 10px 12px !important;
+            border: 1px solid #e5e7eb !important;
+            border-radius: 10px !important;
+            overflow: hidden !important;
+            background: white !important;
         }
 
         .stock-table td {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            text-align: right;
-            border: none;
-            border-bottom: 1px solid #f1f1f1;
-            padding: 10px 12px;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            gap: 12px !important;
+            text-align: right !important;
+            border: none !important;
+            border-bottom: 1px solid #f1f1f1 !important;
+            padding: 10px 12px !important;
         }
 
         .stock-table td::before {
-            content: attr(data-label);
-            flex: 0 0 auto;
-            color: #583e04;
-            font-weight: 700;
-            text-align: left;
-            white-space: nowrap;
+            content: attr(data-label) !important;
+            flex: 0 0 auto !important;
+            color: #583e04 !important;
+            font-weight: 700 !important;
+            text-align: left !important;
+            white-space: nowrap !important;
         }
 
         .stock-table td:last-child {
