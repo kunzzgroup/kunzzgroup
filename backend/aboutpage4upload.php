@@ -909,23 +909,29 @@ if (file_exists($configFile)) {
                 <div class="year-management">
                     <div class="year-tabs">
                         <?php 
-                        $years = array_values(array_unique(array_map(function($it){ return (string)($it['year'] ?? ''); }, $items)));
-                        sort($years, SORT_NUMERIC);
-                        if (empty($years)) {
-                            // 如果没有年份，显示提示
-                            echo '<span style="color: #666; font-size: clamp(10px, 0.84vw, 16px);">' . ($isEnglish ? 'No records yet' : '暂无记录') . '</span>';
-                        } else {
-                            foreach ($years as $index => $year): 
+                        try {
+                            $years = array_values(array_unique(array_map(function($it){ return (string)($it['year'] ?? ''); }, $items)));
+                            sort($years, SORT_NUMERIC);
+                            if (empty($years)) {
+                                // 如果没有年份，显示提示
+                                echo '<span style="color: #666; font-size: clamp(10px, 0.84vw, 16px);">' . htmlspecialchars($isEnglish ? 'No records yet' : '暂无记录', ENT_QUOTES, 'UTF-8') . '</span>';
+                            } else {
+                                foreach ($years as $index => $year): 
+                                    $yearEscaped = htmlspecialchars($year, ENT_QUOTES, 'UTF-8');
                         ?>
-                            <button class="year-tab <?php echo $index === 0 ? 'active' : ''; ?>" onclick="showYear('<?php echo htmlspecialchars($year, ENT_QUOTES); ?>')"><?php echo htmlspecialchars($year); ?><?php echo $isEnglish ? '' : '年'; ?></button>
+                            <button class="year-tab <?php echo $index === 0 ? 'active' : ''; ?>" onclick="showYear('<?php echo $yearEscaped; ?>')"><?php echo $yearEscaped; ?><?php echo $isEnglish ? '' : '年'; ?></button>
                         <?php 
-                            endforeach;
+                                endforeach;
+                            }
+                        } catch (Exception $e) {
+                            error_log("Error in year-tabs: " . $e->getMessage());
+                            echo '<span style="color: red;">错误：无法加载年份</span>';
                         }
                         ?>
                     </div>
                     
-                    <div class="year-actions" style="display: flex; gap: 10px; align-items: center;">
-                        <button type="button" class="btn btn-add" onclick="showAddRecordModal()" style="min-width: 120px; white-space: nowrap; background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer;">+ <?php echo $isEnglish ? 'Add Record' : '新增记录'; ?></button>
+                    <div class="year-actions" style="display: flex !important; gap: 10px; align-items: center; visibility: visible !important; opacity: 1 !important;">
+                        <button type="button" class="btn btn-add" onclick="showAddRecordModal()" style="min-width: 120px !important; white-space: nowrap !important; background: #28a745 !important; color: white !important; padding: 10px 20px !important; border: none !important; border-radius: 6px !important; font-size: 16px !important; font-weight: 600 !important; cursor: pointer !important; display: inline-block !important; visibility: visible !important; opacity: 1 !important;">+ <?php echo htmlspecialchars($isEnglish ? 'Add Record' : '新增记录', ENT_QUOTES, 'UTF-8'); ?></button>
                     </div>
                 </div>
 
