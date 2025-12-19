@@ -8491,7 +8491,7 @@ require_once 'session_check.php';
                     // 填入最终Total（进位后的金额）
                     const finalTotalText = formatCentsToCurrency(finalTotalCents);
                     page.drawText(finalTotalText, {
-                        x: getRightAlignedX(finalTotalText, 588, 8),
+                        x: getRightAlignedX(finalTotalText, 580, 8),
                         y: height - 717, // 调整到最终Total行
                         size: fontSize,
                         color: textColor,
