@@ -1,10 +1,18 @@
 <?php
+// 开启输出缓冲，避免 header 发送问题
+if (!ob_get_level()) {
+    ob_start();
+}
+
 // 开启错误报告（调试用，生产环境可关闭）
 error_reporting(E_ALL);
 ini_set('display_errors', 0); // 不直接显示错误，记录到日志
 ini_set('log_errors', 1);
 
-session_start();
+// 确保 session 只启动一次（sidebar.php 也会启动 session）
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // 检查是否已登录（根据你的登录系统调整）
 if (!isset($_SESSION['user_id'])) {
