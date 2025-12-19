@@ -8558,8 +8558,8 @@ require_once 'session_check.php';
                     // 填入Total（进位后的金额）
                     const totalText = formatCurrencyForPDF(totalRounded);
                     page.drawText(totalText, {
-                        x: getRightAlignedX(totalText, 570, 8),
-                        y: height - 720,
+                        x: getRightAlignedX(totalText, 575, 8),
+                        y: height - 715,
                         size: fontSize,
                         color: textColor,
                         font: boldFont,
