@@ -8897,13 +8897,7 @@ require_once 'session_check.php';
                                     color: textColor,
                                 });
                                 
-                                // 填入Rounding标签和数值（进位前的金额）
-                                page.drawText('Rounding', {
-                                    x: 480, // Rounding标签位置
-                                    y: height - 720, // Rounding在Total上方
-                                    size: smallFontSize,
-                                    color: textColor,
-                                });
+                                // 填入Rounding（进位前的金额）
                                 const roundingText = formatCurrencyForPDF(subtotalRaw);
                                 page.drawText(roundingText, {
                                     x: getRightAlignedX(roundingText, 580, 8),
@@ -8947,13 +8941,7 @@ require_once 'session_check.php';
                                     color: textColor,
                                 });
                                 
-                                // 填入Rounding标签和数值（进位前的金额）
-                                page.drawText('Rounding', {
-                                    x: 480, // Rounding标签位置
-                                    y: height - 720, // Rounding在Total上方
-                                    size: smallFontSize,
-                                    color: textColor,
-                                });
+                                // 填入Rounding（进位前的金额）
                                 const roundingText = formatCurrencyForPDF(subtotalRaw);
                                 page.drawText(roundingText, {
                                     x: getRightAlignedX(roundingText, 580, 8),
@@ -8976,13 +8964,7 @@ require_once 'session_check.php';
                                 const totalRaw = grandTotalRaw; // 原始总金额（不进位）
                                 const totalRounded = roundToNearestFive(totalRaw); // 进位后的总金额
                                 
-                                // 填入Rounding标签和数值（进位前的金额）
-                                page.drawText('Rounding', {
-                                    x: 480, // Rounding标签位置
-                                    y: height - 720, // Rounding在Total上方
-                                    size: smallFontSize,
-                                    color: textColor,
-                                });
+                                // 填入Rounding（进位前的金额）
                                 const roundingText = formatCurrencyForPDF(totalRaw);
                                 page.drawText(roundingText, {
                                     x: getRightAlignedX(roundingText, 580, 8),
