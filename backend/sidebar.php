@@ -156,7 +156,7 @@ if (isset($_SESSION['user_id'])) {
             if ($permRow && isset($permRow['submenu_permissions_json']) && !empty($permRow['submenu_permissions_json'])) {
                 $subList = json_decode($permRow['submenu_permissions_json'], true);
                 if (is_array($subList) && !empty($subList)) {
-                    foreach ($submenuVisibility as $section => &$items) {
+                    foreach ($submenuVisibility as $section => &$subItems) {
                         // 对于brand，需要特殊处理，因为它的结构不同
                         if ($section === 'brand') {
                             continue; // 稍后单独处理
@@ -170,11 +170,11 @@ if (isset($_SESSION['user_id'])) {
                         if (empty($allowed)) {
                             continue;
                         }
-                        foreach ($items as $key => $value) {
-                            $items[$key] = in_array($key, $allowed, true);
+                        foreach ($subItems as $key => $value) {
+                            $subItems[$key] = in_array($key, $allowed, true);
                         }
                     }
-                    unset($items);
+                    unset($subItems);
                     
                     // 处理visual权限：如果主模块可见，则所有子选项都可见
                     if ($canSeeVisual) {
