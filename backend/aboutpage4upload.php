@@ -909,8 +909,17 @@ if (file_exists($configFile)) {
                 <div class="year-management">
                     <div class="year-tabs">
                         <?php 
+                        // 确保 $items 是数组
+                        if (!is_array($items)) {
+                            $items = [];
+                        }
                         try {
-                            $years = array_values(array_unique(array_map(function($it){ return (string)($it['year'] ?? ''); }, $items)));
+                            $years = array_values(array_unique(array_map(function($it){ 
+                                return (string)($it['year'] ?? ''); 
+                            }, $items)));
+                            // 过滤空值
+                            $years = array_filter($years, function($y) { return !empty($y); });
+                            $years = array_values($years);
                             sort($years, SORT_NUMERIC);
                             if (empty($years)) {
                                 // 如果没有年份，显示提示
@@ -926,11 +935,15 @@ if (file_exists($configFile)) {
                         } catch (Exception $e) {
                             error_log("Error in year-tabs: " . $e->getMessage());
                             echo '<span style="color: red;">错误：无法加载年份</span>';
+                        } catch (Error $e) {
+                            error_log("Fatal error in year-tabs: " . $e->getMessage());
+                            echo '<span style="color: red;">致命错误：无法加载年份</span>';
                         }
                         ?>
                     </div>
                     
-                    <div class="year-actions" style="display: flex !important; gap: 10px; align-items: center; visibility: visible !important; opacity: 1 !important;">
+                    <!-- year-actions div - 确保始终显示 -->
+                    <div class="year-actions" style="display: flex !important; gap: 10px; align-items: center; visibility: visible !important; opacity: 1 !important; min-width: 150px;">
                         <button type="button" class="btn btn-add" onclick="showAddRecordModal()" style="min-width: 120px !important; white-space: nowrap !important; background: #28a745 !important; color: white !important; padding: 10px 20px !important; border: none !important; border-radius: 6px !important; font-size: 16px !important; font-weight: 600 !important; cursor: pointer !important; display: inline-block !important; visibility: visible !important; opacity: 1 !important;">+ <?php echo htmlspecialchars($isEnglish ? 'Add Record' : '新增记录', ENT_QUOTES, 'UTF-8'); ?></button>
                     </div>
                 </div>
