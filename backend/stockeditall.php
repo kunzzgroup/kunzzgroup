@@ -8967,7 +8967,7 @@ require_once 'session_check.php';
                                 // 填入Rounding（进位前的金额）
                                 const roundingText = formatCurrencyForPDF(totalRaw);
                                 page.drawText(roundingText, {
-                                    x: getRightAlignedX(roundingText, 588, 8),
+                                    x: getRightAlignedX(roundingText, 595, 8),
                                     y: height - 700, // Rounding在Total上方
                                     size: smallFontSize,
                                     color: textColor,
@@ -8976,7 +8976,7 @@ require_once 'session_check.php';
                                 // 填入Total（进位后的金额）
                                 const totalText = formatCurrencyForPDF(totalRounded);
                                 page.drawText(totalText, {
-                                    x: getRightAlignedX(totalText, 580, 8),
+                                    x: getRightAlignedX(totalText, 588, 8),
                                     y: height - 717,
                                     size: fontSize,
                                     color: textColor,
