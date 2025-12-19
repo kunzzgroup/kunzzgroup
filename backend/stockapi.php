@@ -366,7 +366,7 @@ function handleApprove() {
     }
     
     // 检查用户是否使用了允许的注册码
-    $allowedCodes = ['SUPPORT88', 'IT4567', 'QX0EQP', 'HR2025','AZGQOY'];
+    $allowedCodes = ['SUPPORT88', 'IT4567', 'QX0EQP', 'HR2025','AZGQOY','IT7890'];
     $userId = $_SESSION['user_id'];
 
     $stmt = $pdo->prepare("SELECT registration_code FROM users WHERE id = ?");
