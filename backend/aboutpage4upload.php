@@ -1,56 +1,19 @@
 <?php
-// 开启输出缓冲，避免 header 发送问题
-if (!ob_get_level()) {
-    ob_start();
-}
-
-// 开启错误报告（调试用，生产环境可关闭）
-error_reporting(E_ALL);
-ini_set('display_errors', 0); // 不直接显示错误，记录到日志
-ini_set('log_errors', 1);
-
-// 确保 session 只启动一次（sidebar.php 也会启动 session）
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+session_start();
 
 // 检查是否已登录（根据你的登录系统调整）
 if (!isset($_SESSION['user_id'])) {
-    // 清理输出缓冲，避免在重定向前输出内容
-    if (ob_get_level()) {
-        ob_clean();
-    }
-    // 从 backend 目录重定向到根目录的登录页
-    header("Location: ../login.html");
+    header("Location: login.html");
     exit();
 }
 
-// 检查并包含配置文件
-$mediaConfigPath = __DIR__ . '/../media_config.php';
-if (!file_exists($mediaConfigPath)) {
-    error_log("错误：找不到 media_config.php 文件，路径: $mediaConfigPath");
-    die("系统配置错误：找不到配置文件。请联系管理员。");
-}
-include_once $mediaConfigPath;
+include_once '../media_config.php';
 
 // 处理语言版本切换
 $language = isset($_GET['lang']) ? $_GET['lang'] : 'zh';
 $isEnglish = ($language === 'en');
-// 使用绝对路径确保文件路径正确
-$configFile = $isEnglish ? __DIR__ . '/../timeline_config_en.json' : __DIR__ . '/../timeline_config.json';
-$uploadDir = __DIR__ . '/../images/images/';
-
-// 确保上传目录存在
-if (!file_exists($uploadDir)) {
-    if (!mkdir($uploadDir, 0777, true)) {
-        error_log("错误：无法创建上传目录: $uploadDir");
-    }
-}
-
-// 检查上传目录权限
-if (!is_writable($uploadDir)) {
-    error_log("警告：上传目录不可写: $uploadDir");
-}
+$configFile = $isEnglish ? '../timeline_config_en.json' : '../timeline_config.json';
+$uploadDir = '../images/images/';
 
 // 安全写入：规范化为扁平结构 + 文件锁 + 原子重命名
 function normalizeToFlatArray($raw) {
@@ -393,30 +356,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // 读取当前配置（扁平记录列表）
 $items = [];
 if (file_exists($configFile)) {
-    $content = @file_get_contents($configFile);
-    if ($content === false) {
-        error_log("错误：无法读取配置文件: $configFile");
-    } else {
-        $raw = json_decode($content, true);
-        if ($raw === null && json_last_error() !== JSON_ERROR_NONE) {
-            error_log("错误：配置文件 JSON 解析失败: " . json_last_error_msg() . " (文件: $configFile)");
-            $raw = [];
-        }
-        $raw = $raw ?: [];
-        if ($raw && array_keys($raw) !== range(0, count($raw) - 1)) {
-            foreach ($raw as $yearKey => $entries) {
-                foreach ($entries as $entry) {
-                    $entryArray = is_array($entry) ? $entry : [ 'title' => (string)$entry ];
-                    $items[] = array_merge($entryArray, [ 'year' => (string)$yearKey, 'month' => isset($entryArray['month']) ? (int)$entryArray['month'] : 0 ]);
-                }
+    $raw = json_decode(file_get_contents($configFile), true) ?: [];
+    if ($raw && array_keys($raw) !== range(0, count($raw) - 1)) {
+        foreach ($raw as $yearKey => $entries) {
+            foreach ($entries as $entry) {
+                $entryArray = is_array($entry) ? $entry : [ 'title' => (string)$entry ];
+                $items[] = array_merge($entryArray, [ 'year' => (string)$yearKey, 'month' => isset($entryArray['month']) ? (int)$entryArray['month'] : 0 ]);
             }
-        } else {
-            $items = $raw;
         }
+    } else {
+        $items = $raw;
     }
-} else {
-    // 配置文件不存在是正常的（首次使用）
-    error_log("信息：配置文件不存在，将创建新文件: $configFile");
 }
 
 // 默认时间线数据已移除 - 不再自动添加默认记录
@@ -699,14 +649,12 @@ if (file_exists($configFile)) {
             background: #f99e00;
             color: white;
             border: none;
-            padding: clamp(8px, 0.63vw, 12px) clamp(12px, 1.04vw, 20px);
+            padding: clamp(4px, 0.42vw, 8px) clamp(6px, 0.63vw, 12px);
             border-radius: clamp(4px, 0.42vw, 8px);
-            font-size: clamp(12px, 0.94vw, 18px);
+            font-size: clamp(8px, 0.74vw, 14px);
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            min-height: 36px;
-            white-space: nowrap;
         }
         
         .btn:hover {
@@ -804,10 +752,8 @@ if (file_exists($configFile)) {
         
         .btn-add {
             background: #28a745;
-            font-size: clamp(10px, 0.84vw, 16px);
-            padding: clamp(8px, 0.63vw, 12px) clamp(12px, 1.04vw, 20px);
-            min-width: 120px;
-            white-space: nowrap;
+            font-size: clamp(6px, 0.63vw, 12px);
+            padding: clamp(4px, 0.42vw, 8px) clamp(6px, 0.63vw, 12px);
         }
         
         .btn-add:hover {
@@ -869,15 +815,7 @@ if (file_exists($configFile)) {
     </style>
 </head>
 <body>
-    <?php 
-    $sidebarPath = __DIR__ . '/sidebar.php';
-    if (file_exists($sidebarPath)) {
-        include $sidebarPath;
-    } else {
-        error_log("错误：找不到 sidebar.php 文件，路径: $sidebarPath");
-        echo "<div style='padding: 20px; color: red;'>错误：找不到侧边栏文件。请联系管理员。</div>";
-    }
-    ?>
+    <?php include 'sidebar.php'; ?>
     <div class="container">
         <div class="header">
             <h1><?php echo $isEnglish ? 'Timeline Management' : '发展历史管理'; ?></h1>
@@ -909,42 +847,16 @@ if (file_exists($configFile)) {
                 <div class="year-management">
                     <div class="year-tabs">
                         <?php 
-                        // 确保 $items 是数组
-                        if (!is_array($items)) {
-                            $items = [];
-                        }
-                        try {
-                            $years = array_values(array_unique(array_map(function($it){ 
-                                return (string)($it['year'] ?? ''); 
-                            }, $items)));
-                            // 过滤空值
-                            $years = array_filter($years, function($y) { return !empty($y); });
-                            $years = array_values($years);
-                            sort($years, SORT_NUMERIC);
-                            if (empty($years)) {
-                                // 如果没有年份，显示提示
-                                echo '<span style="color: #666; font-size: clamp(10px, 0.84vw, 16px);">' . htmlspecialchars($isEnglish ? 'No records yet' : '暂无记录', ENT_QUOTES, 'UTF-8') . '</span>';
-                            } else {
-                                foreach ($years as $index => $year): 
-                                    $yearEscaped = htmlspecialchars($year, ENT_QUOTES, 'UTF-8');
+                        $years = array_values(array_unique(array_map(function($it){ return (string)($it['year'] ?? ''); }, $items)));
+                        sort($years, SORT_NUMERIC);
+                        foreach ($years as $index => $year): 
                         ?>
-                            <button class="year-tab <?php echo $index === 0 ? 'active' : ''; ?>" onclick="showYear('<?php echo $yearEscaped; ?>')"><?php echo $yearEscaped; ?><?php echo $isEnglish ? '' : '年'; ?></button>
-                        <?php 
-                                endforeach;
-                            }
-                        } catch (Exception $e) {
-                            error_log("Error in year-tabs: " . $e->getMessage());
-                            echo '<span style="color: red;">错误：无法加载年份</span>';
-                        } catch (Error $e) {
-                            error_log("Fatal error in year-tabs: " . $e->getMessage());
-                            echo '<span style="color: red;">致命错误：无法加载年份</span>';
-                        }
-                        ?>
+                            <button class="year-tab <?php echo $index === 0 ? 'active' : ''; ?>" onclick="showYear('<?php echo $year; ?>')"><?php echo $year; ?><?php echo $isEnglish ? '' : '年'; ?></button>
+                        <?php endforeach; ?>
                     </div>
                     
-                    <!-- year-actions div - 确保始终显示 -->
-                    <div class="year-actions" style="display: flex !important; gap: 10px; align-items: center; visibility: visible !important; opacity: 1 !important; min-width: 150px;">
-                        <button type="button" class="btn btn-add" onclick="showAddRecordModal()" style="min-width: 120px !important; white-space: nowrap !important; background: #28a745 !important; color: white !important; padding: 10px 20px !important; border: none !important; border-radius: 6px !important; font-size: 16px !important; font-weight: 600 !important; cursor: pointer !important; display: inline-block !important; visibility: visible !important; opacity: 1 !important;">+ <?php echo htmlspecialchars($isEnglish ? 'Add Record' : '新增记录', ENT_QUOTES, 'UTF-8'); ?></button>
+                    <div class="year-actions">
+                        <button type="button" class="btn btn-add" onclick="showAddRecordModal()">+ <?php echo $isEnglish ? 'Add Record' : '新增记录'; ?></button>
                     </div>
                 </div>
 
@@ -1282,9 +1194,3 @@ if (file_exists($configFile)) {
     </script>
 </body>
 </html>
-<?php
-// 刷新输出缓冲，确保内容输出到浏览器
-if (ob_get_level()) {
-    ob_end_flush();
-}
-?>
