@@ -752,8 +752,10 @@ if (file_exists($configFile)) {
         
         .btn-add {
             background: #28a745;
-            font-size: clamp(6px, 0.63vw, 12px);
-            padding: clamp(4px, 0.42vw, 8px) clamp(6px, 0.63vw, 12px);
+            font-size: clamp(12px, 0.94vw, 18px);
+            padding: clamp(8px, 0.63vw, 12px) clamp(12px, 1.04vw, 20px);
+            min-width: 120px;
+            white-space: nowrap;
         }
         
         .btn-add:hover {
@@ -847,16 +849,31 @@ if (file_exists($configFile)) {
                 <div class="year-management">
                     <div class="year-tabs">
                         <?php 
-                        $years = array_values(array_unique(array_map(function($it){ return (string)($it['year'] ?? ''); }, $items)));
+                        // 确保 $items 是数组
+                        if (!is_array($items)) {
+                            $items = [];
+                        }
+                        $years = array_values(array_unique(array_map(function($it){ 
+                            return (string)($it['year'] ?? ''); 
+                        }, $items)));
+                        // 过滤空值
+                        $years = array_filter($years, function($y) { return !empty($y); });
+                        $years = array_values($years);
                         sort($years, SORT_NUMERIC);
-                        foreach ($years as $index => $year): 
+                        if (empty($years)) {
+                            echo '<span style="color: #666;">暂无记录</span>';
+                        } else {
+                            foreach ($years as $index => $year): 
                         ?>
-                            <button class="year-tab <?php echo $index === 0 ? 'active' : ''; ?>" onclick="showYear('<?php echo $year; ?>')"><?php echo $year; ?><?php echo $isEnglish ? '' : '年'; ?></button>
-                        <?php endforeach; ?>
+                            <button class="year-tab <?php echo $index === 0 ? 'active' : ''; ?>" onclick="showYear('<?php echo htmlspecialchars($year, ENT_QUOTES); ?>')"><?php echo htmlspecialchars($year); ?><?php echo $isEnglish ? '' : '年'; ?></button>
+                        <?php 
+                            endforeach;
+                        }
+                        ?>
                     </div>
                     
-                    <div class="year-actions">
-                        <button type="button" class="btn btn-add" onclick="showAddRecordModal()">+ <?php echo $isEnglish ? 'Add Record' : '新增记录'; ?></button>
+                    <div class="year-actions" style="display: flex !important; gap: 10px !important; align-items: center !important;">
+                        <button type="button" class="btn btn-add" onclick="showAddRecordModal()" style="display: inline-block !important; visibility: visible !important; opacity: 1 !important;">+ <?php echo $isEnglish ? 'Add Record' : '新增记录'; ?></button>
                     </div>
                 </div>
 
