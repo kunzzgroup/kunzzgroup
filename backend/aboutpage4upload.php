@@ -926,10 +926,11 @@ if (file_exists($configFile) && is_readable($configFile)) {
                         }
                         
                         // 调试信息（临时，用于诊断）
-                        error_log("调试：显示时 items 数量: " . count($items));
+                        $debugInfo = "调试：显示时 items 数量: " . count($items);
                         if (!empty($items)) {
-                            error_log("调试：第一条记录的 year 字段: " . ($items[0]['year'] ?? '不存在'));
+                            $debugInfo .= ", 第一条记录的 year 字段: " . ($items[0]['year'] ?? '不存在');
                         }
+                        error_log($debugInfo);
                         
                         $years = array_values(array_unique(array_map(function($it){ 
                             return (string)($it['year'] ?? ''); 
