@@ -12,7 +12,30 @@ include_once '../media_config.php';
 // 处理语言版本切换
 $language = isset($_GET['lang']) ? $_GET['lang'] : 'zh';
 $isEnglish = ($language === 'en');
-$configFile = $isEnglish ? '../timeline_config_en.json' : '../timeline_config.json';
+$configFileName = $isEnglish ? 'timeline_config_en.json' : 'timeline_config.json';
+
+// 尝试多个可能的配置文件路径
+$possiblePaths = [
+    __DIR__ . '/../' . $configFileName,  // 从 backend 目录访问根目录（绝对路径）
+    '../' . $configFileName,              // 相对路径
+    '../../' . $configFileName,            // 从其他子目录
+    $configFileName,                       // 当前目录
+];
+
+$configFile = null;
+foreach ($possiblePaths as $path) {
+    if (file_exists($path)) {
+        $configFile = $path;
+        break;
+    }
+}
+
+// 如果找不到文件，使用默认路径（用于创建新文件）
+if (!$configFile) {
+    $configFile = __DIR__ . '/../' . $configFileName;
+    error_log("警告：找不到配置文件，将使用默认路径: $configFile");
+}
+
 $uploadDir = '../images/images/';
 
 // 安全写入：规范化为扁平结构 + 文件锁 + 原子重命名
@@ -355,18 +378,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // 读取当前配置（扁平记录列表）
 $items = [];
-if (file_exists($configFile)) {
-    $raw = json_decode(file_get_contents($configFile), true) ?: [];
-    if ($raw && array_keys($raw) !== range(0, count($raw) - 1)) {
-        foreach ($raw as $yearKey => $entries) {
-            foreach ($entries as $entry) {
-                $entryArray = is_array($entry) ? $entry : [ 'title' => (string)$entry ];
-                $items[] = array_merge($entryArray, [ 'year' => (string)$yearKey, 'month' => isset($entryArray['month']) ? (int)$entryArray['month'] : 0 ]);
+if (file_exists($configFile) && is_readable($configFile)) {
+    $content = @file_get_contents($configFile);
+    if ($content !== false) {
+        $raw = json_decode($content, true);
+        if ($raw === null && json_last_error() !== JSON_ERROR_NONE) {
+            error_log("错误：配置文件 JSON 解析失败: " . json_last_error_msg() . " (文件: $configFile)");
+            $raw = [];
+        }
+        $raw = $raw ?: [];
+        
+        // 检查数组结构：如果是关联数组（按年份分组），转换为扁平数组
+        if ($raw && array_keys($raw) !== range(0, count($raw) - 1)) {
+            // 按年份分组的结构
+            foreach ($raw as $yearKey => $entries) {
+                if (is_array($entries)) {
+                    // 检查 entries 是否是索引数组（多条记录）还是关联数组（单条记录）
+                    if (array_keys($entries) === range(0, count($entries) - 1)) {
+                        // 多条记录
+                        foreach ($entries as $entry) {
+                            $entryArray = is_array($entry) ? $entry : [ 'title' => (string)$entry ];
+                            $items[] = array_merge($entryArray, [ 
+                                'year' => (string)$yearKey, 
+                                'month' => isset($entryArray['month']) ? (int)$entryArray['month'] : 0 
+                            ]);
+                        }
+                    } else {
+                        // 单条记录
+                        $entryArray = $entries;
+                        $items[] = array_merge($entryArray, [ 
+                            'year' => (string)$yearKey, 
+                            'month' => isset($entryArray['month']) ? (int)$entryArray['month'] : 0 
+                        ]);
+                    }
+                } else {
+                    // 非数组条目
+                    $items[] = [
+                        'title' => (string)$entries,
+                        'year' => (string)$yearKey,
+                        'month' => 0
+                    ];
+                }
             }
+        } else {
+            // 扁平数组结构
+            $items = $raw;
         }
     } else {
-        $items = $raw;
+        error_log("错误：无法读取配置文件: $configFile");
     }
+} else {
+    error_log("信息：配置文件不存在或不可读: $configFile");
 }
 
 // 默认时间线数据已移除 - 不再自动添加默认记录
