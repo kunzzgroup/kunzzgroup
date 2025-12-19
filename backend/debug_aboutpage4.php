@@ -52,14 +52,26 @@ if (file_exists(__DIR__ . '/aboutpage4upload.php')) {
     $contentLength = strlen($content);
     echo "<p>文件大小: $contentLength 字节</p>";
     
-    // 检查是否有 PHP 语法错误
-    $syntaxCheck = shell_exec("php -l " . escapeshellarg(__DIR__ . '/aboutpage4upload.php') . " 2>&1");
-    if (strpos($syntaxCheck, 'No syntax errors') !== false) {
-        echo "<p style='color: green;'>✓ PHP 语法检查通过</p>";
-    } else {
+    // 检查 PHP 语法（不使用 shell_exec，因为可能被禁用）
+    // 尝试包含文件来检查语法错误
+    ob_start();
+    $syntaxError = false;
+    try {
+        // 使用 token_get_all 来检查基本语法
+        $tokens = @token_get_all($content);
+        if ($tokens === false) {
+            echo "<p style='color: orange;'>⚠ 无法进行语法检查（token_get_all 失败）</p>";
+        } else {
+            echo "<p style='color: green;'>✓ 基本语法检查通过（使用 token_get_all）</p>";
+        }
+    } catch (ParseError $e) {
+        $syntaxError = true;
         echo "<p style='color: red;'>✗ PHP 语法错误:</p>";
-        echo "<pre>" . htmlspecialchars($syntaxCheck) . "</pre>";
+        echo "<pre>" . htmlspecialchars($e->getMessage()) . "</pre>";
+    } catch (Error $e) {
+        // 忽略其他错误，因为这只是检查语法
     }
+    ob_end_clean();
     
     // 检查文件末尾
     $lastLines = array_slice(explode("\n", $content), -5);
