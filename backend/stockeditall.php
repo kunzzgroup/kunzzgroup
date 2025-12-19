@@ -8483,7 +8483,7 @@ require_once 'session_check.php';
                     const roundingText = formatCurrencyForPDF(subtotalRaw);
                     page.drawText(roundingText, {
                         x: getRightAlignedX(roundingText, 580, 8),
-                        y: height - 720, // Rounding在Total上方
+                        y: height - 700, // Rounding在Total上方
                         size: smallFontSize,
                         color: textColor,
                     });
@@ -8491,8 +8491,8 @@ require_once 'session_check.php';
                     // 填入最终Total（进位后的金额）
                     const finalTotalText = formatCentsToCurrency(finalTotalCents);
                     page.drawText(finalTotalText, {
-                        x: getRightAlignedX(finalTotalText, 580, 8),
-                        y: height - 708, // 调整到最终Total行
+                        x: getRightAlignedX(finalTotalText, 574, 8),
+                        y: height - 717, // 调整到最终Total行
                         size: fontSize,
                         color: textColor,
                         font: boldFont,
