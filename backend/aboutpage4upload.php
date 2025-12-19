@@ -16,6 +16,10 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // 检查是否已登录（根据你的登录系统调整）
 if (!isset($_SESSION['user_id'])) {
+    // 清理输出缓冲，避免在重定向前输出内容
+    if (ob_get_level()) {
+        ob_clean();
+    }
     // 从 backend 目录重定向到根目录的登录页
     header("Location: ../login.html");
     exit();
@@ -1248,3 +1252,9 @@ if (file_exists($configFile)) {
     </script>
 </body>
 </html>
+<?php
+// 刷新输出缓冲，确保内容输出到浏览器
+if (ob_get_level()) {
+    ob_end_flush();
+}
+?>
