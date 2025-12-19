@@ -8550,7 +8550,7 @@ require_once 'session_check.php';
                     const roundingText = formatCurrencyForPDF(totalRaw);
                     page.drawText(roundingText, {
                         x: getRightAlignedX(roundingText, 580, 8),
-                        y: height - 720, // Rounding在Total上方
+                        y: height - 705, // Rounding在Total上方
                         size: smallFontSize,
                         color: textColor,
                     });
@@ -8559,7 +8559,7 @@ require_once 'session_check.php';
                     const totalText = formatCurrencyForPDF(totalRounded);
                     page.drawText(totalText, {
                         x: getRightAlignedX(totalText, 580, 8),
-                        y: height - 705,
+                        y: height - 720,
                         size: fontSize,
                         color: textColor,
                         font: boldFont,
