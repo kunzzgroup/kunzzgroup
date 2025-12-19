@@ -34,6 +34,8 @@ foreach ($possiblePaths as $path) {
 if (!$configFile) {
     $configFile = __DIR__ . '/../' . $configFileName;
     error_log("警告：找不到配置文件，将使用默认路径: $configFile");
+} else {
+    error_log("信息：找到配置文件: $configFile");
 }
 
 $uploadDir = '../images/images/';
@@ -423,6 +425,13 @@ if (file_exists($configFile) && is_readable($configFile)) {
         } else {
             // 扁平数组结构
             $items = $raw;
+        }
+        
+        // 调试信息（生产环境可移除）
+        if (empty($items)) {
+            error_log("警告：读取配置文件后 items 为空 (文件: $configFile, 原始数据数量: " . count($raw) . ", 数组类型: " . (is_array($raw) && array_keys($raw) === range(0, count($raw) - 1) ? '扁平数组' : '关联数组') . ")");
+        } else {
+            error_log("信息：成功读取 " . count($items) . " 条记录 (文件: $configFile)");
         }
     } else {
         error_log("错误：无法读取配置文件: $configFile");
