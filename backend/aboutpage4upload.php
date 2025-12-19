@@ -926,10 +926,10 @@ if (file_exists($configFile) && is_readable($configFile)) {
                         }
                         
                         // 调试信息（临时，用于诊断）
-                        // error_log("调试：items 数量: " . count($items));
-                        // if (!empty($items)) {
-                        //     error_log("调试：第一条记录: " . print_r($items[0], true));
-                        // }
+                        error_log("调试：显示时 items 数量: " . count($items));
+                        if (!empty($items)) {
+                            error_log("调试：第一条记录的 year 字段: " . ($items[0]['year'] ?? '不存在'));
+                        }
                         
                         $years = array_values(array_unique(array_map(function($it){ 
                             return (string)($it['year'] ?? ''); 
@@ -939,11 +939,13 @@ if (file_exists($configFile) && is_readable($configFile)) {
                         $years = array_values($years);
                         sort($years, SORT_NUMERIC);
                         
+                        error_log("调试：提取的年份数量: " . count($years) . ", 年份列表: " . implode(', ', $years));
+                        
                         if (empty($years)) {
                             echo '<span style="color: #666;">暂无记录</span>';
                             // 调试：如果 items 不为空但 years 为空，说明 year 字段有问题
                             if (!empty($items)) {
-                                error_log("警告：items 有 " . count($items) . " 条记录，但无法提取年份。第一条记录: " . print_r($items[0] ?? null, true));
+                                error_log("警告：items 有 " . count($items) . " 条记录，但无法提取年份。第一条记录: " . json_encode($items[0] ?? null, JSON_UNESCAPED_UNICODE));
                             }
                         } else {
                             foreach ($years as $index => $year): 
