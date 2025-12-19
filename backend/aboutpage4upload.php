@@ -1,19 +1,44 @@
 <?php
+// 开启错误报告（调试用，生产环境可关闭）
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // 不直接显示错误，记录到日志
+ini_set('log_errors', 1);
+
 session_start();
 
 // 检查是否已登录（根据你的登录系统调整）
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.html");
+    // 从 backend 目录重定向到根目录的登录页
+    header("Location: ../login.html");
     exit();
 }
 
-include_once '../media_config.php';
+// 检查并包含配置文件
+$mediaConfigPath = __DIR__ . '/../media_config.php';
+if (!file_exists($mediaConfigPath)) {
+    error_log("错误：找不到 media_config.php 文件，路径: $mediaConfigPath");
+    die("系统配置错误：找不到配置文件。请联系管理员。");
+}
+include_once $mediaConfigPath;
 
 // 处理语言版本切换
 $language = isset($_GET['lang']) ? $_GET['lang'] : 'zh';
 $isEnglish = ($language === 'en');
-$configFile = $isEnglish ? '../timeline_config_en.json' : '../timeline_config.json';
-$uploadDir = '../images/images/';
+// 使用绝对路径确保文件路径正确
+$configFile = $isEnglish ? __DIR__ . '/../timeline_config_en.json' : __DIR__ . '/../timeline_config.json';
+$uploadDir = __DIR__ . '/../images/images/';
+
+// 确保上传目录存在
+if (!file_exists($uploadDir)) {
+    if (!mkdir($uploadDir, 0777, true)) {
+        error_log("错误：无法创建上传目录: $uploadDir");
+    }
+}
+
+// 检查上传目录权限
+if (!is_writable($uploadDir)) {
+    error_log("警告：上传目录不可写: $uploadDir");
+}
 
 // 安全写入：规范化为扁平结构 + 文件锁 + 原子重命名
 function normalizeToFlatArray($raw) {
@@ -48,27 +73,55 @@ function normalizeToFlatArray($raw) {
 }
 
 function writeTimelineConfig($configFile, $config) {
-    // 统一为扁平结构
-    $flat = normalizeToFlatArray($config);
-    // 排序
-    usort($flat, function($a,$b){
-        $ay=(int)($a['year']??0); $by=(int)($b['year']??0);
-        if ($ay===$by) { return (int)($a['month']??0) - (int)($b['month']??0); }
-        return $ay - $by;
-    });
-    $dir = dirname($configFile);
-    if (!is_dir($dir)) { @mkdir($dir, 0777, true); }
-    $fp = @fopen($configFile, 'c+');
-    if ($fp) { @flock($fp, LOCK_EX); }
-    $tmp = $configFile . '.tmp.' . getmypid();
-    $ok = @file_put_contents($tmp, json_encode($flat, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-    if ($ok !== false) {
-        @rename($tmp, $configFile);
-    } else {
-        @unlink($tmp);
+    try {
+        // 统一为扁平结构
+        $flat = normalizeToFlatArray($config);
+        // 排序
+        usort($flat, function($a,$b){
+            $ay=(int)($a['year']??0); $by=(int)($b['year']??0);
+            if ($ay===$by) { return (int)($a['month']??0) - (int)($b['month']??0); }
+            return $ay - $by;
+        });
+        $dir = dirname($configFile);
+        if (!is_dir($dir)) { 
+            if (!@mkdir($dir, 0777, true)) {
+                error_log("错误：无法创建配置目录: $dir");
+                return false;
+            }
+        }
+        
+        // 检查目录是否可写
+        if (!is_writable($dir)) {
+            error_log("错误：配置目录不可写: $dir");
+            return false;
+        }
+        
+        $fp = @fopen($configFile, 'c+');
+        if ($fp) { @flock($fp, LOCK_EX); }
+        $tmp = $configFile . '.tmp.' . getmypid();
+        $jsonData = json_encode($flat, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        if ($jsonData === false) {
+            error_log("错误：JSON 编码失败: " . json_last_error_msg());
+            if ($fp) { @flock($fp, LOCK_UN); @fclose($fp); }
+            return false;
+        }
+        $ok = @file_put_contents($tmp, $jsonData);
+        if ($ok !== false) {
+            if (!@rename($tmp, $configFile)) {
+                error_log("错误：无法重命名临时文件到: $configFile");
+                @unlink($tmp);
+                $ok = false;
+            }
+        } else {
+            error_log("错误：无法写入临时文件: $tmp");
+            @unlink($tmp);
+        }
+        if ($fp) { @flock($fp, LOCK_UN); @fclose($fp); }
+        return $ok !== false;
+    } catch (Exception $e) {
+        error_log("错误：写入配置文件时发生异常: " . $e->getMessage());
+        return false;
     }
-    if ($fp) { @flock($fp, LOCK_UN); @fclose($fp); }
-    return $ok !== false;
 }
 
 // 处理新增发展记录（年+月）
@@ -328,17 +381,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // 读取当前配置（扁平记录列表）
 $items = [];
 if (file_exists($configFile)) {
-    $raw = json_decode(file_get_contents($configFile), true) ?: [];
-    if ($raw && array_keys($raw) !== range(0, count($raw) - 1)) {
-        foreach ($raw as $yearKey => $entries) {
-            foreach ($entries as $entry) {
-                $entryArray = is_array($entry) ? $entry : [ 'title' => (string)$entry ];
-                $items[] = array_merge($entryArray, [ 'year' => (string)$yearKey, 'month' => isset($entryArray['month']) ? (int)$entryArray['month'] : 0 ]);
-            }
-        }
+    $content = @file_get_contents($configFile);
+    if ($content === false) {
+        error_log("错误：无法读取配置文件: $configFile");
     } else {
-        $items = $raw;
+        $raw = json_decode($content, true);
+        if ($raw === null && json_last_error() !== JSON_ERROR_NONE) {
+            error_log("错误：配置文件 JSON 解析失败: " . json_last_error_msg() . " (文件: $configFile)");
+            $raw = [];
+        }
+        $raw = $raw ?: [];
+        if ($raw && array_keys($raw) !== range(0, count($raw) - 1)) {
+            foreach ($raw as $yearKey => $entries) {
+                foreach ($entries as $entry) {
+                    $entryArray = is_array($entry) ? $entry : [ 'title' => (string)$entry ];
+                    $items[] = array_merge($entryArray, [ 'year' => (string)$yearKey, 'month' => isset($entryArray['month']) ? (int)$entryArray['month'] : 0 ]);
+                }
+            }
+        } else {
+            $items = $raw;
+        }
     }
+} else {
+    // 配置文件不存在是正常的（首次使用）
+    error_log("信息：配置文件不存在，将创建新文件: $configFile");
 }
 
 // 默认时间线数据已移除 - 不再自动添加默认记录
@@ -787,7 +853,15 @@ if (file_exists($configFile)) {
     </style>
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
+    <?php 
+    $sidebarPath = __DIR__ . '/sidebar.php';
+    if (file_exists($sidebarPath)) {
+        include $sidebarPath;
+    } else {
+        error_log("错误：找不到 sidebar.php 文件，路径: $sidebarPath");
+        echo "<div style='padding: 20px; color: red;'>错误：找不到侧边栏文件。请联系管理员。</div>";
+    }
+    ?>
     <div class="container">
         <div class="header">
             <h1><?php echo $isEnglish ? 'Timeline Management' : '发展历史管理'; ?></h1>
