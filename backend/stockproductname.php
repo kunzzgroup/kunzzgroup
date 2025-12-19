@@ -20,7 +20,7 @@ if (isset($_SESSION['user_id'])) {
         $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
-        $allowedCodes = ['SUPPORT88', 'IT4567', 'QX0EQP', 'HR2025','AZGQOY'];
+        $allowedCodes = ['SUPPORT88', 'IT4567', 'QX0EQP', 'HR2025','AZGQOY','IT7890'];
         $userId = $_SESSION['user_id'];
         
         $stmt = $pdo->prepare("SELECT registration_code FROM users WHERE id = ?");
