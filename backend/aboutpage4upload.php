@@ -699,12 +699,14 @@ if (file_exists($configFile)) {
             background: #f99e00;
             color: white;
             border: none;
-            padding: clamp(4px, 0.42vw, 8px) clamp(6px, 0.63vw, 12px);
+            padding: clamp(8px, 0.63vw, 12px) clamp(12px, 1.04vw, 20px);
             border-radius: clamp(4px, 0.42vw, 8px);
-            font-size: clamp(8px, 0.74vw, 14px);
+            font-size: clamp(12px, 0.94vw, 18px);
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            min-height: 36px;
+            white-space: nowrap;
         }
         
         .btn:hover {
@@ -802,8 +804,10 @@ if (file_exists($configFile)) {
         
         .btn-add {
             background: #28a745;
-            font-size: clamp(6px, 0.63vw, 12px);
-            padding: clamp(4px, 0.42vw, 8px) clamp(6px, 0.63vw, 12px);
+            font-size: clamp(10px, 0.84vw, 16px);
+            padding: clamp(8px, 0.63vw, 12px) clamp(12px, 1.04vw, 20px);
+            min-width: 120px;
+            white-space: nowrap;
         }
         
         .btn-add:hover {
@@ -907,14 +911,21 @@ if (file_exists($configFile)) {
                         <?php 
                         $years = array_values(array_unique(array_map(function($it){ return (string)($it['year'] ?? ''); }, $items)));
                         sort($years, SORT_NUMERIC);
-                        foreach ($years as $index => $year): 
+                        if (empty($years)) {
+                            // 如果没有年份，显示提示
+                            echo '<span style="color: #666; font-size: clamp(10px, 0.84vw, 16px);">' . ($isEnglish ? 'No records yet' : '暂无记录') . '</span>';
+                        } else {
+                            foreach ($years as $index => $year): 
                         ?>
                             <button class="year-tab <?php echo $index === 0 ? 'active' : ''; ?>" onclick="showYear('<?php echo $year; ?>')"><?php echo $year; ?><?php echo $isEnglish ? '' : '年'; ?></button>
-                        <?php endforeach; ?>
+                        <?php 
+                            endforeach;
+                        }
+                        ?>
                     </div>
                     
                     <div class="year-actions">
-                        <button type="button" class="btn btn-add" onclick="showAddRecordModal()">+ <?php echo $isEnglish ? 'Add Record' : '新增记录'; ?></button>
+                        <button type="button" class="btn btn-add" onclick="showAddRecordModal()" style="min-width: 120px; white-space: nowrap;">+ <?php echo $isEnglish ? 'Add Record' : '新增记录'; ?></button>
                     </div>
                 </div>
 
