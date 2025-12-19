@@ -917,15 +917,15 @@ if (file_exists($configFile)) {
                         } else {
                             foreach ($years as $index => $year): 
                         ?>
-                            <button class="year-tab <?php echo $index === 0 ? 'active' : ''; ?>" onclick="showYear('<?php echo $year; ?>')"><?php echo $year; ?><?php echo $isEnglish ? '' : '年'; ?></button>
+                            <button class="year-tab <?php echo $index === 0 ? 'active' : ''; ?>" onclick="showYear('<?php echo htmlspecialchars($year, ENT_QUOTES); ?>')"><?php echo htmlspecialchars($year); ?><?php echo $isEnglish ? '' : '年'; ?></button>
                         <?php 
                             endforeach;
                         }
                         ?>
                     </div>
                     
-                    <div class="year-actions">
-                        <button type="button" class="btn btn-add" onclick="showAddRecordModal()" style="min-width: 120px; white-space: nowrap;">+ <?php echo $isEnglish ? 'Add Record' : '新增记录'; ?></button>
+                    <div class="year-actions" style="display: flex; gap: 10px; align-items: center;">
+                        <button type="button" class="btn btn-add" onclick="showAddRecordModal()" style="min-width: 120px; white-space: nowrap; background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer;">+ <?php echo $isEnglish ? 'Add Record' : '新增记录'; ?></button>
                     </div>
                 </div>
 
