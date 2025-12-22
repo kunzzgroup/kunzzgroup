@@ -891,7 +891,7 @@ require_once 'session_check.php';
                 const answerGaps = {
                     1: 64,  // 第1题和第2题之间的间距
                     2: 80,  // 第2题和第3题之间的间距
-                    3: 66,  // ...
+                    3: 65,  // ...
                     4: answerGap,
                     5: answerGap,
                     6: answerGap,
