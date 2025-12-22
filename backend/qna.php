@@ -863,7 +863,7 @@ require_once 'session_check.php';
                 const rightMargin = 100;
                 const maxWidth = width - leftMargin - rightMargin;
                 const topMargin = 100;
-                const answerGap = 50; // 每个答案之间的间距（可以调整这个值来改变答案之间的gap）
+                const answerGap = 60; // 每个答案之间的间距（可以调整这个值来改变答案之间的gap）
                 let currentY = height - topMargin;
                 
                 // 在页面顶部中间绘制用户名和职位
