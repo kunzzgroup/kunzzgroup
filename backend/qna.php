@@ -110,7 +110,7 @@ require_once 'session_check.php';
         }
 
         .form-section-content {
-            padding: clamp(12px, 1.04vw, 20px) clamp(10px, 0.73vw, 14px);
+            padding: clamp(6px, 0.52vw, 10px) clamp(8px, 0.63vw, 12px);
         }
 
         .question-item {
