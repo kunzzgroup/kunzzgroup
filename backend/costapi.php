@@ -191,23 +191,124 @@ function handleGet() {
                 $endDate = date('Y-m-t');
             }
 
-            $sql = "SELECT * FROM " . $config['data_table'] . " WHERE 1=1";
-            $params = [];
-            
-            if ($searchDate) {
-                $sql .= " AND date = ?";
-                $params[] = $searchDate;
-            } elseif ($startDate && $endDate) {
-                $sql .= " AND date BETWEEN ? AND ?";
-                $params[] = $startDate;
-                $params[] = $endDate;
+            // KPI 表配置
+            $kpiTableMap = [
+                'j1' => 'j1data',
+                'j2' => 'j2data',
+                'j3' => 'j3data'
+            ];
+
+            // 处理 total 情况
+            if ($restaurant === 'total') {
+                // 对于 total，需要合并所有三个餐厅的数据
+                $allRecords = [];
+                
+                foreach (['j1', 'j2', 'j3'] as $r) {
+                    $rConfig = getRestaurantConfig($r);
+                    $kpiTable = $kpiTableMap[$r] ?? null;
+                    
+                    // JOIN KPI 表获取 sales 数据
+                    $sql = "SELECT 
+                                c.id,
+                                c.date,
+                                c.day_name,
+                                c.c_beverage,
+                                c.c_kitchen,
+                                c.c_total,
+                                COALESCE((k.gross_sales - IFNULL(k.discounts, 0)), 0) as sales
+                            FROM " . $rConfig['data_table'] . " c
+                            LEFT JOIN " . $kpiTable . " k ON c.date = k.date
+                            WHERE 1=1";
+                    $params = [];
+                    
+                    if ($searchDate) {
+                        $sql .= " AND c.date = ?";
+                        $params[] = $searchDate;
+                    } elseif ($startDate && $endDate) {
+                        $sql .= " AND c.date BETWEEN ? AND ?";
+                        $params[] = $startDate;
+                        $params[] = $endDate;
+                    }
+                    
+                    $sql .= " ORDER BY c.date DESC";
+                    
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute($params);
+                    $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    
+                    $allRecords = array_merge($allRecords, $records);
+                }
+                
+                // 按日期分组并合并数据
+                $dateMap = [];
+                foreach ($allRecords as $record) {
+                    $date = $record['date'];
+                    if (!isset($dateMap[$date])) {
+                        $dateMap[$date] = [
+                            'date' => $date,
+                            'sales' => 0,
+                            'c_beverage' => 0,
+                            'c_kitchen' => 0,
+                            'c_total' => 0
+                        ];
+                    }
+                    $dateMap[$date]['sales'] += floatval($record['sales'] ?? 0);
+                    $dateMap[$date]['c_beverage'] += floatval($record['c_beverage'] ?? 0);
+                    $dateMap[$date]['c_kitchen'] += floatval($record['c_kitchen'] ?? 0);
+                    $dateMap[$date]['c_total'] += floatval($record['c_total'] ?? 0);
+                }
+                
+                $records = array_values($dateMap);
+                usort($records, function($a, $b) {
+                    return strcmp($b['date'], $a['date']);
+                });
+            } else {
+                // 单个餐厅：JOIN KPI 表获取 sales 数据
+                $kpiTable = $kpiTableMap[$restaurant] ?? null;
+                
+                if ($kpiTable) {
+                    $sql = "SELECT 
+                                c.id,
+                                c.date,
+                                c.day_name,
+                                c.c_beverage,
+                                c.c_kitchen,
+                                c.c_total,
+                                COALESCE((k.gross_sales - IFNULL(k.discounts, 0)), 0) as sales
+                            FROM " . $config['data_table'] . " c
+                            LEFT JOIN " . $kpiTable . " k ON c.date = k.date
+                            WHERE 1=1";
+                } else {
+                    // 如果没有 KPI 表，只查询 cost 表，sales 为 0
+                    $sql = "SELECT 
+                                c.id,
+                                c.date,
+                                c.day_name,
+                                c.c_beverage,
+                                c.c_kitchen,
+                                c.c_total,
+                                0 as sales
+                            FROM " . $config['data_table'] . " c
+                            WHERE 1=1";
+                }
+                
+                $params = [];
+                
+                if ($searchDate) {
+                    $sql .= " AND c.date = ?";
+                    $params[] = $searchDate;
+                } elseif ($startDate && $endDate) {
+                    $sql .= " AND c.date BETWEEN ? AND ?";
+                    $params[] = $startDate;
+                    $params[] = $endDate;
+                }
+                
+                $sql .= " ORDER BY c.date DESC";
+                
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute($params);
+                $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
             }
-            
-            $sql .= " ORDER BY date DESC";
-            
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute($params);
-            $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
             sendResponse(true, "数据获取成功", $records);
             break;
