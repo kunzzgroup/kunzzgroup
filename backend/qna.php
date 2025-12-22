@@ -886,6 +886,36 @@ require_once 'session_check.php';
                 // 调整起始Y位置，为头部信息留出空间
                 currentY = height - topMargin - -20;
 
+                // 每个问题的答案间距配置（可以单独调整每个答案的间距）
+                // 如果某个问题没有配置，则使用默认的 answerGap
+                const answerGaps = {
+                    1: 60,  // 第1题的答案间距
+                    2: 60,  // 第2题的答案间距
+                    3: 60,  // 第3题的答案间距
+                    4: 60,  // 第4题的答案间距
+                    5: 60,  // 第5题的答案间距
+                    6: 60,  // 第6题的答案间距
+                    7: 60,  // 第7题的答案间距
+                    8: 60,  // 第8题的答案间距
+                    9: 60,  // 第9题的答案间距
+                    10: 60  // 第10题的答案间距
+                };
+                
+                // 每个问题的Y偏移量配置（可以单独调整每个答案的起始位置）
+                // 正值向下移动，负值向上移动
+                const answerYOffsets = {
+                    1: 0,   // 第1题的Y偏移量
+                    2: 0,   // 第2题的Y偏移量
+                    3: 0,   // 第3题的Y偏移量
+                    4: 0,   // 第4题的Y偏移量
+                    5: 0,   // 第5题的Y偏移量
+                    6: 0,   // 第6题的Y偏移量
+                    7: 0,   // 第7题的Y偏移量
+                    8: 0,   // 第8题的Y偏移量
+                    9: 0,   // 第9题的Y偏移量
+                    10: 0   // 第10题的Y偏移量
+                };
+                
                 // 问题列表
                 const questions = [
                     { num: 1, text: userResponse.question1 || '' },
@@ -908,34 +938,43 @@ require_once 'session_check.php';
                 for (let i = 0; i < questions.length; i++) {
                     const q = questions[i];
                     if (q.text && q.text.trim()) {
+                        // 获取当前问题的间距和Y偏移量配置
+                        const questionGap = answerGaps[q.num] !== undefined ? answerGaps[q.num] : answerGap;
+                        const questionYOffset = answerYOffsets[q.num] !== undefined ? answerYOffsets[q.num] : 0;
+                        
+                        // 应用Y偏移量
+                        let questionStartY = currentY + questionYOffset;
+                        
                         // 处理长文本换行
                         const lines = wrapText(q.text, maxWidth, fontSize, font);
                         
                         // 检查是否需要新页面
                         const neededHeight = lines.length * lineHeight + 20;
-                        if (currentY - neededHeight < 50) {
+                        if (questionStartY - neededHeight < 50) {
                             // 创建新页面
                             currentPage = pdfDoc.addPage([width, height]);
-                            currentY = height - topMargin;
+                            questionStartY = height - topMargin;
+                            currentY = questionStartY;
                         }
                         
                         // 绘制答案文本（每行，不显示问题编号）
                         for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
                             const line = lines[lineIndex];
-                            const yPos = currentY - (lineIndex + 1) * lineHeight;
+                            const yPos = questionStartY - (lineIndex + 1) * lineHeight;
                             
                             if (yPos < 50) {
                                 // 如果超出当前页，创建新页面
                                 currentPage = pdfDoc.addPage([width, height]);
-                                currentY = height - topMargin;
-                                await drawTextSmart(currentPage, line, leftMargin, currentY, fontSize, false);
+                                questionStartY = height - topMargin;
+                                currentY = questionStartY;
+                                await drawTextSmart(currentPage, line, leftMargin, questionStartY, fontSize, false);
                             } else {
                                 await drawTextSmart(currentPage, line, leftMargin, yPos, fontSize, false);
                             }
                         }
                         
-                        // 更新Y位置，留出间距
-                        currentY -= (lines.length * lineHeight + answerGap);
+                        // 更新Y位置，使用当前问题的间距配置
+                        currentY = questionStartY - (lines.length * lineHeight + questionGap);
                     }
                 }
 
