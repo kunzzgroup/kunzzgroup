@@ -890,7 +890,7 @@ require_once 'session_check.php';
                 // 每个问题的“区域高度”配置（单独控制每题占用的垂直高度，而不是gap）
                 // 不设置的题目会使用 defaultAnswerHeight 作为默认高度
                 const answerHeights = {
-                    1: 65,  // 第1题的高度
+                    1: defaultAnswerHeight,  // 第1题的高度
                     2: defaultAnswerHeight,  // 第2题的高度
                     3: defaultAnswerHeight,  // 第3题的高度
                     4: defaultAnswerHeight,
@@ -900,6 +900,22 @@ require_once 'session_check.php';
                     8: defaultAnswerHeight,
                     9: defaultAnswerHeight,
                     10: defaultAnswerHeight
+                };
+
+                // 每个问题的“绝对起始Y坐标”配置（类似 invoice 的固定位置）
+                // 设定后，该题会从这里开始绘制；未设定的题目按顺序排版。
+                // 例：1: height - 200 表示第1题起点Y为 height-200。
+                const answerPositions = {
+                    1: height - 180,
+                    2: height - 220,
+                    3: height - 260,
+                    4: height - 300,
+                    5: height - 340,
+                    6: height - 380,
+                    7: height - 420,
+                    8: height - 460,
+                    9: height - 500,
+                    10: height - 540,
                 };
 
                 // 问题列表
@@ -928,6 +944,12 @@ require_once 'session_check.php';
                         const questionHeight = (answerHeights[q.num] !== undefined)
                             ? answerHeights[q.num]
                             : defaultAnswerHeight;
+
+                        // 如果设定了绝对位置，则使用该Y值作为起点；否则按顺序排版
+                        const hasFixedPosition = answerPositions[q.num] !== undefined;
+                        if (hasFixedPosition) {
+                            currentY = answerPositions[q.num];
+                        }
 
                         // 处理长文本换行
                         const lines = wrapText(q.text, maxWidth, fontSize, font);
