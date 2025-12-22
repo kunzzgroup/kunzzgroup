@@ -145,8 +145,8 @@ require_once 'session_check.php';
             border-radius: 8px;
             font-size: clamp(10px, 0.83vw, 16px);
             font-family: inherit;
-            resize: vertical;
-            min-height: clamp(10px, 1.04vw, 20px);
+            resize: none;
+            height: clamp(10px, 1.04vw, 20px);
             transition: all 0.3s ease;
         }
 
