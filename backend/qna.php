@@ -887,7 +887,7 @@ require_once 'session_check.php';
                 const answerPositions = {
                     1: height - 95,
                     2: height - 170,
-                    3: height - 260,
+                    3: height - 265,
                     4: height - 300,
                     5: height - 340,
                     6: height - 380,
