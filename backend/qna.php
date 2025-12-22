@@ -532,6 +532,10 @@ require_once 'session_check.php';
     </div>
 
     <script>
+        // 从PHP获取用户名和职位
+        const currentUsername = '<?php echo isset($username) ? addslashes($username) : "User"; ?>';
+        const currentPosition = '<?php echo isset($position) && !empty($position) ? addslashes($position) : "User"; ?>';
+        
         let userResponse = null;
         let isSubmitted = false;
 
@@ -705,6 +709,7 @@ require_once 'session_check.php';
 
                 // 设置字体大小和颜色
                 const fontSize = 11;
+                const headerFontSize = 14;
                 const textColor = rgb(0, 0, 0);
                 const lineHeight = 14;
                 const leftMargin = 100;
@@ -712,6 +717,22 @@ require_once 'session_check.php';
                 const maxWidth = width - leftMargin - rightMargin;
                 const topMargin = 100;
                 let currentY = height - topMargin;
+                
+                // 在页面顶部中间绘制用户名和职位
+                const userInfoText = `${currentUsername} (${currentPosition})`;
+                const textWidth = boldFont.widthOfTextAtSize(userInfoText, headerFontSize);
+                const centerX = (width - textWidth) / 2;
+                
+                page.drawText(userInfoText, {
+                    x: centerX,
+                    y: height - 50,
+                    size: headerFontSize,
+                    font: boldFont,
+                    color: textColor,
+                });
+                
+                // 调整起始Y位置，为头部信息留出空间
+                currentY = height - topMargin - 30;
 
                 // 问题列表
                 const questions = [
