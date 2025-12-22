@@ -858,7 +858,7 @@ require_once 'session_check.php';
                 const fontSize = 10;
                 const headerFontSize = 12;
                 const textColor = rgb(0, 0, 0);
-                const lineHeight = 14;
+                const lineHeight = 20;
                 const leftMargin = 100;
                 const rightMargin = 100;
                 const maxWidth = width - leftMargin - rightMargin;
