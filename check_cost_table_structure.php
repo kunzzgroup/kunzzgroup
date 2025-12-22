@@ -47,11 +47,34 @@ try {
             $dependsOnSales = false;
             if ($isGenerated) {
                 // 从 CREATE TABLE 语句中查找该字段的定义
-                if (preg_match("/`{$fieldName}`[^,)]+AS\s*\(([^)]+)\)/i", $createTable, $matches)) {
-                    $expression = $matches[1];
-                    if (stripos($expression, 'sales') !== false) {
-                        $dependsOnSales = true;
-                        $columnsToDrop[] = $fieldName;
+                // 尝试多种匹配模式
+                $patterns = [
+                    "/`{$fieldName}`[^,)]+AS\s*\(([^)]+)\)/i",
+                    "/`{$fieldName}`\s+[^,)]+GENERATED\s+ALWAYS\s+AS\s*\(([^)]+)\)/i",
+                    "/`{$fieldName}`[^`]+\(([^)]+)\)/i"
+                ];
+                
+                foreach ($patterns as $pattern) {
+                    if (preg_match($pattern, $createTable, $matches)) {
+                        $expression = $matches[1];
+                        // 检查表达式中是否包含 sales（可能是 `sales` 或 sales）
+                        if (preg_match('/\b(sales|`sales`)\b/i', $expression)) {
+                            $dependsOnSales = true;
+                            $columnsToDrop[] = $fieldName;
+                            break;
+                        }
+                    }
+                }
+                
+                // 如果正则匹配失败，直接检查 CREATE TABLE 中该字段附近的内容
+                if (!$dependsOnSales && $isGenerated) {
+                    // 提取该字段的完整定义
+                    if (preg_match("/`{$fieldName}`[^,`]+/i", $createTable, $fieldMatch)) {
+                        $fieldDef = $fieldMatch[0];
+                        if (stripos($fieldDef, 'sales') !== false) {
+                            $dependsOnSales = true;
+                            $columnsToDrop[] = $fieldName;
+                        }
                     }
                 }
             }
