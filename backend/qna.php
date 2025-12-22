@@ -889,18 +889,18 @@ require_once 'session_check.php';
 
                 // 每个问题的“区域高度”配置（单独控制每题占用的垂直高度，而不是gap）
                 // 不设置的题目会使用 defaultAnswerHeight 作为默认高度
-                const answerHeights = {
-                    1: defaultAnswerHeight,  // 第1题的高度
-                    2: defaultAnswerHeight,  // 第2题的高度
-                    3: defaultAnswerHeight,  // 第3题的高度
-                    4: defaultAnswerHeight,
-                    5: defaultAnswerHeight,
-                    6: defaultAnswerHeight,
-                    7: defaultAnswerHeight,
-                    8: defaultAnswerHeight,
-                    9: defaultAnswerHeight,
-                    10: defaultAnswerHeight
-                };
+                // const answerHeights = {
+                //     1: defaultAnswerHeight,  // 第1题的高度
+                //     2: defaultAnswerHeight,  // 第2题的高度
+                //     3: defaultAnswerHeight,  // 第3题的高度
+                //     4: defaultAnswerHeight,
+                //     5: defaultAnswerHeight,
+                //     6: defaultAnswerHeight,
+                //     7: defaultAnswerHeight,
+                //     8: defaultAnswerHeight,
+                //     9: defaultAnswerHeight,
+                //     10: defaultAnswerHeight
+                // };
 
                 // 每个问题的“绝对起始Y坐标”配置（类似 invoice 的固定位置）
                 // 设定后，该题会从这里开始绘制；未设定的题目按顺序排版。
