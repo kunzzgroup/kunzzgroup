@@ -146,7 +146,7 @@ require_once 'session_check.php';
             font-size: clamp(10px, 0.83vw, 16px);
             font-family: inherit;
             resize: none;
-            height: clamp(30px, 2.6vw, 50px);
+            height: clamp(20px, 1.56vw, 30px);
             transition: all 0.3s ease;
         }
 
