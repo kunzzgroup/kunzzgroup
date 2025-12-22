@@ -27,9 +27,12 @@ try {
         $stmt = $pdo->query("DESCRIBE {$table}");
         $columns = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
+        echo "<h4>完整的 CREATE TABLE 语句:</h4>\n";
+        echo "<pre style='background: #f5f5f5; padding: 10px; overflow-x: auto;'>" . htmlspecialchars($createTable) . "</pre>\n";
+        
         echo "<h4>字段列表:</h4>\n";
         echo "<table border='1' cellpadding='5' style='border-collapse: collapse;'>\n";
-        echo "<tr><th>字段名</th><th>类型</th><th>Extra</th><th>是否依赖 sales</th></tr>\n";
+        echo "<tr><th>字段名</th><th>类型</th><th>Extra</th><th>是否依赖 sales</th><th>计算表达式</th></tr>\n";
         
         $columnsToDrop = [];
         
@@ -82,11 +85,22 @@ try {
             $color = $dependsOnSales ? 'red' : ($isGenerated ? 'blue' : 'black');
             $dependsText = $dependsOnSales ? '是（需要删除）' : ($isGenerated ? '否' : 'N/A');
             
+            // 提取计算表达式
+            $expression = '';
+            if ($isGenerated) {
+                if (preg_match("/`{$fieldName}`[^,`]+AS\s*\(([^)]+)\)/i", $createTable, $exprMatches)) {
+                    $expression = $exprMatches[1];
+                } elseif (preg_match("/`{$fieldName}`[^,`]+\(([^)]+)\)/i", $createTable, $exprMatches)) {
+                    $expression = $exprMatches[1];
+                }
+            }
+            
             echo "<tr>";
             echo "<td><strong>{$fieldName}</strong></td>";
             echo "<td>{$type}</td>";
             echo "<td style='color: {$color};'>{$extra}</td>";
             echo "<td style='color: {$color};'>{$dependsText}</td>";
+            echo "<td style='font-family: monospace; font-size: 12px;'>{$expression}</td>";
             echo "</tr>\n";
         }
         echo "</table>\n";
