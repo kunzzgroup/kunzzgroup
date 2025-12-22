@@ -19,78 +19,40 @@ require_once 'session_check.php';
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #e5e5e5;
+            background-color: #faf7f2;
             min-height: 100vh;
-            padding: clamp(20px, 2.08vw, 40px);
-            position: relative;
-        }
-
-        /* 左上角橙色圆形装饰 */
-        body::before {
-            content: "";
-            position: fixed;
-            top: clamp(20px, 2.08vw, 40px);
-            left: clamp(20px, 2.08vw, 40px);
-            width: clamp(40px, 4.17vw, 80px);
-            height: clamp(40px, 4.17vw, 80px);
-            background-color: #ff5c00;
-            border-radius: 50%;
-            z-index: 1;
         }
 
         .container {
-            max-width: clamp(800px, 62.5vw, 1200px);
+            max-width: 1800px;
             margin: 0 auto;
-            background-color: white;
-            border-radius: 12px;
-            padding: clamp(30px, 3.13vw, 60px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            position: relative;
-            z-index: 2;
-            max-height: calc(100vh - clamp(40px, 4.17vw, 80px));
+            padding: clamp(16px, 1.25vw, 24px) 24px;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            box-sizing: border-box;
         }
 
         .header {
             text-align: center;
-            margin-bottom: clamp(20px, 2.08vw, 40px);
+            margin-bottom: clamp(10px, 1.56vw, 30px);
             position: relative;
-            flex-shrink: 0;
         }
 
         .header h1 {
-            color: #000000;
-            font-size: clamp(24px, 2.6vw, 50px);
-            font-weight: bold;
-            margin-bottom: 0;
-            text-align: center;
+            color: #000000ff;
+            font-size: clamp(20px, 2.6vw, 50px);
+            margin-bottom: 10px;
+            text-align: left;
         }
 
-        .content-wrapper {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding-right: clamp(10px, 0.83vw, 20px);
-        }
-
-        .content-wrapper::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .content-wrapper::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        .content-wrapper::-webkit-scrollbar-thumb {
-            background: #ff5c00;
-            border-radius: 4px;
-        }
-
-        .content-wrapper::-webkit-scrollbar-thumb:hover {
-            background: #ff7700;
+        .header h1::after {
+            content: "";
+            display: block;
+            height: 3px;
+            width: 100%;
+            margin-top: 16px;
+            background: linear-gradient(90deg, rgba(255,92,0,0) 0%, rgba(0, 0, 0, 1) 25%, rgba(0, 0, 0, 1) 75%, rgba(255,92,0,0) 100%);
         }
 
         .question-section {
@@ -100,7 +62,26 @@ require_once 'session_check.php';
         }
 
         .form-section {
-            margin-bottom: clamp(25px, 2.6vw, 50px);
+            margin-bottom: clamp(10px, 1.04vw, 20px);
+            border: 1px solid #000000ff;
+            border-radius: 8px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+
+        .form-section-header {
+            padding: clamp(6px, 0.52vw, 10px) clamp(10px, 0.73vw, 14px);
+            border-bottom: 1px solid #ffddaa;
+            font-size: clamp(8px, 0.74vw, 14px);
+            font-weight: 700;
+            text-align: left;
+            color: white;
+            background: #f99e00;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .form-section-content {
+            padding: clamp(12px, 1.04vw, 20px) clamp(10px, 0.73vw, 14px);
         }
 
         .question-item {
@@ -108,43 +89,42 @@ require_once 'session_check.php';
         }
 
         .question-number {
-            font-size: clamp(14px, 1.46vw, 28px);
+            font-size: clamp(10px, 0.83vw, 16px);
             font-weight: bold;
-            color: #000000;
-            margin-bottom: clamp(8px, 0.83vw, 16px);
+            color: #000000ff;
+            margin-bottom: clamp(4px, 0.42vw, 8px);
         }
 
         .question-text {
-            font-size: clamp(12px, 1.25vw, 24px);
-            color: #000000;
-            margin-bottom: clamp(6px, 0.63vw, 12px);
+            font-size: clamp(10px, 0.83vw, 16px);
+            color: #000000ff;
+            margin-bottom: clamp(4px, 0.42vw, 8px);
             line-height: 1.6;
         }
 
         .question-example {
-            font-size: clamp(10px, 1.04vw, 20px);
+            font-size: clamp(8px, 0.74vw, 14px);
             color: #999999;
-            margin-bottom: clamp(8px, 0.83vw, 16px);
+            margin-bottom: clamp(6px, 0.63vw, 12px);
             font-style: italic;
         }
 
         .question-input {
             width: 100%;
-            padding: clamp(10px, 1.04vw, 20px);
-            border: 1px solid #d5d5d5;
+            padding: clamp(4px, 0.625vw, 12px);
+            border: 2px solid #ff5c00;
             border-radius: 8px;
-            font-size: clamp(12px, 1.25vw, 24px);
+            font-size: clamp(10px, 0.83vw, 16px);
             font-family: inherit;
             resize: vertical;
-            min-height: clamp(40px, 4.17vw, 80px);
-            transition: border-color 0.3s ease;
-            background-color: white;
+            min-height: clamp(60px, 6.25vw, 120px);
+            transition: all 0.3s ease;
         }
 
         .question-input:focus {
             outline: none;
             border-color: #ff5c00;
-            box-shadow: 0 0 0 3px rgba(255, 92, 0, 0.1);
+            box-shadow: 0 0 10px rgba(255, 115, 0, 0.8);
         }
 
         .question-input:disabled {
@@ -155,60 +135,43 @@ require_once 'session_check.php';
 
         .button-group {
             display: flex;
-            justify-content: flex-start;
+            justify-content: flex-end;
             gap: clamp(12px, 1.25vw, 24px);
             margin-top: clamp(20px, 2.08vw, 40px);
-            flex-shrink: 0;
-            padding-top: clamp(20px, 2.08vw, 40px);
-            border-top: 1px solid #e0e0e0;
         }
 
         .btn {
-            padding: clamp(10px, 1.04vw, 20px) clamp(24px, 2.5vw, 48px);
+            background: #f99e00;
+            color: white;
             border: none;
+            padding: clamp(8px, 0.83vw, 16px) clamp(16px, 1.67vw, 32px);
             border-radius: 8px;
-            font-size: clamp(12px, 1.25vw, 24px);
-            font-weight: 500;
+            font-size: clamp(8px, 0.74vw, 14px);
+            font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .btn-submit {
-            background-color: #4caf50;
-            color: white;
-        }
-
-        .btn-submit:hover:not(:disabled) {
-            background-color: #45a049;
+        .btn:hover:not(:disabled) {
+            background: #f98500ff;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
         }
 
-        .btn-submit:disabled {
+        .btn:disabled {
             background-color: #cccccc;
             cursor: not-allowed;
             transform: none;
         }
 
         .btn-reset {
-            background-color: #e0e0e0;
-            color: #666666;
+            background: #6b7280;
         }
 
         .btn-reset:hover {
-            background-color: #d0d0d0;
-        }
-
-        .btn-print {
-            background-color: #4caf50;
-            color: white;
-        }
-
-        .btn-print:hover {
-            background-color: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+            background: #4b5563;
         }
 
         .message {
@@ -305,188 +268,229 @@ require_once 'session_check.php';
         </div>
         
         <div id="messageArea"></div>
-        
-        <div class="content-wrapper">
+            
             <!-- 编辑模式 -->
             <form id="qnaForm" class="edit-mode">
                 <div class="form-section">
-                    <div class="question-item">
-                        <div class="question-number">1.</div>
-                        <div class="question-text">如果不考虑现实限制,你希望自己在3-5年后成为什么样的人?</div>
-                        <textarea class="question-input" name="question1" id="question1" required></textarea>
+                    <div class="form-section-header">问题 1</div>
+                    <div class="form-section-content">
+                        <div class="question-item">
+                            <div class="question-text">如果不考虑现实限制,你希望自己在3-5年后成为什么样的人?</div>
+                            <textarea class="question-input" name="question1" id="question1" required></textarea>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <div class="question-item">
-                        <div class="question-number">2.</div>
-                        <div class="question-text">你目前最重要的个人目标或梦想是什么?</div>
-                        <div class="question-example">(例如:事业发展,专业技能,经济目标,生活稳定,家庭等)</div>
-                        <textarea class="question-input" name="question2" id="question2" required></textarea>
+                    <div class="form-section-header">问题 2</div>
+                    <div class="form-section-content">
+                        <div class="question-item">
+                            <div class="question-text">你目前最重要的个人目标或梦想是什么?</div>
+                            <div class="question-example">(例如:事业发展,专业技能,经济目标,生活稳定,家庭等)</div>
+                            <textarea class="question-input" name="question2" id="question2" required></textarea>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <div class="question-item">
-                        <div class="question-number">3.</div>
-                        <div class="question-text">如果公司为你提供机会,你是否愿意承担更高的责任与压力?你认为这些责任具体体现在哪些方面?</div>
-                        <div class="question-example">(例如:结果要求,学习投入,团队管理,时间管理,抗压能力等)</div>
-                        <textarea class="question-input" name="question3" id="question3" required></textarea>
+                    <div class="form-section-header">问题 3</div>
+                    <div class="form-section-content">
+                        <div class="question-item">
+                            <div class="question-text">如果公司为你提供机会,你是否愿意承担更高的责任与压力?你认为这些责任具体体现在哪些方面?</div>
+                            <div class="question-example">(例如:结果要求,学习投入,团队管理,时间管理,抗压能力等)</div>
+                            <textarea class="question-input" name="question3" id="question3" required></textarea>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <div class="question-item">
-                        <div class="question-number">4.</div>
-                        <div class="question-text">在实现的目标过程中,你目前遇到最大的困难或挑战是什么?</div>
-                        <div class="question-example">(可以是工作上的,也可以是个人层面的)</div>
-                        <textarea class="question-input" name="question4" id="question4" required></textarea>
+                    <div class="form-section-header">问题 4</div>
+                    <div class="form-section-content">
+                        <div class="question-item">
+                            <div class="question-text">在实现的目标过程中,你目前遇到最大的困难或挑战是什么?</div>
+                            <div class="question-example">(可以是工作上的,也可以是个人层面的)</div>
+                            <textarea class="question-input" name="question4" id="question4" required></textarea>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <div class="question-item">
-                        <div class="question-number">5.</div>
-                        <div class="question-text">如果公司可以提供支持,你最希望公司在哪些方面给予帮助?</div>
-                        <textarea class="question-input" name="question5" id="question5" required></textarea>
+                    <div class="form-section-header">问题 5</div>
+                    <div class="form-section-content">
+                        <div class="question-item">
+                            <div class="question-text">如果公司可以提供支持,你最希望公司在哪些方面给予帮助?</div>
+                            <textarea class="question-input" name="question5" id="question5" required></textarea>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <div class="question-item">
-                        <div class="question-number">6.</div>
-                        <div class="question-text">在目前的公司中,有没有你特别希望尝试或发展的方向?为什么?</div>
-                        <div class="question-example">(例如:管理,专业深度,跨部门,新项目等)</div>
-                        <textarea class="question-input" name="question6" id="question6" required></textarea>
+                    <div class="form-section-header">问题 6</div>
+                    <div class="form-section-content">
+                        <div class="question-item">
+                            <div class="question-text">在目前的公司中,有没有你特别希望尝试或发展的方向?为什么?</div>
+                            <div class="question-example">(例如:管理,专业深度,跨部门,新项目等)</div>
+                            <textarea class="question-input" name="question6" id="question6" required></textarea>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <div class="question-item">
-                        <div class="question-number">7.</div>
-                        <div class="question-text">你认为哪些能力或经验,是你未来1-2年最需要重点提升的?</div>
-                        <textarea class="question-input" name="question7" id="question7" required></textarea>
+                    <div class="form-section-header">问题 7</div>
+                    <div class="form-section-content">
+                        <div class="question-item">
+                            <div class="question-text">你认为哪些能力或经验,是你未来1-2年最需要重点提升的?</div>
+                            <textarea class="question-input" name="question7" id="question7" required></textarea>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <div class="question-item">
-                        <div class="question-number">8.</div>
-                        <div class="question-text">问题8（预留）</div>
-                        <textarea class="question-input" name="question8" id="question8"></textarea>
+                    <div class="form-section-header">问题 8</div>
+                    <div class="form-section-content">
+                        <div class="question-item">
+                            <div class="question-text">问题8（预留）</div>
+                            <textarea class="question-input" name="question8" id="question8"></textarea>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <div class="question-item">
-                        <div class="question-number">9.</div>
-                        <div class="question-text">问题9（预留）</div>
-                        <textarea class="question-input" name="question9" id="question9"></textarea>
+                    <div class="form-section-header">问题 9</div>
+                    <div class="form-section-content">
+                        <div class="question-item">
+                            <div class="question-text">问题9（预留）</div>
+                            <textarea class="question-input" name="question9" id="question9"></textarea>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <div class="question-item">
-                        <div class="question-number">10.</div>
-                        <div class="question-text">问题10（预留）</div>
-                        <textarea class="question-input" name="question10" id="question10"></textarea>
+                    <div class="form-section-header">问题 10</div>
+                    <div class="form-section-content">
+                        <div class="question-item">
+                            <div class="question-text">问题10（预留）</div>
+                            <textarea class="question-input" name="question10" id="question10"></textarea>
+                        </div>
                     </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn btn-reset" onclick="resetForm()">重新回答</button>
+                    <button type="submit" class="btn" id="submitBtn">提交问卷</button>
                 </div>
             </form>
 
             <!-- 查看模式 -->
             <div class="view-mode">
                 <div class="form-section">
-                    <div class="question-item">
-                        <div class="question-number">1.</div>
-                        <div class="question-text">如果不考虑现实限制,你希望自己在3-5年后成为什么样的人?</div>
-                        <div class="view-answer" id="view-question1"><span class="empty-answer">未填写</span></div>
+                    <div class="form-section-header">问题 1</div>
+                    <div class="form-section-content">
+                        <div class="question-item">
+                            <div class="question-text">如果不考虑现实限制,你希望自己在3-5年后成为什么样的人?</div>
+                            <div class="view-answer" id="view-question1"><span class="empty-answer">未填写</span></div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <div class="question-item">
-                        <div class="question-number">2.</div>
-                        <div class="question-text">你目前最重要的个人目标或梦想是什么?</div>
-                        <div class="question-example">(例如:事业发展,专业技能,经济目标,生活稳定,家庭等)</div>
-                        <div class="view-answer" id="view-question2"><span class="empty-answer">未填写</span></div>
+                    <div class="form-section-header">问题 2</div>
+                    <div class="form-section-content">
+                        <div class="question-item">
+                            <div class="question-text">你目前最重要的个人目标或梦想是什么?</div>
+                            <div class="question-example">(例如:事业发展,专业技能,经济目标,生活稳定,家庭等)</div>
+                            <div class="view-answer" id="view-question2"><span class="empty-answer">未填写</span></div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <div class="question-item">
-                        <div class="question-number">3.</div>
-                        <div class="question-text">如果公司为你提供机会,你是否愿意承担更高的责任与压力?你认为这些责任具体体现在哪些方面?</div>
-                        <div class="question-example">(例如:结果要求,学习投入,团队管理,时间管理,抗压能力等)</div>
-                        <div class="view-answer" id="view-question3"><span class="empty-answer">未填写</span></div>
+                    <div class="form-section-header">问题 3</div>
+                    <div class="form-section-content">
+                        <div class="question-item">
+                            <div class="question-text">如果公司为你提供机会,你是否愿意承担更高的责任与压力?你认为这些责任具体体现在哪些方面?</div>
+                            <div class="question-example">(例如:结果要求,学习投入,团队管理,时间管理,抗压能力等)</div>
+                            <div class="view-answer" id="view-question3"><span class="empty-answer">未填写</span></div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <div class="question-item">
-                        <div class="question-number">4.</div>
-                        <div class="question-text">在实现的目标过程中,你目前遇到最大的困难或挑战是什么?</div>
-                        <div class="question-example">(可以是工作上的,也可以是个人层面的)</div>
-                        <div class="view-answer" id="view-question4"><span class="empty-answer">未填写</span></div>
+                    <div class="form-section-header">问题 4</div>
+                    <div class="form-section-content">
+                        <div class="question-item">
+                            <div class="question-text">在实现的目标过程中,你目前遇到最大的困难或挑战是什么?</div>
+                            <div class="question-example">(可以是工作上的,也可以是个人层面的)</div>
+                            <div class="view-answer" id="view-question4"><span class="empty-answer">未填写</span></div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <div class="question-item">
-                        <div class="question-number">5.</div>
-                        <div class="question-text">如果公司可以提供支持,你最希望公司在哪些方面给予帮助?</div>
-                        <div class="view-answer" id="view-question5"><span class="empty-answer">未填写</span></div>
+                    <div class="form-section-header">问题 5</div>
+                    <div class="form-section-content">
+                        <div class="question-item">
+                            <div class="question-text">如果公司可以提供支持,你最希望公司在哪些方面给予帮助?</div>
+                            <div class="view-answer" id="view-question5"><span class="empty-answer">未填写</span></div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <div class="question-item">
-                        <div class="question-number">6.</div>
-                        <div class="question-text">在目前的公司中,有没有你特别希望尝试或发展的方向?为什么?</div>
-                        <div class="question-example">(例如:管理,专业深度,跨部门,新项目等)</div>
-                        <div class="view-answer" id="view-question6"><span class="empty-answer">未填写</span></div>
+                    <div class="form-section-header">问题 6</div>
+                    <div class="form-section-content">
+                        <div class="question-item">
+                            <div class="question-text">在目前的公司中,有没有你特别希望尝试或发展的方向?为什么?</div>
+                            <div class="question-example">(例如:管理,专业深度,跨部门,新项目等)</div>
+                            <div class="view-answer" id="view-question6"><span class="empty-answer">未填写</span></div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <div class="question-item">
-                        <div class="question-number">7.</div>
-                        <div class="question-text">你认为哪些能力或经验,是你未来1-2年最需要重点提升的?</div>
-                        <div class="view-answer" id="view-question7"><span class="empty-answer">未填写</span></div>
+                    <div class="form-section-header">问题 7</div>
+                    <div class="form-section-content">
+                        <div class="question-item">
+                            <div class="question-text">你认为哪些能力或经验,是你未来1-2年最需要重点提升的?</div>
+                            <div class="view-answer" id="view-question7"><span class="empty-answer">未填写</span></div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <div class="question-item">
-                        <div class="question-number">8.</div>
-                        <div class="question-text">问题8（预留）</div>
-                        <div class="view-answer" id="view-question8"><span class="empty-answer">未填写</span></div>
+                    <div class="form-section-header">问题 8</div>
+                    <div class="form-section-content">
+                        <div class="question-item">
+                            <div class="question-text">问题8（预留）</div>
+                            <div class="view-answer" id="view-question8"><span class="empty-answer">未填写</span></div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <div class="question-item">
-                        <div class="question-number">9.</div>
-                        <div class="question-text">问题9（预留）</div>
-                        <div class="view-answer" id="view-question9"><span class="empty-answer">未填写</span></div>
+                    <div class="form-section-header">问题 9</div>
+                    <div class="form-section-content">
+                        <div class="question-item">
+                            <div class="question-text">问题9（预留）</div>
+                            <div class="view-answer" id="view-question9"><span class="empty-answer">未填写</span></div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-section">
-                    <div class="question-item">
-                        <div class="question-number">10.</div>
-                        <div class="question-text">问题10（预留）</div>
-                        <div class="view-answer" id="view-question10"><span class="empty-answer">未填写</span></div>
+                    <div class="form-section-header">问题 10</div>
+                    <div class="form-section-content">
+                        <div class="question-item">
+                            <div class="question-text">问题10（预留）</div>
+                            <div class="view-answer" id="view-question10"><span class="empty-answer">未填写</span></div>
+                        </div>
                     </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn" onclick="generatePDF()">打印问卷</button>
                 </div>
             </div>
-
-            <div class="button-group">
-                <button type="button" class="btn btn-reset" onclick="resetForm()" id="resetBtn" style="display: none;">重新回答</button>
-                <button type="submit" class="btn btn-submit" id="submitBtn" form="qnaForm" style="display: none;">提交问卷</button>
-                <button type="button" class="btn btn-print" onclick="generatePDF()" id="printBtn" style="display: none;">打印问卷</button>
-            </div>
-        </div>
     </div>
 
     <script>
@@ -496,16 +500,6 @@ require_once 'session_check.php';
         // 页面加载时检查是否已提交
         document.addEventListener('DOMContentLoaded', async function() {
             await loadUserResponse();
-            // 根据模式显示/隐藏按钮
-            if (isSubmitted) {
-                document.getElementById('submitBtn').style.display = 'none';
-                document.getElementById('resetBtn').style.display = 'none';
-                document.getElementById('printBtn').style.display = 'block';
-            } else {
-                document.getElementById('submitBtn').style.display = 'block';
-                document.getElementById('resetBtn').style.display = 'block';
-                document.getElementById('printBtn').style.display = 'none';
-            }
         });
 
         // 加载用户的问卷回答
@@ -536,9 +530,6 @@ require_once 'session_check.php';
         function switchToViewMode() {
             document.body.classList.add('mode-view');
             document.getElementById('qnaForm').style.display = 'none';
-            document.getElementById('submitBtn').style.display = 'none';
-            document.getElementById('resetBtn').style.display = 'none';
-            document.getElementById('printBtn').style.display = 'block';
         }
 
         // 填充查看模式的数据
@@ -590,10 +581,6 @@ require_once 'session_check.php';
                     showAlert('问卷提交成功！', 'success');
                     isSubmitted = true;
                     await loadUserResponse();
-                    // 更新按钮显示
-                    document.getElementById('submitBtn').style.display = 'none';
-                    document.getElementById('resetBtn').style.display = 'none';
-                    document.getElementById('printBtn').style.display = 'block';
                 } else {
                     showAlert(result.message || '提交失败，请重试', 'error');
                     submitBtn.innerHTML = originalText;
