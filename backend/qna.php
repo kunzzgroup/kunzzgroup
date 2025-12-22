@@ -708,7 +708,7 @@ require_once 'session_check.php';
                 const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
                 // 设置字体大小和颜色
-                const fontSize = small;
+                const fontSize = 10;
                 const headerFontSize = 12;
                 const textColor = rgb(0, 0, 0);
                 const lineHeight = 14;
