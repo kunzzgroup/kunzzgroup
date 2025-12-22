@@ -855,10 +855,10 @@ require_once 'session_check.php';
                 }
 
                 // 设置字体大小和颜色
-                const fontSize = 10;
+                const fontSize = 12;
                 const headerFontSize = 12;
                 const textColor = rgb(0, 0, 0);
-                const lineHeight = 20;
+                const lineHeight = 14;
                 const leftMargin = 100;
                 const rightMargin = 100;
                 const maxWidth = width - leftMargin - rightMargin;
