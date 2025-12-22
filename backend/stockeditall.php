@@ -8096,8 +8096,11 @@ require_once 'session_check.php';
                 }
                 
                 // 检查日期范围是否超过一天
-                const daysDiff = Math.ceil((endDateObj - startDateObj) / (1000 * 60 * 60 * 24));
-                const isMultiDay = daysDiff > 0;
+                // 先比较日期部分（年月日），而不是包含时间的完整日期对象
+                const startDateOnly = new Date(startDateObj.getFullYear(), startDateObj.getMonth(), startDateObj.getDate());
+                const endDateOnly = new Date(endDateObj.getFullYear(), endDateObj.getMonth(), endDateObj.getDate());
+                const daysDiff = Math.ceil((endDateOnly - startDateOnly) / (1000 * 60 * 60 * 24));
+                const isMultiDay = daysDiff >= 1; // 只有当日期差大于等于1天（即跨天）时才认为是多天
                 
                 let finalData = outData;
                 let isGroupedByDate = false;
