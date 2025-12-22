@@ -708,8 +708,8 @@ require_once 'session_check.php';
                 const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
                 // 设置字体大小和颜色
-                const fontSize = 11;
-                const headerFontSize = 14;
+                const fontSize = small;
+                const headerFontSize = 12;
                 const textColor = rgb(0, 0, 0);
                 const lineHeight = 14;
                 const leftMargin = 100;
@@ -725,7 +725,7 @@ require_once 'session_check.php';
                 
                 page.drawText(userInfoText, {
                     x: centerX,
-                    y: height - 30,
+                    y: height - 40,
                     size: headerFontSize,
                     font: boldFont,
                     color: textColor,
