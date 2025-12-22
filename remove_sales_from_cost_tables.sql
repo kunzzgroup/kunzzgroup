@@ -26,7 +26,8 @@ ALTER TABLE j1cost DROP COLUMN sales;
 ALTER TABLE j2cost DROP COLUMN sales;
 ALTER TABLE j3cost DROP COLUMN sales;
 
--- 步骤 3（可选）: 如果需要，可以重新创建不依赖 sales 的计算列
--- 注意：c_total 已经存在且不依赖 sales，所以不需要重新创建
--- 如果需要 gross_total 和 cost_percent，需要在应用层计算（从 KPI 表获取销售额）
+-- 步骤 3: 删除后，gross_total 和 cost_percent 需要在应用层计算
+-- 注意：不能重新创建依赖 sales 的计算列（因为 sales 字段已被删除）
+-- costedit.php 已经在应用层计算这些值，无需修改
+-- costapi.php 的汇总查询需要修改，改为在应用层计算（见后续代码修改）
 

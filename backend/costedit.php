@@ -2184,14 +2184,13 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                     const cBeverage = parseFloat(getInputValue('c_beverage', day)) || 0;
                     const cKitchen = parseFloat(getInputValue('c_kitchen', day)) || 0;
                     
-                    const hasData = sales > 0 || cBeverage > 0 || cKitchen > 0;
+                    const hasData = cBeverage > 0 || cKitchen > 0;
 
                     if (hasData) {
                         const dateStr = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
                         
                         const recordData = {
                             date: dateStr,
-                            sales: sales,
                             c_beverage: cBeverage,
                             c_kitchen: cKitchen,
                             restaurant: currentRestaurant
@@ -2310,17 +2309,9 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
             try {
                 const dateStr = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
 
-                // 保留销售额（从KPI自动获取/或数据库中已有的 sales）
-                const salesFromMemory = (monthData[day] && monthData[day].sales !== undefined && monthData[day].sales !== null)
-                    ? parseFloat(monthData[day].sales)
-                    : NaN;
-                const salesFromInput = parseFloat(getInputValue('sales', day));
-                const sales = (!isNaN(salesFromMemory) ? salesFromMemory : (!isNaN(salesFromInput) ? salesFromInput : 0));
-
-                // 只清空成本字段
+                // 只清空成本字段（销售额从 KPI 表获取，不存储在 cost 表）
                 const recordData = {
                     date: dateStr,
-                    sales: sales,
                     c_beverage: 0,
                     c_kitchen: 0,
                     restaurant: currentRestaurant
@@ -2352,7 +2343,7 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                         body: JSON.stringify(payload)
                     });
                 } else {
-                    // 数据库确实没有记录时，插入一条 0 成本记录（sales 取当前页面值）
+                    // 数据库确实没有记录时，插入一条 0 成本记录
                     result = await apiCall('', {
                         method: 'POST',
                         body: JSON.stringify(recordData)
@@ -2653,18 +2644,16 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
             editBtn.disabled = true;
             
             try {
-                const sales = parseFloat(getInputValue('sales', day)) || 0;
                 const cBeverage = parseFloat(getInputValue('c_beverage', day)) || 0;
                 const cKitchen = parseFloat(getInputValue('c_kitchen', day)) || 0;
                 
-                const hasData = sales > 0 || cBeverage > 0 || cKitchen > 0;
+                const hasData = cBeverage > 0 || cKitchen > 0;
 
                 if (hasData) {
                     const dateStr = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
                     
                     const recordData = {
                         date: dateStr,
-                        sales: sales,
                         c_beverage: cBeverage,
                         c_kitchen: cKitchen,
                         restaurant: currentRestaurant

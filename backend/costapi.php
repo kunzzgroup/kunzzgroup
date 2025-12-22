@@ -217,6 +217,13 @@ function handleGet() {
             $startDate = $_GET['start_date'] ?? null;
             $endDate = $_GET['end_date'] ?? null;
             
+            // KPI 表配置
+            $kpiTableMap = [
+                'j1' => 'j1data',
+                'j2' => 'j2data',
+                'j3' => 'j3data'
+            ];
+            
             // 处理 total 情况
             if ($restaurant === 'total') {
                 // 对于 total，需要合并所有三个餐厅的数据
@@ -233,33 +240,57 @@ function handleGet() {
                 // 汇总所有餐厅的数据
                 foreach (['j1', 'j2', 'j3'] as $r) {
                     $rConfig = getRestaurantConfig($r);
-                    $sql = "SELECT 
+                    $kpiTable = $kpiTableMap[$r] ?? null;
+                    
+                    // 从 cost 表获取成本数据
+                    $costSql = "SELECT 
                                 COUNT(*) as total_days,
-                                SUM(sales) as total_sales,
                                 SUM(c_beverage) as total_beverage_cost,
                                 SUM(c_kitchen) as total_kitchen_cost,
-                                SUM(c_total) as total_cost,
-                                SUM(gross_total) as total_profit
+                                SUM(c_total) as total_cost
                             FROM " . $rConfig['data_table'] . " WHERE 1=1";
-                    $params = [];
+                    $costParams = [];
                     
                     if ($startDate && $endDate) {
-                        $sql .= " AND date BETWEEN ? AND ?";
-                        $params[] = $startDate;
-                        $params[] = $endDate;
+                        $costSql .= " AND date BETWEEN ? AND ?";
+                        $costParams[] = $startDate;
+                        $costParams[] = $endDate;
                     }
                     
-                    $stmt = $pdo->prepare($sql);
-                    $stmt->execute($params);
-                    $rSummary = $stmt->fetch(PDO::FETCH_ASSOC);
+                    $stmt = $pdo->prepare($costSql);
+                    $stmt->execute($costParams);
+                    $costSummary = $stmt->fetch(PDO::FETCH_ASSOC);
                     
-                    if ($rSummary) {
-                        $summary['total_days'] += intval($rSummary['total_days'] ?? 0);
-                        $summary['total_sales'] += floatval($rSummary['total_sales'] ?? 0);
-                        $summary['total_beverage_cost'] += floatval($rSummary['total_beverage_cost'] ?? 0);
-                        $summary['total_kitchen_cost'] += floatval($rSummary['total_kitchen_cost'] ?? 0);
-                        $summary['total_cost'] += floatval($rSummary['total_cost'] ?? 0);
-                        $summary['total_profit'] += floatval($rSummary['total_profit'] ?? 0);
+                    // 从 KPI 表获取销售额（净销售额 = 总销售额 - 折扣）
+                    $totalSales = 0;
+                    if ($kpiTable) {
+                        $kpiSql = "SELECT 
+                                    SUM(gross_sales - discounts) as total_net_sales
+                                FROM " . $kpiTable . " WHERE 1=1";
+                        $kpiParams = [];
+                        
+                        if ($startDate && $endDate) {
+                            $kpiSql .= " AND date BETWEEN ? AND ?";
+                            $kpiParams[] = $startDate;
+                            $kpiParams[] = $endDate;
+                        }
+                        
+                        $stmt = $pdo->prepare($kpiSql);
+                        $stmt->execute($kpiParams);
+                        $kpiResult = $stmt->fetch(PDO::FETCH_ASSOC);
+                        $totalSales = floatval($kpiResult['total_net_sales'] ?? 0);
+                    }
+                    
+                    if ($costSummary) {
+                        $totalCost = floatval($costSummary['total_cost'] ?? 0);
+                        $totalProfit = $totalSales - $totalCost;
+                        
+                        $summary['total_days'] += intval($costSummary['total_days'] ?? 0);
+                        $summary['total_sales'] += $totalSales;
+                        $summary['total_beverage_cost'] += floatval($costSummary['total_beverage_cost'] ?? 0);
+                        $summary['total_kitchen_cost'] += floatval($costSummary['total_kitchen_cost'] ?? 0);
+                        $summary['total_cost'] += $totalCost;
+                        $summary['total_profit'] += $totalProfit;
                     }
                 }
                 
@@ -268,26 +299,62 @@ function handleGet() {
                     $summary['avg_cost_percent'] = ($summary['total_cost'] / $summary['total_sales']) * 100;
                 }
             } else {
-                $sql = "SELECT 
+                // 单个餐厅的汇总
+                $kpiTable = $kpiTableMap[$restaurant] ?? null;
+                
+                // 从 cost 表获取成本数据
+                $costSql = "SELECT 
                             COUNT(*) as total_days,
-                            SUM(sales) as total_sales,
                             SUM(c_beverage) as total_beverage_cost,
                             SUM(c_kitchen) as total_kitchen_cost,
-                            SUM(c_total) as total_cost,
-                            SUM(gross_total) as total_profit,
-                            AVG(cost_percent) as avg_cost_percent
+                            SUM(c_total) as total_cost
                         FROM " . $config['data_table'] . " WHERE 1=1";
-                $params = [];
+                $costParams = [];
                 
                 if ($startDate && $endDate) {
-                    $sql .= " AND date BETWEEN ? AND ?";
-                    $params[] = $startDate;
-                    $params[] = $endDate;
+                    $costSql .= " AND date BETWEEN ? AND ?";
+                    $costParams[] = $startDate;
+                    $costParams[] = $endDate;
                 }
                 
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute($params);
-                $summary = $stmt->fetch(PDO::FETCH_ASSOC);
+                $stmt = $pdo->prepare($costSql);
+                $stmt->execute($costParams);
+                $costSummary = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                // 从 KPI 表获取销售额（净销售额 = 总销售额 - 折扣）
+                $totalSales = 0;
+                if ($kpiTable) {
+                    $kpiSql = "SELECT 
+                                SUM(gross_sales - discounts) as total_net_sales
+                            FROM " . $kpiTable . " WHERE 1=1";
+                    $kpiParams = [];
+                    
+                    if ($startDate && $endDate) {
+                        $kpiSql .= " AND date BETWEEN ? AND ?";
+                        $kpiParams[] = $startDate;
+                        $kpiParams[] = $endDate;
+                    }
+                    
+                    $stmt = $pdo->prepare($kpiSql);
+                    $stmt->execute($kpiParams);
+                    $kpiResult = $stmt->fetch(PDO::FETCH_ASSOC);
+                    $totalSales = floatval($kpiResult['total_net_sales'] ?? 0);
+                }
+                
+                // 合并数据并计算
+                $totalCost = floatval($costSummary['total_cost'] ?? 0);
+                $totalProfit = $totalSales - $totalCost;
+                $avgCostPercent = $totalSales > 0 ? ($totalCost / $totalSales) * 100 : 0;
+                
+                $summary = [
+                    'total_days' => intval($costSummary['total_days'] ?? 0),
+                    'total_sales' => $totalSales,
+                    'total_beverage_cost' => floatval($costSummary['total_beverage_cost'] ?? 0),
+                    'total_kitchen_cost' => floatval($costSummary['total_kitchen_cost'] ?? 0),
+                    'total_cost' => $totalCost,
+                    'total_profit' => $totalProfit,
+                    'avg_cost_percent' => $avgCostPercent
+                ];
             }
             
             // 获取库存数据
@@ -511,8 +578,8 @@ function handlePost() {
     
     try {
         $sql = "INSERT INTO " . $config['data_table'] . " 
-                (date, day_name, sales, c_beverage, c_kitchen) 
-                VALUES (?, ?, ?, ?, ?)";
+                (date, day_name, c_beverage, c_kitchen) 
+                VALUES (?, ?, ?, ?)";
         
         $stmt = $pdo->prepare($sql);
         
@@ -520,7 +587,6 @@ function handlePost() {
         $stmt->execute([
             $data['date'],
             $dayName,
-            $data['sales'] ?? 0,
             $data['c_beverage'] ?? 0,
             $data['c_kitchen'] ?? 0
         ]);
@@ -560,7 +626,7 @@ function handlePut() {
     }
     
     try {
-        // 先读取数据库现有记录，用于“缺省字段保持原值”（避免前端清空成本时误把 sales 覆盖成 0）
+        // 先读取数据库现有记录，用于"缺省字段保持原值"
         $stmt = $pdo->prepare("SELECT * FROM " . $config['data_table'] . " WHERE id = ?");
         $stmt->execute([$data['id']]);
         $existing = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -569,9 +635,6 @@ function handlePut() {
         }
 
         // 若字段未提供（或为空/null），则保持数据库原值
-        $salesValue = (array_key_exists('sales', $data) && $data['sales'] !== null && $data['sales'] !== '')
-            ? $data['sales']
-            : ($existing['sales'] ?? 0);
         $beverageValue = (array_key_exists('c_beverage', $data) && $data['c_beverage'] !== null && $data['c_beverage'] !== '')
             ? $data['c_beverage']
             : ($existing['c_beverage'] ?? 0);
@@ -585,12 +648,11 @@ function handlePut() {
         error_log("表名: " . $config['data_table']);
         error_log("记录ID: " . $data['id']);
         error_log("日期: " . $data['date']);
-        error_log("销售额: " . $salesValue);
         error_log("饮料成本: " . $beverageValue);
         error_log("厨房成本: " . $kitchenValue);
         
         $sql = "UPDATE " . $config['data_table'] . " 
-                SET date = ?, day_name = ?, sales = ?, c_beverage = ?, c_kitchen = ?
+                SET date = ?, day_name = ?, c_beverage = ?, c_kitchen = ?
                 WHERE id = ?";
         
         $stmt = $pdo->prepare($sql);
@@ -599,7 +661,6 @@ function handlePut() {
         $result = $stmt->execute([
             $data['date'],
             $dayName,
-            $salesValue,
             $beverageValue,
             $kitchenValue,
             $data['id']
