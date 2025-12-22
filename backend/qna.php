@@ -890,7 +890,7 @@ require_once 'session_check.php';
                 // 不设置的题目会使用上面的 answerGap 作为默认值
                 const answerGaps = {
                     1: 64,  // 第1题和第2题之间的间距
-                    2: 75,  // 第2题和第3题之间的间距
+                    2: 80,  // 第2题和第3题之间的间距
                     3: answerGap,  // ...
                     4: answerGap,
                     5: answerGap,
