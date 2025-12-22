@@ -171,23 +171,26 @@ require_once 'session_check.php';
         }
 
         .btn {
-            background: #f99e00;
-            color: white;
+            width: clamp(60px, 6.25vw, 120px);
+            background: #ff5c00;
             border: none;
-            padding: clamp(8px, 0.83vw, 16px) clamp(16px, 1.67vw, 32px);
-            border-radius: 8px;
+            border-radius: 20px;
+            padding: clamp(4px, 0.42vw, 8px) clamp(6px, 0.63vw, 12px);
+            color: white;
             font-size: clamp(8px, 0.74vw, 14px);
-            font-weight: bold;
+            font-weight: 500;
             cursor: pointer;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         .btn:hover:not(:disabled) {
-            background: #f98500ff;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+            background: #ff7700;
+            transform: translateY(-1px);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
         }
 
         .btn:disabled {
