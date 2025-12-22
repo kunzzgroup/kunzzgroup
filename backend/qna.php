@@ -765,18 +765,94 @@ require_once 'session_check.php';
                     }
                 }
                 
-                // 如果仍然没有中文字体，使用标准字体（会显示警告）
-                if (!chineseFont) {
-                    console.warn('无法加载中文字体，使用标准字体（中文可能无法正确显示）');
-                    chineseFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-                }
-                if (!chineseBoldFont) {
-                    chineseBoldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+                // 检查是否成功加载了中文字体
+                // 如果字体加载失败，chineseFont 和 chineseBoldFont 仍为 undefined
+                let useCanvasFallback = false;
+                if (!chineseFont || !chineseBoldFont) {
+                    console.warn('无法加载中文字体，将使用 Canvas 渲染中文文本');
+                    useCanvasFallback = true;
+                    // 仍然需要标准字体用于英文和数字
+                    if (!chineseFont) {
+                        chineseFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+                    }
+                    if (!chineseBoldFont) {
+                        chineseBoldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+                    }
+                } else {
+                    console.log('成功加载中文字体，将直接以文字形式打印中文');
                 }
                 
-                // 使用中文字体（支持中文和英文）
+                // 使用字体（如果加载成功就用中文字体，否则用标准字体）
                 const font = chineseFont;
                 const boldFont = chineseBoldFont;
+                
+                // 辅助函数：检查文本是否包含中文字符
+                function containsChinese(text) {
+                    return /[\u4e00-\u9fa5]/.test(text);
+                }
+                
+                // Canvas 渲染备选方案（仅在字体加载失败时使用）
+                async function renderTextAsImage(text, fontSize, isBold = false) {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    const fontFamily = 'Arial, "Microsoft YaHei", "SimHei", "PingFang SC", sans-serif';
+                    ctx.font = `${isBold ? 'bold ' : ''}${fontSize}px ${fontFamily}`;
+                    
+                    const metrics = ctx.measureText(text);
+                    const textWidth = metrics.width;
+                    const textHeight = fontSize * 1.2;
+                    
+                    const padding = 10;
+                    canvas.width = Math.ceil(textWidth) + padding * 2;
+                    canvas.height = Math.ceil(textHeight) + padding * 2;
+                    
+                    ctx.font = `${isBold ? 'bold ' : ''}${fontSize}px ${fontFamily}`;
+                    ctx.fillStyle = '#000000';
+                    ctx.textBaseline = 'top';
+                    ctx.textAlign = 'left';
+                    
+                    ctx.fillText(text, padding, padding);
+                    
+                    return {
+                        dataUrl: canvas.toDataURL('image/png'),
+                        width: textWidth,
+                        height: textHeight
+                    };
+                }
+                
+                // 智能文本绘制函数（自动选择文字或图片方式）
+                async function drawTextSmart(page, text, x, y, fontSize, isBold = false) {
+                    // 如果字体加载成功且文本不包含中文，直接使用文字
+                    if (!useCanvasFallback || !containsChinese(text)) {
+                        const fontToUse = isBold ? boldFont : font;
+                        page.drawText(text, {
+                            x: x,
+                            y: y,
+                            size: fontSize,
+                            font: fontToUse,
+                            color: textColor,
+                        });
+                    } else {
+                        // 字体加载失败且包含中文，使用 Canvas 渲染
+                        const { dataUrl, width: textWidth, height: textHeight } = await renderTextAsImage(text, fontSize, isBold);
+                        
+                        const base64Data = dataUrl.split(',')[1];
+                        const binaryString = atob(base64Data);
+                        const bytes = new Uint8Array(binaryString.length);
+                        for (let i = 0; i < binaryString.length; i++) {
+                            bytes[i] = binaryString.charCodeAt(i);
+                        }
+                        
+                        const image = await pdfDoc.embedPng(bytes);
+                        page.drawImage(image, {
+                            x: x,
+                            y: y - textHeight,
+                            width: textWidth,
+                            height: textHeight,
+                        });
+                    }
+                }
 
                 // 设置字体大小和颜色
                 const fontSize = 10;
@@ -791,17 +867,20 @@ require_once 'session_check.php';
                 
                 // 在页面顶部中间绘制用户名和职位
                 const userInfoText = `${currentUsername} (${currentPosition})`;
-                // 计算文本宽度（使用嵌入的字体）
-                const textWidth = boldFont.widthOfTextAtSize(userInfoText, headerFontSize);
-                const centerX = (width - textWidth) / 2;
+                // 计算文本宽度
+                let textWidth, centerX;
+                if (useCanvasFallback && containsChinese(userInfoText)) {
+                    // 使用 Canvas 测量
+                    const tempCanvas = document.createElement('canvas');
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCtx.font = `bold ${headerFontSize}px Arial, "Microsoft YaHei", "SimHei", sans-serif`;
+                    textWidth = tempCtx.measureText(userInfoText).width;
+                } else {
+                    textWidth = boldFont.widthOfTextAtSize(userInfoText, headerFontSize);
+                }
+                centerX = (width - textWidth) / 2;
                 
-                page.drawText(userInfoText, {
-                    x: centerX,
-                    y: height - 40,
-                    size: headerFontSize,
-                    font: boldFont,
-                    color: textColor,
-                });
+                await drawTextSmart(page, userInfoText, centerX, height - 40, headerFontSize, true);
                 
                 // 调整起始Y位置，为头部信息留出空间
                 currentY = height - topMargin - 30;
@@ -840,13 +919,7 @@ require_once 'session_check.php';
                         }
                         
                         // 绘制问题编号
-                        currentPage.drawText(`${q.num}.`, {
-                            x: leftMargin,
-                            y: currentY,
-                            size: fontSize,
-                            font: boldFont,
-                            color: textColor,
-                        });
+                        await drawTextSmart(currentPage, `${q.num}.`, leftMargin, currentY, fontSize, true);
                         
                         // 绘制答案文本（每行）
                         for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
@@ -857,21 +930,9 @@ require_once 'session_check.php';
                                 // 如果超出当前页，创建新页面
                                 currentPage = pdfDoc.addPage([width, height]);
                                 currentY = height - topMargin;
-                                currentPage.drawText(line, {
-                                    x: leftMargin + 20,
-                                    y: currentY,
-                                    size: fontSize,
-                                    font: font,
-                                    color: textColor,
-                                });
+                                await drawTextSmart(currentPage, line, leftMargin + 20, currentY, fontSize, false);
                             } else {
-                                currentPage.drawText(line, {
-                                    x: leftMargin + 20,
-                                    y: yPos,
-                                    size: fontSize,
-                                    font: font,
-                                    color: textColor,
-                                });
+                                await drawTextSmart(currentPage, line, leftMargin + 20, yPos, fontSize, false);
                             }
                         }
                         
