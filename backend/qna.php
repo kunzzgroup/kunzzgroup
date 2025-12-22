@@ -863,7 +863,8 @@ require_once 'session_check.php';
                 const rightMargin = 100;
                 const maxWidth = width - leftMargin - rightMargin;
                 const topMargin = 100;
-                const answerGap = 60; // 默认答案间距
+                // 每一题可占用的“高度”（默认值），单位与 lineHeight 一致（越大占的垂直空间越多）
+                const defaultAnswerHeight = 60;
                 let currentY = height - topMargin;
                 
                 // 在页面顶部中间绘制用户名和职位
@@ -886,19 +887,19 @@ require_once 'session_check.php';
                 // 调整起始Y位置，为头部信息留出空间（保持你现在看到的效果）
                 currentY = height - topMargin + 20;
 
-                // 每个问题的答案间距配置（可以单独调整每一题之间的gap）
-                // 不设置的题目会使用上面的 answerGap 作为默认值
-                const answerGaps = {
-                    1: 64,  // 第1题和第2题之间的间距
-                    2: 80,  // 第2题和第3题之间的间距
-                    3: 65,  // ...
-                    4: answerGap,
+                // 每个问题的“区域高度”配置（单独控制每题占用的垂直高度，而不是gap）
+                // 不设置的题目会使用 defaultAnswerHeight 作为默认高度
+                const answerHeights = {
+                    1: 64,  // 第1题的高度
+                    2: 80,  // 第2题的高度
+                    3: 65,  // 第3题的高度
+                    4: defaultAnswerHeight,
                     5: 65,
-                    6: answerGap,
+                    6: defaultAnswerHeight,
                     7: 60,
-                    8: answerGap,
-                    9: answerGap,
-                    10: answerGap  // 第10题后面其实不会再用到
+                    8: defaultAnswerHeight,
+                    9: defaultAnswerHeight,
+                    10: defaultAnswerHeight
                 };
 
                 // 问题列表
@@ -923,14 +924,21 @@ require_once 'session_check.php';
                 for (let i = 0; i < questions.length; i++) {
                     const q = questions[i];
                     if (q.text && q.text.trim()) {
-                        // 当前题目与下一题之间的间距（如果没单独设，就用默认 answerGap）
-                        const questionGap = (answerGaps[q.num] !== undefined) ? answerGaps[q.num] : answerGap;
+                        // 当前题目的“区域高度”（如果没单独设，就用默认高度）
+                        const questionHeight = (answerHeights[q.num] !== undefined)
+                            ? answerHeights[q.num]
+                            : defaultAnswerHeight;
 
                         // 处理长文本换行
                         const lines = wrapText(q.text, maxWidth, fontSize, font);
+
+                        // 实际文本所需高度
+                        const textHeight = lines.length * lineHeight;
+                        // 这个题目实际占用的高度 = max(设定的高度, 文本高度 + 一点padding)
+                        const blockHeight = Math.max(questionHeight, textHeight + 10);
                         
-                        // 检查是否需要新页面
-                        const neededHeight = lines.length * lineHeight + 20;
+                        // 检查是否需要新页面（按整个题目的高度判断）
+                        const neededHeight = blockHeight + 20;
                         if (currentY - neededHeight < 50) {
                             // 创建新页面
                             currentPage = pdfDoc.addPage([width, height]);
@@ -952,8 +960,8 @@ require_once 'session_check.php';
                             }
                         }
                         
-                        // 更新Y位置，留出间距（用当前题目的 questionGap）
-                        currentY -= (lines.length * lineHeight + questionGap);
+                        // 更新Y位置：直接减去这个题目的“区域高度”（高度越大，下一个题目越往下）
+                        currentY -= blockHeight;
                     }
                 }
 
