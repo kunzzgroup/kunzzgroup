@@ -863,7 +863,7 @@ require_once 'session_check.php';
                 const rightMargin = 100;
                 const maxWidth = width - leftMargin - rightMargin;
                 const topMargin = 100;
-                const answerGap = 30; // 每个答案之间的间距（可以调整这个值来改变答案之间的gap）
+                const answerGap = 60; // 每个答案之间的间距（可以调整这个值来改变答案之间的gap）
                 let currentY = height - topMargin;
                 
                 // 在页面顶部中间绘制用户名和职位
@@ -884,7 +884,7 @@ require_once 'session_check.php';
                 await drawTextSmart(page, userInfoText, centerX, height - 40, headerFontSize, true);
                 
                 // 调整起始Y位置，为头部信息留出空间
-                currentY = height - topMargin - 30;
+                currentY = height - topMargin - 20;
 
                 // 问题列表
                 const questions = [
