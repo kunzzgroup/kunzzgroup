@@ -140,7 +140,7 @@ require_once 'session_check.php';
 
         .question-input {
             width: 100%;
-            padding: clamp(4px, 0.625vw, 12px);
+            padding: 0px clamp(4px, 0.625vw, 12px);
             border: 2px solid #ff5c00;
             border-radius: 8px;
             font-size: clamp(10px, 0.83vw, 16px);
