@@ -381,7 +381,7 @@ require_once 'session_check.php';
                     <div class="form-section-header">问题 8</div>
                     <div class="form-section-content">
                         <div class="question-item">
-                            <div class="question-text">问题8（预留）</div>
+                            <div class="question-text">如果未来1年内，公司只能为你提供一项最有价值的支持，你希望是什么？</div>
                             <textarea class="question-input" name="question8" id="question8"></textarea>
                         </div>
                     </div>
@@ -391,7 +391,7 @@ require_once 'session_check.php';
                     <div class="form-section-header">问题 9</div>
                     <div class="form-section-content">
                         <div class="question-item">
-                            <div class="question-text">问题9（预留）</div>
+                            <div class="question-text">当你想到“理想的工作状态”时，请写下你最重视的3个关键词。</div>
                             <textarea class="question-input" name="question9" id="question9"></textarea>
                         </div>
                     </div>
@@ -401,7 +401,7 @@ require_once 'session_check.php';
                     <div class="form-section-header">问题 10</div>
                     <div class="form-section-content">
                         <div class="question-item">
-                            <div class="question-text">问题10（预留）</div>
+                            <div class="question-text">你希望公司在“员工发展”这件事上，扮演什么角色？</div>
                             <textarea class="question-input" name="question10" id="question10"></textarea>
                         </div>
                     </div>
@@ -489,7 +489,7 @@ require_once 'session_check.php';
                     <div class="form-section-header">问题 8</div>
                     <div class="form-section-content">
                         <div class="question-item">
-                            <div class="question-text">问题8（预留）</div>
+                            <div class="question-text">如果未来1年内，公司只能为你提供一项最有价值的支持，你希望是什么？</div>
                             <div class="view-answer" id="view-question8"><span class="empty-answer">未填写</span></div>
                         </div>
                     </div>
@@ -499,7 +499,7 @@ require_once 'session_check.php';
                     <div class="form-section-header">问题 9</div>
                     <div class="form-section-content">
                         <div class="question-item">
-                            <div class="question-text">问题9（预留）</div>
+                            <div class="question-text">当你想到“理想的工作状态”时，请写下你最重视的3个关键词。</div>
                             <div class="view-answer" id="view-question9"><span class="empty-answer">未填写</span></div>
                         </div>
                     </div>
@@ -509,7 +509,7 @@ require_once 'session_check.php';
                     <div class="form-section-header">问题 10</div>
                     <div class="form-section-content">
                         <div class="question-item">
-                            <div class="question-text">问题10（预留）</div>
+                            <div class="question-text">你希望公司在“员工发展”这件事上，扮演什么角色？</div>
                             <div class="view-answer" id="view-question10"><span class="empty-answer">未填写</span></div>
                         </div>
                     </div>
