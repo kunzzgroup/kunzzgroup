@@ -884,7 +884,7 @@ require_once 'session_check.php';
                 await drawTextSmart(page, userInfoText, centerX, height - 40, headerFontSize, true);
                 
                 // 调整起始Y位置，为头部信息留出空间
-                currentY = height - topMargin - 20;
+                currentY = height - topMargin - -20;
 
                 // 问题列表
                 const questions = [
