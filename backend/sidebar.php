@@ -1008,7 +1008,7 @@ body.sidebar-transition {
             </div>
             <div class="dropdown-menu-items" id="brand-items">
                 <?php if (!empty($submenuVisibility['brand']['kunzz_holdings'])): ?>
-                <!-- <div class="menu-item-wrapper">
+                <div class="menu-item-wrapper">
                     <a href="#" class="informationmenu-item">
                         KUNZZ HOLDINGS SDN BHD
                         <span class="informationmenu-arrow">›</span>
@@ -1021,7 +1021,7 @@ body.sidebar-transition {
                             <a href="#" class="submenu-item">集团总部</a>
                         </div>
                     </div>
-                </div> -->
+                </div>
                 <?php endif; ?>
                 
                 <!-- Tokyo Japanese Cuisine Sdn Bhd -->
@@ -1135,6 +1135,11 @@ body.sidebar-transition {
                 <div class="menu-item-wrapper">
                     <a href="generatecode.php" class="informationmenu-item">
                         职员管理
+                    </a>
+                </div>
+                <div class="menu-item-wrapper">
+                    <a href="qna.php" class="informationmenu-item">
+                        问卷回答
                     </a>
                 </div>
                 <?php endif; ?>
