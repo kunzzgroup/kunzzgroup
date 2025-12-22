@@ -72,7 +72,6 @@ require_once 'session_check.php';
             overflow-x: hidden;
             flex: 1;
             min-height: 0;
-            padding: clamp(16px, 1.25vw, 24px);
         }
 
         .qna-content-wrapper::-webkit-scrollbar {
