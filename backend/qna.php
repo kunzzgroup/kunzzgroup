@@ -893,7 +893,7 @@ require_once 'session_check.php';
                     2: 80,  // 第2题和第3题之间的间距
                     3: 65,  // ...
                     4: answerGap,
-                    5: answerGap,
+                    5: 65,
                     6: answerGap,
                     7: answerGap,
                     8: answerGap,
