@@ -703,9 +703,88 @@ require_once 'session_check.php';
                 const page = pdfDoc.getPage(0);
                 const { width, height } = page.getSize();
 
-                // 嵌入字体（支持中文需要特殊字体，这里先用标准字体）
+                // 使用标准字体（对于非中文部分）
                 const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
                 const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+                
+                // 辅助函数：检查文本是否包含中文字符
+                function containsChinese(text) {
+                    return /[\u4e00-\u9fa5]/.test(text);
+                }
+                
+                // 辅助函数：使用Canvas渲染中文文本为图片
+                async function renderChineseTextAsImage(text, fontSize, isBold = false) {
+                    // 创建canvas
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // 设置字体
+                    const fontFamily = 'Arial, "Microsoft YaHei", "SimHei", sans-serif';
+                    ctx.font = `${isBold ? 'bold ' : ''}${fontSize}px ${fontFamily}`;
+                    
+                    // 测量文本宽度
+                    const metrics = ctx.measureText(text);
+                    const textWidth = metrics.width;
+                    const textHeight = fontSize * 1.2;
+                    
+                    // 设置canvas尺寸（添加一些padding）
+                    const padding = 10;
+                    canvas.width = Math.ceil(textWidth) + padding * 2;
+                    canvas.height = Math.ceil(textHeight) + padding * 2;
+                    
+                    // 重新设置字体和样式（canvas尺寸改变后需要重新设置）
+                    ctx.font = `${isBold ? 'bold ' : ''}${fontSize}px ${fontFamily}`;
+                    ctx.fillStyle = '#000000';
+                    ctx.textBaseline = 'top';
+                    ctx.textAlign = 'left';
+                    
+                    // 绘制文本
+                    ctx.fillText(text, padding, padding);
+                    
+                    // 将canvas转换为PNG格式的base64
+                    return {
+                        dataUrl: canvas.toDataURL('image/png'),
+                        width: textWidth,
+                        height: textHeight
+                    };
+                }
+                
+                // 辅助函数：在PDF上绘制文本（支持中文）
+                async function drawTextOnPDF(page, text, x, y, fontSize, isBold = false) {
+                    if (containsChinese(text)) {
+                        // 对于包含中文的文本，使用Canvas渲染为图片
+                        const { dataUrl, width: textWidth, height: textHeight } = await renderChineseTextAsImage(text, fontSize, isBold);
+                        
+                        // 将base64转换为Uint8Array
+                        const base64Data = dataUrl.split(',')[1];
+                        const binaryString = atob(base64Data);
+                        const bytes = new Uint8Array(binaryString.length);
+                        for (let i = 0; i < binaryString.length; i++) {
+                            bytes[i] = binaryString.charCodeAt(i);
+                        }
+                        
+                        // 嵌入PNG图片
+                        const image = await pdfDoc.embedPng(bytes);
+                        
+                        // 绘制图片（使用实际文本尺寸）
+                        page.drawImage(image, {
+                            x: x,
+                            y: y - textHeight,
+                            width: textWidth,
+                            height: textHeight,
+                        });
+                    } else {
+                        // 对于纯英文/数字，使用标准字体
+                        const fontToUse = isBold ? boldFont : font;
+                        page.drawText(text, {
+                            x: x,
+                            y: y,
+                            size: fontSize,
+                            font: fontToUse,
+                            color: rgb(0, 0, 0),
+                        });
+                    }
+                }
 
                 // 设置字体大小和颜色
                 const fontSize = 10;
@@ -720,16 +799,19 @@ require_once 'session_check.php';
                 
                 // 在页面顶部中间绘制用户名和职位
                 const userInfoText = `${currentUsername} (${currentPosition})`;
-                const textWidth = boldFont.widthOfTextAtSize(userInfoText, headerFontSize);
+                // 计算文本宽度（支持中文）
+                let textWidth;
+                if (containsChinese(userInfoText)) {
+                    const tempCanvas = document.createElement('canvas');
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCtx.font = `bold ${headerFontSize}px Arial, "Microsoft YaHei", "SimHei", sans-serif`;
+                    textWidth = tempCtx.measureText(userInfoText).width;
+                } else {
+                    textWidth = boldFont.widthOfTextAtSize(userInfoText, headerFontSize);
+                }
                 const centerX = (width - textWidth) / 2;
                 
-                page.drawText(userInfoText, {
-                    x: centerX,
-                    y: height - 40,
-                    size: headerFontSize,
-                    font: boldFont,
-                    color: textColor,
-                });
+                await drawTextOnPDF(page, userInfoText, centerX, height - 40, headerFontSize, true);
                 
                 // 调整起始Y位置，为头部信息留出空间
                 currentY = height - topMargin - 30;
@@ -751,6 +833,8 @@ require_once 'session_check.php';
                 // 在PDF上填写答案
                 // 注意：坐标位置需要根据实际的PDF模板调整
                 // 这里提供一个通用的布局方案
+                let currentPage = page; // 当前使用的页面
+                
                 for (let i = 0; i < questions.length; i++) {
                     const q = questions[i];
                     if (q.text && q.text.trim()) {
@@ -761,42 +845,27 @@ require_once 'session_check.php';
                         const neededHeight = lines.length * lineHeight + 20;
                         if (currentY - neededHeight < 50) {
                             // 创建新页面
-                            const newPage = pdfDoc.addPage([width, height]);
+                            currentPage = pdfDoc.addPage([width, height]);
                             currentY = height - topMargin;
                         }
                         
                         // 绘制问题编号
-                        page.drawText(`${q.num}.`, {
-                            x: leftMargin,
-                            y: currentY,
-                            size: fontSize,
-                            font: boldFont,
-                            color: textColor,
-                        });
+                        await drawTextOnPDF(currentPage, `${q.num}.`, leftMargin, currentY, fontSize, true);
                         
                         // 绘制答案文本（每行）
-                        lines.forEach((line, lineIndex) => {
+                        for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+                            const line = lines[lineIndex];
                             const yPos = currentY - (lineIndex + 1) * lineHeight;
+                            
                             if (yPos < 50) {
                                 // 如果超出当前页，创建新页面
-                                const newPage = pdfDoc.addPage([width, height]);
-                                newPage.drawText(line, {
-                                    x: leftMargin + 20,
-                                    y: height - topMargin - lineIndex * lineHeight,
-                                    size: fontSize,
-                                    font: font,
-                                    color: textColor,
-                                });
+                                currentPage = pdfDoc.addPage([width, height]);
+                                currentY = height - topMargin;
+                                await drawTextOnPDF(currentPage, line, leftMargin + 20, currentY, fontSize, false);
                             } else {
-                                page.drawText(line, {
-                                    x: leftMargin + 20,
-                                    y: yPos,
-                                    size: fontSize,
-                                    font: font,
-                                    color: textColor,
-                                });
+                                await drawTextOnPDF(currentPage, line, leftMargin + 20, yPos, fontSize, false);
                             }
-                        });
+                        }
                         
                         // 更新Y位置，留出间距
                         currentY -= (lines.length * lineHeight + 30);
