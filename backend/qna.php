@@ -435,7 +435,6 @@ require_once 'session_check.php';
                     <div class="form-section-content">
                         <div class="question-item">
                             <div class="question-text">你目前最重要的个人目标或梦想是什么?</div>
-                            <div class="question-example">(例如:事业发展,专业技能,经济目标,生活稳定,家庭等)</div>
                             <div class="view-answer" id="view-question2"><span class="empty-answer">未填写</span></div>
                         </div>
                     </div>
@@ -446,7 +445,6 @@ require_once 'session_check.php';
                     <div class="form-section-content">
                         <div class="question-item">
                             <div class="question-text">如果公司为你提供机会,你是否愿意承担更高的责任与压力?你认为这些责任具体体现在哪些方面?</div>
-                            <div class="question-example">(例如:结果要求,学习投入,团队管理,时间管理,抗压能力等)</div>
                             <div class="view-answer" id="view-question3"><span class="empty-answer">未填写</span></div>
                         </div>
                     </div>
@@ -457,7 +455,6 @@ require_once 'session_check.php';
                     <div class="form-section-content">
                         <div class="question-item">
                             <div class="question-text">在实现的目标过程中,你目前遇到最大的困难或挑战是什么?</div>
-                            <div class="question-example">(可以是工作上的,也可以是个人层面的)</div>
                             <div class="view-answer" id="view-question4"><span class="empty-answer">未填写</span></div>
                         </div>
                     </div>
@@ -478,7 +475,6 @@ require_once 'session_check.php';
                     <div class="form-section-content">
                         <div class="question-item">
                             <div class="question-text">在目前的公司中,有没有你特别希望尝试或发展的方向?为什么?</div>
-                            <div class="question-example">(例如:管理,专业深度,跨部门,新项目等)</div>
                             <div class="view-answer" id="view-question6"><span class="empty-answer">未填写</span></div>
                         </div>
                     </div>
@@ -499,7 +495,6 @@ require_once 'session_check.php';
                     <div class="form-section-content">
                         <div class="question-item">
                             <div class="question-text">如果未来1年内，公司只能为你提供一项最有价值的支持，你希望是什么？</div>
-                            <div class="question-example">(请写下你认为最重要的一项)</div>
                             <div class="view-answer" id="view-question8"><span class="empty-answer">未填写</span></div>
                         </div>
                     </div>
@@ -509,8 +504,7 @@ require_once 'session_check.php';
                     <div class="form-section-header">问题 9</div>
                     <div class="form-section-content">
                         <div class="question-item">
-                            <div class="question-text">当你想到“理想的工作状态”时，请写下你最重视的3个关键词。</div>
-                            <div class="question-example">(例如：成长，稳定，被尊重，有挑战，自由，有意义等)</div>
+                            <div class="question-text">当你想到"理想的工作状态"时，请写下你最重视的3个关键词。</div>
                             <div class="view-answer" id="view-question9"><span class="empty-answer">未填写</span></div>
                         </div>
                     </div>
@@ -520,8 +514,7 @@ require_once 'session_check.php';
                     <div class="form-section-header">问题 10</div>
                     <div class="form-section-content">
                         <div class="question-item">
-                            <div class="question-text">你希望公司在“员工发展”这件事上，扮演什么角色？</div>
-                            <div class="question-example">(例如：平台，导师，伙伴，资源提供者，稳定后盾等)</div>
+                            <div class="question-text">你希望公司在"员工发展"这件事上，扮演什么角色？</div>
                             <div class="view-answer" id="view-question10"><span class="empty-answer">未填写</span></div>
                         </div>
                     </div>
