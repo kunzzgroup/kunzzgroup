@@ -94,7 +94,7 @@ require_once 'session_check.php';
         }
 
         .form-section {
-            margin-bottom: clamp(10px, 1.04vw, 20px);
+            margin-bottom: 0;
             border: 1px solid #000000ff;
             border-radius: 8px;
             background-color: #ffffff;
