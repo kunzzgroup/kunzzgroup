@@ -1482,6 +1482,8 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                 // 合并成本数据和KPI净销售额
                 // 销售额字段优先使用KPI的净销售额，如果KPI中没有数据则使用成本数据中的销售额
                 monthData = {};
+                
+                // 首先处理成本数据（这是主要数据源，必须保留）
                 costData.forEach(item => {
                     const day = parseInt(item.date.split('-')[2]);
                     monthData[day] = item;
@@ -1492,18 +1494,21 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                 });
                 
                 // 对于成本数据中没有但KPI数据中有的日期，也添加到monthData中
-                // 这样即使成本数据中没有记录，也能显示从KPI获取的销售额
-                Object.keys(kpiDataMap).forEach(day => {
-                    if (!monthData[day]) {
-                        const dateStr = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-                        monthData[day] = {
-                            date: dateStr,
-                            sales: kpiDataMap[day].net_sales,
-                            c_beverage: 0,
-                            c_kitchen: 0
-                        };
-                    }
-                });
+                // 但只有在成本数据查询成功且确实没有该日期的记录时，才创建临时对象
+                // 这样可以避免覆盖已保存但查询失败的成本数据
+                if (costResult.success !== false) {
+                    Object.keys(kpiDataMap).forEach(day => {
+                        if (!monthData[day]) {
+                            const dateStr = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                            monthData[day] = {
+                                date: dateStr,
+                                sales: kpiDataMap[day].net_sales,
+                                c_beverage: 0,
+                                c_kitchen: 0
+                            };
+                        }
+                    });
+                }
                 
                 // 加载当月库存数据
                 await loadMonthStock();
@@ -2225,6 +2230,10 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                             
                             if (result.success === true) {
                                 successCount++;
+                                // 更新 monthData 以包含保存后的数据（包括 id）
+                                if (result.data && result.data.id) {
+                                    monthData[day] = { ...(monthData[day] || {}), ...result.data };
+                                }
                             } else if (result.success === false) {
                                 const message = result.message || '';
                                 if (message.includes('已存在') || message.includes('无变化')) {
@@ -2235,6 +2244,10 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                                 }
                             } else {
                                 successCount++;
+                                // 即使 success 字段未定义，如果返回了数据，也更新 monthData
+                                if (result.data && result.data.id) {
+                                    monthData[day] = { ...(monthData[day] || {}), ...result.data };
+                                }
                             }
                             
                         } catch (error) {
