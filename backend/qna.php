@@ -259,16 +259,19 @@ require_once 'session_check.php';
         }
 
         .view-answer {
-            padding: clamp(8px, 0.83vw, 16px);
-            background-color: #f9f9f9;
-            border: 1px solid #e0e0e0;
+            width: 100%;
+            padding: 0px clamp(4px, 0.625vw, 12px);
+            border: 2px solid #ff5c00;
             border-radius: 8px;
             font-size: clamp(10px, 0.83vw, 16px);
+            font-family: inherit;
+            height: clamp(20px, 1.56vw, 30px);
+            line-height: clamp(20px, 1.56vw, 30px);
             color: #333333;
-            line-height: 1.6;
             white-space: pre-wrap;
             word-wrap: break-word;
-            min-height: clamp(40px, 4.17vw, 80px);
+            background-color: white;
+            box-sizing: border-box;
         }
 
         .empty-answer {
