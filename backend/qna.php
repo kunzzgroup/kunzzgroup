@@ -863,7 +863,7 @@ require_once 'session_check.php';
                 const rightMargin = 100;
                 const maxWidth = width - leftMargin - rightMargin;
                 const topMargin = 100;
-                const answerGap = 60; // 每个答案之间的间距（可以调整这个值来改变答案之间的gap）
+                const answerGap = 60; // 默认答案间距
                 let currentY = height - topMargin;
                 
                 // 在页面顶部中间绘制用户名和职位
@@ -883,8 +883,23 @@ require_once 'session_check.php';
                 
                 await drawTextSmart(page, userInfoText, centerX, height - 40, headerFontSize, true);
                 
-                // 调整起始Y位置，为头部信息留出空间
-                currentY = height - topMargin - -20;
+                // 调整起始Y位置，为头部信息留出空间（保持你现在看到的效果）
+                currentY = height - topMargin + 20;
+
+                // 每个问题的答案间距配置（可以单独调整每一题之间的gap）
+                // 不设置的题目会使用上面的 answerGap 作为默认值
+                const answerGaps = {
+                    1: answerGap,  // 第1题和第2题之间的间距
+                    2: answerGap,  // 第2题和第3题之间的间距
+                    3: answerGap,  // ...
+                    4: answerGap,
+                    5: answerGap,
+                    6: answerGap,
+                    7: answerGap,
+                    8: answerGap,
+                    9: answerGap,
+                    10: answerGap  // 第10题后面其实不会再用到
+                };
 
                 // 问题列表
                 const questions = [
@@ -908,6 +923,9 @@ require_once 'session_check.php';
                 for (let i = 0; i < questions.length; i++) {
                     const q = questions[i];
                     if (q.text && q.text.trim()) {
+                        // 当前题目与下一题之间的间距（如果没单独设，就用默认 answerGap）
+                        const questionGap = (answerGaps[q.num] !== undefined) ? answerGaps[q.num] : answerGap;
+
                         // 处理长文本换行
                         const lines = wrapText(q.text, maxWidth, fontSize, font);
                         
@@ -934,8 +952,8 @@ require_once 'session_check.php';
                             }
                         }
                         
-                        // 更新Y位置，留出间距
-                        currentY -= (lines.length * lineHeight + answerGap);
+                        // 更新Y位置，留出间距（用当前题目的 questionGap）
+                        currentY -= (lines.length * lineHeight + questionGap);
                     }
                 }
 
