@@ -167,7 +167,7 @@ require_once 'session_check.php';
 
         .button-group {
             display: flex;
-            justify-content: flex-end;
+            justify-content: center;
             gap: clamp(12px, 1.25vw, 24px);
             margin-top: clamp(20px, 2.08vw, 40px);
             flex-shrink: 0;
