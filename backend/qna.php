@@ -895,7 +895,7 @@ require_once 'session_check.php';
                     4: answerGap,
                     5: 65,
                     6: answerGap,
-                    7: answerGap,
+                    7: 60,
                     8: answerGap,
                     9: answerGap,
                     10: answerGap  // 第10题后面其实不会再用到
