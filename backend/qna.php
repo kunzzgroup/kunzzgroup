@@ -725,7 +725,7 @@ require_once 'session_check.php';
                 
                 page.drawText(userInfoText, {
                     x: centerX,
-                    y: height - 20,
+                    y: height - 30,
                     size: headerFontSize,
                     font: boldFont,
                     color: textColor,
