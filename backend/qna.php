@@ -170,10 +170,7 @@ require_once 'session_check.php';
             justify-content: flex-end;
             gap: clamp(12px, 1.25vw, 24px);
             margin-top: clamp(20px, 2.08vw, 40px);
-            padding: clamp(16px, 1.25vw, 24px);
             flex-shrink: 0;
-            border-top: 1px solid #e0e0e0;
-            background: white;
         }
 
         .btn {
@@ -523,12 +520,12 @@ require_once 'session_check.php';
 
                 </div>
             </div>
-            
-            <div class="button-group" id="buttonGroup">
-                <button type="button" class="btn btn-reset" onclick="resetForm()" id="resetBtn" style="display: none;">重新回答</button>
-                <button type="submit" class="btn" id="submitBtn" form="qnaForm" style="display: none;">提交问卷</button>
-                <button type="button" class="btn" onclick="generatePDF()" id="printBtn" style="display: none;">打印问卷</button>
-            </div>
+        </div>
+        
+        <div class="button-group" id="buttonGroup">
+            <button type="button" class="btn btn-reset" onclick="resetForm()" id="resetBtn" style="display: none;">重新回答</button>
+            <button type="submit" class="btn" id="submitBtn" form="qnaForm" style="display: none;">提交问卷</button>
+            <button type="button" class="btn" onclick="generatePDF()" id="printBtn" style="display: none;">打印问卷</button>
         </div>
     </div>
 
