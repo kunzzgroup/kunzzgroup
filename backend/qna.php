@@ -886,7 +886,7 @@ require_once 'session_check.php';
                 // 例：1: height - 200 表示第1题起点Y为 height-200。
                 const answerPositions = {
                     1: height - 95,
-                    2: height - 150,
+                    2: height - 180,
                     3: height - 260,
                     4: height - 300,
                     5: height - 340,
