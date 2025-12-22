@@ -919,10 +919,7 @@ require_once 'session_check.php';
                             currentY = height - topMargin;
                         }
                         
-                        // 绘制问题编号
-                        await drawTextSmart(currentPage, `${q.num}.`, leftMargin, currentY, fontSize, true);
-                        
-                        // 绘制答案文本（每行）
+                        // 绘制答案文本（每行，不显示问题编号）
                         for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
                             const line = lines[lineIndex];
                             const yPos = currentY - (lineIndex + 1) * lineHeight;
@@ -931,9 +928,9 @@ require_once 'session_check.php';
                                 // 如果超出当前页，创建新页面
                                 currentPage = pdfDoc.addPage([width, height]);
                                 currentY = height - topMargin;
-                                await drawTextSmart(currentPage, line, leftMargin + 20, currentY, fontSize, false);
+                                await drawTextSmart(currentPage, line, leftMargin, currentY, fontSize, false);
                             } else {
-                                await drawTextSmart(currentPage, line, leftMargin + 20, yPos, fontSize, false);
+                                await drawTextSmart(currentPage, line, leftMargin, yPos, fontSize, false);
                             }
                         }
                         
