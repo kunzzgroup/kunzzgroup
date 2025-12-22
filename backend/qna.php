@@ -55,10 +55,42 @@ require_once 'session_check.php';
             background: linear-gradient(90deg, rgba(255,92,0,0) 0%, rgba(0, 0, 0, 1) 25%, rgba(0, 0, 0, 1) 75%, rgba(255,92,0,0) 100%);
         }
 
-        .question-section {
-            background: transparent;
+        .qna-content-container {
+            background: white;
             border-radius: 15px;
-            margin-bottom: clamp(10px, 1.04vw, 20px);
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 2px solid #000000ff;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .qna-content-wrapper {
+            overflow-y: auto;
+            overflow-x: hidden;
+            flex: 1;
+            min-height: 0;
+            padding: clamp(16px, 1.25vw, 24px);
+        }
+
+        .qna-content-wrapper::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .qna-content-wrapper::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .qna-content-wrapper::-webkit-scrollbar-thumb {
+            background: #ff5c00;
+            border-radius: 4px;
+        }
+
+        .qna-content-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #ff7700;
         }
 
         .form-section {
@@ -138,6 +170,10 @@ require_once 'session_check.php';
             justify-content: flex-end;
             gap: clamp(12px, 1.25vw, 24px);
             margin-top: clamp(20px, 2.08vw, 40px);
+            padding: clamp(16px, 1.25vw, 24px);
+            flex-shrink: 0;
+            border-top: 1px solid #e0e0e0;
+            background: white;
         }
 
         .btn {
@@ -268,9 +304,11 @@ require_once 'session_check.php';
         </div>
         
         <div id="messageArea"></div>
-            
-            <!-- 编辑模式 -->
-            <form id="qnaForm" class="edit-mode">
+        
+        <div class="qna-content-container">
+            <div class="qna-content-wrapper">
+                <!-- 编辑模式 -->
+                <form id="qnaForm" class="edit-mode">
                 <div class="form-section">
                     <div class="form-section-header">问题 1</div>
                     <div class="form-section-content">
@@ -375,14 +413,10 @@ require_once 'session_check.php';
                     </div>
                 </div>
 
-                <div class="button-group">
-                    <button type="button" class="btn btn-reset" onclick="resetForm()">重新回答</button>
-                    <button type="submit" class="btn" id="submitBtn">提交问卷</button>
-                </div>
-            </form>
+                </form>
 
-            <!-- 查看模式 -->
-            <div class="view-mode">
+                <!-- 查看模式 -->
+                <div class="view-mode">
                 <div class="form-section">
                     <div class="form-section-header">问题 1</div>
                     <div class="form-section-content">
@@ -487,10 +521,15 @@ require_once 'session_check.php';
                     </div>
                 </div>
 
-                <div class="button-group">
-                    <button type="button" class="btn" onclick="generatePDF()">打印问卷</button>
                 </div>
             </div>
+            
+            <div class="button-group" id="buttonGroup">
+                <button type="button" class="btn btn-reset" onclick="resetForm()" id="resetBtn" style="display: none;">重新回答</button>
+                <button type="submit" class="btn" id="submitBtn" form="qnaForm" style="display: none;">提交问卷</button>
+                <button type="button" class="btn" onclick="generatePDF()" id="printBtn" style="display: none;">打印问卷</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -500,7 +539,26 @@ require_once 'session_check.php';
         // 页面加载时检查是否已提交
         document.addEventListener('DOMContentLoaded', async function() {
             await loadUserResponse();
+            // 根据模式显示/隐藏按钮
+            updateButtonVisibility();
         });
+        
+        // 更新按钮显示状态
+        function updateButtonVisibility() {
+            const resetBtn = document.getElementById('resetBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            const printBtn = document.getElementById('printBtn');
+            
+            if (isSubmitted) {
+                if (resetBtn) resetBtn.style.display = 'none';
+                if (submitBtn) submitBtn.style.display = 'none';
+                if (printBtn) printBtn.style.display = 'block';
+            } else {
+                if (resetBtn) resetBtn.style.display = 'block';
+                if (submitBtn) submitBtn.style.display = 'block';
+                if (printBtn) printBtn.style.display = 'none';
+            }
+        }
 
         // 加载用户的问卷回答
         async function loadUserResponse() {
@@ -530,6 +588,7 @@ require_once 'session_check.php';
         function switchToViewMode() {
             document.body.classList.add('mode-view');
             document.getElementById('qnaForm').style.display = 'none';
+            updateButtonVisibility();
         }
 
         // 填充查看模式的数据
@@ -581,6 +640,7 @@ require_once 'session_check.php';
                     showAlert('问卷提交成功！', 'success');
                     isSubmitted = true;
                     await loadUserResponse();
+                    updateButtonVisibility();
                 } else {
                     showAlert(result.message || '提交失败，请重试', 'error');
                     submitBtn.innerHTML = originalText;
