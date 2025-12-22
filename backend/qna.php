@@ -890,7 +890,7 @@ require_once 'session_check.php';
                 // 每个问题的“区域高度”配置（单独控制每题占用的垂直高度，而不是gap）
                 // 不设置的题目会使用 defaultAnswerHeight 作为默认高度
                 const answerHeights = {
-                    1: 100,  // 第1题的高度
+                    1: 65,  // 第1题的高度
                     2: defaultAnswerHeight,  // 第2题的高度
                     3: defaultAnswerHeight,  // 第3题的高度
                     4: defaultAnswerHeight,
