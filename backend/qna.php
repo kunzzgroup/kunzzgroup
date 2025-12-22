@@ -863,9 +863,6 @@ require_once 'session_check.php';
                 const rightMargin = 100;
                 const maxWidth = width - leftMargin - rightMargin;
                 const topMargin = 100;
-                // 每一题可占用的“高度”（默认值），单位与 lineHeight 一致（越大占的垂直空间越多）
-                const defaultAnswerHeight = 60;
-                let currentY = height - topMargin;
                 
                 // 在页面顶部中间绘制用户名和职位
                 const userInfoText = `${currentUsername} (${currentPosition})`;
@@ -884,26 +881,8 @@ require_once 'session_check.php';
                 
                 await drawTextSmart(page, userInfoText, centerX, height - 40, headerFontSize, true);
                 
-                // 调整起始Y位置，为头部信息留出空间（保持你现在看到的效果）
-                currentY = height - topMargin + 20;
-
-                // 每个问题的“区域高度”配置（单独控制每题占用的垂直高度，而不是gap）
-                // 不设置的题目会使用 defaultAnswerHeight 作为默认高度
-                // const answerHeights = {
-                //     1: defaultAnswerHeight,  // 第1题的高度
-                //     2: defaultAnswerHeight,  // 第2题的高度
-                //     3: defaultAnswerHeight,  // 第3题的高度
-                //     4: defaultAnswerHeight,
-                //     5: defaultAnswerHeight,
-                //     6: defaultAnswerHeight,
-                //     7: defaultAnswerHeight,
-                //     8: defaultAnswerHeight,
-                //     9: defaultAnswerHeight,
-                //     10: defaultAnswerHeight
-                // };
-
-                // 每个问题的“绝对起始Y坐标”配置（类似 invoice 的固定位置）
-                // 设定后，该题会从这里开始绘制；未设定的题目按顺序排版。
+                // 每个问题的“绝对起始Y坐标”配置（完全类似 invoice：固定坐标）
+                // 这里建议先用一组大概的初始值，之后你只改这些数字就能调位置
                 // 例：1: height - 200 表示第1题起点Y为 height-200。
                 const answerPositions = {
                     1: height - 180,
@@ -932,58 +911,45 @@ require_once 'session_check.php';
                     { num: 10, text: userResponse.question10 || '' }
                 ];
 
-                // 在PDF上填写答案
-                // 注意：坐标位置需要根据实际的PDF模板调整
-                // 这里提供一个通用的布局方案
+                // 在PDF上填写答案（完全按绝对坐标绘制，每题互不影响）
                 let currentPage = page; // 当前使用的页面
                 
                 for (let i = 0; i < questions.length; i++) {
                     const q = questions[i];
-                    if (q.text && q.text.trim()) {
-                        // 当前题目的“区域高度”（如果没单独设，就用默认高度）
-                        const questionHeight = (answerHeights[q.num] !== undefined)
-                            ? answerHeights[q.num]
-                            : defaultAnswerHeight;
+                    if (!q.text || !q.text.trim()) continue;
 
-                        // 如果设定了绝对位置，则使用该Y值作为起点；否则按顺序排版
-                        const hasFixedPosition = answerPositions[q.num] !== undefined;
-                        if (hasFixedPosition) {
-                            currentY = answerPositions[q.num];
-                        }
+                    // 该题的起始Y坐标（必须在 answerPositions 里配置）
+                    const startY = answerPositions[q.num];
+                    if (typeof startY !== 'number') {
+                        // 如果没有配置位置，就跳过这题，避免画到奇怪的位置
+                        console.warn(`answerPositions 中未配置第 ${q.num} 题的位置，已跳过该题`);
+                        continue;
+                    }
 
-                        // 处理长文本换行
-                        const lines = wrapText(q.text, maxWidth, fontSize, font);
+                    // 处理长文本换行
+                    const lines = wrapText(q.text, maxWidth, fontSize, font);
 
-                        // 实际文本所需高度
-                        const textHeight = lines.length * lineHeight;
-                        // 这个题目实际占用的高度 = max(设定的高度, 文本高度 + 一点padding)
-                        const blockHeight = Math.max(questionHeight, textHeight + 10);
-                        
-                        // 检查是否需要新页面（按整个题目的高度判断）
-                        const neededHeight = blockHeight + 20;
-                        if (currentY - neededHeight < 50) {
-                            // 创建新页面
+                    let yBase = startY;
+                    // 如果这一题超出页面底部，就直接换到新的一页再按同样的 y 画
+                    if (yBase - lines.length * lineHeight < 50) {
+                        currentPage = pdfDoc.addPage([width, height]);
+                        yBase = startY; // 新页同样的 y 坐标（根据模板排版）
+                    }
+
+                    // 绘制答案文本（每行，不显示问题编号）
+                    for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+                        const line = lines[lineIndex];
+                        const yPos = yBase - (lineIndex * lineHeight);
+
+                        // 如果某一行会掉到页底以下，则新开一页，从同一个 startY 重新往下画
+                        if (yPos < 50) {
                             currentPage = pdfDoc.addPage([width, height]);
-                            currentY = height - topMargin;
+                            const newYBase = startY;
+                            const newYPos = newYBase - (lineIndex * lineHeight);
+                            await drawTextSmart(currentPage, line, leftMargin, newYPos, fontSize, false);
+                        } else {
+                            await drawTextSmart(currentPage, line, leftMargin, yPos, fontSize, false);
                         }
-                        
-                        // 绘制答案文本（每行，不显示问题编号）
-                        for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
-                            const line = lines[lineIndex];
-                            const yPos = currentY - (lineIndex + 1) * lineHeight;
-                            
-                            if (yPos < 50) {
-                                // 如果超出当前页，创建新页面
-                                currentPage = pdfDoc.addPage([width, height]);
-                                currentY = height - topMargin;
-                                await drawTextSmart(currentPage, line, leftMargin, currentY, fontSize, false);
-                            } else {
-                                await drawTextSmart(currentPage, line, leftMargin, yPos, fontSize, false);
-                            }
-                        }
-                        
-                        // 更新Y位置：直接减去这个题目的“区域高度”（高度越大，下一个题目越往下）
-                        currentY -= blockHeight;
                     }
                 }
 
