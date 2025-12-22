@@ -863,7 +863,6 @@ require_once 'session_check.php';
                 const rightMargin = 100;
                 const maxWidth = width - leftMargin - rightMargin;
                 const topMargin = 100;
-                const answerGap = 60; // 每个答案之间的间距（可以调整这个值来改变答案之间的gap）
                 let currentY = height - topMargin;
                 
                 // 在页面顶部中间绘制用户名和职位
@@ -886,23 +885,9 @@ require_once 'session_check.php';
                 // 调整起始Y位置，为头部信息留出空间
                 currentY = height - topMargin - -20;
 
-                // 每个问题的答案间距配置（可以单独调整每个答案的间距）
-                // 如果某个问题没有配置，则使用默认的 answerGap
-                const answerGaps = {
-                    1: 60,  // 第1题的答案间距
-                    2: 60,  // 第2题的答案间距
-                    3: 60,  // 第3题的答案间距
-                    4: 60,  // 第4题的答案间距
-                    5: 60,  // 第5题的答案间距
-                    6: 60,  // 第6题的答案间距
-                    7: 60,  // 第7题的答案间距
-                    8: 60,  // 第8题的答案间距
-                    9: 60,  // 第9题的答案间距
-                    10: 60  // 第10题的答案间距
-                };
-                
                 // 每个问题的Y偏移量配置（可以单独调整每个答案的起始位置）
                 // 正值向下移动，负值向上移动
+                // 每个问题的位置 = 上一个答案结束位置 + 当前问题的Y偏移量
                 const answerYOffsets = {
                     1: 0,   // 第1题的Y偏移量
                     2: 0,   // 第2题的Y偏移量
@@ -938,11 +923,10 @@ require_once 'session_check.php';
                 for (let i = 0; i < questions.length; i++) {
                     const q = questions[i];
                     if (q.text && q.text.trim()) {
-                        // 获取当前问题的间距和Y偏移量配置
-                        const questionGap = answerGaps[q.num] !== undefined ? answerGaps[q.num] : answerGap;
+                        // 获取当前问题的Y偏移量配置
                         const questionYOffset = answerYOffsets[q.num] !== undefined ? answerYOffsets[q.num] : 0;
                         
-                        // 应用Y偏移量
+                        // 应用Y偏移量（相对于上一个答案的结束位置）
                         let questionStartY = currentY + questionYOffset;
                         
                         // 处理长文本换行
@@ -973,8 +957,8 @@ require_once 'session_check.php';
                             }
                         }
                         
-                        // 更新Y位置，使用当前问题的间距配置
-                        currentY = questionStartY - (lines.length * lineHeight + questionGap);
+                        // 更新Y位置（答案结束位置，下一个问题会在此基础上加上它的Y偏移量）
+                        currentY = questionStartY - (lines.length * lineHeight);
                     }
                 }
 
