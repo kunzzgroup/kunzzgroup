@@ -891,7 +891,7 @@ require_once 'session_check.php';
                 // 不设置的题目会使用 defaultAnswerHeight 作为默认高度
                 const answerHeights = {
                     1: 60,  // 第1题的高度
-                    2: 70,  // 第2题的高度
+                    2: 100,  // 第2题的高度
                     3: defaultAnswerHeight,  // 第3题的高度
                     4: defaultAnswerHeight,
                     5: defaultAnswerHeight,
