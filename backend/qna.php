@@ -149,7 +149,7 @@ require_once 'session_check.php';
             font-size: clamp(10px, 0.83vw, 16px);
             font-family: inherit;
             resize: vertical;
-            min-height: clamp(60px, 6.25vw, 120px);
+            min-height: clamp(30px, 2.6vw, 50px);
             transition: all 0.3s ease;
         }
 
