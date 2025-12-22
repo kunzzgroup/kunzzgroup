@@ -863,6 +863,7 @@ require_once 'session_check.php';
                 const rightMargin = 100;
                 const maxWidth = width - leftMargin - rightMargin;
                 const topMargin = 100;
+                const answerGap = 30; // 每个答案之间的间距（可以调整这个值来改变答案之间的gap）
                 let currentY = height - topMargin;
                 
                 // 在页面顶部中间绘制用户名和职位
@@ -883,24 +884,8 @@ require_once 'session_check.php';
                 await drawTextSmart(page, userInfoText, centerX, height - 40, headerFontSize, true);
                 
                 // 调整起始Y位置，为头部信息留出空间
-                currentY = height - topMargin - -20;
+                currentY = height - topMargin - 30;
 
-                // 每个问题的Y偏移量配置（可以单独调整每个答案的起始位置）
-                // 正值向下移动，负值向上移动
-                // 每个问题的位置 = 上一个答案结束位置 + 当前问题的Y偏移量
-                const answerYOffsets = {
-                    1: 0,   // 第1题的Y偏移量
-                    2: 100,   // 第2题的Y偏移量
-                    3: 0,   // 第3题的Y偏移量
-                    4: 0,   // 第4题的Y偏移量
-                    5: 0,   // 第5题的Y偏移量
-                    6: 0,   // 第6题的Y偏移量
-                    7: 0,   // 第7题的Y偏移量
-                    8: 0,   // 第8题的Y偏移量
-                    9: 0,   // 第9题的Y偏移量
-                    10: 0   // 第10题的Y偏移量
-                };
-                
                 // 问题列表
                 const questions = [
                     { num: 1, text: userResponse.question1 || '' },
@@ -923,42 +908,34 @@ require_once 'session_check.php';
                 for (let i = 0; i < questions.length; i++) {
                     const q = questions[i];
                     if (q.text && q.text.trim()) {
-                        // 获取当前问题的Y偏移量配置
-                        const questionYOffset = answerYOffsets[q.num] !== undefined ? answerYOffsets[q.num] : 0;
-                        
-                        // 应用Y偏移量（相对于上一个答案的结束位置）
-                        let questionStartY = currentY + questionYOffset;
-                        
                         // 处理长文本换行
                         const lines = wrapText(q.text, maxWidth, fontSize, font);
                         
                         // 检查是否需要新页面
                         const neededHeight = lines.length * lineHeight + 20;
-                        if (questionStartY - neededHeight < 50) {
+                        if (currentY - neededHeight < 50) {
                             // 创建新页面
                             currentPage = pdfDoc.addPage([width, height]);
-                            questionStartY = height - topMargin;
-                            currentY = questionStartY;
+                            currentY = height - topMargin;
                         }
                         
                         // 绘制答案文本（每行，不显示问题编号）
                         for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
                             const line = lines[lineIndex];
-                            const yPos = questionStartY - (lineIndex + 1) * lineHeight;
+                            const yPos = currentY - (lineIndex + 1) * lineHeight;
                             
                             if (yPos < 50) {
                                 // 如果超出当前页，创建新页面
                                 currentPage = pdfDoc.addPage([width, height]);
-                                questionStartY = height - topMargin;
-                                currentY = questionStartY;
-                                await drawTextSmart(currentPage, line, leftMargin, questionStartY, fontSize, false);
+                                currentY = height - topMargin;
+                                await drawTextSmart(currentPage, line, leftMargin, currentY, fontSize, false);
                             } else {
                                 await drawTextSmart(currentPage, line, leftMargin, yPos, fontSize, false);
                             }
                         }
                         
-                        // 更新Y位置（答案结束位置，下一个问题会在此基础上加上它的Y偏移量）
-                        currentY = questionStartY - (lines.length * lineHeight);
+                        // 更新Y位置，留出间距
+                        currentY -= (lines.length * lineHeight + answerGap);
                     }
                 }
 
