@@ -10,6 +10,7 @@ require_once 'session_check.php';
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <title>问卷回答 - KUNZZ HOLDINGS</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.0.0/dist/index.umd.js"></script>
     <style>
         * {
             margin: 0;
@@ -697,6 +698,25 @@ require_once 'session_check.php';
 
                 const templateBytes = await templateResponse.arrayBuffer();
                 const { PDFDocument, rgb, StandardFonts } = PDFLib;
+                
+                // 注册 fontkit（用于嵌入自定义字体，必须在创建 PDFDocument 之前注册）
+                // 尝试多个可能的全局变量名
+                let fontkitInstance = null;
+                if (typeof fontkit !== 'undefined') {
+                    fontkitInstance = fontkit;
+                } else if (typeof window.fontkit !== 'undefined') {
+                    fontkitInstance = window.fontkit;
+                } else if (typeof window.FontKit !== 'undefined') {
+                    fontkitInstance = window.FontKit;
+                }
+                
+                if (fontkitInstance) {
+                    PDFDocument.registerFontkit(fontkitInstance);
+                    console.log('fontkit 已注册');
+                } else {
+                    throw new Error('fontkit 未加载，请检查网络连接或刷新页面重试。如果问题持续，请尝试刷新页面。');
+                }
+                
                 const pdfDoc = await PDFDocument.load(templateBytes);
 
                 // 获取第一页
