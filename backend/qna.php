@@ -782,7 +782,11 @@ require_once 'session_check.php';
                 
                 // 注册 fontkit（用于嵌入自定义字体，必须在创建 PDFDocument 之前注册）
                 let fontkitInstance = null;
+                
+                // 尝试多种可能的全局变量名和导出方式
                 const possibleNames = ['fontkit', 'FontKit', 'pdfLibFontkit', 'PDFLibFontkit'];
+                
+                // 首先检查 window 上的全局变量
                 for (const name of possibleNames) {
                     if (typeof window[name] !== 'undefined') {
                         fontkitInstance = window[name];
@@ -791,11 +795,41 @@ require_once 'session_check.php';
                     }
                 }
                 
-                if (fontkitInstance) {
+                // 如果还没找到，检查是否有默认导出（UMD 模块可能导出为 default）
+                if (!fontkitInstance && typeof window.fontkit !== 'undefined') {
+                    // 检查是否是模块导出
+                    if (window.fontkit.default) {
+                        fontkitInstance = window.fontkit.default;
+                        console.log('找到 fontkit，使用 default 导出');
+                    } else if (window.fontkit.fontkit) {
+                        fontkitInstance = window.fontkit.fontkit;
+                        console.log('找到 fontkit，使用 fontkit.fontkit');
+                    } else {
+                        fontkitInstance = window.fontkit;
+                        console.log('找到 fontkit，直接使用 window.fontkit');
+                    }
+                }
+                
+                // 如果还是没找到，列出所有可能的全局变量用于调试
+                if (!fontkitInstance) {
+                    const fontRelated = Object.keys(window).filter(k => 
+                        k.toLowerCase().includes('font') || k.toLowerCase().includes('kit')
+                    );
+                    console.warn('fontkit 未找到。相关的全局变量:', fontRelated);
+                    console.warn('window.fontkit 类型:', typeof window.fontkit);
+                    if (window.fontkit) {
+                        console.warn('window.fontkit 内容:', Object.keys(window.fontkit));
+                    }
+                    throw new Error('fontkit 未加载。请确保 fonts/fontkit.umd.js 文件存在，或检查浏览器控制台的错误信息。');
+                }
+                
+                // 注册 fontkit
+                try {
                     PDFDocument.registerFontkit(fontkitInstance);
                     console.log('fontkit 已成功注册到 PDFDocument');
-                } else {
-                    throw new Error('fontkit 未加载。请刷新页面重试，或检查 get_fontkit.php 是否正常工作。');
+                } catch (e) {
+                    console.error('注册 fontkit 失败:', e);
+                    throw new Error('注册 fontkit 失败: ' + e.message);
                 }
                 
                 const pdfDoc = await PDFDocument.load(templateBytes);
@@ -854,7 +888,7 @@ require_once 'session_check.php';
                     2: height - 170,
                     3: height - 265,
                     4: height - 342,
-                    5: height - 420,
+                    5: height - 420                                                                                                                                                                                     ,
                     6: height - 496,
                     7: height - 573,
                     8: height - 650,

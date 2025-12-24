@@ -2,13 +2,20 @@
 // 提供 fontkit.umd.js 文件
 // 如果本地有文件，直接提供；否则尝试从 CDN 下载并缓存
 
-$fontkitFile = __DIR__ . '/../fonts/fontkit.umd.js';
+// 优先查找压缩版，如果没有则查找普通版
+$fontkitFile = __DIR__ . '/../fonts/fontkit.umd.min.js';
+$fontkitFileAlt = __DIR__ . '/../fonts/fontkit.umd.js';
 
-// 如果本地文件存在，直接提供
+// 如果本地文件存在，直接提供（优先使用 .min.js）
 if (file_exists($fontkitFile)) {
     header('Content-Type: application/javascript');
     header('Cache-Control: public, max-age=31536000'); // 缓存1年
     readfile($fontkitFile);
+    exit;
+} elseif (file_exists($fontkitFileAlt)) {
+    header('Content-Type: application/javascript');
+    header('Cache-Control: public, max-age=31536000');
+    readfile($fontkitFileAlt);
     exit;
 }
 
