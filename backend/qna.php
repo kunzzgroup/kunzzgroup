@@ -704,211 +704,22 @@ require_once 'session_check.php';
                 const { width, height } = page.getSize();
                 console.log(`PDF尺寸: 宽度=${width.toFixed(2)}pt, 高度=${height.toFixed(2)}pt`);
 
-                // 加载支持中文的字体（使用在线字体文件）
+                // 加载本地中文字体文件
                 // 使用 Noto Sans SC (思源黑体) 字体，支持简体中文
-                let chineseFont, chineseBoldFont;
+                const regularFontResponse = await fetch('../fonts/NotoSansSC-Regular.ttf');
+                const boldFontResponse = await fetch('../fonts/NotoSansSC-Bold.ttf');
                 
-                // 尝试多个字体源，按优先级顺序
-                const fontSources = [
-                    // 方案1: 使用 fonts.googleapis.com 直接下载 (TTF格式，pdf-lib支持)
-                    {
-                        regular: 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400&text=中文&display=swap',
-                        bold: 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@700&text=中文&display=swap',
-                        extractFromCSS: true
-                    },
-                    // 方案2: 使用 unpkg CDN (OTF格式)
-                    {
-                        regular: 'https://unpkg.com/@fontsource/noto-sans-sc@5.0.0/files/noto-sans-sc-chinese-simplified-400-normal.otf',
-                        bold: 'https://unpkg.com/@fontsource/noto-sans-sc@5.0.0/files/noto-sans-sc-chinese-simplified-700-normal.otf'
-                    },
-                    // 方案3: 使用 cdnjs (备用)
-                    {
-                        regular: 'https://cdnjs.cloudflare.com/ajax/libs/fontsource-noto-sans-sc/5.0.0/files/noto-sans-sc-chinese-simplified-400-normal.otf',
-                        bold: 'https://cdnjs.cloudflare.com/ajax/libs/fontsource-noto-sans-sc/5.0.0/files/noto-sans-sc-chinese-simplified-700-normal.otf'
-                    },
-                    // 方案4: 本地字体文件（如果用户有）
-                    {
-                        regular: '../fonts/NotoSansSC-Regular.otf',
-                        bold: '../fonts/NotoSansSC-Bold.otf'
-                    },
-                    // 方案5: 本地字体文件 TTF 格式
-                    {
-                        regular: '../fonts/NotoSansSC-Regular.ttf',
-                        bold: '../fonts/NotoSansSC-Bold.ttf'
-                    }
-                ];
-                
-                // 辅助函数：从Google Fonts CSS中提取字体URL
-                async function extractFontUrlFromCSS(cssUrl) {
-                    try {
-                        const cssResponse = await fetch(cssUrl);
-                        if (!cssResponse.ok) return null;
-                        const cssText = await cssResponse.text();
-                        // 查找 @font-face 中的 src: url(...)
-                        const urlMatch = cssText.match(/src:\s*url\(['"]?([^'")]+)['"]?\)/);
-                        if (urlMatch && urlMatch[1]) {
-                            return urlMatch[1].startsWith('http') ? urlMatch[1] : `https://fonts.gstatic.com${urlMatch[1]}`;
-                        }
-                    } catch (e) {
-                        console.warn('无法从CSS提取字体URL:', e);
-                    }
-                    return null;
+                if (!regularFontResponse.ok || !boldFontResponse.ok) {
+                    throw new Error('无法加载中文字体文件，请确保 fonts 文件夹中有 NotoSansSC-Regular.ttf 和 NotoSansSC-Bold.ttf');
                 }
                 
-                // 尝试加载字体
-                for (const source of fontSources) {
-                    if (!chineseFont) {
-                        try {
-                            let fontUrl = source.regular;
-                            // 如果是Google Fonts CSS，需要先提取实际字体URL
-                            if (source.extractFromCSS) {
-                                fontUrl = await extractFontUrlFromCSS(source.regular);
-                                if (!fontUrl) continue;
-                            }
-                            
-                            const fontResponse = await fetch(fontUrl);
-                            if (fontResponse.ok) {
-                                const fontBytes = await fontResponse.arrayBuffer();
-                                chineseFont = await pdfDoc.embedFont(fontBytes);
-                                console.log('成功加载中文字体（常规）:', fontUrl);
-                            }
-                        } catch (e) {
-                            // 继续尝试下一个源
-                        }
-                    }
-                    
-                    if (!chineseBoldFont) {
-                        try {
-                            let fontUrl = source.bold;
-                            // 如果是Google Fonts CSS，需要先提取实际字体URL
-                            if (source.extractFromCSS) {
-                                fontUrl = await extractFontUrlFromCSS(source.bold);
-                                if (!fontUrl) continue;
-                            }
-                            
-                            const boldFontResponse = await fetch(fontUrl);
-                            if (boldFontResponse.ok) {
-                                const boldFontBytes = await boldFontResponse.arrayBuffer();
-                                chineseBoldFont = await pdfDoc.embedFont(boldFontBytes);
-                                console.log('成功加载中文字体（粗体）:', fontUrl);
-                            }
-                        } catch (e) {
-                            // 继续尝试下一个源
-                        }
-                    }
-                    
-                    // 如果两个字体都加载成功，停止尝试
-                    if (chineseFont && chineseBoldFont) {
-                        break;
-                    }
-                }
+                const regularFontBytes = await regularFontResponse.arrayBuffer();
+                const boldFontBytes = await boldFontResponse.arrayBuffer();
                 
-                // 检查是否成功加载了中文字体
-                // 如果字体加载失败，chineseFont 和 chineseBoldFont 仍为 undefined
-                let useCanvasFallback = false;
-                if (!chineseFont || !chineseBoldFont) {
-                    console.warn('无法加载中文字体，将使用 Canvas 渲染中文文本');
-                    useCanvasFallback = true;
-                    // 仍然需要标准字体用于英文和数字
-                    if (!chineseFont) {
-                        chineseFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-                    }
-                    if (!chineseBoldFont) {
-                        chineseBoldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-                    }
-                } else {
-                    console.log('成功加载中文字体，将直接以文字形式打印中文');
-                }
+                const font = await pdfDoc.embedFont(regularFontBytes);
+                const boldFont = await pdfDoc.embedFont(boldFontBytes);
                 
-                // 使用字体（如果加载成功就用中文字体，否则用标准字体）
-                const font = chineseFont;
-                const boldFont = chineseBoldFont;
-                
-                // 辅助函数：检查文本是否包含中文字符
-                function containsChinese(text) {
-                    return /[\u4e00-\u9fa5]/.test(text);
-                }
-                
-                // Canvas 渲染备选方案（仅在字体加载失败时使用）
-                async function renderTextAsImage(text, fontSize, isBold = false) {
-                    // 使用高DPI避免模糊（2倍分辨率）
-                    const dpr = 2;
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    
-                    const fontFamily = '"Microsoft YaHei", "SimHei", "PingFang SC", "WenQuanYi Micro Hei", Arial, sans-serif';
-                    const scaledFontSize = fontSize * dpr;
-                    
-                    // 先测量文本尺寸（使用高分辨率字体）
-                    ctx.font = `${isBold ? 'bold ' : ''}${scaledFontSize}px ${fontFamily}`;
-                    const metrics = ctx.measureText(text);
-                    const textWidth = metrics.width;
-                    const textHeight = scaledFontSize * 1.2;
-                    
-                    // 设置canvas尺寸（高分辨率，包含padding）
-                    const padding = 10 * dpr;
-                    const canvasWidth = Math.ceil(textWidth) + padding * 2;
-                    const canvasHeight = Math.ceil(textHeight) + padding * 2;
-                    
-                    canvas.width = canvasWidth;
-                    canvas.height = canvasHeight;
-                    
-                    // 重新获取context（设置width/height后会重置）
-                    const finalCtx = canvas.getContext('2d');
-                    
-                    // 使用高分辨率字体绘制
-                    finalCtx.font = `${isBold ? 'bold ' : ''}${scaledFontSize}px ${fontFamily}`;
-                    finalCtx.fillStyle = '#000000';
-                    finalCtx.textBaseline = 'top';
-                    finalCtx.textAlign = 'left';
-                    
-                    // 绘制文本
-                    finalCtx.fillText(text, padding, padding);
-                    
-                    // 转换为PNG
-                    const dataUrl = canvas.toDataURL('image/png');
-                    
-                    // 返回实际显示尺寸（除以DPI）
-                    return {
-                        dataUrl: dataUrl,
-                        width: textWidth / dpr,  // 实际显示宽度（pt）
-                        height: textHeight / dpr  // 实际显示高度（pt）
-                    };
-                }
-                
-                // 智能文本绘制函数（自动选择文字或图片方式）
-                async function drawTextSmart(page, text, x, y, fontSize, isBold = false) {
-                    // 如果字体加载成功且文本不包含中文，直接使用文字
-                    if (!useCanvasFallback || !containsChinese(text)) {
-                        const fontToUse = isBold ? boldFont : font;
-                        page.drawText(text, {
-                            x: x,
-                            y: y,
-                            size: fontSize,
-                            font: fontToUse,
-                            color: textColor,
-                        });
-                    } else {
-                        // 字体加载失败且包含中文，使用 Canvas 渲染
-                        const { dataUrl, width: textWidth, height: textHeight } = await renderTextAsImage(text, fontSize, isBold);
-                        
-                        const base64Data = dataUrl.split(',')[1];
-                        const binaryString = atob(base64Data);
-                        const bytes = new Uint8Array(binaryString.length);
-                        for (let i = 0; i < binaryString.length; i++) {
-                            bytes[i] = binaryString.charCodeAt(i);
-                        }
-                        
-                        const image = await pdfDoc.embedPng(bytes);
-                        // 使用返回的textWidth/textHeight（已经是除以dpr后的实际显示尺寸）
-                        page.drawImage(image, {
-                            x: x,
-                            y: y - textHeight,  // PDF坐标原点在左下角，所以需要减去高度
-                            width: textWidth,    // 实际显示宽度（pt）
-                            height: textHeight,  // 实际显示高度（pt）
-                        });
-                    }
-                }
+                console.log('成功加载中文字体');
 
                 // 设置字体大小和颜色
                 const fontSize = 12;
@@ -922,20 +733,17 @@ require_once 'session_check.php';
                 
                 // 在页面顶部中间绘制用户名和职位
                 const userInfoText = `${currentUsername} (${currentPosition})`;
-                // 计算文本宽度
-                let textWidth, centerX;
-                if (useCanvasFallback && containsChinese(userInfoText)) {
-                    // 使用 Canvas 测量
-                    const tempCanvas = document.createElement('canvas');
-                    const tempCtx = tempCanvas.getContext('2d');
-                    tempCtx.font = `bold ${headerFontSize}px Arial, "Microsoft YaHei", "SimHei", sans-serif`;
-                    textWidth = tempCtx.measureText(userInfoText).width;
-                } else {
-                    textWidth = boldFont.widthOfTextAtSize(userInfoText, headerFontSize);
-                }
-                centerX = (width - textWidth) / 2;
+                // 计算文本宽度并居中
+                const textWidth = boldFont.widthOfTextAtSize(userInfoText, headerFontSize);
+                const centerX = (width - textWidth) / 2;
                 
-                await drawTextSmart(page, userInfoText, centerX, height - 40, headerFontSize, true);
+                page.drawText(userInfoText, {
+                    x: centerX,
+                    y: height - 40,
+                    size: headerFontSize,
+                    font: boldFont,
+                    color: textColor,
+                });
                 
                 // 每个问题的“绝对起始Y坐标”配置（完全类似 invoice：固定坐标）
                 // 这里建议先用一组大概的初始值，之后你只改这些数字就能调位置
@@ -994,7 +802,13 @@ require_once 'session_check.php';
                     for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
                         const line = lines[lineIndex];
                         const yPos = yBase - (lineIndex * lineHeight);
-                        await drawTextSmart(currentPage, line, leftMargin, yPos, fontSize, false);
+                        currentPage.drawText(line, {
+                            x: leftMargin,
+                            y: yPos,
+                            size: fontSize,
+                            font: font,
+                            color: textColor,
+                        });
                     }
                 }
 
