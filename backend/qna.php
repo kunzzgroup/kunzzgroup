@@ -881,14 +881,14 @@ require_once 'session_check.php';
                 // 例：1: height - 200 表示第1题起点Y为 height-200。
                 const answerPositions = {
                     1: height - 105,
-                    2: height - 180,
-                    3: height - 275,
-                    4: height - 352,
+                    2: height - 181,
+                    3: height - 276,
+                    4: height - 353,
                     5: height - 430                                                                                                                                                                                     ,
-                    6: height - 506,
+                    6: height - 507,
                     7: height - 583,
-                    8: height - 660,
-                    9: height - 737,
+                    8: height - 661,
+                    9: height - 738,
                     10: height - 815,
                 };
 
