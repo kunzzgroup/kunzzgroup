@@ -710,37 +710,67 @@ require_once 'session_check.php';
                 
                 // 尝试多个字体源，按优先级顺序
                 const fontSources = [
-                    // 方案1: 使用 jsDelivr CDN (Google Fonts - OTF格式)
+                    // 方案1: 使用 fonts.googleapis.com 直接下载 (TTF格式，pdf-lib支持)
                     {
-                        regular: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/notosanssc/NotoSansSC-Regular.otf',
-                        bold: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/notosanssc/NotoSansSC-Bold.otf'
+                        regular: 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400&text=中文&display=swap',
+                        bold: 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@700&text=中文&display=swap',
+                        extractFromCSS: true
                     },
-                    // 方案2: 使用 raw.githubusercontent.com (备用源)
+                    // 方案2: 使用 unpkg CDN (OTF格式)
                     {
-                        regular: 'https://raw.githubusercontent.com/google/fonts/main/ofl/notosanssc/NotoSansSC-Regular.otf',
-                        bold: 'https://raw.githubusercontent.com/google/fonts/main/ofl/notosanssc/NotoSansSC-Bold.otf'
+                        regular: 'https://unpkg.com/@fontsource/noto-sans-sc@5.0.0/files/noto-sans-sc-chinese-simplified-400-normal.otf',
+                        bold: 'https://unpkg.com/@fontsource/noto-sans-sc@5.0.0/files/noto-sans-sc-chinese-simplified-700-normal.otf'
                     },
-                    // 方案3: 本地字体文件（如果用户有）
+                    // 方案3: 使用 cdnjs (备用)
+                    {
+                        regular: 'https://cdnjs.cloudflare.com/ajax/libs/fontsource-noto-sans-sc/5.0.0/files/noto-sans-sc-chinese-simplified-400-normal.otf',
+                        bold: 'https://cdnjs.cloudflare.com/ajax/libs/fontsource-noto-sans-sc/5.0.0/files/noto-sans-sc-chinese-simplified-700-normal.otf'
+                    },
+                    // 方案4: 本地字体文件（如果用户有）
                     {
                         regular: '../fonts/NotoSansSC-Regular.otf',
                         bold: '../fonts/NotoSansSC-Bold.otf'
                     },
-                    // 方案4: 本地字体文件 TTF 格式
+                    // 方案5: 本地字体文件 TTF 格式
                     {
                         regular: '../fonts/NotoSansSC-Regular.ttf',
                         bold: '../fonts/NotoSansSC-Bold.ttf'
                     }
                 ];
                 
+                // 辅助函数：从Google Fonts CSS中提取字体URL
+                async function extractFontUrlFromCSS(cssUrl) {
+                    try {
+                        const cssResponse = await fetch(cssUrl);
+                        if (!cssResponse.ok) return null;
+                        const cssText = await cssResponse.text();
+                        // 查找 @font-face 中的 src: url(...)
+                        const urlMatch = cssText.match(/src:\s*url\(['"]?([^'")]+)['"]?\)/);
+                        if (urlMatch && urlMatch[1]) {
+                            return urlMatch[1].startsWith('http') ? urlMatch[1] : `https://fonts.gstatic.com${urlMatch[1]}`;
+                        }
+                    } catch (e) {
+                        console.warn('无法从CSS提取字体URL:', e);
+                    }
+                    return null;
+                }
+                
                 // 尝试加载字体
                 for (const source of fontSources) {
                     if (!chineseFont) {
                         try {
-                            const fontResponse = await fetch(source.regular);
+                            let fontUrl = source.regular;
+                            // 如果是Google Fonts CSS，需要先提取实际字体URL
+                            if (source.extractFromCSS) {
+                                fontUrl = await extractFontUrlFromCSS(source.regular);
+                                if (!fontUrl) continue;
+                            }
+                            
+                            const fontResponse = await fetch(fontUrl);
                             if (fontResponse.ok) {
                                 const fontBytes = await fontResponse.arrayBuffer();
                                 chineseFont = await pdfDoc.embedFont(fontBytes);
-                                console.log('成功加载中文字体（常规）');
+                                console.log('成功加载中文字体（常规）:', fontUrl);
                             }
                         } catch (e) {
                             // 继续尝试下一个源
@@ -749,11 +779,18 @@ require_once 'session_check.php';
                     
                     if (!chineseBoldFont) {
                         try {
-                            const boldFontResponse = await fetch(source.bold);
+                            let fontUrl = source.bold;
+                            // 如果是Google Fonts CSS，需要先提取实际字体URL
+                            if (source.extractFromCSS) {
+                                fontUrl = await extractFontUrlFromCSS(source.bold);
+                                if (!fontUrl) continue;
+                            }
+                            
+                            const boldFontResponse = await fetch(fontUrl);
                             if (boldFontResponse.ok) {
                                 const boldFontBytes = await boldFontResponse.arrayBuffer();
                                 chineseBoldFont = await pdfDoc.embedFont(boldFontBytes);
-                                console.log('成功加载中文字体（粗体）');
+                                console.log('成功加载中文字体（粗体）:', fontUrl);
                             }
                         } catch (e) {
                             // 继续尝试下一个源
@@ -794,31 +831,48 @@ require_once 'session_check.php';
                 
                 // Canvas 渲染备选方案（仅在字体加载失败时使用）
                 async function renderTextAsImage(text, fontSize, isBold = false) {
+                    // 使用高DPI避免模糊（2倍分辨率）
+                    const dpr = 2;
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     
-                    const fontFamily = 'Arial, "Microsoft YaHei", "SimHei", "PingFang SC", sans-serif';
-                    ctx.font = `${isBold ? 'bold ' : ''}${fontSize}px ${fontFamily}`;
+                    const fontFamily = '"Microsoft YaHei", "SimHei", "PingFang SC", "WenQuanYi Micro Hei", Arial, sans-serif';
+                    const scaledFontSize = fontSize * dpr;
                     
+                    // 先测量文本尺寸（使用高分辨率字体）
+                    ctx.font = `${isBold ? 'bold ' : ''}${scaledFontSize}px ${fontFamily}`;
                     const metrics = ctx.measureText(text);
                     const textWidth = metrics.width;
-                    const textHeight = fontSize * 1.2;
+                    const textHeight = scaledFontSize * 1.2;
                     
-                    const padding = 10;
-                    canvas.width = Math.ceil(textWidth) + padding * 2;
-                    canvas.height = Math.ceil(textHeight) + padding * 2;
+                    // 设置canvas尺寸（高分辨率，包含padding）
+                    const padding = 10 * dpr;
+                    const canvasWidth = Math.ceil(textWidth) + padding * 2;
+                    const canvasHeight = Math.ceil(textHeight) + padding * 2;
                     
-                    ctx.font = `${isBold ? 'bold ' : ''}${fontSize}px ${fontFamily}`;
-                    ctx.fillStyle = '#000000';
-                    ctx.textBaseline = 'top';
-                    ctx.textAlign = 'left';
+                    canvas.width = canvasWidth;
+                    canvas.height = canvasHeight;
                     
-                    ctx.fillText(text, padding, padding);
+                    // 重新获取context（设置width/height后会重置）
+                    const finalCtx = canvas.getContext('2d');
                     
+                    // 使用高分辨率字体绘制
+                    finalCtx.font = `${isBold ? 'bold ' : ''}${scaledFontSize}px ${fontFamily}`;
+                    finalCtx.fillStyle = '#000000';
+                    finalCtx.textBaseline = 'top';
+                    finalCtx.textAlign = 'left';
+                    
+                    // 绘制文本
+                    finalCtx.fillText(text, padding, padding);
+                    
+                    // 转换为PNG
+                    const dataUrl = canvas.toDataURL('image/png');
+                    
+                    // 返回实际显示尺寸（除以DPI）
                     return {
-                        dataUrl: canvas.toDataURL('image/png'),
-                        width: textWidth,
-                        height: textHeight
+                        dataUrl: dataUrl,
+                        width: textWidth / dpr,  // 实际显示宽度（pt）
+                        height: textHeight / dpr  // 实际显示高度（pt）
                     };
                 }
                 
@@ -846,11 +900,12 @@ require_once 'session_check.php';
                         }
                         
                         const image = await pdfDoc.embedPng(bytes);
+                        // 使用返回的textWidth/textHeight（已经是除以dpr后的实际显示尺寸）
                         page.drawImage(image, {
                             x: x,
-                            y: y - textHeight,
-                            width: textWidth,
-                            height: textHeight,
+                            y: y - textHeight,  // PDF坐标原点在左下角，所以需要减去高度
+                            width: textWidth,    // 实际显示宽度（pt）
+                            height: textHeight,  // 实际显示高度（pt）
                         });
                     }
                 }
