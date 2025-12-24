@@ -581,11 +581,11 @@ require_once 'session_check.php';
             </div>
         </div>
         
-        <div class="button-group" id="buttonGroup">
+        <!-- <div class="button-group" id="buttonGroup">
             <button type="button" class="btn btn-reset" onclick="resetForm()" id="resetBtn" style="display: none;">重新回答</button>
             <button type="submit" class="btn" id="submitBtn" form="qnaForm" style="display: none;">提交问卷</button>
             <button type="button" class="btn" onclick="generatePDF()" id="printBtn" style="display: none;">打印问卷</button>
-        </div>
+        </div> -->
     </div>
 
     <script>
