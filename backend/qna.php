@@ -10,7 +10,7 @@ require_once 'session_check.php';
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <title>问卷回答 - KUNZZ HOLDINGS</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.0.0/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@pdf-lib/fontkit@1.0.0/dist/index.umd.js" onerror="console.error('fontkit 加载失败')"></script>
     <style>
         * {
             margin: 0;
@@ -699,22 +699,61 @@ require_once 'session_check.php';
                 const templateBytes = await templateResponse.arrayBuffer();
                 const { PDFDocument, rgb, StandardFonts } = PDFLib;
                 
-                // 注册 fontkit（用于嵌入自定义字体，必须在创建 PDFDocument 之前注册）
-                // 尝试多个可能的全局变量名
+                // 动态加载并注册 fontkit（用于嵌入自定义字体，必须在创建 PDFDocument 之前注册）
                 let fontkitInstance = null;
-                if (typeof fontkit !== 'undefined') {
-                    fontkitInstance = fontkit;
-                } else if (typeof window.fontkit !== 'undefined') {
-                    fontkitInstance = window.fontkit;
-                } else if (typeof window.FontKit !== 'undefined') {
-                    fontkitInstance = window.FontKit;
+                
+                // 首先检查是否已经加载（尝试多种可能的全局变量名）
+                const possibleNames = ['fontkit', 'FontKit', 'pdfLibFontkit', 'PDFLibFontkit'];
+                for (const name of possibleNames) {
+                    if (typeof window[name] !== 'undefined') {
+                        fontkitInstance = window[name];
+                        console.log(`找到 fontkit，使用变量名: ${name}`);
+                        break;
+                    }
+                }
+                
+                // 如果仍未找到，尝试动态加载
+                if (!fontkitInstance) {
+                    console.log('fontkit 未找到，尝试动态加载...');
+                    try {
+                        await new Promise((resolve, reject) => {
+                            const script = document.createElement('script');
+                            script.src = 'https://unpkg.com/@pdf-lib/fontkit@1.0.0/dist/index.umd.js';
+                            script.onload = () => {
+                                // 等待一下确保全局变量已设置
+                                setTimeout(() => {
+                                    for (const name of possibleNames) {
+                                        if (typeof window[name] !== 'undefined') {
+                                            fontkitInstance = window[name];
+                                            console.log(`fontkit 动态加载成功，使用变量名: ${name}`);
+                                            resolve();
+                                            return;
+                                        }
+                                    }
+                                    // 如果还是找不到，列出所有 window 属性用于调试
+                                    const fontRelated = Object.keys(window).filter(k => 
+                                        k.toLowerCase().includes('font') || k.toLowerCase().includes('kit')
+                                    );
+                                    console.warn('fontkit 全局变量未找到。相关变量:', fontRelated);
+                                    reject(new Error('fontkit 全局变量未找到'));
+                                }, 300);
+                            };
+                            script.onerror = () => {
+                                console.error('无法从 CDN 加载 fontkit 脚本');
+                                reject(new Error('无法从 CDN 加载 fontkit'));
+                            };
+                            document.head.appendChild(script);
+                        });
+                    } catch (e) {
+                        console.error('动态加载 fontkit 失败:', e);
+                    }
                 }
                 
                 if (fontkitInstance) {
                     PDFDocument.registerFontkit(fontkitInstance);
-                    console.log('fontkit 已注册');
+                    console.log('fontkit 已成功注册到 PDFDocument');
                 } else {
-                    throw new Error('fontkit 未加载，请检查网络连接或刷新页面重试。如果问题持续，请尝试刷新页面。');
+                    throw new Error('fontkit 未加载。请检查浏览器控制台的错误信息，或尝试刷新页面。如果问题持续，可能需要检查网络连接或使用本地 fontkit 文件。');
                 }
                 
                 const pdfDoc = await PDFDocument.load(templateBytes);
