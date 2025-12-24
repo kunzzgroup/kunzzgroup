@@ -931,26 +931,15 @@ require_once 'session_check.php';
                     const lines = wrapText(q.text, maxWidth, fontSize, font);
 
                     let yBase = startY;
-                    // 如果这一题超出页面底部，就直接换到新的一页再按同样的 y 画
-                    if (yBase - lines.length * lineHeight < 50) {
-                        currentPage = pdfDoc.addPage([width, height]);
-                        yBase = startY; // 新页同样的 y 坐标（根据模板排版）
-                    }
+                    // 固定位置模式：不进行自动换页检查，直接使用用户指定的位置
+                    // （如果用户设置的位置会导致内容超出页面，由用户自己负责调整位置）
 
                     // 绘制答案文本（每行，不显示问题编号）
+                    // 固定位置模式：直接按用户指定的位置绘制，不进行换页检查
                     for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
                         const line = lines[lineIndex];
                         const yPos = yBase - (lineIndex * lineHeight);
-
-                        // 如果某一行会掉到页底以下，则新开一页，从同一个 startY 重新往下画
-                        if (yPos < 50) {
-                            currentPage = pdfDoc.addPage([width, height]);
-                            const newYBase = startY;
-                            const newYPos = newYBase - (lineIndex * lineHeight);
-                            await drawTextSmart(currentPage, line, leftMargin, newYPos, fontSize, false);
-                        } else {
-                            await drawTextSmart(currentPage, line, leftMargin, yPos, fontSize, false);
-                        }
+                        await drawTextSmart(currentPage, line, leftMargin, yPos, fontSize, false);
                     }
                 }
 
