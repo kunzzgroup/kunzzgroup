@@ -35,7 +35,9 @@ require_once 'session_check.php';
         }
 
         .header {
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: clamp(10px, 1.56vw, 30px);
             position: relative;
         }
@@ -45,6 +47,38 @@ require_once 'session_check.php';
             font-size: clamp(20px, 2.6vw, 50px);
             margin-bottom: 10px;
             text-align: left;
+            flex: 1;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: clamp(8px, 0.83vw, 16px);
+            align-items: center;
+        }
+        
+        .btn-print-template {
+            background: #ff5c00;
+            border: none;
+            border-radius: 20px;
+            padding: clamp(6px, 0.63vw, 12px) clamp(12px, 1.25vw, 24px);
+            color: white;
+            font-size: clamp(10px, 0.94vw, 18px);
+            font-weight: 500;
+            cursor: pointer;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-print-template:hover {
+            background: #ff7700;
+            transform: translateY(-1px);
+        }
+        
+        .btn-print-template:active {
+            transform: translateY(0);
         }
 
         .header h1::after {
@@ -282,8 +316,24 @@ require_once 'session_check.php';
 
         /* 响应式设计 */
         @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
             .header h1 {
                 font-size: 40px;
+                margin-bottom: 0;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+            
+            .btn-print-template {
+                width: auto;
             }
 
             .button-group {
@@ -302,6 +352,12 @@ require_once 'session_check.php';
     <div class="container">
         <div class="header">
             <h1>问卷回答</h1>
+            <div class="header-actions">
+                <button type="button" class="btn-print-template" onclick="printTemplate()">
+                    <i class="fas fa-print"></i>
+                    打印问卷
+                </button>
+            </div>
         </div>
         
         <div id="messageArea"></div>
@@ -663,6 +719,13 @@ require_once 'session_check.php';
             if (confirm('确定要清空所有回答吗？')) {
                 document.getElementById('qnaForm').reset();
             }
+        }
+        
+        // 打印问卷模板
+        function printTemplate() {
+            // 直接打开 PDF 模板文件进行打印
+            const templatePath = '../form/survey.pdf';
+            window.open(templatePath, '_blank');
         }
 
         // 显示提示信息
