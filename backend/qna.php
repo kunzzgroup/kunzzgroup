@@ -880,16 +880,16 @@ require_once 'session_check.php';
                 // 这里建议先用一组大概的初始值，之后你只改这些数字就能调位置
                 // 例：1: height - 200 表示第1题起点Y为 height-200。
                 const answerPositions = {
-                    1: height - 100,
-                    2: height - 170,
-                    3: height - 265,
-                    4: height - 342,
-                    5: height - 420                                                                                                                                                                                     ,
-                    6: height - 496,
-                    7: height - 573,
-                    8: height - 650,
-                    9: height - 727,
-                    10: height - 805,
+                    1: height - 105,
+                    2: height - 180,
+                    3: height - 275,
+                    4: height - 352,
+                    5: height - 430                                                                                                                                                                                     ,
+                    6: height - 506,
+                    7: height - 583,
+                    8: height - 660,
+                    9: height - 737,
+                    10: height - 815,
                 };
 
                 // 问题列表
