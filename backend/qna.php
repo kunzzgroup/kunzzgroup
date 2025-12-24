@@ -880,7 +880,7 @@ require_once 'session_check.php';
                 // 这里建议先用一组大概的初始值，之后你只改这些数字就能调位置
                 // 例：1: height - 200 表示第1题起点Y为 height-200。
                 const answerPositions = {
-                    1: height - 95,
+                    1: height - 100,
                     2: height - 170,
                     3: height - 265,
                     4: height - 342,
