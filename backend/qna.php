@@ -724,7 +724,7 @@ require_once 'session_check.php';
         // 打印问卷模板（直接下载）
         async function printTemplate() {
             try {
-                const templatePath = '../form/survey.pdf';
+                const templatePath = '../form/surveyform.pdf';
                 const response = await fetch(templatePath);
                 
                 if (!response.ok) {
