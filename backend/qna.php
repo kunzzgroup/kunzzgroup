@@ -891,7 +891,7 @@ require_once 'session_check.php';
                     3: height - 265,
                     4: height - 300,
                     5: height - 340,
-                    6: height - 500,
+                    6: height - 495,
                     7: height - 573,
                     8: height - 650,
                     9: height - 727,
