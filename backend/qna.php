@@ -702,6 +702,7 @@ require_once 'session_check.php';
                 // 获取第一页
                 const page = pdfDoc.getPage(0);
                 const { width, height } = page.getSize();
+                console.log(`PDF尺寸: 宽度=${width.toFixed(2)}pt, 高度=${height.toFixed(2)}pt`);
 
                 // 加载支持中文的字体（使用在线字体文件）
                 // 使用 Noto Sans SC (思源黑体) 字体，支持简体中文
