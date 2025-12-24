@@ -857,7 +857,7 @@ require_once 'session_check.php';
                 const headerFontSize = 12;
                 const textColor = rgb(0, 0, 0);
                 const lineHeight = 14;
-                const leftMargin = 20;  // 减小这个值可以让答案往左移（当前：80，原值：100）
+                const leftMargin = 25;  // 减小这个值可以让答案往左移（当前：80，原值：100）
                 const rightMargin = 100;
                 const maxWidth = width - leftMargin - rightMargin;
                 const topMargin = 100;
