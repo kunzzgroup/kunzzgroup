@@ -721,11 +721,29 @@ require_once 'session_check.php';
             }
         }
         
-        // 打印问卷模板
-        function printTemplate() {
-            // 直接打开 PDF 模板文件进行打印
-            const templatePath = '../form/survey.pdf';
-            window.open(templatePath, '_blank');
+        // 打印问卷模板（直接下载）
+        async function printTemplate() {
+            try {
+                const templatePath = '../form/survey.pdf';
+                const response = await fetch(templatePath);
+                
+                if (!response.ok) {
+                    throw new Error('无法加载PDF模板');
+                }
+                
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = '问卷模板.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('下载PDF模板失败:', error);
+                showAlert('下载PDF模板失败：' + error.message, 'error');
+            }
         }
 
         // 显示提示信息
