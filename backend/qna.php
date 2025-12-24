@@ -10,7 +10,9 @@ require_once 'session_check.php';
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <title>问卷回答 - KUNZZ HOLDINGS</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script src="https://unpkg.com/@pdf-lib/fontkit@1.0.0/dist/index.umd.js" onerror="console.error('fontkit 加载失败')"></script>
+    <!-- 尝试加载 fontkit（优先使用本地文件） -->
+    <script src="../fonts/fontkit.umd.js" 
+            onerror="console.warn('本地 fontkit 未找到，将尝试从 CDN 加载')"></script>
     <style>
         * {
             margin: 0;
@@ -712,40 +714,50 @@ require_once 'session_check.php';
                     }
                 }
                 
-                // 如果仍未找到，尝试动态加载
+                // 如果仍未找到，尝试动态加载（多个 CDN 源）
                 if (!fontkitInstance) {
                     console.log('fontkit 未找到，尝试动态加载...');
-                    try {
-                        await new Promise((resolve, reject) => {
-                            const script = document.createElement('script');
-                            script.src = 'https://unpkg.com/@pdf-lib/fontkit@1.0.0/dist/index.umd.js';
-                            script.onload = () => {
-                                // 等待一下确保全局变量已设置
-                                setTimeout(() => {
-                                    for (const name of possibleNames) {
-                                        if (typeof window[name] !== 'undefined') {
-                                            fontkitInstance = window[name];
-                                            console.log(`fontkit 动态加载成功，使用变量名: ${name}`);
-                                            resolve();
-                                            return;
+                    const fontkitSources = [
+                        '../fonts/fontkit.umd.js',  // 本地文件（优先）
+                        'https://unpkg.com/fontkit/dist/fontkit.umd.js',
+                        'https://cdn.jsdelivr.net/npm/fontkit/dist/fontkit.umd.js',
+                        'https://unpkg.com/@pdf-lib/fontkit/dist/fontkit.umd.js'
+                    ];
+                    
+                    let loaded = false;
+                    for (const src of fontkitSources) {
+                        try {
+                            await new Promise((resolve, reject) => {
+                                const script = document.createElement('script');
+                                script.src = src;
+                                script.onload = () => {
+                                    // 等待一下确保全局变量已设置
+                                    setTimeout(() => {
+                                        for (const name of possibleNames) {
+                                            if (typeof window[name] !== 'undefined') {
+                                                fontkitInstance = window[name];
+                                                console.log(`fontkit 动态加载成功 (${src})，使用变量名: ${name}`);
+                                                loaded = true;
+                                                resolve();
+                                                return;
+                                            }
                                         }
-                                    }
-                                    // 如果还是找不到，列出所有 window 属性用于调试
-                                    const fontRelated = Object.keys(window).filter(k => 
-                                        k.toLowerCase().includes('font') || k.toLowerCase().includes('kit')
-                                    );
-                                    console.warn('fontkit 全局变量未找到。相关变量:', fontRelated);
-                                    reject(new Error('fontkit 全局变量未找到'));
-                                }, 300);
-                            };
-                            script.onerror = () => {
-                                console.error('无法从 CDN 加载 fontkit 脚本');
-                                reject(new Error('无法从 CDN 加载 fontkit'));
-                            };
-                            document.head.appendChild(script);
-                        });
-                    } catch (e) {
-                        console.error('动态加载 fontkit 失败:', e);
+                                        // 如果还是找不到，尝试检查是否有其他导出方式
+                                        console.warn(`fontkit 脚本已加载 (${src})，但全局变量未找到`);
+                                        reject(new Error('fontkit 全局变量未找到'));
+                                    }, 300);
+                                };
+                                script.onerror = () => {
+                                    console.warn(`无法从 ${src} 加载 fontkit`);
+                                    reject(new Error(`无法加载: ${src}`));
+                                };
+                                document.head.appendChild(script);
+                            });
+                            if (loaded) break;
+                        } catch (e) {
+                            console.warn(`尝试加载 fontkit 失败 (${src}):`, e.message);
+                            continue;
+                        }
                     }
                 }
                 
