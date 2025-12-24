@@ -10,9 +10,6 @@ require_once 'session_check.php';
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <title>问卷回答 - KUNZZ HOLDINGS</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <!-- 尝试加载 fontkit（优先使用本地文件） -->
-    <script src="../fonts/fontkit.umd.js" 
-            onerror="console.warn('本地 fontkit 未找到，将尝试从 CDN 加载')"></script>
     <style>
         * {
             margin: 0;
@@ -700,74 +697,6 @@ require_once 'session_check.php';
 
                 const templateBytes = await templateResponse.arrayBuffer();
                 const { PDFDocument, rgb, StandardFonts } = PDFLib;
-                
-                // 动态加载并注册 fontkit（用于嵌入自定义字体，必须在创建 PDFDocument 之前注册）
-                let fontkitInstance = null;
-                
-                // 首先检查是否已经加载（尝试多种可能的全局变量名）
-                const possibleNames = ['fontkit', 'FontKit', 'pdfLibFontkit', 'PDFLibFontkit'];
-                for (const name of possibleNames) {
-                    if (typeof window[name] !== 'undefined') {
-                        fontkitInstance = window[name];
-                        console.log(`找到 fontkit，使用变量名: ${name}`);
-                        break;
-                    }
-                }
-                
-                // 如果仍未找到，尝试动态加载（多个 CDN 源）
-                if (!fontkitInstance) {
-                    console.log('fontkit 未找到，尝试动态加载...');
-                    const fontkitSources = [
-                        '../fonts/fontkit.umd.js',  // 本地文件（优先）
-                        'https://unpkg.com/fontkit/dist/fontkit.umd.js',
-                        'https://cdn.jsdelivr.net/npm/fontkit/dist/fontkit.umd.js',
-                        'https://unpkg.com/@pdf-lib/fontkit/dist/fontkit.umd.js'
-                    ];
-                    
-                    let loaded = false;
-                    for (const src of fontkitSources) {
-                        try {
-                            await new Promise((resolve, reject) => {
-                                const script = document.createElement('script');
-                                script.src = src;
-                                script.onload = () => {
-                                    // 等待一下确保全局变量已设置
-                                    setTimeout(() => {
-                                        for (const name of possibleNames) {
-                                            if (typeof window[name] !== 'undefined') {
-                                                fontkitInstance = window[name];
-                                                console.log(`fontkit 动态加载成功 (${src})，使用变量名: ${name}`);
-                                                loaded = true;
-                                                resolve();
-                                                return;
-                                            }
-                                        }
-                                        // 如果还是找不到，尝试检查是否有其他导出方式
-                                        console.warn(`fontkit 脚本已加载 (${src})，但全局变量未找到`);
-                                        reject(new Error('fontkit 全局变量未找到'));
-                                    }, 300);
-                                };
-                                script.onerror = () => {
-                                    console.warn(`无法从 ${src} 加载 fontkit`);
-                                    reject(new Error(`无法加载: ${src}`));
-                                };
-                                document.head.appendChild(script);
-                            });
-                            if (loaded) break;
-                        } catch (e) {
-                            console.warn(`尝试加载 fontkit 失败 (${src}):`, e.message);
-                            continue;
-                        }
-                    }
-                }
-                
-                if (fontkitInstance) {
-                    PDFDocument.registerFontkit(fontkitInstance);
-                    console.log('fontkit 已成功注册到 PDFDocument');
-                } else {
-                    throw new Error('fontkit 未加载。请检查浏览器控制台的错误信息，或尝试刷新页面。如果问题持续，可能需要检查网络连接或使用本地 fontkit 文件。');
-                }
-                
                 const pdfDoc = await PDFDocument.load(templateBytes);
 
                 // 获取第一页
@@ -775,22 +704,98 @@ require_once 'session_check.php';
                 const { width, height } = page.getSize();
                 console.log(`PDF尺寸: 宽度=${width.toFixed(2)}pt, 高度=${height.toFixed(2)}pt`);
 
-                // 加载本地中文字体文件
-                // 使用 Noto Sans SC (思源黑体) 字体，支持简体中文
-                const regularFontResponse = await fetch('../fonts/NotoSansSC-Regular.ttf');
-                const boldFontResponse = await fetch('../fonts/NotoSansSC-Bold.ttf');
+                // 使用标准字体（英文和数字）
+                const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+                const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
                 
-                if (!regularFontResponse.ok || !boldFontResponse.ok) {
-                    throw new Error('无法加载中文字体文件，请确保 fonts 文件夹中有 NotoSansSC-Regular.ttf 和 NotoSansSC-Bold.ttf');
+                // 辅助函数：检查文本是否包含中文字符
+                function containsChinese(text) {
+                    return /[\u4e00-\u9fa5]/.test(text);
                 }
                 
-                const regularFontBytes = await regularFontResponse.arrayBuffer();
-                const boldFontBytes = await boldFontResponse.arrayBuffer();
+                // Canvas 渲染中文文本（避免挤压）
+                async function renderTextAsImage(text, fontSize, isBold = false) {
+                    // 使用高DPI避免模糊（2倍分辨率）
+                    const dpr = 2;
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // 使用系统中文字体
+                    const fontFamily = '"Microsoft YaHei", "SimHei", "PingFang SC", "WenQuanYi Micro Hei", Arial, sans-serif';
+                    const scaledFontSize = fontSize * dpr;
+                    
+                    // 先测量文本尺寸（使用高分辨率字体）
+                    ctx.font = `${isBold ? 'bold ' : ''}${scaledFontSize}px ${fontFamily}`;
+                    const metrics = ctx.measureText(text);
+                    const textWidth = metrics.width;
+                    const textHeight = scaledFontSize * 1.2;
+                    
+                    // 设置canvas尺寸（高分辨率，包含padding）
+                    const padding = 10 * dpr;
+                    const canvasWidth = Math.ceil(textWidth) + padding * 2;
+                    const canvasHeight = Math.ceil(textHeight) + padding * 2;
+                    
+                    canvas.width = canvasWidth;
+                    canvas.height = canvasHeight;
+                    
+                    // 重新获取context（设置width/height后会重置）
+                    const finalCtx = canvas.getContext('2d');
+                    
+                    // 使用高分辨率字体绘制
+                    finalCtx.font = `${isBold ? 'bold ' : ''}${scaledFontSize}px ${fontFamily}`;
+                    finalCtx.fillStyle = '#000000';
+                    finalCtx.textBaseline = 'top';
+                    finalCtx.textAlign = 'left';
+                    
+                    // 绘制文本
+                    finalCtx.fillText(text, padding, padding);
+                    
+                    // 转换为PNG
+                    const dataUrl = canvas.toDataURL('image/png');
+                    
+                    // 返回实际显示尺寸（除以DPI）和图片数据
+                    return {
+                        dataUrl: dataUrl,
+                        width: textWidth / dpr,  // 实际显示宽度（pt）
+                        height: textHeight / dpr  // 实际显示高度（pt）
+                    };
+                }
                 
-                const font = await pdfDoc.embedFont(regularFontBytes);
-                const boldFont = await pdfDoc.embedFont(boldFontBytes);
+                // 智能文本绘制函数（中文用Canvas，英文用文字）
+                async function drawTextSmart(page, text, x, y, fontSize, isBold = false) {
+                    if (containsChinese(text)) {
+                        // 包含中文，使用 Canvas 渲染
+                        const { dataUrl, width: textWidth, height: textHeight } = await renderTextAsImage(text, fontSize, isBold);
+                        
+                        // 转换 base64 为 Uint8Array
+                        const base64Data = dataUrl.split(',')[1];
+                        const binaryString = atob(base64Data);
+                        const bytes = new Uint8Array(binaryString.length);
+                        for (let i = 0; i < binaryString.length; i++) {
+                            bytes[i] = binaryString.charCodeAt(i);
+                        }
+                        
+                        const image = await pdfDoc.embedPng(bytes);
+                        page.drawImage(image, {
+                            x: x,
+                            y: y - textHeight,  // PDF坐标原点在左下角
+                            width: textWidth,    // 实际显示宽度（pt）
+                            height: textHeight,  // 实际显示高度（pt）
+                        });
+                    } else {
+                        // 不包含中文，直接使用文字
+                        const fontToUse = isBold ? boldFont : font;
+                        page.drawText(text, {
+                            x: x,
+                            y: y,
+                            size: fontSize,
+                            font: fontToUse,
+                            color: textColor,
+                        });
+                    }
+                }
                 
-                console.log('成功加载中文字体');
+                console.log('使用 Canvas 渲染中文文本');
 
                 // 设置字体大小和颜色
                 const fontSize = 12;
@@ -804,17 +809,19 @@ require_once 'session_check.php';
                 
                 // 在页面顶部中间绘制用户名和职位
                 const userInfoText = `${currentUsername} (${currentPosition})`;
-                // 计算文本宽度并居中
-                const textWidth = boldFont.widthOfTextAtSize(userInfoText, headerFontSize);
-                const centerX = (width - textWidth) / 2;
+                // 计算文本宽度并居中（如果是中文，使用 Canvas 测量）
+                let textWidth, centerX;
+                if (containsChinese(userInfoText)) {
+                    const tempCanvas = document.createElement('canvas');
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCtx.font = `bold ${headerFontSize}px "Microsoft YaHei", "SimHei", sans-serif`;
+                    textWidth = tempCtx.measureText(userInfoText).width;
+                } else {
+                    textWidth = boldFont.widthOfTextAtSize(userInfoText, headerFontSize);
+                }
+                centerX = (width - textWidth) / 2;
                 
-                page.drawText(userInfoText, {
-                    x: centerX,
-                    y: height - 40,
-                    size: headerFontSize,
-                    font: boldFont,
-                    color: textColor,
-                });
+                await drawTextSmart(page, userInfoText, centerX, height - 40, headerFontSize, true);
                 
                 // 每个问题的“绝对起始Y坐标”配置（完全类似 invoice：固定坐标）
                 // 这里建议先用一组大概的初始值，之后你只改这些数字就能调位置
@@ -873,13 +880,7 @@ require_once 'session_check.php';
                     for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
                         const line = lines[lineIndex];
                         const yPos = yBase - (lineIndex * lineHeight);
-                        currentPage.drawText(line, {
-                            x: leftMargin,
-                            y: yPos,
-                            size: fontSize,
-                            font: font,
-                            color: textColor,
-                        });
+                        await drawTextSmart(currentPage, line, leftMargin, yPos, fontSize, false);
                     }
                 }
 
