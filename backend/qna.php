@@ -894,7 +894,7 @@ require_once 'session_check.php';
                     7: height - 420,
                     8: height - 460,
                     9: height - 500,
-                    10: height - 775,
+                    10: height - 776,
                 };
 
                 // 问题列表
