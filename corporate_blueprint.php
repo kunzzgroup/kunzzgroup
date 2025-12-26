@@ -108,6 +108,7 @@ $careerData = [
 $careerDataJson = json_encode($careerData, JSON_UNESCAPED_UNICODE);
 
 // PDF文件路径配置（可以从数据库或配置文件中读取）
+// 注意：根据Figma设计，公司战略页面显示封面，PDF将在封面后显示
 $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategic_plan.pdf'; // 默认PDF路径
 ?>
 <!DOCTYPE html>
@@ -222,10 +223,24 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
             background: #fff;
             border-radius: 20px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 30px;
+            padding: 60px;
             min-height: 600px;
-            display: flex;
-            flex-direction: column;
+            background: linear-gradient(135deg, #fff 0%, #fffef0 50%, #fff 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 黄色渐变背景效果 */
+        .slide-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -20%;
+            width: 80%;
+            height: 150%;
+            background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
         }
 
         /* 导航按钮 */
@@ -273,12 +288,13 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
             align-items: flex-start;
             height: 100%;
             position: relative;
+            z-index: 1;
         }
 
         .slide-header {
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 40px;
             width: 100%;
         }
 
@@ -287,6 +303,7 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
             height: 40px;
             background: #ff6b35;
             margin-right: 15px;
+            flex-shrink: 0;
         }
 
         .slide-title {
@@ -295,48 +312,94 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
             color: #333;
         }
 
-        /* PDF查看器容器 */
-        .pdf-viewer-container {
+        /* 公司信息区域 */
+        .company-info {
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             width: 100%;
-            min-height: 500px;
-            border-radius: 10px;
-            overflow: hidden;
-            background: #f5f5f5;
-            border: 1px solid #e0e0e0;
-            margin-top: 20px;
+            position: relative;
+            z-index: 1;
         }
 
-        .pdf-viewer-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
+        .company-name {
+            font-size: 48px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            line-height: 1.2;
         }
 
-        .pdf-placeholder {
+        .company-subtitle {
+            font-size: 36px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            line-height: 1.2;
+        }
+
+        .company-subtitle-en {
+            font-size: 18px;
+            color: #666;
+            letter-spacing: 3px;
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+
+        /* Logo容器 */
+        .logo-container {
+            position: absolute;
+            right: 60px;
+            top: 60px;
+            z-index: 2;
+        }
+
+        .logo {
+            width: 150px;
+            height: 150px;
+            background: #ff6b35;
+            border-radius: 50%;
+            border: 3px solid #ffd700;
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100%;
-            color: #999;
-            font-size: 16px;
-            text-align: center;
-            padding: 40px;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
         }
 
-        .pdf-placeholder p {
-            margin: 10px 0;
+        .logo-k {
+            font-size: 60px;
+            font-weight: 700;
+            color: #fff;
+            position: absolute;
+            left: 30px;
+            line-height: 1;
         }
 
-        .pdf-placeholder .upload-hint {
-            font-size: 14px;
-            color: #666;
-            margin-top: 20px;
+        .logo-arrows {
+            position: absolute;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .logo-arrow {
+            width: 0;
+            height: 0;
+            border-left: 15px solid #fff;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
         }
 
         /* 个人考核页面样式 */
         .assessment-slide {
             display: none;
+            position: relative;
+            z-index: 1;
         }
 
         .assessment-slide.active {
@@ -347,11 +410,13 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .career-table th,
         .career-table td {
-            padding: 12px;
+            padding: 15px 12px;
             text-align: left;
             border: 1px solid #e0e0e0;
         }
@@ -360,13 +425,19 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
             background: #ffd700;
             color: #333;
             font-weight: 600;
+            font-size: 14px;
         }
 
-        .career-table tr:nth-child(even) {
+        .career-table td {
+            background: #fff;
+            font-size: 13px;
+        }
+
+        .career-table tr:nth-child(even) td {
             background: #f9f9f9;
         }
 
-        .career-table tr:hover {
+        .career-table tr:hover td {
             background: #fff5f0;
         }
 
@@ -374,22 +445,25 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
             font-size: 24px;
             font-weight: 700;
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .table-subtitle {
             font-size: 16px;
             color: #666;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            font-weight: 400;
         }
 
         .requirement-list {
             font-size: 13px;
-            line-height: 1.6;
+            line-height: 1.8;
+            max-width: 400px;
         }
 
         .requirement-item {
-            margin-bottom: 4px;
+            margin-bottom: 6px;
+            color: #555;
         }
 
         /* 页面指示器 */
@@ -404,16 +478,36 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
             font-size: 14px;
             color: #666;
             font-weight: 600;
+            z-index: 2;
         }
 
         /* 响应式设计 */
         @media (max-width: 1024px) {
             .slide-container {
-                padding: 20px;
+                padding: 40px;
             }
 
-            .pdf-viewer-container {
-                min-height: 400px;
+            .company-name {
+                font-size: 36px;
+            }
+
+            .company-subtitle {
+                font-size: 28px;
+            }
+
+            .logo {
+                width: 120px;
+                height: 120px;
+            }
+
+            .logo-k {
+                font-size: 48px;
+                left: 25px;
+            }
+
+            .logo-container {
+                right: 40px;
+                top: 40px;
             }
         }
 
@@ -427,12 +521,38 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
             }
 
             .slide-container {
-                padding: 15px;
+                padding: 30px 20px;
                 min-height: 500px;
             }
 
-            .pdf-viewer-container {
-                min-height: 400px;
+            .company-name {
+                font-size: 28px;
+            }
+
+            .company-subtitle {
+                font-size: 22px;
+            }
+
+            .company-subtitle-en {
+                font-size: 14px;
+            }
+
+            .logo-container {
+                position: relative;
+                right: auto;
+                top: auto;
+                margin: 20px 0;
+                align-self: center;
+            }
+
+            .logo {
+                width: 100px;
+                height: 100px;
+            }
+
+            .logo-k {
+                font-size: 40px;
+                left: 20px;
             }
 
             .nav-button {
@@ -491,24 +611,19 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
                         <div class="slide-header-line"></div>
                         <div class="slide-title">企业蓝图</div>
                     </div>
-                    <!-- PDF查看器区域 -->
-                    <div class="pdf-viewer-container" id="pdfViewerContainer">
-                        <?php if (file_exists($strategyPdfPath)): ?>
-                            <iframe src="<?php echo htmlspecialchars($strategyPdfPath); ?>#toolbar=1&navpanes=1&scrollbar=1" 
-                                    type="application/pdf" 
-                                    id="pdfViewer">
-                                <div class="pdf-placeholder">
-                                    <p>您的浏览器不支持PDF预览</p>
-                                    <p><a href="<?php echo htmlspecialchars($strategyPdfPath); ?>" target="_blank">点击下载PDF文件</a></p>
-                                </div>
-                            </iframe>
-                        <?php else: ?>
-                            <div class="pdf-placeholder">
-                                <p>📄 PDF文件未找到</p>
-                                <p>请将PDF文件放置在：<code><?php echo htmlspecialchars($strategyPdfPath); ?></code></p>
-                                <p class="upload-hint">或者通过URL参数指定PDF路径：?pdf=your_pdf_path.pdf</p>
+                    <div class="company-info">
+                        <div class="company-name">KUNZZ HOLDINGS</div>
+                        <div class="company-subtitle">SDN BHD 战略计划</div>
+                        <div class="company-subtitle-en">CORPORATE STRATEGIC PLAN</div>
+                    </div>
+                    <div class="logo-container">
+                        <div class="logo">
+                            <div class="logo-k">K</div>
+                            <div class="logo-arrows">
+                                <div class="logo-arrow"></div>
+                                <div class="logo-arrow"></div>
                             </div>
-                        <?php endif; ?>
+                        </div>
                     </div>
                     <div class="page-indicator">第1页</div>
                 </div>
