@@ -106,6 +106,9 @@ $careerData = [
 
 // 将数据转换为JSON供JavaScript使用
 $careerDataJson = json_encode($careerData, JSON_UNESCAPED_UNICODE);
+
+// PDF文件路径配置（可以从数据库或配置文件中读取）
+$strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategic_plan.pdf'; // 默认PDF路径
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -219,9 +222,10 @@ $careerDataJson = json_encode($careerData, JSON_UNESCAPED_UNICODE);
             background: #fff;
             border-radius: 20px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 60px;
+            padding: 30px;
             min-height: 600px;
-            background: linear-gradient(135deg, #fff 0%, #fffef0 100%);
+            display: flex;
+            flex-direction: column;
         }
 
         /* 导航按钮 */
@@ -268,12 +272,14 @@ $careerDataJson = json_encode($careerData, JSON_UNESCAPED_UNICODE);
             flex-direction: column;
             align-items: flex-start;
             height: 100%;
+            position: relative;
         }
 
         .slide-header {
             display: flex;
             align-items: center;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
+            width: 100%;
         }
 
         .slide-header-line {
@@ -289,69 +295,43 @@ $careerDataJson = json_encode($careerData, JSON_UNESCAPED_UNICODE);
             color: #333;
         }
 
-        .company-name {
-            font-size: 48px;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 10px;
-            letter-spacing: 2px;
+        /* PDF查看器容器 */
+        .pdf-viewer-container {
+            flex: 1;
+            width: 100%;
+            min-height: 500px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            margin-top: 20px;
         }
 
-        .company-subtitle {
-            font-size: 36px;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 10px;
-            letter-spacing: 1px;
+        .pdf-viewer-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
 
-        .company-subtitle-en {
-            font-size: 18px;
-            color: #666;
-            letter-spacing: 3px;
-            margin-top: 10px;
-        }
-
-        .logo-container {
-            position: absolute;
-            right: 60px;
-            top: 60px;
-        }
-
-        .logo {
-            width: 150px;
-            height: 150px;
-            background: #ff6b35;
-            border-radius: 50%;
-            border: 3px solid #ffd700;
+        .pdf-placeholder {
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
+            height: 100%;
+            color: #999;
+            font-size: 16px;
+            text-align: center;
+            padding: 40px;
         }
 
-        .logo-k {
-            font-size: 60px;
-            font-weight: 700;
-            color: #fff;
-            position: absolute;
-            left: 30px;
+        .pdf-placeholder p {
+            margin: 10px 0;
         }
 
-        .logo-arrows {
-            position: absolute;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .logo-arrow {
-            width: 0;
-            height: 0;
-            border-left: 15px solid #fff;
-            border-top: 8px solid transparent;
-            border-bottom: 8px solid transparent;
+        .pdf-placeholder .upload-hint {
+            font-size: 14px;
+            color: #666;
+            margin-top: 20px;
         }
 
         /* 个人考核页面样式 */
@@ -429,25 +409,11 @@ $careerDataJson = json_encode($careerData, JSON_UNESCAPED_UNICODE);
         /* 响应式设计 */
         @media (max-width: 1024px) {
             .slide-container {
-                padding: 40px;
+                padding: 20px;
             }
 
-            .company-name {
-                font-size: 36px;
-            }
-
-            .company-subtitle {
-                font-size: 28px;
-            }
-
-            .logo {
-                width: 120px;
-                height: 120px;
-            }
-
-            .logo-k {
-                font-size: 48px;
-                left: 25px;
+            .pdf-viewer-container {
+                min-height: 400px;
             }
         }
 
@@ -461,23 +427,12 @@ $careerDataJson = json_encode($careerData, JSON_UNESCAPED_UNICODE);
             }
 
             .slide-container {
-                padding: 30px 20px;
+                padding: 15px;
                 min-height: 500px;
             }
 
-            .company-name {
-                font-size: 28px;
-            }
-
-            .company-subtitle {
-                font-size: 22px;
-            }
-
-            .logo-container {
-                position: relative;
-                right: auto;
-                top: auto;
-                margin: 20px 0;
+            .pdf-viewer-container {
+                min-height: 400px;
             }
 
             .nav-button {
@@ -536,19 +491,24 @@ $careerDataJson = json_encode($careerData, JSON_UNESCAPED_UNICODE);
                         <div class="slide-header-line"></div>
                         <div class="slide-title">企业蓝图</div>
                     </div>
-                    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; width: 100%;">
-                        <div class="company-name">KUNZZ HOLDINGS</div>
-                        <div class="company-subtitle">SDN BHD 战略计划</div>
-                        <div class="company-subtitle-en">CORPORATE STRATEGIC PLAN</div>
-                    </div>
-                    <div class="logo-container">
-                        <div class="logo">
-                            <div class="logo-k">K</div>
-                            <div class="logo-arrows">
-                                <div class="logo-arrow"></div>
-                                <div class="logo-arrow"></div>
+                    <!-- PDF查看器区域 -->
+                    <div class="pdf-viewer-container" id="pdfViewerContainer">
+                        <?php if (file_exists($strategyPdfPath)): ?>
+                            <iframe src="<?php echo htmlspecialchars($strategyPdfPath); ?>#toolbar=1&navpanes=1&scrollbar=1" 
+                                    type="application/pdf" 
+                                    id="pdfViewer">
+                                <div class="pdf-placeholder">
+                                    <p>您的浏览器不支持PDF预览</p>
+                                    <p><a href="<?php echo htmlspecialchars($strategyPdfPath); ?>" target="_blank">点击下载PDF文件</a></p>
+                                </div>
+                            </iframe>
+                        <?php else: ?>
+                            <div class="pdf-placeholder">
+                                <p>📄 PDF文件未找到</p>
+                                <p>请将PDF文件放置在：<code><?php echo htmlspecialchars($strategyPdfPath); ?></code></p>
+                                <p class="upload-hint">或者通过URL参数指定PDF路径：?pdf=your_pdf_path.pdf</p>
                             </div>
-                        </div>
+                        <?php endif; ?>
                     </div>
                     <div class="page-indicator">第1页</div>
                 </div>
