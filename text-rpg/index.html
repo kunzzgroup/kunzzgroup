@@ -102,6 +102,17 @@
                     </div>
                 </div>
 
+                <!-- 训练面板 -->
+                <div class="panel training-panel" id="training-panel" style="display: none;">
+                    <h2 class="panel-title">训练场</h2>
+                    <div class="training-content">
+                        <p class="training-desc">花费金币提升属性，每次训练提升1点属性</p>
+                        <div class="training-options" id="training-options">
+                            <!-- 训练选项将通过JS动态添加 -->
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 战斗区域 -->
                 <div class="panel combat-panel" id="combat-panel" style="display: none;">
                     <h2 class="panel-title">战斗</h2>
@@ -138,10 +149,7 @@
                 <div class="panel quest-panel">
                     <h2 class="panel-title">任务</h2>
                     <div class="quest-list" id="quest-list">
-                        <div class="quest-item">
-                            <div class="quest-title">创建角色</div>
-                            <div class="quest-desc">选择你的职业和属性</div>
-                        </div>
+                        <!-- 任务将通过JS动态添加 -->
                     </div>
                 </div>
 
@@ -150,6 +158,20 @@
                     <div class="location-info">
                         <div class="location-name" id="current-location">新手村</div>
                         <div class="location-desc" id="location-desc">一个宁静的小村庄，适合新手冒险者开始他们的旅程。</div>
+                    </div>
+                </div>
+
+                <div class="panel skills-panel">
+                    <h2 class="panel-title">技能</h2>
+                    <div class="skills-list" id="skills-list">
+                        <!-- 技能将通过JS动态添加 -->
+                    </div>
+                </div>
+
+                <div class="panel achievements-panel">
+                    <h2 class="panel-title">成就</h2>
+                    <div class="achievements-list" id="achievements-list">
+                        <!-- 成就将通过JS动态添加 -->
                     </div>
                 </div>
             </aside>
@@ -186,6 +208,32 @@
                     </div>
                 </div>
                 <button class="btn btn-primary" id="create-character-btn">开始冒险</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 商店模态框 -->
+    <div class="modal" id="shop-modal">
+        <div class="modal-content shop-modal-content">
+            <div class="modal-header">
+                <h2>商店</h2>
+                <button class="btn-close" id="close-shop">×</button>
+            </div>
+            <div class="shop-tabs">
+                <button class="shop-tab active" data-tab="buy">购买</button>
+                <button class="shop-tab" data-tab="sell">出售</button>
+            </div>
+            <div class="shop-content">
+                <div class="shop-section active" id="shop-buy">
+                    <div class="shop-items" id="shop-items">
+                        <!-- 商品将通过JS动态添加 -->
+                    </div>
+                </div>
+                <div class="shop-section" id="shop-sell">
+                    <div class="shop-items" id="sell-items">
+                        <!-- 可出售物品将通过JS动态添加 -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>
