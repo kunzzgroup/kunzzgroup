@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文字RPG - 冒险之旅</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- 游戏标题 -->
+        <header class="game-header">
+            <h1 class="game-title">冒险之旅</h1>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="stat-label">等级</span>
+                    <span class="stat-value" id="player-level">1</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">金币</span>
+                    <span class="stat-value" id="player-gold">100</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主游戏区域 -->
+        <div class="main-content">
+            <!-- 左侧：角色信息面板 -->
+            <aside class="sidebar">
+                <div class="panel character-panel">
+                    <h2 class="panel-title">角色信息</h2>
+                    <div class="character-info">
+                        <div class="character-name" id="character-name">未命名冒险者</div>
+                        <div class="character-class" id="character-class">-</div>
+                        <div class="health-bar-container">
+                            <div class="bar-label">
+                                <span>生命值</span>
+                                <span id="health-text">100/100</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill health-fill" id="health-bar"></div>
+                            </div>
+                        </div>
+                        <div class="mana-bar-container">
+                            <div class="bar-label">
+                                <span>魔法值</span>
+                                <span id="mana-text">50/50</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill mana-fill" id="mana-bar"></div>
+                            </div>
+                        </div>
+                        <div class="exp-bar-container">
+                            <div class="bar-label">
+                                <span>经验值</span>
+                                <span id="exp-text">0/100</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill exp-fill" id="exp-bar"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="attributes">
+                        <div class="attribute-item">
+                            <span class="attr-name">力量</span>
+                            <span class="attr-value" id="attr-strength">10</span>
+                        </div>
+                        <div class="attribute-item">
+                            <span class="attr-name">敏捷</span>
+                            <span class="attr-value" id="attr-dexterity">10</span>
+                        </div>
+                        <div class="attribute-item">
+                            <span class="attr-name">智力</span>
+                            <span class="attr-value" id="attr-intelligence">10</span>
+                        </div>
+                        <div class="attribute-item">
+                            <span class="attr-name">体质</span>
+                            <span class="attr-value" id="attr-constitution">10</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel inventory-panel">
+                    <h2 class="panel-title">背包</h2>
+                    <div class="inventory-grid" id="inventory">
+                        <!-- 物品将通过JS动态添加 -->
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 中间：游戏主区域 -->
+            <main class="game-main">
+                <!-- 游戏日志/故事区域 -->
+                <div class="panel story-panel">
+                    <h2 class="panel-title">冒险日志</h2>
+                    <div class="story-content" id="story-content">
+                        <div class="story-entry welcome">
+                            <p>欢迎来到冒险之旅！</p>
+                            <p>在这个充满危险与机遇的世界中，你将扮演一名勇敢的冒险者。</p>
+                            <p>首先，请创建你的角色...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 战斗区域 -->
+                <div class="panel combat-panel" id="combat-panel" style="display: none;">
+                    <h2 class="panel-title">战斗</h2>
+                    <div class="combat-info">
+                        <div class="enemy-info">
+                            <div class="enemy-name" id="enemy-name">-</div>
+                            <div class="enemy-level">等级 <span id="enemy-level">-</span></div>
+                            <div class="health-bar-container">
+                                <div class="bar-label">
+                                    <span>生命值</span>
+                                    <span id="enemy-health-text">-/-</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill enemy-health-fill" id="enemy-health-bar"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="combat-actions" id="combat-actions">
+                        <!-- 战斗按钮将通过JS动态添加 -->
+                    </div>
+                </div>
+
+                <!-- 行动按钮区域 -->
+                <div class="action-panel">
+                    <div class="action-buttons" id="action-buttons">
+                        <!-- 按钮将通过JS动态添加 -->
+                    </div>
+                </div>
+            </main>
+
+            <!-- 右侧：任务和地点面板 -->
+            <aside class="sidebar-right">
+                <div class="panel quest-panel">
+                    <h2 class="panel-title">任务</h2>
+                    <div class="quest-list" id="quest-list">
+                        <div class="quest-item">
+                            <div class="quest-title">创建角色</div>
+                            <div class="quest-desc">选择你的职业和属性</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel location-panel">
+                    <h2 class="panel-title">当前位置</h2>
+                    <div class="location-info">
+                        <div class="location-name" id="current-location">新手村</div>
+                        <div class="location-desc" id="location-desc">一个宁静的小村庄，适合新手冒险者开始他们的旅程。</div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- 角色创建模态框 -->
+    <div class="modal" id="character-creation-modal">
+        <div class="modal-content">
+            <h2>创建角色</h2>
+            <div class="creation-form">
+                <div class="form-group">
+                    <label for="player-name">角色名称</label>
+                    <input type="text" id="player-name" placeholder="输入角色名称" maxlength="20">
+                </div>
+                <div class="form-group">
+                    <label>选择职业</label>
+                    <div class="class-selection">
+                        <div class="class-option" data-class="warrior">
+                            <div class="class-name">战士</div>
+                            <div class="class-desc">高生命值和防御力，擅长近战</div>
+                            <div class="class-stats">力量+5, 体质+5</div>
+                        </div>
+                        <div class="class-option" data-class="rogue">
+                            <div class="class-name">盗贼</div>
+                            <div class="class-desc">高敏捷和暴击率，擅长偷袭</div>
+                            <div class="class-stats">敏捷+5, 智力+3</div>
+                        </div>
+                        <div class="class-option" data-class="mage">
+                            <div class="class-name">法师</div>
+                            <div class="class-desc">高魔法值和法术伤害</div>
+                            <div class="class-stats">智力+5, 敏捷+3</div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="create-character-btn">开始冒险</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
