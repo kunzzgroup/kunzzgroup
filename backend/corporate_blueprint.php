@@ -225,61 +225,16 @@ if (file_exists($jsonFile)) {
             width: 100%;
             height: 100%;
             position: relative;
-        }
-
-        .logo-outer-ring {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: clamp(4px, 0.42vw, 6px) solid #ffd700;
-            background: transparent;
-            position: relative;
-            z-index: 2;
-        }
-
-        .logo-inner-circle {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: calc(100% - clamp(12px, 1.25vw, 18px));
-            height: calc(100% - clamp(12px, 1.25vw, 18px));
-            border-radius: 50%;
-            background: #ff5c00;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1;
         }
 
-        .logo-symbol {
-            color: #ffffff;
-            font-size: clamp(48px, 5.21vw, 72px);
-            font-weight: 700;
-            font-family: 'Georgia', 'Times New Roman', serif;
-            display: flex;
-            align-items: center;
-            gap: clamp(4px, 0.42vw, 6px);
-            letter-spacing: -2px;
-        }
-
-        .logo-k {
-            position: relative;
-            font-style: italic;
-        }
-
-        .logo-arrows {
-            display: flex;
-            flex-direction: column;
-            gap: clamp(2px, 0.21vw, 3px);
-        }
-
-        .logo-arrow {
-            width: 0;
-            height: 0;
-            border-left: clamp(8px, 0.83vw, 12px) solid #ffffff;
-            border-top: clamp(4px, 0.42vw, 6px) solid transparent;
-            border-bottom: clamp(4px, 0.42vw, 6px) solid transparent;
+        .header-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
         }
 
         /* Logo reflection */
@@ -716,17 +671,7 @@ if (file_exists($jsonFile)) {
                                 <!-- Right side logo -->
                                 <div class="header-logo-container">
                                     <div class="header-logo">
-                                        <div class="logo-outer-ring">
-                                            <div class="logo-inner-circle">
-                                                <div class="logo-symbol">
-                                                    <span class="logo-k">K</span>
-                                                    <div class="logo-arrows">
-                                                        <div class="logo-arrow"></div>
-                                                        <div class="logo-arrow"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <img src="../images/images/logo.png" alt="KUNZZ HOLDINGS Logo">
                                         <div class="logo-reflection"></div>
                                     </div>
                                 </div>
