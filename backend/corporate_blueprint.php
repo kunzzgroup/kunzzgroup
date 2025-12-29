@@ -229,15 +229,17 @@ if (file_exists($jsonFile)) {
 
         .timeline-main-title {
             font-size: clamp(36px, 3.75vw, 56px);
-            font-weight: 800;
-            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 50%, #ffd700 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-weight: 900;
+            color: #ff5c00;
             margin-bottom: clamp(14px, 1.46vw, 20px);
-            letter-spacing: 1px;
-            text-shadow: 0 4px 8px rgba(255, 92, 0, 0.2);
+            letter-spacing: 2px;
+            text-shadow: 
+                3px 3px 0px rgba(255, 92, 0, 0.3),
+                1px 1px 0px rgba(0, 0, 0, 0.1);
             position: relative;
+            font-family: 'Comic Sans MS', 'Marker Felt', 'Kalam', cursive;
+            transform: rotate(-1deg);
+            display: inline-block;
         }
 
         .timeline-main-title::after {
@@ -256,209 +258,106 @@ if (file_exists($jsonFile)) {
             font-size: clamp(15px, 1.56vw, 20px);
             color: #4a5568;
             font-weight: 500;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.5px;
             margin-top: clamp(20px, 2.08vw, 28px);
+            font-family: 'Comic Sans MS', 'Marker Felt', 'Kalam', cursive;
+            transform: rotate(0.5deg);
+            display: inline-block;
         }
 
-        /* 卷轴式时间线容器 */
         .timeline-wrapper {
             position: relative;
-            padding: clamp(60px, 6.25vw, 100px) 0;
-            overflow-x: auto;
-            overflow-y: visible;
-            -webkit-overflow-scrolling: touch;
-            scroll-behavior: smooth;
+            padding: clamp(80px, 8.33vw, 120px) clamp(40px, 4.17vw, 60px);
+            overflow: visible;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 92, 0, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(255, 215, 0, 0.02) 0%, transparent 50%);
         }
 
-        .timeline-wrapper::-webkit-scrollbar {
-            height: 8px;
-        }
-
-        .timeline-wrapper::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 4px;
-        }
-
-        .timeline-wrapper::-webkit-scrollbar-thumb {
-            background: rgba(255, 92, 0, 0.3);
-            border-radius: 4px;
-        }
-
-        .timeline-wrapper::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 92, 0, 0.5);
-        }
-
-        /* 卷轴背景 */
-        .scroll-container {
-            position: relative;
-            min-width: max-content;
-            padding: clamp(60px, 6.25vw, 90px) clamp(120px, 12.5vw, 180px);
-            margin: 0 auto;
-        }
-
-        .scroll-paper {
-            position: relative;
-            background: linear-gradient(
-                to bottom,
-                #f5f1e8 0%,
-                #f9f6f0 20%,
-                #f5f1e8 50%,
-                #f9f6f0 80%,
-                #f5f1e8 100%
-            );
-            background-image: 
-                repeating-linear-gradient(
-                    90deg,
-                    transparent,
-                    transparent 2px,
-                    rgba(139, 115, 85, 0.03) 2px,
-                    rgba(139, 115, 85, 0.03) 4px
-                ),
-                repeating-linear-gradient(
-                    0deg,
-                    transparent,
-                    transparent 2px,
-                    rgba(139, 115, 85, 0.03) 2px,
-                    rgba(139, 115, 85, 0.03) 4px
-                );
-            border-radius: 8px;
-            box-shadow: 
-                0 20px 60px rgba(0, 0, 0, 0.15),
-                inset 0 0 100px rgba(139, 115, 85, 0.05),
-                inset 0 2px 4px rgba(255, 255, 255, 0.8);
-            padding: clamp(50px, 5.21vw, 80px) clamp(80px, 8.33vw, 120px);
-            position: relative;
-            border: 2px solid rgba(139, 115, 85, 0.2);
-        }
-
-        /* 卷轴左右轴装饰 */
-        .scroll-rod {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: clamp(40px, 4.17vw, 60px);
-            background: linear-gradient(
-                to right,
-                #c9a961 0%,
-                #d4b574 30%,
-                #e5c98a 50%,
-                #d4b574 70%,
-                #c9a961 100%
-            );
-            box-shadow: 
-                inset 0 0 20px rgba(0, 0, 0, 0.2),
-                0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 50%;
-            z-index: 2;
-        }
-
-        .scroll-rod.left {
-            left: clamp(20px, 2.08vw, 40px);
-        }
-
-        .scroll-rod.right {
-            right: clamp(20px, 2.08vw, 40px);
-        }
-
-        .scroll-rod::before {
-            content: '';
+        /* Hand-drawn style SVG timeline line */
+        .timeline-svg-container {
             position: absolute;
             top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60%;
-            height: 60%;
-            background: radial-gradient(
-                circle,
-                rgba(255, 255, 255, 0.3) 0%,
-                transparent 70%
-            );
-            border-radius: 50%;
-        }
-
-        /* 卷轴纸张的左右边缘阴影 */
-        .scroll-paper::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: clamp(60px, 6.25vw, 100px);
-            background: linear-gradient(
-                to right,
-                rgba(139, 115, 85, 0.15),
-                transparent
-            );
-            pointer-events: none;
+            left: clamp(80px, 8.33vw, 120px);
+            right: clamp(80px, 8.33vw, 120px);
+            height: 100px;
+            transform: translateY(-50%);
             z-index: 1;
+            overflow: visible;
         }
 
-        .scroll-paper::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            width: clamp(60px, 6.25vw, 100px);
-            background: linear-gradient(
-                to left,
-                rgba(139, 115, 85, 0.15),
-                transparent
-            );
-            pointer-events: none;
-            z-index: 1;
+        .timeline-svg-line {
+            width: 100%;
+            height: 8px;
+            stroke: #ff5c00;
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 2px 4px rgba(255, 92, 0, 0.3));
+            opacity: 0;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            transition: opacity 0.5s ease, stroke-dashoffset 1.5s cubic-bezier(0.65, 0, 0.35, 1);
         }
 
-        /* 卷轴式时间线主线 */
-        .scroll-timeline-line {
-            position: relative;
-            height: 4px;
-            background: linear-gradient(90deg, 
-                transparent 0%, 
-                #8b7355 10%,
-                #b8956a 30%,
-                #8b7355 50%,
-                #b8956a 70%,
-                #8b7355 90%,
-                transparent 100%);
-            margin: clamp(40px, 4.17vw, 60px) 0;
-            border-radius: 2px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transform: scaleX(0);
-            transform-origin: left center;
-            transition: transform 1.5s cubic-bezier(0.65, 0, 0.35, 1);
+        .timeline-svg-container.animate-in .timeline-svg-line {
+            opacity: 1;
+            stroke-dashoffset: 0;
         }
 
-        .scroll-timeline-line.animate-in {
-            transform: scaleX(1);
+        /* Hand-drawn style path - wavy and irregular */
+        .timeline-hand-drawn-path {
+            vector-effect: non-scaling-stroke;
         }
 
-        /* Start point - rectangle */
+        /* Start point - hand-drawn style rectangle */
         .timeline-start {
             position: absolute;
             left: 0;
             top: 50%;
-            transform: translateY(-50%) scale(0);
-            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
+            transform: translateY(-50%) scale(0) rotate(-2deg);
+            background: #ff5c00;
             padding: clamp(14px, 1.46vw, 18px) clamp(28px, 2.92vw, 36px);
             color: #ffffff;
             font-size: clamp(14px, 1.46vw, 18px);
             font-weight: 700;
-            border-radius: 8px;
             z-index: 3;
             white-space: nowrap;
             box-shadow: 
                 0 4px 12px rgba(255, 92, 0, 0.4),
-                0 2px 4px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+                0 2px 4px rgba(0, 0, 0, 0.1);
             letter-spacing: 0.5px;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 3px solid #ffffff;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            /* Hand-drawn border effect */
+            clip-path: polygon(
+                0% 8%, 2% 4%, 6% 2%, 10% 1%, 
+                14% 0%, 86% 0%, 90% 1%, 94% 3%, 
+                98% 6%, 100% 10%, 100% 90%, 98% 94%, 
+                94% 97%, 90% 99%, 86% 100%, 14% 100%, 
+                10% 99%, 6% 97%, 2% 94%, 0% 90%
+            );
         }
 
         .timeline-start.animate-in {
-            transform: translateY(-50%) scale(1);
+            transform: translateY(-50%) scale(1) rotate(-1deg);
+        }
+
+        .timeline-start::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: rgba(255, 255, 255, 0.1);
+            clip-path: polygon(
+                0% 8%, 2% 4%, 6% 2%, 10% 1%, 
+                14% 0%, 86% 0%, 90% 1%, 94% 3%, 
+                98% 6%, 100% 10%, 100% 90%, 98% 94%, 
+                94% 97%, 90% 99%, 86% 100%, 14% 100%, 
+                10% 99%, 6% 97%, 2% 94%, 0% 90%
+            );
+            z-index: -1;
         }
 
         /* Start point event (below the box) */
@@ -513,45 +412,39 @@ if (file_exists($jsonFile)) {
             font-size: clamp(14px, 1.46vw, 18px);
             color: #2c3e50;
             text-align: center;
-            line-height: 1.6;
+            line-height: 1.7;
             font-weight: 500;
-            padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 20px);
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(255, 92, 0, 0.1);
+            padding: clamp(14px, 1.46vw, 20px) clamp(18px, 1.88vw, 24px);
+            background: #fffef7;
             max-width: 100%;
             word-wrap: break-word;
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            backdrop-filter: blur(10px);
             cursor: pointer;
             position: relative;
-            overflow: hidden;
-        }
-
-        .timeline-start-event .timeline-goal-text::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 92, 0, 0.1), transparent);
-            transition: left 0.5s ease;
+            overflow: visible;
+            border: 3px solid #ff5c00;
+            clip-path: polygon(
+                0% 12%, 3% 8%, 7% 5%, 12% 3%, 
+                18% 2%, 82% 2%, 88% 4%, 93% 7%, 
+                97% 11%, 100% 16%, 100% 84%, 97% 88%, 
+                93% 92%, 88% 95%, 82% 97%, 18% 97%, 
+                12% 95%, 7% 92%, 3% 88%, 0% 84%
+            );
+            box-shadow: 
+                4px 4px 0px rgba(255, 92, 0, 0.3),
+                8px 8px 0px rgba(255, 92, 0, 0.1);
+            transform: rotate(-0.5deg);
+            font-family: 'Comic Sans MS', 'Marker Felt', 'Kalam', cursive;
         }
 
         .timeline-start-event:hover .timeline-goal-text {
-            background: rgba(255, 255, 255, 0.98);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(255, 92, 0, 0.15);
-            border-color: rgba(255, 92, 0, 0.3);
-            transform: translateY(-2px);
+            transform: rotate(0deg) translateY(-3px) scale(1.05);
+            box-shadow: 
+                6px 6px 0px rgba(255, 92, 0, 0.4),
+                12px 12px 0px rgba(255, 92, 0, 0.15);
         }
 
-        .timeline-start-event:hover .timeline-goal-text::before {
-            left: 100%;
-        }
-
-        /* End point - star */
+        /* End point - hand-drawn style star */
         .timeline-end {
             position: absolute;
             right: 0;
@@ -559,8 +452,7 @@ if (file_exists($jsonFile)) {
             transform: translateY(-50%) scale(0) rotate(0deg);
             width: clamp(70px, 7.29vw, 90px);
             height: clamp(70px, 7.29vw, 90px);
-            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
-            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            background: #ff5c00;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -570,32 +462,40 @@ if (file_exists($jsonFile)) {
             z-index: 3;
             box-shadow: 
                 0 4px 16px rgba(255, 92, 0, 0.4),
-                0 2px 6px rgba(0, 0, 0, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+                0 2px 6px rgba(0, 0, 0, 0.15);
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
             letter-spacing: 0.5px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 3px solid #ffffff;
             transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            /* Hand-drawn star shape */
+            clip-path: polygon(
+                50% 5%, 55% 32%, 82% 32%, 62% 48%, 
+                70% 75%, 50% 60%, 30% 75%, 38% 48%, 
+                18% 32%, 45% 32%
+            );
         }
 
         .timeline-end.animate-in {
-            transform: translateY(-50%) scale(1) rotate(360deg);
+            transform: translateY(-50%) scale(1) rotate(5deg);
         }
 
         .timeline-end::before {
             content: '';
             position: absolute;
             inset: -2px;
-            background: linear-gradient(135deg, rgba(255, 92, 0, 0.3), rgba(255, 140, 66, 0.3));
-            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            background: rgba(255, 255, 255, 0.1);
+            clip-path: polygon(
+                50% 5%, 55% 32%, 82% 32%, 62% 48%, 
+                70% 75%, 50% 60%, 30% 75%, 38% 48%, 
+                18% 32%, 45% 32%
+            );
             z-index: -1;
-            filter: blur(4px);
-            animation: pulse-glow 2s ease-in-out infinite;
+            animation: hand-drawn-float 3s ease-in-out infinite;
         }
 
-        @keyframes pulse-glow {
-            0%, 100% { opacity: 0.6; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.05); }
+        @keyframes hand-drawn-float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(2px, -2px) rotate(2deg); }
         }
 
         /* End point event (below the star) */
@@ -635,153 +535,159 @@ if (file_exists($jsonFile)) {
         }
 
         .timeline-end-event .timeline-year-label {
-            font-size: clamp(18px, 1.88vw, 26px);
-            font-weight: 800;
-            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: clamp(20px, 2.08vw, 28px);
+            font-weight: 900;
+            color: #ff5c00;
             margin-bottom: clamp(10px, 1.04vw, 14px);
-            letter-spacing: 0.5px;
-            text-shadow: 0 2px 4px rgba(255, 92, 0, 0.2);
+            letter-spacing: 1px;
+            text-shadow: 
+                2px 2px 0px rgba(255, 92, 0, 0.2),
+                1px 1px 0px rgba(0, 0, 0, 0.1);
+            font-family: 'Comic Sans MS', 'Marker Felt', 'Kalam', cursive;
+            transform: rotate(1deg);
+            display: inline-block;
         }
 
         .timeline-end-event .timeline-goal-text {
             font-size: clamp(14px, 1.46vw, 18px);
             color: #2c3e50;
             text-align: center;
-            line-height: 1.6;
+            line-height: 1.7;
             font-weight: 500;
-            padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 20px);
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(255, 92, 0, 0.1);
+            padding: clamp(14px, 1.46vw, 20px) clamp(18px, 1.88vw, 24px);
+            background: #fffef7;
             max-width: 100%;
             word-wrap: break-word;
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            backdrop-filter: blur(10px);
             cursor: pointer;
             position: relative;
-            overflow: hidden;
-        }
-
-        .timeline-end-event .timeline-goal-text::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 92, 0, 0.1), transparent);
-            transition: left 0.5s ease;
+            overflow: visible;
+            border: 3px solid #ff5c00;
+            clip-path: polygon(
+                0% 12%, 3% 8%, 7% 5%, 12% 3%, 
+                18% 2%, 82% 2%, 88% 4%, 93% 7%, 
+                97% 11%, 100% 16%, 100% 84%, 97% 88%, 
+                93% 92%, 88% 95%, 82% 97%, 18% 97%, 
+                12% 95%, 7% 92%, 3% 88%, 0% 84%
+            );
+            box-shadow: 
+                4px 4px 0px rgba(255, 92, 0, 0.3),
+                8px 8px 0px rgba(255, 92, 0, 0.1);
+            transform: rotate(0.5deg);
+            font-family: 'Comic Sans MS', 'Marker Felt', 'Kalam', cursive;
         }
 
         .timeline-end-event:hover .timeline-goal-text {
-            background: rgba(255, 255, 255, 0.98);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(255, 92, 0, 0.15);
-            border-color: rgba(255, 92, 0, 0.3);
-            transform: translateY(-2px);
+            transform: rotate(0deg) translateY(-3px) scale(1.05);
+            box-shadow: 
+                6px 6px 0px rgba(255, 92, 0, 0.4),
+                12px 12px 0px rgba(255, 92, 0, 0.15);
         }
 
-        .timeline-end-event:hover .timeline-goal-text::before {
-            left: 100%;
-        }
-
-        /* 卷轴式时间线事件容器 */
-        .scroll-timeline-items {
+        /* Timeline items container */
+        .timeline-items {
             position: relative;
-            display: flex;
-            justify-content: space-around;
-            align-items: flex-start;
-            min-height: clamp(280px, 29.17vw, 400px);
-            padding: clamp(20px, 2.08vw, 30px) 0;
-            gap: clamp(20px, 2.08vw, 40px);
+            padding: 0 clamp(100px, 10.42vw, 140px);
+            min-height: clamp(220px, 22.92vw, 320px);
         }
 
-        /* 卷轴式时间线事件 */
-        .scroll-timeline-event {
-            flex: 1;
-            max-width: clamp(180px, 18.75vw, 260px);
+        .timeline-event {
+            position: absolute;
             display: flex;
             flex-direction: column;
             align-items: center;
-            position: relative;
+            width: clamp(140px, 14.58vw, 200px);
+            transform: translateX(-50%) translateY(20px);
             opacity: 0;
-            transform: translateY(30px);
-            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
-                        opacity 0.8s ease,
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                        opacity 0.6s ease,
                         filter 0.3s ease;
         }
 
-        .scroll-timeline-event.animate-in {
+        .timeline-event.animate-in {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateX(-50%) translateY(0);
         }
 
-        .scroll-timeline-event:hover {
-            transform: translateY(-8px) scale(1.05);
-            filter: drop-shadow(0 10px 20px rgba(139, 115, 85, 0.3));
+        .timeline-event:nth-child(odd).animate-in {
+            transform: translateX(-50%) translateY(0);
         }
 
-        /* 事件之间的连接点 */
-        .scroll-timeline-event::before {
-            content: '';
-            position: absolute;
-            top: clamp(-80px, -8.33vw, -120px);
-            left: 50%;
-            transform: translateX(-50%);
-            width: clamp(16px, 1.67vw, 24px);
-            height: clamp(16px, 1.67vw, 24px);
-            background: radial-gradient(circle, #b8956a 0%, #8b7355 70%);
-            border: 3px solid #f5f1e8;
-            border-radius: 50%;
-            box-shadow: 
-                0 2px 8px rgba(0, 0, 0, 0.2),
-                inset 0 2px 4px rgba(255, 255, 255, 0.3);
-            z-index: 3;
+        .timeline-event:nth-child(even).animate-in {
+            transform: translateX(-50%) translateY(0);
         }
 
+        .timeline-event:nth-child(odd):hover {
+            transform: translateX(-50%) translateY(-5px) scale(1.08);
+            filter: drop-shadow(0 12px 24px rgba(255, 92, 0, 0.25));
+        }
+
+        .timeline-event:nth-child(even):hover {
+            transform: translateX(-50%) translateY(5px) scale(1.08);
+            filter: drop-shadow(0 12px 24px rgba(255, 92, 0, 0.25));
+        }
+
+        /* Alternate between top and bottom - odd items below, even items above */
+        .timeline-event:nth-child(odd) {
+            bottom: 0;
+            flex-direction: column;
+        }
+
+        .timeline-event:nth-child(even) {
+            top: 0;
+            flex-direction: column;
+        }
+
+        /* Hand-drawn style arrow */
         .timeline-arrow {
-            width: 0;
-            height: 0;
+            width: clamp(20px, 2.08vw, 28px);
+            height: clamp(20px, 2.08vw, 28px);
             margin-bottom: clamp(10px, 1.04vw, 14px);
-            transition: filter 0.3s ease;
+            transition: transform 0.3s ease;
+            position: relative;
+            transform: rotate(-5deg);
         }
 
         .timeline-event:nth-child(even) .timeline-arrow {
             margin-bottom: 0;
             margin-top: clamp(10px, 1.04vw, 14px);
             order: -1;
+            transform: rotate(5deg);
         }
 
-        /* Odd items (below timeline) - arrow points up */
-        .timeline-event:nth-child(odd) .timeline-arrow {
-            border-left: clamp(9px, 0.94vw, 13px) solid transparent;
-            border-right: clamp(9px, 0.94vw, 13px) solid transparent;
-            border-bottom: clamp(14px, 1.46vw, 18px) solid #000000;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        /* Hand-drawn arrow using SVG */
+        .timeline-arrow::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            clip-path: polygon(50% 0%, 0% 100%, 50% 80%, 100% 100%);
+            filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.2));
         }
 
-        /* Even items (above timeline) - arrow points down */
-        .timeline-event:nth-child(even) .timeline-arrow {
-            border-left: clamp(9px, 0.94vw, 13px) solid transparent;
-            border-right: clamp(9px, 0.94vw, 13px) solid transparent;
-            border-top: clamp(14px, 1.46vw, 18px) solid #000000;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        .timeline-event:nth-child(even) .timeline-arrow::before {
+            clip-path: polygon(50% 100%, 0% 0%, 50% 20%, 100% 0%);
+        }
+
+        .timeline-start-event .timeline-arrow::before,
+        .timeline-end-event .timeline-arrow::before {
+            clip-path: polygon(50% 0%, 0% 100%, 50% 80%, 100% 100%);
         }
 
         .timeline-year-label {
-            font-size: clamp(18px, 1.88vw, 26px);
-            font-weight: 800;
-            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: clamp(20px, 2.08vw, 28px);
+            font-weight: 900;
+            color: #ff5c00;
             margin-bottom: clamp(10px, 1.04vw, 14px);
-            letter-spacing: 0.5px;
-            text-shadow: 0 2px 4px rgba(255, 92, 0, 0.2);
+            letter-spacing: 1px;
+            text-shadow: 
+                2px 2px 0px rgba(255, 92, 0, 0.2),
+                1px 1px 0px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease;
+            font-family: 'Comic Sans MS', 'Marker Felt', 'Kalam', cursive;
+            transform: rotate(-1deg);
+            display: inline-block;
         }
 
         .timeline-event:hover .timeline-year-label {
@@ -797,46 +703,41 @@ if (file_exists($jsonFile)) {
             font-size: clamp(14px, 1.46vw, 18px);
             color: #2c3e50;
             text-align: center;
-            line-height: 1.6;
+            line-height: 1.7;
             font-weight: 500;
-            padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 20px);
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(255, 92, 0, 0.1);
+            padding: clamp(14px, 1.46vw, 20px) clamp(18px, 1.88vw, 24px);
+            background: #fffef7;
             max-width: 100%;
             word-wrap: break-word;
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            backdrop-filter: blur(10px);
             cursor: pointer;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
+            border: 3px solid #ff5c00;
+            /* Hand-drawn border effect */
+            clip-path: polygon(
+                0% 12%, 3% 8%, 7% 5%, 12% 3%, 
+                18% 2%, 82% 2%, 88% 4%, 93% 7%, 
+                97% 11%, 100% 16%, 100% 84%, 97% 88%, 
+                93% 92%, 88% 95%, 82% 97%, 18% 97%, 
+                12% 95%, 7% 92%, 3% 88%, 0% 84%
+            );
+            box-shadow: 
+                4px 4px 0px rgba(255, 92, 0, 0.3),
+                8px 8px 0px rgba(255, 92, 0, 0.1);
+            transform: rotate(-0.5deg);
+            font-family: 'Comic Sans MS', 'Marker Felt', 'Kalam', cursive;
         }
 
-        .timeline-goal-text::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 92, 0, 0.1), transparent);
-            transition: left 0.5s ease;
+        .timeline-event:nth-child(even) .timeline-goal-text {
+            transform: rotate(0.5deg);
         }
 
-        .timeline-event:hover .timeline-goal-text,
-        .timeline-start-event:hover .timeline-goal-text,
-        .timeline-end-event:hover .timeline-goal-text {
-            background: rgba(255, 255, 255, 0.98);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(255, 92, 0, 0.15);
-            border-color: rgba(255, 92, 0, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .timeline-event:hover .timeline-goal-text::before,
-        .timeline-start-event:hover .timeline-goal-text::before,
-        .timeline-end-event:hover .timeline-goal-text::before {
-            left: 100%;
+        .timeline-event:hover .timeline-goal-text {
+            transform: rotate(0deg) translateY(-3px) scale(1.05);
+            box-shadow: 
+                6px 6px 0px rgba(255, 92, 0, 0.4),
+                12px 12px 0px rgba(255, 92, 0, 0.15);
         }
 
         /* Corporate Core Section */
@@ -1148,48 +1049,62 @@ if (file_exists($jsonFile)) {
                 grid-template-columns: 1fr;
             }
 
-            .scroll-container {
-                padding: clamp(40px, 4.17vw, 60px) clamp(60px, 6.25vw, 100px);
+            .timeline-wrapper {
+                padding: clamp(40px, 4.17vw, 60px) clamp(24px, 2.5vw, 32px);
             }
 
-            .scroll-paper {
-                padding: clamp(40px, 4.17vw, 60px) clamp(50px, 5.21vw, 80px);
+            .timeline-svg-container {
+                left: clamp(60px, 6.25vw, 80px);
+                right: clamp(60px, 6.25vw, 80px);
             }
 
-            .scroll-rod {
-                width: clamp(30px, 3.13vw, 45px);
+            .timeline-wrapper {
+                padding: clamp(60px, 6.25vw, 80px) clamp(24px, 2.5vw, 32px);
             }
 
-            .scroll-rod.left {
-                left: clamp(10px, 1.04vw, 20px);
+            .timeline-start {
+                padding: clamp(12px, 1.25vw, 14px) clamp(20px, 2.08vw, 24px);
+                font-size: clamp(12px, 1.25vw, 14px);
             }
 
-            .scroll-rod.right {
-                right: clamp(10px, 1.04vw, 20px);
+            .timeline-start-event {
+                width: clamp(110px, 11.46vw, 160px);
+                transform: translate(-50%, calc(100% + clamp(20px, 2.08vw, 30px)));
             }
 
-            .scroll-timeline-items {
-                flex-direction: column;
-                gap: clamp(30px, 3.13vw, 50px);
-                min-height: auto;
+            .timeline-start-event .timeline-goal-text,
+            .timeline-end-event .timeline-goal-text,
+            .timeline-event .timeline-goal-text {
+                padding: clamp(10px, 1.04vw, 14px) clamp(12px, 1.25vw, 16px);
+                font-size: clamp(12px, 1.25vw, 15px);
             }
 
-            .scroll-timeline-event {
-                max-width: 100%;
-                width: 100%;
+            .timeline-end {
+                width: clamp(55px, 5.73vw, 70px);
+                height: clamp(55px, 5.73vw, 70px);
             }
 
-            .scroll-timeline-event::before {
-                top: clamp(-60px, -6.25vw, -90px);
+            .timeline-end-event {
+                width: clamp(110px, 11.46vw, 160px);
+                transform: translate(50%, calc(100% + clamp(20px, 2.08vw, 30px)));
             }
 
-            .scroll-year-label {
-                font-size: clamp(18px, 1.88vw, 24px);
+            .timeline-year-label {
+                font-size: clamp(16px, 1.67vw, 22px);
             }
 
-            .scroll-goal-text {
-                font-size: clamp(13px, 1.35vw, 16px);
-                padding: clamp(14px, 1.46vw, 20px) clamp(16px, 1.67vw, 24px);
+            .timeline-start-event .timeline-year-label,
+            .timeline-end-event .timeline-year-label {
+                font-size: clamp(16px, 1.67vw, 22px);
+            }
+
+            .timeline-items {
+                padding: 0 clamp(70px, 7.29vw, 100px);
+                min-height: clamp(180px, 18.75vw, 250px);
+            }
+
+            .timeline-event {
+                width: clamp(100px, 10.42vw, 140px);
             }
         }
     </style>
@@ -1237,30 +1152,61 @@ if (file_exists($jsonFile)) {
                         </div>
                         
                         <div class="timeline-wrapper">
-                            <div class="scroll-container">
-                                <!-- 左卷轴轴 -->
-                                <div class="scroll-rod left"></div>
-                                
-                                <!-- 卷轴纸张 -->
-                                <div class="scroll-paper">
-                                    <!-- 时间线主线 -->
-                                    <div class="scroll-timeline-line"></div>
-                                    
-                                    <!-- 时间线事件 -->
-                                    <div class="scroll-timeline-items">
-                                        <?php if (!empty($strategyData['timeline'])): ?>
-                                            <?php foreach ($strategyData['timeline'] as $index => $item): ?>
-                                            <div class="scroll-timeline-event">
-                                                <div class="scroll-year-label"><?php echo htmlspecialchars($item['year'] ?? ''); ?>年</div>
-                                                <div class="scroll-goal-text"><?php echo htmlspecialchars($item['goal'] ?? ''); ?></div>
-                                            </div>
-                                            <?php endforeach; ?>
-                                        <?php endif; ?>
-                                    </div>
+                            <!-- Hand-drawn SVG timeline line -->
+                            <div class="timeline-svg-container">
+                                <svg class="timeline-svg-line" viewBox="0 0 1000 8" preserveAspectRatio="none">
+                                    <path class="timeline-hand-drawn-path" d="M 0,4 Q 100,2 200,4 T 400,4 T 600,4 T 800,4 T 1000,4" 
+                                          stroke="#ff5c00" stroke-width="3" fill="none" 
+                                          stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            
+                            <!-- Start point -->
+                            <div class="timeline-start">起始</div>
+                            <?php 
+                            // Get start year and goal from first timeline item
+                            $startItem = !empty($strategyData['timeline']) ? $strategyData['timeline'][0] : null;
+                            ?>
+                            <?php if ($startItem): ?>
+                            <div class="timeline-start-event">
+                                <div class="timeline-arrow"></div>
+                                <div class="timeline-year-label"><?php echo htmlspecialchars($startItem['year'] ?? ''); ?>年</div>
+                                <div class="timeline-goal-text"><?php echo htmlspecialchars($startItem['goal'] ?? ''); ?></div>
+                            </div>
+                            <?php endif; ?>
+                            
+                            <!-- End point -->
+                            <div class="timeline-end">终点</div>
+                            <?php 
+                            // Get end year and goal from last timeline item
+                            $endItem = !empty($strategyData['timeline']) ? end($strategyData['timeline']) : null;
+                            ?>
+                            <?php if ($endItem): ?>
+                            <div class="timeline-end-event">
+                                <div class="timeline-arrow"></div>
+                                <div class="timeline-year-label"><?php echo htmlspecialchars($endItem['year'] ?? ''); ?>年</div>
+                                <div class="timeline-goal-text"><?php echo htmlspecialchars($endItem['goal'] ?? ''); ?></div>
+                            </div>
+                            <?php endif; ?>
+                            
+                            <!-- Middle events -->
+                            <div class="timeline-items">
+                                <?php 
+                                // Skip first and last items since they're shown at start/end points
+                                $middleItems = !empty($strategyData['timeline']) ? array_slice($strategyData['timeline'], 1, -1) : [];
+                                $totalMiddleItems = count($middleItems);
+                                foreach ($middleItems as $index => $item): 
+                                ?>
+                                <?php
+                                // 计算位置百分比（均匀分布，从起始后到终点前）
+                                $position = ($index + 2) / (count($strategyData['timeline']) + 1) * 100;
+                                ?>
+                                <div class="timeline-event" style="left: <?php echo $position; ?>%;">
+                                    <div class="timeline-arrow"></div>
+                                    <div class="timeline-year-label"><?php echo htmlspecialchars($item['year'] ?? ''); ?>年</div>
+                                    <div class="timeline-goal-text"><?php echo htmlspecialchars($item['goal'] ?? ''); ?></div>
                                 </div>
-                                
-                                <!-- 右卷轴轴 -->
-                                <div class="scroll-rod right"></div>
+                                <?php endforeach; ?>
                             </div>
                         </div>
                     </div>
@@ -1491,48 +1437,77 @@ if (file_exists($jsonFile)) {
             observer.observe(timelineWrapper);
 
             function animateTimeline(container) {
-                // 1. 先显示时间线
-                const timelineLine = container.querySelector('.scroll-timeline-line');
-                if (timelineLine) {
+                // 1. 先显示起始点
+                const startPoint = container.querySelector('.timeline-start');
+                if (startPoint) {
                     setTimeout(() => {
-                        timelineLine.classList.add('animate-in');
-                    }, 300);
+                        startPoint.classList.add('animate-in');
+                    }, 100);
                 }
 
-                // 2. 逐个显示事件（从右到左，像展开卷轴）
-                const events = container.querySelectorAll('.scroll-timeline-event');
+                // 2. 然后显示手绘时间线
+                const timelineSvg = container.querySelector('.timeline-svg-container');
+                if (timelineSvg) {
+                    setTimeout(() => {
+                        timelineSvg.classList.add('animate-in');
+                    }, 400);
+                }
+
+                // 3. 显示终点
+                const endPoint = container.querySelector('.timeline-end');
+                if (endPoint) {
+                    setTimeout(() => {
+                        endPoint.classList.add('animate-in');
+                    }, 800);
+                }
+
+                // 4. 逐个显示起始事件
+                const startEvent = container.querySelector('.timeline-start-event');
+                if (startEvent) {
+                    setTimeout(() => {
+                        startEvent.classList.add('animate-in');
+                    }, 1200);
+                }
+
+                // 5. 逐个显示中间事件（带延迟）
+                const events = container.querySelectorAll('.timeline-event');
                 events.forEach((event, index) => {
                     setTimeout(() => {
                         event.classList.add('animate-in');
-                    }, 800 + (index * 200));
+                    }, 1600 + (index * 150));
                 });
+
+                // 6. 最后显示终点事件
+                const endEvent = container.querySelector('.timeline-end-event');
+                if (endEvent) {
+                    setTimeout(() => {
+                        endEvent.classList.add('animate-in');
+                    }, 1600 + (events.length * 150) + 200);
+                }
             }
 
             // 增强交互：点击事件卡片时的高亮效果
-            const eventCards = document.querySelectorAll('.scroll-goal-text');
+            const eventCards = document.querySelectorAll('.timeline-goal-text');
             eventCards.forEach(card => {
                 card.addEventListener('click', function() {
                     // 移除其他卡片的高亮
                     eventCards.forEach(c => c.classList.remove('active'));
                     // 添加当前卡片的高亮
                     this.classList.add('active');
-                    // 平滑滚动到该卡片
-                    this.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                 });
             });
         });
 
-        // 添加卡片激活状态的样式
+        // 添加卡片激活状态的样式（通过内联样式或CSS类）
         const style = document.createElement('style');
         style.textContent = `
-            .scroll-goal-text.active {
-                background: rgba(184, 149, 106, 0.2) !important;
-                border-color: rgba(139, 115, 85, 0.6) !important;
+            .timeline-goal-text.active {
+                background: #fff9e6 !important;
+                border-color: rgba(255, 92, 0, 0.8) !important;
                 box-shadow: 
-                    0 10px 30px rgba(0, 0, 0, 0.15),
-                    inset 0 1px 3px rgba(255, 255, 255, 0.95),
-                    0 0 20px rgba(184, 149, 106, 0.3) !important;
-                transform: translateY(-4px) scale(1.03) !important;
+                    6px 6px 0px rgba(255, 92, 0, 0.5) !important,
+                    12px 12px 0px rgba(255, 92, 0, 0.2) !important;
+                transform: rotate(0deg) translateY(-5px) scale(1.08) !important;
             }
         `;
         document.head.appendChild(style);
