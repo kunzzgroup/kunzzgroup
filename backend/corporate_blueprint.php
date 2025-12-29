@@ -94,40 +94,6 @@ if (file_exists($jsonFile)) {
         }
 
         /* Header Section */
-        .header-section-wrapper {
-            position: relative;
-            background: #ffffff;
-            padding: clamp(60px, 7.29vw, 100px) clamp(40px, 4.69vw, 80px);
-            overflow: hidden;
-        }
-
-        .header-section-wrapper::before {
-            content: '';
-            position: absolute;
-            top: -100px;
-            left: -150px;
-            width: clamp(400px, 41.67vw, 600px);
-            height: clamp(400px, 41.67vw, 600px);
-            background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.15) 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .header-section-wrapper::after {
-            content: '';
-            position: absolute;
-            bottom: -80px;
-            right: -100px;
-            width: clamp(300px, 31.25vw, 450px);
-            height: clamp(300px, 31.25vw, 450px);
-            background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.12) 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* Central white panel */
         .header-panel {
             background: #ffffff;
             border-radius: clamp(16px, 1.67vw, 24px);
@@ -593,10 +559,6 @@ if (file_exists($jsonFile)) {
                 padding: 16px;
             }
 
-            .header-section-wrapper {
-                padding: clamp(40px, 4.17vw, 60px) clamp(24px, 2.5vw, 32px);
-            }
-
             .header-panel {
                 padding: clamp(32px, 3.33vw, 48px) clamp(32px, 3.33vw, 48px);
             }
@@ -638,33 +600,31 @@ if (file_exists($jsonFile)) {
             <?php if ($strategyData): ?>
                 <!-- Header Section -->
                 <div class="section">
-                    <div class="header-section-wrapper">
-                        <div class="header-panel">
-                                <!-- Left side text content -->
-                                <div class="header-text-content">
-                                    <div class="header-label">
-                                        <div class="header-label-line"></div>
-                                        <span>企业蓝图</span>
-                                    </div>
-                                    <div class="company-name-large">
-                                        KUNZZ HOLDINGS
-                                    </div>
-                                    <div class="company-subtitle">
-                                        SDN BHD 战略计划
-                                    </div>
-                                    <div class="plan-title-en">
-                                        <div class="plan-title-en-line"></div>
-                                        <span>CORPORATE STRATEGIC PLAN</span>
-                                    </div>
-                                </div>
+                    <div class="header-panel">
+                        <!-- Left side text content -->
+                        <div class="header-text-content">
+                            <div class="header-label">
+                                <div class="header-label-line"></div>
+                                <span>企业蓝图</span>
+                            </div>
+                            <div class="company-name-large">
+                                KUNZZ HOLDINGS
+                            </div>
+                            <div class="company-subtitle">
+                                SDN BHD 战略计划
+                            </div>
+                            <div class="plan-title-en">
+                                <div class="plan-title-en-line"></div>
+                                <span>CORPORATE STRATEGIC PLAN</span>
+                            </div>
+                        </div>
 
-                                <!-- Right side logo -->
-                                <div class="header-logo-container">
-                                    <div class="header-logo">
-                                        <img src="../images/images/logo.png" alt="KUNZZ HOLDINGS Logo">
-                                        <div class="logo-reflection"></div>
-                                    </div>
-                                </div>
+                        <!-- Right side logo -->
+                        <div class="header-logo-container">
+                            <div class="header-logo">
+                                <img src="../images/images/logo.png" alt="KUNZZ HOLDINGS Logo">
+                                <div class="logo-reflection"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
