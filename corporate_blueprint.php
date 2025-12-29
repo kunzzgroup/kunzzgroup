@@ -129,41 +129,17 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
             background: #f5f5f5;
             color: #333;
             min-height: 100vh;
-            display: flex;
-        }
-
-        /* 左侧边栏 */
-        .sidebar {
-            width: 60px;
-            background: #fff;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-        }
-
-        .sidebar-top {
-            width: 40px;
-            height: 40px;
-            background: #ff6b35;
-            border-radius: 50%;
-        }
-
-        .sidebar-bottom {
-            width: 40px;
-            height: 20px;
-            background: #ff6b35;
-            border-radius: 10px;
         }
 
         /* 主内容区域 */
         .main-container {
-            flex: 1;
             display: flex;
             flex-direction: column;
             padding: 30px;
             background: #fff;
+            width: 100%;
+            box-sizing: border-box;
+            min-height: 100vh;
         }
 
         /* 标题区域 */
@@ -580,12 +556,8 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
     </style>
 </head>
 <body>
-    <!-- 左侧边栏 -->
-    <div class="sidebar">
-        <div class="sidebar-top"></div>
-        <div class="sidebar-bottom"></div>
-    </div>
-
+    <?php include 'sidebar.php'; ?>
+    
     <!-- 主内容区域 -->
     <div class="main-container">
         <!-- 标题和标签页 -->
