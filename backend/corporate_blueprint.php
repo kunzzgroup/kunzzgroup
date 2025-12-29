@@ -733,12 +733,12 @@ if (file_exists($jsonFile)) {
 
         /* Cards above the pin */
         .milestone-top .milestone-card {
-            margin-bottom: clamp(28px, 2.92vw, 40px);
+            margin-bottom: 10px;
         }
 
         /* Cards below the pin */
         .milestone-bottom .milestone-card {
-            margin-top: clamp(28px, 2.92vw, 40px);
+            margin-top: 10px;
         }
 
         /* All milestone cards have arrow pointing upward */
@@ -1226,11 +1226,11 @@ if (file_exists($jsonFile)) {
             }
 
             .milestone-top .milestone-card {
-                margin-bottom: clamp(24px, 2.5vw, 32px);
+                margin-bottom: 10px;
             }
 
             .milestone-bottom .milestone-card {
-                margin-top: clamp(24px, 2.5vw, 32px);
+                margin-top: 10px;
             }
 
             .timeline-start {
