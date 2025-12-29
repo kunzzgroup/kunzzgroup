@@ -45,6 +45,10 @@ if (file_exists($jsonFile)) {
             overflow-x: hidden;
         }
 
+        .section {
+            margin-bottom: clamp(24px, 2.08vw, 40px);
+        }
+
         /* 主内容容器 */
         .main-container {
             max-width: 1800px;
