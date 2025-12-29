@@ -111,14 +111,13 @@ if (file_exists($jsonFile)) {
         .header-panel {
             background: #ffffff;
             border-radius: clamp(16px, 1.67vw, 24px);
-            padding: clamp(32px, 3.13vw, 48px) clamp(40px, 4.17vw, 64px);
+            padding: clamp(24px, 2.5vw, 32px) clamp(40px, 4.17vw, 100px);
             box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
             position: relative;
             z-index: 1;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: clamp(32px, 3.13vw, 48px);
         }
 
         /* Left side text content */
@@ -1161,8 +1160,8 @@ if (file_exists($jsonFile)) {
         /* 响应式设计 */
         @media (max-width: 1024px) {
             .header-panel {
-                flex-direction: column;
-                text-align: center;
+                flex-direction: row;
+                text-align: left;
             }
 
             .header-text-content {
@@ -1181,6 +1180,15 @@ if (file_exists($jsonFile)) {
 
             .header-panel {
                 padding: clamp(24px, 2.5vw, 32px) clamp(24px, 2.5vw, 32px);
+                flex-direction: row;
+            }
+            
+            .header-text-content {
+                text-align: left;
+            }
+            
+            .header-logo-container {
+                margin-top: 0;
             }
 
             .core-grid,
