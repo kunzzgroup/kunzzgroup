@@ -932,6 +932,8 @@ if (file_exists($jsonFile)) {
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             transition: transform 0.3s, box-shadow 0.3s;
             position: relative;
+            display: flex;
+            gap: clamp(16px, 1.67vw, 24px);
         }
 
         .core-card:hover {
@@ -942,6 +944,7 @@ if (file_exists($jsonFile)) {
         .core-card-number {
             width: clamp(48px, 5vw, 64px);
             height: clamp(48px, 5vw, 64px);
+            min-width: clamp(48px, 5vw, 64px);
             background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
             border-radius: 50%;
             display: flex;
@@ -950,15 +953,21 @@ if (file_exists($jsonFile)) {
             font-size: clamp(20px, 2.08vw, 28px);
             font-weight: 800;
             color: #000000;
-            margin-bottom: clamp(16px, 1.67vw, 24px);
             box-shadow: 0 2px 8px rgba(255, 165, 0, 0.3);
+            flex-shrink: 0;
+        }
+
+        .core-card-content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .core-card-title {
             font-size: clamp(18px, 1.88vw, 24px);
             font-weight: 800;
             color: #000000;
-            margin-bottom: clamp(16px, 1.67vw, 24px);
+            margin-bottom: clamp(12px, 1.25vw, 16px);
             line-height: 1.4;
         }
 
@@ -1453,36 +1462,44 @@ if (file_exists($jsonFile)) {
                         <!-- 01 Mission -->
                         <div class="core-card">
                             <div class="core-card-number">01</div>
-                            <div class="core-card-title">使命:初心&感性的目标<br></div>
-                            <div class="core-card-content">
-                                塑造积极向上和舒适的工作环境
+                            <div class="core-card-content-wrapper">
+                                <div class="core-card-title">使命:初心&感性的目标</div>
+                                <div class="core-card-content">
+                                    塑造积极向上和舒适的工作环境
+                                </div>
                             </div>
                         </div>
 
                         <!-- 02 Vision -->
                         <div class="core-card">
                             <div class="core-card-number">02</div>
-                            <div class="core-card-title">愿景:理性可具体化的目标<br></div>
-                            <div class="core-card-content">
-                                打造高效的团队,创造行业未来
+                            <div class="core-card-content-wrapper">
+                                <div class="core-card-title">愿景:理性可具体化的目标</div>
+                                <div class="core-card-content">
+                                    打造高效的团队,创造行业未来
+                                </div>
                             </div>
                         </div>
 
                         <!-- 03 Culture -->
                         <div class="core-card">
                             <div class="core-card-number">03</div>
-                            <div class="core-card-title">文化:做人的态度<br></div>
-                            <div class="core-card-content">
-                                积极向上,高效执行 灵活应变,诚信待人
+                            <div class="core-card-content-wrapper">
+                                <div class="core-card-title">文化:做人的态度</div>
+                                <div class="core-card-content">
+                                    积极向上,高效执行 灵活应变,诚信待人
+                                </div>
                             </div>
                         </div>
 
                         <!-- 04 Values -->
                         <div class="core-card">
                             <div class="core-card-number">04</div>
-                            <div class="core-card-title">价值观:做事的态度<br></div>
-                            <div class="core-card-content">
-                                目标导向,理念一致 追求卓越,创新精神
+                            <div class="core-card-content-wrapper">
+                                <div class="core-card-title">价值观:做事的态度</div>
+                                <div class="core-card-content">
+                                    目标导向,理念一致 追求卓越,创新精神
+                                </div>
                             </div>
                         </div>
                     </div>
