@@ -223,17 +223,6 @@ if (file_exists($jsonFile)) {
             position: relative;
             padding: clamp(40px, 4.17vw, 60px) 0;
         }
-        
-        /* Make timeline section match header section width */
-        .section-timeline {
-            width: 100%;
-            position: relative;
-            margin-left: 0;
-            margin-right: 0;
-            padding-left: 0;
-            padding-right: 0;
-            box-sizing: border-box;
-        }
 
         .timeline-header {
             text-align: center;
@@ -1311,7 +1300,7 @@ if (file_exists($jsonFile)) {
 
                 <!-- Timeline Section -->
                 <?php if (!empty($strategyData['timeline'])): ?>
-                <div class="section section-timeline">
+                <div class="section">
                     <div class="timeline-container">
                         <div class="timeline-header">
                             <div class="timeline-main-title">以终为始</div>
