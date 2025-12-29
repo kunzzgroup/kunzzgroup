@@ -753,9 +753,6 @@ if (file_exists($jsonFile)) {
             transform: translateY(5px);
         }
 
-        .milestone-card.active::before {
-            border-color: rgba(255, 92, 0, 0.4);
-        }
 
         .milestone-year {
             font-size: clamp(18px, 1.88vw, 26px);
@@ -1610,17 +1607,6 @@ if (file_exists($jsonFile)) {
                 });
             }
 
-            // 增强交互：点击里程碑卡片时的高亮效果
-            const milestoneCards = document.querySelectorAll('.milestone-card');
-            milestoneCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    // 移除其他卡片的高亮
-                    milestoneCards.forEach(c => c.classList.remove('active'));
-                    // 添加当前卡片的高亮
-                    this.classList.add('active');
-                });
-            });
-
             // 添加里程碑悬停时的路径高亮效果
             const milestones = document.querySelectorAll('.map-milestone');
             milestones.forEach(milestone => {
@@ -1632,21 +1618,6 @@ if (file_exists($jsonFile)) {
                 });
             });
         });
-
-        // 添加里程碑卡片激活状态的样式
-        const style = document.createElement('style');
-        style.textContent = `
-            .milestone-card.active {
-                background: rgba(255, 92, 0, 0.1) !important;
-                border-color: rgba(255, 92, 0, 0.6) !important;
-                box-shadow: 0 12px 32px rgba(255, 92, 0, 0.3) !important;
-                transform: translateY(-8px) scale(1.05) !important;
-            }
-            .milestone-card.active .milestone-year {
-                font-size: clamp(20px, 2.08vw, 28px) !important;
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 
 </body>
