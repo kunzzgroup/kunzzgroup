@@ -972,7 +972,7 @@ if (file_exists($jsonFile)) {
         }
 
         .core-card-content {
-            font-size: clamp(14px, 1.46vw, 18px);
+            font-size: clamp(16px, 1.67vw, 22px);
             color: #374151;
             line-height: 1.8;
         }
