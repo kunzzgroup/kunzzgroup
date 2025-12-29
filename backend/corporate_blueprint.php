@@ -146,11 +146,12 @@ if (file_exists($jsonFile)) {
         }
 
         .company-subtitle {
-            font-size: clamp(18px, 2.08vw, 28px);
-            font-weight: 400;
+            font-size: clamp(36px, 4.69vw, 64px);
+            font-weight: 700;
             color: #000000;
-            margin-bottom: clamp(20px, 2.08vw, 28px);
-            line-height: 1.4;
+            margin-bottom: clamp(12px, 1.25vw, 16px);
+            letter-spacing: 1px;
+            line-height: 1.2;
         }
 
         .company-subtitle-upper {
