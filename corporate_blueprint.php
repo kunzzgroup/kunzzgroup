@@ -146,9 +146,6 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
 
         /* 标题区域 */
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             margin-bottom: clamp(16px, 1.67vw, 32px);
         }
 
@@ -156,19 +153,19 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
             font-size: clamp(20px, 2.6vw, 50px);
             font-weight: bold;
             color: #000000ff;
-            margin-bottom: 20px;
+            margin-bottom: clamp(12px, 1.04vw, 20px);
         }
 
         /* 标签页 */
         .tabs {
             display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
+            gap: clamp(8px, 0.63vw, 12px);
+            margin-bottom: 0;
         }
 
         .tab {
-            padding: clamp(8px, 0.63vw, 12px) clamp(16px, 1.25vw, 24px);
-            border-radius: 8px;
+            padding: clamp(10px, 0.73vw, 14px) clamp(20px, 1.56vw, 30px);
+            border-radius: 20px;
             border: none;
             font-size: clamp(14px, 1.04vw, 16px);
             font-weight: 600;
