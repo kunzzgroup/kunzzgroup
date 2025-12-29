@@ -927,7 +927,7 @@ if (file_exists($jsonFile)) {
         .core-card {
             background: #fff;
             border-radius: clamp(12px, 1.25vw, 16px);
-            padding: clamp(24px, 2.5vw, 40px);
+            padding: clamp(16px, 1.67vw, 24px);
             border: 2px solid #e5e7eb;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             transition: transform 0.3s, box-shadow 0.3s;
