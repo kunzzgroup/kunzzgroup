@@ -1454,7 +1454,7 @@ if (file_exists($jsonFile)) {
                         <!-- 01 Mission -->
                         <div class="core-card">
                             <div class="core-card-number">01</div>
-                            <div class="core-card-title">使命:初心&感性的目标<br><span style="font-size: 0.75em; font-weight: 500;">Mission: Original Intention & Emotional Goals</span></div>
+                            <div class="core-card-title">使命:初心&感性的目标<br></div>
                             <div class="core-card-content">
                                 塑造积极向上和舒适的工作环境
                             </div>
@@ -1463,7 +1463,7 @@ if (file_exists($jsonFile)) {
                         <!-- 02 Vision -->
                         <div class="core-card">
                             <div class="core-card-number">02</div>
-                            <div class="core-card-title">愿景:理性可具体化的目标<br><span style="font-size: 0.75em; font-weight: 500;">Vision: Rational and Tangible Goals</span></div>
+                            <div class="core-card-title">愿景:理性可具体化的目标<br></div>
                             <div class="core-card-content">
                                 打造高效的团队,创造行业未来
                             </div>
@@ -1472,7 +1472,7 @@ if (file_exists($jsonFile)) {
                         <!-- 03 Culture -->
                         <div class="core-card">
                             <div class="core-card-number">03</div>
-                            <div class="core-card-title">文化:做人的态度<br><span style="font-size: 0.75em; font-weight: 500;">Culture: Attitude towards being a person</span></div>
+                            <div class="core-card-title">文化:做人的态度<br></div>
                             <div class="core-card-content">
                                 积极向上,高效执行 灵活应变,诚信待人
                             </div>
@@ -1481,7 +1481,7 @@ if (file_exists($jsonFile)) {
                         <!-- 04 Values -->
                         <div class="core-card">
                             <div class="core-card-number">04</div>
-                            <div class="core-card-title">价值观:做事的态度<br><span style="font-size: 0.75em; font-weight: 500;">Values: Attitude towards doing things</span></div>
+                            <div class="core-card-title">价值观:做事的态度<br></div>
                             <div class="core-card-content">
                                 目标导向,理念一致 追求卓越,创新精神
                             </div>
