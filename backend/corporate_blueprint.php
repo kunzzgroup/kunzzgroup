@@ -731,11 +731,7 @@ if (file_exists($jsonFile)) {
             position: relative;
         }
 
-        /* Cards above the pin - reverse flex order so card appears above pin */
-        .milestone-top {
-            flex-direction: column-reverse;
-        }
-        
+        /* Cards above the pin */
         .milestone-top .milestone-card {
             margin-bottom: clamp(28px, 2.92vw, 40px);
         }
@@ -751,14 +747,9 @@ if (file_exists($jsonFile)) {
             border-left: 7px solid transparent;
             border-right: 7px solid transparent;
             border-top: 7px solid rgba(255, 92, 0, 0.2);
-            z-index: 1;
         }
 
         /* Cards below the pin */
-        .milestone-bottom {
-            flex-direction: column;
-        }
-        
         .milestone-bottom .milestone-card {
             margin-top: clamp(28px, 2.92vw, 40px);
         }
@@ -774,7 +765,6 @@ if (file_exists($jsonFile)) {
             border-left: 7px solid transparent;
             border-right: 7px solid transparent;
             border-bottom: 7px solid rgba(255, 92, 0, 0.2);
-            z-index: 1;
         }
 
         .map-milestone:hover .milestone-card {
