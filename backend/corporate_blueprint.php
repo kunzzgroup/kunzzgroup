@@ -325,13 +325,19 @@ if (file_exists($jsonFile)) {
 
         .timeline-event:nth-child(even) {
             top: 0;
-            flex-direction: column-reverse;
+            flex-direction: column;
         }
 
         .timeline-arrow {
             width: 0;
             height: 0;
-            margin: clamp(8px, 0.83vw, 12px) 0;
+            margin-bottom: clamp(8px, 0.83vw, 12px);
+        }
+
+        .timeline-event:nth-child(even) .timeline-arrow {
+            margin-bottom: 0;
+            margin-top: clamp(8px, 0.83vw, 12px);
+            order: -1;
         }
 
         /* Odd items (below timeline) - arrow points up */
@@ -352,14 +358,12 @@ if (file_exists($jsonFile)) {
             font-size: clamp(16px, 1.67vw, 22px);
             font-weight: 700;
             color: #ff5c00;
-        }
-
-        .timeline-event:nth-child(odd) .timeline-year-label {
             margin-bottom: clamp(8px, 0.83vw, 12px);
         }
 
         .timeline-event:nth-child(even) .timeline-year-label {
-            margin-top: clamp(8px, 0.83vw, 12px);
+            margin-bottom: clamp(8px, 0.83vw, 12px);
+            margin-top: 0;
         }
 
         .timeline-goal-text {
@@ -766,8 +770,8 @@ if (file_exists($jsonFile)) {
                                 $position = ($index + 1) / ($totalItems + 1) * 100;
                                 ?>
                                 <div class="timeline-event" style="left: <?php echo $position; ?>%;">
-                                    <div class="timeline-year-label"><?php echo htmlspecialchars($item['year'] ?? ''); ?>年</div>
                                     <div class="timeline-arrow"></div>
+                                    <div class="timeline-year-label"><?php echo htmlspecialchars($item['year'] ?? ''); ?>年</div>
                                     <div class="timeline-goal-text"><?php echo htmlspecialchars($item['goal'] ?? ''); ?></div>
                                 </div>
                                 <?php endforeach; ?>
