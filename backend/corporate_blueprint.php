@@ -289,14 +289,18 @@ if (file_exists($jsonFile)) {
             width: 100%;
             /* 确保容器包含所有子元素（包括绝对定位的里程碑和SVG） */
             isolation: isolate;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         /* Map-style SVG path container */
         .map-timeline-svg {
             position: absolute;
             top: 0;
-            left: 0;
-            width: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 83.33%;
             height: 100%;
             pointer-events: none;
             z-index: 1;
@@ -1386,7 +1390,11 @@ if (file_exists($jsonFile)) {
                                     }
                                     
                                     // Convert SVG coordinates (0-600, 0-600) to percentage
-                                    $xPercent = ($point[0] / 600) * 100;
+                                    // SVG is 83.33% width and centered, so adjust left position accordingly
+                                    $svgWidthPercent = 83.33;
+                                    $svgLeftOffset = (100 - $svgWidthPercent) / 2; // 8.335%
+                                    $xPercentRelative = ($point[0] / 600) * 100; // Position within SVG (0-100%)
+                                    $xPercent = $svgLeftOffset + ($xPercentRelative * $svgWidthPercent / 100); // Actual position in container
                                     $yPercent = ($point[1] / 600) * 100;
                                     
                                     // Alternate card position (above or below pin) for better layout
