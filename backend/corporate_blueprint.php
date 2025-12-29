@@ -23,7 +23,7 @@ if (file_exists($jsonFile)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>企业蓝图 - KUNZZ HOLDINGS</title>
+    <title>企业蓝图</title>
     <style>
         * {
             margin: 0;
@@ -507,7 +507,6 @@ if (file_exists($jsonFile)) {
             <!-- 页面标题 -->
             <div class="header">
                 <h1 class="header-title">企业蓝图</h1>
-                <div class="header-subtitle">Corporate Strategic Plan</div>
             </div>
 
             <?php if ($strategyData): ?>
