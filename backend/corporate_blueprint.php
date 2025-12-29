@@ -262,223 +262,105 @@ if (file_exists($jsonFile)) {
 
         .timeline-wrapper {
             position: relative;
-            padding: clamp(60px, 6.25vw, 100px) clamp(40px, 4.17vw, 60px);
+            padding: clamp(100px, 10.42vw, 150px) clamp(40px, 4.17vw, 60px);
             overflow: visible;
             background: 
                 radial-gradient(circle at 20% 50%, rgba(255, 92, 0, 0.03) 0%, transparent 50%),
                 radial-gradient(circle at 80% 50%, rgba(255, 215, 0, 0.02) 0%, transparent 50%);
             border-radius: 12px;
-        }
-
-        /* Flowchart container */
-        .flowchart-container {
-            position: relative;
-            width: 100%;
             min-height: clamp(400px, 41.67vw, 600px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: clamp(24px, 2.5vw, 40px);
         }
 
-        /* Flowchart connection lines */
-        .flowchart-connector {
-            width: 4px;
-            height: clamp(60px, 6.25vw, 100px);
-            background: linear-gradient(180deg, #ff5c00 0%, #ff8c42 100%);
-            z-index: 1;
-            box-shadow: 0 2px 8px rgba(255, 92, 0, 0.3);
-            opacity: 1;
-            transform: scaleY(1);
-            transform-origin: top center;
-            transition: opacity 0.6s ease, transform 0.8s cubic-bezier(0.65, 0, 0.35, 1);
-            margin: 0 auto;
-        }
-
-        .flowchart-connector:not(.animate-in) {
-            opacity: 0;
-            transform: scaleY(0);
-        }
-
-        .flowchart-connector.animate-in {
-            opacity: 1;
-            transform: scaleY(1);
-        }
-
-        /* Arrow at the end of connector */
-        .flowchart-connector::after {
-            content: '';
+        /* SVG Wave Timeline Path */
+        .timeline-svg-container {
             position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-top: 14px solid #ff5c00;
+            top: 0;
+            left: clamp(80px, 8.33vw, 120px);
+            right: clamp(80px, 8.33vw, 120px);
+            height: 100%;
+            width: calc(100% - clamp(160px, 16.67vw, 240px));
+            z-index: 1;
+            overflow: visible;
+        }
+
+        .timeline-svg-path {
+            stroke: #ff5c00;
+            stroke-width: 5;
+            fill: none;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            transition: stroke-dashoffset 2s cubic-bezier(0.65, 0, 0.35, 1);
             filter: drop-shadow(0 2px 4px rgba(255, 92, 0, 0.3));
         }
 
-        /* Flowchart node - Start (Rounded Rectangle) */
-        .flowchart-node {
-            position: relative;
+        .timeline-svg-path.animate-in {
+            stroke-dashoffset: 0;
+        }
+
+        /* Wave line gradient */
+        .timeline-svg-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Start point - rectangle */
+        .timeline-start {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%) scale(0);
             background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
+            padding: clamp(14px, 1.46vw, 18px) clamp(28px, 2.92vw, 36px);
             color: #ffffff;
-            padding: clamp(16px, 1.67vw, 24px) clamp(32px, 3.33vw, 48px);
-            border-radius: 12px;
-            z-index: 2;
-            box-shadow: 
-                0 6px 20px rgba(255, 92, 0, 0.4),
-                0 2px 8px rgba(0, 0, 0, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            text-align: center;
-            font-weight: 700;
             font-size: clamp(14px, 1.46vw, 18px);
+            font-weight: 700;
+            border-radius: 8px;
+            z-index: 4;
+            white-space: nowrap;
+            box-shadow: 
+                0 4px 12px rgba(255, 92, 0, 0.4),
+                0 2px 4px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
             letter-spacing: 0.5px;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            min-width: clamp(140px, 14.58vw, 200px);
-            opacity: 1;
-            transform: scale(1) translateY(0);
-            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            cursor: pointer;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .flowchart-node:not(.animate-in) {
-            opacity: 0;
-            transform: scale(0.8) translateY(20px);
+        .timeline-start.animate-in {
+            transform: translateY(-50%) scale(1);
         }
 
-        .flowchart-node.animate-in {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-        }
-
-        .flowchart-node:hover {
-            transform: scale(1.05) translateY(-3px);
-            box-shadow: 
-                0 10px 30px rgba(255, 92, 0, 0.5),
-                0 4px 12px rgba(0, 0, 0, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4);
-        }
-
-        /* Start node specific */
-        .flowchart-node-start {
-            border-radius: 25px;
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            box-shadow: 
-                0 6px 20px rgba(40, 167, 69, 0.4),
-                0 2px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        /* End node specific (Diamond shape) */
-        .flowchart-node-end {
-            position: relative;
-            width: clamp(100px, 10.42vw, 140px);
-            height: clamp(100px, 10.42vw, 140px);
-            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
-            transform: rotate(45deg) scale(1);
-            border-radius: 12px;
-            box-shadow: 
-                0 6px 20px rgba(255, 92, 0, 0.4),
-                0 2px 8px rgba(0, 0, 0, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            border: 2px solid rgba(255, 255, 255, 0.2);
+        /* Start point event (below the box) */
+        .timeline-start-event {
+            position: absolute;
+            left: 0;
+            top: 60%;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            z-index: 2;
-            opacity: 1;
-            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            cursor: pointer;
-        }
-
-        .flowchart-node-end:not(.animate-in) {
+            width: clamp(140px, 14.58vw, 200px);
+            transform: translate(-50%, 0) translateY(20px);
             opacity: 0;
-            transform: rotate(45deg) scale(0);
+            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        opacity 0.8s ease,
+                        filter 0.3s ease;
+            z-index: 3;
         }
 
-        .flowchart-node-end.animate-in {
+        .timeline-start-event.animate-in {
             opacity: 1;
-            transform: rotate(45deg) scale(1);
+            transform: translate(-50%, 0) translateY(0);
         }
 
-        .flowchart-node-end:hover {
-            transform: rotate(45deg) scale(1.1);
-            box-shadow: 
-                0 10px 30px rgba(255, 92, 0, 0.5),
-                0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .flowchart-node-end-text {
-            transform: rotate(-45deg);
-            color: #ffffff;
-            font-weight: 700;
-            font-size: clamp(13px, 1.35vw, 17px);
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-            letter-spacing: 0.5px;
-        }
-
-        /* Flowchart process node (Rectangle with rounded corners) */
-        .flowchart-process-node {
-            position: relative;
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-            border: 3px solid #ff5c00;
-            border-radius: 12px;
-            padding: clamp(20px, 2.08vw, 32px);
-            min-width: clamp(200px, 20.83vw, 300px);
-            max-width: clamp(280px, 29.17vw, 400px);
-            box-shadow: 
-                0 6px 20px rgba(0, 0, 0, 0.1),
-                0 2px 8px rgba(255, 92, 0, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.9);
-            z-index: 2;
-            opacity: 1;
-            transform: scale(1) translateY(0);
-            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            cursor: pointer;
-        }
-
-        .flowchart-process-node:not(.animate-in) {
-            opacity: 0;
-            transform: scale(0.8) translateY(20px);
-        }
-
-        .flowchart-process-node.animate-in {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-        }
-
-        .flowchart-process-node:hover {
-            transform: scale(1.05) translateY(-5px);
-            box-shadow: 
-                0 12px 32px rgba(0, 0, 0, 0.15),
-                0 4px 16px rgba(255, 92, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 1);
-            border-color: #ff8c42;
-        }
-
-        /* Process node year label */
-        .flowchart-year {
-            font-size: clamp(20px, 2.08vw, 28px);
-            font-weight: 800;
-            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: clamp(12px, 1.25vw, 18px);
-            text-align: center;
-            letter-spacing: 0.5px;
-        }
-
-        /* Process node goal text */
-        .flowchart-goal {
-            font-size: clamp(14px, 1.46vw, 18px);
-            color: #2c3e50;
-            line-height: 1.7;
-            text-align: center;
-            font-weight: 500;
+        .timeline-start-event:hover {
+            transform: translate(-50%, 0) translateY(-8px) scale(1.15);
+            filter: drop-shadow(0 12px 24px rgba(255, 92, 0, 0.3));
         }
 
         .timeline-start-event .timeline-arrow {
@@ -489,6 +371,7 @@ if (file_exists($jsonFile)) {
             border-right: clamp(9px, 0.94vw, 13px) solid transparent;
             border-bottom: clamp(14px, 1.46vw, 18px) solid #000000;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+            transform: rotate(-90deg);
         }
 
         .timeline-start-event .timeline-year-label {
@@ -561,7 +444,7 @@ if (file_exists($jsonFile)) {
             color: #ffffff;
             font-size: clamp(13px, 1.35vw, 17px);
             font-weight: 700;
-            z-index: 3;
+            z-index: 4;
             box-shadow: 
                 0 4px 16px rgba(255, 92, 0, 0.4),
                 0 2px 6px rgba(0, 0, 0, 0.15),
@@ -596,26 +479,27 @@ if (file_exists($jsonFile)) {
         .timeline-end-event {
             position: absolute;
             right: 0;
-            bottom: 0;
+            top: 60%;
             display: flex;
             flex-direction: column;
             align-items: center;
             width: clamp(140px, 14.58vw, 200px);
-            transform: translate(50%, calc(100% + clamp(28px, 2.92vw, 40px))) translateY(20px);
+            transform: translate(50%, 0) translateY(20px);
             opacity: 0;
             transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
                         opacity 0.8s ease,
                         filter 0.3s ease;
+            z-index: 3;
         }
 
         .timeline-end-event.animate-in {
             opacity: 1;
-            transform: translate(50%, calc(100% + clamp(28px, 2.92vw, 40px))) translateY(0);
+            transform: translate(50%, 0) translateY(0);
         }
 
         .timeline-end-event:hover {
-            transform: translate(50%, calc(100% + clamp(28px, 2.92vw, 40px))) translateY(-5px) scale(1.08);
-            filter: drop-shadow(0 12px 24px rgba(255, 92, 0, 0.25));
+            transform: translate(50%, 0) translateY(-8px) scale(1.15);
+            filter: drop-shadow(0 12px 24px rgba(255, 92, 0, 0.3));
         }
 
         .timeline-end-event .timeline-arrow {
@@ -626,6 +510,7 @@ if (file_exists($jsonFile)) {
             border-right: clamp(9px, 0.94vw, 13px) solid transparent;
             border-bottom: clamp(14px, 1.46vw, 18px) solid #000000;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+            transform: rotate(90deg);
         }
 
         .timeline-end-event .timeline-year-label {
@@ -686,7 +571,9 @@ if (file_exists($jsonFile)) {
         .timeline-items {
             position: relative;
             padding: 0 clamp(100px, 10.42vw, 140px);
-            min-height: clamp(220px, 22.92vw, 320px);
+            width: 100%;
+            height: 100%;
+            min-height: clamp(400px, 41.67vw, 600px);
         }
 
         .timeline-event {
@@ -695,45 +582,21 @@ if (file_exists($jsonFile)) {
             flex-direction: column;
             align-items: center;
             width: clamp(140px, 14.58vw, 200px);
-            transform: translateX(-50%) translateY(20px);
             opacity: 0;
-            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                        opacity 0.6s ease,
+            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                        opacity 0.8s ease,
                         filter 0.3s ease;
+            /* 初始位置将在JavaScript中设置 */
         }
 
         .timeline-event.animate-in {
             opacity: 1;
-            transform: translateX(-50%) translateY(0);
         }
 
-        .timeline-event:nth-child(odd).animate-in {
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .timeline-event:nth-child(even).animate-in {
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .timeline-event:nth-child(odd):hover {
-            transform: translateX(-50%) translateY(-5px) scale(1.08);
-            filter: drop-shadow(0 12px 24px rgba(255, 92, 0, 0.25));
-        }
-
-        .timeline-event:nth-child(even):hover {
-            transform: translateX(-50%) translateY(5px) scale(1.08);
-            filter: drop-shadow(0 12px 24px rgba(255, 92, 0, 0.25));
-        }
-
-        /* Alternate between top and bottom - odd items below, even items above */
-        .timeline-event:nth-child(odd) {
-            bottom: 0;
-            flex-direction: column;
-        }
-
-        .timeline-event:nth-child(even) {
-            top: 0;
-            flex-direction: column;
+        .timeline-event:hover {
+            transform: scale(1.15) translateY(-8px);
+            filter: drop-shadow(0 12px 24px rgba(255, 92, 0, 0.3));
+            z-index: 10;
         }
 
         .timeline-arrow {
@@ -741,27 +604,9 @@ if (file_exists($jsonFile)) {
             height: 0;
             margin-bottom: clamp(10px, 1.04vw, 14px);
             transition: filter 0.3s ease;
-        }
-
-        .timeline-event:nth-child(even) .timeline-arrow {
-            margin-bottom: 0;
-            margin-top: clamp(10px, 1.04vw, 14px);
-            order: -1;
-        }
-
-        /* Odd items (below timeline) - arrow points up */
-        .timeline-event:nth-child(odd) .timeline-arrow {
             border-left: clamp(9px, 0.94vw, 13px) solid transparent;
             border-right: clamp(9px, 0.94vw, 13px) solid transparent;
             border-bottom: clamp(14px, 1.46vw, 18px) solid #000000;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-        }
-
-        /* Even items (above timeline) - arrow points down */
-        .timeline-event:nth-child(even) .timeline-arrow {
-            border-left: clamp(9px, 0.94vw, 13px) solid transparent;
-            border-right: clamp(9px, 0.94vw, 13px) solid transparent;
-            border-top: clamp(14px, 1.46vw, 18px) solid #000000;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
         }
 
@@ -1152,42 +997,52 @@ if (file_exists($jsonFile)) {
             }
 
             .timeline-wrapper {
-                padding: clamp(40px, 4.17vw, 60px) clamp(24px, 2.5vw, 32px);
+                padding: clamp(60px, 6.25vw, 80px) clamp(24px, 2.5vw, 32px);
             }
 
-            .flowchart-container {
-                min-height: auto;
-                gap: clamp(20px, 2.08vw, 30px);
+            .timeline-start {
+                padding: clamp(12px, 1.25vw, 14px) clamp(20px, 2.08vw, 24px);
+                font-size: clamp(12px, 1.25vw, 14px);
             }
 
-            .flowchart-node {
-                padding: clamp(12px, 1.25vw, 18px) clamp(24px, 2.5vw, 36px);
-                font-size: clamp(13px, 1.35vw, 16px);
-                min-width: clamp(120px, 12.5vw, 180px);
+            .timeline-start-event {
+                width: clamp(110px, 11.46vw, 160px);
+                transform: translate(-50%, calc(100% + clamp(20px, 2.08vw, 30px)));
             }
 
-            .flowchart-process-node {
-                padding: clamp(16px, 1.67vw, 24px);
-                min-width: clamp(180px, 18.75vw, 260px);
-                max-width: 90%;
+            .timeline-start-event .timeline-goal-text,
+            .timeline-end-event .timeline-goal-text,
+            .timeline-event .timeline-goal-text {
+                padding: clamp(10px, 1.04vw, 14px) clamp(12px, 1.25vw, 16px);
+                font-size: clamp(12px, 1.25vw, 15px);
             }
 
-            .flowchart-node-end {
-                width: clamp(80px, 8.33vw, 120px);
-                height: clamp(80px, 8.33vw, 120px);
+            .timeline-end {
+                width: clamp(55px, 5.73vw, 70px);
+                height: clamp(55px, 5.73vw, 70px);
             }
 
-            .flowchart-year {
-                font-size: clamp(16px, 1.67vw, 24px);
-                margin-bottom: clamp(10px, 1.04vw, 14px);
+            .timeline-end-event {
+                width: clamp(110px, 11.46vw, 160px);
+                transform: translate(50%, calc(100% + clamp(20px, 2.08vw, 30px)));
             }
 
-            .flowchart-goal {
-                font-size: clamp(13px, 1.35vw, 16px);
+            .timeline-year-label {
+                font-size: clamp(16px, 1.67vw, 22px);
             }
 
-            .flowchart-connector {
-                width: 3px;
+            .timeline-start-event .timeline-year-label,
+            .timeline-end-event .timeline-year-label {
+                font-size: clamp(16px, 1.67vw, 22px);
+            }
+
+            .timeline-items {
+                padding: 0 clamp(70px, 7.29vw, 100px);
+                min-height: clamp(180px, 18.75vw, 250px);
+            }
+
+            .timeline-event {
+                width: clamp(100px, 10.42vw, 140px);
             }
         }
     </style>
@@ -1235,41 +1090,63 @@ if (file_exists($jsonFile)) {
                         </div>
                         
                         <div class="timeline-wrapper">
-                            <div class="flowchart-container">
-                                <?php if (!empty($strategyData['timeline'])): 
-                                    $timelineItems = $strategyData['timeline'];
-                                    $totalItems = count($timelineItems);
+                            <!-- SVG Wave Path -->
+                            <svg class="timeline-svg-container" viewBox="0 0 1000 400" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" style="stop-color:rgba(255, 92, 0, 0.3);stop-opacity:1" />
+                                        <stop offset="20%" style="stop-color:#ff5c00;stop-opacity:1" />
+                                        <stop offset="80%" style="stop-color:#ff5c00;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:rgba(255, 92, 0, 0.3);stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <path class="timeline-svg-path" d="M 0,200 Q 125,100 250,200 T 500,200 T 750,200 T 1000,200" 
+                                      stroke="url(#waveGradient)" 
+                                      id="timelinePath"/>
+                            </svg>
+                            
+                            <!-- Start point -->
+                            <div class="timeline-start">起始</div>
+                            <?php 
+                            // Get start year and goal from first timeline item
+                            $startItem = !empty($strategyData['timeline']) ? $strategyData['timeline'][0] : null;
+                            ?>
+                            <?php if ($startItem): ?>
+                            <div class="timeline-start-event">
+                                <div class="timeline-arrow"></div>
+                                <div class="timeline-year-label"><?php echo htmlspecialchars($startItem['year'] ?? ''); ?>年</div>
+                                <div class="timeline-goal-text"><?php echo htmlspecialchars($startItem['goal'] ?? ''); ?></div>
+                            </div>
+                            <?php endif; ?>
+                            
+                            <!-- End point -->
+                            <div class="timeline-end">终点</div>
+                            <?php 
+                            // Get end year and goal from last timeline item
+                            $endItem = !empty($strategyData['timeline']) ? end($strategyData['timeline']) : null;
+                            ?>
+                            <?php if ($endItem): ?>
+                            <div class="timeline-end-event">
+                                <div class="timeline-arrow"></div>
+                                <div class="timeline-year-label"><?php echo htmlspecialchars($endItem['year'] ?? ''); ?>年</div>
+                                <div class="timeline-goal-text"><?php echo htmlspecialchars($endItem['goal'] ?? ''); ?></div>
+                            </div>
+                            <?php endif; ?>
+                            
+                            <!-- Middle events -->
+                            <div class="timeline-items">
+                                <?php 
+                                // Skip first and last items since they're shown at start/end points
+                                $middleItems = !empty($strategyData['timeline']) ? array_slice($strategyData['timeline'], 1, -1) : [];
+                                $totalMiddleItems = count($middleItems);
+                                foreach ($middleItems as $index => $item): 
                                 ?>
-                                
-                                <!-- Start Node -->
-                                <div class="flowchart-node flowchart-node-start" data-index="0">
-                                    起始
+                                <div class="timeline-event">
+                                    <div class="timeline-arrow"></div>
+                                    <div class="timeline-year-label"><?php echo htmlspecialchars($item['year'] ?? ''); ?>年</div>
+                                    <div class="timeline-goal-text"><?php echo htmlspecialchars($item['goal'] ?? ''); ?></div>
                                 </div>
-                                
-                                <?php foreach ($timelineItems as $index => $item): ?>
-                                    <!-- Connector -->
-                                    <div class="flowchart-connector" 
-                                         data-connector="<?php echo $index; ?>">
-                                    </div>
-                                    
-                                    <!-- Process Node -->
-                                    <div class="flowchart-process-node" data-index="<?php echo $index + 1; ?>">
-                                        <div class="flowchart-year"><?php echo htmlspecialchars($item['year'] ?? ''); ?>年</div>
-                                        <div class="flowchart-goal"><?php echo htmlspecialchars($item['goal'] ?? ''); ?></div>
-                                    </div>
                                 <?php endforeach; ?>
-                                
-                                <!-- Final Connector -->
-                                <div class="flowchart-connector" 
-                                     data-connector="final">
-                                </div>
-                                
-                                <!-- End Node -->
-                                <div class="flowchart-node-end" data-index="<?php echo $totalItems + 1; ?>">
-                                    <div class="flowchart-node-end-text">终点</div>
-                                </div>
-                                
-                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -1478,104 +1355,168 @@ if (file_exists($jsonFile)) {
     </div>
 
     <script>
-        // 流程图式时间线动画控制器
+        // 时间线动画控制器 - 波浪形路径
         document.addEventListener('DOMContentLoaded', function() {
             const timelineWrapper = document.querySelector('.timeline-wrapper');
             if (!timelineWrapper) return;
+
+            // 获取SVG路径
+            const path = document.getElementById('timelinePath');
+            if (!path) return;
+
+            // 计算波浪路径上的点
+            function getPointAtLength(pathLength, totalLength, index, totalItems) {
+                const path = document.getElementById('timelinePath');
+                const point = path.getPointAtLength(pathLength);
+                return point;
+            }
 
             // 创建 IntersectionObserver 观察时间线容器
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        // 触发流程图动画
-                        animateFlowchart(entry.target);
+                        // 触发时间线动画
+                        animateTimeline(entry.target);
                         observer.unobserve(entry.target);
                     }
                 });
             }, {
                 threshold: 0.2,
-                rootMargin: '0px 0px -50px 0px'
+                rootMargin: '0px 0px -100px 0px'
             });
 
             observer.observe(timelineWrapper);
 
-            function animateFlowchart(container) {
-                const flowchartContainer = container.querySelector('.flowchart-container');
-                if (!flowchartContainer) return;
-
-                // 1. 显示起始节点
-                const startNode = flowchartContainer.querySelector('.flowchart-node-start');
-                if (startNode) {
+            function animateTimeline(container) {
+                // 1. 先显示起始点
+                const startPoint = container.querySelector('.timeline-start');
+                if (startPoint) {
                     setTimeout(() => {
-                        startNode.classList.add('animate-in');
-                    }, 200);
+                        startPoint.classList.add('animate-in');
+                    }, 100);
                 }
 
-                // 2. 获取所有节点（按DOM顺序）
-                const connectors = flowchartContainer.querySelectorAll('.flowchart-connector');
-                const processNodes = flowchartContainer.querySelectorAll('.flowchart-process-node');
-                const endNode = flowchartContainer.querySelector('.flowchart-node-end');
-
-                // 3. 逐个显示连接线和流程节点（交替进行）
-                connectors.forEach((connector, index) => {
-                    // 显示连接线
+                // 2. 显示波浪路径动画
+                const svgPath = container.querySelector('.timeline-svg-path');
+                if (svgPath) {
                     setTimeout(() => {
-                        connector.classList.add('animate-in');
-                    }, 500 + (index * 250));
+                        svgPath.classList.add('animate-in');
+                    }, 400);
+                }
 
-                    // 显示对应的流程节点（在连接线之后）
-                    if (index < processNodes.length) {
+                // 3. 显示终点
+                const endPoint = container.querySelector('.timeline-end');
+                if (endPoint) {
+                    setTimeout(() => {
+                        endPoint.classList.add('animate-in');
+                    }, 800);
+                }
+
+                // 4. 逐个显示起始事件
+                const startEvent = container.querySelector('.timeline-start-event');
+                if (startEvent) {
+                    setTimeout(() => {
+                        startEvent.classList.add('animate-in');
+                    }, 1200);
+                }
+
+                // 5. 计算并定位中间事件到波浪路径上
+                const events = container.querySelectorAll('.timeline-event');
+                if (events.length > 0 && path) {
+                    const pathLength = path.getTotalLength();
+                    const wrapperWidth = container.offsetWidth;
+                    const wrapperHeight = container.offsetHeight;
+                    const svgLeftOffset = clamp(80, 8.33, 120);
+                    const svgElement = container.querySelector('.timeline-svg-container');
+                    const svgRect = svgElement ? svgElement.getBoundingClientRect() : { width: wrapperWidth, height: wrapperHeight };
+                    
+                    events.forEach((event, index) => {
+                        // 计算事件在波浪路径上的位置（0到1之间的值）
+                        const progress = (index + 1) / (events.length + 1);
+                        const pathPoint = path.getPointAtLength(pathLength * progress);
+                        
+                        // 获取SVG的viewBox转换
+                        const svgWidth = svgRect.width || (wrapperWidth - (svgLeftOffset * 2));
+                        const svgHeight = svgRect.height || wrapperHeight;
+                        
+                        // 将SVG坐标转换为容器坐标
+                        const x = svgLeftOffset + (pathPoint.x / 1000) * svgWidth;
+                        const y = (pathPoint.y / 400) * svgHeight;
+                        
+                        // 计算箭头方向（垂直于路径在该点的切线）
+                        const nextProgress = Math.min(progress + 0.01, 1);
+                        const nextPoint = path.getPointAtLength(pathLength * nextProgress);
+                        const angle = Math.atan2(nextPoint.y - pathPoint.y, nextPoint.x - pathPoint.x) * 180 / Math.PI;
+                        
+                        // 保存角度以供悬停时使用
+                        event.dataset.angle = angle;
+                        
+                        // 设置事件位置
+                        event.style.left = x + 'px';
+                        event.style.top = y + 'px';
+                        event.style.transform = `translate(-50%, -50%) translateY(20px) rotate(${angle}deg)`;
+                        
+                        // 箭头指向路径（垂直于路径）
+                        const arrow = event.querySelector('.timeline-arrow');
+                        if (arrow) {
+                            arrow.style.transform = `rotate(${angle + 90}deg)`;
+                        }
+                        
+                        // 动画显示
                         setTimeout(() => {
-                            processNodes[index].classList.add('animate-in');
-                        }, 700 + (index * 250));
-                    }
-                });
+                            event.classList.add('animate-in');
+                            event.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+                        }, 1600 + (index * 150));
+                        
+                        // 添加悬停事件
+                        event.addEventListener('mouseenter', function() {
+                            const angle = parseFloat(this.dataset.angle || 0);
+                            this.style.transform = `translate(-50%, -50%) scale(1.15) translateY(-8px) rotate(${angle}deg)`;
+                        });
+                        
+                        event.addEventListener('mouseleave', function() {
+                            const angle = parseFloat(this.dataset.angle || 0);
+                            this.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+                        });
+                    });
+                }
 
-                // 4. 显示终点节点（在所有连接线和流程节点之后）
-                if (endNode) {
+                // 6. 最后显示终点事件
+                const endEvent = container.querySelector('.timeline-end-event');
+                if (endEvent) {
                     setTimeout(() => {
-                        endNode.classList.add('animate-in');
-                    }, 700 + (connectors.length * 250));
+                        endEvent.classList.add('animate-in');
+                    }, 1600 + (events.length * 150) + 200);
                 }
             }
 
-            // 增强交互：点击节点时的高亮效果
-            const allNodes = document.querySelectorAll('.flowchart-node, .flowchart-process-node, .flowchart-node-end');
-            allNodes.forEach(node => {
-                node.addEventListener('click', function() {
-                    // 移除其他节点的高亮
-                    allNodes.forEach(n => n.classList.remove('active'));
-                    // 添加当前节点的高亮
+            // 辅助函数：clamp
+            function clamp(min, vw, max) {
+                return Math.min(Math.max(window.innerWidth * vw / 100, min), max);
+            }
+
+            // 增强交互：点击事件卡片时的高亮效果
+            const eventCards = document.querySelectorAll('.timeline-goal-text');
+            eventCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // 移除其他卡片的高亮
+                    eventCards.forEach(c => c.classList.remove('active'));
+                    // 添加当前卡片的高亮
                     this.classList.add('active');
                 });
             });
+
+            } // 关闭animateTimeline函数
         });
 
-        // 添加节点激活状态的样式
+        // 添加卡片激活状态的样式（通过内联样式或CSS类）
         const style = document.createElement('style');
         style.textContent = `
-            .flowchart-node.active,
-            .flowchart-process-node.active,
-            .flowchart-node-end.active {
-                animation: pulse-active 2s ease-in-out infinite;
-            }
-
-            @keyframes pulse-active {
-                0%, 100% {
-                    box-shadow: 
-                        0 6px 20px rgba(255, 92, 0, 0.4),
-                        0 0 0 0 rgba(255, 92, 0, 0.7);
-                }
-                50% {
-                    box-shadow: 
-                        0 6px 20px rgba(255, 92, 0, 0.4),
-                        0 0 0 8px rgba(255, 92, 0, 0);
-                }
-            }
-
-            .flowchart-process-node.active {
-                border-color: #ff8c42 !important;
-                background: linear-gradient(135deg, #fff8f5 0%, #ffffff 100%) !important;
+            .timeline-goal-text.active {
+                background: rgba(255, 92, 0, 0.1) !important;
+                border-color: rgba(255, 92, 0, 0.5) !important;
+                box-shadow: 0 8px 24px rgba(255, 92, 0, 0.25) !important;
+                transform: translateY(-3px) scale(1.02) !important;
             }
         `;
         document.head.appendChild(style);
