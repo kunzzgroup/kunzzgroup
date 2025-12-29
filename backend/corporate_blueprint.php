@@ -282,10 +282,16 @@ if (file_exists($jsonFile)) {
                 #ff5c00 20%, 
                 #ff5c00 80%, 
                 rgba(255, 92, 0, 0.3) 100%);
-            transform: translateY(-50%);
+            transform: translateY(-50%) scaleX(0);
+            transform-origin: left center;
             z-index: 1;
             border-radius: 3px;
             box-shadow: 0 2px 8px rgba(255, 92, 0, 0.2);
+            transition: transform 1.2s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+
+        .timeline-line.animate-in {
+            transform: translateY(-50%) scaleX(1);
         }
 
         .timeline-line::before {
@@ -300,6 +306,12 @@ if (file_exists($jsonFile)) {
                 rgba(255, 255, 255, 0.4) 50%, 
                 transparent 100%);
             border-radius: 3px;
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
 
         /* Start point - rectangle */
@@ -307,7 +319,7 @@ if (file_exists($jsonFile)) {
             position: absolute;
             left: 0;
             top: 50%;
-            transform: translateY(-50%);
+            transform: translateY(-50%) scale(0);
             background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
             padding: clamp(14px, 1.46vw, 18px) clamp(28px, 2.92vw, 36px);
             color: #ffffff;
@@ -323,6 +335,11 @@ if (file_exists($jsonFile)) {
             letter-spacing: 0.5px;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .timeline-start.animate-in {
+            transform: translateY(-50%) scale(1);
         }
 
         /* Start point event (below the box) */
@@ -334,12 +351,21 @@ if (file_exists($jsonFile)) {
             flex-direction: column;
             align-items: center;
             width: clamp(140px, 14.58vw, 200px);
-            transform: translate(-50%, calc(100% + clamp(28px, 2.92vw, 40px)));
-            transition: transform 0.3s ease;
+            transform: translate(-50%, calc(100% + clamp(28px, 2.92vw, 40px))) translateY(20px);
+            opacity: 0;
+            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        opacity 0.8s ease,
+                        filter 0.3s ease;
+        }
+
+        .timeline-start-event.animate-in {
+            opacity: 1;
+            transform: translate(-50%, calc(100% + clamp(28px, 2.92vw, 40px))) translateY(0);
         }
 
         .timeline-start-event:hover {
-            transform: translate(-50%, calc(100% + clamp(28px, 2.92vw, 40px))) scale(1.05);
+            transform: translate(-50%, calc(100% + clamp(28px, 2.92vw, 40px))) translateY(-5px) scale(1.08);
+            filter: drop-shadow(0 12px 24px rgba(255, 92, 0, 0.25));
         }
 
         .timeline-start-event .timeline-arrow {
@@ -377,6 +403,33 @@ if (file_exists($jsonFile)) {
             border: 1px solid rgba(255, 92, 0, 0.1);
             max-width: 100%;
             word-wrap: break-word;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timeline-start-event .timeline-goal-text::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 92, 0, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .timeline-start-event:hover .timeline-goal-text {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(255, 92, 0, 0.15);
+            border-color: rgba(255, 92, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .timeline-start-event:hover .timeline-goal-text::before {
+            left: 100%;
         }
 
         /* End point - star */
@@ -384,7 +437,7 @@ if (file_exists($jsonFile)) {
             position: absolute;
             right: 0;
             top: 50%;
-            transform: translateY(-50%);
+            transform: translateY(-50%) scale(0) rotate(0deg);
             width: clamp(70px, 7.29vw, 90px);
             height: clamp(70px, 7.29vw, 90px);
             background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
@@ -403,6 +456,11 @@ if (file_exists($jsonFile)) {
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
             letter-spacing: 0.5px;
             border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .timeline-end.animate-in {
+            transform: translateY(-50%) scale(1) rotate(360deg);
         }
 
         .timeline-end::before {
@@ -413,6 +471,12 @@ if (file_exists($jsonFile)) {
             clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
             z-index: -1;
             filter: blur(4px);
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
         }
 
         /* End point event (below the star) */
@@ -424,12 +488,21 @@ if (file_exists($jsonFile)) {
             flex-direction: column;
             align-items: center;
             width: clamp(140px, 14.58vw, 200px);
-            transform: translate(50%, calc(100% + clamp(28px, 2.92vw, 40px)));
-            transition: transform 0.3s ease;
+            transform: translate(50%, calc(100% + clamp(28px, 2.92vw, 40px))) translateY(20px);
+            opacity: 0;
+            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        opacity 0.8s ease,
+                        filter 0.3s ease;
+        }
+
+        .timeline-end-event.animate-in {
+            opacity: 1;
+            transform: translate(50%, calc(100% + clamp(28px, 2.92vw, 40px))) translateY(0);
         }
 
         .timeline-end-event:hover {
-            transform: translate(50%, calc(100% + clamp(28px, 2.92vw, 40px))) scale(1.05);
+            transform: translate(50%, calc(100% + clamp(28px, 2.92vw, 40px))) translateY(-5px) scale(1.08);
+            filter: drop-shadow(0 12px 24px rgba(255, 92, 0, 0.25));
         }
 
         .timeline-end-event .timeline-arrow {
@@ -467,6 +540,33 @@ if (file_exists($jsonFile)) {
             border: 1px solid rgba(255, 92, 0, 0.1);
             max-width: 100%;
             word-wrap: break-word;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timeline-end-event .timeline-goal-text::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 92, 0, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .timeline-end-event:hover .timeline-goal-text {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(255, 92, 0, 0.15);
+            border-color: rgba(255, 92, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .timeline-end-event:hover .timeline-goal-text::before {
+            left: 100%;
         }
 
         /* Timeline items container */
@@ -482,13 +582,34 @@ if (file_exists($jsonFile)) {
             flex-direction: column;
             align-items: center;
             width: clamp(140px, 14.58vw, 200px);
-            transform: translateX(-50%);
-            transition: transform 0.3s ease, filter 0.3s ease;
+            transform: translateX(-50%) translateY(20px);
+            opacity: 0;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                        opacity 0.6s ease,
+                        filter 0.3s ease;
         }
 
-        .timeline-event:hover {
-            transform: translateX(-50%) scale(1.05);
-            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.12));
+        .timeline-event.animate-in {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .timeline-event:nth-child(odd).animate-in {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .timeline-event:nth-child(even).animate-in {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .timeline-event:nth-child(odd):hover {
+            transform: translateX(-50%) translateY(-5px) scale(1.08);
+            filter: drop-shadow(0 12px 24px rgba(255, 92, 0, 0.25));
+        }
+
+        .timeline-event:nth-child(even):hover {
+            transform: translateX(-50%) translateY(5px) scale(1.08);
+            filter: drop-shadow(0 12px 24px rgba(255, 92, 0, 0.25));
         }
 
         /* Alternate between top and bottom - odd items below, even items above */
@@ -566,14 +687,37 @@ if (file_exists($jsonFile)) {
             border: 1px solid rgba(255, 92, 0, 0.1);
             max-width: 100%;
             word-wrap: break-word;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             backdrop-filter: blur(10px);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
         }
 
-        .timeline-event:hover .timeline-goal-text {
-            background: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(255, 92, 0, 0.1);
-            border-color: rgba(255, 92, 0, 0.2);
+        .timeline-goal-text::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 92, 0, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .timeline-event:hover .timeline-goal-text,
+        .timeline-start-event:hover .timeline-goal-text,
+        .timeline-end-event:hover .timeline-goal-text {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(255, 92, 0, 0.15);
+            border-color: rgba(255, 92, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .timeline-event:hover .timeline-goal-text::before,
+        .timeline-start-event:hover .timeline-goal-text::before,
+        .timeline-end-event:hover .timeline-goal-text::before {
+            left: 100%;
         }
 
         /* Corporate Core Section */
@@ -1242,6 +1386,103 @@ if (file_exists($jsonFile)) {
 
         </div>
     </div>
+
+    <script>
+        // 时间线动画控制器
+        document.addEventListener('DOMContentLoaded', function() {
+            const timelineWrapper = document.querySelector('.timeline-wrapper');
+            if (!timelineWrapper) return;
+
+            // 创建 IntersectionObserver 观察时间线容器
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // 触发时间线动画
+                        animateTimeline(entry.target);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.3,
+                rootMargin: '0px 0px -100px 0px'
+            });
+
+            observer.observe(timelineWrapper);
+
+            function animateTimeline(container) {
+                // 1. 先显示起始点
+                const startPoint = container.querySelector('.timeline-start');
+                if (startPoint) {
+                    setTimeout(() => {
+                        startPoint.classList.add('animate-in');
+                    }, 100);
+                }
+
+                // 2. 然后显示时间线
+                const timelineLine = container.querySelector('.timeline-line');
+                if (timelineLine) {
+                    setTimeout(() => {
+                        timelineLine.classList.add('animate-in');
+                    }, 400);
+                }
+
+                // 3. 显示终点
+                const endPoint = container.querySelector('.timeline-end');
+                if (endPoint) {
+                    setTimeout(() => {
+                        endPoint.classList.add('animate-in');
+                    }, 800);
+                }
+
+                // 4. 逐个显示起始事件
+                const startEvent = container.querySelector('.timeline-start-event');
+                if (startEvent) {
+                    setTimeout(() => {
+                        startEvent.classList.add('animate-in');
+                    }, 1200);
+                }
+
+                // 5. 逐个显示中间事件（带延迟）
+                const events = container.querySelectorAll('.timeline-event');
+                events.forEach((event, index) => {
+                    setTimeout(() => {
+                        event.classList.add('animate-in');
+                    }, 1600 + (index * 150));
+                });
+
+                // 6. 最后显示终点事件
+                const endEvent = container.querySelector('.timeline-end-event');
+                if (endEvent) {
+                    setTimeout(() => {
+                        endEvent.classList.add('animate-in');
+                    }, 1600 + (events.length * 150) + 200);
+                }
+            }
+
+            // 增强交互：点击事件卡片时的高亮效果
+            const eventCards = document.querySelectorAll('.timeline-goal-text');
+            eventCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // 移除其他卡片的高亮
+                    eventCards.forEach(c => c.classList.remove('active'));
+                    // 添加当前卡片的高亮
+                    this.classList.add('active');
+                });
+            });
+        });
+
+        // 添加卡片激活状态的样式（通过内联样式或CSS类）
+        const style = document.createElement('style');
+        style.textContent = `
+            .timeline-goal-text.active {
+                background: rgba(255, 92, 0, 0.1) !important;
+                border-color: rgba(255, 92, 0, 0.5) !important;
+                box-shadow: 0 8px 24px rgba(255, 92, 0, 0.25) !important;
+                transform: translateY(-3px) scale(1.02) !important;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 
 </body>
 </html>
