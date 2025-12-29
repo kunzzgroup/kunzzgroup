@@ -1007,16 +1007,45 @@ if (file_exists($jsonFile)) {
         .culture-explanation-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: clamp(20px, 2.08vw, 32px);
+            gap: 0;
+            border: 1px solid #e5e7eb;
+            border-radius: clamp(12px, 1.25vw, 16px);
+            overflow: hidden;
+            background: #fff;
         }
 
         .culture-explanation-card {
             background: #fff;
-            border-radius: clamp(12px, 1.25vw, 16px);
             padding: clamp(24px, 2.5vw, 40px);
-            border: 2px solid #e5e7eb;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             position: relative;
+        }
+
+        /* 添加分割线 - 垂直分割线（中间） */
+        .culture-explanation-card:nth-child(odd) {
+            border-right: 1px solid #e5e7eb;
+        }
+
+        /* 添加分割线 - 水平分割线（中间） */
+        .culture-explanation-card:nth-child(1),
+        .culture-explanation-card:nth-child(2) {
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        /* 移除角落的重复边框 */
+        .culture-explanation-card:nth-child(1) {
+            border-top-left-radius: clamp(12px, 1.25vw, 16px);
+        }
+
+        .culture-explanation-card:nth-child(2) {
+            border-top-right-radius: clamp(12px, 1.25vw, 16px);
+        }
+
+        .culture-explanation-card:nth-child(3) {
+            border-bottom-left-radius: clamp(12px, 1.25vw, 16px);
+        }
+
+        .culture-explanation-card:nth-child(4) {
+            border-bottom-right-radius: clamp(12px, 1.25vw, 16px);
         }
 
         .culture-explanation-number {
