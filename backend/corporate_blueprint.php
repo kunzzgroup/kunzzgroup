@@ -216,58 +216,157 @@ if (file_exists($jsonFile)) {
         }
 
         /* Timeline Section */
-        .timeline {
+        .timeline-container {
             position: relative;
-            padding: clamp(20px, 2.08vw, 32px) 0;
+            padding: clamp(40px, 4.17vw, 60px) 0;
         }
 
-        .timeline-item {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: clamp(24px, 2.6vw, 40px);
-            position: relative;
+        .timeline-header {
+            margin-bottom: clamp(32px, 3.13vw, 48px);
         }
 
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: 15px;
-            top: 32px;
-            bottom: -24px;
-            width: 2px;
-            background: #e5e7eb;
-        }
-
-        .timeline-item:last-child::before {
-            display: none;
-        }
-
-        .timeline-year {
-            font-size: clamp(18px, 2.08vw, 24px);
-            font-weight: bold;
+        .timeline-main-title {
+            font-size: clamp(28px, 3.65vw, 48px);
+            font-weight: 700;
             color: #ff5c00;
-            background: #fff;
-            border: 2px solid #ff5c00;
-            border-radius: 50%;
-            width: clamp(32px, 3.13vw, 48px);
-            height: clamp(32px, 3.13vw, 48px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            margin-right: clamp(16px, 2.08vw, 24px);
+            margin-bottom: clamp(12px, 1.25vw, 16px);
+        }
+
+        .timeline-subtitle {
+            font-size: clamp(14px, 1.46vw, 18px);
+            color: #000000;
+            font-weight: 400;
+        }
+
+        .timeline-wrapper {
             position: relative;
+            padding: clamp(60px, 6.25vw, 100px) clamp(40px, 4.17vw, 60px);
+            overflow: visible;
+        }
+
+        /* Horizontal timeline line */
+        .timeline-line {
+            position: absolute;
+            top: 50%;
+            left: clamp(80px, 8.33vw, 120px);
+            right: clamp(80px, 8.33vw, 120px);
+            height: 4px;
+            background: #ff5c00;
+            transform: translateY(-50%);
             z-index: 1;
         }
 
-        .timeline-content {
-            flex: 1;
-            padding-top: clamp(4px, 0.52vw, 8px);
+        /* Start point - rectangle */
+        .timeline-start {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #ff5c00;
+            padding: clamp(12px, 1.25vw, 16px) clamp(24px, 2.5vw, 32px);
+            color: #ffffff;
+            font-size: clamp(14px, 1.46vw, 18px);
+            font-weight: 600;
+            border-radius: 4px;
+            z-index: 2;
         }
 
-        .timeline-goal {
-            font-size: clamp(14px, 1.25vw, 18px);
-            color: #374151;
+        /* End point - star */
+        .timeline-end {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: clamp(60px, 6.25vw, 80px);
+            height: clamp(60px, 6.25vw, 80px);
+            background: #ff5c00;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: clamp(12px, 1.25vw, 16px);
+            font-weight: 600;
+            z-index: 2;
+        }
+
+        .timeline-end-text {
+            position: absolute;
+            bottom: clamp(-28px, -2.92vw, -36px);
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: clamp(12px, 1.25vw, 16px);
+            color: #000000;
+            font-weight: 500;
+        }
+
+        /* Timeline items container */
+        .timeline-items {
+            position: relative;
+            padding: 0 clamp(100px, 10.42vw, 140px);
+            min-height: clamp(200px, 20.83vw, 300px);
+        }
+
+        .timeline-event {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: clamp(120px, 12.5vw, 180px);
+            transform: translateX(-50%);
+        }
+
+        /* Alternate between top and bottom - odd items below, even items above */
+        .timeline-event:nth-child(odd) {
+            bottom: 0;
+            flex-direction: column;
+        }
+
+        .timeline-event:nth-child(even) {
+            top: 0;
+            flex-direction: column-reverse;
+        }
+
+        .timeline-arrow {
+            width: 0;
+            height: 0;
+            margin: clamp(8px, 0.83vw, 12px) 0;
+        }
+
+        /* Odd items (below timeline) - arrow points up */
+        .timeline-event:nth-child(odd) .timeline-arrow {
+            border-left: clamp(8px, 0.83vw, 12px) solid transparent;
+            border-right: clamp(8px, 0.83vw, 12px) solid transparent;
+            border-bottom: clamp(12px, 1.25vw, 16px) solid #000000;
+        }
+
+        /* Even items (above timeline) - arrow points down */
+        .timeline-event:nth-child(even) .timeline-arrow {
+            border-left: clamp(8px, 0.83vw, 12px) solid transparent;
+            border-right: clamp(8px, 0.83vw, 12px) solid transparent;
+            border-top: clamp(12px, 1.25vw, 16px) solid #000000;
+        }
+
+        .timeline-year-label {
+            font-size: clamp(16px, 1.67vw, 22px);
+            font-weight: 700;
+            color: #ff5c00;
+        }
+
+        .timeline-event:nth-child(odd) .timeline-year-label {
+            margin-bottom: clamp(8px, 0.83vw, 12px);
+        }
+
+        .timeline-event:nth-child(even) .timeline-year-label {
+            margin-top: clamp(8px, 0.83vw, 12px);
+        }
+
+        .timeline-goal-text {
+            font-size: clamp(13px, 1.35vw, 16px);
+            color: #000000;
+            text-align: center;
+            line-height: 1.5;
         }
 
         /* Corporate Core Section */
@@ -579,15 +678,32 @@ if (file_exists($jsonFile)) {
                 grid-template-columns: 1fr;
             }
 
-            .timeline-item::before {
-                left: 11px;
+            .timeline-wrapper {
+                padding: clamp(40px, 4.17vw, 60px) clamp(24px, 2.5vw, 32px);
             }
 
-            .timeline-year {
-                width: 24px;
-                height: 24px;
-                font-size: 12px;
-                margin-right: 12px;
+            .timeline-line {
+                left: clamp(60px, 6.25vw, 80px);
+                right: clamp(60px, 6.25vw, 80px);
+            }
+
+            .timeline-start {
+                padding: clamp(10px, 1.04vw, 12px) clamp(16px, 1.67vw, 20px);
+                font-size: clamp(12px, 1.25vw, 14px);
+            }
+
+            .timeline-end {
+                width: clamp(50px, 5.21vw, 60px);
+                height: clamp(50px, 5.21vw, 60px);
+            }
+
+            .timeline-items {
+                padding: 0 clamp(70px, 7.29vw, 100px);
+                min-height: clamp(180px, 18.75vw, 250px);
+            }
+
+            .timeline-event {
+                width: clamp(100px, 10.42vw, 140px);
             }
         }
     </style>
@@ -628,16 +744,35 @@ if (file_exists($jsonFile)) {
                 <!-- Timeline Section -->
                 <?php if (!empty($strategyData['timeline'])): ?>
                 <div class="section">
-                    <h2 class="section-title">战略时间线</h2>
-                    <div class="timeline">
-                        <?php foreach ($strategyData['timeline'] as $item): ?>
-                        <div class="timeline-item">
-                            <div class="timeline-year"><?php echo htmlspecialchars($item['year'] ?? ''); ?></div>
-                            <div class="timeline-content">
-                                <div class="timeline-goal"><?php echo htmlspecialchars($item['goal'] ?? ''); ?></div>
+                    <div class="timeline-container">
+                        <div class="timeline-header">
+                            <div class="timeline-main-title">以终为始</div>
+                            <div class="timeline-subtitle">请明确写出公司真正要去的终点</div>
+                        </div>
+                        
+                        <div class="timeline-wrapper">
+                            <div class="timeline-line"></div>
+                            
+                            <div class="timeline-start">起始</div>
+                            <div class="timeline-end">
+                                <div class="timeline-end-text">终点</div>
+                            </div>
+                            
+                            <div class="timeline-items">
+                                <?php foreach ($strategyData['timeline'] as $index => $item): ?>
+                                <?php
+                                // 计算位置百分比（均匀分布，从起始后到终点前）
+                                $totalItems = count($strategyData['timeline']);
+                                $position = ($index + 1) / ($totalItems + 1) * 100;
+                                ?>
+                                <div class="timeline-event" style="left: <?php echo $position; ?>%;">
+                                    <div class="timeline-year-label"><?php echo htmlspecialchars($item['year'] ?? ''); ?>年</div>
+                                    <div class="timeline-arrow"></div>
+                                    <div class="timeline-goal-text"><?php echo htmlspecialchars($item['goal'] ?? ''); ?></div>
+                                </div>
+                                <?php endforeach; ?>
                             </div>
                         </div>
-                        <?php endforeach; ?>
                     </div>
                 </div>
                 <?php endif; ?>
