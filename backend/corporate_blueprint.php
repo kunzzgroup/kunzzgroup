@@ -1295,7 +1295,8 @@ if (file_exists($jsonFile)) {
                 <!-- Header Section -->
                 <div class="section">
                     <div class="header-panel">
-                        <!-- Left side text content -->
+                        <!-- Left side text content
+                        <div class="header-text-content"> -->
                             <div class="company-name-large">KUNZZ HOLDINGS</div>
                             <div class="company-subtitle">
                                 <span class="company-subtitle-upper">SDN BHD</span> 战略计划
@@ -1318,7 +1319,6 @@ if (file_exists($jsonFile)) {
                     <div class="timeline-container">
                         <div class="timeline-header">
                             <div class="timeline-main-title">以终为始</div>
-                            <div class="timeline-subtitle">请明确写出公司真正要去的终点</div>
                         </div>
                         
                         <div class="timeline-wrapper">
