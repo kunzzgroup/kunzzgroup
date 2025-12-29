@@ -41,13 +41,8 @@ if (file_exists($jsonFile)) {
             line-height: 1.6;
         }
         
-        /* Allow timeline to break out horizontally */
-        html {
-            overflow-x: visible;
-        }
-        
-        body:has(.section-timeline) {
-            overflow-x: visible;
+        body {
+            overflow-x: hidden;
         }
 
         /* 主内容容器 */
@@ -58,7 +53,6 @@ if (file_exists($jsonFile)) {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            overflow-x: visible;
         }
 
         /* 标题区域 */
@@ -230,11 +224,10 @@ if (file_exists($jsonFile)) {
             padding: clamp(40px, 4.17vw, 60px) 0;
         }
         
-        /* Make timeline section break out to full width */
+        /* Make timeline section match header section width */
         .section-timeline {
-            width: 100vw;
+            width: 100%;
             position: relative;
-            left: calc(50% - 50vw);
             margin-left: 0;
             margin-right: 0;
             padding-left: 0;
