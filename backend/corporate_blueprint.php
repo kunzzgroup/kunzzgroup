@@ -1295,8 +1295,8 @@ if (file_exists($jsonFile)) {
                 <!-- Header Section -->
                 <div class="section">
                     <div class="header-panel">
-                        <!-- Left side text content
-                        <div class="header-text-content"> -->
+                        <!-- Left side text content -->
+                        <div class="header-text-content">
                             <div class="company-name-large">KUNZZ HOLDINGS</div>
                             <div class="company-subtitle">
                                 <span class="company-subtitle-upper">SDN BHD</span> 战略计划
