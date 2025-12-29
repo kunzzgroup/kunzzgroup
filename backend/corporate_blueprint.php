@@ -285,7 +285,7 @@ if (file_exists($jsonFile)) {
                     rgba(255, 92, 0, 0.02) 21px
                 );
             border-radius: 12px;
-            min-height: clamp(300px, 31.25vw, 450px);
+            min-height: clamp(250px, 26.04vw, 380px);
             width: 100%;
             /* 确保容器包含所有子元素（包括绝对定位的里程碑和SVG） */
             isolation: isolate;
@@ -1205,7 +1205,7 @@ if (file_exists($jsonFile)) {
 
             .timeline-wrapper {
                 padding: clamp(40px, 4.17vw, 60px) clamp(15px, 1.56vw, 20px);
-                min-height: clamp(320px, 33.33vw, 450px);
+                min-height: clamp(260px, 27.08vw, 380px);
             }
 
             .map-milestone {
@@ -1397,8 +1397,8 @@ if (file_exists($jsonFile)) {
                                     $xPercent = $svgLeftOffset + ($xPercentRelative * $svgWidthPercent / 100); // Actual position in container
                                     $yPercent = ($point[1] / 600) * 100;
                                     
-                                    // Alternate card position (above or below pin) for better layout
-                                    $cardPosition = ($index % 2 == 0) ? 'top' : 'bottom';
+                                    // 单数索引（第1、3、5个，index 0,2,4）往下，双数索引（第2、4个，index 1,3）往上
+                                    $cardPosition = ($index % 2 == 0) ? 'bottom' : 'top';
                             ?>
                             <div class="map-milestone milestone-<?php echo $cardPosition; ?>" 
                                  style="left: <?php echo $xPercent; ?>%; top: <?php echo $yPercent; ?>%;"
