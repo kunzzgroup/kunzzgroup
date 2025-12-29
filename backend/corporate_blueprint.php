@@ -262,50 +262,108 @@ if (file_exists($jsonFile)) {
 
         .timeline-wrapper {
             position: relative;
-            padding: clamp(100px, 10.42vw, 150px) clamp(40px, 4.17vw, 60px);
+            padding: clamp(80px, 8.33vw, 120px) clamp(40px, 4.17vw, 60px);
             overflow: visible;
             background: 
-                radial-gradient(circle at 20% 50%, rgba(255, 92, 0, 0.03) 0%, transparent 50%),
-                radial-gradient(circle at 80% 50%, rgba(255, 215, 0, 0.02) 0%, transparent 50%);
+                radial-gradient(circle at 20% 30%, rgba(255, 92, 0, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.03) 0%, transparent 40%),
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 20px,
+                    rgba(255, 92, 0, 0.02) 20px,
+                    rgba(255, 92, 0, 0.02) 21px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 20px,
+                    rgba(255, 92, 0, 0.02) 20px,
+                    rgba(255, 92, 0, 0.02) 21px
+                );
             border-radius: 12px;
-            min-height: clamp(400px, 41.67vw, 600px);
+            min-height: clamp(500px, 52.08vw, 700px);
         }
 
-        /* SVG Wave Timeline Path */
-        .timeline-svg-container {
+        /* Map-style SVG path container */
+        .map-timeline-svg {
             position: absolute;
             top: 0;
-            left: clamp(80px, 8.33vw, 120px);
-            right: clamp(80px, 8.33vw, 120px);
+            left: 0;
+            width: 100%;
             height: 100%;
-            width: calc(100% - clamp(160px, 16.67vw, 240px));
+            pointer-events: none;
             z-index: 1;
-            overflow: visible;
         }
 
-        .timeline-svg-path {
-            stroke: #ff5c00;
-            stroke-width: 5;
+        /* Path for the route */
+        .map-route-path {
             fill: none;
-            filter: drop-shadow(0 2px 4px rgba(255, 92, 0, 0.3));
+            stroke: #ff5c00;
+            stroke-width: 4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
             stroke-dasharray: 1000;
             stroke-dashoffset: 1000;
-            transition: stroke-dashoffset 2s cubic-bezier(0.65, 0, 0.35, 1);
+            filter: drop-shadow(0 2px 4px rgba(255, 92, 0, 0.3));
+            transition: stroke-dashoffset 2s ease-in-out;
         }
 
-        .timeline-svg-path.animate-in {
+        .map-route-path.animate-in {
             stroke-dashoffset: 0;
         }
 
-        /* Wave line gradient */
-        .timeline-svg-gradient {
+        /* Route glow effect */
+        .map-route-glow {
+            fill: none;
+            stroke: rgba(255, 92, 0, 0.3);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Horizontal timeline line */
+        .timeline-line {
+            position: absolute;
+            top: 50%;
+            left: clamp(80px, 8.33vw, 120px);
+            right: clamp(80px, 8.33vw, 120px);
+            height: 5px;
+            background: linear-gradient(90deg, 
+                rgba(255, 92, 0, 0.3) 0%, 
+                #ff5c00 20%, 
+                #ff5c00 80%, 
+                rgba(255, 92, 0, 0.3) 100%);
+            transform: translateY(-50%) scaleX(0);
+            transform-origin: left center;
+            z-index: 1;
+            border-radius: 3px;
+            box-shadow: 0 2px 8px rgba(255, 92, 0, 0.2);
+            transition: transform 1.2s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+
+        .timeline-line.animate-in {
+            transform: translateY(-50%) scaleX(1);
+        }
+
+        .timeline-line::before {
+            content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.4) 50%, 
+                transparent 100%);
+            border-radius: 3px;
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
 
         /* Start point - rectangle */
@@ -320,7 +378,7 @@ if (file_exists($jsonFile)) {
             font-size: clamp(14px, 1.46vw, 18px);
             font-weight: 700;
             border-radius: 8px;
-            z-index: 4;
+            z-index: 3;
             white-space: nowrap;
             box-shadow: 
                 0 4px 12px rgba(255, 92, 0, 0.4),
@@ -340,27 +398,26 @@ if (file_exists($jsonFile)) {
         .timeline-start-event {
             position: absolute;
             left: 0;
-            top: 60%;
+            bottom: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             width: clamp(140px, 14.58vw, 200px);
-            transform: translate(-50%, 0) translateY(20px);
+            transform: translate(-50%, calc(100% + clamp(28px, 2.92vw, 40px))) translateY(20px);
             opacity: 0;
             transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
                         opacity 0.8s ease,
                         filter 0.3s ease;
-            z-index: 3;
         }
 
         .timeline-start-event.animate-in {
             opacity: 1;
-            transform: translate(-50%, 0) translateY(0);
+            transform: translate(-50%, calc(100% + clamp(28px, 2.92vw, 40px))) translateY(0);
         }
 
         .timeline-start-event:hover {
-            transform: translate(-50%, 0) translateY(-8px) scale(1.15);
-            filter: drop-shadow(0 12px 24px rgba(255, 92, 0, 0.3));
+            transform: translate(-50%, calc(100% + clamp(28px, 2.92vw, 40px))) translateY(-5px) scale(1.08);
+            filter: drop-shadow(0 12px 24px rgba(255, 92, 0, 0.25));
         }
 
         .timeline-start-event .timeline-arrow {
@@ -371,7 +428,6 @@ if (file_exists($jsonFile)) {
             border-right: clamp(9px, 0.94vw, 13px) solid transparent;
             border-bottom: clamp(14px, 1.46vw, 18px) solid #000000;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-            transform: rotate(-90deg);
         }
 
         .timeline-start-event .timeline-year-label {
@@ -444,7 +500,7 @@ if (file_exists($jsonFile)) {
             color: #ffffff;
             font-size: clamp(13px, 1.35vw, 17px);
             font-weight: 700;
-            z-index: 4;
+            z-index: 3;
             box-shadow: 
                 0 4px 16px rgba(255, 92, 0, 0.4),
                 0 2px 6px rgba(0, 0, 0, 0.15),
@@ -479,27 +535,26 @@ if (file_exists($jsonFile)) {
         .timeline-end-event {
             position: absolute;
             right: 0;
-            top: 60%;
+            bottom: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             width: clamp(140px, 14.58vw, 200px);
-            transform: translate(50%, 0) translateY(20px);
+            transform: translate(50%, calc(100% + clamp(28px, 2.92vw, 40px))) translateY(20px);
             opacity: 0;
             transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
                         opacity 0.8s ease,
                         filter 0.3s ease;
-            z-index: 3;
         }
 
         .timeline-end-event.animate-in {
             opacity: 1;
-            transform: translate(50%, 0) translateY(0);
+            transform: translate(50%, calc(100% + clamp(28px, 2.92vw, 40px))) translateY(0);
         }
 
         .timeline-end-event:hover {
-            transform: translate(50%, 0) translateY(-8px) scale(1.15);
-            filter: drop-shadow(0 12px 24px rgba(255, 92, 0, 0.3));
+            transform: translate(50%, calc(100% + clamp(28px, 2.92vw, 40px))) translateY(-5px) scale(1.08);
+            filter: drop-shadow(0 12px 24px rgba(255, 92, 0, 0.25));
         }
 
         .timeline-end-event .timeline-arrow {
@@ -510,7 +565,6 @@ if (file_exists($jsonFile)) {
             border-right: clamp(9px, 0.94vw, 13px) solid transparent;
             border-bottom: clamp(14px, 1.46vw, 18px) solid #000000;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-            transform: rotate(90deg);
         }
 
         .timeline-end-event .timeline-year-label {
@@ -567,43 +621,158 @@ if (file_exists($jsonFile)) {
             left: 100%;
         }
 
-        /* Timeline items container */
-        .timeline-items {
-            position: relative;
-            padding: 0 clamp(100px, 10.42vw, 140px);
-            width: 100%;
-            height: 100%;
-            min-height: clamp(400px, 41.67vw, 600px);
-        }
-
-        .timeline-event {
+        /* Map milestone marker */
+        .map-milestone {
             position: absolute;
+            z-index: 10;
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: clamp(140px, 14.58vw, 200px);
+            cursor: pointer;
+            transform: translate(-50%, -50%) scale(0);
             opacity: 0;
-            visibility: hidden;
-            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                        opacity 0.8s ease,
-                        visibility 0s 0.8s,
-                        filter 0.3s ease;
-            /* 初始位置将在JavaScript中设置 */
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        opacity 0.5s ease;
         }
 
-        .timeline-event.animate-in {
+        .map-milestone.animate-in {
             opacity: 1;
-            visibility: visible;
-            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                        opacity 0.8s ease,
-                        visibility 0s 0s,
-                        filter 0.3s ease;
+            transform: translate(-50%, -50%) scale(1);
         }
 
-        .timeline-event:hover {
-            transform: scale(1.15) translateY(-8px);
-            filter: drop-shadow(0 12px 24px rgba(255, 92, 0, 0.3));
-            z-index: 10;
+        /* Milestone pin/marker icon */
+        .milestone-pin {
+            width: clamp(50px, 5.21vw, 70px);
+            height: clamp(50px, 5.21vw, 70px);
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            position: relative;
+            box-shadow: 
+                0 4px 12px rgba(255, 92, 0, 0.4),
+                0 2px 6px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            border: 3px solid #ffffff;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .map-milestone:hover .milestone-pin {
+            transform: rotate(-45deg) scale(1.2);
+            box-shadow: 
+                0 6px 20px rgba(255, 92, 0, 0.6),
+                0 4px 10px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .milestone-pin::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(45deg);
+            width: clamp(20px, 2.08vw, 28px);
+            height: clamp(20px, 2.08vw, 28px);
+            background: #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .milestone-pin::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(45deg);
+            width: clamp(12px, 1.25vw, 16px);
+            height: clamp(12px, 1.25vw, 16px);
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
+            border-radius: 50%;
+        }
+
+        /* Milestone content card */
+        .milestone-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: clamp(14px, 1.46vw, 20px) clamp(18px, 1.88vw, 24px);
+            box-shadow: 
+                0 8px 24px rgba(0, 0, 0, 0.12),
+                0 4px 12px rgba(255, 92, 0, 0.1);
+            border: 2px solid rgba(255, 92, 0, 0.2);
+            min-width: clamp(140px, 14.58vw, 200px);
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        /* Cards above the pin */
+        .milestone-top .milestone-card {
+            margin-bottom: clamp(35px, 3.65vw, 50px);
+        }
+
+        .milestone-top .milestone-card::before {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid rgba(255, 92, 0, 0.2);
+        }
+
+        /* Cards below the pin */
+        .milestone-bottom .milestone-card {
+            margin-top: clamp(35px, 3.65vw, 50px);
+        }
+
+        .milestone-bottom .milestone-card::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid rgba(255, 92, 0, 0.2);
+        }
+
+        .map-milestone:hover .milestone-card {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 12px 32px rgba(0, 0, 0, 0.18),
+                0 6px 16px rgba(255, 92, 0, 0.15);
+            border-color: rgba(255, 92, 0, 0.4);
+        }
+
+        .milestone-top:hover .milestone-card {
+            transform: translateY(5px);
+        }
+
+        .milestone-card.active::before {
+            border-color: rgba(255, 92, 0, 0.4);
+        }
+
+        .milestone-year {
+            font-size: clamp(18px, 1.88vw, 26px);
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: clamp(8px, 0.83vw, 12px);
+            letter-spacing: 0.5px;
+        }
+
+        .milestone-goal {
+            font-size: clamp(13px, 1.35vw, 16px);
+            color: #2c3e50;
+            line-height: 1.5;
+            font-weight: 500;
         }
 
         .timeline-arrow {
@@ -611,9 +780,27 @@ if (file_exists($jsonFile)) {
             height: 0;
             margin-bottom: clamp(10px, 1.04vw, 14px);
             transition: filter 0.3s ease;
+        }
+
+        .timeline-event:nth-child(even) .timeline-arrow {
+            margin-bottom: 0;
+            margin-top: clamp(10px, 1.04vw, 14px);
+            order: -1;
+        }
+
+        /* Odd items (below timeline) - arrow points up */
+        .timeline-event:nth-child(odd) .timeline-arrow {
             border-left: clamp(9px, 0.94vw, 13px) solid transparent;
             border-right: clamp(9px, 0.94vw, 13px) solid transparent;
             border-bottom: clamp(14px, 1.46vw, 18px) solid #000000;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        /* Even items (above timeline) - arrow points down */
+        .timeline-event:nth-child(even) .timeline-arrow {
+            border-left: clamp(9px, 0.94vw, 13px) solid transparent;
+            border-right: clamp(9px, 0.94vw, 13px) solid transparent;
+            border-top: clamp(14px, 1.46vw, 18px) solid #000000;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
         }
 
@@ -995,16 +1182,30 @@ if (file_exists($jsonFile)) {
             }
 
             .timeline-wrapper {
-                padding: clamp(40px, 4.17vw, 60px) clamp(24px, 2.5vw, 32px);
-            }
-
-            .timeline-line {
-                left: clamp(60px, 6.25vw, 80px);
-                right: clamp(60px, 6.25vw, 80px);
-            }
-
-            .timeline-wrapper {
                 padding: clamp(60px, 6.25vw, 80px) clamp(24px, 2.5vw, 32px);
+                min-height: clamp(400px, 41.67vw, 600px);
+            }
+
+            .map-milestone {
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+
+            .milestone-pin {
+                width: clamp(40px, 4.17vw, 60px);
+                height: clamp(40px, 4.17vw, 60px);
+            }
+
+            .milestone-card {
+                min-width: clamp(120px, 12.5vw, 180px);
+                padding: clamp(12px, 1.25vw, 16px) clamp(14px, 1.46vw, 20px);
+            }
+
+            .milestone-year {
+                font-size: clamp(16px, 1.67vw, 22px);
+            }
+
+            .milestone-goal {
+                font-size: clamp(12px, 1.25vw, 14px);
             }
 
             .timeline-start {
@@ -1097,63 +1298,71 @@ if (file_exists($jsonFile)) {
                         </div>
                         
                         <div class="timeline-wrapper">
-                            <!-- SVG Wave Path -->
-                            <svg class="timeline-svg-container" viewBox="0 0 1000 400" preserveAspectRatio="none">
+                            <!-- Map-style SVG path -->
+                            <svg class="map-timeline-svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet">
                                 <defs>
-                                    <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <linearGradient id="routeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                                         <stop offset="0%" style="stop-color:rgba(255, 92, 0, 0.3);stop-opacity:1" />
-                                        <stop offset="20%" style="stop-color:#ff5c00;stop-opacity:1" />
-                                        <stop offset="80%" style="stop-color:#ff5c00;stop-opacity:1" />
+                                        <stop offset="50%" style="stop-color:#ff5c00;stop-opacity:1" />
                                         <stop offset="100%" style="stop-color:rgba(255, 92, 0, 0.3);stop-opacity:1" />
                                     </linearGradient>
                                 </defs>
-                                <path class="timeline-svg-path" d="M 0,200 Q 125,100 250,200 T 500,200 T 750,200 T 1000,200" 
-                                      stroke="url(#waveGradient)" 
-                                      id="timelinePath"/>
+                                <!-- Route glow -->
+                                <path class="map-route-glow" d="M 80 300 Q 250 200, 500 300 T 920 300" stroke="url(#routeGradient)"/>
+                                <!-- Main route path -->
+                                <path class="map-route-path" d="M 80 300 Q 250 200, 500 300 T 920 300" stroke="#ff5c00"/>
                             </svg>
-                            
-                            <!-- Start point -->
-                            <div class="timeline-start">起始</div>
+
+                            <!-- Map milestones -->
                             <?php 
-                            // Get start year and goal from first timeline item
-                            $startItem = !empty($strategyData['timeline']) ? $strategyData['timeline'][0] : null;
+                            if (!empty($strategyData['timeline'])): 
+                                $totalItems = count($strategyData['timeline']);
+                                
+                                // Calculate positions along the curved path
+                                // Path: M 80 300 Q 250 200, 500 300 T 920 300
+                                // This creates a smooth S-curve
+                                foreach ($strategyData['timeline'] as $index => $item):
+                                    $t = $totalItems > 1 ? $index / ($totalItems - 1) : 0; // 0 to 1
+                                    
+                                    // Calculate X position (linear from 8% to 92%)
+                                    $xPercent = 8 + $t * 84;
+                                    
+                                    // Calculate Y position along the curve
+                                    // Using a smooth S-curve: starts at 50%, goes up to ~35%, then back to 50%
+                                    // We use a combination of sin functions for smooth curve
+                                    if ($t < 0.5) {
+                                        // First half: curve upward
+                                        $yPercent = 50 - sin($t * M_PI) * 15;
+                                    } else {
+                                        // Second half: curve downward back
+                                        $yPercent = 35 + sin(($t - 0.5) * M_PI) * 15;
+                                    }
+                                    
+                                    // Alternate card position (above or below pin) for better layout
+                                    $cardPosition = ($index % 2 == 0) ? 'top' : 'bottom';
                             ?>
-                            <?php if ($startItem): ?>
-                            <div class="timeline-start-event">
-                                <div class="timeline-arrow"></div>
-                                <div class="timeline-year-label"><?php echo htmlspecialchars($startItem['year'] ?? ''); ?>年</div>
-                                <div class="timeline-goal-text"><?php echo htmlspecialchars($startItem['goal'] ?? ''); ?></div>
-                            </div>
-                            <?php endif; ?>
-                            
-                            <!-- End point -->
-                            <div class="timeline-end">终点</div>
-                            <?php 
-                            // Get end year and goal from last timeline item
-                            $endItem = !empty($strategyData['timeline']) ? end($strategyData['timeline']) : null;
-                            ?>
-                            <?php if ($endItem): ?>
-                            <div class="timeline-end-event">
-                                <div class="timeline-arrow"></div>
-                                <div class="timeline-year-label"><?php echo htmlspecialchars($endItem['year'] ?? ''); ?>年</div>
-                                <div class="timeline-goal-text"><?php echo htmlspecialchars($endItem['goal'] ?? ''); ?></div>
-                            </div>
-                            <?php endif; ?>
-                            
-                            <!-- Middle events -->
-                            <div class="timeline-items">
-                                <?php 
-                                // Skip first and last items since they're shown at start/end points
-                                $middleItems = !empty($strategyData['timeline']) ? array_slice($strategyData['timeline'], 1, -1) : [];
-                                $totalMiddleItems = count($middleItems);
-                                foreach ($middleItems as $index => $item): 
-                                ?>
-                                <div class="timeline-event">
-                                    <div class="timeline-arrow"></div>
-                                    <div class="timeline-year-label"><?php echo htmlspecialchars($item['year'] ?? ''); ?>年</div>
-                                    <div class="timeline-goal-text"><?php echo htmlspecialchars($item['goal'] ?? ''); ?></div>
+                            <div class="map-milestone milestone-<?php echo $cardPosition; ?>" 
+                                 style="left: <?php echo $xPercent; ?>%; top: <?php echo $yPercent; ?>%;"
+                                 data-year="<?php echo htmlspecialchars($item['year'] ?? ''); ?>">
+                                <div class="milestone-pin"></div>
+                                <div class="milestone-card">
+                                    <div class="milestone-year"><?php echo htmlspecialchars($item['year'] ?? ''); ?>年</div>
+                                    <div class="milestone-goal"><?php echo htmlspecialchars($item['goal'] ?? ''); ?></div>
                                 </div>
-                                <?php endforeach; ?>
+                            </div>
+                            <?php 
+                                endforeach; 
+                            endif; 
+                            ?>
+
+                            <!-- Start label -->
+                            <div style="position: absolute; left: 8%; top: 32%; font-size: clamp(12px, 1.25vw, 16px); color: #ff5c00; font-weight: 700; background: rgba(255, 255, 255, 0.9); padding: 8px 16px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 5;">
+                                起始
+                            </div>
+
+                            <!-- End label -->
+                            <div style="position: absolute; right: 8%; top: 32%; font-size: clamp(12px, 1.25vw, 16px); color: #ff5c00; font-weight: 700; background: rgba(255, 255, 255, 0.9); padding: 8px 16px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 5;">
+                                终点
                             </div>
                         </div>
                     </div>
@@ -1362,176 +1571,79 @@ if (file_exists($jsonFile)) {
     </div>
 
     <script>
-        // 时间线动画控制器 - 波浪形路径
+        // 时间线动画控制器
         document.addEventListener('DOMContentLoaded', function() {
             const timelineWrapper = document.querySelector('.timeline-wrapper');
             if (!timelineWrapper) return;
 
-            // 获取SVG路径
-            const path = document.getElementById('timelinePath');
-            if (!path) return;
+            // 创建 IntersectionObserver 观察时间线容器
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // 触发时间线动画
+                        animateTimeline(entry.target);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.3,
+                rootMargin: '0px 0px -100px 0px'
+            });
 
-            // 计算波浪路径上的点
-            function getPointAtLength(pathLength, totalLength, index, totalItems) {
-                const path = document.getElementById('timelinePath');
-                const point = path.getPointAtLength(pathLength);
-                return point;
-            }
-
-            // 立即尝试初始化（如果元素已在视口中）
-            function initTimeline() {
-                if (timelineWrapper.getBoundingClientRect().top < window.innerHeight + 200) {
-                    animateTimeline(timelineWrapper);
-                } else {
-                    // 如果不在视口，使用IntersectionObserver
-                    const observer = new IntersectionObserver((entries) => {
-                        entries.forEach(entry => {
-                            if (entry.isIntersecting) {
-                                animateTimeline(entry.target);
-                                observer.unobserve(entry.target);
-                            }
-                        });
-                    }, {
-                        threshold: 0.1,
-                        rootMargin: '200px 0px'
-                    });
-                    observer.observe(timelineWrapper);
-                }
-            }
-            
-            // 延迟初始化以确保DOM完全渲染
-            setTimeout(initTimeline, 200);
+            observer.observe(timelineWrapper);
 
             function animateTimeline(container) {
-                // 1. 先显示起始点
-                const startPoint = container.querySelector('.timeline-start');
-                if (startPoint) {
+                // 1. 先绘制路径
+                const routePath = container.querySelector('.map-route-path');
+                if (routePath) {
                     setTimeout(() => {
-                        startPoint.classList.add('animate-in');
-                    }, 100);
+                        routePath.classList.add('animate-in');
+                    }, 200);
                 }
 
-                // 2. 显示波浪路径动画
-                const svgPath = container.querySelector('.timeline-svg-path');
-                if (svgPath) {
+                // 2. 逐个显示里程碑（按路径顺序）
+                const milestones = container.querySelectorAll('.map-milestone');
+                milestones.forEach((milestone, index) => {
                     setTimeout(() => {
-                        svgPath.classList.add('animate-in');
-                    }, 400);
-                }
-
-                // 3. 显示终点
-                const endPoint = container.querySelector('.timeline-end');
-                if (endPoint) {
-                    setTimeout(() => {
-                        endPoint.classList.add('animate-in');
-                    }, 800);
-                }
-
-                // 4. 逐个显示起始事件
-                const startEvent = container.querySelector('.timeline-start-event');
-                if (startEvent) {
-                    setTimeout(() => {
-                        startEvent.classList.add('animate-in');
-                    }, 1200);
-                }
-
-                // 5. 计算并定位中间事件到波浪路径上
-                const events = container.querySelectorAll('.timeline-event');
-                if (events.length > 0 && path) {
-                    const pathLength = path.getTotalLength();
-                    const wrapperWidth = container.offsetWidth;
-                    const wrapperHeight = container.offsetHeight;
-                    const svgLeftOffset = clamp(80, 8.33, 120);
-                    const svgElement = container.querySelector('.timeline-svg-container');
-                    const svgRect = svgElement ? svgElement.getBoundingClientRect() : { width: wrapperWidth, height: wrapperHeight };
-                    
-                    events.forEach((event, index) => {
-                        // 计算事件在波浪路径上的位置（0到1之间的值）
-                        const progress = (index + 1) / (events.length + 1);
-                        const pathPoint = path.getPointAtLength(pathLength * progress);
-                        
-                        // 获取SVG的viewBox转换
-                        const svgWidth = svgRect.width || (wrapperWidth - (svgLeftOffset * 2));
-                        const svgHeight = svgRect.height || wrapperHeight;
-                        
-                        // 将SVG坐标转换为容器坐标
-                        const x = svgLeftOffset + (pathPoint.x / 1000) * svgWidth;
-                        const y = (pathPoint.y / 400) * svgHeight;
-                        
-                        // 计算箭头方向（垂直于路径在该点的切线）
-                        const nextProgress = Math.min(progress + 0.01, 1);
-                        const nextPoint = path.getPointAtLength(pathLength * nextProgress);
-                        const angle = Math.atan2(nextPoint.y - pathPoint.y, nextPoint.x - pathPoint.x) * 180 / Math.PI;
-                        
-                        // 保存角度以供悬停时使用
-                        event.dataset.angle = angle;
-                        
-                        // 设置事件位置
-                        event.style.left = x + 'px';
-                        event.style.top = y + 'px';
-                        event.style.transform = `translate(-50%, -50%) translateY(20px) rotate(${angle}deg)`;
-                        
-                        // 箭头指向路径（垂直于路径）
-                        const arrow = event.querySelector('.timeline-arrow');
-                        if (arrow) {
-                            arrow.style.transform = `rotate(${angle + 90}deg)`;
-                        }
-                        
-                        // 动画显示
-                        setTimeout(() => {
-                            event.classList.add('animate-in');
-                            event.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
-                        }, 1600 + (index * 150));
-                        
-                        // 添加悬停事件
-                        event.addEventListener('mouseenter', function() {
-                            const angle = parseFloat(this.dataset.angle || 0);
-                            this.style.transform = `translate(-50%, -50%) scale(1.15) translateY(-8px) rotate(${angle}deg)`;
-                        });
-                        
-                        event.addEventListener('mouseleave', function() {
-                            const angle = parseFloat(this.dataset.angle || 0);
-                            this.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
-                        });
-                    });
-                }
-
-                // 6. 最后显示终点事件
-                const endEvent = container.querySelector('.timeline-end-event');
-                if (endEvent) {
-                    setTimeout(() => {
-                        endEvent.classList.add('animate-in');
-                    }, 1600 + (events.length * 150) + 200);
-                }
+                        milestone.classList.add('animate-in');
+                    }, 1000 + (index * 200)); // 路径动画后开始显示里程碑
+                });
             }
 
-            // 辅助函数：clamp
-            function clamp(min, vw, max) {
-                return Math.min(Math.max(window.innerWidth * vw / 100, min), max);
-            }
-
-            // 增强交互：点击事件卡片时的高亮效果
-            const eventCards = document.querySelectorAll('.timeline-goal-text');
-            eventCards.forEach(card => {
+            // 增强交互：点击里程碑卡片时的高亮效果
+            const milestoneCards = document.querySelectorAll('.milestone-card');
+            milestoneCards.forEach(card => {
                 card.addEventListener('click', function() {
                     // 移除其他卡片的高亮
-                    eventCards.forEach(c => c.classList.remove('active'));
+                    milestoneCards.forEach(c => c.classList.remove('active'));
                     // 添加当前卡片的高亮
                     this.classList.add('active');
                 });
             });
 
-            } // 关闭animateTimeline函数
+            // 添加里程碑悬停时的路径高亮效果
+            const milestones = document.querySelectorAll('.map-milestone');
+            milestones.forEach(milestone => {
+                milestone.addEventListener('mouseenter', function() {
+                    this.style.zIndex = '20';
+                });
+                milestone.addEventListener('mouseleave', function() {
+                    this.style.zIndex = '10';
+                });
+            });
         });
 
-        // 添加卡片激活状态的样式（通过内联样式或CSS类）
+        // 添加里程碑卡片激活状态的样式
         const style = document.createElement('style');
         style.textContent = `
-            .timeline-goal-text.active {
+            .milestone-card.active {
                 background: rgba(255, 92, 0, 0.1) !important;
-                border-color: rgba(255, 92, 0, 0.5) !important;
-                box-shadow: 0 8px 24px rgba(255, 92, 0, 0.25) !important;
-                transform: translateY(-3px) scale(1.02) !important;
+                border-color: rgba(255, 92, 0, 0.6) !important;
+                box-shadow: 0 12px 32px rgba(255, 92, 0, 0.3) !important;
+                transform: translateY(-8px) scale(1.05) !important;
+            }
+            .milestone-card.active .milestone-year {
+                font-size: clamp(20px, 2.08vw, 28px) !important;
             }
         `;
         document.head.appendChild(style);
