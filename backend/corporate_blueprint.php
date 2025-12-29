@@ -219,6 +219,10 @@ if (file_exists($jsonFile)) {
         .timeline-container {
             position: relative;
             padding: clamp(40px, 4.17vw, 60px) 0;
+            width: 100vw;
+            margin-left: calc(-50vw + 50%);
+            left: 50%;
+            right: 50%;
         }
 
         .timeline-header {
@@ -262,7 +266,7 @@ if (file_exists($jsonFile)) {
 
         .timeline-wrapper {
             position: relative;
-            padding: clamp(50px, 5.21vw, 80px) clamp(30px, 3.13vw, 50px);
+            padding: clamp(50px, 5.21vw, 80px) clamp(20px, 2.08vw, 30px);
             overflow: visible;
             background: 
                 radial-gradient(circle at 20% 30%, rgba(255, 92, 0, 0.05) 0%, transparent 40%),
@@ -283,6 +287,7 @@ if (file_exists($jsonFile)) {
                 );
             border-radius: 12px;
             min-height: clamp(380px, 39.58vw, 550px);
+            width: 100%;
         }
 
         /* Map-style SVG path container */
@@ -1180,7 +1185,7 @@ if (file_exists($jsonFile)) {
             }
 
             .timeline-wrapper {
-                padding: clamp(40px, 4.17vw, 60px) clamp(20px, 2.08vw, 30px);
+                padding: clamp(40px, 4.17vw, 60px) clamp(15px, 1.56vw, 20px);
                 min-height: clamp(320px, 33.33vw, 450px);
             }
 
@@ -1305,7 +1310,7 @@ if (file_exists($jsonFile)) {
                         
                         <div class="timeline-wrapper">
                             <!-- Map-style SVG path -->
-                            <svg class="map-timeline-svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet">
+                            <svg class="map-timeline-svg" viewBox="0 0 2000 600" preserveAspectRatio="none">
                                 <defs>
                                     <linearGradient id="routeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                                         <stop offset="0%" style="stop-color:rgba(255, 92, 0, 0.3);stop-opacity:1" />
@@ -1314,9 +1319,9 @@ if (file_exists($jsonFile)) {
                                     </linearGradient>
                                 </defs>
                                 <!-- Route glow -->
-                                <path class="map-route-glow" d="M 80 300 Q 250 200, 500 300 T 920 300" stroke="url(#routeGradient)"/>
+                                <path class="map-route-glow" d="M 40 300 Q 600 180, 1000 300 Q 1400 420, 1960 300" stroke="url(#routeGradient)"/>
                                 <!-- Main route path -->
-                                <path class="map-route-path" d="M 80 300 Q 250 200, 500 300 T 920 300" stroke="#ff5c00"/>
+                                <path class="map-route-path" d="M 40 300 Q 600 180, 1000 300 Q 1400 420, 1960 300" stroke="#ff5c00"/>
                             </svg>
 
                             <!-- Map milestones -->
@@ -1334,19 +1339,17 @@ if (file_exists($jsonFile)) {
                                     ];
                                 }
                                 
-                                // SVG path: M 80 300 Q 250 200, 500 300 T 920 300
-                                // ViewBox: 1000x600
-                                // First curve: M 80 300 Q 250 200, 500 300
-                                $p0_1 = [80, 300];   // Start point
-                                $p1_1 = [250, 200];  // Control point
-                                $p2_1 = [500, 300];  // End point
+                                // SVG path: M 40 300 Q 600 180, 1000 300 Q 1400 420, 1960 300
+                                // ViewBox: 2000x600
+                                // First curve: M 40 300 Q 600 180, 1000 300
+                                $p0_1 = [40, 300];    // Start point
+                                $p1_1 = [600, 180];   // Control point
+                                $p2_1 = [1000, 300];  // End point
                                 
-                                // Second curve (smooth continuation): T 920 300
-                                // For smooth continuation, control point is reflection
-                                // Calculate reflection: p1_2 = p2_1 + (p2_1 - p1_1)
-                                $p0_2 = [500, 300];  // Start (same as p2_1)
-                                $p1_2 = [750, 400];  // Reflected control point: 500 + (500-250) = 750, 300 + (300-200) = 400
-                                $p2_2 = [920, 300];  // End point
+                                // Second curve: Q 1400 420, 1960 300
+                                $p0_2 = [1000, 300];  // Start (same as p2_1)
+                                $p1_2 = [1400, 420];  // Control point
+                                $p2_2 = [1960, 300];  // End point
                                 
                                 foreach ($strategyData['timeline'] as $index => $item):
                                     $t = $totalItems > 1 ? $index / ($totalItems - 1) : 0; // 0 to 1
@@ -1363,8 +1366,8 @@ if (file_exists($jsonFile)) {
                                         $point = bezierQuad($t_curve, $p0_2, $p1_2, $p2_2);
                                     }
                                     
-                                    // Convert SVG coordinates (0-1000, 0-600) to percentage
-                                    $xPercent = ($point[0] / 1000) * 100;
+                                    // Convert SVG coordinates (0-2000, 0-600) to percentage
+                                    $xPercent = ($point[0] / 2000) * 100;
                                     $yPercent = ($point[1] / 600) * 100;
                                     
                                     // Alternate card position (above or below pin) for better layout
