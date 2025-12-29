@@ -37,9 +37,17 @@ if (file_exists($jsonFile)) {
             background-color: #faf7f2;
             color: #000000;
             min-height: 100vh;
-            overflow-x: hidden;
             overflow-y: auto;
             line-height: 1.6;
+        }
+        
+        /* Allow timeline to break out horizontally */
+        html {
+            overflow-x: visible;
+        }
+        
+        body:has(.section-timeline) {
+            overflow-x: visible;
         }
 
         /* 主内容容器 */
@@ -50,6 +58,7 @@ if (file_exists($jsonFile)) {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            overflow-x: visible;
         }
 
         /* 标题区域 */
@@ -219,10 +228,18 @@ if (file_exists($jsonFile)) {
         .timeline-container {
             position: relative;
             padding: clamp(40px, 4.17vw, 60px) 0;
+        }
+        
+        /* Make timeline section break out to full width */
+        .section-timeline {
             width: 100vw;
-            margin-left: calc(-50vw + 50%);
-            left: 50%;
-            right: 50%;
+            position: relative;
+            left: calc(50% - 50vw);
+            margin-left: 0;
+            margin-right: 0;
+            padding-left: 0;
+            padding-right: 0;
+            box-sizing: border-box;
         }
 
         .timeline-header {
@@ -1301,7 +1318,7 @@ if (file_exists($jsonFile)) {
 
                 <!-- Timeline Section -->
                 <?php if (!empty($strategyData['timeline'])): ?>
-                <div class="section">
+                <div class="section section-timeline">
                     <div class="timeline-container">
                         <div class="timeline-header">
                             <div class="timeline-main-title">以终为始</div>
