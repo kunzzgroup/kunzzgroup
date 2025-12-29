@@ -82,11 +82,6 @@ if (file_exists($jsonFile)) {
             color: #6b7280;
         }
 
-        /* 章节样式 */
-        .section {
-            margin-bottom: clamp(32px, 3.13vw, 60px);
-        }
-
         .section-title {
             font-size: clamp(20px, 2.08vw, 32px);
             font-weight: bold;
