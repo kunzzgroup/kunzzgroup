@@ -1324,25 +1324,48 @@ if (file_exists($jsonFile)) {
                             if (!empty($strategyData['timeline'])): 
                                 $totalItems = count($strategyData['timeline']);
                                 
-                                // Calculate positions along the curved path
-                                // Path: M 80 300 Q 250 200, 500 300 T 920 300
-                                // This creates a smooth S-curve
+                                // Function to calculate point on quadratic Bezier curve
+                                // B(t) = (1-t)²P₀ + 2(1-t)tP₁ + t²P₂
+                                function bezierQuad($t, $p0, $p1, $p2) {
+                                    $mt = 1 - $t;
+                                    return [
+                                        $mt * $mt * $p0[0] + 2 * $mt * $t * $p1[0] + $t * $t * $p2[0],
+                                        $mt * $mt * $p0[1] + 2 * $mt * $t * $p1[1] + $t * $t * $p2[1]
+                                    ];
+                                }
+                                
+                                // SVG path: M 80 300 Q 250 200, 500 300 T 920 300
+                                // ViewBox: 1000x600
+                                // First curve: M 80 300 Q 250 200, 500 300
+                                $p0_1 = [80, 300];   // Start point
+                                $p1_1 = [250, 200];  // Control point
+                                $p2_1 = [500, 300];  // End point
+                                
+                                // Second curve (smooth continuation): T 920 300
+                                // For smooth continuation, control point is reflection
+                                // Calculate reflection: p1_2 = p2_1 + (p2_1 - p1_1)
+                                $p0_2 = [500, 300];  // Start (same as p2_1)
+                                $p1_2 = [750, 400];  // Reflected control point: 500 + (500-250) = 750, 300 + (300-200) = 400
+                                $p2_2 = [920, 300];  // End point
+                                
                                 foreach ($strategyData['timeline'] as $index => $item):
                                     $t = $totalItems > 1 ? $index / ($totalItems - 1) : 0; // 0 to 1
                                     
-                                    // Calculate X position (linear from 8% to 92%)
-                                    $xPercent = 8 + $t * 84;
-                                    
-                                    // Calculate Y position along the curve
-                                    // Using a smooth S-curve: starts at 50%, goes up to ~35%, then back to 50%
-                                    // We use a combination of sin functions for smooth curve
-                                    if ($t < 0.5) {
-                                        // First half: curve upward
-                                        $yPercent = 50 - sin($t * M_PI) * 15;
+                                    // Determine which curve segment this point belongs to
+                                    // Split the path roughly in half
+                                    if ($t <= 0.5) {
+                                        // First half: use first Bezier curve
+                                        $t_curve = $t * 2; // Map to 0-1 for first curve
+                                        $point = bezierQuad($t_curve, $p0_1, $p1_1, $p2_1);
                                     } else {
-                                        // Second half: curve downward back
-                                        $yPercent = 35 + sin(($t - 0.5) * M_PI) * 15;
+                                        // Second half: use second Bezier curve
+                                        $t_curve = ($t - 0.5) * 2; // Map to 0-1 for second curve
+                                        $point = bezierQuad($t_curve, $p0_2, $p1_2, $p2_2);
                                     }
+                                    
+                                    // Convert SVG coordinates (0-1000, 0-600) to percentage
+                                    $xPercent = ($point[0] / 1000) * 100;
+                                    $yPercent = ($point[1] / 600) * 100;
                                     
                                     // Alternate card position (above or below pin) for better layout
                                     $cardPosition = ($index % 2 == 0) ? 'top' : 'bottom';
