@@ -94,15 +94,6 @@ if (file_exists($jsonFile)) {
         }
 
         /* Header Section */
-        .header-section {
-            background: #ffffff;
-            position: relative;
-            overflow: visible;
-            margin-bottom: 0;
-            padding: 0;
-        }
-
-        /* Background decorative shapes */
         .header-section-wrapper {
             position: relative;
             background: #ffffff;
@@ -647,9 +638,8 @@ if (file_exists($jsonFile)) {
             <?php if ($strategyData): ?>
                 <!-- Header Section -->
                 <div class="section">
-                    <div class="header-section">
-                        <div class="header-section-wrapper">
-                            <div class="header-panel">
+                    <div class="header-section-wrapper">
+                        <div class="header-panel">
                                 <!-- Left side text content -->
                                 <div class="header-text-content">
                                     <div class="header-label">
@@ -675,7 +665,6 @@ if (file_exists($jsonFile)) {
                                         <div class="logo-reflection"></div>
                                     </div>
                                 </div>
-                            </div>
                         </div>
                     </div>
                 </div>
