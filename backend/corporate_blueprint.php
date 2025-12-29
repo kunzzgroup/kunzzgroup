@@ -287,6 +287,8 @@ if (file_exists($jsonFile)) {
             border-radius: 12px;
             min-height: clamp(380px, 39.58vw, 550px);
             width: 100%;
+            /* 确保容器包含所有子元素（包括绝对定位的里程碑和SVG） */
+            isolation: isolate;
         }
 
         /* Map-style SVG path container */
