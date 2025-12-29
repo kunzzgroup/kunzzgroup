@@ -248,7 +248,7 @@ if (file_exists($jsonFile)) {
             bottom: -12px;
             left: 50%;
             transform: translateX(-50%);
-            width: 80px;
+            width: 200px;
             height: 3px;
             background: linear-gradient(90deg, transparent, #ff5c00, transparent);
             border-radius: 2px;
