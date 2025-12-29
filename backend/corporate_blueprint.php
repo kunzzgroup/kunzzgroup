@@ -613,7 +613,6 @@ if (file_exists($jsonFile)) {
                             <div class="company-subtitle">
                                 <span class="company-subtitle-upper">SDN BHD</span> 战略计划
                             </div>
-                            <div class="plan-title-en">CORPORATE STRATEGIC PLAN</div>
                         </div>
 
                         <!-- Right side logo -->
