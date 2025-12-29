@@ -229,17 +229,15 @@ if (file_exists($jsonFile)) {
 
         .timeline-main-title {
             font-size: clamp(36px, 3.75vw, 56px);
-            font-weight: 900;
-            color: #ff5c00;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 50%, #ffd700 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: clamp(14px, 1.46vw, 20px);
-            letter-spacing: 2px;
-            text-shadow: 
-                3px 3px 0px rgba(255, 92, 0, 0.3),
-                1px 1px 0px rgba(0, 0, 0, 0.1);
+            letter-spacing: 1px;
+            text-shadow: 0 4px 8px rgba(255, 92, 0, 0.2);
             position: relative;
-            font-family: 'Comic Sans MS', 'Marker Felt', 'Kalam', cursive;
-            transform: rotate(-1deg);
-            display: inline-block;
         }
 
         .timeline-main-title::after {
@@ -258,132 +256,208 @@ if (file_exists($jsonFile)) {
             font-size: clamp(15px, 1.56vw, 20px);
             color: #4a5568;
             font-weight: 500;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
             margin-top: clamp(20px, 2.08vw, 28px);
-            font-family: 'Comic Sans MS', 'Marker Felt', 'Kalam', cursive;
-            transform: rotate(0.5deg);
-            display: inline-block;
         }
 
         .timeline-wrapper {
             position: relative;
-            padding: clamp(80px, 8.33vw, 120px) clamp(40px, 4.17vw, 60px);
+            padding: clamp(60px, 6.25vw, 100px) clamp(40px, 4.17vw, 60px);
             overflow: visible;
             background: 
                 radial-gradient(circle at 20% 50%, rgba(255, 92, 0, 0.03) 0%, transparent 50%),
                 radial-gradient(circle at 80% 50%, rgba(255, 215, 0, 0.02) 0%, transparent 50%);
+            border-radius: 12px;
         }
 
-        /* Hand-drawn style SVG timeline line */
-        .timeline-svg-container {
-            position: absolute;
-            top: 50%;
-            left: clamp(80px, 8.33vw, 120px);
-            right: clamp(80px, 8.33vw, 120px);
-            height: 100px;
-            transform: translateY(-50%);
-            z-index: 1;
-            overflow: visible;
-        }
-
-        .timeline-svg-line {
+        /* Flowchart container */
+        .flowchart-container {
+            position: relative;
             width: 100%;
-            height: 8px;
-            stroke: #ff5c00;
-            stroke-width: 3;
-            fill: none;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            filter: drop-shadow(0 2px 4px rgba(255, 92, 0, 0.3));
-            opacity: 0;
-            stroke-dasharray: 1000;
-            stroke-dashoffset: 1000;
-            transition: opacity 0.5s ease, stroke-dashoffset 1.5s cubic-bezier(0.65, 0, 0.35, 1);
-        }
-
-        .timeline-svg-container.animate-in .timeline-svg-line {
-            opacity: 1;
-            stroke-dashoffset: 0;
-        }
-
-        /* Hand-drawn style path - wavy and irregular */
-        .timeline-hand-drawn-path {
-            vector-effect: non-scaling-stroke;
-        }
-
-        /* Start point - hand-drawn style rectangle */
-        .timeline-start {
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%) scale(0) rotate(-2deg);
-            background: #ff5c00;
-            padding: clamp(14px, 1.46vw, 18px) clamp(28px, 2.92vw, 36px);
-            color: #ffffff;
-            font-size: clamp(14px, 1.46vw, 18px);
-            font-weight: 700;
-            z-index: 3;
-            white-space: nowrap;
-            box-shadow: 
-                0 4px 12px rgba(255, 92, 0, 0.4),
-                0 2px 4px rgba(0, 0, 0, 0.1);
-            letter-spacing: 0.5px;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-            border: 3px solid #ffffff;
-            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            /* Hand-drawn border effect */
-            clip-path: polygon(
-                0% 8%, 2% 4%, 6% 2%, 10% 1%, 
-                14% 0%, 86% 0%, 90% 1%, 94% 3%, 
-                98% 6%, 100% 10%, 100% 90%, 98% 94%, 
-                94% 97%, 90% 99%, 86% 100%, 14% 100%, 
-                10% 99%, 6% 97%, 2% 94%, 0% 90%
-            );
-        }
-
-        .timeline-start.animate-in {
-            transform: translateY(-50%) scale(1) rotate(-1deg);
-        }
-
-        .timeline-start::before {
-            content: '';
-            position: absolute;
-            inset: -2px;
-            background: rgba(255, 255, 255, 0.1);
-            clip-path: polygon(
-                0% 8%, 2% 4%, 6% 2%, 10% 1%, 
-                14% 0%, 86% 0%, 90% 1%, 94% 3%, 
-                98% 6%, 100% 10%, 100% 90%, 98% 94%, 
-                94% 97%, 90% 99%, 86% 100%, 14% 100%, 
-                10% 99%, 6% 97%, 2% 94%, 0% 90%
-            );
-            z-index: -1;
-        }
-
-        /* Start point event (below the box) */
-        .timeline-start-event {
-            position: absolute;
-            left: 0;
-            bottom: 0;
+            min-height: clamp(400px, 41.67vw, 600px);
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: clamp(140px, 14.58vw, 200px);
-            transform: translate(-50%, calc(100% + clamp(28px, 2.92vw, 40px))) translateY(20px);
+            gap: clamp(24px, 2.5vw, 40px);
+        }
+
+        /* Flowchart connection lines */
+        .flowchart-connector {
+            width: 4px;
+            background: linear-gradient(180deg, #ff5c00 0%, #ff8c42 100%);
+            z-index: 1;
+            box-shadow: 0 2px 8px rgba(255, 92, 0, 0.3);
             opacity: 0;
-            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
-                        opacity 0.8s ease,
-                        filter 0.3s ease;
+            transform: scaleY(0);
+            transform-origin: top center;
+            transition: opacity 0.6s ease, transform 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+            margin: 0 auto;
         }
 
-        .timeline-start-event.animate-in {
+        .flowchart-connector.animate-in {
             opacity: 1;
-            transform: translate(-50%, calc(100% + clamp(28px, 2.92vw, 40px))) translateY(0);
+            transform: scaleY(1);
         }
 
-        .timeline-start-event:hover {
-            transform: translate(-50%, calc(100% + clamp(28px, 2.92vw, 40px))) translateY(-5px) scale(1.08);
-            filter: drop-shadow(0 12px 24px rgba(255, 92, 0, 0.25));
+        /* Arrow at the end of connector */
+        .flowchart-connector::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 14px solid #ff5c00;
+            filter: drop-shadow(0 2px 4px rgba(255, 92, 0, 0.3));
+        }
+
+        /* Flowchart node - Start (Rounded Rectangle) */
+        .flowchart-node {
+            position: relative;
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
+            color: #ffffff;
+            padding: clamp(16px, 1.67vw, 24px) clamp(32px, 3.33vw, 48px);
+            border-radius: 12px;
+            z-index: 2;
+            box-shadow: 
+                0 6px 20px rgba(255, 92, 0, 0.4),
+                0 2px 8px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            text-align: center;
+            font-weight: 700;
+            font-size: clamp(14px, 1.46vw, 18px);
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            min-width: clamp(140px, 14.58vw, 200px);
+            opacity: 0;
+            transform: scale(0.8) translateY(20px);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+        }
+
+        .flowchart-node.animate-in {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        .flowchart-node:hover {
+            transform: scale(1.05) translateY(-3px);
+            box-shadow: 
+                0 10px 30px rgba(255, 92, 0, 0.5),
+                0 4px 12px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        /* Start node specific */
+        .flowchart-node-start {
+            border-radius: 25px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            box-shadow: 
+                0 6px 20px rgba(40, 167, 69, 0.4),
+                0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* End node specific (Diamond shape) */
+        .flowchart-node-end {
+            position: relative;
+            width: clamp(100px, 10.42vw, 140px);
+            height: clamp(100px, 10.42vw, 140px);
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
+            transform: rotate(45deg);
+            border-radius: 12px;
+            box-shadow: 
+                0 6px 20px rgba(255, 92, 0, 0.4),
+                0 2px 8px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+        }
+
+        .flowchart-node-end.animate-in {
+            opacity: 1;
+            transform: rotate(45deg) scale(1);
+        }
+
+        .flowchart-node-end:hover {
+            transform: rotate(45deg) scale(1.1);
+            box-shadow: 
+                0 10px 30px rgba(255, 92, 0, 0.5),
+                0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .flowchart-node-end-text {
+            transform: rotate(-45deg);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: clamp(13px, 1.35vw, 17px);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.5px;
+        }
+
+        /* Flowchart process node (Rectangle with rounded corners) */
+        .flowchart-process-node {
+            position: relative;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 3px solid #ff5c00;
+            border-radius: 12px;
+            padding: clamp(20px, 2.08vw, 32px);
+            min-width: clamp(200px, 20.83vw, 300px);
+            max-width: clamp(280px, 29.17vw, 400px);
+            box-shadow: 
+                0 6px 20px rgba(0, 0, 0, 0.1),
+                0 2px 8px rgba(255, 92, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            z-index: 2;
+            opacity: 0;
+            transform: scale(0.8) translateY(20px);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+        }
+
+        .flowchart-process-node.animate-in {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        .flowchart-process-node:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 
+                0 12px 32px rgba(0, 0, 0, 0.15),
+                0 4px 16px rgba(255, 92, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 1);
+            border-color: #ff8c42;
+        }
+
+        /* Process node year label */
+        .flowchart-year {
+            font-size: clamp(20px, 2.08vw, 28px);
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: clamp(12px, 1.25vw, 18px);
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        /* Process node goal text */
+        .flowchart-goal {
+            font-size: clamp(14px, 1.46vw, 18px);
+            color: #2c3e50;
+            line-height: 1.7;
+            text-align: center;
+            font-weight: 500;
         }
 
         .timeline-start-event .timeline-arrow {
@@ -412,39 +486,45 @@ if (file_exists($jsonFile)) {
             font-size: clamp(14px, 1.46vw, 18px);
             color: #2c3e50;
             text-align: center;
-            line-height: 1.7;
+            line-height: 1.6;
             font-weight: 500;
-            padding: clamp(14px, 1.46vw, 20px) clamp(18px, 1.88vw, 24px);
-            background: #fffef7;
+            padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 20px);
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 92, 0, 0.1);
             max-width: 100%;
             word-wrap: break-word;
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(10px);
             cursor: pointer;
             position: relative;
-            overflow: visible;
-            border: 3px solid #ff5c00;
-            clip-path: polygon(
-                0% 12%, 3% 8%, 7% 5%, 12% 3%, 
-                18% 2%, 82% 2%, 88% 4%, 93% 7%, 
-                97% 11%, 100% 16%, 100% 84%, 97% 88%, 
-                93% 92%, 88% 95%, 82% 97%, 18% 97%, 
-                12% 95%, 7% 92%, 3% 88%, 0% 84%
-            );
-            box-shadow: 
-                4px 4px 0px rgba(255, 92, 0, 0.3),
-                8px 8px 0px rgba(255, 92, 0, 0.1);
-            transform: rotate(-0.5deg);
-            font-family: 'Comic Sans MS', 'Marker Felt', 'Kalam', cursive;
+            overflow: hidden;
+        }
+
+        .timeline-start-event .timeline-goal-text::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 92, 0, 0.1), transparent);
+            transition: left 0.5s ease;
         }
 
         .timeline-start-event:hover .timeline-goal-text {
-            transform: rotate(0deg) translateY(-3px) scale(1.05);
-            box-shadow: 
-                6px 6px 0px rgba(255, 92, 0, 0.4),
-                12px 12px 0px rgba(255, 92, 0, 0.15);
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(255, 92, 0, 0.15);
+            border-color: rgba(255, 92, 0, 0.3);
+            transform: translateY(-2px);
         }
 
-        /* End point - hand-drawn style star */
+        .timeline-start-event:hover .timeline-goal-text::before {
+            left: 100%;
+        }
+
+        /* End point - star */
         .timeline-end {
             position: absolute;
             right: 0;
@@ -452,7 +532,8 @@ if (file_exists($jsonFile)) {
             transform: translateY(-50%) scale(0) rotate(0deg);
             width: clamp(70px, 7.29vw, 90px);
             height: clamp(70px, 7.29vw, 90px);
-            background: #ff5c00;
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -462,40 +543,32 @@ if (file_exists($jsonFile)) {
             z-index: 3;
             box-shadow: 
                 0 4px 16px rgba(255, 92, 0, 0.4),
-                0 2px 6px rgba(0, 0, 0, 0.15);
+                0 2px 6px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
             letter-spacing: 0.5px;
-            border: 3px solid #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
             transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            /* Hand-drawn star shape */
-            clip-path: polygon(
-                50% 5%, 55% 32%, 82% 32%, 62% 48%, 
-                70% 75%, 50% 60%, 30% 75%, 38% 48%, 
-                18% 32%, 45% 32%
-            );
         }
 
         .timeline-end.animate-in {
-            transform: translateY(-50%) scale(1) rotate(5deg);
+            transform: translateY(-50%) scale(1) rotate(360deg);
         }
 
         .timeline-end::before {
             content: '';
             position: absolute;
             inset: -2px;
-            background: rgba(255, 255, 255, 0.1);
-            clip-path: polygon(
-                50% 5%, 55% 32%, 82% 32%, 62% 48%, 
-                70% 75%, 50% 60%, 30% 75%, 38% 48%, 
-                18% 32%, 45% 32%
-            );
+            background: linear-gradient(135deg, rgba(255, 92, 0, 0.3), rgba(255, 140, 66, 0.3));
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
             z-index: -1;
-            animation: hand-drawn-float 3s ease-in-out infinite;
+            filter: blur(4px);
+            animation: pulse-glow 2s ease-in-out infinite;
         }
 
-        @keyframes hand-drawn-float {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            50% { transform: translate(2px, -2px) rotate(2deg); }
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
         }
 
         /* End point event (below the star) */
@@ -535,53 +608,57 @@ if (file_exists($jsonFile)) {
         }
 
         .timeline-end-event .timeline-year-label {
-            font-size: clamp(20px, 2.08vw, 28px);
-            font-weight: 900;
-            color: #ff5c00;
+            font-size: clamp(18px, 1.88vw, 26px);
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: clamp(10px, 1.04vw, 14px);
-            letter-spacing: 1px;
-            text-shadow: 
-                2px 2px 0px rgba(255, 92, 0, 0.2),
-                1px 1px 0px rgba(0, 0, 0, 0.1);
-            font-family: 'Comic Sans MS', 'Marker Felt', 'Kalam', cursive;
-            transform: rotate(1deg);
-            display: inline-block;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(255, 92, 0, 0.2);
         }
 
         .timeline-end-event .timeline-goal-text {
             font-size: clamp(14px, 1.46vw, 18px);
             color: #2c3e50;
             text-align: center;
-            line-height: 1.7;
+            line-height: 1.6;
             font-weight: 500;
-            padding: clamp(14px, 1.46vw, 20px) clamp(18px, 1.88vw, 24px);
-            background: #fffef7;
+            padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 20px);
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 92, 0, 0.1);
             max-width: 100%;
             word-wrap: break-word;
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(10px);
             cursor: pointer;
             position: relative;
-            overflow: visible;
-            border: 3px solid #ff5c00;
-            clip-path: polygon(
-                0% 12%, 3% 8%, 7% 5%, 12% 3%, 
-                18% 2%, 82% 2%, 88% 4%, 93% 7%, 
-                97% 11%, 100% 16%, 100% 84%, 97% 88%, 
-                93% 92%, 88% 95%, 82% 97%, 18% 97%, 
-                12% 95%, 7% 92%, 3% 88%, 0% 84%
-            );
-            box-shadow: 
-                4px 4px 0px rgba(255, 92, 0, 0.3),
-                8px 8px 0px rgba(255, 92, 0, 0.1);
-            transform: rotate(0.5deg);
-            font-family: 'Comic Sans MS', 'Marker Felt', 'Kalam', cursive;
+            overflow: hidden;
+        }
+
+        .timeline-end-event .timeline-goal-text::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 92, 0, 0.1), transparent);
+            transition: left 0.5s ease;
         }
 
         .timeline-end-event:hover .timeline-goal-text {
-            transform: rotate(0deg) translateY(-3px) scale(1.05);
-            box-shadow: 
-                6px 6px 0px rgba(255, 92, 0, 0.4),
-                12px 12px 0px rgba(255, 92, 0, 0.15);
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(255, 92, 0, 0.15);
+            border-color: rgba(255, 92, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .timeline-end-event:hover .timeline-goal-text::before {
+            left: 100%;
         }
 
         /* Timeline items container */
@@ -638,56 +715,46 @@ if (file_exists($jsonFile)) {
             flex-direction: column;
         }
 
-        /* Hand-drawn style arrow */
         .timeline-arrow {
-            width: clamp(20px, 2.08vw, 28px);
-            height: clamp(20px, 2.08vw, 28px);
+            width: 0;
+            height: 0;
             margin-bottom: clamp(10px, 1.04vw, 14px);
-            transition: transform 0.3s ease;
-            position: relative;
-            transform: rotate(-5deg);
+            transition: filter 0.3s ease;
         }
 
         .timeline-event:nth-child(even) .timeline-arrow {
             margin-bottom: 0;
             margin-top: clamp(10px, 1.04vw, 14px);
             order: -1;
-            transform: rotate(5deg);
         }
 
-        /* Hand-drawn arrow using SVG */
-        .timeline-arrow::before {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: #000000;
-            clip-path: polygon(50% 0%, 0% 100%, 50% 80%, 100% 100%);
-            filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.2));
+        /* Odd items (below timeline) - arrow points up */
+        .timeline-event:nth-child(odd) .timeline-arrow {
+            border-left: clamp(9px, 0.94vw, 13px) solid transparent;
+            border-right: clamp(9px, 0.94vw, 13px) solid transparent;
+            border-bottom: clamp(14px, 1.46vw, 18px) solid #000000;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
         }
 
-        .timeline-event:nth-child(even) .timeline-arrow::before {
-            clip-path: polygon(50% 100%, 0% 0%, 50% 20%, 100% 0%);
-        }
-
-        .timeline-start-event .timeline-arrow::before,
-        .timeline-end-event .timeline-arrow::before {
-            clip-path: polygon(50% 0%, 0% 100%, 50% 80%, 100% 100%);
+        /* Even items (above timeline) - arrow points down */
+        .timeline-event:nth-child(even) .timeline-arrow {
+            border-left: clamp(9px, 0.94vw, 13px) solid transparent;
+            border-right: clamp(9px, 0.94vw, 13px) solid transparent;
+            border-top: clamp(14px, 1.46vw, 18px) solid #000000;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
         }
 
         .timeline-year-label {
-            font-size: clamp(20px, 2.08vw, 28px);
-            font-weight: 900;
-            color: #ff5c00;
+            font-size: clamp(18px, 1.88vw, 26px);
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: clamp(10px, 1.04vw, 14px);
-            letter-spacing: 1px;
-            text-shadow: 
-                2px 2px 0px rgba(255, 92, 0, 0.2),
-                1px 1px 0px rgba(0, 0, 0, 0.1);
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(255, 92, 0, 0.2);
             transition: transform 0.3s ease;
-            font-family: 'Comic Sans MS', 'Marker Felt', 'Kalam', cursive;
-            transform: rotate(-1deg);
-            display: inline-block;
         }
 
         .timeline-event:hover .timeline-year-label {
@@ -703,41 +770,46 @@ if (file_exists($jsonFile)) {
             font-size: clamp(14px, 1.46vw, 18px);
             color: #2c3e50;
             text-align: center;
-            line-height: 1.7;
+            line-height: 1.6;
             font-weight: 500;
-            padding: clamp(14px, 1.46vw, 20px) clamp(18px, 1.88vw, 24px);
-            background: #fffef7;
+            padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 20px);
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 92, 0, 0.1);
             max-width: 100%;
             word-wrap: break-word;
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(10px);
             cursor: pointer;
             position: relative;
-            overflow: visible;
-            border: 3px solid #ff5c00;
-            /* Hand-drawn border effect */
-            clip-path: polygon(
-                0% 12%, 3% 8%, 7% 5%, 12% 3%, 
-                18% 2%, 82% 2%, 88% 4%, 93% 7%, 
-                97% 11%, 100% 16%, 100% 84%, 97% 88%, 
-                93% 92%, 88% 95%, 82% 97%, 18% 97%, 
-                12% 95%, 7% 92%, 3% 88%, 0% 84%
-            );
-            box-shadow: 
-                4px 4px 0px rgba(255, 92, 0, 0.3),
-                8px 8px 0px rgba(255, 92, 0, 0.1);
-            transform: rotate(-0.5deg);
-            font-family: 'Comic Sans MS', 'Marker Felt', 'Kalam', cursive;
+            overflow: hidden;
         }
 
-        .timeline-event:nth-child(even) .timeline-goal-text {
-            transform: rotate(0.5deg);
+        .timeline-goal-text::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 92, 0, 0.1), transparent);
+            transition: left 0.5s ease;
         }
 
-        .timeline-event:hover .timeline-goal-text {
-            transform: rotate(0deg) translateY(-3px) scale(1.05);
-            box-shadow: 
-                6px 6px 0px rgba(255, 92, 0, 0.4),
-                12px 12px 0px rgba(255, 92, 0, 0.15);
+        .timeline-event:hover .timeline-goal-text,
+        .timeline-start-event:hover .timeline-goal-text,
+        .timeline-end-event:hover .timeline-goal-text {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(255, 92, 0, 0.15);
+            border-color: rgba(255, 92, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .timeline-event:hover .timeline-goal-text::before,
+        .timeline-start-event:hover .timeline-goal-text::before,
+        .timeline-end-event:hover .timeline-goal-text::before {
+            left: 100%;
         }
 
         /* Corporate Core Section */
@@ -1053,58 +1125,48 @@ if (file_exists($jsonFile)) {
                 padding: clamp(40px, 4.17vw, 60px) clamp(24px, 2.5vw, 32px);
             }
 
-            .timeline-svg-container {
+            .timeline-line {
                 left: clamp(60px, 6.25vw, 80px);
                 right: clamp(60px, 6.25vw, 80px);
             }
 
             .timeline-wrapper {
-                padding: clamp(60px, 6.25vw, 80px) clamp(24px, 2.5vw, 32px);
+                padding: clamp(40px, 4.17vw, 60px) clamp(24px, 2.5vw, 32px);
             }
 
-            .timeline-start {
-                padding: clamp(12px, 1.25vw, 14px) clamp(20px, 2.08vw, 24px);
-                font-size: clamp(12px, 1.25vw, 14px);
+            .flowchart-container {
+                min-height: auto;
+                gap: clamp(20px, 2.08vw, 30px);
             }
 
-            .timeline-start-event {
-                width: clamp(110px, 11.46vw, 160px);
-                transform: translate(-50%, calc(100% + clamp(20px, 2.08vw, 30px)));
+            .flowchart-node {
+                padding: clamp(12px, 1.25vw, 18px) clamp(24px, 2.5vw, 36px);
+                font-size: clamp(13px, 1.35vw, 16px);
+                min-width: clamp(120px, 12.5vw, 180px);
             }
 
-            .timeline-start-event .timeline-goal-text,
-            .timeline-end-event .timeline-goal-text,
-            .timeline-event .timeline-goal-text {
-                padding: clamp(10px, 1.04vw, 14px) clamp(12px, 1.25vw, 16px);
-                font-size: clamp(12px, 1.25vw, 15px);
+            .flowchart-process-node {
+                padding: clamp(16px, 1.67vw, 24px);
+                min-width: clamp(180px, 18.75vw, 260px);
+                max-width: 90%;
             }
 
-            .timeline-end {
-                width: clamp(55px, 5.73vw, 70px);
-                height: clamp(55px, 5.73vw, 70px);
+            .flowchart-node-end {
+                width: clamp(80px, 8.33vw, 120px);
+                height: clamp(80px, 8.33vw, 120px);
             }
 
-            .timeline-end-event {
-                width: clamp(110px, 11.46vw, 160px);
-                transform: translate(50%, calc(100% + clamp(20px, 2.08vw, 30px)));
+            .flowchart-year {
+                font-size: clamp(16px, 1.67vw, 24px);
+                margin-bottom: clamp(10px, 1.04vw, 14px);
             }
 
-            .timeline-year-label {
-                font-size: clamp(16px, 1.67vw, 22px);
+            .flowchart-goal {
+                font-size: clamp(13px, 1.35vw, 16px);
             }
 
-            .timeline-start-event .timeline-year-label,
-            .timeline-end-event .timeline-year-label {
-                font-size: clamp(16px, 1.67vw, 22px);
-            }
-
-            .timeline-items {
-                padding: 0 clamp(70px, 7.29vw, 100px);
-                min-height: clamp(180px, 18.75vw, 250px);
-            }
-
-            .timeline-event {
-                width: clamp(100px, 10.42vw, 140px);
+            .flowchart-connector {
+                width: 3px;
             }
         }
     </style>
@@ -1152,61 +1214,43 @@ if (file_exists($jsonFile)) {
                         </div>
                         
                         <div class="timeline-wrapper">
-                            <!-- Hand-drawn SVG timeline line -->
-                            <div class="timeline-svg-container">
-                                <svg class="timeline-svg-line" viewBox="0 0 1000 8" preserveAspectRatio="none">
-                                    <path class="timeline-hand-drawn-path" d="M 0,4 Q 100,2 200,4 T 400,4 T 600,4 T 800,4 T 1000,4" 
-                                          stroke="#ff5c00" stroke-width="3" fill="none" 
-                                          stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </div>
-                            
-                            <!-- Start point -->
-                            <div class="timeline-start">起始</div>
-                            <?php 
-                            // Get start year and goal from first timeline item
-                            $startItem = !empty($strategyData['timeline']) ? $strategyData['timeline'][0] : null;
-                            ?>
-                            <?php if ($startItem): ?>
-                            <div class="timeline-start-event">
-                                <div class="timeline-arrow"></div>
-                                <div class="timeline-year-label"><?php echo htmlspecialchars($startItem['year'] ?? ''); ?>年</div>
-                                <div class="timeline-goal-text"><?php echo htmlspecialchars($startItem['goal'] ?? ''); ?></div>
-                            </div>
-                            <?php endif; ?>
-                            
-                            <!-- End point -->
-                            <div class="timeline-end">终点</div>
-                            <?php 
-                            // Get end year and goal from last timeline item
-                            $endItem = !empty($strategyData['timeline']) ? end($strategyData['timeline']) : null;
-                            ?>
-                            <?php if ($endItem): ?>
-                            <div class="timeline-end-event">
-                                <div class="timeline-arrow"></div>
-                                <div class="timeline-year-label"><?php echo htmlspecialchars($endItem['year'] ?? ''); ?>年</div>
-                                <div class="timeline-goal-text"><?php echo htmlspecialchars($endItem['goal'] ?? ''); ?></div>
-                            </div>
-                            <?php endif; ?>
-                            
-                            <!-- Middle events -->
-                            <div class="timeline-items">
-                                <?php 
-                                // Skip first and last items since they're shown at start/end points
-                                $middleItems = !empty($strategyData['timeline']) ? array_slice($strategyData['timeline'], 1, -1) : [];
-                                $totalMiddleItems = count($middleItems);
-                                foreach ($middleItems as $index => $item): 
+                            <div class="flowchart-container">
+                                <?php if (!empty($strategyData['timeline'])): 
+                                    $timelineItems = $strategyData['timeline'];
+                                    $totalItems = count($timelineItems);
                                 ?>
-                                <?php
-                                // 计算位置百分比（均匀分布，从起始后到终点前）
-                                $position = ($index + 2) / (count($strategyData['timeline']) + 1) * 100;
-                                ?>
-                                <div class="timeline-event" style="left: <?php echo $position; ?>%;">
-                                    <div class="timeline-arrow"></div>
-                                    <div class="timeline-year-label"><?php echo htmlspecialchars($item['year'] ?? ''); ?>年</div>
-                                    <div class="timeline-goal-text"><?php echo htmlspecialchars($item['goal'] ?? ''); ?></div>
+                                
+                                <!-- Start Node -->
+                                <div class="flowchart-node flowchart-node-start" data-index="0">
+                                    起始
                                 </div>
+                                
+                                <?php foreach ($timelineItems as $index => $item): ?>
+                                    <!-- Connector -->
+                                    <div class="flowchart-connector" 
+                                         style="height: <?php echo clamp(60, 6.25, 100); ?>px;"
+                                         data-connector="<?php echo $index; ?>">
+                                    </div>
+                                    
+                                    <!-- Process Node -->
+                                    <div class="flowchart-process-node" data-index="<?php echo $index + 1; ?>">
+                                        <div class="flowchart-year"><?php echo htmlspecialchars($item['year'] ?? ''); ?>年</div>
+                                        <div class="flowchart-goal"><?php echo htmlspecialchars($item['goal'] ?? ''); ?></div>
+                                    </div>
                                 <?php endforeach; ?>
+                                
+                                <!-- Final Connector -->
+                                <div class="flowchart-connector" 
+                                     style="height: <?php echo clamp(60, 6.25, 100); ?>px;"
+                                     data-connector="final">
+                                </div>
+                                
+                                <!-- End Node -->
+                                <div class="flowchart-node-end" data-index="<?php echo $totalItems + 1; ?>">
+                                    <div class="flowchart-node-end-text">终点</div>
+                                </div>
+                                
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -1415,7 +1459,7 @@ if (file_exists($jsonFile)) {
     </div>
 
     <script>
-        // 时间线动画控制器
+        // 流程图式时间线动画控制器
         document.addEventListener('DOMContentLoaded', function() {
             const timelineWrapper = document.querySelector('.timeline-wrapper');
             if (!timelineWrapper) return;
@@ -1424,90 +1468,95 @@ if (file_exists($jsonFile)) {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        // 触发时间线动画
-                        animateTimeline(entry.target);
+                        // 触发流程图动画
+                        animateFlowchart(entry.target);
                         observer.unobserve(entry.target);
                     }
                 });
             }, {
-                threshold: 0.3,
-                rootMargin: '0px 0px -100px 0px'
+                threshold: 0.2,
+                rootMargin: '0px 0px -50px 0px'
             });
 
             observer.observe(timelineWrapper);
 
-            function animateTimeline(container) {
-                // 1. 先显示起始点
-                const startPoint = container.querySelector('.timeline-start');
-                if (startPoint) {
+            function animateFlowchart(container) {
+                const flowchartContainer = container.querySelector('.flowchart-container');
+                if (!flowchartContainer) return;
+
+                // 1. 显示起始节点
+                const startNode = flowchartContainer.querySelector('.flowchart-node-start');
+                if (startNode) {
                     setTimeout(() => {
-                        startPoint.classList.add('animate-in');
-                    }, 100);
+                        startNode.classList.add('animate-in');
+                    }, 200);
                 }
 
-                // 2. 然后显示手绘时间线
-                const timelineSvg = container.querySelector('.timeline-svg-container');
-                if (timelineSvg) {
-                    setTimeout(() => {
-                        timelineSvg.classList.add('animate-in');
-                    }, 400);
-                }
+                // 2. 获取所有节点（按DOM顺序）
+                const connectors = flowchartContainer.querySelectorAll('.flowchart-connector');
+                const processNodes = flowchartContainer.querySelectorAll('.flowchart-process-node');
+                const endNode = flowchartContainer.querySelector('.flowchart-node-end');
 
-                // 3. 显示终点
-                const endPoint = container.querySelector('.timeline-end');
-                if (endPoint) {
+                // 3. 逐个显示连接线和流程节点（交替进行）
+                connectors.forEach((connector, index) => {
+                    // 显示连接线
                     setTimeout(() => {
-                        endPoint.classList.add('animate-in');
-                    }, 800);
-                }
+                        connector.classList.add('animate-in');
+                    }, 500 + (index * 250));
 
-                // 4. 逐个显示起始事件
-                const startEvent = container.querySelector('.timeline-start-event');
-                if (startEvent) {
-                    setTimeout(() => {
-                        startEvent.classList.add('animate-in');
-                    }, 1200);
-                }
-
-                // 5. 逐个显示中间事件（带延迟）
-                const events = container.querySelectorAll('.timeline-event');
-                events.forEach((event, index) => {
-                    setTimeout(() => {
-                        event.classList.add('animate-in');
-                    }, 1600 + (index * 150));
+                    // 显示对应的流程节点（在连接线之后）
+                    if (index < processNodes.length) {
+                        setTimeout(() => {
+                            processNodes[index].classList.add('animate-in');
+                        }, 700 + (index * 250));
+                    }
                 });
 
-                // 6. 最后显示终点事件
-                const endEvent = container.querySelector('.timeline-end-event');
-                if (endEvent) {
+                // 4. 显示终点节点（在所有连接线和流程节点之后）
+                if (endNode) {
                     setTimeout(() => {
-                        endEvent.classList.add('animate-in');
-                    }, 1600 + (events.length * 150) + 200);
+                        endNode.classList.add('animate-in');
+                    }, 700 + (connectors.length * 250));
                 }
             }
 
-            // 增强交互：点击事件卡片时的高亮效果
-            const eventCards = document.querySelectorAll('.timeline-goal-text');
-            eventCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    // 移除其他卡片的高亮
-                    eventCards.forEach(c => c.classList.remove('active'));
-                    // 添加当前卡片的高亮
+            // 增强交互：点击节点时的高亮效果
+            const allNodes = document.querySelectorAll('.flowchart-node, .flowchart-process-node, .flowchart-node-end');
+            allNodes.forEach(node => {
+                node.addEventListener('click', function() {
+                    // 移除其他节点的高亮
+                    allNodes.forEach(n => n.classList.remove('active'));
+                    // 添加当前节点的高亮
                     this.classList.add('active');
                 });
             });
         });
 
-        // 添加卡片激活状态的样式（通过内联样式或CSS类）
+        // 添加节点激活状态的样式
         const style = document.createElement('style');
         style.textContent = `
-            .timeline-goal-text.active {
-                background: #fff9e6 !important;
-                border-color: rgba(255, 92, 0, 0.8) !important;
-                box-shadow: 
-                    6px 6px 0px rgba(255, 92, 0, 0.5) !important,
-                    12px 12px 0px rgba(255, 92, 0, 0.2) !important;
-                transform: rotate(0deg) translateY(-5px) scale(1.08) !important;
+            .flowchart-node.active,
+            .flowchart-process-node.active,
+            .flowchart-node-end.active {
+                animation: pulse-active 2s ease-in-out infinite;
+            }
+
+            @keyframes pulse-active {
+                0%, 100% {
+                    box-shadow: 
+                        0 6px 20px rgba(255, 92, 0, 0.4),
+                        0 0 0 0 rgba(255, 92, 0, 0.7);
+                }
+                50% {
+                    box-shadow: 
+                        0 6px 20px rgba(255, 92, 0, 0.4),
+                        0 0 0 8px rgba(255, 92, 0, 0);
+                }
+            }
+
+            .flowchart-process-node.active {
+                border-color: #ff8c42 !important;
+                background: linear-gradient(135deg, #fff8f5 0%, #ffffff 100%) !important;
             }
         `;
         document.head.appendChild(style);
