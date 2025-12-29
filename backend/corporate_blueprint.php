@@ -222,26 +222,52 @@ if (file_exists($jsonFile)) {
         }
 
         .timeline-header {
-            margin-bottom: clamp(32px, 3.13vw, 48px);
+            text-align: center;
+            margin-bottom: clamp(50px, 5.21vw, 70px);
+            position: relative;
         }
 
         .timeline-main-title {
-            font-size: clamp(28px, 3.65vw, 48px);
-            font-weight: 700;
-            color: #ff5c00;
-            margin-bottom: clamp(12px, 1.25vw, 16px);
+            font-size: clamp(36px, 3.75vw, 56px);
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 50%, #ffd700 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: clamp(14px, 1.46vw, 20px);
+            letter-spacing: 1px;
+            text-shadow: 0 4px 8px rgba(255, 92, 0, 0.2);
+            position: relative;
+        }
+
+        .timeline-main-title::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ff5c00, transparent);
+            border-radius: 2px;
         }
 
         .timeline-subtitle {
-            font-size: clamp(14px, 1.46vw, 18px);
-            color: #000000;
-            font-weight: 400;
+            font-size: clamp(15px, 1.56vw, 20px);
+            color: #4a5568;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            margin-top: clamp(20px, 2.08vw, 28px);
         }
 
         .timeline-wrapper {
             position: relative;
-            padding: clamp(60px, 6.25vw, 100px) clamp(40px, 4.17vw, 60px);
+            padding: clamp(80px, 8.33vw, 120px) clamp(40px, 4.17vw, 60px);
             overflow: visible;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 92, 0, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(255, 215, 0, 0.02) 0%, transparent 50%);
+            border-radius: 12px;
         }
 
         /* Horizontal timeline line */
@@ -250,10 +276,30 @@ if (file_exists($jsonFile)) {
             top: 50%;
             left: clamp(80px, 8.33vw, 120px);
             right: clamp(80px, 8.33vw, 120px);
-            height: 4px;
-            background: #ff5c00;
+            height: 5px;
+            background: linear-gradient(90deg, 
+                rgba(255, 92, 0, 0.3) 0%, 
+                #ff5c00 20%, 
+                #ff5c00 80%, 
+                rgba(255, 92, 0, 0.3) 100%);
             transform: translateY(-50%);
             z-index: 1;
+            border-radius: 3px;
+            box-shadow: 0 2px 8px rgba(255, 92, 0, 0.2);
+        }
+
+        .timeline-line::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.4) 50%, 
+                transparent 100%);
+            border-radius: 3px;
         }
 
         /* Start point - rectangle */
@@ -262,14 +308,21 @@ if (file_exists($jsonFile)) {
             left: 0;
             top: 50%;
             transform: translateY(-50%);
-            background: #ff5c00;
-            padding: clamp(12px, 1.25vw, 16px) clamp(24px, 2.5vw, 32px);
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
+            padding: clamp(14px, 1.46vw, 18px) clamp(28px, 2.92vw, 36px);
             color: #ffffff;
             font-size: clamp(14px, 1.46vw, 18px);
-            font-weight: 600;
-            border-radius: 4px;
-            z-index: 2;
+            font-weight: 700;
+            border-radius: 8px;
+            z-index: 3;
             white-space: nowrap;
+            box-shadow: 
+                0 4px 12px rgba(255, 92, 0, 0.4),
+                0 2px 4px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         /* Start point event (below the box) */
@@ -280,31 +333,50 @@ if (file_exists($jsonFile)) {
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: clamp(120px, 12.5vw, 180px);
-            transform: translate(-50%, calc(100% + clamp(20px, 2.08vw, 30px)));
+            width: clamp(140px, 14.58vw, 200px);
+            transform: translate(-50%, calc(100% + clamp(28px, 2.92vw, 40px)));
+            transition: transform 0.3s ease;
+        }
+
+        .timeline-start-event:hover {
+            transform: translate(-50%, calc(100% + clamp(28px, 2.92vw, 40px))) scale(1.05);
         }
 
         .timeline-start-event .timeline-arrow {
             width: 0;
             height: 0;
-            margin-bottom: clamp(8px, 0.83vw, 12px);
-            border-left: clamp(8px, 0.83vw, 12px) solid transparent;
-            border-right: clamp(8px, 0.83vw, 12px) solid transparent;
-            border-bottom: clamp(12px, 1.25vw, 16px) solid #000000;
+            margin-bottom: clamp(10px, 1.04vw, 14px);
+            border-left: clamp(9px, 0.94vw, 13px) solid transparent;
+            border-right: clamp(9px, 0.94vw, 13px) solid transparent;
+            border-bottom: clamp(14px, 1.46vw, 18px) solid #000000;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
         }
 
         .timeline-start-event .timeline-year-label {
-            font-size: clamp(16px, 1.67vw, 22px);
-            font-weight: 700;
-            color: #ff5c00;
-            margin-bottom: clamp(8px, 0.83vw, 12px);
+            font-size: clamp(18px, 1.88vw, 26px);
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: clamp(10px, 1.04vw, 14px);
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(255, 92, 0, 0.2);
         }
 
         .timeline-start-event .timeline-goal-text {
-            font-size: clamp(13px, 1.35vw, 16px);
-            color: #000000;
+            font-size: clamp(14px, 1.46vw, 18px);
+            color: #2c3e50;
             text-align: center;
-            line-height: 1.5;
+            line-height: 1.6;
+            font-weight: 500;
+            padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 20px);
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 92, 0, 0.1);
+            max-width: 100%;
+            word-wrap: break-word;
         }
 
         /* End point - star */
@@ -313,17 +385,34 @@ if (file_exists($jsonFile)) {
             right: 0;
             top: 50%;
             transform: translateY(-50%);
-            width: clamp(60px, 6.25vw, 80px);
-            height: clamp(60px, 6.25vw, 80px);
-            background: #ff5c00;
+            width: clamp(70px, 7.29vw, 90px);
+            height: clamp(70px, 7.29vw, 90px);
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
             clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
             display: flex;
             align-items: center;
             justify-content: center;
             color: #ffffff;
-            font-size: clamp(12px, 1.25vw, 16px);
-            font-weight: 600;
-            z-index: 2;
+            font-size: clamp(13px, 1.35vw, 17px);
+            font-weight: 700;
+            z-index: 3;
+            box-shadow: 
+                0 4px 16px rgba(255, 92, 0, 0.4),
+                0 2px 6px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .timeline-end::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(135deg, rgba(255, 92, 0, 0.3), rgba(255, 140, 66, 0.3));
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            z-index: -1;
+            filter: blur(4px);
         }
 
         /* End point event (below the star) */
@@ -334,38 +423,57 @@ if (file_exists($jsonFile)) {
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: clamp(120px, 12.5vw, 180px);
-            transform: translate(50%, calc(100% + clamp(20px, 2.08vw, 30px)));
+            width: clamp(140px, 14.58vw, 200px);
+            transform: translate(50%, calc(100% + clamp(28px, 2.92vw, 40px)));
+            transition: transform 0.3s ease;
+        }
+
+        .timeline-end-event:hover {
+            transform: translate(50%, calc(100% + clamp(28px, 2.92vw, 40px))) scale(1.05);
         }
 
         .timeline-end-event .timeline-arrow {
             width: 0;
             height: 0;
-            margin-bottom: clamp(8px, 0.83vw, 12px);
-            border-left: clamp(8px, 0.83vw, 12px) solid transparent;
-            border-right: clamp(8px, 0.83vw, 12px) solid transparent;
-            border-bottom: clamp(12px, 1.25vw, 16px) solid #000000;
+            margin-bottom: clamp(10px, 1.04vw, 14px);
+            border-left: clamp(9px, 0.94vw, 13px) solid transparent;
+            border-right: clamp(9px, 0.94vw, 13px) solid transparent;
+            border-bottom: clamp(14px, 1.46vw, 18px) solid #000000;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
         }
 
         .timeline-end-event .timeline-year-label {
-            font-size: clamp(16px, 1.67vw, 22px);
-            font-weight: 700;
-            color: #ff5c00;
-            margin-bottom: clamp(8px, 0.83vw, 12px);
+            font-size: clamp(18px, 1.88vw, 26px);
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: clamp(10px, 1.04vw, 14px);
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(255, 92, 0, 0.2);
         }
 
         .timeline-end-event .timeline-goal-text {
-            font-size: clamp(13px, 1.35vw, 16px);
-            color: #000000;
+            font-size: clamp(14px, 1.46vw, 18px);
+            color: #2c3e50;
             text-align: center;
-            line-height: 1.5;
+            line-height: 1.6;
+            font-weight: 500;
+            padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 20px);
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 92, 0, 0.1);
+            max-width: 100%;
+            word-wrap: break-word;
         }
 
         /* Timeline items container */
         .timeline-items {
             position: relative;
             padding: 0 clamp(100px, 10.42vw, 140px);
-            min-height: clamp(200px, 20.83vw, 300px);
+            min-height: clamp(220px, 22.92vw, 320px);
         }
 
         .timeline-event {
@@ -373,8 +481,14 @@ if (file_exists($jsonFile)) {
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: clamp(120px, 12.5vw, 180px);
+            width: clamp(140px, 14.58vw, 200px);
             transform: translateX(-50%);
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+
+        .timeline-event:hover {
+            transform: translateX(-50%) scale(1.05);
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.12));
         }
 
         /* Alternate between top and bottom - odd items below, even items above */
@@ -391,46 +505,75 @@ if (file_exists($jsonFile)) {
         .timeline-arrow {
             width: 0;
             height: 0;
-            margin-bottom: clamp(8px, 0.83vw, 12px);
+            margin-bottom: clamp(10px, 1.04vw, 14px);
+            transition: filter 0.3s ease;
         }
 
         .timeline-event:nth-child(even) .timeline-arrow {
             margin-bottom: 0;
-            margin-top: clamp(8px, 0.83vw, 12px);
+            margin-top: clamp(10px, 1.04vw, 14px);
             order: -1;
         }
 
         /* Odd items (below timeline) - arrow points up */
         .timeline-event:nth-child(odd) .timeline-arrow {
-            border-left: clamp(8px, 0.83vw, 12px) solid transparent;
-            border-right: clamp(8px, 0.83vw, 12px) solid transparent;
-            border-bottom: clamp(12px, 1.25vw, 16px) solid #000000;
+            border-left: clamp(9px, 0.94vw, 13px) solid transparent;
+            border-right: clamp(9px, 0.94vw, 13px) solid transparent;
+            border-bottom: clamp(14px, 1.46vw, 18px) solid #000000;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
         }
 
         /* Even items (above timeline) - arrow points down */
         .timeline-event:nth-child(even) .timeline-arrow {
-            border-left: clamp(8px, 0.83vw, 12px) solid transparent;
-            border-right: clamp(8px, 0.83vw, 12px) solid transparent;
-            border-top: clamp(12px, 1.25vw, 16px) solid #000000;
+            border-left: clamp(9px, 0.94vw, 13px) solid transparent;
+            border-right: clamp(9px, 0.94vw, 13px) solid transparent;
+            border-top: clamp(14px, 1.46vw, 18px) solid #000000;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
         }
 
         .timeline-year-label {
-            font-size: clamp(16px, 1.67vw, 22px);
-            font-weight: 700;
-            color: #ff5c00;
-            margin-bottom: clamp(8px, 0.83vw, 12px);
+            font-size: clamp(18px, 1.88vw, 26px);
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: clamp(10px, 1.04vw, 14px);
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(255, 92, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .timeline-event:hover .timeline-year-label {
+            transform: scale(1.1);
         }
 
         .timeline-event:nth-child(even) .timeline-year-label {
-            margin-bottom: clamp(8px, 0.83vw, 12px);
+            margin-bottom: clamp(10px, 1.04vw, 14px);
             margin-top: 0;
         }
 
         .timeline-goal-text {
-            font-size: clamp(13px, 1.35vw, 16px);
-            color: #000000;
+            font-size: clamp(14px, 1.46vw, 18px);
+            color: #2c3e50;
             text-align: center;
-            line-height: 1.5;
+            line-height: 1.6;
+            font-weight: 500;
+            padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 20px);
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 92, 0, 0.1);
+            max-width: 100%;
+            word-wrap: break-word;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .timeline-event:hover .timeline-goal-text {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(255, 92, 0, 0.1);
+            border-color: rgba(255, 92, 0, 0.2);
         }
 
         /* Corporate Core Section */
@@ -751,24 +894,44 @@ if (file_exists($jsonFile)) {
                 right: clamp(60px, 6.25vw, 80px);
             }
 
+            .timeline-wrapper {
+                padding: clamp(60px, 6.25vw, 80px) clamp(24px, 2.5vw, 32px);
+            }
+
             .timeline-start {
-                padding: clamp(10px, 1.04vw, 12px) clamp(16px, 1.67vw, 20px);
+                padding: clamp(12px, 1.25vw, 14px) clamp(20px, 2.08vw, 24px);
                 font-size: clamp(12px, 1.25vw, 14px);
             }
 
             .timeline-start-event {
-                width: clamp(100px, 10.42vw, 150px);
-                transform: translate(-50%, calc(100% + clamp(15px, 1.56vw, 25px)));
+                width: clamp(110px, 11.46vw, 160px);
+                transform: translate(-50%, calc(100% + clamp(20px, 2.08vw, 30px)));
+            }
+
+            .timeline-start-event .timeline-goal-text,
+            .timeline-end-event .timeline-goal-text,
+            .timeline-event .timeline-goal-text {
+                padding: clamp(10px, 1.04vw, 14px) clamp(12px, 1.25vw, 16px);
+                font-size: clamp(12px, 1.25vw, 15px);
             }
 
             .timeline-end {
-                width: clamp(50px, 5.21vw, 60px);
-                height: clamp(50px, 5.21vw, 60px);
+                width: clamp(55px, 5.73vw, 70px);
+                height: clamp(55px, 5.73vw, 70px);
             }
 
             .timeline-end-event {
-                width: clamp(100px, 10.42vw, 150px);
-                transform: translate(50%, calc(100% + clamp(15px, 1.56vw, 25px)));
+                width: clamp(110px, 11.46vw, 160px);
+                transform: translate(50%, calc(100% + clamp(20px, 2.08vw, 30px)));
+            }
+
+            .timeline-year-label {
+                font-size: clamp(16px, 1.67vw, 22px);
+            }
+
+            .timeline-start-event .timeline-year-label,
+            .timeline-end-event .timeline-year-label {
+                font-size: clamp(16px, 1.67vw, 22px);
             }
 
             .timeline-items {
