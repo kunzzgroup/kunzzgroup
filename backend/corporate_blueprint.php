@@ -967,7 +967,6 @@ if (file_exists($jsonFile)) {
             font-size: clamp(18px, 1.88vw, 24px);
             font-weight: 800;
             color: #000000;
-            margin-bottom: clamp(12px, 1.25vw, 16px);
             line-height: 1.4;
         }
 
