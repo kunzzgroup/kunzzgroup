@@ -265,7 +265,7 @@ if (file_exists($jsonFile)) {
 
         .timeline-wrapper {
             position: relative;
-            padding: clamp(50px, 5.21vw, 80px) clamp(20px, 2.08vw, 30px);
+            padding: 0 clamp(20px, 2.08vw, 30px) clamp(50px, 5.21vw, 80px) clamp(20px, 2.08vw, 30px);
             overflow: visible;
             background: 
                 radial-gradient(circle at 20% 30%, rgba(255, 92, 0, 0.05) 0%, transparent 40%),
@@ -1204,7 +1204,7 @@ if (file_exists($jsonFile)) {
             }
 
             .timeline-wrapper {
-                padding: clamp(40px, 4.17vw, 60px) clamp(15px, 1.56vw, 20px);
+                padding: 0 clamp(15px, 1.56vw, 20px) clamp(40px, 4.17vw, 60px) clamp(15px, 1.56vw, 20px);
                 min-height: clamp(260px, 27.08vw, 380px);
             }
 
