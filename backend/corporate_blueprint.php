@@ -1319,7 +1319,6 @@ if (file_exists($jsonFile)) {
                     <div class="timeline-container">
                         <div class="timeline-header">
                             <div class="timeline-main-title">以终为始</div>
-                            <div class="timeline-subtitle">请明确写出公司真正要去的终点</div>
                         </div>
                         
                         <div class="timeline-wrapper">
