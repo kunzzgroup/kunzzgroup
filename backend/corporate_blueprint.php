@@ -1327,7 +1327,7 @@ if (file_exists($jsonFile)) {
                         
                         <div class="timeline-wrapper">
                             <!-- Map-style SVG path -->
-                            <svg class="map-timeline-svg" viewBox="0 0 1280 600" preserveAspectRatio="none">
+                            <svg class="map-timeline-svg" viewBox="0 0 1024 600" preserveAspectRatio="none">
                                 <defs>
                                     <linearGradient id="routeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                                         <stop offset="0%" style="stop-color:rgba(255, 92, 0, 0.3);stop-opacity:1" />
@@ -1336,9 +1336,9 @@ if (file_exists($jsonFile)) {
                                     </linearGradient>
                                 </defs>
                                 <!-- Route glow -->
-                                <path class="map-route-glow" d="M 32 300 Q 384 180, 640 300 Q 896 420, 1248 300" stroke="url(#routeGradient)"/>
+                                <path class="map-route-glow" d="M 26 300 Q 307 180, 512 300 Q 717 420, 998 300" stroke="url(#routeGradient)"/>
                                 <!-- Main route path -->
-                                <path class="map-route-path" d="M 32 300 Q 384 180, 640 300 Q 896 420, 1248 300" stroke="#ff5c00"/>
+                                <path class="map-route-path" d="M 26 300 Q 307 180, 512 300 Q 717 420, 998 300" stroke="#ff5c00"/>
                             </svg>
 
                             <!-- Map milestones -->
@@ -1356,17 +1356,17 @@ if (file_exists($jsonFile)) {
                                     ];
                                 }
                                 
-                                // SVG path: M 32 300 Q 384 180, 640 300 Q 896 420, 1248 300
-                                // ViewBox: 1280x600
-                                // First curve: M 32 300 Q 384 180, 640 300
-                                $p0_1 = [32, 300];    // Start point
-                                $p1_1 = [384, 180];   // Control point
-                                $p2_1 = [640, 300];   // End point
+                                // SVG path: M 26 300 Q 307 180, 512 300 Q 717 420, 998 300
+                                // ViewBox: 1024x600
+                                // First curve: M 26 300 Q 307 180, 512 300
+                                $p0_1 = [26, 300];    // Start point
+                                $p1_1 = [307, 180];   // Control point
+                                $p2_1 = [512, 300];   // End point
                                 
-                                // Second curve: Q 896 420, 1248 300
-                                $p0_2 = [640, 300];   // Start (same as p2_1)
-                                $p1_2 = [896, 420];   // Control point
-                                $p2_2 = [1248, 300];  // End point
+                                // Second curve: Q 717 420, 998 300
+                                $p0_2 = [512, 300];   // Start (same as p2_1)
+                                $p1_2 = [717, 420];   // Control point
+                                $p2_2 = [998, 300];   // End point
                                 
                                 foreach ($strategyData['timeline'] as $index => $item):
                                     $t = $totalItems > 1 ? $index / ($totalItems - 1) : 0; // 0 to 1
@@ -1383,8 +1383,8 @@ if (file_exists($jsonFile)) {
                                         $point = bezierQuad($t_curve, $p0_2, $p1_2, $p2_2);
                                     }
                                     
-                                    // Convert SVG coordinates (0-1280, 0-600) to percentage
-                                    $xPercent = ($point[0] / 1280) * 100;
+                                    // Convert SVG coordinates (0-1024, 0-600) to percentage
+                                    $xPercent = ($point[0] / 1024) * 100;
                                     $yPercent = ($point[1] / 600) * 100;
                                     
                                     // Alternate card position (above or below pin) for better layout
