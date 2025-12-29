@@ -933,6 +933,7 @@ if (file_exists($jsonFile)) {
             transition: transform 0.3s, box-shadow 0.3s;
             position: relative;
             display: flex;
+            align-items: center;
             gap: clamp(16px, 1.67vw, 24px);
         }
 
