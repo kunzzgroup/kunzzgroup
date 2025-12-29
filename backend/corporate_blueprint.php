@@ -611,7 +611,7 @@ if (file_exists($jsonFile)) {
                             <div class="company-name-large">
                                 KUNZZ HOLDINGS
                             </div>
-                            <div class="company-subtitle">
+                            <div class="company-name-large">
                                 SDN BHD 战略计划
                             </div>
                             <div class="plan-title-en">
