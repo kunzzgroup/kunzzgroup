@@ -98,14 +98,14 @@ if (file_exists($jsonFile)) {
         .header-panel {
             background: #ffffff;
             border-radius: clamp(16px, 1.67vw, 24px);
-            padding: clamp(48px, 5.21vw, 80px) clamp(56px, 6.25vw, 96px);
+            padding: clamp(32px, 3.13vw, 48px) clamp(40px, 4.17vw, 64px);
             box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
             position: relative;
             z-index: 1;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: clamp(48px, 5.21vw, 80px);
+            gap: clamp(32px, 3.13vw, 48px);
         }
 
         /* Left side text content */
@@ -561,7 +561,7 @@ if (file_exists($jsonFile)) {
             }
 
             .header-panel {
-                padding: clamp(32px, 3.33vw, 48px) clamp(32px, 3.33vw, 48px);
+                padding: clamp(24px, 2.5vw, 32px) clamp(24px, 2.5vw, 32px);
             }
 
             .core-grid,
