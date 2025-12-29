@@ -112,6 +112,19 @@ if (file_exists($jsonFile)) {
         .header-text-content {
             flex: 1;
             text-align: left;
+            position: relative;
+            padding-left: clamp(20px, 2.08vw, 32px);
+        }
+
+        /* Vertical golden line on the left */
+        .header-text-content::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #ffd700;
         }
 
         .header-label {
@@ -119,20 +132,7 @@ if (file_exists($jsonFile)) {
             color: #ffd700;
             font-weight: 500;
             margin-bottom: clamp(16px, 1.67vw, 24px);
-            display: flex;
-            align-items: center;
-            gap: clamp(8px, 0.83vw, 12px);
             letter-spacing: 0.5px;
-        }
-
-        .header-label span {
-            color: #ff5c00;
-        }
-
-        .header-label-line {
-            width: 3px;
-            height: clamp(16px, 1.67vw, 20px);
-            background: #ff5c00;
         }
 
         .company-name-large {
@@ -142,33 +142,27 @@ if (file_exists($jsonFile)) {
             margin-bottom: clamp(12px, 1.25vw, 16px);
             letter-spacing: 1px;
             line-height: 1.2;
+            text-transform: uppercase;
         }
 
         .company-subtitle {
             font-size: clamp(18px, 2.08vw, 28px);
-            font-weight: 600;
+            font-weight: 400;
             color: #000000;
             margin-bottom: clamp(20px, 2.08vw, 28px);
+            line-height: 1.4;
+        }
+
+        .company-subtitle-upper {
+            text-transform: uppercase;
         }
 
         .plan-title-en {
             font-size: clamp(12px, 1.25vw, 16px);
-            color: #ffd700;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: clamp(8px, 0.83vw, 12px);
+            color: #000000;
+            font-weight: 400;
             letter-spacing: 1px;
-        }
-
-        .plan-title-en span {
-            color: #ff5c00;
-        }
-
-        .plan-title-en-line {
-            width: 3px;
-            height: clamp(16px, 1.67vw, 20px);
-            background: #ff5c00;
+            text-transform: uppercase;
         }
 
         /* Right side logo */
@@ -604,20 +598,12 @@ if (file_exists($jsonFile)) {
                     <div class="header-panel">
                         <!-- Left side text content -->
                         <div class="header-text-content">
-                            <div class="header-label">
-                                <div class="header-label-line"></div>
-                                <span>企业蓝图</span>
+                            <div class="header-label">企业蓝图</div>
+                            <div class="company-name-large">KUNZZ HOLDINGS</div>
+                            <div class="company-subtitle">
+                                <span class="company-subtitle-upper">SDN BHD</span> 战略计划
                             </div>
-                            <div class="company-name-large">
-                                KUNZZ HOLDINGS
-                            </div>
-                            <div class="company-name-large">
-                                SDN BHD 战略计划
-                            </div>
-                            <div class="plan-title-en">
-                                <div class="plan-title-en-line"></div>
-                                <span>CORPORATE STRATEGIC PLAN</span>
-                            </div>
+                            <div class="plan-title-en">CORPORATE STRATEGIC PLAN</div>
                         </div>
 
                         <!-- Right side logo -->
