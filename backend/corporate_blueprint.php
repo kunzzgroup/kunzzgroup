@@ -599,7 +599,6 @@ if (file_exists($jsonFile)) {
                     <div class="header-panel">
                         <!-- Left side text content -->
                         <div class="header-text-content">
-                            <div class="header-label">企业蓝图</div>
                             <div class="company-name-large">KUNZZ HOLDINGS</div>
                             <div class="company-subtitle">
                                 <span class="company-subtitle-upper">SDN BHD</span> 战略计划
