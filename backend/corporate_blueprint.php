@@ -215,7 +215,7 @@ if (file_exists($jsonFile)) {
             z-index: 0;
         }
 
-        /* Dashboard Timeline Section */
+        /* Timeline Section */
         .timeline-container {
             position: relative;
             padding: clamp(40px, 4.17vw, 60px) 0;
@@ -223,7 +223,7 @@ if (file_exists($jsonFile)) {
 
         .timeline-header {
             text-align: center;
-            margin-bottom: clamp(40px, 4.17vw, 60px);
+            margin-bottom: clamp(50px, 5.21vw, 70px);
             position: relative;
         }
 
@@ -260,149 +260,177 @@ if (file_exists($jsonFile)) {
             margin-top: clamp(20px, 2.08vw, 28px);
         }
 
+        /* 卷轴式时间线容器 */
         .timeline-wrapper {
             position: relative;
-            padding: clamp(80px, 8.33vw, 120px) clamp(40px, 4.17vw, 60px);
-            overflow: visible;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(255, 92, 0, 0.03) 0%, transparent 50%),
-                radial-gradient(circle at 80% 50%, rgba(255, 215, 0, 0.02) 0%, transparent 50%);
-            border-radius: 12px;
+            padding: clamp(60px, 6.25vw, 100px) 0;
+            overflow-x: auto;
+            overflow-y: visible;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
         }
 
-        /* Dashboard Card */
-        .dashboard-card {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: clamp(24px, 2.5vw, 32px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            border: 2px solid rgba(255, 92, 0, 0.1);
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        .timeline-wrapper::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .timeline-wrapper::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
+
+        .timeline-wrapper::-webkit-scrollbar-thumb {
+            background: rgba(255, 92, 0, 0.3);
+            border-radius: 4px;
+        }
+
+        .timeline-wrapper::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 92, 0, 0.5);
+        }
+
+        /* 卷轴背景 */
+        .scroll-container {
             position: relative;
-            overflow: hidden;
-            opacity: 0;
-            transform: translateY(30px);
+            min-width: max-content;
+            padding: clamp(60px, 6.25vw, 90px) clamp(120px, 12.5vw, 180px);
+            margin: 0 auto;
         }
 
-        .dashboard-card.animate-in {
-            opacity: 1;
-            transform: translateY(0);
+        .scroll-paper {
+            position: relative;
+            background: linear-gradient(
+                to bottom,
+                #f5f1e8 0%,
+                #f9f6f0 20%,
+                #f5f1e8 50%,
+                #f9f6f0 80%,
+                #f5f1e8 100%
+            );
+            background-image: 
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(139, 115, 85, 0.03) 2px,
+                    rgba(139, 115, 85, 0.03) 4px
+                ),
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(139, 115, 85, 0.03) 2px,
+                    rgba(139, 115, 85, 0.03) 4px
+                );
+            border-radius: 8px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.15),
+                inset 0 0 100px rgba(139, 115, 85, 0.05),
+                inset 0 2px 4px rgba(255, 255, 255, 0.8);
+            padding: clamp(50px, 5.21vw, 80px) clamp(80px, 8.33vw, 120px);
+            position: relative;
+            border: 2px solid rgba(139, 115, 85, 0.2);
         }
 
-        .dashboard-card::before {
-            content: '';
+        /* 卷轴左右轴装饰 */
+        .scroll-rod {
             position: absolute;
             top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #ff5c00 0%, #ff8c42 100%);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.6s ease;
+            bottom: 0;
+            width: clamp(40px, 4.17vw, 60px);
+            background: linear-gradient(
+                to right,
+                #c9a961 0%,
+                #d4b574 30%,
+                #e5c98a 50%,
+                #d4b574 70%,
+                #c9a961 100%
+            );
+            box-shadow: 
+                inset 0 0 20px rgba(0, 0, 0, 0.2),
+                0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            z-index: 2;
         }
 
-        .dashboard-card.animate-in::before {
-            transform: scaleX(1);
+        .scroll-rod.left {
+            left: clamp(20px, 2.08vw, 40px);
         }
 
-        .dashboard-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 12px 40px rgba(255, 92, 0, 0.2);
-            border-color: rgba(255, 92, 0, 0.3);
+        .scroll-rod.right {
+            right: clamp(20px, 2.08vw, 40px);
         }
 
-        .dashboard-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: clamp(20px, 2.08vw, 28px);
-        }
-
-        .dashboard-card-year {
-            font-size: clamp(28px, 2.92vw, 40px);
-            font-weight: 800;
-            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1;
-        }
-
-        .dashboard-card-progress-circle {
-            width: clamp(70px, 7.29vw, 90px);
-            height: clamp(70px, 7.29vw, 90px);
-            position: relative;
-        }
-
-        .progress-circle-svg {
-            width: 100%;
-            height: 100%;
-            transform: rotate(-90deg);
-        }
-
-        .progress-circle-bg {
-            fill: none;
-            stroke: rgba(255, 92, 0, 0.1);
-            stroke-width: 8;
-        }
-
-        .progress-circle-fill {
-            fill: none;
-            stroke: url(#progressGradient);
-            stroke-width: 8;
-            stroke-linecap: round;
-            stroke-dasharray: 251.2;
-            stroke-dashoffset: 251.2;
-            transition: stroke-dashoffset 1.5s cubic-bezier(0.65, 0, 0.35, 1);
-        }
-
-        .progress-circle-text {
+        .scroll-rod::before {
+            content: '';
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: clamp(16px, 1.67vw, 20px);
-            font-weight: 700;
-            color: #ff5c00;
+            width: 60%;
+            height: 60%;
+            background: radial-gradient(
+                circle,
+                rgba(255, 255, 255, 0.3) 0%,
+                transparent 70%
+            );
+            border-radius: 50%;
         }
 
-        .dashboard-card-goal {
-            font-size: clamp(16px, 1.67vw, 20px);
-            font-weight: 600;
-            color: #2c3e50;
-            line-height: 1.6;
-            margin-bottom: clamp(16px, 1.67vw, 24px);
-            padding: clamp(16px, 1.67vw, 20px);
-            background: linear-gradient(135deg, rgba(255, 92, 0, 0.05) 0%, rgba(255, 140, 66, 0.05) 100%);
-            border-radius: 12px;
-            border-left: 4px solid #ff5c00;
+        /* 卷轴纸张的左右边缘阴影 */
+        .scroll-paper::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: clamp(60px, 6.25vw, 100px);
+            background: linear-gradient(
+                to right,
+                rgba(139, 115, 85, 0.15),
+                transparent
+            );
+            pointer-events: none;
+            z-index: 1;
         }
 
-        .dashboard-card-stats {
-            display: flex;
-            gap: clamp(16px, 1.67vw, 24px);
-            margin-top: clamp(16px, 1.67vw, 24px);
-            padding-top: clamp(16px, 1.67vw, 24px);
-            border-top: 1px solid rgba(255, 92, 0, 0.1);
+        .scroll-paper::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: clamp(60px, 6.25vw, 100px);
+            background: linear-gradient(
+                to left,
+                rgba(139, 115, 85, 0.15),
+                transparent
+            );
+            pointer-events: none;
+            z-index: 1;
         }
 
-        .dashboard-stat-item {
-            flex: 1;
-            text-align: center;
+        /* 卷轴式时间线主线 */
+        .scroll-timeline-line {
+            position: relative;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                #8b7355 10%,
+                #b8956a 30%,
+                #8b7355 50%,
+                #b8956a 70%,
+                #8b7355 90%,
+                transparent 100%);
+            margin: clamp(40px, 4.17vw, 60px) 0;
+            border-radius: 2px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transform: scaleX(0);
+            transform-origin: left center;
+            transition: transform 1.5s cubic-bezier(0.65, 0, 0.35, 1);
         }
 
-        .dashboard-stat-label {
-            font-size: clamp(11px, 1.15vw, 13px);
-            color: #6b7280;
-            font-weight: 500;
-            margin-bottom: clamp(4px, 0.42vw, 6px);
-        }
-
-        .dashboard-stat-value {
-            font-size: clamp(18px, 1.88vw, 24px);
-            font-weight: 700;
-            color: #ff5c00;
+        .scroll-timeline-line.animate-in {
+            transform: scaleX(1);
         }
 
         /* Start point - rectangle */
@@ -660,58 +688,58 @@ if (file_exists($jsonFile)) {
             left: 100%;
         }
 
-        /* Timeline items container */
-        .timeline-items {
+        /* 卷轴式时间线事件容器 */
+        .scroll-timeline-items {
             position: relative;
-            padding: 0 clamp(100px, 10.42vw, 140px);
-            min-height: clamp(220px, 22.92vw, 320px);
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            min-height: clamp(280px, 29.17vw, 400px);
+            padding: clamp(20px, 2.08vw, 30px) 0;
+            gap: clamp(20px, 2.08vw, 40px);
         }
 
-        .timeline-event {
-            position: absolute;
+        /* 卷轴式时间线事件 */
+        .scroll-timeline-event {
+            flex: 1;
+            max-width: clamp(180px, 18.75vw, 260px);
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: clamp(140px, 14.58vw, 200px);
-            transform: translateX(-50%) translateY(20px);
+            position: relative;
             opacity: 0;
-            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                        opacity 0.6s ease,
+            transform: translateY(30px);
+            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        opacity 0.8s ease,
                         filter 0.3s ease;
         }
 
-        .timeline-event.animate-in {
+        .scroll-timeline-event.animate-in {
             opacity: 1;
-            transform: translateX(-50%) translateY(0);
+            transform: translateY(0);
         }
 
-        .timeline-event:nth-child(odd).animate-in {
-            transform: translateX(-50%) translateY(0);
+        .scroll-timeline-event:hover {
+            transform: translateY(-8px) scale(1.05);
+            filter: drop-shadow(0 10px 20px rgba(139, 115, 85, 0.3));
         }
 
-        .timeline-event:nth-child(even).animate-in {
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .timeline-event:nth-child(odd):hover {
-            transform: translateX(-50%) translateY(-5px) scale(1.08);
-            filter: drop-shadow(0 12px 24px rgba(255, 92, 0, 0.25));
-        }
-
-        .timeline-event:nth-child(even):hover {
-            transform: translateX(-50%) translateY(5px) scale(1.08);
-            filter: drop-shadow(0 12px 24px rgba(255, 92, 0, 0.25));
-        }
-
-        /* Alternate between top and bottom - odd items below, even items above */
-        .timeline-event:nth-child(odd) {
-            bottom: 0;
-            flex-direction: column;
-        }
-
-        .timeline-event:nth-child(even) {
-            top: 0;
-            flex-direction: column;
+        /* 事件之间的连接点 */
+        .scroll-timeline-event::before {
+            content: '';
+            position: absolute;
+            top: clamp(-80px, -8.33vw, -120px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: clamp(16px, 1.67vw, 24px);
+            height: clamp(16px, 1.67vw, 24px);
+            background: radial-gradient(circle, #b8956a 0%, #8b7355 70%);
+            border: 3px solid #f5f1e8;
+            border-radius: 50%;
+            box-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.2),
+                inset 0 2px 4px rgba(255, 255, 255, 0.3);
+            z-index: 3;
         }
 
         .timeline-arrow {
@@ -1120,47 +1148,48 @@ if (file_exists($jsonFile)) {
                 grid-template-columns: 1fr;
             }
 
-            .timeline-wrapper {
-                padding: clamp(40px, 4.17vw, 60px) clamp(24px, 2.5vw, 32px);
+            .scroll-container {
+                padding: clamp(40px, 4.17vw, 60px) clamp(60px, 6.25vw, 100px);
             }
 
-            .timeline-line {
-                left: clamp(60px, 6.25vw, 80px);
-                right: clamp(60px, 6.25vw, 80px);
+            .scroll-paper {
+                padding: clamp(40px, 4.17vw, 60px) clamp(50px, 5.21vw, 80px);
             }
 
-            .timeline-wrapper {
-                padding: clamp(24px, 2.5vw, 32px);
+            .scroll-rod {
+                width: clamp(30px, 3.13vw, 45px);
             }
 
-            .dashboard-cards-grid {
-                grid-template-columns: 1fr;
-                gap: clamp(20px, 2.08vw, 24px);
+            .scroll-rod.left {
+                left: clamp(10px, 1.04vw, 20px);
             }
 
-            .dashboard-card {
-                padding: clamp(20px, 2.08vw, 24px);
+            .scroll-rod.right {
+                right: clamp(10px, 1.04vw, 20px);
             }
 
-            .dashboard-card-year {
-                font-size: clamp(24px, 2.5vw, 32px);
-            }
-
-            .dashboard-card-progress-circle {
-                width: clamp(60px, 6.25vw, 80px);
-                height: clamp(60px, 6.25vw, 80px);
-            }
-
-            .dashboard-card-stats {
+            .scroll-timeline-items {
                 flex-direction: column;
-                gap: clamp(12px, 1.25vw, 16px);
+                gap: clamp(30px, 3.13vw, 50px);
+                min-height: auto;
             }
 
-            .dashboard-stat-item {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                text-align: left;
+            .scroll-timeline-event {
+                max-width: 100%;
+                width: 100%;
+            }
+
+            .scroll-timeline-event::before {
+                top: clamp(-60px, -6.25vw, -90px);
+            }
+
+            .scroll-year-label {
+                font-size: clamp(18px, 1.88vw, 24px);
+            }
+
+            .scroll-goal-text {
+                font-size: clamp(13px, 1.35vw, 16px);
+                padding: clamp(14px, 1.46vw, 20px) clamp(16px, 1.67vw, 24px);
             }
         }
     </style>
@@ -1198,18 +1227,8 @@ if (file_exists($jsonFile)) {
                     </div>
                 </div>
 
-                <!-- Timeline Section - Dashboard Style -->
+                <!-- Timeline Section -->
                 <?php if (!empty($strategyData['timeline'])): ?>
-                <?php
-                $timelineItems = $strategyData['timeline'];
-                $totalItems = count($timelineItems);
-                $startYear = $timelineItems[0]['year'] ?? 0;
-                $endYear = $timelineItems[$totalItems - 1]['year'] ?? 0;
-                $currentYear = date('Y');
-                $totalYears = $endYear - $startYear + 1;
-                $completedYears = max(0, $currentYear - $startYear + 1);
-                $overallProgress = min(100, ($completedYears / $totalYears) * 100);
-                ?>
                 <div class="section">
                     <div class="timeline-container">
                         <div class="timeline-header">
@@ -1218,86 +1237,30 @@ if (file_exists($jsonFile)) {
                         </div>
                         
                         <div class="timeline-wrapper">
-                            <!-- Overall Progress Bar -->
-                            <div class="dashboard-progress-container">
-                                <div class="dashboard-progress-header">
-                                    <div class="dashboard-progress-title">整体进度</div>
-                                    <div class="dashboard-progress-percentage" data-progress="<?php echo $overallProgress; ?>">0%</div>
-                                </div>
-                                <div class="dashboard-progress-bar-container">
-                                    <div class="dashboard-progress-bar" data-progress="<?php echo $overallProgress; ?>" style="width: 0%;"></div>
-                                </div>
-                            </div>
-
-                            <!-- SVG Gradient Definition -->
-                            <svg style="position: absolute; width: 0; height: 0;">
-                                <defs>
-                                    <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                        <stop offset="0%" style="stop-color:#ff5c00;stop-opacity:1" />
-                                        <stop offset="50%" style="stop-color:#ff8c42;stop-opacity:1" />
-                                        <stop offset="100%" style="stop-color:#ffd700;stop-opacity:1" />
-                                    </linearGradient>
-                                </defs>
-                            </svg>
-
-                            <!-- Dashboard Cards Grid -->
-                            <div class="dashboard-cards-grid">
-                                <?php foreach ($timelineItems as $index => $item): ?>
-                                <?php
-                                $year = $item['year'] ?? 0;
-                                $yearProgress = $index === 0 ? 100 : ($year <= $currentYear ? 100 : ($year == $currentYear + 1 ? 50 : 0));
-                                $isCurrent = ($year == $currentYear);
-                                $isFuture = ($year > $currentYear);
-                                $yearIndex = $index + 1;
-                                $yearPercentage = ($yearIndex / $totalItems) * 100;
+                            <div class="scroll-container">
+                                <!-- 左卷轴轴 -->
+                                <div class="scroll-rod left"></div>
                                 
-                                // 提取数字（假设目标是"创建X间子公司"）
-                                preg_match('/(\d+)/', $item['goal'] ?? '', $matches);
-                                $targetCount = isset($matches[1]) ? (int)$matches[1] : 0;
-                                ?>
-                                <div class="dashboard-card" data-index="<?php echo $index; ?>">
-                                    <div class="dashboard-card-header">
-                                        <div class="dashboard-card-year"><?php echo htmlspecialchars($year); ?></div>
-                                        <div class="dashboard-card-progress-circle">
-                                            <svg class="progress-circle-svg" viewBox="0 0 90 90">
-                                                <circle class="progress-circle-bg" cx="45" cy="45" r="40"></circle>
-                                                <circle class="progress-circle-fill" 
-                                                    cx="45" 
-                                                    cy="45" 
-                                                    r="40"
-                                                    data-progress="<?php echo $yearProgress; ?>"
-                                                    style="stroke-dasharray: 251.2; stroke-dashoffset: 251.2;"></circle>
-                                            </svg>
-                                            <div class="progress-circle-text" data-progress="<?php echo $yearProgress; ?>">0%</div>
-                                        </div>
-                                    </div>
+                                <!-- 卷轴纸张 -->
+                                <div class="scroll-paper">
+                                    <!-- 时间线主线 -->
+                                    <div class="scroll-timeline-line"></div>
                                     
-                                    <div class="dashboard-card-goal">
-                                        <?php echo htmlspecialchars($item['goal'] ?? ''); ?>
-                                    </div>
-
-                                    <div class="dashboard-card-stats">
-                                        <div class="dashboard-stat-item">
-                                            <div class="dashboard-stat-label">阶段</div>
-                                            <div class="dashboard-stat-value"><?php echo $yearIndex; ?>/<?php echo $totalItems; ?></div>
-                                        </div>
-                                        <div class="dashboard-stat-item">
-                                            <div class="dashboard-stat-label">目标</div>
-                                            <div class="dashboard-stat-value"><?php echo $targetCount; ?></div>
-                                        </div>
-                                        <div class="dashboard-stat-item">
-                                            <div class="dashboard-stat-label">状态</div>
-                                            <div class="dashboard-stat-value" style="font-size: clamp(14px, 1.46vw, 18px);">
-                                                <?php 
-                                                if ($isCurrent) echo '进行中';
-                                                elseif ($isFuture) echo '待开始';
-                                                else echo '已完成';
-                                                ?>
+                                    <!-- 时间线事件 -->
+                                    <div class="scroll-timeline-items">
+                                        <?php if (!empty($strategyData['timeline'])): ?>
+                                            <?php foreach ($strategyData['timeline'] as $index => $item): ?>
+                                            <div class="scroll-timeline-event">
+                                                <div class="scroll-year-label"><?php echo htmlspecialchars($item['year'] ?? ''); ?>年</div>
+                                                <div class="scroll-goal-text"><?php echo htmlspecialchars($item['goal'] ?? ''); ?></div>
                                             </div>
-                                        </div>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
-                                <?php endforeach; ?>
+                                
+                                <!-- 右卷轴轴 -->
+                                <div class="scroll-rod right"></div>
                             </div>
                         </div>
                     </div>
@@ -1506,110 +1469,70 @@ if (file_exists($jsonFile)) {
     </div>
 
     <script>
-        // Dashboard Timeline Animation Controller
+        // 时间线动画控制器
         document.addEventListener('DOMContentLoaded', function() {
             const timelineWrapper = document.querySelector('.timeline-wrapper');
             if (!timelineWrapper) return;
 
-            // Create IntersectionObserver for timeline container
+            // 创建 IntersectionObserver 观察时间线容器
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        animateDashboard(entry.target);
+                        // 触发时间线动画
+                        animateTimeline(entry.target);
                         observer.unobserve(entry.target);
                     }
                 });
             }, {
-                threshold: 0.2,
-                rootMargin: '0px 0px -50px 0px'
+                threshold: 0.3,
+                rootMargin: '0px 0px -100px 0px'
             });
 
             observer.observe(timelineWrapper);
 
-            function animateDashboard(container) {
-                // Animate overall progress bar
-                const progressBar = container.querySelector('.dashboard-progress-bar');
-                const progressPercentage = container.querySelector('.dashboard-progress-percentage');
-                
-                if (progressBar && progressPercentage) {
-                    const progress = parseFloat(progressBar.dataset.progress || 0);
-                    
-                    // Animate progress bar width
+            function animateTimeline(container) {
+                // 1. 先显示时间线
+                const timelineLine = container.querySelector('.scroll-timeline-line');
+                if (timelineLine) {
                     setTimeout(() => {
-                        progressBar.style.width = progress + '%';
-                    }, 200);
-                    
-                    // Animate percentage counter
-                    let current = 0;
-                    const duration = 1500;
-                    const increment = progress / (duration / 16);
-                    const timer = setInterval(() => {
-                        current += increment;
-                        if (current >= progress) {
-                            current = progress;
-                            clearInterval(timer);
-                        }
-                        progressPercentage.textContent = Math.round(current) + '%';
-                    }, 16);
+                        timelineLine.classList.add('animate-in');
+                    }, 300);
                 }
 
-                // Animate progress circles
-                const progressCircles = container.querySelectorAll('.progress-circle-fill');
-                progressCircles.forEach((circle, index) => {
+                // 2. 逐个显示事件（从右到左，像展开卷轴）
+                const events = container.querySelectorAll('.scroll-timeline-event');
+                events.forEach((event, index) => {
                     setTimeout(() => {
-                        const progress = parseFloat(circle.dataset.progress || 0);
-                        const circumference = 2 * Math.PI * 40; // radius = 40
-                        const offset = circumference - (progress / 100) * circumference;
-                        
-                        // Animate circle
-                        circle.style.strokeDashoffset = offset;
-                        
-                        // Update percentage text
-                        const circleContainer = circle.closest('.dashboard-card-progress-circle');
-                        const circleText = circleContainer ? circleContainer.querySelector('.progress-circle-text') : null;
-                        if (circleText) {
-                            let currentPercent = 0;
-                            const increment = progress / 30;
-                            const percentTimer = setInterval(() => {
-                                currentPercent += increment;
-                                if (currentPercent >= progress) {
-                                    currentPercent = progress;
-                                    clearInterval(percentTimer);
-                                }
-                                circleText.textContent = Math.round(currentPercent) + '%';
-                            }, 50);
-                        }
-                    }, 500 + (index * 100));
-                });
-
-                // Animate cards
-                const cards = container.querySelectorAll('.dashboard-card');
-                cards.forEach((card, index) => {
-                    setTimeout(() => {
-                        card.classList.add('animate-in');
-                    }, 800 + (index * 100));
+                        event.classList.add('animate-in');
+                    }, 800 + (index * 200));
                 });
             }
 
-            // Card click interaction
-            const dashboardCards = document.querySelectorAll('.dashboard-card');
-            dashboardCards.forEach(card => {
+            // 增强交互：点击事件卡片时的高亮效果
+            const eventCards = document.querySelectorAll('.scroll-goal-text');
+            eventCards.forEach(card => {
                 card.addEventListener('click', function() {
-                    // Remove active class from all cards
-                    dashboardCards.forEach(c => c.classList.remove('active'));
-                    // Add active class to clicked card
+                    // 移除其他卡片的高亮
+                    eventCards.forEach(c => c.classList.remove('active'));
+                    // 添加当前卡片的高亮
                     this.classList.add('active');
+                    // 平滑滚动到该卡片
+                    this.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                 });
             });
         });
 
-        // Add active state styles
+        // 添加卡片激活状态的样式
         const style = document.createElement('style');
         style.textContent = `
-            .dashboard-card.active {
-                border-color: rgba(255, 92, 0, 0.5) !important;
-                box-shadow: 0 16px 48px rgba(255, 92, 0, 0.3) !important;
-                transform: translateY(-12px) scale(1.03) !important;
+            .scroll-goal-text.active {
+                background: rgba(184, 149, 106, 0.2) !important;
+                border-color: rgba(139, 115, 85, 0.6) !important;
+                box-shadow: 
+                    0 10px 30px rgba(0, 0, 0, 0.15),
+                    inset 0 1px 3px rgba(255, 255, 255, 0.95),
+                    0 0 20px rgba(184, 149, 106, 0.3) !important;
+                transform: translateY(-4px) scale(1.03) !important;
             }
         `;
         document.head.appendChild(style);
