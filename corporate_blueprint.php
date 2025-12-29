@@ -125,32 +125,54 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
         }
 
         body {
-            font-family: 'Microsoft YaHei', 'Segoe UI', Arial, sans-serif;
-            background: #f5f5f5;
-            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #faf7f2;
+            color: #000000;
             min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
-        /* 主内容区域 */
+        /* 主内容区域样式 */
+        .main-content {
+            margin-left: clamp(140px, 13.02vw, 250px);
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+            position: relative;
+            overflow: visible;
+        }
+
+        /* 当侧边栏收起时，主内容区域扩展 */
+        .main-content.sidebar-collapsed {
+            margin-left: clamp(50px, 3.65vw, 70px);
+        }
+
+        body.sidebar-collapsed .main-content {
+            margin-left: clamp(50px, 3.65vw, 70px);
+        }
+
+        /* 主内容容器 */
         .main-container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: clamp(16px, 1.25vw, 24px) 24px;
             display: flex;
             flex-direction: column;
-            padding: 30px;
-            background: #fff;
-            width: 100%;
-            box-sizing: border-box;
             min-height: 100vh;
         }
 
         /* 标题区域 */
         .header {
-            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: clamp(16px, 1.67vw, 32px);
         }
 
         .header-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: #333;
+            font-size: clamp(20px, 2.6vw, 50px);
+            font-weight: bold;
+            color: #000000ff;
             margin-bottom: 20px;
         }
 
@@ -162,24 +184,25 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
         }
 
         .tab {
-            padding: 12px 30px;
-            border-radius: 20px;
+            padding: clamp(8px, 0.63vw, 12px) clamp(16px, 1.25vw, 24px);
+            border-radius: 8px;
             border: none;
-            font-size: 16px;
+            font-size: clamp(14px, 1.04vw, 16px);
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            background: #e0e0e0;
-            color: #666;
+            background: #e5e7eb;
+            color: #6b7280;
         }
 
         .tab.active {
-            background: #ff6b35;
+            background: #ff5c00;
             color: #fff;
         }
 
         .tab:hover:not(.active) {
-            background: #d0d0d0;
+            background: #d1d5db;
+            color: #374151;
         }
 
         /* 内容区域 */
@@ -191,57 +214,57 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
             justify-content: center;
         }
 
+        /* 卡片样式 */
+        .card {
+            background: rgba(255, 255, 255, 1);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .card-body {
+            padding: clamp(16px, 1.25vw, 24px);
+        }
+
         /* 幻灯片容器 */
         .slide-container {
             width: 100%;
-            max-width: 1200px;
             position: relative;
-            background: #fff;
-            border-radius: 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 60px;
+            background: rgba(255, 255, 255, 1);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            padding: clamp(24px, 2.08vw, 40px);
             min-height: 600px;
-            background: linear-gradient(135deg, #fff 0%, #fffef0 50%, #fff 100%);
             position: relative;
             overflow: hidden;
         }
 
-        /* 黄色渐变背景效果 */
-        .slide-container::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -20%;
-            width: 80%;
-            height: 150%;
-            background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.15) 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-        }
 
         /* 导航按钮 */
         .nav-button {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: #e0e0e0;
-            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: #e5e7eb;
+            border: 1px solid #d1d5db;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            color: #666;
-            transition: all 0.3s;
+            font-size: 18px;
+            color: #6b7280;
+            transition: all 0.2s;
             z-index: 10;
         }
 
         .nav-button:hover {
-            background: #ff6b35;
+            background: #ff5c00;
             color: #fff;
+            border-color: #ff5c00;
         }
 
         .nav-button.prev {
@@ -277,15 +300,16 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
         .slide-header-line {
             width: 4px;
             height: 40px;
-            background: #ff6b35;
+            background: #ff5c00;
             margin-right: 15px;
             flex-shrink: 0;
+            border-radius: 2px;
         }
 
         .slide-title {
-            font-size: 24px;
+            font-size: clamp(18px, 1.56vw, 24px);
             font-weight: 700;
-            color: #333;
+            color: #000000ff;
         }
 
         /* 公司信息区域 */
@@ -300,29 +324,30 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
         }
 
         .company-name {
-            font-size: 48px;
+            font-size: clamp(32px, 3.13vw, 48px);
             font-weight: 700;
-            color: #333;
+            color: #000000ff;
             margin-bottom: 10px;
             letter-spacing: 2px;
             line-height: 1.2;
         }
 
         .company-subtitle {
-            font-size: 36px;
+            font-size: clamp(24px, 2.34vw, 36px);
             font-weight: 700;
-            color: #333;
+            color: #000000ff;
             margin-bottom: 10px;
             letter-spacing: 1px;
             line-height: 1.2;
         }
 
         .company-subtitle-en {
-            font-size: 18px;
-            color: #666;
+            font-size: clamp(14px, 1.04vw, 18px);
+            color: #6b7280;
             letter-spacing: 3px;
             margin-top: 10px;
             text-transform: uppercase;
+            font-weight: 500;
         }
 
         /* Logo容器 */
@@ -334,16 +359,16 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
         }
 
         .logo {
-            width: 150px;
-            height: 150px;
-            background: #ff6b35;
+            width: clamp(120px, 9.38vw, 150px);
+            height: clamp(120px, 9.38vw, 150px);
+            background: #ff5c00;
             border-radius: 50%;
             border: 3px solid #ffd700;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+            box-shadow: 0 4px 15px rgba(255, 92, 0, 0.3);
         }
 
         .logo-k {
@@ -398,35 +423,37 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
         }
 
         .career-table th {
-            background: #ffd700;
-            color: #333;
-            font-weight: 600;
-            font-size: 14px;
+            background: #fff;
+            color: #000000ff;
+            font-weight: bold;
+            font-size: clamp(12px, 0.84vw, 14px);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
         }
 
         .career-table td {
             background: #fff;
-            font-size: 13px;
+            font-size: clamp(11px, 0.73vw, 13px);
         }
 
         .career-table tr:nth-child(even) td {
-            background: #f9f9f9;
+            background: #f9fafb;
         }
 
         .career-table tr:hover td {
-            background: #fff5f0;
+            background: #f3f4f6;
         }
 
         .table-title {
-            font-size: 24px;
+            font-size: clamp(18px, 1.56vw, 24px);
             font-weight: 700;
-            color: #333;
+            color: #000000ff;
             margin-bottom: 8px;
         }
 
         .table-subtitle {
-            font-size: 16px;
-            color: #666;
+            font-size: clamp(14px, 1.04vw, 16px);
+            color: #6b7280;
             margin-bottom: 25px;
             font-weight: 400;
         }
@@ -439,7 +466,8 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
 
         .requirement-item {
             margin-bottom: 6px;
-            color: #555;
+            color: #374151;
+            font-size: clamp(11px, 0.73vw, 13px);
         }
 
         /* 页面指示器 */
@@ -448,48 +476,59 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: #fff5f0;
+            background: #f3f4f6;
             padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            color: #666;
+            border-radius: 8px;
+            font-size: clamp(12px, 0.84vw, 14px);
+            color: #6b7280;
             font-weight: 600;
             z-index: 2;
+            border: 1px solid #e5e7eb;
+        }
+
+        /* 自定义滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Firefox 滚动条样式 */
+        html {
+            scrollbar-width: thin;
+            scrollbar-color: #c1c1c1 #f1f1f1;
         }
 
         /* 响应式设计 */
         @media (max-width: 1024px) {
             .slide-container {
-                padding: 40px;
-            }
-
-            .company-name {
-                font-size: 36px;
-            }
-
-            .company-subtitle {
-                font-size: 28px;
-            }
-
-            .logo {
-                width: 120px;
-                height: 120px;
-            }
-
-            .logo-k {
-                font-size: 48px;
-                left: 25px;
-            }
-
-            .logo-container {
-                right: 40px;
-                top: 40px;
+                padding: clamp(20px, 2.08vw, 40px);
             }
         }
 
         @media (max-width: 768px) {
-            .sidebar {
-                width: 40px;
+            .main-content {
+                margin-left: 0;
+            }
+
+            .main-content.sidebar-collapsed {
+                margin-left: 0;
+            }
+
+            body.sidebar-collapsed .main-content {
+                margin-left: 0;
             }
 
             .main-container {
@@ -497,20 +536,8 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
             }
 
             .slide-container {
-                padding: 30px 20px;
+                padding: clamp(16px, 1.25vw, 24px);
                 min-height: 500px;
-            }
-
-            .company-name {
-                font-size: 28px;
-            }
-
-            .company-subtitle {
-                font-size: 22px;
-            }
-
-            .company-subtitle-en {
-                font-size: 14px;
             }
 
             .logo-container {
@@ -521,36 +548,18 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
                 align-self: center;
             }
 
-            .logo {
-                width: 100px;
-                height: 100px;
-            }
-
-            .logo-k {
-                font-size: 40px;
-                left: 20px;
-            }
-
             .nav-button {
-                width: 40px;
-                height: 40px;
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
             }
 
             .nav-button.prev {
-                left: -20px;
+                left: -18px;
             }
 
             .nav-button.next {
-                right: -20px;
-            }
-
-            .career-table {
-                font-size: 12px;
-            }
-
-            .career-table th,
-            .career-table td {
-                padding: 8px;
+                right: -18px;
             }
         }
     </style>
@@ -559,7 +568,8 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
     <?php include 'sidebar.php'; ?>
     
     <!-- 主内容区域 -->
-    <div class="main-container">
+    <div class="main-content">
+        <div class="main-container">
         <!-- 标题和标签页 -->
         <div class="header">
             <h1 class="header-title">企业蓝图</h1>
@@ -622,6 +632,7 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
                     <div class="page-indicator">第1页</div>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 
