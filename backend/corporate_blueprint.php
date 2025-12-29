@@ -879,62 +879,99 @@ if (file_exists($jsonFile)) {
         }
 
         /* Corporate Core Section */
+        .core-section-header {
+            position: relative;
+            padding: clamp(60px, 6.25vw, 100px) clamp(40px, 4.17vw, 80px);
+            margin-bottom: clamp(40px, 4.17vw, 60px);
+            border-radius: clamp(16px, 1.67vw, 24px);
+            overflow: hidden;
+            background: 
+                linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 165, 0, 0.15) 100%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><defs><filter id="blur"><feGaussianBlur stdDeviation="3"/></filter></defs><circle cx="80" cy="120" r="40" fill="%23FFD700" opacity="0.3" filter="url(%23blur)"/><circle cx="200" cy="80" r="35" fill="%23FFA500" opacity="0.3" filter="url(%23blur)"/><circle cx="320" cy="140" r="45" fill="%23FFD700" opacity="0.3" filter="url(%23blur)"/><circle cx="120" cy="200" r="30" fill="%23FFA500" opacity="0.3" filter="url(%23blur)"/><circle cx="280" cy="220" r="40" fill="%23FFD700" opacity="0.3" filter="url(%23blur)"/></svg>');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .core-section-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 165, 0, 0.25) 100%);
+            z-index: 1;
+        }
+
+        .core-section-title {
+            font-size: clamp(48px, 5vw, 72px);
+            font-weight: 800;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: clamp(8px, 0.83vw, 12px);
+            position: relative;
+            z-index: 2;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .core-section-subtitle {
+            font-size: clamp(16px, 1.67vw, 24px);
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.95);
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
+        }
+
         .core-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: clamp(16px, 1.67vw, 24px);
+            grid-template-columns: repeat(2, 1fr);
+            gap: clamp(20px, 2.08vw, 32px);
         }
 
         .core-card {
             background: #fff;
-            border-radius: 8px;
-            padding: clamp(20px, 2.08vw, 32px);
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
+            border-radius: clamp(12px, 1.25vw, 16px);
+            padding: clamp(24px, 2.5vw, 40px);
+            border: 2px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
         }
 
         .core-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .core-card-number {
+            width: clamp(48px, 5vw, 64px);
+            height: clamp(48px, 5vw, 64px);
+            background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(20px, 2.08vw, 28px);
+            font-weight: 800;
+            color: #000000;
+            margin-bottom: clamp(16px, 1.67vw, 24px);
+            box-shadow: 0 2px 8px rgba(255, 165, 0, 0.3);
         }
 
         .core-card-title {
-            font-size: clamp(16px, 1.56vw, 20px);
-            font-weight: bold;
-            color: #ff5c00;
-            margin-bottom: clamp(12px, 1.04vw, 16px);
-            padding-bottom: clamp(8px, 0.83vw, 12px);
-            border-bottom: 2px solid #ff5c00;
+            font-size: clamp(18px, 1.88vw, 24px);
+            font-weight: 800;
+            color: #000000;
+            margin-bottom: clamp(16px, 1.67vw, 24px);
+            line-height: 1.4;
         }
 
         .core-card-content {
-            font-size: clamp(13px, 1.04vw, 16px);
+            font-size: clamp(14px, 1.46vw, 18px);
             color: #374151;
             line-height: 1.8;
-        }
-
-        .core-card-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .core-card-list li {
-            padding: clamp(6px, 0.63vw, 10px) 0;
-            font-size: clamp(13px, 1.04vw, 16px);
-            color: #374151;
-            border-bottom: 1px solid #f3f4f6;
-        }
-
-        .core-card-list li:last-child {
-            border-bottom: none;
-        }
-
-        .core-card-list li::before {
-            content: '•';
-            color: #ff5c00;
-            font-weight: bold;
-            margin-right: 8px;
         }
 
         /* Culture & Values Explanation */
@@ -1415,46 +1452,45 @@ if (file_exists($jsonFile)) {
                 <!-- Corporate Core Section -->
                 <?php if (!empty($strategyData['corporateCore'])): ?>
                 <div class="section">
-                    <h2 class="section-title">企业核心</h2>
+                    <div class="core-section-header">
+                        <h2 class="core-section-title">企业核心</h2>
+                        <div class="core-section-subtitle">CORPORATE CORE</div>
+                    </div>
                     <div class="core-grid">
-                        <!-- Mission -->
+                        <!-- 01 Mission -->
                         <div class="core-card">
-                            <div class="core-card-title">使命 Mission</div>
+                            <div class="core-card-number">01</div>
+                            <div class="core-card-title">使命:初心&感性的目标<br><span style="font-size: 0.75em; font-weight: 500;">Mission: Original Intention & Emotional Goals</span></div>
                             <div class="core-card-content">
-                                <?php echo htmlspecialchars($strategyData['corporateCore']['mission'] ?? ''); ?>
+                                塑造积极向上和舒适的工作环境
                             </div>
                         </div>
 
-                        <!-- Vision -->
+                        <!-- 02 Vision -->
                         <div class="core-card">
-                            <div class="core-card-title">愿景 Vision</div>
+                            <div class="core-card-number">02</div>
+                            <div class="core-card-title">愿景:理性可具体化的目标<br><span style="font-size: 0.75em; font-weight: 500;">Vision: Rational and Tangible Goals</span></div>
                             <div class="core-card-content">
-                                <?php echo htmlspecialchars($strategyData['corporateCore']['vision'] ?? ''); ?>
+                                打造高效的团队,创造行业未来
                             </div>
                         </div>
 
-                        <!-- Culture -->
+                        <!-- 03 Culture -->
                         <div class="core-card">
-                            <div class="core-card-title">文化 Culture</div>
-                            <ul class="core-card-list">
-                                <?php if (!empty($strategyData['corporateCore']['culture'])): ?>
-                                    <?php foreach ($strategyData['corporateCore']['culture'] as $culture): ?>
-                                        <li><?php echo htmlspecialchars($culture); ?></li>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </ul>
+                            <div class="core-card-number">03</div>
+                            <div class="core-card-title">文化:做人的态度<br><span style="font-size: 0.75em; font-weight: 500;">Culture: Attitude towards being a person</span></div>
+                            <div class="core-card-content">
+                                积极向上,高效执行 灵活应变,诚信待人
+                            </div>
                         </div>
 
-                        <!-- Values -->
+                        <!-- 04 Values -->
                         <div class="core-card">
-                            <div class="core-card-title">价值观 Values</div>
-                            <ul class="core-card-list">
-                                <?php if (!empty($strategyData['corporateCore']['values'])): ?>
-                                    <?php foreach ($strategyData['corporateCore']['values'] as $value): ?>
-                                        <li><?php echo htmlspecialchars($value); ?></li>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </ul>
+                            <div class="core-card-number">04</div>
+                            <div class="core-card-title">价值观:做事的态度<br><span style="font-size: 0.75em; font-weight: 500;">Values: Attitude towards doing things</span></div>
+                            <div class="core-card-content">
+                                目标导向,理念一致 追求卓越,创新精神
+                            </div>
                         </div>
                     </div>
                 </div>
