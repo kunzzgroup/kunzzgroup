@@ -723,7 +723,8 @@ if (file_exists($jsonFile)) {
                 0 6px 20px rgba(0, 0, 0, 0.12),
                 0 3px 10px rgba(255, 92, 0, 0.1);
             border: 2px solid rgba(255, 92, 0, 0.2);
-            min-width: clamp(120px, 12.5vw, 160px);
+            width: clamp(120px, 12.5vw, 160px);
+            box-sizing: border-box;
             text-align: center;
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
@@ -1222,8 +1223,9 @@ if (file_exists($jsonFile)) {
             }
 
             .milestone-card {
-                min-width: clamp(100px, 10.42vw, 140px);
+                width: clamp(100px, 10.42vw, 140px);
                 padding: clamp(8px, 0.83vw, 12px) clamp(12px, 1.25vw, 16px);
+                box-sizing: border-box;
             }
 
             .milestone-year {
