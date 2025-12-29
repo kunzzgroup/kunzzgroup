@@ -149,7 +149,7 @@ if (file_exists($jsonFile)) {
         }
 
         .company-name-large {
-            font-size: clamp(36px, 4.69vw, 64px);
+            font-size: clamp(24px, 2.6vw, 50px);
             font-weight: 700;
             color: #000000;
             margin-bottom: clamp(12px, 1.25vw, 16px);
@@ -159,7 +159,7 @@ if (file_exists($jsonFile)) {
         }
 
         .company-subtitle {
-            font-size: clamp(36px, 4.69vw, 64px);
+            font-size: clamp(24px, 2.6vw, 50px);
             font-weight: 700;
             color: #000000;
             margin-bottom: clamp(12px, 1.25vw, 16px);
