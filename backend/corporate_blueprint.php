@@ -651,7 +651,7 @@ if (file_exists($jsonFile)) {
         .milestone-pin {
             width: clamp(36px, 3.75vw, 50px);
             height: clamp(36px, 3.75vw, 50px);
-            background: linear-gradient(135deg,rgb(47, 0, 255) 0%, #ff8c42 100%);
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
             border-radius: 50% 50% 50% 0;
             transform: rotate(-45deg);
             position: relative;
