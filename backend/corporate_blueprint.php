@@ -95,49 +95,206 @@ if (file_exists($jsonFile)) {
 
         /* Header Section */
         .header-section {
-            background: linear-gradient(135deg, #fff 0%, #fffef0 50%, #fff 100%);
-            padding: clamp(32px, 3.13vw, 60px);
-            text-align: center;
+            background: #ffffff;
             position: relative;
+            overflow: visible;
+            margin-bottom: 0;
+            padding: 0;
+        }
+
+        /* Background decorative shapes */
+        .header-section-wrapper {
+            position: relative;
+            background: #ffffff;
+            padding: clamp(60px, 7.29vw, 100px) clamp(40px, 4.69vw, 80px);
             overflow: hidden;
         }
 
-        .header-section::before {
+        .header-section-wrapper::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -20%;
-            width: 80%;
-            height: 150%;
-            background: radial-gradient(ellipse at center, rgba(255, 92, 0, 0.1) 0%, transparent 70%);
+            top: -100px;
+            left: -150px;
+            width: clamp(400px, 41.67vw, 600px);
+            height: clamp(400px, 41.67vw, 600px);
+            background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.15) 0%, transparent 70%);
             border-radius: 50%;
             pointer-events: none;
+            z-index: 0;
+        }
+
+        .header-section-wrapper::after {
+            content: '';
+            position: absolute;
+            bottom: -80px;
+            right: -100px;
+            width: clamp(300px, 31.25vw, 450px);
+            height: clamp(300px, 31.25vw, 450px);
+            background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.12) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Central white panel */
+        .header-panel {
+            background: #ffffff;
+            border-radius: clamp(16px, 1.67vw, 24px);
+            padding: clamp(48px, 5.21vw, 80px) clamp(56px, 6.25vw, 96px);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: clamp(48px, 5.21vw, 80px);
+        }
+
+        /* Left side text content */
+        .header-text-content {
+            flex: 1;
+            text-align: left;
+        }
+
+        .header-label {
+            font-size: clamp(12px, 1.25vw, 16px);
+            color: #ffd700;
+            font-weight: 500;
+            margin-bottom: clamp(16px, 1.67vw, 24px);
+            display: flex;
+            align-items: center;
+            gap: clamp(8px, 0.83vw, 12px);
+            letter-spacing: 0.5px;
+        }
+
+        .header-label span {
+            color: #ff5c00;
+        }
+
+        .header-label-line {
+            width: 3px;
+            height: clamp(16px, 1.67vw, 20px);
+            background: #ff5c00;
         }
 
         .company-name-large {
-            font-size: clamp(32px, 4.17vw, 64px);
+            font-size: clamp(36px, 4.69vw, 64px);
             font-weight: 700;
-            color: #000000ff;
-            margin-bottom: clamp(12px, 1.04vw, 16px);
-            letter-spacing: 2px;
-            position: relative;
-            z-index: 1;
+            color: #000000;
+            margin-bottom: clamp(12px, 1.25vw, 16px);
+            letter-spacing: 1px;
+            line-height: 1.2;
         }
 
-        .plan-title {
+        .company-subtitle {
             font-size: clamp(18px, 2.08vw, 28px);
             font-weight: 600;
-            color: #374151;
-            margin-bottom: clamp(8px, 0.83vw, 12px);
+            color: #000000;
+            margin-bottom: clamp(20px, 2.08vw, 28px);
+        }
+
+        .plan-title-en {
+            font-size: clamp(12px, 1.25vw, 16px);
+            color: #ffd700;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: clamp(8px, 0.83vw, 12px);
+            letter-spacing: 1px;
+        }
+
+        .plan-title-en span {
+            color: #ff5c00;
+        }
+
+        .plan-title-en-line {
+            width: 3px;
+            height: clamp(16px, 1.67vw, 20px);
+            background: #ff5c00;
+        }
+
+        /* Right side logo */
+        .header-logo-container {
+            flex-shrink: 0;
             position: relative;
+            width: clamp(140px, 14.58vw, 200px);
+            height: clamp(140px, 14.58vw, 200px);
+        }
+
+        .header-logo {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .logo-outer-ring {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: clamp(4px, 0.42vw, 6px) solid #ffd700;
+            background: transparent;
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo-inner-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: calc(100% - clamp(12px, 1.25vw, 18px));
+            height: calc(100% - clamp(12px, 1.25vw, 18px));
+            border-radius: 50%;
+            background: #ff5c00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             z-index: 1;
         }
 
-        .year-range {
-            font-size: clamp(14px, 1.25vw, 18px);
-            color: #6b7280;
+        .logo-symbol {
+            color: #ffffff;
+            font-size: clamp(48px, 5.21vw, 72px);
+            font-weight: 700;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            display: flex;
+            align-items: center;
+            gap: clamp(4px, 0.42vw, 6px);
+            letter-spacing: -2px;
+        }
+
+        .logo-k {
             position: relative;
-            z-index: 1;
+            font-style: italic;
+        }
+
+        .logo-arrows {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(2px, 0.21vw, 3px);
+        }
+
+        .logo-arrow {
+            width: 0;
+            height: 0;
+            border-left: clamp(8px, 0.83vw, 12px) solid #ffffff;
+            border-top: clamp(4px, 0.42vw, 6px) solid transparent;
+            border-bottom: clamp(4px, 0.42vw, 6px) solid transparent;
+        }
+
+        /* Logo reflection */
+        .logo-reflection {
+            position: absolute;
+            bottom: clamp(-30px, -3.13vw, -40px);
+            left: 50%;
+            transform: translateX(-50%) scaleY(-1);
+            width: 80%;
+            height: 20%;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 0%, transparent 100%);
+            border-radius: 50%;
+            opacity: 0.3;
+            filter: blur(2px);
+            z-index: 0;
         }
 
         /* Timeline Section */
@@ -470,9 +627,32 @@ if (file_exists($jsonFile)) {
         }
 
         /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .header-panel {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header-text-content {
+                text-align: center;
+            }
+
+            .header-logo-container {
+                margin-top: clamp(32px, 3.13vw, 48px);
+            }
+        }
+
         @media (max-width: 768px) {
             .main-container {
                 padding: 16px;
+            }
+
+            .header-section-wrapper {
+                padding: clamp(40px, 4.17vw, 60px) clamp(24px, 2.5vw, 32px);
+            }
+
+            .header-panel {
+                padding: clamp(32px, 3.33vw, 48px) clamp(32px, 3.33vw, 48px);
             }
 
             .core-grid,
@@ -512,19 +692,45 @@ if (file_exists($jsonFile)) {
             <?php if ($strategyData): ?>
                 <!-- Header Section -->
                 <div class="section">
-                    <div class="card header-section">
-                        <div class="company-name-large">
-                            <?php echo htmlspecialchars($strategyData['companyOverview']['companyName'] ?? 'KUNZZ HOLDINGS SDN BHD'); ?>
-                        </div>
-                        <div class="plan-title">
-                            <?php echo htmlspecialchars($strategyData['companyOverview']['planTitle'] ?? 'Corporate Strategic Plan'); ?>
-                        </div>
-                        <div class="year-range">
-                            <?php 
-                            $startYear = $strategyData['companyOverview']['strategyStartYear'] ?? '';
-                            $endYear = $strategyData['companyOverview']['strategyEndYear'] ?? '';
-                            echo $startYear . ' - ' . $endYear;
-                            ?>
+                    <div class="header-section">
+                        <div class="header-section-wrapper">
+                            <div class="header-panel">
+                                <!-- Left side text content -->
+                                <div class="header-text-content">
+                                    <div class="header-label">
+                                        <div class="header-label-line"></div>
+                                        <span>企业蓝图</span>
+                                    </div>
+                                    <div class="company-name-large">
+                                        KUNZZ HOLDINGS
+                                    </div>
+                                    <div class="company-subtitle">
+                                        SDN BHD 战略计划
+                                    </div>
+                                    <div class="plan-title-en">
+                                        <div class="plan-title-en-line"></div>
+                                        <span>CORPORATE STRATEGIC PLAN</span>
+                                    </div>
+                                </div>
+
+                                <!-- Right side logo -->
+                                <div class="header-logo-container">
+                                    <div class="header-logo">
+                                        <div class="logo-outer-ring">
+                                            <div class="logo-inner-circle">
+                                                <div class="logo-symbol">
+                                                    <span class="logo-k">K</span>
+                                                    <div class="logo-arrows">
+                                                        <div class="logo-arrow"></div>
+                                                        <div class="logo-arrow"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="logo-reflection"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
