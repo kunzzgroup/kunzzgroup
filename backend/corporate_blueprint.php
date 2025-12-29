@@ -1361,15 +1361,6 @@ if (file_exists($jsonFile)) {
                             endif; 
                             ?>
 
-                            <!-- Start label -->
-                            <div style="position: absolute; left: 8%; top: 32%; font-size: clamp(12px, 1.25vw, 16px); color: #ff5c00; font-weight: 700; background: rgba(255, 255, 255, 0.9); padding: 8px 16px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 5;">
-                                起始
-                            </div>
-
-                            <!-- End label -->
-                            <div style="position: absolute; right: 8%; top: 32%; font-size: clamp(12px, 1.25vw, 16px); color: #ff5c00; font-weight: 700; background: rgba(255, 255, 255, 0.9); padding: 8px 16px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 5;">
-                                终点
-                            </div>
                         </div>
                     </div>
                 </div>
