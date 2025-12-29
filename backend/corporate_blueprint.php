@@ -274,15 +274,15 @@ if (file_exists($jsonFile)) {
                     0deg,
                     transparent,
                     transparent 20px,
-                    rgba(255, 92, 0, 0.02) 20px,
-                    rgba(255, 92, 0, 0.02) 21px
+                    rgba(255, 92, 0, 0.08) 20px,
+                    rgba(255, 92, 0, 0.08) 21px
                 ),
                 repeating-linear-gradient(
                     90deg,
                     transparent,
                     transparent 20px,
-                    rgba(255, 92, 0, 0.02) 20px,
-                    rgba(255, 92, 0, 0.02) 21px
+                    rgba(255, 92, 0, 0.08) 20px,
+                    rgba(255, 92, 0, 0.08) 21px
                 );
             border-radius: 12px;
             min-height: clamp(250px, 26.04vw, 380px);
