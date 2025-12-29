@@ -215,7 +215,7 @@ if (file_exists($jsonFile)) {
             z-index: 0;
         }
 
-        /* Timeline Section */
+        /* Dashboard Timeline Section */
         .timeline-container {
             position: relative;
             padding: clamp(40px, 4.17vw, 60px) 0;
@@ -223,7 +223,7 @@ if (file_exists($jsonFile)) {
 
         .timeline-header {
             text-align: center;
-            margin-bottom: clamp(50px, 5.21vw, 70px);
+            margin-bottom: clamp(40px, 4.17vw, 60px);
             position: relative;
         }
 
@@ -270,48 +270,139 @@ if (file_exists($jsonFile)) {
             border-radius: 12px;
         }
 
-        /* Horizontal timeline line */
-        .timeline-line {
-            position: absolute;
-            top: 50%;
-            left: clamp(80px, 8.33vw, 120px);
-            right: clamp(80px, 8.33vw, 120px);
-            height: 5px;
-            background: linear-gradient(90deg, 
-                rgba(255, 92, 0, 0.3) 0%, 
-                #ff5c00 20%, 
-                #ff5c00 80%, 
-                rgba(255, 92, 0, 0.3) 100%);
-            transform: translateY(-50%) scaleX(0);
-            transform-origin: left center;
-            z-index: 1;
-            border-radius: 3px;
-            box-shadow: 0 2px 8px rgba(255, 92, 0, 0.2);
-            transition: transform 1.2s cubic-bezier(0.65, 0, 0.35, 1);
+        /* Dashboard Card */
+        .dashboard-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: clamp(24px, 2.5vw, 32px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 2px solid rgba(255, 92, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(30px);
         }
 
-        .timeline-line.animate-in {
-            transform: translateY(-50%) scaleX(1);
+        .dashboard-card.animate-in {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        .timeline-line::before {
+        .dashboard-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, 
-                transparent 0%, 
-                rgba(255, 255, 255, 0.4) 50%, 
-                transparent 100%);
-            border-radius: 3px;
-            animation: shimmer 3s infinite;
+            height: 4px;
+            background: linear-gradient(90deg, #ff5c00 0%, #ff8c42 100%);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.6s ease;
         }
 
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+        .dashboard-card.animate-in::before {
+            transform: scaleX(1);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(255, 92, 0, 0.2);
+            border-color: rgba(255, 92, 0, 0.3);
+        }
+
+        .dashboard-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: clamp(20px, 2.08vw, 28px);
+        }
+
+        .dashboard-card-year {
+            font-size: clamp(28px, 2.92vw, 40px);
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .dashboard-card-progress-circle {
+            width: clamp(70px, 7.29vw, 90px);
+            height: clamp(70px, 7.29vw, 90px);
+            position: relative;
+        }
+
+        .progress-circle-svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .progress-circle-bg {
+            fill: none;
+            stroke: rgba(255, 92, 0, 0.1);
+            stroke-width: 8;
+        }
+
+        .progress-circle-fill {
+            fill: none;
+            stroke: url(#progressGradient);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 251.2;
+            stroke-dashoffset: 251.2;
+            transition: stroke-dashoffset 1.5s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+
+        .progress-circle-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(16px, 1.67vw, 20px);
+            font-weight: 700;
+            color: #ff5c00;
+        }
+
+        .dashboard-card-goal {
+            font-size: clamp(16px, 1.67vw, 20px);
+            font-weight: 600;
+            color: #2c3e50;
+            line-height: 1.6;
+            margin-bottom: clamp(16px, 1.67vw, 24px);
+            padding: clamp(16px, 1.67vw, 20px);
+            background: linear-gradient(135deg, rgba(255, 92, 0, 0.05) 0%, rgba(255, 140, 66, 0.05) 100%);
+            border-radius: 12px;
+            border-left: 4px solid #ff5c00;
+        }
+
+        .dashboard-card-stats {
+            display: flex;
+            gap: clamp(16px, 1.67vw, 24px);
+            margin-top: clamp(16px, 1.67vw, 24px);
+            padding-top: clamp(16px, 1.67vw, 24px);
+            border-top: 1px solid rgba(255, 92, 0, 0.1);
+        }
+
+        .dashboard-stat-item {
+            flex: 1;
+            text-align: center;
+        }
+
+        .dashboard-stat-label {
+            font-size: clamp(11px, 1.15vw, 13px);
+            color: #6b7280;
+            font-weight: 500;
+            margin-bottom: clamp(4px, 0.42vw, 6px);
+        }
+
+        .dashboard-stat-value {
+            font-size: clamp(18px, 1.88vw, 24px);
+            font-weight: 700;
+            color: #ff5c00;
         }
 
         /* Start point - rectangle */
@@ -1039,52 +1130,37 @@ if (file_exists($jsonFile)) {
             }
 
             .timeline-wrapper {
-                padding: clamp(60px, 6.25vw, 80px) clamp(24px, 2.5vw, 32px);
+                padding: clamp(24px, 2.5vw, 32px);
             }
 
-            .timeline-start {
-                padding: clamp(12px, 1.25vw, 14px) clamp(20px, 2.08vw, 24px);
-                font-size: clamp(12px, 1.25vw, 14px);
+            .dashboard-cards-grid {
+                grid-template-columns: 1fr;
+                gap: clamp(20px, 2.08vw, 24px);
             }
 
-            .timeline-start-event {
-                width: clamp(110px, 11.46vw, 160px);
-                transform: translate(-50%, calc(100% + clamp(20px, 2.08vw, 30px)));
+            .dashboard-card {
+                padding: clamp(20px, 2.08vw, 24px);
             }
 
-            .timeline-start-event .timeline-goal-text,
-            .timeline-end-event .timeline-goal-text,
-            .timeline-event .timeline-goal-text {
-                padding: clamp(10px, 1.04vw, 14px) clamp(12px, 1.25vw, 16px);
-                font-size: clamp(12px, 1.25vw, 15px);
+            .dashboard-card-year {
+                font-size: clamp(24px, 2.5vw, 32px);
             }
 
-            .timeline-end {
-                width: clamp(55px, 5.73vw, 70px);
-                height: clamp(55px, 5.73vw, 70px);
+            .dashboard-card-progress-circle {
+                width: clamp(60px, 6.25vw, 80px);
+                height: clamp(60px, 6.25vw, 80px);
             }
 
-            .timeline-end-event {
-                width: clamp(110px, 11.46vw, 160px);
-                transform: translate(50%, calc(100% + clamp(20px, 2.08vw, 30px)));
+            .dashboard-card-stats {
+                flex-direction: column;
+                gap: clamp(12px, 1.25vw, 16px);
             }
 
-            .timeline-year-label {
-                font-size: clamp(16px, 1.67vw, 22px);
-            }
-
-            .timeline-start-event .timeline-year-label,
-            .timeline-end-event .timeline-year-label {
-                font-size: clamp(16px, 1.67vw, 22px);
-            }
-
-            .timeline-items {
-                padding: 0 clamp(70px, 7.29vw, 100px);
-                min-height: clamp(180px, 18.75vw, 250px);
-            }
-
-            .timeline-event {
-                width: clamp(100px, 10.42vw, 140px);
+            .dashboard-stat-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                text-align: left;
             }
         }
     </style>
@@ -1122,8 +1198,18 @@ if (file_exists($jsonFile)) {
                     </div>
                 </div>
 
-                <!-- Timeline Section -->
+                <!-- Timeline Section - Dashboard Style -->
                 <?php if (!empty($strategyData['timeline'])): ?>
+                <?php
+                $timelineItems = $strategyData['timeline'];
+                $totalItems = count($timelineItems);
+                $startYear = $timelineItems[0]['year'] ?? 0;
+                $endYear = $timelineItems[$totalItems - 1]['year'] ?? 0;
+                $currentYear = date('Y');
+                $totalYears = $endYear - $startYear + 1;
+                $completedYears = max(0, $currentYear - $startYear + 1);
+                $overallProgress = min(100, ($completedYears / $totalYears) * 100);
+                ?>
                 <div class="section">
                     <div class="timeline-container">
                         <div class="timeline-header">
@@ -1132,52 +1218,84 @@ if (file_exists($jsonFile)) {
                         </div>
                         
                         <div class="timeline-wrapper">
-                            <div class="timeline-line"></div>
-                            
-                            <!-- Start point -->
-                            <div class="timeline-start">起始</div>
-                            <?php 
-                            // Get start year and goal from first timeline item
-                            $startItem = !empty($strategyData['timeline']) ? $strategyData['timeline'][0] : null;
-                            ?>
-                            <?php if ($startItem): ?>
-                            <div class="timeline-start-event">
-                                <div class="timeline-arrow"></div>
-                                <div class="timeline-year-label"><?php echo htmlspecialchars($startItem['year'] ?? ''); ?>年</div>
-                                <div class="timeline-goal-text"><?php echo htmlspecialchars($startItem['goal'] ?? ''); ?></div>
+                            <!-- Overall Progress Bar -->
+                            <div class="dashboard-progress-container">
+                                <div class="dashboard-progress-header">
+                                    <div class="dashboard-progress-title">整体进度</div>
+                                    <div class="dashboard-progress-percentage" data-progress="<?php echo $overallProgress; ?>">0%</div>
+                                </div>
+                                <div class="dashboard-progress-bar-container">
+                                    <div class="dashboard-progress-bar" data-progress="<?php echo $overallProgress; ?>" style="width: 0%;"></div>
+                                </div>
                             </div>
-                            <?php endif; ?>
-                            
-                            <!-- End point -->
-                            <div class="timeline-end">终点</div>
-                            <?php 
-                            // Get end year and goal from last timeline item
-                            $endItem = !empty($strategyData['timeline']) ? end($strategyData['timeline']) : null;
-                            ?>
-                            <?php if ($endItem): ?>
-                            <div class="timeline-end-event">
-                                <div class="timeline-arrow"></div>
-                                <div class="timeline-year-label"><?php echo htmlspecialchars($endItem['year'] ?? ''); ?>年</div>
-                                <div class="timeline-goal-text"><?php echo htmlspecialchars($endItem['goal'] ?? ''); ?></div>
-                            </div>
-                            <?php endif; ?>
-                            
-                            <!-- Middle events -->
-                            <div class="timeline-items">
-                                <?php 
-                                // Skip first and last items since they're shown at start/end points
-                                $middleItems = !empty($strategyData['timeline']) ? array_slice($strategyData['timeline'], 1, -1) : [];
-                                $totalMiddleItems = count($middleItems);
-                                foreach ($middleItems as $index => $item): 
-                                ?>
+
+                            <!-- SVG Gradient Definition -->
+                            <svg style="position: absolute; width: 0; height: 0;">
+                                <defs>
+                                    <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#ff5c00;stop-opacity:1" />
+                                        <stop offset="50%" style="stop-color:#ff8c42;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#ffd700;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+
+                            <!-- Dashboard Cards Grid -->
+                            <div class="dashboard-cards-grid">
+                                <?php foreach ($timelineItems as $index => $item): ?>
                                 <?php
-                                // 计算位置百分比（均匀分布，从起始后到终点前）
-                                $position = ($index + 2) / (count($strategyData['timeline']) + 1) * 100;
+                                $year = $item['year'] ?? 0;
+                                $yearProgress = $index === 0 ? 100 : ($year <= $currentYear ? 100 : ($year == $currentYear + 1 ? 50 : 0));
+                                $isCurrent = ($year == $currentYear);
+                                $isFuture = ($year > $currentYear);
+                                $yearIndex = $index + 1;
+                                $yearPercentage = ($yearIndex / $totalItems) * 100;
+                                
+                                // 提取数字（假设目标是"创建X间子公司"）
+                                preg_match('/(\d+)/', $item['goal'] ?? '', $matches);
+                                $targetCount = isset($matches[1]) ? (int)$matches[1] : 0;
                                 ?>
-                                <div class="timeline-event" style="left: <?php echo $position; ?>%;">
-                                    <div class="timeline-arrow"></div>
-                                    <div class="timeline-year-label"><?php echo htmlspecialchars($item['year'] ?? ''); ?>年</div>
-                                    <div class="timeline-goal-text"><?php echo htmlspecialchars($item['goal'] ?? ''); ?></div>
+                                <div class="dashboard-card" data-index="<?php echo $index; ?>">
+                                    <div class="dashboard-card-header">
+                                        <div class="dashboard-card-year"><?php echo htmlspecialchars($year); ?></div>
+                                        <div class="dashboard-card-progress-circle">
+                                            <svg class="progress-circle-svg" viewBox="0 0 90 90">
+                                                <circle class="progress-circle-bg" cx="45" cy="45" r="40"></circle>
+                                                <circle class="progress-circle-fill" 
+                                                    cx="45" 
+                                                    cy="45" 
+                                                    r="40"
+                                                    data-progress="<?php echo $yearProgress; ?>"
+                                                    style="stroke-dasharray: 251.2; stroke-dashoffset: 251.2;"></circle>
+                                            </svg>
+                                            <div class="progress-circle-text" data-progress="<?php echo $yearProgress; ?>">0%</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="dashboard-card-goal">
+                                        <?php echo htmlspecialchars($item['goal'] ?? ''); ?>
+                                    </div>
+
+                                    <div class="dashboard-card-stats">
+                                        <div class="dashboard-stat-item">
+                                            <div class="dashboard-stat-label">阶段</div>
+                                            <div class="dashboard-stat-value"><?php echo $yearIndex; ?>/<?php echo $totalItems; ?></div>
+                                        </div>
+                                        <div class="dashboard-stat-item">
+                                            <div class="dashboard-stat-label">目标</div>
+                                            <div class="dashboard-stat-value"><?php echo $targetCount; ?></div>
+                                        </div>
+                                        <div class="dashboard-stat-item">
+                                            <div class="dashboard-stat-label">状态</div>
+                                            <div class="dashboard-stat-value" style="font-size: clamp(14px, 1.46vw, 18px);">
+                                                <?php 
+                                                if ($isCurrent) echo '进行中';
+                                                elseif ($isFuture) echo '待开始';
+                                                else echo '已完成';
+                                                ?>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <?php endforeach; ?>
                             </div>
@@ -1388,97 +1506,110 @@ if (file_exists($jsonFile)) {
     </div>
 
     <script>
-        // 时间线动画控制器
+        // Dashboard Timeline Animation Controller
         document.addEventListener('DOMContentLoaded', function() {
             const timelineWrapper = document.querySelector('.timeline-wrapper');
             if (!timelineWrapper) return;
 
-            // 创建 IntersectionObserver 观察时间线容器
+            // Create IntersectionObserver for timeline container
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        // 触发时间线动画
-                        animateTimeline(entry.target);
+                        animateDashboard(entry.target);
                         observer.unobserve(entry.target);
                     }
                 });
             }, {
-                threshold: 0.3,
-                rootMargin: '0px 0px -100px 0px'
+                threshold: 0.2,
+                rootMargin: '0px 0px -50px 0px'
             });
 
             observer.observe(timelineWrapper);
 
-            function animateTimeline(container) {
-                // 1. 先显示起始点
-                const startPoint = container.querySelector('.timeline-start');
-                if (startPoint) {
+            function animateDashboard(container) {
+                // Animate overall progress bar
+                const progressBar = container.querySelector('.dashboard-progress-bar');
+                const progressPercentage = container.querySelector('.dashboard-progress-percentage');
+                
+                if (progressBar && progressPercentage) {
+                    const progress = parseFloat(progressBar.dataset.progress || 0);
+                    
+                    // Animate progress bar width
                     setTimeout(() => {
-                        startPoint.classList.add('animate-in');
-                    }, 100);
+                        progressBar.style.width = progress + '%';
+                    }, 200);
+                    
+                    // Animate percentage counter
+                    let current = 0;
+                    const duration = 1500;
+                    const increment = progress / (duration / 16);
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= progress) {
+                            current = progress;
+                            clearInterval(timer);
+                        }
+                        progressPercentage.textContent = Math.round(current) + '%';
+                    }, 16);
                 }
 
-                // 2. 然后显示时间线
-                const timelineLine = container.querySelector('.timeline-line');
-                if (timelineLine) {
+                // Animate progress circles
+                const progressCircles = container.querySelectorAll('.progress-circle-fill');
+                progressCircles.forEach((circle, index) => {
                     setTimeout(() => {
-                        timelineLine.classList.add('animate-in');
-                    }, 400);
-                }
-
-                // 3. 显示终点
-                const endPoint = container.querySelector('.timeline-end');
-                if (endPoint) {
-                    setTimeout(() => {
-                        endPoint.classList.add('animate-in');
-                    }, 800);
-                }
-
-                // 4. 逐个显示起始事件
-                const startEvent = container.querySelector('.timeline-start-event');
-                if (startEvent) {
-                    setTimeout(() => {
-                        startEvent.classList.add('animate-in');
-                    }, 1200);
-                }
-
-                // 5. 逐个显示中间事件（带延迟）
-                const events = container.querySelectorAll('.timeline-event');
-                events.forEach((event, index) => {
-                    setTimeout(() => {
-                        event.classList.add('animate-in');
-                    }, 1600 + (index * 150));
+                        const progress = parseFloat(circle.dataset.progress || 0);
+                        const circumference = 2 * Math.PI * 40; // radius = 40
+                        const offset = circumference - (progress / 100) * circumference;
+                        
+                        // Animate circle
+                        circle.style.strokeDashoffset = offset;
+                        
+                        // Update percentage text
+                        const circleContainer = circle.closest('.dashboard-card-progress-circle');
+                        const circleText = circleContainer ? circleContainer.querySelector('.progress-circle-text') : null;
+                        if (circleText) {
+                            let currentPercent = 0;
+                            const increment = progress / 30;
+                            const percentTimer = setInterval(() => {
+                                currentPercent += increment;
+                                if (currentPercent >= progress) {
+                                    currentPercent = progress;
+                                    clearInterval(percentTimer);
+                                }
+                                circleText.textContent = Math.round(currentPercent) + '%';
+                            }, 50);
+                        }
+                    }, 500 + (index * 100));
                 });
 
-                // 6. 最后显示终点事件
-                const endEvent = container.querySelector('.timeline-end-event');
-                if (endEvent) {
+                // Animate cards
+                const cards = container.querySelectorAll('.dashboard-card');
+                cards.forEach((card, index) => {
                     setTimeout(() => {
-                        endEvent.classList.add('animate-in');
-                    }, 1600 + (events.length * 150) + 200);
-                }
+                        card.classList.add('animate-in');
+                    }, 800 + (index * 100));
+                });
             }
 
-            // 增强交互：点击事件卡片时的高亮效果
-            const eventCards = document.querySelectorAll('.timeline-goal-text');
-            eventCards.forEach(card => {
+            // Card click interaction
+            const dashboardCards = document.querySelectorAll('.dashboard-card');
+            dashboardCards.forEach(card => {
                 card.addEventListener('click', function() {
-                    // 移除其他卡片的高亮
-                    eventCards.forEach(c => c.classList.remove('active'));
-                    // 添加当前卡片的高亮
+                    // Remove active class from all cards
+                    dashboardCards.forEach(c => c.classList.remove('active'));
+                    // Add active class to clicked card
                     this.classList.add('active');
                 });
             });
         });
 
-        // 添加卡片激活状态的样式（通过内联样式或CSS类）
+        // Add active state styles
         const style = document.createElement('style');
         style.textContent = `
-            .timeline-goal-text.active {
-                background: rgba(255, 92, 0, 0.1) !important;
+            .dashboard-card.active {
                 border-color: rgba(255, 92, 0, 0.5) !important;
-                box-shadow: 0 8px 24px rgba(255, 92, 0, 0.25) !important;
-                transform: translateY(-3px) scale(1.02) !important;
+                box-shadow: 0 16px 48px rgba(255, 92, 0, 0.3) !important;
+                transform: translateY(-12px) scale(1.03) !important;
             }
         `;
         document.head.appendChild(style);
