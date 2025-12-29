@@ -651,7 +651,7 @@ if (file_exists($jsonFile)) {
         .milestone-pin {
             width: clamp(36px, 3.75vw, 50px);
             height: clamp(36px, 3.75vw, 50px);
-            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
+            background: linear-gradient(135deg,rgb(47, 0, 255) 0%, #ff8c42 100%);
             border-radius: 50% 50% 50% 0;
             transform: rotate(-45deg);
             position: relative;
@@ -1332,7 +1332,7 @@ if (file_exists($jsonFile)) {
                             <svg class="map-timeline-svg" viewBox="0 0 720 600" preserveAspectRatio="none">
                                 <defs>
                                     <linearGradient id="routeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                        <stop offset="0%" style="stop-color:rgba(1, 18, 253, 0.3);stop-opacity:1" />
+                                        <stop offset="0%" style="stop-color:rgba(255, 92, 0, 0.3);stop-opacity:1" />
                                         <stop offset="50%" style="stop-color:#ff5c00;stop-opacity:1" />
                                         <stop offset="100%" style="stop-color:rgba(255, 92, 0, 0.3);stop-opacity:1" />
                                     </linearGradient>
