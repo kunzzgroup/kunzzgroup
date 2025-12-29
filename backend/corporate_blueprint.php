@@ -981,30 +981,61 @@ if (file_exists($jsonFile)) {
             line-height: 1.8;
         }
 
-        /* Culture & Values Explanation */
-        .explanation-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        /* Culture Explanation Section */
+        .culture-explanation-header {
+            background: linear-gradient(90deg, #ffd700 0%, #ffd700 30%, transparent 30%);
+            padding: clamp(16px, 1.67vw, 24px) clamp(24px, 2.5vw, 40px);
+            margin-bottom: clamp(40px, 4.17vw, 60px);
+            border-radius: clamp(8px, 0.83vw, 12px);
+            display: flex;
+            align-items: center;
             gap: clamp(16px, 1.67vw, 24px);
         }
 
-        .explanation-card {
+        .culture-explanation-title-cn {
+            font-size: clamp(20px, 2.08vw, 28px);
+            font-weight: 800;
+            color: #000000;
+        }
+
+        .culture-explanation-title-en {
+            font-size: clamp(16px, 1.67vw, 22px);
+            font-weight: 500;
+            color: #ffd700;
+        }
+
+        .culture-explanation-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: clamp(20px, 2.08vw, 32px);
+        }
+
+        .culture-explanation-card {
             background: #fff;
-            border-radius: 8px;
-            padding: clamp(20px, 2.08vw, 32px);
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-radius: clamp(12px, 1.25vw, 16px);
+            padding: clamp(24px, 2.5vw, 40px);
+            border: 2px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            position: relative;
         }
 
-        .explanation-key {
-            font-size: clamp(16px, 1.56vw, 20px);
-            font-weight: bold;
-            color: #ff5c00;
-            margin-bottom: clamp(8px, 0.83vw, 12px);
+        .culture-explanation-number {
+            font-size: clamp(48px, 5vw, 72px);
+            font-weight: 800;
+            color: #ffd700;
+            line-height: 1;
+            margin-bottom: clamp(16px, 1.67vw, 24px);
         }
 
-        .explanation-description {
-            font-size: clamp(13px, 1.04vw, 16px);
+        .culture-explanation-key {
+            font-size: clamp(18px, 1.88vw, 24px);
+            font-weight: 800;
+            color: #000000;
+            margin-bottom: clamp(12px, 1.25vw, 16px);
+        }
+
+        .culture-explanation-description {
+            font-size: clamp(14px, 1.46vw, 18px);
             color: #374151;
             line-height: 1.8;
         }
@@ -1231,6 +1262,7 @@ if (file_exists($jsonFile)) {
             }
 
             .core-grid,
+            .culture-explanation-grid,
             .explanation-grid,
             .objectives-grid {
                 grid-template-columns: 1fr;
@@ -1511,21 +1543,49 @@ if (file_exists($jsonFile)) {
                 <?php endif; ?>
 
                 <!-- Culture Explanation -->
-                <?php if (!empty($strategyData['cultureExplanation'])): ?>
                 <div class="section">
-                    <h2 class="section-title">文化阐述</h2>
-                    <div class="explanation-grid">
-                        <?php foreach ($strategyData['cultureExplanation'] as $culture): ?>
-                        <div class="explanation-card">
-                            <div class="explanation-key"><?php echo htmlspecialchars($culture['key'] ?? ''); ?></div>
-                            <div class="explanation-description">
-                                <?php echo htmlspecialchars($culture['description'] ?? ''); ?>
+                    <div class="culture-explanation-header">
+                        <div class="culture-explanation-title-cn">文化解说</div>
+                        <div class="culture-explanation-title-en">Cultural Expand</div>
+                    </div>
+                    <div class="culture-explanation-grid">
+                        <!-- 01 积极向上 -->
+                        <div class="culture-explanation-card">
+                            <div class="culture-explanation-number">01</div>
+                            <div class="culture-explanation-key">积极向上:</div>
+                            <div class="culture-explanation-description">
+                                作为Holding管理公司,面对多家子公司及不同行业的挑战,员工和管理层都需要保持积极向上的态度。这种心态不仅有助于应对困难,还能激励团队不断寻求突破,推动公司持续成长和发展
                             </div>
                         </div>
-                        <?php endforeach; ?>
+
+                        <!-- 02 高效执行 -->
+                        <div class="culture-explanation-card">
+                            <div class="culture-explanation-number">02</div>
+                            <div class="culture-explanation-key">高效执行:</div>
+                            <div class="culture-explanation-description">
+                                高效执行不仅是快速完成任务,更是确保战略精准落地。通过精简流程、优化资源分配,各部门紧密协作,减少延误。高效执行帮助公司在市场变化中迅速应对挑战,抢占先机,实现目标。
+                            </div>
+                        </div>
+
+                        <!-- 03 灵活应变 -->
+                        <div class="culture-explanation-card">
+                            <div class="culture-explanation-number">03</div>
+                            <div class="culture-explanation-key">灵活应变:</div>
+                            <div class="culture-explanation-description">
+                                灵活应变要求根据各子公司实际情况快速调整策略,促进团队合作与创新。确保公司在多变市场中保持领先。
+                            </div>
+                        </div>
+
+                        <!-- 04 诚信待人 -->
+                        <div class="culture-explanation-card">
+                            <div class="culture-explanation-number">04</div>
+                            <div class="culture-explanation-key">诚信待人:</div>
+                            <div class="culture-explanation-description">
+                                诚信是公司文化的核心,无论是公司内部的员工管理,还是客户和合作伙伴的关系,诚信是建立信任的基础。诚信待人不仅能促进公司内部合作与沟通,也能增强外部与合作伙伴的关系,帮助公司长期发展。
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <?php endif; ?>
 
                 <!-- Values Explanation -->
                 <?php if (!empty($strategyData['valuesExplanation'])): ?>
