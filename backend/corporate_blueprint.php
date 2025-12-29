@@ -1448,7 +1448,6 @@ if (file_exists($jsonFile)) {
                 <div class="section">
                     <div class="core-header">
                         <div class="core-main-title">企业核心</div>
-                        <div class="core-subtitle">CORPORATE CORE</div>
                     </div>
                     <div class="core-grid">
                         <!-- 01 Mission -->
