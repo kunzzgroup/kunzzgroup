@@ -262,7 +262,7 @@ if (file_exists($jsonFile)) {
 
         .timeline-wrapper {
             position: relative;
-            padding: clamp(80px, 8.33vw, 120px) clamp(40px, 4.17vw, 60px);
+            padding: clamp(50px, 5.21vw, 80px) clamp(30px, 3.13vw, 50px);
             overflow: visible;
             background: 
                 radial-gradient(circle at 20% 30%, rgba(255, 92, 0, 0.05) 0%, transparent 40%),
@@ -282,7 +282,7 @@ if (file_exists($jsonFile)) {
                     rgba(255, 92, 0, 0.02) 21px
                 );
             border-radius: 12px;
-            min-height: clamp(500px, 52.08vw, 700px);
+            min-height: clamp(380px, 39.58vw, 550px);
         }
 
         /* Map-style SVG path container */
@@ -300,7 +300,7 @@ if (file_exists($jsonFile)) {
         .map-route-path {
             fill: none;
             stroke: #ff5c00;
-            stroke-width: 4;
+            stroke-width: 3;
             stroke-linecap: round;
             stroke-linejoin: round;
             stroke-dasharray: 1000;
@@ -317,7 +317,7 @@ if (file_exists($jsonFile)) {
         .map-route-glow {
             fill: none;
             stroke: rgba(255, 92, 0, 0.3);
-            stroke-width: 8;
+            stroke-width: 6;
             stroke-linecap: round;
             stroke-linejoin: round;
         }
@@ -642,25 +642,26 @@ if (file_exists($jsonFile)) {
 
         /* Milestone pin/marker icon */
         .milestone-pin {
-            width: clamp(50px, 5.21vw, 70px);
-            height: clamp(50px, 5.21vw, 70px);
+            width: clamp(36px, 3.75vw, 50px);
+            height: clamp(36px, 3.75vw, 50px);
             background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
             border-radius: 50% 50% 50% 0;
             transform: rotate(-45deg);
             position: relative;
             box-shadow: 
-                0 4px 12px rgba(255, 92, 0, 0.4),
-                0 2px 6px rgba(0, 0, 0, 0.2),
+                0 3px 10px rgba(255, 92, 0, 0.4),
+                0 2px 5px rgba(0, 0, 0, 0.2),
                 inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            border: 3px solid #ffffff;
+            border: 2px solid #ffffff;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            z-index: 2;
         }
 
         .map-milestone:hover .milestone-pin {
-            transform: rotate(-45deg) scale(1.2);
+            transform: rotate(-45deg) scale(1.15);
             box-shadow: 
-                0 6px 20px rgba(255, 92, 0, 0.6),
-                0 4px 10px rgba(0, 0, 0, 0.3),
+                0 5px 18px rgba(255, 92, 0, 0.6),
+                0 3px 8px rgba(0, 0, 0, 0.3),
                 inset 0 1px 0 rgba(255, 255, 255, 0.4);
         }
 
@@ -670,8 +671,8 @@ if (file_exists($jsonFile)) {
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(45deg);
-            width: clamp(20px, 2.08vw, 28px);
-            height: clamp(20px, 2.08vw, 28px);
+            width: clamp(16px, 1.67vw, 22px);
+            height: clamp(16px, 1.67vw, 22px);
             background: #ffffff;
             border-radius: 50%;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -683,8 +684,8 @@ if (file_exists($jsonFile)) {
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(45deg);
-            width: clamp(12px, 1.25vw, 16px);
-            height: clamp(12px, 1.25vw, 16px);
+            width: clamp(10px, 1.04vw, 14px);
+            height: clamp(10px, 1.04vw, 14px);
             background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
             border-radius: 50%;
         }
@@ -692,13 +693,13 @@ if (file_exists($jsonFile)) {
         /* Milestone content card */
         .milestone-card {
             background: rgba(255, 255, 255, 0.95);
-            border-radius: 12px;
-            padding: clamp(14px, 1.46vw, 20px) clamp(18px, 1.88vw, 24px);
+            border-radius: 10px;
+            padding: clamp(10px, 1.04vw, 14px) clamp(14px, 1.46vw, 18px);
             box-shadow: 
-                0 8px 24px rgba(0, 0, 0, 0.12),
-                0 4px 12px rgba(255, 92, 0, 0.1);
+                0 6px 20px rgba(0, 0, 0, 0.12),
+                0 3px 10px rgba(255, 92, 0, 0.1);
             border: 2px solid rgba(255, 92, 0, 0.2);
-            min-width: clamp(140px, 14.58vw, 200px);
+            min-width: clamp(120px, 12.5vw, 160px);
             text-align: center;
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
@@ -707,38 +708,38 @@ if (file_exists($jsonFile)) {
 
         /* Cards above the pin */
         .milestone-top .milestone-card {
-            margin-bottom: clamp(35px, 3.65vw, 50px);
+            margin-bottom: clamp(28px, 2.92vw, 40px);
         }
 
         .milestone-top .milestone-card::before {
             content: '';
             position: absolute;
-            bottom: -8px;
+            bottom: -7px;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
             height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-top: 8px solid rgba(255, 92, 0, 0.2);
+            border-left: 7px solid transparent;
+            border-right: 7px solid transparent;
+            border-top: 7px solid rgba(255, 92, 0, 0.2);
         }
 
         /* Cards below the pin */
         .milestone-bottom .milestone-card {
-            margin-top: clamp(35px, 3.65vw, 50px);
+            margin-top: clamp(28px, 2.92vw, 40px);
         }
 
         .milestone-bottom .milestone-card::before {
             content: '';
             position: absolute;
-            top: -8px;
+            top: -7px;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
             height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-bottom: 8px solid rgba(255, 92, 0, 0.2);
+            border-left: 7px solid transparent;
+            border-right: 7px solid transparent;
+            border-bottom: 7px solid rgba(255, 92, 0, 0.2);
         }
 
         .map-milestone:hover .milestone-card {
@@ -755,18 +756,18 @@ if (file_exists($jsonFile)) {
 
 
         .milestone-year {
-            font-size: clamp(18px, 1.88vw, 26px);
+            font-size: clamp(16px, 1.67vw, 22px);
             font-weight: 800;
             background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: clamp(8px, 0.83vw, 12px);
+            margin-bottom: clamp(6px, 0.63vw, 8px);
             letter-spacing: 0.5px;
         }
 
         .milestone-goal {
-            font-size: clamp(13px, 1.35vw, 16px);
+            font-size: clamp(12px, 1.25vw, 14px);
             color: #2c3e50;
             line-height: 1.5;
             font-weight: 500;
@@ -1179,30 +1180,38 @@ if (file_exists($jsonFile)) {
             }
 
             .timeline-wrapper {
-                padding: clamp(60px, 6.25vw, 80px) clamp(24px, 2.5vw, 32px);
-                min-height: clamp(400px, 41.67vw, 600px);
+                padding: clamp(40px, 4.17vw, 60px) clamp(20px, 2.08vw, 30px);
+                min-height: clamp(320px, 33.33vw, 450px);
             }
 
             .map-milestone {
-                transform: translate(-50%, -50%) scale(0.8);
+                transform: translate(-50%, -50%) scale(0.85);
             }
 
             .milestone-pin {
-                width: clamp(40px, 4.17vw, 60px);
-                height: clamp(40px, 4.17vw, 60px);
+                width: clamp(30px, 3.13vw, 42px);
+                height: clamp(30px, 3.13vw, 42px);
             }
 
             .milestone-card {
-                min-width: clamp(120px, 12.5vw, 180px);
-                padding: clamp(12px, 1.25vw, 16px) clamp(14px, 1.46vw, 20px);
+                min-width: clamp(100px, 10.42vw, 140px);
+                padding: clamp(8px, 0.83vw, 12px) clamp(12px, 1.25vw, 16px);
             }
 
             .milestone-year {
-                font-size: clamp(16px, 1.67vw, 22px);
+                font-size: clamp(14px, 1.46vw, 18px);
             }
 
             .milestone-goal {
-                font-size: clamp(12px, 1.25vw, 14px);
+                font-size: clamp(11px, 1.15vw, 13px);
+            }
+
+            .milestone-top .milestone-card {
+                margin-bottom: clamp(24px, 2.5vw, 32px);
+            }
+
+            .milestone-bottom .milestone-card {
+                margin-top: clamp(24px, 2.5vw, 32px);
             }
 
             .timeline-start {
