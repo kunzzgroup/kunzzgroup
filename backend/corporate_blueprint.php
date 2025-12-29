@@ -61,7 +61,17 @@ if (file_exists($jsonFile)) {
             font-size: clamp(24px, 2.6vw, 50px);
             font-weight: bold;
             color: #000000ff;
-            margin-bottom: clamp(8px, 0.63vw, 12px);
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .header-title::after {
+            content: "";
+            display: block;
+            height: 3px;
+            width: 100%;
+            margin-top: 16px;
+            background: linear-gradient(90deg, rgba(255,92,0,0) 0%, rgba(0, 0, 0, 1) 25%, rgba(0, 0, 0, 1) 75%, rgba(255,92,0,0) 100%);
         }
 
         .header-subtitle {
