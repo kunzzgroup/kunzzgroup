@@ -133,8 +133,8 @@ if (file_exists($jsonFile)) {
             left: 0;
             top: 0;
             bottom: 0;
-            width: 3px;
-            background: #ffd700;
+            width: 5px;
+            background: #ff5c00;
         }
 
         .header-label {
