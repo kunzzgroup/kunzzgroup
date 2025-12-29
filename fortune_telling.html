@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今日运势占卜</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'SimSun', serif;
+            background: linear-gradient(135deg, #1a0a0a 0%, #2d1b1b 50%, #1a0a0a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 背景装饰 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            background: linear-gradient(135deg, #2d1b1b 0%, #1a0a0a 100%);
+            border: 4px solid #d4af37;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.5), inset 0 0 30px rgba(212, 175, 55, 0.1);
+            max-width: 1200px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            text-align: center;
+            color: #d4af37;
+            margin-bottom: 10px;
+            font-size: clamp(2em, 4vw, 3.5em);
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.8), 0 0 40px rgba(212, 175, 55, 0.4);
+            letter-spacing: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #d4af37;
+            margin-bottom: 30px;
+            font-size: clamp(14px, 2vw, 18px);
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 运势卡片 */
+        .fortune-section {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #d4af37;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .section-title {
+            color: #d4af37;
+            font-size: clamp(1.5em, 3vw, 2em);
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+
+        .fortune-button {
+            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+            color: #1a0a0a;
+            border: none;
+            padding: 15px 40px;
+            font-size: clamp(16px, 2vw, 20px);
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+            font-family: 'Microsoft YaHei', 'SimSun', serif;
+        }
+
+        .fortune-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
+        }
+
+        .fortune-button:active {
+            transform: translateY(0);
+        }
+
+        .fortune-result {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 10px;
+            border: 1px solid #d4af37;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .fortune-level {
+            font-size: clamp(2em, 4vw, 3em);
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px currentColor;
+        }
+
+        .fortune-level.shangshang {
+            color: #ffd700;
+        }
+
+        .fortune-level.shang {
+            color: #ff6b6b;
+        }
+
+        .fortune-level.zhong {
+            color: #4ecdc4;
+        }
+
+        .fortune-level.xia {
+            color: #95a5a6;
+        }
+
+        .fortune-level.xiaxia {
+            color: #7f8c8d;
+        }
+
+        .fortune-description {
+            font-size: clamp(14px, 2vw, 18px);
+            line-height: 1.8;
+            color: #f0f0f0;
+            margin-top: 15px;
+        }
+
+        /* 圣杯投掷区域 */
+        .divination-section {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #d4af37;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .cups-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .cup {
+            width: 120px;
+            height: 120px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .cup:hover {
+            transform: scale(1.1);
+        }
+
+        .cup.flipping {
+            animation: flip 1s ease-in-out;
+        }
+
+        @keyframes flip {
+            0%, 100% { transform: rotateY(0deg); }
+            50% { transform: rotateY(180deg); }
+        }
+
+        .cup-face {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 3px solid #d4af37;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3em;
+            background: linear-gradient(135deg, #2d1b1b 0%, #1a0a0a 100%);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+            position: relative;
+            backface-visibility: hidden;
+        }
+
+        .cup-result {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 10px;
+            border: 1px solid #d4af37;
+            min-height: 100px;
+        }
+
+        .divination-result {
+            font-size: clamp(1.2em, 2.5vw, 1.8em);
+            color: #d4af37;
+            margin: 10px 0;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+
+        .divination-description {
+            font-size: clamp(14px, 2vw, 16px);
+            color: #f0f0f0;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+
+        .throw-button {
+            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+            color: #1a0a0a;
+            border: none;
+            padding: 15px 40px;
+            font-size: clamp(16px, 2vw, 20px);
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+            font-family: 'Microsoft YaHei', 'SimSun', serif;
+        }
+
+        .throw-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
+        }
+
+        .throw-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 日期显示 */
+        .date-display {
+            text-align: center;
+            color: #d4af37;
+            font-size: clamp(14px, 2vw, 18px);
+            margin-bottom: 20px;
+            opacity: 0.9;
+            line-height: 1.8;
+        }
+
+        .date-info {
+            margin: 8px 0;
+        }
+
+        .lunar-date {
+            font-size: clamp(16px, 2.5vw, 22px);
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            margin: 10px 0;
+        }
+
+        .ganzhi-info {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .ganzhi-item {
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid #d4af37;
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-size: clamp(13px, 1.8vw, 16px);
+        }
+
+        .ganzhi-label {
+            color: #d4af37;
+            margin-right: 5px;
+        }
+
+        .ganzhi-value {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fortune-result, .cup-result {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>今日运势占卜</h1>
+        <div class="subtitle">诚心求签 · 圣杯问事</div>
+        
+        <div class="date-display" id="dateDisplay">
+            <div class="date-info" id="solarDate"></div>
+            <div class="lunar-date" id="lunarDate"></div>
+            <div class="ganzhi-info" id="ganzhiInfo"></div>
+        </div>
+
+        <div class="main-content">
+            <!-- 运势抽签区域 -->
+            <div class="fortune-section">
+                <h2 class="section-title">今日运势</h2>
+                <button class="fortune-button" onclick="drawFortune()">抽取运势签</button>
+                <div class="fortune-result" id="fortuneResult" style="display: none;">
+                    <div class="fortune-level" id="fortuneLevel"></div>
+                    <div class="fortune-description" id="fortuneDescription"></div>
+                </div>
+            </div>
+
+            <!-- 圣杯投掷区域 -->
+            <div class="divination-section">
+                <h2 class="section-title">圣杯投掷</h2>
+                <div class="cups-container">
+                    <div class="cup" id="cup1">
+                        <div class="cup-face">⚪</div>
+                    </div>
+                    <div class="cup" id="cup2">
+                        <div class="cup-face">⚪</div>
+                    </div>
+                </div>
+                <button class="throw-button" onclick="throwCups()" id="throwButton">投掷圣杯</button>
+                <div class="cup-result" id="cupResult" style="display: none;">
+                    <div class="divination-result" id="divinationResult"></div>
+                    <div class="divination-description" id="divinationDescription"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 天干地支数组
+        const tianGan = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+        const diZhi = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+        const zodiac = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
+        
+        // 农历月份名称
+        const lunarMonths = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '冬', '腊'];
+        const lunarDays = ['初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
+                          '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
+                          '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'];
+
+        // 农历数据表（1900-2100年）
+        const lunarInfo = [
+            0x04bd8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x16554,0x056a0,0x09ad0,0x055d2,
+            0x04ae0,0x0a5b6,0x0a4d0,0x0d250,0x1d255,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x14977,
+            0x04970,0x0a4b0,0x0b4b5,0x06a50,0x06d40,0x1ab54,0x02b60,0x09570,0x052f2,0x04970,
+            0x06566,0x0d4a0,0x0ea50,0x16a95,0x05ad0,0x02b60,0x186e3,0x092e0,0x1c8d7,0x0c950,
+            0x0d4a0,0x1d8a6,0x0b550,0x056a0,0x1a5b4,0x025d0,0x092d0,0x0d2b2,0x0a950,0x0b557,
+            0x06ca0,0x0b550,0x15355,0x04da0,0x0a5b0,0x14573,0x052b0,0x0a9a8,0x0e950,0x06aa0,
+            0x0aea6,0x0ab50,0x04b60,0x0aae4,0x0a570,0x05260,0x0f263,0x0d950,0x05b57,0x056a0,
+            0x096d0,0x04dd5,0x04ad0,0x0a4d0,0x0d4d4,0x0d250,0x0d558,0x0b540,0x0b6a0,0x195a6,
+            0x095b0,0x049b0,0x0a974,0x0a4b0,0x0b27a,0x06a50,0x06d40,0x0af46,0x0ab60,0x09570,
+            0x04af5,0x04970,0x064b0,0x074a3,0x0ea50,0x06b58,0x055c0,0x0ab60,0x096d5,0x092e0,
+            0x0c960,0x0d954,0x0d4a0,0x0da50,0x07552,0x056a0,0x0abb7,0x025d0,0x092d0,0x0cab5,
+            0x0a950,0x0b4a0,0x0baa4,0x0ad50,0x055d9,0x04ba0,0x0a5b0,0x15176,0x052b0,0x0a930,
+            0x07954,0x06aa0,0x0ad50,0x05b52,0x04b60,0x0a6e6,0x0a4e0,0x0d260,0x0ea65,0x0d530,
+            0x05aa0,0x076a3,0x096d0,0x04bd7,0x04ad0,0x0a4d0,0x1d0b6,0x0d250,0x0d520,0x0dd45,
+            0x0b5a0,0x056d0,0x055b2,0x049b0,0x0a577,0x0a4b0,0x0aa50,0x1b255,0x06d20,0x0ada0,
+            0x14b63,0x09370,0x049f8,0x04970,0x064b0,0x168a6,0x0ea50,0x06b20,0x1a6c4,0x0aae0,
+            0x0a2e0,0x0d2e3,0x0c960,0x0d557,0x0d4a0,0x0da50,0x05d55,0x056a0,0x0a6d0,0x055d4,
+            0x052d0,0x0a9b8,0x0a950,0x0b4a0,0x0b6a6,0x0ad50,0x055a0,0x0aba4,0x0a5b0,0x052b0,
+            0x0b273,0x06930,0x07337,0x06aa0,0x0ad50,0x14b55,0x04b60,0x0a570,0x054e4,0x0d160,
+            0x0e968,0x0d520,0x0daa0,0x16aa6,0x056d0,0x04ae0,0x0a9d4,0x0a2d0,0x0d150,0x0f252,
+            0x0d520
+        ];
+
+        // 计算农历日期
+        function solarToLunar(year, month, day) {
+            let i, temp = 0;
+            let offset = (Date.UTC(year, month - 1, day) - Date.UTC(1900, 0, 31)) / 86400000;
+            
+            for (i = 1900; i < 2101 && offset > 0; i++) {
+                temp = (lunarInfo[i - 1900] & 0xffff) < 0x10000 ? 365 : 366;
+                offset -= temp;
+            }
+            
+            if (offset < 0) {
+                offset += temp;
+                i--;
+            }
+            
+            const yearCode = lunarInfo[i - 1900];
+            const leap = yearCode & 0xf;
+            const leapMonth = leap;
+            let isLeapMonth = false;
+            let leapMonthDays = 0;
+            
+            if (leap > 0) {
+                leapMonthDays = (yearCode & 0x10000) ? 30 : 29;
+            }
+            
+            let monthDays = 0;
+            let lunarMonth = 1;
+            let lunarDay = 1;
+            
+            for (i = 1; i <= 12 && offset > 0; i++) {
+                if (leap > 0 && i === (leap + 1) && !isLeapMonth) {
+                    i--;
+                    isLeapMonth = true;
+                    monthDays = leapMonthDays;
+                } else {
+                    monthDays = (yearCode & (0x10000 >> i)) ? 30 : 29;
+                }
+                
+                if (isLeapMonth && i === (leap + 1)) {
+                    isLeapMonth = false;
+                }
+                
+                offset -= monthDays;
+                if (!isLeapMonth) {
+                    lunarMonth++;
+                }
+            }
+            
+            if (offset === 0 && leap > 0 && i === (leap + 1)) {
+                if (isLeapMonth) {
+                    isLeapMonth = false;
+                } else {
+                    isLeapMonth = true;
+                    lunarMonth--;
+                }
+            }
+            
+            if (offset < 0) {
+                offset += monthDays;
+                lunarMonth--;
+            }
+            
+            lunarDay = offset + 1;
+            
+            return {
+                year: i,
+                month: lunarMonth,
+                day: lunarDay,
+                isLeapMonth: isLeapMonth,
+                leapMonth: leap
+            };
+        }
+
+        // 计算天干地支
+        function getGanZhi(year, month, day, hour) {
+            // 年柱：以立春为界
+            const yearGan = (year - 4) % 10;
+            const yearZhi = (year - 4) % 12;
+            
+            // 月柱：根据年干和月份计算
+            const monthZhi = (month - 1) % 12;
+            const monthGanTable = [
+                [2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3], // 甲年
+                [4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5], // 乙年
+                [6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7], // 丙年
+                [8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], // 丁年
+                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1], // 戊年
+                [2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3], // 己年
+                [4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5], // 庚年
+                [6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7], // 辛年
+                [8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], // 壬年
+                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1]  // 癸年
+            ];
+            const monthGan = monthGanTable[yearGan][monthZhi];
+            
+            // 日柱：使用公式计算
+            const baseDate = new Date(1900, 0, 1);
+            const currentDate = new Date(year, month - 1, day);
+            const daysDiff = Math.floor((currentDate - baseDate) / 86400000);
+            const dayGan = (daysDiff + 9) % 10;
+            const dayZhi = (daysDiff + 1) % 12;
+            
+            // 时柱：根据日干和时辰计算
+            const hourZhi = Math.floor((hour + 1) / 2) % 12;
+            const hourGanTable = [
+                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1], // 甲日
+                [2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3], // 乙日
+                [4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5], // 丙日
+                [6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7], // 丁日
+                [8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], // 戊日
+                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1], // 己日
+                [2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3], // 庚日
+                [4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5], // 辛日
+                [6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7], // 壬日
+                [8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]  // 癸日
+            ];
+            const hourGan = hourGanTable[dayGan][hourZhi];
+            
+            return {
+                year: tianGan[yearGan] + diZhi[yearZhi],
+                month: tianGan[monthGan] + diZhi[monthZhi],
+                day: tianGan[dayGan] + diZhi[dayZhi],
+                hour: tianGan[hourGan] + diZhi[hourZhi]
+            };
+        }
+
+        // 显示当前日期
+        function updateDate() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth() + 1;
+            const day = now.getDate();
+            const hour = now.getHours();
+            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+            const weekday = weekdays[now.getDay()];
+            
+            // 显示公历日期
+            document.getElementById('solarDate').textContent = 
+                `公历：${year}年${String(month).padStart(2, '0')}月${String(day).padStart(2, '0')}日 星期${weekday}`;
+            
+            // 计算并显示农历日期
+            const lunar = solarToLunar(year, month, day);
+            const lunarMonthName = lunar.isLeapMonth ? '闰' + lunarMonths[lunar.month - 1] : lunarMonths[lunar.month - 1];
+            const lunarDayName = lunarDays[lunar.day - 1];
+            const zodiacName = zodiac[(lunar.year - 4) % 12];
+            
+            document.getElementById('lunarDate').textContent = 
+                `农历：${lunarMonthName}月${lunarDayName} · ${lunar.year}年（${zodiacName}年）`;
+            
+            // 计算并显示天干地支
+            const ganZhi = getGanZhi(year, month, day, hour);
+            const ganzhiInfo = document.getElementById('ganzhiInfo');
+            ganzhiInfo.innerHTML = `
+                <div class="ganzhi-item">
+                    <span class="ganzhi-label">年柱：</span>
+                    <span class="ganzhi-value">${ganZhi.year}</span>
+                </div>
+                <div class="ganzhi-item">
+                    <span class="ganzhi-label">月柱：</span>
+                    <span class="ganzhi-value">${ganZhi.month}</span>
+                </div>
+                <div class="ganzhi-item">
+                    <span class="ganzhi-label">日柱：</span>
+                    <span class="ganzhi-value">${ganZhi.day}</span>
+                </div>
+                <div class="ganzhi-item">
+                    <span class="ganzhi-label">时柱：</span>
+                    <span class="ganzhi-value">${ganZhi.hour}</span>
+                </div>
+            `;
+        }
+
+        // 运势签文数据
+        const fortuneData = {
+            shangshang: {
+                level: '上上签',
+                descriptions: [
+                    '今日运势极佳，万事顺遂，心想事成。',
+                    '贵人相助，机遇降临，把握良机可获成功。',
+                    '财运亨通，事业顺利，感情美满，健康无忧。',
+                    '天时地利人和，所有事情都会朝着好的方向发展。',
+                    '今日宜做重要决定，所有计划都能顺利实施。'
+                ]
+            },
+            shang: {
+                level: '上签',
+                descriptions: [
+                    '今日运势良好，大部分事情都能顺利进行。',
+                    '虽有小的波折，但最终都能化险为夷。',
+                    '工作顺利，人际关系和谐，心情愉悦。',
+                    '财运平稳，适合进行投资或理财规划。',
+                    '健康状态良好，适合进行运动或户外活动。'
+                ]
+            },
+            zhong: {
+                level: '中签',
+                descriptions: [
+                    '今日运势平稳，保持现状即可，不宜大动。',
+                    '凡事需谨慎，三思而后行，避免冲动决策。',
+                    '工作压力较大，但通过努力可以克服困难。',
+                    '财运一般，不宜进行大额投资或消费。',
+                    '注意身体健康，适当休息，避免过度劳累。'
+                ]
+            },
+            xia: {
+                level: '下签',
+                descriptions: [
+                    '今日运势不佳，需多加小心，避免出错。',
+                    '可能遇到一些阻碍，需要耐心应对。',
+                    '工作压力大，人际关系需谨慎处理。',
+                    '财运不佳，避免不必要的开支。',
+                    '注意身体健康，如有不适及时就医。'
+                ]
+            },
+            xiaxia: {
+                level: '下下签',
+                descriptions: [
+                    '今日运势较差，凡事需格外谨慎。',
+                    '可能遇到较大阻碍，需要保持冷静。',
+                    '工作不顺，需调整心态，寻求帮助。',
+                    '财运低迷，避免重大投资决策。',
+                    '健康需特别注意，保持规律作息。'
+                ]
+            }
+        };
+
+        // 抽取运势签
+        function drawFortune() {
+            const resultDiv = document.getElementById('fortuneResult');
+            const levelDiv = document.getElementById('fortuneLevel');
+            const descDiv = document.getElementById('fortuneDescription');
+            
+            // 基于日期生成随机数，确保同一天结果一致
+            const today = new Date();
+            const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+            const random = (seed * 9301 + 49297) % 233280;
+            const normalized = random / 233280;
+            
+            // 根据随机数确定签位（上上签概率较低，中签概率较高）
+            let fortuneType;
+            if (normalized < 0.1) {
+                fortuneType = 'shangshang';
+            } else if (normalized < 0.35) {
+                fortuneType = 'shang';
+            } else if (normalized < 0.7) {
+                fortuneType = 'zhong';
+            } else if (normalized < 0.9) {
+                fortuneType = 'xia';
+            } else {
+                fortuneType = 'xiaxia';
+            }
+            
+            const fortune = fortuneData[fortuneType];
+            const randomDesc = Math.floor(normalized * fortune.descriptions.length);
+            
+            // 显示结果
+            levelDiv.textContent = fortune.level;
+            levelDiv.className = 'fortune-level ' + fortuneType;
+            descDiv.textContent = fortune.descriptions[randomDesc];
+            
+            resultDiv.style.display = 'flex';
+        }
+
+        // 圣杯投掷结果
+        const divinationResults = {
+            'shengbei': {
+                result: '圣杯',
+                description: '一正一反，神明同意，所求之事可成，宜积极行动。'
+            },
+            'shuangzheng': {
+                result: '笑杯',
+                description: '两个正面，神明未表态，需重新投掷或稍后再问。'
+            },
+            'shuangfan': {
+                result: '阴杯',
+                description: '两个反面，神明不同意，所求之事不宜进行，需重新考虑。'
+            }
+        };
+
+        // 投掷圣杯
+        function throwCups() {
+            const cup1 = document.getElementById('cup1');
+            const cup2 = document.getElementById('cup2');
+            const resultDiv = document.getElementById('cupResult');
+            const resultText = document.getElementById('divinationResult');
+            const descText = document.getElementById('divinationDescription');
+            const throwButton = document.getElementById('throwButton');
+            
+            // 禁用按钮
+            throwButton.disabled = true;
+            
+            // 添加翻转动画
+            cup1.classList.add('flipping');
+            cup2.classList.add('flipping');
+            
+            // 随机生成结果
+            setTimeout(() => {
+                const result1 = Math.random() < 0.5 ? '正' : '反';
+                const result2 = Math.random() < 0.5 ? '正' : '反';
+                
+                // 更新杯子显示
+                cup1.querySelector('.cup-face').textContent = result1 === '正' ? '⚪' : '⚫';
+                cup2.querySelector('.cup-face').textContent = result2 === '正' ? '⚪' : '⚫';
+                
+                // 确定结果
+                let divinationType;
+                if (result1 !== result2) {
+                    divinationType = 'shengbei';
+                } else if (result1 === '正') {
+                    divinationType = 'shuangzheng';
+                } else {
+                    divinationType = 'shuangfan';
+                }
+                
+                const divination = divinationResults[divinationType];
+                resultText.textContent = divination.result;
+                descText.textContent = divination.description;
+                
+                resultDiv.style.display = 'block';
+                
+                // 移除动画类
+                cup1.classList.remove('flipping');
+                cup2.classList.remove('flipping');
+                
+                // 重新启用按钮
+                throwButton.disabled = false;
+            }, 1000);
+        }
+
+        // 页面加载时更新日期
+        updateDate();
+    </script>
+</body>
+</html>
