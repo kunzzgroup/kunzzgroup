@@ -133,24 +133,7 @@ $strategyPdfPath = isset($_GET['pdf']) ? $_GET['pdf'] : 'pdfs/corporate_strategi
             overflow-y: auto;
         }
 
-        /* 主内容区域样式 */
-        .main-content {
-            margin-left: clamp(140px, 13.02vw, 250px);
-            transition: margin-left 0.3s ease;
-            min-height: 100vh;
-            position: relative;
-            overflow: visible;
-        }
-
-        /* 当侧边栏收起时，主内容区域扩展 */
-        .main-content.sidebar-collapsed {
-            margin-left: clamp(50px, 3.65vw, 70px);
-        }
-
-        body.sidebar-collapsed .main-content {
-            margin-left: clamp(50px, 3.65vw, 70px);
-        }
-
+        /* 主内容区域样式 - sidebar.php 已经处理了 body 的 margin-left */
         /* 主内容容器 */
         .main-container {
             max-width: 1800px;
