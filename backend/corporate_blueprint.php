@@ -285,7 +285,7 @@ if (file_exists($jsonFile)) {
                     rgba(255, 92, 0, 0.02) 21px
                 );
             border-radius: 12px;
-            min-height: clamp(380px, 39.58vw, 550px);
+            min-height: clamp(300px, 31.25vw, 450px);
             width: 100%;
             /* 确保容器包含所有子元素（包括绝对定位的里程碑和SVG） */
             isolation: isolate;
