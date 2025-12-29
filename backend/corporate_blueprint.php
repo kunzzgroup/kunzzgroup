@@ -269,16 +269,42 @@ if (file_exists($jsonFile)) {
             font-weight: 600;
             border-radius: 4px;
             z-index: 2;
+            white-space: nowrap;
+        }
+
+        /* Start point event (below the box) */
+        .timeline-start-event {
+            position: absolute;
+            left: 0;
+            bottom: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            text-align: center;
+            width: clamp(120px, 12.5vw, 180px);
+            transform: translate(-50%, calc(100% + clamp(20px, 2.08vw, 30px)));
         }
 
-        .timeline-start-year {
-            font-size: clamp(16px, 1.67vw, 20px);
+        .timeline-start-event .timeline-arrow {
+            width: 0;
+            height: 0;
+            margin-bottom: clamp(8px, 0.83vw, 12px);
+            border-left: clamp(8px, 0.83vw, 12px) solid transparent;
+            border-right: clamp(8px, 0.83vw, 12px) solid transparent;
+            border-bottom: clamp(12px, 1.25vw, 16px) solid #000000;
+        }
+
+        .timeline-start-event .timeline-year-label {
+            font-size: clamp(16px, 1.67vw, 22px);
             font-weight: 700;
-            margin-top: clamp(4px, 0.42vw, 6px);
+            color: #ff5c00;
+            margin-bottom: clamp(8px, 0.83vw, 12px);
+        }
+
+        .timeline-start-event .timeline-goal-text {
+            font-size: clamp(13px, 1.35vw, 16px);
+            color: #000000;
+            text-align: center;
+            line-height: 1.5;
         }
 
         /* End point - star */
@@ -300,25 +326,39 @@ if (file_exists($jsonFile)) {
             z-index: 2;
         }
 
-        .timeline-end-text {
+        /* End point event (below the star) */
+        .timeline-end-event {
             position: absolute;
-            bottom: clamp(-28px, -2.92vw, -36px);
-            left: 50%;
-            transform: translateX(-50%);
-            white-space: nowrap;
-            font-size: clamp(12px, 1.25vw, 16px);
-            color: #000000;
-            font-weight: 500;
+            right: 0;
+            bottom: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: clamp(4px, 0.42vw, 6px);
+            width: clamp(120px, 12.5vw, 180px);
+            transform: translate(50%, calc(100% + clamp(20px, 2.08vw, 30px)));
         }
 
-        .timeline-end-year {
-            font-size: clamp(14px, 1.46vw, 18px);
+        .timeline-end-event .timeline-arrow {
+            width: 0;
+            height: 0;
+            margin-bottom: clamp(8px, 0.83vw, 12px);
+            border-left: clamp(8px, 0.83vw, 12px) solid transparent;
+            border-right: clamp(8px, 0.83vw, 12px) solid transparent;
+            border-bottom: clamp(12px, 1.25vw, 16px) solid #000000;
+        }
+
+        .timeline-end-event .timeline-year-label {
+            font-size: clamp(16px, 1.67vw, 22px);
             font-weight: 700;
             color: #ff5c00;
+            margin-bottom: clamp(8px, 0.83vw, 12px);
+        }
+
+        .timeline-end-event .timeline-goal-text {
+            font-size: clamp(13px, 1.35vw, 16px);
+            color: #000000;
+            text-align: center;
+            line-height: 1.5;
         }
 
         /* Timeline items container */
@@ -716,9 +756,9 @@ if (file_exists($jsonFile)) {
                 font-size: clamp(12px, 1.25vw, 14px);
             }
 
-            .timeline-start-year {
-                font-size: clamp(14px, 1.46vw, 18px);
-                margin-top: clamp(3px, 0.31vw, 4px);
+            .timeline-start-event {
+                width: clamp(100px, 10.42vw, 150px);
+                transform: translate(-50%, calc(100% + clamp(15px, 1.56vw, 25px)));
             }
 
             .timeline-end {
@@ -726,8 +766,9 @@ if (file_exists($jsonFile)) {
                 height: clamp(50px, 5.21vw, 60px);
             }
 
-            .timeline-end-year {
-                font-size: clamp(12px, 1.25vw, 16px);
+            .timeline-end-event {
+                width: clamp(100px, 10.42vw, 150px);
+                transform: translate(50%, calc(100% + clamp(15px, 1.56vw, 25px)));
             }
 
             .timeline-items {
@@ -786,23 +827,45 @@ if (file_exists($jsonFile)) {
                         <div class="timeline-wrapper">
                             <div class="timeline-line"></div>
                             
-                            <div class="timeline-start">
-                                起始
-                                <span class="timeline-start-year"><?php echo htmlspecialchars($strategyData['companyOverview']['strategyStartYear'] ?? ''); ?></span>
+                            <!-- Start point -->
+                            <div class="timeline-start">起始</div>
+                            <?php 
+                            // Get start year and goal from first timeline item
+                            $startItem = !empty($strategyData['timeline']) ? $strategyData['timeline'][0] : null;
+                            ?>
+                            <?php if ($startItem): ?>
+                            <div class="timeline-start-event">
+                                <div class="timeline-arrow"></div>
+                                <div class="timeline-year-label"><?php echo htmlspecialchars($startItem['year'] ?? ''); ?>年</div>
+                                <div class="timeline-goal-text"><?php echo htmlspecialchars($startItem['goal'] ?? ''); ?></div>
                             </div>
-                            <div class="timeline-end">
-                                <div class="timeline-end-text">
-                                    终点
-                                    <span class="timeline-end-year"><?php echo htmlspecialchars($strategyData['companyOverview']['strategyEndYear'] ?? ''); ?></span>
-                                </div>
-                            </div>
+                            <?php endif; ?>
                             
+                            <!-- End point -->
+                            <div class="timeline-end">终点</div>
+                            <?php 
+                            // Get end year and goal from last timeline item
+                            $endItem = !empty($strategyData['timeline']) ? end($strategyData['timeline']) : null;
+                            ?>
+                            <?php if ($endItem): ?>
+                            <div class="timeline-end-event">
+                                <div class="timeline-arrow"></div>
+                                <div class="timeline-year-label"><?php echo htmlspecialchars($endItem['year'] ?? ''); ?>年</div>
+                                <div class="timeline-goal-text"><?php echo htmlspecialchars($endItem['goal'] ?? ''); ?></div>
+                            </div>
+                            <?php endif; ?>
+                            
+                            <!-- Middle events -->
                             <div class="timeline-items">
-                                <?php foreach ($strategyData['timeline'] as $index => $item): ?>
+                                <?php 
+                                // Skip first and last items since they're shown at start/end points
+                                $middleItems = !empty($strategyData['timeline']) ? array_slice($strategyData['timeline'], 1, -1) : [];
+                                $totalMiddleItems = count($middleItems);
+                                foreach ($middleItems as $index => $item): 
+                                ?>
                                 <?php
                                 // 计算位置百分比（均匀分布，从起始后到终点前）
-                                $totalItems = count($strategyData['timeline']);
-                                $position = ($index + 1) / ($totalItems + 1) * 100;
+                                $position = ($index + 2) / (count($strategyData['timeline']) + 1) * 100;
                                 ?>
                                 <div class="timeline-event" style="left: <?php echo $position; ?>%;">
                                     <div class="timeline-arrow"></div>
