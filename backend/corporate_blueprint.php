@@ -287,10 +287,10 @@ if (file_exists($jsonFile)) {
             stroke: #ff5c00;
             stroke-width: 5;
             fill: none;
+            filter: drop-shadow(0 2px 4px rgba(255, 92, 0, 0.3));
             stroke-dasharray: 1000;
             stroke-dashoffset: 1000;
             transition: stroke-dashoffset 2s cubic-bezier(0.65, 0, 0.35, 1);
-            filter: drop-shadow(0 2px 4px rgba(255, 92, 0, 0.3));
         }
 
         .timeline-svg-path.animate-in {
@@ -583,14 +583,21 @@ if (file_exists($jsonFile)) {
             align-items: center;
             width: clamp(140px, 14.58vw, 200px);
             opacity: 0;
+            visibility: hidden;
             transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), 
                         opacity 0.8s ease,
+                        visibility 0s 0.8s,
                         filter 0.3s ease;
             /* 初始位置将在JavaScript中设置 */
         }
 
         .timeline-event.animate-in {
             opacity: 1;
+            visibility: visible;
+            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                        opacity 0.8s ease,
+                        visibility 0s 0s,
+                        filter 0.3s ease;
         }
 
         .timeline-event:hover {
@@ -1371,21 +1378,29 @@ if (file_exists($jsonFile)) {
                 return point;
             }
 
-            // 创建 IntersectionObserver 观察时间线容器
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        // 触发时间线动画
-                        animateTimeline(entry.target);
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, {
-                threshold: 0.2,
-                rootMargin: '0px 0px -100px 0px'
-            });
-
-            observer.observe(timelineWrapper);
+            // 立即尝试初始化（如果元素已在视口中）
+            function initTimeline() {
+                if (timelineWrapper.getBoundingClientRect().top < window.innerHeight + 200) {
+                    animateTimeline(timelineWrapper);
+                } else {
+                    // 如果不在视口，使用IntersectionObserver
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                animateTimeline(entry.target);
+                                observer.unobserve(entry.target);
+                            }
+                        });
+                    }, {
+                        threshold: 0.1,
+                        rootMargin: '200px 0px'
+                    });
+                    observer.observe(timelineWrapper);
+                }
+            }
+            
+            // 延迟初始化以确保DOM完全渲染
+            setTimeout(initTimeline, 200);
 
             function animateTimeline(container) {
                 // 1. 先显示起始点
