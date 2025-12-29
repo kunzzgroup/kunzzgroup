@@ -736,25 +736,13 @@ if (file_exists($jsonFile)) {
             margin-bottom: clamp(28px, 2.92vw, 40px);
         }
 
-        .milestone-top .milestone-card::before {
-            content: '';
-            position: absolute;
-            bottom: -7px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 7px solid transparent;
-            border-right: 7px solid transparent;
-            border-top: 7px solid rgba(255, 92, 0, 0.2);
-        }
-
         /* Cards below the pin */
         .milestone-bottom .milestone-card {
             margin-top: clamp(28px, 2.92vw, 40px);
         }
 
-        .milestone-bottom .milestone-card::before {
+        /* All milestone cards have arrow pointing upward */
+        .milestone-card::before {
             content: '';
             position: absolute;
             top: -7px;
@@ -765,6 +753,7 @@ if (file_exists($jsonFile)) {
             border-left: 7px solid transparent;
             border-right: 7px solid transparent;
             border-bottom: 7px solid rgba(255, 92, 0, 0.2);
+            z-index: 1;
         }
 
         .map-milestone:hover .milestone-card {
