@@ -879,49 +879,43 @@ if (file_exists($jsonFile)) {
         }
 
         /* Corporate Core Section */
-        .core-section-header {
+        .core-header {
+            text-align: center;
+            margin-bottom: clamp(50px, 5.21vw, 70px);
             position: relative;
-            padding: clamp(60px, 6.25vw, 100px) clamp(40px, 4.17vw, 80px);
-            margin-bottom: clamp(40px, 4.17vw, 60px);
-            border-radius: clamp(16px, 1.67vw, 24px);
-            overflow: hidden;
-            background: 
-                linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 165, 0, 0.15) 100%),
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><defs><filter id="blur"><feGaussianBlur stdDeviation="3"/></filter></defs><circle cx="80" cy="120" r="40" fill="%23FFD700" opacity="0.3" filter="url(%23blur)"/><circle cx="200" cy="80" r="35" fill="%23FFA500" opacity="0.3" filter="url(%23blur)"/><circle cx="320" cy="140" r="45" fill="%23FFD700" opacity="0.3" filter="url(%23blur)"/><circle cx="120" cy="200" r="30" fill="%23FFA500" opacity="0.3" filter="url(%23blur)"/><circle cx="280" cy="220" r="40" fill="%23FFD700" opacity="0.3" filter="url(%23blur)"/></svg>');
-            background-size: cover;
-            background-position: center;
         }
 
-        .core-section-header::before {
+        .core-main-title {
+            font-size: clamp(24px, 2.6vw, 50px);
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 50%, #ffd700 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: clamp(14px, 1.46vw, 20px);
+            letter-spacing: 1px;
+            text-shadow: 0 4px 8px rgba(255, 92, 0, 0.2);
+            position: relative;
+        }
+
+        .core-main-title::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 165, 0, 0.25) 100%);
-            z-index: 1;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ff5c00, transparent);
+            border-radius: 2px;
         }
 
-        .core-section-title {
-            font-size: clamp(48px, 5vw, 72px);
-            font-weight: 800;
-            color: #ffffff;
-            text-align: center;
-            margin-bottom: clamp(8px, 0.83vw, 12px);
-            position: relative;
-            z-index: 2;
-            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .core-section-subtitle {
-            font-size: clamp(16px, 1.67vw, 24px);
+        .core-subtitle {
+            font-size: clamp(15px, 1.56vw, 20px);
+            color: #4a5568;
             font-weight: 500;
-            color: rgba(255, 255, 255, 0.95);
-            text-align: center;
-            position: relative;
-            z-index: 2;
-            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
+            letter-spacing: 0.3px;
+            margin-top: clamp(20px, 2.08vw, 28px);
         }
 
         .core-grid {
@@ -1452,9 +1446,9 @@ if (file_exists($jsonFile)) {
                 <!-- Corporate Core Section -->
                 <?php if (!empty($strategyData['corporateCore'])): ?>
                 <div class="section">
-                    <div class="core-section-header">
-                        <h2 class="core-section-title">企业核心</h2>
-                        <div class="core-section-subtitle">CORPORATE CORE</div>
+                    <div class="core-header">
+                        <div class="core-main-title">企业核心</div>
+                        <div class="core-subtitle">CORPORATE CORE</div>
                     </div>
                     <div class="core-grid">
                         <!-- 01 Mission -->
