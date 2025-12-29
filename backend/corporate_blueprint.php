@@ -269,6 +269,16 @@ if (file_exists($jsonFile)) {
             font-weight: 600;
             border-radius: 4px;
             z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .timeline-start-year {
+            font-size: clamp(16px, 1.67vw, 20px);
+            font-weight: 700;
+            margin-top: clamp(4px, 0.42vw, 6px);
         }
 
         /* End point - star */
@@ -299,6 +309,16 @@ if (file_exists($jsonFile)) {
             font-size: clamp(12px, 1.25vw, 16px);
             color: #000000;
             font-weight: 500;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(4px, 0.42vw, 6px);
+        }
+
+        .timeline-end-year {
+            font-size: clamp(14px, 1.46vw, 18px);
+            font-weight: 700;
+            color: #ff5c00;
         }
 
         /* Timeline items container */
@@ -696,9 +716,18 @@ if (file_exists($jsonFile)) {
                 font-size: clamp(12px, 1.25vw, 14px);
             }
 
+            .timeline-start-year {
+                font-size: clamp(14px, 1.46vw, 18px);
+                margin-top: clamp(3px, 0.31vw, 4px);
+            }
+
             .timeline-end {
                 width: clamp(50px, 5.21vw, 60px);
                 height: clamp(50px, 5.21vw, 60px);
+            }
+
+            .timeline-end-year {
+                font-size: clamp(12px, 1.25vw, 16px);
             }
 
             .timeline-items {
@@ -757,9 +786,15 @@ if (file_exists($jsonFile)) {
                         <div class="timeline-wrapper">
                             <div class="timeline-line"></div>
                             
-                            <div class="timeline-start">起始</div>
+                            <div class="timeline-start">
+                                起始
+                                <span class="timeline-start-year"><?php echo htmlspecialchars($strategyData['companyOverview']['strategyStartYear'] ?? ''); ?></span>
+                            </div>
                             <div class="timeline-end">
-                                <div class="timeline-end-text">终点</div>
+                                <div class="timeline-end-text">
+                                    终点
+                                    <span class="timeline-end-year"><?php echo htmlspecialchars($strategyData['companyOverview']['strategyEndYear'] ?? ''); ?></span>
+                                </div>
                             </div>
                             
                             <div class="timeline-items">
