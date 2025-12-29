@@ -633,15 +633,16 @@ if (file_exists($jsonFile)) {
             flex-direction: column;
             align-items: center;
             cursor: pointer;
-            transform: translate(-50%, -50%) scale(0);
+            transform: translateX(-50%) translateY(calc(-1 * clamp(18px, 1.88vw, 25px))) scale(0);
             opacity: 0;
             transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
                         opacity 0.5s ease;
+            /* top位置对应路径上的点，pin尖端需要对齐到这里，所以向上偏移半个pin高度 */
         }
 
         .map-milestone.animate-in {
             opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
+            transform: translateX(-50%) translateY(calc(-1 * clamp(18px, 1.88vw, 25px))) scale(1);
         }
 
         /* Milestone pin/marker icon */
@@ -659,6 +660,19 @@ if (file_exists($jsonFile)) {
             border: 2px solid #ffffff;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             z-index: 2;
+            /* Pin旋转-45度后，尖端在底部中心。通过父容器的translateY向上偏移，让尖端对齐到路径 */
+        }
+        
+        /* 使用伪元素或调整定位来让pin尖端对齐 */
+        .map-milestone::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: clamp(36px, 3.75vw, 50px);
+            height: clamp(36px, 3.75vw, 50px);
+            transform: translateX(-50%);
+            pointer-events: none;
         }
 
         .map-milestone:hover .milestone-pin {
@@ -1189,7 +1203,11 @@ if (file_exists($jsonFile)) {
             }
 
             .map-milestone {
-                transform: translate(-50%, -50%) scale(0.85);
+                transform: translateX(-50%) translateY(calc(-1 * clamp(15px, 1.56vw, 21px))) scale(0.85);
+            }
+            
+            .map-milestone.animate-in {
+                transform: translateX(-50%) translateY(calc(-1 * clamp(15px, 1.56vw, 21px))) scale(0.85);
             }
 
             .milestone-pin {
