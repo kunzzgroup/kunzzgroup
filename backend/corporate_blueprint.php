@@ -730,7 +730,11 @@ if (file_exists($jsonFile)) {
             position: relative;
         }
 
-        /* Cards above the pin */
+        /* Cards above the pin - need to reverse order in flex */
+        .milestone-top {
+            flex-direction: column-reverse;
+        }
+        
         .milestone-top .milestone-card {
             margin-bottom: clamp(28px, 2.92vw, 40px);
         }
@@ -749,6 +753,10 @@ if (file_exists($jsonFile)) {
         }
 
         /* Cards below the pin */
+        .milestone-bottom {
+            flex-direction: column;
+        }
+        
         .milestone-bottom .milestone-card {
             margin-top: clamp(28px, 2.92vw, 40px);
         }
