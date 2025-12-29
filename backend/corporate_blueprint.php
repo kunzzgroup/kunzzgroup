@@ -231,7 +231,7 @@ if (file_exists($jsonFile)) {
         }
 
         .timeline-main-title {
-            font-size: clamp(36px, 3.75vw, 56px);
+            font-size: clamp(24px, 2.6vw, 50px);
             font-weight: 800;
             background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 50%, #ffd700 100%);
             -webkit-background-clip: text;
