@@ -2257,7 +2257,7 @@ require_once 'session_check.php';
         
         // 部门上限定义
         const departmentLimits = {
-            'service_line': 8,
+            'service_line': 9,
             'sushi_bar': 4,
             'kitchen': 13
         };
@@ -2458,7 +2458,7 @@ require_once 'session_check.php';
         // 如果是添加新员工，检查部门人数上限
         if (!isEdit) {
             const departmentLimits = {
-                'service_line': 8,
+                'service_line': 9,
                 'sushi_bar': 4,
                 'kitchen': 13
             };
