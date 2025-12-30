@@ -4570,6 +4570,13 @@ require_once '../backend/session_check.php';
                     showAlert('记录添加成功', 'success');
                 }
                 
+                // 先保存其他新增行的数据（在移除当前行和重新加载之前）
+                const otherNewRows = Array.from(document.querySelectorAll('.new-row')).filter(r => r !== row);
+                const savedRows = otherNewRows.map(r => ({
+                    element: r.cloneNode(true),
+                    data: extractRowData(r)
+                }));
+                
                 // 移除当前保存的行
                 row.remove();
                 
@@ -4591,12 +4598,6 @@ require_once '../backend/session_check.php';
                 if (!skipTableRefresh) {
                     // 刷新列表，确保主表显示最新记录
                     try { await loadStockData(); } catch(e) { console.warn('refresh after save failed', e); }
-                    // 保存其他新增行
-                    const otherNewRows = Array.from(document.querySelectorAll('.new-row'));
-                    const savedRows = otherNewRows.map(r => ({
-                        element: r.cloneNode(true),
-                        data: extractRowData(r)
-                    }));
                     
                     // 重新渲染表格
                     renderStockTable();
@@ -4972,10 +4973,19 @@ require_once '../backend/session_check.php';
                 if (result.success) {
                     showAlert('记录更新成功', 'success');
                     
-                    // 保存其他正在编辑的行的输入值（排除当前保存的行）
+                    // 先保存其他正在编辑的行的输入值（排除当前保存的行）
+                    // 临时移除当前保存的ID，以便只保存其他编辑行
+                    const wasEditing = editingRowIds.has(id);
+                    if (wasEditing) {
+                        editingRowIds.delete(id);
+                    }
                     const editingValues = saveEditingRowsInputValues();
+                    // 当前保存的行不需要恢复，因为已经保存到数据库了
                     
-                    editingRowIds.delete(id);
+                    // 确保从编辑列表中移除（如果还没移除）
+                    if (!wasEditing) {
+                        editingRowIds.delete(id);
+                    }
                     if (originalEditData) {
                         originalEditData.delete(id);
                     }
@@ -4987,7 +4997,7 @@ require_once '../backend/session_check.php';
                     searchData().then(() => {
                         // 恢复新创建的行
                         restoreNewRows(newRows);
-                        // 恢复其他正在编辑的行的输入值
+                        // 恢复其他正在编辑的行的输入值（不包括当前保存的行）
                         restoreEditingRowsInputValues(editingValues);
                     });
                 } else {
