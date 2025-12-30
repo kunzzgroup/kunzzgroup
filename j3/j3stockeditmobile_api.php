@@ -256,33 +256,55 @@ function handleGet() {
             break;
             
         case 'stocklist_total':
-            // 获取库存总数
-            $date = $_GET['date'] ?? null;
-            
-            if ($date) {
-                // 获取指定日期的库存总数
-                $stmt = $pdo->prepare("SELECT * FROM j3stocklist_total WHERE last_updated >= ? ORDER BY product_name");
-                $stmt->execute([$date . ' 00:00:00']);
-            } else {
-                // 获取所有库存总数
-                $stmt = $pdo->prepare("SELECT * FROM j3stocklist_total ORDER BY product_name");
+            // 从 j3stockeditmobile_data 表直接计算库存总数
+            try {
+                // 按产品名称和编号分组，计算每个产品的库存总数
+                // 注意：这里包含所有产品，即使库存为0也会显示
+                $sql = "SELECT 
+                            product_name,
+                            code_number,
+                            SUM(in_quantity) as total_in,
+                            SUM(out_quantity) as total_out,
+                            SUM(in_quantity) - SUM(out_quantity) as total_qty
+                        FROM j3stockeditmobile_data
+                        GROUP BY product_name, code_number
+                        ORDER BY product_name";
+                
+                $stmt = $pdo->prepare($sql);
                 $stmt->execute();
+                $totals = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                
+                // 格式化数据，匹配原来的格式
+                $items = [];
+                $totalQty = 0;
+                foreach ($totals as $item) {
+                    $qty = floatval($item['total_qty'] ?? 0);
+                    $totalQty += $qty;
+                    $items[] = [
+                        'product_name' => $item['product_name'],
+                        'code_number' => $item['code_number'],
+                        'total_qty' => number_format($qty, 3, '.', '')
+                    ];
+                }
+                
+                sendResponse(true, "库存总数获取成功", [
+                    'items' => $items,
+                    'total_records' => count($items),
+                    'total_qty' => number_format($totalQty, 3, '.', '')
+                ]);
+            } catch (PDOException $e) {
+                // 表不存在：返回空数组
+                if ($e->getCode() === '42S02' || strpos($e->getMessage(), '1146') !== false) {
+                    try { ensureTables($pdo); } catch (Throwable $ignore) {}
+                    sendResponse(true, "表已创建，暂无数据", [
+                        'items' => [],
+                        'total_records' => 0,
+                        'total_qty' => '0.000'
+                    ]);
+                } else {
+                    sendResponse(false, "计算库存总数失败：" . $e->getMessage());
+                }
             }
-            
-            $totals = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            // 计算总和
-            $totalQty = 0;
-            $totalRecords = count($totals);
-            foreach ($totals as $item) {
-                $totalQty += floatval($item['total_qty'] ?? 0);
-            }
-            
-            sendResponse(true, "库存总数获取成功", [
-                'items' => $totals,
-                'total_records' => $totalRecords,
-                'total_qty' => number_format($totalQty, 3, '.', '')
-            ]);
             break;
             
         default:
