@@ -311,6 +311,28 @@ if (!isset($_SESSION['user_id'])) {
             }
         }
         
+        // 重新加载库存总数并更新stockData
+        async function reloadStockTotals() {
+            try {
+                const totalsResp = await fetch(`${STOCK_EDIT_API}?action=stocklist_total`);
+                const totalsJson = await totalsResp.json();
+                if (totalsJson.success && totalsJson.data) {
+                    const items = totalsJson.data.items || [];
+                    const keyOf = (name, code) => `${(name||'').trim()}|${(code||'').trim()}`;
+                    const totalMap = new Map(items.map(it => [keyOf(it.product_name, it.code_number), parseFloat(it.total_qty || 0).toFixed(3)]));
+                    
+                    // 更新stockData中的库存数量
+                    stockData = stockData.map(it => {
+                        const key = keyOf(it.product_name, it.product_code);
+                        const qty = totalMap.get(key) || '0.00';
+                        return { ...it, qty, original_qty: qty };
+                    });
+                }
+            } catch (e) {
+                console.warn('重新加载库存总数失败:', e);
+            }
+        }
+        
         // 保存单个记录
         async function saveRecord(id) {
             const record = stockData.find(r => r.id === id);
@@ -361,7 +383,16 @@ if (!isset($_SESSION['user_id'])) {
                 const result = await response.json();
                 
                 if (result.success) {
-                    record.original_qty = currentQty;
+                    // 重新加载库存总数以获取最新数据
+                    await reloadStockTotals();
+                    
+                    // 更新当前记录的显示数量
+                    const updatedRecord = stockData.find(r => r.id === id);
+                    if (updatedRecord) {
+                        // 确保显示的数量与数据库同步
+                        updatedRecord.qty = updatedRecord.original_qty;
+                    }
+                    
                     editingRowIds.delete(id);
                     generateTable();
                     alert(`记录已保存\n产品: ${record.product_name}\n出货量: ${soldQty.toFixed(3)}`);
