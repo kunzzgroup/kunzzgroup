@@ -436,16 +436,19 @@ function handleDelete() {
         $stmt = $pdo->prepare("DELETE FROM j3stockeditmobile_data WHERE id = ?");
         $stmt->execute([$id]);
         
-        // 更新库存总数（减去被删除的数量）
+        // 更新库存总数（撤销被删除记录的影响）
         if ($record) {
             $inQty = floatval($record['in_quantity'] ?? 0);
             $outQty = floatval($record['out_quantity'] ?? 0);
             
+            // 删除记录时，需要撤销之前的影响
+            // 如果原来是出库(out_quantity)，删除后应该加回去
+            // 如果原来是入库(in_quantity)，删除后应该减回去
             updateStocklistTotal(
                 $record['product_name'],
                 $record['code_number'],
-                -$inQty,
-                -$outQty,
+                -$inQty,  // 撤销入库
+                -$outQty, // 撤销出库（负数出库 = 加回库存）
                 true
             );
         }
@@ -484,13 +487,14 @@ function updateStocklistTotal($productName, $codeNumber, $inQty, $outQty, $isAdd
                 $newTotal = floatval($existing['total_qty']) - $netQty;
             }
             
-            // 如果总数小于等于0，可以选择删除记录或保留
+            // 如果总数小于等于0，删除记录而不是保留为0
             if ($newTotal <= 0) {
-                $newTotal = 0;
+                $deleteStmt = $pdo->prepare("DELETE FROM j3stocklist_total WHERE id = ?");
+                $deleteStmt->execute([$existing['id']]);
+            } else {
+                $updateStmt = $pdo->prepare("UPDATE j3stocklist_total SET total_qty = ?, last_updated = NOW() WHERE id = ?");
+                $updateStmt->execute([$newTotal, $existing['id']]);
             }
-            
-            $updateStmt = $pdo->prepare("UPDATE j3stocklist_total SET total_qty = ?, last_updated = NOW() WHERE id = ?");
-            $updateStmt->execute([$newTotal, $existing['id']]);
         } else {
             // 创建新记录
             if ($netQty > 0 || $isAdd) {
