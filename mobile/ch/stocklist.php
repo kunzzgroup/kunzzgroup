@@ -95,7 +95,7 @@ if (!isset($_SESSION['user_id'])) {
         let selectedFreezerCategory = '';
         let editingRowIds = new Set();
         
-        // API配置 - 与 j3stockmobile.php 相同的数据源
+        // API配置
         const API_BASE_URL = '../../stockapi.php';
         const SYSTEM_TYPE = 'J3';
         const STOCK_EDIT_API = '../../j3/j3stockeditmobile_api.php';
