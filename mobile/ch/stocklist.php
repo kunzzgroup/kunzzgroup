@@ -311,8 +311,8 @@ if (!isset($_SESSION['user_id'])) {
             }
         }
         
-        // 重新加载库存总数并更新stockData
-        async function reloadStockTotals() {
+        // 重新加载库存总数并更新stockData（排除正在编辑的记录）
+        async function reloadStockTotals(excludeEditingIds = new Set()) {
             try {
                 const totalsResp = await fetch(`${STOCK_EDIT_API}?action=stocklist_total`);
                 const totalsJson = await totalsResp.json();
@@ -321,11 +321,38 @@ if (!isset($_SESSION['user_id'])) {
                     const keyOf = (name, code) => `${(name||'').trim()}|${(code||'').trim()}`;
                     const totalMap = new Map(items.map(it => [keyOf(it.product_name, it.code_number), parseFloat(it.total_qty || 0).toFixed(3)]));
                     
+                    // 保存正在编辑的记录的值（避免被覆盖）
+                    const editingValues = new Map();
+                    excludeEditingIds.forEach(editId => {
+                        const record = stockData.find(r => r.id === editId);
+                        if (record) {
+                            editingValues.set(editId, {
+                                qty: record.qty,
+                                original_qty: record.original_qty
+                            });
+                        }
+                    });
+                    
                     // 更新stockData中的库存数量
                     stockData = stockData.map(it => {
+                        // 如果正在编辑，保留编辑中的值
+                        if (excludeEditingIds.has(it.id) && editingValues.has(it.id)) {
+                            const saved = editingValues.get(it.id);
+                            return { ...it, original_qty: saved.original_qty };
+                        }
+                        
+                        // 否则更新为最新的库存总数
                         const key = keyOf(it.product_name, it.product_code);
                         const qty = totalMap.get(key) || '0.00';
                         return { ...it, qty, original_qty: qty };
+                    });
+                    
+                    // 恢复正在编辑的记录的数量值（保持用户正在编辑的值）
+                    editingValues.forEach((values, editId) => {
+                        const record = stockData.find(r => r.id === editId);
+                        if (record) {
+                            record.qty = values.qty; // 保持用户正在编辑的值
+                        }
                     });
                 }
             } catch (e) {
@@ -383,17 +410,19 @@ if (!isset($_SESSION['user_id'])) {
                 const result = await response.json();
                 
                 if (result.success) {
-                    // 重新加载库存总数以获取最新数据
-                    await reloadStockTotals();
+                    // 从编辑列表中移除当前保存的记录
+                    editingRowIds.delete(id);
                     
-                    // 更新当前记录的显示数量
+                    // 重新加载库存总数以获取最新数据（排除其他正在编辑的记录）
+                    await reloadStockTotals(editingRowIds);
+                    
+                    // 更新当前保存的记录：使用最新的库存总数
                     const updatedRecord = stockData.find(r => r.id === id);
                     if (updatedRecord) {
-                        // 确保显示的数量与数据库同步
+                        // 确保显示的数量与数据库同步（使用重新加载后的 original_qty）
                         updatedRecord.qty = updatedRecord.original_qty;
                     }
                     
-                    editingRowIds.delete(id);
                     generateTable();
                     alert(`记录已保存\n产品: ${record.product_name}\n出货量: ${soldQty.toFixed(3)}`);
                 } else {
