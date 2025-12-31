@@ -1069,208 +1069,266 @@ if (file_exists($jsonFile)) {
             line-height: 1.8;
         }
 
-        /* Organization Structure */
+        /* Organization Structure - Tech Tree Style */
         .org-chart-container {
-            background: #fff;
+            background: linear-gradient(135deg, rgba(255, 92, 0, 0.02) 0%, rgba(255, 215, 0, 0.02) 100%);
             border-radius: clamp(12px, 1.25vw, 16px);
-            padding: clamp(40px, 4.17vw, 60px);
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            overflow-x: auto;
+            padding: clamp(60px, 6.25vw, 100px) clamp(40px, 4.17vw, 60px);
+            border: 2px solid rgba(255, 92, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: visible;
+            min-height: clamp(600px, 62.5vw, 900px);
+        }
+
+        .org-chart-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 92, 0, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.03) 0%, transparent 50%);
+            border-radius: clamp(12px, 1.25vw, 16px);
+            pointer-events: none;
         }
 
         .org-chart {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-width: 100%;
-            position: relative;
-        }
-
-        .org-level {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            gap: clamp(20px, 2.08vw, 32px);
-            margin-bottom: clamp(40px, 4.17vw, 60px);
             position: relative;
             width: 100%;
+            min-height: clamp(500px, 52.08vw, 800px);
         }
 
-        .org-level::before {
-            content: '';
+        /* SVG Connection Lines */
+        .org-connections {
             position: absolute;
-            top: -clamp(20px, 2.08vw, 30px);
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: clamp(20px, 2.08vw, 30px);
-            background: #ff5c00;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
         }
 
-        .org-level:first-child::before {
-            display: none;
+        .org-connection-line {
+            stroke: #ff5c00;
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            transition: stroke-dashoffset 1.5s ease-in-out;
+            filter: drop-shadow(0 2px 4px rgba(255, 92, 0, 0.3));
+        }
+
+        .org-connection-line.animate {
+            stroke-dashoffset: 0;
+        }
+
+        /* Tree Node Styles */
+        .org-tree {
+            position: relative;
+            z-index: 2;
         }
 
         .org-node {
+            position: absolute;
             background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
-            border-radius: clamp(8px, 0.83vw, 12px);
-            padding: clamp(16px, 1.67vw, 24px) clamp(24px, 2.5vw, 32px);
-            box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
+            border-radius: clamp(10px, 1.04vw, 14px);
+            padding: clamp(14px, 1.46vw, 20px) clamp(20px, 2.08vw, 28px);
+            box-shadow: 
+                0 4px 16px rgba(255, 165, 0, 0.3),
+                0 0 0 2px rgba(255, 255, 255, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
             text-align: center;
             min-width: clamp(140px, 14.58vw, 200px);
-            position: relative;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            max-width: clamp(180px, 18.75vw, 240px);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            opacity: 0;
+            transform: translate(-50%, 0) scale(0.8) translateY(-20px);
+            cursor: pointer;
+        }
+
+        .org-node.animate {
+            opacity: 1;
+            transform: translate(-50%, 0) scale(1) translateY(0);
         }
 
         .org-node:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(255, 165, 0, 0.4);
+            transform: translate(-50%, 0) scale(1.05) translateY(-4px);
+            box-shadow: 
+                0 8px 24px rgba(255, 165, 0, 0.5),
+                0 0 0 3px rgba(255, 92, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            z-index: 10;
         }
 
         .org-node.ceo {
             background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
             min-width: clamp(180px, 18.75vw, 240px);
-            padding: clamp(20px, 2.08vw, 28px) clamp(28px, 2.92vw, 36px);
-            box-shadow: 0 6px 16px rgba(255, 92, 0, 0.4);
+            max-width: clamp(220px, 22.92vw, 280px);
+            padding: clamp(18px, 1.88vw, 26px) clamp(24px, 2.5vw, 32px);
+            box-shadow: 
+                0 6px 20px rgba(255, 92, 0, 0.4),
+                0 0 0 3px rgba(255, 255, 255, 0.6),
+                inset 0 2px 0 rgba(255, 255, 255, 0.4);
+            border: 3px solid rgba(255, 255, 255, 0.5);
         }
 
         .org-node.ceo:hover {
-            box-shadow: 0 10px 24px rgba(255, 92, 0, 0.5);
+            box-shadow: 
+                0 12px 32px rgba(255, 92, 0, 0.6),
+                0 0 0 4px rgba(255, 92, 0, 0.3),
+                inset 0 2px 0 rgba(255, 255, 255, 0.5);
         }
 
         .org-node.pa {
             background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
-            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
-            position: relative;
+            box-shadow: 
+                0 4px 16px rgba(74, 144, 226, 0.3),
+                0 0 0 2px rgba(255, 255, 255, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
         }
 
         .org-node.pa:hover {
-            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.4);
+            box-shadow: 
+                0 8px 24px rgba(74, 144, 226, 0.5),
+                0 0 0 3px rgba(74, 144, 226, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
         }
 
-        @media (min-width: 1025px) {
-            .org-level:first-child {
-                justify-content: center;
-                gap: clamp(40px, 4.17vw, 60px);
-            }
+        .org-node.cao {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            box-shadow: 
+                0 4px 16px rgba(155, 89, 182, 0.3),
+                0 0 0 2px rgba(255, 255, 255, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .org-node.cso {
+            background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+            box-shadow: 
+                0 4px 16px rgba(26, 188, 156, 0.3),
+                0 0 0 2px rgba(255, 255, 255, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .org-node.coo {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            box-shadow: 
+                0 4px 16px rgba(231, 76, 60, 0.3),
+                0 0 0 2px rgba(255, 255, 255, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
         }
 
         .org-node-title {
             font-size: clamp(14px, 1.46vw, 18px);
-            font-weight: 700;
+            font-weight: 800;
             color: #000000;
             margin-bottom: clamp(6px, 0.63vw, 8px);
             letter-spacing: 0.5px;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
         }
 
         .org-node-name {
-            font-size: clamp(12px, 1.25vw, 16px);
+            font-size: clamp(11px, 1.15vw, 14px);
             color: #000000;
-            font-weight: 500;
+            font-weight: 600;
             line-height: 1.4;
-        }
-
-        .org-node-subordinates {
-            display: flex;
-            flex-direction: column;
-            gap: clamp(12px, 1.25vw, 16px);
-            margin-top: clamp(20px, 2.08vw, 28px);
-            padding-top: clamp(20px, 2.08vw, 28px);
-            border-top: 2px solid rgba(255, 92, 0, 0.2);
-            position: relative;
-        }
-
-        .org-node-subordinates::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: clamp(20px, 2.08vw, 28px);
-            background: #ff5c00;
+            word-break: break-word;
         }
 
         .org-subordinate {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: clamp(6px, 0.63vw, 8px);
-            padding: clamp(10px, 1.04vw, 14px) clamp(16px, 1.67vw, 20px);
-            border: 1px solid rgba(255, 92, 0, 0.2);
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: clamp(8px, 0.83vw, 10px);
+            padding: clamp(10px, 1.04vw, 14px) clamp(14px, 1.46vw, 18px);
+            border: 2px solid rgba(255, 92, 0, 0.3);
             text-align: center;
+            min-width: clamp(120px, 12.5vw, 160px);
+            max-width: clamp(150px, 15.63vw, 200px);
             transition: all 0.3s ease;
+            box-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            opacity: 0;
+            transform: translate(-50%, 0) scale(0.8);
+        }
+
+        .org-subordinate.animate {
+            opacity: 1;
+            transform: translate(-50%, 0) scale(1);
         }
 
         .org-subordinate:hover {
             background: rgba(255, 255, 255, 1);
-            border-color: rgba(255, 92, 0, 0.4);
-            transform: translateX(4px);
+            border-color: rgba(255, 92, 0, 0.5);
+            transform: translate(-50%, 0) scale(1.05) translateY(-2px);
+            box-shadow: 
+                0 4px 12px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 1);
+            z-index: 10;
         }
 
         .org-subordinate-title {
-            font-size: clamp(12px, 1.25vw, 14px);
-            font-weight: 600;
+            font-size: clamp(11px, 1.15vw, 13px);
+            font-weight: 700;
             color: #ff5c00;
             margin-bottom: clamp(4px, 0.42vw, 6px);
+            letter-spacing: 0.3px;
         }
 
         .org-subordinate-fulltitle {
-            font-size: clamp(10px, 1.04vw, 12px);
+            font-size: clamp(9px, 0.94vw, 11px);
             color: #6b7280;
             line-height: 1.4;
+            word-break: break-word;
         }
 
-        .org-connector {
-            position: absolute;
-            top: -clamp(20px, 2.08vw, 30px);
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: clamp(20px, 2.08vw, 30px);
-            background: #ff5c00;
-        }
-
-        .org-connector-horizontal {
-            position: absolute;
-            top: -clamp(20px, 2.08vw, 30px);
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #ff5c00;
-        }
-
+        /* Responsive Design */
         @media (max-width: 1024px) {
-            .org-level {
-                flex-wrap: wrap;
+            .org-chart-container {
+                padding: clamp(40px, 4.17vw, 60px) clamp(20px, 2.08vw, 30px);
+                min-height: clamp(800px, 83.33vw, 1200px);
             }
 
-            .org-node.pa {
-                position: relative;
-                right: auto;
-                top: auto;
+            .org-node {
+                min-width: clamp(120px, 12.5vw, 160px);
+                max-width: clamp(160px, 16.67vw, 200px);
+            }
+
+            .org-subordinate {
+                min-width: clamp(100px, 10.42vw, 140px);
+                max-width: clamp(130px, 13.54vw, 170px);
             }
         }
 
         @media (max-width: 768px) {
             .org-chart-container {
-                padding: clamp(24px, 2.5vw, 32px);
-            }
-
-            .org-level {
-                flex-direction: column;
-                align-items: center;
-                gap: clamp(16px, 1.67vw, 24px);
+                padding: clamp(30px, 3.13vw, 40px) clamp(15px, 1.56vw, 20px);
+                min-height: clamp(1000px, 104.17vw, 1500px);
             }
 
             .org-node {
-                min-width: 100%;
-                max-width: 100%;
+                min-width: clamp(100px, 10.42vw, 140px);
+                max-width: clamp(140px, 14.58vw, 180px);
+                padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 20px);
             }
 
-            .org-node-subordinates {
-                margin-top: clamp(16px, 1.67vw, 20px);
-                padding-top: clamp(16px, 1.67vw, 20px);
+            .org-node-title {
+                font-size: clamp(12px, 1.25vw, 14px);
+            }
+
+            .org-node-name {
+                font-size: clamp(10px, 1.04vw, 12px);
+            }
+
+            .org-subordinate {
+                min-width: clamp(90px, 9.38vw, 120px);
+                max-width: clamp(120px, 12.5vw, 150px);
+                padding: clamp(8px, 0.83vw, 10px) clamp(12px, 1.25vw, 14px);
             }
         }
 
@@ -1788,7 +1846,7 @@ if (file_exists($jsonFile)) {
                 </div>
                 <?php endif; ?>
 
-                <!-- Organization Structure -->
+                <!-- Organization Structure - Tech Tree -->
                 <?php if (!empty($strategyData['organizationStructure'])): ?>
                 <div class="section">
                     <h2 class="section-title">高层组织架构</h2>
@@ -1797,30 +1855,136 @@ if (file_exists($jsonFile)) {
                             <?php 
                             $orgStructure = $strategyData['organizationStructure'];
                             
-                            // Level 1: CEO and PA
-                            if (!empty($orgStructure['ceo'])): 
+                            // Calculate positions for tech tree layout
+                            // Level 1: CEO at top center, PA to the right
+                            // Level 2: CAO, CSO, COO below CEO
+                            // Level 3: Subordinates below each C-Level
+                            
+                            $containerWidth = 100; // percentage
+                            $level1Y = 5; // Top level Y position (%)
+                            $level2Y = 35; // C-Level Y position (%)
+                            $level3Y = 70; // Subordinates Y position (%)
+                            
+                            // CEO position (center top)
+                            $ceoX = 50;
+                            $ceoY = $level1Y;
+                            
+                            // PA position (right of CEO)
+                            $paX = 75;
+                            $paY = $level1Y;
+                            
+                            // C-Level positions (spread horizontally)
+                            $cLevelCount = !empty($orgStructure['cLevel']) ? count($orgStructure['cLevel']) : 0;
+                            $cLevelPositions = [];
+                            if ($cLevelCount > 0) {
+                                $spacing = 80 / ($cLevelCount + 1); // Distribute across 80% width
+                                for ($i = 0; $i < $cLevelCount; $i++) {
+                                    $cLevelPositions[$i] = 10 + ($i + 1) * $spacing;
+                                }
+                            }
+                            
+                            // Calculate subordinate positions for each C-Level
+                            $subordinatePositions = [];
+                            if (!empty($orgStructure['cLevel'])) {
+                                foreach ($orgStructure['cLevel'] as $index => $exec) {
+                                    if (!empty($exec['subordinates'])) {
+                                        $subCount = count($exec['subordinates']);
+                                        $parentX = $cLevelPositions[$index];
+                                        $subSpacing = min(15, 60 / max($subCount, 1)); // Max 15% spacing
+                                        $startX = $parentX - (($subCount - 1) * $subSpacing / 2);
+                                        
+                                        foreach ($exec['subordinates'] as $subIndex => $sub) {
+                                            $subordinatePositions[$index][$subIndex] = $startX + ($subIndex * $subSpacing);
+                                        }
+                                    }
+                                }
+                            }
                             ?>
-                            <div class="org-level" style="position: relative;">
-                                <div class="org-node ceo">
+                            
+                            <!-- SVG Connection Lines -->
+                            <svg class="org-connections" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#ff5c00;stop-opacity:0.3" />
+                                        <stop offset="50%" style="stop-color:#ff5c00;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#ff5c00;stop-opacity:0.3" />
+                                    </linearGradient>
+                                </defs>
+                                
+                                <?php 
+                                // Draw lines from CEO to C-Level executives
+                                if (!empty($orgStructure['cLevel']) && !empty($cLevelPositions)): 
+                                    foreach ($orgStructure['cLevel'] as $index => $exec):
+                                        $cLevelX = $cLevelPositions[$index];
+                                ?>
+                                <line class="org-connection-line" 
+                                      x1="<?php echo $ceoX; ?>%" 
+                                      y1="<?php echo $ceoY + 8; ?>%" 
+                                      x2="<?php echo $cLevelX; ?>%" 
+                                      y2="<?php echo $level2Y - 2; ?>%"
+                                      stroke="url(#lineGradient)"/>
+                                <?php 
+                                    endforeach;
+                                endif;
+                                
+                                // Draw lines from C-Level to subordinates
+                                if (!empty($orgStructure['cLevel']) && !empty($subordinatePositions)):
+                                    foreach ($orgStructure['cLevel'] as $index => $exec):
+                                        if (!empty($exec['subordinates']) && !empty($subordinatePositions[$index])):
+                                            $cLevelX = $cLevelPositions[$index];
+                                            foreach ($exec['subordinates'] as $subIndex => $sub):
+                                                $subX = $subordinatePositions[$index][$subIndex];
+                                ?>
+                                <line class="org-connection-line" 
+                                      x1="<?php echo $cLevelX; ?>%" 
+                                      y1="<?php echo $level2Y + 8; ?>%" 
+                                      x2="<?php echo $subX; ?>%" 
+                                      y2="<?php echo $level3Y - 2; ?>%"
+                                      stroke="url(#lineGradient)"/>
+                                <?php 
+                                            endforeach;
+                                        endif;
+                                    endforeach;
+                                endif;
+                                ?>
+                            </svg>
+                            
+                            <!-- Tree Nodes -->
+                            <div class="org-tree">
+                                <?php 
+                                // CEO Node
+                                if (!empty($orgStructure['ceo'])): 
+                                ?>
+                                <div class="org-node ceo" 
+                                     style="left: <?php echo $ceoX; ?>%; top: <?php echo $ceoY; ?>%;"
+                                     data-node="ceo">
                                     <div class="org-node-title"><?php echo htmlspecialchars($orgStructure['ceo']['title'] ?? ''); ?></div>
                                     <div class="org-node-name"><?php echo htmlspecialchars($orgStructure['ceo']['name'] ?? ''); ?></div>
                                 </div>
-                                <?php if (!empty($orgStructure['pa'])): ?>
-                                <div class="org-node pa">
+                                <?php endif; ?>
+                                
+                                <?php 
+                                // PA Node
+                                if (!empty($orgStructure['pa'])): 
+                                ?>
+                                <div class="org-node pa" 
+                                     style="left: <?php echo $paX; ?>%; top: <?php echo $paY; ?>%;"
+                                     data-node="pa">
                                     <div class="org-node-title"><?php echo htmlspecialchars($orgStructure['pa']['title'] ?? ''); ?></div>
                                     <div class="org-node-name"><?php echo htmlspecialchars($orgStructure['pa']['name'] ?? ''); ?></div>
                                 </div>
                                 <?php endif; ?>
-                            </div>
-                            <?php endif; ?>
-
-                            <?php 
-                            // Level 2: C-Level Executives
-                            if (!empty($orgStructure['cLevel'])): 
-                            ?>
-                            <div class="org-level">
-                                <?php foreach ($orgStructure['cLevel'] as $exec): ?>
-                                <div class="org-node">
+                                
+                                <?php 
+                                // C-Level Executives
+                                if (!empty($orgStructure['cLevel'])): 
+                                    foreach ($orgStructure['cLevel'] as $index => $exec):
+                                        $cLevelX = $cLevelPositions[$index];
+                                        $nodeClass = strtolower($exec['title'] ?? '');
+                                ?>
+                                <div class="org-node <?php echo $nodeClass; ?>" 
+                                     style="left: <?php echo $cLevelX; ?>%; top: <?php echo $level2Y; ?>%;"
+                                     data-node="<?php echo htmlspecialchars($exec['title'] ?? ''); ?>">
                                     <div class="org-node-title"><?php echo htmlspecialchars($exec['title'] ?? ''); ?></div>
                                     <div class="org-node-name">
                                         <?php 
@@ -1831,23 +1995,29 @@ if (file_exists($jsonFile)) {
                                         }
                                         ?>
                                     </div>
-                                    
-                                    <?php if (!empty($exec['subordinates'])): ?>
-                                    <div class="org-node-subordinates">
-                                        <?php foreach ($exec['subordinates'] as $sub): ?>
-                                        <div class="org-subordinate">
-                                            <div class="org-subordinate-title"><?php echo htmlspecialchars($sub['title'] ?? ''); ?></div>
-                                            <?php if (!empty($sub['fullTitle'])): ?>
-                                            <div class="org-subordinate-fulltitle"><?php echo htmlspecialchars($sub['fullTitle']); ?></div>
-                                            <?php endif; ?>
-                                        </div>
-                                        <?php endforeach; ?>
-                                    </div>
+                                </div>
+                                
+                                <?php 
+                                    // Subordinates
+                                    if (!empty($exec['subordinates']) && !empty($subordinatePositions[$index])):
+                                        foreach ($exec['subordinates'] as $subIndex => $sub):
+                                            $subX = $subordinatePositions[$index][$subIndex];
+                                ?>
+                                <div class="org-subordinate" 
+                                     style="left: <?php echo $subX; ?>%; top: <?php echo $level3Y; ?>%;"
+                                     data-parent="<?php echo htmlspecialchars($exec['title'] ?? ''); ?>">
+                                    <div class="org-subordinate-title"><?php echo htmlspecialchars($sub['title'] ?? ''); ?></div>
+                                    <?php if (!empty($sub['fullTitle'])): ?>
+                                    <div class="org-subordinate-fulltitle"><?php echo htmlspecialchars($sub['fullTitle']); ?></div>
                                     <?php endif; ?>
                                 </div>
-                                <?php endforeach; ?>
+                                <?php 
+                                        endforeach;
+                                    endif;
+                                endforeach;
+                                endif;
+                                ?>
                             </div>
-                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -1984,6 +2154,78 @@ if (file_exists($jsonFile)) {
                     this.style.zIndex = '10';
                 });
             });
+
+            // 科技树组织架构动画
+            const orgChartContainer = document.querySelector('.org-chart-container');
+            if (orgChartContainer) {
+                const orgTreeObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            animateOrgTree(entry.target);
+                            orgTreeObserver.unobserve(entry.target);
+                        }
+                    });
+                }, {
+                    threshold: 0.2,
+                    rootMargin: '0px 0px -50px 0px'
+                });
+
+                orgTreeObserver.observe(orgChartContainer);
+
+                function animateOrgTree(container) {
+                    // 1. 先显示CEO节点
+                    const ceoNode = container.querySelector('.org-node.ceo');
+                    if (ceoNode) {
+                        setTimeout(() => {
+                            ceoNode.classList.add('animate');
+                        }, 200);
+                    }
+
+                    // 2. 显示PA节点
+                    const paNode = container.querySelector('.org-node.pa');
+                    if (paNode) {
+                        setTimeout(() => {
+                            paNode.classList.add('animate');
+                        }, 400);
+                    }
+
+                    // 3. 获取所有连接线
+                    const connectionLines = Array.from(container.querySelectorAll('.org-connection-line'));
+                    const cLevelNodes = container.querySelectorAll('.org-node:not(.ceo):not(.pa)');
+                    const subordinates = container.querySelectorAll('.org-subordinate');
+                    
+                    // 计算CEO到C-Level的连接线数量（等于C-Level节点数）
+                    const cLevelCount = cLevelNodes.length;
+                    
+                    // 4. 绘制从CEO到C-Level的连接线
+                    connectionLines.slice(0, cLevelCount).forEach((line, index) => {
+                        setTimeout(() => {
+                            line.classList.add('animate');
+                        }, 600 + (index * 150));
+                    });
+
+                    // 5. 显示C-Level节点
+                    cLevelNodes.forEach((node, index) => {
+                        setTimeout(() => {
+                            node.classList.add('animate');
+                        }, 1200 + (index * 200));
+                    });
+
+                    // 6. 绘制从C-Level到下属的连接线
+                    connectionLines.slice(cLevelCount).forEach((line, index) => {
+                        setTimeout(() => {
+                            line.classList.add('animate');
+                        }, 2000 + (index * 100));
+                    });
+
+                    // 7. 显示下属节点
+                    subordinates.forEach((sub, index) => {
+                        setTimeout(() => {
+                            sub.classList.add('animate');
+                        }, 2500 + (index * 100));
+                    });
+                }
+            }
         });
     </script>
 
