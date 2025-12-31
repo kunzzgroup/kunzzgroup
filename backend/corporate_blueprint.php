@@ -1070,53 +1070,208 @@ if (file_exists($jsonFile)) {
         }
 
         /* Organization Structure */
-        .org-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: clamp(24px, 2.6vw, 40px);
-        }
-
-        .org-section {
+        .org-chart-container {
             background: #fff;
-            border-radius: 8px;
-            padding: clamp(20px, 2.08vw, 32px);
+            border-radius: clamp(12px, 1.25vw, 16px);
+            padding: clamp(40px, 4.17vw, 60px);
             border: 1px solid #e5e7eb;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow-x: auto;
         }
 
-        .org-section-title {
-            font-size: clamp(18px, 1.88vw, 24px);
-            font-weight: bold;
-            color: #000000ff;
-            margin-bottom: clamp(16px, 1.67vw, 24px);
-            padding-bottom: clamp(8px, 0.83vw, 12px);
-            border-bottom: 2px solid #ff5c00;
+        .org-chart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 100%;
+            position: relative;
         }
 
-        .org-list {
-            list-style: none;
-            padding: 0;
+        .org-level {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: clamp(20px, 2.08vw, 32px);
+            margin-bottom: clamp(40px, 4.17vw, 60px);
+            position: relative;
+            width: 100%;
         }
 
-        .org-list-item {
-            padding: clamp(10px, 1.04vw, 16px) 0;
-            border-bottom: 1px solid #f3f4f6;
+        .org-level::before {
+            content: '';
+            position: absolute;
+            top: -clamp(20px, 2.08vw, 30px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: clamp(20px, 2.08vw, 30px);
+            background: #ff5c00;
         }
 
-        .org-list-item:last-child {
-            border-bottom: none;
+        .org-level:first-child::before {
+            display: none;
         }
 
-        .org-name {
-            font-size: clamp(14px, 1.25vw, 18px);
+        .org-node {
+            background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+            border-radius: clamp(8px, 0.83vw, 12px);
+            padding: clamp(16px, 1.67vw, 24px) clamp(24px, 2.5vw, 32px);
+            box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
+            text-align: center;
+            min-width: clamp(140px, 14.58vw, 200px);
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .org-node:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(255, 165, 0, 0.4);
+        }
+
+        .org-node.ceo {
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
+            min-width: clamp(180px, 18.75vw, 240px);
+            padding: clamp(20px, 2.08vw, 28px) clamp(28px, 2.92vw, 36px);
+            box-shadow: 0 6px 16px rgba(255, 92, 0, 0.4);
+        }
+
+        .org-node.ceo:hover {
+            box-shadow: 0 10px 24px rgba(255, 92, 0, 0.5);
+        }
+
+        .org-node.pa {
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+            position: relative;
+        }
+
+        .org-node.pa:hover {
+            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.4);
+        }
+
+        @media (min-width: 1025px) {
+            .org-level:first-child {
+                justify-content: center;
+                gap: clamp(40px, 4.17vw, 60px);
+            }
+        }
+
+        .org-node-title {
+            font-size: clamp(14px, 1.46vw, 18px);
+            font-weight: 700;
+            color: #000000;
+            margin-bottom: clamp(6px, 0.63vw, 8px);
+            letter-spacing: 0.5px;
+        }
+
+        .org-node-name {
+            font-size: clamp(12px, 1.25vw, 16px);
+            color: #000000;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .org-node-subordinates {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(12px, 1.25vw, 16px);
+            margin-top: clamp(20px, 2.08vw, 28px);
+            padding-top: clamp(20px, 2.08vw, 28px);
+            border-top: 2px solid rgba(255, 92, 0, 0.2);
+            position: relative;
+        }
+
+        .org-node-subordinates::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: clamp(20px, 2.08vw, 28px);
+            background: #ff5c00;
+        }
+
+        .org-subordinate {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: clamp(6px, 0.63vw, 8px);
+            padding: clamp(10px, 1.04vw, 14px) clamp(16px, 1.67vw, 20px);
+            border: 1px solid rgba(255, 92, 0, 0.2);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .org-subordinate:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(255, 92, 0, 0.4);
+            transform: translateX(4px);
+        }
+
+        .org-subordinate-title {
+            font-size: clamp(12px, 1.25vw, 14px);
             font-weight: 600;
-            color: #000000ff;
-            margin-bottom: 4px;
+            color: #ff5c00;
+            margin-bottom: clamp(4px, 0.42vw, 6px);
         }
 
-        .org-title {
-            font-size: clamp(12px, 1.04vw, 16px);
+        .org-subordinate-fulltitle {
+            font-size: clamp(10px, 1.04vw, 12px);
             color: #6b7280;
+            line-height: 1.4;
+        }
+
+        .org-connector {
+            position: absolute;
+            top: -clamp(20px, 2.08vw, 30px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: clamp(20px, 2.08vw, 30px);
+            background: #ff5c00;
+        }
+
+        .org-connector-horizontal {
+            position: absolute;
+            top: -clamp(20px, 2.08vw, 30px);
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #ff5c00;
+        }
+
+        @media (max-width: 1024px) {
+            .org-level {
+                flex-wrap: wrap;
+            }
+
+            .org-node.pa {
+                position: relative;
+                right: auto;
+                top: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .org-chart-container {
+                padding: clamp(24px, 2.5vw, 32px);
+            }
+
+            .org-level {
+                flex-direction: column;
+                align-items: center;
+                gap: clamp(16px, 1.67vw, 24px);
+            }
+
+            .org-node {
+                min-width: 100%;
+                max-width: 100%;
+            }
+
+            .org-node-subordinates {
+                margin-top: clamp(16px, 1.67vw, 20px);
+                padding-top: clamp(16px, 1.67vw, 20px);
+            }
         }
 
         /* Strategic Objectives */
@@ -1636,37 +1791,64 @@ if (file_exists($jsonFile)) {
                 <!-- Organization Structure -->
                 <?php if (!empty($strategyData['organizationStructure'])): ?>
                 <div class="section">
-                    <h2 class="section-title">组织结构</h2>
-                    <div class="org-container">
-                        <!-- Executives -->
-                        <?php if (!empty($strategyData['organizationStructure']['executives'])): ?>
-                        <div class="org-section">
-                            <div class="org-section-title">管理层</div>
-                            <ul class="org-list">
-                                <?php foreach ($strategyData['organizationStructure']['executives'] as $exec): ?>
-                                <li class="org-list-item">
-                                    <div class="org-name"><?php echo htmlspecialchars($exec['name'] ?? ''); ?></div>
-                                    <div class="org-title"><?php echo htmlspecialchars($exec['title'] ?? ''); ?></div>
-                                </li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
-                        <?php endif; ?>
+                    <h2 class="section-title">高层组织架构</h2>
+                    <div class="org-chart-container">
+                        <div class="org-chart">
+                            <?php 
+                            $orgStructure = $strategyData['organizationStructure'];
+                            
+                            // Level 1: CEO and PA
+                            if (!empty($orgStructure['ceo'])): 
+                            ?>
+                            <div class="org-level" style="position: relative;">
+                                <div class="org-node ceo">
+                                    <div class="org-node-title"><?php echo htmlspecialchars($orgStructure['ceo']['title'] ?? ''); ?></div>
+                                    <div class="org-node-name"><?php echo htmlspecialchars($orgStructure['ceo']['name'] ?? ''); ?></div>
+                                </div>
+                                <?php if (!empty($orgStructure['pa'])): ?>
+                                <div class="org-node pa">
+                                    <div class="org-node-title"><?php echo htmlspecialchars($orgStructure['pa']['title'] ?? ''); ?></div>
+                                    <div class="org-node-name"><?php echo htmlspecialchars($orgStructure['pa']['name'] ?? ''); ?></div>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                            <?php endif; ?>
 
-                        <!-- Departments -->
-                        <?php if (!empty($strategyData['organizationStructure']['departments'])): ?>
-                        <div class="org-section">
-                            <div class="org-section-title">部门</div>
-                            <ul class="org-list">
-                                <?php foreach ($strategyData['organizationStructure']['departments'] as $dept): ?>
-                                <li class="org-list-item">
-                                    <div class="org-name"><?php echo htmlspecialchars($dept['name'] ?? ''); ?></div>
-                                    <div class="org-title"><?php echo htmlspecialchars($dept['head'] ?? ''); ?></div>
-                                </li>
+                            <?php 
+                            // Level 2: C-Level Executives
+                            if (!empty($orgStructure['cLevel'])): 
+                            ?>
+                            <div class="org-level">
+                                <?php foreach ($orgStructure['cLevel'] as $exec): ?>
+                                <div class="org-node">
+                                    <div class="org-node-title"><?php echo htmlspecialchars($exec['title'] ?? ''); ?></div>
+                                    <div class="org-node-name">
+                                        <?php 
+                                        if (!empty($exec['name'])) {
+                                            echo htmlspecialchars($exec['name']);
+                                        } else {
+                                            echo htmlspecialchars($exec['fullTitle'] ?? $exec['title']);
+                                        }
+                                        ?>
+                                    </div>
+                                    
+                                    <?php if (!empty($exec['subordinates'])): ?>
+                                    <div class="org-node-subordinates">
+                                        <?php foreach ($exec['subordinates'] as $sub): ?>
+                                        <div class="org-subordinate">
+                                            <div class="org-subordinate-title"><?php echo htmlspecialchars($sub['title'] ?? ''); ?></div>
+                                            <?php if (!empty($sub['fullTitle'])): ?>
+                                            <div class="org-subordinate-fulltitle"><?php echo htmlspecialchars($sub['fullTitle']); ?></div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
                                 <?php endforeach; ?>
-                            </ul>
+                            </div>
+                            <?php endif; ?>
                         </div>
-                        <?php endif; ?>
                     </div>
                 </div>
                 <?php endif; ?>

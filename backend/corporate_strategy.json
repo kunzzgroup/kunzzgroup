@@ -91,60 +91,81 @@
     }
   ],
   "organizationStructure": {
-    "executives": [
+    "ceo": {
+      "name": "TANG YEAW KHOONG",
+      "title": "CEO"
+    },
+    "pa": {
+      "name": "SEE HAO YANG",
+      "title": "PA"
+    },
+    "cLevel": [
       {
-        "name": "Chief Executive Officer",
-        "title": "CEO"
+        "name": "SOO CHEA ING",
+        "title": "CAO",
+        "reportsTo": "CEO",
+        "subordinates": [
+          {
+            "name": "",
+            "title": "CHO",
+            "fullTitle": "Chief Human Resources Officer"
+          },
+          {
+            "name": "",
+            "title": "CFO",
+            "fullTitle": "Chief Financial Officer"
+          }
+        ]
       },
       {
-        "name": "Chief Strategy Officer",
-        "title": "CSO"
+        "name": "TENG BING HWANG",
+        "title": "CSO",
+        "reportsTo": "CEO",
+        "subordinates": [
+          {
+            "name": "",
+            "title": "CMO",
+            "fullTitle": "Chief Marketing Officer"
+          },
+          {
+            "name": "",
+            "title": "CBO",
+            "fullTitle": "Chief Business Officer"
+          },
+          {
+            "name": "",
+            "title": "CTO",
+            "fullTitle": "Chief Technology Officer"
+          },
+          {
+            "name": "",
+            "title": "CVO",
+            "fullTitle": "Chief Visionary Officer"
+          }
+        ]
       },
       {
-        "name": "Chief Technology Officer",
-        "title": "CTO"
-      },
-      {
-        "name": "Chief Financial Officer",
-        "title": "CFO"
-      },
-      {
-        "name": "Chief Operating Officer",
-        "title": "COO"
-      },
-      {
-        "name": "Chief Marketing Officer",
-        "title": "CMO"
-      }
-    ],
-    "departments": [
-      {
-        "name": "Design",
-        "head": "Head of Design"
-      },
-      {
-        "name": "Human Resources",
-        "head": "Head of HR"
-      },
-      {
-        "name": "Marketing",
-        "head": "Head of Marketing"
-      },
-      {
-        "name": "Technology",
-        "head": "Head of Technology"
-      },
-      {
-        "name": "Operations",
-        "head": "Head of Operations"
-      },
-      {
-        "name": "Finance",
-        "head": "Head of Finance"
-      },
-      {
-        "name": "Business Development",
-        "head": "Head of Business Development"
+        "name": "",
+        "title": "COO",
+        "reportsTo": "CEO",
+        "fullTitle": "Chief Operating Officer",
+        "subordinates": [
+          {
+            "name": "",
+            "title": "VP OF R&D",
+            "fullTitle": "Vice President of Research & Development"
+          },
+          {
+            "name": "",
+            "title": "VP OF OPERATIONS",
+            "fullTitle": "Vice President of Operations"
+          },
+          {
+            "name": "",
+            "title": "VP OF KS",
+            "fullTitle": "Vice President of Knowledge Services"
+          }
+        ]
       }
     ]
   },
