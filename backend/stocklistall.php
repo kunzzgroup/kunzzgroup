@@ -10,8 +10,7 @@ require_once 'session_check.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>库存管理系统</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -2811,7 +2810,7 @@ require_once 'session_check.php';
             loadData(system);
         }
 
-        // 导出数据为PDF
+        // 导出数据为PDF（支持中文）
         function exportData(system) {
             if (filteredData[system].length === 0) {
                 showAlert('没有数据可导出', 'error');
@@ -2819,114 +2818,27 @@ require_once 'session_check.php';
             }
             
             try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF('landscape', 'mm', 'a4'); // 横向A4纸张
-                
-                let fileName, title, headers, tableData, columnStyles;
-                
-                if (system === 'remark') {
-                    // 价格分析导出
-                    title = '货品价格分析报表';
-                    headers = [['货品名称', '排序', '货品编号', '库存数量', '单价']];
-                    tableData = [];
-                    
-                    filteredData.remark.forEach(product => {
-                        product.variants.forEach((variant, index) => {
-                            tableData.push([
-                                product.product_name,
-                                (index + 1).toString(),
-                                variant.code_number || '-',
-                                variant.formatted_stock,
-                                variant.formatted_price
-                            ]);
-                        });
-                    });
-                    
-                    fileName = `stock_price_analysis_${new Date().toISOString().split('T')[0]}.pdf`;
-                    
-                    // 价格分析表格列宽设置
-                    columnStyles = {
-                        0: { cellWidth: 70 }, // 货品名称
-                        1: { cellWidth: 20 }, // 排序
-                        2: { cellWidth: 50 }, // 货品编号
-                        3: { cellWidth: 40 }, // 库存数量
-                        4: { cellWidth: 40 }  // 单价
-                    };
-                } else {
-                    // 库存汇总导出
-                    const systemName = SYSTEM_NAMES[system] || system.toUpperCase();
-                    title = `${systemName}库存汇总报表`;
-                    headers = [['序号', '货品名称', '货品编号', '最低库存', '库存数量', '规格', '单价', '总价']];
-                    tableData = [];
-                    
-                    // 计算总价值
-                    let totalValue = 0;
-                    
-                    filteredData[system].forEach(item => {
-                        const productName = (item.product_name || '').trim();
-                        const minimumQuantity = lowStockSettings[productName] || 0;
-                        // 直接显示最低库存值，不进行格式化处理，确保与数据库一致
-                        let minimumStockDisplay = '-';
-                        if (minimumQuantity > 0) {
-                            // 根据规格决定小数位数：kilo 显示3位，其他显示2位
-                            const specification = (item.specification || '').trim().toLowerCase();
-                            if (specification === 'kilo') {
-                                minimumStockDisplay = parseFloat(minimumQuantity).toFixed(3);
-                            } else {
-                                minimumStockDisplay = parseFloat(minimumQuantity).toFixed(2);
-                            }
-                        }
-                        
-                        const totalPrice = parseFloat(item.total_price) || 0;
-                        totalValue += totalPrice;
-                        
-                        tableData.push([
-                            item.no.toString(),
-                            item.product_name,
-                            item.code_number || '-',
-                            minimumStockDisplay,
-                            item.formatted_stock,
-                            item.specification || '-',
-                            item.formatted_price,
-                            item.formatted_total_price
-                        ]);
-                    });
-                    
-                    // 添加总计行
-                    tableData.push([
-                        '',
-                        '总计',
-                        '',
-                        '',
-                        '',
-                        '',
-                        '',
-                        `RM ${formatCurrency(totalValue)}`
-                    ]);
-                    
-                    fileName = `${system}_stock_summary_${new Date().toISOString().split('T')[0]}.pdf`;
-                    
-                    // 库存汇总表格列宽设置
-                    columnStyles = {
-                        0: { cellWidth: 18 }, // 序号
-                        1: { cellWidth: 55 }, // 货品名称
-                        2: { cellWidth: 35 }, // 货品编号
-                        3: { cellWidth: 28 }, // 最低库存
-                        4: { cellWidth: 28 }, // 库存数量
-                        5: { cellWidth: 25 }, // 规格
-                        6: { cellWidth: 35 }, // 单价
-                        7: { cellWidth: 35 }  // 总价
-                    };
+                // 获取当前表格元素
+                const tableElement = document.getElementById(`${system}-stock-table`);
+                if (!tableElement) {
+                    showAlert('无法找到表格数据', 'error');
+                    return;
                 }
                 
-                // 设置标题
-                doc.setFontSize(16);
-                doc.setFont(undefined, 'bold');
-                doc.text(title, 14, 15);
+                // 创建临时容器用于PDF导出
+                const printContainer = document.createElement('div');
+                printContainer.style.position = 'absolute';
+                printContainer.style.left = '-9999px';
+                printContainer.style.width = '1200px';
+                printContainer.style.backgroundColor = 'white';
+                printContainer.style.padding = '20px';
+                printContainer.style.fontFamily = 'Arial, "Microsoft YaHei", "SimSun", sans-serif';
                 
-                // 添加日期信息
-                doc.setFontSize(10);
-                doc.setFont(undefined, 'normal');
+                // 获取系统名称
+                const systemName = SYSTEM_NAMES[system] || system.toUpperCase();
+                const title = system === 'remark' ? '货品价格分析报表' : `${systemName}库存汇总报表`;
+                
+                // 创建标题和元数据
                 const dateStr = new Date().toLocaleString('zh-CN', {
                     year: 'numeric',
                     month: '2-digit',
@@ -2934,47 +2846,72 @@ require_once 'session_check.php';
                     hour: '2-digit',
                     minute: '2-digit'
                 });
-                doc.text(`导出时间: ${dateStr}`, 14, 22);
-                doc.text(`记录数: ${filteredData[system].length}`, 200, 22);
                 
-                // 生成表格
-                doc.autoTable({
-                    head: headers,
-                    body: tableData,
-                    startY: 28,
-                    styles: {
-                        fontSize: 8,
-                        cellPadding: 2,
-                        overflow: 'linebreak',
-                        cellWidth: 'wrap'
+                printContainer.innerHTML = `
+                    <div style="margin-bottom: 20px;">
+                        <h1 style="font-size: 24px; font-weight: bold; margin: 0 0 10px 0; color: #000;">${title}</h1>
+                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">
+                            <span>导出时间: ${dateStr}</span>
+                            <span style="margin-left: 30px;">记录数: ${filteredData[system].length}</span>
+                        </div>
+                    </div>
+                `;
+                
+                // 克隆表格并添加到容器
+                const clonedTable = tableElement.cloneNode(true);
+                clonedTable.style.width = '100%';
+                clonedTable.style.borderCollapse = 'collapse';
+                clonedTable.style.fontSize = '10px';
+                
+                // 设置表格样式
+                const style = document.createElement('style');
+                style.textContent = `
+                    table { border-collapse: collapse; width: 100%; }
+                    th { background-color: #636363; color: white; padding: 8px; text-align: center; font-weight: bold; border: 1px solid #d1d5db; }
+                    td { padding: 6px; text-align: center; border: 1px solid #d1d5db; }
+                    tr:nth-child(even) { background-color: #f9fafb; }
+                    tr.low-stock-row { background-color: #fab9b9 !important; color: #991b1b !important; }
+                    tr.total-row { background-color: #f8f5eb !important; font-weight: bold; }
+                `;
+                printContainer.appendChild(style);
+                printContainer.appendChild(clonedTable);
+                
+                // 添加到页面（临时）
+                document.body.appendChild(printContainer);
+                
+                // 配置PDF选项
+                const opt = {
+                    margin: [10, 10, 10, 10],
+                    filename: system === 'remark' 
+                        ? `stock_price_analysis_${new Date().toISOString().split('T')[0]}.pdf`
+                        : `${system}_stock_summary_${new Date().toISOString().split('T')[0]}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { 
+                        scale: 2,
+                        useCORS: true,
+                        letterRendering: true,
+                        logging: false
                     },
-                    headStyles: {
-                        fillColor: [99, 99, 99],
-                        textColor: [255, 255, 255],
-                        fontStyle: 'bold',
-                        fontSize: 9
-                    },
-                    alternateRowStyles: {
-                        fillColor: [245, 245, 245]
-                    },
-                    columnStyles: columnStyles,
-                    margin: { top: 28, left: 14, right: 14 },
-                    didDrawPage: function (data) {
-                        // 添加页脚
-                        doc.setFontSize(8);
-                        doc.text(
-                            `第 ${data.pageNumber} 页`,
-                            doc.internal.pageSize.width / 2,
-                            doc.internal.pageSize.height - 10,
-                            { align: 'center' }
-                        );
+                    jsPDF: { 
+                        unit: 'mm', 
+                        format: 'a4', 
+                        orientation: 'landscape',
+                        compress: true
                     }
+                };
+                
+                // 生成PDF
+                html2pdf().set(opt).from(printContainer).save().then(() => {
+                    // 清理临时元素
+                    document.body.removeChild(printContainer);
+                    showAlert('PDF导出成功', 'success');
+                }).catch((error) => {
+                    // 清理临时元素
+                    document.body.removeChild(printContainer);
+                    console.error('导出失败:', error);
+                    showAlert('导出失败: ' + error.message, 'error');
                 });
                 
-                // 保存PDF
-                doc.save(fileName);
-                
-                showAlert('PDF导出成功', 'success');
             } catch (error) {
                 console.error('导出失败:', error);
                 showAlert('导出失败: ' + error.message, 'error');
