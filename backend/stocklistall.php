@@ -2810,7 +2810,7 @@ require_once 'session_check.php';
             loadData(system);
         }
 
-        // 导出数据为PDF（支持中文）
+        // 导出数据为PDF（英文格式）
         function exportData(system) {
             if (filteredData[system].length === 0) {
                 showAlert('没有数据可导出', 'error');
@@ -2818,13 +2818,6 @@ require_once 'session_check.php';
             }
             
             try {
-                // 获取当前表格元素
-                const tableElement = document.getElementById(`${system}-stock-table`);
-                if (!tableElement) {
-                    showAlert('无法找到表格数据', 'error');
-                    return;
-                }
-                
                 // 创建临时容器用于PDF导出
                 const printContainer = document.createElement('div');
                 printContainer.style.position = 'absolute';
@@ -2832,14 +2825,20 @@ require_once 'session_check.php';
                 printContainer.style.width = '1200px';
                 printContainer.style.backgroundColor = 'white';
                 printContainer.style.padding = '20px';
-                printContainer.style.fontFamily = 'Arial, "Microsoft YaHei", "SimSun", sans-serif';
+                printContainer.style.fontFamily = 'Arial, sans-serif';
                 
-                // 获取系统名称
-                const systemName = SYSTEM_NAMES[system] || system.toUpperCase();
-                const title = system === 'remark' ? '货品价格分析报表' : `${systemName}库存汇总报表`;
+                // 获取系统名称（英文）
+                const systemNameMap = {
+                    'central': 'Central',
+                    'j1': 'J1',
+                    'j2': 'J2',
+                    'j3': 'J3'
+                };
+                const systemName = systemNameMap[system] || system.toUpperCase();
+                const title = system === 'remark' ? 'Product Price Analysis Report' : `${systemName} Stock Summary Report`;
                 
-                // 创建标题和元数据
-                const dateStr = new Date().toLocaleString('zh-CN', {
+                // 创建标题和元数据（英文）
+                const dateStr = new Date().toLocaleString('en-US', {
                     year: 'numeric',
                     month: '2-digit',
                     day: '2-digit',
@@ -2851,30 +2850,115 @@ require_once 'session_check.php';
                     <div style="margin-bottom: 20px;">
                         <h1 style="font-size: 24px; font-weight: bold; margin: 0 0 10px 0; color: #000;">${title}</h1>
                         <div style="font-size: 12px; color: #666; margin-bottom: 5px;">
-                            <span>导出时间: ${dateStr}</span>
-                            <span style="margin-left: 30px;">记录数: ${filteredData[system].length}</span>
+                            <span>Export Time: ${dateStr}</span>
+                            <span style="margin-left: 30px;">Records: ${filteredData[system].length}</span>
                         </div>
                     </div>
                 `;
                 
-                // 克隆表格并添加到容器
-                const clonedTable = tableElement.cloneNode(true);
-                clonedTable.style.width = '100%';
-                clonedTable.style.borderCollapse = 'collapse';
-                clonedTable.style.fontSize = '10px';
+                // 创建英文表格
+                const table = document.createElement('table');
+                table.style.width = '100%';
+                table.style.borderCollapse = 'collapse';
+                table.style.fontSize = '10px';
                 
-                // 设置表格样式
-                const style = document.createElement('style');
-                style.textContent = `
-                    table { border-collapse: collapse; width: 100%; }
-                    th { background-color: #636363; color: white; padding: 8px; text-align: center; font-weight: bold; border: 1px solid #d1d5db; }
-                    td { padding: 6px; text-align: center; border: 1px solid #d1d5db; }
-                    tr:nth-child(even) { background-color: #f9fafb; }
-                    tr.low-stock-row { background-color: #fab9b9 !important; color: #991b1b !important; }
-                    tr.total-row { background-color: #f8f5eb !important; font-weight: bold; }
-                `;
-                printContainer.appendChild(style);
-                printContainer.appendChild(clonedTable);
+                // 创建表头（英文）
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                
+                if (system === 'remark') {
+                    // 价格分析表头
+                    const headers = ['Product Name', 'Rank', 'Code Number', 'Stock', 'Unit Price'];
+                    headers.forEach(header => {
+                        const th = document.createElement('th');
+                        th.textContent = header;
+                        th.style.cssText = 'background-color: #636363; color: white; padding: 8px; text-align: center; font-weight: bold; border: 1px solid #d1d5db;';
+                        headerRow.appendChild(th);
+                    });
+                } else {
+                    // 库存汇总表头
+                    const headers = ['No.', 'Product Name', 'Code Number', 'Minimum Stock', 'Total Stock', 'Specification', 'Unit Price', 'Total Price'];
+                    headers.forEach(header => {
+                        const th = document.createElement('th');
+                        th.textContent = header;
+                        th.style.cssText = 'background-color: #636363; color: white; padding: 8px; text-align: center; font-weight: bold; border: 1px solid #d1d5db;';
+                        headerRow.appendChild(th);
+                    });
+                }
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+                
+                // 创建表体
+                const tbody = document.createElement('tbody');
+                let totalValue = 0;
+                
+                if (system === 'remark') {
+                    filteredData.remark.forEach(product => {
+                        product.variants.forEach((variant, index) => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${product.product_name}</td>
+                                <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${index + 1}</td>
+                                <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${variant.code_number || '-'}</td>
+                                <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${variant.formatted_stock}</td>
+                                <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${variant.formatted_price}</td>
+                            `;
+                            tbody.appendChild(row);
+                        });
+                    });
+                } else {
+                    filteredData[system].forEach((item, index) => {
+                        const productName = (item.product_name || '').trim();
+                        const minimumQuantity = lowStockSettings[productName] || 0;
+                        let minimumStockDisplay = '-';
+                        if (minimumQuantity > 0) {
+                            const specification = (item.specification || '').trim().toLowerCase();
+                            if (specification === 'kilo') {
+                                minimumStockDisplay = parseFloat(minimumQuantity).toFixed(3);
+                            } else {
+                                minimumStockDisplay = parseFloat(minimumQuantity).toFixed(2);
+                            }
+                        }
+                        
+                        const totalPrice = parseFloat(item.total_price) || 0;
+                        totalValue += totalPrice;
+                        
+                        const row = document.createElement('tr');
+                        // 检查是否为低库存行
+                        const isLowStock = minimumQuantity > 0 && parseFloat(item.total_stock) <= parseFloat(minimumQuantity) + 0.001;
+                        if (isLowStock) {
+                            row.style.backgroundColor = '#fab9b9';
+                            row.style.color = '#991b1b';
+                        } else if (index % 2 === 1) {
+                            row.style.backgroundColor = '#f9fafb';
+                        }
+                        
+                        row.innerHTML = `
+                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${item.no}</td>
+                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${item.product_name}</td>
+                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${item.code_number || '-'}</td>
+                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${minimumStockDisplay}</td>
+                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${item.formatted_stock}</td>
+                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${item.specification || '-'}</td>
+                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${item.formatted_price}</td>
+                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${item.formatted_total_price}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                    
+                    // 添加总计行
+                    const totalRow = document.createElement('tr');
+                    totalRow.style.backgroundColor = '#f8f5eb';
+                    totalRow.style.fontWeight = 'bold';
+                    totalRow.innerHTML = `
+                        <td colspan="7" style="padding: 6px; text-align: right; border: 1px solid #d1d5db;">Total:</td>
+                        <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">RM ${formatCurrency(totalValue)}</td>
+                    `;
+                    tbody.appendChild(totalRow);
+                }
+                
+                table.appendChild(tbody);
+                printContainer.appendChild(table);
                 
                 // 添加到页面（临时）
                 document.body.appendChild(printContainer);
