@@ -1073,12 +1073,12 @@ if (file_exists($jsonFile)) {
         .org-chart-container {
             background: linear-gradient(135deg, rgba(255, 92, 0, 0.02) 0%, rgba(255, 215, 0, 0.02) 100%);
             border-radius: clamp(12px, 1.25vw, 16px);
-            padding: clamp(60px, 6.25vw, 100px) clamp(40px, 4.17vw, 60px);
+            padding: clamp(40px, 4.17vw, 60px) clamp(20px, 2.08vw, 40px);
             border: 2px solid rgba(255, 92, 0, 0.1);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             position: relative;
             overflow: visible;
-            min-height: clamp(600px, 62.5vw, 900px);
+            min-height: clamp(700px, 72.92vw, 1000px);
         }
 
         .org-chart-container::before {
@@ -1098,7 +1098,8 @@ if (file_exists($jsonFile)) {
         .org-chart {
             position: relative;
             width: 100%;
-            min-height: clamp(500px, 52.08vw, 800px);
+            height: 100%;
+            min-height: clamp(600px, 62.5vw, 900px);
         }
 
         /* SVG Connection Lines */
@@ -1114,7 +1115,7 @@ if (file_exists($jsonFile)) {
 
         .org-connection-line {
             stroke: #ff5c00;
-            stroke-width: 2;
+            stroke-width: 2.5;
             fill: none;
             stroke-dasharray: 1000;
             stroke-dashoffset: 1000;
@@ -1136,19 +1137,21 @@ if (file_exists($jsonFile)) {
             position: absolute;
             background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
             border-radius: clamp(10px, 1.04vw, 14px);
-            padding: clamp(14px, 1.46vw, 20px) clamp(20px, 2.08vw, 28px);
+            padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 24px);
             box-shadow: 
                 0 4px 16px rgba(255, 165, 0, 0.3),
                 0 0 0 2px rgba(255, 255, 255, 0.5),
                 inset 0 1px 0 rgba(255, 255, 255, 0.3);
             text-align: center;
-            min-width: clamp(140px, 14.58vw, 200px);
-            max-width: clamp(180px, 18.75vw, 240px);
+            width: clamp(130px, 13.54vw, 180px);
+            box-sizing: border-box;
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             border: 2px solid rgba(255, 255, 255, 0.4);
             opacity: 0;
             transform: translate(-50%, 0) scale(0.8) translateY(-20px);
             cursor: pointer;
+            white-space: normal;
+            word-wrap: break-word;
         }
 
         .org-node.animate {
@@ -1167,9 +1170,8 @@ if (file_exists($jsonFile)) {
 
         .org-node.ceo {
             background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
-            min-width: clamp(180px, 18.75vw, 240px);
-            max-width: clamp(220px, 22.92vw, 280px);
-            padding: clamp(18px, 1.88vw, 26px) clamp(24px, 2.5vw, 32px);
+            width: clamp(160px, 16.67vw, 220px);
+            padding: clamp(16px, 1.67vw, 22px) clamp(20px, 2.08vw, 28px);
             box-shadow: 
                 0 6px 20px rgba(255, 92, 0, 0.4),
                 0 0 0 3px rgba(255, 255, 255, 0.6),
@@ -1244,17 +1246,19 @@ if (file_exists($jsonFile)) {
             position: absolute;
             background: rgba(255, 255, 255, 0.95);
             border-radius: clamp(8px, 0.83vw, 10px);
-            padding: clamp(10px, 1.04vw, 14px) clamp(14px, 1.46vw, 18px);
+            padding: clamp(8px, 0.83vw, 12px) clamp(12px, 1.25vw, 16px);
             border: 2px solid rgba(255, 92, 0, 0.3);
             text-align: center;
-            min-width: clamp(120px, 12.5vw, 160px);
-            max-width: clamp(150px, 15.63vw, 200px);
+            width: clamp(110px, 11.46vw, 150px);
+            box-sizing: border-box;
             transition: all 0.3s ease;
             box-shadow: 
                 0 2px 8px rgba(0, 0, 0, 0.1),
                 inset 0 1px 0 rgba(255, 255, 255, 0.8);
             opacity: 0;
             transform: translate(-50%, 0) scale(0.8);
+            white-space: normal;
+            word-wrap: break-word;
         }
 
         .org-subordinate.animate {
@@ -1857,29 +1861,37 @@ if (file_exists($jsonFile)) {
                             
                             // Calculate positions for tech tree layout
                             // Level 1: CEO at top center, PA to the right
-                            // Level 2: CAO, CSO, COO below CEO
-                            // Level 3: Subordinates below each C-Level
+                            // Level 2: CAO, CSO, COO below CEO (evenly distributed)
+                            // Level 3: Subordinates below each C-Level (centered under parent)
                             
-                            $containerWidth = 100; // percentage
-                            $level1Y = 5; // Top level Y position (%)
-                            $level2Y = 35; // C-Level Y position (%)
-                            $level3Y = 70; // Subordinates Y position (%)
+                            $level1Y = 8; // Top level Y position (%)
+                            $level2Y = 40; // C-Level Y position (%)
+                            $level3Y = 75; // Subordinates Y position (%)
                             
                             // CEO position (center top)
                             $ceoX = 50;
                             $ceoY = $level1Y;
                             
-                            // PA position (right of CEO)
-                            $paX = 75;
-                            $paY = $level1Y;
+                            // PA position (right of CEO, slightly lower)
+                            $paX = 80;
+                            $paY = $level1Y + 2;
                             
-                            // C-Level positions (spread horizontally)
+                            // C-Level positions (evenly distributed horizontally)
                             $cLevelCount = !empty($orgStructure['cLevel']) ? count($orgStructure['cLevel']) : 0;
                             $cLevelPositions = [];
                             if ($cLevelCount > 0) {
-                                $spacing = 80 / ($cLevelCount + 1); // Distribute across 80% width
-                                for ($i = 0; $i < $cLevelCount; $i++) {
-                                    $cLevelPositions[$i] = 10 + ($i + 1) * $spacing;
+                                // Distribute evenly across 70% of width (15% margin on each side)
+                                $startX = 15;
+                                $endX = 85;
+                                $totalWidth = $endX - $startX;
+                                
+                                if ($cLevelCount == 1) {
+                                    $cLevelPositions[0] = 50; // Center if only one
+                                } else {
+                                    $spacing = $totalWidth / ($cLevelCount - 1);
+                                    for ($i = 0; $i < $cLevelCount; $i++) {
+                                        $cLevelPositions[$i] = $startX + ($i * $spacing);
+                                    }
                                 }
                             }
                             
@@ -1890,11 +1902,30 @@ if (file_exists($jsonFile)) {
                                     if (!empty($exec['subordinates'])) {
                                         $subCount = count($exec['subordinates']);
                                         $parentX = $cLevelPositions[$index];
-                                        $subSpacing = min(15, 60 / max($subCount, 1)); // Max 15% spacing
-                                        $startX = $parentX - (($subCount - 1) * $subSpacing / 2);
                                         
-                                        foreach ($exec['subordinates'] as $subIndex => $sub) {
-                                            $subordinatePositions[$index][$subIndex] = $startX + ($subIndex * $subSpacing);
+                                        // Calculate spacing based on number of subordinates
+                                        // Each subordinate gets max 12% width, with min 8% spacing
+                                        $maxSubWidth = 12;
+                                        $minSpacing = 8;
+                                        
+                                        if ($subCount == 1) {
+                                            // Single subordinate: center under parent
+                                            $subordinatePositions[$index][0] = $parentX;
+                                        } else {
+                                            // Multiple subordinates: distribute evenly
+                                            $totalSubWidth = ($subCount - 1) * $minSpacing;
+                                            $startSubX = $parentX - ($totalSubWidth / 2);
+                                            
+                                            for ($subIndex = 0; $subIndex < $subCount; $subIndex++) {
+                                                $subordinatePositions[$index][$subIndex] = $startSubX + ($subIndex * $minSpacing);
+                                                
+                                                // Ensure positions stay within bounds (5% to 95%)
+                                                if ($subordinatePositions[$index][$subIndex] < 5) {
+                                                    $subordinatePositions[$index][$subIndex] = 5;
+                                                } elseif ($subordinatePositions[$index][$subIndex] > 95) {
+                                                    $subordinatePositions[$index][$subIndex] = 95;
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -1919,9 +1950,9 @@ if (file_exists($jsonFile)) {
                                 ?>
                                 <line class="org-connection-line" 
                                       x1="<?php echo $ceoX; ?>%" 
-                                      y1="<?php echo $ceoY + 8; ?>%" 
+                                      y1="<?php echo $ceoY + 6; ?>%" 
                                       x2="<?php echo $cLevelX; ?>%" 
-                                      y2="<?php echo $level2Y - 2; ?>%"
+                                      y2="<?php echo $level2Y - 3; ?>%"
                                       stroke="url(#lineGradient)"/>
                                 <?php 
                                     endforeach;
@@ -1937,9 +1968,9 @@ if (file_exists($jsonFile)) {
                                 ?>
                                 <line class="org-connection-line" 
                                       x1="<?php echo $cLevelX; ?>%" 
-                                      y1="<?php echo $level2Y + 8; ?>%" 
+                                      y1="<?php echo $level2Y + 6; ?>%" 
                                       x2="<?php echo $subX; ?>%" 
-                                      y2="<?php echo $level3Y - 2; ?>%"
+                                      y2="<?php echo $level3Y - 3; ?>%"
                                       stroke="url(#lineGradient)"/>
                                 <?php 
                                             endforeach;
