@@ -10,7 +10,8 @@ require_once 'session_check.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>库存管理系统</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -2810,7 +2811,7 @@ require_once 'session_check.php';
             loadData(system);
         }
 
-        // 导出数据为PDF（英文格式）
+        // 导出数据为PDF（英文格式，使用jsPDF直接生成）
         function exportData(system) {
             // 检查数据是否存在
             if (!filteredData[system] || filteredData[system].length === 0) {
@@ -2824,19 +2825,9 @@ require_once 'session_check.php';
                 }
             }
             
-            console.log('导出系统:', system);
-            console.log('数据数量:', filteredData[system].length);
-            console.log('数据示例:', filteredData[system][0]);
-            
             try {
-                // 创建临时容器用于PDF导出
-                const printContainer = document.createElement('div');
-                printContainer.style.position = 'absolute';
-                printContainer.style.left = '-9999px';
-                printContainer.style.width = '1200px';
-                printContainer.style.backgroundColor = 'white';
-                printContainer.style.padding = '20px';
-                printContainer.style.fontFamily = 'Arial, sans-serif';
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('landscape', 'mm', 'a4');
                 
                 // 获取系统名称（英文）
                 const systemNameMap = {
@@ -2848,7 +2839,14 @@ require_once 'session_check.php';
                 const systemName = systemNameMap[system] || system.toUpperCase();
                 const title = system === 'remark' ? 'Product Price Analysis Report' : `${systemName} Stock Summary Report`;
                 
-                // 创建标题和元数据（英文）
+                // 设置标题
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'bold');
+                doc.text(title, 14, 15);
+                
+                // 添加日期信息
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
                 const dateStr = new Date().toLocaleString('en-US', {
                     year: 'numeric',
                     month: '2-digit',
@@ -2856,74 +2854,44 @@ require_once 'session_check.php';
                     hour: '2-digit',
                     minute: '2-digit'
                 });
+                doc.text(`Export Time: ${dateStr}`, 14, 22);
+                doc.text(`Records: ${filteredData[system].length}`, 200, 22);
                 
-                printContainer.innerHTML = `
-                    <div style="margin-bottom: 20px;">
-                        <h1 style="font-size: 24px; font-weight: bold; margin: 0 0 10px 0; color: #000;">${title}</h1>
-                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">
-                            <span>Export Time: ${dateStr}</span>
-                            <span style="margin-left: 30px;">Records: ${filteredData[system].length}</span>
-                        </div>
-                    </div>
-                `;
-                
-                // 创建英文表格
-                const table = document.createElement('table');
-                table.style.width = '100%';
-                table.style.borderCollapse = 'collapse';
-                table.style.fontSize = '10px';
-                
-                // 创建表头（英文）
-                const thead = document.createElement('thead');
-                const headerRow = document.createElement('tr');
+                // 准备表格数据
+                let headers, tableData, columnStyles;
                 
                 if (system === 'remark') {
-                    // 价格分析表头
-                    const headers = ['Product Name', 'Rank', 'Code Number', 'Stock', 'Unit Price'];
-                    headers.forEach(header => {
-                        const th = document.createElement('th');
-                        th.textContent = header;
-                        th.style.cssText = 'background-color: #636363; color: white; padding: 8px; text-align: center; font-weight: bold; border: 1px solid #d1d5db;';
-                        headerRow.appendChild(th);
-                    });
-                } else {
-                    // 库存汇总表头
-                    const headers = ['No.', 'Product Name', 'Code Number', 'Minimum Stock', 'Total Stock', 'Specification', 'Unit Price', 'Total Price'];
-                    headers.forEach(header => {
-                        const th = document.createElement('th');
-                        th.textContent = header;
-                        th.style.cssText = 'background-color: #636363; color: white; padding: 8px; text-align: center; font-weight: bold; border: 1px solid #d1d5db;';
-                        headerRow.appendChild(th);
-                    });
-                }
-                thead.appendChild(headerRow);
-                table.appendChild(thead);
-                
-                // 创建表体
-                const tbody = document.createElement('tbody');
-                let totalValue = 0;
-                
-                if (system === 'remark') {
+                    // 价格分析
+                    headers = [['Product Name', 'Rank', 'Code Number', 'Stock', 'Unit Price']];
+                    tableData = [];
+                    
                     filteredData.remark.forEach(product => {
                         product.variants.forEach((variant, index) => {
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
-                                <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${product.product_name}</td>
-                                <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${index + 1}</td>
-                                <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${variant.code_number || '-'}</td>
-                                <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${variant.formatted_stock}</td>
-                                <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${variant.formatted_price}</td>
-                            `;
-                            tbody.appendChild(row);
+                            tableData.push([
+                                product.product_name || '-',
+                                (index + 1).toString(),
+                                variant.code_number || '-',
+                                variant.formatted_stock || variant.stock || '0.00',
+                                variant.formatted_price || variant.price || '0.00'
+                            ]);
                         });
                     });
+                    
+                    columnStyles = {
+                        0: { cellWidth: 70 },
+                        1: { cellWidth: 20 },
+                        2: { cellWidth: 50 },
+                        3: { cellWidth: 40 },
+                        4: { cellWidth: 40 }
+                    };
                 } else {
+                    // 库存汇总
+                    headers = [['No.', 'Product Name', 'Code Number', 'Minimum Stock', 'Total Stock', 'Specification', 'Unit Price', 'Total Price']];
+                    tableData = [];
+                    let totalValue = 0;
+                    
                     filteredData[system].forEach((item, index) => {
-                        // 验证数据项
-                        if (!item) {
-                            console.warn('空数据项，索引:', index);
-                            return;
-                        }
+                        if (!item) return;
                         
                         const productName = (item.product_name || '').trim();
                         const minimumQuantity = lowStockSettings[productName] || 0;
@@ -2940,105 +2908,83 @@ require_once 'session_check.php';
                         const totalPrice = parseFloat(item.total_price) || 0;
                         totalValue += totalPrice;
                         
-                        const row = document.createElement('tr');
-                        // 检查是否为低库存行
-                        const isLowStock = minimumQuantity > 0 && parseFloat(item.total_stock || 0) <= parseFloat(minimumQuantity) + 0.001;
-                        if (isLowStock) {
-                            row.style.backgroundColor = '#fab9b9';
-                            row.style.color = '#991b1b';
-                        } else if (index % 2 === 1) {
-                            row.style.backgroundColor = '#f9fafb';
-                        }
-                        
-                        // 确保所有字段都有值
-                        const no = item.no || (index + 1);
-                        const productNameDisplay = item.product_name || '-';
-                        const codeNumber = item.code_number || '-';
-                        const formattedStock = item.formatted_stock || item.total_stock || '0.00';
-                        const specification = item.specification || '-';
-                        const formattedPrice = item.formatted_price || item.price || '0.00';
-                        const formattedTotalPrice = item.formatted_total_price || item.total_price || '0.00';
-                        
-                        row.innerHTML = `
-                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${no}</td>
-                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${productNameDisplay}</td>
-                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${codeNumber}</td>
-                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${minimumStockDisplay}</td>
-                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${formattedStock}</td>
-                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${specification}</td>
-                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${formattedPrice}</td>
-                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${formattedTotalPrice}</td>
-                        `;
-                        tbody.appendChild(row);
+                        tableData.push([
+                            (item.no || (index + 1)).toString(),
+                            item.product_name || '-',
+                            item.code_number || '-',
+                            minimumStockDisplay,
+                            item.formatted_stock || item.total_stock || '0.00',
+                            item.specification || '-',
+                            item.formatted_price || item.price || '0.00',
+                            item.formatted_total_price || item.total_price || '0.00'
+                        ]);
                     });
                     
                     // 添加总计行
-                    const totalRow = document.createElement('tr');
-                    totalRow.style.backgroundColor = '#f8f5eb';
-                    totalRow.style.fontWeight = 'bold';
-                    totalRow.innerHTML = `
-                        <td colspan="7" style="padding: 6px; text-align: right; border: 1px solid #d1d5db;">Total:</td>
-                        <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">RM ${formatCurrency(totalValue)}</td>
-                    `;
-                    tbody.appendChild(totalRow);
-                }
-                
-                table.appendChild(tbody);
-                printContainer.appendChild(table);
-                
-                // 验证表格数据
-                const rowCount = tbody.querySelectorAll('tr').length;
-                console.log('表格行数:', rowCount);
-                
-                if (rowCount === 0) {
-                    showAlert('表格数据为空，无法导出', 'error');
-                    return;
-                }
-                
-                // 添加到页面（临时）
-                document.body.appendChild(printContainer);
-                
-                // 等待DOM渲染完成
-                setTimeout(() => {
-                    // 配置PDF选项
-                    const opt = {
-                        margin: [10, 10, 10, 10],
-                        filename: system === 'remark' 
-                            ? `stock_price_analysis_${new Date().toISOString().split('T')[0]}.pdf`
-                            : `${system}_stock_summary_${new Date().toISOString().split('T')[0]}.pdf`,
-                        image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { 
-                            scale: 2,
-                            useCORS: true,
-                            letterRendering: true,
-                            logging: false,
-                            windowWidth: printContainer.scrollWidth,
-                            windowHeight: printContainer.scrollHeight
-                        },
-                        jsPDF: { 
-                            unit: 'mm', 
-                            format: 'a4', 
-                            orientation: 'landscape',
-                            compress: true
-                        }
-                    };
+                    tableData.push([
+                        '',
+                        'Total',
+                        '',
+                        '',
+                        '',
+                        '',
+                        '',
+                        `RM ${formatCurrency(totalValue)}`
+                    ]);
                     
-                    // 生成PDF
-                    html2pdf().set(opt).from(printContainer).save().then(() => {
-                        // 清理临时元素
-                        if (printContainer.parentNode) {
-                            document.body.removeChild(printContainer);
-                        }
-                        showAlert('PDF导出成功', 'success');
-                    }).catch((error) => {
-                        // 清理临时元素
-                        if (printContainer.parentNode) {
-                            document.body.removeChild(printContainer);
-                        }
-                        console.error('导出失败:', error);
-                        showAlert('导出失败: ' + error.message, 'error');
-                    });
-                }, 100); // 等待100ms确保DOM渲染完成
+                    columnStyles = {
+                        0: { cellWidth: 18 },
+                        1: { cellWidth: 55 },
+                        2: { cellWidth: 35 },
+                        3: { cellWidth: 28 },
+                        4: { cellWidth: 28 },
+                        5: { cellWidth: 25 },
+                        6: { cellWidth: 35 },
+                        7: { cellWidth: 35 }
+                    };
+                }
+                
+                // 生成表格
+                doc.autoTable({
+                    head: headers,
+                    body: tableData,
+                    startY: 28,
+                    styles: {
+                        fontSize: 8,
+                        cellPadding: 2,
+                        overflow: 'linebreak',
+                        cellWidth: 'wrap'
+                    },
+                    headStyles: {
+                        fillColor: [99, 99, 99],
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold',
+                        fontSize: 9
+                    },
+                    alternateRowStyles: {
+                        fillColor: [245, 245, 245]
+                    },
+                    columnStyles: columnStyles,
+                    margin: { top: 28, left: 14, right: 14 },
+                    didDrawPage: function (data) {
+                        // 添加页脚
+                        doc.setFontSize(8);
+                        doc.text(
+                            `Page ${data.pageNumber}`,
+                            doc.internal.pageSize.width / 2,
+                            doc.internal.pageSize.height - 10,
+                            { align: 'center' }
+                        );
+                    }
+                });
+                
+                // 保存PDF
+                const fileName = system === 'remark' 
+                    ? `stock_price_analysis_${new Date().toISOString().split('T')[0]}.pdf`
+                    : `${system}_stock_summary_${new Date().toISOString().split('T')[0]}.pdf`;
+                
+                doc.save(fileName);
+                showAlert('PDF导出成功', 'success');
                 
             } catch (error) {
                 console.error('导出失败:', error);
