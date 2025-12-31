@@ -2812,10 +2812,21 @@ require_once 'session_check.php';
 
         // 导出数据为PDF（英文格式）
         function exportData(system) {
-            if (filteredData[system].length === 0) {
-                showAlert('没有数据可导出', 'error');
-                return;
+            // 检查数据是否存在
+            if (!filteredData[system] || filteredData[system].length === 0) {
+                // 如果没有过滤数据，尝试使用原始数据
+                if (!stockData[system] || stockData[system].length === 0) {
+                    showAlert('没有数据可导出', 'error');
+                    return;
+                } else {
+                    // 使用原始数据
+                    filteredData[system] = [...stockData[system]];
+                }
             }
+            
+            console.log('导出系统:', system);
+            console.log('数据数量:', filteredData[system].length);
+            console.log('数据示例:', filteredData[system][0]);
             
             try {
                 // 创建临时容器用于PDF导出
@@ -2908,6 +2919,12 @@ require_once 'session_check.php';
                     });
                 } else {
                     filteredData[system].forEach((item, index) => {
+                        // 验证数据项
+                        if (!item) {
+                            console.warn('空数据项，索引:', index);
+                            return;
+                        }
+                        
                         const productName = (item.product_name || '').trim();
                         const minimumQuantity = lowStockSettings[productName] || 0;
                         let minimumStockDisplay = '-';
@@ -2925,7 +2942,7 @@ require_once 'session_check.php';
                         
                         const row = document.createElement('tr');
                         // 检查是否为低库存行
-                        const isLowStock = minimumQuantity > 0 && parseFloat(item.total_stock) <= parseFloat(minimumQuantity) + 0.001;
+                        const isLowStock = minimumQuantity > 0 && parseFloat(item.total_stock || 0) <= parseFloat(minimumQuantity) + 0.001;
                         if (isLowStock) {
                             row.style.backgroundColor = '#fab9b9';
                             row.style.color = '#991b1b';
@@ -2933,15 +2950,24 @@ require_once 'session_check.php';
                             row.style.backgroundColor = '#f9fafb';
                         }
                         
+                        // 确保所有字段都有值
+                        const no = item.no || (index + 1);
+                        const productNameDisplay = item.product_name || '-';
+                        const codeNumber = item.code_number || '-';
+                        const formattedStock = item.formatted_stock || item.total_stock || '0.00';
+                        const specification = item.specification || '-';
+                        const formattedPrice = item.formatted_price || item.price || '0.00';
+                        const formattedTotalPrice = item.formatted_total_price || item.total_price || '0.00';
+                        
                         row.innerHTML = `
-                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${item.no}</td>
-                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${item.product_name}</td>
-                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${item.code_number || '-'}</td>
+                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${no}</td>
+                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${productNameDisplay}</td>
+                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${codeNumber}</td>
                             <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${minimumStockDisplay}</td>
-                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${item.formatted_stock}</td>
-                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${item.specification || '-'}</td>
-                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${item.formatted_price}</td>
-                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${item.formatted_total_price}</td>
+                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${formattedStock}</td>
+                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${specification}</td>
+                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${formattedPrice}</td>
+                            <td style="padding: 6px; text-align: center; border: 1px solid #d1d5db;">${formattedTotalPrice}</td>
                         `;
                         tbody.appendChild(row);
                     });
@@ -2960,41 +2986,59 @@ require_once 'session_check.php';
                 table.appendChild(tbody);
                 printContainer.appendChild(table);
                 
+                // 验证表格数据
+                const rowCount = tbody.querySelectorAll('tr').length;
+                console.log('表格行数:', rowCount);
+                
+                if (rowCount === 0) {
+                    showAlert('表格数据为空，无法导出', 'error');
+                    return;
+                }
+                
                 // 添加到页面（临时）
                 document.body.appendChild(printContainer);
                 
-                // 配置PDF选项
-                const opt = {
-                    margin: [10, 10, 10, 10],
-                    filename: system === 'remark' 
-                        ? `stock_price_analysis_${new Date().toISOString().split('T')[0]}.pdf`
-                        : `${system}_stock_summary_${new Date().toISOString().split('T')[0]}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { 
-                        scale: 2,
-                        useCORS: true,
-                        letterRendering: true,
-                        logging: false
-                    },
-                    jsPDF: { 
-                        unit: 'mm', 
-                        format: 'a4', 
-                        orientation: 'landscape',
-                        compress: true
-                    }
-                };
-                
-                // 生成PDF
-                html2pdf().set(opt).from(printContainer).save().then(() => {
-                    // 清理临时元素
-                    document.body.removeChild(printContainer);
-                    showAlert('PDF导出成功', 'success');
-                }).catch((error) => {
-                    // 清理临时元素
-                    document.body.removeChild(printContainer);
-                    console.error('导出失败:', error);
-                    showAlert('导出失败: ' + error.message, 'error');
-                });
+                // 等待DOM渲染完成
+                setTimeout(() => {
+                    // 配置PDF选项
+                    const opt = {
+                        margin: [10, 10, 10, 10],
+                        filename: system === 'remark' 
+                            ? `stock_price_analysis_${new Date().toISOString().split('T')[0]}.pdf`
+                            : `${system}_stock_summary_${new Date().toISOString().split('T')[0]}.pdf`,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { 
+                            scale: 2,
+                            useCORS: true,
+                            letterRendering: true,
+                            logging: false,
+                            windowWidth: printContainer.scrollWidth,
+                            windowHeight: printContainer.scrollHeight
+                        },
+                        jsPDF: { 
+                            unit: 'mm', 
+                            format: 'a4', 
+                            orientation: 'landscape',
+                            compress: true
+                        }
+                    };
+                    
+                    // 生成PDF
+                    html2pdf().set(opt).from(printContainer).save().then(() => {
+                        // 清理临时元素
+                        if (printContainer.parentNode) {
+                            document.body.removeChild(printContainer);
+                        }
+                        showAlert('PDF导出成功', 'success');
+                    }).catch((error) => {
+                        // 清理临时元素
+                        if (printContainer.parentNode) {
+                            document.body.removeChild(printContainer);
+                        }
+                        console.error('导出失败:', error);
+                        showAlert('导出失败: ' + error.message, 'error');
+                    });
+                }, 100); // 等待100ms确保DOM渲染完成
                 
             } catch (error) {
                 console.error('导出失败:', error);
