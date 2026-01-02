@@ -164,9 +164,8 @@ if ($method === 'GET') {
     switch ($action) {
         case 'summary':
             try {
-                $startDate = $_GET['start_date'] ?? null;
                 $endDate = $_GET['end_date'] ?? null;
-                $result = getJ3StockSummary($startDate, $endDate);
+                $result = getJ3StockSummary(null, $endDate);
                 sendResponse(true, "J3库存汇总数据获取成功", $result);
             } catch (Exception $e) {
                 sendResponse(false, $e->getMessage());

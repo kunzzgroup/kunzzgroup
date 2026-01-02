@@ -1399,7 +1399,7 @@ require_once 'session_check.php';
             <div class="export-date-modal-header">
                 <h2>
                     <i class="fas fa-calendar-alt"></i>
-                    选择导出日期范围
+                    选择导出日期
                 </h2>
                 <button class="close-modal" onclick="closeExportDateModalComplete()">
                     <i class="fas fa-times"></i>
@@ -1407,11 +1407,7 @@ require_once 'session_check.php';
             </div>
             <div class="export-date-modal-body">
                 <div class="date-selector-group">
-                    <label for="export-start-date">开始日期</label>
-                    <input type="date" id="export-start-date" required>
-                </div>
-                <div class="date-selector-group">
-                    <label for="export-end-date">结束日期</label>
+                    <label for="export-end-date">选择日期</label>
                     <input type="date" id="export-end-date" required>
                 </div>
             </div>
@@ -2908,20 +2904,14 @@ require_once 'session_check.php';
         // 显示导出日期选择模态框
         function showExportDateModal() {
             const modal = document.getElementById('export-date-modal');
-            const startDateInput = document.getElementById('export-start-date');
             const endDateInput = document.getElementById('export-end-date');
             
-            // 设置默认日期（今天作为结束日期，30天前作为开始日期）
+            // 设置默认日期为今天
             const today = new Date();
-            const thirtyDaysAgo = new Date();
-            thirtyDaysAgo.setDate(today.getDate() - 30);
-            
             endDateInput.value = formatDateForInput(today);
-            startDateInput.value = formatDateForInput(thirtyDaysAgo);
             
             // 设置最大日期为今天
             const todayStr = formatDateForInput(today);
-            startDateInput.max = todayStr;
             endDateInput.max = todayStr;
             
             modal.style.display = 'block';
@@ -2949,22 +2939,11 @@ require_once 'session_check.php';
 
         // 确认导出
         function confirmExport() {
-            const startDateInput = document.getElementById('export-start-date');
             const endDateInput = document.getElementById('export-end-date');
-            
-            const startDate = startDateInput.value;
             const endDate = endDateInput.value;
             
-            if (!startDate || !endDate) {
-                showAlert('请选择开始日期和结束日期', 'error');
-                return;
-            }
-            
-            const startDateObj = new Date(startDate);
-            const endDateObj = new Date(endDate);
-            
-            if (startDateObj > endDateObj) {
-                showAlert('开始日期不能晚于结束日期', 'error');
+            if (!endDate) {
+                showAlert('请选择日期', 'error');
                 return;
             }
             
@@ -2986,28 +2965,30 @@ require_once 'session_check.php';
             closeExportDateModalComplete();
             
             // 执行导出
-            performExport(systemToExport, startDate, endDate);
+            performExport(systemToExport, endDate);
         }
 
         // 执行实际的导出操作
-        async function performExport(system, startDate, endDate) {
+        async function performExport(system, endDate) {
             // 显示加载提示
-            showAlert('正在根据日期范围获取数据...', 'info');
+            showAlert('正在根据日期获取数据...', 'info');
             
             try {
-                // 根据日期范围重新获取数据
+                // 根据日期重新获取数据
                 let result;
+                let dataToExport;
+                
                 if (system === 'remark') {
                     result = await apiCall(system, '?action=analysis');
                     if (result.success) {
-                        var dataToExport = result.data.products || [];
+                        dataToExport = result.data.products || [];
                     } else {
                         showAlert('获取数据失败: ' + (result.message || '未知错误'), 'error');
                         return;
                     }
                 } else {
-                    // 构建带日期范围的API URL
-                    const apiUrl = `${API_CONFIG[system]}?action=summary&start_date=${startDate}&end_date=${endDate}`;
+                    // 构建带日期的API URL（只使用结束日期）
+                    const apiUrl = `${API_CONFIG[system]}?action=summary&end_date=${endDate}`;
                     const response = await fetch(apiUrl, {
                         headers: {
                             'Content-Type': 'application/json'
@@ -3027,7 +3008,7 @@ require_once 'session_check.php';
                     }
                     
                     if (result.success) {
-                        var dataToExport = result.data.summary || [];
+                        dataToExport = result.data.summary || [];
                         
                         // J2系统过滤掉Sake类型的数据
                         if (system === 'j2') {
@@ -3042,14 +3023,14 @@ require_once 'session_check.php';
                 }
                 
                 if (!dataToExport || dataToExport.length === 0) {
-                    showAlert('所选日期范围内没有数据可导出', 'error');
+                    showAlert('所选日期没有数据可导出', 'error');
                     return;
                 }
                 
                 console.log('Data to export:', dataToExport.length, 'records');
                 
                 // 执行PDF生成
-                generatePDF(system, dataToExport, startDate, endDate);
+                generatePDF(system, dataToExport, endDate);
                 
             } catch (error) {
                 console.error('获取数据失败:', error);
@@ -3058,7 +3039,7 @@ require_once 'session_check.php';
         }
 
         // 生成PDF文件
-        function generatePDF(system, dataToExport, startDate, endDate) {
+        function generatePDF(system, dataToExport, endDate) {
             try {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF('landscape', 'mm', 'a4');
@@ -3078,7 +3059,7 @@ require_once 'session_check.php';
                 doc.setFont(undefined, 'bold');
                 doc.text(title, 14, 15);
                 
-                // 格式化日期范围显示
+                // 格式化日期显示
                 const formatDateForDisplay = (dateStr) => {
                     const date = new Date(dateStr);
                     return date.toLocaleDateString('en-US', {
@@ -3099,7 +3080,7 @@ require_once 'session_check.php';
                     minute: '2-digit'
                 });
                 doc.text(`Export Time: ${exportTimeStr}`, 14, 22);
-                doc.text(`Date Range: ${formatDateForDisplay(startDate)} - ${formatDateForDisplay(endDate)}`, 14, 28);
+                doc.text(`As of Date: ${formatDateForDisplay(endDate)}`, 14, 28);
                 doc.text(`Records: ${dataToExport.length}`, 200, 22);
                 
                 // 准备表格数据
@@ -3223,13 +3204,13 @@ require_once 'session_check.php';
                     }
                 });
                 
-                // 保存PDF（文件名包含日期范围）
+                // 保存PDF（文件名包含日期）
                 const formatDateForFileName = (dateStr) => {
                     return dateStr.replace(/-/g, '');
                 };
                 const fileName = system === 'remark' 
-                    ? `stock_price_analysis_${formatDateForFileName(startDate)}_${formatDateForFileName(endDate)}.pdf`
-                    : `${system}_stock_summary_${formatDateForFileName(startDate)}_${formatDateForFileName(endDate)}.pdf`;
+                    ? `stock_price_analysis_${formatDateForFileName(endDate)}.pdf`
+                    : `${system}_stock_summary_${formatDateForFileName(endDate)}.pdf`;
                 
                 doc.save(fileName);
                 showAlert('PDF导出成功', 'success');

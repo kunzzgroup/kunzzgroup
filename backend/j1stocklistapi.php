@@ -164,9 +164,8 @@ if ($method === 'GET') {
     switch ($action) {
         case 'summary':
             try {
-                $startDate = $_GET['start_date'] ?? null;
                 $endDate = $_GET['end_date'] ?? null;
-                $result = getJ1StockSummary($startDate, $endDate);
+                $result = getJ1StockSummary(null, $endDate);
                 sendResponse(true, "J1库存汇总数据获取成功", $result);
             } catch (Exception $e) {
                 sendResponse(false, $e->getMessage());
