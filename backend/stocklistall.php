@@ -3227,7 +3227,7 @@ require_once 'session_check.php';
             if (!container) return;
 
             // 先检查并限制通知数量（在添加新通知之前）
-            const existingToasts = container.querySelectorAll('.toast');
+            let existingToasts = container.querySelectorAll('.toast');
             while (existingToasts.length >= 3) {
                 closeToast(existingToasts[0].id);
                 // 立即从DOM移除，不等待动画
