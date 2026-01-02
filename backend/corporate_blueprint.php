@@ -1114,17 +1114,10 @@ if (file_exists($jsonFile)) {
         }
 
         .org-connection-line {
-            stroke: #ff5c00;
-            stroke-width: 2.5;
+            stroke: #000000;
+            stroke-width: 2;
             fill: none;
-            stroke-dasharray: 1000;
-            stroke-dashoffset: 1000;
-            transition: stroke-dashoffset 1.5s ease-in-out;
-            filter: drop-shadow(0 2px 4px rgba(255, 92, 0, 0.3));
-        }
-
-        .org-connection-line.animate {
-            stroke-dashoffset: 0;
+            opacity: 1;
         }
 
         /* Tree Node Styles */
@@ -1135,20 +1128,17 @@ if (file_exists($jsonFile)) {
 
         .org-node {
             position: absolute;
-            background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
-            border-radius: clamp(10px, 1.04vw, 14px);
+            background: #ff8c42;
+            border-radius: clamp(8px, 0.83vw, 12px);
             padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 24px);
-            box-shadow: 
-                0 4px 16px rgba(255, 165, 0, 0.3),
-                0 0 0 2px rgba(255, 255, 255, 0.5),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             text-align: center;
             width: clamp(130px, 13.54vw, 180px);
             box-sizing: border-box;
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            border: 2px solid rgba(255, 255, 255, 0.4);
+            transition: all 0.3s ease;
+            border: none;
             opacity: 0;
-            transform: translate(-50%, 0) scale(0.8) translateY(-20px);
+            transform: translate(-50%, 0) scale(0.9);
             cursor: pointer;
             white-space: normal;
             word-wrap: break-word;
@@ -1227,36 +1217,33 @@ if (file_exists($jsonFile)) {
 
         .org-node-title {
             font-size: clamp(14px, 1.46vw, 18px);
-            font-weight: 800;
-            color: #000000;
-            margin-bottom: clamp(6px, 0.63vw, 8px);
-            letter-spacing: 0.5px;
-            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: clamp(4px, 0.42vw, 6px);
+            letter-spacing: 0.3px;
         }
 
         .org-node-name {
             font-size: clamp(11px, 1.15vw, 14px);
-            color: #000000;
-            font-weight: 600;
+            color: #ffffff;
+            font-weight: 500;
             line-height: 1.4;
             word-break: break-word;
         }
 
         .org-subordinate {
             position: absolute;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: clamp(8px, 0.83vw, 10px);
+            background: #ff8c42;
+            border-radius: clamp(8px, 0.83vw, 12px);
             padding: clamp(8px, 0.83vw, 12px) clamp(12px, 1.25vw, 16px);
-            border: 2px solid rgba(255, 92, 0, 0.3);
+            border: none;
             text-align: center;
             width: clamp(110px, 11.46vw, 150px);
             box-sizing: border-box;
             transition: all 0.3s ease;
-            box-shadow: 
-                0 2px 8px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
             opacity: 0;
-            transform: translate(-50%, 0) scale(0.8);
+            transform: translate(-50%, 0) scale(0.9);
             white-space: normal;
             word-wrap: break-word;
         }
@@ -1267,28 +1254,25 @@ if (file_exists($jsonFile)) {
         }
 
         .org-subordinate:hover {
-            background: rgba(255, 255, 255, 1);
-            border-color: rgba(255, 92, 0, 0.5);
-            transform: translate(-50%, 0) scale(1.05) translateY(-2px);
-            box-shadow: 
-                0 4px 12px rgba(0, 0, 0, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 1);
+            transform: translate(-50%, 0) scale(1.03);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
             z-index: 10;
         }
 
         .org-subordinate-title {
             font-size: clamp(11px, 1.15vw, 13px);
             font-weight: 700;
-            color: #ff5c00;
+            color: #ffffff;
             margin-bottom: clamp(4px, 0.42vw, 6px);
             letter-spacing: 0.3px;
         }
 
         .org-subordinate-fulltitle {
             font-size: clamp(9px, 0.94vw, 11px);
-            color: #6b7280;
+            color: #ffffff;
             line-height: 1.4;
             word-break: break-word;
+            opacity: 0.95;
         }
 
         /* Responsive Design */
@@ -1859,34 +1843,37 @@ if (file_exists($jsonFile)) {
                             <?php 
                             $orgStructure = $strategyData['organizationStructure'];
                             
-                            // Calculate positions for tech tree layout
-                            // Level 1: CEO at top center, PA to the right
-                            // Level 2: CAO, CSO, COO below CEO (evenly distributed)
-                            // Level 3: Subordinates below each C-Level (centered under parent)
+                            // Traditional org chart layout with T-shaped connections
+                            // Level 1: CEO at top center, PA to the right (same level)
+                            // Level 2: CAO, CSO, COO below CEO (connected via vertical line + horizontal branches)
+                            // Level 3: Subordinates below each C-Level (same pattern)
                             
-                            $level1Y = 8; // Top level Y position (%)
-                            $level2Y = 40; // C-Level Y position (%)
-                            $level3Y = 75; // Subordinates Y position (%)
+                            $level1Y = 10; // Top level Y position (%)
+                            $level2Y = 38; // C-Level Y position (%)
+                            $level3Y = 72; // Subordinates Y position (%)
                             
                             // CEO position (center top)
                             $ceoX = 50;
                             $ceoY = $level1Y;
                             
-                            // PA position (right of CEO, slightly lower)
-                            $paX = 80;
-                            $paY = $level1Y + 2;
+                            // PA position (right of CEO, same level)
+                            $paX = 70;
+                            $paY = $level1Y;
+                            
+                            // Connection point for CEO-PA horizontal line (middle point)
+                            $ceoPaMidY = $level1Y;
                             
                             // C-Level positions (evenly distributed horizontally)
                             $cLevelCount = !empty($orgStructure['cLevel']) ? count($orgStructure['cLevel']) : 0;
                             $cLevelPositions = [];
                             if ($cLevelCount > 0) {
-                                // Distribute evenly across 70% of width (15% margin on each side)
-                                $startX = 15;
-                                $endX = 85;
+                                // Distribute evenly
+                                $startX = 20;
+                                $endX = 80;
                                 $totalWidth = $endX - $startX;
                                 
                                 if ($cLevelCount == 1) {
-                                    $cLevelPositions[0] = 50; // Center if only one
+                                    $cLevelPositions[0] = 50;
                                 } else {
                                     $spacing = $totalWidth / ($cLevelCount - 1);
                                     for ($i = 0; $i < $cLevelCount; $i++) {
@@ -1895,37 +1882,50 @@ if (file_exists($jsonFile)) {
                                 }
                             }
                             
+                            // Branch line Y position (horizontal line connecting C-Level nodes)
+                            $branchLineY = $level2Y - 5;
+                            
+                            // Main vertical line from CEO to branch line
+                            $mainVerticalStartY = $ceoY + 6;
+                            $mainVerticalEndY = $branchLineY;
+                            
                             // Calculate subordinate positions for each C-Level
                             $subordinatePositions = [];
+                            $subBranchLines = [];
                             if (!empty($orgStructure['cLevel'])) {
                                 foreach ($orgStructure['cLevel'] as $index => $exec) {
                                     if (!empty($exec['subordinates'])) {
                                         $subCount = count($exec['subordinates']);
                                         $parentX = $cLevelPositions[$index];
                                         
-                                        // Calculate spacing based on number of subordinates
-                                        // Each subordinate gets max 12% width, with min 8% spacing
-                                        $maxSubWidth = 12;
-                                        $minSpacing = 8;
-                                        
                                         if ($subCount == 1) {
-                                            // Single subordinate: center under parent
+                                            // Single subordinate: directly below parent
                                             $subordinatePositions[$index][0] = $parentX;
+                                            $subBranchLines[$index] = null; // No branch line needed
                                         } else {
-                                            // Multiple subordinates: distribute evenly
+                                            // Multiple subordinates: create branch line
+                                            $minSpacing = 10;
                                             $totalSubWidth = ($subCount - 1) * $minSpacing;
                                             $startSubX = $parentX - ($totalSubWidth / 2);
                                             
+                                            // Adjust to stay within bounds
+                                            if ($startSubX < 5) {
+                                                $startSubX = 5;
+                                            }
+                                            if (($startSubX + $totalSubWidth) > 95) {
+                                                $startSubX = 95 - $totalSubWidth;
+                                            }
+                                            
                                             for ($subIndex = 0; $subIndex < $subCount; $subIndex++) {
                                                 $subordinatePositions[$index][$subIndex] = $startSubX + ($subIndex * $minSpacing);
-                                                
-                                                // Ensure positions stay within bounds (5% to 95%)
-                                                if ($subordinatePositions[$index][$subIndex] < 5) {
-                                                    $subordinatePositions[$index][$subIndex] = 5;
-                                                } elseif ($subordinatePositions[$index][$subIndex] > 95) {
-                                                    $subordinatePositions[$index][$subIndex] = 95;
-                                                }
                                             }
+                                            
+                                            // Branch line coordinates
+                                            $subBranchLines[$index] = [
+                                                'startX' => $subordinatePositions[$index][0],
+                                                'endX' => $subordinatePositions[$index][$subCount - 1],
+                                                'y' => $level3Y - 5
+                                            ];
                                         }
                                     }
                                 }
@@ -1936,44 +1936,109 @@ if (file_exists($jsonFile)) {
                             <svg class="org-connections" viewBox="0 0 100 100" preserveAspectRatio="none">
                                 <defs>
                                     <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                        <stop offset="0%" style="stop-color:#ff5c00;stop-opacity:0.3" />
-                                        <stop offset="50%" style="stop-color:#ff5c00;stop-opacity:1" />
-                                        <stop offset="100%" style="stop-color:#ff5c00;stop-opacity:0.3" />
+                                        <stop offset="0%" style="stop-color:#000000;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#000000;stop-opacity:1" />
                                     </linearGradient>
                                 </defs>
                                 
                                 <?php 
-                                // Draw lines from CEO to C-Level executives
-                                if (!empty($orgStructure['cLevel']) && !empty($cLevelPositions)): 
-                                    foreach ($orgStructure['cLevel'] as $index => $exec):
-                                        $cLevelX = $cLevelPositions[$index];
+                                // 1. Horizontal line from CEO to PA
+                                if (!empty($orgStructure['pa'])): 
                                 ?>
                                 <line class="org-connection-line" 
                                       x1="<?php echo $ceoX; ?>%" 
-                                      y1="<?php echo $ceoY + 6; ?>%" 
+                                      y1="<?php echo $ceoPaMidY; ?>%" 
+                                      x2="<?php echo $paX; ?>%" 
+                                      y2="<?php echo $paY; ?>%"
+                                      stroke="#000000" stroke-width="2"/>
+                                <?php endif; ?>
+                                
+                                <?php 
+                                // 2. Main vertical line from CEO down to branch line
+                                if (!empty($orgStructure['cLevel']) && $cLevelCount > 0): 
+                                ?>
+                                <line class="org-connection-line" 
+                                      x1="<?php echo $ceoX; ?>%" 
+                                      y1="<?php echo $mainVerticalStartY; ?>%" 
+                                      x2="<?php echo $ceoX; ?>%" 
+                                      y2="<?php echo $mainVerticalEndY; ?>%"
+                                      stroke="#000000" stroke-width="2"/>
+                                
+                                <?php 
+                                // 3. Horizontal branch line connecting C-Level nodes
+                                if ($cLevelCount > 1): 
+                                ?>
+                                <line class="org-connection-line" 
+                                      x1="<?php echo $cLevelPositions[0]; ?>%" 
+                                      y1="<?php echo $branchLineY; ?>%" 
+                                      x2="<?php echo $cLevelPositions[$cLevelCount - 1]; ?>%" 
+                                      y2="<?php echo $branchLineY; ?>%"
+                                      stroke="#000000" stroke-width="2"/>
+                                <?php endif; ?>
+                                
+                                <?php 
+                                // 4. Vertical lines from branch line to each C-Level node
+                                foreach ($orgStructure['cLevel'] as $index => $exec):
+                                    $cLevelX = $cLevelPositions[$index];
+                                ?>
+                                <line class="org-connection-line" 
+                                      x1="<?php echo $cLevelX; ?>%" 
+                                      y1="<?php echo $branchLineY; ?>%" 
                                       x2="<?php echo $cLevelX; ?>%" 
                                       y2="<?php echo $level2Y - 3; ?>%"
-                                      stroke="url(#lineGradient)"/>
+                                      stroke="#000000" stroke-width="2"/>
                                 <?php 
-                                    endforeach;
+                                endforeach;
                                 endif;
                                 
-                                // Draw lines from C-Level to subordinates
+                                // 5. Lines from C-Level to subordinates (same pattern)
                                 if (!empty($orgStructure['cLevel']) && !empty($subordinatePositions)):
                                     foreach ($orgStructure['cLevel'] as $index => $exec):
                                         if (!empty($exec['subordinates']) && !empty($subordinatePositions[$index])):
                                             $cLevelX = $cLevelPositions[$index];
-                                            foreach ($exec['subordinates'] as $subIndex => $sub):
-                                                $subX = $subordinatePositions[$index][$subIndex];
+                                            $subCount = count($exec['subordinates']);
+                                            
+                                            if ($subCount == 1) {
+                                                // Single subordinate: direct vertical line
+                                                $subX = $subordinatePositions[$index][0];
                                 ?>
                                 <line class="org-connection-line" 
                                       x1="<?php echo $cLevelX; ?>%" 
                                       y1="<?php echo $level2Y + 6; ?>%" 
                                       x2="<?php echo $subX; ?>%" 
                                       y2="<?php echo $level3Y - 3; ?>%"
-                                      stroke="url(#lineGradient)"/>
+                                      stroke="#000000" stroke-width="2"/>
                                 <?php 
-                                            endforeach;
+                                            } else {
+                                                // Multiple subordinates: vertical line + horizontal branch
+                                                // Vertical line from C-Level to branch line
+                                ?>
+                                <line class="org-connection-line" 
+                                      x1="<?php echo $cLevelX; ?>%" 
+                                      y1="<?php echo $level2Y + 6; ?>%" 
+                                      x2="<?php echo $cLevelX; ?>%" 
+                                      y2="<?php echo $subBranchLines[$index]['y']; ?>%"
+                                      stroke="#000000" stroke-width="2"/>
+                                <line class="org-connection-line" 
+                                      x1="<?php echo $subBranchLines[$index]['startX']; ?>%" 
+                                      y1="<?php echo $subBranchLines[$index]['y']; ?>%" 
+                                      x2="<?php echo $subBranchLines[$index]['endX']; ?>%" 
+                                      y2="<?php echo $subBranchLines[$index]['y']; ?>%"
+                                      stroke="#000000" stroke-width="2"/>
+                                <?php 
+                                                // Vertical lines from branch line to each subordinate
+                                                foreach ($exec['subordinates'] as $subIndex => $sub):
+                                                    $subX = $subordinatePositions[$index][$subIndex];
+                                ?>
+                                <line class="org-connection-line" 
+                                      x1="<?php echo $subX; ?>%" 
+                                      y1="<?php echo $subBranchLines[$index]['y']; ?>%" 
+                                      x2="<?php echo $subX; ?>%" 
+                                      y2="<?php echo $level3Y - 3; ?>%"
+                                      stroke="#000000" stroke-width="2"/>
+                                <?php 
+                                                endforeach;
+                                            }
                                         endif;
                                     endforeach;
                                 endif;
@@ -2209,7 +2274,7 @@ if (file_exists($jsonFile)) {
                     if (ceoNode) {
                         setTimeout(() => {
                             ceoNode.classList.add('animate');
-                        }, 200);
+                        }, 100);
                     }
 
                     // 2. 显示PA节点
@@ -2217,43 +2282,23 @@ if (file_exists($jsonFile)) {
                     if (paNode) {
                         setTimeout(() => {
                             paNode.classList.add('animate');
-                        }, 400);
+                        }, 200);
                     }
 
-                    // 3. 获取所有连接线
-                    const connectionLines = Array.from(container.querySelectorAll('.org-connection-line'));
+                    // 3. 显示C-Level节点
                     const cLevelNodes = container.querySelectorAll('.org-node:not(.ceo):not(.pa)');
-                    const subordinates = container.querySelectorAll('.org-subordinate');
-                    
-                    // 计算CEO到C-Level的连接线数量（等于C-Level节点数）
-                    const cLevelCount = cLevelNodes.length;
-                    
-                    // 4. 绘制从CEO到C-Level的连接线
-                    connectionLines.slice(0, cLevelCount).forEach((line, index) => {
-                        setTimeout(() => {
-                            line.classList.add('animate');
-                        }, 600 + (index * 150));
-                    });
-
-                    // 5. 显示C-Level节点
                     cLevelNodes.forEach((node, index) => {
                         setTimeout(() => {
                             node.classList.add('animate');
-                        }, 1200 + (index * 200));
+                        }, 400 + (index * 100));
                     });
 
-                    // 6. 绘制从C-Level到下属的连接线
-                    connectionLines.slice(cLevelCount).forEach((line, index) => {
-                        setTimeout(() => {
-                            line.classList.add('animate');
-                        }, 2000 + (index * 100));
-                    });
-
-                    // 7. 显示下属节点
+                    // 4. 显示下属节点
+                    const subordinates = container.querySelectorAll('.org-subordinate');
                     subordinates.forEach((sub, index) => {
                         setTimeout(() => {
                             sub.classList.add('animate');
-                        }, 2500 + (index * 100));
+                        }, 800 + (index * 50));
                     });
                 }
             }
