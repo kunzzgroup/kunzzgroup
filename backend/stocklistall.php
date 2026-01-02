@@ -2990,56 +2990,75 @@ require_once 'session_check.php';
         }
 
         // 执行实际的导出操作
-        function performExport(system, startDate, endDate) {
-            // 调试：检查数据状态
-            console.log('performExport called with system:', system);
-            console.log('filteredData[system]:', filteredData[system]);
-            console.log('stockData[system]:', stockData[system]);
+        async function performExport(system, startDate, endDate) {
+            // 显示加载提示
+            showAlert('正在根据日期范围获取数据...', 'info');
             
-            // 检查数据是否存在，如果filteredData为空，尝试使用stockData
-            let dataToExport;
-            if (system === 'remark') {
-                dataToExport = filteredData.remark;
-                console.log('remark filteredData:', filteredData.remark);
-                console.log('remark stockData:', stockData.remark);
-                if (!dataToExport || dataToExport.length === 0) {
-                    if (stockData.remark && stockData.remark.length > 0) {
-                        dataToExport = stockData.remark;
-                        console.log('Using stockData.remark, length:', dataToExport.length);
+            try {
+                // 根据日期范围重新获取数据
+                let result;
+                if (system === 'remark') {
+                    result = await apiCall(system, '?action=analysis');
+                    if (result.success) {
+                        var dataToExport = result.data.products || [];
                     } else {
-                        console.error('No remark data available');
-                        showAlert('没有数据可导出', 'error');
+                        showAlert('获取数据失败: ' + (result.message || '未知错误'), 'error');
                         return;
                     }
                 } else {
-                    console.log('Using filteredData.remark, length:', dataToExport.length);
-                }
-            } else {
-                dataToExport = filteredData[system];
-                console.log('filteredData[' + system + '] length:', dataToExport ? dataToExport.length : 0);
-                if (!dataToExport || dataToExport.length === 0) {
-                    // 如果没有过滤数据，尝试使用原始数据
-                    if (stockData[system] && stockData[system].length > 0) {
-                        dataToExport = stockData[system];
-                        console.log('Using stockData[' + system + '], length:', dataToExport.length);
-                    } else {
-                        console.error('No data available for system:', system);
-                        console.error('filteredData[' + system + ']:', filteredData[system]);
-                        console.error('stockData[' + system + ']:', stockData[system]);
-                        showAlert('没有数据可导出', 'error');
+                    // 构建带日期范围的API URL
+                    const apiUrl = `${API_CONFIG[system]}?action=summary&start_date=${startDate}&end_date=${endDate}`;
+                    const response = await fetch(apiUrl, {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP错误: ${response.status}`);
+                    }
+                    
+                    result = await response.json();
+                    
+                    // 检查是否是会话过期
+                    if (result.code === 'SESSION_EXPIRED') {
+                        showSessionExpiredMessage();
                         return;
                     }
-                } else {
-                    console.log('Using filteredData[' + system + '], length:', dataToExport.length);
+                    
+                    if (result.success) {
+                        var dataToExport = result.data.summary || [];
+                        
+                        // J2系统过滤掉Sake类型的数据
+                        if (system === 'j2') {
+                            dataToExport = dataToExport.filter(item => {
+                                return item.type !== 'Sake';
+                            });
+                        }
+                    } else {
+                        showAlert('获取数据失败: ' + (result.message || '未知错误'), 'error');
+                        return;
+                    }
                 }
+                
+                if (!dataToExport || dataToExport.length === 0) {
+                    showAlert('所选日期范围内没有数据可导出', 'error');
+                    return;
+                }
+                
+                console.log('Data to export:', dataToExport.length, 'records');
+                
+                // 执行PDF生成
+                generatePDF(system, dataToExport, startDate, endDate);
+                
+            } catch (error) {
+                console.error('获取数据失败:', error);
+                showAlert('获取数据失败: ' + error.message, 'error');
             }
-            
-            if (!dataToExport || dataToExport.length === 0) {
-                console.error('dataToExport is empty after all checks');
-                showAlert('没有数据可导出', 'error');
-                return;
-            }
-            
+        }
+
+        // 生成PDF文件
+        function generatePDF(system, dataToExport, startDate, endDate) {
             try {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF('landscape', 'mm', 'a4');

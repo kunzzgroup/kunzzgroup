@@ -42,7 +42,7 @@ function sendResponse($success, $message = "", $data = null) {
 }
 
 // 获取J3库存汇总数据
-function getJ3StockSummary() {
+function getJ3StockSummary($startDate = null, $endDate = null) {
     global $pdo;
     
     try {
@@ -58,13 +58,23 @@ function getJ3StockSummary() {
                     (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
                      SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
                 FROM j3stockedit_data 
-                WHERE product_name IS NOT NULL AND product_name != ''
-                GROUP BY product_name, specification, price, code_number, type
+                WHERE product_name IS NOT NULL AND product_name != ''";
+        
+        $params = [];
+        
+        // 如果提供了日期范围，只计算该日期范围内的库存变动
+        if ($startDate && $endDate) {
+            $sql .= " AND date BETWEEN ? AND ?";
+            $params[] = $startDate;
+            $params[] = $endDate;
+        }
+        
+        $sql .= " GROUP BY product_name, specification, price, code_number, type
                 HAVING current_stock != 0
                 ORDER BY product_name ASC, price ASC";
         
         $stmt = $pdo->prepare($sql);
-        $stmt->execute();
+        $stmt->execute($params);
         $stockData = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         // 计算总价值和按类型统计 - 使用原始数值计算，只在显示时格式化
@@ -140,7 +150,9 @@ if ($method === 'GET') {
     switch ($action) {
         case 'summary':
             try {
-                $result = getJ3StockSummary();
+                $startDate = $_GET['start_date'] ?? null;
+                $endDate = $_GET['end_date'] ?? null;
+                $result = getJ3StockSummary($startDate, $endDate);
                 sendResponse(true, "J3库存汇总数据获取成功", $result);
             } catch (Exception $e) {
                 sendResponse(false, $e->getMessage());
