@@ -2971,10 +2971,29 @@ require_once 'session_check.php';
 
         // 执行实际的导出操作
         function performExport(system, startDate, endDate) {
-            // 检查数据是否存在
-            if (!filteredData[system] || filteredData[system].length === 0) {
-                showAlert('没有数据可导出', 'error');
-                return;
+            // 检查数据是否存在，如果filteredData为空，尝试使用stockData
+            let dataToExport;
+            if (system === 'remark') {
+                dataToExport = filteredData.remark;
+                if (!dataToExport || dataToExport.length === 0) {
+                    if (stockData.remark && stockData.remark.length > 0) {
+                        dataToExport = stockData.remark;
+                    } else {
+                        showAlert('没有数据可导出', 'error');
+                        return;
+                    }
+                }
+            } else {
+                dataToExport = filteredData[system];
+                if (!dataToExport || dataToExport.length === 0) {
+                    // 如果没有过滤数据，尝试使用原始数据
+                    if (stockData[system] && stockData[system].length > 0) {
+                        dataToExport = stockData[system];
+                    } else {
+                        showAlert('没有数据可导出', 'error');
+                        return;
+                    }
+                }
             }
             
             try {
@@ -3018,7 +3037,7 @@ require_once 'session_check.php';
                 });
                 doc.text(`Export Time: ${exportTimeStr}`, 14, 22);
                 doc.text(`Date Range: ${formatDateForDisplay(startDate)} - ${formatDateForDisplay(endDate)}`, 14, 28);
-                doc.text(`Records: ${filteredData[system].length}`, 200, 22);
+                doc.text(`Records: ${dataToExport.length}`, 200, 22);
                 
                 // 准备表格数据
                 let headers, tableData, columnStyles;
@@ -3028,7 +3047,7 @@ require_once 'session_check.php';
                     headers = [['Product Name', 'Rank', 'Code Number', 'Stock', 'Unit Price']];
                     tableData = [];
                     
-                    filteredData.remark.forEach(product => {
+                    dataToExport.forEach(product => {
                         product.variants.forEach((variant, index) => {
                             tableData.push([
                                 product.product_name || '-',
@@ -3053,7 +3072,7 @@ require_once 'session_check.php';
                     tableData = [];
                     let totalValue = 0;
                     
-                    filteredData[system].forEach((item, index) => {
+                    dataToExport.forEach((item, index) => {
                         if (!item) return;
                         
                         const productName = (item.product_name || '').trim();
