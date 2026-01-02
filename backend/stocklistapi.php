@@ -46,8 +46,8 @@ function getStockSummary($startDate = null, $endDate = null) {
     global $pdo;
     
     try {
-        // 如果提供了日期范围，计算到结束日期为止的所有库存（包括历史累计）
-        if ($startDate && $endDate) {
+        // 如果提供了结束日期，计算到该日期为止的所有库存（包括历史累计）
+        if ($endDate) {
             // 计算到结束日期为止的所有库存
             $sql = "SELECT 
                         product_name,
