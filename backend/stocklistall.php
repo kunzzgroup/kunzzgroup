@@ -797,7 +797,7 @@ require_once 'session_check.php';
             width: 100%;
         }
 
-        .low-stock-modal {
+        .low-stock-modal, .export-date-modal {
             display: none;
             position: fixed;
             z-index: 10000;
@@ -809,7 +809,7 @@ require_once 'session_check.php';
             animation: fadeIn 0.3s ease-out;
         }
 
-        .low-stock-modal-content {
+        .low-stock-modal-content, .export-date-modal-content {
             background-color: #fff;
             margin: 5% auto;
             padding: 0;
@@ -822,8 +822,13 @@ require_once 'session_check.php';
             animation: slideIn 0.3s ease-out;
         }
 
-        .low-stock-modal-header {
-            background: linear-gradient(135deg, #dc2626, #ef4444);
+        .export-date-modal-content {
+            width: clamp(400px, 33.33vw, 500px);
+            max-height: auto;
+        }
+
+        .low-stock-modal-header, .export-date-modal-header {
+            background: linear-gradient(135deg, #f99300, #f98500ff);
             color: white;
             padding: clamp(10px, 1.04vw, 20px) clamp(18px, 1.25vw, 24px);
             display: flex;
@@ -859,10 +864,42 @@ require_once 'session_check.php';
             background-color: rgba(255, 255, 255, 0.2);
         }
 
-        .low-stock-modal-body {
+        .low-stock-modal-body, .export-date-modal-body {
             padding: clamp(10px, 1.15vw, 22px) clamp(18px, 1.25vw, 24px);
-            height: clamp(58vh, 30vw, 60vh);
             overflow-y: auto;
+        }
+
+        .export-date-modal-body {
+            padding: clamp(20px, 2.08vw, 40px) clamp(18px, 1.25vw, 24px);
+        }
+
+        .date-selector-group {
+            margin-bottom: 24px;
+        }
+
+        .date-selector-group label {
+            display: block;
+            font-size: clamp(12px, 1.04vw, 16px);
+            font-weight: 600;
+            color: #583e04;
+            margin-bottom: 8px;
+        }
+
+        .date-selector-group input[type="date"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: clamp(12px, 1.04vw, 16px);
+            background: white;
+            color: #583e04;
+            transition: all 0.2s;
+        }
+
+        .date-selector-group input[type="date"]:focus {
+            outline: none;
+            border-color: #f99300;
+            box-shadow: 0 0 0 3px rgba(249, 147, 0, 0.1);
         }
 
         .low-stock-table {
@@ -1352,6 +1389,41 @@ require_once 'session_check.php';
                 <div class="alert-summary" id="alert-summary">
                     <!-- Summary info -->
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导出日期选择弹窗 -->
+    <div id="export-date-modal" class="export-date-modal">
+        <div class="export-date-modal-content">
+            <div class="export-date-modal-header">
+                <h2>
+                    <i class="fas fa-calendar-alt"></i>
+                    选择导出日期范围
+                </h2>
+                <button class="close-modal" onclick="closeExportDateModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="export-date-modal-body">
+                <div class="date-selector-group">
+                    <label for="export-start-date">开始日期</label>
+                    <input type="date" id="export-start-date" required>
+                </div>
+                <div class="date-selector-group">
+                    <label for="export-end-date">结束日期</label>
+                    <input type="date" id="export-end-date" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeExportDateModal()">
+                    <i class="fas fa-times"></i>
+                    取消
+                </button>
+                <button class="btn btn-primary" onclick="confirmExport()">
+                    <i class="fas fa-download"></i>
+                    确认导出
+                </button>
             </div>
         </div>
     </div>
@@ -2811,6 +2883,9 @@ require_once 'session_check.php';
             loadData(system);
         }
 
+        // 存储当前要导出的系统
+        let currentExportSystem = null;
+
         // 导出数据为PDF（英文格式，使用jsPDF直接生成）
         function exportData(system) {
             // 检查数据是否存在
@@ -2823,6 +2898,83 @@ require_once 'session_check.php';
                     // 使用原始数据
                     filteredData[system] = [...stockData[system]];
                 }
+            }
+            
+            // 保存当前系统并显示日期选择模态框
+            currentExportSystem = system;
+            showExportDateModal();
+        }
+
+        // 显示导出日期选择模态框
+        function showExportDateModal() {
+            const modal = document.getElementById('export-date-modal');
+            const startDateInput = document.getElementById('export-start-date');
+            const endDateInput = document.getElementById('export-end-date');
+            
+            // 设置默认日期（今天作为结束日期，30天前作为开始日期）
+            const today = new Date();
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(today.getDate() - 30);
+            
+            endDateInput.value = formatDateForInput(today);
+            startDateInput.value = formatDateForInput(thirtyDaysAgo);
+            
+            // 设置最大日期为今天
+            const todayStr = formatDateForInput(today);
+            startDateInput.max = todayStr;
+            endDateInput.max = todayStr;
+            
+            modal.style.display = 'block';
+        }
+
+        // 关闭导出日期选择模态框
+        function closeExportDateModal() {
+            document.getElementById('export-date-modal').style.display = 'none';
+            currentExportSystem = null;
+        }
+
+        // 格式化日期为YYYY-MM-DD格式（用于input[type="date"]）
+        function formatDateForInput(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // 确认导出
+        function confirmExport() {
+            const startDateInput = document.getElementById('export-start-date');
+            const endDateInput = document.getElementById('export-end-date');
+            
+            const startDate = startDateInput.value;
+            const endDate = endDateInput.value;
+            
+            if (!startDate || !endDate) {
+                showAlert('请选择开始日期和结束日期', 'error');
+                return;
+            }
+            
+            const startDateObj = new Date(startDate);
+            const endDateObj = new Date(endDate);
+            
+            if (startDateObj > endDateObj) {
+                showAlert('开始日期不能晚于结束日期', 'error');
+                return;
+            }
+            
+            // 关闭模态框
+            closeExportDateModal();
+            
+            // 执行导出
+            performExport(currentExportSystem, startDate, endDate);
+        }
+
+        // 执行实际的导出操作
+        function performExport(system, startDate, endDate) {
+            // 检查数据是否存在
+            if (!filteredData[system] || filteredData[system].length === 0) {
+                showAlert('没有数据可导出', 'error');
+                return;
             }
             
             try {
@@ -2844,17 +2996,28 @@ require_once 'session_check.php';
                 doc.setFont(undefined, 'bold');
                 doc.text(title, 14, 15);
                 
+                // 格式化日期范围显示
+                const formatDateForDisplay = (dateStr) => {
+                    const date = new Date(dateStr);
+                    return date.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                    });
+                };
+                
                 // 添加日期信息
                 doc.setFontSize(10);
                 doc.setFont(undefined, 'normal');
-                const dateStr = new Date().toLocaleString('en-US', {
+                const exportTimeStr = new Date().toLocaleString('en-US', {
                     year: 'numeric',
                     month: '2-digit',
                     day: '2-digit',
                     hour: '2-digit',
                     minute: '2-digit'
                 });
-                doc.text(`Export Time: ${dateStr}`, 14, 22);
+                doc.text(`Export Time: ${exportTimeStr}`, 14, 22);
+                doc.text(`Date Range: ${formatDateForDisplay(startDate)} - ${formatDateForDisplay(endDate)}`, 14, 28);
                 doc.text(`Records: ${filteredData[system].length}`, 200, 22);
                 
                 // 准备表格数据
@@ -2944,11 +3107,11 @@ require_once 'session_check.php';
                     };
                 }
                 
-                // 生成表格
+                // 生成表格（调整起始位置以容纳日期范围）
                 doc.autoTable({
                     head: headers,
                     body: tableData,
-                    startY: 28,
+                    startY: 34,
                     styles: {
                         fontSize: 8,
                         cellPadding: 2,
@@ -2978,10 +3141,13 @@ require_once 'session_check.php';
                     }
                 });
                 
-                // 保存PDF
+                // 保存PDF（文件名包含日期范围）
+                const formatDateForFileName = (dateStr) => {
+                    return dateStr.replace(/-/g, '');
+                };
                 const fileName = system === 'remark' 
-                    ? `stock_price_analysis_${new Date().toISOString().split('T')[0]}.pdf`
-                    : `${system}_stock_summary_${new Date().toISOString().split('T')[0]}.pdf`;
+                    ? `stock_price_analysis_${formatDateForFileName(startDate)}_${formatDateForFileName(endDate)}.pdf`
+                    : `${system}_stock_summary_${formatDateForFileName(startDate)}_${formatDateForFileName(endDate)}.pdf`;
                 
                 doc.save(fileName);
                 showAlert('PDF导出成功', 'success');
@@ -3250,9 +3416,13 @@ require_once 'session_check.php';
 
         // 点击弹窗外部关闭
         document.addEventListener('click', function(e) {
-            const modal = document.getElementById('low-stock-modal');
-            if (e.target === modal) {
+            const lowStockModal = document.getElementById('low-stock-modal');
+            const exportDateModal = document.getElementById('export-date-modal');
+            if (e.target === lowStockModal) {
                 closeLowStockModal();
+            }
+            if (e.target === exportDateModal) {
+                closeExportDateModal();
             }
         });
     </script>
