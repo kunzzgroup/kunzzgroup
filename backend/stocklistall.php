@@ -1401,7 +1401,7 @@ require_once 'session_check.php';
                     <i class="fas fa-calendar-alt"></i>
                     选择导出日期范围
                 </h2>
-                <button class="close-modal" onclick="closeExportDateModal()">
+                <button class="close-modal" onclick="closeExportDateModalComplete()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -1416,7 +1416,7 @@ require_once 'session_check.php';
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeExportDateModal()">
+                <button class="btn btn-secondary" onclick="closeExportDateModalComplete()">
                     <i class="fas fa-times"></i>
                     取消
                 </button>
@@ -2930,6 +2930,12 @@ require_once 'session_check.php';
         // 关闭导出日期选择模态框
         function closeExportDateModal() {
             document.getElementById('export-date-modal').style.display = 'none';
+            // 不在这里清空 currentExportSystem，因为 confirmExport 还需要它
+        }
+        
+        // 完全关闭导出日期选择模态框（清空所有状态）
+        function closeExportDateModalComplete() {
+            document.getElementById('export-date-modal').style.display = 'none';
             currentExportSystem = null;
         }
 
@@ -2962,38 +2968,76 @@ require_once 'session_check.php';
                 return;
             }
             
+            // 调试：检查当前系统
+            console.log('confirmExport - currentExportSystem:', currentExportSystem);
+            console.log('confirmExport - filteredData:', filteredData);
+            console.log('confirmExport - stockData:', stockData);
+            
+            if (!currentExportSystem) {
+                console.error('currentExportSystem is null!');
+                showAlert('系统错误：无法确定导出系统', 'error');
+                return;
+            }
+            
+            // 保存系统变量，因为关闭模态框可能会清空它
+            const systemToExport = currentExportSystem;
+            
             // 关闭模态框
-            closeExportDateModal();
+            closeExportDateModalComplete();
             
             // 执行导出
-            performExport(currentExportSystem, startDate, endDate);
+            performExport(systemToExport, startDate, endDate);
         }
 
         // 执行实际的导出操作
         function performExport(system, startDate, endDate) {
+            // 调试：检查数据状态
+            console.log('performExport called with system:', system);
+            console.log('filteredData[system]:', filteredData[system]);
+            console.log('stockData[system]:', stockData[system]);
+            
             // 检查数据是否存在，如果filteredData为空，尝试使用stockData
             let dataToExport;
             if (system === 'remark') {
                 dataToExport = filteredData.remark;
+                console.log('remark filteredData:', filteredData.remark);
+                console.log('remark stockData:', stockData.remark);
                 if (!dataToExport || dataToExport.length === 0) {
                     if (stockData.remark && stockData.remark.length > 0) {
                         dataToExport = stockData.remark;
+                        console.log('Using stockData.remark, length:', dataToExport.length);
                     } else {
+                        console.error('No remark data available');
                         showAlert('没有数据可导出', 'error');
                         return;
                     }
+                } else {
+                    console.log('Using filteredData.remark, length:', dataToExport.length);
                 }
             } else {
                 dataToExport = filteredData[system];
+                console.log('filteredData[' + system + '] length:', dataToExport ? dataToExport.length : 0);
                 if (!dataToExport || dataToExport.length === 0) {
                     // 如果没有过滤数据，尝试使用原始数据
                     if (stockData[system] && stockData[system].length > 0) {
                         dataToExport = stockData[system];
+                        console.log('Using stockData[' + system + '], length:', dataToExport.length);
                     } else {
+                        console.error('No data available for system:', system);
+                        console.error('filteredData[' + system + ']:', filteredData[system]);
+                        console.error('stockData[' + system + ']:', stockData[system]);
                         showAlert('没有数据可导出', 'error');
                         return;
                     }
+                } else {
+                    console.log('Using filteredData[' + system + '], length:', dataToExport.length);
                 }
+            }
+            
+            if (!dataToExport || dataToExport.length === 0) {
+                console.error('dataToExport is empty after all checks');
+                showAlert('没有数据可导出', 'error');
+                return;
             }
             
             try {
@@ -3441,7 +3485,7 @@ require_once 'session_check.php';
                 closeLowStockModal();
             }
             if (e.target === exportDateModal) {
-                closeExportDateModal();
+                closeExportDateModalComplete();
             }
         });
     </script>
