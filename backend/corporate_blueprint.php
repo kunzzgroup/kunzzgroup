@@ -1728,13 +1728,14 @@ if (file_exists($jsonFile)) {
                         <?php 
                         $orgStructure = $strategyData['organizationStructure'];
                         
-                        // ========== 从数据中读取信息的辅助函数 ==========
+                        // ========== 从数据中读取信息的辅助函数（优先返回缩写）==========
                         function getOrgData($key, $orgStructure, $defaultTitle = '') {
                             $result = ['title' => $defaultTitle, 'name' => '', 'fullTitle' => ''];
                             
                             // 1. 直接通过 key 查找（如 'ceo', 'pa'）
                             if (isset($orgStructure[$key])) {
-                                $result['title'] = $orgStructure[$key]['title'] ?? $defaultTitle;
+                                // 优先使用缩写（title），如果没有则使用全称（fullTitle）
+                                $result['title'] = $orgStructure[$key]['title'] ?? $orgStructure[$key]['fullTitle'] ?? $defaultTitle;
                                 $result['name'] = $orgStructure[$key]['name'] ?? '';
                                 $result['fullTitle'] = $orgStructure[$key]['fullTitle'] ?? '';
                                 if ($result['name']) {
@@ -1760,7 +1761,8 @@ if (file_exists($jsonFile)) {
                                     foreach ($searchKeys as $searchKey) {
                                         if ($execTitle === $searchKey || $execFullTitle === $searchKey || 
                                             strpos($execFullTitle, $searchKey) !== false) {
-                                            $result['title'] = $exec['title'] ?? $defaultTitle;
+                                            // 优先使用缩写（title），如果没有则使用全称（fullTitle）
+                                            $result['title'] = $exec['title'] ?? $exec['fullTitle'] ?? $defaultTitle;
                                             $result['name'] = $exec['name'] ?? '';
                                             $result['fullTitle'] = $exec['fullTitle'] ?? '';
                                             return $result;
@@ -1776,7 +1778,8 @@ if (file_exists($jsonFile)) {
                                             foreach ($searchKeys as $searchKey) {
                                                 if ($subTitle === $searchKey || $subFullTitle === $searchKey ||
                                                     strpos($subFullTitle, $searchKey) !== false) {
-                                                    $result['title'] = $sub['title'] ?? $defaultTitle;
+                                                    // 优先使用缩写（title），如果没有则使用全称（fullTitle）
+                                                    $result['title'] = $sub['title'] ?? $sub['fullTitle'] ?? $defaultTitle;
                                                     $result['name'] = $sub['name'] ?? '';
                                                     $result['fullTitle'] = $sub['fullTitle'] ?? '';
                                                     return $result;
@@ -1792,22 +1795,24 @@ if (file_exists($jsonFile)) {
                         ?>
                         
                         <?php 
-                        // 构建水平组织树所需的数据
-                        $ceoTitle = htmlspecialchars($orgStructure['ceo']['fullTitle'] ?? $orgStructure['ceo']['title'] ?? 'CEO');
+                        // 构建水平组织树所需的数据（优先使用缩写）
+                        $ceoTitle = htmlspecialchars($orgStructure['ceo']['title'] ?? $orgStructure['ceo']['fullTitle'] ?? 'CEO');
                         $ceoName  = htmlspecialchars($orgStructure['ceo']['name'] ?? '');
 
-                        $paTitle = !empty($orgStructure['pa']) ? htmlspecialchars($orgStructure['pa']['fullTitle'] ?? $orgStructure['pa']['title'] ?? 'PA') : '';
+                        $paTitle = !empty($orgStructure['pa']) ? htmlspecialchars($orgStructure['pa']['title'] ?? $orgStructure['pa']['fullTitle'] ?? 'PA') : '';
                         $paName  = !empty($orgStructure['pa']) ? htmlspecialchars($orgStructure['pa']['name'] ?? '') : '';
 
                         $cLevelNodes = [];
                         if (!empty($orgStructure['cLevel'])) {
                             foreach ($orgStructure['cLevel'] as $exec) {
-                                $title = htmlspecialchars($exec['fullTitle'] ?? $exec['title'] ?? '');
+                                // 优先使用缩写（title），如果没有则使用全称（fullTitle）
+                                $title = htmlspecialchars($exec['title'] ?? $exec['fullTitle'] ?? '');
                                 $name  = htmlspecialchars($exec['name'] ?? '');
                                 $children = [];
                                 if (!empty($exec['subordinates']) && is_array($exec['subordinates'])) {
                                     foreach ($exec['subordinates'] as $sub) {
-                                        $childTitle = htmlspecialchars($sub['fullTitle'] ?? $sub['title'] ?? '');
+                                        // 优先使用缩写（title），如果没有则使用全称（fullTitle）
+                                        $childTitle = htmlspecialchars($sub['title'] ?? $sub['fullTitle'] ?? '');
                                         $childName  = htmlspecialchars($sub['name'] ?? '');
                                         $children[] = [
                                             'title' => $childTitle,
