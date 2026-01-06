@@ -1337,7 +1337,7 @@ if (file_exists($jsonFile)) {
             }
         }
 
-        /* Binary Tree 组织架构样式 */
+        /* Binary Tree 组织架构样式 - 匹配图片设计 */
         .mermaid-org-chart {
             background: #ffffff;
             border-radius: clamp(12px, 1.25vw, 16px);
@@ -1368,6 +1368,7 @@ if (file_exists($jsonFile)) {
             position: relative;
             padding: 10px;
             transition: .5s;
+            vertical-align: top;
         }
 
         /* 连接线 - 使用伪元素自动画线 */
@@ -1387,6 +1388,7 @@ if (file_exists($jsonFile)) {
             border-left: 2px solid #000000;
         }
 
+        /* 单子节点不显示连接线 */
         .org-tree li:only-child::after, .org-tree li:only-child::before {
             display: none;
         }
@@ -1395,6 +1397,7 @@ if (file_exists($jsonFile)) {
             padding-top: 0;
         }
 
+        /* 第一个和最后一个节点的连接线调整 */
         .org-tree li:first-child::before, .org-tree li:last-child::after {
             border: 0 none;
         }
@@ -1408,6 +1411,7 @@ if (file_exists($jsonFile)) {
             border-radius: 5px 0 0 0;
         }
 
+        /* 子层级的垂直连接线 */
         .org-tree ul ul::before {
             content: '';
             position: absolute;
@@ -1418,29 +1422,44 @@ if (file_exists($jsonFile)) {
             height: 20px;
         }
 
-        /* 节点卡片样式 - 橙色品牌色 */
+        /* 确保顶层（CEO 和 PA）水平排列 */
+        .org-tree > ul > li {
+            display: inline-table;
+            vertical-align: top;
+        }
+
+        /* 节点卡片样式 - 橙色圆角矩形（匹配图片） */
         .org-tree li a {
             border: 2px solid #ff5c00;
             background: #ff5c00;
-            padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 24px);
-            display: inline-grid;
+            padding: clamp(10px, 1.04vw, 14px) clamp(14px, 1.46vw, 20px);
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             border-radius: 8px;
             text-decoration: none;
             transition: .5s;
             min-width: clamp(120px, 12.5vw, 160px);
+            max-width: clamp(160px, 16.67vw, 200px);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
         }
 
         .org-tree li a span {
             border: none;
             border-radius: 0;
             color: #ffffff;
-            padding: 4px 0;
+            padding: 2px 0;
             font-size: clamp(12px, 1.25vw, 16px);
             text-transform: none;
             letter-spacing: 0.3px;
             font-weight: 500;
             background: transparent;
+            line-height: 1.4;
+            display: block;
+            width: 100%;
+            text-align: center;
         }
 
         .org-tree li a .org-title {
@@ -1452,6 +1471,7 @@ if (file_exists($jsonFile)) {
         .org-tree li a .org-name {
             font-weight: 500;
             font-size: clamp(11px, 1.15vw, 15px);
+            word-break: break-word;
         }
 
         /* 悬停效果 */
