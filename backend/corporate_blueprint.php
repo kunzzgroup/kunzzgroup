@@ -1338,104 +1338,71 @@ if (file_exists($jsonFile)) {
             }
         }
 
-        /* Mermaid 组织架构样式 - 匹配 Figma 设计 */
+        /* 图片模板组织架构样式 */
         .mermaid-org-chart {
             background: #ffffff;
             border-radius: clamp(12px, 1.25vw, 16px);
-            padding: clamp(40px, 4.17vw, 60px);
+            padding: clamp(20px, 2.08vw, 30px);
             position: relative;
-            overflow-x: auto;
-            overflow-y: visible;
-            min-height: clamp(500px, 52.08vw, 700px);
-        }
-
-        /* 淡橙色水印背景 */
-        .mermaid-org-chart::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 30%, rgba(255, 92, 0, 0.03) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.03) 0%, transparent 50%);
-            border-radius: clamp(12px, 1.25vw, 16px);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .mermaid-org-chart .mermaid {
-            position: relative;
-            z-index: 1;
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* 自定义 Mermaid 节点样式 - 橙色圆角矩形，白色文字（匹配 Figma） */
-        .mermaid-org-chart .mermaid svg .node rect,
-        .mermaid-org-chart .mermaid svg .node polygon,
-        .mermaid-org-chart .mermaid svg .node circle {
-            fill: #ff5c00 !important;
-            stroke: #ff5c00 !important;
-            stroke-width: 2px !important;
-            rx: 8px !important;
-            ry: 8px !important;
+        /* 图片模板容器 */
+        .org-chart-image-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        /* 节点文字容器样式 */
-        .mermaid-org-chart .mermaid svg .nodeLabel {
-            color: #ffffff !important;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif !important;
-            font-size: 14px !important;
-            text-anchor: middle !important;
+        /* 模板图片 */
+        .org-chart-template-image {
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+            display: block;
+            object-fit: contain;
         }
 
-        /* 节点文字中的粗体 */
-        .mermaid-org-chart .mermaid svg .nodeLabel b,
-        .mermaid-org-chart .mermaid svg .nodeLabel strong {
-            color: #ffffff !important;
-            font-weight: 700 !important;
+        /* 名字标签容器 */
+        .org-name-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
         }
 
-        /* 节点文字中的普通文本 */
-        .mermaid-org-chart .mermaid svg .nodeLabel {
-            font-weight: 500 !important;
+        /* 单个名字标签 */
+        .org-name-label {
+            position: absolute;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
+            font-weight: 500;
+            text-align: center;
+            white-space: nowrap;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), 0 0 2px rgba(0, 0, 0, 0.3);
+            font-size: clamp(12px, 1.25vw, 16px);
+            line-height: 1.4;
+            padding: 2px 4px;
         }
 
-        /* 连接线样式 - 黑色细线（匹配 Figma） */
-        .mermaid-org-chart .mermaid svg .edgePath path {
-            stroke: #000000 !important;
-            stroke-width: 2px !important;
-            fill: none !important;
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .org-name-label {
+                font-size: clamp(10px, 1.04vw, 14px);
+            }
         }
 
-        .mermaid-org-chart .mermaid svg .edgePath .path {
-            stroke: #000000 !important;
-            stroke-width: 2px !important;
-        }
-
-        /* 箭头样式 - 黑色 */
-        .mermaid-org-chart .mermaid svg marker path,
-        .mermaid-org-chart .mermaid svg marker polygon {
-            fill: #000000 !important;
-            stroke: #000000 !important;
-        }
-
-        /* 连接线箭头标记 */
-        .mermaid-org-chart .mermaid svg .arrowheadPath {
-            fill: #000000 !important;
-            stroke: #000000 !important;
-        }
-
-        /* 确保 SVG 背景透明 */
-        .mermaid-org-chart .mermaid svg {
-            background: transparent !important;
-        }
     </style>
-    <!-- Mermaid.js 库 -->
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
@@ -1682,7 +1649,7 @@ if (file_exists($jsonFile)) {
                 </div>
                 <?php endif; ?>
 
-                <!-- Organization Structure - Template-based Mermaid.js -->
+                <!-- Organization Structure - Image Template with Dynamic Names -->
                 <?php if (!empty($strategyData['organizationStructure'])): ?>
                 <div class="section">
                     <h2 class="section-title">高层组织架构</h2>
@@ -1690,72 +1657,55 @@ if (file_exists($jsonFile)) {
                         <?php 
                         $orgStructure = $strategyData['organizationStructure'];
                         
-                        // ========== 组织架构模板（固定结构）==========
+                        // ========== 图片模板配置 ==========
                         // 
                         // 使用说明：
-                        // 1. 在 $orgTemplate 中定义所有职位和连接关系
-                        // 2. 名字会自动从 $strategyData['organizationStructure'] 中读取
-                        // 3. 只需修改 JSON 数据中的名字，图表会自动更新
-                        // 
-                        // 模板结构：
-                        // - 'id': Mermaid 节点 ID（必须唯一）
-                        // - 'title': 职位显示名称
-                        // - 'connections': 连接到哪些职位（使用目标职位的 'id'）
+                        // 1. 准备一张组织架构图模板（PNG/JPG格式）
+                        // 2. 将图片命名为 org_chart_template.png 并放在 images/images/ 目录下
+                        // 3. 在下面的 $namePositions 中配置每个名字在图片上的位置
+                        // 4. 位置使用百分比：left 是距离左边的百分比，top 是距离顶部的百分比
+                        // 5. 名字会自动从 JSON 数据中读取并显示在对应位置
                         //
-                        $orgTemplate = [
-                            'ceo' => [
-                                'id' => 'CEO',
-                                'title' => 'CEO',
-                                'connections' => ['PA', 'CAO', 'CSO', 'COO']
-                            ],
-                            'pa' => [
-                                'id' => 'PA',
-                                'title' => 'PA',
-                                'connections' => []
-                            ],
-                            'cao' => [
-                                'id' => 'CAO',
-                                'title' => 'CAO',
-                                'connections' => ['CHO', 'CFO']
-                            ],
-                            'cso' => [
-                                'id' => 'CSO',
-                                'title' => 'CSO',
-                                'connections' => ['CMO', 'CBO', 'CTO', 'CVO']
-                            ],
-                            'coo' => [
-                                'id' => 'COO',
-                                'title' => 'COO',
-                                'connections' => ['VP_RD', 'VP_OP', 'VP_KS']
-                            ],
-                            // 下属职位
-                            'cho' => ['id' => 'CHO', 'title' => 'CHO', 'connections' => []],
-                            'cfo' => ['id' => 'CFO', 'title' => 'CFO', 'connections' => []],
-                            'cmo' => ['id' => 'CMO', 'title' => 'CMO', 'connections' => []],
-                            'cbo' => ['id' => 'CBO', 'title' => 'CBO', 'connections' => []],
-                            'cto' => ['id' => 'CTO', 'title' => 'CTO', 'connections' => []],
-                            'cvo' => ['id' => 'CVO', 'title' => 'CVO', 'connections' => []],
-                            'vp_rd' => ['id' => 'VP_RD', 'title' => 'VP OF R&D', 'connections' => []],
-                            'vp_op' => ['id' => 'VP_OP', 'title' => 'VP OF OPERATIONS', 'connections' => []],
-                            'vp_ks' => ['id' => 'VP_KS', 'title' => 'VP OF KS', 'connections' => []],
+                        $templateImagePath = '../images/images/org_chart_template.png'; // 模板图片路径
+                        
+                        // ========== 名字位置配置（使用百分比定位）==========
+                        // 
+                        // 如何调整位置：
+                        // 1. 打开图片，找到每个名字应该显示的位置
+                        // 2. 测量该位置距离图片左边和顶部的百分比
+                        // 3. 修改下面的 left 和 top 值
+                        // 例如：如果名字应该在图片中间，则 left: 50, top: 50
+                        //
+                        $namePositions = [
+                        $namePositions = [
+                            'ceo' => ['left' => 20, 'top' => 15],      // CEO 位置
+                            'pa' => ['left' => 50, 'top' => 15],        // PA 位置
+                            'cao' => ['left' => 15, 'top' => 40],       // CAO 位置
+                            'cso' => ['left' => 50, 'top' => 40],       // CSO 位置
+                            'coo' => ['left' => 85, 'top' => 40],       // COO 位置
+                            // CAO 下属
+                            'cho' => ['left' => 10, 'top' => 65],      // CHO 位置
+                            'cfo' => ['left' => 20, 'top' => 65],      // CFO 位置
+                            // CSO 下属
+                            'cmo' => ['left' => 40, 'top' => 65],      // CMO 位置
+                            'cbo' => ['left' => 50, 'top' => 65],       // CBO 位置
+                            'cto' => ['left' => 60, 'top' => 65],       // CTO 位置
+                            'cvo' => ['left' => 70, 'top' => 65],       // CVO 位置
+                            // COO 下属
+                            'vp_rd' => ['left' => 75, 'top' => 65],     // VP OF R&D 位置
+                            'vp_op' => ['left' => 85, 'top' => 65],    // VP OF OPERATIONS 位置
+                            'vp_ks' => ['left' => 95, 'top' => 65],    // VP OF KS 位置
                         ];
                         
-                        // ========== 从数据中读取名字和全称的映射函数 ==========
-                        function getDataFromOrg($key, $orgStructure, $templateTitle) {
-                            $result = ['name' => '', 'fullTitle' => ''];
-                            
+                        // ========== 从数据中读取名字的函数 ==========
+                        function getNameFromOrg($key, $orgStructure) {
                             // 1. 直接通过 key 查找（如 'ceo', 'pa'）
-                            if (isset($orgStructure[$key])) {
-                                $result['name'] = $orgStructure[$key]['name'] ?? '';
-                                $result['fullTitle'] = $orgStructure[$key]['fullTitle'] ?? '';
-                                if ($result['name']) {
-                                    return $result;
-                                }
+                            if (isset($orgStructure[$key]) && isset($orgStructure[$key]['name'])) {
+                                return $orgStructure[$key]['name'];
                             }
                             
-                            // 2. 通过职位标题匹配（支持多种格式）
-                            $searchTitles = [
-                                strtoupper($templateTitle),
+                            // 2. 通过职位标题匹配
+                            $searchKeys = [
                                 strtoupper($key),
                                 str_replace('_', ' ', strtoupper($key)),
                                 str_replace('_', ' OF ', strtoupper($key))
@@ -1768,12 +1718,10 @@ if (file_exists($jsonFile)) {
                                     $execFullTitle = strtoupper($exec['fullTitle'] ?? '');
                                     
                                     // 匹配 C-Level 高管
-                                    foreach ($searchTitles as $searchTitle) {
-                                        if ($execTitle === $searchTitle || $execFullTitle === $searchTitle || 
-                                            strpos($execFullTitle, $searchTitle) !== false) {
-                                            $result['name'] = $exec['name'] ?? '';
-                                            $result['fullTitle'] = $exec['fullTitle'] ?? '';
-                                            return $result;
+                                    foreach ($searchKeys as $searchKey) {
+                                        if ($execTitle === $searchKey || $execFullTitle === $searchKey || 
+                                            strpos($execFullTitle, $searchKey) !== false) {
+                                            return $exec['name'] ?? '';
                                         }
                                     }
                                     
@@ -1783,12 +1731,10 @@ if (file_exists($jsonFile)) {
                                             $subTitle = strtoupper($sub['title'] ?? '');
                                             $subFullTitle = strtoupper($sub['fullTitle'] ?? '');
                                             
-                                            foreach ($searchTitles as $searchTitle) {
-                                                if ($subTitle === $searchTitle || $subFullTitle === $searchTitle ||
-                                                    strpos($subFullTitle, $searchTitle) !== false) {
-                                                    $result['name'] = $sub['name'] ?? '';
-                                                    $result['fullTitle'] = $sub['fullTitle'] ?? '';
-                                                    return $result;
+                                            foreach ($searchKeys as $searchKey) {
+                                                if ($subTitle === $searchKey || $subFullTitle === $searchKey ||
+                                                    strpos($subFullTitle, $searchKey) !== false) {
+                                                    return $sub['name'] ?? '';
                                                 }
                                             }
                                         }
@@ -1796,61 +1742,40 @@ if (file_exists($jsonFile)) {
                                 }
                             }
                             
-                            return $result;
+                            return '';
                         }
+                        ?>
                         
-                        // ========== 构建 Mermaid 图表代码 ==========
-                        $mermaidCode = "graph TD\n";
-                        
-                        // 1. 定义所有节点（使用模板中的职位，填充数据中的名字）
-                        foreach ($orgTemplate as $key => $position) {
-                            $nodeId = $position['id'];
-                            $title = $position['title'];
-                            $data = getDataFromOrg($key, $orgStructure, $title);
-                            $name = $data['name'];
-                            $fullTitle = $data['fullTitle'];
+                        <div class="org-chart-image-container">
+                            <!-- 模板图片 -->
+                            <img src="<?php echo htmlspecialchars($templateImagePath); ?>" 
+                                 alt="组织架构图" 
+                                 class="org-chart-template-image"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                             
-                            // 构建节点标签：职位 + 名字（如果有）
-                            // 如果有全称，优先使用全称作为标题
-                            $displayTitle = $fullTitle ? $fullTitle : $title;
-                            $label = $name 
-                                ? "<b>" . htmlspecialchars($displayTitle) . "</b><br/>" . htmlspecialchars($name)
-                                : "<b>" . htmlspecialchars($displayTitle) . "</b>";
+                            <!-- 如果图片加载失败，显示提示 -->
+                            <div style="display: none; padding: 40px; text-align: center; color: #6b7280;">
+                                <p>请将组织架构模板图片放在：<?php echo htmlspecialchars($templateImagePath); ?></p>
+                                <p>图片名称：org_chart_template.png</p>
+                            </div>
                             
-                            $mermaidCode .= "    {$nodeId}[\"{$label}\"]\n";
-                        }
-                        
-                        // 2. 定义连接关系（使用模板中的连接）
-                        foreach ($orgTemplate as $key => $position) {
-                            $fromId = $position['id'];
-                            if (!empty($position['connections'])) {
-                                foreach ($position['connections'] as $toKey) {
-                                    // 查找目标节点的 ID（支持多种匹配方式）
-                                    $toId = null;
-                                    
-                                    // 方式1：直接通过 ID 匹配
-                                    foreach ($orgTemplate as $k => $p) {
-                                        if ($p['id'] === $toKey) {
-                                            $toId = $p['id'];
-                                            break;
-                                        }
-                                    }
-                                    
-                                    // 方式2：通过 key 匹配
-                                    if (!$toId && isset($orgTemplate[$toKey])) {
-                                        $toId = $orgTemplate[$toKey]['id'];
-                                    }
-                                    
-                                    if ($toId) {
-                                        $mermaidCode .= "    {$fromId} --> {$toId}\n";
+                            <!-- 名字覆盖层 -->
+                            <div class="org-name-overlay">
+                                <?php 
+                                // 在图片上显示所有名字
+                                foreach ($namePositions as $key => $position) {
+                                    $name = getNameFromOrg($key, $orgStructure);
+                                    if ($name) {
+                                        $left = $position['left'];
+                                        $top = $position['top'];
+                                        echo '<div class="org-name-label" style="left: ' . $left . '%; top: ' . $top . '%;">';
+                                        echo htmlspecialchars($name);
+                                        echo '</div>';
                                     }
                                 }
-                            }
-                        }
-                        
-                        // 输出 Mermaid 代码
-                        echo '<div class="mermaid">' . htmlspecialchars($mermaidCode) . '</div>';
-                        ?>
+                                ?>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -1987,38 +1912,6 @@ if (file_exists($jsonFile)) {
                 });
             });
 
-            // 初始化 Mermaid 组织架构图 - 匹配 Figma 设计
-            if (typeof mermaid !== 'undefined') {
-                mermaid.initialize({ 
-                    startOnLoad: true,
-                    theme: 'base',
-                    themeVariables: {
-                        // 节点颜色 - 橙色
-                        primaryColor: '#ff5c00',
-                        primaryTextColor: '#ffffff',
-                        primaryBorderColor: '#ff5c00',
-                        // 连接线颜色 - 黑色
-                        lineColor: '#000000',
-                        secondaryColor: '#ff5c00',
-                        tertiaryColor: '#ffffff',
-                        // 文字颜色
-                        textColor: '#ffffff',
-                        // 背景
-                        background: '#ffffff',
-                        // 边框
-                        border1: '#ff5c00',
-                        border2: '#ff5c00'
-                    },
-                    flowchart: {
-                        useMaxWidth: true,
-                        htmlLabels: true,
-                        curve: 'basis',
-                        padding: 30,
-                        nodeSpacing: 50,
-                        rankSpacing: 80
-                    }
-                });
-            }
         });
     </script>
 
