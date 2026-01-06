@@ -1069,436 +1069,6 @@ if (file_exists($jsonFile)) {
             line-height: 1.8;
         }
 
-        /* Organization Structure - Structured HTML with Pseudo-elements */
-        .org-chart-container {
-            background: linear-gradient(135deg, rgba(255, 92, 0, 0.02) 0%, rgba(255, 215, 0, 0.02) 100%);
-            border-radius: clamp(12px, 1.25vw, 16px);
-            padding: clamp(40px, 4.17vw, 60px) clamp(40px, 4.17vw, 60px);
-            border: 2px solid rgba(255, 92, 0, 0.1);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            position: relative;
-            overflow-x: auto;
-            overflow-y: visible;
-        }
-
-        .org-chart-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 30%, rgba(255, 92, 0, 0.03) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.03) 0%, transparent 50%);
-            border-radius: clamp(12px, 1.25vw, 16px);
-            pointer-events: none;
-        }
-
-        /* 组织架构树结构 */
-        .org-tree {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: clamp(20px, 2.08vw, 30px) 0;
-        }
-
-        /* 顶层：CEO 和 PA */
-        .org-top-level {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: clamp(40px, 4.17vw, 60px);
-            margin-bottom: clamp(40px, 4.17vw, 60px);
-            position: relative;
-        }
-
-        /* CEO 和 PA 之间的连接线 */
-        .org-top-level::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: calc(100% - clamp(160px, 16.67vw, 220px) - clamp(130px, 13.54vw, 180px));
-            height: 2px;
-            background: #000000;
-            z-index: 0;
-        }
-
-        /* 节点卡片基础样式 */
-        .org-node {
-            background: #ff8c42;
-            border-radius: clamp(8px, 0.83vw, 12px);
-            padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 24px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            width: clamp(130px, 13.54vw, 180px);
-            box-sizing: border-box;
-            transition: all 0.3s ease;
-            position: relative;
-            z-index: 1;
-            opacity: 0;
-            transform: scale(0.9);
-            cursor: pointer;
-            white-space: normal;
-            word-wrap: break-word;
-        }
-
-        .org-node.animate {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .org-node:hover {
-            transform: scale(1.05) translateY(-4px);
-            box-shadow: 
-                0 8px 24px rgba(255, 165, 0, 0.5),
-                0 0 0 3px rgba(255, 92, 0, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4);
-            z-index: 10;
-        }
-
-        .org-node.ceo {
-            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
-            width: clamp(160px, 16.67vw, 220px);
-            padding: clamp(16px, 1.67vw, 22px) clamp(20px, 2.08vw, 28px);
-            box-shadow: 
-                0 6px 20px rgba(255, 92, 0, 0.4),
-                0 0 0 3px rgba(255, 255, 255, 0.6),
-                inset 0 2px 0 rgba(255, 255, 255, 0.4);
-            border: 3px solid rgba(255, 255, 255, 0.5);
-        }
-
-        .org-node.ceo:hover {
-            box-shadow: 
-                0 12px 32px rgba(255, 92, 0, 0.6),
-                0 0 0 4px rgba(255, 92, 0, 0.3),
-                inset 0 2px 0 rgba(255, 255, 255, 0.5);
-        }
-
-        .org-node.pa {
-            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
-            box-shadow: 
-                0 4px 16px rgba(74, 144, 226, 0.3),
-                0 0 0 2px rgba(255, 255, 255, 0.5),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
-        }
-
-        .org-node.pa:hover {
-            box-shadow: 
-                0 8px 24px rgba(74, 144, 226, 0.5),
-                0 0 0 3px rgba(74, 144, 226, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4);
-        }
-
-        .org-node.cao {
-            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
-            box-shadow: 
-                0 4px 16px rgba(155, 89, 182, 0.3),
-                0 0 0 2px rgba(255, 255, 255, 0.5),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
-        }
-
-        .org-node.cso {
-            background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
-            box-shadow: 
-                0 4px 16px rgba(26, 188, 156, 0.3),
-                0 0 0 2px rgba(255, 255, 255, 0.5),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
-        }
-
-        .org-node.coo {
-            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-            box-shadow: 
-                0 4px 16px rgba(231, 76, 60, 0.3),
-                0 0 0 2px rgba(255, 255, 255, 0.5),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
-        }
-
-        .org-node-title {
-            font-size: clamp(14px, 1.46vw, 18px);
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: clamp(4px, 0.42vw, 6px);
-            letter-spacing: 0.3px;
-        }
-
-        .org-node-name {
-            font-size: clamp(11px, 1.15vw, 14px);
-            color: #ffffff;
-            font-weight: 500;
-            line-height: 1.4;
-            word-break: break-word;
-        }
-
-        /* 第二层：C-Level 高管 */
-        .org-clevel-container {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            gap: clamp(30px, 3.13vw, 40px);
-            margin-bottom: clamp(40px, 4.17vw, 60px);
-            padding-top: clamp(20px, 2.08vw, 30px);
-        }
-
-        /* 从顶层到 C-Level 的连接线 */
-        .org-clevel-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: clamp(20px, 2.08vw, 30px);
-            background: #000000;
-            z-index: 0;
-        }
-
-        /* C-Level 节点 */
-        .org-clevel-item {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* 从主连接线到每个 C-Level 节点的水平线 */
-        .org-clevel-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: clamp(30px, 3.13vw, 40px);
-            height: 2px;
-            background: #000000;
-            z-index: 0;
-        }
-
-        /* 从水平线到节点的垂直线 */
-        .org-clevel-item::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: clamp(20px, 2.08vw, 30px);
-            background: #000000;
-            z-index: 0;
-        }
-
-        /* 第三层：下属 */
-        .org-subordinates {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: clamp(20px, 2.08vw, 30px);
-            margin-top: clamp(20px, 2.08vw, 30px);
-            position: relative;
-        }
-
-        /* 从 C-Level 节点到下属的连接线 */
-        .org-subordinates {
-            position: relative;
-            padding-top: clamp(20px, 2.08vw, 30px);
-        }
-
-        .org-subordinates::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: clamp(20px, 2.08vw, 30px);
-            background: #000000;
-            z-index: 0;
-        }
-
-        /* 多个下属时的分支线容器 */
-        .org-subordinates-list {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            gap: clamp(20px, 2.08vw, 30px);
-            position: relative;
-        }
-
-        /* 分支线的垂直线（连接所有下属） */
-        .org-subordinates-list::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: 100%;
-            background: #000000;
-            z-index: 0;
-        }
-
-        /* 单个下属项 */
-        .org-subordinate-item {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* 从分支线到每个下属的水平线（仅多个下属时显示） */
-        .org-subordinates-list .org-subordinate-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: clamp(20px, 2.08vw, 30px);
-            height: 2px;
-            background: #000000;
-            z-index: 0;
-        }
-
-        /* 从水平线到节点的垂直线（仅多个下属时显示） */
-        .org-subordinates-list .org-subordinate-item::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: clamp(20px, 2.08vw, 30px);
-            background: #000000;
-            z-index: 0;
-        }
-
-        .org-subordinate {
-            background: #ff8c42;
-            border-radius: clamp(8px, 0.83vw, 12px);
-            padding: clamp(8px, 0.83vw, 12px) clamp(12px, 1.25vw, 16px);
-            border: none;
-            text-align: center;
-            width: clamp(110px, 11.46vw, 150px);
-            box-sizing: border-box;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            position: relative;
-            z-index: 1;
-            opacity: 0;
-            transform: scale(0.9);
-            white-space: normal;
-            word-wrap: break-word;
-        }
-
-        .org-subordinate.animate {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .org-subordinate:hover {
-            transform: scale(1.03) translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-            z-index: 10;
-        }
-
-        .org-subordinate-title {
-            font-size: clamp(11px, 1.15vw, 13px);
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: clamp(4px, 0.42vw, 6px);
-            letter-spacing: 0.3px;
-        }
-
-        .org-subordinate-fulltitle {
-            font-size: clamp(9px, 0.94vw, 11px);
-            color: #ffffff;
-            line-height: 1.4;
-            word-break: break-word;
-            opacity: 0.95;
-        }
-
-
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .org-chart-container {
-                padding: clamp(40px, 4.17vw, 60px) clamp(20px, 2.08vw, 30px);
-            }
-
-            .org-top-level {
-                gap: clamp(30px, 3.13vw, 40px);
-            }
-
-            .org-clevel-container {
-                flex-wrap: wrap;
-                gap: clamp(20px, 2.08vw, 30px);
-            }
-
-            .org-node {
-                min-width: clamp(120px, 12.5vw, 160px);
-                max-width: clamp(160px, 16.67vw, 200px);
-            }
-
-            .org-subordinate {
-                min-width: clamp(100px, 10.42vw, 140px);
-                max-width: clamp(130px, 13.54vw, 170px);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .org-chart-container {
-                padding: clamp(30px, 3.13vw, 40px) clamp(15px, 1.56vw, 20px);
-            }
-
-            .org-top-level {
-                flex-direction: column;
-                gap: clamp(30px, 3.13vw, 40px);
-            }
-
-            .org-top-level::before {
-                display: none;
-            }
-
-            .org-clevel-container {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .org-clevel-container::before {
-                display: none;
-            }
-
-            .org-clevel-item::before,
-            .org-clevel-item::after {
-                display: none;
-            }
-
-            .org-node {
-                min-width: clamp(100px, 10.42vw, 140px);
-                max-width: clamp(140px, 14.58vw, 180px);
-                padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 20px);
-            }
-
-            .org-node-title {
-                font-size: clamp(12px, 1.25vw, 14px);
-            }
-
-            .org-node-name {
-                font-size: clamp(10px, 1.04vw, 12px);
-            }
-
-            .org-subordinates-list {
-                flex-direction: column;
-            }
-
-            .org-subordinate {
-                min-width: clamp(90px, 9.38vw, 120px);
-                max-width: clamp(120px, 12.5vw, 150px);
-                padding: clamp(8px, 0.83vw, 10px) clamp(12px, 1.25vw, 14px);
-            }
-        }
 
         /* Strategic Objectives */
         .objectives-container {
@@ -1767,7 +1337,44 @@ if (file_exists($jsonFile)) {
                 width: clamp(100px, 10.42vw, 140px);
             }
         }
+
+        /* Mermaid 组织架构样式 */
+        .mermaid-org-chart {
+            background: linear-gradient(135deg, rgba(255, 92, 0, 0.02) 0%, rgba(255, 215, 0, 0.02) 100%);
+            border-radius: clamp(12px, 1.25vw, 16px);
+            padding: clamp(40px, 4.17vw, 60px);
+            border: 2px solid rgba(255, 92, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow-x: auto;
+            overflow-y: visible;
+            min-height: clamp(400px, 41.67vw, 600px);
+        }
+
+        .mermaid-org-chart::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 92, 0, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.03) 0%, transparent 50%);
+            border-radius: clamp(12px, 1.25vw, 16px);
+            pointer-events: none;
+        }
+
+        .mermaid-org-chart .mermaid {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
     </style>
+    <!-- Mermaid.js 库 -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
@@ -2014,90 +1621,94 @@ if (file_exists($jsonFile)) {
                 </div>
                 <?php endif; ?>
 
-                <!-- Organization Structure - Structured HTML -->
+                <!-- Organization Structure - Mermaid.js -->
                 <?php if (!empty($strategyData['organizationStructure'])): ?>
                 <div class="section">
                     <h2 class="section-title">高层组织架构</h2>
-                    <div class="org-chart-container">
-                        <div class="org-tree">
-                            <?php 
-                            $orgStructure = $strategyData['organizationStructure'];
-                            ?>
-                            
-                            <!-- 顶层：CEO 和 PA -->
-                            <div class="org-top-level">
-                                <?php if (!empty($orgStructure['ceo'])): ?>
-                                <div class="org-node ceo" data-node="ceo">
-                                    <div class="org-node-title"><?php echo htmlspecialchars($orgStructure['ceo']['title'] ?? ''); ?></div>
-                                    <div class="org-node-name"><?php echo htmlspecialchars($orgStructure['ceo']['name'] ?? ''); ?></div>
-                                </div>
-                                <?php endif; ?>
+                    <div class="mermaid-org-chart">
+                        <?php 
+                        $orgStructure = $strategyData['organizationStructure'];
+                        
+                        // 构建 Mermaid 图表代码
+                        $mermaidCode = "graph TD\n";
+                        
+                        // 节点 ID 映射表（确保相同文本生成相同 ID）
+                        $nodeIdMap = [];
+                        
+                        // 生成节点 ID（用于避免特殊字符问题）
+                        function generateNodeId($text, &$nodeIdMap) {
+                            if (isset($nodeIdMap[$text])) {
+                                return $nodeIdMap[$text];
+                            }
+                            // 生成简洁的 ID：取前几个字母数字字符
+                            $clean = preg_replace('/[^a-zA-Z0-9]/', '', $text);
+                            $id = 'n' . substr(md5($text), 0, 8);
+                            if (!empty($clean)) {
+                                $id = substr($clean, 0, 10) . substr($id, 0, 6);
+                            }
+                            $nodeIdMap[$text] = $id;
+                            return $id;
+                        }
+                        
+                        // CEO 节点
+                        $ceoId = null;
+                        if (!empty($orgStructure['ceo'])) {
+                            $ceoId = generateNodeId('CEO', $nodeIdMap);
+                            $ceoTitle = htmlspecialchars($orgStructure['ceo']['title'] ?? 'CEO');
+                            $ceoName = htmlspecialchars($orgStructure['ceo']['name'] ?? '');
+                            $mermaidCode .= "    {$ceoId}[\"<b>{$ceoTitle}</b><br/>{$ceoName}\"]\n";
+                        }
+                        
+                        // PA 节点（连接到 CEO）
+                        $paId = null;
+                        if (!empty($orgStructure['pa'])) {
+                            $paId = generateNodeId('PA', $nodeIdMap);
+                            $paTitle = htmlspecialchars($orgStructure['pa']['title'] ?? 'PA');
+                            $paName = htmlspecialchars($orgStructure['pa']['name'] ?? '');
+                            $mermaidCode .= "    {$paId}[\"<b>{$paTitle}</b><br/>{$paName}\"]\n";
+                            if ($ceoId) {
+                                $mermaidCode .= "    {$ceoId} --> {$paId}\n";
+                            }
+                        }
+                        
+                        // C-Level 高管节点
+                        if (!empty($orgStructure['cLevel'])) {
+                            foreach ($orgStructure['cLevel'] as $exec) {
+                                $execTitle = $exec['title'] ?? '';
+                                $execId = generateNodeId($execTitle, $nodeIdMap);
+                                $execTitleEscaped = htmlspecialchars($execTitle);
+                                $execName = !empty($exec['name']) 
+                                    ? htmlspecialchars($exec['name']) 
+                                    : htmlspecialchars($exec['fullTitle'] ?? $execTitle);
+                                $mermaidCode .= "    {$execId}[\"<b>{$execTitleEscaped}</b><br/>{$execName}\"]\n";
                                 
-                                <?php if (!empty($orgStructure['pa'])): ?>
-                                <div class="org-node pa" data-node="pa">
-                                    <div class="org-node-title"><?php echo htmlspecialchars($orgStructure['pa']['title'] ?? ''); ?></div>
-                                    <div class="org-node-name"><?php echo htmlspecialchars($orgStructure['pa']['name'] ?? ''); ?></div>
-                                </div>
-                                <?php endif; ?>
-                            </div>
-                            
-                            <!-- 第二层：C-Level 高管 -->
-                            <?php if (!empty($orgStructure['cLevel'])): ?>
-                            <div class="org-clevel-container">
-                                <?php foreach ($orgStructure['cLevel'] as $index => $exec): 
-                                    $nodeClass = strtolower($exec['title'] ?? '');
-                                ?>
-                                <div class="org-clevel-item">
-                                    <div class="org-node <?php echo $nodeClass; ?>" data-node="<?php echo htmlspecialchars($exec['title'] ?? ''); ?>">
-                                        <div class="org-node-title"><?php echo htmlspecialchars($exec['title'] ?? ''); ?></div>
-                                        <div class="org-node-name">
-                                            <?php 
-                                            if (!empty($exec['name'])) {
-                                                echo htmlspecialchars($exec['name']);
-                                            } else {
-                                                echo htmlspecialchars($exec['fullTitle'] ?? $exec['title']);
-                                            }
-                                            ?>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- 第三层：下属 -->
-                                    <?php if (!empty($exec['subordinates'])): 
-                                        $subCount = count($exec['subordinates']);
-                                    ?>
-                                    <div class="org-subordinates">
-                                        <?php if ($subCount == 1): ?>
-                                            <!-- 单个下属 -->
-                                            <div class="org-subordinate-item">
-                                                <div class="org-subordinate" data-parent="<?php echo htmlspecialchars($exec['title'] ?? ''); ?>">
-                                                    <div class="org-subordinate-title"><?php echo htmlspecialchars($exec['subordinates'][0]['title'] ?? ''); ?></div>
-                                                    <?php if (!empty($exec['subordinates'][0]['fullTitle'])): ?>
-                                                    <div class="org-subordinate-fulltitle"><?php echo htmlspecialchars($exec['subordinates'][0]['fullTitle']); ?></div>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </div>
-                                        <?php else: ?>
-                                            <!-- 多个下属 -->
-                                            <div class="org-subordinates-list">
-                                                <?php foreach ($exec['subordinates'] as $sub): ?>
-                                                <div class="org-subordinate-item">
-                                                    <div class="org-subordinate" data-parent="<?php echo htmlspecialchars($exec['title'] ?? ''); ?>">
-                                                        <div class="org-subordinate-title"><?php echo htmlspecialchars($sub['title'] ?? ''); ?></div>
-                                                        <?php if (!empty($sub['fullTitle'])): ?>
-                                                        <div class="org-subordinate-fulltitle"><?php echo htmlspecialchars($sub['fullTitle']); ?></div>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                </div>
-                                                <?php endforeach; ?>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
-                                    <?php endif; ?>
-                                </div>
-                                <?php endforeach; ?>
-                            </div>
-                            <?php endif; ?>
-                        </div>
+                                // 连接到 CEO
+                                if ($ceoId) {
+                                    $mermaidCode .= "    {$ceoId} --> {$execId}\n";
+                                }
+                                
+                                // 下属节点
+                                if (!empty($exec['subordinates'])) {
+                                    foreach ($exec['subordinates'] as $sub) {
+                                        $subTitle = $sub['title'] ?? '';
+                                        $subId = generateNodeId($subTitle, $nodeIdMap);
+                                        $subTitleEscaped = htmlspecialchars($subTitle);
+                                        $subFullTitle = !empty($sub['fullTitle']) 
+                                            ? htmlspecialchars($sub['fullTitle']) 
+                                            : '';
+                                        $subLabel = $subFullTitle 
+                                            ? "<b>{$subTitleEscaped}</b><br/>{$subFullTitle}" 
+                                            : "<b>{$subTitleEscaped}</b>";
+                                        $mermaidCode .= "    {$subId}[\"{$subLabel}\"]\n";
+                                        $mermaidCode .= "    {$execId} --> {$subId}\n";
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // 输出 Mermaid 代码
+                        echo '<div class="mermaid">' . htmlspecialchars($mermaidCode) . '</div>';
+                        ?>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -2234,59 +1845,26 @@ if (file_exists($jsonFile)) {
                 });
             });
 
-            // 组织架构动画
-            const orgChartContainer = document.querySelector('.org-chart-container');
-            if (orgChartContainer) {
-                const orgTreeObserver = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            animateOrgTree(entry.target);
-                            orgTreeObserver.unobserve(entry.target);
-                        }
-                    });
-                }, {
-                    threshold: 0.2,
-                    rootMargin: '0px 0px -50px 0px'
+            // 初始化 Mermaid 组织架构图
+            if (typeof mermaid !== 'undefined') {
+                mermaid.initialize({ 
+                    startOnLoad: true,
+                    theme: 'default',
+                    flowchart: {
+                        useMaxWidth: true,
+                        htmlLabels: true,
+                        curve: 'basis',
+                        padding: 20
+                    },
+                    themeVariables: {
+                        primaryColor: '#ff5c00',
+                        primaryTextColor: '#ffffff',
+                        primaryBorderColor: '#ff8c42',
+                        lineColor: '#000000',
+                        secondaryColor: '#ff8c42',
+                        tertiaryColor: '#faf7f2'
+                    }
                 });
-
-                orgTreeObserver.observe(orgChartContainer);
-
-                function animateOrgTree(container) {
-                    // 1. 先显示CEO节点
-                    const ceoNode = container.querySelector('.org-node.ceo');
-                    if (ceoNode) {
-                        setTimeout(() => {
-                            ceoNode.classList.add('animate');
-                        }, 100);
-                    }
-
-                    // 2. 显示PA节点
-                    const paNode = container.querySelector('.org-node.pa');
-                    if (paNode) {
-                        setTimeout(() => {
-                            paNode.classList.add('animate');
-                        }, 200);
-                    }
-
-                    // 3. 显示C-Level节点（在 org-clevel-item 内的节点）
-                    const cLevelItems = container.querySelectorAll('.org-clevel-item');
-                    cLevelItems.forEach((item, index) => {
-                        const cLevelNode = item.querySelector('.org-node');
-                        if (cLevelNode) {
-                            setTimeout(() => {
-                                cLevelNode.classList.add('animate');
-                            }, 400 + (index * 100));
-                        }
-                    });
-
-                    // 4. 显示下属节点
-                    const subordinates = container.querySelectorAll('.org-subordinate');
-                    subordinates.forEach((sub, index) => {
-                        setTimeout(() => {
-                            sub.classList.add('animate');
-                        }, 800 + (index * 50));
-                    });
-                }
             }
         });
     </script>
