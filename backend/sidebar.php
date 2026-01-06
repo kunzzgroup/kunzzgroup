@@ -68,6 +68,7 @@ $canSeeHR = true;
 $canSeeResource = true;
 $canSeeVisual = true;
 $canSeeBrand = true;
+$kpiUploadDefaultPage = 'kpiedit.php'; // 默认跳转到kpiedit.php
 $submenuVisibility = [
     'analytics' => [
         'kpi_report' => true,
@@ -133,9 +134,22 @@ if (isset($_SESSION['user_id'])) {
             try { $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN page_permissions_json TEXT NULL"); } catch (Throwable $e) { /* ignore */ }
             try { $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN submenu_permissions_json TEXT NULL"); } catch (Throwable $e) { /* ignore */ }
             try { $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN brand_permissions_json TEXT NULL"); } catch (Throwable $e) { /* ignore */ }
-            $permStmt = $pdo->prepare("SELECT permissions_json, submenu_permissions_json, brand_permissions_json FROM user_sidebar_permissions WHERE user_id = ?");
+            $permStmt = $pdo->prepare("SELECT permissions_json, page_permissions_json, submenu_permissions_json, brand_permissions_json FROM user_sidebar_permissions WHERE user_id = ?");
             $permStmt->execute([$userId]);
             $permRow = $permStmt->fetch(PDO::FETCH_ASSOC);
+            
+            // 读取kpi_upload权限，用于决定数据上传的默认跳转页面
+            if ($permRow && !empty($permRow['page_permissions_json'])) {
+                $pagePerms = json_decode($permRow['page_permissions_json'], true);
+                if (is_array($pagePerms) && isset($pagePerms['kpi_upload']) && isset($pagePerms['kpi_upload']['type'])) {
+                    $uploadTypes = array_values(array_intersect($pagePerms['kpi_upload']['type'] ?? [], ['kpi', 'cost']));
+                    // 如果只有cost权限，默认跳转到costedit.php
+                    if (count($uploadTypes) === 1 && $uploadTypes[0] === 'cost') {
+                        $kpiUploadDefaultPage = 'costedit.php';
+                    }
+                    // 如果只有kpi权限，或者两者都有，默认跳转到kpiedit.php（已经是默认值）
+                }
+            }
             // 如果没有权限记录，默认全部开启
             if (!$permRow || empty($permRow['permissions_json'])) {
                 // 保持默认值（全部为true）
@@ -1115,7 +1129,7 @@ body.sidebar-transition {
                 <?php endif; ?>
                 <?php if (!empty($submenuVisibility['analytics']['kpi_upload'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="kpiedit.php" class="informationmenu-item">
+                    <a href="<?php echo $kpiUploadDefaultPage; ?>" class="informationmenu-item">
                         数据上传
                     </a>
                 </div>

@@ -25,6 +25,9 @@ if (!isset($_SESSION)) {
     @session_start();
 }
 
+// 标记是否使用了新权限系统
+$hasNewPermissions = false;
+
 if (isset($_SESSION['user_id'])) {
     $host = 'localhost';
     $dbname = 'u690174784_kunzz';
@@ -46,33 +49,33 @@ if (isset($_SESSION['user_id'])) {
                 $pagePerms = json_decode($row['page_permissions_json'], true);
                 if (is_array($pagePerms) && isset($pagePerms['kpi_upload'])) {
                     // 使用新权限系统
+                    $hasNewPermissions = true;
                     $uploadSystems = array_values(array_intersect($pagePerms['kpi_upload']['system'] ?? [], ['j1', 'j2', 'j3']));
                     $uploadTypes = array_values(array_intersect($pagePerms['kpi_upload']['type'] ?? [], ['kpi', 'cost']));
-                    if (!empty($uploadTypes)) {
-                        $reportPermissions = $uploadTypes;
-                    }
-                    if (!empty($uploadSystems)) {
-                        $restaurantPermissions = $uploadSystems;
-                    }
+                    // 即使为空数组，也使用新权限系统的值（表示用户没有任何权限）
+                    $reportPermissions = $uploadTypes;
+                    $restaurantPermissions = $uploadSystems;
                 }
             }
             
             // 如果新权限系统没有数据，回退到旧权限系统（向后兼容）
-            if (empty($reportPermissions) && !empty($row['report_permissions_json'])) {
-                $decoded = json_decode($row['report_permissions_json'], true);
-                if (is_array($decoded) && !empty($decoded)) {
-                    $filtered = array_values(array_intersect($decoded, ['kpi', 'cost']));
-                    if (!empty($filtered)) {
-                        $reportPermissions = $filtered;
+            if (!$hasNewPermissions) {
+                if (!empty($row['report_permissions_json'])) {
+                    $decoded = json_decode($row['report_permissions_json'], true);
+                    if (is_array($decoded) && !empty($decoded)) {
+                        $filtered = array_values(array_intersect($decoded, ['kpi', 'cost']));
+                        if (!empty($filtered)) {
+                            $reportPermissions = $filtered;
+                        }
                     }
                 }
-            }
-            if (empty($restaurantPermissions) && !empty($row['restaurant_permissions_json'])) {
-                $decoded = json_decode($row['restaurant_permissions_json'], true);
-                if (is_array($decoded) && !empty($decoded)) {
-                    $filtered = array_values(array_intersect($decoded, ['j1', 'j2', 'j3']));
-                    if (!empty($filtered)) {
-                        $restaurantPermissions = $filtered;
+                if (!empty($row['restaurant_permissions_json'])) {
+                    $decoded = json_decode($row['restaurant_permissions_json'], true);
+                    if (is_array($decoded) && !empty($decoded)) {
+                        $filtered = array_values(array_intersect($decoded, ['j1', 'j2', 'j3']));
+                        if (!empty($filtered)) {
+                            $restaurantPermissions = $filtered;
+                        }
                     }
                 }
             }
@@ -82,14 +85,25 @@ if (isset($_SESSION['user_id'])) {
     }
 }
 
-$reportPermissions = array_values(array_intersect(['kpi', 'cost'], $reportPermissions));
-if (empty($reportPermissions)) {
-    $reportPermissions = ['kpi', 'cost'];
-}
+// 只有在没有使用新权限系统的情况下，才使用默认值
+if (!$hasNewPermissions) {
+    $reportPermissions = array_values(array_intersect(['kpi', 'cost'], $reportPermissions));
+    if (empty($reportPermissions)) {
+        $reportPermissions = ['kpi', 'cost'];
+    }
 
-$restaurantPermissions = array_values(array_intersect(['j1', 'j2', 'j3'], $restaurantPermissions));
-if (empty($restaurantPermissions)) {
-    $restaurantPermissions = ['j1', 'j2', 'j3'];
+    $restaurantPermissions = array_values(array_intersect(['j1', 'j2', 'j3'], $restaurantPermissions));
+    if (empty($restaurantPermissions)) {
+        $restaurantPermissions = ['j1', 'j2', 'j3'];
+    }
+} else {
+    // 使用新权限系统时，确保值是正确的格式（只做格式验证，不使用默认值）
+    $reportPermissions = array_values(array_intersect(['kpi', 'cost'], $reportPermissions));
+    $restaurantPermissions = array_values(array_intersect(['j1', 'j2', 'j3'], $restaurantPermissions));
+    
+    // 如果新权限系统返回了空数组，说明用户没有任何权限
+    // 为了安全，这里不设置默认值，而是保持空数组
+    // 后续代码需要处理空权限的情况
 }
 
 if (!in_array('cost', $reportPermissions, true)) {
@@ -102,12 +116,24 @@ if (!in_array('cost', $reportPermissions, true)) {
 $reportPermissions = array_values(array_intersect(['kpi', 'cost'], $reportPermissions));
 
 $restaurantConfigAllowed = array_intersect_key($restaurantConfigPhp, array_flip($restaurantPermissions));
+// 只有在没有使用新权限系统且配置为空时，才使用默认值
+if (empty($restaurantConfigAllowed) && !$hasNewPermissions) {
+    $restaurantPermissions = ['j1', 'j2', 'j3'];
+    $restaurantConfigAllowed = $restaurantConfigPhp;
+}
+
+// 如果使用新权限系统但配置为空，说明用户没有任何权限，使用第一个可用的餐厅（如果存在）
+if (empty($restaurantConfigAllowed) && $hasNewPermissions && !empty($restaurantPermissions)) {
+    $restaurantConfigAllowed = array_intersect_key($restaurantConfigPhp, array_flip($restaurantPermissions));
+}
+
+// 如果仍然为空，使用默认值作为最后的后备方案
 if (empty($restaurantConfigAllowed)) {
     $restaurantPermissions = ['j1', 'j2', 'j3'];
     $restaurantConfigAllowed = $restaurantConfigPhp;
 }
 
-$defaultRestaurant = $restaurantPermissions[0];
+$defaultRestaurant = !empty($restaurantPermissions) ? $restaurantPermissions[0] : 'j1';
 $showReportDropdown = count($reportPermissions) > 1;
 $showRestaurantDropdown = count($restaurantPermissions) > 1;
 ?>
