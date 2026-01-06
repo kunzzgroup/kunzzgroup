@@ -1782,7 +1782,6 @@ require_once 'session_check.php';
                                 </div>
                                 <div class="perm-level-3-section">
                                     <div class="perm-section-title">系统选项</div>
-                                    <label><input type="checkbox" class="perm-upload-system" value="central"> 中央</label>
                                     <label><input type="checkbox" class="perm-upload-system" value="j1"> J1</label>
                                     <label><input type="checkbox" class="perm-upload-system" value="j2"> J2</label>
                                     <label><input type="checkbox" class="perm-upload-system" value="j3"> J3</label>

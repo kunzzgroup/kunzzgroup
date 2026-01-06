@@ -1254,6 +1254,8 @@ function getUserPagePermissions($pdo, $input) {
             
             $stockSystems = [];
             $stockViews = [];
+            $uploadSystems = [];
+            $uploadTypes = [];
             $hasUnifiedStockEntry = false;
             $legacyKeys = ['stocklistall','stockeditall','stockproductname','stockremark','stocksot'];
             
@@ -1268,10 +1270,14 @@ function getUserPagePermissions($pdo, $input) {
                 }
                 $systems = $permData['systems'] ?? $permData['system'] ?? [];
                 $views = $permData['views'] ?? $permData['view'] ?? [];
+                $types = $permData['types'] ?? $permData['type'] ?? [];
                 if ($pageKey === 'stock_inventory') {
                     $hasUnifiedStockEntry = true;
                     $stockSystems = is_array($systems) ? array_values(array_intersect($systems, ['central','j1','j2','j3'])) : [];
                     $stockViews = is_array($views) ? array_values(array_intersect($views, ['list','records','remark','product','sot'])) : [];
+                } elseif ($pageKey === 'kpi_upload') {
+                    $uploadSystems = is_array($systems) ? array_values(array_intersect($systems, ['j1','j2','j3'])) : [];
+                    $uploadTypes = is_array($types) ? array_values(array_intersect($types, ['kpi','cost'])) : [];
                 } elseif (in_array($pageKey, $legacyKeys, true)) {
                     if (is_array($systems)) {
                         $stockSystems = array_merge($stockSystems, array_values(array_intersect($systems, ['central','j1','j2','j3'])));
@@ -1287,6 +1293,11 @@ function getUserPagePermissions($pdo, $input) {
                 'system' => $stockSystems,
                 'view' => $stockViews
             ];
+            $pagePerms['kpi_upload'] = [
+                'system' => $uploadSystems,
+                'type' => $uploadTypes
+            ];
+            
             // 同时尝试从 user_sidebar_permissions 读取报表/餐厅权限
             try {
                 ensurePermissionsTable($pdo);
@@ -1347,6 +1358,22 @@ function getUserPagePermissions($pdo, $input) {
                 'system' => $stockSystems,
                 'view' => $stockViews
             ];
+            
+            // 读取 kpi_upload 权限
+            $uploadSystems = [];
+            $uploadTypes = [];
+            if ($row && !empty($row['page_permissions_json'])) {
+                $tmp = json_decode($row['page_permissions_json'], true);
+                if (is_array($tmp) && isset($tmp['kpi_upload'])) {
+                    $uploadSystems = array_values(array_intersect($tmp['kpi_upload']['system'] ?? [], ['j1','j2','j3']));
+                    $uploadTypes = array_values(array_intersect($tmp['kpi_upload']['type'] ?? [], ['kpi','cost']));
+                }
+            }
+            $pagePerms['kpi_upload'] = [
+                'system' => $uploadSystems,
+                'type' => $uploadTypes
+            ];
+            
             if ($row && !empty($row['report_permissions_json'])) {
                 $decoded = json_decode($row['report_permissions_json'], true);
                 if (is_array($decoded) && !empty($decoded)) {

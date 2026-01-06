@@ -37,10 +37,28 @@ if (isset($_SESSION['user_id'])) {
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ]);
 
-        $stmt = $pdo->prepare("SELECT report_permissions_json, restaurant_permissions_json FROM user_sidebar_permissions WHERE user_id = ?");
+        // 优先使用新的权限系统（page_permissions.kpi_upload）
+        $stmt = $pdo->prepare("SELECT page_permissions_json, report_permissions_json, restaurant_permissions_json FROM user_sidebar_permissions WHERE user_id = ?");
         $stmt->execute([$_SESSION['user_id']]);
         if ($row = $stmt->fetch()) {
-            if (!empty($row['report_permissions_json'])) {
+            // 读取新的权限系统（page_permissions.kpi_upload）
+            if (!empty($row['page_permissions_json'])) {
+                $pagePerms = json_decode($row['page_permissions_json'], true);
+                if (is_array($pagePerms) && isset($pagePerms['kpi_upload'])) {
+                    // 使用新权限系统
+                    $uploadSystems = array_values(array_intersect($pagePerms['kpi_upload']['system'] ?? [], ['j1', 'j2', 'j3']));
+                    $uploadTypes = array_values(array_intersect($pagePerms['kpi_upload']['type'] ?? [], ['kpi', 'cost']));
+                    if (!empty($uploadTypes)) {
+                        $reportPermissions = $uploadTypes;
+                    }
+                    if (!empty($uploadSystems)) {
+                        $restaurantPermissions = $uploadSystems;
+                    }
+                }
+            }
+            
+            // 如果新权限系统没有数据，回退到旧权限系统（向后兼容）
+            if (empty($reportPermissions) && !empty($row['report_permissions_json'])) {
                 $decoded = json_decode($row['report_permissions_json'], true);
                 if (is_array($decoded) && !empty($decoded)) {
                     $filtered = array_values(array_intersect($decoded, ['kpi', 'cost']));
@@ -49,7 +67,7 @@ if (isset($_SESSION['user_id'])) {
                     }
                 }
             }
-            if (!empty($row['restaurant_permissions_json'])) {
+            if (empty($restaurantPermissions) && !empty($row['restaurant_permissions_json'])) {
                 $decoded = json_decode($row['restaurant_permissions_json'], true);
                 if (is_array($decoded) && !empty($decoded)) {
                     $filtered = array_values(array_intersect($decoded, ['j1', 'j2', 'j3']));
