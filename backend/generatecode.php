@@ -1781,7 +1781,14 @@ require_once 'session_check.php';
                                     <button type="button" class="perm-close-btn" onclick="closeDetailPanel()">×</button>
                                 </div>
                                 <div class="perm-level-3-section">
-                                    <div class="perm-section-title">数据上传类型</div>
+                                    <div class="perm-section-title">系统选项</div>
+                                    <label><input type="checkbox" class="perm-upload-system" value="central"> 中央</label>
+                                    <label><input type="checkbox" class="perm-upload-system" value="j1"> J1</label>
+                                    <label><input type="checkbox" class="perm-upload-system" value="j2"> J2</label>
+                                    <label><input type="checkbox" class="perm-upload-system" value="j3"> J3</label>
+                                </div>
+                                <div class="perm-level-3-section">
+                                    <div class="perm-section-title">上传类型</div>
                                     <label><input type="checkbox" class="perm-upload-type" value="kpi"> KPI</label>
                                     <label><input type="checkbox" class="perm-upload-type" value="cost"> 成本</label>
                                 </div>
@@ -3913,12 +3920,12 @@ require_once 'session_check.php';
             });
             
             // 三级页面权限和库存/上传权限的向上联动
-            document.querySelectorAll('.perm-stock-system, .perm-stock-view, .perm-upload-type, .perm-page-schedule').forEach(checkbox => {
+            document.querySelectorAll('.perm-stock-system, .perm-stock-view, .perm-upload-system, .perm-upload-type, .perm-page-schedule').forEach(checkbox => {
                 checkbox.addEventListener('change', function() {
                     let level2Value = '';
                     if (this.classList.contains('perm-stock-system') || this.classList.contains('perm-stock-view')) {
                         level2Value = 'stock_inventory';
-                    } else if (this.classList.contains('perm-upload-type')) {
+                    } else if (this.classList.contains('perm-upload-system') || this.classList.contains('perm-upload-type')) {
                         level2Value = 'kpi_upload';
                     } else if (this.classList.contains('perm-page-schedule')) {
                         level2Value = this.dataset.brand || '';
@@ -3940,7 +3947,7 @@ require_once 'session_check.php';
                         if (level2Value === 'stock_inventory') {
                             otherChecked = document.querySelectorAll('.perm-stock-system:checked, .perm-stock-view:checked').length;
                         } else if (level2Value === 'kpi_upload') {
-                            otherChecked = document.querySelectorAll('.perm-upload-type:checked').length;
+                            otherChecked = document.querySelectorAll('.perm-upload-system:checked, .perm-upload-type:checked').length;
                         } else {
                             otherChecked = document.querySelectorAll(`.perm-page-schedule[data-brand="${level2Value}"]:checked`).length;
                         }
@@ -3978,7 +3985,7 @@ require_once 'session_check.php';
             });
             
             // 全选所有三级权限（库存、数据上传、集团架构页面权限）
-            document.querySelectorAll('.perm-stock-system, .perm-stock-view, .perm-upload-type, .perm-page-schedule').forEach(cb => {
+            document.querySelectorAll('.perm-stock-system, .perm-stock-view, .perm-upload-system, .perm-upload-type, .perm-page-schedule').forEach(cb => {
                 cb.checked = true;
                 cb.disabled = false;
             });
@@ -4016,7 +4023,7 @@ require_once 'session_check.php';
             
             // 数据上传权限
             if (level2Value === 'kpi_upload') {
-                document.querySelectorAll('.perm-upload-type').forEach(cb => {
+                document.querySelectorAll('.perm-upload-system, .perm-upload-type').forEach(cb => {
                     cb.checked = level2Checked ? true : false;
                 });
             }
@@ -4194,6 +4201,20 @@ require_once 'session_check.php';
                 cb.checked = viewSet.has(cb.value);
             });
             
+            // 设置数据上传三级权限
+            const uploadPagePerms = (pagePerms && typeof pagePerms === 'object') ? (pagePerms.kpi_upload || {}) : {};
+            const uploadSystems = Array.isArray(uploadPagePerms.system) ? uploadPagePerms.system : [];
+            const uploadTypes = Array.isArray(uploadPagePerms.type) ? uploadPagePerms.type : [];
+            const uploadSystemSet = new Set(uploadSystems);
+            const uploadTypeSet = new Set(uploadTypes);
+            
+            document.querySelectorAll('.perm-upload-system').forEach(cb => {
+                cb.checked = uploadSystemSet.has(cb.value);
+            });
+            document.querySelectorAll('.perm-upload-type').forEach(cb => {
+                cb.checked = uploadTypeSet.has(cb.value);
+            });
+            
             // 设置集团架构三级和四级权限
             const brandData = (brandPerms && typeof brandPerms === 'object') ? brandPerms : {};
             
@@ -4250,13 +4271,6 @@ require_once 'session_check.php';
                 });
             }
             
-            // 设置数据上传三级权限（新增）
-            const uploadData = Array.isArray(uploadPerms) && uploadPerms.length ? uploadPerms : [];
-            const uploadSet = new Set(uploadData);
-            document.querySelectorAll('.perm-upload-type').forEach(cb => {
-                cb.checked = uploadSet.has(cb.value);
-            });
-            
             // 设置额外权限
             const reportSetSource = Array.isArray(reportPerms) && reportPerms.length ? reportPerms : [];
             const reportSet = new Set(reportSetSource);
@@ -4295,8 +4309,7 @@ require_once 'session_check.php';
                         page_permissions: data.page_permissions || {},
                         report_permissions: data.report_permissions || [],
                         restaurant_permissions: data.restaurant_permissions || [],
-                        brand_permissions: data.brand_permissions || {},
-                        upload_permissions: data.upload_permissions || []
+                        brand_permissions: data.brand_permissions || {}
                     };
                     
                     // 检查是否有权限数据（即使brand_permissions的值为空数组，只要键存在就表示有权限数据）
@@ -4306,8 +4319,7 @@ require_once 'session_check.php';
                         Object.keys(permsPayload.page_permissions).length > 0 ||
                         Object.keys(permsPayload.brand_permissions).length > 0 ||
                         (permsPayload.report_permissions && permsPayload.report_permissions.length > 0) ||
-                        (permsPayload.restaurant_permissions && permsPayload.restaurant_permissions.length > 0) ||
-                        (permsPayload.upload_permissions && permsPayload.upload_permissions.length > 0);
+                        (permsPayload.restaurant_permissions && permsPayload.restaurant_permissions.length > 0);
                     
                     if (hasAnyPermissions) {
                         // 有权限数据，根据实际数据更新（覆盖默认全选）
@@ -4319,7 +4331,7 @@ require_once 'session_check.php';
                             permsPayload.report_permissions,
                             permsPayload.restaurant_permissions,
                             permsPayload.brand_permissions,
-                            permsPayload.upload_permissions
+                            null
                         );
                         // 确保所有checkbox都是active的（不设置disabled）
                         document.querySelectorAll('#permissionsModal input[type="checkbox"]').forEach(cb => {
@@ -4356,10 +4368,19 @@ require_once 'session_check.php';
             // 获取库存三级权限
             const selectedStockSystems = Array.from(document.querySelectorAll('.perm-stock-system:checked')).map(cb => cb.value);
             const selectedStockViews = Array.from(document.querySelectorAll('.perm-stock-view:checked')).map(cb => cb.value);
+            
+            // 获取数据上传三级权限
+            const selectedUploadSystems = Array.from(document.querySelectorAll('.perm-upload-system:checked')).map(cb => cb.value);
+            const selectedUploadTypes = Array.from(document.querySelectorAll('.perm-upload-type:checked')).map(cb => cb.value);
+            
             const pagePermissions = {
                 stock_inventory: {
                     system: selectedStockSystems,
                     view: selectedStockViews
+                },
+                kpi_upload: {
+                    system: selectedUploadSystems,
+                    type: selectedUploadTypes
                 }
             };
             
@@ -4388,9 +4409,6 @@ require_once 'session_check.php';
                 tokyo_izakaya: izakayaStorePermissions
             };
             
-            // 获取数据上传三级权限（新增）
-            const uploadPermissions = Array.from(document.querySelectorAll('.perm-upload-type:checked')).map(cb => cb.value);
-            
             // 获取额外权限
             const reportPermissions = Array.from(document.querySelectorAll('.perm-report:checked')).map(cb => cb.value);
             const restaurantPermissions = Array.from(document.querySelectorAll('.perm-restaurant:checked')).map(cb => cb.value);
@@ -4412,8 +4430,7 @@ require_once 'session_check.php';
                         submenu_permissions: submenuPermissions,
                         report_permissions: reportPermissions,
                         restaurant_permissions: restaurantPermissions,
-                        brand_permissions: brandPermissions,
-                        upload_permissions: uploadPermissions
+                        brand_permissions: brandPermissions
                     })
                 });
                 const data = await res.json();
