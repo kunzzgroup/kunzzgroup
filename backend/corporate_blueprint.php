@@ -1176,24 +1176,24 @@ if (file_exists($jsonFile)) {
 
         .culture-explanation-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: clamp(20px, 2.08vw, 32px);
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: clamp(16px, 1.67vw, 20px);
         }
 
         .culture-explanation-card {
-            background: #ffffff;
-            border-radius: 12px;
-            border: 2px solid #ffe0cc;
-            padding: clamp(24px, 2.5vw, 32px);
+            background: #fffaf3;
+            border-radius: 10px;
+            border: 1px solid #f6c99f;
+            padding: clamp(18px, 1.88vw, 24px);
             display: flex;
             flex-direction: column;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
             transition: box-shadow 0.25s ease, transform 0.25s ease;
         }
 
         .culture-explanation-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 16px rgba(255, 92, 0, 0.18);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 92, 0, 0.14);
         }
 
         .culture-explanation-number {
@@ -1220,71 +1220,33 @@ if (file_exists($jsonFile)) {
             flex-grow: 1;
         }
 
-        /* 评分标准部分 */
+        /* 评分标准部分（表格风格） */
         .culture-scoring {
             margin-top: auto;
-            padding-top: clamp(16px, 1.67vw, 24px);
-            border-top: 1px solid #ffe0cc;
-        }
-
-        .culture-scoring-title {
-            font-size: clamp(14px, 1.46vw, 18px);
-            font-weight: 700;
-            color: #ff5c00;
-            margin-bottom: clamp(12px, 1.25vw, 16px);
+            background: #fff2e3;
+            border: 1px solid #f6c99f;
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         .culture-scoring-item {
-            margin-bottom: clamp(10px, 1.04vw, 14px);
-            padding-left: clamp(8px, 0.83vw, 12px);
-            border-left: 3px solid #ff5c00;
+            padding: clamp(10px, 1.04vw, 12px) clamp(12px, 1.25vw, 16px);
+            display: grid;
+            grid-template-columns: auto 1fr;
+            column-gap: clamp(8px, 0.83vw, 12px);
+            align-items: flex-start;
+            border-top: 1px solid #f6c99f;
         }
-
-        .culture-scoring-item:last-child {
-            margin-bottom: 0;
+        .culture-scoring-item:first-child {
+            border-top: none;
         }
 
         .culture-scoring-point {
             font-size: clamp(12px, 1.25vw, 15px);
-            font-weight: 700;
+            font-weight: 800;
             color: #ff5c00;
-            margin-bottom: clamp(4px, 0.42vw, 6px);
-        }
-
-        /* 1-5 分配色，越高越深 */
-        .culture-scoring-item:nth-child(1) {
-            border-left-color: #ffe8cc;
-        }
-        .culture-scoring-item:nth-child(1) .culture-scoring-point {
-            color: #ffe8cc;
-        }
-
-        .culture-scoring-item:nth-child(2) {
-            border-left-color: #ffcc99;
-        }
-        .culture-scoring-item:nth-child(2) .culture-scoring-point {
-            color: #ffcc99;
-        }
-
-        .culture-scoring-item:nth-child(3) {
-            border-left-color: #ffb066;
-        }
-        .culture-scoring-item:nth-child(3) .culture-scoring-point {
-            color: #ffb066;
-        }
-
-        .culture-scoring-item:nth-child(4) {
-            border-left-color: #ff8c33;
-        }
-        .culture-scoring-item:nth-child(4) .culture-scoring-point {
-            color: #ff8c33;
-        }
-
-        .culture-scoring-item:nth-child(5) {
-            border-left-color: #ff5c00;
-        }
-        .culture-scoring-item:nth-child(5) .culture-scoring-point {
-            color: #ff5c00;
+            line-height: 1.3;
+            white-space: nowrap;
         }
 
         .culture-scoring-description {
@@ -1293,10 +1255,13 @@ if (file_exists($jsonFile)) {
             line-height: 1.6;
         }
 
-        /* 1-5 分颜色逐级加深 */
-        .culture-scoring-item:nth-child(1) {
-            border-left-color: #ffd7b3;
-        }
+        /* 1-5 分颜色逐级加深（点 + 交替底色） */
+        .culture-scoring-item:nth-child(1) .culture-scoring-point { color: #ffb266; }
+        .culture-scoring-item:nth-child(2) .culture-scoring-point { color: #ff9933; }
+        .culture-scoring-item:nth-child(3) .culture-scoring-point { color: #ff7f1a; }
+        .culture-scoring-item:nth-child(4) .culture-scoring-point { color: #ff6600; }
+        .culture-scoring-item:nth-child(5) .culture-scoring-point { color: #e84d00; }
+        .culture-scoring-item:nth-child(odd) { background: rgba(255, 246, 236, 0.7); }
         .culture-scoring-item:nth-child(1) .culture-scoring-point {
             color: #ffb266;
         }
