@@ -18,6 +18,10 @@ if (!isset($_SESSION)) {
     @session_start();
 }
 
+// 获取用户职位信息
+$userPosition = (!empty($_SESSION['position'])) ? strtoupper(trim($_SESSION['position'])) : '';
+$isOperationManager = ($userPosition === 'OPERATION MANAGER');
+
 // 标记是否使用了新权限系统
 $hasNewPermissions = false;
 
@@ -1294,6 +1298,10 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
         const availableRestaurants = <?php echo json_encode($restaurantPermissions); ?>;
         const restaurantDropdownEnabled = <?php echo $showRestaurantDropdown ? 'true' : 'false'; ?>;
         const restaurantConfig = <?php echo json_encode($restaurantConfigAllowed); ?>;
+        
+        // 用户职位权限控制
+        const isOperationManager = <?php echo $isOperationManager ? 'true' : 'false'; ?>;
+        const operationManagerEditableFields = ['new_customers', 'returning_customers']; // Operation Manager 可以编辑的字段
 
         // 应用状态
         let currentRestaurant = '<?php echo $defaultRestaurant; ?>';
@@ -1596,9 +1604,7 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                         <button class="edit-btn" id="edit-btn-${day}" onclick="toggleEdit(${day})" title="编辑${day}日数据">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="delete-day-btn" onclick="clearDayData(${day})" title="清空${day}日数据">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
+                        ${!isOperationManager ? '<button class="delete-day-btn" onclick="clearDayData(' + day + ')" title="清空' + day + '日数据"><i class="fas fa-trash-alt"></i></button>' : ''}
                     </td>
                 `;
                 
@@ -1715,22 +1721,48 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
             const row = document.querySelector(`input[data-day="${day}"]`).closest('tr');
             
             inputs.forEach(input => {
-                if (readonly) {
-                    input.classList.add('readonly');
-                    input.setAttribute('readonly', 'readonly');
-                    input.setAttribute('disabled', 'disabled');
+                const field = input.dataset.field;
+                
+                // 如果是 Operation Manager，只允许编辑特定字段
+                if (isOperationManager) {
+                    const canEdit = !readonly && operationManagerEditableFields.includes(field);
+                    if (canEdit) {
+                        input.classList.remove('readonly');
+                        input.removeAttribute('readonly');
+                        input.removeAttribute('disabled');
+                    } else {
+                        input.classList.add('readonly');
+                        input.setAttribute('readonly', 'readonly');
+                        input.setAttribute('disabled', 'disabled');
+                    }
                 } else {
-                    input.classList.remove('readonly');
-                    input.removeAttribute('readonly');
-                    input.removeAttribute('disabled');
+                    // 非 Operation Manager，正常处理
+                    if (readonly) {
+                        input.classList.add('readonly');
+                        input.setAttribute('readonly', 'readonly');
+                        input.setAttribute('disabled', 'disabled');
+                    } else {
+                        input.classList.remove('readonly');
+                        input.removeAttribute('readonly');
+                        input.removeAttribute('disabled');
+                    }
                 }
             });
             
-            // 切换行的编辑样式
+            // 切换行的编辑样式（只有当至少有一个字段可编辑时才显示编辑样式）
             if (readonly) {
                 row.classList.remove('editing-row');
             } else {
-                row.classList.add('editing-row');
+                // 检查是否有可编辑的字段
+                const hasEditableField = Array.from(inputs).some(input => {
+                    if (isOperationManager) {
+                        return operationManagerEditableFields.includes(input.dataset.field);
+                    }
+                    return true;
+                });
+                if (hasEditableField) {
+                    row.classList.add('editing-row');
+                }
             }
         }
 
