@@ -4917,6 +4917,17 @@ require_once 'session_check.php';
             return sign * (integerPart + roundedCents / 100);
         }
 
+        // 计算 rounding 调整量（可以是正数或负数）
+        // 返回值 = roundToNearestFive(value) - value
+        function calculateRoundingAdjustment(value) {
+            if (value === null || value === undefined || value === '' || value === '0') return 0;
+            const num = typeof value === 'number' ? value : parseFloat(value);
+            if (!isFinite(num)) return 0;
+            
+            const rounded = roundToNearestFive(num);
+            return rounded - num;
+        }
+
         // 格式化货币 - 显示时使用两位小数
         function formatCurrency(value) {
             const rounded = roundCurrencyValue(value);
@@ -8545,13 +8556,16 @@ require_once 'session_check.php';
 
                 if (exportSystem === 'j2') {
                     const subtotalRaw = grandTotalRaw; // 原始subtotal（不进位）
-                    const subtotalRounded = roundToNearestFive(subtotalRaw); // 进位后的subtotal
-                    const subtotalCents = Math.round(subtotalRounded * 100);
+                    const subtotalCents = Math.round(subtotalRaw * 100); // SUBTOTAL 显示原始值（转换为分）
                     
                     if (isGroupedByDate) {
-                        // 按日期分组：不计算 Charge 15%，直接显示 Total
-                        // 填入Rounding（进位前的金额）
-                        const roundingText = formatCurrencyForPDF(subtotalRaw);
+                        // 按日期分组：不计算 Charge 15%，直接显示 Rounding 和 Total
+                        const roundingAdjustment = calculateRoundingAdjustment(subtotalRaw);
+                        const roundingCents = Math.round(roundingAdjustment * 100);
+                        const finalTotalCents = subtotalCents + roundingCents;
+                        
+                        // 填入Rounding（调整量）
+                        const roundingText = formatCurrencyForPDF(roundingAdjustment);
                         page.drawText(roundingText, {
                             x: getRightAlignedX(roundingText, 588, 8),
                             y: height - 701, // Rounding在Total上方
@@ -8559,8 +8573,8 @@ require_once 'session_check.php';
                             color: textColor,
                         });
                         
-                        // 填入最终Total（进位后的金额）
-                        const finalTotalText = formatCentsToCurrency(subtotalCents);
+                        // 填入最终Total（rounding后的金额）
+                        const finalTotalText = formatCentsToCurrency(finalTotalCents);
                         page.drawText(finalTotalText, {
                             x: getRightAlignedX(finalTotalText, 580, 8),
                             y: height - 717, // 调整到最终Total行
@@ -8569,11 +8583,15 @@ require_once 'session_check.php';
                             font: boldFont,
                         });
                     } else {
-                        // 正常模式：计算subtotal, charge 15%, 和最终total
+                        // 正常模式：计算subtotal, charge 15%, rounding调整量, 和最终total
+                        // SUBTOTAL 使用原始值（不进位）
                         const chargeCents = Math.round(subtotalCents * 15 / 100);
-                        const finalTotalCents = subtotalCents + chargeCents;
+                        const subtotalPlusCharge = subtotalRaw + (chargeCents / 100); // SUBTOTAL + Charge
+                        const roundingAdjustment = calculateRoundingAdjustment(subtotalPlusCharge);
+                        const roundingCents = Math.round(roundingAdjustment * 100);
+                        const finalTotalCents = subtotalCents + chargeCents + roundingCents;
                         
-                        // 填入Subtotal
+                        // 填入Subtotal（原始值）
                         const subtotalText = formatCentsToCurrency(subtotalCents);
                         page.drawText(subtotalText, {
                             x: getRightAlignedX(subtotalText, 588, 8),
@@ -8591,8 +8609,8 @@ require_once 'session_check.php';
                             color: textColor,
                         });
                         
-                        // 填入Rounding（进位前的金额）
-                        const roundingText = formatCurrencyForPDF(subtotalRaw);
+                        // 填入Rounding（调整量）
+                        const roundingText = formatCurrencyForPDF(roundingAdjustment);
                         page.drawText(roundingText, {
                             x: getRightAlignedX(roundingText, 588, 8),
                             y: height - 701, // Rounding在Total上方
@@ -8600,7 +8618,7 @@ require_once 'session_check.php';
                             color: textColor,
                         });
                         
-                        // 填入最终Total（进位后的金额）
+                        // 填入最终Total（subtotal + charge + rounding）
                         const finalTotalText = formatCentsToCurrency(finalTotalCents);
                         page.drawText(finalTotalText, {
                             x: getRightAlignedX(finalTotalText, 580, 8),
@@ -8612,13 +8630,16 @@ require_once 'session_check.php';
                     }
                 } else if (exportSystem === 'j3') {
                     const subtotalRaw = grandTotalRaw; // 原始subtotal（不进位）
-                    const subtotalRounded = roundToNearestFive(subtotalRaw); // 进位后的subtotal
-                    const subtotalCents = Math.round(subtotalRounded * 100);
+                    const subtotalCents = Math.round(subtotalRaw * 100); // SUBTOTAL 显示原始值（转换为分）
                     
                     if (isGroupedByDate) {
-                        // 按日期分组：不计算 Charge 15%，直接显示 Total
-                        // 填入Rounding（进位前的金额）
-                        const roundingText = formatCurrencyForPDF(subtotalRaw);
+                        // 按日期分组：不计算 Charge 15%，直接显示 Rounding 和 Total
+                        const roundingAdjustment = calculateRoundingAdjustment(subtotalRaw);
+                        const roundingCents = Math.round(roundingAdjustment * 100);
+                        const finalTotalCents = subtotalCents + roundingCents;
+                        
+                        // 填入Rounding（调整量）
+                        const roundingText = formatCurrencyForPDF(roundingAdjustment);
                         page.drawText(roundingText, {
                             x: getRightAlignedX(roundingText, 588, 8),
                             y: height - 701, // Rounding在Total上方
@@ -8626,8 +8647,8 @@ require_once 'session_check.php';
                             color: textColor,
                         });
                         
-                        // 填入最终Total（进位后的金额）
-                        const finalTotalText = formatCentsToCurrency(subtotalCents);
+                        // 填入最终Total（rounding后的金额）
+                        const finalTotalText = formatCentsToCurrency(finalTotalCents);
                         page.drawText(finalTotalText, {
                             x: getRightAlignedX(finalTotalText, 580, 8),
                             y: height - 717, // 调整到最终Total行
@@ -8636,11 +8657,15 @@ require_once 'session_check.php';
                             font: boldFont,
                         });
                     } else {
-                        // 正常模式：计算subtotal, charge 15%, 和最终total
+                        // 正常模式：计算subtotal, charge 15%, rounding调整量, 和最终total
+                        // SUBTOTAL 使用原始值（不进位）
                         const chargeCents = Math.round(subtotalCents * 15 / 100);
-                        const finalTotalCents = subtotalCents + chargeCents;
+                        const subtotalPlusCharge = subtotalRaw + (chargeCents / 100); // SUBTOTAL + Charge
+                        const roundingAdjustment = calculateRoundingAdjustment(subtotalPlusCharge);
+                        const roundingCents = Math.round(roundingAdjustment * 100);
+                        const finalTotalCents = subtotalCents + chargeCents + roundingCents;
                         
-                        // 填入Subtotal
+                        // 填入Subtotal（原始值）
                         const subtotalText = formatCentsToCurrency(subtotalCents);
                         page.drawText(subtotalText, {
                             x: getRightAlignedX(subtotalText, 588, 8),
@@ -8658,8 +8683,8 @@ require_once 'session_check.php';
                             color: textColor,
                         });
                         
-                        // 填入Rounding（进位前的金额）
-                        const roundingText = formatCurrencyForPDF(subtotalRaw);
+                        // 填入Rounding（调整量）
+                        const roundingText = formatCurrencyForPDF(roundingAdjustment);
                         page.drawText(roundingText, {
                             x: getRightAlignedX(roundingText, 588, 8),
                             y: height - 701, // Rounding在Total上方
@@ -8667,7 +8692,7 @@ require_once 'session_check.php';
                             color: textColor,
                         });
                         
-                        // 填入最终Total（进位后的金额）
+                        // 填入最终Total（subtotal + charge + rounding）
                         const finalTotalText = formatCentsToCurrency(finalTotalCents);
                         page.drawText(finalTotalText, {
                             x: getRightAlignedX(finalTotalText, 580, 8),
@@ -8678,12 +8703,14 @@ require_once 'session_check.php';
                         });
                     }
                 } else {
-                    // J1模板：显示Rounding和总计
+                    // J1模板：显示Rounding调整量和总计
                     const totalRaw = grandTotalRaw; // 原始总金额（不进位）
-                    const totalRounded = roundToNearestFive(totalRaw); // 进位后的总金额
+                    const roundingAdjustment = calculateRoundingAdjustment(totalRaw);
+                    const totalRounded = roundToNearestFive(totalRaw); // rounding后的总金额
+                    const totalCents = Math.round(totalRounded * 100);
                     
-                    // 填入Rounding（进位前的金额）
-                    const roundingText = formatCurrencyForPDF(totalRaw);
+                    // 填入Rounding（调整量）
+                    const roundingText = formatCurrencyForPDF(roundingAdjustment);
                     page.drawText(roundingText, {
                         x: getRightAlignedX(roundingText, 580, 8),
                         y: height - 700, // Rounding在Total上方
@@ -8691,8 +8718,8 @@ require_once 'session_check.php';
                         color: textColor,
                     });
                     
-                    // 填入Total（进位后的金额）
-                    const totalText = formatCurrencyForPDF(totalRounded);
+                    // 填入Total（rounding后的金额）
+                    const totalText = formatCentsToCurrency(totalCents);
                     page.drawText(totalText, {
                         x: getRightAlignedX(totalText, 574, 8),
                         y: height - 717,
@@ -9036,13 +9063,16 @@ require_once 'session_check.php';
                         if (pageIndex === totalPages - 1) {
                             if (exportSystem === 'j2') {
                                 const subtotalRaw = grandTotalRaw; // 原始subtotal（不进位）
-                                const subtotalRounded = roundToNearestFive(subtotalRaw); // 进位后的subtotal
-                                const subtotalCents = Math.round(subtotalRounded * 100);
+                                const subtotalCents = Math.round(subtotalRaw * 100); // SUBTOTAL 显示原始值（转换为分）
                                 
                                 if (isGroupedByDate) {
-                                    // 按日期分组：不计算 Charge 15%，直接显示 Total
-                                    // 填入Rounding（进位前的金额）
-                                    const roundingText = formatCurrencyForPDF(subtotalRaw);
+                                    // 按日期分组：不计算 Charge 15%，直接显示 Rounding 和 Total
+                                    const roundingAdjustment = calculateRoundingAdjustment(subtotalRaw);
+                                    const roundingCents = Math.round(roundingAdjustment * 100);
+                                    const finalTotalCents = subtotalCents + roundingCents;
+                                    
+                                    // 填入Rounding（调整量）
+                                    const roundingText = formatCurrencyForPDF(roundingAdjustment);
                                     page.drawText(roundingText, {
                                         x: getRightAlignedX(roundingText, 595, 8),
                                         y: height - 701, // Rounding在Total上方
@@ -9050,8 +9080,8 @@ require_once 'session_check.php';
                                         color: textColor,
                                     });
                                     
-                                    // 填入最终Total（进位后的金额）
-                                    const finalTotalText = formatCentsToCurrency(subtotalCents);
+                                    // 填入最终Total（rounding后的金额）
+                                    const finalTotalText = formatCentsToCurrency(finalTotalCents);
                                     page.drawText(finalTotalText, {
                                         x: getRightAlignedX(finalTotalText, 588, 8),
                                         y: height - 717,
@@ -9060,11 +9090,15 @@ require_once 'session_check.php';
                                         font: boldFont,
                                     });
                                 } else {
-                                    // 正常模式：计算subtotal, charge 15%, 和最终total
+                                    // 正常模式：计算subtotal, charge 15%, rounding调整量, 和最终total
+                                    // SUBTOTAL 使用原始值（不进位）
                                     const chargeCents = Math.round(subtotalCents * 15 / 100);
-                                    const finalTotalCents = subtotalCents + chargeCents;
+                                    const subtotalPlusCharge = subtotalRaw + (chargeCents / 100); // SUBTOTAL + Charge
+                                    const roundingAdjustment = calculateRoundingAdjustment(subtotalPlusCharge);
+                                    const roundingCents = Math.round(roundingAdjustment * 100);
+                                    const finalTotalCents = subtotalCents + chargeCents + roundingCents;
                                     
-                                    // 填入Subtotal
+                                    // 填入Subtotal（原始值）
                                     const subtotalText = formatCentsToCurrency(subtotalCents);
                                     page.drawText(subtotalText, {
                                         x: getRightAlignedX(subtotalText, 588, 8),
@@ -9082,8 +9116,8 @@ require_once 'session_check.php';
                                         color: textColor,
                                     });
                                     
-                                    // 填入Rounding（进位前的金额）
-                                    const roundingText = formatCurrencyForPDF(subtotalRaw);
+                                    // 填入Rounding（调整量）
+                                    const roundingText = formatCurrencyForPDF(roundingAdjustment);
                                     page.drawText(roundingText, {
                                         x: getRightAlignedX(roundingText, 595, 8),
                                         y: height - 701, // Rounding在Total上方
@@ -9091,7 +9125,7 @@ require_once 'session_check.php';
                                         color: textColor,
                                     });
                                     
-                                    // 填入最终Total（进位后的金额）
+                                    // 填入最终Total（subtotal + charge + rounding）
                                     const finalTotalText = formatCentsToCurrency(finalTotalCents);
                                     page.drawText(finalTotalText, {
                                         x: getRightAlignedX(finalTotalText, 588, 8),
@@ -9103,13 +9137,16 @@ require_once 'session_check.php';
                                 }
                             } else if (exportSystem === 'j3') {
                                 const subtotalRaw = grandTotalRaw; // 原始subtotal（不进位）
-                                const subtotalRounded = roundToNearestFive(subtotalRaw); // 进位后的subtotal
-                                const subtotalCents = Math.round(subtotalRounded * 100);
+                                const subtotalCents = Math.round(subtotalRaw * 100); // SUBTOTAL 显示原始值（转换为分）
                                 
                                 if (isGroupedByDate) {
-                                    // 按日期分组：不计算 Charge 15%，直接显示 Total
-                                    // 填入Rounding（进位前的金额）
-                                    const roundingText = formatCurrencyForPDF(subtotalRaw);
+                                    // 按日期分组：不计算 Charge 15%，直接显示 Rounding 和 Total
+                                    const roundingAdjustment = calculateRoundingAdjustment(subtotalRaw);
+                                    const roundingCents = Math.round(roundingAdjustment * 100);
+                                    const finalTotalCents = subtotalCents + roundingCents;
+                                    
+                                    // 填入Rounding（调整量）
+                                    const roundingText = formatCurrencyForPDF(roundingAdjustment);
                                     page.drawText(roundingText, {
                                         x: getRightAlignedX(roundingText, 588, 8),
                                         y: height - 701, // Rounding在Total上方
@@ -9117,8 +9154,8 @@ require_once 'session_check.php';
                                         color: textColor,
                                     });
                                     
-                                    // 填入最终Total（进位后的金额）
-                                    const finalTotalText = formatCentsToCurrency(subtotalCents);
+                                    // 填入最终Total（rounding后的金额）
+                                    const finalTotalText = formatCentsToCurrency(finalTotalCents);
                                     page.drawText(finalTotalText, {
                                         x: getRightAlignedX(finalTotalText, 580, 8),
                                         y: height - 717,
@@ -9127,11 +9164,15 @@ require_once 'session_check.php';
                                         font: boldFont,
                                     });
                                 } else {
-                                    // 正常模式：计算subtotal, charge 15%, 和最终total
+                                    // 正常模式：计算subtotal, charge 15%, rounding调整量, 和最终total
+                                    // SUBTOTAL 使用原始值（不进位）
                                     const chargeCents = Math.round(subtotalCents * 15 / 100);
-                                    const finalTotalCents = subtotalCents + chargeCents;
+                                    const subtotalPlusCharge = subtotalRaw + (chargeCents / 100); // SUBTOTAL + Charge
+                                    const roundingAdjustment = calculateRoundingAdjustment(subtotalPlusCharge);
+                                    const roundingCents = Math.round(roundingAdjustment * 100);
+                                    const finalTotalCents = subtotalCents + chargeCents + roundingCents;
                                     
-                                    // 填入Subtotal
+                                    // 填入Subtotal（原始值）
                                     const subtotalText = formatCentsToCurrency(subtotalCents);
                                     page.drawText(subtotalText, {
                                         x: getRightAlignedX(subtotalText, 588, 8),
@@ -9149,8 +9190,8 @@ require_once 'session_check.php';
                                         color: textColor,
                                     });
                                     
-                                    // 填入Rounding（进位前的金额）
-                                    const roundingText = formatCurrencyForPDF(subtotalRaw);
+                                    // 填入Rounding（调整量）
+                                    const roundingText = formatCurrencyForPDF(roundingAdjustment);
                                     page.drawText(roundingText, {
                                         x: getRightAlignedX(roundingText, 588, 8),
                                         y: height - 701, // Rounding在Total上方
@@ -9158,7 +9199,7 @@ require_once 'session_check.php';
                                         color: textColor,
                                     });
                                     
-                                    // 填入最终Total（进位后的金额）
+                                    // 填入最终Total（subtotal + charge + rounding）
                                     const finalTotalText = formatCentsToCurrency(finalTotalCents);
                                     page.drawText(finalTotalText, {
                                         x: getRightAlignedX(finalTotalText, 580, 8),
@@ -9169,12 +9210,14 @@ require_once 'session_check.php';
                                     });
                                 }
                             } else {
-                                // J1模板：显示Rounding和总计
+                                // J1模板：显示Rounding调整量和总计
                                 const totalRaw = grandTotalRaw; // 原始总金额（不进位）
-                                const totalRounded = roundToNearestFive(totalRaw); // 进位后的总金额
+                                const roundingAdjustment = calculateRoundingAdjustment(totalRaw);
+                                const totalRounded = roundToNearestFive(totalRaw); // rounding后的总金额
+                                const totalCents = Math.round(totalRounded * 100);
                                 
-                                // 填入Rounding（进位前的金额）
-                                const roundingText = formatCurrencyForPDF(totalRaw);
+                                // 填入Rounding（调整量）
+                                const roundingText = formatCurrencyForPDF(roundingAdjustment);
                                 page.drawText(roundingText, {
                                     x: getRightAlignedX(roundingText, 595, 8),
                                     y: height - 700, // Rounding在Total上方
@@ -9182,8 +9225,8 @@ require_once 'session_check.php';
                                     color: textColor,
                                 });
                                 
-                                // 填入Total（进位后的金额）
-                                const totalText = formatCurrencyForPDF(totalRounded);
+                                // 填入Total（rounding后的金额）
+                                const totalText = formatCentsToCurrency(totalCents);
                                 page.drawText(totalText, {
                                     x: getRightAlignedX(totalText, 588, 8),
                                     y: height - 717,
