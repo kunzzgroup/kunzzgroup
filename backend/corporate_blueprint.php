@@ -1220,10 +1220,10 @@ if (file_exists($jsonFile)) {
             flex-grow: 1;
         }
 
-        /* 评分标准部分（表格风格） */
+        /* 评分标准部分（表格风格，逐级加深，仅色条+文字） */
         .culture-scoring {
             margin-top: auto;
-            background: #fff2e3;
+            background: #ffffff;
             border: 1px solid #f6c99f;
             border-radius: 8px;
             overflow: hidden;
@@ -1236,6 +1236,7 @@ if (file_exists($jsonFile)) {
             column-gap: clamp(8px, 0.83vw, 12px);
             align-items: flex-start;
             border-top: 1px solid #f6c99f;
+            background: #ffffff;
         }
         .culture-scoring-item:first-child {
             border-top: none;
@@ -1247,6 +1248,8 @@ if (file_exists($jsonFile)) {
             color: #ff5c00;
             line-height: 1.3;
             white-space: nowrap;
+            padding-left: 4px;
+            border-left: 4px solid transparent;
         }
 
         .culture-scoring-description {
@@ -1255,16 +1258,12 @@ if (file_exists($jsonFile)) {
             line-height: 1.6;
         }
 
-        /* 1-5 分颜色逐级加深（点 + 交替底色） */
-        .culture-scoring-item:nth-child(1) .culture-scoring-point { color: #ffb266; }
-        .culture-scoring-item:nth-child(2) .culture-scoring-point { color: #ff9933; }
-        .culture-scoring-item:nth-child(3) .culture-scoring-point { color: #ff7f1a; }
-        .culture-scoring-item:nth-child(4) .culture-scoring-point { color: #ff6600; }
-        .culture-scoring-item:nth-child(5) .culture-scoring-point { color: #e84d00; }
-        .culture-scoring-item:nth-child(odd) { background: rgba(255, 246, 236, 0.7); }
-        .culture-scoring-item:nth-child(1) .culture-scoring-point {
-            color: #ffb266;
-        }
+        /* 1-5 分颜色逐级加深（仅色条+文字加深，背景保持白） */
+        .culture-scoring-item:nth-child(1) .culture-scoring-point { color: #ffcc99; border-left-color: #ffcc99; }
+        .culture-scoring-item:nth-child(2) .culture-scoring-point { color: #ffb266; border-left-color: #ffb266; }
+        .culture-scoring-item:nth-child(3) .culture-scoring-point { color: #ff9933; border-left-color: #ff9933; }
+        .culture-scoring-item:nth-child(4) .culture-scoring-point { color: #ff7f1a; border-left-color: #ff7f1a; }
+        .culture-scoring-item:nth-child(5) .culture-scoring-point { color: #ff6600; border-left-color: #ff6600; }
 
         .culture-scoring-item:nth-child(2) {
             border-left-color: #ffc08a;
