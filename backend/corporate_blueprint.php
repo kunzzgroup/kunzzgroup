@@ -1265,6 +1265,13 @@ if (file_exists($jsonFile)) {
         .culture-scoring-item:nth-child(4) .culture-scoring-point { color: #ff7f1a; border-left-color: #ff7f1a; }
         .culture-scoring-item:nth-child(5) .culture-scoring-point { color: #ff6600; border-left-color: #ff6600; }
 
+        /* 1-5 行整块背景依次加深 */
+        .culture-scoring-item:nth-child(1) { background: #fffbf5; }
+        .culture-scoring-item:nth-child(2) { background: #fff7ea; }
+        .culture-scoring-item:nth-child(3) { background: #fff0d8; }
+        .culture-scoring-item:nth-child(4) { background: #fbe3bb; }
+        .culture-scoring-item:nth-child(5) { background: #ffd389; }
+
         .culture-scoring-item:nth-child(2) {
             border-left-color: #ffc08a;
         }
