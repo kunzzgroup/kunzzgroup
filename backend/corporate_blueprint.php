@@ -114,7 +114,7 @@ if (file_exists($jsonFile)) {
                 #ffe8d6 60%, 
                 #ffddd0 100%);
             border-radius: clamp(16px, 1.67vw, 24px);
-            padding: clamp(60px, 6.25vw, 100px) clamp(40px, 4.17vw, 60px);
+            padding: clamp(40px, 4.17vw, 60px) clamp(40px, 4.17vw, 60px);
             box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
             position: relative;
             z-index: 1;
@@ -124,7 +124,7 @@ if (file_exists($jsonFile)) {
             justify-content: center;
             text-align: center;
             overflow: hidden;
-            min-height: clamp(400px, 41.67vw, 600px);
+            min-height: clamp(280px, 29.17vw, 400px);
         }
 
         /* 柔和的圆形模糊背景效果 */
@@ -158,9 +158,9 @@ if (file_exists($jsonFile)) {
         .header-logo-container {
             position: relative;
             z-index: 2;
-            margin-bottom: clamp(30px, 3.13vw, 40px);
-            width: clamp(120px, 12.5vw, 160px);
-            height: clamp(120px, 12.5vw, 160px);
+            margin-bottom: clamp(20px, 2.08vw, 28px);
+            width: clamp(100px, 10.42vw, 140px);
+            height: clamp(100px, 10.42vw, 140px);
         }
 
         .header-logo {
@@ -208,10 +208,10 @@ if (file_exists($jsonFile)) {
 
         /* 英文公司名 */
         .company-name-large {
-            font-size: clamp(28px, 2.92vw, 48px);
+            font-size: clamp(24px, 2.5vw, 40px);
             font-weight: 700;
             color: #000000;
-            margin-bottom: clamp(16px, 1.67vw, 24px);
+            margin-bottom: clamp(12px, 1.25vw, 18px);
             letter-spacing: 2px;
             line-height: 1.2;
             text-transform: uppercase;
@@ -225,16 +225,16 @@ if (file_exists($jsonFile)) {
             width: calc(100% + clamp(40px, 4.17vw, 60px));
             height: 3px;
             background: #ff5c00;
-            margin: clamp(12px, 1.25vw, 16px) auto 0;
+            margin: clamp(10px, 1.04vw, 14px) auto 0;
             border-radius: 2px;
         }
 
         /* 中文文字 */
         .company-subtitle {
-            font-size: clamp(20px, 2.08vw, 32px);
+            font-size: clamp(18px, 1.88vw, 28px);
             font-weight: 700;
             color: #000000;
-            margin-top: clamp(16px, 1.67vw, 24px);
+            margin-top: clamp(12px, 1.25vw, 18px);
             letter-spacing: 1px;
             line-height: 1.4;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
@@ -1245,14 +1245,14 @@ if (file_exists($jsonFile)) {
         /* 响应式设计 */
         @media (max-width: 1024px) {
             .header-panel {
-                padding: clamp(50px, 5.21vw, 80px) clamp(30px, 3.13vw, 50px);
-                min-height: clamp(350px, 36.46vw, 500px);
+                padding: clamp(35px, 3.65vw, 50px) clamp(30px, 3.13vw, 50px);
+                min-height: clamp(240px, 25vw, 320px);
             }
 
             .header-logo-container {
-                width: clamp(100px, 10.42vw, 140px);
-                height: clamp(100px, 10.42vw, 140px);
-                margin-bottom: clamp(24px, 2.5vw, 32px);
+                width: clamp(90px, 9.38vw, 120px);
+                height: clamp(90px, 9.38vw, 120px);
+                margin-bottom: clamp(18px, 1.88vw, 24px);
             }
         }
 
@@ -1262,14 +1262,14 @@ if (file_exists($jsonFile)) {
             }
 
             .header-panel {
-                padding: clamp(40px, 4.17vw, 60px) clamp(20px, 2.08vw, 30px);
-                min-height: clamp(300px, 31.25vw, 400px);
+                padding: clamp(30px, 3.13vw, 45px) clamp(20px, 2.08vw, 30px);
+                min-height: clamp(220px, 22.92vw, 280px);
             }
 
             .header-logo-container {
-                width: clamp(80px, 8.33vw, 120px);
-                height: clamp(80px, 8.33vw, 120px);
-                margin-bottom: clamp(20px, 2.08vw, 28px);
+                width: clamp(80px, 8.33vw, 100px);
+                height: clamp(80px, 8.33vw, 100px);
+                margin-bottom: clamp(16px, 1.67vw, 20px);
             }
 
             .company-name-large {
