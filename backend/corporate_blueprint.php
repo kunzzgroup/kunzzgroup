@@ -1348,88 +1348,59 @@ if (file_exists($jsonFile)) {
             min-height: clamp(500px, 52.08vw, 700px);
         }
 
-        /* 树形结构容器 */
+        /* 树形结构容器（水平排列） */
         .org-tree {
             width: 100%;
-            height: auto;
-            text-align: center;
         }
 
-        .org-tree ul {
-            padding-top: 20px;
+        .org-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 32px;
+        }
+
+        .org-node-wrap {
             position: relative;
-            transition: .5s;
+            display: flex;
+            align-items: center;
         }
 
-        .org-tree li {
-            display: inline-table;
-            text-align: center;
-            list-style-type: none;
-            position: relative;
-            padding: 10px;
-            transition: .5s;
-            vertical-align: top;
+        .org-node-wrap.has-children {
+            padding-right: 32px;
         }
 
-        /* 连接线 - 使用伪元素自动画线 */
-        .org-tree li::before, .org-tree li::after {
+        /* 父节点到子容器的横线 */
+        .org-node-wrap.has-children::after {
             content: '';
             position: absolute;
-            top: 0;
-            right: 50%;
+            top: 50%;
+            left: 100%;
+            width: 32px;
             border-top: 2px solid #000000;
-            width: 51%;
-            height: 10px;
         }
 
-        .org-tree li::after {
-            right: auto;
-            left: 50%;
+        /* 子节点容器：竖线 + 子节点列表 */
+        .org-children {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-left: 32px;
+            padding-left: 32px;
             border-left: 2px solid #000000;
         }
 
-        /* 单子节点不显示连接线 */
-        .org-tree li:only-child::after, .org-tree li:only-child::before {
-            display: none;
-        }
-
-        .org-tree li:only-child {
-            padding-top: 0;
-        }
-
-        /* 第一个和最后一个节点的连接线调整 */
-        .org-tree li:first-child::before, .org-tree li:last-child::after {
-            border: 0 none;
-        }
-
-        .org-tree li:last-child::before {
-            border-right: 2px solid #000000;
-            border-radius: 0 5px 0 0;
-        }
-
-        .org-tree li:first-child::after {
-            border-radius: 5px 0 0 0;
-        }
-
-        /* 子层级的垂直连接线 */
-        .org-tree ul ul::before {
+        /* 子节点前的横线（从竖线到子节点） */
+        .org-children .org-node-wrap::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 50%;
-            border-left: 2px solid #000000;
-            width: 0;
-            height: 20px;
-        }
-
-        /* 确保顶层（CEO 和 PA）水平排列 */
-        .org-tree > ul > li {
-            display: inline-table;
-            vertical-align: top;
+            top: 50%;
+            left: -32px;
+            width: 32px;
+            border-top: 2px solid #000000;
         }
 
         /* 节点卡片样式 - 橙色圆角矩形（匹配图片） */
-        .org-tree li a {
+        .org-box {
             border: 2px solid #ff5c00;
             background: #ff5c00;
             padding: clamp(10px, 1.04vw, 14px) clamp(14px, 1.46vw, 20px);
@@ -1446,7 +1417,7 @@ if (file_exists($jsonFile)) {
             box-sizing: border-box;
         }
 
-        .org-tree li a span {
+        .org-box span {
             border: none;
             border-radius: 0;
             color: #ffffff;
@@ -1462,35 +1433,28 @@ if (file_exists($jsonFile)) {
             text-align: center;
         }
 
-        .org-tree li a .org-title {
+        .org-box .org-title {
             font-weight: 700;
             font-size: clamp(13px, 1.35vw, 17px);
             margin-bottom: 4px;
         }
 
-        .org-tree li a .org-name {
+        .org-box .org-name {
             font-weight: 500;
             font-size: clamp(11px, 1.15vw, 15px);
             word-break: break-word;
         }
 
         /* 悬停效果 */
-        .org-tree li a:hover {
+        .org-box:hover {
             background: #ff8c42;
             border-color: #ff8c42;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(255, 92, 0, 0.3);
         }
 
-        .org-tree li a:hover span {
+        .org-box:hover span {
             color: #ffffff;
-        }
-
-        .org-tree li a:hover+ul li::after, 
-        .org-tree li a:hover+ul li::before, 
-        .org-tree li a:hover+ul::before, 
-        .org-tree li a:hover+ul ul::before {
-            border-color: #ff5c00;
         }
 
         /* 响应式调整 */
@@ -1827,82 +1791,89 @@ if (file_exists($jsonFile)) {
                         }
                         ?>
                         
+                        <?php 
+                        // 构建水平组织树所需的数据
+                        $ceoTitle = htmlspecialchars($orgStructure['ceo']['fullTitle'] ?? $orgStructure['ceo']['title'] ?? 'CEO');
+                        $ceoName  = htmlspecialchars($orgStructure['ceo']['name'] ?? '');
+
+                        $paTitle = !empty($orgStructure['pa']) ? htmlspecialchars($orgStructure['pa']['fullTitle'] ?? $orgStructure['pa']['title'] ?? 'PA') : '';
+                        $paName  = !empty($orgStructure['pa']) ? htmlspecialchars($orgStructure['pa']['name'] ?? '') : '';
+
+                        $cLevelNodes = [];
+                        if (!empty($orgStructure['cLevel'])) {
+                            foreach ($orgStructure['cLevel'] as $exec) {
+                                $title = htmlspecialchars($exec['fullTitle'] ?? $exec['title'] ?? '');
+                                $name  = htmlspecialchars($exec['name'] ?? '');
+                                $children = [];
+                                if (!empty($exec['subordinates']) && is_array($exec['subordinates'])) {
+                                    foreach ($exec['subordinates'] as $sub) {
+                                        $childTitle = htmlspecialchars($sub['fullTitle'] ?? $sub['title'] ?? '');
+                                        $childName  = htmlspecialchars($sub['name'] ?? '');
+                                        $children[] = [
+                                            'title' => $childTitle,
+                                            'name'  => $childName,
+                                            'children' => []
+                                        ];
+                                    }
+                                }
+                                $cLevelNodes[] = [
+                                    'title' => $title,
+                                    'name'  => $name,
+                                    'children' => $children
+                                ];
+                            }
+                        }
+
+                        // 递归渲染节点
+                        function renderNodeHorizontal($node) {
+                            $hasChildren = !empty($node['children']);
+                            echo '<div class="org-node-wrap' . ($hasChildren ? ' has-children' : '') . '">';
+                            echo '<div class="org-box">';
+                            echo '<span class="org-title">' . ($node['title'] ?? '') . '</span>';
+                            if (!empty($node['name'])) {
+                                echo '<span class="org-name">' . $node['name'] . '</span>';
+                            }
+                            echo '</div>';
+                            if ($hasChildren) {
+                                echo '<div class="org-children">';
+                                foreach ($node['children'] as $child) {
+                                    renderNodeHorizontal($child);
+                                }
+                                echo '</div>';
+                            }
+                            echo '</div>';
+                        }
+                        ?>
+
                         <div class="org-tree">
-                            <ul>
-                                <!-- 顶层：CEO 和 PA 同级 -->
-                                <?php if (!empty($orgStructure['ceo'])): 
-                                    $ceoData = getOrgData('ceo', $orgStructure, 'CEO');
-                                    $ceoTitle = htmlspecialchars($ceoData['title']);
-                                    $ceoName = htmlspecialchars($ceoData['name']);
-                                ?>
-                                <li>
-                                    <a href="#">
+                            <div class="org-row">
+                                <!-- CEO 节点，向右连接 C-Level -->
+                                <div class="org-node-wrap<?php echo !empty($cLevelNodes) ? ' has-children' : ''; ?>">
+                                    <div class="org-box">
                                         <span class="org-title"><?php echo $ceoTitle; ?></span>
                                         <?php if ($ceoName): ?>
                                         <span class="org-name"><?php echo $ceoName; ?></span>
                                         <?php endif; ?>
-                                    </a>
-                                    
-                                    <!-- 第二层：C-Level 高管 -->
-                                    <?php if (!empty($orgStructure['cLevel'])): ?>
-                                    <ul>
-                                        <?php foreach ($orgStructure['cLevel'] as $exec):
-                                            $execTitle = htmlspecialchars($exec['title'] ?? '');
-                                            $execName = htmlspecialchars($exec['name'] ?? '');
-                                            $execFullTitle = htmlspecialchars($exec['fullTitle'] ?? '');
-                                            $displayTitle = $execFullTitle ? $execFullTitle : $execTitle;
-                                        ?>
-                                        <li>
-                                            <a href="#">
-                                                <span class="org-title"><?php echo $displayTitle; ?></span>
-                                                <?php if ($execName): ?>
-                                                <span class="org-name"><?php echo $execName; ?></span>
-                                                <?php endif; ?>
-                                            </a>
-                                            
-                                            <!-- 第三层：下属 -->
-                                            <?php if (!empty($exec['subordinates']) && is_array($exec['subordinates'])): ?>
-                                            <ul>
-                                                <?php foreach ($exec['subordinates'] as $sub): 
-                                                    $subTitle = htmlspecialchars($sub['title'] ?? '');
-                                                    $subName = htmlspecialchars($sub['name'] ?? '');
-                                                    $subFullTitle = htmlspecialchars($sub['fullTitle'] ?? '');
-                                                    $subDisplayTitle = $subFullTitle ? $subFullTitle : $subTitle;
-                                                ?>
-                                                <li>
-                                                    <a href="#">
-                                                        <span class="org-title"><?php echo $subDisplayTitle; ?></span>
-                                                        <?php if ($subName): ?>
-                                                        <span class="org-name"><?php echo $subName; ?></span>
-                                                        <?php endif; ?>
-                                                    </a>
-                                                </li>
-                                                <?php endforeach; ?>
-                                            </ul>
-                                            <?php endif; ?>
-                                        </li>
-                                        <?php endforeach; ?>
-                                    </ul>
+                                    </div>
+                                    <?php if (!empty($cLevelNodes)): ?>
+                                    <div class="org-children">
+                                        <?php foreach ($cLevelNodes as $node) { renderNodeHorizontal($node); } ?>
+                                    </div>
                                     <?php endif; ?>
-                                </li>
-                                
-                                <!-- PA（与 CEO 同级） -->
-                                <?php if (!empty($orgStructure['pa'])): 
-                                    $paData = getOrgData('pa', $orgStructure, 'PA');
-                                    $paTitle = htmlspecialchars($paData['title']);
-                                    $paName = htmlspecialchars($paData['name']);
-                                ?>
-                                <li>
-                                    <a href="#">
+                                </div>
+
+                                <!-- PA 节点（与 CEO 同级，且不向下连接） -->
+                                <?php if (!empty($orgStructure['pa'])): ?>
+                                <div class="org-node-wrap">
+                                    <div class="org-box">
                                         <span class="org-title"><?php echo $paTitle; ?></span>
                                         <?php if ($paName): ?>
                                         <span class="org-name"><?php echo $paName; ?></span>
                                         <?php endif; ?>
-                                    </a>
-                                </li>
+                                    </div>
+                                </div>
                                 <?php endif; ?>
-                                <?php endif; ?>
-                            </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
