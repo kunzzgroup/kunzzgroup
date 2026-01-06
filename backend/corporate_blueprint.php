@@ -154,6 +154,137 @@ if (file_exists($jsonFile)) {
             z-index: 0;
         }
 
+        /* 飘动的模糊圆球 */
+        .floating-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .floating-orb-1 {
+            width: clamp(120px, 12.5vw, 180px);
+            height: clamp(120px, 12.5vw, 180px);
+            background: radial-gradient(circle, rgba(255, 200, 150, 0.5) 0%, rgba(255, 180, 120, 0.3) 50%, transparent 100%);
+            top: 10%;
+            left: 15%;
+            animation: float1 20s ease-in-out infinite;
+        }
+
+        .floating-orb-2 {
+            width: clamp(100px, 10.42vw, 150px);
+            height: clamp(100px, 10.42vw, 150px);
+            background: radial-gradient(circle, rgba(255, 180, 120, 0.4) 0%, rgba(255, 160, 100, 0.2) 50%, transparent 100%);
+            top: 60%;
+            right: 20%;
+            animation: float2 25s ease-in-out infinite;
+        }
+
+        .floating-orb-3 {
+            width: clamp(80px, 8.33vw, 120px);
+            height: clamp(80px, 8.33vw, 120px);
+            background: radial-gradient(circle, rgba(255, 220, 170, 0.4) 0%, rgba(255, 200, 150, 0.2) 50%, transparent 100%);
+            bottom: 20%;
+            left: 25%;
+            animation: float3 18s ease-in-out infinite;
+        }
+
+        .floating-orb-4 {
+            width: clamp(90px, 9.38vw, 130px);
+            height: clamp(90px, 9.38vw, 130px);
+            background: radial-gradient(circle, rgba(255, 190, 130, 0.35) 0%, rgba(255, 170, 110, 0.2) 50%, transparent 100%);
+            top: 30%;
+            right: 35%;
+            animation: float4 22s ease-in-out infinite;
+        }
+
+        .floating-orb-5 {
+            width: clamp(70px, 7.29vw, 100px);
+            height: clamp(70px, 7.29vw, 100px);
+            background: radial-gradient(circle, rgba(255, 210, 160, 0.3) 0%, rgba(255, 190, 140, 0.15) 50%, transparent 100%);
+            bottom: 40%;
+            right: 10%;
+            animation: float5 24s ease-in-out infinite;
+        }
+
+        /* 飘动动画 */
+        @keyframes float1 {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            25% {
+                transform: translate(30px, -40px) scale(1.1);
+            }
+            50% {
+                transform: translate(-20px, -60px) scale(0.9);
+            }
+            75% {
+                transform: translate(-30px, -20px) scale(1.05);
+            }
+        }
+
+        @keyframes float2 {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            33% {
+                transform: translate(-40px, 30px) scale(1.15);
+            }
+            66% {
+                transform: translate(25px, -35px) scale(0.85);
+            }
+        }
+
+        @keyframes float3 {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            30% {
+                transform: translate(35px, 25px) scale(1.2);
+            }
+            60% {
+                transform: translate(-25px, 40px) scale(0.8);
+            }
+            90% {
+                transform: translate(15px, -15px) scale(1.1);
+            }
+        }
+
+        @keyframes float4 {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            20% {
+                transform: translate(-30px, -25px) scale(1.1);
+            }
+            40% {
+                transform: translate(20px, -45px) scale(0.9);
+            }
+            60% {
+                transform: translate(35px, 20px) scale(1.15);
+            }
+            80% {
+                transform: translate(-15px, 30px) scale(0.95);
+            }
+        }
+
+        @keyframes float5 {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            25% {
+                transform: translate(20px, 35px) scale(1.05);
+            }
+            50% {
+                transform: translate(-35px, 20px) scale(0.9);
+            }
+            75% {
+                transform: translate(25px, -30px) scale(1.1);
+            }
+        }
+
         /* Logo 容器 - 居中显示 */
         .header-logo-container {
             position: relative;
@@ -1549,6 +1680,13 @@ if (file_exists($jsonFile)) {
                 <!-- Header Section - 新设计 -->
                 <div class="section">
                     <div class="header-panel">
+                        <!-- 飘动的模糊圆球 -->
+                        <div class="floating-orb floating-orb-1"></div>
+                        <div class="floating-orb floating-orb-2"></div>
+                        <div class="floating-orb floating-orb-3"></div>
+                        <div class="floating-orb floating-orb-4"></div>
+                        <div class="floating-orb floating-orb-5"></div>
+                        
                         <!-- Logo - 居中显示 -->
                         <div class="header-logo-container">
                             <div class="header-logo">
