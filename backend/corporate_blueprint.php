@@ -1050,103 +1050,81 @@ if (file_exists($jsonFile)) {
             left: 100%;
         }
 
-        /* Corporate Core Section */
+        /* Corporate Core Section - 新设计（参考图片） */
         .core-header {
             text-align: center;
-            margin-bottom: clamp(50px, 5.21vw, 70px);
-            position: relative;
+            margin-bottom: clamp(32px, 3.33vw, 40px);
         }
 
         .core-main-title {
-            font-size: clamp(24px, 2.6vw, 50px);
+            font-size: clamp(24px, 2.6vw, 40px);
             font-weight: 800;
-            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 50%, #ffd700 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: clamp(14px, 1.46vw, 20px);
-            letter-spacing: 1px;
-            text-shadow: 0 4px 8px rgba(255, 92, 0, 0.2);
-            position: relative;
-        }
-
-        .core-main-title::after {
-            content: '';
-            position: absolute;
-            bottom: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, #ff5c00, transparent);
-            border-radius: 2px;
-        }
-
-        .core-subtitle {
-            font-size: clamp(15px, 1.56vw, 20px);
-            color: #4a5568;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-            margin-top: clamp(20px, 2.08vw, 28px);
+            color: #ff5c00;
+            letter-spacing: 2px;
         }
 
         .core-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: clamp(20px, 2.08vw, 32px);
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: clamp(16px, 1.67vw, 20px);
         }
 
         .core-card {
-            background: #fff;
-            border-radius: clamp(12px, 1.25vw, 16px);
-            padding: clamp(16px, 1.67vw, 24px);
-            border: 2px solid #e5e7eb;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: clamp(16px, 1.67vw, 24px);
+            display: grid;
+            grid-template-columns: auto 1fr;
+            align-items: stretch;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 2px solid #ffe0cc;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+            transition: box-shadow 0.25s ease, transform 0.25s ease;
         }
 
         .core-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(255, 92, 0, 0.18);
         }
 
+        /* 左侧橙色编号块 */
         .core-card-number {
-            width: clamp(48px, 5vw, 64px);
-            height: clamp(48px, 5vw, 64px);
-            min-width: clamp(48px, 5vw, 64px);
-            background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
-            border-radius: 50%;
+            background: #ff5c00;
+            color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: clamp(20px, 2.08vw, 28px);
+            padding: 0 clamp(18px, 1.88vw, 24px);
+            font-size: clamp(26px, 2.71vw, 36px);
             font-weight: 800;
-            color: #000000;
-            box-shadow: 0 2px 8px rgba(255, 165, 0, 0.3);
-            flex-shrink: 0;
+            letter-spacing: 2px;
+            min-width: clamp(70px, 7.29vw, 90px);
         }
 
+        /* 右侧内容区域 */
         .core-card-content-wrapper {
-            flex: 1;
+            padding: clamp(18px, 1.88vw, 22px) clamp(20px, 2.08vw, 26px);
             display: flex;
             flex-direction: column;
+            justify-content: center;
+            gap: clamp(6px, 0.63vw, 10px);
         }
 
         .core-card-title {
-            font-size: clamp(18px, 1.88vw, 24px);
-            font-weight: 800;
-            color: #000000;
-            line-height: 1.4;
+            font-size: clamp(16px, 1.67vw, 22px);
+            font-weight: 700;
+            color: #111827;
         }
 
         .core-card-content {
-            font-size: clamp(16px, 1.67vw, 22px);
-            color: #374151;
-            line-height: 1.8;
+            font-size: clamp(14px, 1.35vw, 18px);
+            color: #4b5563;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 900px) {
+            .core-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* Culture Explanation Section */
