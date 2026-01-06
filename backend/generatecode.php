@@ -2506,7 +2506,7 @@ require_once 'session_check.php';
                 'DESIGN DIRECTOR',
                 'SENIOR DESIGN MANAGER',
                 'DESIGN MANAGER',
-                'DESGIN SUPERVISOR',
+                'DESIGN SUPERVISOR',
                 'GRAPHIC DESIGNER',
                 'JUNIOR GRAPHIC DESIGNER',
                 'DESIGN ASSISTANT',
