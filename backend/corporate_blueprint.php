@@ -1338,19 +1338,18 @@ if (file_exists($jsonFile)) {
             }
         }
 
-        /* Mermaid 组织架构样式 */
+        /* Mermaid 组织架构样式 - 匹配 Figma 设计 */
         .mermaid-org-chart {
-            background: linear-gradient(135deg, rgba(255, 92, 0, 0.02) 0%, rgba(255, 215, 0, 0.02) 100%);
+            background: #ffffff;
             border-radius: clamp(12px, 1.25vw, 16px);
             padding: clamp(40px, 4.17vw, 60px);
-            border: 2px solid rgba(255, 92, 0, 0.1);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             position: relative;
             overflow-x: auto;
             overflow-y: visible;
-            min-height: clamp(400px, 41.67vw, 600px);
+            min-height: clamp(500px, 52.08vw, 700px);
         }
 
+        /* 淡橙色水印背景 */
         .mermaid-org-chart::before {
             content: '';
             position: absolute;
@@ -1363,6 +1362,7 @@ if (file_exists($jsonFile)) {
                 radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.03) 0%, transparent 50%);
             border-radius: clamp(12px, 1.25vw, 16px);
             pointer-events: none;
+            z-index: 0;
         }
 
         .mermaid-org-chart .mermaid {
@@ -1371,6 +1371,67 @@ if (file_exists($jsonFile)) {
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+
+        /* 自定义 Mermaid 节点样式 - 橙色圆角矩形，白色文字（匹配 Figma） */
+        .mermaid-org-chart .mermaid svg .node rect,
+        .mermaid-org-chart .mermaid svg .node polygon,
+        .mermaid-org-chart .mermaid svg .node circle {
+            fill: #ff5c00 !important;
+            stroke: #ff5c00 !important;
+            stroke-width: 2px !important;
+            rx: 8px !important;
+            ry: 8px !important;
+        }
+
+        /* 节点文字容器样式 */
+        .mermaid-org-chart .mermaid svg .nodeLabel {
+            color: #ffffff !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif !important;
+            font-size: 14px !important;
+            text-anchor: middle !important;
+        }
+
+        /* 节点文字中的粗体 */
+        .mermaid-org-chart .mermaid svg .nodeLabel b,
+        .mermaid-org-chart .mermaid svg .nodeLabel strong {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+
+        /* 节点文字中的普通文本 */
+        .mermaid-org-chart .mermaid svg .nodeLabel {
+            font-weight: 500 !important;
+        }
+
+        /* 连接线样式 - 黑色细线（匹配 Figma） */
+        .mermaid-org-chart .mermaid svg .edgePath path {
+            stroke: #000000 !important;
+            stroke-width: 2px !important;
+            fill: none !important;
+        }
+
+        .mermaid-org-chart .mermaid svg .edgePath .path {
+            stroke: #000000 !important;
+            stroke-width: 2px !important;
+        }
+
+        /* 箭头样式 - 黑色 */
+        .mermaid-org-chart .mermaid svg marker path,
+        .mermaid-org-chart .mermaid svg marker polygon {
+            fill: #000000 !important;
+            stroke: #000000 !important;
+        }
+
+        /* 连接线箭头标记 */
+        .mermaid-org-chart .mermaid svg .arrowheadPath {
+            fill: #000000 !important;
+            stroke: #000000 !important;
+        }
+
+        /* 确保 SVG 背景透明 */
+        .mermaid-org-chart .mermaid svg {
+            background: transparent !important;
         }
     </style>
     <!-- Mermaid.js 库 -->
@@ -1629,7 +1690,7 @@ if (file_exists($jsonFile)) {
                         <?php 
                         $orgStructure = $strategyData['organizationStructure'];
                         
-                        // 构建 Mermaid 图表代码
+                        // 构建 Mermaid 图表代码 - 从上到下布局（匹配 Figma 设计）
                         $mermaidCode = "graph TD\n";
                         
                         // 节点 ID 映射表（确保相同文本生成相同 ID）
@@ -1845,24 +1906,35 @@ if (file_exists($jsonFile)) {
                 });
             });
 
-            // 初始化 Mermaid 组织架构图
+            // 初始化 Mermaid 组织架构图 - 匹配 Figma 设计
             if (typeof mermaid !== 'undefined') {
                 mermaid.initialize({ 
                     startOnLoad: true,
-                    theme: 'default',
+                    theme: 'base',
+                    themeVariables: {
+                        // 节点颜色 - 橙色
+                        primaryColor: '#ff5c00',
+                        primaryTextColor: '#ffffff',
+                        primaryBorderColor: '#ff5c00',
+                        // 连接线颜色 - 黑色
+                        lineColor: '#000000',
+                        secondaryColor: '#ff5c00',
+                        tertiaryColor: '#ffffff',
+                        // 文字颜色
+                        textColor: '#ffffff',
+                        // 背景
+                        background: '#ffffff',
+                        // 边框
+                        border1: '#ff5c00',
+                        border2: '#ff5c00'
+                    },
                     flowchart: {
                         useMaxWidth: true,
                         htmlLabels: true,
                         curve: 'basis',
-                        padding: 20
-                    },
-                    themeVariables: {
-                        primaryColor: '#ff5c00',
-                        primaryTextColor: '#ffffff',
-                        primaryBorderColor: '#ff8c42',
-                        lineColor: '#000000',
-                        secondaryColor: '#ff8c42',
-                        tertiaryColor: '#faf7f2'
+                        padding: 30,
+                        nodeSpacing: 50,
+                        rankSpacing: 80
                     }
                 });
             }
