@@ -1300,6 +1300,34 @@ if (file_exists($jsonFile)) {
             border-left-color: #ff6600;
         }
 
+        /* Values Explanation - 复用与 Culture 相同的标题样式 */
+        .values-explanation-header {
+            text-align: center;
+            margin-bottom: clamp(40px, 4.17vw, 60px);
+            position: relative;
+        }
+
+        .values-explanation-title-cn {
+            font-size: clamp(24px, 2.6vw, 40px);
+            font-weight: 800;
+            color: #ff5c00;
+            letter-spacing: 2px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .values-explanation-title-cn::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ff5c00, transparent);
+            border-radius: 2px;
+        }
+
         /* 响应式设计 */
         @media (max-width: 1200px) {
             .culture-explanation-grid {
@@ -2077,22 +2105,141 @@ if (file_exists($jsonFile)) {
                     </div>
                 </div>
 
-                <!-- Values Explanation -->
-                <?php if (!empty($strategyData['valuesExplanation'])): ?>
+                <!-- Values Explanation - 新设计，风格与 Culture Explanation 一致 -->
                 <div class="section">
-                    <h2 class="section-title">价值观阐述</h2>
-                    <div class="explanation-grid">
-                        <?php foreach ($strategyData['valuesExplanation'] as $value): ?>
-                        <div class="explanation-card">
-                            <div class="explanation-key"><?php echo htmlspecialchars($value['key'] ?? ''); ?></div>
-                            <div class="explanation-description">
-                                <?php echo htmlspecialchars($value['description'] ?? ''); ?>
+                    <div class="values-explanation-header">
+                        <div class="values-explanation-title-cn">价值观解说&考核</div>
+                    </div>
+                    <div class="culture-explanation-grid">
+                        <!-- 01 目标导向 -->
+                        <div class="culture-explanation-card">
+                            <div class="culture-explanation-number">01</div>
+                            <div class="culture-explanation-key">目标导向</div>
+                            <div class="culture-explanation-description">
+                                公司需要明确战略目标,并确保每个部门围绕这些目标高效运作。所有工作都应有清晰的方向,以实现公司整体愿景和长期发展。
+                            </div>
+                            <div class="culture-scoring">
+                                <div class="culture-scoring-title">评分标准:</div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">1分:</div>
+                                    <div class="culture-scoring-description">缺少明确的目标,经常偏离方向</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">2分:</div>
+                                    <div class="culture-scoring-description">知道整体方向,但常常在执行上存在偏移</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">3分:</div>
+                                    <div class="culture-scoring-description">有基本的目标意识,能根据公司目标安排好任务</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">4分:</div>
+                                    <div class="culture-scoring-description">会主动对照公司目标调整计划,确保工作的推进方向一致</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">5分:</div>
+                                    <div class="culture-scoring-description">以目标为核心进行规划,并能推动团队围绕共同目标高效落实</div>
+                                </div>
                             </div>
                         </div>
-                        <?php endforeach; ?>
+
+                        <!-- 02 理念一致 -->
+                        <div class="culture-explanation-card">
+                            <div class="culture-explanation-number">02</div>
+                            <div class="culture-explanation-key">理念一致</div>
+                            <div class="culture-explanation-description">
+                                管理层和团队需在战略、决策和执行上保持一致,以保障组织沟通顺畅,避免内部摩擦和资源浪费,共同推动公司整体稳健发展。
+                            </div>
+                            <div class="culture-scoring">
+                                <div class="culture-scoring-title">评分标准:</div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">1分:</div>
+                                    <div class="culture-scoring-description">与公司方向和理念差异明显,行为不够统一</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">2分:</div>
+                                    <div class="culture-scoring-description">大部分情况能配合公司理念,但偶尔仍按个人习惯行事</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">3分:</div>
+                                    <div class="culture-scoring-description">理解并基本认同公司理念,能按照要求执行</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">4分:</div>
+                                    <div class="culture-scoring-description">积极传递公司理念,并在团队中保持统一标准和做法</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">5分:</div>
+                                    <div class="culture-scoring-description">高度认同公司理念,能影响团队成员,共同维持一致的价值判断和行为标准</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 03 追求卓越 -->
+                        <div class="culture-explanation-card">
+                            <div class="culture-explanation-number">03</div>
+                            <div class="culture-explanation-key">追求卓越</div>
+                            <div class="culture-explanation-description">
+                                公司不仅要优化管理流程,还要不断提升自身的管理水平。通过持续改进,提高工作效率和质量,在公司内部树立精益求精的文化。
+                            </div>
+                            <div class="culture-scoring">
+                                <div class="culture-scoring-title">评分标准:</div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">1分:</div>
+                                    <div class="culture-scoring-description">缺少主动进步的意愿,满足在最低的标准内完成工作</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">2分:</div>
+                                    <div class="culture-scoring-description">能做到基本要求,但很少主动提出优化或改进建议</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">3分:</div>
+                                    <div class="culture-scoring-description">在保证质量的前提下,会适度思考提升效率和成果</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">4分:</div>
+                                    <div class="culture-scoring-description">不断自我提升,主动优化工作流程,追求更高标准</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">5分:</div>
+                                    <div class="culture-scoring-description">以卓越为目标,持续突破既有成绩,对团队有明显的标杆示范作用</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 04 创新精神 -->
+                        <div class="culture-explanation-card">
+                            <div class="culture-explanation-number">04</div>
+                            <div class="culture-explanation-key">创新精神</div>
+                            <div class="culture-explanation-description">
+                                通过流程、技术和管理模式上的不断创新,以提升内部管理效能。通过鼓励全员参与创新,能够更好地应对市场变化,增强公司的竞争力和决策能力。
+                            </div>
+                            <div class="culture-scoring">
+                                <div class="culture-scoring-title">评分标准:</div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">1分:</div>
+                                    <div class="culture-scoring-description">习惯依赖既有方法,不愿尝试新做法</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">2分:</div>
+                                    <div class="culture-scoring-description">可以接受变化,但多数情况为被动配合,缺少主动思考</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">3分:</div>
+                                    <div class="culture-scoring-description">在需要时会提出改进想法,并能配合推动部分创新措施</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">4分:</div>
+                                    <div class="culture-scoring-description">积极参与各类创新项目,能提出可行方案并协助落实</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">5分:</div>
+                                    <div class="culture-scoring-description">具有强烈的创新意识,能系统性思考并带领团队一起设计和落地创新方案</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <?php endif; ?>
 
                 <!-- Organization Structure - Binary Tree Structure -->
                 <?php if (!empty($strategyData['organizationStructure'])): ?>
