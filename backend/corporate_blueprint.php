@@ -1061,6 +1061,21 @@ if (file_exists($jsonFile)) {
             font-weight: 800;
             color: #ff5c00;
             letter-spacing: 2px;
+            position: relative;
+            display: inline-block;
+            padding-bottom: clamp(10px, 1.04vw, 14px);
+        }
+
+        .core-main-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ff5c00, transparent);
+            border-radius: 2px;
         }
 
         .core-grid {
