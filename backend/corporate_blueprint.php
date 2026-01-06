@@ -1676,7 +1676,6 @@ if (file_exists($jsonFile)) {
                         // 例如：如果名字应该在图片中间，则 left: 50, top: 50
                         //
                         $namePositions = [
-                        $namePositions = [
                             'ceo' => ['left' => 20, 'top' => 15],      // CEO 位置
                             'pa' => ['left' => 50, 'top' => 15],        // PA 位置
                             'cao' => ['left' => 15, 'top' => 40],       // CAO 位置
