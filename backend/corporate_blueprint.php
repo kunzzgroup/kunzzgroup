@@ -1337,67 +1337,155 @@ if (file_exists($jsonFile)) {
             }
         }
 
-        /* 图片模板组织架构样式 */
+        /* Binary Tree 组织架构样式 */
         .mermaid-org-chart {
             background: #ffffff;
             border-radius: clamp(12px, 1.25vw, 16px);
-            padding: clamp(20px, 2.08vw, 30px);
+            padding: clamp(40px, 4.17vw, 60px);
             position: relative;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            overflow-x: auto;
+            overflow-y: visible;
+            min-height: clamp(500px, 52.08vw, 700px);
         }
 
-        /* 图片模板容器 */
-        .org-chart-image-container {
-            position: relative;
-            width: 100%;
-            max-width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* 模板图片 */
-        .org-chart-template-image {
+        /* 树形结构容器 */
+        .org-tree {
             width: 100%;
             height: auto;
-            max-width: 100%;
-            display: block;
-            object-fit: contain;
+            text-align: center;
         }
 
-        /* 名字标签容器 */
-        .org-name-overlay {
+        .org-tree ul {
+            padding-top: 20px;
+            position: relative;
+            transition: .5s;
+        }
+
+        .org-tree li {
+            display: inline-table;
+            text-align: center;
+            list-style-type: none;
+            position: relative;
+            padding: 10px;
+            transition: .5s;
+        }
+
+        /* 连接线 - 使用伪元素自动画线 */
+        .org-tree li::before, .org-tree li::after {
+            content: '';
             position: absolute;
             top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
+            right: 50%;
+            border-top: 2px solid #000000;
+            width: 51%;
+            height: 10px;
         }
 
-        /* 单个名字标签 */
-        .org-name-label {
+        .org-tree li::after {
+            right: auto;
+            left: 50%;
+            border-left: 2px solid #000000;
+        }
+
+        .org-tree li:only-child::after, .org-tree li:only-child::before {
+            display: none;
+        }
+
+        .org-tree li:only-child {
+            padding-top: 0;
+        }
+
+        .org-tree li:first-child::before, .org-tree li:last-child::after {
+            border: 0 none;
+        }
+
+        .org-tree li:last-child::before {
+            border-right: 2px solid #000000;
+            border-radius: 0 5px 0 0;
+        }
+
+        .org-tree li:first-child::after {
+            border-radius: 5px 0 0 0;
+        }
+
+        .org-tree ul ul::before {
+            content: '';
             position: absolute;
+            top: 0;
+            left: 50%;
+            border-left: 2px solid #000000;
+            width: 0;
+            height: 20px;
+        }
+
+        /* 节点卡片样式 - 橙色品牌色 */
+        .org-tree li a {
+            border: 2px solid #ff5c00;
+            background: #ff5c00;
+            padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 24px);
+            display: inline-grid;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: .5s;
+            min-width: clamp(120px, 12.5vw, 160px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .org-tree li a span {
+            border: none;
+            border-radius: 0;
             color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
-            font-weight: 500;
-            text-align: center;
-            white-space: nowrap;
-            pointer-events: none;
-            transform: translate(-50%, -50%);
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), 0 0 2px rgba(0, 0, 0, 0.3);
+            padding: 4px 0;
             font-size: clamp(12px, 1.25vw, 16px);
-            line-height: 1.4;
-            padding: 2px 4px;
+            text-transform: none;
+            letter-spacing: 0.3px;
+            font-weight: 500;
+            background: transparent;
+        }
+
+        .org-tree li a .org-title {
+            font-weight: 700;
+            font-size: clamp(13px, 1.35vw, 17px);
+            margin-bottom: 4px;
+        }
+
+        .org-tree li a .org-name {
+            font-weight: 500;
+            font-size: clamp(11px, 1.15vw, 15px);
+        }
+
+        /* 悬停效果 */
+        .org-tree li a:hover {
+            background: #ff8c42;
+            border-color: #ff8c42;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 92, 0, 0.3);
+        }
+
+        .org-tree li a:hover span {
+            color: #ffffff;
+        }
+
+        .org-tree li a:hover+ul li::after, 
+        .org-tree li a:hover+ul li::before, 
+        .org-tree li a:hover+ul::before, 
+        .org-tree li a:hover+ul ul::before {
+            border-color: #ff5c00;
         }
 
         /* 响应式调整 */
         @media (max-width: 768px) {
-            .org-name-label {
-                font-size: clamp(10px, 1.04vw, 14px);
+            .mermaid-org-chart {
+                padding: clamp(20px, 2.08vw, 30px);
+            }
+
+            .org-tree li {
+                padding: 8px;
+            }
+
+            .org-tree li a {
+                min-width: clamp(100px, 10.42vw, 140px);
+                padding: clamp(10px, 1.04vw, 14px) clamp(12px, 1.25vw, 16px);
             }
         }
 
@@ -1648,7 +1736,7 @@ if (file_exists($jsonFile)) {
                 </div>
                 <?php endif; ?>
 
-                <!-- Organization Structure - Image Template with Dynamic Names -->
+                <!-- Organization Structure - Binary Tree Structure -->
                 <?php if (!empty($strategyData['organizationStructure'])): ?>
                 <div class="section">
                     <h2 class="section-title">高层组织架构</h2>
@@ -1656,54 +1744,23 @@ if (file_exists($jsonFile)) {
                         <?php 
                         $orgStructure = $strategyData['organizationStructure'];
                         
-                        // ========== 图片模板配置 ==========
-                        // 
-                        // 使用说明：
-                        // 1. 准备一张组织架构图模板（PNG/JPG格式）
-                        // 2. 将图片命名为 org_chart_template.png 并放在 images/images/ 目录下
-                        // 3. 在下面的 $namePositions 中配置每个名字在图片上的位置
-                        // 4. 位置使用百分比：left 是距离左边的百分比，top 是距离顶部的百分比
-                        // 5. 名字会自动从 JSON 数据中读取并显示在对应位置
-                        //
-                        $templateImagePath = '../images/images/org_chart_template.png'; // 模板图片路径
-                        
-                        // ========== 名字位置配置（使用百分比定位）==========
-                        // 
-                        // 如何调整位置：
-                        // 1. 打开图片，找到每个名字应该显示的位置
-                        // 2. 测量该位置距离图片左边和顶部的百分比
-                        // 3. 修改下面的 left 和 top 值
-                        // 例如：如果名字应该在图片中间，则 left: 50, top: 50
-                        //
-                        $namePositions = [
-                            'ceo' => ['left' => 20, 'top' => 15],      // CEO 位置
-                            'pa' => ['left' => 50, 'top' => 15],        // PA 位置
-                            'cao' => ['left' => 15, 'top' => 40],       // CAO 位置
-                            'cso' => ['left' => 50, 'top' => 40],       // CSO 位置
-                            'coo' => ['left' => 85, 'top' => 40],       // COO 位置
-                            // CAO 下属
-                            'cho' => ['left' => 10, 'top' => 65],      // CHO 位置
-                            'cfo' => ['left' => 20, 'top' => 65],      // CFO 位置
-                            // CSO 下属
-                            'cmo' => ['left' => 40, 'top' => 65],      // CMO 位置
-                            'cbo' => ['left' => 50, 'top' => 65],       // CBO 位置
-                            'cto' => ['left' => 60, 'top' => 65],       // CTO 位置
-                            'cvo' => ['left' => 70, 'top' => 65],       // CVO 位置
-                            // COO 下属
-                            'vp_rd' => ['left' => 75, 'top' => 65],     // VP OF R&D 位置
-                            'vp_op' => ['left' => 85, 'top' => 65],    // VP OF OPERATIONS 位置
-                            'vp_ks' => ['left' => 95, 'top' => 65],    // VP OF KS 位置
-                        ];
-                        
-                        // ========== 从数据中读取名字的函数 ==========
-                        function getNameFromOrg($key, $orgStructure) {
+                        // ========== 从数据中读取信息的辅助函数 ==========
+                        function getOrgData($key, $orgStructure, $defaultTitle = '') {
+                            $result = ['title' => $defaultTitle, 'name' => '', 'fullTitle' => ''];
+                            
                             // 1. 直接通过 key 查找（如 'ceo', 'pa'）
-                            if (isset($orgStructure[$key]) && isset($orgStructure[$key]['name'])) {
-                                return $orgStructure[$key]['name'];
+                            if (isset($orgStructure[$key])) {
+                                $result['title'] = $orgStructure[$key]['title'] ?? $defaultTitle;
+                                $result['name'] = $orgStructure[$key]['name'] ?? '';
+                                $result['fullTitle'] = $orgStructure[$key]['fullTitle'] ?? '';
+                                if ($result['name']) {
+                                    return $result;
+                                }
                             }
                             
                             // 2. 通过职位标题匹配
                             $searchKeys = [
+                                strtoupper($defaultTitle),
                                 strtoupper($key),
                                 str_replace('_', ' ', strtoupper($key)),
                                 str_replace('_', ' OF ', strtoupper($key))
@@ -1719,7 +1776,10 @@ if (file_exists($jsonFile)) {
                                     foreach ($searchKeys as $searchKey) {
                                         if ($execTitle === $searchKey || $execFullTitle === $searchKey || 
                                             strpos($execFullTitle, $searchKey) !== false) {
-                                            return $exec['name'] ?? '';
+                                            $result['title'] = $exec['title'] ?? $defaultTitle;
+                                            $result['name'] = $exec['name'] ?? '';
+                                            $result['fullTitle'] = $exec['fullTitle'] ?? '';
+                                            return $result;
                                         }
                                     }
                                     
@@ -1732,7 +1792,10 @@ if (file_exists($jsonFile)) {
                                             foreach ($searchKeys as $searchKey) {
                                                 if ($subTitle === $searchKey || $subFullTitle === $searchKey ||
                                                     strpos($subFullTitle, $searchKey) !== false) {
-                                                    return $sub['name'] ?? '';
+                                                    $result['title'] = $sub['title'] ?? $defaultTitle;
+                                                    $result['name'] = $sub['name'] ?? '';
+                                                    $result['fullTitle'] = $sub['fullTitle'] ?? '';
+                                                    return $result;
                                                 }
                                             }
                                         }
@@ -1740,39 +1803,86 @@ if (file_exists($jsonFile)) {
                                 }
                             }
                             
-                            return '';
+                            return $result;
                         }
                         ?>
                         
-                        <div class="org-chart-image-container">
-                            <!-- 模板图片 -->
-                            <img src="<?php echo htmlspecialchars($templateImagePath); ?>" 
-                                 alt="组织架构图" 
-                                 class="org-chart-template-image"
-                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                            
-                            <!-- 如果图片加载失败，显示提示 -->
-                            <div style="display: none; padding: 40px; text-align: center; color: #6b7280;">
-                                <p>请将组织架构模板图片放在：<?php echo htmlspecialchars($templateImagePath); ?></p>
-                                <p>图片名称：org_chart_template.png</p>
-                            </div>
-                            
-                            <!-- 名字覆盖层 -->
-                            <div class="org-name-overlay">
-                                <?php 
-                                // 在图片上显示所有名字
-                                foreach ($namePositions as $key => $position) {
-                                    $name = getNameFromOrg($key, $orgStructure);
-                                    if ($name) {
-                                        $left = $position['left'];
-                                        $top = $position['top'];
-                                        echo '<div class="org-name-label" style="left: ' . $left . '%; top: ' . $top . '%;">';
-                                        echo htmlspecialchars($name);
-                                        echo '</div>';
-                                    }
-                                }
+                        <div class="org-tree">
+                            <ul>
+                                <!-- 顶层：CEO 和 PA 同级 -->
+                                <?php if (!empty($orgStructure['ceo'])): 
+                                    $ceoData = getOrgData('ceo', $orgStructure, 'CEO');
+                                    $ceoTitle = htmlspecialchars($ceoData['title']);
+                                    $ceoName = htmlspecialchars($ceoData['name']);
                                 ?>
-                            </div>
+                                <li>
+                                    <a href="#">
+                                        <span class="org-title"><?php echo $ceoTitle; ?></span>
+                                        <?php if ($ceoName): ?>
+                                        <span class="org-name"><?php echo $ceoName; ?></span>
+                                        <?php endif; ?>
+                                    </a>
+                                    
+                                    <!-- 第二层：C-Level 高管 -->
+                                    <?php if (!empty($orgStructure['cLevel'])): ?>
+                                    <ul>
+                                        <?php foreach ($orgStructure['cLevel'] as $exec):
+                                            $execTitle = htmlspecialchars($exec['title'] ?? '');
+                                            $execName = htmlspecialchars($exec['name'] ?? '');
+                                            $execFullTitle = htmlspecialchars($exec['fullTitle'] ?? '');
+                                            $displayTitle = $execFullTitle ? $execFullTitle : $execTitle;
+                                        ?>
+                                        <li>
+                                            <a href="#">
+                                                <span class="org-title"><?php echo $displayTitle; ?></span>
+                                                <?php if ($execName): ?>
+                                                <span class="org-name"><?php echo $execName; ?></span>
+                                                <?php endif; ?>
+                                            </a>
+                                            
+                                            <!-- 第三层：下属 -->
+                                            <?php if (!empty($exec['subordinates']) && is_array($exec['subordinates'])): ?>
+                                            <ul>
+                                                <?php foreach ($exec['subordinates'] as $sub): 
+                                                    $subTitle = htmlspecialchars($sub['title'] ?? '');
+                                                    $subName = htmlspecialchars($sub['name'] ?? '');
+                                                    $subFullTitle = htmlspecialchars($sub['fullTitle'] ?? '');
+                                                    $subDisplayTitle = $subFullTitle ? $subFullTitle : $subTitle;
+                                                ?>
+                                                <li>
+                                                    <a href="#">
+                                                        <span class="org-title"><?php echo $subDisplayTitle; ?></span>
+                                                        <?php if ($subName): ?>
+                                                        <span class="org-name"><?php echo $subName; ?></span>
+                                                        <?php endif; ?>
+                                                    </a>
+                                                </li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                            <?php endif; ?>
+                                        </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                    <?php endif; ?>
+                                </li>
+                                
+                                <!-- PA（与 CEO 同级） -->
+                                <?php if (!empty($orgStructure['pa'])): 
+                                    $paData = getOrgData('pa', $orgStructure, 'PA');
+                                    $paTitle = htmlspecialchars($paData['title']);
+                                    $paName = htmlspecialchars($paData['name']);
+                                ?>
+                                <li>
+                                    <a href="#">
+                                        <span class="org-title"><?php echo $paTitle; ?></span>
+                                        <?php if ($paName): ?>
+                                        <span class="org-name"><?php echo $paName; ?></span>
+                                        <?php endif; ?>
+                                    </a>
+                                </li>
+                                <?php endif; ?>
+                                <?php endif; ?>
+                            </ul>
                         </div>
                     </div>
                 </div>
