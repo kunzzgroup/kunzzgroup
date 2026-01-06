@@ -222,7 +222,8 @@ if (file_exists($jsonFile)) {
         .company-name-large::after {
             content: '';
             display: block;
-            width: calc(100% + clamp(40px, 4.17vw, 60px));
+            /* 居中且不占满整行 */
+            width: clamp(240px, 35vw, 520px);
             height: 3px;
             background: #ff5c00;
             margin: clamp(10px, 1.04vw, 14px) auto 0;
