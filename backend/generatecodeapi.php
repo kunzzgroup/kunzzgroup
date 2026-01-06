@@ -1109,10 +1109,16 @@ function saveUserSidebarPermissions($pdo, $input) {
     };
     $stockSystemsAllowed = ['central','j1','j2','j3'];
     $stockViewsAllowed = ['list','records','remark','product','sot'];
+    $uploadSystemsAllowed = ['j1','j2','j3'];
+    $uploadTypesAllowed = ['kpi','cost'];
     $pagePermsNorm = [
         'stock_inventory' => [
             'system' => $normalize($pagePerms['stock_inventory']['system'] ?? [], $stockSystemsAllowed),
             'view'   => $normalize($pagePerms['stock_inventory']['view'] ?? [], $stockViewsAllowed)
+        ],
+        'kpi_upload' => [
+            'system' => $normalize($pagePerms['kpi_upload']['system'] ?? [], $uploadSystemsAllowed),
+            'type'   => $normalize($pagePerms['kpi_upload']['type'] ?? [], $uploadTypesAllowed)
         ]
     ];
     $submenuInput = isset($input['submenu_permissions']) && is_array($input['submenu_permissions']) ? $input['submenu_permissions'] : [];
@@ -1188,6 +1194,21 @@ function saveUserSidebarPermissions($pdo, $input) {
             $ok = $up->execute([':uid'=>$userId, ':permJson'=>$permJson]);
             if (!$ok) {
                 throw new Exception("保存页面权限失败: stock_inventory");
+            }
+            
+            // 保存 kpi_upload 权限
+            $uploadPermData = $pagePermsNorm['kpi_upload'] ?? ['system'=>[], 'type'=>[]];
+            $uploadPermJson = json_encode([
+                'systems' => $uploadPermData['system'] ?? [],
+                'types' => $uploadPermData['type'] ?? []
+            ], JSON_UNESCAPED_UNICODE);
+            
+            $upUpload = $pdo->prepare("INSERT INTO user_page_permissions (user_id, page_key, permissions_json, updated_at)
+                VALUES (:uid, 'kpi_upload', :permJson, NOW())
+                ON DUPLICATE KEY UPDATE permissions_json = VALUES(permissions_json), updated_at = NOW()");
+            $okUpload = $upUpload->execute([':uid'=>$userId, ':permJson'=>$uploadPermJson]);
+            if (!$okUpload) {
+                throw new Exception("保存页面权限失败: kpi_upload");
             }
         }
         
