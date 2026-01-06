@@ -8567,7 +8567,7 @@ require_once 'session_check.php';
                         // 填入Rounding（调整量）
                         const roundingText = formatCurrencyForPDF(roundingAdjustment);
                         page.drawText(roundingText, {
-                            x: getRightAlignedX(roundingText, 588, 8),
+                            x: getRightAlignedX(roundingText, 587, 8),
                             y: height - 701, // Rounding在Total上方
                             size: smallFontSize,
                             color: textColor,
@@ -8612,7 +8612,7 @@ require_once 'session_check.php';
                         // 填入Rounding（调整量）
                         const roundingText = formatCurrencyForPDF(roundingAdjustment);
                         page.drawText(roundingText, {
-                            x: getRightAlignedX(roundingText, 588, 8),
+                            x: getRightAlignedX(roundingText, 587, 8),
                             y: height - 701, // Rounding在Total上方
                             size: smallFontSize,
                             color: textColor,
@@ -8641,7 +8641,7 @@ require_once 'session_check.php';
                         // 填入Rounding（调整量）
                         const roundingText = formatCurrencyForPDF(roundingAdjustment);
                         page.drawText(roundingText, {
-                            x: getRightAlignedX(roundingText, 588, 8),
+                            x: getRightAlignedX(roundingText, 587, 8),
                             y: height - 701, // Rounding在Total上方
                             size: smallFontSize,
                             color: textColor,
@@ -8686,7 +8686,7 @@ require_once 'session_check.php';
                         // 填入Rounding（调整量）
                         const roundingText = formatCurrencyForPDF(roundingAdjustment);
                         page.drawText(roundingText, {
-                            x: getRightAlignedX(roundingText, 588, 8),
+                            x: getRightAlignedX(roundingText, 587, 8),
                             y: height - 701, // Rounding在Total上方
                             size: smallFontSize,
                             color: textColor,
@@ -8712,7 +8712,7 @@ require_once 'session_check.php';
                     // 填入Rounding（调整量）
                     const roundingText = formatCurrencyForPDF(roundingAdjustment);
                     page.drawText(roundingText, {
-                        x: getRightAlignedX(roundingText, 580, 8),
+                        x: getRightAlignedX(roundingText, 579, 8),
                         y: height - 700, // Rounding在Total上方
                         size: smallFontSize,
                         color: textColor,
@@ -9074,7 +9074,7 @@ require_once 'session_check.php';
                                     // 填入Rounding（调整量）
                                     const roundingText = formatCurrencyForPDF(roundingAdjustment);
                                     page.drawText(roundingText, {
-                                        x: getRightAlignedX(roundingText, 595, 8),
+                                        x: getRightAlignedX(roundingText, 594, 8),
                                         y: height - 701, // Rounding在Total上方
                                         size: smallFontSize,
                                         color: textColor,
@@ -9119,7 +9119,7 @@ require_once 'session_check.php';
                                     // 填入Rounding（调整量）
                                     const roundingText = formatCurrencyForPDF(roundingAdjustment);
                                     page.drawText(roundingText, {
-                                        x: getRightAlignedX(roundingText, 595, 8),
+                                        x: getRightAlignedX(roundingText, 594, 8),
                                         y: height - 701, // Rounding在Total上方
                                         size: smallFontSize,
                                         color: textColor,
