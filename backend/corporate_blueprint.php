@@ -1682,7 +1682,7 @@ if (file_exists($jsonFile)) {
                 </div>
                 <?php endif; ?>
 
-                <!-- Organization Structure - Mermaid.js -->
+                <!-- Organization Structure - Template-based Mermaid.js -->
                 <?php if (!empty($strategyData['organizationStructure'])): ?>
                 <div class="section">
                     <h2 class="section-title">高层组织架构</h2>
@@ -1690,78 +1690,159 @@ if (file_exists($jsonFile)) {
                         <?php 
                         $orgStructure = $strategyData['organizationStructure'];
                         
-                        // 构建 Mermaid 图表代码 - 从上到下布局（匹配 Figma 设计）
+                        // ========== 组织架构模板（固定结构）==========
+                        // 
+                        // 使用说明：
+                        // 1. 在 $orgTemplate 中定义所有职位和连接关系
+                        // 2. 名字会自动从 $strategyData['organizationStructure'] 中读取
+                        // 3. 只需修改 JSON 数据中的名字，图表会自动更新
+                        // 
+                        // 模板结构：
+                        // - 'id': Mermaid 节点 ID（必须唯一）
+                        // - 'title': 职位显示名称
+                        // - 'connections': 连接到哪些职位（使用目标职位的 'id'）
+                        //
+                        $orgTemplate = [
+                            'ceo' => [
+                                'id' => 'CEO',
+                                'title' => 'CEO',
+                                'connections' => ['PA', 'CAO', 'CSO', 'COO']
+                            ],
+                            'pa' => [
+                                'id' => 'PA',
+                                'title' => 'PA',
+                                'connections' => []
+                            ],
+                            'cao' => [
+                                'id' => 'CAO',
+                                'title' => 'CAO',
+                                'connections' => ['CHO', 'CFO']
+                            ],
+                            'cso' => [
+                                'id' => 'CSO',
+                                'title' => 'CSO',
+                                'connections' => ['CMO', 'CBO', 'CTO', 'CVO']
+                            ],
+                            'coo' => [
+                                'id' => 'COO',
+                                'title' => 'COO',
+                                'connections' => ['VP_RD', 'VP_OP', 'VP_KS']
+                            ],
+                            // 下属职位
+                            'cho' => ['id' => 'CHO', 'title' => 'CHO', 'connections' => []],
+                            'cfo' => ['id' => 'CFO', 'title' => 'CFO', 'connections' => []],
+                            'cmo' => ['id' => 'CMO', 'title' => 'CMO', 'connections' => []],
+                            'cbo' => ['id' => 'CBO', 'title' => 'CBO', 'connections' => []],
+                            'cto' => ['id' => 'CTO', 'title' => 'CTO', 'connections' => []],
+                            'cvo' => ['id' => 'CVO', 'title' => 'CVO', 'connections' => []],
+                            'vp_rd' => ['id' => 'VP_RD', 'title' => 'VP OF R&D', 'connections' => []],
+                            'vp_op' => ['id' => 'VP_OP', 'title' => 'VP OF OPERATIONS', 'connections' => []],
+                            'vp_ks' => ['id' => 'VP_KS', 'title' => 'VP OF KS', 'connections' => []],
+                        ];
+                        
+                        // ========== 从数据中读取名字和全称的映射函数 ==========
+                        function getDataFromOrg($key, $orgStructure, $templateTitle) {
+                            $result = ['name' => '', 'fullTitle' => ''];
+                            
+                            // 1. 直接通过 key 查找（如 'ceo', 'pa'）
+                            if (isset($orgStructure[$key])) {
+                                $result['name'] = $orgStructure[$key]['name'] ?? '';
+                                $result['fullTitle'] = $orgStructure[$key]['fullTitle'] ?? '';
+                                if ($result['name']) {
+                                    return $result;
+                                }
+                            }
+                            
+                            // 2. 通过职位标题匹配（支持多种格式）
+                            $searchTitles = [
+                                strtoupper($templateTitle),
+                                strtoupper($key),
+                                str_replace('_', ' ', strtoupper($key)),
+                                str_replace('_', ' OF ', strtoupper($key))
+                            ];
+                            
+                            // 从 cLevel 中查找
+                            if (isset($orgStructure['cLevel']) && is_array($orgStructure['cLevel'])) {
+                                foreach ($orgStructure['cLevel'] as $exec) {
+                                    $execTitle = strtoupper($exec['title'] ?? '');
+                                    $execFullTitle = strtoupper($exec['fullTitle'] ?? '');
+                                    
+                                    // 匹配 C-Level 高管
+                                    foreach ($searchTitles as $searchTitle) {
+                                        if ($execTitle === $searchTitle || $execFullTitle === $searchTitle || 
+                                            strpos($execFullTitle, $searchTitle) !== false) {
+                                            $result['name'] = $exec['name'] ?? '';
+                                            $result['fullTitle'] = $exec['fullTitle'] ?? '';
+                                            return $result;
+                                        }
+                                    }
+                                    
+                                    // 查找下属
+                                    if (isset($exec['subordinates']) && is_array($exec['subordinates'])) {
+                                        foreach ($exec['subordinates'] as $sub) {
+                                            $subTitle = strtoupper($sub['title'] ?? '');
+                                            $subFullTitle = strtoupper($sub['fullTitle'] ?? '');
+                                            
+                                            foreach ($searchTitles as $searchTitle) {
+                                                if ($subTitle === $searchTitle || $subFullTitle === $searchTitle ||
+                                                    strpos($subFullTitle, $searchTitle) !== false) {
+                                                    $result['name'] = $sub['name'] ?? '';
+                                                    $result['fullTitle'] = $sub['fullTitle'] ?? '';
+                                                    return $result;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            return $result;
+                        }
+                        
+                        // ========== 构建 Mermaid 图表代码 ==========
                         $mermaidCode = "graph TD\n";
                         
-                        // 节点 ID 映射表（确保相同文本生成相同 ID）
-                        $nodeIdMap = [];
-                        
-                        // 生成节点 ID（用于避免特殊字符问题）
-                        function generateNodeId($text, &$nodeIdMap) {
-                            if (isset($nodeIdMap[$text])) {
-                                return $nodeIdMap[$text];
-                            }
-                            // 生成简洁的 ID：取前几个字母数字字符
-                            $clean = preg_replace('/[^a-zA-Z0-9]/', '', $text);
-                            $id = 'n' . substr(md5($text), 0, 8);
-                            if (!empty($clean)) {
-                                $id = substr($clean, 0, 10) . substr($id, 0, 6);
-                            }
-                            $nodeIdMap[$text] = $id;
-                            return $id;
+                        // 1. 定义所有节点（使用模板中的职位，填充数据中的名字）
+                        foreach ($orgTemplate as $key => $position) {
+                            $nodeId = $position['id'];
+                            $title = $position['title'];
+                            $data = getDataFromOrg($key, $orgStructure, $title);
+                            $name = $data['name'];
+                            $fullTitle = $data['fullTitle'];
+                            
+                            // 构建节点标签：职位 + 名字（如果有）
+                            // 如果有全称，优先使用全称作为标题
+                            $displayTitle = $fullTitle ? $fullTitle : $title;
+                            $label = $name 
+                                ? "<b>" . htmlspecialchars($displayTitle) . "</b><br/>" . htmlspecialchars($name)
+                                : "<b>" . htmlspecialchars($displayTitle) . "</b>";
+                            
+                            $mermaidCode .= "    {$nodeId}[\"{$label}\"]\n";
                         }
                         
-                        // CEO 节点
-                        $ceoId = null;
-                        if (!empty($orgStructure['ceo'])) {
-                            $ceoId = generateNodeId('CEO', $nodeIdMap);
-                            $ceoTitle = htmlspecialchars($orgStructure['ceo']['title'] ?? 'CEO');
-                            $ceoName = htmlspecialchars($orgStructure['ceo']['name'] ?? '');
-                            $mermaidCode .= "    {$ceoId}[\"<b>{$ceoTitle}</b><br/>{$ceoName}\"]\n";
-                        }
-                        
-                        // PA 节点（连接到 CEO）
-                        $paId = null;
-                        if (!empty($orgStructure['pa'])) {
-                            $paId = generateNodeId('PA', $nodeIdMap);
-                            $paTitle = htmlspecialchars($orgStructure['pa']['title'] ?? 'PA');
-                            $paName = htmlspecialchars($orgStructure['pa']['name'] ?? '');
-                            $mermaidCode .= "    {$paId}[\"<b>{$paTitle}</b><br/>{$paName}\"]\n";
-                            if ($ceoId) {
-                                $mermaidCode .= "    {$ceoId} --> {$paId}\n";
-                            }
-                        }
-                        
-                        // C-Level 高管节点
-                        if (!empty($orgStructure['cLevel'])) {
-                            foreach ($orgStructure['cLevel'] as $exec) {
-                                $execTitle = $exec['title'] ?? '';
-                                $execId = generateNodeId($execTitle, $nodeIdMap);
-                                $execTitleEscaped = htmlspecialchars($execTitle);
-                                $execName = !empty($exec['name']) 
-                                    ? htmlspecialchars($exec['name']) 
-                                    : htmlspecialchars($exec['fullTitle'] ?? $execTitle);
-                                $mermaidCode .= "    {$execId}[\"<b>{$execTitleEscaped}</b><br/>{$execName}\"]\n";
-                                
-                                // 连接到 CEO
-                                if ($ceoId) {
-                                    $mermaidCode .= "    {$ceoId} --> {$execId}\n";
-                                }
-                                
-                                // 下属节点
-                                if (!empty($exec['subordinates'])) {
-                                    foreach ($exec['subordinates'] as $sub) {
-                                        $subTitle = $sub['title'] ?? '';
-                                        $subId = generateNodeId($subTitle, $nodeIdMap);
-                                        $subTitleEscaped = htmlspecialchars($subTitle);
-                                        $subFullTitle = !empty($sub['fullTitle']) 
-                                            ? htmlspecialchars($sub['fullTitle']) 
-                                            : '';
-                                        $subLabel = $subFullTitle 
-                                            ? "<b>{$subTitleEscaped}</b><br/>{$subFullTitle}" 
-                                            : "<b>{$subTitleEscaped}</b>";
-                                        $mermaidCode .= "    {$subId}[\"{$subLabel}\"]\n";
-                                        $mermaidCode .= "    {$execId} --> {$subId}\n";
+                        // 2. 定义连接关系（使用模板中的连接）
+                        foreach ($orgTemplate as $key => $position) {
+                            $fromId = $position['id'];
+                            if (!empty($position['connections'])) {
+                                foreach ($position['connections'] as $toKey) {
+                                    // 查找目标节点的 ID（支持多种匹配方式）
+                                    $toId = null;
+                                    
+                                    // 方式1：直接通过 ID 匹配
+                                    foreach ($orgTemplate as $k => $p) {
+                                        if ($p['id'] === $toKey) {
+                                            $toId = $p['id'];
+                                            break;
+                                        }
+                                    }
+                                    
+                                    // 方式2：通过 key 匹配
+                                    if (!$toId && isset($orgTemplate[$toKey])) {
+                                        $toId = $orgTemplate[$toKey]['id'];
+                                    }
+                                    
+                                    if ($toId) {
+                                        $mermaidCode .= "    {$fromId} --> {$toId}\n";
                                     }
                                 }
                             }
