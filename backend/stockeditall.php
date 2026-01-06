@@ -3958,7 +3958,7 @@ require_once 'session_check.php';
 
         // 收货人选项列表
         const receiverOptions = [
-            '中央', 'JUN HAO', 'A KIM', 'MJ', 'HY', 'CINDY', 'KAI', 'BX'
+            '中央', 'JUN HAO', 'A KIM', 'MJ', 'HY', 'CINDY', 'KAI', 'BX','ZX'
         ];
 
         // 处理出货数量变化，控制收货单位输入框状态
