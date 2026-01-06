@@ -106,63 +106,133 @@ if (file_exists($jsonFile)) {
             margin-bottom: clamp(16px, 1.67vw, 24px);
         }
 
-        /* Header Section */
+        /* Header Section - 新设计（匹配图片） */
         .header-panel {
-            background: #ffffff;
+            background: linear-gradient(135deg, 
+                #fef9f5 0%, 
+                #fff5eb 30%, 
+                #ffe8d6 60%, 
+                #ffddd0 100%);
             border-radius: clamp(16px, 1.67vw, 24px);
-            padding: clamp(24px, 2.5vw, 32px) clamp(40px, 4.17vw, 100px);
+            padding: clamp(60px, 6.25vw, 100px) clamp(40px, 4.17vw, 60px);
             box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
             position: relative;
             z-index: 1;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+            min-height: clamp(400px, 41.67vw, 600px);
         }
 
-        /* Left side text content */
-        .header-text-content {
-            flex: 1;
-            text-align: left;
-            position: relative;
-            padding-left: clamp(20px, 2.08vw, 32px);
-        }
-
-        /* Vertical golden line on the left */
-        .header-text-content::before {
+        /* 柔和的圆形模糊背景效果 */
+        .header-panel::before {
             content: '';
             position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 5px;
+            top: -20%;
+            left: -10%;
+            width: 40%;
+            height: 40%;
+            background: radial-gradient(circle, rgba(255, 200, 150, 0.4) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(60px);
+            z-index: 0;
+        }
+
+        .header-panel::after {
+            content: '';
+            position: absolute;
+            bottom: -15%;
+            right: -5%;
+            width: 35%;
+            height: 35%;
+            background: radial-gradient(circle, rgba(255, 180, 120, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(50px);
+            z-index: 0;
+        }
+
+        /* Logo 容器 - 居中显示 */
+        .header-logo-container {
+            position: relative;
+            z-index: 2;
+            margin-bottom: clamp(30px, 3.13vw, 40px);
+            width: clamp(120px, 12.5vw, 160px);
+            height: clamp(120px, 12.5vw, 160px);
+        }
+
+        .header-logo {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Logo 圆形背景 */
+        .header-logo::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
             background: #ff5c00;
+            border-radius: 50%;
+            z-index: 1;
         }
 
-        .header-label {
-            font-size: clamp(12px, 1.25vw, 16px);
-            color: #ffd700;
-            font-weight: 500;
-            margin-bottom: clamp(16px, 1.67vw, 24px);
-            letter-spacing: 0.5px;
+        .header-logo img {
+            position: relative;
+            z-index: 2;
+            width: 70%;
+            height: 70%;
+            object-fit: contain;
+            display: block;
+            filter: brightness(0) invert(1);
         }
 
+        /* 文本内容容器 */
+        .header-text-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* 英文公司名 */
         .company-name-large {
-            font-size: clamp(24px, 2.6vw, 50px);
+            font-size: clamp(28px, 2.92vw, 48px);
             font-weight: 700;
             color: #000000;
-            margin-bottom: clamp(12px, 1.25vw, 16px);
-            letter-spacing: 1px;
+            margin-bottom: clamp(16px, 1.67vw, 24px);
+            letter-spacing: 2px;
             line-height: 1.2;
             text-transform: uppercase;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
         }
 
+        /* 橙色横线 */
+        .company-name-large::after {
+            content: '';
+            display: block;
+            width: calc(100% + clamp(40px, 4.17vw, 60px));
+            height: 3px;
+            background: #ff5c00;
+            margin: clamp(12px, 1.25vw, 16px) auto 0;
+            border-radius: 2px;
+        }
+
+        /* 中文文字 */
         .company-subtitle {
-            font-size: clamp(24px, 2.6vw, 50px);
+            font-size: clamp(20px, 2.08vw, 32px);
             font-weight: 700;
             color: #000000;
-            margin-bottom: clamp(12px, 1.25vw, 16px);
+            margin-top: clamp(16px, 1.67vw, 24px);
             letter-spacing: 1px;
-            line-height: 1.2;
+            line-height: 1.4;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
         }
 
         .company-subtitle-upper {
@@ -175,45 +245,6 @@ if (file_exists($jsonFile)) {
             font-weight: 400;
             letter-spacing: 1px;
             text-transform: uppercase;
-        }
-
-        /* Right side logo */
-        .header-logo-container {
-            flex-shrink: 0;
-            position: relative;
-            width: clamp(140px, 14.58vw, 200px);
-            height: clamp(140px, 14.58vw, 200px);
-        }
-
-        .header-logo {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .header-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            display: block;
-        }
-
-        /* Logo reflection */
-        .logo-reflection {
-            position: absolute;
-            bottom: clamp(-30px, -3.13vw, -40px);
-            left: 50%;
-            transform: translateX(-50%) scaleY(-1);
-            width: 80%;
-            height: 20%;
-            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 0%, transparent 100%);
-            border-radius: 50%;
-            opacity: 0.3;
-            filter: blur(2px);
-            z-index: 0;
         }
 
         /* Timeline Section */
@@ -1209,16 +1240,14 @@ if (file_exists($jsonFile)) {
         /* 响应式设计 */
         @media (max-width: 1024px) {
             .header-panel {
-                flex-direction: row;
-                text-align: left;
-            }
-
-            .header-text-content {
-                text-align: center;
+                padding: clamp(50px, 5.21vw, 80px) clamp(30px, 3.13vw, 50px);
+                min-height: clamp(350px, 36.46vw, 500px);
             }
 
             .header-logo-container {
-                margin-top: clamp(32px, 3.13vw, 48px);
+                width: clamp(100px, 10.42vw, 140px);
+                height: clamp(100px, 10.42vw, 140px);
+                margin-bottom: clamp(24px, 2.5vw, 32px);
             }
         }
 
@@ -1228,16 +1257,23 @@ if (file_exists($jsonFile)) {
             }
 
             .header-panel {
-                padding: clamp(24px, 2.5vw, 32px) clamp(24px, 2.5vw, 32px);
-                flex-direction: row;
+                padding: clamp(40px, 4.17vw, 60px) clamp(20px, 2.08vw, 30px);
+                min-height: clamp(300px, 31.25vw, 400px);
             }
-            
-            .header-text-content {
-                text-align: left;
-            }
-            
+
             .header-logo-container {
-                margin-top: 0;
+                width: clamp(80px, 8.33vw, 120px);
+                height: clamp(80px, 8.33vw, 120px);
+                margin-bottom: clamp(20px, 2.08vw, 28px);
+            }
+
+            .company-name-large {
+                font-size: clamp(22px, 2.29vw, 36px);
+                letter-spacing: 1px;
+            }
+
+            .company-subtitle {
+                font-size: clamp(16px, 1.67vw, 24px);
             }
 
             .core-grid,
@@ -1504,23 +1540,20 @@ if (file_exists($jsonFile)) {
             </div>
 
             <?php if ($strategyData): ?>
-                <!-- Header Section -->
+                <!-- Header Section - 新设计 -->
                 <div class="section">
                     <div class="header-panel">
-                        <!-- Left side text content -->
-                        <div class="header-text-content">
-                            <div class="company-name-large">KUNZZ HOLDINGS</div>
-                            <div class="company-subtitle">
-                                <span class="company-subtitle-upper">SDN BHD</span> 战略计划
-                            </div>
-                        </div>
-
-                        <!-- Right side logo -->
+                        <!-- Logo - 居中显示 -->
                         <div class="header-logo-container">
                             <div class="header-logo">
                                 <img src="../images/images/logo.png" alt="KUNZZ HOLDINGS Logo">
-                                <div class="logo-reflection"></div>
                             </div>
+                        </div>
+
+                        <!-- 文本内容 - 居中显示 -->
+                        <div class="header-text-content">
+                            <div class="company-name-large">KUNZZ HOLDINGS SDN BHD</div>
+                            <div class="company-subtitle">企业蓝图 · 战略计划</div>
                         </div>
                     </div>
                 </div>
