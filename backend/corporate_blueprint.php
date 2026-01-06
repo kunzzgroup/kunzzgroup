@@ -1337,9 +1337,12 @@ if (file_exists($jsonFile)) {
             }
         }
 
-        /* Binary Tree 组织架构样式 - 匹配图片设计 */
+        /* Binary Tree 组织架构样式 - 匹配图片设计（加强美观） */
         .mermaid-org-chart {
-            background: #ffffff;
+            background:
+                radial-gradient(circle at 10% 20%, rgba(255, 92, 0, 0.02) 0, transparent 55%),
+                radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.03) 0, transparent 55%),
+                #ffffff;
             border-radius: clamp(12px, 1.25vw, 16px);
             padding: clamp(40px, 4.17vw, 60px);
             position: relative;
@@ -1354,9 +1357,19 @@ if (file_exists($jsonFile)) {
         }
 
         .org-row {
-            display: flex;
+            display: inline-flex;
             align-items: flex-start;
-            gap: 32px;
+            gap: clamp(32px, 3.33vw, 48px);
+            position: relative;
+        }
+
+        /* 整体水平居中 */
+        .org-tree {
+            text-align: center;
+        }
+
+        .org-tree > .org-row {
+            margin: 0 auto;
         }
 
         .org-node-wrap {
@@ -1366,7 +1379,7 @@ if (file_exists($jsonFile)) {
         }
 
         .org-node-wrap.has-children {
-            padding-right: 32px;
+            padding-right: clamp(32px, 3.33vw, 48px);
         }
 
         /* 父节点到子容器的横线 */
@@ -1375,18 +1388,19 @@ if (file_exists($jsonFile)) {
             position: absolute;
             top: 50%;
             left: 100%;
-            width: 32px;
-            border-top: 2px solid #000000;
+            width: clamp(32px, 3.33vw, 48px);
+            border-top: 2px solid #ff5c00;
+            border-radius: 999px;
         }
 
         /* 子节点容器：竖线 + 子节点列表 */
         .org-children {
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            margin-left: 32px;
-            padding-left: 32px;
-            border-left: 2px solid #000000;
+            gap: clamp(16px, 1.67vw, 24px);
+            margin-left: clamp(32px, 3.33vw, 48px);
+            padding-left: clamp(24px, 2.5vw, 36px);
+            border-left: 2px solid #e5e7eb;
         }
 
         /* 子节点前的横线（从竖线到子节点） */
@@ -1394,15 +1408,16 @@ if (file_exists($jsonFile)) {
             content: '';
             position: absolute;
             top: 50%;
-            left: -32px;
-            width: 32px;
-            border-top: 2px solid #000000;
+            left: calc(-1 * clamp(32px, 3.33vw, 48px));
+            width: clamp(32px, 3.33vw, 48px);
+            border-top: 2px solid #ff5c00;
+            border-radius: 999px;
         }
 
         /* 节点卡片样式 - 橙色圆角矩形（匹配图片） */
         .org-box {
             border: 2px solid #ff5c00;
-            background: #ff5c00;
+            background: linear-gradient(180deg, #ff7a1a 0%, #ff5c00 55%, #ff4b00 100%);
             padding: clamp(10px, 1.04vw, 14px) clamp(14px, 1.46vw, 20px);
             display: inline-flex;
             flex-direction: column;
@@ -1413,7 +1428,9 @@ if (file_exists($jsonFile)) {
             transition: .5s;
             min-width: clamp(120px, 12.5vw, 160px);
             max-width: clamp(160px, 16.67vw, 200px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow:
+                0 4px 12px rgba(0, 0, 0, 0.12),
+                0 0 0 1px rgba(255, 255, 255, 0.4);
             box-sizing: border-box;
         }
 
@@ -1447,8 +1464,8 @@ if (file_exists($jsonFile)) {
 
         /* 悬停效果 */
         .org-box:hover {
-            background: #ff8c42;
-            border-color: #ff8c42;
+            background: linear-gradient(180deg, #ff9440 0%, #ff7a1a 55%, #ff5c00 100%);
+            border-color: #ff7a1a;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(255, 92, 0, 0.3);
         }
