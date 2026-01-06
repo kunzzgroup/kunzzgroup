@@ -186,11 +186,10 @@ if (file_exists($jsonFile)) {
         .header-logo img {
             position: relative;
             z-index: 2;
-            width: 70%;
-            height: 70%;
+            width: 72%;
+            height: 72%;
             object-fit: contain;
             display: block;
-            filter: brightness(0) invert(1);
         }
 
         /* 文本内容容器 */
