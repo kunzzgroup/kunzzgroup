@@ -172,24 +172,30 @@ if (file_exists($jsonFile)) {
             justify-content: center;
         }
 
-        /* Logo 圆形背景 */
-        .header-logo::before {
-            content: '';
+        .header-logo img {
+            position: relative;
+            z-index: 3;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Logo 加载失败时的占位符 */
+        .logo-fallback {
             position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             background: #ff5c00;
             border-radius: 50%;
             z-index: 1;
-        }
-
-        .header-logo img {
-            position: relative;
-            z-index: 2;
-            width: 72%;
-            height: 72%;
-            object-fit: contain;
-            display: block;
+            display: none;
         }
 
         /* 文本内容容器 */
@@ -1545,7 +1551,20 @@ if (file_exists($jsonFile)) {
                         <!-- Logo - 居中显示 -->
                         <div class="header-logo-container">
                             <div class="header-logo">
-                                <img src="../images/images/logo.png" alt="KUNZZ HOLDINGS Logo">
+                                <?php 
+                                $logoPath = '../images/images/logo.png';
+                                $logoFullPath = __DIR__ . '/../images/images/logo.png';
+                                if (file_exists($logoFullPath)): 
+                                ?>
+                                <img src="<?php echo htmlspecialchars($logoPath); ?>" 
+                                     alt="KUNZZ HOLDINGS Logo"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                <?php else: ?>
+                                <!-- 如果图片不存在，显示占位符 -->
+                                <div class="logo-fallback" style="display: block;"></div>
+                                <?php endif; ?>
+                                <!-- 图片加载失败时的备用占位符 -->
+                                <div class="logo-fallback" style="display: none;"></div>
                             </div>
                         </div>
 
