@@ -1142,77 +1142,64 @@ if (file_exists($jsonFile)) {
             }
         }
 
-        /* Culture Explanation Section */
+        /* Culture Explanation Section - 新设计（参考图片） */
         .culture-explanation-header {
-            background: linear-gradient(90deg, #ffd700 0%, #ffd700 30%, transparent 30%);
-            padding: clamp(16px, 1.67vw, 24px) clamp(24px, 2.5vw, 40px);
+            text-align: center;
             margin-bottom: clamp(40px, 4.17vw, 60px);
-            border-radius: clamp(8px, 0.83vw, 12px);
-            display: flex;
-            align-items: center;
-            gap: clamp(16px, 1.67vw, 24px);
+            position: relative;
         }
 
         .culture-explanation-title-cn {
-            font-size: clamp(20px, 2.08vw, 28px);
+            font-size: clamp(24px, 2.6vw, 40px);
             font-weight: 800;
-            color: #000000;
+            color: #ff5c00;
+            letter-spacing: 2px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .culture-explanation-title-cn::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ff5c00, transparent);
+            border-radius: 2px;
         }
 
         .culture-explanation-title-en {
-            font-size: clamp(16px, 1.67vw, 22px);
-            font-weight: 500;
-            color: #ffd700;
+            display: none;
         }
 
         .culture-explanation-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0;
-            border: 1px solid #e5e7eb;
-            border-radius: clamp(12px, 1.25vw, 16px);
-            overflow: hidden;
-            background: #fff;
+            grid-template-columns: repeat(4, 1fr);
+            gap: clamp(20px, 2.08vw, 32px);
         }
 
         .culture-explanation-card {
-            background: #fff;
-            padding: clamp(24px, 2.5vw, 40px);
-            position: relative;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 2px solid #ffe0cc;
+            padding: clamp(24px, 2.5vw, 32px);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+            transition: box-shadow 0.25s ease, transform 0.25s ease;
         }
 
-        /* 添加分割线 - 垂直分割线（中间） */
-        .culture-explanation-card:nth-child(odd) {
-            border-right: 1px solid #e5e7eb;
-        }
-
-        /* 添加分割线 - 水平分割线（中间） */
-        .culture-explanation-card:nth-child(1),
-        .culture-explanation-card:nth-child(2) {
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        /* 移除角落的重复边框 */
-        .culture-explanation-card:nth-child(1) {
-            border-top-left-radius: clamp(12px, 1.25vw, 16px);
-        }
-
-        .culture-explanation-card:nth-child(2) {
-            border-top-right-radius: clamp(12px, 1.25vw, 16px);
-        }
-
-        .culture-explanation-card:nth-child(3) {
-            border-bottom-left-radius: clamp(12px, 1.25vw, 16px);
-        }
-
-        .culture-explanation-card:nth-child(4) {
-            border-bottom-right-radius: clamp(12px, 1.25vw, 16px);
+        .culture-explanation-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(255, 92, 0, 0.18);
         }
 
         .culture-explanation-number {
-            font-size: clamp(48px, 5vw, 72px);
+            font-size: clamp(32px, 3.33vw, 48px);
             font-weight: 800;
-            color: #ffd700;
+            color: #ff5c00;
             line-height: 1;
             margin-bottom: clamp(16px, 1.67vw, 24px);
         }
@@ -1222,12 +1209,65 @@ if (file_exists($jsonFile)) {
             font-weight: 800;
             color: #000000;
             margin-bottom: clamp(12px, 1.25vw, 16px);
+            line-height: 1.4;
         }
 
         .culture-explanation-description {
-            font-size: clamp(14px, 1.46vw, 18px);
+            font-size: clamp(13px, 1.35vw, 16px);
             color: #374151;
             line-height: 1.8;
+            margin-bottom: clamp(20px, 2.08vw, 28px);
+            flex-grow: 1;
+        }
+
+        /* 评分标准部分 */
+        .culture-scoring {
+            margin-top: auto;
+            padding-top: clamp(16px, 1.67vw, 24px);
+            border-top: 1px solid #ffe0cc;
+        }
+
+        .culture-scoring-title {
+            font-size: clamp(14px, 1.46vw, 18px);
+            font-weight: 700;
+            color: #ff5c00;
+            margin-bottom: clamp(12px, 1.25vw, 16px);
+        }
+
+        .culture-scoring-item {
+            margin-bottom: clamp(10px, 1.04vw, 14px);
+            padding-left: clamp(8px, 0.83vw, 12px);
+            border-left: 3px solid #ff5c00;
+        }
+
+        .culture-scoring-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .culture-scoring-point {
+            font-size: clamp(12px, 1.25vw, 15px);
+            font-weight: 700;
+            color: #ff5c00;
+            margin-bottom: clamp(4px, 0.42vw, 6px);
+        }
+
+        .culture-scoring-description {
+            font-size: clamp(11px, 1.15vw, 14px);
+            color: #4b5563;
+            line-height: 1.6;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .culture-explanation-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .culture-explanation-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* Strategic Objectives */
@@ -1858,46 +1898,137 @@ if (file_exists($jsonFile)) {
                 </div>
                 <?php endif; ?>
 
-                <!-- Culture Explanation -->
+                <!-- Culture Explanation - 新设计 -->
                 <div class="section">
                     <div class="culture-explanation-header">
-                        <div class="culture-explanation-title-cn">文化解说</div>
-                        <div class="culture-explanation-title-en">Cultural Expand</div>
+                        <div class="culture-explanation-title-cn">文化解说&考核</div>
                     </div>
                     <div class="culture-explanation-grid">
                         <!-- 01 积极向上 -->
                         <div class="culture-explanation-card">
                             <div class="culture-explanation-number">01</div>
-                            <div class="culture-explanation-key">积极向上:</div>
+                            <div class="culture-explanation-key">积极向上</div>
                             <div class="culture-explanation-description">
-                                作为Holding管理公司,面对多家子公司及不同行业的挑战,员工和管理层都需要保持积极向上的态度。这种心态不仅有助于应对困难,还能激励团队不断寻求突破,推动公司持续成长和发展
+                                作为Holding管理公司,面对多家子公司及不同行业的挑战,员工和管理层都需要保持积极向上的态度。这种心态不仅有助于应对困难,还能激励团队不断寻求突破,推动公司持续成长和发展。
+                            </div>
+                            <div class="culture-scoring">
+                                <div class="culture-scoring-title">评分标准:</div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">1分:</div>
+                                    <div class="culture-scoring-description">经常表现出消极情绪,缺乏主动性</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">2分:</div>
+                                    <div class="culture-scoring-description">能够完成任务,但缺少正能量激励和带动的作用</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">3分:</div>
+                                    <div class="culture-scoring-description">整体态度积极,可以较好的应对挑战并维持稳定的状态</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">4分:</div>
+                                    <div class="culture-scoring-description">会主动激励同事,面对困难保持乐观的态度并寻求方法突破难关</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">5分:</div>
+                                    <div class="culture-scoring-description">始终保持积极乐观的心态,主动进步不断提升自己</div>
+                                </div>
                             </div>
                         </div>
 
                         <!-- 02 高效执行 -->
                         <div class="culture-explanation-card">
                             <div class="culture-explanation-number">02</div>
-                            <div class="culture-explanation-key">高效执行:</div>
+                            <div class="culture-explanation-key">高效执行</div>
                             <div class="culture-explanation-description">
                                 高效执行不仅是快速完成任务,更是确保战略精准落地。通过精简流程、优化资源分配,各部门紧密协作,减少延误。高效执行帮助公司在市场变化中迅速应对挑战,抢占先机,实现目标。
+                            </div>
+                            <div class="culture-scoring">
+                                <div class="culture-scoring-title">评分标准:</div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">1分:</div>
+                                    <div class="culture-scoring-description">工作常延迟,缺少计划性</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">2分:</div>
+                                    <div class="culture-scoring-description">可以完成任务,但效率不高,容易出错</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">3分:</div>
+                                    <div class="culture-scoring-description">能确保任务按时完成,流程执行基本符合要求</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">4分:</div>
+                                    <div class="culture-scoring-description">高效推进任务,能优化流程并减少拖延</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">5分:</div>
+                                    <div class="culture-scoring-description">执行力极强,能确保计划精准落实并能带动团队缩短任务时间</div>
+                                </div>
                             </div>
                         </div>
 
                         <!-- 03 灵活应变 -->
                         <div class="culture-explanation-card">
                             <div class="culture-explanation-number">03</div>
-                            <div class="culture-explanation-key">灵活应变:</div>
+                            <div class="culture-explanation-key">灵活应变</div>
                             <div class="culture-explanation-description">
                                 灵活应变要求根据各子公司实际情况快速调整策略,促进团队合作与创新。确保公司在多变市场中保持领先。
+                            </div>
+                            <div class="culture-scoring">
+                                <div class="culture-scoring-title">评分标准:</div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">1分:</div>
+                                    <div class="culture-scoring-description">遇到变化不知所措,缺少应对能力</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">2分:</div>
+                                    <div class="culture-scoring-description">在指导下能适应变化,但缺乏独立应对的能力</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">3分:</div>
+                                    <div class="culture-scoring-description">能根据情况做出调整,并应对在一般的变化上</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">4分:</div>
+                                    <div class="culture-scoring-description">能快速调整策略,并推动创新与团队合作</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">5分:</div>
+                                    <div class="culture-scoring-description">反应迅速,能预判变化并引领团队一起应对</div>
+                                </div>
                             </div>
                         </div>
 
                         <!-- 04 诚信待人 -->
                         <div class="culture-explanation-card">
                             <div class="culture-explanation-number">04</div>
-                            <div class="culture-explanation-key">诚信待人:</div>
+                            <div class="culture-explanation-key">诚信待人</div>
                             <div class="culture-explanation-description">
                                 诚信是公司文化的核心,无论是公司内部的员工管理,还是客户和合作伙伴的关系,诚信是建立信任的基础。诚信待人不仅能促进公司内部合作与沟通,也能增强外部与合作伙伴的关系,帮助公司长期发展。
+                            </div>
+                            <div class="culture-scoring">
+                                <div class="culture-scoring-title">评分标准:</div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">1分:</div>
+                                    <div class="culture-scoring-description">有失信的行为,影响合作关系</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">2分:</div>
+                                    <div class="culture-scoring-description">基本遵守承诺,但偶尔承诺与结果之间存在差距</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">3分:</div>
+                                    <div class="culture-scoring-description">为人诚实守信,合作关系稳定</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">4分:</div>
+                                    <div class="culture-scoring-description">在团队中树立良好的信誉,促进团队的合作顺畅</div>
+                                </div>
+                                <div class="culture-scoring-item">
+                                    <div class="culture-scoring-point">5分:</div>
+                                    <div class="culture-scoring-description">以诚信为核心价值,成为团队和外部伙伴的诚信典范</div>
+                                </div>
                             </div>
                         </div>
                     </div>
