@@ -114,7 +114,7 @@ if (file_exists($jsonFile)) {
                 #ffe8d6 60%, 
                 #ffddd0 100%);
             border-radius: clamp(16px, 1.67vw, 24px);
-            padding: clamp(40px, 4.17vw, 60px) clamp(40px, 4.17vw, 60px);
+            padding: clamp(30px, 3.13vw, 45px) clamp(30px, 3.13vw, 45px);
             box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
             position: relative;
             z-index: 1;
@@ -1377,7 +1377,7 @@ if (file_exists($jsonFile)) {
         /* 响应式设计 */
         @media (max-width: 1024px) {
             .header-panel {
-                padding: clamp(35px, 3.65vw, 50px) clamp(30px, 3.13vw, 50px);
+                padding: clamp(25px, 2.6vw, 35px) clamp(25px, 2.6vw, 35px);
                 min-height: clamp(240px, 25vw, 320px);
             }
 
@@ -1394,7 +1394,7 @@ if (file_exists($jsonFile)) {
             }
 
             .header-panel {
-                padding: clamp(30px, 3.13vw, 45px) clamp(20px, 2.08vw, 30px);
+                padding: clamp(20px, 2.08vw, 30px) clamp(20px, 2.08vw, 30px);
                 min-height: clamp(220px, 22.92vw, 280px);
             }
 
