@@ -1251,10 +1251,82 @@ if (file_exists($jsonFile)) {
             margin-bottom: clamp(4px, 0.42vw, 6px);
         }
 
+        /* 1-5 分配色，越高越深 */
+        .culture-scoring-item:nth-child(1) {
+            border-left-color: #ffe8cc;
+        }
+        .culture-scoring-item:nth-child(1) .culture-scoring-point {
+            color: #ffe8cc;
+        }
+
+        .culture-scoring-item:nth-child(2) {
+            border-left-color: #ffcc99;
+        }
+        .culture-scoring-item:nth-child(2) .culture-scoring-point {
+            color: #ffcc99;
+        }
+
+        .culture-scoring-item:nth-child(3) {
+            border-left-color: #ffb066;
+        }
+        .culture-scoring-item:nth-child(3) .culture-scoring-point {
+            color: #ffb066;
+        }
+
+        .culture-scoring-item:nth-child(4) {
+            border-left-color: #ff8c33;
+        }
+        .culture-scoring-item:nth-child(4) .culture-scoring-point {
+            color: #ff8c33;
+        }
+
+        .culture-scoring-item:nth-child(5) {
+            border-left-color: #ff5c00;
+        }
+        .culture-scoring-item:nth-child(5) .culture-scoring-point {
+            color: #ff5c00;
+        }
+
         .culture-scoring-description {
             font-size: clamp(11px, 1.15vw, 14px);
             color: #4b5563;
             line-height: 1.6;
+        }
+
+        /* 1-5 分颜色逐级加深 */
+        .culture-scoring-item:nth-child(1) {
+            border-left-color: #ffd7b3;
+        }
+        .culture-scoring-item:nth-child(1) .culture-scoring-point {
+            color: #ffb266;
+        }
+
+        .culture-scoring-item:nth-child(2) {
+            border-left-color: #ffc08a;
+        }
+        .culture-scoring-item:nth-child(2) .culture-scoring-point {
+            color: #ff9933;
+        }
+
+        .culture-scoring-item:nth-child(3) {
+            border-left-color: #ffa45c;
+        }
+        .culture-scoring-item:nth-child(3) .culture-scoring-point {
+            color: #ff7f1a;
+        }
+
+        .culture-scoring-item:nth-child(4) {
+            border-left-color: #ff8a33;
+        }
+        .culture-scoring-item:nth-child(4) .culture-scoring-point {
+            color: #ff6600;
+        }
+
+        .culture-scoring-item:nth-child(5) {
+            border-left-color: #ff6600;
+        }
+        .culture-scoring-item:nth-child(5) .culture-scoring-point {
+            color: #e84d00;
         }
 
         /* 响应式设计 */
