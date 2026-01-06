@@ -8567,7 +8567,7 @@ require_once 'session_check.php';
                         // 填入Rounding（调整量）
                         const roundingText = formatCurrencyForPDF(roundingAdjustment);
                         page.drawText(roundingText, {
-                            x: getRightAlignedX(roundingText, 587, 8),
+                            x: getRightAlignedX(roundingText, 583, 8),
                             y: height - 701, // Rounding在Total上方
                             size: smallFontSize,
                             color: textColor,
@@ -8612,7 +8612,7 @@ require_once 'session_check.php';
                         // 填入Rounding（调整量）
                         const roundingText = formatCurrencyForPDF(roundingAdjustment);
                         page.drawText(roundingText, {
-                            x: getRightAlignedX(roundingText, 587, 8),
+                            x: getRightAlignedX(roundingText, 583, 8),
                             y: height - 701, // Rounding在Total上方
                             size: smallFontSize,
                             color: textColor,
@@ -8641,7 +8641,7 @@ require_once 'session_check.php';
                         // 填入Rounding（调整量）
                         const roundingText = formatCurrencyForPDF(roundingAdjustment);
                         page.drawText(roundingText, {
-                            x: getRightAlignedX(roundingText, 587, 8),
+                            x: getRightAlignedX(roundingText, 583, 8),
                             y: height - 701, // Rounding在Total上方
                             size: smallFontSize,
                             color: textColor,
@@ -8686,7 +8686,7 @@ require_once 'session_check.php';
                         // 填入Rounding（调整量）
                         const roundingText = formatCurrencyForPDF(roundingAdjustment);
                         page.drawText(roundingText, {
-                            x: getRightAlignedX(roundingText, 587, 8),
+                            x: getRightAlignedX(roundingText, 583, 8),
                             y: height - 701, // Rounding在Total上方
                             size: smallFontSize,
                             color: textColor,
@@ -8712,7 +8712,7 @@ require_once 'session_check.php';
                     // 填入Rounding（调整量）
                     const roundingText = formatCurrencyForPDF(roundingAdjustment);
                     page.drawText(roundingText, {
-                        x: getRightAlignedX(roundingText, 579, 8),
+                        x: getRightAlignedX(roundingText, 575, 8),
                         y: height - 700, // Rounding在Total上方
                         size: smallFontSize,
                         color: textColor,
@@ -9071,10 +9071,10 @@ require_once 'session_check.php';
                                     const roundingCents = Math.round(roundingAdjustment * 100);
                                     const finalTotalCents = subtotalCents + roundingCents;
                                     
-                                    // 填入Rounding（调整量）
-                                    const roundingText = formatCurrencyForPDF(roundingAdjustment);
-                                    page.drawText(roundingText, {
-                                        x: getRightAlignedX(roundingText, 594, 8),
+                        // 填入Rounding（调整量）
+                        const roundingText = formatCurrencyForPDF(roundingAdjustment);
+                        page.drawText(roundingText, {
+                            x: getRightAlignedX(roundingText, 590, 8),
                                         y: height - 701, // Rounding在Total上方
                                         size: smallFontSize,
                                         color: textColor,
@@ -9116,10 +9116,10 @@ require_once 'session_check.php';
                                         color: textColor,
                                     });
                                     
-                                    // 填入Rounding（调整量）
-                                    const roundingText = formatCurrencyForPDF(roundingAdjustment);
-                                    page.drawText(roundingText, {
-                                        x: getRightAlignedX(roundingText, 594, 8),
+                        // 填入Rounding（调整量）
+                        const roundingText = formatCurrencyForPDF(roundingAdjustment);
+                        page.drawText(roundingText, {
+                            x: getRightAlignedX(roundingText, 590, 8),
                                         y: height - 701, // Rounding在Total上方
                                         size: smallFontSize,
                                         color: textColor,
@@ -9148,7 +9148,7 @@ require_once 'session_check.php';
                                     // 填入Rounding（调整量）
                                     const roundingText = formatCurrencyForPDF(roundingAdjustment);
                                     page.drawText(roundingText, {
-                                        x: getRightAlignedX(roundingText, 587, 8),
+                                        x: getRightAlignedX(roundingText, 583, 8),
                                         y: height - 701, // Rounding在Total上方
                                         size: smallFontSize,
                                         color: textColor,
@@ -9193,7 +9193,7 @@ require_once 'session_check.php';
                                     // 填入Rounding（调整量）
                                     const roundingText = formatCurrencyForPDF(roundingAdjustment);
                                     page.drawText(roundingText, {
-                                        x: getRightAlignedX(roundingText, 587, 8),
+                                        x: getRightAlignedX(roundingText, 583, 8),
                                         y: height - 701, // Rounding在Total上方
                                         size: smallFontSize,
                                         color: textColor,
@@ -9216,10 +9216,10 @@ require_once 'session_check.php';
                                 const totalRounded = roundToNearestFive(totalRaw); // rounding后的总金额
                                 const totalCents = Math.round(totalRounded * 100);
                                 
-                                // 填入Rounding（调整量）
-                                const roundingText = formatCurrencyForPDF(roundingAdjustment);
-                                page.drawText(roundingText, {
-                                    x: getRightAlignedX(roundingText, 594, 8),
+                        // 填入Rounding（调整量）
+                        const roundingText = formatCurrencyForPDF(roundingAdjustment);
+                        page.drawText(roundingText, {
+                            x: getRightAlignedX(roundingText, 590, 8),
                                     y: height - 700, // Rounding在Total上方
                                     size: smallFontSize,
                                     color: textColor,
