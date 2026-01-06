@@ -958,6 +958,8 @@ function getUserSidebarPermissions($pdo, $input) {
             
             $stockSystems = [];
             $stockViews = [];
+            $uploadSystems = [];
+            $uploadTypes = [];
             $legacyKeys = ['stocklistall','stockeditall','stockproductname','stockremark','stocksot'];
             
             foreach ($rows as $row) {
@@ -971,9 +973,13 @@ function getUserSidebarPermissions($pdo, $input) {
                 }
                 $systems = $permData['systems'] ?? $permData['system'] ?? [];
                 $views = $permData['views'] ?? $permData['view'] ?? [];
+                $types = $permData['types'] ?? $permData['type'] ?? [];
                 if ($pageKey === 'stock_inventory') {
                     $stockSystems = is_array($systems) ? array_values(array_intersect($systems, ['central','j1','j2','j3'])) : [];
                     $stockViews = is_array($views) ? array_values(array_intersect($views, ['list','records','remark','product','sot'])) : [];
+                } elseif ($pageKey === 'kpi_upload') {
+                    $uploadSystems = is_array($systems) ? array_values(array_intersect($systems, ['j1','j2','j3'])) : [];
+                    $uploadTypes = is_array($types) ? array_values(array_intersect($types, ['kpi','cost'])) : [];
                 } elseif (in_array($pageKey, $legacyKeys, true)) {
                     if (is_array($systems)) {
                         $stockSystems = array_merge($stockSystems, array_values(array_intersect($systems, ['central','j1','j2','j3'])));
@@ -988,6 +994,10 @@ function getUserSidebarPermissions($pdo, $input) {
             $pagePerms['stock_inventory'] = [
                 'system' => $stockSystems,
                 'view' => $stockViews
+            ];
+            $pagePerms['kpi_upload'] = [
+                'system' => $uploadSystems,
+                'type' => $uploadTypes
             ];
         }
         
@@ -1030,6 +1040,18 @@ function getUserSidebarPermissions($pdo, $input) {
                         'system' => $stockSystems,
                         'view' => $stockViews
                     ];
+                    
+                    // 读取 kpi_upload 权限
+                    $uploadSystems = [];
+                    $uploadTypes = [];
+                    if (isset($decoded2['kpi_upload'])) {
+                        $uploadSystems = array_values(array_intersect($decoded2['kpi_upload']['system'] ?? [], ['j1','j2','j3']));
+                        $uploadTypes = array_values(array_intersect($decoded2['kpi_upload']['type'] ?? [], ['kpi','cost']));
+                    }
+                    $pagePerms['kpi_upload'] = [
+                        'system' => $uploadSystems,
+                        'type' => $uploadTypes
+                    ];
                 }
             }
             if ($row && !empty($row['submenu_permissions_json'])) {
@@ -1069,6 +1091,12 @@ function getUserSidebarPermissions($pdo, $input) {
             $pagePerms['stock_inventory'] = [
                 'system' => [],
                 'view' => []
+            ];
+        }
+        if (!isset($pagePerms['kpi_upload'])) {
+            $pagePerms['kpi_upload'] = [
+                'system' => [],
+                'type' => []
             ];
         }
         
