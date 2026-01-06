@@ -154,56 +154,56 @@ if (file_exists($jsonFile)) {
             z-index: 0;
         }
 
-        /* 飘动的模糊圆球 */
+        /* 飘动的模糊圆球 - 更明显 */
         .floating-orb {
             position: absolute;
             border-radius: 50%;
-            filter: blur(40px);
+            filter: blur(35px);
             z-index: 0;
             pointer-events: none;
-            opacity: 0.3;
+            opacity: 0.6;
         }
 
         .floating-orb-1 {
-            width: clamp(120px, 12.5vw, 180px);
-            height: clamp(120px, 12.5vw, 180px);
-            background: radial-gradient(circle, rgba(255, 200, 150, 0.5) 0%, rgba(255, 180, 120, 0.3) 50%, transparent 100%);
+            width: clamp(150px, 15.63vw, 220px);
+            height: clamp(150px, 15.63vw, 220px);
+            background: radial-gradient(circle, rgba(255, 180, 120, 0.8) 0%, rgba(255, 160, 100, 0.5) 40%, rgba(255, 140, 80, 0.2) 70%, transparent 100%);
             top: 10%;
             left: 15%;
             animation: float1 20s ease-in-out infinite;
         }
 
         .floating-orb-2 {
-            width: clamp(100px, 10.42vw, 150px);
-            height: clamp(100px, 10.42vw, 150px);
-            background: radial-gradient(circle, rgba(255, 180, 120, 0.4) 0%, rgba(255, 160, 100, 0.2) 50%, transparent 100%);
+            width: clamp(130px, 13.54vw, 180px);
+            height: clamp(130px, 13.54vw, 180px);
+            background: radial-gradient(circle, rgba(255, 160, 100, 0.75) 0%, rgba(255, 140, 80, 0.45) 40%, rgba(255, 120, 60, 0.2) 70%, transparent 100%);
             top: 60%;
             right: 20%;
             animation: float2 25s ease-in-out infinite;
         }
 
         .floating-orb-3 {
-            width: clamp(80px, 8.33vw, 120px);
-            height: clamp(80px, 8.33vw, 120px);
-            background: radial-gradient(circle, rgba(255, 220, 170, 0.4) 0%, rgba(255, 200, 150, 0.2) 50%, transparent 100%);
+            width: clamp(110px, 11.46vw, 160px);
+            height: clamp(110px, 11.46vw, 160px);
+            background: radial-gradient(circle, rgba(255, 200, 140, 0.7) 0%, rgba(255, 180, 120, 0.4) 40%, rgba(255, 160, 100, 0.2) 70%, transparent 100%);
             bottom: 20%;
             left: 25%;
             animation: float3 18s ease-in-out infinite;
         }
 
         .floating-orb-4 {
-            width: clamp(90px, 9.38vw, 130px);
-            height: clamp(90px, 9.38vw, 130px);
-            background: radial-gradient(circle, rgba(255, 190, 130, 0.35) 0%, rgba(255, 170, 110, 0.2) 50%, transparent 100%);
+            width: clamp(120px, 12.5vw, 170px);
+            height: clamp(120px, 12.5vw, 170px);
+            background: radial-gradient(circle, rgba(255, 170, 110, 0.7) 0%, rgba(255, 150, 90, 0.4) 40%, rgba(255, 130, 70, 0.2) 70%, transparent 100%);
             top: 30%;
             right: 35%;
             animation: float4 22s ease-in-out infinite;
         }
 
         .floating-orb-5 {
-            width: clamp(70px, 7.29vw, 100px);
-            height: clamp(70px, 7.29vw, 100px);
-            background: radial-gradient(circle, rgba(255, 210, 160, 0.3) 0%, rgba(255, 190, 140, 0.15) 50%, transparent 100%);
+            width: clamp(100px, 10.42vw, 140px);
+            height: clamp(100px, 10.42vw, 140px);
+            background: radial-gradient(circle, rgba(255, 190, 130, 0.65) 0%, rgba(255, 170, 110, 0.4) 40%, rgba(255, 150, 90, 0.2) 70%, transparent 100%);
             bottom: 40%;
             right: 10%;
             animation: float5 24s ease-in-out infinite;
