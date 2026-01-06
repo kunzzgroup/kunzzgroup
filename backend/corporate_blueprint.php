@@ -1258,46 +1258,46 @@ if (file_exists($jsonFile)) {
             line-height: 1.6;
         }
 
-        /* 1-5 分颜色逐级加深（仅色条+文字加深，背景保持白） */
-        .culture-scoring-item:nth-child(1) .culture-scoring-point { color: #ffcc99; border-left-color: #ffcc99; }
-        .culture-scoring-item:nth-child(2) .culture-scoring-point { color: #ffb266; border-left-color: #ffb266; }
-        .culture-scoring-item:nth-child(3) .culture-scoring-point { color: #ff9933; border-left-color: #ff9933; }
-        .culture-scoring-item:nth-child(4) .culture-scoring-point { color: #ff7f1a; border-left-color: #ff7f1a; }
-        .culture-scoring-item:nth-child(5) .culture-scoring-point { color: #ff6600; border-left-color: #ff6600; }
-
-        /* 1-5 行整块背景依次加深 */
-        .culture-scoring-item:nth-child(1) { background: #fffbf5; }
-        .culture-scoring-item:nth-child(2) { background: #fff7ea; }
-        .culture-scoring-item:nth-child(3) { background: #fff0d8; }
-        .culture-scoring-item:nth-child(4) { background: #fbe3bb; }
-        .culture-scoring-item:nth-child(5) { background: #ffd389; }
-
-        .culture-scoring-item:nth-child(2) {
-            border-left-color: #ffc08a;
+        /* 1-5 分颜色逐级加深（整块背景 + 左侧色条 + 文字）
+           注意有一个标题 div，评分项从第 2 个子元素开始计数 */
+        .culture-scoring-item:nth-of-type(2) {
+            background: #fffbf5;
         }
-        .culture-scoring-item:nth-child(2) .culture-scoring-point {
+        .culture-scoring-item:nth-of-type(2) .culture-scoring-point {
+            color: #ffcc99;
+            border-left-color: #ffcc99;
+        }
+
+        .culture-scoring-item:nth-of-type(3) {
+            background: #fff7ea;
+        }
+        .culture-scoring-item:nth-of-type(3) .culture-scoring-point {
+            color: #ffb266;
+            border-left-color: #ffb266;
+        }
+
+        .culture-scoring-item:nth-of-type(4) {
+            background: #fff0d8;
+        }
+        .culture-scoring-item:nth-of-type(4) .culture-scoring-point {
             color: #ff9933;
+            border-left-color: #ff9933;
         }
 
-        .culture-scoring-item:nth-child(3) {
-            border-left-color: #ffa45c;
+        .culture-scoring-item:nth-of-type(5) {
+            background: #fbe3bb;
         }
-        .culture-scoring-item:nth-child(3) .culture-scoring-point {
+        .culture-scoring-item:nth-of-type(5) .culture-scoring-point {
             color: #ff7f1a;
+            border-left-color: #ff7f1a;
         }
 
-        .culture-scoring-item:nth-child(4) {
-            border-left-color: #ff8a33;
+        .culture-scoring-item:nth-of-type(6) {
+            background: #ffd389;
         }
-        .culture-scoring-item:nth-child(4) .culture-scoring-point {
+        .culture-scoring-item:nth-of-type(6) .culture-scoring-point {
             color: #ff6600;
-        }
-
-        .culture-scoring-item:nth-child(5) {
             border-left-color: #ff6600;
-        }
-        .culture-scoring-item:nth-child(5) .culture-scoring-point {
-            color: #e84d00;
         }
 
         /* 响应式设计 */
