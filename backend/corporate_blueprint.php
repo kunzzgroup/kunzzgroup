@@ -1069,7 +1069,6 @@ if (file_exists($jsonFile)) {
             line-height: 1.8;
         }
 
-
         /* Strategic Objectives */
         .objectives-container {
             display: flex;
