@@ -2288,7 +2288,7 @@ if (file_exists($jsonFile)) {
             padding: clamp(80px, 8.33vw, 120px) clamp(160px, 16.67vw, 240px);
         }
 
-        /* 背景大号文字 */
+        /* 背景Logo图片 */
         .org-bg-text {
             position: absolute;
             inset: 0;
@@ -2301,10 +2301,10 @@ if (file_exists($jsonFile)) {
             z-index: 0;
         }
 
-        .org-bg-text span {
-            font-size: clamp(300px, 31.25vw, 720px);
-            font-weight: 800;
-            color: #0f172a;
+        .org-bg-text img {
+            width: clamp(400px, 41.67vw, 1312px);
+            height: clamp(400px, 41.67vw, 1312px);
+            object-fit: contain;
         }
 
         /* 树包装器 */
@@ -3191,9 +3191,15 @@ if (file_exists($jsonFile)) {
 
                         <!-- 树根容器 -->
                         <div class="org-tree-root-container">
-                            <!-- 背景大号文字 -->
+                            <!-- 背景Logo图片 -->
                             <div class="org-bg-text">
-                                <span>K2</span>
+                                <?php 
+                                $logoPath = '../images/images/logo.png';
+                                $logoFullPath = __DIR__ . '/../images/images/logo.png';
+                                if (file_exists($logoFullPath)): 
+                                ?>
+                                <img src="<?php echo htmlspecialchars($logoPath); ?>" alt="Logo">
+                                <?php endif; ?>
                             </div>
 
                             <?php 
