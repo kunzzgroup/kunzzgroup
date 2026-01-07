@@ -2244,12 +2244,12 @@ if (file_exists($jsonFile)) {
         .org-workspace {
             background: rgba(255, 255, 255, 0.4);
             backdrop-filter: blur(12px);
-            border-radius: 64px;
+            border-radius: 48px;
             border: 1px solid rgba(255, 255, 255, 0.8);
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-            padding: clamp(48px, 5vw, 80px);
+            padding: clamp(32px, 3.33vw, 48px);
             overflow-x: auto;
-            min-height: 800px;
+            min-height: 600px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -2259,22 +2259,22 @@ if (file_exists($jsonFile)) {
         /* 标题覆盖层 */
         .org-title-overlay {
             position: absolute;
-            top: clamp(48px, 5vw, 80px);
-            left: clamp(48px, 5vw, 80px);
+            top: clamp(32px, 3.33vw, 48px);
+            left: clamp(32px, 3.33vw, 48px);
             z-index: 10;
         }
 
         .org-title-badge {
             color: #ff5c00;
             font-weight: 800;
-            font-size: clamp(12px, 1.25vw, 14px);
+            font-size: clamp(10px, 1.04vw, 12px);
             text-transform: uppercase;
             letter-spacing: 0.4em;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .org-title-main {
-            font-size: clamp(32px, 3.33vw, 48px);
+            font-size: clamp(24px, 2.5vw, 36px);
             font-weight: 800;
             color: #0f172a;
             letter-spacing: -0.02em;
@@ -2285,7 +2285,7 @@ if (file_exists($jsonFile)) {
             position: relative;
             display: flex;
             align-items: center;
-            padding: clamp(80px, 8.33vw, 120px) clamp(160px, 16.67vw, 240px);
+            padding: clamp(50px, 5.21vw, 80px) clamp(100px, 10.42vw, 160px);
         }
 
         /* 背景Logo图片 */
@@ -2302,8 +2302,8 @@ if (file_exists($jsonFile)) {
         }
 
         .org-bg-text img {
-            width: clamp(400px, 41.67vw, 1312px);
-            height: clamp(400px, 41.67vw, 1312px);
+            width: clamp(300px, 31.25vw, 800px);
+            height: clamp(300px, 31.25vw, 800px);
             object-fit: contain;
         }
 
@@ -2319,7 +2319,7 @@ if (file_exists($jsonFile)) {
         .org-tree-branch {
             display: flex;
             align-items: center;
-            gap: clamp(48px, 5vw, 64px);
+            gap: clamp(32px, 3.33vw, 48px);
             position: relative;
         }
 
@@ -2346,8 +2346,8 @@ if (file_exists($jsonFile)) {
         .org-node-card {
             display: flex;
             flex-direction: column;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
             overflow: hidden;
             border: 1px solid;
             transition: all 0.3s ease;
@@ -2361,22 +2361,22 @@ if (file_exists($jsonFile)) {
 
         .org-node-card.highlighted {
             border-color: #ff5c00;
-            box-shadow: 0 20px 25px -5px rgba(255, 92, 0, 0.1), 0 10px 10px -5px rgba(255, 92, 0, 0.04), 0 0 0 4px rgba(255, 92, 0, 0.1);
+            box-shadow: 0 10px 15px -3px rgba(255, 92, 0, 0.15), 0 4px 6px -2px rgba(255, 92, 0, 0.1), 0 0 0 3px rgba(255, 92, 0, 0.1);
         }
 
         .org-node-card.small {
-            width: 144px;
+            width: 120px;
         }
 
         .org-node-card:not(.small) {
-            width: 208px;
+            width: 160px;
         }
 
         /* 节点角色标题 */
         .org-node-role {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 800;
-            padding: 8px 12px;
+            padding: 6px 10px;
             text-align: center;
             letter-spacing: 0.1em;
             text-transform: uppercase;
@@ -2399,17 +2399,17 @@ if (file_exists($jsonFile)) {
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 12px;
+            padding: 10px;
             text-align: center;
             background: rgba(255, 255, 255, 0.5);
         }
 
         .org-node-card.small .org-node-name-area {
-            min-height: 40px;
+            min-height: 32px;
         }
 
         .org-node-card:not(.small) .org-node-name-area {
-            min-height: 60px;
+            min-height: 48px;
         }
 
         .org-node-name {
@@ -2419,18 +2419,18 @@ if (file_exists($jsonFile)) {
         }
 
         .org-node-card.small .org-node-name {
-            font-size: 10px;
+            font-size: 9px;
         }
 
         .org-node-card:not(.small) .org-node-name {
-            font-size: 12px;
+            font-size: 11px;
         }
 
         /* 根节点标识 */
         .org-node-root-indicator {
-            margin-top: 4px;
-            width: 32px;
-            height: 4px;
+            margin-top: 3px;
+            width: 24px;
+            height: 3px;
             background: #ff5c00;
             border-radius: 9999px;
         }
@@ -2439,9 +2439,9 @@ if (file_exists($jsonFile)) {
         .org-children-container {
             display: flex;
             flex-direction: column;
-            gap: clamp(20px, 2.08vw, 24px);
+            gap: clamp(16px, 1.67vw, 20px);
             position: relative;
-            padding: clamp(16px, 1.67vw, 20px) 0;
+            padding: clamp(12px, 1.25vw, 16px) 0;
         }
 
         /* SVG 连接层 */
@@ -2453,7 +2453,7 @@ if (file_exists($jsonFile)) {
             pointer-events: none;
             overflow: visible;
             z-index: 10;
-            left: -64px;
+            left: -48px;
         }
 
         .org-connector-path {
@@ -2480,8 +2480,8 @@ if (file_exists($jsonFile)) {
         /* PA节点特殊定位 */
         .org-pa-container {
             position: absolute;
-            left: 260px;
-            top: -140px;
+            left: 200px;
+            top: -110px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -2489,20 +2489,20 @@ if (file_exists($jsonFile)) {
 
         .org-pa-connector {
             width: 1px;
-            height: 80px;
+            height: 60px;
             background: #cbd5e1;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         /* 保密标识 */
         .org-confidential-badge {
             position: absolute;
-            bottom: clamp(48px, 5vw, 80px);
-            right: clamp(48px, 5vw, 80px);
+            bottom: clamp(32px, 3.33vw, 48px);
+            right: clamp(32px, 3.33vw, 48px);
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 24px;
+            gap: 10px;
+            padding: 10px 20px;
             background: #0f172a;
             color: #ffffff;
             border-radius: 9999px;
@@ -2511,8 +2511,8 @@ if (file_exists($jsonFile)) {
         }
 
         .org-confidential-dot {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             background: #ff5c00;
             animation: pulse 2s ease-in-out infinite;
@@ -2524,7 +2524,7 @@ if (file_exists($jsonFile)) {
         }
 
         .org-confidential-text {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.1em;
@@ -2533,53 +2533,17 @@ if (file_exists($jsonFile)) {
         /* 响应式调整 */
         @media (max-width: 1024px) {
             .org-workspace {
-                padding: clamp(32px, 3.33vw, 48px);
-                border-radius: 32px;
-            }
-
-            .org-tree-root-container {
-                padding: clamp(40px, 4.17vw, 60px) clamp(40px, 4.17vw, 60px);
-            }
-
-            .org-tree-branch {
-                gap: clamp(24px, 2.5vw, 32px);
-            }
-
-            .org-node-card:not(.small) {
-                width: 160px;
-            }
-
-            .org-node-card.small {
-                width: 120px;
-            }
-
-            .org-pa-container {
-                left: 200px;
-                top: -100px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .org-workspace {
                 padding: clamp(24px, 2.5vw, 32px);
-                min-height: 600px;
-            }
-
-            .org-title-overlay {
-                top: clamp(24px, 2.5vw, 32px);
-                left: clamp(24px, 2.5vw, 32px);
-            }
-
-            .org-title-main {
-                font-size: clamp(24px, 2.5vw, 32px);
+                border-radius: 32px;
+                min-height: 500px;
             }
 
             .org-tree-root-container {
-                padding: clamp(20px, 2.08vw, 30px) clamp(20px, 2.08vw, 30px);
+                padding: clamp(30px, 3.13vw, 50px) clamp(60px, 6.25vw, 100px);
             }
 
             .org-tree-branch {
-                gap: clamp(16px, 1.67vw, 24px);
+                gap: clamp(20px, 2.08vw, 28px);
             }
 
             .org-node-card:not(.small) {
@@ -2591,16 +2555,64 @@ if (file_exists($jsonFile)) {
             }
 
             .org-pa-container {
+                left: 160px;
+                top: -90px;
+            }
+
+            .org-bg-text img {
+                width: clamp(250px, 26.04vw, 600px);
+                height: clamp(250px, 26.04vw, 600px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .org-workspace {
+                padding: clamp(20px, 2.08vw, 24px);
+                min-height: 450px;
+                border-radius: 24px;
+            }
+
+            .org-title-overlay {
+                top: clamp(20px, 2.08vw, 24px);
+                left: clamp(20px, 2.08vw, 24px);
+            }
+
+            .org-title-main {
+                font-size: clamp(20px, 2.08vw, 28px);
+            }
+
+            .org-tree-root-container {
+                padding: clamp(20px, 2.08vw, 30px) clamp(20px, 2.08vw, 30px);
+            }
+
+            .org-tree-branch {
+                gap: clamp(12px, 1.25vw, 20px);
+            }
+
+            .org-node-card:not(.small) {
+                width: 120px;
+            }
+
+            .org-node-card.small {
+                width: 90px;
+            }
+
+            .org-pa-container {
                 position: relative;
                 left: auto;
                 top: auto;
-                margin-top: 20px;
+                margin-top: 16px;
             }
 
             .org-confidential-badge {
-                bottom: clamp(24px, 2.5vw, 32px);
-                right: clamp(24px, 2.5vw, 32px);
-                padding: 8px 16px;
+                bottom: clamp(20px, 2.08vw, 24px);
+                right: clamp(20px, 2.08vw, 24px);
+                padding: 8px 14px;
+            }
+
+            .org-bg-text img {
+                width: clamp(200px, 20.83vw, 400px);
+                height: clamp(200px, 20.83vw, 400px);
             }
         }
 
