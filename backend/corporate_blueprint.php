@@ -1969,32 +1969,6 @@ if (file_exists($jsonFile)) {
             transition: width 0.5s ease;
         }
 
-        .execution-button {
-            width: 100%;
-            padding: clamp(14px, 1.46vw, 16px);
-            background: #0f172a;
-            color: #ffffff;
-            font-weight: 700;
-            border-radius: clamp(8px, 0.83vw, 12px);
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-top: clamp(12px, 1.25vw, 16px);
-        }
-
-        .execution-button:hover {
-            background: #ff5c00;
-            box-shadow: 0 4px 12px rgba(255, 92, 0, 0.3);
-        }
-
-        .execution-button-icon {
-            width: 18px;
-            height: 18px;
-        }
 
         /* 自定义滚动条样式 */
         ::-webkit-scrollbar {
@@ -3609,13 +3583,6 @@ if (file_exists($jsonFile)) {
                                                     <div class="execution-progress-bar"></div>
                                                 </div>
                                             </div>
-
-                                            <button class="execution-button">
-                                                Review Documentation
-                                                <svg class="execution-button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <polyline points="9 18 15 12 9 6"/>
-                                                </svg>
-                                            </button>
                                         </div>
                                     </div>
                                 </div>
