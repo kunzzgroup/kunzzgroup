@@ -2163,14 +2163,12 @@ if (file_exists($jsonFile)) {
             letter-spacing: -0.02em;
         }
 
-        /* 树根容器（分层泳道式布局） */
+        /* 树根容器 */
         .org-tree-root-container {
             position: relative;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: clamp(32px, 3.33vw, 40px);
-            padding: clamp(40px, 4.17vw, 60px) clamp(80px, 8.33vw, 120px);
+            padding: clamp(50px, 5.21vw, 80px) clamp(100px, 10.42vw, 160px);
         }
 
         /* 背景Logo图片 */
@@ -2192,152 +2190,79 @@ if (file_exists($jsonFile)) {
             object-fit: contain;
         }
 
-        /* 分层容器 */
-        .org-tree-wrapper {
+        /* 组织架构表格布局 */
+        .org-table-wrapper {
             position: relative;
             z-index: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: clamp(32px, 3.33vw, 40px);
-        }
-
-        .org-level-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: clamp(32px, 3.33vw, 48px);
-        }
-
-        .org-level-label {
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: #94a3b8;
-            margin-bottom: 4px;
-            text-align: center;
-        }
-
-        /* 节点容器 */
-        .org-node-container {
-            position: relative;
-            z-index: 30;
-            transition: all 0.5s ease;
-        }
-
-        .org-node-container.highlighted {
-            transform: scale(1.05);
-        }
-
-        .org-node-container:not(.highlighted) {
-            opacity: 0.9;
-        }
-
-        .org-node-container:not(.highlighted):hover {
-            opacity: 1;
-        }
-
-        /* 节点卡片：上层职位缩写 + 下层职员名字（与示意图一致的橙色胶囊卡片） */
-        .org-node-card {
-            display: flex;
-            flex-direction: column;
-            border-radius: 999px;
-            overflow: hidden;
-            border: 2px solid #ff5c00;
+            width: 100%;
             background: #ffffff;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            border-radius: clamp(16px, 1.67vw, 24px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
         }
 
-        .org-node-card.small {
-            width: 150px;
+        .org-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
         }
 
-        .org-node-card:not(.small) {
-            width: 180px;
-        }
-
-        .org-node-card.highlighted {
-            box-shadow: 0 10px 20px rgba(255, 92, 0, 0.35);
-            transform: translateY(-2px);
-        }
-
-        /* 上层：职位缩写 */
-        .org-node-role {
-            font-size: 11px;
-            font-weight: 800;
-            padding: 6px 12px;
-            text-align: center;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            background: #ff5c00;
+        .org-table thead {
+            background: #111827;
             color: #ffffff;
         }
 
-        /* 下层：职员名字 */
-        .org-node-name-area {
-            display: flex;
-            flex-direction: column;
+        .org-table th {
+            padding: 12px 16px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border-right: 1px solid rgba(148, 163, 184, 0.4);
+        }
+
+        .org-table th:last-child {
+            border-right: none;
+        }
+
+        .org-table tbody tr:nth-child(even) {
+            background: #f9fafb;
+        }
+
+        .org-table td {
+            padding: 10px 16px;
+            font-size: 13px;
+            border-top: 1px solid #e5e7eb;
+            border-right: 1px solid #e5e7eb;
+            vertical-align: middle;
+        }
+
+        .org-table td:last-child {
+            border-right: none;
+        }
+
+        .org-level-badge {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 8px 10px 10px 10px;
-            text-align: center;
-            background: #ffffff;
-        }
-
-        .org-node-card.small .org-node-name-area {
-            min-height: 34px;
-        }
-
-        .org-node-card:not(.small) .org-node-name-area {
-            min-height: 44px;
-        }
-
-        .org-node-name {
-            font-weight: 700;
-            color: #0f172a;
-            line-height: 1.2;
-        }
-
-        .org-node-card.small .org-node-name {
-            font-size: 9px;
-        }
-
-        .org-node-card:not(.small) .org-node-name {
-            font-size: 11px;
-        }
-
-        /* 根节点标识 */
-        .org-node-root-indicator {
-            margin-top: 3px;
-            width: 24px;
-            height: 3px;
-            background: #ff5c00;
+            min-width: 60px;
+            padding: 2px 8px;
             border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 700;
+            background: #fef3c7;
+            color: #92400e;
         }
 
-        /* 简化：不再使用 SVG 连接线 */
-        .org-children-container,
-        .org-svg-connector {
-            display: none;
+        .org-position {
+            font-weight: 700;
+            color: #111827;
         }
 
-        /* PA节点特殊定位 */
-        .org-pa-container {
-            position: absolute;
-            left: 200px;
-            top: -110px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .org-pa-connector {
-            width: 1px;
-            height: 60px;
-            background: #cbd5e1;
-            margin-bottom: 6px;
+        .org-name {
+            font-weight: 600;
+            color: #374151;
         }
 
 
@@ -2465,7 +2390,7 @@ if (file_exists($jsonFile)) {
                 width: min(300px, 80vw);
                 height: 60px;
             }
-            
+
             .org-chart-title {
                 font-size: 32px;
                 left: 20px;
@@ -3006,139 +2931,190 @@ if (file_exists($jsonFile)) {
                             <h1 class="org-title-main">高层组织架构图</h1>
                         </div>
 
-                        <!-- 树根容器 -->
+                        <!-- 树根容器（改为表格呈现层级关系） -->
                         <div class="org-tree-root-container">
-                            <!-- 背景Logo图片 -->
-                            <div class="org-bg-text">
-                                <?php 
-                                $logoPath = '../images/images/logo.png';
-                                $logoFullPath = __DIR__ . '/../images/images/logo.png';
-                                if (file_exists($logoFullPath)): 
-                                ?>
-                                <img src="<?php echo htmlspecialchars($logoPath); ?>" alt="Logo">
-                                <?php endif; ?>
-                            </div>
-
                             <?php 
                             $orgStructure = $strategyData['organizationStructure'];
 
-                            $ceo = $orgStructure['ceo'] ?? null;
-                            $pa  = $orgStructure['pa'] ?? null;
-                            $cLevels = $orgStructure['cLevel'] ?? [];
+                            // 构建根节点（CEO + C-Level 作为子节点）
+                            $ceoTitle = $orgStructure['ceo']['title'] ?? $orgStructure['ceo']['fullTitle'] ?? 'CEO';
+                            $ceoName  = $orgStructure['ceo']['name'] ?? '';
 
-                            // 收集所有 VP / 下级
-                            $vpRows = [];
-                            foreach ($cLevels as $cLevel) {
-                                $parentTitle = $cLevel['title'] ?? $cLevel['fullTitle'] ?? '';
-                                $parentName  = $cLevel['name'] ?? '';
-                                $subs = $cLevel['subordinates'] ?? [];
-                                foreach ($subs as $sub) {
-                                    $vpRows[] = [
-                                        'parentTitle' => $parentTitle,
-                                        'parentName'  => $parentName,
-                                        'title'       => $sub['title'] ?? $sub['fullTitle'] ?? '',
-                                        'name'        => $sub['name'] ?? '',
-                                    ];
+                            $rootNode = [
+                                'title'        => $ceoTitle,
+                                'fullTitle'    => $ceoTitle,
+                                'name'         => $ceoName,
+                                'subordinates' => []
+                            ];
+
+                            if (!empty($orgStructure['cLevel'])) {
+                                foreach ($orgStructure['cLevel'] as $cLevel) {
+                                    $rootNode['subordinates'][] = $cLevel;
                                 }
+                            }
+
+                            // 扁平化为表格行
+                            $orgRows = [];
+
+                            function flattenOrgNode($node, $level = 0, &$rows = []) {
+                                $rows[] = [
+                                    'level' => $level,
+                                    'title' => $node['title'] ?? ($node['fullTitle'] ?? ''),
+                                    'name'  => $node['name'] ?? ''
+                                ];
+
+                                if (!empty($node['subordinates']) && is_array($node['subordinates'])) {
+                                    foreach ($node['subordinates'] as $child) {
+                                        flattenOrgNode($child, $level + 1, $rows);
+                                    }
+                                }
+                            }
+
+                            flattenOrgNode($rootNode, 0, $orgRows);
+
+                            // PA 作为独立一行
+                            if (!empty($orgStructure['pa'])) {
+                                $orgRows[] = [
+                                    'level' => 1,
+                                    'title' => $orgStructure['pa']['title'] ?? ($orgStructure['pa']['fullTitle'] ?? 'PA'),
+                                    'name'  => $orgStructure['pa']['name'] ?? ''
+                                ];
                             }
                             ?>
 
-                            <div class="org-tree-wrapper">
-                                <!-- 顶层：CEO & PA -->
-                                <div class="org-level-row org-level-ceo">
-                                    <?php if ($ceo): ?>
-                                        <div class="org-node-container">
-                                            <div class="org-node-card">
-                                                <div class="org-node-role">
-                                                    <?php echo htmlspecialchars($ceo['title'] ?? $ceo['fullTitle'] ?? 'CEO'); ?>
-                                                </div>
-                                                <div class="org-node-name-area">
-                                                    <span class="org-node-name">
-                                                        <?php echo htmlspecialchars($ceo['name'] ?? ''); ?>
+                            <div class="org-table-wrapper">
+                                <table class="org-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 80px;">层级</th>
+                                            <th style="width: 160px;">职位</th>
+                                            <th>姓名</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($orgRows as $row): 
+                                            $levelLabel = 'L' . ($row['level'] + 1);
+                                        ?>
+                                            <tr>
+                                                <td>
+                                                    <span class="org-level-badge"><?php echo htmlspecialchars($levelLabel); ?></span>
+                                                </td>
+                                                <td>
+                                                    <span class="org-position">
+                                                        <?php echo htmlspecialchars($row['title'] ?? ''); ?>
                                                     </span>
-                                                    <div class="org-node-root-indicator"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    <?php endif; ?>
-
-                                    <?php if ($pa): ?>
-                                        <div class="org-node-container">
-                                            <div class="org-node-card small">
-                                                <div class="org-node-role">
-                                                    <?php echo htmlspecialchars($pa['title'] ?? $pa['fullTitle'] ?? 'PA'); ?>
-                                                </div>
-                                                <div class="org-node-name-area">
-                                                    <span class="org-node-name">
-                                                        <?php echo htmlspecialchars($pa['name'] ?? ''); ?>
+                                                </td>
+                                                <td>
+                                                    <span class="org-name">
+                                                        <?php echo htmlspecialchars($row['name'] ?? '—'); ?>
                                                     </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-
-                                <!-- 第二层：C-Level -->
-                                <?php if (!empty($cLevels)): ?>
-                                <div class="org-level-row org-level-clevel">
-                                    <?php foreach ($cLevels as $cLevel): ?>
-                                        <div class="org-node-container">
-                                            <div class="org-node-card">
-                                                <div class="org-node-role">
-                                                    <?php echo htmlspecialchars($cLevel['title'] ?? $cLevel['fullTitle'] ?? ''); ?>
-                                                </div>
-                                                <div class="org-node-name-area">
-                                                    <span class="org-node-name">
-                                                        <?php echo htmlspecialchars($cLevel['name'] ?? ''); ?>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                                <?php endif; ?>
-
-                                <!-- 第三层：VP / 下级 -->
-                                <?php if (!empty($vpRows)): ?>
-                                <div class="org-level-row org-level-vp">
-                                    <?php foreach ($vpRows as $vp): ?>
-                                        <div class="org-node-container">
-                                            <div class="org-node-card small">
-                                                <div class="org-node-role">
-                                                    <?php echo htmlspecialchars($vp['title']); ?>
-                                                </div>
-                                                <div class="org-node-name-area">
-                                                    <span class="org-node-name">
-                                                        <?php echo htmlspecialchars($vp['name']); ?>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                                <?php endif; ?>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
                             </div>
-
                         </div>
                     </div>
                 </div>
                 
                 <script>
-                // 简单入场动画，去掉复杂的悬停高亮与连线逻辑
+                // 组织架构悬停高亮功能
                 document.addEventListener('DOMContentLoaded', function() {
+                    let hoveredNodeId = null;
+                    
+                    function updateHighlights(nodeId) {
+                        hoveredNodeId = nodeId;
+                        
+                        // 更新所有节点
+                        document.querySelectorAll('.org-node-container').forEach(container => {
+                            const containerId = container.getAttribute('data-node-id');
+                            const card = container.querySelector('.org-node-card');
+                            
+                            if (nodeId === null) {
+                                container.classList.remove('highlighted');
+                                if (card) card.classList.remove('highlighted');
+                            } else {
+                                // 检查是否应该高亮
+                                let shouldHighlight = (containerId === nodeId);
+                                
+                                // 检查子节点
+                                if (!shouldHighlight) {
+                                    const childrenContainer = container.nextElementSibling;
+                                    if (childrenContainer && childrenContainer.classList.contains('org-children-container')) {
+                                        const childNodes = childrenContainer.querySelectorAll('.org-node-container');
+                                        childNodes.forEach(child => {
+                                            if (child.getAttribute('data-node-id') === nodeId) {
+                                                shouldHighlight = true;
+                                            }
+                                        });
+                            }
+                        }
+
+                                // 检查父节点
+                                if (!shouldHighlight && nodeId) {
+                                    const path = container.closest('.org-tree-branch');
+                                    if (path) {
+                                        const parentContainer = path.querySelector('.org-node-container');
+                                        if (parentContainer && parentContainer.getAttribute('data-node-id') === nodeId) {
+                                            shouldHighlight = true;
+                                        }
+                                    }
+                                }
+                                
+                                if (shouldHighlight) {
+                                    container.classList.add('highlighted');
+                                    if (card) card.classList.add('highlighted');
+                                } else {
+                                    container.classList.remove('highlighted');
+                                    if (card) card.classList.remove('highlighted');
+                                }
+                            }
+                        });
+                        
+                        // 更新连接线
+                        document.querySelectorAll('.org-connector-path').forEach(path => {
+                            const fromId = path.getAttribute('data-path-from');
+                            const toId = path.getAttribute('data-path-to');
+                            
+                            if (nodeId === null) {
+                                path.classList.remove('highlighted');
+                            } else {
+                                if (fromId === nodeId || toId === nodeId) {
+                                    path.classList.add('highlighted');
+                                } else {
+                                    path.classList.remove('highlighted');
+                                }
+                            }
+                        });
+                    }
+                    
+                    // 绑定鼠标事件
+                    document.querySelectorAll('.org-node-container').forEach(container => {
+                        container.addEventListener('mouseenter', function() {
+                            const nodeId = this.getAttribute('data-node-id');
+                            updateHighlights(nodeId);
+                        });
+                        
+                        container.addEventListener('mouseleave', function() {
+                            updateHighlights(null);
+                        });
+                    });
+                    
+                    // 初始化动画
                     const containers = document.querySelectorAll('.org-node-container');
                     containers.forEach((container, index) => {
                         container.style.opacity = '0';
-                        container.style.transform = 'translateY(10px)';
+                        container.style.transform = 'translateX(-20px)';
                         setTimeout(() => {
-                            container.style.transition = 'all 0.6s ease';
+                            container.style.transition = 'all 0.8s ease';
                             container.style.opacity = '1';
-                            container.style.transform = 'translateY(0)';
-                        }, 200 + (index * 60));
+                            container.style.transform = 'translateX(0)';
+                        }, 300 + (index * 50));
                     });
                 });
                 </script>
-                <?php endif; ?>
+                                        <?php endif; ?>
 
                 <!-- Strategic Objectives -->
                 <div class="strategic-objectives-section">
@@ -3161,8 +3137,8 @@ if (file_exists($jsonFile)) {
                                         2028年
                                         <span class="strategic-year">创办10间子公司</span>
                                     </h1>
+                                    </div>
                                 </div>
-                            </div>
                         </header>
 
                         <!-- 主要内容区域 -->
@@ -3187,7 +3163,7 @@ if (file_exists($jsonFile)) {
                                                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
                                                 <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                                             </svg>
-                                        </div>
+                                    </div>
                                         <div class="strategy-content">
                                             <div class="strategy-meta">
                                                 <span class="strategy-id">S1-人事部 • 2028</span>
@@ -3195,10 +3171,10 @@ if (file_exists($jsonFile)) {
                                                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                                                     <polyline points="22 4 12 14.01 9 11.01"/>
                                                 </svg>
-                                            </div>
+                                </div>
                                             <h3 class="strategy-title">建立高效且有吸引力的人才管理体系</h3>
                                             <p class="strategy-description">支持公司服务子公司扩展</p>
-                                        </div>
+                            </div>
                                         <svg class="strategy-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <polyline points="9 18 15 12 9 6"/>
                                         </svg>
@@ -3217,7 +3193,7 @@ if (file_exists($jsonFile)) {
                                                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
                                                 <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                                             </svg>
-                                        </div>
+                        </div>
                                         <div class="strategy-content">
                                             <div class="strategy-meta">
                                                 <span class="strategy-id">S2-推广部 • 2028</span>
@@ -3225,10 +3201,10 @@ if (file_exists($jsonFile)) {
                                                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                                                     <polyline points="22 4 12 14.01 9 11.01"/>
                                                 </svg>
-                                            </div>
+                    </div>
                                             <h3 class="strategy-title">建立标准化、多平台适用的人才与传播体系</h3>
                                             <p class="strategy-description">赋能子公司快速启动社群内容运营与品牌建设</p>
-                                        </div>
+                </div>
                                         <svg class="strategy-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <polyline points="9 18 15 12 9 6"/>
                                         </svg>
@@ -3277,7 +3253,7 @@ if (file_exists($jsonFile)) {
                                                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
                                                 <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                                             </svg>
-                                        </div>
+                                    </div>
                                         <div class="strategy-content">
                                             <div class="strategy-meta">
                                                 <span class="strategy-id">S4-开发部 • 2028</span>
@@ -3285,7 +3261,7 @@ if (file_exists($jsonFile)) {
                                                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                                                     <polyline points="22 4 12 14.01 9 11.01"/>
                                                 </svg>
-                                            </div>
+                                    </div>
                                             <h3 class="strategy-title">建立高效IT体系</h3>
                                             <p class="strategy-description">提升营运效率与数据整合,支撑公司扩张</p>
                                         </div>
@@ -3455,8 +3431,8 @@ if (file_exists($jsonFile)) {
                                                     <div class="measure-dot"></div>
                                                     <span class="measure-text">文化宣传</span>
                                                 </li>
-                                            </ul>
-                                        </div>
+                                        </ul>
+                                    </div>
                                     </div>
 
                                     <!-- 执行计划 -->
@@ -3478,7 +3454,7 @@ if (file_exists($jsonFile)) {
                                                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                                                         <circle cx="12" cy="7" r="4"/>
                                                     </svg>
-                                                </div>
+                                        </div>
                                                 <div class="execution-pic-info">
                                                     <span class="execution-pic-label">负责人</span>
                                                     <span class="execution-pic-name" id="picName">Paris</span>
@@ -3489,16 +3465,16 @@ if (file_exists($jsonFile)) {
                                                 <div class="execution-date-item">
                                                     <span class="execution-date-label">开始日期</span>
                                                     <span class="execution-date-value" id="startDate">—</span>
-                                                </div>
+                                        </div>
                                                 <div class="execution-date-item execution-date-divider">
                                                     <span class="execution-date-label">完成日期</span>
                                                     <span class="execution-date-value" id="endDate">—</span>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
                         </main>
                     </div>
                 </div>
