@@ -1465,6 +1465,26 @@ if (file_exists($jsonFile)) {
             max-height: 520px;
             overflow-y: auto;
             padding-right: 4px;
+            scrollbar-width: thin;              /* Firefox */
+            scrollbar-color: #f59e0b transparent;
+        }
+
+        /* 策略列表滚动条样式（WebKit 浏览器） */
+        .strategic-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .strategic-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .strategic-list::-webkit-scrollbar-thumb {
+            background: #f59e0b;
+            border-radius: 999px;
+        }
+
+        .strategic-list::-webkit-scrollbar-thumb:hover {
+            background: #d97706;
         }
 
         .strategic-list-title {
