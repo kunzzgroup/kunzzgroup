@@ -1343,10 +1343,14 @@ if (file_exists($jsonFile)) {
 
         /* Strategic Objectives - 基于App.tsx设计 */
         .strategic-objectives-section {
-            background: #f8fafc;
+            background: linear-gradient(to bottom, #FFF7EA, #FFFFFF);
             min-height: 100vh;
             padding: clamp(32px, 3.33vw, 48px) 0;
             position: relative;
+            border: 1px solid #F7931E;
+            border-radius: clamp(16px, 1.67vw, 24px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
         }
 
         /* 背景装饰 */
