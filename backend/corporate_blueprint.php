@@ -1462,6 +1462,9 @@ if (file_exists($jsonFile)) {
             display: flex;
             flex-direction: column;
             gap: clamp(12px, 1.25vw, 16px);
+            max-height: 520px;
+            overflow-y: auto;
+            padding-right: 4px;
         }
 
         .strategic-list-title {
@@ -3278,7 +3281,7 @@ if (file_exists($jsonFile)) {
                             <div class="strategic-list-wrapper">
                                 <h2 class="strategic-list-title">
                                     策略 · 检核
-                                    <span class="strategic-list-count">5</span>
+                                    <span class="strategic-list-count" id="strategicListCount">5</span>
                                 </h2>
                                 <div class="strategic-list" id="strategicList">
                                     <!-- 策略1 - 人事部 -->
@@ -3430,6 +3433,96 @@ if (file_exists($jsonFile)) {
                                             <polyline points="9 18 15 12 9 6"/>
                                         </svg>
                                     </button>
+
+                                    <!-- 策略6 - 研发部 -->
+                                    <button 
+                                        class="strategy-card" 
+                                        data-strategy-index="5"
+                                        onclick="selectStrategy(5)"
+                                    >
+                                        <div class="strategy-icon-wrapper">
+                                            <svg class="strategy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                                <circle cx="9" cy="7" r="4"/>
+                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                            </svg>
+                                        </div>
+                                        <div class="strategy-content">
+                                            <div class="strategy-meta">
+                                                <span class="strategy-id">S6-研发部 • 2028</span>
+                                                <svg class="strategy-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                                    <polyline points="22 4 12 14.01 9 11.01"/>
+                                                </svg>
+                                            </div>
+                                            <h3 class="strategy-title">打造专业高效的研发团队</h3>
+                                            <p class="strategy-description">通过高效研发流程和市场导向的方法，培养并吸引高端人才</p>
+                                        </div>
+                                        <svg class="strategy-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="9 18 15 12 9 6"/>
+                                        </svg>
+                                    </button>
+
+                                    <!-- 策略7 - 支援部 -->
+                                    <button 
+                                        class="strategy-card" 
+                                        data-strategy-index="6"
+                                        onclick="selectStrategy(6)"
+                                    >
+                                        <div class="strategy-icon-wrapper">
+                                            <svg class="strategy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                                <circle cx="9" cy="7" r="4"/>
+                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                            </svg>
+                                        </div>
+                                        <div class="strategy-content">
+                                            <div class="strategy-meta">
+                                                <span class="strategy-id">S7-支援部 • 2028</span>
+                                                <svg class="strategy-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                                    <polyline points="22 4 12 14.01 9 11.01"/>
+                                                </svg>
+                                            </div>
+                                            <h3 class="strategy-title">打造高效有制度的支援团队</h3>
+                                            <p class="strategy-description">支持所有子公司所需的资源调配，让公司利润最大化</p>
+                                        </div>
+                                        <svg class="strategy-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="9 18 15 12 9 6"/>
+                                        </svg>
+                                    </button>
+
+                                    <!-- 策略8 - 生产部 -->
+                                    <button 
+                                        class="strategy-card" 
+                                        data-strategy-index="7"
+                                        onclick="selectStrategy(7)"
+                                    >
+                                        <div class="strategy-icon-wrapper">
+                                            <svg class="strategy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                                <circle cx="9" cy="7" r="4"/>
+                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                            </svg>
+                                        </div>
+                                        <div class="strategy-content">
+                                            <div class="strategy-meta">
+                                                <span class="strategy-id">S8-生产部 • 2028</span>
+                                                <svg class="strategy-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                                    <polyline points="22 4 12 14.01 9 11.01"/>
+                                                </svg>
+                                            </div>
+                                            <h3 class="strategy-title">生产部战略</h3>
+                                            <p class="strategy-description">待定</p>
+                                        </div>
+                                        <svg class="strategy-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="9 18 15 12 9 6"/>
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
 
@@ -3572,6 +3665,36 @@ if (file_exists($jsonFile)) {
                         startDate: '',
                         endDate: '',
                         dashboardMetrics: []
+                    },
+                    {
+                        deptName: 'S6-研发部',
+                        deptDisplay: '研发部',
+                        strategy: '打造专业高效的研发团队',
+                        department: '通过高效研发流程和市场导向的方法，培养并吸引高端人才，推出创新且差异化的产品',
+                        pic: 'LUN',
+                        startDate: '',
+                        endDate: '',
+                        dashboardMetrics: []
+                    },
+                    {
+                        deptName: 'S7-支援部',
+                        deptDisplay: '支援部',
+                        strategy: '打造高效有制度的支援团队',
+                        department: '支持所有子公司所需的资源调配，让公司利润最大化',
+                        pic: '',
+                        startDate: '',
+                        endDate: '',
+                        dashboardMetrics: []
+                    },
+                    {
+                        deptName: 'S8-生产部',
+                        deptDisplay: '生产部',
+                        strategy: '生产部战略',
+                        department: '',
+                        pic: '',
+                        startDate: '',
+                        endDate: '',
+                        dashboardMetrics: []
                     }
                 ];
                 
@@ -3648,6 +3771,12 @@ if (file_exists($jsonFile)) {
                             card.style.transform = 'translateX(0)';
                         }, 300 + (index * 100));
                     });
+
+                    // 更新策略总数
+                    const countEl = document.getElementById('strategicListCount');
+                    if (countEl) {
+                        countEl.textContent = strategiesData.length.toString();
+                    }
                 });
                 </script>
 
