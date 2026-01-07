@@ -1616,16 +1616,66 @@ if (file_exists($jsonFile)) {
 
         /* 组织架构样式 - 横向组织结构图 */
         .mermaid-org-chart {
-            background:
-                radial-gradient(circle at 10% 20%, rgba(255, 92, 0, 0.02) 0, transparent 55%),
-                radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.03) 0, transparent 55%),
-                #ffffff;
+            background: #ffffff;
             border-radius: clamp(12px, 1.25vw, 16px);
             padding: clamp(40px, 4.17vw, 60px);
             position: relative;
             overflow-x: auto;
             overflow-y: visible;
             min-height: clamp(400px, 41.67vw, 600px);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        }
+
+        /* 背景装饰图形 - 向右的箭头或K形状 */
+        .mermaid-org-chart::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 60%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 80% 20%, rgba(255, 184, 77, 0.15) 0%, transparent 50%),
+                linear-gradient(135deg, transparent 0%, rgba(255, 184, 77, 0.08) 50%, transparent 100%),
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 40px,
+                    rgba(255, 184, 77, 0.03) 40px,
+                    rgba(255, 184, 77, 0.03) 42px
+                );
+            pointer-events: none;
+            z-index: 0;
+            border-radius: clamp(12px, 1.25vw, 16px);
+        }
+
+        /* 标题容器 */
+        .org-chart-header {
+            position: relative;
+            z-index: 2;
+            margin-bottom: clamp(40px, 4.17vw, 60px);
+        }
+
+        /* 标题样式 - 橙色圆角矩形 */
+        .org-chart-title {
+            display: inline-block;
+            background: #ff5c00;
+            color: #ffffff;
+            font-size: clamp(18px, 1.88vw, 24px);
+            font-weight: 700;
+            padding: clamp(12px, 1.25vw, 16px) clamp(24px, 2.5vw, 32px);
+            border-radius: clamp(8px, 0.83vw, 12px);
+            box-shadow: 0 2px 8px rgba(255, 92, 0, 0.2);
+            letter-spacing: 1px;
+            margin: 0;
+        }
+
+        /* 组织树内容容器 */
+        .org-tree-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            min-height: clamp(300px, 31.25vw, 400px);
         }
 
         .org-tree {
@@ -1636,6 +1686,7 @@ if (file_exists($jsonFile)) {
             width: 100%;
             min-width: fit-content;
             padding-left: clamp(20px, 2.08vw, 30px);
+            min-height: clamp(300px, 31.25vw, 400px);
         }
 
         /* CEO和PA容器 */
@@ -2323,8 +2374,14 @@ if (file_exists($jsonFile)) {
                 <!-- Organization Structure - Binary Tree Structure -->
                 <?php if (!empty($strategyData['organizationStructure'])): ?>
                 <div class="section">
-                    <h2 class="section-title">高层组织架构</h2>
                     <div class="mermaid-org-chart">
+                        <!-- 标题 -->
+                        <div class="org-chart-header">
+                            <h2 class="org-chart-title">高层组织架构图</h2>
+                        </div>
+                        
+                        <!-- 组织树容器 -->
+                        <div class="org-tree-content" style="position: relative; z-index: 2;">
                         <?php 
                         $orgStructure = $strategyData['organizationStructure'];
                         
@@ -2389,48 +2446,12 @@ if (file_exists($jsonFile)) {
                             return $html;
                         }
                         
-                        // 获取CEO和PA数据
-                        $ceoTitle = $orgStructure['ceo']['title'] ?? $orgStructure['ceo']['fullTitle'] ?? 'CEO';
-                        $ceoName = $orgStructure['ceo']['name'] ?? '';
-                        
-                        $paTitle = !empty($orgStructure['pa']) ? ($orgStructure['pa']['title'] ?? $orgStructure['pa']['fullTitle'] ?? 'PA') : '';
-                        $paName = !empty($orgStructure['pa']) ? ($orgStructure['pa']['name'] ?? '') : '';
-                        
-                        // 获取C-Level高管
-                        $cLevelExecs = !empty($orgStructure['cLevel']) ? $orgStructure['cLevel'] : [];
                         ?>
 
-                        <div class="org-tree">
-                            <!-- CEO和PA容器 -->
-                            <div class="org-tree-root">
-                                <?php if (!empty($paTitle)): ?>
-                                <!-- PA节点（在CEO上方） -->
-                                <div class="org-pa-node">
-                                    <?php echo renderNodeBox($paTitle, $paName); ?>
-                                </div>
-                                <!-- 从CEO到PA的连接线 -->
-                                <div class="org-connector-line org-ceo-to-pa"></div>
-                                <?php endif; ?>
-                                
-                                <!-- CEO节点 -->
-                                <div class="org-ceo-node">
-                                    <?php echo renderNodeBox($ceoTitle, $ceoName); ?>
-                                    
-                                    <!-- 从CEO到C-Level的连接线 -->
-                                    <?php if (!empty($cLevelExecs)): ?>
-                                    <div class="org-connector-line org-ceo-to-clevel"></div>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                            
-                            <!-- C-Level容器 - 水平排列 -->
-                            <?php if (!empty($cLevelExecs)): ?>
-                            <div class="org-clevel-container">
-                                <?php foreach ($cLevelExecs as $cLevelNode): ?>
-                                    <?php echo renderCLevelGroup($cLevelNode); ?>
-                                <?php endforeach; ?>
-                            </div>
-                            <?php endif; ?>
+                        <!-- 组织树框架 - 暂时留空，后续添加树结构 -->
+                        <div class="org-tree" style="min-height: 300px;">
+                            <!-- 树结构将在这里添加 -->
+                        </div>
                         </div>
                     </div>
                 </div>
