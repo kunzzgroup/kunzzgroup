@@ -3349,7 +3349,7 @@ if (file_exists($jsonFile)) {
                                         <span>Strategic Vision</span>
                                     </div>
                                     <h1 class="strategic-main-title">
-                                        实现战略目标
+                                        2028年创办10间子公司
                                         <span class="strategic-year">by 2028</span>
                                     </h1>
                                 </div>
@@ -3363,13 +3363,13 @@ if (file_exists($jsonFile)) {
                                         <span class="milestone-label">Phase 1 Milestone</span>
                                     </div>
                                     <p class="milestone-text">
-                                        推进第一阶段计划 - 提升运营效率
+                                        2025年创办4间子公司
                                     </p>
                                     <div class="milestone-progress">
                                         <div class="milestone-progress-bar"></div>
                                     </div>
                                     <div class="milestone-target">
-                                        Target: 2028
+                                        Target: 2025
                                     </div>
                                 </div>
                             </div>
@@ -3381,10 +3381,10 @@ if (file_exists($jsonFile)) {
                             <div class="strategic-list-wrapper">
                                 <h2 class="strategic-list-title">
                                     Strategic Pillars
-                                    <span class="strategic-list-count">2</span>
+                                    <span class="strategic-list-count">5</span>
                                 </h2>
                                 <div class="strategic-list" id="strategicList">
-                                    <!-- 策略1 -->
+                                    <!-- 策略1 - 人事部 -->
                                     <button 
                                         class="strategy-card active" 
                                         data-strategy-index="0"
@@ -3400,21 +3400,21 @@ if (file_exists($jsonFile)) {
                                         </div>
                                         <div class="strategy-content">
                                             <div class="strategy-meta">
-                                                <span class="strategy-id">OPERATIONS • 2028</span>
+                                                <span class="strategy-id">S1-人事部 • 2028</span>
                                                 <svg class="strategy-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                                                     <polyline points="22 4 12 14.01 9 11.01"/>
                                                 </svg>
                                             </div>
-                                            <h3 class="strategy-title">提升运营效率与流程优化</h3>
-                                            <p class="strategy-description">运营部门</p>
+                                            <h3 class="strategy-title">建立高效且有吸引力的人才管理体系</h3>
+                                            <p class="strategy-description">支持公司服务子公司扩展</p>
                                         </div>
                                         <svg class="strategy-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <polyline points="9 18 15 12 9 6"/>
                                         </svg>
                                     </button>
 
-                                    <!-- 策略2 -->
+                                    <!-- 策略2 - 推广部 -->
                                     <button 
                                         class="strategy-card" 
                                         data-strategy-index="1"
@@ -3430,14 +3430,104 @@ if (file_exists($jsonFile)) {
                                         </div>
                                         <div class="strategy-content">
                                             <div class="strategy-meta">
-                                                <span class="strategy-id">MARKETING • 2028</span>
+                                                <span class="strategy-id">S2-推广部 • 2028</span>
                                                 <svg class="strategy-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
                                                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                                                     <polyline points="22 4 12 14.01 9 11.01"/>
                                                 </svg>
                                             </div>
-                                            <h3 class="strategy-title">扩大市场份额与品牌影响力</h3>
-                                            <p class="strategy-description">市场部门</p>
+                                            <h3 class="strategy-title">建立标准化、多平台适用的人才与传播体系</h3>
+                                            <p class="strategy-description">赋能子公司快速启动社群内容运营与品牌建设</p>
+                                        </div>
+                                        <svg class="strategy-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="9 18 15 12 9 6"/>
+                                        </svg>
+                                    </button>
+
+                                    <!-- 策略3 - 设计部 -->
+                                    <button 
+                                        class="strategy-card" 
+                                        data-strategy-index="2"
+                                        onclick="selectStrategy(2)"
+                                    >
+                                        <div class="strategy-icon-wrapper">
+                                            <svg class="strategy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                                <circle cx="9" cy="7" r="4"/>
+                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                            </svg>
+                                        </div>
+                                        <div class="strategy-content">
+                                            <div class="strategy-meta">
+                                                <span class="strategy-id">S3-设计部 • 2028</span>
+                                                <svg class="strategy-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                                    <polyline points="22 4 12 14.01 9 11.01"/>
+                                                </svg>
+                                            </div>
+                                            <h3 class="strategy-title">打造创新且高效的设计团队</h3>
+                                            <p class="strategy-description">提升品牌设计的质量</p>
+                                        </div>
+                                        <svg class="strategy-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="9 18 15 12 9 6"/>
+                                        </svg>
+                                    </button>
+
+                                    <!-- 策略4 - 开发部 -->
+                                    <button 
+                                        class="strategy-card" 
+                                        data-strategy-index="3"
+                                        onclick="selectStrategy(3)"
+                                    >
+                                        <div class="strategy-icon-wrapper">
+                                            <svg class="strategy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                                <circle cx="9" cy="7" r="4"/>
+                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                            </svg>
+                                        </div>
+                                        <div class="strategy-content">
+                                            <div class="strategy-meta">
+                                                <span class="strategy-id">S4-开发部 • 2028</span>
+                                                <svg class="strategy-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                                    <polyline points="22 4 12 14.01 9 11.01"/>
+                                                </svg>
+                                            </div>
+                                            <h3 class="strategy-title">建立高效IT体系</h3>
+                                            <p class="strategy-description">提升营运效率与数据整合,支撑公司扩张</p>
+                                        </div>
+                                        <svg class="strategy-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="9 18 15 12 9 6"/>
+                                        </svg>
+                                    </button>
+
+                                    <!-- 策略5 - 摄影部 -->
+                                    <button 
+                                        class="strategy-card" 
+                                        data-strategy-index="4"
+                                        onclick="selectStrategy(4)"
+                                    >
+                                        <div class="strategy-icon-wrapper">
+                                            <svg class="strategy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                                <circle cx="9" cy="7" r="4"/>
+                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                            </svg>
+                                        </div>
+                                        <div class="strategy-content">
+                                            <div class="strategy-meta">
+                                                <span class="strategy-id">S5-摄影部 • 2028</span>
+                                                <svg class="strategy-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                                    <polyline points="22 4 12 14.01 9 11.01"/>
+                                                </svg>
+                                            </div>
+                                            <h3 class="strategy-title">摄影部战略</h3>
+                                            <p class="strategy-description">待定</p>
                                         </div>
                                         <svg class="strategy-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <polyline points="9 18 15 12 9 6"/>
@@ -3457,8 +3547,8 @@ if (file_exists($jsonFile)) {
                                     </svg>
                                     <div>
                                         <div class="details-badge">Selected Pillar</div>
-                                        <h2 class="details-title" id="detailsTitle">提升运营效率与流程优化</h2>
-                                        <p class="details-description" id="detailsDescription">运营部门</p>
+                                        <h2 class="details-title" id="detailsTitle">建立高效且有吸引力的人才管理体系</h2>
+                                        <p class="details-description" id="detailsDescription">支持公司服务子公司扩展</p>
                                     </div>
                                 </div>
 
@@ -3474,21 +3564,17 @@ if (file_exists($jsonFile)) {
                                         
                                         <div class="measure-item">
                                             <div class="measure-header">
-                                                <span class="measure-badge">M1</span>
+                                                <span class="measure-badge">D1</span>
                                                 <span class="measure-label">关键指标</span>
                                             </div>
                                             <ul class="measure-list" id="measureList">
                                                 <li class="measure-list-item">
                                                     <div class="measure-dot"></div>
-                                                    <span class="measure-text">运营成本降低20%</span>
+                                                    <span class="measure-text">人才引进与储备</span>
                                                 </li>
                                                 <li class="measure-list-item">
                                                     <div class="measure-dot"></div>
-                                                    <span class="measure-text">流程效率提升30%</span>
-                                                </li>
-                                                <li class="measure-list-item">
-                                                    <div class="measure-dot"></div>
-                                                    <span class="measure-text">客户满意度达到90%</span>
+                                                    <span class="measure-text">文化宣传</span>
                                                 </li>
                                             </ul>
                                         </div>
@@ -3516,18 +3602,18 @@ if (file_exists($jsonFile)) {
                                                 </div>
                                                 <div class="execution-pic-info">
                                                     <span class="execution-pic-label">Person in Charge</span>
-                                                    <span class="execution-pic-name" id="picName">John Doe</span>
+                                                    <span class="execution-pic-name" id="picName">Paris</span>
                                                 </div>
                                             </div>
                                             
                                             <div class="execution-dates">
                                                 <div class="execution-date-item">
                                                     <span class="execution-date-label">Start Date</span>
-                                                    <span class="execution-date-value" id="startDate">2024-01-01</span>
+                                                    <span class="execution-date-value" id="startDate">—</span>
                                                 </div>
                                                 <div class="execution-date-item execution-date-divider">
                                                     <span class="execution-date-label">Completion Target</span>
-                                                    <span class="execution-date-value" id="endDate">2028-12-31</span>
+                                                    <span class="execution-date-value" id="endDate">—</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -3539,23 +3625,47 @@ if (file_exists($jsonFile)) {
                 </div>
                 
                 <script>
-                // 硬编码的两个策略数据
+                // 硬编码的5个策略数据
                 const strategiesData = [
                     {
-                        strategy: '提升运营效率与流程优化',
-                        department: '运营部门',
-                        pic: 'John Doe',
-                        startDate: '2024-01-01',
-                        endDate: '2028-12-31',
-                        dashboardMetrics: ['运营成本降低20%', '流程效率提升30%', '客户满意度达到90%']
+                        strategy: '建立高效且有吸引力的人才管理体系',
+                        department: '支持公司服务子公司扩展',
+                        pic: 'Paris',
+                        startDate: '',
+                        endDate: '',
+                        dashboardMetrics: ['人才引进与储备', '文化宣传']
                     },
                     {
-                        strategy: '扩大市场份额与品牌影响力',
-                        department: '市场部门',
-                        pic: 'Jane Smith',
-                        startDate: '2024-03-01',
-                        endDate: '2028-12-31',
-                        dashboardMetrics: ['市场份额增长25%', '品牌知名度提升40%', '新客户获取增长50%']
+                        strategy: '建立一套标准化、多平台适用的人才与传播体系',
+                        department: '赋能子公司快速启动社群内容运营与品牌建设',
+                        pic: 'LW',
+                        startDate: '',
+                        endDate: '',
+                        dashboardMetrics: ['人才体系搭建', '平台能力建设', '品牌知名度']
+                    },
+                    {
+                        strategy: '打造创新且高效的设计团队',
+                        department: '提升品牌设计的质量',
+                        pic: 'SH',
+                        startDate: '2025-05-15',
+                        endDate: '',
+                        dashboardMetrics: ['创意思维训练', '自动化工具引入']
+                    },
+                    {
+                        strategy: '建立高效IT体系',
+                        department: '提升营运效率与数据整合,支撑公司扩张',
+                        pic: 'ZJ',
+                        startDate: '2025-05-19',
+                        endDate: '2025-08-15',
+                        dashboardMetrics: ['统一简化编程体系', '系统稳定性']
+                    },
+                    {
+                        strategy: '摄影部战略',
+                        department: '待定',
+                        pic: '',
+                        startDate: '',
+                        endDate: '',
+                        dashboardMetrics: []
                     }
                 ];
                 
@@ -3582,19 +3692,38 @@ if (file_exists($jsonFile)) {
                         // 更新内容
                         document.getElementById('detailsTitle').textContent = strategy.strategy;
                         document.getElementById('detailsDescription').textContent = strategy.department;
-                        document.getElementById('picName').textContent = strategy.pic;
-                        document.getElementById('startDate').textContent = strategy.startDate;
-                        document.getElementById('endDate').textContent = strategy.endDate;
+                        document.getElementById('picName').textContent = strategy.pic || '—';
+                        
+                        // 格式化日期
+                        const formatDate = (dateStr) => {
+                            if (!dateStr) return '—';
+                            try {
+                                const date = new Date(dateStr);
+                                const year = date.getFullYear();
+                                const month = String(date.getMonth() + 1).padStart(2, '0');
+                                const day = String(date.getDate()).padStart(2, '0');
+                                return `${year}-${month}-${day}`;
+                            } catch (e) {
+                                return dateStr;
+                            }
+                        };
+                        
+                        document.getElementById('startDate').textContent = formatDate(strategy.startDate);
+                        document.getElementById('endDate').textContent = formatDate(strategy.endDate);
                         
                         // 更新指标
                         const metricsList = document.getElementById('measureList');
-                        if (metricsList && strategy.dashboardMetrics) {
-                            metricsList.innerHTML = strategy.dashboardMetrics.map(metric => 
-                                `<li class="measure-list-item">
-                                    <div class="measure-dot"></div>
-                                    <span class="measure-text">${metric}</span>
-                                </li>`
-                            ).join('');
+                        if (metricsList) {
+                            if (strategy.dashboardMetrics && strategy.dashboardMetrics.length > 0) {
+                                metricsList.innerHTML = strategy.dashboardMetrics.map(metric => 
+                                    `<li class="measure-list-item">
+                                        <div class="measure-dot"></div>
+                                        <span class="measure-text">${metric}</span>
+                                    </li>`
+                                ).join('');
+                            } else {
+                                metricsList.innerHTML = '<li class="measure-list-item"><span class="measure-text">暂无指标</span></li>';
+                            }
                         }
                         
                         detailsEl.classList.remove('hidden');
