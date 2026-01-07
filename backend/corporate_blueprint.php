@@ -2202,74 +2202,60 @@ if (file_exists($jsonFile)) {
             opacity: 1;
         }
 
-        /* 节点卡片 */
+        /* 节点卡片：上层职位缩写 + 下层职员名字（与示意图一致的橙色胶囊卡片） */
         .org-node-card {
             display: flex;
             flex-direction: column;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            border-radius: 12px;
+            border-radius: 999px;
             overflow: hidden;
-            border: 1px solid;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-        }
-
-        .org-node-card:not(.highlighted) {
-            border-color: #e2e8f0;
-        }
-
-        .org-node-card.highlighted {
-            border-color: #ff5c00;
-            box-shadow: 0 10px 15px -3px rgba(255, 92, 0, 0.15), 0 4px 6px -2px rgba(255, 92, 0, 0.1), 0 0 0 3px rgba(255, 92, 0, 0.1);
+            border: 2px solid #ff5c00;
+            background: #ffffff;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
 
         .org-node-card.small {
-            width: 120px;
+            width: 150px;
         }
 
         .org-node-card:not(.small) {
-            width: 160px;
+            width: 180px;
         }
 
-        /* 节点角色标题 */
+        .org-node-card.highlighted {
+            box-shadow: 0 10px 20px rgba(255, 92, 0, 0.35);
+            transform: translateY(-2px);
+        }
+
+        /* 上层：职位缩写 */
         .org-node-role {
-            font-size: 9px;
+            font-size: 11px;
             font-weight: 800;
-            padding: 6px 10px;
+            padding: 6px 12px;
             text-align: center;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.15em;
             text-transform: uppercase;
-            transition: all 0.3s ease;
-        }
-
-        .org-node-card:not(.highlighted) .org-node-role {
-            background: #f1f5f9;
-            color: #64748b;
-        }
-
-        .org-node-card.highlighted .org-node-role {
             background: #ff5c00;
             color: #ffffff;
         }
 
-        /* 节点姓名区域 */
+        /* 下层：职员名字 */
         .org-node-name-area {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 10px;
+            padding: 8px 10px 10px 10px;
             text-align: center;
-            background: rgba(255, 255, 255, 0.5);
+            background: #ffffff;
         }
 
         .org-node-card.small .org-node-name-area {
-            min-height: 32px;
+            min-height: 34px;
         }
 
         .org-node-card:not(.small) .org-node-name-area {
-            min-height: 48px;
+            min-height: 44px;
         }
 
         .org-node-name {
