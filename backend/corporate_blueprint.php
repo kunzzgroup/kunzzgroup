@@ -1614,7 +1614,7 @@ if (file_exists($jsonFile)) {
             }
         }
 
-        /* Binary Tree 组织架构样式 - 匹配图片设计（加强美观） */
+        /* Binary Tree 组织架构样式 - 垂直二叉树结构 */
         .mermaid-org-chart {
             background:
                 radial-gradient(circle at 10% 20%, rgba(255, 92, 0, 0.02) 0, transparent 55%),
@@ -1625,145 +1625,151 @@ if (file_exists($jsonFile)) {
             position: relative;
             overflow-x: auto;
             overflow-y: visible;
-            min-height: clamp(500px, 52.08vw, 700px);
+            min-height: clamp(400px, 41.67vw, 600px);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
         }
 
-        /* 树形结构容器（水平排列） */
         .org-tree {
+            --dark: #ff5c00;
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             width: 100%;
         }
 
-        .org-row {
-            display: inline-flex;
-            align-items: flex-start;
-            gap: clamp(32px, 3.33vw, 48px);
-            position: relative;
-        }
-
-        /* 整体水平居中 */
-        .org-tree {
-            text-align: center;
-        }
-
-        .org-tree > .org-row {
-            margin: 0 auto;
-        }
-
-        .org-node-wrap {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .org-node-wrap.has-children {
-            padding-right: clamp(32px, 3.33vw, 48px);
-        }
-
-        /* 父节点到子容器的横线 */
-        .org-node-wrap.has-children::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 100%;
-            width: clamp(32px, 3.33vw, 48px);
-            border-top: 2px solid #ff5c00;
-            border-radius: 999px;
-        }
-
-        /* 子节点容器：竖线 + 子节点列表 */
-        .org-children {
+        .org-tree .node {
             display: flex;
             flex-direction: column;
-            gap: clamp(16px, 1.67vw, 24px);
-            margin-left: clamp(32px, 3.33vw, 48px);
-            padding-left: clamp(24px, 2.5vw, 36px);
-            border-left: 2px solid #e5e7eb;
+            align-items: center;
+            margin: 0 20px;
+            position: relative;
         }
 
-        /* 子节点前的横线（从竖线到子节点） */
-        .org-children .org-node-wrap::before {
+        .org-tree .node:not(.node--root) > .node__element::before {
             content: '';
+            height: 20px;
+            width: 2px;
+            background-color: #ff5c00;
+            display: block;
             position: absolute;
-            top: 50%;
-            left: calc(-1 * clamp(32px, 3.33vw, 48px));
-            width: clamp(32px, 3.33vw, 48px);
-            border-top: 2px solid #ff5c00;
-            border-radius: 999px;
+            left: 0;
+            right: 0;
+            top: -20px;
+            margin: auto;
+            transition: all ease 0.2s;
         }
 
-        /* 节点卡片样式 - 橙色圆角矩形（匹配图片） */
-        .org-box {
+        .org-tree .node.node--left {
+            margin-right: 10px;
+        }
+
+        .org-tree .node.node--right {
+            margin-left: 10px;
+        }
+
+        .org-tree .node__element {
+            cursor: pointer;
             border: 2px solid #ff5c00;
+            height: auto;
+            min-height: 60px;
             background: linear-gradient(180deg, #ff7a1a 0%, #ff5c00 55%, #ff4b00 100%);
-            padding: clamp(10px, 1.04vw, 14px) clamp(14px, 1.46vw, 20px);
-            display: inline-flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: .5s;
+            border-radius: 12px;
             min-width: clamp(120px, 12.5vw, 160px);
             max-width: clamp(160px, 16.67vw, 200px);
+            padding: clamp(10px, 1.04vw, 14px) clamp(12px, 1.25vw, 16px);
+            font-size: clamp(12px, 1.25vw, 16px);
+            line-height: 1.4;
+            text-align: center;
+            color: #ffffff;
             box-shadow:
                 0 4px 12px rgba(0, 0, 0, 0.12),
                 0 0 0 1px rgba(255, 255, 255, 0.4);
-            box-sizing: border-box;
+            transition: all ease 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
-        .org-box span {
-            border: none;
-            border-radius: 0;
-            color: #ffffff;
-            padding: 2px 0;
-            font-size: clamp(12px, 1.25vw, 16px);
-            text-transform: none;
-            letter-spacing: 0.3px;
-            font-weight: 500;
-            background: transparent;
-            line-height: 1.4;
-            display: block;
-            width: 100%;
-            text-align: center;
-        }
-
-        .org-box .org-title {
+        .org-tree .node__element .org-title {
             font-weight: 700;
             font-size: clamp(13px, 1.35vw, 17px);
             margin-bottom: 4px;
+            color: #ffffff;
         }
 
-        .org-box .org-name {
+        .org-tree .node__element .org-name {
             font-weight: 500;
             font-size: clamp(11px, 1.15vw, 15px);
             word-break: break-word;
-        }
-
-        /* 悬停效果 */
-        .org-box:hover {
-            background: linear-gradient(180deg, #ff9440 0%, #ff7a1a 55%, #ff5c00 100%);
-            border-color: #ff7a1a;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 92, 0, 0.3);
-        }
-
-        .org-box:hover span {
             color: #ffffff;
+        }
+
+        .org-tree .node__bottom-line {
+            height: 20px;
+            width: 2px;
+            background-color: #ff5c00;
+            transition: all ease 0.2s;
+        }
+
+        .org-tree .node__element,
+        .org-tree .node__element::before,
+        .org-tree .node__children,
+        .org-tree .node__bottom-line {
+            transition: all ease 0.2s;
+        }
+
+        .org-tree .node__children {
+            display: flex;
+            padding: 20px 0;
+            border-top: 2px solid #ff5c00;
+            gap: 20px;
+        }
+
+        .org-tree .node__element:hover {
+            border-color: #ff9440;
+            background: linear-gradient(180deg, #ff9440 0%, #ff7a1a 55%, #ff5c00 100%);
+            transform: translateY(-2px);
+            box-shadow: 
+                0 6px 16px rgba(255, 92, 0, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.4);
+        }
+
+        .org-tree .node__element:hover ~ .node__children .node__element::before {
+            width: 3px;
+            background-color: #ff9440;
+        }
+
+        .org-tree .node__element:hover ~ .node__bottom-line,
+        .org-tree .node__element:hover ~ .node__children .node__bottom-line {
+            width: 3px;
+            background-color: #ff9440;
+        }
+
+        .org-tree .node__element:hover ~ .node__children,
+        .org-tree .node__element:hover ~ .node__children .node__children {
+            border-top-width: 3px;
+            border-color: #ff9440;
         }
 
         /* 响应式调整 */
         @media (max-width: 768px) {
             .mermaid-org-chart {
                 padding: clamp(20px, 2.08vw, 30px);
+                min-height: clamp(300px, 31.25vw, 400px);
             }
 
-            .org-tree li {
-                padding: 8px;
-            }
-
-            .org-tree li a {
+            .org-tree .node__element {
                 min-width: clamp(100px, 10.42vw, 140px);
-                padding: clamp(10px, 1.04vw, 14px) clamp(12px, 1.25vw, 16px);
+                max-width: clamp(140px, 14.58vw, 180px);
+                padding: clamp(8px, 0.83vw, 12px) clamp(10px, 1.04vw, 14px);
+            }
+
+            .org-tree .node__children {
+                gap: 10px;
             }
         }
 
@@ -2249,157 +2255,210 @@ if (file_exists($jsonFile)) {
                         <?php 
                         $orgStructure = $strategyData['organizationStructure'];
                         
-                        // ========== 从数据中读取信息的辅助函数（优先返回缩写）==========
-                        function getOrgData($key, $orgStructure, $defaultTitle = '') {
-                            $result = ['title' => $defaultTitle, 'name' => '', 'fullTitle' => ''];
-                            
-                            // 1. 直接通过 key 查找（如 'ceo', 'pa'）
-                            if (isset($orgStructure[$key])) {
-                                // 优先使用缩写（title），如果没有则使用全称（fullTitle）
-                                $result['title'] = $orgStructure[$key]['title'] ?? $orgStructure[$key]['fullTitle'] ?? $defaultTitle;
-                                $result['name'] = $orgStructure[$key]['name'] ?? '';
-                                $result['fullTitle'] = $orgStructure[$key]['fullTitle'] ?? '';
-                                if ($result['name']) {
-                                    return $result;
-                                }
+                        // 将数组形式的子节点转换为二叉树的左右节点结构
+                        function convertToBinaryTree($children) {
+                            if (empty($children) || !is_array($children)) {
+                                return ['left' => null, 'right' => null];
                             }
                             
-                            // 2. 通过职位标题匹配
-                            $searchKeys = [
-                                strtoupper($defaultTitle),
-                                strtoupper($key),
-                                str_replace('_', ' ', strtoupper($key)),
-                                str_replace('_', ' OF ', strtoupper($key))
+                            $count = count($children);
+                            
+                            // 如果只有一个子节点，放在左节点
+                            if ($count === 1) {
+                                return [
+                                    'left' => convertNodeToBinary($children[0]),
+                                    'right' => null
+                                ];
+                            }
+                            
+                            // 如果有两个子节点，分别放在左右
+                            if ($count === 2) {
+                                return [
+                                    'left' => convertNodeToBinary($children[0]),
+                                    'right' => convertNodeToBinary($children[1])
+                                ];
+                            }
+                            
+                            // 如果有三个或更多子节点，拆分到左右子树
+                            // 将前一半放在左子树，后一半放在右子树
+                            $mid = (int)ceil($count / 2);
+                            $leftChildren = array_slice($children, 0, $mid);
+                            $rightChildren = array_slice($children, $mid);
+                            
+                            // 递归处理左右子树
+                            $leftBinary = convertToBinaryTree($leftChildren);
+                            $rightBinary = convertToBinaryTree($rightChildren);
+                            
+                            // 如果左子树只有一个节点，直接使用
+                            if ($leftBinary['right'] === null && $leftBinary['left'] !== null) {
+                                $leftNode = $leftBinary['left'];
+                            } else {
+                                // 需要创建一个中间节点来包含左子树
+                                $leftNode = [
+                                    'element' => '',
+                                    'title' => '',
+                                    'name' => '',
+                                    'left' => $leftBinary['left'],
+                                    'right' => $leftBinary['right']
+                                ];
+                            }
+                            
+                            // 如果右子树只有一个节点，直接使用
+                            if ($rightBinary['right'] === null && $rightBinary['left'] !== null) {
+                                $rightNode = $rightBinary['left'];
+                            } else {
+                                // 需要创建一个中间节点来包含右子树
+                                $rightNode = [
+                                    'element' => '',
+                                    'title' => '',
+                                    'name' => '',
+                                    'left' => $rightBinary['left'],
+                                    'right' => $rightBinary['right']
+                                ];
+                            }
+                            
+                            return [
+                                'left' => $leftNode,
+                                'right' => $rightNode
+                            ];
+                        }
+                        
+                        // 将单个节点转换为二叉树节点格式
+                        function convertNodeToBinary($node) {
+                            $title = htmlspecialchars($node['title'] ?? $node['fullTitle'] ?? '');
+                            $name = htmlspecialchars($node['name'] ?? '');
+                            
+                            $result = [
+                                'element' => '',
+                                'title' => $title,
+                                'name' => $name,
+                                'left' => null,
+                                'right' => null
                             ];
                             
-                            // 从 cLevel 中查找
-                            if (isset($orgStructure['cLevel']) && is_array($orgStructure['cLevel'])) {
-                                foreach ($orgStructure['cLevel'] as $exec) {
-                                    $execTitle = strtoupper($exec['title'] ?? '');
-                                    $execFullTitle = strtoupper($exec['fullTitle'] ?? '');
-                                    
-                                    // 匹配 C-Level 高管
-                                    foreach ($searchKeys as $searchKey) {
-                                        if ($execTitle === $searchKey || $execFullTitle === $searchKey || 
-                                            strpos($execFullTitle, $searchKey) !== false) {
-                                            // 优先使用缩写（title），如果没有则使用全称（fullTitle）
-                                            $result['title'] = $exec['title'] ?? $exec['fullTitle'] ?? $defaultTitle;
-                                            $result['name'] = $exec['name'] ?? '';
-                                            $result['fullTitle'] = $exec['fullTitle'] ?? '';
-                                            return $result;
-                                        }
-                                    }
-                                    
-                                    // 查找下属
-                                    if (isset($exec['subordinates']) && is_array($exec['subordinates'])) {
-                                        foreach ($exec['subordinates'] as $sub) {
-                                            $subTitle = strtoupper($sub['title'] ?? '');
-                                            $subFullTitle = strtoupper($sub['fullTitle'] ?? '');
-                                            
-                                            foreach ($searchKeys as $searchKey) {
-                                                if ($subTitle === $searchKey || $subFullTitle === $searchKey ||
-                                                    strpos($subFullTitle, $searchKey) !== false) {
-                                                    // 优先使用缩写（title），如果没有则使用全称（fullTitle）
-                                                    $result['title'] = $sub['title'] ?? $sub['fullTitle'] ?? $defaultTitle;
-                                                    $result['name'] = $sub['name'] ?? '';
-                                                    $result['fullTitle'] = $sub['fullTitle'] ?? '';
-                                                    return $result;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                            // 处理子节点
+                            if (!empty($node['subordinates']) && is_array($node['subordinates'])) {
+                                $binary = convertToBinaryTree($node['subordinates']);
+                                $result['left'] = $binary['left'];
+                                $result['right'] = $binary['right'];
                             }
                             
                             return $result;
                         }
-                        ?>
                         
-                        <?php 
-                        // 构建水平组织树所需的数据（优先使用缩写）
+                        // 递归渲染二叉树节点
+                        function renderBinaryTreeNode($node, $isRoot = false, $isLeft = false, $isRight = false) {
+                            if (empty($node)) {
+                                return '';
+                            }
+                            
+                            // 检查是否有有效的节点内容（title或name）
+                            $hasContent = !empty($node['title']) || !empty($node['name']);
+                            
+                            // 如果节点没有内容但也没有子节点，跳过
+                            if (!$hasContent && empty($node['left']) && empty($node['right'])) {
+                                return '';
+                            }
+                            
+                            $hasChildren = (!empty($node['left']) || !empty($node['right']));
+                            
+                            // 如果没有内容但有子节点，创建一个容器节点
+                            if (!$hasContent && $hasChildren) {
+                                $html = '';
+                                if (!empty($node['left'])) {
+                                    $html .= renderBinaryTreeNode($node['left'], false, true, false);
+                                }
+                                if (!empty($node['right'])) {
+                                    $html .= renderBinaryTreeNode($node['right'], false, false, true);
+                                }
+                                // 如果有两个子节点，需要包装在children容器中
+                                if (!empty($node['left']) && !empty($node['right'])) {
+                                    $html = '<div class="node__children">' . $html . '</div>';
+                                }
+                                return $html;
+                            }
+                            
+                            // 构建节点类名
+                            $nodeClass = 'node';
+                            if ($isRoot) {
+                                $nodeClass .= ' node--root';
+                            }
+                            if ($isLeft) {
+                                $nodeClass .= ' node--left';
+                            }
+                            if ($isRight) {
+                                $nodeClass .= ' node--right';
+                            }
+                            
+                            $html = '<div class="' . $nodeClass . '">';
+                            
+                            // 渲染节点元素
+                            $title = $node['title'] ?? '';
+                            $name = $node['name'] ?? '';
+                            
+                            $html .= '<div class="node__element">';
+                            if (!empty($title)) {
+                                $html .= '<span class="org-title">' . $title . '</span>';
+                            }
+                            if (!empty($name)) {
+                                $html .= '<span class="org-name">' . $name . '</span>';
+                            }
+                            $html .= '</div>';
+                            
+                            // 如果有子节点，添加连接线和子节点容器
+                            if ($hasChildren) {
+                                $html .= '<div class="node__bottom-line"></div>';
+                                $html .= '<div class="node__children">';
+                                
+                                if (!empty($node['left'])) {
+                                    $html .= renderBinaryTreeNode($node['left'], false, true, false);
+                                }
+                                
+                                if (!empty($node['right'])) {
+                                    $html .= renderBinaryTreeNode($node['right'], false, false, true);
+                                }
+                                
+                                $html .= '</div>';
+                            }
+                            
+                            $html .= '</div>';
+                            
+                            return $html;
+                        }
+                        
+                        // 构建根节点（CEO）
                         $ceoTitle = htmlspecialchars($orgStructure['ceo']['title'] ?? $orgStructure['ceo']['fullTitle'] ?? 'CEO');
-                        $ceoName  = htmlspecialchars($orgStructure['ceo']['name'] ?? '');
-
-                        $paTitle = !empty($orgStructure['pa']) ? htmlspecialchars($orgStructure['pa']['title'] ?? $orgStructure['pa']['fullTitle'] ?? 'PA') : '';
-                        $paName  = !empty($orgStructure['pa']) ? htmlspecialchars($orgStructure['pa']['name'] ?? '') : '';
-
-                        $cLevelNodes = [];
+                        $ceoName = htmlspecialchars($orgStructure['ceo']['name'] ?? '');
+                        
+                        // 收集所有C-Level和PA作为CEO的子节点
+                        $ceoChildren = [];
                         if (!empty($orgStructure['cLevel'])) {
                             foreach ($orgStructure['cLevel'] as $exec) {
-                                // 优先使用缩写（title），如果没有则使用全称（fullTitle）
-                                $title = htmlspecialchars($exec['title'] ?? $exec['fullTitle'] ?? '');
-                                $name  = htmlspecialchars($exec['name'] ?? '');
-                                $children = [];
-                                if (!empty($exec['subordinates']) && is_array($exec['subordinates'])) {
-                                    foreach ($exec['subordinates'] as $sub) {
-                                        // 优先使用缩写（title），如果没有则使用全称（fullTitle）
-                                        $childTitle = htmlspecialchars($sub['title'] ?? $sub['fullTitle'] ?? '');
-                                        $childName  = htmlspecialchars($sub['name'] ?? '');
-                                        $children[] = [
-                                            'title' => $childTitle,
-                                            'name'  => $childName,
-                                            'children' => []
-                                        ];
-                                    }
-                                }
-                                $cLevelNodes[] = [
-                                    'title' => $title,
-                                    'name'  => $name,
-                                    'children' => $children
-                                ];
+                                $ceoChildren[] = $exec;
                             }
                         }
-
-                        // 递归渲染节点
-                        function renderNodeHorizontal($node) {
-                            $hasChildren = !empty($node['children']);
-                            echo '<div class="org-node-wrap' . ($hasChildren ? ' has-children' : '') . '">';
-                            echo '<div class="org-box">';
-                            echo '<span class="org-title">' . ($node['title'] ?? '') . '</span>';
-                            if (!empty($node['name'])) {
-                                echo '<span class="org-name">' . $node['name'] . '</span>';
-                            }
-                            echo '</div>';
-                            if ($hasChildren) {
-                                echo '<div class="org-children">';
-                                foreach ($node['children'] as $child) {
-                                    renderNodeHorizontal($child);
-                                }
-                                echo '</div>';
-                            }
-                            echo '</div>';
+                        if (!empty($orgStructure['pa'])) {
+                            $ceoChildren[] = $orgStructure['pa'];
+                        }
+                        
+                        // 构建CEO节点
+                        $rootNode = [
+                            'element' => '',
+                            'title' => $ceoTitle,
+                            'name' => $ceoName,
+                            'left' => null,
+                            'right' => null
+                        ];
+                        
+                        if (!empty($ceoChildren)) {
+                            $binary = convertToBinaryTree($ceoChildren);
+                            $rootNode['left'] = $binary['left'];
+                            $rootNode['right'] = $binary['right'];
                         }
                         ?>
 
                         <div class="org-tree">
-                            <div class="org-row">
-                                <!-- CEO 节点，向右连接 C-Level -->
-                                <div class="org-node-wrap<?php echo !empty($cLevelNodes) ? ' has-children' : ''; ?>">
-                                    <div class="org-box">
-                                        <span class="org-title"><?php echo $ceoTitle; ?></span>
-                                        <?php if ($ceoName): ?>
-                                        <span class="org-name"><?php echo $ceoName; ?></span>
-                                        <?php endif; ?>
-                                    </div>
-                                    <?php if (!empty($cLevelNodes)): ?>
-                                    <div class="org-children">
-                                        <?php foreach ($cLevelNodes as $node) { renderNodeHorizontal($node); } ?>
-                                    </div>
-                                    <?php endif; ?>
-                                </div>
-
-                                <!-- PA 节点（与 CEO 同级，且不向下连接） -->
-                                <?php if (!empty($orgStructure['pa'])): ?>
-                                <div class="org-node-wrap">
-                                    <div class="org-box">
-                                        <span class="org-title"><?php echo $paTitle; ?></span>
-                                        <?php if ($paName): ?>
-                                        <span class="org-name"><?php echo $paName; ?></span>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                                <?php endif; ?>
-                            </div>
+                            <?php echo renderBinaryTreeNode($rootNode, true); ?>
                         </div>
                     </div>
                 </div>
