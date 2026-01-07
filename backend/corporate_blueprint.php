@@ -1614,60 +1614,88 @@ if (file_exists($jsonFile)) {
             }
         }
 
-        /* 组织架构样式 - 横向组织结构图 */
+        /* 组织架构样式 - 基于Figma设计 */
         .mermaid-org-chart {
-            background: #ffffff;
-            border-radius: clamp(12px, 1.25vw, 16px);
-            padding: clamp(40px, 4.17vw, 60px);
+            background-color: #ffffff;
+            height: clamp(500px, 52.08vw, 765px);
+            width: 100%;
+            max-width: 1536px;
+            border-radius: 15px;
+            padding: 0;
             position: relative;
-            overflow-x: auto;
-            overflow-y: visible;
-            min-height: clamp(400px, 41.67vw, 600px);
+            overflow: hidden;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
         }
 
-        /* 背景装饰图形 - 向右的箭头或K形状 */
-        .mermaid-org-chart::before {
-            content: '';
-            position: absolute;
+        /* Logo背景图片 */
+        .org-chart-logo {
+            height: clamp(400px, 68.36vw, 1312px);
+            width: clamp(400px, 68.36vw, 1312px);
+            left: 0;
             top: 0;
-            right: 0;
-            width: 60%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 80% 20%, rgba(255, 184, 77, 0.15) 0%, transparent 50%),
-                linear-gradient(135deg, transparent 0%, rgba(255, 184, 77, 0.08) 50%, transparent 100%),
-                repeating-linear-gradient(
-                    45deg,
-                    transparent,
-                    transparent 40px,
-                    rgba(255, 184, 77, 0.03) 40px,
-                    rgba(255, 184, 77, 0.03) 42px
-                );
-            pointer-events: none;
+            position: absolute;
+            opacity: 0.03;
             z-index: 0;
-            border-radius: clamp(12px, 1.25vw, 16px);
+            pointer-events: none;
+        }
+
+        .org-chart-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         /* 标题容器 */
         .org-chart-header {
             position: relative;
             z-index: 2;
-            margin-bottom: clamp(40px, 4.17vw, 60px);
+            height: clamp(60px, 6.25vw, 82px);
+            margin-bottom: clamp(30px, 3.13vw, 40px);
         }
 
-        /* 标题样式 - 橙色圆角矩形 */
+        /* 橙色矩形背景 */
+        .org-chart-title-bg {
+            background-color: #ff5c00;
+            height: clamp(60px, 6.25vw, 82px);
+            width: clamp(280px, 27.6vw, 424px);
+            border-radius: 0 30px 30px 0;
+            position: absolute;
+            top: clamp(15px, 1.56vw, 25px);
+            left: 0;
+            z-index: 1;
+        }
+
+        /* 标题文字 */
         .org-chart-title {
-            display: inline-block;
-            background: #ff5c00;
             color: #ffffff;
-            font-size: clamp(18px, 1.88vw, 24px);
-            font-weight: 700;
-            padding: clamp(12px, 1.25vw, 16px) clamp(24px, 2.5vw, 32px);
-            border-radius: clamp(8px, 0.83vw, 12px);
-            box-shadow: 0 2px 8px rgba(255, 92, 0, 0.2);
-            letter-spacing: 1px;
+            text-align: center;
+            vertical-align: text-top;
+            font-size: clamp(28px, 3.13vw, 48px);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
+            line-height: auto;
+            border-style: hidden;
+            outline: none;
+            left: clamp(28px, 2.86vw, 44px);
+            top: clamp(23px, 2.4vw, 37px);
+            position: absolute;
+            width: clamp(220px, 21.88vw, 336px);
+            z-index: 2;
+            font-weight: 600;
             margin: 0;
+            padding: 0;
+        }
+
+        /* 标题下方的白色线条 */
+        .org-chart-title-line {
+            background-color: #ffffff;
+            width: clamp(220px, 21.88vw, 336px);
+            transform: rotate(-1deg);
+            border: 3px solid #ffffff;
+            top: clamp(60px, 6.25vw, 95px);
+            left: clamp(28px, 2.86vw, 44px);
+            position: absolute;
+            z-index: 2;
+            height: 0;
         }
 
         /* 组织树内容容器 */
@@ -1676,6 +1704,8 @@ if (file_exists($jsonFile)) {
             z-index: 2;
             width: 100%;
             min-height: clamp(300px, 31.25vw, 400px);
+            padding: clamp(20px, 2.08vw, 30px) clamp(20px, 2.08vw, 30px) clamp(20px, 2.08vw, 30px) clamp(20px, 2.08vw, 30px);
+            margin-top: clamp(40px, 4.17vw, 60px);
         }
 
         .org-tree {
@@ -2447,11 +2477,34 @@ if (file_exists($jsonFile)) {
                         }
                         
                         ?>
-
-                        <!-- 组织树框架 - 暂时留空，后续添加树结构 -->
-                        <div class="org-tree" style="min-height: 300px;">
-                            <!-- 树结构将在这里添加 -->
+                        
+                        <!-- Logo背景 -->
+                        <div class="org-chart-logo">
+                            <?php 
+                            $logoPath = '../images/images/logo.png';
+                            $logoFullPath = __DIR__ . '/../images/images/logo.png';
+                            if (file_exists($logoFullPath)): 
+                            ?>
+                            <img src="<?php echo htmlspecialchars($logoPath); ?>" alt="Logo">
+                            <?php endif; ?>
                         </div>
+
+                        <!-- 标题区域 -->
+                        <div class="org-chart-header">
+                            <!-- 橙色矩形背景 -->
+                            <div class="org-chart-title-bg"></div>
+                            <!-- 标题文字 -->
+                            <div class="org-chart-title">高层组织架构图</div>
+                            <!-- 标题下方白色线条 -->
+                            <div class="org-chart-title-line"></div>
+                        </div>
+
+                        <!-- 组织树内容容器 -->
+                        <div class="org-tree-content">
+                            <!-- 组织树框架 - 暂时留空，后续添加树结构 -->
+                            <div class="org-tree" style="min-height: 300px;">
+                                <!-- 树结构将在这里添加 -->
+                            </div>
                         </div>
                     </div>
                 </div>
