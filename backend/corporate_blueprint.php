@@ -1439,75 +1439,6 @@ if (file_exists($jsonFile)) {
             margin-left: clamp(12px, 1.25vw, 16px);
         }
 
-        .strategic-milestone-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            padding: clamp(20px, 2.08vw, 24px);
-            border-radius: clamp(12px, 1.25vw, 16px);
-            border-left: 4px solid #ff5c00;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            max-width: 100%;
-        }
-
-        @media (min-width: 768px) {
-            .strategic-milestone-card {
-                max-width: 384px;
-            }
-        }
-
-        .milestone-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: clamp(8px, 0.83vw, 12px);
-        }
-
-        .milestone-icon {
-            color: #ff5c00;
-            width: 20px;
-            height: 20px;
-        }
-
-        .milestone-label {
-            font-size: clamp(12px, 1.25vw, 14px);
-            font-weight: 700;
-            text-transform: uppercase;
-            color: #64748b;
-            letter-spacing: 0.05em;
-        }
-
-        .milestone-text {
-            font-size: clamp(16px, 1.67vw, 18px);
-            font-weight: 700;
-            color: #0f172a;
-            line-height: 1.4;
-            margin-bottom: clamp(12px, 1.25vw, 16px);
-        }
-
-        .milestone-progress {
-            width: 100%;
-            background: #e2e8f0;
-            height: 8px;
-            border-radius: 9999px;
-            overflow: hidden;
-            margin-bottom: clamp(8px, 0.83vw, 12px);
-        }
-
-        .milestone-progress-bar {
-            background: #ff5c00;
-            height: 100%;
-            width: 40%;
-            border-radius: 9999px;
-            box-shadow: 0 0 8px rgba(255, 92, 0, 0.5);
-            transition: width 0.5s ease;
-        }
-
-        .milestone-target {
-            font-size: clamp(11px, 1.15vw, 12px);
-            text-align: right;
-            font-weight: 500;
-            color: #64748b;
-        }
 
         /* 主要内容区域 */
         .strategic-main {
@@ -3352,25 +3283,6 @@ if (file_exists($jsonFile)) {
                                         2028年创办10间子公司
                                         <span class="strategic-year">by 2028</span>
                                     </h1>
-                                </div>
-                                
-                                <!-- 里程碑卡片 -->
-                                <div class="strategic-milestone-card">
-                                    <div class="milestone-header">
-                                        <svg class="milestone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                                        </svg>
-                                        <span class="milestone-label">Phase 1 Milestone</span>
-                                    </div>
-                                    <p class="milestone-text">
-                                        2025年创办4间子公司
-                                    </p>
-                                    <div class="milestone-progress">
-                                        <div class="milestone-progress-bar"></div>
-                                    </div>
-                                    <div class="milestone-target">
-                                        Target: 2025
-                                    </div>
                                 </div>
                             </div>
                         </header>
