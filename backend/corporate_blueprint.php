@@ -1614,10 +1614,10 @@ if (file_exists($jsonFile)) {
             }
         }
 
-        /* 组织架构样式 - 基于Figma设计 */
+        /* 组织架构样式 - 精确匹配Figma设计 */
         .mermaid-org-chart {
             background-color: #ffffff;
-            height: clamp(500px, 52.08vw, 765px);
+            height: 765px;
             width: 100%;
             max-width: 1536px;
             border-radius: 15px;
@@ -1627,10 +1627,10 @@ if (file_exists($jsonFile)) {
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
         }
 
-        /* Logo背景图片 */
+        /* Logo背景图片 - 精确匹配Figma */
         .org-chart-logo {
-            height: clamp(400px, 68.36vw, 1312px);
-            width: clamp(400px, 68.36vw, 1312px);
+            height: 1312px;
+            width: 1312px;
             left: 0;
             top: 0;
             position: absolute;
@@ -1649,50 +1649,50 @@ if (file_exists($jsonFile)) {
         .org-chart-header {
             position: relative;
             z-index: 2;
-            height: clamp(60px, 6.25vw, 82px);
-            margin-bottom: clamp(30px, 3.13vw, 40px);
+            width: 100%;
         }
 
-        /* 橙色矩形背景 */
+        /* 橙色矩形背景 - 精确匹配Figma */
         .org-chart-title-bg {
             background-color: #ff5c00;
-            height: clamp(60px, 6.25vw, 82px);
-            width: clamp(280px, 27.6vw, 424px);
+            height: 82px;
+            width: 424px;
             border-radius: 0 30px 30px 0;
             position: absolute;
-            top: clamp(15px, 1.56vw, 25px);
+            top: 25px;
             left: 0;
             z-index: 1;
         }
 
-        /* 标题文字 */
+        /* 标题文字 - 精确匹配Figma */
         .org-chart-title {
             color: #ffffff;
             text-align: center;
             vertical-align: text-top;
-            font-size: clamp(28px, 3.13vw, 48px);
+            font-size: 48px;
             font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
             line-height: auto;
             border-style: hidden;
             outline: none;
-            left: clamp(28px, 2.86vw, 44px);
-            top: clamp(23px, 2.4vw, 37px);
+            left: 44px;
+            top: 37px;
             position: absolute;
-            width: clamp(220px, 21.88vw, 336px);
+            width: 336px;
             z-index: 2;
             font-weight: 600;
             margin: 0;
             padding: 0;
+            white-space: nowrap;
         }
 
-        /* 标题下方的白色线条 */
+        /* 标题下方的白色线条 - 精确匹配Figma */
         .org-chart-title-line {
             background-color: #ffffff;
-            width: clamp(220px, 21.88vw, 336px);
+            width: 336px;
             transform: rotate(-1deg);
             border: 3px solid #ffffff;
-            top: clamp(60px, 6.25vw, 95px);
-            left: clamp(28px, 2.86vw, 44px);
+            top: 95px;
+            left: 44px;
             position: absolute;
             z-index: 2;
             height: 0;
@@ -1703,9 +1703,9 @@ if (file_exists($jsonFile)) {
             position: relative;
             z-index: 2;
             width: 100%;
-            min-height: clamp(300px, 31.25vw, 400px);
-            padding: clamp(20px, 2.08vw, 30px) clamp(20px, 2.08vw, 30px) clamp(20px, 2.08vw, 30px) clamp(20px, 2.08vw, 30px);
-            margin-top: clamp(40px, 4.17vw, 60px);
+            min-height: 400px;
+            padding: 120px 20px 20px 20px;
+            margin-top: 0;
         }
 
         .org-tree {
@@ -1880,12 +1880,65 @@ if (file_exists($jsonFile)) {
         }
 
         /* 响应式调整 */
+        @media (max-width: 1536px) {
+            .mermaid-org-chart {
+                height: auto;
+                min-height: 765px;
+            }
+            
+            .org-chart-logo {
+                height: min(1312px, 85vw);
+                width: min(1312px, 85vw);
+            }
+            
+            .org-chart-title-bg {
+                width: min(424px, 27.6vw);
+                height: min(82px, 5.34vw);
+                top: min(25px, 1.63vw);
+            }
+            
+            .org-chart-title {
+                font-size: min(48px, 3.13vw);
+                left: min(44px, 2.86vw);
+                top: min(37px, 2.4vw);
+                width: min(336px, 21.88vw);
+            }
+            
+            .org-chart-title-line {
+                width: min(336px, 21.88vw);
+                top: min(95px, 6.19vw);
+                left: min(44px, 2.86vw);
+            }
+        }
+
         @media (max-width: 768px) {
             .mermaid-org-chart {
-                padding: clamp(20px, 2.08vw, 30px);
-                min-height: clamp(300px, 31.25vw, 400px);
+                padding: 0;
+                min-height: 400px;
                 overflow-x: auto;
                 overflow-y: visible;
+            }
+            
+            .org-chart-title-bg {
+                width: min(300px, 80vw);
+                height: 60px;
+            }
+            
+            .org-chart-title {
+                font-size: 32px;
+                left: 20px;
+                top: 20px;
+                width: min(260px, 70vw);
+            }
+            
+            .org-chart-title-line {
+                width: min(260px, 70vw);
+                top: 70px;
+                left: 20px;
+            }
+            
+            .org-tree-content {
+                padding: 100px 10px 10px 10px;
             }
 
             .org-tree {
