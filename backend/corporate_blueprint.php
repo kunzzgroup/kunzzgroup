@@ -3106,7 +3106,6 @@ if (file_exists($jsonFile)) {
                 <?php endif; ?>
 
                 <!-- Strategic Objectives -->
-                <?php if (!empty($strategyData['strategicObjectives'])): ?>
                 <div class="strategic-objectives-section">
                     <!-- 背景装饰 -->
                     <div class="strategic-bg-decor"></div>
@@ -3124,16 +3123,8 @@ if (file_exists($jsonFile)) {
                                         <span>Strategic Vision</span>
                                     </div>
                                     <h1 class="strategic-main-title">
-                                        <?php 
-                                        // 获取主要目标（从第一个年份的第一个目标或自定义）
-                                        $firstYear = min(array_keys($strategyData['strategicObjectives']));
-                                        $mainObjective = '实现战略目标';
-                                        if (!empty($strategyData['strategicObjectives'][$firstYear][0]['strategy'])) {
-                                            $mainObjective = $strategyData['strategicObjectives'][$firstYear][0]['strategy'];
-                                        }
-                                        echo htmlspecialchars($mainObjective);
-                                        ?>
-                                        <span class="strategic-year">by <?php echo htmlspecialchars($firstYear); ?></span>
+                                        实现战略目标
+                                        <span class="strategic-year">by 2028</span>
                                     </h1>
                                 </div>
                                 
@@ -3146,21 +3137,13 @@ if (file_exists($jsonFile)) {
                                         <span class="milestone-label">Phase 1 Milestone</span>
                                     </div>
                                     <p class="milestone-text">
-                                        <?php 
-                                        // 获取子目标
-                                        $subObjective = '推进第一阶段计划';
-                                        if (!empty($strategyData['strategicObjectives'][$firstYear][0]['department'])) {
-                                            $subObjective = $strategyData['strategicObjectives'][$firstYear][0]['department'] . ' - ' . 
-                                                          ($strategyData['strategicObjectives'][$firstYear][0]['strategy'] ?? '');
-                                        }
-                                        echo htmlspecialchars($subObjective);
-                                        ?>
+                                        推进第一阶段计划 - 提升运营效率
                                     </p>
                                     <div class="milestone-progress">
                                         <div class="milestone-progress-bar"></div>
                                     </div>
                                     <div class="milestone-target">
-                                        Target: <?php echo htmlspecialchars($firstYear); ?>
+                                        Target: 2028
                                     </div>
                                 </div>
                             </div>
@@ -3172,33 +3155,14 @@ if (file_exists($jsonFile)) {
                             <div class="strategic-list-wrapper">
                                 <h2 class="strategic-list-title">
                                     Strategic Pillars
-                                    <span class="strategic-list-count">
-                                        <?php 
-                                        $totalStrategies = 0;
-                                        foreach ($strategyData['strategicObjectives'] as $year => $objectives) {
-                                            $totalStrategies += count($objectives);
-                                        }
-                                        echo $totalStrategies;
-                                        ?>
-                                    </span>
+                                    <span class="strategic-list-count">2</span>
                                 </h2>
                                 <div class="strategic-list" id="strategicList">
-                                    <?php 
-                                    $strategyIndex = 0;
-                                    $allStrategies = [];
-                                    foreach ($strategyData['strategicObjectives'] as $year => $objectives) {
-                                        foreach ($objectives as $objective) {
-                                            $allStrategies[] = array_merge($objective, ['year' => $year, 'index' => $strategyIndex++]);
-                                        }
-                                    }
-                                    
-                                    foreach ($allStrategies as $index => $strategy): 
-                                        $isActive = $index === 0;
-                                    ?>
+                                    <!-- 策略1 -->
                                     <button 
-                                        class="strategy-card <?php echo $isActive ? 'active' : ''; ?>" 
-                                        data-strategy-index="<?php echo $index; ?>"
-                                        onclick="selectStrategy(<?php echo $index; ?>)"
+                                        class="strategy-card active" 
+                                        data-strategy-index="0"
+                                        onclick="selectStrategy(0)"
                                     >
                                         <div class="strategy-icon-wrapper">
                                             <svg class="strategy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -3210,34 +3174,54 @@ if (file_exists($jsonFile)) {
                                         </div>
                                         <div class="strategy-content">
                                             <div class="strategy-meta">
-                                                <span class="strategy-id">
-                                                    <?php echo htmlspecialchars($strategy['department'] ?? 'STRATEGY'); ?> • <?php echo htmlspecialchars($strategy['year'] ?? ''); ?>
-                                                </span>
+                                                <span class="strategy-id">OPERATIONS • 2028</span>
                                                 <svg class="strategy-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                                                     <polyline points="22 4 12 14.01 9 11.01"/>
                                                 </svg>
                                             </div>
-                                            <h3 class="strategy-title">
-                                                <?php echo htmlspecialchars($strategy['strategy'] ?? ''); ?>
-                                            </h3>
-                                            <p class="strategy-description">
-                                                <?php echo htmlspecialchars($strategy['department'] ?? ''); ?>
-                                            </p>
+                                            <h3 class="strategy-title">提升运营效率与流程优化</h3>
+                                            <p class="strategy-description">运营部门</p>
                                         </div>
                                         <svg class="strategy-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <polyline points="9 18 15 12 9 6"/>
                                         </svg>
                                     </button>
-                                    <?php endforeach; ?>
+
+                                    <!-- 策略2 -->
+                                    <button 
+                                        class="strategy-card" 
+                                        data-strategy-index="1"
+                                        onclick="selectStrategy(1)"
+                                    >
+                                        <div class="strategy-icon-wrapper">
+                                            <svg class="strategy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                                <circle cx="9" cy="7" r="4"/>
+                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                            </svg>
+                                        </div>
+                                        <div class="strategy-content">
+                                            <div class="strategy-meta">
+                                                <span class="strategy-id">MARKETING • 2028</span>
+                                                <svg class="strategy-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                                    <polyline points="22 4 12 14.01 9 11.01"/>
+                                                </svg>
+                                            </div>
+                                            <h3 class="strategy-title">扩大市场份额与品牌影响力</h3>
+                                            <p class="strategy-description">市场部门</p>
+                                        </div>
+                                        <svg class="strategy-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="9 18 15 12 9 6"/>
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
 
                             <!-- 详细视图 -->
                             <div class="strategic-details" id="strategicDetails">
-                                <?php if (!empty($allStrategies[0])): 
-                                    $selectedStrategy = $allStrategies[0];
-                                ?>
                                 <div class="details-header">
                                     <svg class="details-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -3247,10 +3231,8 @@ if (file_exists($jsonFile)) {
                                     </svg>
                                     <div>
                                         <div class="details-badge">Selected Pillar</div>
-                                        <h2 class="details-title"><?php echo htmlspecialchars($selectedStrategy['strategy'] ?? ''); ?></h2>
-                                        <p class="details-description">
-                                            <?php echo htmlspecialchars($selectedStrategy['department'] ?? ''); ?>
-                                        </p>
+                                        <h2 class="details-title" id="detailsTitle">提升运营效率与流程优化</h2>
+                                        <p class="details-description" id="detailsDescription">运营部门</p>
                                     </div>
                                 </div>
 
@@ -3264,22 +3246,26 @@ if (file_exists($jsonFile)) {
                                             Measures & Metrics
                                         </h4>
                                         
-                                        <?php if (!empty($selectedStrategy['dashboardMetrics'])): ?>
                                         <div class="measure-item">
                                             <div class="measure-header">
                                                 <span class="measure-badge">M1</span>
                                                 <span class="measure-label">关键指标</span>
                                             </div>
-                                            <ul class="measure-list">
-                                                <?php foreach ($selectedStrategy['dashboardMetrics'] as $metric): ?>
+                                            <ul class="measure-list" id="measureList">
                                                 <li class="measure-list-item">
                                                     <div class="measure-dot"></div>
-                                                    <span class="measure-text"><?php echo htmlspecialchars($metric); ?></span>
+                                                    <span class="measure-text">运营成本降低20%</span>
                                                 </li>
-                                                <?php endforeach; ?>
+                                                <li class="measure-list-item">
+                                                    <div class="measure-dot"></div>
+                                                    <span class="measure-text">流程效率提升30%</span>
+                                                </li>
+                                                <li class="measure-list-item">
+                                                    <div class="measure-dot"></div>
+                                                    <span class="measure-text">客户满意度达到90%</span>
+                                                </li>
                                             </ul>
                                         </div>
-                                        <?php endif; ?>
                                     </div>
 
                                     <!-- 执行计划 -->
@@ -3295,7 +3281,6 @@ if (file_exists($jsonFile)) {
                                         </h4>
                                         
                                         <div class="execution-plan">
-                                            <?php if (!empty($selectedStrategy['pic'])): ?>
                                             <div class="execution-pic">
                                                 <div class="execution-pic-icon">
                                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -3305,29 +3290,19 @@ if (file_exists($jsonFile)) {
                                                 </div>
                                                 <div class="execution-pic-info">
                                                     <span class="execution-pic-label">Person in Charge</span>
-                                                    <span class="execution-pic-name"><?php echo htmlspecialchars($selectedStrategy['pic']); ?></span>
+                                                    <span class="execution-pic-name" id="picName">John Doe</span>
                                                 </div>
                                             </div>
-                                            <?php endif; ?>
                                             
                                             <div class="execution-dates">
-                                                <?php if (!empty($selectedStrategy['startDate'])): ?>
                                                 <div class="execution-date-item">
                                                     <span class="execution-date-label">Start Date</span>
-                                                    <span class="execution-date-value">
-                                                        <?php echo date('Y-m-d', strtotime($selectedStrategy['startDate'])); ?>
-                                                    </span>
+                                                    <span class="execution-date-value" id="startDate">2024-01-01</span>
                                                 </div>
-                                                <?php endif; ?>
-                                                
-                                                <?php if (!empty($selectedStrategy['endDate'])): ?>
                                                 <div class="execution-date-item execution-date-divider">
                                                     <span class="execution-date-label">Completion Target</span>
-                                                    <span class="execution-date-value">
-                                                        <?php echo date('Y-m-d', strtotime($selectedStrategy['endDate'])); ?>
-                                                    </span>
+                                                    <span class="execution-date-value" id="endDate">2028-12-31</span>
                                                 </div>
-                                                <?php endif; ?>
                                             </div>
 
                                             <div class="execution-status">
@@ -3349,15 +3324,31 @@ if (file_exists($jsonFile)) {
                                         </div>
                                     </div>
                                 </div>
-                                <?php endif; ?>
                             </div>
                         </main>
                     </div>
                 </div>
                 
                 <script>
-                // 存储所有策略数据
-                const strategiesData = <?php echo json_encode($allStrategies, JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT); ?>;
+                // 硬编码的两个策略数据
+                const strategiesData = [
+                    {
+                        strategy: '提升运营效率与流程优化',
+                        department: '运营部门',
+                        pic: 'John Doe',
+                        startDate: '2024-01-01',
+                        endDate: '2028-12-31',
+                        dashboardMetrics: ['运营成本降低20%', '流程效率提升30%', '客户满意度达到90%']
+                    },
+                    {
+                        strategy: '扩大市场份额与品牌影响力',
+                        department: '市场部门',
+                        pic: 'Jane Smith',
+                        startDate: '2024-03-01',
+                        endDate: '2028-12-31',
+                        dashboardMetrics: ['市场份额增长25%', '品牌知名度提升40%', '新客户获取增长50%']
+                    }
+                ];
                 
                 function selectStrategy(index) {
                     const strategy = strategiesData[index];
@@ -3367,8 +3358,10 @@ if (file_exists($jsonFile)) {
                     document.querySelectorAll('.strategy-card').forEach((card, i) => {
                         if (i === index) {
                             card.classList.add('active');
+                            card.querySelector('.strategy-check').style.display = 'block';
                         } else {
                             card.classList.remove('active');
+                            card.querySelector('.strategy-check').style.display = 'none';
                         }
                     });
                     
@@ -3378,42 +3371,21 @@ if (file_exists($jsonFile)) {
                     
                     setTimeout(() => {
                         // 更新内容
-                        const header = detailsEl.querySelector('.details-header > div');
-                        const body = detailsEl.querySelector('.details-body');
+                        document.getElementById('detailsTitle').textContent = strategy.strategy;
+                        document.getElementById('detailsDescription').textContent = strategy.department;
+                        document.getElementById('picName').textContent = strategy.pic;
+                        document.getElementById('startDate').textContent = strategy.startDate;
+                        document.getElementById('endDate').textContent = strategy.endDate;
                         
-                        if (header) {
-                            header.querySelector('.details-title').textContent = strategy.strategy || '';
-                            header.querySelector('.details-description').textContent = strategy.department || '';
-                        }
-                        
-                        if (body) {
-                            // 更新指标
-                            const metricsSection = body.querySelector('.measure-list');
-                            if (metricsSection && strategy.dashboardMetrics) {
-                                metricsSection.innerHTML = strategy.dashboardMetrics.map(metric => 
-                                    `<li class="measure-list-item">
-                                        <div class="measure-dot"></div>
-                                        <span class="measure-text">${metric}</span>
-                                    </li>`
-                                ).join('');
-                            }
-                            
-                            // 更新负责人
-                            const picName = body.querySelector('.execution-pic-name');
-                            if (picName) {
-                                picName.textContent = strategy.pic || 'TBD';
-                            }
-                            
-                            // 更新日期
-                            const startDate = body.querySelector('.execution-date-item .execution-date-value');
-                            if (startDate && strategy.startDate) {
-                                startDate.textContent = new Date(strategy.startDate).toLocaleDateString('zh-CN');
-                            }
-                            
-                            const endDate = body.querySelector('.execution-date-divider .execution-date-value');
-                            if (endDate && strategy.endDate) {
-                                endDate.textContent = new Date(strategy.endDate).toLocaleDateString('zh-CN');
-                            }
+                        // 更新指标
+                        const metricsList = document.getElementById('measureList');
+                        if (metricsList && strategy.dashboardMetrics) {
+                            metricsList.innerHTML = strategy.dashboardMetrics.map(metric => 
+                                `<li class="measure-list-item">
+                                    <div class="measure-dot"></div>
+                                    <span class="measure-text">${metric}</span>
+                                </li>`
+                            ).join('');
                         }
                         
                         detailsEl.classList.remove('hidden');
@@ -3434,7 +3406,6 @@ if (file_exists($jsonFile)) {
                     });
                 });
                 </script>
-                <?php endif; ?>
 
             <?php else: ?>
                 <!-- 如果没有JSON数据，显示错误信息 -->
