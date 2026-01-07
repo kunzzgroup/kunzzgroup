@@ -1455,7 +1455,7 @@ if (file_exists($jsonFile)) {
 
         /* 策略列表容器 */
         .strategic-list-wrapper {
-            background: #ffffff;
+            background: linear-gradient(to bottom, #FFF7EA, #FFFFFF);
             border-radius: clamp(16px, 1.67vw, 24px);
             padding: clamp(24px, 2.5vw, 32px);
             border: 1px solid #e2e8f0;
