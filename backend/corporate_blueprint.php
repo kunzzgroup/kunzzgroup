@@ -3278,8 +3278,8 @@ if (file_exists($jsonFile)) {
                                         <span>Strategic Vision</span>
                                     </div>
                                     <h1 class="strategic-main-title">
-                                        创办10间子公司
-                                        <span class="strategic-year">- 2028</span>
+                                        2028年
+                                        <span class="strategic-year">创办10间子公司</span>
                                     </h1>
                                 </div>
                             </div>
