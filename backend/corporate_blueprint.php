@@ -2163,14 +2163,12 @@ if (file_exists($jsonFile)) {
             letter-spacing: -0.02em;
         }
 
-        /* 树根容器（垂直组织结构图） */
+        /* 树根容器 */
         .org-tree-root-container {
             position: relative;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: clamp(50px, 5.21vw, 80px) clamp(40px, 4.17vw, 80px);
+            padding: clamp(50px, 5.21vw, 80px) clamp(100px, 10.42vw, 160px);
         }
 
         /* 背景Logo图片 */
@@ -2197,17 +2195,14 @@ if (file_exists($jsonFile)) {
             position: relative;
             z-index: 1;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: clamp(32px, 3.33vw, 48px);
         }
 
-        /* 树分支容器：单个节点 + 子节点 */
+        /* 树分支容器 */
         .org-tree-branch {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: clamp(24px, 2.5vw, 32px);
+            gap: clamp(32px, 3.33vw, 48px);
             position: relative;
         }
 
@@ -2309,59 +2304,46 @@ if (file_exists($jsonFile)) {
             border-radius: 9999px;
         }
 
-        /* 子节点容器（横向排列在父节点下方） */
+        /* 子节点容器 */
         .org-children-container {
             display: flex;
-            flex-direction: row;
-            justify-content: center;
-            gap: clamp(32px, 3.33vw, 48px);
+            flex-direction: column;
+            gap: clamp(16px, 1.67vw, 20px);
             position: relative;
-            padding-top: clamp(24px, 2.5vw, 32px);
+            padding: clamp(12px, 1.25vw, 16px) 0;
         }
 
-        /* 父节点到底部的竖线 */
-        .org-node-container.has-children::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            bottom: -clamp(24px, 2.5vw, 32px);
-            transform: translateX(-50%);
-            width: 2px;
-            height: clamp(24px, 2.5vw, 32px);
-            background: #e2e8f0;
-            z-index: 5;
-        }
-
-        /* 子节点之间的横线 */
-        .org-children-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #e2e8f0;
-        }
-
-        /* 每个子节点与横线相连的竖线 */
-        .org-children-container > .org-tree-branch {
-            position: relative;
-        }
-
-        .org-children-container > .org-tree-branch::before {
-            content: '';
-            position: absolute;
-            top: -clamp(24px, 2.5vw, 32px);
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: clamp(24px, 2.5vw, 32px);
-            background: #e2e8f0;
-        }
-
-        /* SVG 连接层（改为隐藏，改用纯 CSS 线条实现） */
+        /* SVG 连接层 */
         .org-svg-connector {
-            display: none;
+            position: absolute;
+            inset: 0;
+            width: calc(100% + 40px);
+            height: 100%;
+            pointer-events: none;
+            overflow: visible;
+            z-index: 10;
+            left: -40px;
+        }
+
+        .org-connector-path {
+            fill: none;
+            stroke: #e2e8f0;
+            stroke-width: 2;
+            transition: all 0.5s ease;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: drawPath 1.5s ease forwards;
+        }
+
+        .org-connector-path.highlighted {
+            stroke: #ff5c00;
+            stroke-width: 3;
+        }
+
+        @keyframes drawPath {
+            to {
+                stroke-dashoffset: 0;
+            }
         }
 
         /* PA节点特殊定位 */
@@ -3091,7 +3073,7 @@ if (file_exists($jsonFile)) {
                                 $html = '<div class="org-tree-branch">';
                                 
                                 // 当前节点
-                                $html .= '<div class="org-node-container' . ($isHighlighted ? ' highlighted' : '') . ($hasChildren ? ' has-children' : '') . '" data-node-id="' . $nodeId . '">';
+                                $html .= '<div class="org-node-container' . ($isHighlighted ? ' highlighted' : '') . '" data-node-id="' . $nodeId . '">';
                                 $html .= '<div class="org-node-card' . ($isSmall ? ' small' : '') . ($isHighlighted ? ' highlighted' : '') . '">';
                                 
                                 // 角色标题
