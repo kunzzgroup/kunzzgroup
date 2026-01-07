@@ -1925,49 +1925,6 @@ if (file_exists($jsonFile)) {
             padding-top: clamp(12px, 1.25vw, 16px);
         }
 
-        .execution-status {
-            background: #ffffff;
-            padding: clamp(12px, 1.25vw, 16px);
-            border-radius: clamp(8px, 0.83vw, 12px);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e2e8f0;
-        }
-
-        .execution-status-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-
-        .execution-status-label {
-            font-size: clamp(10px, 1.04vw, 12px);
-            font-weight: 700;
-            color: #94a3b8;
-            text-transform: uppercase;
-        }
-
-        .execution-status-percent {
-            font-size: clamp(10px, 1.04vw, 12px);
-            font-weight: 700;
-            color: #ff5c00;
-        }
-
-        .execution-progress {
-            width: 100%;
-            background: #f1f5f9;
-            height: 6px;
-            border-radius: 9999px;
-            overflow: hidden;
-        }
-
-        .execution-progress-bar {
-            background: #ff5c00;
-            height: 100%;
-            width: 65%;
-            border-radius: 9999px;
-            transition: width 0.5s ease;
-        }
 
 
         /* 自定义滚动条样式 */
@@ -3571,16 +3528,6 @@ if (file_exists($jsonFile)) {
                                                 <div class="execution-date-item execution-date-divider">
                                                     <span class="execution-date-label">Completion Target</span>
                                                     <span class="execution-date-value" id="endDate">2028-12-31</span>
-                                                </div>
-                                            </div>
-
-                                            <div class="execution-status">
-                                                <div class="execution-status-header">
-                                                    <span class="execution-status-label">Preparation Status</span>
-                                                    <span class="execution-status-percent">65% Ready</span>
-                                                </div>
-                                                <div class="execution-progress">
-                                                    <div class="execution-progress-bar"></div>
                                                 </div>
                                             </div>
                                         </div>
