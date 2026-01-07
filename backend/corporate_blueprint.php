@@ -1341,117 +1341,659 @@ if (file_exists($jsonFile)) {
             }
         }
 
-        /* Strategic Objectives */
-        .objectives-container {
-            display: flex;
-            flex-direction: column;
-            gap: clamp(32px, 3.13vw, 48px);
-        }
-
-        .year-section {
-            background: #fff;
-            border-radius: 8px;
-            padding: clamp(24px, 2.6vw, 40px);
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .year-title {
-            font-size: clamp(20px, 2.08vw, 28px);
-            font-weight: bold;
-            color: #ff5c00;
-            margin-bottom: clamp(20px, 2.08vw, 32px);
-            padding-bottom: clamp(8px, 0.83vw, 12px);
-            border-bottom: 3px solid #ff5c00;
-        }
-
-        .objectives-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: clamp(16px, 1.67vw, 24px);
-        }
-
-        .objective-card {
-            background: #f9fafb;
-            border-radius: 8px;
-            padding: clamp(20px, 2.08vw, 32px);
-            border-left: 4px solid #ff5c00;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .objective-card:hover {
-            transform: translateX(4px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .objective-department {
-            font-size: clamp(14px, 1.25vw, 18px);
-            font-weight: bold;
-            color: #ff5c00;
-            margin-bottom: clamp(8px, 0.83vw, 12px);
-        }
-
-        .objective-strategy {
-            font-size: clamp(13px, 1.04vw, 16px);
-            color: #374151;
-            margin-bottom: clamp(12px, 1.04vw, 16px);
-            line-height: 1.7;
-        }
-
-        .objective-metrics {
-            margin-bottom: clamp(12px, 1.04vw, 16px);
-        }
-
-        .objective-metrics-title {
-            font-size: clamp(12px, 1.04vw, 14px);
-            font-weight: 600;
-            color: #6b7280;
-            margin-bottom: clamp(6px, 0.63vw, 8px);
-        }
-
-        .objective-metrics-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .objective-metrics-list li {
-            font-size: clamp(11px, 0.94vw, 13px);
-            color: #374151;
-            padding: clamp(4px, 0.42vw, 6px) 0;
-            padding-left: clamp(16px, 1.56vw, 24px);
+        /* Strategic Objectives - 基于App.tsx设计 */
+        .strategic-objectives-section {
+            background: #f8fafc;
+            min-height: 100vh;
+            padding: clamp(32px, 3.33vw, 48px) 0;
             position: relative;
         }
 
-        .objective-metrics-list li::before {
-            content: '→';
+        /* 背景装饰 */
+        .strategic-bg-decor {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            opacity: 0.1;
+            z-index: 0;
+        }
+
+        .strategic-bg-decor::before {
+            content: '';
             position: absolute;
-            left: 0;
+            top: -10%;
+            left: -10%;
+            width: 40%;
+            height: 40%;
+            background: #ff5c00;
+            border-radius: 50%;
+            filter: blur(120px);
+        }
+
+        .strategic-bg-decor::after {
+            content: '';
+            position: absolute;
+            bottom: -10%;
+            right: -10%;
+            width: 40%;
+            height: 40%;
+            background: #3b82f6;
+            border-radius: 50%;
+            filter: blur(120px);
+        }
+
+        .strategic-container {
+            position: relative;
+            z-index: 10;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 clamp(16px, 1.67vw, 24px);
+        }
+
+        /* 头部区域 */
+        .strategic-header {
+            margin-bottom: clamp(32px, 3.33vw, 48px);
+        }
+
+        .strategic-header-content {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(16px, 1.67vw, 24px);
+        }
+
+        @media (min-width: 768px) {
+            .strategic-header-content {
+                flex-direction: row;
+                align-items: flex-end;
+                justify-content: space-between;
+            }
+        }
+
+        .strategic-header-left {
+            flex: 1;
+        }
+
+        .strategic-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #ff5c00;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: clamp(12px, 1.25vw, 14px);
+            margin-bottom: clamp(8px, 0.83vw, 12px);
+        }
+
+        .strategic-main-title {
+            font-size: clamp(32px, 3.33vw, 48px);
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.2;
+            margin-bottom: clamp(8px, 0.83vw, 12px);
+        }
+
+        .strategic-year {
+            color: #ff5c00;
+            margin-left: clamp(12px, 1.25vw, 16px);
+        }
+
+        .strategic-milestone-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: clamp(20px, 2.08vw, 24px);
+            border-radius: clamp(12px, 1.25vw, 16px);
+            border-left: 4px solid #ff5c00;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .strategic-milestone-card {
+                max-width: 384px;
+            }
+        }
+
+        .milestone-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: clamp(8px, 0.83vw, 12px);
+        }
+
+        .milestone-icon {
+            color: #ff5c00;
+            width: 20px;
+            height: 20px;
+        }
+
+        .milestone-label {
+            font-size: clamp(12px, 1.25vw, 14px);
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.05em;
+        }
+
+        .milestone-text {
+            font-size: clamp(16px, 1.67vw, 18px);
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.4;
+            margin-bottom: clamp(12px, 1.25vw, 16px);
+        }
+
+        .milestone-progress {
+            width: 100%;
+            background: #e2e8f0;
+            height: 8px;
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-bottom: clamp(8px, 0.83vw, 12px);
+        }
+
+        .milestone-progress-bar {
+            background: #ff5c00;
+            height: 100%;
+            width: 40%;
+            border-radius: 9999px;
+            box-shadow: 0 0 8px rgba(255, 92, 0, 0.5);
+            transition: width 0.5s ease;
+        }
+
+        .milestone-target {
+            font-size: clamp(11px, 1.15vw, 12px);
+            text-align: right;
+            font-weight: 500;
+            color: #64748b;
+        }
+
+        /* 主要内容区域 */
+        .strategic-main {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: clamp(24px, 2.5vw, 32px);
+        }
+
+        @media (min-width: 1024px) {
+            .strategic-main {
+                grid-template-columns: 5fr 7fr;
+            }
+        }
+
+        /* 策略列表 */
+        .strategic-list {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(12px, 1.25vw, 16px);
+        }
+
+        .strategic-list-title {
+            font-size: clamp(18px, 1.88vw, 20px);
+            font-weight: 700;
+            margin-bottom: clamp(16px, 1.67vw, 24px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 8px;
+        }
+
+        .strategic-list-count {
+            background: #e2e8f0;
+            color: #64748b;
+            font-size: clamp(10px, 1.04vw, 12px);
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-weight: 600;
+        }
+
+        .strategy-card {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: clamp(12px, 1.25vw, 16px);
+            padding: clamp(16px, 1.67vw, 20px);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
+            border: none;
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            gap: clamp(12px, 1.25vw, 16px);
+        }
+
+        .strategy-card:hover {
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .strategy-card.active {
+            background: #ffffff;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            transform: scale(1.02);
+            border: 2px solid #ff5c00;
+        }
+
+        .strategy-icon-wrapper {
+            padding: clamp(10px, 1.04vw, 12px);
+            border-radius: clamp(8px, 0.83vw, 12px);
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .strategy-card:not(.active) .strategy-icon-wrapper {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .strategy-card.active .strategy-icon-wrapper {
+            background: #ff5c00;
+            color: #ffffff;
+        }
+
+        .strategy-card:hover:not(.active) .strategy-icon-wrapper {
+            background: #fff5e6;
             color: #ff5c00;
         }
 
-        .objective-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: clamp(12px, 1.25vw, 16px);
-            padding-top: clamp(12px, 1.04vw, 16px);
-            border-top: 1px solid #e5e7eb;
-            font-size: clamp(11px, 0.94vw, 13px);
-            color: #6b7280;
+        .strategy-icon {
+            width: 24px;
+            height: 24px;
         }
 
-        .objective-meta-item {
+        .strategy-content {
+            flex: 1;
+        }
+
+        .strategy-meta {
             display: flex;
             align-items: center;
-            gap: 4px;
+            justify-content: space-between;
+            margin-bottom: 4px;
         }
 
-        .objective-meta-label {
-            font-weight: 600;
-            color: #6b7280;
+        .strategy-id {
+            font-size: clamp(10px, 1.04vw, 12px);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
         }
 
-        .objective-meta-value {
-            color: #374151;
+        .strategy-card:not(.active) .strategy-id {
+            color: #94a3b8;
+        }
+
+        .strategy-card.active .strategy-id {
+            color: #ff5c00;
+        }
+
+        .strategy-check {
+            width: 16px;
+            height: 16px;
+            color: #ff5c00;
+            display: none;
+        }
+
+        .strategy-card.active .strategy-check {
+            display: block;
+        }
+
+        .strategy-title {
+            font-size: clamp(16px, 1.67vw, 18px);
+            font-weight: 700;
+            margin-bottom: clamp(6px, 0.63vw, 8px);
+        }
+
+        .strategy-card:not(.active) .strategy-title {
+            color: #475569;
+        }
+
+        .strategy-card.active .strategy-title {
+            color: #0f172a;
+        }
+
+        .strategy-description {
+            font-size: clamp(13px, 1.35vw, 14px);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .strategy-card:not(.active) .strategy-description {
+            color: #94a3b8;
+        }
+
+        .strategy-card.active .strategy-description {
+            color: #64748b;
+        }
+
+        .strategy-chevron {
+            align-self: center;
+            width: 20px;
+            height: 20px;
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .strategy-card:not(.active) .strategy-chevron {
+            color: #cbd5e1;
+        }
+
+        .strategy-card.active .strategy-chevron {
+            transform: rotate(90deg);
+            color: #ff5c00;
+        }
+
+        /* 详细视图 */
+        .strategic-details {
+            background: #ffffff;
+            border-radius: clamp(16px, 1.67vw, 24px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            opacity: 1;
+            transform: translateX(0);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .strategic-details.hidden {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+
+        .details-header {
+            background: #0f172a;
+            padding: clamp(24px, 2.5vw, 32px);
+            color: #ffffff;
+            position: relative;
+        }
+
+        .details-header-icon {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: clamp(24px, 2.5vw, 32px);
+            opacity: 0.1;
+            width: 120px;
+            height: 120px;
+        }
+
+        .details-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #ff5c00;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 700;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: clamp(12px, 1.25vw, 16px);
+        }
+
+        .details-title {
+            font-size: clamp(24px, 2.5vw, 30px);
+            font-weight: 700;
+            margin-bottom: clamp(12px, 1.25vw, 16px);
+        }
+
+        .details-description {
+            color: #cbd5e1;
+            font-size: clamp(16px, 1.67vw, 18px);
+            line-height: 1.6;
+            max-width: 672px;
+        }
+
+        .details-body {
+            padding: clamp(24px, 2.5vw, 32px);
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: clamp(24px, 2.5vw, 40px);
+        }
+
+        @media (min-width: 768px) {
+            .details-body {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .details-section {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(24px, 2.5vw, 32px);
+        }
+
+        .details-section-title {
+            font-size: clamp(12px, 1.25vw, 14px);
+            font-weight: 800;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .details-section-icon {
+            width: 16px;
+            height: 16px;
+        }
+
+        .measure-item {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(12px, 1.25vw, 16px);
+        }
+
+        .measure-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .measure-badge {
+            background: #fff5e6;
+            color: #ff5c00;
+            font-size: clamp(10px, 1.04vw, 12px);
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .measure-label {
+            font-weight: 700;
+            color: #0f172a;
+            font-size: clamp(14px, 1.46vw, 16px);
+        }
+
+        .measure-list {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(10px, 1.04vw, 12px);
+        }
+
+        .measure-list-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            transition: transform 0.2s ease;
+        }
+
+        .measure-list-item:hover {
+            transform: scale(1.02);
+        }
+
+        .measure-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #ff5c00;
+            margin-top: 6px;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+
+        .measure-list-item:hover .measure-dot {
+            transform: scale(1.5);
+        }
+
+        .measure-text {
+            color: #475569;
+            font-size: clamp(13px, 1.35vw, 14px);
+            line-height: 1.6;
+        }
+
+        .execution-plan {
+            background: #f8fafc;
+            padding: clamp(20px, 2.08vw, 24px);
+            border-radius: clamp(12px, 1.25vw, 16px);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(20px, 2.08vw, 24px);
+        }
+
+        .execution-pic {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .execution-pic-icon {
+            width: 48px;
+            height: 48px;
+            background: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            color: #ff5c00;
+        }
+
+        .execution-pic-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .execution-pic-label {
+            font-size: clamp(10px, 1.04vw, 12px);
+            color: #94a3b8;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .execution-pic-name {
+            font-size: clamp(16px, 1.67vw, 18px);
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .execution-dates {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(12px, 1.25vw, 16px);
+        }
+
+        .execution-date-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: clamp(13px, 1.35vw, 14px);
+        }
+
+        .execution-date-label {
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .execution-date-value {
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .execution-date-divider {
+            border-top: 1px solid #e2e8f0;
+            padding-top: clamp(12px, 1.25vw, 16px);
+        }
+
+        .execution-status {
+            background: #ffffff;
+            padding: clamp(12px, 1.25vw, 16px);
+            border-radius: clamp(8px, 0.83vw, 12px);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .execution-status-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .execution-status-label {
+            font-size: clamp(10px, 1.04vw, 12px);
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        .execution-status-percent {
+            font-size: clamp(10px, 1.04vw, 12px);
+            font-weight: 700;
+            color: #ff5c00;
+        }
+
+        .execution-progress {
+            width: 100%;
+            background: #f1f5f9;
+            height: 6px;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .execution-progress-bar {
+            background: #ff5c00;
+            height: 100%;
+            width: 65%;
+            border-radius: 9999px;
+            transition: width 0.5s ease;
+        }
+
+        .execution-button {
+            width: 100%;
+            padding: clamp(14px, 1.46vw, 16px);
+            background: #0f172a;
+            color: #ffffff;
+            font-weight: 700;
+            border-radius: clamp(8px, 0.83vw, 12px);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: clamp(12px, 1.25vw, 16px);
+        }
+
+        .execution-button:hover {
+            background: #ff5c00;
+            box-shadow: 0 4px 12px rgba(255, 92, 0, 0.3);
+        }
+
+        .execution-button-icon {
+            width: 18px;
+            height: 18px;
         }
 
         /* 自定义滚动条样式 */
@@ -2565,71 +3107,333 @@ if (file_exists($jsonFile)) {
 
                 <!-- Strategic Objectives -->
                 <?php if (!empty($strategyData['strategicObjectives'])): ?>
-                <div class="section">
-                    <h2 class="section-title">战略目标</h2>
-                    <div class="objectives-container">
-                        <?php 
-                        // Sort years in ascending order
-                        $years = array_keys($strategyData['strategicObjectives']);
-                        sort($years, SORT_NUMERIC);
-                        
-                        foreach ($years as $year): 
-                            $objectives = $strategyData['strategicObjectives'][$year];
-                            if (empty($objectives)) continue;
-                        ?>
-                        <div class="year-section">
-                            <div class="year-title"><?php echo htmlspecialchars($year); ?> 年</div>
-                            <div class="objectives-grid">
-                                <?php foreach ($objectives as $objective): ?>
-                                <div class="objective-card">
-                                    <div class="objective-department">
-                                        <?php echo htmlspecialchars($objective['department'] ?? ''); ?>
+                <div class="strategic-objectives-section">
+                    <!-- 背景装饰 -->
+                    <div class="strategic-bg-decor"></div>
+                    
+                    <div class="strategic-container">
+                        <!-- 头部区域 -->
+                        <header class="strategic-header">
+                            <div class="strategic-header-content">
+                                <div class="strategic-header-left">
+                                    <div class="strategic-badge">
+                                        <svg class="strategy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <path d="M12 6v6l4 2"/>
+                                        </svg>
+                                        <span>Strategic Vision</span>
                                     </div>
-                                    <div class="objective-strategy">
-                                        <?php echo htmlspecialchars($objective['strategy'] ?? ''); ?>
+                                    <h1 class="strategic-main-title">
+                                        <?php 
+                                        // 获取主要目标（从第一个年份的第一个目标或自定义）
+                                        $firstYear = min(array_keys($strategyData['strategicObjectives']));
+                                        $mainObjective = '实现战略目标';
+                                        if (!empty($strategyData['strategicObjectives'][$firstYear][0]['strategy'])) {
+                                            $mainObjective = $strategyData['strategicObjectives'][$firstYear][0]['strategy'];
+                                        }
+                                        echo htmlspecialchars($mainObjective);
+                                        ?>
+                                        <span class="strategic-year">by <?php echo htmlspecialchars($firstYear); ?></span>
+                                    </h1>
+                                </div>
+                                
+                                <!-- 里程碑卡片 -->
+                                <div class="strategic-milestone-card">
+                                    <div class="milestone-header">
+                                        <svg class="milestone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                                        </svg>
+                                        <span class="milestone-label">Phase 1 Milestone</span>
                                     </div>
-                                    
-                                    <?php if (!empty($objective['dashboardMetrics'])): ?>
-                                    <div class="objective-metrics">
-                                        <div class="objective-metrics-title">关键指标：</div>
-                                        <ul class="objective-metrics-list">
-                                            <?php foreach ($objective['dashboardMetrics'] as $metric): ?>
-                                            <li><?php echo htmlspecialchars($metric); ?></li>
-                                            <?php endforeach; ?>
-                                        </ul>
+                                    <p class="milestone-text">
+                                        <?php 
+                                        // 获取子目标
+                                        $subObjective = '推进第一阶段计划';
+                                        if (!empty($strategyData['strategicObjectives'][$firstYear][0]['department'])) {
+                                            $subObjective = $strategyData['strategicObjectives'][$firstYear][0]['department'] . ' - ' . 
+                                                          ($strategyData['strategicObjectives'][$firstYear][0]['strategy'] ?? '');
+                                        }
+                                        echo htmlspecialchars($subObjective);
+                                        ?>
+                                    </p>
+                                    <div class="milestone-progress">
+                                        <div class="milestone-progress-bar"></div>
                                     </div>
-                                    <?php endif; ?>
-
-                                    <div class="objective-meta">
-                                        <?php if (!empty($objective['pic'])): ?>
-                                        <div class="objective-meta-item">
-                                            <span class="objective-meta-label">负责人：</span>
-                                            <span class="objective-meta-value"><?php echo htmlspecialchars($objective['pic']); ?></span>
-                                        </div>
-                                        <?php endif; ?>
-                                        
-                                        <?php if (!empty($objective['startDate']) || !empty($objective['endDate'])): ?>
-                                        <div class="objective-meta-item">
-                                            <span class="objective-meta-label">时间：</span>
-                                            <span class="objective-meta-value">
-                                                <?php 
-                                                if (!empty($objective['startDate']) && !empty($objective['endDate'])) {
-                                                    echo date('Y-m-d', strtotime($objective['startDate'])) . ' ~ ' . date('Y-m-d', strtotime($objective['endDate']));
-                                                } elseif (!empty($objective['startDate'])) {
-                                                    echo date('Y-m-d', strtotime($objective['startDate']));
-                                                }
-                                                ?>
-                                            </span>
-                                        </div>
-                                        <?php endif; ?>
+                                    <div class="milestone-target">
+                                        Target: <?php echo htmlspecialchars($firstYear); ?>
                                     </div>
                                 </div>
-                                <?php endforeach; ?>
                             </div>
-                        </div>
-                        <?php endforeach; ?>
+                        </header>
+
+                        <!-- 主要内容区域 -->
+                        <main class="strategic-main">
+                            <!-- 策略列表 -->
+                            <div class="strategic-list-wrapper">
+                                <h2 class="strategic-list-title">
+                                    Strategic Pillars
+                                    <span class="strategic-list-count">
+                                        <?php 
+                                        $totalStrategies = 0;
+                                        foreach ($strategyData['strategicObjectives'] as $year => $objectives) {
+                                            $totalStrategies += count($objectives);
+                                        }
+                                        echo $totalStrategies;
+                                        ?>
+                                    </span>
+                                </h2>
+                                <div class="strategic-list" id="strategicList">
+                                    <?php 
+                                    $strategyIndex = 0;
+                                    $allStrategies = [];
+                                    foreach ($strategyData['strategicObjectives'] as $year => $objectives) {
+                                        foreach ($objectives as $objective) {
+                                            $allStrategies[] = array_merge($objective, ['year' => $year, 'index' => $strategyIndex++]);
+                                        }
+                                    }
+                                    
+                                    foreach ($allStrategies as $index => $strategy): 
+                                        $isActive = $index === 0;
+                                    ?>
+                                    <button 
+                                        class="strategy-card <?php echo $isActive ? 'active' : ''; ?>" 
+                                        data-strategy-index="<?php echo $index; ?>"
+                                        onclick="selectStrategy(<?php echo $index; ?>)"
+                                    >
+                                        <div class="strategy-icon-wrapper">
+                                            <svg class="strategy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                                <circle cx="9" cy="7" r="4"/>
+                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                            </svg>
+                                        </div>
+                                        <div class="strategy-content">
+                                            <div class="strategy-meta">
+                                                <span class="strategy-id">
+                                                    <?php echo htmlspecialchars($strategy['department'] ?? 'STRATEGY'); ?> • <?php echo htmlspecialchars($strategy['year'] ?? ''); ?>
+                                                </span>
+                                                <svg class="strategy-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                                    <polyline points="22 4 12 14.01 9 11.01"/>
+                                                </svg>
+                                            </div>
+                                            <h3 class="strategy-title">
+                                                <?php echo htmlspecialchars($strategy['strategy'] ?? ''); ?>
+                                            </h3>
+                                            <p class="strategy-description">
+                                                <?php echo htmlspecialchars($strategy['department'] ?? ''); ?>
+                                            </p>
+                                        </div>
+                                        <svg class="strategy-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="9 18 15 12 9 6"/>
+                                        </svg>
+                                    </button>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+
+                            <!-- 详细视图 -->
+                            <div class="strategic-details" id="strategicDetails">
+                                <?php if (!empty($allStrategies[0])): 
+                                    $selectedStrategy = $allStrategies[0];
+                                ?>
+                                <div class="details-header">
+                                    <svg class="details-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="9" cy="7" r="4"/>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                    </svg>
+                                    <div>
+                                        <div class="details-badge">Selected Pillar</div>
+                                        <h2 class="details-title"><?php echo htmlspecialchars($selectedStrategy['strategy'] ?? ''); ?></h2>
+                                        <p class="details-description">
+                                            <?php echo htmlspecialchars($selectedStrategy['department'] ?? ''); ?>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="details-body">
+                                    <!-- 指标和措施 -->
+                                    <div class="details-section">
+                                        <h4 class="details-section-title">
+                                            <svg class="details-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                                            </svg>
+                                            Measures & Metrics
+                                        </h4>
+                                        
+                                        <?php if (!empty($selectedStrategy['dashboardMetrics'])): ?>
+                                        <div class="measure-item">
+                                            <div class="measure-header">
+                                                <span class="measure-badge">M1</span>
+                                                <span class="measure-label">关键指标</span>
+                                            </div>
+                                            <ul class="measure-list">
+                                                <?php foreach ($selectedStrategy['dashboardMetrics'] as $metric): ?>
+                                                <li class="measure-list-item">
+                                                    <div class="measure-dot"></div>
+                                                    <span class="measure-text"><?php echo htmlspecialchars($metric); ?></span>
+                                                </li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        </div>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <!-- 执行计划 -->
+                                    <div class="details-section">
+                                        <h4 class="details-section-title">
+                                            <svg class="details-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                                <line x1="3" y1="10" x2="21" y2="10"/>
+                                            </svg>
+                                            Execution Plan
+                                        </h4>
+                                        
+                                        <div class="execution-plan">
+                                            <?php if (!empty($selectedStrategy['pic'])): ?>
+                                            <div class="execution-pic">
+                                                <div class="execution-pic-icon">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                                        <circle cx="12" cy="7" r="4"/>
+                                                    </svg>
+                                                </div>
+                                                <div class="execution-pic-info">
+                                                    <span class="execution-pic-label">Person in Charge</span>
+                                                    <span class="execution-pic-name"><?php echo htmlspecialchars($selectedStrategy['pic']); ?></span>
+                                                </div>
+                                            </div>
+                                            <?php endif; ?>
+                                            
+                                            <div class="execution-dates">
+                                                <?php if (!empty($selectedStrategy['startDate'])): ?>
+                                                <div class="execution-date-item">
+                                                    <span class="execution-date-label">Start Date</span>
+                                                    <span class="execution-date-value">
+                                                        <?php echo date('Y-m-d', strtotime($selectedStrategy['startDate'])); ?>
+                                                    </span>
+                                                </div>
+                                                <?php endif; ?>
+                                                
+                                                <?php if (!empty($selectedStrategy['endDate'])): ?>
+                                                <div class="execution-date-item execution-date-divider">
+                                                    <span class="execution-date-label">Completion Target</span>
+                                                    <span class="execution-date-value">
+                                                        <?php echo date('Y-m-d', strtotime($selectedStrategy['endDate'])); ?>
+                                                    </span>
+                                                </div>
+                                                <?php endif; ?>
+                                            </div>
+
+                                            <div class="execution-status">
+                                                <div class="execution-status-header">
+                                                    <span class="execution-status-label">Preparation Status</span>
+                                                    <span class="execution-status-percent">65% Ready</span>
+                                                </div>
+                                                <div class="execution-progress">
+                                                    <div class="execution-progress-bar"></div>
+                                                </div>
+                                            </div>
+
+                                            <button class="execution-button">
+                                                Review Documentation
+                                                <svg class="execution-button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <polyline points="9 18 15 12 9 6"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </main>
                     </div>
                 </div>
+                
+                <script>
+                // 存储所有策略数据
+                const strategiesData = <?php echo json_encode($allStrategies, JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT); ?>;
+                
+                function selectStrategy(index) {
+                    const strategy = strategiesData[index];
+                    if (!strategy) return;
+                    
+                    // 更新卡片状态
+                    document.querySelectorAll('.strategy-card').forEach((card, i) => {
+                        if (i === index) {
+                            card.classList.add('active');
+                        } else {
+                            card.classList.remove('active');
+                        }
+                    });
+                    
+                    // 更新详细视图
+                    const detailsEl = document.getElementById('strategicDetails');
+                    detailsEl.classList.add('hidden');
+                    
+                    setTimeout(() => {
+                        // 更新内容
+                        const header = detailsEl.querySelector('.details-header > div');
+                        const body = detailsEl.querySelector('.details-body');
+                        
+                        if (header) {
+                            header.querySelector('.details-title').textContent = strategy.strategy || '';
+                            header.querySelector('.details-description').textContent = strategy.department || '';
+                        }
+                        
+                        if (body) {
+                            // 更新指标
+                            const metricsSection = body.querySelector('.measure-list');
+                            if (metricsSection && strategy.dashboardMetrics) {
+                                metricsSection.innerHTML = strategy.dashboardMetrics.map(metric => 
+                                    `<li class="measure-list-item">
+                                        <div class="measure-dot"></div>
+                                        <span class="measure-text">${metric}</span>
+                                    </li>`
+                                ).join('');
+                            }
+                            
+                            // 更新负责人
+                            const picName = body.querySelector('.execution-pic-name');
+                            if (picName) {
+                                picName.textContent = strategy.pic || 'TBD';
+                            }
+                            
+                            // 更新日期
+                            const startDate = body.querySelector('.execution-date-item .execution-date-value');
+                            if (startDate && strategy.startDate) {
+                                startDate.textContent = new Date(strategy.startDate).toLocaleDateString('zh-CN');
+                            }
+                            
+                            const endDate = body.querySelector('.execution-date-divider .execution-date-value');
+                            if (endDate && strategy.endDate) {
+                                endDate.textContent = new Date(strategy.endDate).toLocaleDateString('zh-CN');
+                            }
+                        }
+                        
+                        detailsEl.classList.remove('hidden');
+                    }, 300);
+                }
+                
+                // 初始化动画
+                document.addEventListener('DOMContentLoaded', function() {
+                    const cards = document.querySelectorAll('.strategy-card');
+                    cards.forEach((card, index) => {
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateX(-30px)';
+                        setTimeout(() => {
+                            card.style.transition = 'all 0.8s ease';
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateX(0)';
+                        }, 300 + (index * 100));
+                    });
+                });
+                </script>
                 <?php endif; ?>
 
             <?php else: ?>
