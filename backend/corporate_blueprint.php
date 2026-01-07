@@ -1343,7 +1343,7 @@ if (file_exists($jsonFile)) {
 
         /* Strategic Objectives - 基于App.tsx设计 */
         .strategic-objectives-section {
-            background: #faf7f2;
+            background: #f8fafc;
             min-height: 100vh;
             padding: clamp(32px, 3.33vw, 48px) 0;
             position: relative;
@@ -1453,15 +1453,6 @@ if (file_exists($jsonFile)) {
             }
         }
 
-        /* 策略列表容器 */
-        .strategic-list-wrapper {
-            background: #ffffff;
-            border-radius: clamp(16px, 1.67vw, 24px);
-            padding: clamp(24px, 2.5vw, 32px);
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
         /* 策略列表 */
         .strategic-list {
             display: flex;
@@ -1489,14 +1480,14 @@ if (file_exists($jsonFile)) {
         }
 
         .strategy-card {
-            background: #f8fafc;
+            background: rgba(255, 255, 255, 0.5);
             border-radius: clamp(12px, 1.25vw, 16px);
             padding: clamp(16px, 1.67vw, 20px);
             transition: all 0.3s ease;
             cursor: pointer;
             text-align: left;
             width: 100%;
-            border: 1px solid #e2e8f0;
+            border: none;
             position: relative;
             display: flex;
             align-items: flex-start;
@@ -1504,9 +1495,8 @@ if (file_exists($jsonFile)) {
         }
 
         .strategy-card:hover {
-            background: #ffffff;
+            background: rgba(255, 255, 255, 1);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            border-color: #cbd5e1;
         }
 
         .strategy-card.active {
@@ -1630,11 +1620,11 @@ if (file_exists($jsonFile)) {
 
         /* 详细视图 */
         .strategic-details {
-            background: #0f172a;
+            background: #ffffff;
             border-radius: clamp(16px, 1.67vw, 24px);
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid #e2e8f0;
             min-height: 600px;
             display: flex;
             flex-direction: column;
@@ -1750,7 +1740,7 @@ if (file_exists($jsonFile)) {
 
         .measure-label {
             font-weight: 700;
-            color: #ffffff;
+            color: #0f172a;
             font-size: clamp(14px, 1.46vw, 16px);
         }
 
@@ -1786,16 +1776,16 @@ if (file_exists($jsonFile)) {
         }
 
         .measure-text {
-            color: #cbd5e1;
+            color: #475569;
             font-size: clamp(13px, 1.35vw, 14px);
             line-height: 1.6;
         }
 
         .execution-plan {
-            background: rgba(255, 255, 255, 0.05);
+            background: #f8fafc;
             padding: clamp(20px, 2.08vw, 24px);
             border-radius: clamp(12px, 1.25vw, 16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid #e2e8f0;
             display: flex;
             flex-direction: column;
             gap: clamp(20px, 2.08vw, 24px);
@@ -1835,7 +1825,7 @@ if (file_exists($jsonFile)) {
         .execution-pic-name {
             font-size: clamp(16px, 1.67vw, 18px);
             font-weight: 700;
-            color: #ffffff;
+            color: #0f172a;
         }
 
         .execution-dates {
@@ -1852,17 +1842,17 @@ if (file_exists($jsonFile)) {
         }
 
         .execution-date-label {
-            color: #94a3b8;
+            color: #64748b;
             font-weight: 500;
         }
 
         .execution-date-value {
             font-weight: 700;
-            color: #ffffff;
+            color: #0f172a;
         }
 
         .execution-date-divider {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid #e2e8f0;
             padding-top: clamp(12px, 1.25vw, 16px);
         }
 
