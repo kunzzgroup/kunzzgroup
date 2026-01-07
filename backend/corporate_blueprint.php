@@ -1491,7 +1491,7 @@ if (file_exists($jsonFile)) {
             cursor: pointer;
             text-align: left;
             width: 100%;
-            border: none;
+            border: 1px solid #F7931E;
             position: relative;
             display: flex;
             align-items: flex-start;
@@ -1501,6 +1501,7 @@ if (file_exists($jsonFile)) {
         .strategy-card:hover {
             background: rgba(255, 255, 255, 1);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-color: #F7931E;
         }
 
         .strategy-card.active {
