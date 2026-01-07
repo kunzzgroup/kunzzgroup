@@ -1654,10 +1654,9 @@ if (file_exists($jsonFile)) {
             position: absolute;
             top: 0;
             right: 0;
-            padding: clamp(24px, 2.5vw, 32px);
             opacity: 0.1;
-            width: 140px;
-            height: 140px;
+            width: 210px;
+            height: 210px;
         }
 
         .details-badge {
