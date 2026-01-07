@@ -3463,7 +3463,7 @@ if (file_exists($jsonFile)) {
                                         <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                                     </svg>
                                     <div>
-                                        <div class="details-badge">Selected Pillar</div>
+                                        <div class="details-badge" id="detailsBadge">S1-人事部</div>
                                         <h2 class="details-title" id="detailsTitle">建立高效且有吸引力的人才管理体系</h2>
                                         <p class="details-description" id="detailsDescription">支持公司服务子公司扩展</p>
                                     </div>
@@ -3545,6 +3545,7 @@ if (file_exists($jsonFile)) {
                 // 硬编码的5个策略数据
                 const strategiesData = [
                     {
+                        deptName: 'S1-人事部',
                         strategy: '建立高效且有吸引力的人才管理体系',
                         department: '支持公司服务子公司扩展',
                         pic: 'Paris',
@@ -3553,6 +3554,7 @@ if (file_exists($jsonFile)) {
                         dashboardMetrics: ['人才引进与储备', '文化宣传']
                     },
                     {
+                        deptName: 'S2-推广部',
                         strategy: '建立一套标准化、多平台适用的人才与传播体系',
                         department: '赋能子公司快速启动社群内容运营与品牌建设',
                         pic: 'LW',
@@ -3561,6 +3563,7 @@ if (file_exists($jsonFile)) {
                         dashboardMetrics: ['人才体系搭建', '平台能力建设', '品牌知名度']
                     },
                     {
+                        deptName: 'S3-设计部',
                         strategy: '打造创新且高效的设计团队',
                         department: '提升品牌设计的质量',
                         pic: 'SH',
@@ -3569,6 +3572,7 @@ if (file_exists($jsonFile)) {
                         dashboardMetrics: ['创意思维训练', '自动化工具引入']
                     },
                     {
+                        deptName: 'S4-开发部',
                         strategy: '建立高效IT体系',
                         department: '提升营运效率与数据整合,支撑公司扩张',
                         pic: 'ZJ',
@@ -3577,6 +3581,7 @@ if (file_exists($jsonFile)) {
                         dashboardMetrics: ['统一简化编程体系', '系统稳定性']
                     },
                     {
+                        deptName: 'S5-摄影部',
                         strategy: '摄影部战略',
                         department: '待定',
                         pic: '',
@@ -3609,6 +3614,7 @@ if (file_exists($jsonFile)) {
                         // 更新内容
                         document.getElementById('detailsTitle').textContent = strategy.strategy;
                         document.getElementById('detailsDescription').textContent = strategy.department;
+                        document.getElementById('detailsBadge').textContent = strategy.deptName || 'Selected Pillar';
                         document.getElementById('picName').textContent = strategy.pic || '—';
                         
                         // 格式化日期
