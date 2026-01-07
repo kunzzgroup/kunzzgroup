@@ -3275,7 +3275,7 @@ if (file_exists($jsonFile)) {
                                             <circle cx="12" cy="12" r="10"/>
                                             <path d="M12 6v6l4 2"/>
                                         </svg>
-                                        <span>Strategic Vision</span>
+                                        <span>最终目标</span>
                                     </div>
                                     <h1 class="strategic-main-title">
                                         2028年
@@ -3290,7 +3290,7 @@ if (file_exists($jsonFile)) {
                             <!-- 策略列表 -->
                             <div class="strategic-list-wrapper">
                                 <h2 class="strategic-list-title">
-                                    Strategic Pillars
+                                    策略 · 检核
                                     <span class="strategic-list-count">5</span>
                                 </h2>
                                 <div class="strategic-list" id="strategicList">
@@ -3468,7 +3468,7 @@ if (file_exists($jsonFile)) {
                                             <svg class="details-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                 <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
                                             </svg>
-                                            Measures & Metrics
+                                            策略 · 检核
                                         </h4>
                                         
                                         <div class="measure-item">
