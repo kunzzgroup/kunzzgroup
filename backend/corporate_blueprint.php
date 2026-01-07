@@ -2494,41 +2494,6 @@ if (file_exists($jsonFile)) {
             margin-bottom: 6px;
         }
 
-        /* 保密标识 */
-        .org-confidential-badge {
-            position: absolute;
-            bottom: clamp(32px, 3.33vw, 48px);
-            right: clamp(32px, 3.33vw, 48px);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 20px;
-            background: #0f172a;
-            color: #ffffff;
-            border-radius: 9999px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            z-index: 20;
-        }
-
-        .org-confidential-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #ff5c00;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .org-confidential-text {
-            font-size: 9px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
 
         /* 响应式调整 */
         @media (max-width: 1024px) {
@@ -2602,12 +2567,6 @@ if (file_exists($jsonFile)) {
                 left: auto;
                 top: auto;
                 margin-top: 16px;
-            }
-
-            .org-confidential-badge {
-                bottom: clamp(20px, 2.08vw, 24px);
-                right: clamp(20px, 2.08vw, 24px);
-                padding: 8px 14px;
             }
 
             .org-bg-text img {
@@ -3339,12 +3298,6 @@ if (file_exists($jsonFile)) {
                             echo '</div>';
                             ?>
 
-                        </div>
-
-                        <!-- 保密标识 -->
-                        <div class="org-confidential-badge">
-                            <div class="org-confidential-dot"></div>
-                            <span class="org-confidential-text">Level 1 Security Access Only</span>
                         </div>
                     </div>
                 </div>
