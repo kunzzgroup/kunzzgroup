@@ -1661,16 +1661,17 @@ if (file_exists($jsonFile)) {
         }
 
         .details-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            background: #ff5c00;
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            background: #F7931E;
             color: #ffffff;
-            font-size: 10px;
+            font-size: clamp(12px, 1.25vw, 14px);
             font-weight: 700;
             border-radius: 9999px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.02em;
             margin-bottom: clamp(12px, 1.25vw, 16px);
+            line-height: 1;
         }
 
         .details-title {
@@ -3463,7 +3464,7 @@ if (file_exists($jsonFile)) {
                                         <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                                     </svg>
                                     <div>
-                                        <div class="details-badge" id="detailsBadge">S1-人事部</div>
+                                        <div class="details-badge" id="detailsBadge">人事部</div>
                                         <h2 class="details-title" id="detailsTitle">建立高效且有吸引力的人才管理体系</h2>
                                         <p class="details-description" id="detailsDescription">支持公司服务子公司扩展</p>
                                     </div>
@@ -3546,6 +3547,7 @@ if (file_exists($jsonFile)) {
                 const strategiesData = [
                     {
                         deptName: 'S1-人事部',
+                        deptDisplay: '人事部',
                         strategy: '建立高效且有吸引力的人才管理体系',
                         department: '支持公司服务子公司扩展',
                         pic: 'Paris',
@@ -3555,6 +3557,7 @@ if (file_exists($jsonFile)) {
                     },
                     {
                         deptName: 'S2-推广部',
+                        deptDisplay: '推广部',
                         strategy: '建立一套标准化、多平台适用的人才与传播体系',
                         department: '赋能子公司快速启动社群内容运营与品牌建设',
                         pic: 'LW',
@@ -3564,6 +3567,7 @@ if (file_exists($jsonFile)) {
                     },
                     {
                         deptName: 'S3-设计部',
+                        deptDisplay: '设计部',
                         strategy: '打造创新且高效的设计团队',
                         department: '提升品牌设计的质量',
                         pic: 'SH',
@@ -3573,6 +3577,7 @@ if (file_exists($jsonFile)) {
                     },
                     {
                         deptName: 'S4-开发部',
+                        deptDisplay: '开发部',
                         strategy: '建立高效IT体系',
                         department: '提升营运效率与数据整合,支撑公司扩张',
                         pic: 'ZJ',
@@ -3582,6 +3587,7 @@ if (file_exists($jsonFile)) {
                     },
                     {
                         deptName: 'S5-摄影部',
+                        deptDisplay: '摄影部',
                         strategy: '摄影部战略',
                         department: '待定',
                         pic: '',
@@ -3614,7 +3620,7 @@ if (file_exists($jsonFile)) {
                         // 更新内容
                         document.getElementById('detailsTitle').textContent = strategy.strategy;
                         document.getElementById('detailsDescription').textContent = strategy.department;
-                        document.getElementById('detailsBadge').textContent = strategy.deptName || 'Selected Pillar';
+                        document.getElementById('detailsBadge').textContent = strategy.deptDisplay || strategy.deptName || 'Selected Pillar';
                         document.getElementById('picName').textContent = strategy.pic || '—';
                         
                         // 格式化日期
