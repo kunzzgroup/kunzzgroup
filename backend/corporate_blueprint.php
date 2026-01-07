@@ -1614,7 +1614,7 @@ if (file_exists($jsonFile)) {
             }
         }
 
-        /* Binary Tree 组织架构样式 - 垂直二叉树结构 */
+        /* Binary Tree 组织架构样式 - 横向二叉树结构 */
         .mermaid-org-chart {
             background:
                 radial-gradient(circle at 10% 20%, rgba(255, 92, 0, 0.02) 0, transparent 55%),
@@ -1627,59 +1627,60 @@ if (file_exists($jsonFile)) {
             overflow-y: visible;
             min-height: clamp(400px, 41.67vw, 600px);
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
+            justify-content: flex-start;
+            align-items: center;
         }
 
         .org-tree {
             --dark: #ff5c00;
-            margin-top: 30px;
+            margin-left: 30px;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             justify-content: center;
             align-items: center;
             width: 100%;
+            min-width: fit-content;
         }
 
         .org-tree .node {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
-            margin: 0 20px;
+            margin: 20px 0;
             position: relative;
         }
 
         .org-tree .node:not(.node--root) > .node__element::before {
             content: '';
-            height: 20px;
-            width: 2px;
+            width: 20px;
+            height: 2px;
             background-color: #ff5c00;
             display: block;
             position: absolute;
-            left: 0;
-            right: 0;
-            top: -20px;
+            top: 0;
+            bottom: 0;
+            left: -20px;
             margin: auto;
             transition: all ease 0.2s;
         }
 
         .org-tree .node.node--left {
-            margin-right: 10px;
+            margin-bottom: 10px;
         }
 
         .org-tree .node.node--right {
-            margin-left: 10px;
+            margin-top: 10px;
         }
 
         .org-tree .node__element {
             cursor: pointer;
             border: 2px solid #ff5c00;
-            height: auto;
-            min-height: 60px;
-            background: linear-gradient(180deg, #ff7a1a 0%, #ff5c00 55%, #ff4b00 100%);
-            border-radius: 12px;
+            width: auto;
             min-width: clamp(120px, 12.5vw, 160px);
             max-width: clamp(160px, 16.67vw, 200px);
+            min-height: 60px;
+            background: linear-gradient(90deg, #ff7a1a 0%, #ff5c00 55%, #ff4b00 100%);
+            border-radius: 12px;
             padding: clamp(10px, 1.04vw, 14px) clamp(12px, 1.25vw, 16px);
             font-size: clamp(12px, 1.25vw, 16px);
             line-height: 1.4;
@@ -1709,8 +1710,8 @@ if (file_exists($jsonFile)) {
         }
 
         .org-tree .node__bottom-line {
-            height: 20px;
-            width: 2px;
+            width: 20px;
+            height: 2px;
             background-color: #ff5c00;
             transition: all ease 0.2s;
         }
@@ -1724,34 +1725,36 @@ if (file_exists($jsonFile)) {
 
         .org-tree .node__children {
             display: flex;
-            padding: 20px 0;
-            border-top: 2px solid #ff5c00;
+            flex-direction: column;
+            padding: 0 20px;
+            border-left: 2px solid #ff5c00;
             gap: 20px;
+            align-items: center;
         }
 
         .org-tree .node__element:hover {
             border-color: #ff9440;
-            background: linear-gradient(180deg, #ff9440 0%, #ff7a1a 55%, #ff5c00 100%);
-            transform: translateY(-2px);
+            background: linear-gradient(90deg, #ff9440 0%, #ff7a1a 55%, #ff5c00 100%);
+            transform: translateX(-2px);
             box-shadow: 
                 0 6px 16px rgba(255, 92, 0, 0.3),
                 0 0 0 1px rgba(255, 255, 255, 0.4);
         }
 
         .org-tree .node__element:hover ~ .node__children .node__element::before {
-            width: 3px;
+            height: 3px;
             background-color: #ff9440;
         }
 
         .org-tree .node__element:hover ~ .node__bottom-line,
         .org-tree .node__element:hover ~ .node__children .node__bottom-line {
-            width: 3px;
+            height: 3px;
             background-color: #ff9440;
         }
 
         .org-tree .node__element:hover ~ .node__children,
         .org-tree .node__element:hover ~ .node__children .node__children {
-            border-top-width: 3px;
+            border-left-width: 3px;
             border-color: #ff9440;
         }
 
@@ -1760,16 +1763,37 @@ if (file_exists($jsonFile)) {
             .mermaid-org-chart {
                 padding: clamp(20px, 2.08vw, 30px);
                 min-height: clamp(300px, 31.25vw, 400px);
+                overflow-x: auto;
+                overflow-y: visible;
+            }
+
+            .org-tree {
+                margin-left: 10px;
+            }
+
+            .org-tree .node {
+                margin: 10px 0;
             }
 
             .org-tree .node__element {
                 min-width: clamp(100px, 10.42vw, 140px);
                 max-width: clamp(140px, 14.58vw, 180px);
                 padding: clamp(8px, 0.83vw, 12px) clamp(10px, 1.04vw, 14px);
+                min-height: 50px;
             }
 
             .org-tree .node__children {
                 gap: 10px;
+                padding: 0 15px;
+            }
+
+            .org-tree .node__bottom-line {
+                width: 15px;
+            }
+
+            .org-tree .node:not(.node--root) > .node__element::before {
+                width: 15px;
+                left: -15px;
             }
         }
 
