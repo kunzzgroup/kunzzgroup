@@ -1680,13 +1680,6 @@ if (file_exists($jsonFile)) {
             margin-bottom: clamp(12px, 1.25vw, 16px);
         }
 
-        .details-description {
-            color: #cbd5e1;
-            font-size: clamp(16px, 1.67vw, 18px);
-            line-height: 1.6;
-            max-width: 672px;
-        }
-
         .details-body {
             padding: clamp(24px, 2.5vw, 32px);
             flex: 1;
@@ -3466,7 +3459,6 @@ if (file_exists($jsonFile)) {
                                     <div>
                                         <div class="details-badge" id="detailsBadge">人事部</div>
                                         <h2 class="details-title" id="detailsTitle">建立高效且有吸引力的人才管理体系</h2>
-                                        <p class="details-description" id="detailsDescription">支持公司服务子公司扩展</p>
                                     </div>
                                 </div>
 
@@ -3619,7 +3611,6 @@ if (file_exists($jsonFile)) {
                     setTimeout(() => {
                         // 更新内容
                         document.getElementById('detailsTitle').textContent = strategy.strategy;
-                        document.getElementById('detailsDescription').textContent = strategy.department;
                         document.getElementById('detailsBadge').textContent = strategy.deptDisplay || strategy.deptName || 'Selected Pillar';
                         document.getElementById('picName').textContent = strategy.pic || '—';
                         
