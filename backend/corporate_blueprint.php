@@ -2294,12 +2294,12 @@ if (file_exists($jsonFile)) {
         .org-svg-connector {
             position: absolute;
             inset: 0;
-            width: 100%;
+            width: calc(100% + 40px);
             height: 100%;
             pointer-events: none;
             overflow: visible;
             z-index: 10;
-            left: -48px;
+            left: -40px;
         }
 
         .org-connector-path {
@@ -3082,7 +3082,8 @@ if (file_exists($jsonFile)) {
                                         $pathHighlighted = ($isHighlighted || $hoveredId === $childId);
                                         
                                         $html .= '<path class="org-connector-path' . ($pathHighlighted ? ' highlighted' : '') . '" ';
-                                        $html .= 'd="M 0,' . $yStart . '% C 32,' . $yStart . '% 32,' . $yEnd . '% 64,' . $yEnd . '%" ';
+                                        // 直角折线：先水平再垂直，类似示意图中的连接线
+                                        $html .= 'd="M 0,' . $yStart . '% L 32,' . $yStart . '% L 32,' . $yEnd . '% L 64,' . $yEnd . '%" ';
                                         $html .= 'data-path-from="' . $nodeId . '" data-path-to="' . $childId . '"/>';
                                     }
                                     $html .= '</svg>';
