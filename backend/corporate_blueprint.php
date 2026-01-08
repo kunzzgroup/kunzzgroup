@@ -2190,116 +2190,103 @@ if (file_exists($jsonFile)) {
             object-fit: contain;
         }
 
-        /* 组织架构分层泳道布局 */
-        .org-lanes-container {
+        /* 分区卡片墙布局 */
+        .org-sections-container {
             position: relative;
             z-index: 1;
             width: 100%;
-            padding: clamp(40px, 4.17vw, 60px) clamp(30px, 3.13vw, 50px);
-        }
-
-        .org-lane {
-            position: relative;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: clamp(20px, 2.08vw, 32px);
-            margin-bottom: clamp(60px, 6.25vw, 80px);
-            min-height: 120px;
+            flex-direction: column;
+            gap: clamp(24px, 2.5vw, 40px);
         }
 
-        .org-lane:last-child {
-            margin-bottom: 0;
+        .org-section {
+            background: #ffffff;
+            border-radius: clamp(16px, 1.67vw, 24px);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            padding: clamp(20px, 2.08vw, 32px);
         }
 
-        .org-lane.ceo-lane {
-            justify-content: center;
+        .org-section-title {
+            font-size: clamp(18px, 1.88vw, 24px);
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: clamp(16px, 1.67vw, 24px);
+            padding-bottom: clamp(12px, 1.25vw, 16px);
+            border-bottom: 2px solid #ff5c00;
         }
 
-        .org-lane.c-level-lane {
-            flex-wrap: wrap;
-            justify-content: center;
+        .org-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(clamp(140px, 14.58vw, 180px), 1fr));
+            gap: clamp(16px, 1.67vw, 24px);
         }
 
-        .org-lane.vp-lane {
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-
-        /* 卡片样式 */
-        .org-node-card {
-            position: relative;
-            z-index: 2;
-            background: linear-gradient(135deg, #ffffff 0%, #fff5eb 100%);
-            border: 2px solid #ff5c00;
+        .org-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
             border-radius: clamp(12px, 1.25vw, 16px);
-            padding: clamp(16px, 1.67vw, 24px) clamp(24px, 2.5vw, 32px);
-            min-width: clamp(140px, 14.58vw, 180px);
-            box-shadow: 0 4px 16px rgba(255, 92, 0, 0.2);
+            padding: clamp(16px, 1.67vw, 20px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
             transition: all 0.3s ease;
-            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            min-height: clamp(100px, 10.42vw, 140px);
         }
 
-        .org-node-card:hover {
+        .org-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(255, 92, 0, 0.35);
-            border-color: #ff7a33;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            border-color: #ff5c00;
         }
 
-        .org-node-card.ceo-card {
-            min-width: clamp(180px, 18.75vw, 240px);
-            padding: clamp(20px, 2.08vw, 28px) clamp(32px, 3.33vw, 40px);
-        }
-
-        .org-node-role {
+        .org-card-role {
             font-size: clamp(14px, 1.46vw, 18px);
-            font-weight: 700;
+            font-weight: 800;
             color: #ff5c00;
-            text-align: center;
             margin-bottom: clamp(8px, 0.83vw, 12px);
-            letter-spacing: 0.5px;
+            letter-spacing: 0.05em;
         }
 
-        .org-node-name {
-            font-size: clamp(13px, 1.35vw, 16px);
+        .org-card-name {
+            font-size: clamp(12px, 1.25vw, 16px);
             font-weight: 600;
-            color: #1f2937;
-            text-align: center;
+            color: #0f172a;
+            line-height: 1.4;
         }
 
-        /* 从CEO到C-Level的连接线 */
-        .org-connector-ceo {
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: clamp(30px, 3.13vw, 40px);
-            background: linear-gradient(to bottom, #ff5c00, rgba(255, 92, 0, 0.5));
-            z-index: 1;
+        .org-card-empty {
+            color: #94a3b8;
+            font-weight: 400;
+            font-style: italic;
         }
 
-        .org-connector-horizontal-line {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(to right, rgba(255, 92, 0, 0.3), #ff5c00 20%, #ff5c00 80%, rgba(255, 92, 0, 0.3));
-            z-index: 0;
+        /* CEO区块特殊样式 - 单个大卡片居中 */
+        .org-section-ceo .org-cards-grid {
+            grid-template-columns: 1fr;
+            max-width: clamp(200px, 20.83vw, 280px);
+            margin: 0 auto;
         }
 
-        /* 从C-Level到下属的连接线 */
-        .org-connector-to-child {
-            position: absolute;
-            bottom: -clamp(30px, 3.13vw, 40px);
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: clamp(30px, 3.13vw, 40px);
-            background: linear-gradient(to bottom, #ff5c00, rgba(255, 92, 0, 0.5));
-            z-index: 1;
+        .org-section-ceo .org-card {
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
+            border: none;
+            min-height: clamp(120px, 12.5vw, 160px);
+        }
+
+        .org-section-ceo .org-card-role {
+            color: #ffffff;
+            font-size: clamp(20px, 2.08vw, 28px);
+        }
+
+        .org-section-ceo .org-card-name {
+            color: #ffffff;
+            font-size: clamp(14px, 1.46vw, 20px);
         }
 
 
@@ -2312,54 +2299,67 @@ if (file_exists($jsonFile)) {
             }
 
             .org-tree-root-container {
-                padding: clamp(20px, 2.08vw, 30px) clamp(20px, 2.08vw, 30px);
+                padding: clamp(20px, 2.08vw, 30px);
             }
 
-            .org-lanes-container {
-                padding: clamp(20px, 2.08vw, 30px) clamp(15px, 1.56vw, 25px);
+            .org-sections-container {
+                gap: clamp(20px, 2.08vw, 32px);
             }
 
-            .org-lane {
-                gap: clamp(12px, 1.25vw, 20px);
-                margin-bottom: clamp(40px, 4.17vw, 60px);
-                min-height: 100px;
+            .org-section {
+                padding: clamp(16px, 1.67vw, 24px);
             }
 
-            .org-node-card {
-                min-width: clamp(120px, 12.5vw, 160px);
-                padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 24px);
+            .org-section-title {
+                font-size: clamp(16px, 1.67vw, 20px);
+                margin-bottom: clamp(12px, 1.25vw, 18px);
             }
 
-            .org-node-card.ceo-card {
-                min-width: clamp(150px, 15.63vw, 200px);
-                padding: clamp(16px, 1.67vw, 20px) clamp(24px, 2.5vw, 32px);
+            .org-cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(clamp(120px, 12.5vw, 160px), 1fr));
+                gap: clamp(12px, 1.25vw, 18px);
             }
 
-            .org-node-role {
+            .org-card {
+                min-height: clamp(90px, 9.38vw, 120px);
+                padding: clamp(12px, 1.25vw, 16px);
+            }
+
+            .org-card-role {
                 font-size: clamp(12px, 1.25vw, 16px);
+                margin-bottom: clamp(6px, 0.63vw, 10px);
             }
 
-            .org-node-name {
+            .org-card-name {
                 font-size: clamp(11px, 1.15vw, 14px);
             }
 
-            .org-connector-ceo,
-            .org-connector-to-child {
-                height: clamp(20px, 2.08vw, 30px);
+            .org-section-ceo .org-card {
+                min-height: clamp(100px, 10.42vw, 140px);
             }
 
-            .org-node-card.small {
-                width: 100px;
+            .org-section-ceo .org-card-role {
+                font-size: clamp(18px, 1.88vw, 24px);
             }
 
-            .org-pa-container {
-                left: 160px;
-                top: -90px;
+            .org-section-ceo .org-card-name {
+                font-size: clamp(12px, 1.25vw, 18px);
             }
 
             .org-bg-text img {
                 width: clamp(250px, 26.04vw, 600px);
                 height: clamp(250px, 26.04vw, 600px);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .org-cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 12px;
+            }
+
+            .org-section-ceo .org-cards-grid {
+                max-width: 100%;
             }
         }
 
@@ -2987,128 +2987,119 @@ if (file_exists($jsonFile)) {
                 <?php if (!empty($strategyData['organizationStructure'])): ?>
                 <div class="section">
                     <div class="org-workspace">
+                        <!-- 背景Logo图片 -->
+                        <div class="org-bg-text">
+                            <img src="images/images/logo.png" alt="Logo">
+                        </div>
+
                         <!-- 标题覆盖层 -->
                         <div class="org-title-overlay">
                             <div class="org-title-badge">Internal Framework</div>
                             <h1 class="org-title-main">高层组织架构图</h1>
                         </div>
 
-                        <!-- 树根容器（改为分层泳道布局） -->
+                        <!-- 分区卡片墙容器 -->
                         <div class="org-tree-root-container">
-                            <?php 
-                            $orgStructure = $strategyData['organizationStructure'];
+                        <?php 
+                        $orgStructure = $strategyData['organizationStructure'];
+                        
+                            // 提取CEO信息
+                            $ceoTitle = $orgStructure['ceo']['title'] ?? $orgStructure['ceo']['fullTitle'] ?? 'CEO';
+                            $ceoName  = $orgStructure['ceo']['name'] ?? '';
 
-                            // 按层级组织数据
-                            function organizeByLevel($orgStructure) {
-                                $levels = [];
-                                
-                                // Level 0: CEO
-                                if (!empty($orgStructure['ceo'])) {
-                                    $levels[0] = [[
-                                        'title' => $orgStructure['ceo']['title'] ?? $orgStructure['ceo']['fullTitle'] ?? 'CEO',
-                                        'name'  => $orgStructure['ceo']['name'] ?? ''
-                                    ]];
+                            // 提取C-Level信息
+                            $cLevelMembers = !empty($orgStructure['cLevel']) ? $orgStructure['cLevel'] : [];
+
+                            // 提取PA信息
+                            $paTitle = !empty($orgStructure['pa']['title']) ? $orgStructure['pa']['title'] : (!empty($orgStructure['pa']['fullTitle']) ? $orgStructure['pa']['fullTitle'] : 'PA');
+                            $paName  = !empty($orgStructure['pa']['name']) ? $orgStructure['pa']['name'] : '';
+
+                            // 获取职位缩写辅助函数
+                            function getRoleAbbreviation($title) {
+                                // 移除常见前缀
+                                $title = preg_replace('/^(Chief|Senior|Executive|Vice)\s+/i', '', $title);
+                                // 提取大写字母或常见缩写
+                                if (preg_match('/^(CAO|CSO|COO|CHO|CFO|CMO|CTO|CIO|PA)$/i', $title, $matches)) {
+                                    return strtoupper($matches[1]);
                                 }
-                                
-                                // Level 1: C-Level + PA
-                                $levels[1] = [];
-                                if (!empty($orgStructure['cLevel'])) {
-                                    foreach ($orgStructure['cLevel'] as $cLevel) {
-                                        $levels[1][] = [
-                                            'title' => $cLevel['title'] ?? ($cLevel['fullTitle'] ?? ''),
-                                            'name'  => $cLevel['name'] ?? '',
-                                            'subordinates' => $cLevel['subordinates'] ?? []
-                                        ];
+                                // 提取首字母缩写
+                                $words = preg_split('/\s+/', $title);
+                                if (count($words) > 1) {
+                                    $abbr = '';
+                                    foreach ($words as $word) {
+                                        $abbr .= strtoupper(substr($word, 0, 1));
                                     }
+                                    return substr($abbr, 0, 3); // 最多3个字母
                                 }
-                                
-                                if (!empty($orgStructure['pa'])) {
-                                    $levels[1][] = [
-                                        'title' => $orgStructure['pa']['title'] ?? ($orgStructure['pa']['fullTitle'] ?? 'PA'),
-                                        'name'  => $orgStructure['pa']['name'] ?? '',
-                                        'subordinates' => []
-                                    ];
-                                }
-                                
-                                // Level 2: VP 等（从C-Level的下属中提取）
-                                $levels[2] = [];
-                                if (!empty($levels[1])) {
-                                    foreach ($levels[1] as $cLevel) {
-                                        if (!empty($cLevel['subordinates']) && is_array($cLevel['subordinates'])) {
-                                            foreach ($cLevel['subordinates'] as $sub) {
-                                                $levels[2][] = [
-                                                    'title' => $sub['title'] ?? ($sub['fullTitle'] ?? ''),
-                                                    'name'  => $sub['name'] ?? ''
-                                                ];
-                                            }
-                                        }
-                                    }
-                                }
-                                
-                                return $levels;
+                                // 如果只有一个词，返回前3个大写字母或全部
+                                return strtoupper(substr($title, 0, 3));
                             }
-
-                            $orgLevels = organizeByLevel($orgStructure);
                             ?>
 
-                            <div class="org-lanes-container">
-                                <?php 
-                                // Level 0: CEO Lane
-                                if (!empty($orgLevels[0])): 
-                                    $ceo = $orgLevels[0][0];
-                                ?>
-                                    <div class="org-lane ceo-lane">
-                                        <div class="org-node-card ceo-card">
-                                            <div class="org-node-role"><?php echo htmlspecialchars($ceo['title']); ?></div>
-                                            <div class="org-node-name"><?php echo htmlspecialchars($ceo['name'] ?: '—'); ?></div>
+                            <div class="org-sections-container">
+                                <!-- CEO区块 -->
+                                <div class="org-section org-section-ceo">
+                                    <h2 class="org-section-title">首席执行官</h2>
+                                    <div class="org-cards-grid">
+                                        <div class="org-card">
+                                            <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($ceoTitle)); ?></div>
+                                            <div class="org-card-name"><?php echo htmlspecialchars($ceoName ?: '—'); ?></div>
                                         </div>
-                                        <?php if (!empty($orgLevels[1])): ?>
-                                            <div class="org-connector-ceo"></div>
-                                        <?php endif; ?>
                                     </div>
-                                <?php endif; ?>
+                                </div>
 
-                                <?php 
-                                // Level 1: C-Level Lane
-                                if (!empty($orgLevels[1])): 
-                                ?>
-                                    <?php if (!empty($orgLevels[0])): ?>
-                                        <div class="org-connector-horizontal-line"></div>
-                                    <?php endif; ?>
-                                    <div class="org-lane c-level-lane">
-                                        <?php foreach ($orgLevels[1] as $index => $member): ?>
-                                            <div class="org-node-card" style="position: relative;">
-                                                <div class="org-node-role"><?php echo htmlspecialchars($member['title']); ?></div>
-                                                <div class="org-node-name"><?php echo htmlspecialchars($member['name'] ?: '—'); ?></div>
-                                                <?php if (!empty($member['subordinates'])): ?>
-                                                    <div class="org-connector-to-child"></div>
-                                                <?php endif; ?>
+                                <!-- C-Level区块 -->
+                                <?php if (!empty($cLevelMembers)): ?>
+                                <div class="org-section">
+                                    <h2 class="org-section-title">管理层</h2>
+                                    <div class="org-cards-grid">
+                                        <?php foreach ($cLevelMembers as $member): 
+                                            $memberTitle = $member['title'] ?? $member['fullTitle'] ?? '';
+                                            $memberName  = $member['name'] ?? '';
+                                            
+                                            // 处理subordinates（如果有的话，也显示在同一区块）
+                                            $subordinates = !empty($member['subordinates']) && is_array($member['subordinates']) ? $member['subordinates'] : [];
+                                        ?>
+                                            <!-- C-Level成员卡片 -->
+                                            <div class="org-card">
+                                                <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($memberTitle)); ?></div>
+                                                <div class="org-card-name"><?php echo htmlspecialchars($memberName ?: '—'); ?></div>
                                             </div>
+
+                                            <!-- 如果有下属，也显示在同一区块 -->
+                                            <?php if (!empty($subordinates)): ?>
+                                                <?php foreach ($subordinates as $sub): 
+                                                    $subTitle = $sub['title'] ?? $sub['fullTitle'] ?? '';
+                                                    $subName  = $sub['name'] ?? '';
+                                                ?>
+                                                    <div class="org-card">
+                                                        <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($subTitle)); ?></div>
+                                                        <div class="org-card-name"><?php echo htmlspecialchars($subName ?: '—'); ?></div>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
                                         <?php endforeach; ?>
                                     </div>
+                                </div>
                                 <?php endif; ?>
 
-                                <?php 
-                                // Level 2: VP Lane
-                                if (!empty($orgLevels[2])): 
-                                ?>
-                                    <?php if (!empty($orgLevels[1])): ?>
-                                        <div class="org-connector-horizontal-line"></div>
-                                    <?php endif; ?>
-                                    <div class="org-lane vp-lane">
-                                        <?php foreach ($orgLevels[2] as $member): ?>
-                                            <div class="org-node-card">
-                                                <div class="org-node-role"><?php echo htmlspecialchars($member['title']); ?></div>
-                                                <div class="org-node-name"><?php echo htmlspecialchars($member['name'] ?: '—'); ?></div>
-                                            </div>
-                                        <?php endforeach; ?>
+                                <!-- PA区块 -->
+                                <?php if (!empty($paName)): ?>
+                                <div class="org-section">
+                                    <h2 class="org-section-title">执行助理</h2>
+                                    <div class="org-cards-grid">
+                                        <div class="org-card">
+                                            <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($paTitle)); ?></div>
+                                            <div class="org-card-name"><?php echo htmlspecialchars($paName); ?></div>
+                                        </div>
                                     </div>
+                                </div>
                                 <?php endif; ?>
                             </div>
                         </div>
                     </div>
                 </div>
-                                        <?php endif; ?>
+                <?php endif; ?>
 
                 <!-- Strategic Objectives -->
                 <div class="strategic-objectives-section">
