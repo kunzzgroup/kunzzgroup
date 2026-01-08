@@ -1595,9 +1595,10 @@ require_once 'session_check.php';
                         </div>
                         <div class="perm-level-2-container" data-parent="brand">
                             <!-- KUNZZ HOLDINGS SDN BHD -->
-                            <div class="perm-level-2-item">
+                            <div class="perm-level-2-item has-level-3" data-sub="kunzz_holdings">
                                 <label class="perm-checkbox-label">
                                     <input type="checkbox" class="perm-l2-check" data-parent="brand" value="kunzz_holdings">
+                                    <span class="perm-arrow-sub">▶</span>
                                     <span>KUNZZ HOLDINGS SDN BHD</span>
                                 </label>
                             </div>
@@ -1719,6 +1720,18 @@ require_once 'session_check.php';
                         
                         <!-- 所有三级面板移到这里 -->
                         <div id="perm-detail-content">
+                            <!-- 集团架构 - KUNZZ HOLDINGS -->
+                            <div class="perm-level-3-panel" data-for="kunzz_holdings">
+                                <div class="perm-detail-header">
+                                    <strong>KUNZZ HOLDINGS SDN BHD</strong>
+                                    <button type="button" class="perm-close-btn" onclick="closeDetailPanel()">×</button>
+                                </div>
+                                <div class="perm-level-3-section">
+                                    <div class="perm-section-title">页面权限</div>
+                                    <label><input type="checkbox" class="perm-page-blueprint" data-brand="kunzz_holdings" value="blueprint"> 企业蓝图</label>
+                                </div>
+                            </div>
+                            
                             <!-- 集团架构 - TOKYO CUISINE -->
                             <div class="perm-level-3-panel" data-for="tokyo_cuisine">
                                 <div class="perm-detail-header">
@@ -3919,7 +3932,7 @@ require_once 'session_check.php';
             });
             
             // 三级页面权限和库存/上传权限的向上联动
-            document.querySelectorAll('.perm-stock-system, .perm-stock-view, .perm-upload-system, .perm-upload-type, .perm-page-schedule').forEach(checkbox => {
+            document.querySelectorAll('.perm-stock-system, .perm-stock-view, .perm-upload-system, .perm-upload-type, .perm-page-schedule, .perm-page-blueprint').forEach(checkbox => {
                 checkbox.addEventListener('change', function() {
                     let level2Value = '';
                     if (this.classList.contains('perm-stock-system') || this.classList.contains('perm-stock-view')) {
@@ -3927,6 +3940,8 @@ require_once 'session_check.php';
                     } else if (this.classList.contains('perm-upload-system') || this.classList.contains('perm-upload-type')) {
                         level2Value = 'kpi_upload';
                     } else if (this.classList.contains('perm-page-schedule')) {
+                        level2Value = this.dataset.brand || '';
+                    } else if (this.classList.contains('perm-page-blueprint')) {
                         level2Value = this.dataset.brand || '';
                     }
                     
@@ -3947,6 +3962,8 @@ require_once 'session_check.php';
                             otherChecked = document.querySelectorAll('.perm-stock-system:checked, .perm-stock-view:checked').length;
                         } else if (level2Value === 'kpi_upload') {
                             otherChecked = document.querySelectorAll('.perm-upload-system:checked, .perm-upload-type:checked').length;
+                        } else if (level2Value === 'kunzz_holdings') {
+                            otherChecked = document.querySelectorAll(`.perm-page-blueprint[data-brand="${level2Value}"]:checked`).length;
                         } else {
                             otherChecked = document.querySelectorAll(`.perm-page-schedule[data-brand="${level2Value}"]:checked`).length;
                         }
@@ -3984,7 +4001,7 @@ require_once 'session_check.php';
             });
             
             // 全选所有三级权限（库存、数据上传、集团架构页面权限）
-            document.querySelectorAll('.perm-stock-system, .perm-stock-view, .perm-upload-system, .perm-upload-type, .perm-page-schedule').forEach(cb => {
+            document.querySelectorAll('.perm-stock-system, .perm-stock-view, .perm-upload-system, .perm-upload-type, .perm-page-schedule, .perm-page-blueprint').forEach(cb => {
                 cb.checked = true;
                 cb.disabled = false;
             });
@@ -4023,6 +4040,13 @@ require_once 'session_check.php';
             // 数据上传权限
             if (level2Value === 'kpi_upload') {
                 document.querySelectorAll('.perm-upload-system, .perm-upload-type').forEach(cb => {
+                    cb.checked = level2Checked ? true : false;
+                });
+            }
+            
+            // 集团架构权限 - KUNZZ HOLDINGS
+            if (level2Value === 'kunzz_holdings') {
+                document.querySelectorAll('.perm-page-blueprint[data-brand="kunzz_holdings"]').forEach(cb => {
                     cb.checked = level2Checked ? true : false;
                 });
             }
@@ -4242,8 +4266,20 @@ require_once 'session_check.php';
             }
             
             // 检查相关二级权限是否选中
+            const kunzzHoldingsChecked = document.querySelector('.perm-l2-check[value="kunzz_holdings"]')?.checked || false;
             const tokyoCuisineChecked = document.querySelector('.perm-l2-check[value="tokyo_cuisine"]')?.checked || false;
             const tokyoIzakayaChecked = document.querySelector('.perm-l2-check[value="tokyo_izakaya"]')?.checked || false;
+            
+            // 设置KUNZZ HOLDINGS的页面权限（企业蓝图）
+            if (brandData.kunzz_holdings && typeof brandData.kunzz_holdings === 'object') {
+                // 如果是对象格式，检查是否有blueprint权限
+                const kunzzPerms = brandData.kunzz_holdings.blueprint;
+                if (Array.isArray(kunzzPerms) && kunzzPerms.includes('blueprint')) {
+                    document.querySelectorAll('.perm-page-blueprint[data-brand="kunzz_holdings"]').forEach(cb => {
+                        cb.checked = true;
+                    });
+                }
+            }
             
             // 设置三级页面权限（员工排班表）- 每个店面独立设置
             // 设置J1的页面权限
@@ -4384,6 +4420,13 @@ require_once 'session_check.php';
             };
             
             // 获取集团架构三级页面权限，每个店面独立保存
+            // 获取KUNZZ HOLDINGS的页面权限（企业蓝图）
+            const kunzzHoldingsPermissions = {};
+            const blueprintChecked = document.querySelector('.perm-page-blueprint[data-brand="kunzz_holdings"]')?.checked || false;
+            if (blueprintChecked) {
+                kunzzHoldingsPermissions['blueprint'] = ['blueprint'];
+            }
+            
             const cuisineStorePermissions = {};
             // 获取J1的页面权限
             const j1ScheduleChecked = document.querySelector('.perm-page-schedule[data-store="j1"]')?.checked || false;
@@ -4404,6 +4447,7 @@ require_once 'session_check.php';
             }
             
             const brandPermissions = {
+                kunzz_holdings: kunzzHoldingsPermissions,
                 tokyo_cuisine: cuisineStorePermissions,
                 tokyo_izakaya: izakayaStorePermissions
             };
