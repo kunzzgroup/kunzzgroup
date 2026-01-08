@@ -1174,6 +1174,215 @@ $avatarLetter = strtoupper($username[0]);
         .report-dropdown-item:last-child {
             border-bottom: none;
         }
+
+        /* 日历选择器样式 */
+        .date-range-picker {
+            display: flex;
+            align-items: center;
+            gap: clamp(4px, 0.42vw, 8px);
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: clamp(4px, 0.42vw, 8px);
+            padding: clamp(4px, 0.42vw, 8px) clamp(8px, 0.83vw, 16px);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            min-width: clamp(180px, 15.63vw, 300px);
+            z-index: 1;
+        }
+
+        .date-range-picker:hover {
+            border-color: #f99e00;
+            box-shadow: 0 0 0 3px rgba(249, 158, 0, 0.1);
+        }
+
+        .date-range-picker i {
+            color: #f99e00;
+            font-size: clamp(8px, 0.74vw, 14px);
+            margin: 0 clamp(2px, 0.32vw, 6px);
+        }
+
+        .date-range-picker span {
+            color: #374151;
+            font-size: clamp(8px, 0.74vw, 14px);
+            font-weight: 500;
+        }
+
+        .calendar-popup {
+            position: fixed;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            z-index: 99999;
+            padding: clamp(8px, 0.83vw, 16px);
+            min-width: clamp(180px, 15.63vw, 300px);
+            max-height: 350px;
+            overflow: visible;
+        }
+
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .calendar-nav-btn {
+            background: transparent;
+            border: 0px solid #d1d5db;
+            border-radius: 4px;
+            width: clamp(20px, 1.25vw, 24px);
+            height: clamp(20px, 1.25vw, 24px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .calendar-nav-btn:hover {
+            background-color: #f3f4f6;
+            border-color: #f99e00;
+        }
+
+        .calendar-nav-btn i {
+            color: #374151;
+            font-size: clamp(7px, 0.57vw, 11px);
+        }
+
+        .calendar-month-year {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .calendar-month-year select {
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: clamp(2px, 0.21vw, 4px) clamp(4px, 0.31vw, 6px);
+            font-size: clamp(8px, 0.63vw, 12px);
+            font-weight: 600;
+            color: #000000ff;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .calendar-month-year select:hover {
+            border-color: #f99e00;
+        }
+
+        .calendar-month-year select:focus {
+            outline: none;
+            border-color: #f99e00;
+            box-shadow: 0 0 0 2px rgba(249, 158, 0, 0.1);
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 4px;
+        }
+
+        .calendar-weekday {
+            text-align: center;
+            font-size: clamp(8px, 0.63vw, 12px);
+            font-weight: 600;
+            color: #898989;
+            padding: clamp(2px, 0.21vw, 4px) 0;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: clamp(8px, 0.63vw, 12px);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #000000ff;
+            background: transparent;
+            border: 1px solid transparent;
+            position: relative;
+            padding: 4px;
+        }
+
+        .calendar-day:hover {
+            background-color: #f3f4f6;
+        }
+
+        .calendar-day.today {
+            border-color: #f99e00;
+            font-weight: 600;
+        }
+
+        .calendar-day.selected {
+            background-color: #f99e00;
+            color: white;
+            font-weight: 600;
+        }
+
+        .calendar-day.in-range {
+            background-color: rgba(249, 158, 0, 0.2);
+            color: #374151;
+            border-radius: 0px;
+        }
+
+        .calendar-day.start-date {
+            background-color: #f99e00;
+            color: white;
+            border-radius: 6px 0 0 6px;
+        }
+
+        .calendar-day.end-date {
+            background-color: #f99e00;
+            color: white;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .calendar-day.start-date.end-date {
+            border-radius: 6px;
+        }
+
+        .calendar-day.start-date.selecting {
+            border-radius: 6px;
+        }
+
+        .calendar-day.preview-range {
+            background-color: rgba(249, 158, 0, 0.15);
+            color: #374151;
+            border-radius: 0px;
+        }
+
+        .calendar-day.preview-end {
+            background-color: rgba(249, 158, 0, 0.4);
+            color: #374151;
+            font-weight: 600;
+            border: 1px dashed #f99e00;
+        }
+
+        .calendar-day.other-month {
+            color: #d1d5db;
+        }
+
+        .calendar-day.disabled {
+            color: #d1d5db;
+            cursor: not-allowed;
+        }
+
+        .calendar-day.disabled:hover {
+            background-color: transparent;
+        }
     </style>
 </head>
 <body class="restaurant-j1">
@@ -1195,47 +1404,12 @@ $avatarLetter = strtoupper($username[0]);
                 <div class="card-body">
                     <div class="date-controls">
     
-                        <!-- 开始日期选择器 -->
+                        <!-- 日期范围选择器 -->
                         <div style="display: flex; flex-direction: column; gap: 4px;">
-                            <label class="form-label" style="margin: 0;">开始日期</label>
-                            <div class="enhanced-date-picker" id="start-date-picker">
-                                <div class="date-part" data-type="year" onclick="showDateDropdown('start', 'year')">
-                                    <span id="start-year-display">2024</span>
-                                </div>
-                                <span class="date-separator">年</span>
-                                <div class="date-part" data-type="month" onclick="showDateDropdown('start', 'month')">
-                                    <span id="start-month-display">01</span>
-                                </div>
-                                <span class="date-separator">月</span>
-                                <div class="date-part" data-type="day" onclick="showDateDropdown('start', 'day')">
-                                    <span id="start-day-display">01</span>
-                                </div>
-                                <span class="date-separator">日</span>
-            
-                                <div class="date-dropdown" id="start-dropdown">
-                                </div>
-                            </div>
-                        </div>
-    
-                        <!-- 结束日期选择器 -->
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                            <label class="form-label" style="margin: 0;">结束日期</label>
-                            <div class="enhanced-date-picker" id="end-date-picker">
-                                <div class="date-part" data-type="year" onclick="showDateDropdown('end', 'year')">
-                                    <span id="end-year-display">2024</span>
-                                </div>
-                                <span class="date-separator">年</span>
-                                <div class="date-part" data-type="month" onclick="showDateDropdown('end', 'month')">
-                                    <span id="end-month-display">01</span>
-                                </div>
-                                <span class="date-separator">月</span>
-                                <div class="date-part" data-type="day" onclick="showDateDropdown('end', 'day')">
-                                    <span id="end-day-display">01</span>
-                                </div>
-                                <span class="date-separator">日</span>
-            
-                                <div class="date-dropdown" id="end-dropdown">
-                                </div>
+                            <label class="form-label" style="margin: 0;">日期范围</label>
+                            <div class="date-range-picker" id="date-range-picker" onclick="toggleCalendar()">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span id="date-range-display">选择日期范围</span>
                             </div>
                         </div>
 
@@ -1508,6 +1682,49 @@ $avatarLetter = strtoupper($username[0]);
     </div>
     </div>
 
+    <!-- 日历弹窗 -->
+    <div class="calendar-popup" id="calendar-popup" style="display: none;">
+        <div class="calendar-header">
+            <button class="calendar-nav-btn" onclick="event.stopPropagation(); changeMonth(-1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="calendar-month-year" onclick="event.stopPropagation();">
+                <select id="calendar-month-select" onchange="renderCalendar()">
+                    <option value="0">1月</option>
+                    <option value="1">2月</option>
+                    <option value="2">3月</option>
+                    <option value="3">4月</option>
+                    <option value="4">5月</option>
+                    <option value="5">6月</option>
+                    <option value="6">7月</option>
+                    <option value="7">8月</option>
+                    <option value="8">9月</option>
+                    <option value="9">10月</option>
+                    <option value="10">11月</option>
+                    <option value="11">12月</option>
+                </select>
+                <select id="calendar-year-select" onchange="renderCalendar()">
+                    <!-- 动态生成年份 -->
+                </select>
+            </div>
+            <button class="calendar-nav-btn" onclick="event.stopPropagation(); changeMonth(1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        <div class="calendar-weekdays">
+            <div class="calendar-weekday">日</div>
+            <div class="calendar-weekday">一</div>
+            <div class="calendar-weekday">二</div>
+            <div class="calendar-weekday">三</div>
+            <div class="calendar-weekday">四</div>
+            <div class="calendar-weekday">五</div>
+            <div class="calendar-weekday">六</div>
+        </div>
+        <div class="calendar-days" id="calendar-days">
+            <!-- 动态生成日期 -->
+        </div>
+    </div>
+
     <script>
         // API 配置
         const API_BASE_URL = 'costapi.php';
@@ -1529,6 +1746,12 @@ $avatarLetter = strtoupper($username[0]);
         let startDateValue = { year: null, month: null, day: null };
         let endDateValue = { year: null, month: null, day: null };
         let monthDateValue = { year: null, month: null };
+
+        // 日历选择器变量
+        let calendarCurrentDate = new Date();
+        let calendarStartDate = null;
+        let calendarEndDate = null;
+        let isSelectingRange = false;
 
         // 钻取状态管理
         let isDrillDownMode = false;
@@ -1575,12 +1798,17 @@ $avatarLetter = strtoupper($username[0]);
         function initEnhancedDatePickers() {
             // 获取当前日期
             const today = new Date();
+            today.setHours(0, 0, 0, 0);
             const currentYear = today.getFullYear();
             const currentMonth = today.getMonth() + 1;
 
             // 计算本月第一天和最后一天
             const firstDayOfMonth = new Date(currentYear, currentMonth - 1, 1);
             const lastDayOfMonth = new Date(currentYear, currentMonth, 0);
+
+            // 初始化日历选择器默认值为当月第一天和最后一天
+            calendarStartDate = new Date(currentYear, currentMonth - 1, 1);
+            calendarEndDate = new Date(currentYear, currentMonth - 1, lastDayOfMonth.getDate());
 
             // 正确设置dateRange为当月第一天和最后一天
             dateRange = {
@@ -1611,6 +1839,7 @@ $avatarLetter = strtoupper($username[0]);
             updateDateDisplay('start');
             updateDateDisplay('end');
             updateDateDisplay('month');
+            updateDateRangeDisplay();
     
             // 绑定全局点击事件以关闭下拉框
             document.addEventListener('click', function(e) {
@@ -1619,6 +1848,338 @@ $avatarLetter = strtoupper($username[0]);
                 }
             });
         }
+
+        // 切换日历显示
+        function toggleCalendar() {
+            const popup = document.getElementById('calendar-popup');
+            const picker = document.getElementById('date-range-picker');
+            
+            if (popup.style.display === 'none' || !popup.style.display) {
+                // 获取触发元素的位置
+                const rect = picker.getBoundingClientRect();
+                
+                // 设置日历位置（使用fixed定位）
+                popup.style.top = (rect.bottom + 8) + 'px';
+                popup.style.left = rect.left + 'px';
+                
+                popup.style.display = 'block';
+                initCalendar();
+                renderCalendar();
+            } else {
+                popup.style.display = 'none';
+            }
+        }
+
+        // 初始化日历
+        function initCalendar() {
+            const today = new Date();
+            calendarCurrentDate = new Date(today.getFullYear(), today.getMonth(), 1);
+            
+            // 设置默认日期范围
+            if (!calendarStartDate) {
+                const currentYear = today.getFullYear();
+                const currentMonth = today.getMonth() + 1;
+                const firstDayOfMonth = new Date(currentYear, currentMonth - 1, 1);
+                const lastDayOfMonth = new Date(currentYear, currentMonth, 0);
+                calendarStartDate = new Date(firstDayOfMonth);
+                calendarStartDate.setHours(0, 0, 0, 0);
+                calendarEndDate = new Date(currentYear, currentMonth - 1, lastDayOfMonth.getDate());
+                calendarEndDate.setHours(0, 0, 0, 0);
+            }
+            
+            // 初始化年份选择器
+            const yearSelect = document.getElementById('calendar-year-select');
+            yearSelect.innerHTML = '';
+            const currentYear = today.getFullYear();
+            for (let year = 2022; year <= currentYear + 1; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year + '年';
+                if (year === calendarCurrentDate.getFullYear()) {
+                    option.selected = true;
+                }
+                yearSelect.appendChild(option);
+            }
+            
+            // 设置月份选择器
+            document.getElementById('calendar-month-select').value = calendarCurrentDate.getMonth();
+            
+            updateDateRangeDisplay();
+        }
+
+        // 切换月份
+        function changeMonth(delta) {
+            calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + delta);
+            document.getElementById('calendar-month-select').value = calendarCurrentDate.getMonth();
+            document.getElementById('calendar-year-select').value = calendarCurrentDate.getFullYear();
+            renderCalendar();
+        }
+
+        // 渲染日历
+        function renderCalendar() {
+            const year = parseInt(document.getElementById('calendar-year-select').value);
+            const month = parseInt(document.getElementById('calendar-month-select').value);
+            
+            calendarCurrentDate = new Date(year, month, 1);
+            
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const prevLastDay = new Date(year, month, 0);
+            
+            const firstDayWeek = firstDay.getDay();
+            const lastDate = lastDay.getDate();
+            const prevLastDate = prevLastDay.getDate();
+            
+            const daysContainer = document.getElementById('calendar-days');
+            daysContainer.innerHTML = '';
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // 上个月的日期
+            for (let i = firstDayWeek - 1; i >= 0; i--) {
+                const day = prevLastDate - i;
+                const dayElement = createDayElement(day, year, month - 1, true);
+                daysContainer.appendChild(dayElement);
+            }
+            
+            // 当前月的日期
+            for (let day = 1; day <= lastDate; day++) {
+                const dayElement = createDayElement(day, year, month, false);
+                daysContainer.appendChild(dayElement);
+            }
+            
+            // 下个月的日期（填充剩余空格）
+            const totalCells = daysContainer.children.length;
+            const remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+            for (let day = 1; day <= remainingCells; day++) {
+                const dayElement = createDayElement(day, year, month + 1, true);
+                daysContainer.appendChild(dayElement);
+            }
+        }
+
+        // 创建日期元素
+        function createDayElement(day, year, month, isOtherMonth) {
+            const dayElement = document.createElement('div');
+            dayElement.className = 'calendar-day';
+            dayElement.textContent = day;
+            
+            const date = new Date(year, month, day);
+            date.setHours(0, 0, 0, 0);
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            if (isOtherMonth) {
+                dayElement.classList.add('other-month');
+            }
+            
+            // 标记今天
+            if (date.getTime() === today.getTime() && !isOtherMonth) {
+                dayElement.classList.add('today');
+            }
+            
+            // 标记选中的日期
+            if (calendarStartDate) {
+                const startTime = calendarStartDate.getTime();
+                const currentTime = date.getTime();
+                
+                if (calendarEndDate) {
+                    // 已选择开始和结束日期
+                    const endTime = calendarEndDate.getTime();
+                    
+                    if (currentTime === startTime && currentTime === endTime) {
+                        dayElement.classList.add('selected', 'start-date', 'end-date');
+                    } else if (currentTime === startTime) {
+                        dayElement.classList.add('start-date');
+                    } else if (currentTime === endTime) {
+                        dayElement.classList.add('end-date');
+                    } else if (currentTime > startTime && currentTime < endTime) {
+                        dayElement.classList.add('in-range');
+                    }
+                } else {
+                    // 只选择了开始日期，还在选择结束日期
+                    if (currentTime === startTime) {
+                        dayElement.classList.add('start-date', 'selecting');
+                    }
+                }
+            }
+            
+            // 点击事件
+            dayElement.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectDate(date);
+            });
+            
+            // 鼠标悬停事件 - 预览范围
+            dayElement.addEventListener('mouseenter', () => {
+                if (isSelectingRange && calendarStartDate && !calendarEndDate) {
+                    highlightPreviewRange(date);
+                }
+            });
+            
+            return dayElement;
+        }
+
+        // 高亮预览范围
+        function highlightPreviewRange(hoverDate) {
+            const days = document.querySelectorAll('.calendar-day');
+            const startTime = calendarStartDate.getTime();
+            const hoverTime = hoverDate.getTime();
+            
+            days.forEach(day => {
+                // 移除预览样式
+                day.classList.remove('preview-range', 'preview-end');
+                
+                // 获取日期（从元素的文本内容和当前日历月份）
+                const dayText = parseInt(day.textContent);
+                if (!dayText) return;
+                
+                // 构建该日期
+                const year = parseInt(document.getElementById('calendar-year-select').value);
+                const month = parseInt(document.getElementById('calendar-month-select').value);
+                
+                let dayDate;
+                if (day.classList.contains('other-month')) {
+                    // 处理上个月或下个月的日期
+                    const firstDayOfMonth = new Date(year, month, 1);
+                    const firstDayWeek = firstDayOfMonth.getDay();
+                    
+                    if (dayText > 20) {
+                        // 上个月的日期
+                        dayDate = new Date(year, month - 1, dayText);
+                    } else {
+                        // 下个月的日期
+                        dayDate = new Date(year, month + 1, dayText);
+                    }
+                } else {
+                    dayDate = new Date(year, month, dayText);
+                }
+                
+                dayDate.setHours(0, 0, 0, 0);
+                const dayTime = dayDate.getTime();
+                
+                // 添加预览高亮
+                const minTime = Math.min(startTime, hoverTime);
+                const maxTime = Math.max(startTime, hoverTime);
+                
+                if (dayTime > minTime && dayTime < maxTime) {
+                    day.classList.add('preview-range');
+                } else if (dayTime === hoverTime && dayTime !== startTime) {
+                    day.classList.add('preview-end');
+                }
+            });
+        }
+
+        // 选择日期
+        async function selectDate(date) {
+            if (!calendarStartDate || (calendarStartDate && calendarEndDate)) {
+                // 开始新的选择
+                calendarStartDate = new Date(date);
+                calendarEndDate = null;
+                isSelectingRange = true;
+            } else {
+                // 选择结束日期
+                if (date < calendarStartDate) {
+                    calendarEndDate = calendarStartDate;
+                    calendarStartDate = new Date(date);
+                } else {
+                    calendarEndDate = new Date(date);
+                }
+                isSelectingRange = false;
+                
+                // 更新日期范围并关闭日历
+                await updateDateRange();
+                document.getElementById('calendar-popup').style.display = 'none';
+            }
+            
+            renderCalendar();
+            updateDateRangeDisplay();
+        }
+
+        // 更新日期范围显示
+        function updateDateRangeDisplay() {
+            const display = document.getElementById('date-range-display');
+            if (calendarStartDate && calendarEndDate) {
+                const start = formatDateDisplay(calendarStartDate);
+                const end = formatDateDisplay(calendarEndDate);
+                display.textContent = `${start} - ${end}`;
+            } else if (calendarStartDate) {
+                const start = formatDateDisplay(calendarStartDate);
+                display.textContent = `${start} - 选择结束日期`;
+            } else {
+                display.textContent = '选择日期范围';
+            }
+        }
+
+        // 格式化日期显示
+        function formatDateDisplay(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}年${month}月${day}日`;
+        }
+
+        // 格式化日期为 YYYY-MM-DD
+        function formatDateToYYYYMMDD(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // 更新dateRange对象
+        async function updateDateRange() {
+            if (calendarStartDate && calendarEndDate) {
+                dateRange.startDate = formatDateToYYYYMMDD(calendarStartDate);
+                dateRange.endDate = formatDateToYYYYMMDD(calendarEndDate);
+                
+                // 更新开始和结束日期选择器的值
+                startDateValue = {
+                    year: calendarStartDate.getFullYear(),
+                    month: calendarStartDate.getMonth() + 1,
+                    day: calendarStartDate.getDate()
+                };
+
+                endDateValue = {
+                    year: calendarEndDate.getFullYear(),
+                    month: calendarEndDate.getMonth() + 1,
+                    day: calendarEndDate.getDate()
+                };
+
+                updateDateDisplay('start');
+                updateDateDisplay('end');
+                
+                // 新增：退出钻取模式
+                if (isDrillDownMode) {
+                    isDrillDownMode = false;
+                    drillDownMonth = null;
+                    originalDateRange = null;
+                    hideBackButtons();
+                }
+                
+                // 只有选择了餐厅才加载数据
+                if (isRestaurantSelected) {
+                    await loadData({
+                        start_date: dateRange.startDate,
+                        end_date: dateRange.endDate
+                    });
+                    updateDashboard();
+                }
+                
+                // 更新图表日期范围显示
+                updateChartDateRange();
+            }
+        }
+
+        // 点击外部关闭日历
+        document.addEventListener('click', function(e) {
+            const calendar = document.getElementById('date-range-picker');
+            const popup = document.getElementById('calendar-popup');
+            if (calendar && popup && !calendar.contains(e.target) && !popup.contains(e.target)) {
+                popup.style.display = 'none';
+            }
+        });
 
         function updateDateDisplay(prefix) {
             if (prefix === 'month') {
@@ -1849,6 +2410,12 @@ $avatarLetter = strtoupper($username[0]);
                     endDate: lastDayFormatted
                 };
 
+                // 更新日历选择器
+                calendarStartDate = new Date(year, month - 1, 1);
+                calendarStartDate.setHours(0, 0, 0, 0);
+                calendarEndDate = new Date(year, month - 1, lastDay);
+                calendarEndDate.setHours(0, 0, 0, 0);
+
                 startDateValue = {
                     year: year,
                     month: month,
@@ -1863,6 +2430,7 @@ $avatarLetter = strtoupper($username[0]);
 
                 updateDateDisplay('start');
                 updateDateDisplay('end');
+                updateDateRangeDisplay();
             }
             else if (year && !month) {
                 const firstDay = `${year}-01-01`;
@@ -1872,6 +2440,12 @@ $avatarLetter = strtoupper($username[0]);
                     startDate: firstDay,
                     endDate: lastDay
                 };
+
+                // 更新日历选择器
+                calendarStartDate = new Date(year, 0, 1);
+                calendarStartDate.setHours(0, 0, 0, 0);
+                calendarEndDate = new Date(year, 11, 31);
+                calendarEndDate.setHours(0, 0, 0, 0);
 
                 startDateValue = {
                     year: year,
@@ -1887,6 +2461,7 @@ $avatarLetter = strtoupper($username[0]);
 
                 updateDateDisplay('start');
                 updateDateDisplay('end');
+                updateDateRangeDisplay();
             }
             else {
                 return;
@@ -1923,6 +2498,12 @@ $avatarLetter = strtoupper($username[0]);
                 startDate: startDateStr,
                 endDate: endDateStr
             };
+
+            // 更新日历选择器
+            calendarStartDate = new Date(startDateValue.year, startDateValue.month - 1, startDateValue.day);
+            calendarStartDate.setHours(0, 0, 0, 0);
+            calendarEndDate = new Date(endDateValue.year, endDateValue.month - 1, endDateValue.day);
+            calendarEndDate.setHours(0, 0, 0, 0);
             
             if (isDrillDownMode) {
                 isDrillDownMode = false;
@@ -1940,6 +2521,7 @@ $avatarLetter = strtoupper($username[0]);
             }
             document.getElementById('quick-select-text').textContent = '选择时间段';
             updateChartDateRange();
+            updateDateRangeDisplay();
         }
 
         // 数据获取
@@ -3077,6 +3659,12 @@ $avatarLetter = strtoupper($username[0]);
                 endDate: formatDate(endDate)
             };
 
+            // 更新日历选择器
+            calendarStartDate = new Date(startDate);
+            calendarStartDate.setHours(0, 0, 0, 0);
+            calendarEndDate = new Date(endDate);
+            calendarEndDate.setHours(0, 0, 0, 0);
+
             startDateValue = {
                 year: startDate.getFullYear(),
                 month: startDate.getMonth() + 1,
@@ -3097,6 +3685,7 @@ $avatarLetter = strtoupper($username[0]);
             updateDateDisplay('start');
             updateDateDisplay('end');
             updateDateDisplay('month');
+            updateDateRangeDisplay();
 
             const quickSelectText = document.getElementById('quick-select-text');
             const rangeTexts = {
