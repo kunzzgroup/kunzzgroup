@@ -2190,179 +2190,118 @@ if (file_exists($jsonFile)) {
             object-fit: contain;
         }
 
-        /* 中心辐射式布局 - CEO在中心 */
-        .org-radial-container {
+        /* 瀑布流布局 - 卡片流式布局 */
+        .org-grid-container {
             position: relative;
             z-index: 1;
             width: 100%;
-            height: clamp(600px, 62.5vw, 900px);
-            min-height: 600px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: clamp(40px, 4.17vw, 60px);
         }
 
-        .org-radial-wrapper {
+        .org-cards-wall {
+            columns: auto;
+            column-width: clamp(180px, 18.75vw, 240px);
+            column-gap: clamp(16px, 1.67vw, 24px);
+            padding: clamp(20px, 2.08vw, 32px);
+            background: #ffffff;
+            border-radius: clamp(16px, 1.67vw, 24px);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            column-fill: balance;
+        }
+
+        .org-card {
+            break-inside: avoid;
+            page-break-inside: avoid;
+            margin-bottom: clamp(16px, 1.67vw, 24px);
+            background: #ffffff;
+            border-radius: clamp(12px, 1.25vw, 16px);
+            padding: clamp(16px, 1.67vw, 20px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             position: relative;
             width: 100%;
-            height: 100%;
-            max-width: clamp(800px, 83.33vw, 1200px);
-            max-height: clamp(600px, 62.5vw, 900px);
+            box-sizing: border-box;
         }
 
-        /* CEO中心卡片 */
-        .org-card-ceo-center {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
-            border: 4px solid #ffffff;
-            border-radius: clamp(16px, 1.67vw, 24px);
-            padding: clamp(24px, 2.5vw, 36px) clamp(32px, 3.33vw, 48px);
-            width: clamp(180px, 18.75vw, 260px);
-            min-height: clamp(160px, 16.67vw, 220px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            box-shadow: 0 12px 40px rgba(255, 92, 0, 0.4);
+        .org-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
             z-index: 10;
-            transition: all 0.3s ease;
         }
 
-        .org-card-ceo-center:hover {
-            transform: translate(-50%, -50%) scale(1.05);
-            box-shadow: 0 16px 50px rgba(255, 92, 0, 0.5);
+        /* CEO卡片 - 最大，橙色渐变背景 */
+        .org-card-level-ceo {
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
+            border: 3px solid #ffffff;
+            box-shadow: 0 8px 32px rgba(255, 92, 0, 0.3);
+            min-height: clamp(200px, 20.83vw, 280px);
+            padding: clamp(24px, 2.5vw, 32px);
         }
 
-        .org-card-ceo-center .org-card-role {
+        .org-card-level-ceo:hover {
+            box-shadow: 0 12px 40px rgba(255, 92, 0, 0.4);
+        }
+
+        .org-card-level-ceo .org-card-role {
             color: #ffffff;
-            font-size: clamp(28px, 2.92vw, 42px);
-            font-weight: 800;
-            margin-bottom: clamp(12px, 1.25vw, 16px);
-            letter-spacing: 0.05em;
-            line-height: 1.2;
+            font-size: clamp(28px, 2.92vw, 40px);
         }
 
-        .org-card-ceo-center .org-card-name {
+        .org-card-level-ceo .org-card-name {
             color: #ffffff;
-            font-size: clamp(18px, 1.88vw, 26px);
-            font-weight: 600;
-            line-height: 1.4;
+            font-size: clamp(20px, 2.08vw, 28px);
         }
 
-        /* C-Level成员卡片 - 围绕CEO排列 */
-        .org-card-radial {
-            position: absolute;
-            background: #ffffff;
+        /* C-Level卡片 - 中等大小，橙色边框 */
+        .org-card-level-clevel {
             border: 2px solid #ff5c00;
-            border-radius: clamp(12px, 1.25vw, 16px);
-            padding: clamp(16px, 1.67vw, 20px) clamp(20px, 2.08vw, 28px);
-            width: clamp(140px, 14.58vw, 200px);
-            min-height: clamp(110px, 11.46vw, 150px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-            z-index: 8;
-            transition: all 0.3s ease;
             background: #fff5e6;
+            min-height: clamp(140px, 14.58vw, 200px);
+            padding: clamp(18px, 1.88vw, 24px);
         }
 
-        .org-card-radial:hover {
-            transform: scale(1.1) translateY(-4px);
-            box-shadow: 0 8px 24px rgba(255, 92, 0, 0.3);
+        .org-card-level-clevel:hover {
             background: #ffffff;
             border-color: #ff5c00;
-            z-index: 9;
+            box-shadow: 0 8px 24px rgba(255, 92, 0, 0.2);
         }
 
-        .org-card-radial .org-card-role {
+        .org-card-level-clevel .org-card-role {
             color: #ff5c00;
-            font-size: clamp(16px, 1.67vw, 22px);
-            font-weight: 800;
-            margin-bottom: clamp(8px, 0.83vw, 12px);
-            letter-spacing: 0.05em;
-            line-height: 1.2;
+            font-size: clamp(18px, 1.88vw, 24px);
         }
 
-        .org-card-radial .org-card-name {
+        .org-card-level-clevel .org-card-name {
             color: #0f172a;
-            font-size: clamp(14px, 1.46vw, 18px);
-            font-weight: 600;
-            line-height: 1.4;
+            font-size: clamp(16px, 1.67vw, 20px);
         }
 
-        /* PA/其他成员卡片 - 第二圈（可选） */
-        .org-card-radial-outer {
-            position: absolute;
-            background: #ffffff;
+        /* PA/其他卡片 - 标准大小，灰色边框 */
+        .org-card-level-other {
             border: 1px solid #e2e8f0;
-            border-radius: clamp(10px, 1.04vw, 14px);
-            padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 20px);
-            width: clamp(110px, 11.46vw, 150px);
-            min-height: clamp(90px, 9.38vw, 120px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            z-index: 7;
-            transition: all 0.3s ease;
+            background: #ffffff;
+            min-height: clamp(120px, 12.5vw, 160px);
+            padding: clamp(14px, 1.46vw, 18px);
         }
 
-        .org-card-radial-outer:hover {
-            transform: scale(1.08) translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        .org-card-level-other:hover {
             border-color: #ff5c00;
-            z-index: 8;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
         }
 
-        .org-card-radial-outer .org-card-role {
+        .org-card-level-other .org-card-role {
             color: #64748b;
-            font-size: clamp(13px, 1.35vw, 17px);
-            font-weight: 700;
-            margin-bottom: clamp(6px, 0.63vw, 10px);
-            letter-spacing: 0.03em;
-            line-height: 1.2;
+            font-size: clamp(14px, 1.46vw, 18px);
         }
 
-        .org-card-radial-outer .org-card-name {
+        .org-card-level-other .org-card-name {
             color: #475569;
             font-size: clamp(12px, 1.25vw, 16px);
-            font-weight: 600;
-            line-height: 1.4;
-        }
-
-        /* SVG连接线容器 */
-        .org-radial-connectors {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 5;
-            pointer-events: none;
-        }
-
-        .org-radial-connector {
-            stroke: #ff5c00;
-            stroke-width: 2;
-            fill: none;
-            opacity: 0.4;
-            transition: opacity 0.3s ease;
-        }
-
-        .org-card-radial:hover ~ .org-radial-connectors .org-radial-connector,
-        .org-radial-connector:hover {
-            opacity: 0.8;
-            stroke-width: 3;
         }
 
         .org-card-role {
@@ -2378,7 +2317,7 @@ if (file_exists($jsonFile)) {
         }
 
         .org-card-empty {
-            color: rgba(255, 255, 255, 0.7);
+            color: #94a3b8;
             font-weight: 400;
             font-style: italic;
         }
@@ -2636,52 +2575,53 @@ if (file_exists($jsonFile)) {
                 padding: clamp(20px, 2.08vw, 30px);
             }
 
-            .org-radial-container {
-                height: clamp(500px, 52.08vw, 750px);
-                min-height: 500px;
-                padding: clamp(30px, 3.13vw, 40px);
+            .org-cards-wall {
+                column-width: clamp(140px, 14.58vw, 180px);
+                column-gap: clamp(12px, 1.25vw, 18px);
+                padding: clamp(16px, 1.67vw, 24px);
             }
 
-            .org-card-ceo-center {
-                width: clamp(150px, 15.63vw, 220px);
-                min-height: clamp(130px, 13.54vw, 180px);
-                padding: clamp(20px, 2.08vw, 28px) clamp(24px, 2.5vw, 36px);
+            .org-card {
+                margin-bottom: clamp(12px, 1.25vw, 18px);
             }
 
-            .org-card-ceo-center .org-card-role {
-                font-size: clamp(22px, 2.29vw, 32px);
+            .org-card-level-ceo {
+                min-height: clamp(160px, 16.67vw, 220px);
+                padding: clamp(20px, 2.08vw, 28px);
             }
 
-            .org-card-ceo-center .org-card-name {
-                font-size: clamp(16px, 1.67vw, 22px);
+            .org-card-level-ceo .org-card-role {
+                font-size: clamp(24px, 2.5vw, 32px);
             }
 
-            .org-card-radial {
-                width: clamp(110px, 11.46vw, 160px);
-                min-height: clamp(90px, 9.38vw, 130px);
-                padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 22px);
+            .org-card-level-ceo .org-card-name {
+                font-size: clamp(18px, 1.88vw, 24px);
             }
 
-            .org-card-radial .org-card-role {
+            .org-card-level-clevel {
+                min-height: clamp(120px, 12.5vw, 160px);
+                padding: clamp(16px, 1.67vw, 20px);
+            }
+
+            .org-card-level-clevel .org-card-role {
+                font-size: clamp(16px, 1.67vw, 20px);
+            }
+
+            .org-card-level-clevel .org-card-name {
                 font-size: clamp(14px, 1.46vw, 18px);
             }
 
-            .org-card-radial .org-card-name {
+            .org-card-level-other {
+                min-height: clamp(100px, 10.42vw, 140px);
+                padding: clamp(12px, 1.25vw, 16px);
+            }
+
+            .org-card-level-other .org-card-role {
                 font-size: clamp(12px, 1.25vw, 16px);
             }
 
-            .org-card-radial-outer {
-                width: clamp(90px, 9.38vw, 130px);
-                min-height: clamp(75px, 7.81vw, 110px);
-                padding: clamp(10px, 1.04vw, 14px) clamp(12px, 1.25vw, 18px);
-            }
-
-            .org-card-radial-outer .org-card-role {
-                font-size: clamp(11px, 1.15vw, 15px);
-            }
-
-            .org-card-radial-outer .org-card-name {
-                font-size: clamp(10px, 1.04vw, 14px);
+            .org-card-level-other .org-card-name {
+                font-size: clamp(11px, 1.15vw, 14px);
             }
 
             .org-bg-text img {
@@ -2690,57 +2630,38 @@ if (file_exists($jsonFile)) {
             }
         }
 
-        @media (max-width: 768px) {
-            .org-radial-container {
-                height: clamp(450px, 46.88vw, 650px);
-                min-height: 450px;
-                padding: clamp(20px, 2.08vw, 30px);
+        @media (max-width: 640px) {
+            .org-cards-wall {
+                column-width: clamp(120px, 12.5vw, 150px);
+                column-gap: 12px;
+                padding: clamp(12px, 1.25vw, 16px);
             }
 
-            .org-card-ceo-center {
-                width: clamp(130px, 13.54vw, 180px);
-                min-height: clamp(110px, 11.46vw, 150px);
-                padding: clamp(16px, 1.67vw, 24px) clamp(20px, 2.08vw, 28px);
+            .org-card {
+                margin-bottom: 12px;
             }
 
-            .org-card-ceo-center .org-card-role {
-                font-size: clamp(18px, 1.88vw, 26px);
+            .org-card-level-ceo {
+                min-height: clamp(140px, 14.58vw, 180px);
+                padding: clamp(18px, 1.88vw, 24px);
             }
 
-            .org-card-ceo-center .org-card-name {
-                font-size: clamp(14px, 1.46vw, 18px);
+            .org-card-level-ceo .org-card-role {
+                font-size: clamp(20px, 2.08vw, 28px);
             }
 
-            .org-card-radial {
-                width: clamp(95px, 9.9vw, 140px);
-                min-height: clamp(80px, 8.33vw, 115px);
-                padding: clamp(10px, 1.04vw, 14px) clamp(14px, 1.46vw, 18px);
+            .org-card-level-ceo .org-card-name {
+                font-size: clamp(16px, 1.67vw, 20px);
             }
 
-            .org-card-radial .org-card-role {
-                font-size: clamp(12px, 1.25vw, 16px);
+            .org-card-level-clevel {
+                min-height: clamp(110px, 11.46vw, 140px);
+                padding: clamp(14px, 1.46vw, 18px);
             }
 
-            .org-card-radial .org-card-name {
-                font-size: clamp(11px, 1.15vw, 14px);
-            }
-
-            .org-card-radial-outer {
-                width: clamp(80px, 8.33vw, 110px);
-                min-height: clamp(65px, 6.77vw, 95px);
-                padding: clamp(8px, 0.83vw, 12px) clamp(10px, 1.04vw, 14px);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .org-radial-container {
-                height: clamp(400px, 41.67vw, 550px);
-                min-height: 400px;
-            }
-
-            .org-card-radial,
-            .org-card-radial-outer {
-                font-size: 0.9em;
+            .org-card-level-other {
+                min-height: clamp(90px, 9.38vw, 120px);
+                padding: clamp(12px, 1.25vw, 16px);
             }
         }
 
@@ -3379,7 +3300,7 @@ if (file_exists($jsonFile)) {
                             <h1 class="org-title-main">高层组织架构图</h1>
                         </div>
 
-                        <!-- 中心辐射式容器 -->
+                        <!-- 扁平化网格容器 -->
                         <div class="org-tree-root-container">
                         <?php 
                         $orgStructure = $strategyData['organizationStructure'];
@@ -3415,205 +3336,57 @@ if (file_exists($jsonFile)) {
                                 // 如果只有一个词，返回前3个大写字母或全部
                                 return strtoupper(substr($title, 0, 3));
                         }
-
-                            // 分离第一圈和第二圈成员
-                            $firstCircleMembers = []; // C-Level成员（第一圈）
-                            $secondCircleMembers = []; // PA和下属成员（第二圈）
-                            
-                            if (!empty($cLevelMembers)) {
-                                foreach ($cLevelMembers as $memberIndex => $member) {
-                                    $firstCircleMembers[] = [
-                                        'title' => $member['title'] ?? $member['fullTitle'] ?? '',
-                                        'name' => $member['name'] ?? '—',
-                                        'type' => 'clevel',
-                                        'index' => $memberIndex
-                                    ];
-                                    
-                                    // 如果有下属，添加到第二圈
-                                    $subordinates = !empty($member['subordinates']) && is_array($member['subordinates']) ? $member['subordinates'] : [];
-                                    foreach ($subordinates as $sub) {
-                                        $secondCircleMembers[] = [
-                                            'title' => $sub['title'] ?? $sub['fullTitle'] ?? '',
-                                            'name' => $sub['name'] ?? '—',
-                                            'type' => 'outer',
-                                            'parentIndex' => $memberIndex
-                                        ];
-                                    }
-                                }
-                            }
-                            
-                            // 添加PA到第二圈（如果有）
-                            if (!empty($paName)) {
-                                $secondCircleMembers[] = [
-                                    'title' => $paTitle,
-                                    'name' => $paName,
-                                    'type' => 'outer',
-                                    'parentIndex' => null
-                                ];
-                            }
                         ?>
                         
-                            <div class="org-radial-container">
-                                <div class="org-radial-wrapper">
-                                    <!-- SVG连接线 -->
-                                    <svg class="org-radial-connectors" id="orgRadialConnectors"></svg>
-
-                                    <!-- CEO中心卡片 -->
+                            <div class="org-grid-container">
+                                <div class="org-cards-wall">
+                                    <!-- CEO卡片 - 最大，橙色渐变 -->
                                     <?php if (!empty($ceoName)): ?>
-                                    <div class="org-card-ceo-center" id="ceoCard">
+                                    <div class="org-card org-card-level-ceo">
                                         <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($ceoTitle)); ?></div>
                                         <div class="org-card-name"><?php echo htmlspecialchars($ceoName); ?></div>
                                     </div>
                                     <?php endif; ?>
 
-                                    <!-- C-Level成员卡片 - 围绕CEO排列（第一圈） -->
-                                    <?php if (!empty($firstCircleMembers)): 
-                                        $firstCircleCount = count($firstCircleMembers);
-                                        $radius = 280; // 第一圈半径（像素）
-                                        $centerX = 50; // 百分比
-                                        $centerY = 50; // 百分比
-                                    ?>
-                                        <?php foreach ($firstCircleMembers as $index => $member): 
-                                            $memberTitle = $member['title'];
-                                            $memberName = $member['name'];
+                                    <!-- C-Level成员卡片 - 中等，橙色边框 -->
+                                    <?php if (!empty($cLevelMembers)): ?>
+                                        <?php foreach ($cLevelMembers as $member): 
+                                            $memberTitle = $member['title'] ?? $member['fullTitle'] ?? '';
+                                            $memberName  = $member['name'] ?? '';
                                             
-                                            // 计算角度（均匀分布，从顶部开始）
-                                            $angle = ($index * 360 / $firstCircleCount) - 90;
-                                            $angleRad = deg2rad($angle);
-                                            
-                                            // 计算位置（相对于中心）
-                                            $x = $centerX + ($radius / 10) * cos($angleRad); // 转换为百分比
-                                            $y = $centerY + ($radius / 10) * sin($angleRad);
-                                            
-                                            // 确保卡片不会超出容器
-                                            $x = max(15, min(85, $x));
-                                            $y = max(15, min(85, $y));
+                                            // 处理subordinates（如果有的话，也显示在网格中）
+                                            $subordinates = !empty($member['subordinates']) && is_array($member['subordinates']) ? $member['subordinates'] : [];
                                         ?>
-                                            <div class="org-card-radial" 
-                                                 data-index="<?php echo $index; ?>"
-                                                 data-type="clevel"
-                                                 style="left: <?php echo $x; ?>%; top: <?php echo $y; ?>%; transform: translate(-50%, -50%);"
-                                                 data-angle="<?php echo $angle; ?>"
-                                                 data-radius="<?php echo $radius; ?>">
+                                            <!-- C-Level成员卡片 -->
+                                            <div class="org-card org-card-level-clevel">
                                                 <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($memberTitle)); ?></div>
-                                                <div class="org-card-name"><?php echo htmlspecialchars($memberName); ?></div>
+                                                <div class="org-card-name"><?php echo htmlspecialchars($memberName ?: '—'); ?></div>
                                             </div>
+
+                                            <!-- 如果有下属，也显示在网格中（使用other级别样式） -->
+                                            <?php if (!empty($subordinates)): ?>
+                                                <?php foreach ($subordinates as $sub): 
+                                                    $subTitle = $sub['title'] ?? $sub['fullTitle'] ?? '';
+                                                    $subName  = $sub['name'] ?? '';
+                                                ?>
+                                                    <div class="org-card org-card-level-other">
+                                                        <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($subTitle)); ?></div>
+                                                        <div class="org-card-name"><?php echo htmlspecialchars($subName ?: '—'); ?></div>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
 
-                                    <!-- 第二圈成员卡片（PA和下属） -->
-                                    <?php if (!empty($secondCircleMembers)): 
-                                        $secondCircleCount = count($secondCircleMembers);
-                                        $secondRadius = $radius * 1.6; // 第二圈半径
-                                    ?>
-                                        <?php foreach ($secondCircleMembers as $index => $member): 
-                                            $memberTitle = $member['title'];
-                                            $memberName = $member['name'];
-                                            
-                                            // 计算角度（均匀分布）
-                                            $angle = ($index * 360 / max($secondCircleCount, 1)) - 90;
-                                            $angleRad = deg2rad($angle);
-                                            
-                                            // 计算位置（相对于中心）
-                                            $x = $centerX + ($secondRadius / 10) * cos($angleRad);
-                                            $y = $centerY + ($secondRadius / 10) * sin($angleRad);
-                                            
-                                            // 确保卡片不会超出容器
-                                            $x = max(15, min(85, $x));
-                                            $y = max(15, min(85, $y));
-                                        ?>
-                                            <div class="org-card-radial-outer" 
-                                                 data-index="<?php echo $index + 100; ?>"
-                                                 data-type="outer"
-                                                 style="left: <?php echo $x; ?>%; top: <?php echo $y; ?>%; transform: translate(-50%, -50%);"
-                                                 data-angle="<?php echo $angle; ?>"
-                                                 data-radius="<?php echo $secondRadius; ?>">
-                                                <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($memberTitle)); ?></div>
-                                                <div class="org-card-name"><?php echo htmlspecialchars($memberName); ?></div>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </div>
+                                    <!-- PA卡片 - 标准大小 -->
+                                    <?php if (!empty($paName)): ?>
+                                    <div class="org-card org-card-level-other">
+                                        <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($paTitle)); ?></div>
+                                        <div class="org-card-name"><?php echo htmlspecialchars($paName); ?></div>
+                                    </div>
+                                        <?php endif; ?>
+                                    </div>
                             </div>
-
-                            <script>
-                            // 绘制连接线
-                            (function() {
-                                const wrapper = document.querySelector('.org-radial-wrapper');
-                                const ceoCard = document.getElementById('ceoCard');
-                                const connectorsSvg = document.getElementById('orgRadialConnectors');
-                                const radialCards = document.querySelectorAll('.org-card-radial, .org-card-radial-outer');
-                                
-                                if (!ceoCard || !connectorsSvg || radialCards.length === 0) return;
-                                
-                                // 获取容器尺寸
-                                function updateConnectors() {
-                                    const rect = wrapper.getBoundingClientRect();
-                                    const centerX = rect.width / 2;
-                                    const centerY = rect.height / 2;
-                                    
-                                    // 获取CEO中心位置
-                                    const ceoRect = ceoCard.getBoundingClientRect();
-                                    const ceoX = ceoRect.left + ceoRect.width / 2 - wrapper.getBoundingClientRect().left;
-                                    const ceoY = ceoRect.top + ceoRect.height / 2 - wrapper.getBoundingClientRect().top;
-                                    
-                                    // 设置SVG尺寸
-                                    connectorsSvg.setAttribute('width', rect.width);
-                                    connectorsSvg.setAttribute('height', rect.height);
-                                    
-                                    // 清空之前的连接线
-                                    connectorsSvg.innerHTML = '';
-                                    
-                                    // 为每个卡片绘制连接线（只连接第一圈成员）
-                                    radialCards.forEach((card) => {
-                                        if (card.classList.contains('org-card-radial')) {
-                                            const cardRect = card.getBoundingClientRect();
-                                            const cardX = cardRect.left + cardRect.width / 2 - wrapper.getBoundingClientRect().left;
-                                            const cardY = cardRect.top + cardRect.height / 2 - wrapper.getBoundingClientRect().top;
-                                            
-                                            // 创建路径
-                                            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                                            line.setAttribute('x1', ceoX);
-                                            line.setAttribute('y1', ceoY);
-                                            line.setAttribute('x2', cardX);
-                                            line.setAttribute('y2', cardY);
-                                            line.setAttribute('class', 'org-radial-connector');
-                                            line.setAttribute('data-target', card.dataset.index || card.getAttribute('data-index'));
-                                            
-                                            connectorsSvg.appendChild(line);
-                                        }
-                                    });
-                                }
-                                
-                                // 初始化
-                                updateConnectors();
-                                
-                                // 窗口大小改变时更新
-                                window.addEventListener('resize', updateConnectors);
-                                
-                                // 卡片hover时高亮连接线
-                                radialCards.forEach((card) => {
-                                    if (card.classList.contains('org-card-radial')) {
-                                        const cardIndex = card.dataset.index || card.getAttribute('data-index');
-                                        card.addEventListener('mouseenter', function() {
-                                            const connector = connectorsSvg.querySelector(`line[data-target="${cardIndex}"]`);
-                                            if (connector) {
-                                                connector.style.opacity = '0.8';
-                                                connector.style.strokeWidth = '3';
-                                            }
-                                        });
-                                        
-                                        card.addEventListener('mouseleave', function() {
-                                            const connector = connectorsSvg.querySelector(`line[data-target="${cardIndex}"]`);
-                                            if (connector) {
-                                                connector.style.opacity = '';
-                                                connector.style.strokeWidth = '';
-                                            }
-                                        });
-                                    }
-                                });
-                            })();
-                            </script>
                         </div>
                     </div>
                                     </div>
