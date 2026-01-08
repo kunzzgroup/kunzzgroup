@@ -2190,103 +2190,167 @@ if (file_exists($jsonFile)) {
             object-fit: contain;
         }
 
-        /* 分区卡片墙布局 */
-        .org-sections-container {
+        /* 垂直层级列表（文件树风格） */
+        .org-tree-list {
             position: relative;
             z-index: 1;
             width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: clamp(24px, 2.5vw, 40px);
-        }
-
-        .org-section {
             background: #ffffff;
             border-radius: clamp(16px, 1.67vw, 24px);
             border: 1px solid #e2e8f0;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-            padding: clamp(20px, 2.08vw, 32px);
-        }
-
-        .org-section-title {
-            font-size: clamp(18px, 1.88vw, 24px);
-            font-weight: 800;
-            color: #0f172a;
-            margin-bottom: clamp(16px, 1.67vw, 24px);
-            padding-bottom: clamp(12px, 1.25vw, 16px);
-            border-bottom: 2px solid #ff5c00;
-        }
-
-        .org-cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(clamp(140px, 14.58vw, 180px), 1fr));
-            gap: clamp(16px, 1.67vw, 24px);
-        }
-
-        .org-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: clamp(12px, 1.25vw, 16px);
-            padding: clamp(16px, 1.67vw, 20px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-            min-height: clamp(100px, 10.42vw, 140px);
-        }
-
-        .org-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-            border-color: #ff5c00;
-        }
-
-        .org-card-role {
-            font-size: clamp(14px, 1.46vw, 18px);
-            font-weight: 800;
-            color: #ff5c00;
-            margin-bottom: clamp(8px, 0.83vw, 12px);
-            letter-spacing: 0.05em;
-        }
-
-        .org-card-name {
-            font-size: clamp(12px, 1.25vw, 16px);
-            font-weight: 600;
-            color: #0f172a;
-            line-height: 1.4;
-        }
-
-        .org-card-empty {
-            color: #94a3b8;
-            font-weight: 400;
-            font-style: italic;
-        }
-
-        /* CEO区块特殊样式 - 单个大卡片居中 */
-        .org-section-ceo .org-cards-grid {
-            grid-template-columns: 1fr;
-            max-width: clamp(200px, 20.83vw, 280px);
+            padding: clamp(24px, 2.5vw, 32px);
+            max-width: 900px;
             margin: 0 auto;
         }
 
-        .org-section-ceo .org-card {
+        .org-tree-item {
+            position: relative;
+            margin-bottom: clamp(8px, 0.83vw, 12px);
+        }
+
+        .org-tree-node {
+            display: flex;
+            align-items: center;
+            padding: clamp(10px, 1.04vw, 14px) clamp(12px, 1.25vw, 16px);
+            border-radius: clamp(8px, 0.83vw, 12px);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #ffffff;
+            border: 1px solid transparent;
+        }
+
+        .org-tree-node:hover {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+        }
+
+        .org-tree-node.root {
             background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
             border: none;
-            min-height: clamp(120px, 12.5vw, 160px);
+            box-shadow: 0 4px 12px rgba(255, 92, 0, 0.2);
         }
 
-        .org-section-ceo .org-card-role {
-            color: #ffffff;
-            font-size: clamp(20px, 2.08vw, 28px);
+        .org-tree-node.root:hover {
+            background: linear-gradient(135deg, #ff4a00 0%, #ff7c32 100%);
+            box-shadow: 0 6px 16px rgba(255, 92, 0, 0.3);
         }
 
-        .org-section-ceo .org-card-name {
+        /* 树形图标和连接线 */
+        .org-tree-icon {
+            width: clamp(16px, 1.67vw, 20px);
+            height: clamp(16px, 1.67vw, 20px);
+            margin-right: clamp(8px, 0.83vw, 12px);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        .org-tree-node.root .org-tree-icon {
             color: #ffffff;
-            font-size: clamp(14px, 1.46vw, 20px);
+        }
+
+        .org-tree-icon.expanded {
+            transform: rotate(90deg);
+        }
+
+        .org-tree-icon.has-children::before {
+            content: '▶';
+            font-size: clamp(10px, 1.04vw, 12px);
+        }
+
+        .org-tree-icon.no-children::before {
+            content: '▷';
+            font-size: clamp(10px, 1.04vw, 12px);
+            opacity: 0.3;
+        }
+
+        .org-tree-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: clamp(12px, 1.25vw, 16px);
+        }
+
+        .org-tree-role {
+            font-size: clamp(14px, 1.46vw, 18px);
+            font-weight: 800;
+            color: #ff5c00;
+            letter-spacing: 0.05em;
+            min-width: clamp(60px, 6.25vw, 80px);
+        }
+
+        .org-tree-node.root .org-tree-role {
+            color: #ffffff;
+            font-size: clamp(18px, 1.88vw, 24px);
+        }
+
+        .org-tree-name {
+            font-size: clamp(13px, 1.35vw, 16px);
+            font-weight: 600;
+            color: #0f172a;
+            flex: 1;
+        }
+
+        .org-tree-node.root .org-tree-name {
+            color: #ffffff;
+            font-size: clamp(15px, 1.56vw, 20px);
+        }
+
+        /* 子节点容器 */
+        .org-tree-children {
+            margin-left: clamp(28px, 2.92vw, 36px);
+            margin-top: clamp(4px, 0.42vw, 6px);
+            border-left: 2px solid #e2e8f0;
+            padding-left: clamp(16px, 1.67vw, 20px);
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease;
+        }
+
+        .org-tree-children.expanded {
+            max-height: 5000px;
+            opacity: 1;
+            margin-top: clamp(8px, 0.83vw, 12px);
+        }
+
+        /* 连接线样式 - 仅对子节点显示 */
+        .org-tree-children .org-tree-item::before {
+            content: '';
+            position: absolute;
+            left: clamp(18px, 1.88vw, 22px);
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e2e8f0;
+            z-index: 0;
+        }
+
+        .org-tree-children .org-tree-item:first-child::before {
+            top: 50%;
+        }
+
+        .org-tree-children .org-tree-item:last-child::before {
+            bottom: 50%;
+        }
+
+        .org-tree-children .org-tree-node::after {
+            content: '';
+            position: absolute;
+            left: clamp(18px, 1.88vw, 22px);
+            top: 50%;
+            width: clamp(10px, 1.04vw, 14px);
+            height: 2px;
+            background: #e2e8f0;
+            z-index: 1;
+        }
+
+        .org-tree-children .org-tree-item:first-child .org-tree-node::after {
+            display: none;
         }
 
 
@@ -2302,48 +2366,34 @@ if (file_exists($jsonFile)) {
                 padding: clamp(20px, 2.08vw, 30px);
             }
 
-            .org-sections-container {
-                gap: clamp(20px, 2.08vw, 32px);
+            .org-tree-list {
+                padding: clamp(20px, 2.08vw, 24px);
             }
 
-            .org-section {
-                padding: clamp(16px, 1.67vw, 24px);
+            .org-tree-node {
+                padding: clamp(8px, 0.83vw, 12px) clamp(10px, 1.04vw, 14px);
             }
 
-            .org-section-title {
-                font-size: clamp(16px, 1.67vw, 20px);
-                margin-bottom: clamp(12px, 1.25vw, 18px);
-            }
-
-            .org-cards-grid {
-                grid-template-columns: repeat(auto-fill, minmax(clamp(120px, 12.5vw, 160px), 1fr));
-                gap: clamp(12px, 1.25vw, 18px);
-            }
-
-            .org-card {
-                min-height: clamp(90px, 9.38vw, 120px);
-                padding: clamp(12px, 1.25vw, 16px);
-            }
-
-            .org-card-role {
+            .org-tree-role {
                 font-size: clamp(12px, 1.25vw, 16px);
-                margin-bottom: clamp(6px, 0.63vw, 10px);
+                min-width: clamp(50px, 5.21vw, 70px);
             }
 
-            .org-card-name {
-                font-size: clamp(11px, 1.15vw, 14px);
+            .org-tree-name {
+                font-size: clamp(12px, 1.25vw, 14px);
             }
 
-            .org-section-ceo .org-card {
-                min-height: clamp(100px, 10.42vw, 140px);
+            .org-tree-node.root .org-tree-role {
+                font-size: clamp(16px, 1.67vw, 20px);
             }
 
-            .org-section-ceo .org-card-role {
-                font-size: clamp(18px, 1.88vw, 24px);
+            .org-tree-node.root .org-tree-name {
+                font-size: clamp(14px, 1.46vw, 18px);
             }
 
-            .org-section-ceo .org-card-name {
-                font-size: clamp(12px, 1.25vw, 18px);
+            .org-tree-children {
+                margin-left: clamp(24px, 2.5vw, 30px);
+                padding-left: clamp(12px, 1.25vw, 16px);
             }
 
             .org-bg-text img {
@@ -2353,13 +2403,17 @@ if (file_exists($jsonFile)) {
         }
 
         @media (max-width: 640px) {
-            .org-cards-grid {
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-                gap: 12px;
+            .org-tree-list {
+                padding: clamp(16px, 1.67vw, 20px);
             }
 
-            .org-section-ceo .org-cards-grid {
-                max-width: 100%;
+            .org-tree-node {
+                padding: clamp(8px, 0.83vw, 10px) clamp(8px, 0.83vw, 12px);
+            }
+
+            .org-tree-children {
+                margin-left: clamp(20px, 2.08vw, 24px);
+                padding-left: clamp(10px, 1.04vw, 12px);
             }
         }
 
@@ -2998,7 +3052,7 @@ if (file_exists($jsonFile)) {
                             <h1 class="org-title-main">高层组织架构图</h1>
                         </div>
 
-                        <!-- 分区卡片墙容器 -->
+                        <!-- 垂直层级列表容器 -->
                         <div class="org-tree-root-container">
                         <?php 
                         $orgStructure = $strategyData['organizationStructure'];
@@ -3034,67 +3088,85 @@ if (file_exists($jsonFile)) {
                                 // 如果只有一个词，返回前3个大写字母或全部
                                 return strtoupper(substr($title, 0, 3));
                             }
+
+                            // 递归渲染树节点
+                            function renderTreeNode($node, $title, $name, $level = 0, $hasChildren = false, $isRoot = false) {
+                                static $nodeCounter = 0;
+                                $nodeCounter++;
+                                $nodeId = 'node-' . $nodeCounter;
+                                $roleAbbr = getRoleAbbreviation($title);
+                                $iconClass = $hasChildren ? 'has-children' : 'no-children';
+                                
+                                echo '<div class="org-tree-item">';
+                                echo '<div class="org-tree-node' . ($isRoot ? ' root' : '') . '"' . ($hasChildren ? ' onclick="toggleNode(\'' . $nodeId . '\')" style="cursor: pointer;"' : '') . '>';
+                                echo '<span class="org-tree-icon ' . $iconClass . '" id="icon-' . $nodeId . '"></span>';
+                                echo '<div class="org-tree-content">';
+                                echo '<span class="org-tree-role">' . htmlspecialchars($roleAbbr) . '</span>';
+                                echo '<span class="org-tree-name">' . htmlspecialchars($name ?: '—') . '</span>';
+                                echo '</div>';
+                                echo '</div>';
+                                
+                                // 如果有子节点，渲染子节点容器
+                                if ($hasChildren) {
+                                    $subordinates = !empty($node['subordinates']) && is_array($node['subordinates']) ? $node['subordinates'] : [];
+                                    if (!empty($subordinates)) {
+                                        echo '<div class="org-tree-children expanded" id="' . $nodeId . '">';
+                                        foreach ($subordinates as $sub) {
+                                            $subTitle = $sub['title'] ?? $sub['fullTitle'] ?? '';
+                                            $subName  = $sub['name'] ?? '';
+                                            $subHasChildren = !empty($sub['subordinates']) && is_array($sub['subordinates']) && count($sub['subordinates']) > 0;
+                                            renderTreeNode($sub, $subTitle, $subName, $level + 1, $subHasChildren, false);
+                                        }
+                                        echo '</div>';
+                                        // 默认展开时，图标也应该旋转
+                                        echo '<script>document.getElementById("icon-' . $nodeId . '").classList.add("expanded");</script>';
+                                    }
+                                }
+                                
+                                echo '</div>';
+                            }
                             ?>
 
-                            <div class="org-sections-container">
-                                <!-- CEO区块 -->
-                                <div class="org-section org-section-ceo">
-                                    <h2 class="org-section-title">首席执行官</h2>
-                                    <div class="org-cards-grid">
-                                        <div class="org-card">
-                                            <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($ceoTitle)); ?></div>
-                                            <div class="org-card-name"><?php echo htmlspecialchars($ceoName ?: '—'); ?></div>
+                            <div class="org-tree-list">
+                                <!-- CEO根节点 -->
+                                <?php 
+                                $ceoHasChildren = !empty($cLevelMembers) || !empty($paName);
+                                $nodeCounter = 0;
+                                $nodeCounter++;
+                                $ceoNodeId = 'node-' . $nodeCounter;
+                                $ceoRoleAbbr = getRoleAbbreviation($ceoTitle);
+                                ?>
+                                <div class="org-tree-item">
+                                    <div class="org-tree-node root" <?php echo $ceoHasChildren ? 'onclick="toggleNode(\'' . $ceoNodeId . '\')" style="cursor: pointer;"' : ''; ?>>
+                                        <span class="org-tree-icon <?php echo $ceoHasChildren ? 'has-children expanded' : 'no-children'; ?>" id="icon-<?php echo $ceoNodeId; ?>"></span>
+                                        <div class="org-tree-content">
+                                            <span class="org-tree-role"><?php echo htmlspecialchars($ceoRoleAbbr); ?></span>
+                                            <span class="org-tree-name"><?php echo htmlspecialchars($ceoName ?: '—'); ?></span>
                                         </div>
                                     </div>
-                                </div>
-
-                                <!-- C-Level区块 -->
-                                <?php if (!empty($cLevelMembers)): ?>
-                                <div class="org-section">
-                                    <h2 class="org-section-title">管理层</h2>
-                                    <div class="org-cards-grid">
-                                        <?php foreach ($cLevelMembers as $member): 
-                                            $memberTitle = $member['title'] ?? $member['fullTitle'] ?? '';
-                                            $memberName  = $member['name'] ?? '';
-                                            
-                                            // 处理subordinates（如果有的话，也显示在同一区块）
-                                            $subordinates = !empty($member['subordinates']) && is_array($member['subordinates']) ? $member['subordinates'] : [];
-                                        ?>
-                                            <!-- C-Level成员卡片 -->
-                                            <div class="org-card">
-                                                <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($memberTitle)); ?></div>
-                                                <div class="org-card-name"><?php echo htmlspecialchars($memberName ?: '—'); ?></div>
-                                            </div>
-
-                                            <!-- 如果有下属，也显示在同一区块 -->
-                                            <?php if (!empty($subordinates)): ?>
-                                                <?php foreach ($subordinates as $sub): 
-                                                    $subTitle = $sub['title'] ?? $sub['fullTitle'] ?? '';
-                                                    $subName  = $sub['name'] ?? '';
-                                                ?>
-                                                    <div class="org-card">
-                                                        <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($subTitle)); ?></div>
-                                                        <div class="org-card-name"><?php echo htmlspecialchars($subName ?: '—'); ?></div>
-                                                    </div>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        <?php endforeach; ?>
+                                    
+                                    <?php if ($ceoHasChildren): ?>
+                                    <div class="org-tree-children expanded" id="<?php echo $ceoNodeId; ?>">
+                                        <!-- C-Level子节点 -->
+                                        <?php if (!empty($cLevelMembers)): ?>
+                                            <?php foreach ($cLevelMembers as $member): 
+                                                $memberTitle = $member['title'] ?? $member['fullTitle'] ?? '';
+                                                $memberName  = $member['name'] ?? '';
+                                                $memberHasChildren = !empty($member['subordinates']) && is_array($member['subordinates']) && count($member['subordinates']) > 0;
+                                                renderTreeNode($member, $memberTitle, $memberName, 1, $memberHasChildren, false);
+                                            endforeach; ?>
+                                        <?php endif; ?>
+                                        
+                                        <!-- PA子节点 -->
+                                        <?php if (!empty($paName)): ?>
+                                            <?php 
+                                            $paNode = ['pa' => ['title' => $paTitle, 'name' => $paName]];
+                                            renderTreeNode($paNode, $paTitle, $paName, 1, false, false);
+                                            ?>
+                                        <?php endif; ?>
                                     </div>
+                                    <?php endif; ?>
                                 </div>
-                                <?php endif; ?>
-
-                                <!-- PA区块 -->
-                                <?php if (!empty($paName)): ?>
-                                <div class="org-section">
-                                    <h2 class="org-section-title">执行助理</h2>
-                                    <div class="org-cards-grid">
-                                        <div class="org-card">
-                                            <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($paTitle)); ?></div>
-                                            <div class="org-card-name"><?php echo htmlspecialchars($paName); ?></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -3694,6 +3766,39 @@ if (file_exists($jsonFile)) {
                 });
             });
 
+        });
+
+        // 树节点展开/收起功能
+        function toggleNode(nodeId) {
+            const children = document.getElementById(nodeId);
+            const icon = document.getElementById('icon-' + nodeId);
+            
+            if (!children || !icon) return;
+            
+            const isExpanded = children.classList.contains('expanded');
+            
+            if (isExpanded) {
+                // 收起
+                children.classList.remove('expanded');
+                icon.classList.remove('expanded');
+            } else {
+                // 展开
+                children.classList.add('expanded');
+                icon.classList.add('expanded');
+            }
+        }
+
+        // 页面加载时默认展开所有节点
+        document.addEventListener('DOMContentLoaded', function() {
+            const allChildren = document.querySelectorAll('.org-tree-children');
+            allChildren.forEach(children => {
+                children.classList.add('expanded');
+            });
+            
+            const allIcons = document.querySelectorAll('.org-tree-icon.has-children');
+            allIcons.forEach(icon => {
+                icon.classList.add('expanded');
+            });
         });
     </script>
 
