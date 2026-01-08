@@ -2190,171 +2190,197 @@ if (file_exists($jsonFile)) {
             object-fit: contain;
         }
 
-        /* 矩阵式布局 - 按层级（行）和部门（列）分组 */
-        .org-matrix-container {
+        /* 中心辐射式布局 - CEO在中心 */
+        .org-radial-container {
             position: relative;
             z-index: 1;
             width: 100%;
-            padding: clamp(20px, 2.08vw, 32px);
-        }
-
-        .org-matrix-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: clamp(12px, 1.25vw, 20px);
-            background: #ffffff;
-            border-radius: clamp(16px, 1.67vw, 24px);
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            padding: clamp(16px, 1.67vw, 24px);
-            display: table;
-        }
-
-        .org-matrix-row {
-            display: table-row;
-        }
-
-        .org-matrix-cell {
-            display: table-cell;
-            vertical-align: middle;
-            padding: clamp(16px, 1.67vw, 24px);
-            text-align: left;
-            position: relative;
-        }
-
-        .org-matrix-level-label {
-            font-size: clamp(12px, 1.25vw, 16px);
-            font-weight: 700;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            padding-right: clamp(16px, 1.67vw, 24px);
-            text-align: right;
-            width: clamp(100px, 10.42vw, 140px);
-            vertical-align: middle;
-            background: #f8fafc;
-            border-right: 2px solid #e2e8f0;
-        }
-
-        .org-matrix-cards-row {
+            height: clamp(600px, 62.5vw, 900px);
+            min-height: 600px;
             display: flex;
-            gap: clamp(12px, 1.25vw, 20px);
-            justify-content: flex-start;
             align-items: center;
-            flex-wrap: wrap;
-            min-height: clamp(120px, 12.5vw, 180px);
+            justify-content: center;
+            padding: clamp(40px, 4.17vw, 60px);
         }
 
-        .org-matrix-card {
-            background: #ffffff;
-            border-radius: clamp(12px, 1.25vw, 16px);
-            padding: clamp(16px, 1.67vw, 24px);
+        .org-radial-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: clamp(800px, 83.33vw, 1200px);
+            max-height: clamp(600px, 62.5vw, 900px);
+        }
+
+        /* CEO中心卡片 */
+        .org-card-ceo-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
+            border: 4px solid #ffffff;
+            border-radius: clamp(16px, 1.67vw, 24px);
+            padding: clamp(24px, 2.5vw, 36px) clamp(32px, 3.33vw, 48px);
+            width: clamp(180px, 18.75vw, 260px);
+            min-height: clamp(160px, 16.67vw, 220px);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-            position: relative;
-            min-width: clamp(140px, 14.58vw, 180px);
-            min-height: clamp(100px, 10.42vw, 140px);
-        }
-
-        .org-matrix-card:hover {
-            transform: translateY(-4px) scale(1.05);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 12px 40px rgba(255, 92, 0, 0.4);
             z-index: 10;
+            transition: all 0.3s ease;
         }
 
-        /* CEO行 - 橙色渐变，独占一行 */
-        .org-matrix-row-ceo .org-matrix-card {
-            background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
-            border: 3px solid #ffffff;
-            box-shadow: 0 8px 32px rgba(255, 92, 0, 0.3);
-            min-width: clamp(200px, 20.83vw, 280px);
-            min-height: clamp(140px, 14.58vw, 200px);
-            margin: 0 auto;
+        .org-card-ceo-center:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+            box-shadow: 0 16px 50px rgba(255, 92, 0, 0.5);
         }
 
-        .org-matrix-row-ceo .org-matrix-cards-row {
-            justify-content: center;
-        }
-
-        .org-matrix-row-ceo .org-matrix-card .org-matrix-card-role {
+        .org-card-ceo-center .org-card-role {
             color: #ffffff;
-            font-size: clamp(24px, 2.5vw, 36px);
+            font-size: clamp(28px, 2.92vw, 42px);
+            font-weight: 800;
+            margin-bottom: clamp(12px, 1.25vw, 16px);
+            letter-spacing: 0.05em;
+            line-height: 1.2;
         }
 
-        .org-matrix-row-ceo .org-matrix-card .org-matrix-card-name {
+        .org-card-ceo-center .org-card-name {
             color: #ffffff;
-            font-size: clamp(18px, 1.88vw, 24px);
+            font-size: clamp(18px, 1.88vw, 26px);
+            font-weight: 600;
+            line-height: 1.4;
         }
 
-        /* C-Level行 - 橙色边框 */
-        .org-matrix-row-clevel .org-matrix-card {
+        /* C-Level成员卡片 - 围绕CEO排列 */
+        .org-card-radial {
+            position: absolute;
+            background: #ffffff;
             border: 2px solid #ff5c00;
+            border-radius: clamp(12px, 1.25vw, 16px);
+            padding: clamp(16px, 1.67vw, 20px) clamp(20px, 2.08vw, 28px);
+            width: clamp(140px, 14.58vw, 200px);
+            min-height: clamp(110px, 11.46vw, 150px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            z-index: 8;
+            transition: all 0.3s ease;
             background: #fff5e6;
-            min-width: clamp(160px, 16.67vw, 200px);
-            min-height: clamp(120px, 12.5vw, 160px);
         }
 
-        .org-matrix-row-clevel .org-matrix-card .org-matrix-card-role {
+        .org-card-radial:hover {
+            transform: scale(1.1) translateY(-4px);
+            box-shadow: 0 8px 24px rgba(255, 92, 0, 0.3);
+            background: #ffffff;
+            border-color: #ff5c00;
+            z-index: 9;
+        }
+
+        .org-card-radial .org-card-role {
             color: #ff5c00;
-            font-size: clamp(18px, 1.88vw, 24px);
-        }
-
-        .org-matrix-row-clevel .org-matrix-card .org-matrix-card-name {
-            color: #0f172a;
-            font-size: clamp(14px, 1.46vw, 18px);
-        }
-
-        .org-matrix-row-clevel .org-matrix-card:hover {
-            background: #ffffff;
-            border-color: #ff5c00;
-            box-shadow: 0 8px 24px rgba(255, 92, 0, 0.25);
-        }
-
-        /* PA/其他行 - 灰色边框 */
-        .org-matrix-row-other .org-matrix-card {
-            border: 1px solid #e2e8f0;
-            background: #ffffff;
-            min-width: clamp(140px, 14.58vw, 180px);
-            min-height: clamp(100px, 10.42vw, 140px);
-        }
-
-        .org-matrix-row-other .org-matrix-card .org-matrix-card-role {
-            color: #64748b;
-            font-size: clamp(16px, 1.67vw, 20px);
-        }
-
-        .org-matrix-row-other .org-matrix-card .org-matrix-card-name {
-            color: #475569;
-            font-size: clamp(12px, 1.25vw, 16px);
-        }
-
-        .org-matrix-row-other .org-matrix-card:hover {
-            border-color: #ff5c00;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-        }
-
-        .org-matrix-card-role {
+            font-size: clamp(16px, 1.67vw, 22px);
             font-weight: 800;
             margin-bottom: clamp(8px, 0.83vw, 12px);
             letter-spacing: 0.05em;
             line-height: 1.2;
         }
 
-        .org-matrix-card-name {
+        .org-card-radial .org-card-name {
+            color: #0f172a;
+            font-size: clamp(14px, 1.46vw, 18px);
             font-weight: 600;
             line-height: 1.4;
         }
 
-        .org-matrix-card-empty {
-            color: #cbd5e1;
+        /* PA/其他成员卡片 - 第二圈（可选） */
+        .org-card-radial-outer {
+            position: absolute;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: clamp(10px, 1.04vw, 14px);
+            padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 20px);
+            width: clamp(110px, 11.46vw, 150px);
+            min-height: clamp(90px, 9.38vw, 120px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            z-index: 7;
+            transition: all 0.3s ease;
+        }
+
+        .org-card-radial-outer:hover {
+            transform: scale(1.08) translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            border-color: #ff5c00;
+            z-index: 8;
+        }
+
+        .org-card-radial-outer .org-card-role {
+            color: #64748b;
+            font-size: clamp(13px, 1.35vw, 17px);
+            font-weight: 700;
+            margin-bottom: clamp(6px, 0.63vw, 10px);
+            letter-spacing: 0.03em;
+            line-height: 1.2;
+        }
+
+        .org-card-radial-outer .org-card-name {
+            color: #475569;
+            font-size: clamp(12px, 1.25vw, 16px);
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        /* SVG连接线容器 */
+        .org-radial-connectors {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .org-radial-connector {
+            stroke: #ff5c00;
+            stroke-width: 2;
+            fill: none;
+            opacity: 0.4;
+            transition: opacity 0.3s ease;
+        }
+
+        .org-card-radial:hover ~ .org-radial-connectors .org-radial-connector,
+        .org-radial-connector:hover {
+            opacity: 0.8;
+            stroke-width: 3;
+        }
+
+        .org-card-role {
+            font-weight: 800;
+            margin-bottom: clamp(8px, 0.83vw, 12px);
+            letter-spacing: 0.05em;
+            line-height: 1.2;
+        }
+
+        .org-card-name {
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .org-card-empty {
+            color: rgba(255, 255, 255, 0.7);
             font-weight: 400;
             font-style: italic;
-            opacity: 0.6;
         }
 
         /* 内部组织架构图 - 垂直列布局 */
@@ -2581,7 +2607,7 @@ if (file_exists($jsonFile)) {
             .internal-org-title-overlay {
                 top: clamp(20px, 2.08vw, 24px);
                 left: clamp(20px, 2.08vw, 24px);
-            }
+        }
 
             .internal-org-title-main {
                 font-size: clamp(20px, 2.08vw, 28px);
@@ -2610,73 +2636,52 @@ if (file_exists($jsonFile)) {
                 padding: clamp(20px, 2.08vw, 30px);
             }
 
-            .org-matrix-container {
-                padding: clamp(16px, 1.67vw, 24px);
+            .org-radial-container {
+                height: clamp(500px, 52.08vw, 750px);
+                min-height: 500px;
+                padding: clamp(30px, 3.13vw, 40px);
             }
 
-            .org-matrix-table {
-                border-spacing: clamp(10px, 1.04vw, 16px);
-                padding: clamp(12px, 1.25vw, 20px);
+            .org-card-ceo-center {
+                width: clamp(150px, 15.63vw, 220px);
+                min-height: clamp(130px, 13.54vw, 180px);
+                padding: clamp(20px, 2.08vw, 28px) clamp(24px, 2.5vw, 36px);
             }
 
-            .org-matrix-level-label {
-                font-size: clamp(10px, 1.04vw, 14px);
-                padding: clamp(12px, 1.25vw, 20px) clamp(12px, 1.25vw, 20px);
-                width: clamp(80px, 8.33vw, 120px);
+            .org-card-ceo-center .org-card-role {
+                font-size: clamp(22px, 2.29vw, 32px);
             }
 
-            .org-matrix-cell {
-                padding: clamp(12px, 1.25vw, 20px);
+            .org-card-ceo-center .org-card-name {
+                font-size: clamp(16px, 1.67vw, 22px);
             }
 
-            .org-matrix-cards-row {
-                gap: clamp(10px, 1.04vw, 16px);
-                min-height: clamp(100px, 10.42vw, 140px);
+            .org-card-radial {
+                width: clamp(110px, 11.46vw, 160px);
+                min-height: clamp(90px, 9.38vw, 130px);
+                padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 22px);
             }
 
-            .org-matrix-card {
-                min-width: clamp(120px, 12.5vw, 160px);
-                min-height: clamp(90px, 9.38vw, 120px);
-                padding: clamp(12px, 1.25vw, 20px);
-            }
-
-            .org-matrix-row-ceo .org-matrix-card {
-                min-width: clamp(180px, 18.75vw, 240px);
-                min-height: clamp(120px, 12.5vw, 160px);
-            }
-
-            .org-matrix-row-ceo .org-matrix-card .org-matrix-card-role {
-                font-size: clamp(20px, 2.08vw, 28px);
-            }
-
-            .org-matrix-row-ceo .org-matrix-card .org-matrix-card-name {
-                font-size: clamp(16px, 1.67vw, 20px);
-            }
-
-            .org-matrix-row-clevel .org-matrix-card {
-                min-width: clamp(140px, 14.58vw, 180px);
-                min-height: clamp(100px, 10.42vw, 140px);
-            }
-
-            .org-matrix-row-clevel .org-matrix-card .org-matrix-card-role {
-                font-size: clamp(16px, 1.67vw, 20px);
-            }
-
-            .org-matrix-row-clevel .org-matrix-card .org-matrix-card-name {
-                font-size: clamp(12px, 1.25vw, 16px);
-            }
-
-            .org-matrix-row-other .org-matrix-card {
-                min-width: clamp(120px, 12.5vw, 160px);
-                min-height: clamp(80px, 8.33vw, 120px);
-            }
-
-            .org-matrix-row-other .org-matrix-card .org-matrix-card-role {
+            .org-card-radial .org-card-role {
                 font-size: clamp(14px, 1.46vw, 18px);
             }
 
-            .org-matrix-row-other .org-matrix-card .org-matrix-card-name {
-                font-size: clamp(11px, 1.15vw, 14px);
+            .org-card-radial .org-card-name {
+                font-size: clamp(12px, 1.25vw, 16px);
+            }
+
+            .org-card-radial-outer {
+                width: clamp(90px, 9.38vw, 130px);
+                min-height: clamp(75px, 7.81vw, 110px);
+                padding: clamp(10px, 1.04vw, 14px) clamp(12px, 1.25vw, 18px);
+            }
+
+            .org-card-radial-outer .org-card-role {
+                font-size: clamp(11px, 1.15vw, 15px);
+            }
+
+            .org-card-radial-outer .org-card-name {
+                font-size: clamp(10px, 1.04vw, 14px);
             }
 
             .org-bg-text img {
@@ -2685,77 +2690,57 @@ if (file_exists($jsonFile)) {
             }
         }
 
-        @media (max-width: 640px) {
-            .org-matrix-container {
-                padding: clamp(12px, 1.25vw, 16px);
-                overflow-x: auto;
+        @media (max-width: 768px) {
+            .org-radial-container {
+                height: clamp(450px, 46.88vw, 650px);
+                min-height: 450px;
+                padding: clamp(20px, 2.08vw, 30px);
             }
 
-            .org-matrix-table {
-                border-spacing: 8px;
-                padding: clamp(10px, 1.04vw, 14px);
-                min-width: 500px;
+            .org-card-ceo-center {
+                width: clamp(130px, 13.54vw, 180px);
+                min-height: clamp(110px, 11.46vw, 150px);
+                padding: clamp(16px, 1.67vw, 24px) clamp(20px, 2.08vw, 28px);
             }
 
-            .org-matrix-level-label {
-                font-size: clamp(9px, 0.94vw, 12px);
-                padding: clamp(10px, 1.04vw, 14px) clamp(8px, 0.83vw, 12px);
-                width: clamp(60px, 6.25vw, 80px);
+            .org-card-ceo-center .org-card-role {
+                font-size: clamp(18px, 1.88vw, 26px);
             }
 
-            .org-matrix-cell {
-                padding: clamp(10px, 1.04vw, 14px);
-            }
-
-            .org-matrix-cards-row {
-                gap: 8px;
-                min-height: clamp(80px, 8.33vw, 110px);
-                flex-wrap: wrap;
-            }
-
-            .org-matrix-card {
-                min-width: clamp(100px, 10.42vw, 130px);
-                min-height: clamp(70px, 7.29vw, 100px);
-                padding: clamp(10px, 1.04vw, 14px);
-            }
-
-            .org-matrix-row-ceo .org-matrix-card {
-                min-width: clamp(150px, 15.63vw, 200px);
-                min-height: clamp(100px, 10.42vw, 140px);
-            }
-
-            .org-matrix-row-ceo .org-matrix-card .org-matrix-card-role {
-                font-size: clamp(18px, 1.88vw, 24px);
-            }
-
-            .org-matrix-row-ceo .org-matrix-card .org-matrix-card-name {
+            .org-card-ceo-center .org-card-name {
                 font-size: clamp(14px, 1.46vw, 18px);
             }
 
-            .org-matrix-row-clevel .org-matrix-card {
-                min-width: clamp(120px, 12.5vw, 160px);
-                min-height: clamp(80px, 8.33vw, 110px);
+            .org-card-radial {
+                width: clamp(95px, 9.9vw, 140px);
+                min-height: clamp(80px, 8.33vw, 115px);
+                padding: clamp(10px, 1.04vw, 14px) clamp(14px, 1.46vw, 18px);
             }
 
-            .org-matrix-row-clevel .org-matrix-card .org-matrix-card-role {
-                font-size: clamp(14px, 1.46vw, 18px);
-            }
-
-            .org-matrix-row-clevel .org-matrix-card .org-matrix-card-name {
-                font-size: clamp(11px, 1.15vw, 14px);
-            }
-
-            .org-matrix-row-other .org-matrix-card {
-                min-width: clamp(100px, 10.42vw, 130px);
-                min-height: clamp(70px, 7.29vw, 100px);
-            }
-
-            .org-matrix-row-other .org-matrix-card .org-matrix-card-role {
+            .org-card-radial .org-card-role {
                 font-size: clamp(12px, 1.25vw, 16px);
             }
 
-            .org-matrix-row-other .org-matrix-card .org-matrix-card-name {
-                font-size: clamp(10px, 1.04vw, 13px);
+            .org-card-radial .org-card-name {
+                font-size: clamp(11px, 1.15vw, 14px);
+            }
+
+            .org-card-radial-outer {
+                width: clamp(80px, 8.33vw, 110px);
+                min-height: clamp(65px, 6.77vw, 95px);
+                padding: clamp(8px, 0.83vw, 12px) clamp(10px, 1.04vw, 14px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .org-radial-container {
+                height: clamp(400px, 41.67vw, 550px);
+                min-height: 400px;
+            }
+
+            .org-card-radial,
+            .org-card-radial-outer {
+                font-size: 0.9em;
             }
         }
 
@@ -3394,7 +3379,7 @@ if (file_exists($jsonFile)) {
                             <h1 class="org-title-main">高层组织架构图</h1>
                         </div>
 
-                        <!-- 矩阵式布局容器 -->
+                        <!-- 中心辐射式容器 -->
                         <div class="org-tree-root-container">
                         <?php 
                         $orgStructure = $strategyData['organizationStructure'];
@@ -3429,93 +3414,210 @@ if (file_exists($jsonFile)) {
                                 }
                                 // 如果只有一个词，返回前3个大写字母或全部
                                 return strtoupper(substr($title, 0, 3));
-                            }
+                        }
 
-                            // 收集所有C-Level的下属
-                            $allSubordinates = [];
-                            foreach ($cLevelMembers as $member) {
-                                $subordinates = !empty($member['subordinates']) && is_array($member['subordinates']) ? $member['subordinates'] : [];
-                                $allSubordinates = array_merge($allSubordinates, $subordinates);
+                            // 分离第一圈和第二圈成员
+                            $firstCircleMembers = []; // C-Level成员（第一圈）
+                            $secondCircleMembers = []; // PA和下属成员（第二圈）
+                            
+                            if (!empty($cLevelMembers)) {
+                                foreach ($cLevelMembers as $memberIndex => $member) {
+                                    $firstCircleMembers[] = [
+                                        'title' => $member['title'] ?? $member['fullTitle'] ?? '',
+                                        'name' => $member['name'] ?? '—',
+                                        'type' => 'clevel',
+                                        'index' => $memberIndex
+                                    ];
+                                    
+                                    // 如果有下属，添加到第二圈
+                                    $subordinates = !empty($member['subordinates']) && is_array($member['subordinates']) ? $member['subordinates'] : [];
+                                    foreach ($subordinates as $sub) {
+                                        $secondCircleMembers[] = [
+                                            'title' => $sub['title'] ?? $sub['fullTitle'] ?? '',
+                                            'name' => $sub['name'] ?? '—',
+                                            'type' => 'outer',
+                                            'parentIndex' => $memberIndex
+                                        ];
+                                    }
+                                }
                             }
-                            ?>
+                            
+                            // 添加PA到第二圈（如果有）
+                            if (!empty($paName)) {
+                                $secondCircleMembers[] = [
+                                    'title' => $paTitle,
+                                    'name' => $paName,
+                                    'type' => 'outer',
+                                    'parentIndex' => null
+                                ];
+                            }
+                        ?>
+                        
+                            <div class="org-radial-container">
+                                <div class="org-radial-wrapper">
+                                    <!-- SVG连接线 -->
+                                    <svg class="org-radial-connectors" id="orgRadialConnectors"></svg>
 
-                            <div class="org-matrix-container">
-                                <table class="org-matrix-table">
-                                    <!-- CEO行 - 第一层级 -->
+                                    <!-- CEO中心卡片 -->
                                     <?php if (!empty($ceoName)): ?>
-                                    <tr class="org-matrix-row org-matrix-row-ceo">
-                                        <td class="org-matrix-level-label">Level 1</td>
-                                        <td class="org-matrix-cell">
-                                            <div class="org-matrix-cards-row">
-                                                <div class="org-matrix-card">
-                                                    <div class="org-matrix-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($ceoTitle)); ?></div>
-                                                    <div class="org-matrix-card-name"><?php echo htmlspecialchars($ceoName); ?></div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                    <div class="org-card-ceo-center" id="ceoCard">
+                                        <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($ceoTitle)); ?></div>
+                                        <div class="org-card-name"><?php echo htmlspecialchars($ceoName); ?></div>
+                                    </div>
                                     <?php endif; ?>
 
-                                    <!-- C-Level行 - 第二层级 -->
-                                    <?php if (!empty($cLevelMembers)): ?>
-                                    <tr class="org-matrix-row org-matrix-row-clevel">
-                                        <td class="org-matrix-level-label">Level 2</td>
-                                        <td class="org-matrix-cell">
-                                            <div class="org-matrix-cards-row">
-                                                <?php foreach ($cLevelMembers as $member): 
-                                                    $memberTitle = $member['title'] ?? $member['fullTitle'] ?? '';
-                                                    $memberName  = $member['name'] ?? '';
-                                                ?>
-                                                    <div class="org-matrix-card">
-                                                        <div class="org-matrix-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($memberTitle)); ?></div>
-                                                        <div class="org-matrix-card-name"><?php echo htmlspecialchars($memberName ?: '—'); ?></div>
-                                                    </div>
-                                                <?php endforeach; ?>
+                                    <!-- C-Level成员卡片 - 围绕CEO排列（第一圈） -->
+                                    <?php if (!empty($firstCircleMembers)): 
+                                        $firstCircleCount = count($firstCircleMembers);
+                                        $radius = 280; // 第一圈半径（像素）
+                                        $centerX = 50; // 百分比
+                                        $centerY = 50; // 百分比
+                                    ?>
+                                        <?php foreach ($firstCircleMembers as $index => $member): 
+                                            $memberTitle = $member['title'];
+                                            $memberName = $member['name'];
+                                            
+                                            // 计算角度（均匀分布，从顶部开始）
+                                            $angle = ($index * 360 / $firstCircleCount) - 90;
+                                            $angleRad = deg2rad($angle);
+                                            
+                                            // 计算位置（相对于中心）
+                                            $x = $centerX + ($radius / 10) * cos($angleRad); // 转换为百分比
+                                            $y = $centerY + ($radius / 10) * sin($angleRad);
+                                            
+                                            // 确保卡片不会超出容器
+                                            $x = max(15, min(85, $x));
+                                            $y = max(15, min(85, $y));
+                                        ?>
+                                            <div class="org-card-radial" 
+                                                 data-index="<?php echo $index; ?>"
+                                                 data-type="clevel"
+                                                 style="left: <?php echo $x; ?>%; top: <?php echo $y; ?>%; transform: translate(-50%, -50%);"
+                                                 data-angle="<?php echo $angle; ?>"
+                                                 data-radius="<?php echo $radius; ?>">
+                                                <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($memberTitle)); ?></div>
+                                                <div class="org-card-name"><?php echo htmlspecialchars($memberName); ?></div>
                                             </div>
-                                        </td>
-                                    </tr>
+                                        <?php endforeach; ?>
                                     <?php endif; ?>
 
-                                    <!-- 下属行 - 第三层级（如果有） -->
-                                    <?php if (!empty($allSubordinates)): ?>
-                                    <tr class="org-matrix-row org-matrix-row-other">
-                                        <td class="org-matrix-level-label">Level 3</td>
-                                        <td class="org-matrix-cell">
-                                            <div class="org-matrix-cards-row">
-                                                <?php foreach ($allSubordinates as $sub): 
-                                                    $subTitle = $sub['title'] ?? $sub['fullTitle'] ?? '';
-                                                    $subName  = $sub['name'] ?? '';
-                                                ?>
-                                                    <div class="org-matrix-card">
-                                                        <div class="org-matrix-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($subTitle)); ?></div>
-                                                        <div class="org-matrix-card-name"><?php echo htmlspecialchars($subName ?: '—'); ?></div>
-                                                    </div>
-                                                <?php endforeach; ?>
+                                    <!-- 第二圈成员卡片（PA和下属） -->
+                                    <?php if (!empty($secondCircleMembers)): 
+                                        $secondCircleCount = count($secondCircleMembers);
+                                        $secondRadius = $radius * 1.6; // 第二圈半径
+                                    ?>
+                                        <?php foreach ($secondCircleMembers as $index => $member): 
+                                            $memberTitle = $member['title'];
+                                            $memberName = $member['name'];
+                                            
+                                            // 计算角度（均匀分布）
+                                            $angle = ($index * 360 / max($secondCircleCount, 1)) - 90;
+                                            $angleRad = deg2rad($angle);
+                                            
+                                            // 计算位置（相对于中心）
+                                            $x = $centerX + ($secondRadius / 10) * cos($angleRad);
+                                            $y = $centerY + ($secondRadius / 10) * sin($angleRad);
+                                            
+                                            // 确保卡片不会超出容器
+                                            $x = max(15, min(85, $x));
+                                            $y = max(15, min(85, $y));
+                                        ?>
+                                            <div class="org-card-radial-outer" 
+                                                 data-index="<?php echo $index + 100; ?>"
+                                                 data-type="outer"
+                                                 style="left: <?php echo $x; ?>%; top: <?php echo $y; ?>%; transform: translate(-50%, -50%);"
+                                                 data-angle="<?php echo $angle; ?>"
+                                                 data-radius="<?php echo $secondRadius; ?>">
+                                                <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($memberTitle)); ?></div>
+                                                <div class="org-card-name"><?php echo htmlspecialchars($memberName); ?></div>
                                             </div>
-                                        </td>
-                                    </tr>
+                                        <?php endforeach; ?>
                                     <?php endif; ?>
-
-                                    <!-- PA行 - 辅助层级 -->
-                                    <?php if (!empty($paName)): ?>
-                                    <tr class="org-matrix-row org-matrix-row-other">
-                                        <td class="org-matrix-level-label">Support</td>
-                                        <td class="org-matrix-cell">
-                                            <div class="org-matrix-cards-row">
-                                                <div class="org-matrix-card">
-                                                    <div class="org-matrix-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($paTitle)); ?></div>
-                                                    <div class="org-matrix-card-name"><?php echo htmlspecialchars($paName); ?></div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <?php endif; ?>
-                                </table>
+                                </div>
                             </div>
+
+                            <script>
+                            // 绘制连接线
+                            (function() {
+                                const wrapper = document.querySelector('.org-radial-wrapper');
+                                const ceoCard = document.getElementById('ceoCard');
+                                const connectorsSvg = document.getElementById('orgRadialConnectors');
+                                const radialCards = document.querySelectorAll('.org-card-radial, .org-card-radial-outer');
+                                
+                                if (!ceoCard || !connectorsSvg || radialCards.length === 0) return;
+                                
+                                // 获取容器尺寸
+                                function updateConnectors() {
+                                    const rect = wrapper.getBoundingClientRect();
+                                    const centerX = rect.width / 2;
+                                    const centerY = rect.height / 2;
+                                    
+                                    // 获取CEO中心位置
+                                    const ceoRect = ceoCard.getBoundingClientRect();
+                                    const ceoX = ceoRect.left + ceoRect.width / 2 - wrapper.getBoundingClientRect().left;
+                                    const ceoY = ceoRect.top + ceoRect.height / 2 - wrapper.getBoundingClientRect().top;
+                                    
+                                    // 设置SVG尺寸
+                                    connectorsSvg.setAttribute('width', rect.width);
+                                    connectorsSvg.setAttribute('height', rect.height);
+                                    
+                                    // 清空之前的连接线
+                                    connectorsSvg.innerHTML = '';
+                                    
+                                    // 为每个卡片绘制连接线（只连接第一圈成员）
+                                    radialCards.forEach((card) => {
+                                        if (card.classList.contains('org-card-radial')) {
+                                            const cardRect = card.getBoundingClientRect();
+                                            const cardX = cardRect.left + cardRect.width / 2 - wrapper.getBoundingClientRect().left;
+                                            const cardY = cardRect.top + cardRect.height / 2 - wrapper.getBoundingClientRect().top;
+                                            
+                                            // 创建路径
+                                            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                                            line.setAttribute('x1', ceoX);
+                                            line.setAttribute('y1', ceoY);
+                                            line.setAttribute('x2', cardX);
+                                            line.setAttribute('y2', cardY);
+                                            line.setAttribute('class', 'org-radial-connector');
+                                            line.setAttribute('data-target', card.dataset.index || card.getAttribute('data-index'));
+                                            
+                                            connectorsSvg.appendChild(line);
+                                        }
+                                    });
+                                }
+                                
+                                // 初始化
+                                updateConnectors();
+                                
+                                // 窗口大小改变时更新
+                                window.addEventListener('resize', updateConnectors);
+                                
+                                // 卡片hover时高亮连接线
+                                radialCards.forEach((card) => {
+                                    if (card.classList.contains('org-card-radial')) {
+                                        const cardIndex = card.dataset.index || card.getAttribute('data-index');
+                                        card.addEventListener('mouseenter', function() {
+                                            const connector = connectorsSvg.querySelector(`line[data-target="${cardIndex}"]`);
+                                            if (connector) {
+                                                connector.style.opacity = '0.8';
+                                                connector.style.strokeWidth = '3';
+                                            }
+                                        });
+                                        
+                                        card.addEventListener('mouseleave', function() {
+                                            const connector = connectorsSvg.querySelector(`line[data-target="${cardIndex}"]`);
+                                            if (connector) {
+                                                connector.style.opacity = '';
+                                                connector.style.strokeWidth = '';
+                                            }
+                                        });
+                                    }
+                                });
+                            })();
+                            </script>
                         </div>
                     </div>
-                </div>
-                <?php endif; ?>
+                                    </div>
+                                    <?php endif; ?>
 
                 <!-- 内部组织架构图 -->
                 <div class="section">
@@ -3523,13 +3625,13 @@ if (file_exists($jsonFile)) {
                         <!-- 背景Logo图片 -->
                         <div class="internal-org-bg-text">
                             <img src="images/images/logo.png" alt="Logo">
-                        </div>
+                                </div>
 
                         <!-- 标题 -->
                         <div class="internal-org-title-overlay">
                             <div class="internal-org-title-badge">组织架构</div>
                             <h1 class="internal-org-title-main">内部组织架构图</h1>
-                        </div>
+                                    </div>
 
                         <!-- 9个垂直列容器 -->
                         <div class="internal-org-container">
@@ -3680,13 +3782,13 @@ if (file_exists($jsonFile)) {
                                                     <div class="internal-org-position-title"><?php echo htmlspecialchars($posTitle); ?></div>
                                                     <div class="internal-org-position-name <?php echo empty($posName) ? 'internal-org-position-empty' : ''; ?>">
                                                         <?php echo htmlspecialchars($posName ?: '—'); ?>
-                                                    </div>
-                                                </div>
-                                            <?php endforeach; ?>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
+                                </div>
                             </div>
+                                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                                <?php endforeach; ?>
+                </div>
                         </div>
                     </div>
                 </div>
