@@ -1032,7 +1032,7 @@ body.sidebar-transition {
                             <div class="submenu-title">KUNZZ HOLDINGS SDN BHD</div>
                         </div>
                         <div class="submenu-content">
-                            <a href="#" class="submenu-item">集团总部</a>
+                            <a href="corporate_blueprint.php" class="submenu-item">企业蓝图</a>
                         </div>
                     </div>
                 </div>
