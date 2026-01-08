@@ -1891,9 +1891,8 @@ $avatarLetter = strtoupper($username[0]);
         // 初始化日历
         function initCalendar() {
             const today = new Date();
-            calendarCurrentDate = new Date(today.getFullYear(), today.getMonth(), 1);
             
-            // 设置默认日期范围
+            // 设置默认日期范围（如果还没有设置）
             if (!calendarStartDate) {
                 const currentYear = today.getFullYear();
                 const currentMonth = today.getMonth() + 1;
@@ -1903,6 +1902,13 @@ $avatarLetter = strtoupper($username[0]);
                 calendarStartDate.setHours(0, 0, 0, 0);
                 calendarEndDate = new Date(currentYear, currentMonth - 1, lastDayOfMonth.getDate());
                 calendarEndDate.setHours(0, 0, 0, 0);
+            }
+            
+            // 根据已选择的开始日期设置日历显示的月份
+            if (calendarStartDate) {
+                calendarCurrentDate = new Date(calendarStartDate.getFullYear(), calendarStartDate.getMonth(), 1);
+            } else {
+                calendarCurrentDate = new Date(today.getFullYear(), today.getMonth(), 1);
             }
             
             // 初始化年份选择器
