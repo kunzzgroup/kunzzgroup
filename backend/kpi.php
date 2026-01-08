@@ -1892,7 +1892,7 @@ $avatarLetter = strtoupper($username[0]);
         function initCalendar() {
             const today = new Date();
             
-            // 设置默认日期范围（如果还没有设置）
+            // 设置默认日期范围
             if (!calendarStartDate) {
                 const currentYear = today.getFullYear();
                 const currentMonth = today.getMonth() + 1;
