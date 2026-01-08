@@ -2190,29 +2190,65 @@ if (file_exists($jsonFile)) {
             object-fit: contain;
         }
 
-        /* 扁平化网格布局 - 联系人墙风格 */
-        .org-grid-container {
+        /* 矩阵式布局 - 按层级（行）和部门（列）分组 */
+        .org-matrix-container {
             position: relative;
             z-index: 1;
             width: 100%;
+            padding: clamp(20px, 2.08vw, 32px);
         }
 
-        .org-cards-wall {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(clamp(140px, 14.58vw, 180px), 1fr));
-            gap: clamp(16px, 1.67vw, 24px);
-            padding: clamp(20px, 2.08vw, 32px);
+        .org-matrix-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: clamp(12px, 1.25vw, 20px);
             background: #ffffff;
             border-radius: clamp(16px, 1.67vw, 24px);
             border: 1px solid #e2e8f0;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: clamp(16px, 1.67vw, 24px);
+            display: table;
         }
 
-        .org-card {
+        .org-matrix-row {
+            display: table-row;
+        }
+
+        .org-matrix-cell {
+            display: table-cell;
+            vertical-align: middle;
+            padding: clamp(16px, 1.67vw, 24px);
+            text-align: left;
+            position: relative;
+        }
+
+        .org-matrix-level-label {
+            font-size: clamp(12px, 1.25vw, 16px);
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding-right: clamp(16px, 1.67vw, 24px);
+            text-align: right;
+            width: clamp(100px, 10.42vw, 140px);
+            vertical-align: middle;
+            background: #f8fafc;
+            border-right: 2px solid #e2e8f0;
+        }
+
+        .org-matrix-cards-row {
+            display: flex;
+            gap: clamp(12px, 1.25vw, 20px);
+            justify-content: flex-start;
+            align-items: center;
+            flex-wrap: wrap;
+            min-height: clamp(120px, 12.5vw, 180px);
+        }
+
+        .org-matrix-card {
             background: #ffffff;
-            border: 2px solid #e2e8f0;
             border-radius: clamp(12px, 1.25vw, 16px);
-            padding: clamp(16px, 1.67vw, 20px);
+            padding: clamp(16px, 1.67vw, 24px);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -2221,99 +2257,104 @@ if (file_exists($jsonFile)) {
             transition: all 0.3s ease;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             position: relative;
+            min-width: clamp(140px, 14.58vw, 180px);
+            min-height: clamp(100px, 10.42vw, 140px);
         }
 
-        .org-card:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-            border-color: #ff5c00;
+        .org-matrix-card:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            z-index: 10;
         }
 
-        /* CEO卡片 - 最大，橙色渐变背景 */
-        .org-card-level-ceo {
-            grid-column: span 2;
-            grid-row: span 2;
+        /* CEO行 - 橙色渐变，独占一行 */
+        .org-matrix-row-ceo .org-matrix-card {
             background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
             border: 3px solid #ffffff;
             box-shadow: 0 8px 32px rgba(255, 92, 0, 0.3);
-            min-height: clamp(180px, 18.75vw, 260px);
+            min-width: clamp(200px, 20.83vw, 280px);
+            min-height: clamp(140px, 14.58vw, 200px);
+            margin: 0 auto;
         }
 
-        .org-card-level-ceo .org-card-role {
+        .org-matrix-row-ceo .org-matrix-cards-row {
+            justify-content: center;
+        }
+
+        .org-matrix-row-ceo .org-matrix-card .org-matrix-card-role {
             color: #ffffff;
             font-size: clamp(24px, 2.5vw, 36px);
         }
 
-        .org-card-level-ceo .org-card-name {
+        .org-matrix-row-ceo .org-matrix-card .org-matrix-card-name {
             color: #ffffff;
             font-size: clamp(18px, 1.88vw, 24px);
         }
 
-        /* C-Level卡片 - 中等大小，橙色边框 */
-        .org-card-level-clevel {
-            grid-column: span 1;
-            grid-row: span 1;
+        /* C-Level行 - 橙色边框 */
+        .org-matrix-row-clevel .org-matrix-card {
             border: 2px solid #ff5c00;
             background: #fff5e6;
+            min-width: clamp(160px, 16.67vw, 200px);
             min-height: clamp(120px, 12.5vw, 160px);
         }
 
-        .org-card-level-clevel .org-card-role {
+        .org-matrix-row-clevel .org-matrix-card .org-matrix-card-role {
             color: #ff5c00;
-            font-size: clamp(16px, 1.67vw, 22px);
+            font-size: clamp(18px, 1.88vw, 24px);
         }
 
-        .org-card-level-clevel .org-card-name {
+        .org-matrix-row-clevel .org-matrix-card .org-matrix-card-name {
             color: #0f172a;
             font-size: clamp(14px, 1.46vw, 18px);
         }
 
-        .org-card-level-clevel:hover {
+        .org-matrix-row-clevel .org-matrix-card:hover {
             background: #ffffff;
             border-color: #ff5c00;
-            box-shadow: 0 8px 24px rgba(255, 92, 0, 0.2);
+            box-shadow: 0 8px 24px rgba(255, 92, 0, 0.25);
         }
 
-        /* PA/其他卡片 - 标准大小，灰色边框 */
-        .org-card-level-other {
-            grid-column: span 1;
-            grid-row: span 1;
+        /* PA/其他行 - 灰色边框 */
+        .org-matrix-row-other .org-matrix-card {
             border: 1px solid #e2e8f0;
             background: #ffffff;
+            min-width: clamp(140px, 14.58vw, 180px);
             min-height: clamp(100px, 10.42vw, 140px);
         }
 
-        .org-card-level-other .org-card-role {
+        .org-matrix-row-other .org-matrix-card .org-matrix-card-role {
             color: #64748b;
-            font-size: clamp(14px, 1.46vw, 18px);
+            font-size: clamp(16px, 1.67vw, 20px);
         }
 
-        .org-card-level-other .org-card-name {
+        .org-matrix-row-other .org-matrix-card .org-matrix-card-name {
             color: #475569;
             font-size: clamp(12px, 1.25vw, 16px);
         }
 
-        .org-card-level-other:hover {
+        .org-matrix-row-other .org-matrix-card:hover {
             border-color: #ff5c00;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         }
 
-        .org-card-role {
+        .org-matrix-card-role {
             font-weight: 800;
             margin-bottom: clamp(8px, 0.83vw, 12px);
             letter-spacing: 0.05em;
             line-height: 1.2;
         }
 
-        .org-card-name {
+        .org-matrix-card-name {
             font-weight: 600;
             line-height: 1.4;
         }
 
-        .org-card-empty {
-            color: #94a3b8;
+        .org-matrix-card-empty {
+            color: #cbd5e1;
             font-weight: 400;
             font-style: italic;
+            opacity: 0.6;
         }
 
         /* 内部组织架构图 - 垂直列布局 */
@@ -2569,50 +2610,72 @@ if (file_exists($jsonFile)) {
                 padding: clamp(20px, 2.08vw, 30px);
             }
 
-            .org-cards-wall {
-                grid-template-columns: repeat(auto-fill, minmax(clamp(120px, 12.5vw, 160px), 1fr));
-                gap: clamp(12px, 1.25vw, 18px);
+            .org-matrix-container {
                 padding: clamp(16px, 1.67vw, 24px);
             }
 
-            .org-card-level-ceo {
-                grid-column: span 2;
-                grid-row: span 1;
-                min-height: clamp(140px, 14.58vw, 200px);
-                padding: clamp(14px, 1.46vw, 18px);
+            .org-matrix-table {
+                border-spacing: clamp(10px, 1.04vw, 16px);
+                padding: clamp(12px, 1.25vw, 20px);
             }
 
-            .org-card-level-ceo .org-card-role {
+            .org-matrix-level-label {
+                font-size: clamp(10px, 1.04vw, 14px);
+                padding: clamp(12px, 1.25vw, 20px) clamp(12px, 1.25vw, 20px);
+                width: clamp(80px, 8.33vw, 120px);
+            }
+
+            .org-matrix-cell {
+                padding: clamp(12px, 1.25vw, 20px);
+            }
+
+            .org-matrix-cards-row {
+                gap: clamp(10px, 1.04vw, 16px);
+                min-height: clamp(100px, 10.42vw, 140px);
+            }
+
+            .org-matrix-card {
+                min-width: clamp(120px, 12.5vw, 160px);
+                min-height: clamp(90px, 9.38vw, 120px);
+                padding: clamp(12px, 1.25vw, 20px);
+            }
+
+            .org-matrix-row-ceo .org-matrix-card {
+                min-width: clamp(180px, 18.75vw, 240px);
+                min-height: clamp(120px, 12.5vw, 160px);
+            }
+
+            .org-matrix-row-ceo .org-matrix-card .org-matrix-card-role {
                 font-size: clamp(20px, 2.08vw, 28px);
             }
 
-            .org-card-level-ceo .org-card-name {
+            .org-matrix-row-ceo .org-matrix-card .org-matrix-card-name {
                 font-size: clamp(16px, 1.67vw, 20px);
             }
 
-            .org-card-level-clevel {
+            .org-matrix-row-clevel .org-matrix-card {
+                min-width: clamp(140px, 14.58vw, 180px);
                 min-height: clamp(100px, 10.42vw, 140px);
-                padding: clamp(12px, 1.25vw, 16px);
             }
 
-            .org-card-level-clevel .org-card-role {
+            .org-matrix-row-clevel .org-matrix-card .org-matrix-card-role {
+                font-size: clamp(16px, 1.67vw, 20px);
+            }
+
+            .org-matrix-row-clevel .org-matrix-card .org-matrix-card-name {
+                font-size: clamp(12px, 1.25vw, 16px);
+            }
+
+            .org-matrix-row-other .org-matrix-card {
+                min-width: clamp(120px, 12.5vw, 160px);
+                min-height: clamp(80px, 8.33vw, 120px);
+            }
+
+            .org-matrix-row-other .org-matrix-card .org-matrix-card-role {
                 font-size: clamp(14px, 1.46vw, 18px);
             }
 
-            .org-card-level-clevel .org-card-name {
-                font-size: clamp(12px, 1.25vw, 16px);
-            }
-
-            .org-card-level-other {
-                min-height: clamp(90px, 9.38vw, 120px);
-                padding: clamp(12px, 1.25vw, 16px);
-            }
-
-            .org-card-level-other .org-card-role {
-                font-size: clamp(12px, 1.25vw, 16px);
-            }
-
-            .org-card-level-other .org-card-name {
+            .org-matrix-row-other .org-matrix-card .org-matrix-card-name {
                 font-size: clamp(11px, 1.15vw, 14px);
             }
 
@@ -2623,23 +2686,76 @@ if (file_exists($jsonFile)) {
         }
 
         @media (max-width: 640px) {
-            .org-cards-wall {
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-                gap: 12px;
+            .org-matrix-container {
                 padding: clamp(12px, 1.25vw, 16px);
+                overflow-x: auto;
             }
 
-            .org-card-level-ceo {
-                grid-column: span 1;
-                min-height: clamp(120px, 12.5vw, 160px);
+            .org-matrix-table {
+                border-spacing: 8px;
+                padding: clamp(10px, 1.04vw, 14px);
+                min-width: 500px;
             }
 
-            .org-card-level-ceo .org-card-role {
+            .org-matrix-level-label {
+                font-size: clamp(9px, 0.94vw, 12px);
+                padding: clamp(10px, 1.04vw, 14px) clamp(8px, 0.83vw, 12px);
+                width: clamp(60px, 6.25vw, 80px);
+            }
+
+            .org-matrix-cell {
+                padding: clamp(10px, 1.04vw, 14px);
+            }
+
+            .org-matrix-cards-row {
+                gap: 8px;
+                min-height: clamp(80px, 8.33vw, 110px);
+                flex-wrap: wrap;
+            }
+
+            .org-matrix-card {
+                min-width: clamp(100px, 10.42vw, 130px);
+                min-height: clamp(70px, 7.29vw, 100px);
+                padding: clamp(10px, 1.04vw, 14px);
+            }
+
+            .org-matrix-row-ceo .org-matrix-card {
+                min-width: clamp(150px, 15.63vw, 200px);
+                min-height: clamp(100px, 10.42vw, 140px);
+            }
+
+            .org-matrix-row-ceo .org-matrix-card .org-matrix-card-role {
                 font-size: clamp(18px, 1.88vw, 24px);
             }
 
-            .org-card-level-ceo .org-card-name {
+            .org-matrix-row-ceo .org-matrix-card .org-matrix-card-name {
                 font-size: clamp(14px, 1.46vw, 18px);
+            }
+
+            .org-matrix-row-clevel .org-matrix-card {
+                min-width: clamp(120px, 12.5vw, 160px);
+                min-height: clamp(80px, 8.33vw, 110px);
+            }
+
+            .org-matrix-row-clevel .org-matrix-card .org-matrix-card-role {
+                font-size: clamp(14px, 1.46vw, 18px);
+            }
+
+            .org-matrix-row-clevel .org-matrix-card .org-matrix-card-name {
+                font-size: clamp(11px, 1.15vw, 14px);
+            }
+
+            .org-matrix-row-other .org-matrix-card {
+                min-width: clamp(100px, 10.42vw, 130px);
+                min-height: clamp(70px, 7.29vw, 100px);
+            }
+
+            .org-matrix-row-other .org-matrix-card .org-matrix-card-role {
+                font-size: clamp(12px, 1.25vw, 16px);
+            }
+
+            .org-matrix-row-other .org-matrix-card .org-matrix-card-name {
+                font-size: clamp(10px, 1.04vw, 13px);
             }
         }
 
@@ -3278,7 +3394,7 @@ if (file_exists($jsonFile)) {
                             <h1 class="org-title-main">高层组织架构图</h1>
                         </div>
 
-                        <!-- 扁平化网格容器 -->
+                        <!-- 矩阵式布局容器 -->
                         <div class="org-tree-root-container">
                         <?php 
                         $orgStructure = $strategyData['organizationStructure'];
@@ -3314,56 +3430,87 @@ if (file_exists($jsonFile)) {
                                 // 如果只有一个词，返回前3个大写字母或全部
                                 return strtoupper(substr($title, 0, 3));
                             }
+
+                            // 收集所有C-Level的下属
+                            $allSubordinates = [];
+                            foreach ($cLevelMembers as $member) {
+                                $subordinates = !empty($member['subordinates']) && is_array($member['subordinates']) ? $member['subordinates'] : [];
+                                $allSubordinates = array_merge($allSubordinates, $subordinates);
+                            }
                             ?>
 
-                            <div class="org-grid-container">
-                                <div class="org-cards-wall">
-                                    <!-- CEO卡片 - 最大，橙色渐变 -->
+                            <div class="org-matrix-container">
+                                <table class="org-matrix-table">
+                                    <!-- CEO行 - 第一层级 -->
                                     <?php if (!empty($ceoName)): ?>
-                                    <div class="org-card org-card-level-ceo">
-                                        <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($ceoTitle)); ?></div>
-                                        <div class="org-card-name"><?php echo htmlspecialchars($ceoName); ?></div>
-                                    </div>
+                                    <tr class="org-matrix-row org-matrix-row-ceo">
+                                        <td class="org-matrix-level-label">Level 1</td>
+                                        <td class="org-matrix-cell">
+                                            <div class="org-matrix-cards-row">
+                                                <div class="org-matrix-card">
+                                                    <div class="org-matrix-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($ceoTitle)); ?></div>
+                                                    <div class="org-matrix-card-name"><?php echo htmlspecialchars($ceoName); ?></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
                                     <?php endif; ?>
 
-                                    <!-- C-Level成员卡片 - 中等，橙色边框 -->
+                                    <!-- C-Level行 - 第二层级 -->
                                     <?php if (!empty($cLevelMembers)): ?>
-                                        <?php foreach ($cLevelMembers as $member): 
-                                            $memberTitle = $member['title'] ?? $member['fullTitle'] ?? '';
-                                            $memberName  = $member['name'] ?? '';
-                                            
-                                            // 处理subordinates（如果有的话，也显示在网格中）
-                                            $subordinates = !empty($member['subordinates']) && is_array($member['subordinates']) ? $member['subordinates'] : [];
-                                        ?>
-                                            <!-- C-Level成员卡片 -->
-                                            <div class="org-card org-card-level-clevel">
-                                                <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($memberTitle)); ?></div>
-                                                <div class="org-card-name"><?php echo htmlspecialchars($memberName ?: '—'); ?></div>
+                                    <tr class="org-matrix-row org-matrix-row-clevel">
+                                        <td class="org-matrix-level-label">Level 2</td>
+                                        <td class="org-matrix-cell">
+                                            <div class="org-matrix-cards-row">
+                                                <?php foreach ($cLevelMembers as $member): 
+                                                    $memberTitle = $member['title'] ?? $member['fullTitle'] ?? '';
+                                                    $memberName  = $member['name'] ?? '';
+                                                ?>
+                                                    <div class="org-matrix-card">
+                                                        <div class="org-matrix-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($memberTitle)); ?></div>
+                                                        <div class="org-matrix-card-name"><?php echo htmlspecialchars($memberName ?: '—'); ?></div>
+                                                    </div>
+                                                <?php endforeach; ?>
                                             </div>
+                                        </td>
+                                    </tr>
+                                    <?php endif; ?>
 
-                                            <!-- 如果有下属，也显示在网格中（使用other级别样式） -->
-                                            <?php if (!empty($subordinates)): ?>
-                                                <?php foreach ($subordinates as $sub): 
+                                    <!-- 下属行 - 第三层级（如果有） -->
+                                    <?php if (!empty($allSubordinates)): ?>
+                                    <tr class="org-matrix-row org-matrix-row-other">
+                                        <td class="org-matrix-level-label">Level 3</td>
+                                        <td class="org-matrix-cell">
+                                            <div class="org-matrix-cards-row">
+                                                <?php foreach ($allSubordinates as $sub): 
                                                     $subTitle = $sub['title'] ?? $sub['fullTitle'] ?? '';
                                                     $subName  = $sub['name'] ?? '';
                                                 ?>
-                                                    <div class="org-card org-card-level-other">
-                                                        <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($subTitle)); ?></div>
-                                                        <div class="org-card-name"><?php echo htmlspecialchars($subName ?: '—'); ?></div>
+                                                    <div class="org-matrix-card">
+                                                        <div class="org-matrix-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($subTitle)); ?></div>
+                                                        <div class="org-matrix-card-name"><?php echo htmlspecialchars($subName ?: '—'); ?></div>
                                                     </div>
                                                 <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        <?php endforeach; ?>
+                                            </div>
+                                        </td>
+                                    </tr>
                                     <?php endif; ?>
 
-                                    <!-- PA卡片 - 标准大小 -->
+                                    <!-- PA行 - 辅助层级 -->
                                     <?php if (!empty($paName)): ?>
-                                    <div class="org-card org-card-level-other">
-                                        <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($paTitle)); ?></div>
-                                        <div class="org-card-name"><?php echo htmlspecialchars($paName); ?></div>
-                                    </div>
+                                    <tr class="org-matrix-row org-matrix-row-other">
+                                        <td class="org-matrix-level-label">Support</td>
+                                        <td class="org-matrix-cell">
+                                            <div class="org-matrix-cards-row">
+                                                <div class="org-matrix-card">
+                                                    <div class="org-matrix-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($paTitle)); ?></div>
+                                                    <div class="org-matrix-card-name"><?php echo htmlspecialchars($paName); ?></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
                                     <?php endif; ?>
-                                </div>
+                                </table>
                             </div>
                         </div>
                     </div>
