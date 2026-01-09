@@ -2097,20 +2097,15 @@ $avatarLetter = strtoupper($username[0]);
 
         // 选择日期
         async function selectDate(date) {
-            // 如果还没有选择开始日期，或者已经选择了开始和结束日期，则开始新的选择
             if (!calendarStartDate || (calendarStartDate && calendarEndDate)) {
                 // 开始新的选择
                 calendarStartDate = new Date(date);
                 calendarEndDate = null;
                 isSelectingRange = true;
-            } else if (calendarStartDate && !calendarEndDate) {
-                // 已经选择了开始日期，现在选择结束日期
-                const startTime = calendarStartDate.getTime();
-                const selectedTime = date.getTime();
-                
-                // 如果选择的日期早于开始日期，则交换它们
-                if (selectedTime < startTime) {
-                    calendarEndDate = new Date(calendarStartDate);
+            } else {
+                // 选择结束日期
+                if (date < calendarStartDate) {
+                    calendarEndDate = calendarStartDate;
                     calendarStartDate = new Date(date);
                 } else {
                     calendarEndDate = new Date(date);
@@ -2206,10 +2201,6 @@ $avatarLetter = strtoupper($username[0]);
             const calendar = document.getElementById('date-range-picker');
             const popup = document.getElementById('calendar-popup');
             if (calendar && popup && !calendar.contains(e.target) && !popup.contains(e.target)) {
-                // 如果正在选择日期范围（已选择开始日期但未选择结束日期），不关闭日历
-                if (isSelectingRange && calendarStartDate && !calendarEndDate) {
-                    return;
-                }
                 popup.style.display = 'none';
             }
         });
