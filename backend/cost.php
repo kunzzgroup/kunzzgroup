@@ -1801,32 +1801,41 @@ $avatarLetter = strtoupper($username[0]);
             today.setHours(0, 0, 0, 0);
             const currentYear = today.getFullYear();
             const currentMonth = today.getMonth() + 1;
+            const currentDay = today.getDate();
 
-            // 计算本月第一天和最后一天
-            const firstDayOfMonth = new Date(currentYear, currentMonth - 1, 1);
-            const lastDayOfMonth = new Date(currentYear, currentMonth, 0);
+            // 计算本周的开始日期（周一）
+            const thisWeekStart = new Date(today);
+            const dayOfWeek = thisWeekStart.getDay();
+            const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            thisWeekStart.setDate(thisWeekStart.getDate() - daysToMonday);
+            thisWeekStart.setHours(0, 0, 0, 0);
 
-            // 初始化日历选择器默认值为当月第一天和最后一天
-            calendarStartDate = new Date(currentYear, currentMonth - 1, 1);
-            calendarEndDate = new Date(currentYear, currentMonth - 1, lastDayOfMonth.getDate());
+            // 初始化日历选择器默认值为本周（周一到今天）
+            calendarStartDate = new Date(thisWeekStart);
+            calendarEndDate = new Date(today);
 
-            // 正确设置dateRange为当月第一天和最后一天
+            // 格式化日期范围
+            const startYear = thisWeekStart.getFullYear();
+            const startMonth = thisWeekStart.getMonth() + 1;
+            const startDay = thisWeekStart.getDate();
+
+            // 正确设置dateRange为本周
             dateRange = {
-                startDate: `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`,
-                endDate: `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(lastDayOfMonth.getDate()).padStart(2, '0')}`
+                startDate: `${startYear}-${String(startMonth).padStart(2, '0')}-${String(startDay).padStart(2, '0')}`,
+                endDate: `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`
             };
     
-            // 设置开始和结束日期初始值为当月第一天和最后一天
+            // 设置开始和结束日期初始值为本周
             startDateValue = {
-                year: currentYear,
-                month: currentMonth,
-                day: 1
+                year: startYear,
+                month: startMonth,
+                day: startDay
             };
 
             endDateValue = {
                 year: currentYear,
                 month: currentMonth,
-                day: lastDayOfMonth.getDate()
+                day: currentDay
             };
     
             // 月份选择器初始值为未选择状态（显示"--"）
@@ -1836,8 +1845,6 @@ $avatarLetter = strtoupper($username[0]);
             };
     
             // 更新显示
-            updateDateDisplay('start');
-            updateDateDisplay('end');
             updateDateDisplay('month');
             updateDateRangeDisplay();
     
@@ -2197,15 +2204,18 @@ $avatarLetter = strtoupper($username[0]);
         function updateDateDisplay(prefix) {
             if (prefix === 'month') {
                 // 显示年份，如果未选择显示"--"
-                document.getElementById('month-year-display').textContent = monthDateValue.year || '--';
-                // 显示月份，如果未选择显示"--"
-                document.getElementById('month-month-display').textContent = monthDateValue.month ? String(monthDateValue.month).padStart(2, '0') : '--';
+                const monthYearDisplay = document.getElementById('month-year-display');
+                const monthMonthDisplay = document.getElementById('month-month-display');
+                if (monthYearDisplay) {
+                    monthYearDisplay.textContent = monthDateValue.year || '--';
+                }
+                if (monthMonthDisplay) {
+                    monthMonthDisplay.textContent = monthDateValue.month ? String(monthDateValue.month).padStart(2, '0') : '--';
+                }
             } else {
-                const dateValue = prefix === 'start' ? startDateValue : endDateValue;
-        
-                document.getElementById(`${prefix}-year-display`).textContent = dateValue.year;
-                document.getElementById(`${prefix}-month-display`).textContent = String(dateValue.month).padStart(2, '0');
-                document.getElementById(`${prefix}-day-display`).textContent = String(dateValue.day).padStart(2, '0');
+                // cost.php 中没有单独的 start/end 日期选择器，只有月份选择器和日期范围选择器
+                // 所以这里不需要更新 start/end 的显示
+                // 日期范围显示由 updateDateRangeDisplay() 函数处理
             }
         }
 
