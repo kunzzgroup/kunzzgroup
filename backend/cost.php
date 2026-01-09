@@ -1886,6 +1886,13 @@ $avatarLetter = strtoupper($username[0]);
                 calendarEndDate.setHours(0, 0, 0, 0);
             }
             
+            // 如果只有开始日期没有结束日期，设置选择状态
+            if (calendarStartDate && !calendarEndDate) {
+                isSelectingRange = true;
+            } else if (calendarStartDate && calendarEndDate) {
+                isSelectingRange = false;
+            }
+            
             // 根据已选择的开始日期设置日历显示的月份
             if (calendarStartDate) {
                 calendarCurrentDate = new Date(calendarStartDate.getFullYear(), calendarStartDate.getMonth(), 1);
