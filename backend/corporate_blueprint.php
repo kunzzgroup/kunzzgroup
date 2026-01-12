@@ -2797,15 +2797,43 @@ if (file_exists($jsonFile)) {
             position: relative;
             overflow: hidden;
             min-height: 600px;
-            max-height: 800px;
+            max-height: none; /* 允许内部组织架构图有更大的高度 */
             background-image: none !important;
             border: 2px solid #f7931e;
+        }
+        
+        /* 内部组织架构图容器特殊样式 */
+        #internal-orgchart-container {
+            overflow: visible !important;
+            min-height: auto !important;
         }
         
         /* 标题左对齐 */
         .orgchart-title-wrapper {
             text-align: left;
             margin-left: 0;
+        }
+        
+        /* 内部部门组织架构图样式 */
+        .internal-dept-chart-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 40px;
+        }
+        
+        .internal-dept-title {
+            font-size: clamp(18px, 1.88vw, 24px);
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: clamp(20px, 2.08vw, 30px);
+            text-align: center;
+            padding-bottom: clamp(12px, 1.25vw, 16px);
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .internal-dept-orgchart {
+            position: relative;
+            overflow: hidden;
         }
         
         /* 背景Logo图片 */
@@ -3525,21 +3553,15 @@ if (file_exists($jsonFile)) {
                 
                 <?php
                 // 转换内部组织架构数据为 OrgChart.js 所需的树形格式
+                // 返回每个部门作为独立根节点的数组
                 function convertInternalOrgToOrgChartFormat($internalOrgData) {
                     if (empty($internalOrgData) || empty($internalOrgData['departments'])) {
-                        return null;
+                        return [];
                     }
                     
-                    // 创建一个虚拟根节点，连接所有部门
-                    $rootNode = [
-                        'id' => 'internal_root',
-                        'name' => '—',
-                        'title' => '内部组织架构',
-                        'level' => 'root',
-                        'children' => []
-                    ];
-                    
+                    $departmentTrees = [];
                     $departments = $internalOrgData['departments'];
+                    
                     foreach ($departments as $deptIndex => $dept) {
                         $deptName = $dept['name'] ?? '';
                         $positions = $dept['positions'] ?? [];
@@ -3548,16 +3570,17 @@ if (file_exists($jsonFile)) {
                             continue;
                         }
                         
-                        // 部门节点（使用第一个职位作为部门头）
+                        // 部门根节点（使用第一个职位作为部门头）
                         $firstPosition = $positions[0];
                         $deptTitle = $firstPosition['title'] ?? $deptName;
                         $deptNameValue = $firstPosition['name'] ?? '';
                         
-                        $deptNode = [
+                        $deptRootNode = [
                             'id' => 'dept_' . $deptIndex,
                             'name' => $deptNameValue ?: '—',
                             'title' => $deptTitle,
                             'level' => 'department',
+                            'departmentName' => $deptName, // 保存部门名称用于显示
                             'children' => []
                         ];
                         
@@ -3574,13 +3597,13 @@ if (file_exists($jsonFile)) {
                                 'level' => 'position'
                             ];
                             
-                            $deptNode['children'][] = $posNode;
+                            $deptRootNode['children'][] = $posNode;
                         }
                         
-                        $rootNode['children'][] = $deptNode;
+                        $departmentTrees[] = $deptRootNode;
                     }
                     
-                    return $rootNode;
+                    return $departmentTrees;
                 }
                 
                 // 内部组织架构数据 - 从JSON读取或使用示例数据
@@ -3719,7 +3742,18 @@ if (file_exists($jsonFile)) {
                 <div class="section">
                     <div class="orgchart-container-wrapper">
                         <h1 class="orgchart-title-wrapper">内部组织架构图</h1>
-                        <div id="internal-orgchart-container" style="width: 100%; min-height: 600px;"></div>
+                        <div id="internal-orgchart-container" style="display: flex; flex-direction: column; gap: 60px; width: 100%;">
+                            <?php if (!empty($internalOrgChartData)): ?>
+                                <?php foreach ($internalOrgChartData as $deptIndex => $deptTree): ?>
+                                    <div class="internal-dept-chart-wrapper">
+                                        <h2 class="internal-dept-title"><?php echo htmlspecialchars($deptTree['departmentName'] ?? ''); ?></h2>
+                                        <div class="internal-dept-orgchart" data-dept-index="<?php echo $deptIndex; ?>" style="width: 100%; min-height: 300px;"></div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <p style="text-align: center; color: #6b7280; padding: 40px;">无法加载内部组织架构数据</p>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -4381,55 +4415,65 @@ if (file_exists($jsonFile)) {
     <?php if (!empty($internalOrgChartData)): ?>
     <script>
         $(document).ready(function() {
-            // 内部组织架构数据（已经是树形结构）
-            const internalOrgData = <?php echo json_encode($internalOrgChartData, JSON_UNESCAPED_UNICODE); ?>;
+            // 内部组织架构数据（每个部门是一个独立的树结构数组）
+            const internalOrgDataArray = <?php echo json_encode($internalOrgChartData, JSON_UNESCAPED_UNICODE); ?>;
             
-            if (!internalOrgData) {
+            if (!internalOrgDataArray || internalOrgDataArray.length === 0) {
                 console.error('内部组织架构数据为空');
-                $('#internal-orgchart-container').html('<p style="text-align: center; color: #6b7280; padding: 40px;">无法加载内部组织架构数据</p>');
                 return;
             }
             
-            console.log('内部组织架构数据:', internalOrgData);
+            console.log('内部组织架构数据:', internalOrgDataArray);
             
-            // 初始化内部组织架构图 - OrgChart.js 使用树形结构
-            $('#internal-orgchart-container').orgchart({
-                'data': internalOrgData,
-                'nodeContent': 'title',
-                'nodeId': 'id',
-                'pan': false,
-                'zoom': false,
-                'toggleSiblingsResp': true,
-                'createNode': function($node, data) {
-                    // 自定义节点样式
-                    const level = data.level || '';
-                    $node.addClass('level-' + level);
-                    
-                    // 自定义节点内容 - 显示职位和名字
-                    const title = data.title || '—';
-                    const name = data.name || '—';
-                    
-                    $node.html(
-                        '<div class="orgchart-node-title">' + title + '</div>' +
-                        '<div class="orgchart-node-content">' + name + '</div>'
-                    );
-                },
-                'draggable': false,
-                'direction': 't2b'
-            });
-            
-            // 居中显示内部组织架构图
-            setTimeout(function() {
-                const orgchartEl = $('#internal-orgchart-container .orgchart');
-                if (orgchartEl.length) {
-                    const containerWidth = $('#internal-orgchart-container').width();
-                    const chartWidth = orgchartEl.outerWidth();
-                    if (chartWidth < containerWidth) {
-                        const offsetLeft = (containerWidth - chartWidth) / 2;
-                        orgchartEl.css('margin-left', offsetLeft + 'px');
-                    }
+            // 为每个部门初始化独立的组织架构图
+            internalOrgDataArray.forEach(function(deptTree, deptIndex) {
+                const containerSelector = '.internal-dept-orgchart[data-dept-index="' + deptIndex + '"]';
+                const $container = $(containerSelector);
+                
+                if ($container.length === 0) {
+                    console.warn('找不到容器:', containerSelector);
+                    return;
                 }
-            }, 100);
+                
+                // 初始化该部门的组织架构图
+                $container.orgchart({
+                    'data': deptTree,
+                    'nodeContent': 'title',
+                    'nodeId': 'id',
+                    'pan': false,
+                    'zoom': false,
+                    'toggleSiblingsResp': true,
+                    'createNode': function($node, data) {
+                        // 自定义节点样式
+                        const level = data.level || '';
+                        $node.addClass('level-' + level);
+                        
+                        // 自定义节点内容 - 显示职位和名字
+                        const title = data.title || '—';
+                        const name = data.name || '—';
+                        
+                        $node.html(
+                            '<div class="orgchart-node-title">' + title + '</div>' +
+                            '<div class="orgchart-node-content">' + name + '</div>'
+                        );
+                    },
+                    'draggable': false,
+                    'direction': 't2b'
+                });
+                
+                // 居中显示该部门的组织架构图
+                setTimeout(function() {
+                    const orgchartEl = $container.find('.orgchart');
+                    if (orgchartEl.length) {
+                        const containerWidth = $container.width();
+                        const chartWidth = orgchartEl.outerWidth();
+                        if (chartWidth < containerWidth) {
+                            const offsetLeft = (containerWidth - chartWidth) / 2;
+                            orgchartEl.css('margin-left', offsetLeft + 'px');
+                        }
+                    }
+                }, 100 + deptIndex * 50); // 错开时间避免冲突
+            });
         });
     </script>
     <?php endif; ?>
