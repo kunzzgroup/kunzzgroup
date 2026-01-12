@@ -2327,10 +2327,15 @@ if (file_exists($jsonFile)) {
         }
 
         .internal-org-columns {
-            display: grid;
-            grid-template-columns: repeat(9, 1fr);
+            display: flex;
+            flex-direction: row;
             gap: clamp(16px, 1.67vw, 24px);
-            align-items: start;
+            align-items: flex-start;
+            justify-content: flex-start;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            width: 100%;
+            padding: 0;
         }
 
         .internal-org-column {
@@ -2339,6 +2344,8 @@ if (file_exists($jsonFile)) {
             align-items: center;
             position: relative;
             min-height: 200px;
+            flex: 0 0 auto;
+            min-width: clamp(140px, 14.58vw, 180px);
         }
 
         .internal-org-column-title {
@@ -2440,25 +2447,18 @@ if (file_exists($jsonFile)) {
 
         /* 响应式调整 */
         @media (max-width: 1400px) {
-            .internal-org-columns {
-                grid-template-columns: repeat(5, 1fr);
+            .internal-org-column {
+                min-width: clamp(120px, 12.5vw, 160px);
             }
         }
 
         @media (max-width: 1024px) {
-            .internal-org-workspace {
-                padding: clamp(24px, 2.5vw, 32px);
-                border-radius: 32px;
-                min-height: 500px;
-            }
-
-            .internal-org-container {
-                padding: clamp(70px, 7.29vw, 100px) clamp(20px, 2.08vw, 30px) clamp(30px, 3.13vw, 40px);
-            }
-
             .internal-org-columns {
-                grid-template-columns: repeat(3, 1fr);
                 gap: clamp(12px, 1.25vw, 18px);
+            }
+
+            .internal-org-column {
+                min-width: clamp(100px, 10.42vw, 140px);
             }
 
             .internal-org-column-title {
@@ -2468,51 +2468,26 @@ if (file_exists($jsonFile)) {
 
             .internal-org-position-card {
                 max-width: clamp(100px, 10.42vw, 140px);
-                padding: clamp(10px, 1.04vw, 14px) clamp(8px, 0.83vw, 12px);
             }
 
             .internal-org-position-title {
-                font-size: clamp(9px, 0.94vw, 12px);
+                font-size: clamp(11px, 1.15vw, 13px);
+                padding: clamp(10px, 1.04vw, 14px) clamp(12px, 1.25vw, 16px);
             }
 
             .internal-org-position-name {
-                font-size: clamp(8px, 0.83vw, 11px);
-            }
-
-            .internal-org-bg-text img {
-                width: clamp(250px, 26.04vw, 600px);
-                height: clamp(250px, 26.04vw, 600px);
+                font-size: clamp(10px, 1.04vw, 12px);
+                padding: clamp(8px, 0.83vw, 12px) clamp(12px, 1.25vw, 16px);
             }
         }
 
         @media (max-width: 768px) {
             .internal-org-columns {
-                grid-template-columns: repeat(2, 1fr);
+                gap: clamp(10px, 1.04vw, 14px);
             }
 
-            .internal-org-workspace {
-                padding: clamp(20px, 2.08vw, 24px);
-                min-height: 450px;
-                border-radius: 24px;
-            }
-
-            .internal-org-title-overlay {
-                top: clamp(20px, 2.08vw, 24px);
-                left: clamp(20px, 2.08vw, 24px);
-        }
-
-            .internal-org-title-main {
-                font-size: clamp(20px, 2.08vw, 28px);
-            }
-
-            .internal-org-container {
-                padding: clamp(60px, 6.25vw, 80px) clamp(15px, 1.56vw, 20px) clamp(20px, 2.08vw, 30px);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .internal-org-columns {
-                grid-template-columns: 1fr;
+            .internal-org-column {
+                min-width: clamp(90px, 9.38vw, 120px);
             }
         }
 
