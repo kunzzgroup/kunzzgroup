@@ -3051,16 +3051,10 @@ if (file_exists($jsonFile)) {
             border-radius: 12px;
             padding: 0;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s ease;
             width: auto;
             min-width: clamp(120px, 12.5vw, 140px);
             text-align: center;
             overflow: hidden;
-        }
-        
-        #orgchart-container .node:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
         }
         
         /* 职位部分 - 橙色背景，白色文字 */
