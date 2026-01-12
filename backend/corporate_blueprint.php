@@ -2795,8 +2795,9 @@ if (file_exists($jsonFile)) {
             border-radius: 12px;
             padding: 40px;
             position: relative;
-            overflow-x: auto;
+            overflow: hidden;
             min-height: 600px;
+            max-height: 800px;
         }
         
         /* 背景Logo图片 */
@@ -2834,6 +2835,16 @@ if (file_exists($jsonFile)) {
             background: transparent;
             position: relative;
             z-index: 1;
+            overflow: hidden;
+        }
+        
+        /* 禁用组织架构图的滚动 */
+        #orgchart-container .orgchart {
+            overflow: hidden !important;
+        }
+        
+        #orgchart-container .orgchart-wrapper {
+            overflow: hidden !important;
         }
         
         /* 连线颜色 - 黑色 */
