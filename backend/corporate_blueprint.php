@@ -3240,330 +3240,140 @@ if (file_exists($jsonFile)) {
                 <?php endif; ?>
 
                 <!-- Corporate Core Section -->
-                <?php if (!empty($strategyData['corporateCore'])): ?>
+                <?php if (!empty($strategyData['corporateCore'])): 
+                    $corporateCore = $strategyData['corporateCore'];
+                ?>
                 <div class="section">
                     <div class="core-header">
                         <div class="core-main-title">企业核心</div>
                     </div>
                     <div class="core-grid">
                         <!-- 01 Mission -->
+                        <?php if (!empty($corporateCore['mission'])): ?>
                         <div class="core-card">
                             <div class="core-card-number">01</div>
                             <div class="core-card-content-wrapper">
                                 <div class="core-card-title">使命:初心&感性的目标</div>
                                 <div class="core-card-content">
-                                    塑造积极向上和舒适的工作环境
+                                    <?php echo nl2br(htmlspecialchars($corporateCore['mission'])); ?>
                                 </div>
                             </div>
                         </div>
+                        <?php endif; ?>
 
                         <!-- 02 Vision -->
+                        <?php if (!empty($corporateCore['vision'])): ?>
                         <div class="core-card">
                             <div class="core-card-number">02</div>
                             <div class="core-card-content-wrapper">
                                 <div class="core-card-title">愿景:理性可具体化的目标</div>
                                 <div class="core-card-content">
-                                    打造高效的团队,创造行业未来
+                                    <?php echo nl2br(htmlspecialchars($corporateCore['vision'])); ?>
                                 </div>
                             </div>
                         </div>
+                        <?php endif; ?>
 
                         <!-- 03 Culture -->
+                        <?php if (!empty($corporateCore['culture']) && is_array($corporateCore['culture'])): ?>
                         <div class="core-card">
                             <div class="core-card-number">03</div>
                             <div class="core-card-content-wrapper">
                                 <div class="core-card-title">文化:做人的态度</div>
                                 <div class="core-card-content">
-                                    积极向上,高效执行 灵活应变,诚信待人
+                                    <?php echo htmlspecialchars(implode(', ', $corporateCore['culture'])); ?>
                                 </div>
                             </div>
                         </div>
+                        <?php endif; ?>
 
                         <!-- 04 Values -->
+                        <?php if (!empty($corporateCore['values']) && is_array($corporateCore['values'])): ?>
                         <div class="core-card">
                             <div class="core-card-number">04</div>
                             <div class="core-card-content-wrapper">
                                 <div class="core-card-title">价值观:做事的态度</div>
                                 <div class="core-card-content">
-                                    目标导向,理念一致 追求卓越,创新精神
+                                    <?php echo htmlspecialchars(implode(', ', $corporateCore['values'])); ?>
                                 </div>
                             </div>
                         </div>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <?php endif; ?>
 
                 <!-- Culture Explanation - 新设计 -->
+                <?php if (!empty($strategyData['cultureExplanation']) && is_array($strategyData['cultureExplanation'])): ?>
                 <div class="section">
                     <div class="culture-explanation-header">
                         <div class="culture-explanation-title-cn">文化解说&考核</div>
                     </div>
                     <div class="culture-explanation-grid">
-                        <!-- 01 积极向上 -->
+                        <?php foreach ($strategyData['cultureExplanation'] as $index => $explanation): ?>
                         <div class="culture-explanation-card">
-                            <div class="culture-explanation-number">01</div>
-                            <div class="culture-explanation-key">积极向上</div>
+                            <div class="culture-explanation-number"><?php echo str_pad($index + 1, 2, '0', STR_PAD_LEFT); ?></div>
+                            <div class="culture-explanation-key"><?php echo htmlspecialchars($explanation['key'] ?? ''); ?></div>
                             <div class="culture-explanation-description">
-                                作为Holding管理公司,面对多家子公司及不同行业的挑战,员工和管理层都需要保持积极向上的态度。这种心态不仅有助于应对困难,还能激励团队不断寻求突破,推动公司持续成长和发展。
+                                <?php echo nl2br(htmlspecialchars($explanation['description'] ?? '')); ?>
                             </div>
+                            <?php if (!empty($explanation['scoring']) && is_array($explanation['scoring'])): ?>
                             <div class="culture-scoring">
                                 <div class="culture-scoring-title">评分标准:</div>
+                                <?php 
+                                // 按分数排序
+                                usort($explanation['scoring'], function($a, $b) {
+                                    return ($a['point'] ?? 0) <=> ($b['point'] ?? 0);
+                                });
+                                foreach ($explanation['scoring'] as $score): ?>
                                 <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">1分:</div>
-                                    <div class="culture-scoring-description">经常表现出消极情绪,缺乏主动性</div>
+                                    <div class="culture-scoring-point"><?php echo intval($score['point'] ?? 0); ?>分:</div>
+                                    <div class="culture-scoring-description"><?php echo htmlspecialchars($score['description'] ?? ''); ?></div>
                                 </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">2分:</div>
-                                    <div class="culture-scoring-description">能够完成任务,但缺少正能量激励和带动的作用</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">3分:</div>
-                                    <div class="culture-scoring-description">整体态度积极,可以较好的应对挑战并维持稳定的状态</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">4分:</div>
-                                    <div class="culture-scoring-description">会主动激励同事,面对困难保持乐观的态度并寻求方法突破难关</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">5分:</div>
-                                    <div class="culture-scoring-description">始终保持积极乐观的心态,主动进步不断提升自己</div>
-                                </div>
+                                <?php endforeach; ?>
                             </div>
+                            <?php endif; ?>
                         </div>
-
-                        <!-- 02 高效执行 -->
-                        <div class="culture-explanation-card">
-                            <div class="culture-explanation-number">02</div>
-                            <div class="culture-explanation-key">高效执行</div>
-                            <div class="culture-explanation-description">
-                                高效执行不仅是快速完成任务,更是确保战略精准落地。通过精简流程、优化资源分配,各部门紧密协作,减少延误。高效执行帮助公司在市场变化中迅速应对挑战,抢占先机,实现目标。
-                            </div>
-                            <div class="culture-scoring">
-                                <div class="culture-scoring-title">评分标准:</div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">1分:</div>
-                                    <div class="culture-scoring-description">工作常延迟,缺少计划性</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">2分:</div>
-                                    <div class="culture-scoring-description">可以完成任务,但效率不高,容易出错</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">3分:</div>
-                                    <div class="culture-scoring-description">能确保任务按时完成,流程执行基本符合要求</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">4分:</div>
-                                    <div class="culture-scoring-description">高效推进任务,能优化流程并减少拖延</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">5分:</div>
-                                    <div class="culture-scoring-description">执行力极强,能确保计划精准落实并能带动团队缩短任务时间</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 03 灵活应变 -->
-                        <div class="culture-explanation-card">
-                            <div class="culture-explanation-number">03</div>
-                            <div class="culture-explanation-key">灵活应变</div>
-                            <div class="culture-explanation-description">
-                                灵活应变要求根据各子公司实际情况快速调整策略,促进团队合作与创新。确保公司在多变市场中保持领先。
-                            </div>
-                            <div class="culture-scoring">
-                                <div class="culture-scoring-title">评分标准:</div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">1分:</div>
-                                    <div class="culture-scoring-description">遇到变化不知所措,缺少应对能力</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">2分:</div>
-                                    <div class="culture-scoring-description">在指导下能适应变化,但缺乏独立应对的能力</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">3分:</div>
-                                    <div class="culture-scoring-description">能根据情况做出调整,并应对在一般的变化上</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">4分:</div>
-                                    <div class="culture-scoring-description">能快速调整策略,并推动创新与团队合作</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">5分:</div>
-                                    <div class="culture-scoring-description">反应迅速,能预判变化并引领团队一起应对</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 04 诚信待人 -->
-                        <div class="culture-explanation-card">
-                            <div class="culture-explanation-number">04</div>
-                            <div class="culture-explanation-key">诚信待人</div>
-                            <div class="culture-explanation-description">
-                                诚信是公司文化的核心,无论是公司内部的员工管理,还是客户和合作伙伴的关系,诚信是建立信任的基础。诚信待人不仅能促进公司内部合作与沟通,也能增强外部与合作伙伴的关系,帮助公司长期发展。
-                            </div>
-                            <div class="culture-scoring">
-                                <div class="culture-scoring-title">评分标准:</div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">1分:</div>
-                                    <div class="culture-scoring-description">有失信的行为,影响合作关系</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">2分:</div>
-                                    <div class="culture-scoring-description">基本遵守承诺,但偶尔承诺与结果之间存在差距</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">3分:</div>
-                                    <div class="culture-scoring-description">为人诚实守信,合作关系稳定</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">4分:</div>
-                                    <div class="culture-scoring-description">在团队中树立良好的信誉,促进团队的合作顺畅</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">5分:</div>
-                                    <div class="culture-scoring-description">以诚信为核心价值,成为团队和外部伙伴的诚信典范</div>
-                                </div>
-                            </div>
-                        </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
+                <?php endif; ?>
 
                 <!-- Values Explanation - 新设计，风格与 Culture Explanation 一致 -->
+                <?php if (!empty($strategyData['valuesExplanation']) && is_array($strategyData['valuesExplanation'])): ?>
                 <div class="section">
                     <div class="values-explanation-header">
                         <div class="values-explanation-title-cn">价值观解说&考核</div>
                     </div>
                     <div class="culture-explanation-grid">
-                        <!-- 01 目标导向 -->
+                        <?php foreach ($strategyData['valuesExplanation'] as $index => $explanation): ?>
                         <div class="culture-explanation-card">
-                            <div class="culture-explanation-number">01</div>
-                            <div class="culture-explanation-key">目标导向</div>
+                            <div class="culture-explanation-number"><?php echo str_pad($index + 1, 2, '0', STR_PAD_LEFT); ?></div>
+                            <div class="culture-explanation-key"><?php echo htmlspecialchars($explanation['key'] ?? ''); ?></div>
                             <div class="culture-explanation-description">
-                                公司需要明确战略目标,并确保每个部门围绕这些目标高效运作。所有工作都应有清晰的方向,以实现公司整体愿景和长期发展。
+                                <?php echo nl2br(htmlspecialchars($explanation['description'] ?? '')); ?>
                             </div>
+                            <?php if (!empty($explanation['scoring']) && is_array($explanation['scoring'])): ?>
                             <div class="culture-scoring">
                                 <div class="culture-scoring-title">评分标准:</div>
+                                <?php 
+                                // 按分数排序
+                                usort($explanation['scoring'], function($a, $b) {
+                                    return ($a['point'] ?? 0) <=> ($b['point'] ?? 0);
+                                });
+                                foreach ($explanation['scoring'] as $score): ?>
                                 <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">1分:</div>
-                                    <div class="culture-scoring-description">缺少明确的目标,经常偏离方向</div>
+                                    <div class="culture-scoring-point"><?php echo intval($score['point'] ?? 0); ?>分:</div>
+                                    <div class="culture-scoring-description"><?php echo htmlspecialchars($score['description'] ?? ''); ?></div>
                                 </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">2分:</div>
-                                    <div class="culture-scoring-description">知道整体方向,但常常在执行上存在偏移</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">3分:</div>
-                                    <div class="culture-scoring-description">有基本的目标意识,能根据公司目标安排好任务</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">4分:</div>
-                                    <div class="culture-scoring-description">会主动对照公司目标调整计划,确保工作的推进方向一致</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">5分:</div>
-                                    <div class="culture-scoring-description">以目标为核心进行规划,并能推动团队围绕共同目标高效落实</div>
-                                </div>
+                                <?php endforeach; ?>
                             </div>
+                            <?php endif; ?>
                         </div>
-
-                        <!-- 02 理念一致 -->
-                        <div class="culture-explanation-card">
-                            <div class="culture-explanation-number">02</div>
-                            <div class="culture-explanation-key">理念一致</div>
-                            <div class="culture-explanation-description">
-                                管理层和团队需在战略、决策和执行上保持一致,以保障组织沟通顺畅,避免内部摩擦和资源浪费,共同推动公司整体稳健发展。
-                            </div>
-                            <div class="culture-scoring">
-                                <div class="culture-scoring-title">评分标准:</div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">1分:</div>
-                                    <div class="culture-scoring-description">与公司方向和理念差异明显,行为不够统一</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">2分:</div>
-                                    <div class="culture-scoring-description">大部分情况能配合公司理念,但偶尔仍按个人习惯行事</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">3分:</div>
-                                    <div class="culture-scoring-description">理解并基本认同公司理念,能按照要求执行</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">4分:</div>
-                                    <div class="culture-scoring-description">积极传递公司理念,并在团队中保持统一标准和做法</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">5分:</div>
-                                    <div class="culture-scoring-description">高度认同公司理念,能影响团队成员,共同维持一致的价值判断和行为标准</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 03 追求卓越 -->
-                        <div class="culture-explanation-card">
-                            <div class="culture-explanation-number">03</div>
-                            <div class="culture-explanation-key">追求卓越</div>
-                            <div class="culture-explanation-description">
-                                公司不仅要优化管理流程,还要不断提升自身的管理水平。通过持续改进,提高工作效率和质量,在公司内部树立精益求精的文化。
-                            </div>
-                            <div class="culture-scoring">
-                                <div class="culture-scoring-title">评分标准:</div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">1分:</div>
-                                    <div class="culture-scoring-description">缺少主动进步的意愿,满足在最低的标准内完成工作</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">2分:</div>
-                                    <div class="culture-scoring-description">能做到基本要求,但很少主动提出优化或改进建议</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">3分:</div>
-                                    <div class="culture-scoring-description">在保证质量的前提下,会适度思考提升效率和成果</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">4分:</div>
-                                    <div class="culture-scoring-description">不断自我提升,主动优化工作流程,追求更高标准</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">5分:</div>
-                                    <div class="culture-scoring-description">以卓越为目标,持续突破既有成绩,对团队有明显的标杆示范作用</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 04 创新精神 -->
-                        <div class="culture-explanation-card">
-                            <div class="culture-explanation-number">04</div>
-                            <div class="culture-explanation-key">创新精神</div>
-                            <div class="culture-explanation-description">
-                                通过流程、技术和管理模式上的不断创新,以提升内部管理效能。通过鼓励全员参与创新,能够更好地应对市场变化,增强公司的竞争力和决策能力。
-                            </div>
-                            <div class="culture-scoring">
-                                <div class="culture-scoring-title">评分标准:</div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">1分:</div>
-                                    <div class="culture-scoring-description">习惯依赖既有方法,不愿尝试新做法</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">2分:</div>
-                                    <div class="culture-scoring-description">可以接受变化,但多数情况为被动配合,缺少主动思考</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">3分:</div>
-                                    <div class="culture-scoring-description">在需要时会提出改进想法,并能配合推动部分创新措施</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">4分:</div>
-                                    <div class="culture-scoring-description">积极参与各类创新项目,能提出可行方案并协助落实</div>
-                                </div>
-                                <div class="culture-scoring-item">
-                                    <div class="culture-scoring-point">5分:</div>
-                                    <div class="culture-scoring-description">具有强烈的创新意识,能系统性思考并带领团队一起设计和落地创新方案</div>
-                                </div>
-                            </div>
-                        </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
+                <?php endif; ?>
 
                 <!-- Organization Structure - 使用 OrgChart.js -->
                 <?php 
@@ -3703,136 +3513,11 @@ if (file_exists($jsonFile)) {
                     return $departmentTrees;
                 }
                 
-                // 内部组织架构数据 - 从JSON读取或使用示例数据
+                // 内部组织架构数据 - 从JSON读取
                 $internalOrgData = $strategyData['internalOrganization'] ?? null;
                 
-                // 如果没有数据，使用示例数据
-                if (!$internalOrgData) {
-                    $internalOrgData = [
-                        'departments' => [
-                            [
-                                'name' => 'HUMAN RESOURCE',
-                                'positions' => [
-                                    ['title' => 'VP OF HR', 'name' => 'TANG YEAW KHOONG'],
-                                    ['title' => 'HR DIRECTOR', 'name' => ''],
-                                    ['title' => 'SENIOR HR MANAGER', 'name' => ''],
-                                    ['title' => 'HR MANAGER', 'name' => ''],
-                                    ['title' => 'HR SUPERVISOR', 'name' => ''],
-                                    ['title' => 'SENIOR HR EXECUTIVE', 'name' => ''],
-                                    ['title' => 'HR EXECUTIVE', 'name' => ''],
-                                    ['title' => 'JUNIOR HR EXECUTIVE', 'name' => ''],
-                                    ['title' => 'HR INTERN', 'name' => '']
-                                ]
-                            ],
-                            [
-                                'name' => 'ACCOUNTANT',
-                                'positions' => [
-                                    ['title' => 'FINANCE MANAGER', 'name' => 'TANG YEAW KHOONG'],
-                                    ['title' => 'ACCOUNT SUPERVISOR', 'name' => ''],
-                                    ['title' => 'ACCOUNT EXECUTIVE', 'name' => ''],
-                                    ['title' => 'ACCOUNT INTERN', 'name' => '']
-                                ]
-                            ],
-                            [
-                                'name' => 'MEDIA PRODUCTION',
-                                'positions' => [
-                                    ['title' => 'VP VISUAL', 'name' => 'TANG YEAW KHOONG'],
-                                    ['title' => 'VISUAL DIRECTOR', 'name' => ''],
-                                    ['title' => 'SR.MEDIA MANAGER', 'name' => ''],
-                                    ['title' => 'MEDIA MANAGER', 'name' => ''],
-                                    ['title' => 'MEDIA LEAD', 'name' => ''],
-                                    ['title' => 'SR.VIDEO CREATOR', 'name' => ''],
-                                    ['title' => 'VIDEO CREATOR', 'name' => ''],
-                                    ['title' => 'JR.VIDEO CREATOR', 'name' => ''],
-                                    ['title' => 'MEDIA INTERN', 'name' => '']
-                                ]
-                            ],
-                            [
-                                'name' => 'MARKETING',
-                                'positions' => [
-                                    ['title' => 'VP OF MARKETING', 'name' => 'TANG YEAW KHOONG'],
-                                    ['title' => 'MARKETING DIRECTOR', 'name' => ''],
-                                    ['title' => 'SR.MARKETING DIRECTOR', 'name' => ''],
-                                    ['title' => 'MARKETING MANAGER', 'name' => ''],
-                                    ['title' => 'ASST.MARKETING MANAGER', 'name' => ''],
-                                    ['title' => 'SR.MARKETING EXEC', 'name' => ''],
-                                    ['title' => 'MARKETING EXEC', 'name' => ''],
-                                    ['title' => 'JR.MARKETING EXEC', 'name' => ''],
-                                    ['title' => 'MARKETING INTERN', 'name' => '']
-                                ]
-                            ],
-                            [
-                                'name' => 'SUPPORT',
-                                'positions' => [
-                                    ['title' => 'KITCHEN.SUP DIRECTOR', 'name' => 'TANG YEAW KHOONG'],
-                                    ['title' => 'SENIOR KITCHEN SUP MANAGER', 'name' => ''],
-                                    ['title' => 'KITCHEN SUP MANAGER', 'name' => ''],
-                                    ['title' => 'KITCHEN SUPPORT LEAD', 'name' => ''],
-                                    ['title' => 'SENIOR KITCHEN SUPPORT', 'name' => ''],
-                                    ['title' => 'KITCHEN SUPPORT', 'name' => ''],
-                                    ['title' => 'JUNIOR KITCHEN SUPPORT', 'name' => ''],
-                                    ['title' => 'KITCHEN SUPPORT INTERN', 'name' => '']
-                                ]
-                            ],
-                            [
-                                'name' => 'PRODUCTION',
-                                'positions' => [
-                                    ['title' => 'OPERATIONS DIRECTOR', 'name' => 'TANG YEAW KHOONG'],
-                                    ['title' => 'SNR.OPERATIONS MANAGER', 'name' => ''],
-                                    ['title' => 'PRODUCTION MANAGER', 'name' => ''],
-                                    ['title' => 'TEAM LEAD', 'name' => ''],
-                                    ['title' => 'SENIOR PRODUCTION', 'name' => ''],
-                                    ['title' => 'OPERATOR', 'name' => ''],
-                                    ['title' => 'JUNIOR OPERATOR', 'name' => ''],
-                                    ['title' => 'OPERATOR INTERN', 'name' => '']
-                                ]
-                            ],
-                            [
-                                'name' => 'R&D',
-                                'positions' => [
-                                    ['title' => 'R&D DIRECTOR', 'name' => 'TANG YEAW KHOONG'],
-                                    ['title' => 'SENIOR R&D MANAGER', 'name' => ''],
-                                    ['title' => 'R&D MANAGER', 'name' => ''],
-                                    ['title' => 'LEAD R&D', 'name' => ''],
-                                    ['title' => 'SENIOR R&D', 'name' => ''],
-                                    ['title' => 'R&D', 'name' => ''],
-                                    ['title' => 'JUNIOR R&D', 'name' => ''],
-                                    ['title' => 'R&D INTERN', 'name' => '']
-                                ]
-                            ],
-                            [
-                                'name' => 'TECHNICAL',
-                                'positions' => [
-                                    ['title' => 'VP OF TECH', 'name' => 'TANG YEAW KHOONG'],
-                                    ['title' => 'TECH DIRECTOR', 'name' => ''],
-                                    ['title' => 'SR.ENON.MANAGER', 'name' => ''],
-                                    ['title' => 'ENG MANAGER', 'name' => ''],
-                                    ['title' => 'TECH LEAD', 'name' => ''],
-                                    ['title' => 'SR.TECH ENGINEER', 'name' => ''],
-                                    ['title' => 'TECH ENGINEER', 'name' => ''],
-                                    ['title' => 'ENGINEER INTERN', 'name' => '']
-                                ]
-                            ],
-                            [
-                                'name' => 'DESIGN',
-                                'positions' => [
-                                    ['title' => 'VP OF DESIGN', 'name' => 'TANG YEAW KHOONG'],
-                                    ['title' => 'DESIGN DIRECTOR', 'name' => ''],
-                                    ['title' => 'SENIOR DESIGN MANAGER', 'name' => ''],
-                                    ['title' => 'DESIGN MANAGER', 'name' => ''],
-                                    ['title' => 'DESIGN SUPERVISOR', 'name' => ''],
-                                    ['title' => 'GRAPHIC DESIGNER', 'name' => ''],
-                                    ['title' => 'JUNIOR GRAPHIC DESIGNER', 'name' => ''],
-                                    ['title' => 'DESIGN ASSISTANT', 'name' => ''],
-                                    ['title' => 'DESIGN INTERN', 'name' => '']
-                                ]
-                            ]
-                        ]
-                    ];
-                }
-                
-                $internalOrgChartData = convertInternalOrgToOrgChartFormat($internalOrgData);
-                if (!empty($internalOrgChartData)):
+                $internalOrgChartData = $internalOrgData ? convertInternalOrgToOrgChartFormat($internalOrgData) : [];
+                if (!empty($internalOrgChartData) && is_array($internalOrgChartData)):
                 ?>
 
                 <!-- 内部组织架构图 -->
@@ -3866,6 +3551,20 @@ if (file_exists($jsonFile)) {
                 <?php endif; ?>
 
                 <!-- Strategic Objectives -->
+                <?php 
+                $strategicObjectives = $strategyData['strategicObjectives'] ?? [];
+                $ultimateGoal = $strategyData['companyOverview']['ultimateGoal'] ?? '';
+                $strategyEndYear = $strategyData['companyOverview']['strategyEndYear'] ?? date('Y') + 5;
+                
+                // 将所有年份的目标合并到一个数组中，用于显示
+                $allObjectives = [];
+                foreach ($strategicObjectives as $year => $objectives) {
+                    foreach ($objectives as $obj) {
+                        $allObjectives[] = array_merge($obj, ['year' => $year]);
+                    }
+                }
+                ?>
+                <?php if (!empty($allObjectives)): ?>
                 <div class="strategic-objectives-section">
                     <!-- 背景装饰 -->
                     <div class="strategic-bg-decor"></div>
@@ -3883,8 +3582,10 @@ if (file_exists($jsonFile)) {
                                         <span>最终目标</span>
                                     </div>
                                     <h1 class="strategic-main-title">
-                                        2028年
-                                        <span class="strategic-year">创办10间子公司</span>
+                                        <?php echo htmlspecialchars($strategyEndYear); ?>年
+                                        <?php if (!empty($ultimateGoal)): ?>
+                                        <span class="strategic-year"><?php echo htmlspecialchars($ultimateGoal); ?></span>
+                                        <?php endif; ?>
                                     </h1>
                                     </div>
                                 </div>
@@ -3899,71 +3600,11 @@ if (file_exists($jsonFile)) {
                                     <span class="strategic-list-count" id="strategicListCount">5</span>
                                 </h2>
                                 <div class="strategic-list" id="strategicList">
-                                    <!-- 策略1 - 人事部 -->
+                                    <?php foreach ($allObjectives as $index => $obj): ?>
                                     <button 
-                                        class="strategy-card active" 
-                                        data-strategy-index="0"
-                                        onclick="selectStrategy(0)"
-                                    >
-                                        <div class="strategy-icon-wrapper">
-                                            <svg class="strategy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                                <circle cx="9" cy="7" r="4"/>
-                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                            </svg>
-                                    </div>
-                                        <div class="strategy-content">
-                                            <div class="strategy-meta">
-                                                <span class="strategy-id">S1-人事部 • 2028</span>
-                                                <svg class="strategy-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                                    <polyline points="22 4 12 14.01 9 11.01"/>
-                                                </svg>
-                                </div>
-                                            <h3 class="strategy-title">建立高效且有吸引力的人才管理体系</h3>
-                                            <p class="strategy-description">支持公司服务子公司扩展</p>
-                            </div>
-                                        <svg class="strategy-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polyline points="9 18 15 12 9 6"/>
-                                        </svg>
-                                    </button>
-
-                                    <!-- 策略2 - 推广部 -->
-                                    <button 
-                                        class="strategy-card" 
-                                        data-strategy-index="1"
-                                        onclick="selectStrategy(1)"
-                                    >
-                                        <div class="strategy-icon-wrapper">
-                                            <svg class="strategy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                                <circle cx="9" cy="7" r="4"/>
-                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                            </svg>
-                        </div>
-                                        <div class="strategy-content">
-                                            <div class="strategy-meta">
-                                                <span class="strategy-id">S2-推广部 • 2028</span>
-                                                <svg class="strategy-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
-                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                                    <polyline points="22 4 12 14.01 9 11.01"/>
-                                                </svg>
-                    </div>
-                                            <h3 class="strategy-title">建立标准化、多平台适用的人才与传播体系</h3>
-                                            <p class="strategy-description">赋能子公司快速启动社群内容运营与品牌建设</p>
-                </div>
-                                        <svg class="strategy-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polyline points="9 18 15 12 9 6"/>
-                                        </svg>
-                                    </button>
-
-                                    <!-- 策略3 - 设计部 -->
-                                    <button 
-                                        class="strategy-card" 
-                                        data-strategy-index="2"
-                                        onclick="selectStrategy(2)"
+                                        class="strategy-card <?php echo $index === 0 ? 'active' : ''; ?>" 
+                                        data-strategy-index="<?php echo $index; ?>"
+                                        onclick="selectStrategy(<?php echo $index; ?>)"
                                     >
                                         <div class="strategy-icon-wrapper">
                                             <svg class="strategy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -3975,169 +3616,20 @@ if (file_exists($jsonFile)) {
                                         </div>
                                         <div class="strategy-content">
                                             <div class="strategy-meta">
-                                                <span class="strategy-id">S3-设计部 • 2028</span>
-                                                <svg class="strategy-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                                                <span class="strategy-id">S<?php echo $index + 1; ?>-<?php echo htmlspecialchars($obj['department'] ?? ''); ?> • <?php echo htmlspecialchars($obj['year'] ?? ''); ?></span>
+                                                <svg class="strategy-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="<?php echo $index === 0 ? '' : 'display: none;'; ?>">
                                                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                                                     <polyline points="22 4 12 14.01 9 11.01"/>
                                                 </svg>
                                             </div>
-                                            <h3 class="strategy-title">打造创新且高效的设计团队</h3>
-                                            <p class="strategy-description">提升品牌设计的质量</p>
+                                            <h3 class="strategy-title"><?php echo htmlspecialchars($obj['strategy'] ?? ''); ?></h3>
+                                            <p class="strategy-description"><?php echo htmlspecialchars($obj['department'] ?? ''); ?></p>
                                         </div>
                                         <svg class="strategy-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <polyline points="9 18 15 12 9 6"/>
                                         </svg>
                                     </button>
-
-                                    <!-- 策略4 - 开发部 -->
-                                    <button 
-                                        class="strategy-card" 
-                                        data-strategy-index="3"
-                                        onclick="selectStrategy(3)"
-                                    >
-                                        <div class="strategy-icon-wrapper">
-                                            <svg class="strategy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                                <circle cx="9" cy="7" r="4"/>
-                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                            </svg>
-                                    </div>
-                                        <div class="strategy-content">
-                                            <div class="strategy-meta">
-                                                <span class="strategy-id">S4-开发部 • 2028</span>
-                                                <svg class="strategy-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
-                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                                    <polyline points="22 4 12 14.01 9 11.01"/>
-                                                </svg>
-                                    </div>
-                                            <h3 class="strategy-title">建立高效IT体系</h3>
-                                            <p class="strategy-description">提升营运效率与数据整合,支撑公司扩张</p>
-                                        </div>
-                                        <svg class="strategy-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polyline points="9 18 15 12 9 6"/>
-                                        </svg>
-                                    </button>
-
-                                    <!-- 策略5 - 摄影部 -->
-                                    <button 
-                                        class="strategy-card" 
-                                        data-strategy-index="4"
-                                        onclick="selectStrategy(4)"
-                                    >
-                                        <div class="strategy-icon-wrapper">
-                                            <svg class="strategy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                                <circle cx="9" cy="7" r="4"/>
-                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                            </svg>
-                                        </div>
-                                        <div class="strategy-content">
-                                            <div class="strategy-meta">
-                                                <span class="strategy-id">S5-摄影部 • 2028</span>
-                                                <svg class="strategy-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
-                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                                    <polyline points="22 4 12 14.01 9 11.01"/>
-                                                </svg>
-                                            </div>
-                                            <h3 class="strategy-title">摄影部战略</h3>
-                                            <p class="strategy-description">待定</p>
-                                        </div>
-                                        <svg class="strategy-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polyline points="9 18 15 12 9 6"/>
-                                        </svg>
-                                    </button>
-
-                                    <!-- 策略6 - 研发部 -->
-                                    <button 
-                                        class="strategy-card" 
-                                        data-strategy-index="5"
-                                        onclick="selectStrategy(5)"
-                                    >
-                                        <div class="strategy-icon-wrapper">
-                                            <svg class="strategy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                                <circle cx="9" cy="7" r="4"/>
-                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                            </svg>
-                                        </div>
-                                        <div class="strategy-content">
-                                            <div class="strategy-meta">
-                                                <span class="strategy-id">S6-研发部 • 2028</span>
-                                                <svg class="strategy-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
-                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                                    <polyline points="22 4 12 14.01 9 11.01"/>
-                                                </svg>
-                                            </div>
-                                            <h3 class="strategy-title">打造专业高效的研发团队</h3>
-                                            <p class="strategy-description">通过高效研发流程和市场导向的方法，培养并吸引高端人才</p>
-                                        </div>
-                                        <svg class="strategy-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polyline points="9 18 15 12 9 6"/>
-                                        </svg>
-                                    </button>
-
-                                    <!-- 策略7 - 支援部 -->
-                                    <button 
-                                        class="strategy-card" 
-                                        data-strategy-index="6"
-                                        onclick="selectStrategy(6)"
-                                    >
-                                        <div class="strategy-icon-wrapper">
-                                            <svg class="strategy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                                <circle cx="9" cy="7" r="4"/>
-                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                            </svg>
-                                        </div>
-                                        <div class="strategy-content">
-                                            <div class="strategy-meta">
-                                                <span class="strategy-id">S7-支援部 • 2028</span>
-                                                <svg class="strategy-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
-                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                                    <polyline points="22 4 12 14.01 9 11.01"/>
-                                                </svg>
-                                            </div>
-                                            <h3 class="strategy-title">打造高效有制度的支援团队</h3>
-                                            <p class="strategy-description">支持所有子公司所需的资源调配，让公司利润最大化</p>
-                                        </div>
-                                        <svg class="strategy-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polyline points="9 18 15 12 9 6"/>
-                                        </svg>
-                                    </button>
-
-                                    <!-- 策略8 - 生产部 -->
-                                    <button 
-                                        class="strategy-card" 
-                                        data-strategy-index="7"
-                                        onclick="selectStrategy(7)"
-                                    >
-                                        <div class="strategy-icon-wrapper">
-                                            <svg class="strategy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                                <circle cx="9" cy="7" r="4"/>
-                                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                            </svg>
-                                        </div>
-                                        <div class="strategy-content">
-                                            <div class="strategy-meta">
-                                                <span class="strategy-id">S8-生产部 • 2028</span>
-                                                <svg class="strategy-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
-                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                                    <polyline points="22 4 12 14.01 9 11.01"/>
-                                                </svg>
-                                            </div>
-                                            <h3 class="strategy-title">生产部战略</h3>
-                                            <p class="strategy-description">待定</p>
-                                        </div>
-                                        <svg class="strategy-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polyline points="9 18 15 12 9 6"/>
-                                        </svg>
-                                    </button>
+                                    <?php endforeach; ?>
                                 </div>
                             </div>
 
@@ -4227,94 +3719,27 @@ if (file_exists($jsonFile)) {
                         </main>
                     </div>
                 </div>
+                <?php endif; ?>
                 
                 <script>
-                // 硬编码的5个策略数据
-                const strategiesData = [
-                    {
-                        deptName: 'S1-人事部',
-                        deptDisplay: '人事部',
-                        strategy: '建立高效且有吸引力的人才管理体系',
-                        department: '支持公司服务子公司扩展',
-                        pic: 'Paris',
-                        startDate: '',
-                        endDate: '',
-                        dashboardMetrics: ['人才引进与储备', '文化宣传']
-                    },
-                    {
-                        deptName: 'S2-推广部',
-                        deptDisplay: '推广部',
-                        strategy: '建立一套标准化、多平台适用的人才与传播体系',
-                        department: '赋能子公司快速启动社群内容运营与品牌建设',
-                        pic: 'LW',
-                        startDate: '',
-                        endDate: '',
-                        dashboardMetrics: ['人才体系搭建', '平台能力建设', '品牌知名度']
-                    },
-                    {
-                        deptName: 'S3-设计部',
-                        deptDisplay: '设计部',
-                        strategy: '打造创新且高效的设计团队',
-                        department: '提升品牌设计的质量',
-                        pic: 'SH',
-                        startDate: '2025-05-15',
-                        endDate: '',
-                        dashboardMetrics: ['创意思维训练', '自动化工具引入']
-                    },
-                    {
-                        deptName: 'S4-开发部',
-                        deptDisplay: '开发部',
-                        strategy: '建立高效IT体系',
-                        department: '提升营运效率与数据整合,支撑公司扩张',
-                        pic: 'ZJ',
-                        startDate: '2025-05-19',
-                        endDate: '2025-08-15',
-                        dashboardMetrics: ['统一简化编程体系', '系统稳定性']
-                    },
-                    {
-                        deptName: 'S5-摄影部',
-                        deptDisplay: '摄影部',
-                        strategy: '摄影部战略',
-                        department: '待定',
-                        pic: '',
-                        startDate: '',
-                        endDate: '',
-                        dashboardMetrics: []
-                    },
-                    {
-                        deptName: 'S6-研发部',
-                        deptDisplay: '研发部',
-                        strategy: '打造专业高效的研发团队',
-                        department: '通过高效研发流程和市场导向的方法，培养并吸引高端人才，推出创新且差异化的产品',
-                        pic: 'LUN',
-                        startDate: '',
-                        endDate: '',
-                        dashboardMetrics: []
-                    },
-                    {
-                        deptName: 'S7-支援部',
-                        deptDisplay: '支援部',
-                        strategy: '打造高效有制度的支援团队',
-                        department: '支持所有子公司所需的资源调配，让公司利润最大化',
-                        pic: '',
-                        startDate: '',
-                        endDate: '',
-                        dashboardMetrics: []
-                    },
-                    {
-                        deptName: 'S8-生产部',
-                        deptDisplay: '生产部',
-                        strategy: '生产部战略',
-                        department: '',
-                        pic: '',
-                        startDate: '',
-                        endDate: '',
-                        dashboardMetrics: []
-                    }
-                ];
+                // 从PHP传递的战略目标数据
+                const strategiesData = <?php echo json_encode($allObjectives, JSON_UNESCAPED_UNICODE); ?>;
+                
+                // 转换数据格式以匹配原有结构
+                const formattedStrategiesData = strategiesData.map((obj, index) => ({
+                    deptName: 'S' + (index + 1) + '-' + (obj.department || ''),
+                    deptDisplay: obj.department || '',
+                    strategy: obj.strategy || '',
+                    department: obj.department || '',
+                    pic: obj.pic || '',
+                    startDate: obj.startDate || '',
+                    endDate: obj.endDate || '',
+                    dashboardMetrics: obj.dashboardMetrics || [],
+                    year: obj.year || ''
+                }));
                 
                 function selectStrategy(index) {
-                    const strategy = strategiesData[index];
+                    const strategy = formattedStrategiesData[index];
                     if (!strategy) return;
                     
                     // 更新卡片状态
@@ -4390,7 +3815,7 @@ if (file_exists($jsonFile)) {
                     // 更新策略总数
                     const countEl = document.getElementById('strategicListCount');
                     if (countEl) {
-                        countEl.textContent = strategiesData.length.toString();
+                        countEl.textContent = formattedStrategiesData.length.toString();
                     }
                 });
                 </script>
