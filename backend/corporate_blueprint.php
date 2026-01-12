@@ -2845,7 +2845,7 @@ if (file_exists($jsonFile)) {
             z-index: 1;
             overflow: hidden;
             background-image: none !important;
-            display: flex;
+            /* display: flex; */
             justify-content: center;
             align-items: center;
             width: 100%;
