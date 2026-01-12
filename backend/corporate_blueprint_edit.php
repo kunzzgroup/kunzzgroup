@@ -1,0 +1,669 @@
+<?php
+session_start();
+
+// 检查是否已登录
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.html");
+    exit();
+}
+
+$jsonFile = __DIR__ . '/corporate_strategy.json';
+$success = '';
+$error = '';
+
+// 处理表单提交
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    try {
+        // 读取现有数据
+        $data = [];
+        if (file_exists($jsonFile)) {
+            $content = file_get_contents($jsonFile);
+            $data = json_decode($content, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $data = [];
+            }
+        }
+        
+        // 如果没有数据，初始化基本结构
+        if (empty($data)) {
+            $data = [
+                'companyOverview' => [
+                    'companyName' => '',
+                    'planTitle' => '',
+                    'strategyStartYear' => date('Y'),
+                    'strategyEndYear' => date('Y') + 5,
+                    'ultimateGoal' => ''
+                ],
+                'organizationStructure' => [
+                    'ceo' => ['name' => '', 'title' => 'CEO'],
+                    'pa' => ['name' => '', 'title' => 'PA'],
+                    'cLevel' => []
+                ],
+                'internalOrganization' => [
+                    'departments' => []
+                ],
+                'timeline' => [],
+                'strategicObjectives' => []
+            ];
+        }
+        
+        // 更新公司概述
+        if (isset($_POST['companyName'])) {
+            if (!isset($data['companyOverview'])) {
+                $data['companyOverview'] = [];
+            }
+            $data['companyOverview']['companyName'] = $_POST['companyName'];
+            $data['companyOverview']['planTitle'] = $_POST['planTitle'] ?? '';
+            $data['companyOverview']['strategyStartYear'] = intval($_POST['strategyStartYear'] ?? date('Y'));
+            $data['companyOverview']['strategyEndYear'] = intval($_POST['strategyEndYear'] ?? date('Y') + 5);
+            $data['companyOverview']['ultimateGoal'] = $_POST['ultimateGoal'] ?? '';
+        }
+        
+        // 更新组织架构 - CEO
+        if (isset($_POST['ceo_name'])) {
+            if (!isset($data['organizationStructure'])) {
+                $data['organizationStructure'] = ['ceo' => [], 'pa' => [], 'cLevel' => []];
+            }
+            if (!isset($data['organizationStructure']['ceo'])) {
+                $data['organizationStructure']['ceo'] = [];
+            }
+            $data['organizationStructure']['ceo']['name'] = $_POST['ceo_name'];
+            $data['organizationStructure']['ceo']['title'] = $_POST['ceo_title'] ?? 'CEO';
+        }
+        
+        // 更新组织架构 - PA
+        if (isset($_POST['pa_name'])) {
+            if (!isset($data['organizationStructure']['pa'])) {
+                $data['organizationStructure']['pa'] = [];
+            }
+            $data['organizationStructure']['pa']['name'] = $_POST['pa_name'];
+            $data['organizationStructure']['pa']['title'] = $_POST['pa_title'] ?? 'PA';
+        }
+        
+        // 更新C-Level高管
+        if (isset($_POST['clevel']) && is_array($_POST['clevel'])) {
+            $data['organizationStructure']['cLevel'] = [];
+            foreach ($_POST['clevel'] as $index => $clevel) {
+                if (!empty($clevel['name']) || !empty($clevel['title'])) {
+                    $data['organizationStructure']['cLevel'][] = [
+                        'name' => $clevel['name'] ?? '',
+                        'title' => $clevel['title'] ?? '',
+                        'reportsTo' => $clevel['reportsTo'] ?? 'CEO',
+                        'fullTitle' => $clevel['fullTitle'] ?? '',
+                        'subordinates' => []
+                    ];
+                }
+            }
+        }
+        
+        // 更新内部组织架构 - 部门
+        if (isset($_POST['departments']) && is_array($_POST['departments'])) {
+            $data['internalOrganization']['departments'] = [];
+            foreach ($_POST['departments'] as $deptIndex => $dept) {
+                if (!empty($dept['name'])) {
+                    $department = [
+                        'name' => $dept['name'],
+                        'positions' => []
+                    ];
+                    
+                    // 添加职位
+                    if (isset($dept['positions']) && is_array($dept['positions'])) {
+                        foreach ($dept['positions'] as $pos) {
+                            if (!empty($pos['title'])) {
+                                $department['positions'][] = [
+                                    'title' => $pos['title'],
+                                    'name' => $pos['name'] ?? ''
+                                ];
+                            }
+                        }
+                    }
+                    
+                    $data['internalOrganization']['departments'][] = $department;
+                }
+            }
+        }
+        
+        // 保存到JSON文件
+        $jsonContent = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if (file_put_contents($jsonFile, $jsonContent)) {
+            $success = "数据保存成功！";
+        } else {
+            $error = "数据保存失败！";
+        }
+    } catch (Exception $e) {
+        $error = "保存时发生错误：" . $e->getMessage();
+    }
+}
+
+// 读取当前数据
+$currentData = [];
+if (file_exists($jsonFile)) {
+    $content = file_get_contents($jsonFile);
+    $currentData = json_decode($content, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        $currentData = [];
+    }
+}
+
+// 初始化默认值
+$companyOverview = $currentData['companyOverview'] ?? [
+    'companyName' => 'KUNZZ HOLDINGS SDN BHD',
+    'planTitle' => 'Corporate Strategic Plan',
+    'strategyStartYear' => date('Y'),
+    'strategyEndYear' => date('Y') + 5,
+    'ultimateGoal' => ''
+];
+
+$orgStructure = $currentData['organizationStructure'] ?? [
+    'ceo' => ['name' => '', 'title' => 'CEO'],
+    'pa' => ['name' => '', 'title' => 'PA'],
+    'cLevel' => []
+];
+
+$internalOrg = $currentData['internalOrganization'] ?? [
+    'departments' => []
+];
+?>
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业蓝图管理 - KUNZZ HOLDINGS</title>
+    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
+            background: #faf7f2;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #ff5c00;
+            color: white;
+            padding: clamp(20px, 2.08vw, 30px);
+            text-align: left;
+        }
+        
+        .header h1 {
+            font-size: clamp(24px, 2.5vw, 36px);
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: clamp(14px, 1.25vw, 16px);
+        }
+        
+        .content {
+            padding: clamp(20px, 2.08vw, 30px);
+        }
+        
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: clamp(20px, 2.08vw, 30px);
+            margin-bottom: clamp(20px, 2.08vw, 30px);
+            border-left: 5px solid #ff5c00;
+        }
+        
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: clamp(20px, 2.08vw, 24px);
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input[type="text"]:focus,
+        .form-group input[type="number"]:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #ff5c00;
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .sub-section {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .sub-section h3 {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .btn {
+            background: #ff5c00;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #e54a00;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .actions {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e5e7eb;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .remove-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        .remove-btn:hover {
+            background: #dc2626;
+        }
+        
+        .add-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .add-btn:hover {
+            background: #059669;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>企业蓝图管理</h1>
+            <p>编辑企业蓝图数据和咨询信息</p>
+        </div>
+        
+        <div class="content">
+            <?php if ($success): ?>
+                <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
+            <?php endif; ?>
+            
+            <?php if ($error): ?>
+                <div class="alert alert-error"><?php echo htmlspecialchars($error); ?></div>
+            <?php endif; ?>
+            
+            <form method="POST" action="">
+                <!-- 公司概述 -->
+                <div class="section">
+                    <h2>公司概述</h2>
+                    <div class="form-group">
+                        <label>公司名称 *</label>
+                        <input type="text" name="companyName" value="<?php echo htmlspecialchars($companyOverview['companyName'] ?? ''); ?>" required>
+                    </div>
+                    <div class="form-group">
+                        <label>计划标题</label>
+                        <input type="text" name="planTitle" value="<?php echo htmlspecialchars($companyOverview['planTitle'] ?? ''); ?>">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>战略开始年份</label>
+                            <input type="number" name="strategyStartYear" value="<?php echo htmlspecialchars($companyOverview['strategyStartYear'] ?? date('Y')); ?>">
+                        </div>
+                        <div class="form-group">
+                            <label>战略结束年份</label>
+                            <input type="number" name="strategyEndYear" value="<?php echo htmlspecialchars($companyOverview['strategyEndYear'] ?? date('Y') + 5); ?>">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>终极目标</label>
+                        <textarea name="ultimateGoal"><?php echo htmlspecialchars($companyOverview['ultimateGoal'] ?? ''); ?></textarea>
+                    </div>
+                </div>
+                
+                <!-- 高层组织架构 -->
+                <div class="section">
+                    <h2>高层组织架构</h2>
+                    
+                    <div class="sub-section">
+                        <h3>CEO</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>姓名</label>
+                                <input type="text" name="ceo_name" value="<?php echo htmlspecialchars($orgStructure['ceo']['name'] ?? ''); ?>">
+                            </div>
+                            <div class="form-group">
+                                <label>职位</label>
+                                <input type="text" name="ceo_title" value="<?php echo htmlspecialchars($orgStructure['ceo']['title'] ?? 'CEO'); ?>">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="sub-section">
+                        <h3>PA (个人助理)</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>姓名</label>
+                                <input type="text" name="pa_name" value="<?php echo htmlspecialchars($orgStructure['pa']['name'] ?? ''); ?>">
+                            </div>
+                            <div class="form-group">
+                                <label>职位</label>
+                                <input type="text" name="pa_title" value="<?php echo htmlspecialchars($orgStructure['pa']['title'] ?? 'PA'); ?>">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="sub-section">
+                        <h3>C-Level 高管</h3>
+                        <div id="clevel-container">
+                            <?php 
+                            $clevelList = $orgStructure['cLevel'] ?? [];
+                            if (empty($clevelList)) {
+                                $clevelList = [['name' => '', 'title' => '', 'reportsTo' => 'CEO', 'fullTitle' => '']];
+                            }
+                            foreach ($clevelList as $index => $clevel): ?>
+                                <div class="clevel-item" style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>姓名</label>
+                                            <input type="text" name="clevel[<?php echo $index; ?>][name]" value="<?php echo htmlspecialchars($clevel['name'] ?? ''); ?>">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>职位</label>
+                                            <input type="text" name="clevel[<?php echo $index; ?>][title]" value="<?php echo htmlspecialchars($clevel['title'] ?? ''); ?>">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>完整职位名称</label>
+                                        <input type="text" name="clevel[<?php echo $index; ?>][fullTitle]" value="<?php echo htmlspecialchars($clevel['fullTitle'] ?? ''); ?>">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>汇报对象</label>
+                                        <input type="text" name="clevel[<?php echo $index; ?>][reportsTo]" value="<?php echo htmlspecialchars($clevel['reportsTo'] ?? 'CEO'); ?>">
+                                    </div>
+                                    <button type="button" class="remove-btn" onclick="removeCLevel(this)">删除</button>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button type="button" class="add-btn" onclick="addCLevel()">添加 C-Level 高管</button>
+                    </div>
+                </div>
+                
+                <!-- 内部组织架构 -->
+                <div class="section">
+                    <h2>内部组织架构</h2>
+                    <div id="departments-container">
+                        <?php 
+                        $departments = $internalOrg['departments'] ?? [];
+                        if (empty($departments)) {
+                            $departments = [['name' => '', 'positions' => [['title' => '', 'name' => '']]]];
+                        }
+                        foreach ($departments as $deptIndex => $dept): ?>
+                            <div class="department-item" style="margin-bottom: 20px; padding: 20px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+                                <div class="form-group">
+                                    <label>部门名称 *</label>
+                                    <input type="text" name="departments[<?php echo $deptIndex; ?>][name]" value="<?php echo htmlspecialchars($dept['name'] ?? ''); ?>" required>
+                                </div>
+                                
+                                <div class="positions-container">
+                                    <h3 style="font-size: 14px; margin-bottom: 10px; color: #666;">职位列表</h3>
+                                    <?php 
+                                    $positions = $dept['positions'] ?? [];
+                                    if (empty($positions)) {
+                                        $positions = [['title' => '', 'name' => '']];
+                                    }
+                                    foreach ($positions as $posIndex => $pos): ?>
+                                        <div class="position-item" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-bottom: 10px; align-items: end;">
+                                            <div class="form-group" style="margin-bottom: 0;">
+                                                <label>职位</label>
+                                                <input type="text" name="departments[<?php echo $deptIndex; ?>][positions][<?php echo $posIndex; ?>][title]" value="<?php echo htmlspecialchars($pos['title'] ?? ''); ?>" placeholder="职位名称">
+                                            </div>
+                                            <div class="form-group" style="margin-bottom: 0;">
+                                                <label>姓名</label>
+                                                <input type="text" name="departments[<?php echo $deptIndex; ?>][positions][<?php echo $posIndex; ?>][name]" value="<?php echo htmlspecialchars($pos['name'] ?? ''); ?>" placeholder="人员姓名">
+                                            </div>
+                                            <button type="button" class="remove-btn" onclick="removePosition(this)">删除</button>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <button type="button" class="add-btn" onclick="addPosition(this)">添加职位</button>
+                                <button type="button" class="remove-btn" onclick="removeDepartment(this)" style="margin-left: 10px;">删除部门</button>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <button type="button" class="add-btn" onclick="addDepartment()">添加部门</button>
+                </div>
+                
+                <div class="actions">
+                    <button type="submit" class="btn">保存更改</button>
+                    <a href="corporate_blueprint.php" class="btn btn-secondary">返回查看</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        let clevelIndex = <?php echo count($orgStructure['cLevel'] ?? []); ?>;
+        let deptIndex = <?php echo count($internalOrg['departments'] ?? []); ?>;
+        
+        function addCLevel() {
+            const container = document.getElementById('clevel-container');
+            const html = `
+                <div class="clevel-item" style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>姓名</label>
+                            <input type="text" name="clevel[${clevelIndex}][name]" value="">
+                        </div>
+                        <div class="form-group">
+                            <label>职位</label>
+                            <input type="text" name="clevel[${clevelIndex}][title]" value="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>完整职位名称</label>
+                        <input type="text" name="clevel[${clevelIndex}][fullTitle]" value="">
+                    </div>
+                    <div class="form-group">
+                        <label>汇报对象</label>
+                        <input type="text" name="clevel[${clevelIndex}][reportsTo]" value="CEO">
+                    </div>
+                    <button type="button" class="remove-btn" onclick="removeCLevel(this)">删除</button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            clevelIndex++;
+        }
+        
+        function removeCLevel(btn) {
+            if (confirm('确定要删除这个C-Level高管吗？')) {
+                btn.closest('.clevel-item').remove();
+            }
+        }
+        
+        function addDepartment() {
+            const container = document.getElementById('departments-container');
+            const html = `
+                <div class="department-item" style="margin-bottom: 20px; padding: 20px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+                    <div class="form-group">
+                        <label>部门名称 *</label>
+                        <input type="text" name="departments[${deptIndex}][name]" value="" required>
+                    </div>
+                    <div class="positions-container">
+                        <h3 style="font-size: 14px; margin-bottom: 10px; color: #666;">职位列表</h3>
+                        <div class="position-item" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-bottom: 10px; align-items: end;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label>职位</label>
+                                <input type="text" name="departments[${deptIndex}][positions][0][title]" value="" placeholder="职位名称">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label>姓名</label>
+                                <input type="text" name="departments[${deptIndex}][positions][0][name]" value="" placeholder="人员姓名">
+                            </div>
+                            <button type="button" class="remove-btn" onclick="removePosition(this)">删除</button>
+                        </div>
+                    </div>
+                    <button type="button" class="add-btn" onclick="addPosition(this)">添加职位</button>
+                    <button type="button" class="remove-btn" onclick="removeDepartment(this)" style="margin-left: 10px;">删除部门</button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            deptIndex++;
+        }
+        
+        function removeDepartment(btn) {
+            if (confirm('确定要删除这个部门吗？所有职位也将被删除。')) {
+                btn.closest('.department-item').remove();
+            }
+        }
+        
+        function addPosition(btn) {
+            const departmentItem = btn.closest('.department-item');
+            const deptIndexAttr = departmentItem.querySelector('input[name*="[name]"]').name.match(/departments\[(\d+)\]/)[1];
+            const positionsContainer = departmentItem.querySelector('.positions-container');
+            const existingPositions = positionsContainer.querySelectorAll('.position-item');
+            const posIndex = existingPositions.length;
+            
+            const html = `
+                <div class="position-item" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-bottom: 10px; align-items: end;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>职位</label>
+                        <input type="text" name="departments[${deptIndexAttr}][positions][${posIndex}][title]" value="" placeholder="职位名称">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>姓名</label>
+                        <input type="text" name="departments[${deptIndexAttr}][positions][${posIndex}][name]" value="" placeholder="人员姓名">
+                    </div>
+                    <button type="button" class="remove-btn" onclick="removePosition(this)">删除</button>
+                </div>
+            `;
+            positionsContainer.querySelector('h3').insertAdjacentHTML('afterend', html);
+        }
+        
+        function removePosition(btn) {
+            if (confirm('确定要删除这个职位吗？')) {
+                btn.closest('.position-item').remove();
+            }
+        }
+    </script>
+</body>
+</html>
+
