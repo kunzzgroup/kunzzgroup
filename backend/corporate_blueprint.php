@@ -2799,7 +2799,7 @@ if (file_exists($jsonFile)) {
             min-height: 600px;
             max-height: 800px;
             background-image: none !important;
-            border: 2px solid #e5e7eb;
+            border: 2px solid #f7931e;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
         
