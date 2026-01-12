@@ -4271,8 +4271,8 @@ if (file_exists($jsonFile)) {
                 'data': orgData,
                 'nodeContent': 'title',
                 'nodeId': 'id',
-                'pan': true,
-                'zoom': true,
+                'pan': false,
+                'zoom': false,
                 'toggleSiblingsResp': true,
                 'createNode': function($node, data) {
                     // 自定义节点样式
