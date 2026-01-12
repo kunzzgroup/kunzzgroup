@@ -2909,14 +2909,13 @@ if (file_exists($jsonFile)) {
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             transition: all 0.3s ease;
             width: auto;
-            min-width: clamp(160px, 16.67vw, 200px);
+            min-width: clamp(120px, 12.5vw, 140px);
             text-align: center;
             overflow: hidden;
-            transform: scale(1.2);
         }
         
         #orgchart-container .node:hover {
-            transform: scale(1.25) translateY(-3px);
+            transform: translateY(-3px);
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
         }
         
@@ -2925,8 +2924,8 @@ if (file_exists($jsonFile)) {
             background: #ff5c00 !important;
             color: #ffffff !important;
             font-weight: 700;
-            padding: clamp(16px, 1.67vw, 20px) clamp(20px, 2.08vw, 24px);
-            font-size: clamp(20px, 2.08vw, 22px);
+            padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 20px);
+            font-size: clamp(16px, 1.67vw, 18px);
             line-height: 1.3;
             margin: 0;
             border-radius: 12px 12px 0 0;
@@ -2936,8 +2935,8 @@ if (file_exists($jsonFile)) {
         .orgchart-node-content {
             background: #ffffff !important;
             color: #000000 !important;
-            font-size: clamp(16px, 1.67vw, 18px);
-            padding: clamp(14px, 1.46vw, 18px) clamp(20px, 2.08vw, 24px);
+            font-size: clamp(13px, 1.35vw, 14px);
+            padding: clamp(10px, 1.04vw, 14px) clamp(16px, 1.67vw, 20px);
             line-height: 1.4;
             margin: 0;
             border-radius: 0 0 12px 12px;
