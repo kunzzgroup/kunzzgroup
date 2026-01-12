@@ -294,24 +294,10 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+            background: #faf7f2;
             min-height: 100vh;
             padding: 30px 20px;
             position: relative;
-        }
-        
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(255, 92, 0, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(0, 0, 0, 0.02) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 0;
         }
         
         /* 适配 sidebar 的样式 */
