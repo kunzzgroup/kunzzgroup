@@ -2317,66 +2317,13 @@ if (file_exists($jsonFile)) {
         }
 
         /* 内部组织架构图 - 垂直列布局 */
-        .internal-org-workspace {
-            background: rgba(255, 255, 255, 0.4);
-            backdrop-filter: blur(12px);
-            border-radius: 48px;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-            padding: clamp(32px, 3.33vw, 48px);
-            overflow-x: auto;
-            min-height: 600px;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        .internal-org-title-overlay {
-            position: absolute;
-            top: clamp(32px, 3.33vw, 48px);
-            left: clamp(32px, 3.33vw, 48px);
-            z-index: 10;
-        }
-
-        .internal-org-title-badge {
-            color: #ff5c00;
-            font-weight: 800;
-            font-size: clamp(10px, 1.04vw, 12px);
-            text-transform: uppercase;
-            letter-spacing: 0.4em;
-            margin-bottom: 6px;
-        }
-
-        .internal-org-title-main {
-            font-size: clamp(24px, 2.5vw, 36px);
-            font-weight: 800;
-            color: #0f172a;
-            letter-spacing: -0.02em;
-        }
-
-        .internal-org-bg-text {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-            user-select: none;
-            opacity: 0.03;
-            z-index: 0;
-        }
-
-        .internal-org-bg-text img {
-            width: clamp(300px, 31.25vw, 800px);
-            height: clamp(300px, 31.25vw, 800px);
-            object-fit: contain;
-        }
-
         .internal-org-container {
             position: relative;
             z-index: 1;
             width: 100%;
-            padding: clamp(80px, 8.33vw, 120px) clamp(40px, 4.17vw, 60px) clamp(40px, 4.17vw, 60px);
+            padding: 0;
+            overflow: visible;
+            background-image: none !important;
         }
 
         .internal-org-columns {
@@ -2435,9 +2382,10 @@ if (file_exists($jsonFile)) {
         }
 
         .internal-org-position-card {
-            background: #ff5c00;
-            border-radius: clamp(8px, 0.83vw, 12px);
-            padding: clamp(12px, 1.25vw, 16px) clamp(10px, 1.04vw, 14px);
+            background: transparent !important;
+            border: none !important;
+            border-radius: 12px;
+            padding: 0;
             width: 100%;
             max-width: clamp(120px, 12.5vw, 160px);
             display: flex;
@@ -2448,34 +2396,45 @@ if (file_exists($jsonFile)) {
             position: relative;
             z-index: 2;
             margin-bottom: clamp(8px, 0.83vw, 12px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
         }
-
+        
+        /* 移除hover效果 */
         .internal-org-position-card:hover {
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 4px 16px rgba(255, 92, 0, 0.3);
+            transform: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
 
         .internal-org-position-title {
-            font-size: clamp(10px, 1.04vw, 14px);
+            background: #ff5c00 !important;
+            color: #ffffff !important;
             font-weight: 700;
-            color: #ffffff;
-            margin-bottom: clamp(6px, 0.63vw, 8px);
+            padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 20px);
+            font-size: clamp(13px, 1.35vw, 14px);
+            margin: 0;
+            border-radius: 12px 12px 0 0;
             line-height: 1.3;
             letter-spacing: 0.02em;
+            width: 100%;
         }
 
         .internal-org-position-name {
-            font-size: clamp(9px, 0.94vw, 12px);
+            background: #ffffff !important;
+            color: #000000 !important;
+            font-size: clamp(12px, 1.25vw, 14px);
             font-weight: 600;
-            color: #ffffff;
+            padding: clamp(10px, 1.04vw, 14px) clamp(16px, 1.67vw, 20px);
             line-height: 1.4;
             word-break: break-word;
+            margin: 0;
+            border-radius: 0 0 12px 12px;
+            border-top: 1px solid #e5e7eb;
+            width: 100%;
         }
 
         .internal-org-position-empty {
-            color: rgba(255, 255, 255, 0.7);
+            color: #6b7280;
             font-style: italic;
         }
 
@@ -3783,25 +3742,40 @@ if (file_exists($jsonFile)) {
                     ];
                 }
                 
-                $internalOrgChartData = convertInternalOrgToOrgChartFormat($internalOrgData);
-                if ($internalOrgChartData):
+                $departments = $internalOrgData['departments'] ?? [];
+                if (!empty($departments)):
                 ?>
 
                 <!-- 内部组织架构图 -->
                 <div class="section">
                     <div class="orgchart-container-wrapper">
                         <h1 class="orgchart-title-wrapper">内部组织架构图</h1>
-                        <div id="internal-orgchart-container" style="display: flex; flex-direction: column; gap: 60px; width: 100%;">
-                            <?php if (!empty($internalOrgChartData)): ?>
-                                <?php foreach ($internalOrgChartData as $deptIndex => $deptTree): ?>
-                                    <div class="internal-dept-chart-wrapper">
-                                        <h2 class="internal-dept-title"><?php echo htmlspecialchars($deptTree['departmentName'] ?? ''); ?></h2>
-                                        <div class="internal-dept-orgchart" data-dept-index="<?php echo $deptIndex; ?>" style="width: 100%; min-height: 300px;"></div>
+                        <div class="internal-org-container">
+                            <?php
+                            $departments = $internalOrgData['departments'] ?? [];
+                            ?>
+                            <div class="internal-org-columns">
+                                <?php foreach ($departments as $dept): ?>
+                                    <div class="internal-org-column">
+                                        <div class="internal-org-column-title"><?php echo htmlspecialchars($dept['name']); ?></div>
+                                        <div class="internal-org-column-cards">
+                                            <?php 
+                                            $positions = $dept['positions'] ?? [];
+                                            foreach ($positions as $pos): 
+                                                $posTitle = $pos['title'] ?? '';
+                                                $posName = $pos['name'] ?? '';
+                                            ?>
+                                                <div class="internal-org-position-card">
+                                                    <div class="internal-org-position-title"><?php echo htmlspecialchars($posTitle); ?></div>
+                                                    <div class="internal-org-position-name <?php echo empty($posName) ? 'internal-org-position-empty' : ''; ?>">
+                                                        <?php echo htmlspecialchars($posName ?: '—'); ?>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
                                     </div>
                                 <?php endforeach; ?>
-                            <?php else: ?>
-                                <p style="text-align: center; color: #6b7280; padding: 40px;">无法加载内部组织架构数据</p>
-                            <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -4460,72 +4434,6 @@ if (file_exists($jsonFile)) {
     </script>
     <?php endif; ?>
     
-    <!-- 内部组织架构图 OrgChart.js 初始化脚本 -->
-    <?php if (!empty($internalOrgChartData)): ?>
-    <script>
-        $(document).ready(function() {
-            // 内部组织架构数据（每个部门是一个独立的树结构数组）
-            const internalOrgDataArray = <?php echo json_encode($internalOrgChartData, JSON_UNESCAPED_UNICODE); ?>;
-            
-            if (!internalOrgDataArray || internalOrgDataArray.length === 0) {
-                console.error('内部组织架构数据为空');
-                return;
-            }
-            
-            console.log('内部组织架构数据:', internalOrgDataArray);
-            
-            // 为每个部门初始化独立的组织架构图
-            internalOrgDataArray.forEach(function(deptTree, deptIndex) {
-                const containerSelector = '.internal-dept-orgchart[data-dept-index="' + deptIndex + '"]';
-                const $container = $(containerSelector);
-                
-                if ($container.length === 0) {
-                    console.warn('找不到容器:', containerSelector);
-                    return;
-                }
-                
-                // 初始化该部门的组织架构图
-                $container.orgchart({
-                    'data': deptTree,
-                    'nodeContent': 'title',
-                    'nodeId': 'id',
-                    'pan': false,
-                    'zoom': false,
-                    'toggleSiblingsResp': true,
-                    'createNode': function($node, data) {
-                        // 自定义节点样式
-                        const level = data.level || '';
-                        $node.addClass('level-' + level);
-                        
-                        // 自定义节点内容 - 显示职位和名字
-                        const title = data.title || '—';
-                        const name = data.name || '—';
-                        
-                        $node.html(
-                            '<div class="orgchart-node-title">' + title + '</div>' +
-                            '<div class="orgchart-node-content">' + name + '</div>'
-                        );
-                    },
-                    'draggable': false,
-                    'direction': 't2b'
-                });
-                
-                // 居中显示该部门的组织架构图
-                setTimeout(function() {
-                    const orgchartEl = $container.find('.orgchart');
-                    if (orgchartEl.length) {
-                        const containerWidth = $container.width();
-                        const chartWidth = orgchartEl.outerWidth();
-                        if (chartWidth < containerWidth) {
-                            const offsetLeft = (containerWidth - chartWidth) / 2;
-                            orgchartEl.css('margin-left', offsetLeft + 'px');
-                        }
-                    }
-                }, 100 + deptIndex * 50); // 错开时间避免冲突
-            });
-        });
-    </script>
-    <?php endif; ?>
 
 </body>
 </html>
