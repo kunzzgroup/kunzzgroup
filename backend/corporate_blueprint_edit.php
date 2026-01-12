@@ -308,6 +308,22 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
             overflow: hidden;
         }
         
+        /* 适配 sidebar 的样式 */
+        body.has-sidebar {
+            margin-left: clamp(140px, 13.02vw, 250px);
+            transition: margin-left 0.3s ease;
+        }
+        
+        body.sidebar-collapsed {
+            margin-left: clamp(50px, 3.65vw, 70px);
+        }
+        
+        @media (max-width: 768px) {
+            body.has-sidebar {
+                margin-left: 0;
+            }
+        }
+        
         .header {
             background: #ff5c00;
             color: white;
@@ -508,7 +524,8 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
         }
     </style>
 </head>
-<body>
+<body class="has-sidebar">
+    <?php include 'sidebar.php'; ?>
     <div class="container">
         <div class="header">
             <h1>企业蓝图管理</h1>
