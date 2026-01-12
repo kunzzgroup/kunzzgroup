@@ -294,18 +294,24 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
-            background: #faf7f2;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 30px 20px;
+            position: relative;
         }
         
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 92, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
         }
         
         /* 适配 sidebar 的样式 */
@@ -322,103 +328,187 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
             body.has-sidebar {
                 margin-left: 0;
             }
+            body {
+                padding: 15px 10px;
+            }
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
         
         .header {
-            background: #ff5c00;
+            background: linear-gradient(135deg, #ff5c00 0%, #ff7a2e 100%);
             color: white;
-            padding: clamp(20px, 2.08vw, 30px);
-            text-align: left;
+            padding: clamp(30px, 3vw, 50px);
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 10px 40px rgba(255, 92, 0, 0.3);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            filter: blur(60px);
         }
         
         .header h1 {
-            font-size: clamp(24px, 2.5vw, 36px);
-            margin-bottom: 8px;
+            font-size: clamp(28px, 3vw, 42px);
+            margin-bottom: 10px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
         
         .header p {
-            opacity: 0.9;
-            font-size: clamp(14px, 1.25vw, 16px);
+            opacity: 0.95;
+            font-size: clamp(14px, 1.5vw, 18px);
+            position: relative;
+            z-index: 1;
         }
         
         .content {
-            padding: clamp(20px, 2.08vw, 30px);
+            padding: 0;
         }
         
         .alert {
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            margin-bottom: 25px;
             font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
         }
         
         .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
         }
         
         .section {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: clamp(20px, 2.08vw, 30px);
-            margin-bottom: clamp(20px, 2.08vw, 30px);
-            border-left: 5px solid #ff5c00;
+            background: white;
+            border-radius: 20px;
+            padding: clamp(30px, 3vw, 40px);
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(180deg, #ff5c00 0%, #ff7a2e 100%);
+        }
+        
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
         }
         
         .section h2 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: clamp(20px, 2.08vw, 24px);
-            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 30px;
+            font-size: clamp(22px, 2.5vw, 28px);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .section h2::before {
+            content: '';
+            width: 4px;
+            height: 28px;
+            background: linear-gradient(180deg, #ff5c00 0%, #ff7a2e 100%);
+            border-radius: 2px;
         }
         
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
         
         .form-group label {
             display: block;
             font-weight: 600;
-            color: #555;
-            margin-bottom: 8px;
+            color: #374151;
+            margin-bottom: 10px;
             font-size: 14px;
+            letter-spacing: 0.3px;
         }
         
         .form-group input[type="text"],
         .form-group input[type="number"],
+        .form-group input[type="date"],
         .form-group textarea {
             width: 100%;
-            padding: 10px 15px;
+            padding: 14px 18px;
             border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: 12px;
+            font-size: 15px;
             font-family: inherit;
-            transition: border-color 0.3s ease;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+            color: #1f2937;
         }
         
         .form-group input[type="text"]:focus,
         .form-group input[type="number"]:focus,
+        .form-group input[type="date"]:focus,
         .form-group textarea:focus {
             outline: none;
             border-color: #ff5c00;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(255, 92, 0, 0.1);
+            transform: translateY(-2px);
         }
         
         .form-group textarea {
-            min-height: 100px;
+            min-height: 120px;
             resize: vertical;
+            line-height: 1.6;
         }
         
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 20px;
         }
         
         @media (max-width: 768px) {
@@ -428,99 +518,278 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
         }
         
         .sub-section {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border: 1px solid #e5e7eb;
+            background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .sub-section:hover {
+            border-color: #ff5c00;
+            box-shadow: 0 8px 24px rgba(255, 92, 0, 0.1);
         }
         
         .sub-section h3 {
+            font-size: 18px;
+            color: #1f2937;
+            margin-bottom: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sub-section h3::before {
+            content: '▸';
+            color: #ff5c00;
             font-size: 16px;
-            color: #666;
-            margin-bottom: 15px;
-            font-weight: 600;
         }
         
         .btn {
-            background: #ff5c00;
+            background: linear-gradient(135deg, #ff5c00 0%, #ff7a2e 100%);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s ease;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 92, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
         }
         
         .btn:hover {
-            background: #e54a00;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 92, 0, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
         }
         
         .btn-secondary {
-            background: #6b7280;
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
         }
         
         .btn-secondary:hover {
-            background: #4b5563;
+            box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
         }
         
         .btn-danger {
-            background: #ef4444;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
         }
         
         .btn-danger:hover {
-            background: #dc2626;
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
         }
         
         .btn-small {
-            padding: 6px 12px;
-            font-size: 12px;
+            padding: 8px 16px;
+            font-size: 13px;
         }
         
         .btn-group {
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 12px;
+            margin-top: 15px;
         }
         
         .actions {
-            margin-top: 30px;
-            padding-top: 20px;
+            margin-top: 40px;
+            padding-top: 30px;
             border-top: 2px solid #e5e7eb;
             display: flex;
             gap: 15px;
+            flex-wrap: wrap;
         }
         
         .remove-btn {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-        
-        .remove-btn:hover {
-            background: #dc2626;
-        }
-        
-        .add-btn {
-            background: #10b981;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
             color: white;
             border: none;
             padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
             cursor: pointer;
-            margin-top: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        }
+        
+        .remove-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+        
+        .add-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .add-btn::before {
+            content: '+';
+            font-size: 20px;
+            font-weight: 300;
         }
         
         .add-btn:hover {
-            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        /* 卡片式项目样式 */
+        .clevel-item,
+        .department-item {
+            background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .clevel-item:hover,
+        .department-item:hover {
+            border-color: #ff5c00;
+            box-shadow: 0 8px 24px rgba(255, 92, 0, 0.15);
+            transform: translateY(-3px);
+        }
+        
+        .position-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: end;
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        
+        .position-item:hover {
+            border-color: #ff5c00;
+            box-shadow: 0 4px 12px rgba(255, 92, 0, 0.1);
+        }
+        
+        .positions-container h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #374151;
+            font-weight: 600;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        /* 时间线、文化、价值观等项目的样式 */
+        .timeline-item,
+        .culture-item,
+        .values-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: end;
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        
+        .timeline-item {
+            grid-template-columns: 150px 1fr auto;
+        }
+        
+        .timeline-item:hover,
+        .culture-item:hover,
+        .values-item:hover {
+            border-color: #ff5c00;
+            box-shadow: 0 4px 12px rgba(255, 92, 0, 0.1);
+        }
+        
+        .culture-explanation-item,
+        .values-explanation-item {
+            margin-bottom: 20px;
+            padding: 24px;
+            background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+            border-radius: 16px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        
+        .culture-explanation-item:hover,
+        .values-explanation-item:hover {
+            border-color: #ff5c00;
+            box-shadow: 0 8px 24px rgba(255, 92, 0, 0.15);
+        }
+        
+        .year-objectives {
+            margin-bottom: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, #ffffff 0%, #fff5f0 100%);
+            border-radius: 20px;
+            border: 2px solid #ff5c00;
+            box-shadow: 0 8px 24px rgba(255, 92, 0, 0.2);
+        }
+        
+        .year-objectives h3 {
+            margin-bottom: 20px;
+            color: #ff5c00;
+            font-size: 22px;
+            font-weight: 700;
+        }
+        
+        .objective-item {
+            margin-bottom: 20px;
+            padding: 24px;
+            background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+            border-radius: 16px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        
+        .objective-item:hover {
+            border-color: #ff5c00;
+            box-shadow: 0 8px 24px rgba(255, 92, 0, 0.1);
         }
     </style>
 </head>
@@ -610,7 +879,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
                                 $clevelList = [['name' => '', 'title' => '', 'reportsTo' => 'CEO', 'fullTitle' => '']];
                             }
                             foreach ($clevelList as $index => $clevel): ?>
-                                <div class="clevel-item" style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+                                <div class="clevel-item">
                                     <div class="form-row">
                                         <div class="form-group">
                                             <label>姓名</label>
@@ -647,21 +916,21 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
                             $departments = [['name' => '', 'positions' => [['title' => '', 'name' => '']]]];
                         }
                         foreach ($departments as $deptIndex => $dept): ?>
-                            <div class="department-item" style="margin-bottom: 20px; padding: 20px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+                            <div class="department-item">
                                 <div class="form-group">
                                     <label>部门名称 *</label>
                                     <input type="text" name="departments[<?php echo $deptIndex; ?>][name]" value="<?php echo htmlspecialchars($dept['name'] ?? ''); ?>" required>
                                 </div>
                                 
                                 <div class="positions-container">
-                                    <h3 style="font-size: 14px; margin-bottom: 10px; color: #666;">职位列表</h3>
+                                    <h3>职位列表</h3>
                                     <?php 
                                     $positions = $dept['positions'] ?? [];
                                     if (empty($positions)) {
                                         $positions = [['title' => '', 'name' => '']];
                                     }
                                     foreach ($positions as $posIndex => $pos): ?>
-                                        <div class="position-item" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-bottom: 10px; align-items: end;">
+                                        <div class="position-item">
                                             <div class="form-group" style="margin-bottom: 0;">
                                                 <label>职位</label>
                                                 <input type="text" name="departments[<?php echo $deptIndex; ?>][positions][<?php echo $posIndex; ?>][title]" value="<?php echo htmlspecialchars($pos['title'] ?? ''); ?>" placeholder="职位名称">
@@ -697,7 +966,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
         function addCLevel() {
             const container = document.getElementById('clevel-container');
             const html = `
-                <div class="clevel-item" style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+                <div class="clevel-item">
                     <div class="form-row">
                         <div class="form-group">
                             <label>姓名</label>
@@ -732,14 +1001,14 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
         function addDepartment() {
             const container = document.getElementById('departments-container');
             const html = `
-                <div class="department-item" style="margin-bottom: 20px; padding: 20px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+                <div class="department-item">
                     <div class="form-group">
                         <label>部门名称 *</label>
                         <input type="text" name="departments[${deptIndex}][name]" value="" required>
                     </div>
                     <div class="positions-container">
-                        <h3 style="font-size: 14px; margin-bottom: 10px; color: #666;">职位列表</h3>
-                        <div class="position-item" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-bottom: 10px; align-items: end;">
+                        <h3>职位列表</h3>
+                        <div class="position-item">
                             <div class="form-group" style="margin-bottom: 0;">
                                 <label>职位</label>
                                 <input type="text" name="departments[${deptIndex}][positions][0][title]" value="" placeholder="职位名称">
@@ -773,7 +1042,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
             const posIndex = existingPositions.length;
             
             const html = `
-                <div class="position-item" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-bottom: 10px; align-items: end;">
+                <div class="position-item">
                     <div class="form-group" style="margin-bottom: 0;">
                         <label>职位</label>
                         <input type="text" name="departments[${deptIndexAttr}][positions][${posIndex}][title]" value="" placeholder="职位名称">
@@ -799,7 +1068,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
         function addTimeline() {
             const container = document.getElementById('timeline-container');
             const html = `
-                <div class="timeline-item" style="display: grid; grid-template-columns: 150px 1fr auto; gap: 15px; margin-bottom: 15px; align-items: end;">
+                <div class="timeline-item">
                     <div class="form-group" style="margin-bottom: 0;">
                         <label>年份</label>
                         <input type="number" name="timeline[${timelineIndex}][year]" value="" placeholder="2024">
@@ -826,7 +1095,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
         function addCulture() {
             const container = document.getElementById('culture-container');
             const html = `
-                <div class="culture-item" style="display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-bottom: 10px; align-items: end;">
+                <div class="culture-item">
                     <div class="form-group" style="margin-bottom: 0;">
                         <label>文化项</label>
                         <input type="text" name="culture[${cultureIndex}]" value="" placeholder="例如：Innovation">
@@ -849,7 +1118,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
         function addValue() {
             const container = document.getElementById('values-container');
             const html = `
-                <div class="values-item" style="display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-bottom: 10px; align-items: end;">
+                <div class="values-item">
                     <div class="form-group" style="margin-bottom: 0;">
                         <label>价值观</label>
                         <input type="text" name="values[${valuesIndex}]" value="" placeholder="例如：Customer First">
@@ -872,7 +1141,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
         function addCultureExplanation() {
             const container = document.getElementById('culture-explanation-container');
             const html = `
-                <div class="culture-explanation-item" style="margin-bottom: 20px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+                <div class="culture-explanation-item">
                     <div class="form-group">
                         <label>关键词 (Key)</label>
                         <input type="text" name="cultureExplanation[${cultureExplanationIndex}][key]" value="" placeholder="例如：Innovation">
@@ -899,7 +1168,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
         function addValuesExplanation() {
             const container = document.getElementById('values-explanation-container');
             const html = `
-                <div class="values-explanation-item" style="margin-bottom: 20px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+                <div class="values-explanation-item">
                     <div class="form-group">
                         <label>关键词 (Key)</label>
                         <input type="text" name="valuesExplanation[${valuesExplanationIndex}][key]" value="" placeholder="例如：Customer First">
@@ -928,8 +1197,8 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
             
             const container = document.getElementById('strategic-objectives-container');
             const html = `
-                <div class="year-objectives" style="margin-bottom: 30px; padding: 20px; background: white; border-radius: 8px; border: 2px solid #ff5c00;">
-                    <h3 style="margin-bottom: 15px; color: #ff5c00; font-size: 18px;">${year}年</h3>
+                <div class="year-objectives">
+                    <h3>${year}年</h3>
                     <div class="objectives-list" data-year="${year}">
                     </div>
                     <button type="button" class="add-btn" onclick="addObjective('${year}')">添加${year}年目标</button>
@@ -967,7 +1236,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
             const objIndex = objectivesList.querySelectorAll('.objective-item').length;
             
             const html = `
-                <div class="objective-item" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e5e7eb;">
+                <div class="objective-item">
                     <div class="form-row">
                         <div class="form-group">
                             <label>部门</label>
