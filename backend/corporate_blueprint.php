@@ -2821,9 +2821,9 @@ if (file_exists($jsonFile)) {
         .internal-dept-btn {
             background: #ffffff;
             border: 2px solid #e5e7eb;
-            border-radius: clamp(8px, 0.83vw, 12px);
-            padding: clamp(10px, 1.04vw, 14px) clamp(20px, 2.08vw, 28px);
-            font-size: clamp(14px, 1.46vw, 16px);
+            border-radius: clamp(6px, 0.63vw, 8px);
+            padding: clamp(6px, 0.63vw, 8px) clamp(12px, 1.25vw, 16px);
+            font-size: clamp(12px, 1.25vw, 14px);
             font-weight: 600;
             color: #6b7280;
             cursor: pointer;
