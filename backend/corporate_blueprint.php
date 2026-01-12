@@ -2791,7 +2791,7 @@ if (file_exists($jsonFile)) {
 
         /* OrgChart.js 样式 */
         .orgchart-container-wrapper {
-            background: #fff8f0;
+            background: #ffffff;
             border-radius: 12px;
             padding: 40px;
             position: relative;
@@ -2799,6 +2799,8 @@ if (file_exists($jsonFile)) {
             min-height: 600px;
             max-height: 800px;
             background-image: none !important;
+            border: 2px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
         
         /* 背景Logo图片 */
