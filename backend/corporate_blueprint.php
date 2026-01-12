@@ -2789,7 +2789,142 @@ if (file_exists($jsonFile)) {
             }
         }
 
+        /* OrgChart.js 样式 */
+        .orgchart-container-wrapper {
+            background: #fff8f0;
+            border-radius: 12px;
+            padding: 40px;
+            position: relative;
+            overflow-x: auto;
+            min-height: 600px;
+        }
+        
+        /* 背景箭头图案 */
+        .orgchart-container-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(0deg);
+            width: 800px;
+            height: 800px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><path d="M 20 100 L 180 100 M 150 70 L 180 100 L 150 130" stroke="%23ffd4a3" stroke-width="8" fill="none"/></svg>') no-repeat center;
+            background-size: contain;
+            opacity: 0.15;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .orgchart-title-wrapper {
+            position: relative;
+            z-index: 2;
+            font-size: clamp(24px, 2.5vw, 32px);
+            font-weight: 700;
+            color: #ffffff;
+            background: #ff5c00;
+            padding: clamp(16px, 1.67vw, 20px) clamp(30px, 3.13vw, 40px);
+            border-radius: 0 30px 30px 0;
+            display: inline-block;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 12px rgba(255, 92, 0, 0.3);
+        }
+        
+        /* OrgChart 容器 */
+        #orgchart-container {
+            background: transparent;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* 连线颜色 - 黑色 */
+        #orgchart-container svg.edge {
+            stroke: #000000 !important;
+            stroke-width: 2px !important;
+        }
+        
+        #orgchart-container svg path {
+            stroke: #000000 !important;
+            stroke-width: 2px !important;
+        }
+        
+        #orgchart-container .lines .topEdge {
+            border-top-color: #000000 !important;
+            border-top-width: 2px !important;
+        }
+        
+        #orgchart-container .lines .rightEdge {
+            border-right-color: #000000 !important;
+            border-right-width: 2px !important;
+        }
+        
+        #orgchart-container .lines .leftEdge {
+            border-left-color: #000000 !important;
+            border-left-width: 2px !important;
+        }
+        
+        #orgchart-container .lines .bottomEdge {
+            border-bottom-color: #000000 !important;
+            border-bottom-width: 2px !important;
+        }
+        
+        #orgchart-container .lines {
+            border-color: #000000 !important;
+        }
+        
+        #orgchart-container .horizontalEdge {
+            border-color: #000000 !important;
+        }
+        
+        #orgchart-container .verticalEdge {
+            border-color: #000000 !important;
+        }
+        
+        /* 节点样式 - 橙色圆角矩形 */
+        #orgchart-container .node {
+            background: #ff5c00 !important;
+            border: none !important;
+            border-radius: 12px;
+            padding: clamp(16px, 1.67vw, 20px) clamp(20px, 2.08vw, 24px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            width: auto;
+            min-width: clamp(120px, 12.5vw, 140px);
+            text-align: center;
+        }
+        
+        #orgchart-container .node:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+        }
+        
+        /* 所有节点文字颜色 - 白色 */
+        #orgchart-container .node .title,
+        #orgchart-container .node .content,
+        .orgchart-node-title,
+        .orgchart-node-content {
+            color: #ffffff !important;
+            background: transparent !important;
+        }
+        
+        .orgchart-node-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: clamp(16px, 1.67vw, 18px);
+            color: #ffffff;
+            line-height: 1.3;
+        }
+        
+        .orgchart-node-content {
+            font-size: clamp(13px, 1.35vw, 14px);
+            color: #ffffff;
+            line-height: 1.4;
+        }
+
     </style>
+    <!-- 引入 OrgChart.js 库 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/orgchart@2.1.9/dist/css/jquery.orgchart.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/orgchart@2.1.9/dist/js/jquery.orgchart.min.js"></script>
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
@@ -3263,112 +3398,88 @@ if (file_exists($jsonFile)) {
                     </div>
                 </div>
 
-                <!-- Organization Structure - 基于React设计 -->
-                <?php if (!empty($strategyData['organizationStructure'])): ?>
-                <div class="section">
-                    <div class="org-workspace">
-                        <!-- 背景Logo图片 -->
-                        <div class="org-bg-text">
-                            <img src="images/images/logo.png" alt="Logo">
-                        </div>
-
-                        <!-- 标题覆盖层 -->
-                        <div class="org-title-overlay">
-                            <div class="org-title-badge">Internal Framework</div>
-                            <h1 class="org-title-main">高层组织架构图</h1>
-                        </div>
-
-                        <!-- 扁平化网格容器 -->
-                        <div class="org-tree-root-container">
-                        <?php 
-                        $orgStructure = $strategyData['organizationStructure'];
-                        
-                            // 提取CEO信息
-                            $ceoTitle = $orgStructure['ceo']['title'] ?? $orgStructure['ceo']['fullTitle'] ?? 'CEO';
-                            $ceoName  = $orgStructure['ceo']['name'] ?? '';
-
-                            // 提取C-Level信息
-                            $cLevelMembers = !empty($orgStructure['cLevel']) ? $orgStructure['cLevel'] : [];
-
-                            // 提取PA信息
-                            $paTitle = !empty($orgStructure['pa']['title']) ? $orgStructure['pa']['title'] : (!empty($orgStructure['pa']['fullTitle']) ? $orgStructure['pa']['fullTitle'] : 'PA');
-                            $paName  = !empty($orgStructure['pa']['name']) ? $orgStructure['pa']['name'] : '';
-
-                            // 获取职位缩写辅助函数
-                            function getRoleAbbreviation($title) {
-                                // 移除常见前缀
-                                $title = preg_replace('/^(Chief|Senior|Executive|Vice)\s+/i', '', $title);
-                                // 提取大写字母或常见缩写
-                                if (preg_match('/^(CAO|CSO|COO|CHO|CFO|CMO|CTO|CIO|PA)$/i', $title, $matches)) {
-                                    return strtoupper($matches[1]);
+                <!-- Organization Structure - 使用 OrgChart.js -->
+                <?php 
+                // 转换组织架构数据为 OrgChart.js 所需的树形格式
+                function convertToOrgChartFormat($orgStructure) {
+                    // CEO节点（根节点）
+                    if (empty($orgStructure['ceo'])) {
+                        return null;
+                    }
+                    
+                    $ceoTitle = $orgStructure['ceo']['title'] ?? $orgStructure['ceo']['fullTitle'] ?? 'CEO';
+                    $ceoName = $orgStructure['ceo']['name'] ?? '';
+                    
+                    $ceoNode = [
+                        'id' => 'ceo',
+                        'name' => $ceoName ?: '—',
+                        'title' => $ceoTitle,
+                        'level' => 'ceo',
+                        'children' => []
+                    ];
+                    
+                    // C-Level节点作为CEO的子节点
+                    if (!empty($orgStructure['cLevel']) && is_array($orgStructure['cLevel'])) {
+                        foreach ($orgStructure['cLevel'] as $index => $member) {
+                            $memberTitle = $member['title'] ?? $member['fullTitle'] ?? '';
+                            $memberName = $member['name'] ?? '';
+                            
+                            $cLevelNode = [
+                                'id' => 'clevel_' . $index,
+                                'name' => $memberName ?: '—',
+                                'title' => $memberTitle,
+                                'level' => 'clevel',
+                                'children' => []
+                            ];
+                            
+                            // 处理下属
+                            if (!empty($member['subordinates']) && is_array($member['subordinates'])) {
+                                foreach ($member['subordinates'] as $subIndex => $sub) {
+                                    $subTitle = $sub['title'] ?? $sub['fullTitle'] ?? '';
+                                    $subName = $sub['name'] ?? '';
+                                    
+                                    $subNode = [
+                                        'id' => 'sub_' . $index . '_' . $subIndex,
+                                        'name' => $subName ?: '—',
+                                        'title' => $subTitle,
+                                        'level' => 'subordinate'
+                                    ];
+                                    $cLevelNode['children'][] = $subNode;
                                 }
-                                // 提取首字母缩写
-                                $words = preg_split('/\s+/', $title);
-                                if (count($words) > 1) {
-                                    $abbr = '';
-                                    foreach ($words as $word) {
-                                        $abbr .= strtoupper(substr($word, 0, 1));
-                                    }
-                                    return substr($abbr, 0, 3); // 最多3个字母
-                                }
-                                // 如果只有一个词，返回前3个大写字母或全部
-                                return strtoupper(substr($title, 0, 3));
+                            }
+                            
+                            $ceoNode['children'][] = $cLevelNode;
                         }
-                        ?>
+                    }
+                    
+                    // PA节点也作为CEO的子节点
+                    if (!empty($orgStructure['pa'])) {
+                        $paTitle = $orgStructure['pa']['title'] ?? $orgStructure['pa']['fullTitle'] ?? 'PA';
+                        $paName = $orgStructure['pa']['name'] ?? '';
                         
-                            <div class="org-grid-container">
-                                <div class="org-cards-wall">
-                                    <!-- CEO卡片 - 最大，橙色渐变 -->
-                                    <?php if (!empty($ceoName)): ?>
-                                    <div class="org-card org-card-level-ceo">
-                                        <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($ceoTitle)); ?></div>
-                                        <div class="org-card-name"><?php echo htmlspecialchars($ceoName); ?></div>
-                                    </div>
-                                    <?php endif; ?>
-
-                                    <!-- C-Level成员卡片 - 中等，橙色边框 -->
-                                    <?php if (!empty($cLevelMembers)): ?>
-                                        <?php foreach ($cLevelMembers as $member): 
-                                            $memberTitle = $member['title'] ?? $member['fullTitle'] ?? '';
-                                            $memberName  = $member['name'] ?? '';
-                                            
-                                            // 处理subordinates（如果有的话，也显示在网格中）
-                                            $subordinates = !empty($member['subordinates']) && is_array($member['subordinates']) ? $member['subordinates'] : [];
-                                        ?>
-                                            <!-- C-Level成员卡片 -->
-                                            <div class="org-card org-card-level-clevel">
-                                                <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($memberTitle)); ?></div>
-                                                <div class="org-card-name"><?php echo htmlspecialchars($memberName ?: '—'); ?></div>
-                                            </div>
-
-                                            <!-- 如果有下属，也显示在网格中（使用other级别样式） -->
-                                            <?php if (!empty($subordinates)): ?>
-                                                <?php foreach ($subordinates as $sub): 
-                                                    $subTitle = $sub['title'] ?? $sub['fullTitle'] ?? '';
-                                                    $subName  = $sub['name'] ?? '';
-                                                ?>
-                                                    <div class="org-card org-card-level-other">
-                                                        <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($subTitle)); ?></div>
-                                                        <div class="org-card-name"><?php echo htmlspecialchars($subName ?: '—'); ?></div>
-                                                    </div>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-
-                                    <!-- PA卡片 - 标准大小 -->
-                                    <?php if (!empty($paName)): ?>
-                                    <div class="org-card org-card-level-other">
-                                        <div class="org-card-role"><?php echo htmlspecialchars(getRoleAbbreviation($paTitle)); ?></div>
-                                        <div class="org-card-name"><?php echo htmlspecialchars($paName); ?></div>
-                                    </div>
-                                        <?php endif; ?>
-                                    </div>
-                            </div>
-                        </div>
+                        $paNode = [
+                            'id' => 'pa',
+                            'name' => $paName ?: '—',
+                            'title' => $paTitle,
+                            'level' => 'pa'
+                        ];
+                        $ceoNode['children'][] = $paNode;
+                    }
+                    
+                    return $ceoNode;
+                }
+                
+                $orgChartData = null;
+                if (!empty($strategyData['organizationStructure'])): 
+                    $orgChartData = convertToOrgChartFormat($strategyData['organizationStructure']);
+                ?>
+                <div class="section">
+                    <div class="orgchart-container-wrapper">
+                        <h1 class="orgchart-title-wrapper">高层组织架构图</h1>
+                        <div id="orgchart-container" style="width: 100%; min-height: 600px;"></div>
                     </div>
-                                    </div>
-                                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
 
                 <!-- 内部组织架构图 -->
                 <div class="section">
@@ -4139,6 +4250,48 @@ if (file_exists($jsonFile)) {
 
         });
     </script>
+
+    <!-- OrgChart.js 初始化脚本 -->
+    <?php if (!empty($orgChartData)): ?>
+    <script>
+        $(document).ready(function() {
+            // 组织架构数据（已经是树形结构）
+            const orgData = <?php echo json_encode($orgChartData, JSON_UNESCAPED_UNICODE); ?>;
+            
+            if (!orgData) {
+                console.error('组织架构数据为空');
+                $('#orgchart-container').html('<p style="text-align: center; color: #6b7280; padding: 40px;">无法加载组织架构数据</p>');
+                return;
+            }
+            
+            console.log('组织架构数据:', orgData);
+            
+            // 初始化组织架构图 - OrgChart.js 使用树形结构
+            $('#orgchart-container').orgchart({
+                'data': orgData,
+                'nodeContent': 'title',
+                'nodeId': 'id',
+                'pan': true,
+                'zoom': true,
+                'toggleSiblingsResp': true,
+                'createNode': function($node, data) {
+                    // 自定义节点样式
+                    const level = data.level || '';
+                    $node.addClass('level-' + level);
+                    
+                    // 自定义节点内容 - 显示职位和名字
+                    const title = data.title || '—';
+                    const name = data.name || '—';
+                    
+                    $node.html(
+                        '<div class="orgchart-node-title">' + title + '</div>' +
+                        '<div class="orgchart-node-content">' + name + '</div>'
+                    );
+                }
+            });
+        });
+    </script>
+    <?php endif; ?>
 
 </body>
 </html>
