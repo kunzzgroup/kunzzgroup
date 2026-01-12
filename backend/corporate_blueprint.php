@@ -2832,7 +2832,7 @@ if (file_exists($jsonFile)) {
             color: #ffffff;
             background: #ff5c00;
             padding: clamp(16px, 1.67vw, 20px) clamp(30px, 3.13vw, 40px);
-            border-radius: 0 30px 30px 0;
+            border-radius: 30px;
             display: inline-block;
             margin-bottom: 40px;
             box-shadow: 0 4px 12px rgba(255, 92, 0, 0.3);
