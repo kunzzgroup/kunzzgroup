@@ -2804,39 +2804,73 @@ if (file_exists($jsonFile)) {
         
         /* 当包含内部组织架构图时，允许容器滚动 */
         .orgchart-container-wrapper:has(#internal-orgchart-container) {
-            overflow-y: auto;
-            overflow-x: hidden;
-            max-height: 1200px;
+            overflow: hidden;
+            max-height: none;
         }
         
-        /* 内部组织架构图容器 - 允许垂直滚动 */
+        /* 部门切换按钮组 */
+        .internal-dept-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: clamp(12px, 1.25vw, 16px);
+            margin-bottom: clamp(30px, 3.13vw, 40px);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .internal-dept-btn {
+            background: #ffffff;
+            border: 2px solid #e5e7eb;
+            border-radius: clamp(8px, 0.83vw, 12px);
+            padding: clamp(10px, 1.04vw, 14px) clamp(20px, 2.08vw, 28px);
+            font-size: clamp(14px, 1.46vw, 16px);
+            font-weight: 600;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .internal-dept-btn:hover {
+            border-color: #ff5c00;
+            color: #ff5c00;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 92, 0, 0.2);
+        }
+        
+        .internal-dept-btn.active {
+            background: #ff5c00;
+            border-color: #ff5c00;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(255, 92, 0, 0.3);
+        }
+        
+        /* 内部组织架构图容器 */
         #internal-orgchart-container {
             position: relative;
             z-index: 1;
             overflow: visible;
             max-height: none;
-            min-height: auto;
+            min-height: 600px;
         }
         
         /* 内部部门组织架构图样式 */
         .internal-dept-chart-wrapper {
-            position: relative;
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            margin-bottom: 60px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            pointer-events: none;
         }
         
-        .internal-dept-chart-wrapper:last-child {
-            margin-bottom: 0;
-        }
-        
-        .internal-dept-title {
-            font-size: clamp(18px, 1.88vw, 24px);
-            font-weight: 800;
-            color: #0f172a;
-            margin-bottom: clamp(20px, 2.08vw, 30px);
-            text-align: center;
-            padding-bottom: clamp(12px, 1.25vw, 16px);
-            border-bottom: 2px solid #e5e7eb;
+        .internal-dept-chart-wrapper.active {
+            position: relative;
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
         }
         
         .internal-dept-orgchart {
@@ -3805,11 +3839,25 @@ if (file_exists($jsonFile)) {
                 <div class="section">
                     <div class="orgchart-container-wrapper">
                         <h1 class="orgchart-title-wrapper">内部组织架构图</h1>
-                        <div id="internal-orgchart-container" style="width: 100%;">
+                        
+                        <!-- 部门切换按钮组 -->
+                        <div class="internal-dept-buttons">
                             <?php foreach ($internalOrgChartData as $deptIndex => $deptTree): ?>
-                                <div class="internal-dept-chart-wrapper">
-                                    <div class="internal-dept-title"><?php echo htmlspecialchars($deptTree['departmentName'] ?? ''); ?></div>
-                                    <div class="internal-dept-orgchart" id="internal-dept-chart-<?php echo $deptIndex; ?>" style="width: 100%; min-height: 400px;"></div>
+                                <button 
+                                    class="internal-dept-btn <?php echo $deptIndex === 0 ? 'active' : ''; ?>" 
+                                    data-dept-index="<?php echo $deptIndex; ?>"
+                                    onclick="switchInternalDept(<?php echo $deptIndex; ?>)"
+                                >
+                                    <?php echo htmlspecialchars($deptTree['departmentName'] ?? ''); ?>
+                                </button>
+                            <?php endforeach; ?>
+                        </div>
+                        
+                        <!-- 组织架构图容器 -->
+                        <div id="internal-orgchart-container" style="width: 100%; min-height: 600px;">
+                            <?php foreach ($internalOrgChartData as $deptIndex => $deptTree): ?>
+                                <div class="internal-dept-chart-wrapper <?php echo $deptIndex === 0 ? 'active' : ''; ?>" data-dept-index="<?php echo $deptIndex; ?>">
+                                    <div class="internal-dept-orgchart" id="internal-dept-chart-<?php echo $deptIndex; ?>" style="width: 100%; min-height: 500px;"></div>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -4473,10 +4521,80 @@ if (file_exists($jsonFile)) {
     <!-- 内部组织架构图 OrgChart.js 初始化脚本 -->
     <?php if (!empty($internalOrgChartData)): ?>
     <script>
-        $(document).ready(function() {
-            // 内部组织架构数据（每个部门作为独立的树形结构）
-            const internalOrgData = <?php echo json_encode($internalOrgChartData, JSON_UNESCAPED_UNICODE); ?>;
+        // 存储所有部门的组织架构数据
+        const internalOrgData = <?php echo json_encode($internalOrgChartData, JSON_UNESCAPED_UNICODE); ?>;
+        const initializedCharts = {}; // 记录已初始化的图表
+        
+        // 切换部门函数
+        function switchInternalDept(deptIndex) {
+            // 更新按钮状态
+            $('.internal-dept-btn').removeClass('active');
+            $('.internal-dept-btn[data-dept-index="' + deptIndex + '"]').addClass('active');
             
+            // 更新图表显示
+            $('.internal-dept-chart-wrapper').removeClass('active');
+            $('.internal-dept-chart-wrapper[data-dept-index="' + deptIndex + '"]').addClass('active');
+            
+            // 如果该部门的图表还未初始化，则初始化它
+            if (!initializedCharts[deptIndex] && internalOrgData[deptIndex]) {
+                initializeDeptChart(deptIndex, internalOrgData[deptIndex]);
+            }
+        }
+        
+        // 初始化部门组织架构图
+        function initializeDeptChart(index, deptTree) {
+            const containerId = '#internal-dept-chart-' + index;
+            const $container = $(containerId);
+            
+            if ($container.length === 0) {
+                console.warn('容器不存在:', containerId);
+                return;
+            }
+            
+            // 初始化该部门的组织架构图
+            $container.orgchart({
+                'data': deptTree,
+                'nodeContent': 'title',
+                'nodeId': 'id',
+                'pan': false,
+                'zoom': false,
+                'toggleSiblingsResp': true,
+                'createNode': function($node, data) {
+                    // 自定义节点样式
+                    const level = data.level || '';
+                    $node.addClass('level-' + level);
+                    
+                    // 自定义节点内容 - 显示职位和名字
+                    const title = data.title || '—';
+                    const name = data.name || '—';
+                    
+                    $node.html(
+                        '<div class="orgchart-node-title">' + title + '</div>' +
+                        '<div class="orgchart-node-content">' + name + '</div>'
+                    );
+                },
+                'draggable': false,
+                'direction': 't2b'
+            });
+            
+            // 标记为已初始化
+            initializedCharts[index] = true;
+            
+            // 居中显示该部门的组织架构图
+            setTimeout(function() {
+                const orgchartEl = $container.find('.orgchart');
+                if (orgchartEl.length) {
+                    const containerWidth = $container.width();
+                    const chartWidth = orgchartEl.outerWidth();
+                    if (chartWidth < containerWidth) {
+                        const offsetLeft = (containerWidth - chartWidth) / 2;
+                        orgchartEl.css('margin-left', offsetLeft + 'px');
+                    }
+                }
+            }, 100);
+        }
+        
+        $(document).ready(function() {
             if (!internalOrgData || internalOrgData.length === 0) {
                 console.error('内部组织架构数据为空');
                 $('#internal-orgchart-container').html('<p style="text-align: center; color: #6b7280; padding: 40px;">无法加载内部组织架构数据</p>');
@@ -4485,55 +4603,10 @@ if (file_exists($jsonFile)) {
             
             console.log('内部组织架构数据:', internalOrgData);
             
-            // 为每个部门初始化独立的组织架构图
-            internalOrgData.forEach(function(deptTree, index) {
-                const containerId = '#internal-dept-chart-' + index;
-                const $container = $(containerId);
-                
-                if ($container.length === 0) {
-                    console.warn('容器不存在:', containerId);
-                    return;
-                }
-                
-                // 初始化该部门的组织架构图
-                $container.orgchart({
-                    'data': deptTree,
-                    'nodeContent': 'title',
-                    'nodeId': 'id',
-                    'pan': false,
-                    'zoom': false,
-                    'toggleSiblingsResp': true,
-                    'createNode': function($node, data) {
-                        // 自定义节点样式
-                        const level = data.level || '';
-                        $node.addClass('level-' + level);
-                        
-                        // 自定义节点内容 - 显示职位和名字
-                        const title = data.title || '—';
-                        const name = data.name || '—';
-                        
-                        $node.html(
-                            '<div class="orgchart-node-title">' + title + '</div>' +
-                            '<div class="orgchart-node-content">' + name + '</div>'
-                        );
-                    },
-                    'draggable': false,
-                    'direction': 't2b'
-                });
-                
-                // 居中显示该部门的组织架构图
-                setTimeout(function() {
-                    const orgchartEl = $container.find('.orgchart');
-                    if (orgchartEl.length) {
-                        const containerWidth = $container.width();
-                        const chartWidth = orgchartEl.outerWidth();
-                        if (chartWidth < containerWidth) {
-                            const offsetLeft = (containerWidth - chartWidth) / 2;
-                            orgchartEl.css('margin-left', offsetLeft + 'px');
-                        }
-                    }
-                }, 100 + (index * 50)); // 错开时间，避免同时执行
-            });
+            // 初始化第一个部门的组织架构图
+            if (internalOrgData.length > 0) {
+                initializeDeptChart(0, internalOrgData[0]);
+            }
         });
     </script>
     <?php endif; ?>
