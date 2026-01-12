@@ -2190,7 +2190,7 @@ if (file_exists($jsonFile)) {
             object-fit: contain;
         }
 
-        /* 瀑布流布局 - 卡片流式布局 */
+        /* 扁平化网格布局 - 联系人墙风格 */
         .org-grid-container {
             position: relative;
             z-index: 1;
@@ -2198,22 +2198,19 @@ if (file_exists($jsonFile)) {
         }
 
         .org-cards-wall {
-            columns: auto;
-            column-width: clamp(180px, 18.75vw, 240px);
-            column-gap: clamp(16px, 1.67vw, 24px);
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(clamp(140px, 14.58vw, 180px), 1fr));
+            gap: clamp(16px, 1.67vw, 24px);
             padding: clamp(20px, 2.08vw, 32px);
             background: #ffffff;
             border-radius: clamp(16px, 1.67vw, 24px);
             border: 1px solid #e2e8f0;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            column-fill: balance;
         }
 
         .org-card {
-            break-inside: avoid;
-            page-break-inside: avoid;
-            margin-bottom: clamp(16px, 1.67vw, 24px);
             background: #ffffff;
+            border: 2px solid #e2e8f0;
             border-radius: clamp(12px, 1.25vw, 16px);
             padding: clamp(16px, 1.67vw, 20px);
             display: flex;
@@ -2224,45 +2221,51 @@ if (file_exists($jsonFile)) {
             transition: all 0.3s ease;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             position: relative;
-            width: 100%;
-            box-sizing: border-box;
         }
 
         .org-card:hover {
             transform: translateY(-4px) scale(1.02);
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-            z-index: 10;
+            border-color: #ff5c00;
         }
 
         /* CEO卡片 - 最大，橙色渐变背景 */
         .org-card-level-ceo {
+            grid-column: span 2;
+            grid-row: span 2;
             background: linear-gradient(135deg, #ff5c00 0%, #ff8c42 100%);
             border: 3px solid #ffffff;
             box-shadow: 0 8px 32px rgba(255, 92, 0, 0.3);
-            min-height: clamp(200px, 20.83vw, 280px);
-            padding: clamp(24px, 2.5vw, 32px);
-        }
-
-        .org-card-level-ceo:hover {
-            box-shadow: 0 12px 40px rgba(255, 92, 0, 0.4);
+            min-height: clamp(180px, 18.75vw, 260px);
         }
 
         .org-card-level-ceo .org-card-role {
             color: #ffffff;
-            font-size: clamp(28px, 2.92vw, 40px);
+            font-size: clamp(24px, 2.5vw, 36px);
         }
 
         .org-card-level-ceo .org-card-name {
             color: #ffffff;
-            font-size: clamp(20px, 2.08vw, 28px);
+            font-size: clamp(18px, 1.88vw, 24px);
         }
 
         /* C-Level卡片 - 中等大小，橙色边框 */
         .org-card-level-clevel {
+            grid-column: span 1;
+            grid-row: span 1;
             border: 2px solid #ff5c00;
             background: #fff5e6;
-            min-height: clamp(140px, 14.58vw, 200px);
-            padding: clamp(18px, 1.88vw, 24px);
+            min-height: clamp(120px, 12.5vw, 160px);
+        }
+
+        .org-card-level-clevel .org-card-role {
+            color: #ff5c00;
+            font-size: clamp(16px, 1.67vw, 22px);
+        }
+
+        .org-card-level-clevel .org-card-name {
+            color: #0f172a;
+            font-size: clamp(14px, 1.46vw, 18px);
         }
 
         .org-card-level-clevel:hover {
@@ -2271,27 +2274,13 @@ if (file_exists($jsonFile)) {
             box-shadow: 0 8px 24px rgba(255, 92, 0, 0.2);
         }
 
-        .org-card-level-clevel .org-card-role {
-            color: #ff5c00;
-            font-size: clamp(18px, 1.88vw, 24px);
-        }
-
-        .org-card-level-clevel .org-card-name {
-            color: #0f172a;
-            font-size: clamp(16px, 1.67vw, 20px);
-        }
-
         /* PA/其他卡片 - 标准大小，灰色边框 */
         .org-card-level-other {
+            grid-column: span 1;
+            grid-row: span 1;
             border: 1px solid #e2e8f0;
             background: #ffffff;
-            min-height: clamp(120px, 12.5vw, 160px);
-            padding: clamp(14px, 1.46vw, 18px);
-        }
-
-        .org-card-level-other:hover {
-            border-color: #ff5c00;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            min-height: clamp(100px, 10.42vw, 140px);
         }
 
         .org-card-level-other .org-card-role {
@@ -2302,6 +2291,11 @@ if (file_exists($jsonFile)) {
         .org-card-level-other .org-card-name {
             color: #475569;
             font-size: clamp(12px, 1.25vw, 16px);
+        }
+
+        .org-card-level-other:hover {
+            border-color: #ff5c00;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
         }
 
         .org-card-role {
@@ -2576,43 +2570,41 @@ if (file_exists($jsonFile)) {
             }
 
             .org-cards-wall {
-                column-width: clamp(140px, 14.58vw, 180px);
-                column-gap: clamp(12px, 1.25vw, 18px);
+                grid-template-columns: repeat(auto-fill, minmax(clamp(120px, 12.5vw, 160px), 1fr));
+                gap: clamp(12px, 1.25vw, 18px);
                 padding: clamp(16px, 1.67vw, 24px);
             }
 
-            .org-card {
-                margin-bottom: clamp(12px, 1.25vw, 18px);
-            }
-
             .org-card-level-ceo {
-                min-height: clamp(160px, 16.67vw, 220px);
-                padding: clamp(20px, 2.08vw, 28px);
+                grid-column: span 2;
+                grid-row: span 1;
+                min-height: clamp(140px, 14.58vw, 200px);
+                padding: clamp(14px, 1.46vw, 18px);
             }
 
             .org-card-level-ceo .org-card-role {
-                font-size: clamp(24px, 2.5vw, 32px);
+                font-size: clamp(20px, 2.08vw, 28px);
             }
 
             .org-card-level-ceo .org-card-name {
-                font-size: clamp(18px, 1.88vw, 24px);
-            }
-
-            .org-card-level-clevel {
-                min-height: clamp(120px, 12.5vw, 160px);
-                padding: clamp(16px, 1.67vw, 20px);
-            }
-
-            .org-card-level-clevel .org-card-role {
                 font-size: clamp(16px, 1.67vw, 20px);
             }
 
-            .org-card-level-clevel .org-card-name {
+            .org-card-level-clevel {
+                min-height: clamp(100px, 10.42vw, 140px);
+                padding: clamp(12px, 1.25vw, 16px);
+            }
+
+            .org-card-level-clevel .org-card-role {
                 font-size: clamp(14px, 1.46vw, 18px);
             }
 
+            .org-card-level-clevel .org-card-name {
+                font-size: clamp(12px, 1.25vw, 16px);
+            }
+
             .org-card-level-other {
-                min-height: clamp(100px, 10.42vw, 140px);
+                min-height: clamp(90px, 9.38vw, 120px);
                 padding: clamp(12px, 1.25vw, 16px);
             }
 
@@ -2632,36 +2624,22 @@ if (file_exists($jsonFile)) {
 
         @media (max-width: 640px) {
             .org-cards-wall {
-                column-width: clamp(120px, 12.5vw, 150px);
-                column-gap: 12px;
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 12px;
                 padding: clamp(12px, 1.25vw, 16px);
-            }
-
-            .org-card {
-                margin-bottom: 12px;
             }
 
             .org-card-level-ceo {
-                min-height: clamp(140px, 14.58vw, 180px);
-                padding: clamp(18px, 1.88vw, 24px);
+                grid-column: span 1;
+                min-height: clamp(120px, 12.5vw, 160px);
             }
 
             .org-card-level-ceo .org-card-role {
-                font-size: clamp(20px, 2.08vw, 28px);
+                font-size: clamp(18px, 1.88vw, 24px);
             }
 
             .org-card-level-ceo .org-card-name {
-                font-size: clamp(16px, 1.67vw, 20px);
-            }
-
-            .org-card-level-clevel {
-                min-height: clamp(110px, 11.46vw, 140px);
-                padding: clamp(14px, 1.46vw, 18px);
-            }
-
-            .org-card-level-other {
-                min-height: clamp(90px, 9.38vw, 120px);
-                padding: clamp(12px, 1.25vw, 16px);
+                font-size: clamp(14px, 1.46vw, 18px);
             }
         }
 
