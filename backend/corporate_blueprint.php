@@ -2800,7 +2800,6 @@ if (file_exists($jsonFile)) {
             max-height: 800px;
             background-image: none !important;
             border: 2px solid #f7931e;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
         
         /* 背景Logo图片 */
