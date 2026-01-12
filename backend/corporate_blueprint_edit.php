@@ -34,6 +34,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!isset($data['internalOrganization'])) {
             $data['internalOrganization'] = ['departments' => []];
         }
+        if (!isset($data['timeline'])) {
+            $data['timeline'] = [];
+        }
+        if (!isset($data['corporateCore'])) {
+            $data['corporateCore'] = ['mission' => '', 'vision' => '', 'culture' => [], 'values' => []];
+        }
+        if (!isset($data['cultureExplanation'])) {
+            $data['cultureExplanation'] = [];
+        }
+        if (!isset($data['valuesExplanation'])) {
+            $data['valuesExplanation'] = [];
+        }
+        if (!isset($data['strategicObjectives'])) {
+            $data['strategicObjectives'] = [];
+        }
         
         // 更新公司概述（只更新表单提交的字段）
         if (isset($_POST['companyName'])) {
@@ -104,6 +119,112 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
+        // 更新时间线
+        if (isset($_POST['timeline']) && is_array($_POST['timeline'])) {
+            $data['timeline'] = [];
+            foreach ($_POST['timeline'] as $timeline) {
+                if (!empty($timeline['year']) || !empty($timeline['goal'])) {
+                    $data['timeline'][] = [
+                        'year' => intval($timeline['year'] ?? 0),
+                        'goal' => $timeline['goal'] ?? ''
+                    ];
+                }
+            }
+            // 按年份排序
+            usort($data['timeline'], function($a, $b) {
+                return $a['year'] <=> $b['year'];
+            });
+        }
+        
+        // 更新企业核心
+        if (isset($_POST['mission'])) {
+            $data['corporateCore']['mission'] = $_POST['mission'] ?? '';
+            $data['corporateCore']['vision'] = $_POST['vision'] ?? '';
+            
+            // 更新文化列表
+            if (isset($_POST['culture']) && is_array($_POST['culture'])) {
+                $data['corporateCore']['culture'] = array_filter($_POST['culture'], function($item) {
+                    return !empty(trim($item));
+                });
+                $data['corporateCore']['culture'] = array_values($data['corporateCore']['culture']);
+            }
+            
+            // 更新价值观列表
+            if (isset($_POST['values']) && is_array($_POST['values'])) {
+                $data['corporateCore']['values'] = array_filter($_POST['values'], function($item) {
+                    return !empty(trim($item));
+                });
+                $data['corporateCore']['values'] = array_values($data['corporateCore']['values']);
+            }
+        }
+        
+        // 更新文化解释
+        if (isset($_POST['cultureExplanation']) && is_array($_POST['cultureExplanation'])) {
+            $data['cultureExplanation'] = [];
+            foreach ($_POST['cultureExplanation'] as $explanation) {
+                if (!empty($explanation['key']) || !empty($explanation['description'])) {
+                    $data['cultureExplanation'][] = [
+                        'key' => $explanation['key'] ?? '',
+                        'description' => $explanation['description'] ?? ''
+                    ];
+                }
+            }
+        }
+        
+        // 更新价值观解释
+        if (isset($_POST['valuesExplanation']) && is_array($_POST['valuesExplanation'])) {
+            $data['valuesExplanation'] = [];
+            foreach ($_POST['valuesExplanation'] as $explanation) {
+                if (!empty($explanation['key']) || !empty($explanation['description'])) {
+                    $data['valuesExplanation'][] = [
+                        'key' => $explanation['key'] ?? '',
+                        'description' => $explanation['description'] ?? ''
+                    ];
+                }
+            }
+        }
+        
+        // 更新战略目标
+        if (isset($_POST['strategicObjectives']) && is_array($_POST['strategicObjectives'])) {
+            $data['strategicObjectives'] = [];
+            foreach ($_POST['strategicObjectives'] as $year => $objectives) {
+                if (is_array($objectives)) {
+                    $yearObjectives = [];
+                    foreach ($objectives as $obj) {
+                        if (!empty($obj['department']) || !empty($obj['strategy'])) {
+                            // 处理仪表板指标（从textarea转换为数组，每行一个指标）
+                            $dashboardMetrics = [];
+                            if (isset($obj['dashboardMetrics'])) {
+                                if (is_string($obj['dashboardMetrics'])) {
+                                    // 从textarea的换行符分割
+                                    $lines = explode("\n", $obj['dashboardMetrics']);
+                                    $dashboardMetrics = array_filter(array_map('trim', $lines), function($item) {
+                                        return !empty($item);
+                                    });
+                                } elseif (is_array($obj['dashboardMetrics'])) {
+                                    $dashboardMetrics = array_filter($obj['dashboardMetrics'], function($item) { 
+                                        return !empty(trim(is_string($item) ? $item : '')); 
+                                    });
+                                }
+                            }
+                            
+                            $yearObjectives[] = [
+                                'department' => $obj['department'] ?? '',
+                                'strategy' => $obj['strategy'] ?? '',
+                                'dashboardMetrics' => array_values($dashboardMetrics),
+                                'pic' => $obj['pic'] ?? '',
+                                'startDate' => $obj['startDate'] ?? '',
+                                'endDate' => $obj['endDate'] ?? ''
+                            ];
+                        }
+                    }
+                    if (!empty($yearObjectives)) {
+                        $data['strategicObjectives'][$year] = $yearObjectives;
+                    }
+                }
+            }
+        }
+        
         // 保存到JSON文件（保留所有现有数据，只更新修改的字段）
         $jsonContent = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         if (file_put_contents($jsonFile, $jsonContent)) {
@@ -144,6 +265,17 @@ $orgStructure = $currentData['organizationStructure'] ?? [
 $internalOrg = $currentData['internalOrganization'] ?? [
     'departments' => []
 ];
+
+$timeline = $currentData['timeline'] ?? [];
+$corporateCore = $currentData['corporateCore'] ?? [
+    'mission' => '',
+    'vision' => '',
+    'culture' => [],
+    'values' => []
+];
+$cultureExplanation = $currentData['cultureExplanation'] ?? [];
+$valuesExplanation = $currentData['valuesExplanation'] ?? [];
+$strategicObjectives = $currentData['strategicObjectives'] ?? [];
 ?>
 
 <!DOCTYPE html>
@@ -642,6 +774,223 @@ $internalOrg = $currentData['internalOrganization'] ?? [
         function removePosition(btn) {
             if (confirm('确定要删除这个职位吗？')) {
                 btn.closest('.position-item').remove();
+            }
+        }
+        
+        // Timeline functions
+        let timelineIndex = <?php echo count($timeline); ?>;
+        function addTimeline() {
+            const container = document.getElementById('timeline-container');
+            const html = `
+                <div class="timeline-item" style="display: grid; grid-template-columns: 150px 1fr auto; gap: 15px; margin-bottom: 15px; align-items: end;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>年份</label>
+                        <input type="number" name="timeline[${timelineIndex}][year]" value="" placeholder="2024">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>目标</label>
+                        <input type="text" name="timeline[${timelineIndex}][goal]" value="" placeholder="创建X间子公司">
+                    </div>
+                    <button type="button" class="remove-btn" onclick="removeTimeline(this)">删除</button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            timelineIndex++;
+        }
+        
+        function removeTimeline(btn) {
+            if (confirm('确定要删除这个时间线项目吗？')) {
+                btn.closest('.timeline-item').remove();
+            }
+        }
+        
+        // Culture functions
+        let cultureIndex = <?php echo count($corporateCore['culture'] ?? []); ?>;
+        function addCulture() {
+            const container = document.getElementById('culture-container');
+            const html = `
+                <div class="culture-item" style="display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-bottom: 10px; align-items: end;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>文化项</label>
+                        <input type="text" name="culture[${cultureIndex}]" value="" placeholder="例如：Innovation">
+                    </div>
+                    <button type="button" class="remove-btn" onclick="removeCulture(this)">删除</button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            cultureIndex++;
+        }
+        
+        function removeCulture(btn) {
+            if (confirm('确定要删除这个文化项吗？')) {
+                btn.closest('.culture-item').remove();
+            }
+        }
+        
+        // Values functions
+        let valuesIndex = <?php echo count($corporateCore['values'] ?? []); ?>;
+        function addValue() {
+            const container = document.getElementById('values-container');
+            const html = `
+                <div class="values-item" style="display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-bottom: 10px; align-items: end;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>价值观</label>
+                        <input type="text" name="values[${valuesIndex}]" value="" placeholder="例如：Customer First">
+                    </div>
+                    <button type="button" class="remove-btn" onclick="removeValue(this)">删除</button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            valuesIndex++;
+        }
+        
+        function removeValue(btn) {
+            if (confirm('确定要删除这个价值观吗？')) {
+                btn.closest('.values-item').remove();
+            }
+        }
+        
+        // Culture Explanation functions
+        let cultureExplanationIndex = <?php echo count($cultureExplanation); ?>;
+        function addCultureExplanation() {
+            const container = document.getElementById('culture-explanation-container');
+            const html = `
+                <div class="culture-explanation-item" style="margin-bottom: 20px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+                    <div class="form-group">
+                        <label>关键词 (Key)</label>
+                        <input type="text" name="cultureExplanation[${cultureExplanationIndex}][key]" value="" placeholder="例如：Innovation">
+                    </div>
+                    <div class="form-group">
+                        <label>描述 (Description)</label>
+                        <textarea name="cultureExplanation[${cultureExplanationIndex}][description]" rows="3"></textarea>
+                    </div>
+                    <button type="button" class="remove-btn" onclick="removeCultureExplanation(this)">删除</button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            cultureExplanationIndex++;
+        }
+        
+        function removeCultureExplanation(btn) {
+            if (confirm('确定要删除这个文化解释吗？')) {
+                btn.closest('.culture-explanation-item').remove();
+            }
+        }
+        
+        // Values Explanation functions
+        let valuesExplanationIndex = <?php echo count($valuesExplanation); ?>;
+        function addValuesExplanation() {
+            const container = document.getElementById('values-explanation-container');
+            const html = `
+                <div class="values-explanation-item" style="margin-bottom: 20px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+                    <div class="form-group">
+                        <label>关键词 (Key)</label>
+                        <input type="text" name="valuesExplanation[${valuesExplanationIndex}][key]" value="" placeholder="例如：Customer First">
+                    </div>
+                    <div class="form-group">
+                        <label>描述 (Description)</label>
+                        <textarea name="valuesExplanation[${valuesExplanationIndex}][description]" rows="3"></textarea>
+                    </div>
+                    <button type="button" class="remove-btn" onclick="removeValuesExplanation(this)">删除</button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            valuesExplanationIndex++;
+        }
+        
+        function removeValuesExplanation(btn) {
+            if (confirm('确定要删除这个价值观解释吗？')) {
+                btn.closest('.values-explanation-item').remove();
+            }
+        }
+        
+        // Strategic Objectives functions
+        function addYear() {
+            const year = prompt('请输入年份（例如：2024）:');
+            if (!year) return;
+            
+            const container = document.getElementById('strategic-objectives-container');
+            const html = `
+                <div class="year-objectives" style="margin-bottom: 30px; padding: 20px; background: white; border-radius: 8px; border: 2px solid #ff5c00;">
+                    <h3 style="margin-bottom: 15px; color: #ff5c00; font-size: 18px;">${year}年</h3>
+                    <div class="objectives-list" data-year="${year}">
+                    </div>
+                    <button type="button" class="add-btn" onclick="addObjective('${year}')">添加${year}年目标</button>
+                    <button type="button" class="remove-btn" onclick="removeYear('${year}')" style="margin-left: 10px;">删除${year}年</button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            addObjective(year);
+        }
+        
+        function removeYear(year) {
+            if (confirm(`确定要删除${year}年的所有目标吗？`)) {
+                const yearDivs = document.querySelectorAll('.year-objectives');
+                yearDivs.forEach(div => {
+                    const h3 = div.querySelector('h3');
+                    if (h3 && h3.textContent.includes(year)) {
+                        div.remove();
+                    }
+                });
+            }
+        }
+        
+        function addObjective(year) {
+            const yearDivs = document.querySelectorAll('.year-objectives');
+            let yearDiv = null;
+            yearDivs.forEach(div => {
+                const h3 = div.querySelector('h3');
+                if (h3 && h3.textContent.includes(year)) {
+                    yearDiv = div;
+                }
+            });
+            if (!yearDiv) return;
+            
+            const objectivesList = yearDiv.querySelector('.objectives-list');
+            const objIndex = objectivesList.querySelectorAll('.objective-item').length;
+            
+            const html = `
+                <div class="objective-item" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e5e7eb;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>部门</label>
+                            <input type="text" name="strategicObjectives[${year}][${objIndex}][department]" value="" placeholder="例如：Technology">
+                        </div>
+                        <div class="form-group">
+                            <label>负责人 (PIC)</label>
+                            <input type="text" name="strategicObjectives[${year}][${objIndex}][pic]" value="" placeholder="例如：CTO">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>策略</label>
+                        <textarea name="strategicObjectives[${year}][${objIndex}][strategy]" rows="2"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>开始日期</label>
+                            <input type="date" name="strategicObjectives[${year}][${objIndex}][startDate]" value="">
+                        </div>
+                        <div class="form-group">
+                            <label>结束日期</label>
+                            <input type="date" name="strategicObjectives[${year}][${objIndex}][endDate]" value="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>仪表板指标 (每行一个)</label>
+                        <textarea name="strategicObjectives[${year}][${objIndex}][dashboardMetrics]" rows="3" placeholder="System Uptime (%)
+Infrastructure Cost Reduction (%)
+Implementation Timeline Adherence (%)"></textarea>
+                        <small style="color: #666;">每行一个指标</small>
+                    </div>
+                    <button type="button" class="remove-btn" onclick="removeObjective(this, '${year}')">删除</button>
+                </div>
+            `;
+            objectivesList.insertAdjacentHTML('beforeend', html);
+        }
+        
+        function removeObjective(btn, year) {
+            if (confirm('确定要删除这个目标吗？')) {
+                btn.closest('.objective-item').remove();
             }
         }
     </script>
