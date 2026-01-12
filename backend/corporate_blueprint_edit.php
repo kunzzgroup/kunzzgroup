@@ -294,7 +294,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
             min-height: 100vh;
             padding: 30px 20px;
             position: relative;
@@ -308,8 +308,8 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
             right: 0;
             bottom: 0;
             background: 
-                radial-gradient(circle at 20% 50%, rgba(255, 92, 0, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.1) 0%, transparent 50%);
+                radial-gradient(circle at 20% 50%, rgba(255, 92, 0, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 0, 0, 0.02) 0%, transparent 50%);
             pointer-events: none;
             z-index: 0;
         }
