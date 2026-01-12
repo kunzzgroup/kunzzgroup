@@ -825,8 +825,8 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
                 <div class="section">
                     <h2>公司概述</h2>
                     <div class="form-group">
-                        <label>公司名称 *</label>
-                        <input type="text" name="companyName" value="<?php echo htmlspecialchars($companyOverview['companyName'] ?? ''); ?>" required>
+                        <label>公司名称</label>
+                        <input type="text" name="companyName" value="<?php echo htmlspecialchars($companyOverview['companyName'] ?? ''); ?>">
                     </div>
                     <div class="form-group">
                         <label>计划标题</label>
@@ -928,8 +928,8 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
                         foreach ($departments as $deptIndex => $dept): ?>
                             <div class="department-item">
                                 <div class="form-group">
-                                    <label>部门名称 *</label>
-                                    <input type="text" name="departments[<?php echo $deptIndex; ?>][name]" value="<?php echo htmlspecialchars($dept['name'] ?? ''); ?>" required>
+                                    <label>部门名称</label>
+                                    <input type="text" name="departments[<?php echo $deptIndex; ?>][name]" value="<?php echo htmlspecialchars($dept['name'] ?? ''); ?>">
                                 </div>
                                 
                                 <div class="positions-container">
@@ -1241,8 +1241,8 @@ Implementation Timeline Adherence (%)"><?php echo htmlspecialchars(implode("\n",
             const html = `
                 <div class="department-item">
                     <div class="form-group">
-                        <label>部门名称 *</label>
-                        <input type="text" name="departments[${deptIndex}][name]" value="" required>
+                        <label>部门名称</label>
+                        <input type="text" name="departments[${deptIndex}][name]" value="">
                     </div>
                     <div class="positions-container">
                         <h3>职位列表</h3>
