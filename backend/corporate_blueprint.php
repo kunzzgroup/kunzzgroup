@@ -2799,18 +2799,18 @@ if (file_exists($jsonFile)) {
             min-height: 600px;
         }
         
-        /* 背景箭头图案 */
+        /* 背景Logo图片 */
         .orgchart-container-wrapper::before {
             content: '';
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%) rotate(0deg);
-            width: 800px;
-            height: 800px;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><path d="M 20 100 L 180 100 M 150 70 L 180 100 L 150 130" stroke="%23ffd4a3" stroke-width="8" fill="none"/></svg>') no-repeat center;
+            transform: translate(-50%, -50%);
+            width: clamp(600px, 62.5vw, 1000px);
+            height: clamp(600px, 62.5vw, 1000px);
+            background: url('../images/images/logo.png') no-repeat center;
             background-size: contain;
-            opacity: 0.15;
+            opacity: 0.08;
             z-index: 0;
             pointer-events: none;
         }
