@@ -3522,180 +3522,207 @@ if (file_exists($jsonFile)) {
                     </div>
                 </div>
                 <?php endif; ?>
+                
+                <?php
+                // 转换内部组织架构数据为 OrgChart.js 所需的树形格式
+                function convertInternalOrgToOrgChartFormat($internalOrgData) {
+                    if (empty($internalOrgData) || empty($internalOrgData['departments'])) {
+                        return null;
+                    }
+                    
+                    // 创建一个虚拟根节点，连接所有部门
+                    $rootNode = [
+                        'id' => 'internal_root',
+                        'name' => '—',
+                        'title' => '内部组织架构',
+                        'level' => 'root',
+                        'children' => []
+                    ];
+                    
+                    $departments = $internalOrgData['departments'];
+                    foreach ($departments as $deptIndex => $dept) {
+                        $deptName = $dept['name'] ?? '';
+                        $positions = $dept['positions'] ?? [];
+                        
+                        if (empty($positions)) {
+                            continue;
+                        }
+                        
+                        // 部门节点（使用第一个职位作为部门头）
+                        $firstPosition = $positions[0];
+                        $deptTitle = $firstPosition['title'] ?? $deptName;
+                        $deptNameValue = $firstPosition['name'] ?? '';
+                        
+                        $deptNode = [
+                            'id' => 'dept_' . $deptIndex,
+                            'name' => $deptNameValue ?: '—',
+                            'title' => $deptTitle,
+                            'level' => 'department',
+                            'children' => []
+                        ];
+                        
+                        // 添加该部门的其他职位作为子节点
+                        for ($i = 1; $i < count($positions); $i++) {
+                            $pos = $positions[$i];
+                            $posTitle = $pos['title'] ?? '';
+                            $posName = $pos['name'] ?? '';
+                            
+                            $posNode = [
+                                'id' => 'dept_' . $deptIndex . '_pos_' . $i,
+                                'name' => $posName ?: '—',
+                                'title' => $posTitle,
+                                'level' => 'position'
+                            ];
+                            
+                            $deptNode['children'][] = $posNode;
+                        }
+                        
+                        $rootNode['children'][] = $deptNode;
+                    }
+                    
+                    return $rootNode;
+                }
+                
+                // 内部组织架构数据 - 从JSON读取或使用示例数据
+                $internalOrgData = $strategyData['internalOrganization'] ?? null;
+                
+                // 如果没有数据，使用示例数据
+                if (!$internalOrgData) {
+                    $internalOrgData = [
+                        'departments' => [
+                            [
+                                'name' => 'HUMAN RESOURCE',
+                                'positions' => [
+                                    ['title' => 'VP OF HR', 'name' => 'TANG YEAW KHOONG'],
+                                    ['title' => 'HR DIRECTOR', 'name' => ''],
+                                    ['title' => 'SENIOR HR MANAGER', 'name' => ''],
+                                    ['title' => 'HR MANAGER', 'name' => ''],
+                                    ['title' => 'HR SUPERVISOR', 'name' => ''],
+                                    ['title' => 'SENIOR HR EXECUTIVE', 'name' => ''],
+                                    ['title' => 'HR EXECUTIVE', 'name' => ''],
+                                    ['title' => 'JUNIOR HR EXECUTIVE', 'name' => ''],
+                                    ['title' => 'HR INTERN', 'name' => '']
+                                ]
+                            ],
+                            [
+                                'name' => 'ACCOUNTANT',
+                                'positions' => [
+                                    ['title' => 'FINANCE MANAGER', 'name' => 'TANG YEAW KHOONG'],
+                                    ['title' => 'ACCOUNT SUPERVISOR', 'name' => ''],
+                                    ['title' => 'ACCOUNT EXECUTIVE', 'name' => ''],
+                                    ['title' => 'ACCOUNT INTERN', 'name' => '']
+                                ]
+                            ],
+                            [
+                                'name' => 'MEDIA PRODUCTION',
+                                'positions' => [
+                                    ['title' => 'VP VISUAL', 'name' => 'TANG YEAW KHOONG'],
+                                    ['title' => 'VISUAL DIRECTOR', 'name' => ''],
+                                    ['title' => 'SR.MEDIA MANAGER', 'name' => ''],
+                                    ['title' => 'MEDIA MANAGER', 'name' => ''],
+                                    ['title' => 'MEDIA LEAD', 'name' => ''],
+                                    ['title' => 'SR.VIDEO CREATOR', 'name' => ''],
+                                    ['title' => 'VIDEO CREATOR', 'name' => ''],
+                                    ['title' => 'JR.VIDEO CREATOR', 'name' => ''],
+                                    ['title' => 'MEDIA INTERN', 'name' => '']
+                                ]
+                            ],
+                            [
+                                'name' => 'MARKETING',
+                                'positions' => [
+                                    ['title' => 'VP OF MARKETING', 'name' => 'TANG YEAW KHOONG'],
+                                    ['title' => 'MARKETING DIRECTOR', 'name' => ''],
+                                    ['title' => 'SR.MARKETING DIRECTOR', 'name' => ''],
+                                    ['title' => 'MARKETING MANAGER', 'name' => ''],
+                                    ['title' => 'ASST.MARKETING MANAGER', 'name' => ''],
+                                    ['title' => 'SR.MARKETING EXEC', 'name' => ''],
+                                    ['title' => 'MARKETING EXEC', 'name' => ''],
+                                    ['title' => 'JR.MARKETING EXEC', 'name' => ''],
+                                    ['title' => 'MARKETING INTERN', 'name' => '']
+                                ]
+                            ],
+                            [
+                                'name' => 'SUPPORT',
+                                'positions' => [
+                                    ['title' => 'KITCHEN.SUP DIRECTOR', 'name' => 'TANG YEAW KHOONG'],
+                                    ['title' => 'SENIOR KITCHEN SUP MANAGER', 'name' => ''],
+                                    ['title' => 'KITCHEN SUP MANAGER', 'name' => ''],
+                                    ['title' => 'KITCHEN SUPPORT LEAD', 'name' => ''],
+                                    ['title' => 'SENIOR KITCHEN SUPPORT', 'name' => ''],
+                                    ['title' => 'KITCHEN SUPPORT', 'name' => ''],
+                                    ['title' => 'JUNIOR KITCHEN SUPPORT', 'name' => ''],
+                                    ['title' => 'KITCHEN SUPPORT INTERN', 'name' => '']
+                                ]
+                            ],
+                            [
+                                'name' => 'PRODUCTION',
+                                'positions' => [
+                                    ['title' => 'OPERATIONS DIRECTOR', 'name' => 'TANG YEAW KHOONG'],
+                                    ['title' => 'SNR.OPERATIONS MANAGER', 'name' => ''],
+                                    ['title' => 'PRODUCTION MANAGER', 'name' => ''],
+                                    ['title' => 'TEAM LEAD', 'name' => ''],
+                                    ['title' => 'SENIOR PRODUCTION', 'name' => ''],
+                                    ['title' => 'OPERATOR', 'name' => ''],
+                                    ['title' => 'JUNIOR OPERATOR', 'name' => ''],
+                                    ['title' => 'OPERATOR INTERN', 'name' => '']
+                                ]
+                            ],
+                            [
+                                'name' => 'R&D',
+                                'positions' => [
+                                    ['title' => 'R&D DIRECTOR', 'name' => 'TANG YEAW KHOONG'],
+                                    ['title' => 'SENIOR R&D MANAGER', 'name' => ''],
+                                    ['title' => 'R&D MANAGER', 'name' => ''],
+                                    ['title' => 'LEAD R&D', 'name' => ''],
+                                    ['title' => 'SENIOR R&D', 'name' => ''],
+                                    ['title' => 'R&D', 'name' => ''],
+                                    ['title' => 'JUNIOR R&D', 'name' => ''],
+                                    ['title' => 'R&D INTERN', 'name' => '']
+                                ]
+                            ],
+                            [
+                                'name' => 'TECHNICAL',
+                                'positions' => [
+                                    ['title' => 'VP OF TECH', 'name' => 'TANG YEAW KHOONG'],
+                                    ['title' => 'TECH DIRECTOR', 'name' => ''],
+                                    ['title' => 'SR.ENON.MANAGER', 'name' => ''],
+                                    ['title' => 'ENG MANAGER', 'name' => ''],
+                                    ['title' => 'TECH LEAD', 'name' => ''],
+                                    ['title' => 'SR.TECH ENGINEER', 'name' => ''],
+                                    ['title' => 'TECH ENGINEER', 'name' => ''],
+                                    ['title' => 'ENGINEER INTERN', 'name' => '']
+                                ]
+                            ],
+                            [
+                                'name' => 'DESIGN',
+                                'positions' => [
+                                    ['title' => 'VP OF DESIGN', 'name' => 'TANG YEAW KHOONG'],
+                                    ['title' => 'DESIGN DIRECTOR', 'name' => ''],
+                                    ['title' => 'SENIOR DESIGN MANAGER', 'name' => ''],
+                                    ['title' => 'DESIGN MANAGER', 'name' => ''],
+                                    ['title' => 'DESIGN SUPERVISOR', 'name' => ''],
+                                    ['title' => 'GRAPHIC DESIGNER', 'name' => ''],
+                                    ['title' => 'JUNIOR GRAPHIC DESIGNER', 'name' => ''],
+                                    ['title' => 'DESIGN ASSISTANT', 'name' => ''],
+                                    ['title' => 'DESIGN INTERN', 'name' => '']
+                                ]
+                            ]
+                        ]
+                    ];
+                }
+                
+                $internalOrgChartData = convertInternalOrgToOrgChartFormat($internalOrgData);
+                if ($internalOrgChartData):
+                ?>
 
                 <!-- 内部组织架构图 -->
                 <div class="section">
-                    <div class="internal-org-workspace">
-                        <!-- 背景Logo图片 -->
-                        <div class="internal-org-bg-text">
-                            <img src="images/images/logo.png" alt="Logo">
-                                </div>
-
-                        <!-- 标题 -->
-                        <div class="internal-org-title-overlay">
-                            <div class="internal-org-title-badge">组织架构</div>
-                            <h1 class="internal-org-title-main">内部组织架构图</h1>
-                                    </div>
-
-                        <!-- 9个垂直列容器 -->
-                        <div class="internal-org-container">
-                            <?php
-                            // 内部组织架构数据 - 从JSON读取或使用示例数据
-                            $internalOrgData = $strategyData['internalOrganization'] ?? null;
-                            
-                            // 如果没有数据，使用示例数据
-                            if (!$internalOrgData) {
-                                $internalOrgData = [
-                                    'departments' => [
-                                        [
-                                            'name' => 'HUMAN RESOURCE',
-                                            'positions' => [
-                                                ['title' => 'VP OF HR', 'name' => 'TANG YEAW KHOONG'],
-                                                ['title' => 'HR DIRECTOR', 'name' => ''],
-                                                ['title' => 'SENIOR HR MANAGER', 'name' => ''],
-                                                ['title' => 'HR MANAGER', 'name' => ''],
-                                                ['title' => 'HR SUPERVISOR', 'name' => ''],
-                                                ['title' => 'SENIOR HR EXECUTIVE', 'name' => ''],
-                                                ['title' => 'HR EXECUTIVE', 'name' => ''],
-                                                ['title' => 'JUNIOR HR EXECUTIVE', 'name' => ''],
-                                                ['title' => 'HR INTERN', 'name' => '']
-                                            ]
-                                        ],
-                                        [
-                                            'name' => 'ACCOUNTANT',
-                                            'positions' => [
-                                                ['title' => 'FINANCE MANAGER', 'name' => 'TANG YEAW KHOONG'],
-                                                ['title' => 'ACCOUNT SUPERVISOR', 'name' => ''],
-                                                ['title' => 'ACCOUNT EXECUTIVE', 'name' => ''],
-                                                ['title' => 'ACCOUNT INTERN', 'name' => '']
-                                            ]
-                                        ],
-                                        [
-                                            'name' => 'MEDIA PRODUCTION',
-                                            'positions' => [
-                                                ['title' => 'VP VISUAL', 'name' => 'TANG YEAW KHOONG'],
-                                                ['title' => 'VISUAL DIRECTOR', 'name' => ''],
-                                                ['title' => 'SR.MEDIA MANAGER', 'name' => ''],
-                                                ['title' => 'MEDIA MANAGER', 'name' => ''],
-                                                ['title' => 'MEDIA LEAD', 'name' => ''],
-                                                ['title' => 'SR.VIDEO CREATOR', 'name' => ''],
-                                                ['title' => 'VIDEO CREATOR', 'name' => ''],
-                                                ['title' => 'JR.VIDEO CREATOR', 'name' => ''],
-                                                ['title' => 'MEDIA INTERN', 'name' => '']
-                                            ]
-                                        ],
-                                        [
-                                            'name' => 'MARKETING',
-                                            'positions' => [
-                                                ['title' => 'VP OF MARKETING', 'name' => 'TANG YEAW KHOONG'],
-                                                ['title' => 'MARKETING DIRECTOR', 'name' => ''],
-                                                ['title' => 'SR.MARKETING DIRECTOR', 'name' => ''],
-                                                ['title' => 'MARKETING MANAGER', 'name' => ''],
-                                                ['title' => 'ASST.MARKETING MANAGER', 'name' => ''],
-                                                ['title' => 'SR.MARKETING EXEC', 'name' => ''],
-                                                ['title' => 'MARKETING EXEC', 'name' => ''],
-                                                ['title' => 'JR.MARKETING EXEC', 'name' => ''],
-                                                ['title' => 'MARKETING INTERN', 'name' => '']
-                                            ]
-                                        ],
-                                        [
-                                            'name' => 'SUPPORT',
-                                            'positions' => [
-                                                ['title' => 'KITCHEN.SUP DIRECTOR', 'name' => 'TANG YEAW KHOONG'],
-                                                ['title' => 'SENIOR KITCHEN SUP MANAGER', 'name' => ''],
-                                                ['title' => 'KITCHEN SUP MANAGER', 'name' => ''],
-                                                ['title' => 'KITCHEN SUPPORT LEAD', 'name' => ''],
-                                                ['title' => 'SENIOR KITCHEN SUPPORT', 'name' => ''],
-                                                ['title' => 'KITCHEN SUPPORT', 'name' => ''],
-                                                ['title' => 'JUNIOR KITCHEN SUPPORT', 'name' => ''],
-                                                ['title' => 'KITCHEN SUPPORT INTERN', 'name' => '']
-                                            ]
-                                        ],
-                                        [
-                                            'name' => 'PRODUCTION',
-                                            'positions' => [
-                                                ['title' => 'OPERATIONS DIRECTOR', 'name' => 'TANG YEAW KHOONG'],
-                                                ['title' => 'SNR.OPERATIONS MANAGER', 'name' => ''],
-                                                ['title' => 'PRODUCTION MANAGER', 'name' => ''],
-                                                ['title' => 'TEAM LEAD', 'name' => ''],
-                                                ['title' => 'SENIOR PRODUCTION', 'name' => ''],
-                                                ['title' => 'OPERATOR', 'name' => ''],
-                                                ['title' => 'JUNIOR OPERATOR', 'name' => ''],
-                                                ['title' => 'OPERATOR INTERN', 'name' => '']
-                                            ]
-                                        ],
-                                        [
-                                            'name' => 'R&D',
-                                            'positions' => [
-                                                ['title' => 'R&D DIRECTOR', 'name' => 'TANG YEAW KHOONG'],
-                                                ['title' => 'SENIOR R&D MANAGER', 'name' => ''],
-                                                ['title' => 'R&D MANAGER', 'name' => ''],
-                                                ['title' => 'LEAD R&D', 'name' => ''],
-                                                ['title' => 'SENIOR R&D', 'name' => ''],
-                                                ['title' => 'R&D', 'name' => ''],
-                                                ['title' => 'JUNIOR R&D', 'name' => ''],
-                                                ['title' => 'R&D INTERN', 'name' => '']
-                                            ]
-                                        ],
-                                        [
-                                            'name' => 'TECHNICAL',
-                                            'positions' => [
-                                                ['title' => 'VP OF TECH', 'name' => 'TANG YEAW KHOONG'],
-                                                ['title' => 'TECH DIRECTOR', 'name' => ''],
-                                                ['title' => 'SR.ENON.MANAGER', 'name' => ''],
-                                                ['title' => 'ENG MANAGER', 'name' => ''],
-                                                ['title' => 'TECH LEAD', 'name' => ''],
-                                                ['title' => 'SR.TECH ENGINEER', 'name' => ''],
-                                                ['title' => 'TECH ENGINEER', 'name' => ''],
-                                                ['title' => 'ENGINEER INTERN', 'name' => '']
-                                            ]
-                                        ],
-                                        [
-                                            'name' => 'DESIGN',
-                                            'positions' => [
-                                                ['title' => 'VP OF DESIGN', 'name' => 'TANG YEAW KHOONG'],
-                                                ['title' => 'DESIGN DIRECTOR', 'name' => ''],
-                                                ['title' => 'SENIOR DESIGN MANAGER', 'name' => ''],
-                                                ['title' => 'DESIGN MANAGER', 'name' => ''],
-                                                ['title' => 'DESIGN SUPERVISOR', 'name' => ''],
-                                                ['title' => 'GRAPHIC DESIGNER', 'name' => ''],
-                                                ['title' => 'JUNIOR GRAPHIC DESIGNER', 'name' => ''],
-                                                ['title' => 'DESIGN ASSISTANT', 'name' => ''],
-                                                ['title' => 'DESIGN INTERN', 'name' => '']
-                                            ]
-                                        ]
-                                    ]
-                                ];
-                            }
-
-                            $departments = $internalOrgData['departments'] ?? [];
-                            ?>
-
-                            <div class="internal-org-columns">
-                                <?php foreach ($departments as $dept): ?>
-                                    <div class="internal-org-column">
-                                        <div class="internal-org-column-title"><?php echo htmlspecialchars($dept['name']); ?></div>
-                                        <div class="internal-org-column-cards">
-                                            <?php 
-                                            $positions = $dept['positions'] ?? [];
-                                            foreach ($positions as $pos): 
-                                                $posTitle = $pos['title'] ?? '';
-                                                $posName = $pos['name'] ?? '';
-                                            ?>
-                                                <div class="internal-org-position-card">
-                                                    <div class="internal-org-position-title"><?php echo htmlspecialchars($posTitle); ?></div>
-                                                    <div class="internal-org-position-name <?php echo empty($posName) ? 'internal-org-position-empty' : ''; ?>">
-                                                        <?php echo htmlspecialchars($posName ?: '—'); ?>
-                                </div>
-                            </div>
-                                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                                <?php endforeach; ?>
-                </div>
-                        </div>
+                    <div class="orgchart-container-wrapper">
+                        <h1 class="orgchart-title-wrapper">内部组织架构图</h1>
+                        <div id="internal-orgchart-container" style="width: 100%; min-height: 600px;"></div>
                     </div>
                 </div>
+                <?php endif; ?>
 
                 <!-- Strategic Objectives -->
                 <div class="strategic-objectives-section">
@@ -4339,6 +4366,63 @@ if (file_exists($jsonFile)) {
                 const orgchartEl = $('#orgchart-container .orgchart');
                 if (orgchartEl.length) {
                     const containerWidth = $('#orgchart-container').width();
+                    const chartWidth = orgchartEl.outerWidth();
+                    if (chartWidth < containerWidth) {
+                        const offsetLeft = (containerWidth - chartWidth) / 2;
+                        orgchartEl.css('margin-left', offsetLeft + 'px');
+                    }
+                }
+            }, 100);
+        });
+    </script>
+    <?php endif; ?>
+    
+    <!-- 内部组织架构图 OrgChart.js 初始化脚本 -->
+    <?php if (!empty($internalOrgChartData)): ?>
+    <script>
+        $(document).ready(function() {
+            // 内部组织架构数据（已经是树形结构）
+            const internalOrgData = <?php echo json_encode($internalOrgChartData, JSON_UNESCAPED_UNICODE); ?>;
+            
+            if (!internalOrgData) {
+                console.error('内部组织架构数据为空');
+                $('#internal-orgchart-container').html('<p style="text-align: center; color: #6b7280; padding: 40px;">无法加载内部组织架构数据</p>');
+                return;
+            }
+            
+            console.log('内部组织架构数据:', internalOrgData);
+            
+            // 初始化内部组织架构图 - OrgChart.js 使用树形结构
+            $('#internal-orgchart-container').orgchart({
+                'data': internalOrgData,
+                'nodeContent': 'title',
+                'nodeId': 'id',
+                'pan': false,
+                'zoom': false,
+                'toggleSiblingsResp': true,
+                'createNode': function($node, data) {
+                    // 自定义节点样式
+                    const level = data.level || '';
+                    $node.addClass('level-' + level);
+                    
+                    // 自定义节点内容 - 显示职位和名字
+                    const title = data.title || '—';
+                    const name = data.name || '—';
+                    
+                    $node.html(
+                        '<div class="orgchart-node-title">' + title + '</div>' +
+                        '<div class="orgchart-node-content">' + name + '</div>'
+                    );
+                },
+                'draggable': false,
+                'direction': 't2b'
+            });
+            
+            // 居中显示内部组织架构图
+            setTimeout(function() {
+                const orgchartEl = $('#internal-orgchart-container .orgchart');
+                if (orgchartEl.length) {
+                    const containerWidth = $('#internal-orgchart-container').width();
                     const chartWidth = orgchartEl.outerWidth();
                     if (chartWidth < containerWidth) {
                         const offsetLeft = (containerWidth - chartWidth) / 2;
