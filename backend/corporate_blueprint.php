@@ -2800,6 +2800,10 @@ if (file_exists($jsonFile)) {
             max-height: 800px;
             background-image: none !important;
             border: 2px solid #f7931e;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
         }
         
         /* 背景Logo图片 */
@@ -2839,17 +2843,30 @@ if (file_exists($jsonFile)) {
             z-index: 1;
             overflow: hidden;
             background-image: none !important;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
         }
         
         /* 禁用组织架构图的滚动 */
         #orgchart-container .orgchart {
             overflow: hidden !important;
             background-image: none !important;
+            margin: 0 auto;
         }
         
         #orgchart-container .orgchart-wrapper {
             overflow: hidden !important;
             background-image: none !important;
+            margin: 0 auto;
+        }
+        
+        /* 居中组织架构图的根节点 */
+        #orgchart-container .orgchart .orgchart-container {
+            display: flex;
+            justify-content: center;
+            margin: 0 auto;
         }
         
         /* 移除OrgChart.js默认的网格背景 */
@@ -4310,8 +4327,23 @@ if (file_exists($jsonFile)) {
                         '<div class="orgchart-node-title">' + title + '</div>' +
                         '<div class="orgchart-node-content">' + name + '</div>'
                     );
-                }
+                },
+                'draggable': false,
+                'direction': 't2b'
             });
+            
+            // 居中显示组织架构图
+            setTimeout(function() {
+                const orgchartEl = $('#orgchart-container .orgchart');
+                if (orgchartEl.length) {
+                    const containerWidth = $('#orgchart-container').width();
+                    const chartWidth = orgchartEl.outerWidth();
+                    if (chartWidth < containerWidth) {
+                        const offsetLeft = (containerWidth - chartWidth) / 2;
+                        orgchartEl.css('margin-left', offsetLeft + 'px');
+                    }
+                }
+            }, 100);
         });
     </script>
     <?php endif; ?>
