@@ -2793,7 +2793,7 @@ if (file_exists($jsonFile)) {
         .orgchart-container-wrapper {
             background: #ffffff;
             border-radius: 12px;
-            padding: 40px;
+            padding: clamp(20px, 2.08vw, 30px);
             position: relative;
             overflow: hidden;
             min-height: 600px;
