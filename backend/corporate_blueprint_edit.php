@@ -163,9 +163,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data['cultureExplanation'] = [];
             foreach ($_POST['cultureExplanation'] as $explanation) {
                 if (!empty($explanation['key']) || !empty($explanation['description'])) {
+                    $scoring = [];
+                    if (isset($explanation['scoring']) && is_array($explanation['scoring'])) {
+                        foreach ($explanation['scoring'] as $score) {
+                            if (!empty($score['description'])) {
+                                $scoring[] = [
+                                    'point' => intval($score['point'] ?? 0),
+                                    'description' => $score['description'] ?? ''
+                                ];
+                            }
+                        }
+                    }
                     $data['cultureExplanation'][] = [
                         'key' => $explanation['key'] ?? '',
-                        'description' => $explanation['description'] ?? ''
+                        'description' => $explanation['description'] ?? '',
+                        'scoring' => $scoring
                     ];
                 }
             }
@@ -176,9 +188,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data['valuesExplanation'] = [];
             foreach ($_POST['valuesExplanation'] as $explanation) {
                 if (!empty($explanation['key']) || !empty($explanation['description'])) {
+                    $scoring = [];
+                    if (isset($explanation['scoring']) && is_array($explanation['scoring'])) {
+                        foreach ($explanation['scoring'] as $score) {
+                            if (!empty($score['description'])) {
+                                $scoring[] = [
+                                    'point' => intval($score['point'] ?? 0),
+                                    'description' => $score['description'] ?? ''
+                                ];
+                            }
+                        }
+                    }
                     $data['valuesExplanation'][] = [
                         'key' => $explanation['key'] ?? '',
-                        'description' => $explanation['description'] ?? ''
+                        'description' => $explanation['description'] ?? '',
+                        'scoring' => $scoring
                     ];
                 }
             }
@@ -937,6 +961,234 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
                     <button type="button" class="add-btn" onclick="addDepartment()">添加部门</button>
                 </div>
                 
+                <!-- 时间线 -->
+                <div class="section">
+                    <h2>时间线</h2>
+                    <div id="timeline-container">
+                        <?php 
+                        if (empty($timeline)) {
+                            $timeline = [['year' => '', 'goal' => '']];
+                        }
+                        foreach ($timeline as $index => $item): ?>
+                            <div class="timeline-item">
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label>年份</label>
+                                    <input type="number" name="timeline[<?php echo $index; ?>][year]" value="<?php echo htmlspecialchars($item['year'] ?? ''); ?>" placeholder="2024">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label>目标</label>
+                                    <input type="text" name="timeline[<?php echo $index; ?>][goal]" value="<?php echo htmlspecialchars($item['goal'] ?? ''); ?>" placeholder="创建X间子公司">
+                                </div>
+                                <button type="button" class="remove-btn" onclick="removeTimeline(this)">删除</button>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <button type="button" class="add-btn" onclick="addTimeline()">添加时间线项目</button>
+                </div>
+                
+                <!-- 企业核心 -->
+                <div class="section">
+                    <h2>企业核心</h2>
+                    <div class="form-group">
+                        <label>使命 (Mission)</label>
+                        <textarea name="mission" rows="3"><?php echo htmlspecialchars($corporateCore['mission'] ?? ''); ?></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>愿景 (Vision)</label>
+                        <textarea name="vision" rows="3"><?php echo htmlspecialchars($corporateCore['vision'] ?? ''); ?></textarea>
+                    </div>
+                    
+                    <div class="sub-section">
+                        <h3>文化 (Culture)</h3>
+                        <div id="culture-container">
+                            <?php 
+                            $cultureList = $corporateCore['culture'] ?? [];
+                            if (empty($cultureList)) {
+                                $cultureList = [''];
+                            }
+                            foreach ($cultureList as $index => $culture): ?>
+                                <div class="culture-item">
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <label>文化项</label>
+                                        <input type="text" name="culture[<?php echo $index; ?>]" value="<?php echo htmlspecialchars($culture); ?>" placeholder="例如：Innovation">
+                                    </div>
+                                    <button type="button" class="remove-btn" onclick="removeCulture(this)">删除</button>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button type="button" class="add-btn" onclick="addCulture()">添加文化项</button>
+                    </div>
+                    
+                    <div class="sub-section">
+                        <h3>价值观 (Values)</h3>
+                        <div id="values-container">
+                            <?php 
+                            $valuesList = $corporateCore['values'] ?? [];
+                            if (empty($valuesList)) {
+                                $valuesList = [''];
+                            }
+                            foreach ($valuesList as $index => $value): ?>
+                                <div class="values-item">
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <label>价值观</label>
+                                        <input type="text" name="values[<?php echo $index; ?>]" value="<?php echo htmlspecialchars($value); ?>" placeholder="例如：Customer First">
+                                    </div>
+                                    <button type="button" class="remove-btn" onclick="removeValue(this)">删除</button>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button type="button" class="add-btn" onclick="addValue()">添加价值观</button>
+                    </div>
+                </div>
+                
+                <!-- 文化解说 -->
+                <div class="section">
+                    <h2>文化解说 & 考核</h2>
+                    <div id="culture-explanation-container">
+                        <?php 
+                        if (empty($cultureExplanation)) {
+                            $cultureExplanation = [['key' => '', 'description' => '', 'scoring' => []]];
+                        }
+                        foreach ($cultureExplanation as $index => $explanation): 
+                            $scoring = $explanation['scoring'] ?? [];
+                            if (empty($scoring)) {
+                                $scoring = [
+                                    ['point' => 1, 'description' => ''],
+                                    ['point' => 2, 'description' => ''],
+                                    ['point' => 3, 'description' => ''],
+                                    ['point' => 4, 'description' => ''],
+                                    ['point' => 5, 'description' => '']
+                                ];
+                            }
+                        ?>
+                            <div class="culture-explanation-item">
+                                <div class="form-group">
+                                    <label>关键词 (Key)</label>
+                                    <input type="text" name="cultureExplanation[<?php echo $index; ?>][key]" value="<?php echo htmlspecialchars($explanation['key'] ?? ''); ?>" placeholder="例如：积极向上">
+                                </div>
+                                <div class="form-group">
+                                    <label>描述 (Description)</label>
+                                    <textarea name="cultureExplanation[<?php echo $index; ?>][description]" rows="4"><?php echo htmlspecialchars($explanation['description'] ?? ''); ?></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>评分标准</label>
+                                    <?php foreach ($scoring as $scoreIndex => $score): ?>
+                                        <div style="display: grid; grid-template-columns: 80px 1fr; gap: 10px; margin-bottom: 10px; align-items: center;">
+                                            <label style="margin: 0; font-weight: 600;"><?php echo ($score['point'] ?? ($scoreIndex + 1)); ?>分:</label>
+                                            <input type="text" name="cultureExplanation[<?php echo $index; ?>][scoring][<?php echo $scoreIndex; ?>][description]" value="<?php echo htmlspecialchars($score['description'] ?? ''); ?>" placeholder="评分描述">
+                                            <input type="hidden" name="cultureExplanation[<?php echo $index; ?>][scoring][<?php echo $scoreIndex; ?>][point]" value="<?php echo ($score['point'] ?? ($scoreIndex + 1)); ?>">
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <button type="button" class="remove-btn" onclick="removeCultureExplanation(this)">删除</button>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <button type="button" class="add-btn" onclick="addCultureExplanation()">添加文化解说</button>
+                </div>
+                
+                <!-- 价值观解说 -->
+                <div class="section">
+                    <h2>价值观解说 & 考核</h2>
+                    <div id="values-explanation-container">
+                        <?php 
+                        if (empty($valuesExplanation)) {
+                            $valuesExplanation = [['key' => '', 'description' => '', 'scoring' => []]];
+                        }
+                        foreach ($valuesExplanation as $index => $explanation): 
+                            $scoring = $explanation['scoring'] ?? [];
+                            if (empty($scoring)) {
+                                $scoring = [
+                                    ['point' => 1, 'description' => ''],
+                                    ['point' => 2, 'description' => ''],
+                                    ['point' => 3, 'description' => ''],
+                                    ['point' => 4, 'description' => ''],
+                                    ['point' => 5, 'description' => '']
+                                ];
+                            }
+                        ?>
+                            <div class="values-explanation-item">
+                                <div class="form-group">
+                                    <label>关键词 (Key)</label>
+                                    <input type="text" name="valuesExplanation[<?php echo $index; ?>][key]" value="<?php echo htmlspecialchars($explanation['key'] ?? ''); ?>" placeholder="例如：目标导向">
+                                </div>
+                                <div class="form-group">
+                                    <label>描述 (Description)</label>
+                                    <textarea name="valuesExplanation[<?php echo $index; ?>][description]" rows="4"><?php echo htmlspecialchars($explanation['description'] ?? ''); ?></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>评分标准</label>
+                                    <?php foreach ($scoring as $scoreIndex => $score): ?>
+                                        <div style="display: grid; grid-template-columns: 80px 1fr; gap: 10px; margin-bottom: 10px; align-items: center;">
+                                            <label style="margin: 0; font-weight: 600;"><?php echo ($score['point'] ?? ($scoreIndex + 1)); ?>分:</label>
+                                            <input type="text" name="valuesExplanation[<?php echo $index; ?>][scoring][<?php echo $scoreIndex; ?>][description]" value="<?php echo htmlspecialchars($score['description'] ?? ''); ?>" placeholder="评分描述">
+                                            <input type="hidden" name="valuesExplanation[<?php echo $index; ?>][scoring][<?php echo $scoreIndex; ?>][point]" value="<?php echo ($score['point'] ?? ($scoreIndex + 1)); ?>">
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <button type="button" class="remove-btn" onclick="removeValuesExplanation(this)">删除</button>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <button type="button" class="add-btn" onclick="addValuesExplanation()">添加价值观解说</button>
+                </div>
+                
+                <!-- 战略目标 -->
+                <div class="section">
+                    <h2>战略目标</h2>
+                    <div id="strategic-objectives-container">
+                        <?php 
+                        if (!empty($strategicObjectives)):
+                            foreach ($strategicObjectives as $year => $objectives): ?>
+                                <div class="year-objectives">
+                                    <h3><?php echo htmlspecialchars($year); ?>年</h3>
+                                    <div class="objectives-list" data-year="<?php echo htmlspecialchars($year); ?>">
+                                        <?php foreach ($objectives as $objIndex => $obj): ?>
+                                            <div class="objective-item">
+                                                <div class="form-row">
+                                                    <div class="form-group">
+                                                        <label>部门</label>
+                                                        <input type="text" name="strategicObjectives[<?php echo htmlspecialchars($year); ?>][<?php echo $objIndex; ?>][department]" value="<?php echo htmlspecialchars($obj['department'] ?? ''); ?>" placeholder="例如：Technology">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>负责人 (PIC)</label>
+                                                        <input type="text" name="strategicObjectives[<?php echo htmlspecialchars($year); ?>][<?php echo $objIndex; ?>][pic]" value="<?php echo htmlspecialchars($obj['pic'] ?? ''); ?>" placeholder="例如：CTO">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>策略</label>
+                                                    <textarea name="strategicObjectives[<?php echo htmlspecialchars($year); ?>][<?php echo $objIndex; ?>][strategy]" rows="2"><?php echo htmlspecialchars($obj['strategy'] ?? ''); ?></textarea>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="form-group">
+                                                        <label>开始日期</label>
+                                                        <input type="date" name="strategicObjectives[<?php echo htmlspecialchars($year); ?>][<?php echo $objIndex; ?>][startDate]" value="<?php echo htmlspecialchars($obj['startDate'] ?? ''); ?>">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>结束日期</label>
+                                                        <input type="date" name="strategicObjectives[<?php echo htmlspecialchars($year); ?>][<?php echo $objIndex; ?>][endDate]" value="<?php echo htmlspecialchars($obj['endDate'] ?? ''); ?>">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>仪表板指标 (每行一个)</label>
+                                                    <textarea name="strategicObjectives[<?php echo htmlspecialchars($year); ?>][<?php echo $objIndex; ?>][dashboardMetrics]" rows="3" placeholder="System Uptime (%)
+Infrastructure Cost Reduction (%)
+Implementation Timeline Adherence (%)"><?php echo htmlspecialchars(implode("\n", $obj['dashboardMetrics'] ?? [])); ?></textarea>
+                                                    <small style="color: #666;">每行一个指标</small>
+                                                </div>
+                                                <button type="button" class="remove-btn" onclick="removeObjective(this, '<?php echo htmlspecialchars($year); ?>')">删除</button>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <button type="button" class="add-btn" onclick="addObjective('<?php echo htmlspecialchars($year); ?>')">添加<?php echo htmlspecialchars($year); ?>年目标</button>
+                                    <button type="button" class="remove-btn" onclick="removeYear('<?php echo htmlspecialchars($year); ?>')" style="margin-left: 10px;">删除<?php echo htmlspecialchars($year); ?>年</button>
+                                </div>
+                            <?php endforeach;
+                        endif; ?>
+                    </div>
+                    <button type="button" class="add-btn" onclick="addYear()">添加年份</button>
+                </div>
+                
                 <div class="actions">
                     <button type="submit" class="btn">保存更改</button>
                     <a href="corporate_blueprint.php" class="btn btn-secondary">返回查看</a>
@@ -1126,15 +1378,29 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
         let cultureExplanationIndex = <?php echo count($cultureExplanation); ?>;
         function addCultureExplanation() {
             const container = document.getElementById('culture-explanation-container');
+            let scoringHtml = '';
+            for (let i = 1; i <= 5; i++) {
+                scoringHtml += `
+                    <div style="display: grid; grid-template-columns: 80px 1fr; gap: 10px; margin-bottom: 10px; align-items: center;">
+                        <label style="margin: 0; font-weight: 600;">${i}分:</label>
+                        <input type="text" name="cultureExplanation[${cultureExplanationIndex}][scoring][${i-1}][description]" value="" placeholder="评分描述">
+                        <input type="hidden" name="cultureExplanation[${cultureExplanationIndex}][scoring][${i-1}][point]" value="${i}">
+                    </div>
+                `;
+            }
             const html = `
                 <div class="culture-explanation-item">
                     <div class="form-group">
                         <label>关键词 (Key)</label>
-                        <input type="text" name="cultureExplanation[${cultureExplanationIndex}][key]" value="" placeholder="例如：Innovation">
+                        <input type="text" name="cultureExplanation[${cultureExplanationIndex}][key]" value="" placeholder="例如：积极向上">
                     </div>
                     <div class="form-group">
                         <label>描述 (Description)</label>
-                        <textarea name="cultureExplanation[${cultureExplanationIndex}][description]" rows="3"></textarea>
+                        <textarea name="cultureExplanation[${cultureExplanationIndex}][description]" rows="4"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>评分标准</label>
+                        ${scoringHtml}
                     </div>
                     <button type="button" class="remove-btn" onclick="removeCultureExplanation(this)">删除</button>
                 </div>
@@ -1153,15 +1419,29 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
         let valuesExplanationIndex = <?php echo count($valuesExplanation); ?>;
         function addValuesExplanation() {
             const container = document.getElementById('values-explanation-container');
+            let scoringHtml = '';
+            for (let i = 1; i <= 5; i++) {
+                scoringHtml += `
+                    <div style="display: grid; grid-template-columns: 80px 1fr; gap: 10px; margin-bottom: 10px; align-items: center;">
+                        <label style="margin: 0; font-weight: 600;">${i}分:</label>
+                        <input type="text" name="valuesExplanation[${valuesExplanationIndex}][scoring][${i-1}][description]" value="" placeholder="评分描述">
+                        <input type="hidden" name="valuesExplanation[${valuesExplanationIndex}][scoring][${i-1}][point]" value="${i}">
+                    </div>
+                `;
+            }
             const html = `
                 <div class="values-explanation-item">
                     <div class="form-group">
                         <label>关键词 (Key)</label>
-                        <input type="text" name="valuesExplanation[${valuesExplanationIndex}][key]" value="" placeholder="例如：Customer First">
+                        <input type="text" name="valuesExplanation[${valuesExplanationIndex}][key]" value="" placeholder="例如：目标导向">
                     </div>
                     <div class="form-group">
                         <label>描述 (Description)</label>
-                        <textarea name="valuesExplanation[${valuesExplanationIndex}][description]" rows="3"></textarea>
+                        <textarea name="valuesExplanation[${valuesExplanationIndex}][description]" rows="4"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>评分标准</label>
+                        ${scoringHtml}
                     </div>
                     <button type="button" class="remove-btn" onclick="removeValuesExplanation(this)">删除</button>
                 </div>
