@@ -2915,6 +2915,10 @@ if (file_exists($jsonFile)) {
             transform: scale(1.2);
         }
         
+        #orgchart-container .node:hover {
+            transform: scale(1.25) translateY(-3px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+        }
         
         /* 职位部分 - 橙色背景，白色文字 */
         .orgchart-node-title {
