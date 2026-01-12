@@ -21,26 +21,25 @@ if (file_exists($jsonFile)) {
     }
 }
 
-// 转换组织架构数据为 OrgChart.js 所需的格式
+// 转换组织架构数据为 OrgChart.js 所需的树形格式
 function convertToOrgChartFormat($orgStructure) {
-    $nodes = [];
-    
-    // CEO节点
-    if (!empty($orgStructure['ceo'])) {
-        $ceoTitle = $orgStructure['ceo']['title'] ?? $orgStructure['ceo']['fullTitle'] ?? 'CEO';
-        $ceoName = $orgStructure['ceo']['name'] ?? '';
-        
-        $ceoNode = [
-            'id' => 'ceo',
-            'pid' => null,
-            'name' => $ceoName ?: '—',
-            'title' => $ceoTitle,
-            'level' => 'ceo'
-        ];
-        $nodes[] = $ceoNode;
+    // CEO节点（根节点）
+    if (empty($orgStructure['ceo'])) {
+        return null;
     }
     
-    // C-Level节点
+    $ceoTitle = $orgStructure['ceo']['title'] ?? $orgStructure['ceo']['fullTitle'] ?? 'CEO';
+    $ceoName = $orgStructure['ceo']['name'] ?? '';
+    
+    $ceoNode = [
+        'id' => 'ceo',
+        'name' => $ceoName ?: '—',
+        'title' => $ceoTitle,
+        'level' => 'ceo',
+        'children' => []
+    ];
+    
+    // C-Level节点作为CEO的子节点
     if (!empty($orgStructure['cLevel']) && is_array($orgStructure['cLevel'])) {
         foreach ($orgStructure['cLevel'] as $index => $member) {
             $memberTitle = $member['title'] ?? $member['fullTitle'] ?? '';
@@ -48,12 +47,11 @@ function convertToOrgChartFormat($orgStructure) {
             
             $cLevelNode = [
                 'id' => 'clevel_' . $index,
-                'pid' => 'ceo',
                 'name' => $memberName ?: '—',
                 'title' => $memberTitle,
-                'level' => 'clevel'
+                'level' => 'clevel',
+                'children' => []
             ];
-            $nodes[] = $cLevelNode;
             
             // 处理下属
             if (!empty($member['subordinates']) && is_array($member['subordinates'])) {
@@ -63,33 +61,33 @@ function convertToOrgChartFormat($orgStructure) {
                     
                     $subNode = [
                         'id' => 'sub_' . $index . '_' . $subIndex,
-                        'pid' => 'clevel_' . $index,
                         'name' => $subName ?: '—',
                         'title' => $subTitle,
                         'level' => 'subordinate'
                     ];
-                    $nodes[] = $subNode;
+                    $cLevelNode['children'][] = $subNode;
                 }
             }
+            
+            $ceoNode['children'][] = $cLevelNode;
         }
     }
     
-    // PA节点
+    // PA节点也作为CEO的子节点
     if (!empty($orgStructure['pa'])) {
         $paTitle = $orgStructure['pa']['title'] ?? $orgStructure['pa']['fullTitle'] ?? 'PA';
         $paName = $orgStructure['pa']['name'] ?? '';
         
         $paNode = [
             'id' => 'pa',
-            'pid' => 'ceo',
             'name' => $paName ?: '—',
             'title' => $paTitle,
             'level' => 'pa'
         ];
-        $nodes[] = $paNode;
+        $ceoNode['children'][] = $paNode;
     }
     
-    return $nodes;
+    return $ceoNode;
 }
 ?>
 <!DOCTYPE html>
@@ -217,39 +215,37 @@ function convertToOrgChartFormat($orgStructure) {
         
         <script>
         $(document).ready(function() {
-            // 组织架构数据
+            // 组织架构数据（已经是树形结构）
             const orgData = <?php echo json_encode($orgChartData, JSON_UNESCAPED_UNICODE); ?>;
             
-            // 转换为 OrgChart.js 所需格式
-            const chartData = {};
+            if (!orgData) {
+                console.error('组织架构数据为空');
+                $('#orgchart').html('<p style="text-align: center; color: #6b7280; padding: 40px;">无法加载组织架构数据</p>');
+                return;
+            }
             
-            orgData.forEach(node => {
-                const nodeId = node.id;
-                chartData[nodeId] = {
-                    'id': nodeId,
-                    'name': node.name,
-                    'title': node.title,
-                    'relationship': node.pid ? node.pid : '',
-                    'level': node.level
-                };
-            });
+            console.log('组织架构数据:', orgData);
             
-            // 初始化组织架构图
+            // 初始化组织架构图 - OrgChart.js 使用树形结构
             $('#orgchart').orgchart({
-                'data': chartData,
+                'data': orgData,
                 'nodeContent': 'title',
                 'nodeId': 'id',
                 'pan': true,
                 'zoom': true,
+                'toggleSiblingsResp': true,
                 'createNode': function($node, data) {
                     // 自定义节点样式
                     const level = data.level || '';
                     $node.addClass('level-' + level);
                     
                     // 自定义节点内容
+                    const title = data.title || '—';
+                    const name = data.name || '—';
+                    
                     $node.html(
-                        '<div class="node-title">' + data.title + '</div>' +
-                        '<div class="node-content">' + data.name + '</div>'
+                        '<div class="node-title">' + title + '</div>' +
+                        '<div class="node-content">' + name + '</div>'
                     );
                 }
             });
