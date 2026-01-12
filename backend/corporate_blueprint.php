@@ -2793,17 +2793,19 @@ if (file_exists($jsonFile)) {
         .orgchart-container-wrapper {
             background: #ffffff;
             border-radius: 12px;
-            padding: 40px 0px;
+            padding: 40px;
             position: relative;
             overflow: hidden;
             min-height: 600px;
             max-height: 800px;
             background-image: none !important;
             border: 2px solid #f7931e;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
+        }
+        
+        /* 标题左对齐 */
+        .orgchart-title-wrapper {
+            text-align: left;
+            margin-left: 0;
         }
         
         /* 背景Logo图片 */
