@@ -3137,7 +3137,7 @@ if (file_exists($jsonFile)) {
 
                         <!-- 文本内容 - 居中显示 -->
                         <div class="header-text-content">
-                            <div class="company-name-large">KUNZZ HOLDINGS SDN BHD</div>
+                            <div class="company-name-large"><?php echo htmlspecialchars($strategyData['companyOverview']['companyName'] ?? 'KUNZZ HOLDINGS SDN BHD'); ?></div>
                             <div class="company-subtitle">企业蓝图 · 战略计划</div>
                         </div>
                     </div>

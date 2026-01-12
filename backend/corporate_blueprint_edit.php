@@ -14,7 +14,7 @@ $error = '';
 // 处理表单提交
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        // 读取现有数据
+        // 读取现有数据（保留所有现有数据）
         $data = [];
         if (file_exists($jsonFile)) {
             $content = file_get_contents($jsonFile);
@@ -24,76 +24,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
-        // 如果没有数据，初始化基本结构
-        if (empty($data)) {
-            $data = [
-                'companyOverview' => [
-                    'companyName' => '',
-                    'planTitle' => '',
-                    'strategyStartYear' => date('Y'),
-                    'strategyEndYear' => date('Y') + 5,
-                    'ultimateGoal' => ''
-                ],
-                'organizationStructure' => [
-                    'ceo' => ['name' => '', 'title' => 'CEO'],
-                    'pa' => ['name' => '', 'title' => 'PA'],
-                    'cLevel' => []
-                ],
-                'internalOrganization' => [
-                    'departments' => []
-                ],
-                'timeline' => [],
-                'strategicObjectives' => []
-            ];
+        // 初始化不存在的字段，但保留现有数据
+        if (!isset($data['companyOverview'])) {
+            $data['companyOverview'] = [];
+        }
+        if (!isset($data['organizationStructure'])) {
+            $data['organizationStructure'] = ['ceo' => [], 'pa' => [], 'cLevel' => []];
+        }
+        if (!isset($data['internalOrganization'])) {
+            $data['internalOrganization'] = ['departments' => []];
         }
         
-        // 更新公司概述
+        // 更新公司概述（只更新表单提交的字段）
         if (isset($_POST['companyName'])) {
-            if (!isset($data['companyOverview'])) {
-                $data['companyOverview'] = [];
-            }
             $data['companyOverview']['companyName'] = $_POST['companyName'];
-            $data['companyOverview']['planTitle'] = $_POST['planTitle'] ?? '';
-            $data['companyOverview']['strategyStartYear'] = intval($_POST['strategyStartYear'] ?? date('Y'));
-            $data['companyOverview']['strategyEndYear'] = intval($_POST['strategyEndYear'] ?? date('Y') + 5);
-            $data['companyOverview']['ultimateGoal'] = $_POST['ultimateGoal'] ?? '';
+            $data['companyOverview']['planTitle'] = $_POST['planTitle'] ?? ($data['companyOverview']['planTitle'] ?? '');
+            $data['companyOverview']['strategyStartYear'] = intval($_POST['strategyStartYear'] ?? ($data['companyOverview']['strategyStartYear'] ?? date('Y')));
+            $data['companyOverview']['strategyEndYear'] = intval($_POST['strategyEndYear'] ?? ($data['companyOverview']['strategyEndYear'] ?? date('Y') + 5));
+            $data['companyOverview']['ultimateGoal'] = $_POST['ultimateGoal'] ?? ($data['companyOverview']['ultimateGoal'] ?? '');
         }
         
         // 更新组织架构 - CEO
         if (isset($_POST['ceo_name'])) {
-            if (!isset($data['organizationStructure'])) {
-                $data['organizationStructure'] = ['ceo' => [], 'pa' => [], 'cLevel' => []];
-            }
-            if (!isset($data['organizationStructure']['ceo'])) {
-                $data['organizationStructure']['ceo'] = [];
-            }
             $data['organizationStructure']['ceo']['name'] = $_POST['ceo_name'];
-            $data['organizationStructure']['ceo']['title'] = $_POST['ceo_title'] ?? 'CEO';
+            $data['organizationStructure']['ceo']['title'] = $_POST['ceo_title'] ?? ($data['organizationStructure']['ceo']['title'] ?? 'CEO');
         }
         
         // 更新组织架构 - PA
         if (isset($_POST['pa_name'])) {
-            if (!isset($data['organizationStructure']['pa'])) {
-                $data['organizationStructure']['pa'] = [];
-            }
             $data['organizationStructure']['pa']['name'] = $_POST['pa_name'];
-            $data['organizationStructure']['pa']['title'] = $_POST['pa_title'] ?? 'PA';
+            $data['organizationStructure']['pa']['title'] = $_POST['pa_title'] ?? ($data['organizationStructure']['pa']['title'] ?? 'PA');
         }
         
-        // 更新C-Level高管
+        // 更新C-Level高管（如果提交了数据，则更新）
         if (isset($_POST['clevel']) && is_array($_POST['clevel'])) {
-            $data['organizationStructure']['cLevel'] = [];
+            $newCLevel = [];
             foreach ($_POST['clevel'] as $index => $clevel) {
                 if (!empty($clevel['name']) || !empty($clevel['title'])) {
-                    $data['organizationStructure']['cLevel'][] = [
+                    // 保留现有的subordinates和其他字段数据（如果存在）
+                    $existingCLevel = $data['organizationStructure']['cLevel'][$index] ?? null;
+                    $subordinates = $existingCLevel['subordinates'] ?? [];
+                    
+                    $newCLevel[] = [
                         'name' => $clevel['name'] ?? '',
                         'title' => $clevel['title'] ?? '',
-                        'reportsTo' => $clevel['reportsTo'] ?? 'CEO',
-                        'fullTitle' => $clevel['fullTitle'] ?? '',
-                        'subordinates' => []
+                        'reportsTo' => $clevel['reportsTo'] ?? ($existingCLevel['reportsTo'] ?? 'CEO'),
+                        'fullTitle' => $clevel['fullTitle'] ?? ($existingCLevel['fullTitle'] ?? ''),
+                        'subordinates' => $subordinates  // 保留现有subordinates数据
                     ];
                 }
             }
+            $data['organizationStructure']['cLevel'] = $newCLevel;
         }
         
         // 更新内部组织架构 - 部门
@@ -123,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
-        // 保存到JSON文件
+        // 保存到JSON文件（保留所有现有数据，只更新修改的字段）
         $jsonContent = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         if (file_put_contents($jsonFile, $jsonContent)) {
             $success = "数据保存成功！";
