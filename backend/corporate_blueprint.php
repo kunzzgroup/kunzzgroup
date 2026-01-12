@@ -2834,6 +2834,55 @@ if (file_exists($jsonFile)) {
         .internal-dept-orgchart {
             position: relative;
             overflow: hidden;
+            background-image: none !important;
+        }
+        
+        /* 移除内部组织架构图的网格背景 */
+        .internal-dept-orgchart .orgchart {
+            overflow: hidden !important;
+            background-image: none !important;
+            margin: 0 auto;
+        }
+        
+        .internal-dept-orgchart .orgchart-wrapper {
+            overflow: hidden !important;
+            background-image: none !important;
+            margin: 0 auto;
+        }
+        
+        .internal-dept-orgchart * {
+            background-image: none !important;
+        }
+        
+        /* 内部组织架构图连线颜色 - 黑色 */
+        .internal-dept-orgchart svg.edge {
+            stroke: #000000 !important;
+            stroke-width: 2px !important;
+        }
+        
+        .internal-dept-orgchart svg path {
+            stroke: #000000 !important;
+            stroke-width: 2px !important;
+        }
+        
+        .internal-dept-orgchart .lines .topEdge {
+            border-top-color: #000000 !important;
+            border-top-width: 2px !important;
+        }
+        
+        .internal-dept-orgchart .lines .rightEdge {
+            border-right-color: #000000 !important;
+            border-right-width: 2px !important;
+        }
+        
+        .internal-dept-orgchart .lines .bottomEdge {
+            border-bottom-color: #000000 !important;
+            border-bottom-width: 2px !important;
+        }
+        
+        .internal-dept-orgchart .lines .leftEdge {
+            border-left-color: #000000 !important;
+            border-left-width: 2px !important;
         }
         
         /* 背景Logo图片 */
