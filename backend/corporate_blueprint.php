@@ -2798,6 +2798,7 @@ if (file_exists($jsonFile)) {
             overflow: hidden;
             min-height: 600px;
             max-height: 800px;
+            background-image: none !important;
         }
         
         /* 背景Logo图片 */
@@ -2836,15 +2837,23 @@ if (file_exists($jsonFile)) {
             position: relative;
             z-index: 1;
             overflow: hidden;
+            background-image: none !important;
         }
         
         /* 禁用组织架构图的滚动 */
         #orgchart-container .orgchart {
             overflow: hidden !important;
+            background-image: none !important;
         }
         
         #orgchart-container .orgchart-wrapper {
             overflow: hidden !important;
+            background-image: none !important;
+        }
+        
+        /* 移除OrgChart.js默认的网格背景 */
+        #orgchart-container * {
+            background-image: none !important;
         }
         
         /* 连线颜色 - 黑色 */
