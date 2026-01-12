@@ -2890,17 +2890,18 @@ if (file_exists($jsonFile)) {
             border-color: #000000 !important;
         }
         
-        /* 节点样式 - 橙色圆角矩形 */
+        /* 节点样式 - 透明背景，由内部元素控制 */
         #orgchart-container .node {
-            background: #ff5c00 !important;
+            background: transparent !important;
             border: none !important;
             border-radius: 12px;
-            padding: clamp(16px, 1.67vw, 20px) clamp(20px, 2.08vw, 24px);
+            padding: 0;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             transition: all 0.3s ease;
             width: auto;
             min-width: clamp(120px, 12.5vw, 140px);
             text-align: center;
+            overflow: hidden;
         }
         
         #orgchart-container .node:hover {
@@ -2908,27 +2909,28 @@ if (file_exists($jsonFile)) {
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
         }
         
-        /* 所有节点文字颜色 - 白色 */
-        #orgchart-container .node .title,
-        #orgchart-container .node .content,
-        .orgchart-node-title,
-        .orgchart-node-content {
-            color: #ffffff !important;
-            background: transparent !important;
-        }
-        
+        /* 职位部分 - 橙色背景，白色文字 */
         .orgchart-node-title {
+            background: #ff5c00 !important;
+            color: #ffffff !important;
             font-weight: 700;
-            margin-bottom: 8px;
+            padding: clamp(12px, 1.25vw, 16px) clamp(16px, 1.67vw, 20px);
             font-size: clamp(16px, 1.67vw, 18px);
-            color: #ffffff;
             line-height: 1.3;
+            margin: 0;
+            border-radius: 12px 12px 0 0;
         }
         
+        /* 名字部分 - 白色背景，黑色文字 */
         .orgchart-node-content {
+            background: #ffffff !important;
+            color: #000000 !important;
             font-size: clamp(13px, 1.35vw, 14px);
-            color: #ffffff;
+            padding: clamp(10px, 1.04vw, 14px) clamp(16px, 1.67vw, 20px);
             line-height: 1.4;
+            margin: 0;
+            border-radius: 0 0 12px 12px;
+            border-top: 1px solid #e5e7eb;
         }
 
     </style>
