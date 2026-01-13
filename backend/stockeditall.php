@@ -2422,11 +2422,13 @@ require_once 'session_check.php';
                 <div class="export-form-group">
                     <label for="export-start-date">开始日期</label>
                     <input type="text" id="export-start-date" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" required>
+                    <small style="color: #6b7280; font-size: 12px;">可以选择过去或未来的日期</small>
                 </div>
                 
                 <div class="export-form-group">
                     <label for="export-end-date">结束日期</label>
                     <input type="text" id="export-end-date" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" required>
+                    <small style="color: #6b7280; font-size: 12px;">可以选择过去或未来的日期</small>
                 </div>
                 
                 <div class="export-form-group export-central-only" id="export-system-group">
@@ -2442,6 +2444,7 @@ require_once 'session_check.php';
                 <div class="export-form-group export-central-only" id="export-invoice-date-group">
                     <label for="export-invoice-date">发票日期</label>
                     <input type="text" id="export-invoice-date" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}">
+                    <small style="color: #6b7280; font-size: 12px;">可以选择过去或未来的日期</small>
                 </div>
 
                 <div class="export-form-group export-central-only" id="export-invoice-suffix-group">
