@@ -629,15 +629,6 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
             margin-top: 15px;
         }
         
-        .actions {
-            margin-top: 40px;
-            padding-top: 30px;
-            border-top: 2px solid #e5e7eb;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        
         .remove-btn {
             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
             color: white;
@@ -801,6 +792,82 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
             border-color: #ff5c00;
             box-shadow: 0 8px 24px rgba(255, 92, 0, 0.1);
         }
+        
+        /* 标签页导航样式 */
+        .tab-navigation {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+        }
+        
+        .tab-btn {
+            padding: 12px 24px;
+            border: 2px solid #e5e7eb;
+            background: white;
+            color: #374151;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .tab-btn:hover {
+            border-color: #ff5c00;
+            color: #ff5c00;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 92, 0, 0.2);
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, #ff5c00 0%, #ff7a2e 100%);
+            color: white;
+            border-color: #ff5c00;
+            box-shadow: 0 4px 15px rgba(255, 92, 0, 0.3);
+        }
+        
+        .tab-section {
+            display: none;
+        }
+        
+        .tab-section.active {
+            display: block;
+        }
+        
+        .fixed-actions {
+            position: sticky;
+            bottom: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+            z-index: 100;
+            border: 2px solid #e5e7eb;
+        }
+        
+        @media (max-width: 768px) {
+            .tab-navigation {
+                position: relative;
+                top: 0;
+            }
+            
+            .tab-btn {
+                flex: 1;
+                min-width: calc(50% - 6px);
+                font-size: 13px;
+                padding: 10px 16px;
+            }
+        }
     </style>
 </head>
 <body class="has-sidebar">
@@ -821,8 +888,20 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
             <?php endif; ?>
             
             <form method="POST" action="">
+                <!-- 标签导航栏 -->
+                <div class="tab-navigation">
+                    <button type="button" class="tab-btn active" onclick="switchTab('overview', this)">公司概述</button>
+                    <button type="button" class="tab-btn" onclick="switchTab('org-structure', this)">高层组织架构</button>
+                    <button type="button" class="tab-btn" onclick="switchTab('internal-org', this)">内部组织架构</button>
+                    <button type="button" class="tab-btn" onclick="switchTab('timeline', this)">时间线</button>
+                    <button type="button" class="tab-btn" onclick="switchTab('corporate-core', this)">企业核心</button>
+                    <button type="button" class="tab-btn" onclick="switchTab('culture-explanation', this)">文化解说</button>
+                    <button type="button" class="tab-btn" onclick="switchTab('values-explanation', this)">价值观解说</button>
+                    <button type="button" class="tab-btn" onclick="switchTab('strategic-objectives', this)">战略目标</button>
+                </div>
+                
                 <!-- 公司概述 -->
-                <div class="section">
+                <div class="section tab-section active" data-tab="overview">
                     <h2>公司概述</h2>
                     <div class="form-group">
                         <label>公司名称</label>
@@ -849,7 +928,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
                 </div>
                 
                 <!-- 高层组织架构 -->
-                <div class="section">
+                <div class="section tab-section" data-tab="org-structure">
                     <h2>高层组织架构</h2>
                     
                     <div class="sub-section">
@@ -917,7 +996,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
                 </div>
                 
                 <!-- 内部组织架构 -->
-                <div class="section">
+                <div class="section tab-section" data-tab="internal-org">
                     <h2>内部组织架构</h2>
                     <div id="departments-container">
                         <?php 
@@ -962,7 +1041,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
                 </div>
                 
                 <!-- 时间线 -->
-                <div class="section">
+                <div class="section tab-section" data-tab="timeline">
                     <h2>时间线</h2>
                     <div id="timeline-container">
                         <?php 
@@ -987,7 +1066,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
                 </div>
                 
                 <!-- 企业核心 -->
-                <div class="section">
+                <div class="section tab-section" data-tab="corporate-core">
                     <h2>企业核心</h2>
                     <div class="form-group">
                         <label>使命 (Mission)</label>
@@ -1042,7 +1121,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
                 </div>
                 
                 <!-- 文化解说 -->
-                <div class="section">
+                <div class="section tab-section" data-tab="culture-explanation">
                     <h2>文化解说 & 考核</h2>
                     <div id="culture-explanation-container">
                         <?php 
@@ -1088,7 +1167,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
                 </div>
                 
                 <!-- 价值观解说 -->
-                <div class="section">
+                <div class="section tab-section" data-tab="values-explanation">
                     <h2>价值观解说 & 考核</h2>
                     <div id="values-explanation-container">
                         <?php 
@@ -1134,7 +1213,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
                 </div>
                 
                 <!-- 战略目标 -->
-                <div class="section">
+                <div class="section tab-section" data-tab="strategic-objectives">
                     <h2>战略目标</h2>
                     <div id="strategic-objectives-container">
                         <?php 
@@ -1189,7 +1268,8 @@ Implementation Timeline Adherence (%)"><?php echo htmlspecialchars(implode("\n",
                     <button type="button" class="add-btn" onclick="addYear()">添加年份</button>
                 </div>
                 
-                <div class="actions">
+                <!-- 固定操作按钮 -->
+                <div class="fixed-actions">
                     <button type="submit" class="btn">保存更改</button>
                     <a href="corporate_blueprint.php" class="btn btn-secondary">返回查看</a>
                 </div>
@@ -1198,6 +1278,33 @@ Implementation Timeline Adherence (%)"><?php echo htmlspecialchars(implode("\n",
     </div>
     
     <script>
+        // 标签切换函数
+        function switchTab(tabName, btnElement) {
+            // 隐藏所有section
+            document.querySelectorAll('.tab-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // 移除所有按钮的active类
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 显示选中的section
+            const targetSection = document.querySelector(`.tab-section[data-tab="${tabName}"]`);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
+            // 添加按钮的active类
+            if (btnElement) {
+                btnElement.classList.add('active');
+            }
+            
+            // 滚动到顶部（平滑滚动）
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
         let clevelIndex = <?php echo count($orgStructure['cLevel'] ?? []); ?>;
         let deptIndex = <?php echo count($internalOrg['departments'] ?? []); ?>;
         
