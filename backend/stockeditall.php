@@ -3242,6 +3242,17 @@ require_once 'session_check.php';
 
         // 初始化应用
         async function initApp() {
+            // 测试新增表单相关函数是否已定义
+            console.log('initApp: 检查新增表单函数...');
+            console.log('handleAddFormOutQuantityChange:', typeof window.handleAddFormOutQuantityChange);
+            console.log('loadAddFormProductPricesWithStock:', typeof window.loadAddFormProductPricesWithStock);
+            
+            // 测试函数是否可以直接调用
+            if (typeof window.handleAddFormOutQuantityChange === 'function') {
+                console.log('✓ handleAddFormOutQuantityChange 可用');
+            } else {
+                console.error('✗ handleAddFormOutQuantityChange 不可用');
+            }
             // 设置默认日期为今天
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('add-date').value = today;
@@ -7525,7 +7536,7 @@ require_once 'session_check.php';
             }
         }
 
-        async function loadAddFormProductPricesWithStock(productName, requiredQty = 0) {
+        window.loadAddFormProductPricesWithStock = async function(productName, requiredQty = 0) {
             try {
                 // 使用required_qty=1来获取所有有库存的价格，即使requiredQty为0也要检查库存
                 const checkQty = requiredQty > 0 ? requiredQty : 1;
@@ -7795,7 +7806,7 @@ require_once 'session_check.php';
     </script>
     <script>
         // 处理新增表单出库数量变化
-        function handleAddFormOutQuantityChange() {
+        window.handleAddFormOutQuantityChange = function() {
             console.log('handleAddFormOutQuantityChange 被调用');
             const outQty = parseFloat(document.getElementById('add-out-qty').value) || 0;
             const inQty = parseFloat(document.getElementById('add-in-qty').value) || 0;
@@ -7840,6 +7851,16 @@ require_once 'session_check.php';
             }
             
             // 收货人字段保持始终可输入状态，不需要根据出货数量控制
+        };
+        
+        // 确保函数在全局作用域中可用
+        console.log('handleAddFormOutQuantityChange 函数已定义:', typeof window.handleAddFormOutQuantityChange);
+        
+        // 测试函数是否可以被调用
+        if (typeof window.handleAddFormOutQuantityChange === 'function') {
+            console.log('✓ handleAddFormOutQuantityChange 函数已成功定义在全局作用域');
+        } else {
+            console.error('✗ handleAddFormOutQuantityChange 函数未定义');
         }
     </script>
     <script>
