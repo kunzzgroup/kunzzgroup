@@ -3253,6 +3253,31 @@ require_once 'session_check.php';
             } else {
                 console.error('✗ handleAddFormOutQuantityChange 不可用');
             }
+            
+            // 为新增表单的输入框添加事件监听器（作为备选方案）
+            const addOutQtyInput = document.getElementById('add-out-qty');
+            const addInQtyInput = document.getElementById('add-in-qty');
+            
+            if (addOutQtyInput) {
+                // 移除旧的事件监听器（如果有）
+                addOutQtyInput.removeEventListener('input', window.handleAddFormOutQuantityChange);
+                addOutQtyInput.removeEventListener('change', window.handleAddFormOutQuantityChange);
+                // 添加新的事件监听器
+                addOutQtyInput.addEventListener('input', window.handleAddFormOutQuantityChange);
+                addOutQtyInput.addEventListener('change', window.handleAddFormOutQuantityChange);
+                console.log('✓ 已为 add-out-qty 添加事件监听器');
+            } else {
+                console.warn('⚠ 找不到 add-out-qty 元素');
+            }
+            
+            if (addInQtyInput) {
+                addInQtyInput.removeEventListener('input', window.handleAddFormOutQuantityChange);
+                addInQtyInput.addEventListener('input', window.handleAddFormOutQuantityChange);
+                console.log('✓ 已为 add-in-qty 添加事件监听器');
+            } else {
+                console.warn('⚠ 找不到 add-in-qty 元素');
+            }
+            
             // 设置默认日期为今天
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('add-date').value = today;
@@ -7575,7 +7600,15 @@ require_once 'session_check.php';
                         // 只有一个价格，自动填充
                         const singlePrice = pricesWithStock[0].price;
                         const priceValue = parseFloat(singlePrice);
-                        console.log('自动填充单价:', priceValue, '原始值:', singlePrice);
+                        console.log('✓ 只有一个价格，自动填充单价:', priceValue, '原始值:', singlePrice);
+                        console.log('价格元素状态 - selectElement:', selectElement, 'priceInput:', priceInput);
+                        
+                        // 确保元素存在
+                        if (!selectElement || !priceInput) {
+                            console.error('✗ 价格元素不存在');
+                            return;
+                        }
+                        
                         selectElement.style.display = 'none';
                         priceInput.style.display = 'block';
                         priceInput.value = priceValue.toFixed(5);
@@ -7583,9 +7616,14 @@ require_once 'session_check.php';
                         priceInput.placeholder = '0.00';
                         priceInput.style.color = '';
                         priceInput.style.backgroundColor = '';
+                        
+                        console.log('✓ 单价已填充到输入框，值:', priceInput.value);
+                        
                         // 触发input和change事件，确保其他相关逻辑能响应
                         priceInput.dispatchEvent(new Event('input', { bubbles: true }));
                         priceInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        
+                        console.log('✓ 已触发input和change事件');
                     } else {
                         // 有多个价格，显示下拉选单
                         let options = '<option value="">请选择价格</option>';
