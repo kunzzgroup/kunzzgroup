@@ -251,10 +251,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // 保存到JSON文件（保留所有现有数据，只更新修改的字段）
         $jsonContent = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        if (file_put_contents($jsonFile, $jsonContent)) {
-            $success = "数据保存成功！";
+        
+        // 检查JSON编码是否有错误
+        if ($jsonContent === false) {
+            $error = "JSON编码失败：" . json_last_error_msg();
         } else {
-            $error = "数据保存失败！";
+            // 确保目录存在
+            $jsonDir = dirname($jsonFile);
+            if (!is_dir($jsonDir)) {
+                if (!mkdir($jsonDir, 0755, true)) {
+                    $error = "无法创建目录：" . $jsonDir;
+                }
+            }
+            
+            // 尝试保存文件
+            if (isset($error)) {
+                // 如果已经有错误，不继续保存
+            } else {
+                $bytesWritten = file_put_contents($jsonFile, $jsonContent, LOCK_EX);
+                if ($bytesWritten === false) {
+                    $error = "数据保存失败！文件路径：" . $jsonFile . " 请检查文件权限。";
+                } else {
+                    $success = "数据保存成功！已写入 " . $bytesWritten . " 字节。";
+                }
+            }
         }
     } catch (Exception $e) {
         $error = "保存时发生错误：" . $e->getMessage();
