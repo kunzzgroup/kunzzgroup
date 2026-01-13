@@ -8090,8 +8090,8 @@ require_once 'session_check.php';
                         return false;
                     }
                     
-                    // 检查日期范围
-                    const recordDate = record.date || record.out_date || record.created_at;
+                    // 检查日期范围 - 只使用设定的日期字段，不使用创建时间
+                    const recordDate = record.date;
                     if (!recordDate) return false;
                     
                     const recordDateObj = new Date(recordDate);
@@ -8128,9 +8128,9 @@ require_once 'session_check.php';
                     isGroupedByDate = true;
                     const groupedByDate = {};
                     
-                    // 按日期分组并计算每天的总金额
+                    // 按日期分组并计算每天的总金额 - 只使用设定的日期字段，不使用创建时间
                     outData.forEach(record => {
-                        const recordDate = record.date || record.out_date || record.created_at;
+                        const recordDate = record.date;
                         if (!recordDate) return;
                         
                         const dateObj = new Date(recordDate);
