@@ -8069,8 +8069,8 @@ require_once 'session_check.php';
                 // 获取指定日期范围内的出库数据（转换为YYYY-MM-DD格式）
                 const params = new URLSearchParams({
                     action: 'list',
-                    search_start_date: formatDateToYYYYMMDD(startDateObj),
-                    search_end_date: formatDateToYYYYMMDD(endDateObj)
+                    start_date: formatDateToYYYYMMDD(startDateObj),
+                    end_date: formatDateToYYYYMMDD(endDateObj)
                 });
                 
                 const result = await apiCall(`?${params}`);
@@ -8079,20 +8079,30 @@ require_once 'session_check.php';
                     throw new Error('获取数据失败');
                 }
                 
+                console.log('API返回的数据总数:', (result.data || []).length);
+                console.log('查询日期范围:', formatDateToYYYYMMDD(startDateObj), '到', formatDateToYYYYMMDD(endDateObj));
+                
                 // 过滤出库数据 - 按日期范围、出库数量和收货单位筛选
                 const outData = (result.data || []).filter(record => {
                     const outQty = parseFloat(record.out_quantity);
-                    if (outQty <= 0) return false;
+                    if (outQty <= 0) {
+                        console.log('记录出库数量为0或负数，跳过:', record.id, 'out_quantity:', record.out_quantity);
+                        return false;
+                    }
                     
                     // 检查收货单位是否匹配选择的店面
                     const targetSystem = record.target_system;
                     if (!targetSystem || targetSystem.toLowerCase() !== exportSystem.toLowerCase()) {
+                        console.log('记录收货单位不匹配，跳过:', record.id, 'target_system:', targetSystem, '期望:', exportSystem);
                         return false;
                     }
                     
                     // 检查日期范围 - 只使用设定的日期字段，不使用创建时间
                     const recordDate = record.date;
-                    if (!recordDate) return false;
+                    if (!recordDate) {
+                        console.log('记录缺少date字段，跳过:', record.id);
+                        return false;
+                    }
                     
                     const recordDateObj = new Date(recordDate);
                     // 创建日期对象的副本用于比较，避免修改原始对象
@@ -8104,8 +8114,15 @@ require_once 'session_check.php';
                     endDateForCompare.setHours(23, 59, 59, 999);
                     recordDateObj.setHours(0, 0, 0, 0);
                     
-                    return recordDateObj >= startDateForCompare && recordDateObj <= endDateForCompare;
+                    const isInRange = recordDateObj >= startDateForCompare && recordDateObj <= endDateForCompare;
+                    if (!isInRange) {
+                        console.log('记录日期不在范围内:', record.id, '日期:', recordDate, '范围:', formatDateToYYYYMMDD(startDateForCompare), '到', formatDateToYYYYMMDD(endDateForCompare));
+                    }
+                    
+                    return isInRange;
                 });
+                
+                console.log('过滤后的出库数据数量:', outData.length);
                 
                 // 允许导出未来日期，即使没有数据也可以导出
                 if (outData.length === 0) {
