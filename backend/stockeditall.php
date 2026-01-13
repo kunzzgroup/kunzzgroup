@@ -2213,11 +2213,11 @@ require_once 'session_check.php';
                 </div>
                 <div class="form-group">
                     <label for="add-in-qty">入库数量</label>
-                    <input type="number" id="add-in-qty" class="form-input" min="0" step="0.001" placeholder="0.000" oninput="handleAddFormOutQuantityChange()">
+                    <input type="number" id="add-in-qty" class="form-input" min="0" step="0.001" placeholder="0.000" oninput="window.handleAddFormOutQuantityChange()">
                 </div>
                 <div class="form-group">
                     <label for="add-out-qty">出库数量</label>
-                    <input type="number" id="add-out-qty" class="form-input" min="0" step="0.001" placeholder="0.000" oninput="handleAddFormOutQuantityChange()" onchange="handleAddFormOutQuantityChange()">
+                    <input type="number" id="add-out-qty" class="form-input" min="0" step="0.001" placeholder="0.000" oninput="window.handleAddFormOutQuantityChange()" onchange="window.handleAddFormOutQuantityChange()">
                 </div>
                 <select id="add-target" class="form-select" disabled>
                     <option value="">请选择</option>
@@ -3255,28 +3255,54 @@ require_once 'session_check.php';
             }
             
             // 为新增表单的输入框添加事件监听器（作为备选方案）
-            const addOutQtyInput = document.getElementById('add-out-qty');
-            const addInQtyInput = document.getElementById('add-in-qty');
-            
-            if (addOutQtyInput) {
-                // 移除旧的事件监听器（如果有）
-                addOutQtyInput.removeEventListener('input', window.handleAddFormOutQuantityChange);
-                addOutQtyInput.removeEventListener('change', window.handleAddFormOutQuantityChange);
-                // 添加新的事件监听器
-                addOutQtyInput.addEventListener('input', window.handleAddFormOutQuantityChange);
-                addOutQtyInput.addEventListener('change', window.handleAddFormOutQuantityChange);
-                console.log('✓ 已为 add-out-qty 添加事件监听器');
-            } else {
-                console.warn('⚠ 找不到 add-out-qty 元素');
-            }
-            
-            if (addInQtyInput) {
-                addInQtyInput.removeEventListener('input', window.handleAddFormOutQuantityChange);
-                addInQtyInput.addEventListener('input', window.handleAddFormOutQuantityChange);
-                console.log('✓ 已为 add-in-qty 添加事件监听器');
-            } else {
-                console.warn('⚠ 找不到 add-in-qty 元素');
-            }
+            // 使用延迟确保DOM已完全加载
+            setTimeout(() => {
+                const addOutQtyInput = document.getElementById('add-out-qty');
+                const addInQtyInput = document.getElementById('add-in-qty');
+                
+                console.log('查找输入框元素 - addOutQtyInput:', addOutQtyInput, 'addInQtyInput:', addInQtyInput);
+                
+                if (addOutQtyInput) {
+                    // 移除旧的事件监听器（如果有）
+                    const oldHandler = addOutQtyInput.oninput;
+                    if (oldHandler) {
+                        addOutQtyInput.removeEventListener('input', oldHandler);
+                        addOutQtyInput.removeEventListener('change', oldHandler);
+                    }
+                    // 添加新的事件监听器
+                    addOutQtyInput.addEventListener('input', window.handleAddFormOutQuantityChange, true);
+                    addOutQtyInput.addEventListener('change', window.handleAddFormOutQuantityChange, true);
+                    // 同时设置oninput属性作为备选
+                    addOutQtyInput.setAttribute('oninput', 'window.handleAddFormOutQuantityChange()');
+                    addOutQtyInput.setAttribute('onchange', 'window.handleAddFormOutQuantityChange()');
+                    console.log('✓ 已为 add-out-qty 添加事件监听器');
+                    console.log('✓ add-out-qty 的oninput属性:', addOutQtyInput.getAttribute('oninput'));
+                } else {
+                    console.warn('⚠ 找不到 add-out-qty 元素');
+                }
+                
+                if (addInQtyInput) {
+                    const oldHandler = addInQtyInput.oninput;
+                    if (oldHandler) {
+                        addInQtyInput.removeEventListener('input', oldHandler);
+                    }
+                    addInQtyInput.addEventListener('input', window.handleAddFormOutQuantityChange, true);
+                    addInQtyInput.setAttribute('oninput', 'window.handleAddFormOutQuantityChange()');
+                    console.log('✓ 已为 add-in-qty 添加事件监听器');
+                    console.log('✓ add-in-qty 的oninput属性:', addInQtyInput.getAttribute('oninput'));
+                } else {
+                    console.warn('⚠ 找不到 add-in-qty 元素');
+                }
+                
+                // 测试函数是否可以直接调用
+                console.log('测试：尝试直接调用函数');
+                try {
+                    window.handleAddFormOutQuantityChange();
+                    console.log('✓ 函数可以直接调用');
+                } catch (e) {
+                    console.error('✗ 函数调用失败:', e);
+                }
+            }, 500);
             
             // 设置默认日期为今天
             const today = new Date().toISOString().split('T')[0];
@@ -7864,7 +7890,7 @@ require_once 'session_check.php';
     <script>
         // 处理新增表单出库数量变化
         window.handleAddFormOutQuantityChange = function() {
-            console.log('handleAddFormOutQuantityChange 被调用');
+            console.log('=== handleAddFormOutQuantityChange 被调用 ===');
             const outQty = parseFloat(document.getElementById('add-out-qty').value) || 0;
             const inQty = parseFloat(document.getElementById('add-in-qty').value) || 0;
             const productName = document.getElementById('add-product-name').value;
@@ -7925,9 +7951,14 @@ require_once 'session_check.php';
         // 确保函数在全局作用域中可用
         console.log('handleAddFormOutQuantityChange 函数已定义:', typeof window.handleAddFormOutQuantityChange);
         
-        // 测试函数是否可以被调用
+        // 同时创建一个不带window前缀的全局别名，确保内联事件处理器可以访问
         if (typeof window.handleAddFormOutQuantityChange === 'function') {
+            // 创建一个全局变量别名（不带window前缀）
+            if (typeof handleAddFormOutQuantityChange === 'undefined') {
+                handleAddFormOutQuantityChange = window.handleAddFormOutQuantityChange;
+            }
             console.log('✓ handleAddFormOutQuantityChange 函数已成功定义在全局作用域');
+            console.log('✓ 函数可以直接访问:', typeof handleAddFormOutQuantityChange);
         } else {
             console.error('✗ handleAddFormOutQuantityChange 函数未定义');
         }
