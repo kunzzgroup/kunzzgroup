@@ -50,14 +50,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data['strategicObjectives'] = [];
         }
         
-        // 更新公司概述（只更新表单提交的字段）
-        if (isset($_POST['companyName'])) {
-            $data['companyOverview']['companyName'] = $_POST['companyName'];
-            $data['companyOverview']['planTitle'] = $_POST['planTitle'] ?? ($data['companyOverview']['planTitle'] ?? '');
-            $data['companyOverview']['strategyStartYear'] = intval($_POST['strategyStartYear'] ?? ($data['companyOverview']['strategyStartYear'] ?? date('Y')));
-            $data['companyOverview']['strategyEndYear'] = intval($_POST['strategyEndYear'] ?? ($data['companyOverview']['strategyEndYear'] ?? date('Y') + 5));
-            $data['companyOverview']['ultimateGoal'] = $_POST['ultimateGoal'] ?? ($data['companyOverview']['ultimateGoal'] ?? '');
-        }
+        // 更新公司概述（总是更新，即使字段为空）
+        $data['companyOverview']['companyName'] = $_POST['companyName'] ?? ($data['companyOverview']['companyName'] ?? '');
+        $data['companyOverview']['planTitle'] = $_POST['planTitle'] ?? ($data['companyOverview']['planTitle'] ?? '');
+        $data['companyOverview']['strategyStartYear'] = intval($_POST['strategyStartYear'] ?? ($data['companyOverview']['strategyStartYear'] ?? date('Y')));
+        $data['companyOverview']['strategyEndYear'] = intval($_POST['strategyEndYear'] ?? ($data['companyOverview']['strategyEndYear'] ?? date('Y') + 5));
+        $data['companyOverview']['ultimateGoal'] = $_POST['ultimateGoal'] ?? ($data['companyOverview']['ultimateGoal'] ?? '');
         
         // 更新组织架构 - CEO
         if (isset($_POST['ceo_name'])) {
@@ -136,26 +134,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
         }
         
-        // 更新企业核心
-        if (isset($_POST['mission'])) {
-            $data['corporateCore']['mission'] = $_POST['mission'] ?? '';
-            $data['corporateCore']['vision'] = $_POST['vision'] ?? '';
-            
-            // 更新文化列表
-            if (isset($_POST['culture']) && is_array($_POST['culture'])) {
-                $data['corporateCore']['culture'] = array_filter($_POST['culture'], function($item) {
-                    return !empty(trim($item));
-                });
-                $data['corporateCore']['culture'] = array_values($data['corporateCore']['culture']);
-            }
-            
-            // 更新价值观列表
-            if (isset($_POST['values']) && is_array($_POST['values'])) {
-                $data['corporateCore']['values'] = array_filter($_POST['values'], function($item) {
-                    return !empty(trim($item));
-                });
-                $data['corporateCore']['values'] = array_values($data['corporateCore']['values']);
-            }
+        // 更新企业核心（总是更新）
+        $data['corporateCore']['mission'] = $_POST['mission'] ?? ($data['corporateCore']['mission'] ?? '');
+        $data['corporateCore']['vision'] = $_POST['vision'] ?? ($data['corporateCore']['vision'] ?? '');
+        
+        // 更新文化列表
+        if (isset($_POST['culture']) && is_array($_POST['culture'])) {
+            $data['corporateCore']['culture'] = array_filter($_POST['culture'], function($item) {
+                return !empty(trim($item));
+            });
+            $data['corporateCore']['culture'] = array_values($data['corporateCore']['culture']);
+        }
+        
+        // 更新价值观列表
+        if (isset($_POST['values']) && is_array($_POST['values'])) {
+            $data['corporateCore']['values'] = array_filter($_POST['values'], function($item) {
+                return !empty(trim($item));
+            });
+            $data['corporateCore']['values'] = array_values($data['corporateCore']['values']);
         }
         
         // 更新文化解释
@@ -264,10 +260,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
             
-            // 尝试保存文件
-            if (isset($error)) {
-                // 如果已经有错误，不继续保存
-            } else {
+            // 尝试保存文件（只有在没有错误的情况下）
+            if (empty($error)) {
                 $bytesWritten = file_put_contents($jsonFile, $jsonContent, LOCK_EX);
                 if ($bytesWritten === false) {
                     $error = "数据保存失败！文件路径：" . $jsonFile . " 请检查文件权限。";
