@@ -7568,7 +7568,6 @@ require_once 'session_check.php';
                                 : `(库存: ${availableStock})`;
                             options += `<option value="${price}">${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
                         });
-                        options += '<option value="manual">手动输入价格</option>';
                         selectElement.innerHTML = options;
                         selectElement.style.display = 'block';
                         priceInput.style.display = 'none';
@@ -7577,28 +7576,14 @@ require_once 'session_check.php';
                         priceInput.style.backgroundColor = '';
                     }
                 } else {
-                    // 没有价格数据，可能是新货品或没有库存
-                    // 先检查总库存
-                    const stockResult = await apiCall(`?action=product_stock&product_name=${encodeURIComponent(productName)}`);
-                    if (stockResult.success && stockResult.data && parseFloat(stockResult.data.available_stock || 0) > 0) {
-                        // 有库存但没有价格记录，允许手动输入
-                        selectElement.style.display = 'none';
-                        priceInput.style.display = 'block';
-                        priceInput.value = '';
-                        priceInput.disabled = false;
-                        priceInput.placeholder = '0.00';
-                        priceInput.style.color = '';
-                        priceInput.style.backgroundColor = '';
-                    } else {
-                        // 没有库存，显示库存不足
-                        selectElement.style.display = 'none';
-                        priceInput.style.display = 'block';
-                        priceInput.value = '';
-                        priceInput.placeholder = '库存不足';
-                        priceInput.disabled = true;
-                        priceInput.style.color = '#dc2626';
-                        priceInput.style.backgroundColor = '#fef2f2';
-                    }
+                    // 没有价格数据，显示库存不足
+                    selectElement.style.display = 'none';
+                    priceInput.style.display = 'block';
+                    priceInput.value = '';
+                    priceInput.placeholder = '库存不足';
+                    priceInput.disabled = true;
+                    priceInput.style.color = '#dc2626';
+                    priceInput.style.backgroundColor = '#fef2f2';
                 }
                 
             } catch (error) {
@@ -7780,12 +7765,13 @@ require_once 'session_check.php';
             const selectElement = document.getElementById('add-price-select');
             const inputElement = document.getElementById('add-price');
             
-            if (selectElement.value === 'manual') {
+            if (selectElement && inputElement && selectElement.value) {
+                // 将选中的价格填充到输入框并显示输入框
+                inputElement.value = parseFloat(selectElement.value).toFixed(5);
                 selectElement.style.display = 'none';
                 inputElement.style.display = 'block';
+                inputElement.disabled = false;
                 inputElement.focus();
-            } else {
-                inputElement.value = selectElement.value;
             }
         }
     </script>
