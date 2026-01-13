@@ -896,12 +896,12 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
                 <!-- 标签导航栏 -->
                 <div class="tab-navigation">
                     <button type="button" class="tab-btn active" onclick="switchTab('overview', this)">公司概述</button>
-                    <button type="button" class="tab-btn" onclick="switchTab('org-structure', this)">高层组织架构</button>
-                    <button type="button" class="tab-btn" onclick="switchTab('internal-org', this)">内部组织架构</button>
                     <button type="button" class="tab-btn" onclick="switchTab('timeline', this)">时间线</button>
                     <button type="button" class="tab-btn" onclick="switchTab('corporate-core', this)">企业核心</button>
                     <button type="button" class="tab-btn" onclick="switchTab('culture-explanation', this)">文化解说</button>
                     <button type="button" class="tab-btn" onclick="switchTab('values-explanation', this)">价值观解说</button>
+                    <button type="button" class="tab-btn" onclick="switchTab('org-structure', this)">高层组织架构</button>
+                    <button type="button" class="tab-btn" onclick="switchTab('internal-org', this)">内部组织架构</button>
                     <button type="button" class="tab-btn" onclick="switchTab('strategic-objectives', this)">战略目标</button>
                 </div>
                 
