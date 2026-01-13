@@ -4055,6 +4055,16 @@ require_once 'session_check.php';
                             toggleRemarkNumber();
                         }
                     }
+                    // 检查出库数量，如果有出库数量则加载价格
+                    if (productName) {
+                        const outQty = parseFloat(document.getElementById('add-out-qty')?.value || 0);
+                        if (outQty > 0) {
+                            // 延迟执行，确保其他字段已更新
+                            setTimeout(() => {
+                                handleAddFormOutQuantityChange();
+                            }, 100);
+                        }
+                    }
                 }
                 // 如果是表格中的行（编辑模式）
                 else if (isEditMode && recordId) {
@@ -7512,34 +7522,97 @@ require_once 'session_check.php';
 
         async function loadAddFormProductPricesWithStock(productName, requiredQty = 0) {
             try {
-                const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=${requiredQty}`);
+                // 使用required_qty=1来获取所有有库存的价格，即使requiredQty为0也要检查库存
+                const checkQty = requiredQty > 0 ? requiredQty : 1;
+                const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=${checkQty}`);
                 const selectElement = document.getElementById('add-price-select');
+                const priceInput = document.getElementById('add-price');
                 
-                if (!selectElement) return;
+                if (!selectElement || !priceInput) return;
                 
                 if (result.success && result.data && result.data.length > 0) {
-                    let options = '<option value="">请选择价格</option>';
-                    options += '<option value="manual">手动输入价格</option>';
+                    // 过滤出有库存的价格（库存>0）
+                    const pricesWithStock = result.data.filter(item => item.available_stock > 0);
                     
-                    result.data.forEach(item => {
-                        const price = item.price;
-                        const availableStock = item.available_stock;
-                        
-                        // 只显示库存足够的价格选项
-                        if (availableStock >= requiredQty) {
-                            options += `<option value="${price}">${parseFloat(price).toFixed(5)} (库存: ${availableStock})</option>`;
-                        }
-                    });
-                    selectElement.innerHTML = options;
+                    if (pricesWithStock.length === 0) {
+                        // 没有库存，显示库存不足
+                        selectElement.style.display = 'none';
+                        priceInput.style.display = 'block';
+                        priceInput.value = '';
+                        priceInput.placeholder = '库存不足';
+                        priceInput.disabled = true;
+                        priceInput.style.color = '#dc2626';
+                        priceInput.style.backgroundColor = '#fef2f2';
+                        return;
+                    }
+                    
+                    // 有库存，根据价格数量决定显示方式
+                    if (pricesWithStock.length === 1) {
+                        // 只有一个价格，自动填充
+                        const singlePrice = pricesWithStock[0].price;
+                        selectElement.style.display = 'none';
+                        priceInput.style.display = 'block';
+                        priceInput.value = parseFloat(singlePrice).toFixed(5);
+                        priceInput.disabled = false;
+                        priceInput.placeholder = '0.00';
+                        priceInput.style.color = '';
+                        priceInput.style.backgroundColor = '';
+                    } else {
+                        // 有多个价格，显示下拉选单
+                        let options = '<option value="">请选择价格</option>';
+                        pricesWithStock.forEach(item => {
+                            const price = item.price;
+                            const availableStock = item.available_stock;
+                            const stockInfo = requiredQty > 0 && availableStock < requiredQty 
+                                ? `(库存: ${availableStock}, 不足)` 
+                                : `(库存: ${availableStock})`;
+                            options += `<option value="${price}">${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
+                        });
+                        options += '<option value="manual">手动输入价格</option>';
+                        selectElement.innerHTML = options;
+                        selectElement.style.display = 'block';
+                        priceInput.style.display = 'none';
+                        priceInput.disabled = false;
+                        priceInput.style.color = '';
+                        priceInput.style.backgroundColor = '';
+                    }
                 } else {
-                    selectElement.innerHTML = '<option value="">暂无足够库存的价格</option><option value="manual">手动输入价格</option>';
+                    // 没有价格数据，可能是新货品或没有库存
+                    // 先检查总库存
+                    const stockResult = await apiCall(`?action=product_stock&product_name=${encodeURIComponent(productName)}`);
+                    if (stockResult.success && stockResult.data && parseFloat(stockResult.data.available_stock || 0) > 0) {
+                        // 有库存但没有价格记录，允许手动输入
+                        selectElement.style.display = 'none';
+                        priceInput.style.display = 'block';
+                        priceInput.value = '';
+                        priceInput.disabled = false;
+                        priceInput.placeholder = '0.00';
+                        priceInput.style.color = '';
+                        priceInput.style.backgroundColor = '';
+                    } else {
+                        // 没有库存，显示库存不足
+                        selectElement.style.display = 'none';
+                        priceInput.style.display = 'block';
+                        priceInput.value = '';
+                        priceInput.placeholder = '库存不足';
+                        priceInput.disabled = true;
+                        priceInput.style.color = '#dc2626';
+                        priceInput.style.backgroundColor = '#fef2f2';
+                    }
                 }
                 
             } catch (error) {
                 console.error('加载货品价格失败:', error);
                 const selectElement = document.getElementById('add-price-select');
-                if (selectElement) {
-                    selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+                const priceInput = document.getElementById('add-price');
+                if (selectElement && priceInput) {
+                    selectElement.style.display = 'none';
+                    priceInput.style.display = 'block';
+                    priceInput.value = '';
+                    priceInput.disabled = false;
+                    priceInput.placeholder = '0.00';
+                    priceInput.style.color = '';
+                    priceInput.style.backgroundColor = '';
                 }
             }
         }
@@ -7735,6 +7808,10 @@ require_once 'session_check.php';
                 // 入库或出库为0，显示普通输入框
                 priceSelect.style.display = 'none';
                 priceInput.style.display = 'block';
+                priceInput.disabled = false;
+                priceInput.placeholder = '0.00';
+                priceInput.style.color = '';
+                priceInput.style.backgroundColor = '';
                 if (outQty === 0 && inQty === 0) {
                     priceInput.value = '';
                 }
