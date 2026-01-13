@@ -8095,18 +8095,22 @@ require_once 'session_check.php';
                     if (!recordDate) return false;
                     
                     const recordDateObj = new Date(recordDate);
-                    // startDateObj 和 endDateObj 已经在前面解析过了
+                    // 创建日期对象的副本用于比较，避免修改原始对象
+                    const startDateForCompare = new Date(startDateObj);
+                    const endDateForCompare = new Date(endDateObj);
                     
                     // 设置时间为当天的开始和结束
-                    startDateObj.setHours(0, 0, 0, 0);
-                    endDateObj.setHours(23, 59, 59, 999);
+                    startDateForCompare.setHours(0, 0, 0, 0);
+                    endDateForCompare.setHours(23, 59, 59, 999);
+                    recordDateObj.setHours(0, 0, 0, 0);
                     
-                    return recordDateObj >= startDateObj && recordDateObj <= endDateObj;
+                    return recordDateObj >= startDateForCompare && recordDateObj <= endDateForCompare;
                 });
                 
+                // 允许导出未来日期，即使没有数据也可以导出
                 if (outData.length === 0) {
-                    showAlert('指定日期范围内没有出库数据', 'error');
-                    return;
+                    showAlert('指定日期范围内没有出库数据，将生成空的PDF文件', 'info');
+                    // 继续执行，不返回，允许生成空的PDF
                 }
                 
                 // 检查日期范围是否超过一天
