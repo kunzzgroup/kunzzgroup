@@ -7,12 +7,27 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+// 增加 max_input_vars 限制（如果表单字段太多）
+ini_set('max_input_vars', 5000);
+
 $jsonFile = __DIR__ . '/corporate_strategy.json';
 $success = '';
 $error = '';
 
 // 处理表单提交
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // 调试信息
+    error_log("POST 请求已接收");
+    error_log("POST 数据数量: " . count($_POST));
+    error_log("Content-Type: " . ($_SERVER['CONTENT_TYPE'] ?? '未设置'));
+    error_log("Content-Length: " . ($_SERVER['CONTENT_LENGTH'] ?? '未设置'));
+    
+    // 检查是否有 POST 数据
+    if (empty($_POST) && empty($_FILES)) {
+        $error = "未接收到任何 POST 数据。可能原因：表单字段过多超过了 max_input_vars 限制，或表单未正确提交。";
+        error_log("警告：POST 请求但没有数据");
+    }
+    
     try {
         // 读取现有数据（保留所有现有数据）
         $data = [];
@@ -264,10 +279,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
             
-            // 尝试保存文件
-            if (isset($error)) {
-                // 如果已经有错误，不继续保存
-            } else {
+            // 尝试保存文件（仅当尚无错误时）
+            if (empty($error)) {
                 $bytesWritten = file_put_contents($jsonFile, $jsonContent, LOCK_EX);
                 if ($bytesWritten === false) {
                     $error = "数据保存失败！文件路径：" . $jsonFile . " 请检查文件权限。";
@@ -278,6 +291,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } catch (Exception $e) {
         $error = "保存时发生错误：" . $e->getMessage();
+        error_log("保存错误: " . $e->getMessage());
+        error_log("错误堆栈: " . $e->getTraceAsString());
+    } catch (Error $e) {
+        $error = "保存时发生致命错误：" . $e->getMessage();
+        error_log("致命错误: " . $e->getMessage());
     }
 }
 
@@ -913,10 +931,10 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
             <?php endif; ?>
             
             <?php if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($success) && empty($error)): ?>
-                <div class="alert alert-error">表单已提交，但未检测到保存操作。请检查表单数据是否正确提交。</div>
+                <div class="alert alert-error">表单已提交，但未检测到保存操作。请检查表单数据是否正确提交。POST 数据数量: <?php echo count($_POST); ?></div>
             <?php endif; ?>
             
-            <form method="POST" action="">
+            <form method="POST" action="" id="corporate-form" onsubmit="return handleFormSubmit(event)">
                 <!-- 标签导航栏 -->
                 <div class="tab-navigation">
                     <button type="button" class="tab-btn active" onclick="switchTab('overview', this)">公司概述</button>
@@ -1307,6 +1325,46 @@ Implementation Timeline Adherence (%)"><?php echo htmlspecialchars(implode("\n",
     </div>
     
     <script>
+        // 表单提交处理
+        function handleFormSubmit(event) {
+            console.log('表单提交事件触发');
+            const form = event.target;
+            
+            // 显示加载状态
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                const originalText = submitBtn.textContent;
+                submitBtn.disabled = true;
+                submitBtn.textContent = '保存中...';
+                
+                // 如果提交失败，恢复按钮状态（5秒后）
+                setTimeout(function() {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }, 5000);
+            }
+            
+            // 计算表单字段数量（用于调试）
+            const inputs = form.querySelectorAll('input, textarea, select');
+            console.log('表单字段总数:', inputs.length);
+            
+            return true; // 允许表单正常提交
+        }
+        
+        // 页面加载时检查
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('页面加载完成');
+            const form = document.getElementById('corporate-form');
+            if (form) {
+                console.log('表单元素找到');
+                form.addEventListener('submit', function(e) {
+                    console.log('表单提交监听器触发');
+                });
+            } else {
+                console.error('未找到表单元素');
+            }
+        });
+        
         // 标签切换函数
         function switchTab(tabName, btnElement) {
             // 隐藏所有section
