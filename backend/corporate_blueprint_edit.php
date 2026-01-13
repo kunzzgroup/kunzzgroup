@@ -11,6 +11,11 @@ $jsonFile = __DIR__ . '/corporate_strategy.json';
 $success = '';
 $error = '';
 
+// 检查是否有成功消息（从重定向中）
+if (isset($_GET['success']) && $_GET['success'] == '1') {
+    $success = "数据保存成功！";
+}
+
 // 处理表单提交
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
@@ -273,6 +278,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error = "数据保存失败！文件路径：" . $jsonFile . " 请检查文件权限。";
                 } else {
                     $success = "数据保存成功！已写入 " . $bytesWritten . " 字节。";
+                    // 保存成功后，使用GET重定向避免重复提交
+                    header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
+                    exit();
                 }
             }
         }
