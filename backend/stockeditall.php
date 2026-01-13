@@ -4057,12 +4057,17 @@ require_once 'session_check.php';
                     }
                     // 检查出库数量，如果有出库数量则加载价格
                     if (productName) {
+                        console.log('新增表单货品变化，货品名称:', productName);
                         const outQty = parseFloat(document.getElementById('add-out-qty')?.value || 0);
+                        console.log('当前出库数量:', outQty);
                         if (outQty > 0) {
+                            console.log('出库数量>0，延迟调用handleAddFormOutQuantityChange');
                             // 延迟执行，确保其他字段已更新
                             setTimeout(() => {
                                 handleAddFormOutQuantityChange();
                             }, 100);
+                        } else {
+                            console.log('出库数量为0，不加载价格');
                         }
                     }
                 }
@@ -7791,13 +7796,17 @@ require_once 'session_check.php';
     <script>
         // 处理新增表单出库数量变化
         function handleAddFormOutQuantityChange() {
+            console.log('handleAddFormOutQuantityChange 被调用');
             const outQty = parseFloat(document.getElementById('add-out-qty').value) || 0;
             const inQty = parseFloat(document.getElementById('add-in-qty').value) || 0;
             const productName = document.getElementById('add-product-name').value;
             const priceSelect = document.getElementById('add-price-select');
             const priceInput = document.getElementById('add-price');
             
+            console.log('出库数量:', outQty, '入库数量:', inQty, '货品名称:', productName);
+            
             if (outQty > 0 && inQty === 0 && productName) {
+                console.log('条件满足，开始加载价格');
                 // 纯出库且有货品名称，加载价格（带库存检查）
                 // 先清空，等待API返回后再决定显示方式
                 priceSelect.style.display = 'none';
