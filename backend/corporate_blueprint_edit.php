@@ -447,9 +447,14 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
             background: linear-gradient(180deg, #ff5c00 0%, #ff7a2e 100%);
         }
         
-        .section:hover {
+        .section:hover:not(.tab-section) {
             transform: translateY(-5px);
             box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+        }
+        
+        .tab-section:hover {
+            transform: none;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
         }
         
         .section h2 {
