@@ -7609,15 +7609,34 @@ require_once 'session_check.php';
                             return;
                         }
                         
+                        // 强制设置显示和值
                         selectElement.style.display = 'none';
+                        selectElement.innerHTML = ''; // 清空下拉选单
                         priceInput.style.display = 'block';
-                        priceInput.value = priceValue.toFixed(5);
                         priceInput.disabled = false;
                         priceInput.placeholder = '0.00';
                         priceInput.style.color = '';
                         priceInput.style.backgroundColor = '';
                         
-                        console.log('✓ 单价已填充到输入框，值:', priceInput.value);
+                        // 使用多种方式设置值，确保能够填充
+                        const finalValue = priceValue.toFixed(5);
+                        priceInput.value = finalValue;
+                        priceInput.setAttribute('value', finalValue);
+                        
+                        // 使用 setTimeout 确保值被设置（防止其他代码覆盖）
+                        setTimeout(() => {
+                            if (priceInput.value !== finalValue) {
+                                console.warn('价格值被覆盖，重新设置');
+                                priceInput.value = finalValue;
+                            }
+                            console.log('✓ 单价已填充到输入框，值:', priceInput.value, '期望值:', finalValue);
+                        }, 100);
+                        
+                        // 立即输出当前值
+                        console.log('✓ 单价已填充到输入框，值:', priceInput.value, '期望值:', finalValue);
+                        console.log('✓ 输入框元素:', priceInput);
+                        console.log('✓ 输入框display:', priceInput.style.display);
+                        console.log('✓ 输入框disabled:', priceInput.disabled);
                         
                         // 触发input和change事件，确保其他相关逻辑能响应
                         priceInput.dispatchEvent(new Event('input', { bubbles: true }));
@@ -7858,12 +7877,24 @@ require_once 'session_check.php';
                 console.log('条件满足，开始加载价格');
                 // 纯出库且有货品名称，加载价格（带库存检查）
                 // 先清空，等待API返回后再决定显示方式
-                priceSelect.style.display = 'none';
-                priceInput.style.display = 'block';
-                priceInput.value = '';
-                priceInput.disabled = false;
-                priceInput.placeholder = '加载中...';
-                loadAddFormProductPricesWithStock(productName, outQty);
+                if (priceSelect) {
+                    priceSelect.style.display = 'none';
+                    priceSelect.innerHTML = ''; // 清空下拉选单内容
+                }
+                if (priceInput) {
+                    priceInput.style.display = 'block';
+                    priceInput.value = '';
+                    priceInput.disabled = false;
+                    priceInput.placeholder = '加载中...';
+                    priceInput.style.color = '';
+                    priceInput.style.backgroundColor = '';
+                }
+                console.log('调用 loadAddFormProductPricesWithStock，货品:', productName, '数量:', outQty);
+                window.loadAddFormProductPricesWithStock(productName, outQty).then(() => {
+                    console.log('价格加载完成，检查输入框值:', document.getElementById('add-price')?.value);
+                }).catch(error => {
+                    console.error('价格加载失败:', error);
+                });
             } else {
                 // 入库或出库为0，显示普通输入框
                 priceSelect.style.display = 'none';
