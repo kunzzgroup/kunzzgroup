@@ -1218,24 +1218,15 @@ if (file_exists($jsonFile)) {
             line-height: 1.8;
             margin-bottom: clamp(20px, 2.08vw, 28px);
             flex-grow: 1;
-            min-height: 0; /* 允许flex收缩 */
         }
 
         /* 评分标准部分（表格风格，逐级加深，仅色条+文字） */
         .culture-scoring {
-            margin-top: 0;
+            margin-top: auto;
             background: #ffffff;
             border: 1px solid #f6c99f;
             border-radius: 8px;
             overflow: hidden;
-        }
-        
-        .culture-scoring-title {
-            padding: clamp(12px, 1.25vw, 16px) clamp(12px, 1.25vw, 16px);
-            font-size: clamp(14px, 1.46vw, 18px);
-            font-weight: 800;
-            color: #000000;
-            border-bottom: 1px solid #f6c99f;
         }
 
         .culture-scoring-item {
@@ -4035,133 +4026,6 @@ if (file_exists($jsonFile)) {
             if (internalOrgData.length > 0) {
                 initializeDeptChart(0, internalOrgData[0]);
             }
-        });
-        
-        // 对齐评分标准容器顶部
-        function alignScoringTitles() {
-            // 找到所有的文化解说和价值观解说grid
-            const grids = document.querySelectorAll('.culture-explanation-grid');
-            
-            grids.forEach(grid => {
-                const cards = Array.from(grid.querySelectorAll('.culture-explanation-card'));
-                if (cards.length === 0) return;
-                
-                // 通过检查卡片的实际位置来确定列数
-                // 获取第一个卡片的位置
-                const firstCardRect = cards[0].getBoundingClientRect();
-                let columnCount = 1;
-                
-                // 找到同一行的卡片数量
-                for (let i = 1; i < cards.length; i++) {
-                    const cardRect = cards[i].getBoundingClientRect();
-                    // 如果卡片的top值相同或非常接近（在5px范围内），说明在同一行
-                    if (Math.abs(cardRect.top - firstCardRect.top) < 5) {
-                        columnCount++;
-                    } else {
-                        break;
-                    }
-                }
-                
-                // 按行分组卡片
-                const rows = [];
-                for (let i = 0; i < cards.length; i += columnCount) {
-                    rows.push(cards.slice(i, i + columnCount));
-                }
-                
-                // 对每一行进行处理
-                rows.forEach(rowCards => {
-                    // 重置所有高度为auto
-                    rowCards.forEach(card => {
-                        const desc = card.querySelector('.culture-explanation-description');
-                        if (desc) {
-                            desc.style.minHeight = 'auto';
-                            desc.style.height = 'auto';
-                        }
-                    });
-                    
-                    // 强制浏览器重新计算布局
-                    rowCards.forEach(card => void card.offsetHeight);
-                    
-                    // 执行两次对齐，确保精确对齐
-                    for (let iteration = 0; iteration < 2; iteration++) {
-                        // 计算每个卡片中评分标准容器相对于卡片顶部的位置
-                        let maxScoringOffsetTop = 0;
-                        const cardData = [];
-                        
-                        rowCards.forEach(card => {
-                            const scoring = card.querySelector('.culture-scoring');
-                            const desc = card.querySelector('.culture-explanation-description');
-                            
-                            if (scoring && desc) {
-                                // 使用 offsetTop 相对于卡片的位置
-                                const scoringOffsetTop = scoring.offsetTop;
-                                
-                                cardData.push({
-                                    card: card,
-                                    desc: desc,
-                                    scoring: scoring,
-                                    offsetTop: scoringOffsetTop
-                                });
-                                
-                                if (scoringOffsetTop > maxScoringOffsetTop) {
-                                    maxScoringOffsetTop = scoringOffsetTop;
-                                }
-                            }
-                        });
-                        
-                        // 调整每个卡片的描述区域高度，使评分标准顶部对齐
-                        cardData.forEach(data => {
-                            if (maxScoringOffsetTop > 0 && data.offsetTop > 0) {
-                                const offsetDifference = maxScoringOffsetTop - data.offsetTop;
-                                
-                                if (offsetDifference > 0) {
-                                    // 获取当前描述区域的高度
-                                    const currentHeight = data.desc.offsetHeight;
-                                
-                                    // 计算新高度
-                                    const newHeight = currentHeight + offsetDifference;
-                                
-                                    if (newHeight > 0) {
-                                        data.desc.style.minHeight = newHeight + 'px';
-                                        data.desc.style.height = newHeight + 'px';
-                                    }
-                                }
-                            }
-                        });
-                        
-                        // 强制浏览器重新计算布局
-                        rowCards.forEach(card => void card.offsetHeight);
-                    }
-                });
-            });
-        }
-        
-        // 页面加载后执行对齐
-        $(document).ready(function() {
-            // 延迟执行以确保所有内容都已渲染
-            setTimeout(alignScoringTitles, 100);
-            setTimeout(alignScoringTitles, 500);
-            setTimeout(alignScoringTitles, 1000);
-            
-            // 等待图片加载完成后再执行一次
-            $(window).on('load', function() {
-                setTimeout(alignScoringTitles, 100);
-            });
-            
-            // 窗口大小改变时重新对齐（适应响应式布局）
-            let resizeTimer;
-            $(window).on('resize', function() {
-                clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(function() {
-                    // 先重置所有高度
-                    document.querySelectorAll('.culture-explanation-description').forEach(desc => {
-                        desc.style.minHeight = 'auto';
-                        desc.style.height = 'auto';
-                    });
-                    // 重新对齐
-                    setTimeout(alignScoringTitles, 100);
-                }, 250);
-            });
         });
     </script>
     <?php endif; ?>
