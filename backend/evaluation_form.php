@@ -610,7 +610,7 @@ require_once 'session_check.php';
                     <i class="fas fa-plus"></i> 创建新表单
                 </button>
 
-                <div id="formButtons" style="margin-top: 20px; display: none; flex-direction: column; gap: 10px;">
+                <div id="formButtons" style="margin-top: 100px; display: none; flex-direction: column; gap: 10px;">
                     <!-- 按钮将在这里动态显示 -->
                 </div>
             </div>
