@@ -9,6 +9,8 @@ require_once 'session_check.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <title>考核表单管理系统</title>
     <style>
         * {
@@ -358,6 +360,37 @@ require_once 'session_check.php';
             background-color: #059669;
         }
 
+        /* PDF内容区域样式 */
+        #pdf-content {
+            display: none;
+            background: white;
+            padding: 30px;
+            width: 800px;
+            margin: 0 auto;
+        }
+
+        #pdf-content .form-header {
+            margin: 0 0 20px 0;
+            border-radius: 0;
+        }
+
+        #pdf-content .evaluation-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #pdf-content .evaluation-table th,
+        #pdf-content .evaluation-table td {
+            border: 1px solid #000;
+            padding: 12px;
+            text-align: left;
+        }
+
+        #pdf-content .evaluation-table thead {
+            background: #ff5c00;
+            color: white;
+        }
+
         /* 打印样式 */
         @media print {
             body {
@@ -651,17 +684,60 @@ require_once 'session_check.php';
             html += `</tbody></table>`;
 
             html += `
+                <div id="pdf-content">
+                    <div class="form-header">
+                        <h2>TOKYO IZAKAYA</h2>
+                        <div class="form-info">
+                            <div><strong>Name:</strong> ${evaluatorName}</div>
+                            <div><strong>Date:</strong> ${evaluationDate}</div>
+                        </div>
+                    </div>
+                    <div style="background: #ff5c00; color: white; padding: 15px; text-align: center; font-weight: 600; font-size: 18px; margin-bottom: 20px;">
+                        ${deptNames[department] || department.toUpperCase()}
+                    </div>
+                    <table class="evaluation-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+            `;
+
+            // 添加考核指标列（PDF版本）
+            criteria.forEach(c => {
+                html += `<th>${c.criteria_name_zh}<br><small>${c.criteria_name_en}</small></th>`;
+            });
+
+            html += `</tr></thead><tbody>`;
+
+            // 添加员工行（PDF版本）
+            employees.forEach((emp, index) => {
+                html += `<tr>
+                    <td class="employee-name" style="padding: 12px 15px; border: 1px solid #000;">${emp.name}</td>`;
+                
+                criteria.forEach((c, cIndex) => {
+                    html += `<td style="padding: 12px 15px; border: 1px solid #000; min-height: 30px; width: 120px;"></td>`;
+                });
+
+                html += `</tr>`;
+            });
+
+            html += `</tbody></table>
+                </div>
                 <div style="display: flex; gap: 15px; margin-top: 20px;">
                     <button class="save-form-btn" onclick="saveForm()" style="flex: 1;">
                         <i class="fas fa-save"></i> 保存表单
                     </button>
-                    <button class="print-btn" onclick="printForm()" style="flex: 1;">
-                        <i class="fas fa-print"></i> 打印表单
+                    <button class="print-btn" onclick="downloadPDF()" style="flex: 1;">
+                        <i class="fas fa-file-pdf"></i> 下载PDF
                     </button>
                 </div>
             `;
 
             document.getElementById('mainContent').innerHTML = html;
+            
+            // 延迟填充PDF内容区域的数据
+            setTimeout(() => {
+                updatePDFContent();
+            }, 100);
         }
 
         // 保存表单
@@ -853,9 +929,128 @@ require_once 'session_check.php';
             'kitchen': 'KITCHEN'
         };
 
-        // 打印表单
-        function printForm() {
-            window.print();
+        // 更新PDF内容区域的数据
+        function updatePDFContent() {
+            const pdfContent = document.getElementById('pdf-content');
+            if (!pdfContent) return;
+
+            // 同步输入框的值到PDF内容区域
+            const scoreInputs = document.querySelectorAll('.score-input');
+            scoreInputs.forEach(input => {
+                const employeeName = input.getAttribute('data-employee-name');
+                const criteriaIndex = parseInt(input.getAttribute('data-criteria-index'));
+                const value = input.value.trim();
+                
+                // 查找对应的PDF表格行
+                const pdfRows = pdfContent.querySelectorAll('.evaluation-table tbody tr');
+                pdfRows.forEach(row => {
+                    const nameCell = row.querySelector('td.employee-name');
+                    if (nameCell && nameCell.textContent.trim() === employeeName) {
+                        const cells = row.querySelectorAll('td');
+                        // criteriaIndex是从1开始的，cells[0]是姓名，cells[1]是第一个指标
+                        const cellIndex = criteriaIndex; // criteriaIndex已经是1,2,3...对应cells[1],cells[2],cells[3]...
+                        if (cells[cellIndex]) {
+                            cells[cellIndex].textContent = value;
+                        }
+                    }
+                });
+            });
+        }
+
+        // 监听输入框变化，实时更新PDF内容
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('score-input')) {
+                updatePDFContent();
+            }
+        });
+
+        // 下载PDF
+        async function downloadPDF() {
+            const pdfContent = document.getElementById('pdf-content');
+            if (!pdfContent) {
+                showMessage('找不到表单内容', 'error');
+                return;
+            }
+
+            // 更新PDF内容
+            updatePDFContent();
+
+            // 显示加载提示
+            showMessage('正在生成PDF，请稍候...', 'success');
+
+            // 临时显示PDF内容
+            const originalDisplay = pdfContent.style.display;
+            pdfContent.style.display = 'block';
+            
+            // 确保内容已渲染
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            try {
+                const { jsPDF } = window.jspdf;
+                
+                // 使用html2canvas将内容转换为图片
+                const canvas = await html2canvas(pdfContent, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#ffffff',
+                    windowWidth: pdfContent.scrollWidth,
+                    windowHeight: pdfContent.scrollHeight
+                });
+
+                const imgData = canvas.toDataURL('image/png', 1.0);
+                
+                // 创建PDF（A4尺寸，横向以容纳表格）
+                const pdf = new jsPDF('l', 'mm', 'a4'); // 'l' = landscape
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                
+                // 计算图片尺寸以适应PDF页面
+                const imgWidth = canvas.width;
+                const imgHeight = canvas.height;
+                const ratio = Math.min((pdfWidth - 20) / imgWidth, (pdfHeight - 20) / imgHeight); // 留20mm边距
+                const imgScaledWidth = imgWidth * ratio;
+                const imgScaledHeight = imgHeight * ratio;
+                
+                // 居中显示
+                const xOffset = (pdfWidth - imgScaledWidth) / 2;
+                const yOffset = (pdfHeight - imgScaledHeight) / 2;
+
+                // 添加图片
+                pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgScaledWidth, imgScaledHeight);
+                
+                // 如果内容超过一页，添加新页
+                let heightLeft = imgScaledHeight;
+                let position = yOffset;
+                
+                if (heightLeft > pdfHeight) {
+                    while (heightLeft > 0) {
+                        position = position - pdfHeight;
+                        if (position < -imgScaledHeight) break;
+                        
+                        pdf.addPage();
+                        pdf.addImage(imgData, 'PNG', xOffset, position, imgScaledWidth, imgScaledHeight);
+                        heightLeft -= pdfHeight;
+                    }
+                }
+
+                // 生成文件名
+                const department = document.getElementById('department').value;
+                const evaluationDate = document.getElementById('evaluation_date').value;
+                const deptName = deptNames[department] || department;
+                const fileName = `考核表单_${deptName}_${evaluationDate}.pdf`;
+
+                // 下载PDF
+                pdf.save(fileName);
+                
+                showMessage('PDF下载成功', 'success');
+            } catch (error) {
+                console.error('生成PDF失败:', error);
+                showMessage('生成PDF失败: ' + error.message, 'error');
+            } finally {
+                // 恢复原始显示状态
+                pdfContent.style.display = originalDisplay;
+            }
         }
     </script>
 </body>
