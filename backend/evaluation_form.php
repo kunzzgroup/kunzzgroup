@@ -365,7 +365,7 @@ require_once 'session_check.php';
             display: none;
             background: white;
             padding: 30px;
-            width: 800px;
+            width: 1200px; /* 加宽到1200px */
             margin: 0 auto;
             min-height: 1200px; /* 确保PDF有足够的长度 */
         }
@@ -373,18 +373,32 @@ require_once 'session_check.php';
         #pdf-content .form-header {
             margin: 0 0 20px 0;
             border-radius: 0;
+            width: 100%;
         }
 
         #pdf-content .evaluation-table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed; /* 固定表格布局 */
         }
 
         #pdf-content .evaluation-table th,
         #pdf-content .evaluation-table td {
             border: 1px solid #000;
-            padding: 12px;
+            padding: 15px; /* 增加内边距 */
             text-align: left;
+            word-wrap: break-word;
+        }
+
+        /* 设置列宽 */
+        #pdf-content .evaluation-table th:first-child,
+        #pdf-content .evaluation-table td:first-child {
+            width: 200px; /* 姓名列更宽 */
+        }
+
+        #pdf-content .evaluation-table th:not(:first-child),
+        #pdf-content .evaluation-table td:not(:first-child) {
+            width: 200px; /* 评分列更宽 */
         }
 
         #pdf-content .evaluation-table thead {
@@ -712,10 +726,10 @@ require_once 'session_check.php';
             // 添加员工行（PDF版本）
             employees.forEach((emp, index) => {
                 html += `<tr>
-                    <td class="employee-name" style="padding: 12px 15px; border: 1px solid #000;">${emp.name}</td>`;
+                    <td class="employee-name" style="padding: 15px; border: 1px solid #000; width: 200px;">${emp.name}</td>`;
                 
                 criteria.forEach((c, cIndex) => {
-                    html += `<td style="padding: 12px 15px; border: 1px solid #000; min-height: 30px; width: 120px;"></td>`;
+                    html += `<td style="padding: 15px; border: 1px solid #000; min-height: 35px; width: 200px;"></td>`;
                 });
 
                 html += `</tr>`;
@@ -725,10 +739,10 @@ require_once 'session_check.php';
             const emptyRows = 10; // 添加10个空行
             for (let i = 0; i < emptyRows; i++) {
                 html += `<tr>
-                    <td class="employee-name" style="padding: 12px 15px; border: 1px solid #000; border-bottom: 1px dashed #ccc;"></td>`;
+                    <td class="employee-name" style="padding: 15px; border: 1px solid #000; border-bottom: 1px dashed #ccc; width: 200px;"></td>`;
                 
                 criteria.forEach((c, cIndex) => {
-                    html += `<td style="padding: 12px 15px; border: 1px solid #000; border-bottom: 1px dashed #ccc; min-height: 30px; width: 120px;"></td>`;
+                    html += `<td style="padding: 15px; border: 1px solid #000; border-bottom: 1px dashed #ccc; min-height: 35px; width: 200px;"></td>`;
                 });
 
                 html += `</tr>`;
@@ -1014,23 +1028,23 @@ require_once 'session_check.php';
 
                 const imgData = canvas.toDataURL('image/png', 1.0);
                 
-                // 创建PDF（A4尺寸，横向以容纳表格）
-                const pdf = new jsPDF('l', 'mm', 'a4'); // 'l' = landscape
+                // 创建PDF（A3尺寸横向，以容纳更宽的表格）
+                const pdf = new jsPDF('l', 'mm', 'a3'); // 'l' = landscape, 'a3' = A3纸张（比A4更大）
                 const pdfWidth = pdf.internal.pageSize.getWidth();
                 const pdfHeight = pdf.internal.pageSize.getHeight();
                 
-                // 计算图片尺寸以适应PDF页面宽度，高度按比例缩放
+                // 计算图片尺寸以适应PDF页面宽度，优先保持宽度填满
                 const imgWidth = canvas.width;
                 const imgHeight = canvas.height;
-                const widthRatio = (pdfWidth - 20) / imgWidth; // 留10mm左右边距
-                const heightRatio = (pdfHeight - 20) / imgHeight;
-                const ratio = Math.min(widthRatio, heightRatio);
+                const widthRatio = (pdfWidth - 10) / imgWidth; // 留5mm左右边距，尽量填满宽度
+                const heightRatio = (pdfHeight - 10) / imgHeight;
+                const ratio = widthRatio; // 优先使用宽度比例，让表格尽可能宽
                 const imgScaledWidth = imgWidth * ratio;
                 const imgScaledHeight = imgHeight * ratio;
                 
-                // 居中显示（水平居中，顶部对齐）
-                const xOffset = (pdfWidth - imgScaledWidth) / 2;
-                let yOffset = 10; // 顶部留10mm边距
+                // 左对齐显示，顶部对齐（充分利用页面宽度）
+                const xOffset = 5; // 左边留5mm边距
+                let yOffset = 5; // 顶部留5mm边距
                 let position = yOffset;
 
                 // 如果内容高度超过一页，需要分页显示
@@ -1038,7 +1052,7 @@ require_once 'session_check.php';
                 
                 while (remainingHeight > 0) {
                     // 计算当前页要显示的图片高度
-                    const pageHeight = Math.min(remainingHeight, pdfHeight - 20);
+                    const pageHeight = Math.min(remainingHeight, pdfHeight - 10);
                     const sourceY = (imgScaledHeight - remainingHeight) / ratio;
                     const sourceHeight = pageHeight / ratio;
                     
@@ -1058,8 +1072,8 @@ require_once 'session_check.php';
                         sourceHeight
                     );
                     
-                    remainingHeight -= (pdfHeight - 20);
-                    position = 10; // 新页从顶部开始
+                    remainingHeight -= (pdfHeight - 10);
+                    position = 5; // 新页从顶部开始（5mm边距）
                     
                     // 如果还有剩余内容，添加新页
                     if (remainingHeight > 0) {
