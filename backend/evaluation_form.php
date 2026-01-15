@@ -472,20 +472,18 @@ require_once 'session_check.php';
         }
 
         /* Kitchen评分标准表样式 */
-        .rubric-page {
-            width: 1300px;
-            padding: 40px 50px;
-            background: white;
-            box-sizing: border-box;
+        #pdf-content #kitchen-rubrics {
+            margin-top: 40px;
         }
 
-        .rubric-page table {
+        #pdf-content #kitchen-rubrics table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 15px;
+            margin-bottom: 30px;
+            page-break-inside: avoid;
         }
 
-        .rubric-page table th {
+        #pdf-content #kitchen-rubrics table th {
             background: #ff5c00;
             color: white;
             padding: 15px;
@@ -494,18 +492,39 @@ require_once 'session_check.php';
             text-align: center;
         }
 
-        .rubric-page table td {
+        #pdf-content #kitchen-rubrics table td {
             padding: 15px;
             border: 1px solid #000;
             vertical-align: top;
             line-height: 1.6;
         }
 
-        .rubric-page table td:first-child {
+        #pdf-content #kitchen-rubrics table td:first-child {
             width: 80px;
             text-align: center;
             font-size: 18px;
             font-weight: 600;
+        }
+
+        /* 确保分页正确 */
+        #pdf-content .evaluation-table {
+            page-break-after: always !important;
+        }
+
+        #pdf-content #kitchen-rubrics {
+            page-break-before: always !important;
+        }
+
+        #pdf-content #kitchen-rubrics .rubric-page[data-page="2"] {
+            page-break-before: always !important;
+        }
+
+        #pdf-content #kitchen-rubrics .rubric-page[data-page="3"] {
+            page-break-before: always !important;
+        }
+
+        #pdf-content #kitchen-rubrics .rubric-page[data-page="4"] {
+            page-break-before: always !important;
         }
 
         /* 打印样式 */
@@ -703,43 +722,56 @@ require_once 'session_check.php';
             ]
         };
 
-        // 生成单个Kitchen评分标准表HTML
-        function generateSingleRubric(title, rubricData) {
-            let html = `
-                <div class="rubric-page" style="width: 1300px; padding: 40px 50px; background: white; box-sizing: border-box;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
-                        <thead>
-                            <tr>
-                                <th style="width: 80px; padding: 15px; text-align: center; background: #ff5c00; color: white; border: 1px solid #000; font-weight: 600;">分数</th>
-                                <th style="padding: 15px; text-align: center; background: #ff5c00; color: white; border: 1px solid #000; font-weight: 600; font-size: 18px;">${title}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-            
-            rubricData.forEach(item => {
-                html += `
-                    <tr>
-                        <td style="width: 80px; padding: 15px; text-align: center; border: 1px solid #000; font-size: 18px; font-weight: 600; vertical-align: top;">${item.score}</td>
-                        <td style="padding: 15px; border: 1px solid #000; line-height: 1.6; vertical-align: top;">${item.desc}</td>
-                    </tr>
-                `;
-            });
-            
-            html += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            return html;
-        }
-
-        // 生成所有Kitchen评分标准表HTML（隐藏的，用于PDF生成）
+        // 生成Kitchen评分标准表HTML（分四页）
         function generateKitchenRubrics() {
             let html = '<div id="kitchen-rubrics" style="display: none;">';
-            Object.keys(kitchenRubrics).forEach((title) => {
-                html += generateSingleRubric(title, kitchenRubrics[title]);
+            
+            const rubricPages = [
+                // 第二页：出餐速度和食材标准
+                ['出餐速度与效率', '食材标准与品质'],
+                // 第三页：卫生和工作态度
+                ['卫生与整洁', '工作态度'],
+                // 第四页：团队合作
+                ['团队合作']
+            ];
+            
+            rubricPages.forEach((pageTitles, pageIndex) => {
+                pageTitles.forEach((title, titleIndex) => {
+                    const isFirstOnPage = titleIndex === 0;
+                    const isFirstPage = pageIndex === 0;
+                    
+                    // 为每个页面添加分页标记
+                    const pageBreak = isFirstOnPage && !isFirstPage ? 'page-break-before: always;' : '';
+                    
+                    html += `
+                        <div class="rubric-page" data-page="${pageIndex + 2}" style="margin-top: ${isFirstOnPage && !isFirstPage ? '0' : '30px'}; ${pageBreak}">
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: ${titleIndex < pageTitles.length - 1 ? '30px' : '20px'}; font-size: 15px;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 80px; padding: 15px; text-align: center; background: #ff5c00; color: white; border: 1px solid #000; font-weight: 600;">分数</th>
+                                        <th style="padding: 15px; text-align: center; background: #ff5c00; color: white; border: 1px solid #000; font-weight: 600; font-size: 18px;">${title}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+                    
+                    kitchenRubrics[title].forEach(item => {
+                        html += `
+                            <tr>
+                                <td style="width: 80px; padding: 15px; text-align: center; border: 1px solid #000; font-size: 18px; font-weight: 600; vertical-align: top;">${item.score}</td>
+                                <td style="padding: 15px; border: 1px solid #000; line-height: 1.6; vertical-align: top;">${item.desc}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                });
             });
+            
             html += '</div>';
             return html;
         }
@@ -921,6 +953,20 @@ require_once 'session_check.php';
             }
             
             html += `</div>`;
+            
+            // 确保第一页（表单）和后面的评分标准表分页
+            if (department === 'kitchen') {
+                const style = document.createElement('style');
+                style.textContent = `
+                    #pdf-content .evaluation-table {
+                        page-break-after: always;
+                    }
+                    #pdf-content #kitchen-rubrics > div:first-child {
+                        page-break-before: always;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
 
             document.getElementById('mainContent').innerHTML = html;
             
@@ -1082,75 +1128,6 @@ require_once 'session_check.php';
             }
         });
 
-        // 将单个元素转换为图片并添加到PDF
-        async function addElementToPDF(element, pdf, isFirstPage = false) {
-            if (!element) return;
-            
-            // 临时显示元素
-            const originalDisplay = element.style.display;
-            element.style.display = 'block';
-            element.style.position = 'absolute';
-            element.style.left = '-9999px';
-            
-            await new Promise(resolve => setTimeout(resolve, 300));
-            
-            try {
-                const canvas = await html2canvas(element, {
-                    scale: 2.5,
-                    useCORS: true,
-                    logging: false,
-                    backgroundColor: '#ffffff',
-                    width: element.scrollWidth,
-                    height: element.scrollHeight
-                });
-
-                const imgData = canvas.toDataURL('image/png', 1.0);
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = pdf.internal.pageSize.getHeight();
-                
-                const marginX = 8;
-                const marginY = 8;
-                const availableWidth = pdfWidth - marginX * 2;
-                const availableHeight = pdfHeight - marginY * 2;
-                
-                const imgWidth = canvas.width;
-                const imgHeight = canvas.height;
-                const ratioWidth = availableWidth / imgWidth;
-                const ratioHeight = availableHeight / imgHeight;
-                const ratio = Math.min(ratioWidth, ratioHeight);
-                
-                const imgScaledWidth = imgWidth * ratio;
-                const imgScaledHeight = imgHeight * ratio;
-                
-                const xOffset = (pdfWidth - imgScaledWidth) / 2;
-                const yOffset = marginY;
-                
-                // 如果不是第一页，添加新页
-                if (!isFirstPage) {
-                    pdf.addPage();
-                }
-                
-                // 添加图片
-                pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgScaledWidth, imgScaledHeight);
-                
-                // 如果内容超过一页，添加新页继续
-                let heightLeft = imgScaledHeight - (pdfHeight - marginY * 2);
-                let position = yOffset;
-                
-                while (heightLeft > 0) {
-                    position = position - (pdfHeight - marginY * 2);
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', xOffset, position, imgScaledWidth, imgScaledHeight);
-                    heightLeft -= (pdfHeight - marginY * 2);
-                }
-            } finally {
-                // 恢复原始显示状态
-                element.style.display = originalDisplay;
-                element.style.position = '';
-                element.style.left = '';
-            }
-        }
-
         // 下载PDF
         async function downloadPDF() {
             const pdfContent = document.getElementById('pdf-content');
@@ -1163,88 +1140,225 @@ require_once 'session_check.php';
             updatePDFContent();
 
             const department = document.getElementById('department').value;
-            const evaluationDate = document.getElementById('evaluation_date').value;
-            const deptName = deptNames[department] || department;
-            const fileName = `考核表单_${deptName}_${evaluationDate}.pdf`;
+            
+            // 如果是kitchen部门，需要分页生成
+            if (department === 'kitchen') {
+                await downloadKitchenPDF(pdfContent);
+                return;
+            }
 
+            // 非kitchen部门使用原来的生成方式
+            await downloadRegularPDF(pdfContent);
+        }
+
+        // 生成普通PDF（非kitchen部门）
+        async function downloadRegularPDF(pdfContent) {
             // 显示加载提示
             showMessage('正在生成PDF，请稍候...', 'success');
 
+            // 临时显示PDF内容
+            const originalDisplay = pdfContent.style.display;
+            pdfContent.style.display = 'block';
+            
+            // 确保内容已渲染
+            await new Promise(resolve => setTimeout(resolve, 500));
+
             try {
                 const { jsPDF } = window.jspdf;
+                
+                const canvas = await html2canvas(pdfContent, {
+                    scale: 2.5,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#ffffff',
+                    width: pdfContent.scrollWidth,
+                    height: pdfContent.scrollHeight,
+                    windowWidth: pdfContent.scrollWidth,
+                    windowHeight: pdfContent.scrollHeight
+                });
+
+                const imgData = canvas.toDataURL('image/png', 1.0);
+                
                 const pdf = new jsPDF('l', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                
+                const marginX = 8;
+                const marginY = 8;
+                const availableWidth = pdfWidth - marginX * 2;
+                const availableHeight = pdfHeight - marginY * 2;
+                
+                const ratioWidth = availableWidth / canvas.width;
+                const ratioHeight = availableHeight / canvas.height;
+                const ratio = Math.min(ratioWidth, ratioHeight);
+                
+                const imgScaledWidth = canvas.width * ratio;
+                const imgScaledHeight = canvas.height * ratio;
+                
+                const xOffset = (pdfWidth - imgScaledWidth) / 2;
+                const yOffset = marginY;
 
-                // 创建主表单内容的容器（只包含员工考核表，不含评分标准表）
-                const mainFormDiv = document.createElement('div');
-                mainFormDiv.style.width = '1300px';
-                mainFormDiv.style.padding = '40px 50px';
-                mainFormDiv.style.background = 'white';
-                mainFormDiv.style.boxSizing = 'border-box';
+                pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgScaledWidth, imgScaledHeight);
                 
-                // 获取主表单内容（排除评分标准表）
-                const formHeader = pdfContent.querySelector('.form-header');
-                const deptBars = pdfContent.querySelectorAll('div[style*="background: #ff5c00"]');
-                const evaluationTable = pdfContent.querySelector('.evaluation-table');
+                // 如果内容超过一页，添加新页
+                let heightLeft = imgScaledHeight;
+                let position = yOffset;
                 
-                // 复制表单头部
-                if (formHeader) {
-                    const clonedHeader = formHeader.cloneNode(true);
-                    clonedHeader.style.margin = '0 0 20px 0';
-                    clonedHeader.style.borderRadius = '0';
-                    clonedHeader.style.padding = '25px';
-                    mainFormDiv.appendChild(clonedHeader);
-                }
-                
-                // 复制部门标题栏（只取第一个，跳过评分标准表的标题）
-                if (deptBars.length > 0) {
-                    const clonedDeptBar = deptBars[0].cloneNode(true);
-                    clonedDeptBar.style.marginBottom = '30px';
-                    mainFormDiv.appendChild(clonedDeptBar);
-                }
-                
-                // 复制员工考核表
-                if (evaluationTable) {
-                    const clonedTable = evaluationTable.cloneNode(true);
-                    clonedTable.style.width = '100%';
-                    clonedTable.style.borderCollapse = 'collapse';
-                    clonedTable.style.fontSize = '16px';
-                    mainFormDiv.appendChild(clonedTable);
-                }
-                
-                // 临时添加到body
-                document.body.appendChild(mainFormDiv);
-                
-                // 添加第一页：主表单
-                await addElementToPDF(mainFormDiv, pdf, true);
-                document.body.removeChild(mainFormDiv);
-
-                // 如果是kitchen部门，添加五份评分标准表（每份一页）
-                if (department === 'kitchen') {
-                    const rubricTitles = Object.keys(kitchenRubrics);
-                    
-                    for (let i = 0; i < rubricTitles.length; i++) {
-                        const title = rubricTitles[i];
-                        const rubricDiv = document.createElement('div');
-                        rubricDiv.innerHTML = generateSingleRubric(title, kitchenRubrics[title]);
-                        const rubricContent = rubricDiv.querySelector('.rubric-page');
+                if (heightLeft > pdfHeight) {
+                    while (heightLeft > 0) {
+                        position = position - pdfHeight;
+                        if (position < -imgScaledHeight) break;
                         
-                        document.body.appendChild(rubricContent);
-                        
-                        // 添加为独立页面
-                        await addElementToPDF(rubricContent, pdf, false);
-                        
-                        document.body.removeChild(rubricContent);
+                        pdf.addPage();
+                        pdf.addImage(imgData, 'PNG', xOffset, position, imgScaledWidth, imgScaledHeight);
+                        heightLeft -= pdfHeight;
                     }
                 }
 
-                // 下载PDF
+                const evaluationDate = document.getElementById('evaluation_date').value;
+                const department = document.getElementById('department').value;
+                const deptName = deptNames[department] || department;
+                const fileName = `考核表单_${deptName}_${evaluationDate}.pdf`;
+
                 pdf.save(fileName);
-                
                 showMessage('PDF下载成功', 'success');
             } catch (error) {
                 console.error('生成PDF失败:', error);
                 showMessage('生成PDF失败: ' + error.message, 'error');
+            } finally {
+                pdfContent.style.display = originalDisplay;
             }
+        }
+
+        // 生成Kitchen部门PDF（分四页）
+        async function downloadKitchenPDF(pdfContent) {
+            // 确保评分标准表已添加
+            let existingRubrics = pdfContent.querySelector('#kitchen-rubrics');
+            if (!existingRubrics) {
+                const rubricsHtml = generateKitchenRubrics().replace('style="display: none;"', '');
+                pdfContent.innerHTML += rubricsHtml;
+                existingRubrics = pdfContent.querySelector('#kitchen-rubrics');
+            }
+            if (existingRubrics) {
+                existingRubrics.style.display = 'block';
+            }
+
+            // 显示加载提示
+            showMessage('正在生成PDF，请稍候...', 'success');
+
+            const originalDisplay = pdfContent.style.display;
+            pdfContent.style.display = 'block';
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('l', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const marginX = 8;
+                const marginY = 8;
+                const availableWidth = pdfWidth - marginX * 2;
+                const availableHeight = pdfHeight - marginY * 2;
+
+                // 第一页：员工考核表
+                const formHeader = pdfContent.querySelector('.form-header');
+                const deptBanner = pdfContent.querySelector('[style*="background: #ff5c00"]');
+                const formTable = pdfContent.querySelector('.evaluation-table');
+                
+                const formContainer = document.createElement('div');
+                formContainer.style.width = '1300px';
+                formContainer.style.padding = '40px 50px';
+                formContainer.style.background = 'white';
+                
+                if (formHeader) formContainer.appendChild(formHeader.cloneNode(true));
+                if (deptBanner) formContainer.appendChild(deptBanner.cloneNode(true));
+                if (formTable) formContainer.appendChild(formTable.cloneNode(true));
+                
+                formContainer.style.position = 'absolute';
+                formContainer.style.left = '-9999px';
+                document.body.appendChild(formContainer);
+
+                const formCanvas = await html2canvas(formContainer, {
+                    scale: 2.5,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#ffffff',
+                    width: formContainer.scrollWidth,
+                    height: formContainer.scrollHeight
+                });
+
+                const formRatio = Math.min(availableWidth / formCanvas.width, availableHeight / formCanvas.height);
+                const formScaledWidth = formCanvas.width * formRatio;
+                const formScaledHeight = formCanvas.height * formRatio;
+                const formXOffset = (pdfWidth - formScaledWidth) / 2;
+                const formYOffset = marginY;
+
+                pdf.addImage(formCanvas.toDataURL('image/png', 1.0), 'PNG', formXOffset, formYOffset, formScaledWidth, formScaledHeight);
+                document.body.removeChild(formContainer);
+
+                // 第二页：出餐速度和食材标准
+                pdf.addPage();
+                const page2Divs = pdfContent.querySelectorAll('#kitchen-rubrics .rubric-page[data-page="2"]');
+                await addRubricPage(pdf, page2Divs, pdfWidth, pdfHeight, marginX, marginY, availableWidth, availableHeight);
+
+                // 第三页：卫生和工作态度
+                pdf.addPage();
+                const page3Divs = pdfContent.querySelectorAll('#kitchen-rubrics .rubric-page[data-page="3"]');
+                await addRubricPage(pdf, page3Divs, pdfWidth, pdfHeight, marginX, marginY, availableWidth, availableHeight);
+
+                // 第四页：团队合作
+                pdf.addPage();
+                const page4Divs = pdfContent.querySelectorAll('#kitchen-rubrics .rubric-page[data-page="4"]');
+                await addRubricPage(pdf, page4Divs, pdfWidth, pdfHeight, marginX, marginY, availableWidth, availableHeight);
+
+                const evaluationDate = document.getElementById('evaluation_date').value;
+                const fileName = `考核表单_KITCHEN_${evaluationDate}.pdf`;
+
+                pdf.save(fileName);
+                showMessage('PDF下载成功', 'success');
+            } catch (error) {
+                console.error('生成PDF失败:', error);
+                showMessage('生成PDF失败: ' + error.message, 'error');
+            } finally {
+                pdfContent.style.display = originalDisplay;
+            }
+        }
+
+        // 添加评分标准页面到PDF
+        async function addRubricPage(pdf, divs, pdfWidth, pdfHeight, marginX, marginY, availableWidth, availableHeight) {
+            if (divs.length === 0) return;
+
+            const container = document.createElement('div');
+            container.style.width = '1300px';
+            container.style.padding = '40px 50px';
+            container.style.background = 'white';
+            
+            Array.from(divs).forEach(div => {
+                container.appendChild(div.cloneNode(true));
+            });
+
+            container.style.position = 'absolute';
+            container.style.left = '-9999px';
+            document.body.appendChild(container);
+
+            const canvas = await html2canvas(container, {
+                scale: 2.5,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff',
+                width: container.scrollWidth,
+                height: container.scrollHeight
+            });
+
+            const ratio = Math.min(availableWidth / canvas.width, availableHeight / canvas.height);
+            const scaledWidth = canvas.width * ratio;
+            const scaledHeight = canvas.height * ratio;
+            const xOffset = (pdfWidth - scaledWidth) / 2;
+            const yOffset = marginY;
+
+            pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', xOffset, yOffset, scaledWidth, scaledHeight);
+            document.body.removeChild(container);
         }
     </script>
 </body>
