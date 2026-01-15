@@ -36,72 +36,98 @@ require_once 'session_check.php';
         }
 
         .header {
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: clamp(10px, 1.56vw, 30px);
             position: relative;
         }
 
-        .header-actions {
-            position: absolute;
-            right: 0;
-            top: 0;
+        .header .controls {
             display: flex;
-            gap: 10px;
             align-items: center;
+            gap: 0px;
         }
 
-        .toggle-standards-btn {
-            background: #111827;
+        .toggle-standards-selector {
+            position: relative;
+        }
+
+        .selector-button {
+            background-color: #f99e00;
             color: white;
+            font-weight: 500;
+            padding: clamp(6px, 0.52vw, 10px) clamp(16px, 1.04vw, 20px);
+            border-radius: 8px;
             border: none;
-            border-radius: 10px;
-            padding: 10px 14px;
-            font-size: 14px;
-            font-weight: 600;
             cursor: pointer;
+            font-size: clamp(10px, 0.73vw, 14px);
             display: inline-flex;
-            gap: 8px;
             align-items: center;
+            gap: 8px;
             transition: all 0.2s;
+            min-width: clamp(120px, 10vw, 150px);
+            justify-content: space-between;
         }
-
-        .toggle-standards-btn:hover {
-            background: #0b1220;
+        
+        .selector-button:hover {
+            background-color: #f98500ff;
+            border-radius: 8px;
             transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(88, 62, 4, 0.2);
         }
 
-        .header-actions {
+        .selector-dropdown {
             position: absolute;
+            top: 96%;
             right: 0;
-            top: 0;
-            display: flex;
-            gap: 10px;
-            align-items: center;
+            background: white;
+            border: 2px solid #000000ff;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(88, 62, 4, 0.2);
+            min-width: 100%;
+            z-index: 1000;
+            display: none;
+            margin-top: 4px;
         }
 
-        .toggle-standards-btn {
-            background: #111827;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 10px 14px;
-            font-size: 14px;
-            font-weight: 600;
+        .selector-dropdown.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: clamp(6px, 0.42vw, 8px) clamp(10px, 0.83vw, 16px);
             cursor: pointer;
-            display: inline-flex;
-            gap: 8px;
-            align-items: center;
+            border-bottom: 1px solid #e5e7eb;
+            transition: all 0.2s;
+            color: #000000ff;
+            font-size: clamp(8px, 0.74vw, 14px);
+            font-weight: 500;
         }
 
-        .toggle-standards-btn:hover {
-            background: #0b1220;
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8f5eb;
+            border-radius: 8px;
+        }
+
+        .dropdown-item.active {
+            background-color: #f99e00;
+            color: white;
+            border-radius: 4px;
         }
 
         .header h1 {
             color: #000000ff;
             font-size: clamp(20px, 2.6vw, 50px);
-            margin-bottom: 10px;
+            margin: 0;
             text-align: left;
+            position: relative;
+            padding-bottom: 16px;
+            width: 100%;
         }
 
         .header h1::after {
@@ -109,8 +135,15 @@ require_once 'session_check.php';
             display: block;
             height: 3px;
             width: 100%;
-            margin-top: 16px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
             background: linear-gradient(90deg, rgba(245,190,133,0) 0%, rgba(0, 0, 0, 1) 25%, rgba(0, 0, 0, 1) 75%, rgba(245,190,133,0) 100%);
+        }
+        
+        .header .controls {
+            position: relative;
+            z-index: 10;
         }
 
         .back-button {
@@ -773,10 +806,17 @@ require_once 'session_check.php';
     <div class="container">
         <div class="header">
             <h1>考核表单管理</h1>
-            <div class="header-actions">
-                <button class="toggle-standards-btn" onclick="toggleStandardsMode()">
-                    <i class="fas fa-exchange-alt"></i> 切换考核标准
-                </button>
+            <div class="controls">
+                <div class="toggle-standards-selector">
+                    <button class="selector-button" onclick="toggleStandardsDropdown()">
+                        <span id="current-mode">考核表单</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="selector-dropdown" id="standards-dropdown">
+                        <div class="dropdown-item active" onclick="switchToFormMode()">考核表单</div>
+                        <div class="dropdown-item" onclick="switchToStandardsMode()">考核标准</div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -918,20 +958,71 @@ require_once 'session_check.php';
             }, 200);
         }
 
-        function toggleStandardsMode() {
-            isStandardsMode = !isStandardsMode;
-            if (isStandardsMode) {
-                showStandardsEditor();
-            } else {
-                // 回到表单
-                document.getElementById('mainContent').innerHTML = `
-                    <div style="text-align: center; padding: 60px 20px; color: #6b7280;">
-                        <i class="fas fa-clipboard-list" style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;"></i>
-                        <p>请选择或创建一个考核表单</p>
-                    </div>
-                `;
+        // 切换下拉菜单显示
+        function toggleStandardsDropdown() {
+            const dropdown = document.getElementById('standards-dropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('show');
             }
         }
+
+        // 切换到表单模式
+        function switchToFormMode() {
+            isStandardsMode = false;
+            updateDropdownSelection('考核表单', 0);
+            // 回到表单
+            document.getElementById('mainContent').innerHTML = `
+                <div style="text-align: center; padding: 60px 20px; color: #6b7280;">
+                    <i class="fas fa-clipboard-list" style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;"></i>
+                    <p>请选择或创建一个考核表单</p>
+                </div>
+            `;
+            closeDropdown();
+        }
+
+        // 切换到标准模式
+        function switchToStandardsMode() {
+            isStandardsMode = true;
+            updateDropdownSelection('考核标准', 1);
+            showStandardsEditor();
+            closeDropdown();
+        }
+
+        // 更新下拉选择状态
+        function updateDropdownSelection(text, index) {
+            const currentMode = document.getElementById('current-mode');
+            if (currentMode) {
+                currentMode.textContent = text;
+            }
+            
+            const dropdown = document.getElementById('standards-dropdown');
+            if (dropdown) {
+                const items = dropdown.querySelectorAll('.dropdown-item');
+                items.forEach((item, i) => {
+                    if (i === index) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+        }
+
+        // 关闭下拉菜单
+        function closeDropdown() {
+            const dropdown = document.getElementById('standards-dropdown');
+            if (dropdown) {
+                dropdown.classList.remove('show');
+            }
+        }
+
+        // 点击外部关闭下拉菜单
+        document.addEventListener('click', function(event) {
+            const selector = document.querySelector('.toggle-standards-selector');
+            if (selector && !selector.contains(event.target)) {
+                closeDropdown();
+            }
+        });
 
         async function showStandardsEditor() {
             // 拉取三个部门的指标 + 标准
