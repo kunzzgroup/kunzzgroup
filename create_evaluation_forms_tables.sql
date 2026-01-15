@@ -51,6 +51,20 @@ CREATE TABLE IF NOT EXISTS evaluation_criteria_config (
     INDEX idx_department (department)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='考核指标配置表';
 
+-- 考核标准表：存储每个部门每个指标的 1-5 分说明（用于“考核标准”页面与导出PDF）
+CREATE TABLE IF NOT EXISTS evaluation_criteria_standards (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    department VARCHAR(50) NOT NULL COMMENT '部门 (service_line/sushi_bar/kitchen)',
+    criteria_order INT NOT NULL COMMENT '指标顺序(1-5)',
+    score TINYINT NOT NULL COMMENT '分数(1-5)',
+    description_text LONGTEXT NOT NULL COMMENT '考核标准说明文本',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uniq_dept_criteria_score (department, criteria_order, score),
+    INDEX idx_department (department),
+    INDEX idx_criteria (criteria_order),
+    INDEX idx_score (score)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='考核标准说明表';
+
 -- 插入默认的考核指标配置
 -- Service Line (服务部门)
 INSERT INTO evaluation_criteria_config (department, criteria_order, criteria_name_zh, criteria_name_en) VALUES
@@ -78,3 +92,17 @@ INSERT INTO evaluation_criteria_config (department, criteria_order, criteria_nam
 ('kitchen', 4, '工作态度', 'Work Attitude'),
 ('kitchen', 5, '团队合作', 'Teamwork')
 ON DUPLICATE KEY UPDATE criteria_name_zh = VALUES(criteria_name_zh), criteria_name_en = VALUES(criteria_name_en);
+
+-- 考核标准表：存储每个部门每个指标的 1-5 分说明（用于"考核标准"页面与导出PDF）
+CREATE TABLE IF NOT EXISTS evaluation_criteria_standards (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    department VARCHAR(50) NOT NULL COMMENT '部门 (service_line/sushi_bar/kitchen)',
+    criteria_order INT NOT NULL COMMENT '指标顺序(1-5)',
+    score TINYINT NOT NULL COMMENT '分数(1-5)',
+    description_text LONGTEXT NOT NULL COMMENT '考核标准说明文本',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uniq_dept_criteria_score (department, criteria_order, score),
+    INDEX idx_department (department),
+    INDEX idx_criteria (criteria_order),
+    INDEX idx_score (score)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='考核标准说明表';

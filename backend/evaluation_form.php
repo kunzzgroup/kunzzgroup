@@ -41,6 +41,62 @@ require_once 'session_check.php';
             position: relative;
         }
 
+        .header-actions {
+            position: absolute;
+            right: 0;
+            top: 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .toggle-standards-btn {
+            background: #111827;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .toggle-standards-btn:hover {
+            background: #0b1220;
+            transform: translateY(-1px);
+        }
+
+        .header-actions {
+            position: absolute;
+            right: 0;
+            top: 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .toggle-standards-btn {
+            background: #111827;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .toggle-standards-btn:hover {
+            background: #0b1220;
+        }
+
         .header h1 {
             color: #000000ff;
             font-size: clamp(20px, 2.6vw, 50px);
@@ -561,6 +617,155 @@ require_once 'session_check.php';
                 page-break-inside: avoid;
             }
         }
+
+        /* 考核标准编辑区 */
+        .standards-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .standards-toolbar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .standards-toolbar .left {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .standards-tabs {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .standards-tab {
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .standards-tab.active {
+            border-color: #111827;
+            background: #111827;
+            color: #fff;
+        }
+
+        .standards-page {
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .standards-page-title {
+            background: #bf7f3b;
+            color: #fff;
+            padding: 18px 16px;
+            font-size: 32px;
+            font-weight: 800;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .standards-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .standards-table th,
+        .standards-table td {
+            border: 1px solid #111;
+            padding: 14px;
+            vertical-align: top;
+        }
+
+        .standards-score {
+            width: 70px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 18px;
+        }
+
+        .standards-textarea {
+            width: 100%;
+            min-height: 86px;
+            border: none;
+            outline: none;
+            resize: vertical;
+            font-size: 14px;
+            line-height: 1.5;
+            font-family: inherit;
+        }
+
+        /* 标准PDF容器（隐藏，仅用于导出） */
+        #standards-pdf {
+            display: none;
+            width: 1300px;
+            background: #fff;
+            padding: 40px 50px;
+            box-sizing: border-box;
+        }
+
+        #standards-pdf .standards-page-title {
+            background: #bf7f3b;
+            color: #fff;
+            padding: 22px 16px;
+            font-size: 36px;
+            font-weight: 800;
+            text-align: center;
+            letter-spacing: 1.5px;
+            margin-bottom: 0;
+        }
+
+        #standards-pdf .standards-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 16px;
+        }
+
+        #standards-pdf .standards-table th {
+            background: #bf7f3b;
+            color: #fff;
+            padding: 16px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        #standards-pdf .standards-table td {
+            border: 1px solid #000;
+            padding: 18px;
+            vertical-align: top;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        #standards-pdf .standards-score {
+            width: 80px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 20px;
+        }
+
+        .standards-pdf-page {
+            page-break-after: always;
+            margin-bottom: 20px;
+        }
+
+        .standards-pdf-page:last-child {
+            page-break-after: auto;
+        }
     </style>
     <?php include 'sidebar.php'; ?>
 </head>
@@ -568,6 +773,11 @@ require_once 'session_check.php';
     <div class="container">
         <div class="header">
             <h1>考核表单管理</h1>
+            <div class="header-actions">
+                <button class="toggle-standards-btn" onclick="toggleStandardsMode()">
+                    <i class="fas fa-exchange-alt"></i> 切换考核标准
+                </button>
+            </div>
         </div>
 
         <div id="message" class="message"></div>
@@ -626,6 +836,14 @@ require_once 'session_check.php';
         let currentDepartment = '';
         let employees = [];
         let criteria = [];
+        let isStandardsMode = false;
+
+        // 考核标准数据：standards[department][criteria_order][score] = text
+        const standards = {
+            service_line: {},
+            sushi_bar: {},
+            kitchen: {}
+        };
 
         // 部门变化时加载员工和指标
         document.getElementById('department').addEventListener('change', function() {
@@ -698,6 +916,312 @@ require_once 'session_check.php';
             setTimeout(() => {
                 updateSidebarButtons();
             }, 200);
+        }
+
+        function toggleStandardsMode() {
+            isStandardsMode = !isStandardsMode;
+            if (isStandardsMode) {
+                showStandardsEditor();
+            } else {
+                // 回到表单
+                document.getElementById('mainContent').innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px; color: #6b7280;">
+                        <i class="fas fa-clipboard-list" style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;"></i>
+                        <p>请选择或创建一个考核表单</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function showStandardsEditor() {
+            // 拉取三个部门的指标 + 标准
+            try {
+                showMessage('正在加载考核标准...', 'success');
+
+                const [c1, c2, c3] = await Promise.all([
+                    fetch(`evaluation_form_api.php?action=get_criteria&department=service_line`).then(r => r.json()),
+                    fetch(`evaluation_form_api.php?action=get_criteria&department=sushi_bar`).then(r => r.json()),
+                    fetch(`evaluation_form_api.php?action=get_criteria&department=kitchen`).then(r => r.json())
+                ]);
+
+                const criteriaByDept = {
+                    service_line: c1.success ? c1.data : [],
+                    sushi_bar: c2.success ? c2.data : [],
+                    kitchen: c3.success ? c3.data : []
+                };
+
+                const sres = await fetch(`evaluation_form_api.php?action=get_standards`).then(r => r.json());
+                const rows = sres.success ? (sres.data || []) : [];
+
+                // 初始化结构
+                ['service_line', 'sushi_bar', 'kitchen'].forEach(d => {
+                    standards[d] = {};
+                    for (let i = 1; i <= 7; i++) standards[d][i] = {};
+                    for (let i = 1; i <= 7; i++) for (let s = 1; s <= 5; s++) standards[d][i][s] = '';
+                });
+                rows.forEach(r => {
+                    if (standards[r.department] && standards[r.department][parseInt(r.criteria_order)] && standards[r.department][parseInt(r.criteria_order)][parseInt(r.score)] !== undefined) {
+                        standards[r.department][parseInt(r.criteria_order)][parseInt(r.score)] = r.description_text || '';
+                    }
+                });
+
+                // 缓存指标数据
+                _criteriaByDeptCache = criteriaByDept;
+                // 生成UI（默认 service_line）
+                renderStandardsUI('service_line', criteriaByDept);
+            } catch (e) {
+                console.error(e);
+                showMessage('加载考核标准失败', 'error');
+            }
+        }
+
+        function renderStandardsUI(activeDept, criteriaByDept) {
+            const deptLabel = {
+                service_line: 'SERVICE (前台)',
+                sushi_bar: 'SUSHI',
+                kitchen: 'KITCHEN'
+            };
+
+            const activeCriteria = criteriaByDept[activeDept] || [];
+            // 只取前5个指标（你说每个部门5页）
+            const pages = activeCriteria.slice(0, 5);
+
+            let html = `
+                <div class="standards-wrap">
+                    <div class="standards-toolbar">
+                        <div class="left">
+                            <div class="standards-tabs">
+                                <button class="standards-tab ${activeDept === 'service_line' ? 'active' : ''}" onclick="switchStandardsDept('service_line')">SERVICE</button>
+                                <button class="standards-tab ${activeDept === 'sushi_bar' ? 'active' : ''}" onclick="switchStandardsDept('sushi_bar')">SUSHI</button>
+                                <button class="standards-tab ${activeDept === 'kitchen' ? 'active' : ''}" onclick="switchStandardsDept('kitchen')">KITCHEN</button>
+                            </div>
+                            <div style="color:#6b7280;font-size:14px;">顺序：Service 前5页 → Sushi 5页 → Kitchen 5页</div>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn-secondary" onclick="exportStandardsPDF()"><i class="fas fa-file-pdf"></i> 导出标准PDF</button>
+                            <button class="btn-primary" onclick="saveStandards()"><i class="fas fa-save"></i> 保存标准</button>
+                        </div>
+                    </div>
+            `;
+
+            pages.forEach((c, idx) => {
+                const co = parseInt(c.criteria_order || (idx + 1));
+                const title = c.criteria_name_zh || `指标${idx + 1}`;
+                html += `
+                    <div class="standards-page" data-criteria-order="${co}">
+                        <div class="standards-page-title">${title}</div>
+                        <table class="standards-table">
+                            <thead>
+                                <tr>
+                                    <th class="standards-score">分数</th>
+                                    <th>说明</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                for (let s = 1; s <= 5; s++) {
+                    const val = (standards[activeDept]?.[co]?.[s]) || '';
+                    html += `
+                        <tr>
+                            <td class="standards-score">${s}</td>
+                            <td>
+                                <textarea class="standards-textarea"
+                                    data-dept="${activeDept}"
+                                    data-criteria-order="${co}"
+                                    data-score="${s}"
+                                    placeholder="请输入 ${title} 的 ${s} 分说明...">${escapeHtml(val)}</textarea>
+                            </td>
+                        </tr>
+                    `;
+                }
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            });
+
+            html += `
+                    <div id="standards-pdf"></div>
+                </div>
+            `;
+
+            document.getElementById('mainContent').innerHTML = html;
+        }
+
+        let _criteriaByDeptCache = null;
+        function switchStandardsDept(dept) {
+            if (!_criteriaByDeptCache) {
+                showMessage('请先加载考核标准', 'error');
+                return;
+            }
+            renderStandardsUI(dept, _criteriaByDeptCache);
+        }
+
+        // textarea输入同步到standards对象
+        document.addEventListener('input', function(e) {
+            if (!e.target.classList.contains('standards-textarea')) return;
+            const dept = e.target.getAttribute('data-dept');
+            const co = parseInt(e.target.getAttribute('data-criteria-order'));
+            const sc = parseInt(e.target.getAttribute('data-score'));
+            if (!dept || !co || !sc) return;
+            if (!standards[dept]) standards[dept] = {};
+            if (!standards[dept][co]) standards[dept][co] = {};
+            standards[dept][co][sc] = e.target.value;
+        });
+
+        async function saveStandards() {
+            try {
+                const items = [];
+                ['service_line', 'sushi_bar', 'kitchen'].forEach(dept => {
+                    for (let co = 1; co <= 5; co++) {
+                        for (let sc = 1; sc <= 5; sc++) {
+                            items.push({
+                                department: dept,
+                                criteria_order: co,
+                                score: sc,
+                                description_text: (standards[dept]?.[co]?.[sc]) || ''
+                            });
+                        }
+                    }
+                });
+
+                const res = await fetch('evaluation_form_api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'save_standards', items })
+                }).then(r => r.json());
+
+                if (res.success) {
+                    showMessage('考核标准已保存', 'success');
+                } else {
+                    showMessage(res.message || '保存失败', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showMessage('保存失败', 'error');
+            }
+        }
+
+        async function exportStandardsPDF() {
+            try {
+                showMessage('正在生成标准PDF，请稍候...', 'success');
+                const { jsPDF } = window.jspdf;
+
+                // 构建15页：service(1-5) -> sushi(1-5) -> kitchen(1-5)
+                const pdfContainer = document.getElementById('standards-pdf');
+                if (!pdfContainer) return;
+
+                const deptOrder = [
+                    { dept: 'service_line', title: 'SERVICE' },
+                    { dept: 'sushi_bar', title: 'SUSHI' },
+                    { dept: 'kitchen', title: 'KITCHEN' }
+                ];
+
+                // 获取指标名称（从DB配置表拿，若拿不到就用“指标X”）
+                const [c1, c2, c3] = await Promise.all([
+                    fetch(`evaluation_form_api.php?action=get_criteria&department=service_line`).then(r => r.json()),
+                    fetch(`evaluation_form_api.php?action=get_criteria&department=sushi_bar`).then(r => r.json()),
+                    fetch(`evaluation_form_api.php?action=get_criteria&department=kitchen`).then(r => r.json())
+                ]);
+                const criteriaByDept = {
+                    service_line: c1.success ? c1.data : [],
+                    sushi_bar: c2.success ? c2.data : [],
+                    kitchen: c3.success ? c3.data : []
+                };
+
+                // 生成HTML页
+                let pagesHtml = '';
+                deptOrder.forEach(d => {
+                    const list = (criteriaByDept[d.dept] || []).slice(0, 5);
+                    list.forEach((c, idx) => {
+                        const co = parseInt(c.criteria_order || (idx + 1));
+                        const titleZh = c.criteria_name_zh || `指标${idx + 1}`;
+                        pagesHtml += `
+                            <div class="standards-pdf-page">
+                                <div class="standards-page-title">${escapeHtml(titleZh)}</div>
+                                <table class="standards-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="standards-score" style="width: 80px;">分数</th>
+                                            <th>说明</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${[1,2,3,4,5].map(sc => {
+                                            const text = (standards[d.dept]?.[co]?.[sc]) || '';
+                                            return `
+                                            <tr>
+                                                <td class="standards-score">${sc}</td>
+                                                <td style="white-space: pre-wrap; font-size: 15px; line-height: 1.6; padding: 18px;">${escapeHtml(text)}</td>
+                                            </tr>
+                                        `;
+                                        }).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        `;
+                    });
+                });
+
+                pdfContainer.innerHTML = pagesHtml;
+                pdfContainer.style.display = 'block';
+                await new Promise(r => setTimeout(r, 200));
+
+                // A4 横向，规格与表单一致
+                const pdf = new jsPDF('l', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const marginX = 8;
+                const marginY = 8;
+                const availableWidth = pdfWidth - marginX * 2;
+                const availableHeight = pdfHeight - marginY * 2;
+
+                const pageEls = Array.from(pdfContainer.querySelectorAll('.standards-pdf-page'));
+                for (let i = 0; i < pageEls.length; i++) {
+                    const el = pageEls[i];
+                    const canvas = await html2canvas(el, {
+                        scale: 2.2,
+                        useCORS: true,
+                        logging: false,
+                        backgroundColor: '#ffffff',
+                        width: el.scrollWidth,
+                        height: el.scrollHeight,
+                        windowWidth: el.scrollWidth,
+                        windowHeight: el.scrollHeight
+                    });
+                    const imgData = canvas.toDataURL('image/png', 1.0);
+                    const imgWidth = canvas.width;
+                    const imgHeight = canvas.height;
+                    const ratio = Math.min(availableWidth / imgWidth, availableHeight / imgHeight);
+                    const w = imgWidth * ratio;
+                    const h = imgHeight * ratio;
+                    const x = (pdfWidth - w) / 2;
+                    const y = marginY;
+
+                    if (i > 0) pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', x, y, w, h);
+                }
+
+                const fileName = `考核标准_15页_${new Date().toISOString().slice(0,10)}.pdf`;
+                pdf.save(fileName);
+                showMessage('标准PDF下载成功', 'success');
+            } catch (e) {
+                console.error(e);
+                showMessage('导出失败', 'error');
+            } finally {
+                const pdfContainer = document.getElementById('standards-pdf');
+                if (pdfContainer) pdfContainer.style.display = 'none';
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
         }
 
         // 渲染表单

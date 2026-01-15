@@ -56,6 +56,14 @@ switch ($action) {
     case 'get_criteria':
         getCriteria($pdo);
         break;
+
+    case 'get_standards':
+        getStandards($pdo);
+        break;
+    
+    case 'save_standards':
+        saveStandards($pdo);
+        break;
     
     case 'list_forms':
         listForms($pdo);
@@ -80,6 +88,83 @@ switch ($action) {
     default:
         sendResponse(false, "无效的操作请求");
         break;
+}
+
+/**
+ * 获取考核标准（可按department过滤）
+ * GET: action=get_standards&department=service_line|sushi_bar|kitchen(可选)
+ */
+function getStandards($pdo) {
+    $department = $_GET['department'] ?? '';
+    try {
+        $sql = "SELECT department, criteria_order, score, description_text
+                FROM evaluation_criteria_standards";
+        $params = [];
+        if ($department) {
+            $sql .= " WHERE department = :department";
+            $params['department'] = $department;
+        }
+        $sql .= " ORDER BY department, criteria_order, score";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        sendResponse(true, "获取成功", $rows);
+    } catch (PDOException $e) {
+        sendResponse(false, "获取考核标准失败：" . $e->getMessage());
+    }
+}
+
+/**
+ * 保存考核标准（批量upsert）
+ * POST JSON:
+ * {
+ *   action: "save_standards",
+ *   items: [{department, criteria_order, score, description_text}, ...]
+ * }
+ */
+function saveStandards($pdo) {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $items = $input['items'] ?? [];
+    if (!is_array($items) || count($items) === 0) {
+        sendResponse(false, "没有要保存的内容");
+    }
+
+    try {
+        $pdo->beginTransaction();
+
+        $sql = "INSERT INTO evaluation_criteria_standards
+                    (department, criteria_order, score, description_text)
+                VALUES
+                    (:department, :criteria_order, :score, :description_text)
+                ON DUPLICATE KEY UPDATE
+                    description_text = VALUES(description_text),
+                    updated_at = CURRENT_TIMESTAMP";
+        $stmt = $pdo->prepare($sql);
+
+        foreach ($items as $it) {
+            $dept = $it['department'] ?? '';
+            $criteriaOrder = (int)($it['criteria_order'] ?? 0);
+            $score = (int)($it['score'] ?? 0);
+            $text = $it['description_text'] ?? '';
+
+            if (!$dept || $criteriaOrder < 1 || $criteriaOrder > 7 || $score < 1 || $score > 5) {
+                continue;
+            }
+
+            $stmt->execute([
+                ':department' => $dept,
+                ':criteria_order' => $criteriaOrder,
+                ':score' => $score,
+                ':description_text' => $text
+            ]);
+        }
+
+        $pdo->commit();
+        sendResponse(true, "保存成功");
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        sendResponse(false, "保存考核标准失败：" . $e->getMessage());
+    }
 }
 
 /**
@@ -343,5 +428,82 @@ function deleteForm($pdo) {
     } catch (PDOException $e) {
         $pdo->rollBack();
         sendResponse(false, "删除表单失败：" . $e->getMessage());
+    }
+}
+
+/**
+ * 获取考核标准（可按department过滤）
+ * GET: action=get_standards&department=service_line|sushi_bar|kitchen(可选)
+ */
+function getStandards($pdo) {
+    $department = $_GET['department'] ?? '';
+    try {
+        $sql = "SELECT department, criteria_order, score, description_text
+                FROM evaluation_criteria_standards";
+        $params = [];
+        if ($department) {
+            $sql .= " WHERE department = :department";
+            $params['department'] = $department;
+        }
+        $sql .= " ORDER BY department, criteria_order, score";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        sendResponse(true, "获取成功", $rows);
+    } catch (PDOException $e) {
+        sendResponse(false, "获取考核标准失败：" . $e->getMessage());
+    }
+}
+
+/**
+ * 保存考核标准（批量upsert）
+ * POST JSON:
+ * {
+ *   action: "save_standards",
+ *   items: [{department, criteria_order, score, description_text}, ...]
+ * }
+ */
+function saveStandards($pdo) {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $items = $input['items'] ?? [];
+    if (!is_array($items) || count($items) === 0) {
+        sendResponse(false, "没有要保存的内容");
+    }
+
+    try {
+        $pdo->beginTransaction();
+
+        $sql = "INSERT INTO evaluation_criteria_standards
+                    (department, criteria_order, score, description_text)
+                VALUES
+                    (:department, :criteria_order, :score, :description_text)
+                ON DUPLICATE KEY UPDATE
+                    description_text = VALUES(description_text),
+                    updated_at = CURRENT_TIMESTAMP";
+        $stmt = $pdo->prepare($sql);
+
+        foreach ($items as $it) {
+            $dept = $it['department'] ?? '';
+            $criteriaOrder = (int)($it['criteria_order'] ?? 0);
+            $score = (int)($it['score'] ?? 0);
+            $text = $it['description_text'] ?? '';
+
+            if (!$dept || $criteriaOrder < 1 || $criteriaOrder > 7 || $score < 1 || $score > 5) {
+                continue;
+            }
+
+            $stmt->execute([
+                ':department' => $dept,
+                ':criteria_order' => $criteriaOrder,
+                ':score' => $score,
+                ':description_text' => $text
+            ]);
+        }
+
+        $pdo->commit();
+        sendResponse(true, "保存成功");
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        sendResponse(false, "保存考核标准失败：" . $e->getMessage());
     }
 }
