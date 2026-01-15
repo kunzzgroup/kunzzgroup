@@ -340,6 +340,114 @@ require_once 'session_check.php';
         .delete-btn:hover {
             background-color: #dc2626;
         }
+
+        .print-btn {
+            margin-top: 20px;
+            padding: 15px 30px;
+            background-color: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .print-btn:hover {
+            background-color: #059669;
+        }
+
+        /* 打印样式 */
+        @media print {
+            body {
+                background: white;
+            }
+
+            .sidebar,
+            .back-button,
+            .save-form-btn,
+            .print-btn,
+            .header h1::after,
+            #message {
+                display: none !important;
+            }
+
+            .container {
+                max-width: 100%;
+                padding: 0;
+                height: auto;
+            }
+
+            .header {
+                margin-bottom: 20px;
+            }
+
+            .header h1 {
+                font-size: 28px;
+                margin-bottom: 10px;
+            }
+
+            .main-content {
+                box-shadow: none;
+                padding: 20px;
+                overflow: visible;
+                max-height: none;
+            }
+
+            .content-wrapper {
+                display: block;
+            }
+
+            .evaluation-table {
+                page-break-inside: auto;
+            }
+
+            .evaluation-table tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+
+            .evaluation-table thead {
+                display: table-header-group;
+            }
+
+            .evaluation-table tfoot {
+                display: table-footer-group;
+            }
+
+            .score-input {
+                border: 1px solid #000;
+                background: transparent;
+                padding: 8px;
+                min-height: 30px;
+            }
+
+            .form-header {
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .form-header h2 {
+                font-size: 32px;
+            }
+
+            /* 确保表格完整显示 */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            th, td {
+                border: 1px solid #333;
+                padding: 10px;
+            }
+
+            /* 避免分页打断表格行 */
+            tr {
+                page-break-inside: avoid;
+            }
+        }
     </style>
     <?php include 'sidebar.php'; ?>
 </head>
@@ -530,7 +638,6 @@ require_once 'session_check.php';
                     html += `<td>
                         <input type="text" 
                                class="score-input" 
-                               placeholder="( ) ( )"
                                data-employee-id="${emp.id || index}"
                                data-employee-name="${emp.name}"
                                data-criteria-index="${cIndex + 1}"
@@ -544,9 +651,14 @@ require_once 'session_check.php';
             html += `</tbody></table>`;
 
             html += `
-                <button class="save-form-btn" onclick="saveForm()">
-                    <i class="fas fa-save"></i> 保存表单
-                </button>
+                <div style="display: flex; gap: 15px; margin-top: 20px;">
+                    <button class="save-form-btn" onclick="saveForm()" style="flex: 1;">
+                        <i class="fas fa-save"></i> 保存表单
+                    </button>
+                    <button class="print-btn" onclick="printForm()" style="flex: 1;">
+                        <i class="fas fa-print"></i> 打印表单
+                    </button>
+                </div>
             `;
 
             document.getElementById('mainContent').innerHTML = html;
@@ -740,6 +852,11 @@ require_once 'session_check.php';
             'sushi_bar': 'SUSHI BAR',
             'kitchen': 'KITCHEN'
         };
+
+        // 打印表单
+        function printForm() {
+            window.print();
+        }
     </script>
 </body>
 </html>
