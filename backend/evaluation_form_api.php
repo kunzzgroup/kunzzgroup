@@ -13,7 +13,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 ini_set('display_errors', 0);
-error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+error_reporting(E_ALL);
+
+// 设置错误处理，确保错误时也返回JSON
+set_error_handler(function($severity, $message, $file, $line) {
+    if (!(error_reporting() & $severity)) {
+        return;
+    }
+    ob_end_clean();
+    http_response_code(500);
+    echo json_encode([
+        "success" => false,
+        "message" => "服务器错误：$message (在 $file 的第 $line 行)"
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}, E_ALL);
+
+// 设置异常处理
+set_exception_handler(function($exception) {
+    ob_end_clean();
+    http_response_code(500);
+    echo json_encode([
+        "success" => false,
+        "message" => "未捕获的异常：" . $exception->getMessage()
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+});
 
 // 数据库配置
 $host = 'localhost';
@@ -91,93 +116,29 @@ switch ($action) {
 }
 
 /**
- * 获取考核标准（可按department过滤）
- * GET: action=get_standards&department=service_line|sushi_bar|kitchen(可选)
- */
-function getStandards($pdo) {
-    $department = $_GET['department'] ?? '';
-    try {
-        $sql = "SELECT department, criteria_order, score, description_text
-                FROM evaluation_criteria_standards";
-        $params = [];
-        if ($department) {
-            $sql .= " WHERE department = :department";
-            $params['department'] = $department;
-        }
-        $sql .= " ORDER BY department, criteria_order, score";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        sendResponse(true, "获取成功", $rows);
-    } catch (PDOException $e) {
-        sendResponse(false, "获取考核标准失败：" . $e->getMessage());
-    }
-}
-
-/**
- * 保存考核标准（批量upsert）
- * POST JSON:
- * {
- *   action: "save_standards",
- *   items: [{department, criteria_order, score, description_text}, ...]
- * }
- */
-function saveStandards($pdo) {
-    $input = json_decode(file_get_contents('php://input'), true);
-    $items = $input['items'] ?? [];
-    if (!is_array($items) || count($items) === 0) {
-        sendResponse(false, "没有要保存的内容");
-    }
-
-    try {
-        $pdo->beginTransaction();
-
-        $sql = "INSERT INTO evaluation_criteria_standards
-                    (department, criteria_order, score, description_text)
-                VALUES
-                    (:department, :criteria_order, :score, :description_text)
-                ON DUPLICATE KEY UPDATE
-                    description_text = VALUES(description_text),
-                    updated_at = CURRENT_TIMESTAMP";
-        $stmt = $pdo->prepare($sql);
-
-        foreach ($items as $it) {
-            $dept = $it['department'] ?? '';
-            $criteriaOrder = (int)($it['criteria_order'] ?? 0);
-            $score = (int)($it['score'] ?? 0);
-            $text = $it['description_text'] ?? '';
-
-            if (!$dept || $criteriaOrder < 1 || $criteriaOrder > 7 || $score < 1 || $score > 5) {
-                continue;
-            }
-
-            $stmt->execute([
-                ':department' => $dept,
-                ':criteria_order' => $criteriaOrder,
-                ':score' => $score,
-                ':description_text' => $text
-            ]);
-        }
-
-        $pdo->commit();
-        sendResponse(true, "保存成功");
-    } catch (PDOException $e) {
-        $pdo->rollBack();
-        sendResponse(false, "保存考核标准失败：" . $e->getMessage());
-    }
-}
-
-/**
  * 获取考核指标配置
  */
 function getCriteria($pdo) {
-    $department = $_GET['department'] ?? '';
-    
-    if (!$department) {
-        sendResponse(false, "请提供部门参数");
-    }
-    
     try {
+        $department = $_GET['department'] ?? '';
+        
+        if (!$department) {
+            sendResponse(false, "请提供部门参数");
+            return;
+        }
+        
+        // 检查表是否存在
+        try {
+            $checkTable = $pdo->query("SHOW TABLES LIKE 'evaluation_criteria_config'");
+            if ($checkTable->rowCount() == 0) {
+                sendResponse(false, "考核指标配置表不存在，请先执行SQL文件创建表结构");
+                return;
+            }
+        } catch (PDOException $e) {
+            sendResponse(false, "检查表失败：" . $e->getMessage());
+            return;
+        }
+        
         $sql = "SELECT * FROM evaluation_criteria_config 
                 WHERE department = :department AND is_active = 1 
                 ORDER BY criteria_order ASC";
@@ -187,6 +148,8 @@ function getCriteria($pdo) {
         
         sendResponse(true, "获取成功", $criteria);
     } catch (PDOException $e) {
+        sendResponse(false, "获取指标失败：" . $e->getMessage());
+    } catch (Exception $e) {
         sendResponse(false, "获取指标失败：" . $e->getMessage());
     }
 }
@@ -436,8 +399,22 @@ function deleteForm($pdo) {
  * GET: action=get_standards&department=service_line|sushi_bar|kitchen(可选)
  */
 function getStandards($pdo) {
-    $department = $_GET['department'] ?? '';
     try {
+        $department = $_GET['department'] ?? '';
+        
+        // 检查表是否存在，如果不存在返回空数组
+        try {
+            $checkTable = $pdo->query("SHOW TABLES LIKE 'evaluation_criteria_standards'");
+            if ($checkTable->rowCount() == 0) {
+                sendResponse(true, "获取成功", []);
+                return;
+            }
+        } catch (PDOException $e) {
+            // 检查失败时也返回空数组，不阻断流程
+            sendResponse(true, "获取成功", []);
+            return;
+        }
+        
         $sql = "SELECT department, criteria_order, score, description_text
                 FROM evaluation_criteria_standards";
         $params = [];
@@ -452,6 +429,8 @@ function getStandards($pdo) {
         sendResponse(true, "获取成功", $rows);
     } catch (PDOException $e) {
         sendResponse(false, "获取考核标准失败：" . $e->getMessage());
+    } catch (Exception $e) {
+        sendResponse(false, "获取考核标准失败：" . $e->getMessage());
     }
 }
 
@@ -464,13 +443,26 @@ function getStandards($pdo) {
  * }
  */
 function saveStandards($pdo) {
-    $input = json_decode(file_get_contents('php://input'), true);
-    $items = $input['items'] ?? [];
-    if (!is_array($items) || count($items) === 0) {
-        sendResponse(false, "没有要保存的内容");
-    }
-
     try {
+        $input = json_decode(file_get_contents('php://input'), true);
+        $items = $input['items'] ?? [];
+        if (!is_array($items) || count($items) === 0) {
+            sendResponse(false, "没有要保存的内容");
+            return;
+        }
+
+        // 检查表是否存在
+        try {
+            $checkTable = $pdo->query("SHOW TABLES LIKE 'evaluation_criteria_standards'");
+            if ($checkTable->rowCount() == 0) {
+                sendResponse(false, "考核标准表不存在，请先执行SQL文件创建表结构");
+                return;
+            }
+        } catch (PDOException $e) {
+            sendResponse(false, "检查表失败：" . $e->getMessage());
+            return;
+        }
+
         $pdo->beginTransaction();
 
         $sql = "INSERT INTO evaluation_criteria_standards
@@ -503,7 +495,14 @@ function saveStandards($pdo) {
         $pdo->commit();
         sendResponse(true, "保存成功");
     } catch (PDOException $e) {
-        $pdo->rollBack();
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        sendResponse(false, "保存考核标准失败：" . $e->getMessage());
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
         sendResponse(false, "保存考核标准失败：" . $e->getMessage());
     }
 }
