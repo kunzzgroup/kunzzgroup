@@ -4027,6 +4027,99 @@ if (file_exists($jsonFile)) {
                 initializeDeptChart(0, internalOrgData[0]);
             }
         });
+        
+        // 对齐评分标准标题
+        function alignScoringTitles() {
+            // 找到所有的文化解说和价值观解说grid
+            const grids = document.querySelectorAll('.culture-explanation-grid');
+            
+            grids.forEach(grid => {
+                const cards = Array.from(grid.querySelectorAll('.culture-explanation-card'));
+                if (cards.length === 0) return;
+                
+                // 通过检查卡片的实际位置来确定列数
+                // 获取第一个卡片的位置
+                const firstCardRect = cards[0].getBoundingClientRect();
+                let columnCount = 1;
+                
+                // 找到同一行的卡片数量
+                for (let i = 1; i < cards.length; i++) {
+                    const cardRect = cards[i].getBoundingClientRect();
+                    // 如果卡片的top值相同或非常接近（在5px范围内），说明在同一行
+                    if (Math.abs(cardRect.top - firstCardRect.top) < 5) {
+                        columnCount++;
+                    } else {
+                        break;
+                    }
+                }
+                
+                // 按行分组卡片
+                const rows = [];
+                for (let i = 0; i < cards.length; i += columnCount) {
+                    rows.push(cards.slice(i, i + columnCount));
+                }
+                
+                // 对每一行进行处理
+                rows.forEach(rowCards => {
+                    // 重置所有描述区域的高度为auto
+                    rowCards.forEach(card => {
+                        const desc = card.querySelector('.culture-explanation-description');
+                        if (desc) {
+                            desc.style.minHeight = 'auto';
+                            desc.style.height = 'auto';
+                        }
+                    });
+                    
+                    // 强制浏览器重新计算布局
+                    void rowCards[0].offsetHeight;
+                    
+                    // 计算该行中描述区域的最大高度
+                    let maxHeight = 0;
+                    rowCards.forEach(card => {
+                        const desc = card.querySelector('.culture-explanation-description');
+                        if (desc) {
+                            const height = desc.offsetHeight;
+                            if (height > maxHeight) {
+                                maxHeight = height;
+                            }
+                        }
+                    });
+                    
+                    // 将所有描述区域设置为相同高度
+                    if (maxHeight > 0) {
+                        rowCards.forEach(card => {
+                            const desc = card.querySelector('.culture-explanation-description');
+                            if (desc) {
+                                desc.style.minHeight = maxHeight + 'px';
+                                desc.style.height = maxHeight + 'px';
+                            }
+                        });
+                    }
+                });
+            });
+        }
+        
+        // 页面加载后执行对齐
+        $(document).ready(function() {
+            // 延迟执行以确保所有内容都已渲染
+            setTimeout(alignScoringTitles, 100);
+            setTimeout(alignScoringTitles, 500);
+            
+            // 窗口大小改变时重新对齐（适应响应式布局）
+            let resizeTimer;
+            $(window).on('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function() {
+                    // 先重置所有高度
+                    document.querySelectorAll('.culture-explanation-description').forEach(desc => {
+                        desc.style.minHeight = 'auto';
+                        desc.style.height = 'auto';
+                    });
+                    // 重新对齐
+                    setTimeout(alignScoringTitles, 100);
+                }, 250);
+            });
+        });
     </script>
     <?php endif; ?>
 
