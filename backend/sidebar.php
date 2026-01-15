@@ -1157,7 +1157,7 @@ body.sidebar-transition {
                     </a>
                 </div>
                 <div class="menu-item-wrapper">
-                    <a href="#" class="informationmenu-item">
+                    <a href="evaluation_form.php" class="informationmenu-item">
                         考核表单
                     </a>
                 </div>
