@@ -367,6 +367,7 @@ require_once 'session_check.php';
             padding: 30px;
             width: 800px;
             margin: 0 auto;
+            min-height: 1200px; /* 确保PDF有足够的长度 */
         }
 
         #pdf-content .form-header {
@@ -720,6 +721,19 @@ require_once 'session_check.php';
                 html += `</tr>`;
             });
 
+            // 添加空行（使PDF模板更长，便于后续填写）
+            const emptyRows = 10; // 添加10个空行
+            for (let i = 0; i < emptyRows; i++) {
+                html += `<tr>
+                    <td class="employee-name" style="padding: 12px 15px; border: 1px solid #000; border-bottom: 1px dashed #ccc;"></td>`;
+                
+                criteria.forEach((c, cIndex) => {
+                    html += `<td style="padding: 12px 15px; border: 1px solid #000; border-bottom: 1px dashed #ccc; min-height: 30px; width: 120px;"></td>`;
+                });
+
+                html += `</tr>`;
+            }
+
             html += `</tbody></table>
                 </div>
                 <div style="display: flex; gap: 15px; margin-top: 20px;">
@@ -1005,32 +1019,51 @@ require_once 'session_check.php';
                 const pdfWidth = pdf.internal.pageSize.getWidth();
                 const pdfHeight = pdf.internal.pageSize.getHeight();
                 
-                // 计算图片尺寸以适应PDF页面
+                // 计算图片尺寸以适应PDF页面宽度，高度按比例缩放
                 const imgWidth = canvas.width;
                 const imgHeight = canvas.height;
-                const ratio = Math.min((pdfWidth - 20) / imgWidth, (pdfHeight - 20) / imgHeight); // 留20mm边距
+                const widthRatio = (pdfWidth - 20) / imgWidth; // 留10mm左右边距
+                const heightRatio = (pdfHeight - 20) / imgHeight;
+                const ratio = Math.min(widthRatio, heightRatio);
                 const imgScaledWidth = imgWidth * ratio;
                 const imgScaledHeight = imgHeight * ratio;
                 
-                // 居中显示
+                // 居中显示（水平居中，顶部对齐）
                 const xOffset = (pdfWidth - imgScaledWidth) / 2;
-                const yOffset = (pdfHeight - imgScaledHeight) / 2;
-
-                // 添加图片
-                pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgScaledWidth, imgScaledHeight);
-                
-                // 如果内容超过一页，添加新页
-                let heightLeft = imgScaledHeight;
+                let yOffset = 10; // 顶部留10mm边距
                 let position = yOffset;
+
+                // 如果内容高度超过一页，需要分页显示
+                let remainingHeight = imgScaledHeight;
                 
-                if (heightLeft > pdfHeight) {
-                    while (heightLeft > 0) {
-                        position = position - pdfHeight;
-                        if (position < -imgScaledHeight) break;
-                        
+                while (remainingHeight > 0) {
+                    // 计算当前页要显示的图片高度
+                    const pageHeight = Math.min(remainingHeight, pdfHeight - 20);
+                    const sourceY = (imgScaledHeight - remainingHeight) / ratio;
+                    const sourceHeight = pageHeight / ratio;
+                    
+                    // 添加图片到当前页
+                    pdf.addImage(
+                        imgData, 
+                        'PNG', 
+                        xOffset, 
+                        position, 
+                        imgScaledWidth, 
+                        pageHeight,
+                        undefined,
+                        'FAST',
+                        0,
+                        sourceY,
+                        imgWidth,
+                        sourceHeight
+                    );
+                    
+                    remainingHeight -= (pdfHeight - 20);
+                    position = 10; // 新页从顶部开始
+                    
+                    // 如果还有剩余内容，添加新页
+                    if (remainingHeight > 0) {
                         pdf.addPage();
-                        pdf.addImage(imgData, 'PNG', xOffset, position, imgScaledWidth, imgScaledHeight);
-                        heightLeft -= pdfHeight;
                     }
                 }
 
