@@ -189,6 +189,11 @@ require_once 'session_check.php';
             max-height: calc(100vh - 200px);
         }
 
+        /* 考核标准模式下隐藏左侧筛选区 */
+        .sidebar.standards-hidden {
+            display: none;
+        }
+
         .main-content {
             flex: 1;
             background: white;
@@ -970,6 +975,11 @@ require_once 'session_check.php';
         function switchToFormMode() {
             isStandardsMode = false;
             updateDropdownSelection('考核表单', 0);
+            // 显示左侧筛选区
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar) {
+                sidebar.classList.remove('standards-hidden');
+            }
             // 回到表单
             document.getElementById('mainContent').innerHTML = `
                 <div style="text-align: center; padding: 60px 20px; color: #6b7280;">
@@ -984,6 +994,11 @@ require_once 'session_check.php';
         function switchToStandardsMode() {
             isStandardsMode = true;
             updateDropdownSelection('考核标准', 1);
+            // 隐藏左侧筛选区（餐厅、部门、评估人、日期等）
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar) {
+                sidebar.classList.add('standards-hidden');
+            }
             showStandardsEditor();
             closeDropdown();
         }
