@@ -1074,6 +1074,7 @@ require_once 'session_check.php';
                 // 缓存指标数据
                 _criteriaByDeptCache = criteriaByDept;
                 // 生成UI（默认 service_line）
+                _currentActiveDept = 'service_line';
                 renderStandardsUI('service_line', criteriaByDept);
             } catch (e) {
                 console.error(e);
@@ -1101,7 +1102,7 @@ require_once 'session_check.php';
                                 <button class="standards-tab ${activeDept === 'sushi_bar' ? 'active' : ''}" onclick="switchStandardsDept('sushi_bar')">SUSHI</button>
                                 <button class="standards-tab ${activeDept === 'kitchen' ? 'active' : ''}" onclick="switchStandardsDept('kitchen')">KITCHEN</button>
                             </div>
-                            <div style="color:#6b7280;font-size:14px;">顺序：Service 前5页 → Sushi 5页 → Kitchen 5页</div>
+                            <div style="color:#6b7280;font-size:14px;">点击导出PDF将只生成当前选择部门的标准</div>
                         </div>
                         <div style="display:flex; gap:10px;">
                             <button class="btn-secondary" onclick="exportStandardsPDF()"><i class="fas fa-file-pdf"></i> 导出标准PDF</button>
@@ -1156,11 +1157,13 @@ require_once 'session_check.php';
         }
 
         let _criteriaByDeptCache = null;
+        let _currentActiveDept = 'service_line'; // 记录当前激活的部门
         function switchStandardsDept(dept) {
             if (!_criteriaByDeptCache) {
                 showMessage('请先加载考核标准', 'error');
                 return;
             }
+            _currentActiveDept = dept; // 更新当前激活的部门
             renderStandardsUI(dept, _criteriaByDeptCache);
         }
 
@@ -1211,63 +1214,56 @@ require_once 'session_check.php';
 
         async function exportStandardsPDF() {
             try {
-                showMessage('正在生成标准PDF，请稍候...', 'success');
+                // 获取当前激活的部门
+                const activeDept = _currentActiveDept || 'service_line';
+                const deptLabels = {
+                    service_line: 'SERVICE',
+                    sushi_bar: 'SUSHI',
+                    kitchen: 'KITCHEN'
+                };
+                
+                showMessage(`正在生成 ${deptLabels[activeDept]} 标准PDF，请稍候...`, 'success');
                 const { jsPDF } = window.jspdf;
 
-                // 构建15页：service(1-5) -> sushi(1-5) -> kitchen(1-5)
+                // 只导出当前选择的部门
                 const pdfContainer = document.getElementById('standards-pdf');
                 if (!pdfContainer) return;
 
-                const deptOrder = [
-                    { dept: 'service_line', title: 'SERVICE' },
-                    { dept: 'sushi_bar', title: 'SUSHI' },
-                    { dept: 'kitchen', title: 'KITCHEN' }
-                ];
+                // 获取当前部门的指标名称
+                const response = await fetch(`evaluation_form_api.php?action=get_criteria&department=${activeDept}`);
+                const result = await response.json();
+                const criteriaList = result.success ? result.data : [];
 
-                // 获取指标名称（从DB配置表拿，若拿不到就用“指标X”）
-                const [c1, c2, c3] = await Promise.all([
-                    fetch(`evaluation_form_api.php?action=get_criteria&department=service_line`).then(r => r.json()),
-                    fetch(`evaluation_form_api.php?action=get_criteria&department=sushi_bar`).then(r => r.json()),
-                    fetch(`evaluation_form_api.php?action=get_criteria&department=kitchen`).then(r => r.json())
-                ]);
-                const criteriaByDept = {
-                    service_line: c1.success ? c1.data : [],
-                    sushi_bar: c2.success ? c2.data : [],
-                    kitchen: c3.success ? c3.data : []
-                };
-
-                // 生成HTML页
+                // 生成HTML页（只生成当前部门的5页）
                 let pagesHtml = '';
-                deptOrder.forEach(d => {
-                    const list = (criteriaByDept[d.dept] || []).slice(0, 5);
-                    list.forEach((c, idx) => {
-                        const co = parseInt(c.criteria_order || (idx + 1));
-                        const titleZh = c.criteria_name_zh || `指标${idx + 1}`;
-                        pagesHtml += `
-                            <div class="standards-pdf-page">
-                                <div class="standards-page-title">${escapeHtml(titleZh)}</div>
-                                <table class="standards-table">
-                                    <thead>
+                const list = criteriaList.slice(0, 5);
+                list.forEach((c, idx) => {
+                    const co = parseInt(c.criteria_order || (idx + 1));
+                    const titleZh = c.criteria_name_zh || `指标${idx + 1}`;
+                    pagesHtml += `
+                        <div class="standards-pdf-page">
+                            <div class="standards-page-title">${escapeHtml(titleZh)}</div>
+                            <table class="standards-table">
+                                <thead>
+                                    <tr>
+                                        <th class="standards-score" style="width: 80px;">分数</th>
+                                        <th>说明</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${[1,2,3,4,5].map(sc => {
+                                        const text = (standards[activeDept]?.[co]?.[sc]) || '';
+                                        return `
                                         <tr>
-                                            <th class="standards-score" style="width: 80px;">分数</th>
-                                            <th>说明</th>
+                                            <td class="standards-score">${sc}</td>
+                                            <td style="white-space: pre-wrap; font-size: 15px; line-height: 1.6; padding: 18px;">${escapeHtml(text)}</td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${[1,2,3,4,5].map(sc => {
-                                            const text = (standards[d.dept]?.[co]?.[sc]) || '';
-                                            return `
-                                            <tr>
-                                                <td class="standards-score">${sc}</td>
-                                                <td style="white-space: pre-wrap; font-size: 15px; line-height: 1.6; padding: 18px;">${escapeHtml(text)}</td>
-                                            </tr>
-                                        `;
-                                        }).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                        `;
-                    });
+                                    `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
                 });
 
                 pdfContainer.innerHTML = pagesHtml;
@@ -1309,9 +1305,9 @@ require_once 'session_check.php';
                     pdf.addImage(imgData, 'PNG', x, y, w, h);
                 }
 
-                const fileName = `考核标准_15页_${new Date().toISOString().slice(0,10)}.pdf`;
+                const fileName = `考核标准_${deptLabels[activeDept]}_${new Date().toISOString().slice(0,10)}.pdf`;
                 pdf.save(fileName);
-                showMessage('标准PDF下载成功', 'success');
+                showMessage(`${deptLabels[activeDept]} 标准PDF下载成功`, 'success');
             } catch (e) {
                 console.error(e);
                 showMessage('导出失败', 'error');
