@@ -610,8 +610,8 @@ require_once 'session_check.php';
                     <i class="fas fa-plus"></i> 创建新表单
                 </button>
 
-                <div class="form-list" id="formList">
-                    <!-- 表单列表将在这里动态加载 -->
+                <div id="formButtons" style="margin-top: 20px; display: none; flex-direction: column; gap: 10px;">
+                    <!-- 按钮将在这里动态显示 -->
                 </div>
             </div>
 
@@ -637,13 +637,7 @@ require_once 'session_check.php';
                 currentDepartment = dept;
                 loadEmployees(dept);
                 loadCriteria(dept);
-                loadFormList();
             }
-        });
-
-        // 餐厅变化时加载表单列表
-        document.getElementById('restaurant').addEventListener('change', function() {
-            loadFormList();
         });
 
         // 加载员工列表
@@ -886,7 +880,6 @@ require_once 'session_check.php';
                 if (result.success) {
                     showMessage('表单保存成功', 'success');
                     currentFormId = result.data.form_id || result.data.id;
-                    await loadFormList();
                     updateSidebarButtons();
                 } else {
                     showMessage(result.message || '保存失败', 'error');
@@ -899,20 +892,13 @@ require_once 'session_check.php';
 
         // 更新侧边栏按钮
         function updateSidebarButtons() {
-            const formList = document.getElementById('formList');
-            if (!formList) return;
+            const buttonArea = document.getElementById('formButtons');
+            if (!buttonArea) return;
 
-            // 检查是否已经有按钮区域
-            let buttonArea = document.getElementById('formButtons');
-            if (!buttonArea) {
-                buttonArea = document.createElement('div');
-                buttonArea.id = 'formButtons';
-                buttonArea.style.marginTop = '20px';
-                buttonArea.style.display = 'flex';
-                buttonArea.style.flexDirection = 'column';
-                buttonArea.style.gap = '10px';
-                formList.appendChild(buttonArea);
-            }
+            // 显示按钮区域
+            buttonArea.style.display = 'flex';
+            buttonArea.style.flexDirection = 'column';
+            buttonArea.style.gap = '10px';
 
             buttonArea.innerHTML = `
                 <button class="save-form-btn" onclick="saveForm()" style="width: 100%; padding: 12px; background-color: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;">
@@ -922,109 +908,6 @@ require_once 'session_check.php';
                     <i class="fas fa-file-pdf"></i> 下载PDF
                 </button>
             `;
-        }
-
-        // 加载表单列表
-        async function loadFormList() {
-            const restaurant = document.getElementById('restaurant').value;
-            const department = document.getElementById('department').value;
-
-            if (!department) {
-                document.getElementById('formList').innerHTML = '';
-                return;
-            }
-
-            try {
-                const response = await fetch(`evaluation_form_api.php?action=list_forms&restaurant=${restaurant}&department=${department}`);
-                const result = await response.json();
-                
-                if (result.success) {
-                    const forms = result.data || [];
-                    let html = '<h3 style="margin-bottom: 15px; font-size: 16px;">历史表单</h3>';
-                    
-                    if (forms.length === 0) {
-                        html += '<p style="color: #6b7280; font-size: 14px;">暂无历史表单</p>';
-                    } else {
-                        forms.forEach(form => {
-                            html += `
-                                <div class="form-item" onclick="loadForm(${form.id}, this)">
-                                    <div class="form-item-title">${form.form_name}</div>
-                                    <div class="form-item-meta">
-                                        ${form.evaluation_date} | ${form.evaluator_name}
-                                    </div>
-                                </div>
-                            `;
-                        });
-                    }
-                    
-                    document.getElementById('formList').innerHTML = html;
-                    
-                    // 如果有表单内容，更新按钮
-                    if (document.getElementById('mainContent').innerHTML.includes('evaluation-table')) {
-                        updateSidebarButtons();
-                    }
-                }
-            } catch (error) {
-                console.error('加载表单列表失败:', error);
-            }
-        }
-
-        // 加载表单
-        async function loadForm(formId, element) {
-            try {
-                const response = await fetch(`evaluation_form_api.php?action=get_form&form_id=${formId}`);
-                const result = await response.json();
-
-                if (result.success) {
-                    const form = result.data;
-                    currentFormId = formId;
-
-                    // 设置表单信息
-                    document.getElementById('restaurant').value = form.restaurant;
-                    document.getElementById('department').value = form.department;
-                    document.getElementById('evaluator_name').value = form.evaluator_name;
-                    document.getElementById('evaluation_date').value = form.evaluation_date;
-
-                    // 加载员工和指标
-                    currentDepartment = form.department;
-                    await loadEmployees(form.department);
-                    await loadCriteria(form.department);
-
-                    // 渲染表单
-                    renderForm();
-
-                    // 填充数据（延迟执行以确保DOM已渲染）
-                    setTimeout(() => {
-                        if (form.details) {
-                            form.details.forEach(detail => {
-                                criteria.forEach((c, index) => {
-                                    const scoreField = `criteria_${index + 1}`;
-                                    const input = document.querySelector(
-                                        `.score-input[data-employee-name="${detail.employee_name}"][data-criteria-index="${index + 1}"]`
-                                    );
-                                    if (input && detail[scoreField]) {
-                                        input.value = detail[scoreField];
-                                    }
-                                });
-                            });
-                        }
-                    }, 100);
-
-                    // 更新列表选中状态
-                    document.querySelectorAll('.form-item').forEach(item => {
-                        item.classList.remove('active');
-                    });
-                    if (element) {
-                        element.classList.add('active');
-                    }
-                    
-                    // 更新侧边栏按钮
-                    updateSidebarButtons();
-                }
-            } catch (error) {
-                console.error('加载表单失败:', error);
-                showMessage('加载表单失败', 'error');
-            }
         }
 
         // 显示消息
