@@ -1228,6 +1228,14 @@ if (file_exists($jsonFile)) {
             border-radius: 8px;
             overflow: hidden;
         }
+        
+        .culture-scoring-title {
+            padding: clamp(12px, 1.25vw, 16px) clamp(12px, 1.25vw, 16px);
+            font-size: clamp(14px, 1.46vw, 18px);
+            font-weight: 800;
+            color: #000000;
+            border-bottom: 1px solid #f6c99f;
+        }
 
         .culture-scoring-item {
             padding: clamp(10px, 1.04vw, 12px) clamp(12px, 1.25vw, 16px);
@@ -4026,6 +4034,114 @@ if (file_exists($jsonFile)) {
             if (internalOrgData.length > 0) {
                 initializeDeptChart(0, internalOrgData[0]);
             }
+        });
+        
+        // 对齐评分标准容器顶部 - 使同一行的评分标准顶部在同一水平线
+        function alignCultureScoringTops() {
+            const grids = document.querySelectorAll('.culture-explanation-grid');
+            
+            grids.forEach(grid => {
+                const cards = Array.from(grid.querySelectorAll('.culture-explanation-card'));
+                if (cards.length === 0) return;
+                
+                // 检测列数（通过第一行的卡片数量）
+                const firstRow = [];
+                const firstCardTop = cards[0].getBoundingClientRect().top;
+                
+                for (let i = 0; i < cards.length; i++) {
+                    const cardTop = cards[i].getBoundingClientRect().top;
+                    if (Math.abs(cardTop - firstCardTop) < 3) {
+                        firstRow.push(cards[i]);
+                    } else {
+                        break;
+                    }
+                }
+                
+                const columnCount = firstRow.length;
+                if (columnCount === 0) return;
+                
+                // 按行分组
+                const rows = [];
+                for (let i = 0; i < cards.length; i += columnCount) {
+                    rows.push(cards.slice(i, i + columnCount));
+                }
+                
+                // 处理每一行
+                rows.forEach(row => {
+                    // 先重置所有高度
+                    row.forEach(card => {
+                        const desc = card.querySelector('.culture-explanation-description');
+                        if (desc) {
+                            desc.style.height = '';
+                            desc.style.minHeight = '';
+                        }
+                    });
+                    
+                    // 强制重排
+                    row.forEach(card => void card.offsetHeight);
+                    
+                    // 找到该行中评分标准容器距离卡片顶部最远的距离
+                    let maxOffsetTop = 0;
+                    const scoringData = [];
+                    
+                    row.forEach(card => {
+                        const scoring = card.querySelector('.culture-scoring');
+                        const desc = card.querySelector('.culture-explanation-description');
+                        
+                        if (scoring && desc) {
+                            const offsetTop = scoring.offsetTop;
+                            scoringData.push({
+                                card: card,
+                                desc: desc,
+                                scoring: scoring,
+                                offsetTop: offsetTop
+                            });
+                            
+                            if (offsetTop > maxOffsetTop) {
+                                maxOffsetTop = offsetTop;
+                            }
+                        }
+                    });
+                    
+                    // 调整每个描述区域的高度，使评分标准顶部对齐
+                    scoringData.forEach(data => {
+                        const diff = maxOffsetTop - data.offsetTop;
+                        if (diff > 0) {
+                            const currentHeight = data.desc.offsetHeight;
+                            data.desc.style.height = (currentHeight + diff) + 'px';
+                            data.desc.style.minHeight = (currentHeight + diff) + 'px';
+                        }
+                    });
+                });
+            });
+        }
+        
+        // 页面加载后执行对齐
+        $(document).ready(function() {
+            // 多次执行以确保准确对齐
+            setTimeout(alignCultureScoringTops, 200);
+            setTimeout(alignCultureScoringTops, 600);
+            setTimeout(alignCultureScoringTops, 1200);
+            
+            // 图片加载完成后再次对齐
+            $(window).on('load', function() {
+                setTimeout(alignCultureScoringTops, 200);
+            });
+            
+            // 窗口大小改变时重新对齐
+            let resizeTimer;
+            $(window).on('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function() {
+                    // 重置高度
+                    document.querySelectorAll('.culture-explanation-description').forEach(desc => {
+                        desc.style.height = '';
+                        desc.style.minHeight = '';
+                    });
+                    // 重新对齐
+                    setTimeout(alignCultureScoringTops, 100);
+                }, 300);
+            });
         });
     </script>
     <?php endif; ?>
