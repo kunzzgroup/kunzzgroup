@@ -471,6 +471,41 @@ require_once 'session_check.php';
             opacity: 0.9;
         }
 
+        /* Kitchen评分标准表样式 */
+        #pdf-content #kitchen-rubrics {
+            margin-top: 40px;
+        }
+
+        #pdf-content #kitchen-rubrics table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+
+        #pdf-content #kitchen-rubrics table th {
+            background: #ff5c00;
+            color: white;
+            padding: 15px;
+            border: 1px solid #000;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        #pdf-content #kitchen-rubrics table td {
+            padding: 15px;
+            border: 1px solid #000;
+            vertical-align: top;
+            line-height: 1.6;
+        }
+
+        #pdf-content #kitchen-rubrics table td:first-child {
+            width: 80px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
         /* 打印样式 */
         @media print {
             body {
@@ -626,6 +661,82 @@ require_once 'session_check.php';
         let currentDepartment = '';
         let employees = [];
         let criteria = [];
+
+        // Kitchen部门评分标准数据
+        const kitchenRubrics = {
+            '出餐速度与效率': [
+                { score: 1, desc: '出餐速度与工作效率不足。经常出现延误、节奏混乱、跟不上前台节奏。动作较慢、流程不够顺畅，对火候和食材处理的控制不稳定，导致整个厨房节奏被拖慢。' },
+                { score: 2, desc: '出餐速度不够稳定，容易在忙时造成延误或同一桌点单不同步，需要前台催单或提醒才能跟上。效率方面也有改进空间，动作有时会偏慢或不够流畅，导致整体流程变慢。' },
+                { score: 3, desc: '出餐速度基本达标，能够完成订单，但节奏不够稳定，容易受到高峰期影响。偶尔会有轻微延误或需要前台提醒。工作效率不算慢，但动作和流程有时会有多余或重复的步骤。' },
+                { score: 4, desc: '整体出餐速度和工作效率非常稳定，能够按时出餐，并可以配合前台节奏。高峰期可能会有轻微延误，但不影响整体流程。动作熟练，出错少，只是在忙时节奏可能会稍慢或需要额外确认。' },
+                { score: 5, desc: '出餐速度非常稳定，总能在规定时间内完成订单，并能同步出餐同一桌的菜，几乎不需要前台催单。动作快而不乱，调味、火候和分量都准确一致。高峰期节奏也能保持清晰，不会有单被延误或堆积，整个厨房的进展非常顺畅。' }
+            ],
+            '食材标准与品质': [
+                { score: 1, desc: '时常出现味道差异大、分量不一致、火候不准或外观不整齐的问题，甚至造成客诉风险。食材判断与食安意识也需加强。' },
+                { score: 2, desc: '味道偶尔不稳定、火候不够精准，分量或摆盘也会出现不一致的问题。部分餐点在高峰期容易品质下降。' },
+                { score: 3, desc: '食品品质达到基本要求，但在味道、分量或火候方面偶尔会出现不一致的情况。摆盘基本整齐，但有时会因赶单而略显仓促。' },
+                { score: 4, desc: '食物品质整体表现良好，大多数餐点都符合味道与摆盘标准。火候控制稳定，分量也准确。偶尔在繁忙时段会有些微差异，但不影响整体品质。' },
+                { score: 5, desc: '每一道料理在味道、火候、分量和外观上都能达到稳定标准。你对食材的新鲜度判断精准，不会让任何不合格食材进入餐点。即使在高峰期，你依然能保持良好的品质控制，不会为了速度牺牲标准。' }
+            ],
+            '卫生与整洁': [
+                { score: 1, desc: '工作区常出现油渍、脏污、碎料堆积，工具未及时清洗，食材管理也偶有不符合标准的情况。这样的状况可能造成安全隐患或影响食品品质。' },
+                { score: 2, desc: '工作区偶尔会出现油渍、水渍或碎料未及时处理，工具清洁也不够及时。食材处理时偶尔会出现混乱或分类不明确。' },
+                { score: 3, desc: '能够基本保持工作区整洁，但有时会在忙碌时忘记清理台面、工具或地面。食材处理大多干净，但偶尔有摆放不整齐的情况。' },
+                { score: 4, desc: '工作区保持干净，工具也能及时清洗与归位。多数时候都能维持整洁，只是在高峰期偶尔会忽略一些小细节（如桌面小碎料或酱汁痕迹）。' },
+                { score: 5, desc: '工作区始终保持干净，不论多忙都能做到随做随清，桌面、工具和地面都很整齐。食材处理细心、生熟分开，绝对不会使用不合格食材。油炸、炒锅、冷台等区域都被你维护得很专业，让人看见就放心。' }
+            ],
+            '工作态度': [
+                { score: 1, desc: '时常出现拖延、敷衍、需要不断提醒才能完成工作。情绪不稳定，高峰期容易发脾气或影响团队气氛。主动性不足、责任感弱，会造成团队负担。' },
+                { score: 2, desc: '偶尔会出现心不在焉、动作拖延或需要重复提醒的情况。忙碌时容易带有情绪，影响团队合作。主动性不足，常常只完成基本工作，没有额外关注工位或团队整体状况。' },
+                { score: 3, desc: '能完成被安排的任务，但需要提醒才会开始行动。偶尔会因为忙碌而出现焦躁或节奏不稳的情况。主动性方面也不够一致，有时会忽略工位整洁或团队需求。' },
+                { score: 4, desc: '能专注完成自己的任务，也愿意配合团队。你有责任心，工作习惯稳定，情绪控制也不错。只是偶尔在忙碌时会略显紧绷，主动性也还有空间提升。' },
+                { score: 5, desc: '无论忙或闲，你都能保持稳定的专注力和专业性，有责任感、可靠、不会拖延工作。你会主动协助同事、整理工位、补位，不需要主管提醒。情绪管理也非常好，高峰期依然能保持冷静。你愿意学习新技能，也愿意改进自己的不足。' }
+            ],
+            '团队合作': [
+                { score: 1, desc: '容易与同事节奏脱节。缺乏补位意识，高峰期不够配合前台或寿司吧，沟通也不够及时。有时情绪会影响团队氛围。' },
+                { score: 2, desc: '与同事的节奏容易对不上，忙的时候不太会主动协助其他岗位。你常专注自己的工作，忽略团队整体节奏，有时也需重复提醒才会行动。' },
+                { score: 3, desc: '基本能与同事沟通并配合出餐。但偶尔只专注自己的部分，不太会主动支援。高峰期容易有点跟不上节奏，需要别人提醒。' },
+                { score: 4, desc: '能够配合同事完成工作，也会在需要时帮忙，但主动性稍微不足。高峰期的情绪控制稳定，沟通清晰。偶尔在忙碌时会有点专注于自己的工作，但整体协作度仍然可靠。' },
+                { score: 5, desc: '无论是厨房内部、前台还是寿司巴，你都能保持顺畅的沟通与节奏配合。忙碌时会主动补位、支援同事，不需要主管安排。你总是能快速回应、协助并维持稳定情绪，让整个厨房节奏更顺畅。' }
+            ]
+        };
+
+        // 生成Kitchen评分标准表HTML
+        function generateKitchenRubrics() {
+            let html = '<div id="kitchen-rubrics" style="display: none;">';
+            
+            Object.keys(kitchenRubrics).forEach((title, index) => {
+                html += `
+                    <div style="margin-top: ${index > 0 ? '50px' : '30px'}; page-break-before: ${index > 0 ? 'always' : 'auto'};">
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 15px;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 80px; padding: 15px; text-align: center; background: #ff5c00; color: white; border: 1px solid #000; font-weight: 600;">分数</th>
+                                    <th style="padding: 15px; text-align: center; background: #ff5c00; color: white; border: 1px solid #000; font-weight: 600; font-size: 18px;">${title}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                kitchenRubrics[title].forEach(item => {
+                    html += `
+                        <tr>
+                            <td style="width: 80px; padding: 15px; text-align: center; border: 1px solid #000; font-size: 18px; font-weight: 600; vertical-align: top;">${item.score}</td>
+                            <td style="padding: 15px; border: 1px solid #000; line-height: 1.6; vertical-align: top;">${item.desc}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            return html;
+        }
 
         // 部门变化时加载员工和指标
         document.getElementById('department').addEventListener('change', function() {
@@ -795,9 +906,15 @@ require_once 'session_check.php';
                 html += `</tr>`;
             });
 
-            html += `</tbody></table>
-                </div>
-            `;
+            html += `</tbody></table>`;
+            
+            // 如果是kitchen部门，添加评分标准表到PDF内容
+            if (department === 'kitchen') {
+                const rubricsHtml = generateKitchenRubrics().replace('style="display: none;"', '');
+                html += rubricsHtml;
+            }
+            
+            html += `</div>`;
 
             document.getElementById('mainContent').innerHTML = html;
             
@@ -807,7 +924,7 @@ require_once 'session_check.php';
             // 延迟填充PDF内容区域的数据
             setTimeout(() => {
                 updatePDFContent();
-            }, 100);
+            }, 200);
         }
 
         // 保存表单
@@ -970,6 +1087,20 @@ require_once 'session_check.php';
             // 更新PDF内容
             updatePDFContent();
 
+            // 如果是kitchen部门，确保评分标准表已添加
+            const department = document.getElementById('department').value;
+            if (department === 'kitchen') {
+                let existingRubrics = pdfContent.querySelector('#kitchen-rubrics');
+                if (!existingRubrics) {
+                    const rubricsHtml = generateKitchenRubrics().replace('style="display: none;"', '');
+                    pdfContent.innerHTML += rubricsHtml;
+                    existingRubrics = pdfContent.querySelector('#kitchen-rubrics');
+                }
+                if (existingRubrics) {
+                    existingRubrics.style.display = 'block';
+                }
+            }
+
             // 显示加载提示
             showMessage('正在生成PDF，请稍候...', 'success');
 
@@ -978,7 +1109,7 @@ require_once 'session_check.php';
             pdfContent.style.display = 'block';
             
             // 确保内容已渲染
-            await new Promise(resolve => setTimeout(resolve, 300));
+            await new Promise(resolve => setTimeout(resolve, 500));
 
             try {
                 const { jsPDF } = window.jspdf;
