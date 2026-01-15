@@ -134,11 +134,11 @@ require_once 'session_check.php';
         .form-section input:focus,
         .form-section select:focus {
             outline: none;
-            border-color: #f5be85;
+            border-color: #bf7f3b;
         }
 
         .btn-primary {
-            background-color: #f5be85;
+            background-color: #bf7f3b;
             color: white;
             padding: 12px 24px;
             border: none;
@@ -181,7 +181,7 @@ require_once 'session_check.php';
         }
 
         .evaluation-table thead {
-            background: #f5be85;
+            background: #bf7f3b;
             color: white;
         }
 
@@ -239,7 +239,7 @@ require_once 'session_check.php';
 
         .score-input:focus {
             outline: none;
-            border-color: #f5be85;
+            border-color: #bf7f3b;
         }
 
         .evaluation-table th small {
@@ -251,7 +251,7 @@ require_once 'session_check.php';
         }
 
         .form-header {
-            background: #f5be85;
+            background: #bf7f3b;
             color: white;
             padding: 20px;
             border-radius: 12px 12px 0 0;
@@ -284,12 +284,12 @@ require_once 'session_check.php';
         }
 
         .form-item:hover {
-            border-color: #f5be85;
+            border-color: #bf7f3b;
             background-color: #fff5f0;
         }
 
         .form-item.active {
-            border-color: #f5be85;
+            border-color: #bf7f3b;
             background-color: #fff5f0;
         }
 
@@ -425,7 +425,7 @@ require_once 'session_check.php';
             padding: 18px 12px;
             text-align: center;
             font-weight: 600;
-            background: #f5be85;
+            background: #bf7f3b;
             color: white;
             min-width: 140px;
             font-size: 16px;
@@ -455,7 +455,7 @@ require_once 'session_check.php';
         }
 
         #pdf-content .evaluation-table thead {
-            background: #f5be85;
+            background: #bf7f3b;
             color: white;
         }
 
@@ -767,7 +767,7 @@ require_once 'session_check.php';
                             <div><strong>Date:</strong> ${evaluationDate}</div>
                         </div>
                     </div>
-                    <div style="background: #f5be85; color: white; padding: 22px; text-align: center; font-weight: 600; font-size: 24px; margin-bottom: 30px; letter-spacing: 1.5px;">
+                    <div style="background: #bf7f3b; color: white; padding: 22px; text-align: center; font-weight: 600; font-size: 24px; margin-bottom: 30px; letter-spacing: 1.5px;">
                         ${deptNames[department] || department.toUpperCase()}
                     </div>
                     <table class="evaluation-table">
