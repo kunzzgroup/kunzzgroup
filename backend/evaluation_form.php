@@ -339,20 +339,19 @@ require_once 'session_check.php';
         }
 
         .save-form-btn {
-            margin-top: 20px;
-            padding: 15px 30px;
-            background-color: #3b82f6;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
+            transition: all 0.2s;
         }
 
         .save-form-btn:hover {
-            background-color: #2563eb;
+            background-color: #2563eb !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .print-btn:hover {
+            background-color: #059669 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
         }
 
         .delete-btn {
@@ -569,9 +568,9 @@ require_once 'session_check.php';
     <div class="container">
         <div class="header">
             <h1>考核表单管理</h1>
-            <!-- <a href="dashboard.php" class="back-button">
+            <a href="dashboard.php" class="back-button">
                 <i class="fas fa-arrow-left"></i> 返回
-            </a> -->
+            </a>
         </div>
 
         <div id="message" class="message"></div>
@@ -704,6 +703,10 @@ require_once 'session_check.php';
 
             currentFormId = null;
             renderForm();
+            // 渲染表单后更新按钮
+            setTimeout(() => {
+                updateSidebarButtons();
+            }, 200);
         }
 
         // 渲染表单
@@ -803,17 +806,12 @@ require_once 'session_check.php';
 
             html += `</tbody></table>
                 </div>
-                <div style="display: flex; gap: 15px; margin-top: 20px;">
-                    <button class="save-form-btn" onclick="saveForm()" style="flex: 1;">
-                        <i class="fas fa-save"></i> 保存表单
-                    </button>
-                    <button class="print-btn" onclick="downloadPDF()" style="flex: 1;">
-                        <i class="fas fa-file-pdf"></i> 下载PDF
-                    </button>
-                </div>
             `;
 
             document.getElementById('mainContent').innerHTML = html;
+            
+            // 更新侧边栏的按钮
+            updateSidebarButtons();
             
             // 延迟填充PDF内容区域的数据
             setTimeout(() => {
@@ -888,7 +886,8 @@ require_once 'session_check.php';
                 if (result.success) {
                     showMessage('表单保存成功', 'success');
                     currentFormId = result.data.form_id || result.data.id;
-                    loadFormList();
+                    await loadFormList();
+                    updateSidebarButtons();
                 } else {
                     showMessage(result.message || '保存失败', 'error');
                 }
@@ -896,6 +895,33 @@ require_once 'session_check.php';
                 console.error('保存失败:', error);
                 showMessage('保存失败: ' + error.message, 'error');
             }
+        }
+
+        // 更新侧边栏按钮
+        function updateSidebarButtons() {
+            const formList = document.getElementById('formList');
+            if (!formList) return;
+
+            // 检查是否已经有按钮区域
+            let buttonArea = document.getElementById('formButtons');
+            if (!buttonArea) {
+                buttonArea = document.createElement('div');
+                buttonArea.id = 'formButtons';
+                buttonArea.style.marginTop = '20px';
+                buttonArea.style.display = 'flex';
+                buttonArea.style.flexDirection = 'column';
+                buttonArea.style.gap = '10px';
+                formList.appendChild(buttonArea);
+            }
+
+            buttonArea.innerHTML = `
+                <button class="save-form-btn" onclick="saveForm()" style="width: 100%; padding: 12px; background-color: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;">
+                    <i class="fas fa-save"></i> 保存表单
+                </button>
+                <button class="print-btn" onclick="downloadPDF()" style="width: 100%; padding: 12px; background-color: #10b981; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;">
+                    <i class="fas fa-file-pdf"></i> 下载PDF
+                </button>
+            `;
         }
 
         // 加载表单列表
@@ -932,6 +958,11 @@ require_once 'session_check.php';
                     }
                     
                     document.getElementById('formList').innerHTML = html;
+                    
+                    // 如果有表单内容，更新按钮
+                    if (document.getElementById('mainContent').innerHTML.includes('evaluation-table')) {
+                        updateSidebarButtons();
+                    }
                 }
             } catch (error) {
                 console.error('加载表单列表失败:', error);
@@ -986,6 +1017,9 @@ require_once 'session_check.php';
                     if (element) {
                         element.classList.add('active');
                     }
+                    
+                    // 更新侧边栏按钮
+                    updateSidebarButtons();
                 }
             } catch (error) {
                 console.error('加载表单失败:', error);
