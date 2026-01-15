@@ -244,10 +244,10 @@ require_once 'session_check.php';
 
         .evaluation-table th small {
             display: block;
-            font-size: 12px;
+            font-size: 15px;
             margin-top: 5px;
-            font-weight: normal;
-            opacity: 0.9;
+            font-weight: 600;
+            opacity: 1;
         }
 
         .form-header {
@@ -465,10 +465,10 @@ require_once 'session_check.php';
 
         #pdf-content .evaluation-table small {
             display: block;
-            font-size: 12px;
+            font-size: 16px;
             margin-top: 5px;
-            font-weight: normal;
-            opacity: 0.9;
+            font-weight: 600;
+            opacity: 1;
         }
 
         /* 打印样式 */
@@ -721,7 +721,7 @@ require_once 'session_check.php';
                         <div><strong>Date:</strong> ${evaluationDate}</div>
                     </div>
                 </div>
-                <div style="background: #f5be85; color: white; padding: 20px; margin: -30px -30px 25px -30px; text-align: center; font-weight: 600; font-size: 20px; letter-spacing: 1px;">
+                <div style="background: #bf7f3b; color: white; padding: 20px; margin: -30px -30px 25px -30px; text-align: center; font-weight: 600; font-size: 20px; letter-spacing: 1px;">
                     ${deptNames[department] || department.toUpperCase()}
                 </div>
                 <table class="evaluation-table">
@@ -778,7 +778,7 @@ require_once 'session_check.php';
 
             // 添加考核指标列（PDF版本）
             criteria.forEach(c => {
-                html += `<th>${c.criteria_name_zh}<br><small style="font-size: 12px; margin-top: 5px; display: block; font-weight: normal; opacity: 0.9;">${c.criteria_name_en}</small></th>`;
+                html += `<th>${c.criteria_name_zh}<br><small style="font-size: 16px; margin-top: 5px; display: block; font-weight: 600; opacity: 1;">${c.criteria_name_en}</small></th>`;
             });
 
             html += `</tr></thead><tbody>`;
