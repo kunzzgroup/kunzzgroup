@@ -1156,6 +1156,11 @@ body.sidebar-transition {
                         问卷回答
                     </a>
                 </div>
+                <div class="menu-item-wrapper">
+                    <a href="#" class="informationmenu-item">
+                        考核表单
+                    </a>
+                </div>
                 <?php endif; ?>
             </div>
         </div>
