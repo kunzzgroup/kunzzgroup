@@ -176,6 +176,7 @@ require_once 'session_check.php';
             border-collapse: collapse;
             margin-top: 20px;
             background: white;
+            table-layout: fixed;
         }
 
         .evaluation-table thead {
@@ -184,20 +185,31 @@ require_once 'session_check.php';
         }
 
         .evaluation-table th {
-            padding: 15px;
-            text-align: left;
+            padding: 15px 10px;
+            text-align: center;
             font-weight: 600;
             border-right: 1px solid rgba(255,255,255,0.2);
+            word-wrap: break-word;
         }
 
         .evaluation-table th:first-child {
-            min-width: 200px;
+            min-width: 180px;
+            width: 180px;
+            text-align: left;
+            padding-left: 15px;
         }
 
         .evaluation-table td {
-            padding: 12px 15px;
+            padding: 12px 10px;
             border-bottom: 1px solid #e5e7eb;
             border-right: 1px solid #e5e7eb;
+            text-align: center;
+            word-wrap: break-word;
+        }
+
+        .evaluation-table td:first-child {
+            text-align: left;
+            padding-left: 15px;
         }
 
         .evaluation-table tbody tr:hover {
@@ -211,16 +223,26 @@ require_once 'session_check.php';
 
         .score-input {
             width: 100%;
-            padding: 8px;
+            padding: 10px 8px;
             border: 1px solid #d1d5db;
             border-radius: 4px;
             text-align: center;
             font-size: 14px;
+            min-height: 35px;
+            box-sizing: border-box;
         }
 
         .score-input:focus {
             outline: none;
             border-color: #ff5c00;
+        }
+
+        .evaluation-table th small {
+            display: block;
+            font-size: 11px;
+            margin-top: 4px;
+            font-weight: normal;
+            opacity: 0.9;
         }
 
         .form-header {
@@ -364,47 +386,80 @@ require_once 'session_check.php';
         #pdf-content {
             display: none;
             background: white;
-            padding: 20px;
-            /* A4横向：297mm = 1122px (按96dpi计算)，减去40px边距 = 1082px */
-            width: 1082px; /* 刚好适配A4横向宽度 */
+            padding: 30px 40px;
+            width: 1100px;
             margin: 0 auto;
-            min-height: 1200px; /* 确保PDF有足够的长度 */
+            box-sizing: border-box;
         }
 
         #pdf-content .form-header {
             margin: 0 0 20px 0;
             border-radius: 0;
-            width: 100%;
+            padding: 20px;
+        }
+
+        #pdf-content .form-header h2 {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+
+        #pdf-content .form-info {
+            font-size: 16px;
+            gap: 40px;
         }
 
         #pdf-content .evaluation-table {
             width: 100%;
             border-collapse: collapse;
-            table-layout: fixed; /* 固定表格布局 */
+            font-size: 14px;
         }
 
-        #pdf-content .evaluation-table th,
+        #pdf-content .evaluation-table th {
+            border: 1px solid #000;
+            padding: 15px 10px;
+            text-align: center;
+            font-weight: 600;
+            background: #ff5c00;
+            color: white;
+            min-width: 120px;
+        }
+
+        #pdf-content .evaluation-table th:first-child {
+            min-width: 180px;
+            text-align: left;
+            padding-left: 15px;
+        }
+
         #pdf-content .evaluation-table td {
             border: 1px solid #000;
-            padding: 15px; /* 增加内边距 */
+            padding: 15px 10px;
+            text-align: center;
+            min-height: 40px;
+            min-width: 120px;
+        }
+
+        #pdf-content .evaluation-table td.employee-name {
             text-align: left;
-            word-wrap: break-word;
-        }
-
-        /* 设置列宽 - 适配A4横向尺寸 */
-        #pdf-content .evaluation-table th:first-child,
-        #pdf-content .evaluation-table td:first-child {
-            width: 180px; /* 姓名列 */
-        }
-
-        #pdf-content .evaluation-table th:not(:first-child),
-        #pdf-content .evaluation-table td:not(:first-child) {
-            width: 180px; /* 评分列 - 适配A4横向宽度 */
+            padding-left: 15px;
+            font-weight: 500;
+            min-width: 180px;
         }
 
         #pdf-content .evaluation-table thead {
             background: #ff5c00;
             color: white;
+        }
+
+        #pdf-content .evaluation-table tbody tr {
+            height: 50px;
+        }
+
+        #pdf-content .evaluation-table small {
+            display: block;
+            font-size: 10px;
+            margin-top: 4px;
+            font-weight: normal;
+            opacity: 0.9;
         }
 
         /* 打印样式 */
@@ -708,7 +763,7 @@ require_once 'session_check.php';
                             <div><strong>Date:</strong> ${evaluationDate}</div>
                         </div>
                     </div>
-                    <div style="background: #ff5c00; color: white; padding: 15px; text-align: center; font-weight: 600; font-size: 18px; margin-bottom: 20px;">
+                    <div style="background: #ff5c00; color: white; padding: 18px; text-align: center; font-weight: 600; font-size: 20px; margin-bottom: 25px; letter-spacing: 1px;">
                         ${deptNames[department] || department.toUpperCase()}
                     </div>
                     <table class="evaluation-table">
@@ -719,7 +774,7 @@ require_once 'session_check.php';
 
             // 添加考核指标列（PDF版本）
             criteria.forEach(c => {
-                html += `<th>${c.criteria_name_zh}<br><small>${c.criteria_name_en}</small></th>`;
+                html += `<th>${c.criteria_name_zh}<br><small style="font-size: 10px; margin-top: 4px; display: block; font-weight: normal; opacity: 0.9;">${c.criteria_name_en}</small></th>`;
             });
 
             html += `</tr></thead><tbody>`;
@@ -727,27 +782,14 @@ require_once 'session_check.php';
             // 添加员工行（PDF版本）
             employees.forEach((emp, index) => {
                 html += `<tr>
-                    <td class="employee-name" style="padding: 15px; border: 1px solid #000; width: 180px;">${emp.name}</td>`;
+                    <td class="employee-name">${emp.name}</td>`;
                 
                 criteria.forEach((c, cIndex) => {
-                    html += `<td style="padding: 15px; border: 1px solid #000; min-height: 35px; width: 180px;"></td>`;
+                    html += `<td></td>`;
                 });
 
                 html += `</tr>`;
             });
-
-            // 添加空行（使PDF模板更长，便于后续填写）
-            const emptyRows = 10; // 添加10个空行
-            for (let i = 0; i < emptyRows; i++) {
-                html += `<tr>
-                    <td class="employee-name" style="padding: 15px; border: 1px solid #000; border-bottom: 1px dashed #ccc; width: 180px;"></td>`;
-                
-                criteria.forEach((c, cIndex) => {
-                    html += `<td style="padding: 15px; border: 1px solid #000; border-bottom: 1px dashed #ccc; min-height: 35px; width: 180px;"></td>`;
-                });
-
-                html += `</tr>`;
-            }
 
             html += `</tbody></table>
                 </div>
@@ -1023,64 +1065,57 @@ require_once 'session_check.php';
                     useCORS: true,
                     logging: false,
                     backgroundColor: '#ffffff',
+                    width: pdfContent.scrollWidth,
+                    height: pdfContent.scrollHeight,
                     windowWidth: pdfContent.scrollWidth,
                     windowHeight: pdfContent.scrollHeight
                 });
 
                 const imgData = canvas.toDataURL('image/png', 1.0);
                 
-                // 创建PDF（A4尺寸横向）
-                const pdf = new jsPDF('l', 'mm', 'a4'); // 'l' = landscape, A4横向：297mm × 210mm
+                // 创建PDF（A4尺寸，横向以容纳表格）
+                const pdf = new jsPDF('l', 'mm', 'a4'); // 'l' = landscape (297mm x 210mm)
                 const pdfWidth = pdf.internal.pageSize.getWidth(); // 297mm
                 const pdfHeight = pdf.internal.pageSize.getHeight(); // 210mm
                 
-                // 计算图片尺寸以适应A4页面，刚好填满宽度
+                // 计算图片尺寸以适应PDF页面
                 const imgWidth = canvas.width;
                 const imgHeight = canvas.height;
-                // A4横向宽度是297mm，留10mm边距，可用宽度287mm
-                const availableWidth = pdfWidth - 20; // 左右各10mm边距
-                const widthRatio = availableWidth / imgWidth;
-                const heightRatio = (pdfHeight - 20) / imgHeight; // 上下各10mm边距
-                const ratio = Math.min(widthRatio, heightRatio); // 使用较小的比例以确保完整显示
+                
+                // A4横向尺寸: 297mm x 210mm
+                // 留较小的边距以最大化内容宽度
+                const marginX = 10; // 左右边距10mm
+                const marginY = 10; // 上下边距10mm
+                const availableWidth = pdfWidth - marginX * 2; // 277mm
+                const availableHeight = pdfHeight - marginY * 2; // 190mm
+                
+                // 计算缩放比例，确保内容完全显示
+                const ratioWidth = availableWidth / imgWidth;
+                const ratioHeight = availableHeight / imgHeight;
+                const ratio = Math.min(ratioWidth, ratioHeight);
+                
                 const imgScaledWidth = imgWidth * ratio;
                 const imgScaledHeight = imgHeight * ratio;
                 
-                // 居中显示，刚好填满A4页面
-                const xOffset = 10; // 左边留10mm边距
-                let yOffset = 10; // 顶部留10mm边距
-                let position = yOffset;
+                // 居中显示
+                const xOffset = (pdfWidth - imgScaledWidth) / 2;
+                const yOffset = marginY;
 
-                // 如果内容高度超过一页，需要分页显示
-                let remainingHeight = imgScaledHeight;
+                // 添加图片
+                pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgScaledWidth, imgScaledHeight);
                 
-                while (remainingHeight > 0) {
-                    // 计算当前页要显示的图片高度
-                    const pageHeight = Math.min(remainingHeight, pdfHeight - 20);
-                    const sourceY = (imgScaledHeight - remainingHeight) / ratio;
-                    const sourceHeight = pageHeight / ratio;
-                    
-                    // 添加图片到当前页
-                    pdf.addImage(
-                        imgData, 
-                        'PNG', 
-                        xOffset, 
-                        position, 
-                        imgScaledWidth, 
-                        pageHeight,
-                        undefined,
-                        'FAST',
-                        0,
-                        sourceY,
-                        imgWidth,
-                        sourceHeight
-                    );
-                    
-                    remainingHeight -= (pdfHeight - 20);
-                    position = 10; // 新页从顶部开始（10mm边距）
-                    
-                    // 如果还有剩余内容，添加新页
-                    if (remainingHeight > 0) {
+                // 如果内容超过一页，添加新页
+                let heightLeft = imgScaledHeight;
+                let position = yOffset;
+                
+                if (heightLeft > pdfHeight) {
+                    while (heightLeft > 0) {
+                        position = position - pdfHeight;
+                        if (position < -imgScaledHeight) break;
+                        
                         pdf.addPage();
+                        pdf.addImage(imgData, 'PNG', xOffset, position, imgScaledWidth, imgScaledHeight);
+                        heightLeft -= pdfHeight;
                     }
                 }
 
