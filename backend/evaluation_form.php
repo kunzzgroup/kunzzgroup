@@ -177,6 +177,7 @@ require_once 'session_check.php';
             margin-top: 20px;
             background: white;
             table-layout: fixed;
+            font-size: 15px;
         }
 
         .evaluation-table thead {
@@ -185,31 +186,34 @@ require_once 'session_check.php';
         }
 
         .evaluation-table th {
-            padding: 15px 10px;
+            padding: 18px 12px;
             text-align: center;
             font-weight: 600;
             border-right: 1px solid rgba(255,255,255,0.2);
             word-wrap: break-word;
+            font-size: 15px;
         }
 
         .evaluation-table th:first-child {
-            min-width: 180px;
-            width: 180px;
+            min-width: 200px;
+            width: 200px;
             text-align: left;
-            padding-left: 15px;
+            padding-left: 18px;
         }
 
         .evaluation-table td {
-            padding: 12px 10px;
+            padding: 15px 12px;
             border-bottom: 1px solid #e5e7eb;
             border-right: 1px solid #e5e7eb;
             text-align: center;
             word-wrap: break-word;
+            font-size: 14px;
         }
 
         .evaluation-table td:first-child {
             text-align: left;
-            padding-left: 15px;
+            padding-left: 18px;
+            font-weight: 500;
         }
 
         .evaluation-table tbody tr:hover {
@@ -219,16 +223,17 @@ require_once 'session_check.php';
         .employee-name {
             font-weight: 500;
             color: #333;
+            font-size: 15px;
         }
 
         .score-input {
             width: 100%;
-            padding: 10px 8px;
+            padding: 12px 10px;
             border: 1px solid #d1d5db;
             border-radius: 4px;
             text-align: center;
-            font-size: 14px;
-            min-height: 35px;
+            font-size: 15px;
+            min-height: 40px;
             box-sizing: border-box;
         }
 
@@ -239,8 +244,8 @@ require_once 'session_check.php';
 
         .evaluation-table th small {
             display: block;
-            font-size: 11px;
-            margin-top: 4px;
+            font-size: 12px;
+            margin-top: 5px;
             font-weight: normal;
             opacity: 0.9;
         }
@@ -386,63 +391,68 @@ require_once 'session_check.php';
         #pdf-content {
             display: none;
             background: white;
-            padding: 30px 40px;
-            width: 1100px;
+            padding: 40px 50px;
+            width: 1300px;
             margin: 0 auto;
             box-sizing: border-box;
         }
 
         #pdf-content .form-header {
-            margin: 0 0 20px 0;
+            margin: 0 0 25px 0;
             border-radius: 0;
-            padding: 20px;
+            padding: 25px;
         }
 
         #pdf-content .form-header h2 {
-            font-size: 36px;
-            margin-bottom: 15px;
+            font-size: 44px;
+            margin-bottom: 18px;
+            font-weight: 700;
         }
 
         #pdf-content .form-info {
-            font-size: 16px;
-            gap: 40px;
+            font-size: 18px;
+            gap: 50px;
+            font-weight: 500;
         }
 
         #pdf-content .evaluation-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 14px;
+            font-size: 16px;
         }
 
         #pdf-content .evaluation-table th {
             border: 1px solid #000;
-            padding: 15px 10px;
+            padding: 18px 12px;
             text-align: center;
             font-weight: 600;
             background: #ff5c00;
             color: white;
-            min-width: 120px;
+            min-width: 140px;
+            font-size: 16px;
         }
 
         #pdf-content .evaluation-table th:first-child {
-            min-width: 180px;
+            min-width: 220px;
             text-align: left;
-            padding-left: 15px;
+            padding-left: 18px;
         }
 
         #pdf-content .evaluation-table td {
             border: 1px solid #000;
-            padding: 15px 10px;
+            padding: 18px 12px;
             text-align: center;
-            min-height: 40px;
-            min-width: 120px;
+            min-height: 50px;
+            min-width: 140px;
+            font-size: 15px;
         }
 
         #pdf-content .evaluation-table td.employee-name {
             text-align: left;
-            padding-left: 15px;
+            padding-left: 18px;
             font-weight: 500;
-            min-width: 180px;
+            min-width: 220px;
+            font-size: 16px;
         }
 
         #pdf-content .evaluation-table thead {
@@ -451,13 +461,13 @@ require_once 'session_check.php';
         }
 
         #pdf-content .evaluation-table tbody tr {
-            height: 50px;
+            height: 60px;
         }
 
         #pdf-content .evaluation-table small {
             display: block;
-            font-size: 10px;
-            margin-top: 4px;
+            font-size: 12px;
+            margin-top: 5px;
             font-weight: normal;
             opacity: 0.9;
         }
@@ -717,7 +727,7 @@ require_once 'session_check.php';
                         <div><strong>Date:</strong> ${evaluationDate}</div>
                     </div>
                 </div>
-                <div style="background: #ff5c00; color: white; padding: 15px; margin: -30px -30px 20px -30px; text-align: center; font-weight: 600; font-size: 18px;">
+                <div style="background: #ff5c00; color: white; padding: 20px; margin: -30px -30px 25px -30px; text-align: center; font-weight: 600; font-size: 20px; letter-spacing: 1px;">
                     ${deptNames[department] || department.toUpperCase()}
                 </div>
                 <table class="evaluation-table">
@@ -763,7 +773,7 @@ require_once 'session_check.php';
                             <div><strong>Date:</strong> ${evaluationDate}</div>
                         </div>
                     </div>
-                    <div style="background: #ff5c00; color: white; padding: 18px; text-align: center; font-weight: 600; font-size: 20px; margin-bottom: 25px; letter-spacing: 1px;">
+                    <div style="background: #ff5c00; color: white; padding: 22px; text-align: center; font-weight: 600; font-size: 24px; margin-bottom: 30px; letter-spacing: 1.5px;">
                         ${deptNames[department] || department.toUpperCase()}
                     </div>
                     <table class="evaluation-table">
@@ -774,7 +784,7 @@ require_once 'session_check.php';
 
             // 添加考核指标列（PDF版本）
             criteria.forEach(c => {
-                html += `<th>${c.criteria_name_zh}<br><small style="font-size: 10px; margin-top: 4px; display: block; font-weight: normal; opacity: 0.9;">${c.criteria_name_en}</small></th>`;
+                html += `<th>${c.criteria_name_zh}<br><small style="font-size: 12px; margin-top: 5px; display: block; font-weight: normal; opacity: 0.9;">${c.criteria_name_en}</small></th>`;
             });
 
             html += `</tr></thead><tbody>`;
@@ -1059,9 +1069,9 @@ require_once 'session_check.php';
             try {
                 const { jsPDF } = window.jspdf;
                 
-                // 使用html2canvas将内容转换为图片
+                // 使用html2canvas将内容转换为图片，使用更高的scale以获得更清晰的图片
                 const canvas = await html2canvas(pdfContent, {
-                    scale: 2,
+                    scale: 2.5,
                     useCORS: true,
                     logging: false,
                     backgroundColor: '#ffffff',
@@ -1083,13 +1093,13 @@ require_once 'session_check.php';
                 const imgHeight = canvas.height;
                 
                 // A4横向尺寸: 297mm x 210mm
-                // 留较小的边距以最大化内容宽度
-                const marginX = 10; // 左右边距10mm
-                const marginY = 10; // 上下边距10mm
-                const availableWidth = pdfWidth - marginX * 2; // 277mm
-                const availableHeight = pdfHeight - marginY * 2; // 190mm
+                // 使用更小的边距以最大化内容显示
+                const marginX = 8; // 左右边距8mm
+                const marginY = 8; // 上下边距8mm
+                const availableWidth = pdfWidth - marginX * 2; // 281mm
+                const availableHeight = pdfHeight - marginY * 2; // 194mm
                 
-                // 计算缩放比例，确保内容完全显示
+                // 计算缩放比例，确保内容完全显示并尽可能大
                 const ratioWidth = availableWidth / imgWidth;
                 const ratioHeight = availableHeight / imgHeight;
                 const ratio = Math.min(ratioWidth, ratioHeight);
