@@ -1218,15 +1218,24 @@ if (file_exists($jsonFile)) {
             line-height: 1.8;
             margin-bottom: clamp(20px, 2.08vw, 28px);
             flex-grow: 1;
+            min-height: 0; /* 允许flex收缩 */
         }
 
         /* 评分标准部分（表格风格，逐级加深，仅色条+文字） */
         .culture-scoring {
-            margin-top: auto;
+            margin-top: 0;
             background: #ffffff;
             border: 1px solid #f6c99f;
             border-radius: 8px;
             overflow: hidden;
+        }
+        
+        .culture-scoring-title {
+            padding: clamp(12px, 1.25vw, 16px) clamp(12px, 1.25vw, 16px);
+            font-size: clamp(14px, 1.46vw, 18px);
+            font-weight: 800;
+            color: #000000;
+            border-bottom: 1px solid #f6c99f;
         }
 
         .culture-scoring-item {
@@ -4028,7 +4037,7 @@ if (file_exists($jsonFile)) {
             }
         });
         
-        // 对齐评分标准标题
+        // 对齐评分标准容器顶部
         function alignScoringTitles() {
             // 找到所有的文化解说和价值观解说grid
             const grids = document.querySelectorAll('.culture-explanation-grid');
@@ -4061,7 +4070,7 @@ if (file_exists($jsonFile)) {
                 
                 // 对每一行进行处理
                 rows.forEach(rowCards => {
-                    // 重置所有描述区域的高度为auto
+                    // 重置所有高度为auto
                     rowCards.forEach(card => {
                         const desc = card.querySelector('.culture-explanation-description');
                         if (desc) {
@@ -4071,29 +4080,57 @@ if (file_exists($jsonFile)) {
                     });
                     
                     // 强制浏览器重新计算布局
-                    void rowCards[0].offsetHeight;
+                    rowCards.forEach(card => void card.offsetHeight);
                     
-                    // 计算该行中描述区域的最大高度
-                    let maxHeight = 0;
-                    rowCards.forEach(card => {
-                        const desc = card.querySelector('.culture-explanation-description');
-                        if (desc) {
-                            const height = desc.offsetHeight;
-                            if (height > maxHeight) {
-                                maxHeight = height;
-                            }
-                        }
-                    });
-                    
-                    // 将所有描述区域设置为相同高度
-                    if (maxHeight > 0) {
+                    // 执行两次对齐，确保精确对齐
+                    for (let iteration = 0; iteration < 2; iteration++) {
+                        // 计算每个卡片中评分标准容器相对于卡片顶部的位置
+                        let maxScoringOffsetTop = 0;
+                        const cardData = [];
+                        
                         rowCards.forEach(card => {
+                            const scoring = card.querySelector('.culture-scoring');
                             const desc = card.querySelector('.culture-explanation-description');
-                            if (desc) {
-                                desc.style.minHeight = maxHeight + 'px';
-                                desc.style.height = maxHeight + 'px';
+                            
+                            if (scoring && desc) {
+                                // 使用 offsetTop 相对于卡片的位置
+                                const scoringOffsetTop = scoring.offsetTop;
+                                
+                                cardData.push({
+                                    card: card,
+                                    desc: desc,
+                                    scoring: scoring,
+                                    offsetTop: scoringOffsetTop
+                                });
+                                
+                                if (scoringOffsetTop > maxScoringOffsetTop) {
+                                    maxScoringOffsetTop = scoringOffsetTop;
+                                }
                             }
                         });
+                        
+                        // 调整每个卡片的描述区域高度，使评分标准顶部对齐
+                        cardData.forEach(data => {
+                            if (maxScoringOffsetTop > 0 && data.offsetTop > 0) {
+                                const offsetDifference = maxScoringOffsetTop - data.offsetTop;
+                                
+                                if (offsetDifference > 0) {
+                                    // 获取当前描述区域的高度
+                                    const currentHeight = data.desc.offsetHeight;
+                                
+                                    // 计算新高度
+                                    const newHeight = currentHeight + offsetDifference;
+                                
+                                    if (newHeight > 0) {
+                                        data.desc.style.minHeight = newHeight + 'px';
+                                        data.desc.style.height = newHeight + 'px';
+                                    }
+                                }
+                            }
+                        });
+                        
+                        // 强制浏览器重新计算布局
+                        rowCards.forEach(card => void card.offsetHeight);
                     }
                 });
             });
@@ -4104,6 +4141,12 @@ if (file_exists($jsonFile)) {
             // 延迟执行以确保所有内容都已渲染
             setTimeout(alignScoringTitles, 100);
             setTimeout(alignScoringTitles, 500);
+            setTimeout(alignScoringTitles, 1000);
+            
+            // 等待图片加载完成后再执行一次
+            $(window).on('load', function() {
+                setTimeout(alignScoringTitles, 100);
+            });
             
             // 窗口大小改变时重新对齐（适应响应式布局）
             let resizeTimer;
