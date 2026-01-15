@@ -1178,6 +1178,7 @@ if (file_exists($jsonFile)) {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: clamp(16px, 1.67vw, 20px);
+            align-items: start;
         }
 
         .culture-explanation-card {
@@ -1189,6 +1190,13 @@ if (file_exists($jsonFile)) {
             flex-direction: column;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
             transition: box-shadow 0.25s ease, transform 0.25s ease;
+            height: 100%;
+        }
+        
+        .culture-explanation-content {
+            display: flex;
+            flex-direction: column;
+            flex: 0 0 auto;
         }
 
         .culture-explanation-card:hover {
@@ -1216,17 +1224,17 @@ if (file_exists($jsonFile)) {
             font-size: clamp(13px, 1.35vw, 16px);
             color: #374151;
             line-height: 1.8;
-            margin-bottom: clamp(20px, 2.08vw, 28px);
-            flex-grow: 1;
+            margin-bottom: 0;
         }
 
         /* 评分标准部分（表格风格，逐级加深，仅色条+文字） */
         .culture-scoring {
-            margin-top: auto;
             background: #ffffff;
             border: 1px solid #f6c99f;
             border-radius: 8px;
             overflow: hidden;
+            margin-top: clamp(20px, 2.08vw, 28px);
+            flex: 0 0 auto;
         }
 
         .culture-scoring-item {
@@ -3306,10 +3314,12 @@ if (file_exists($jsonFile)) {
                     <div class="culture-explanation-grid">
                         <?php foreach ($strategyData['cultureExplanation'] as $index => $explanation): ?>
                         <div class="culture-explanation-card">
-                            <div class="culture-explanation-number"><?php echo str_pad($index + 1, 2, '0', STR_PAD_LEFT); ?></div>
-                            <div class="culture-explanation-key"><?php echo htmlspecialchars($explanation['key'] ?? ''); ?></div>
-                            <div class="culture-explanation-description">
-                                <?php echo nl2br(htmlspecialchars($explanation['description'] ?? '')); ?>
+                            <div class="culture-explanation-content">
+                                <div class="culture-explanation-number"><?php echo str_pad($index + 1, 2, '0', STR_PAD_LEFT); ?></div>
+                                <div class="culture-explanation-key"><?php echo htmlspecialchars($explanation['key'] ?? ''); ?></div>
+                                <div class="culture-explanation-description">
+                                    <?php echo nl2br(htmlspecialchars($explanation['description'] ?? '')); ?>
+                                </div>
                             </div>
                             <?php if (!empty($explanation['scoring']) && is_array($explanation['scoring'])): ?>
                             <div class="culture-scoring">
@@ -3342,10 +3352,12 @@ if (file_exists($jsonFile)) {
                     <div class="culture-explanation-grid">
                         <?php foreach ($strategyData['valuesExplanation'] as $index => $explanation): ?>
                         <div class="culture-explanation-card">
-                            <div class="culture-explanation-number"><?php echo str_pad($index + 1, 2, '0', STR_PAD_LEFT); ?></div>
-                            <div class="culture-explanation-key"><?php echo htmlspecialchars($explanation['key'] ?? ''); ?></div>
-                            <div class="culture-explanation-description">
-                                <?php echo nl2br(htmlspecialchars($explanation['description'] ?? '')); ?>
+                            <div class="culture-explanation-content">
+                                <div class="culture-explanation-number"><?php echo str_pad($index + 1, 2, '0', STR_PAD_LEFT); ?></div>
+                                <div class="culture-explanation-key"><?php echo htmlspecialchars($explanation['key'] ?? ''); ?></div>
+                                <div class="culture-explanation-description">
+                                    <?php echo nl2br(htmlspecialchars($explanation['description'] ?? '')); ?>
+                                </div>
                             </div>
                             <?php if (!empty($explanation['scoring']) && is_array($explanation['scoring'])): ?>
                             <div class="culture-scoring">
@@ -4029,6 +4041,62 @@ if (file_exists($jsonFile)) {
         });
     </script>
     <?php endif; ?>
+
+    <!-- 对齐文化解说和价值观解说的评分标准部分 -->
+    <script>
+        function alignScoringSections() {
+            // 处理所有 culture-explanation-grid
+            document.querySelectorAll('.culture-explanation-grid').forEach(function(grid) {
+                const cards = grid.querySelectorAll('.culture-explanation-card');
+                if (cards.length === 0) return;
+                
+                // 重置所有内容区域的高度，以便重新计算
+                cards.forEach(function(card) {
+                    const content = card.querySelector('.culture-explanation-content');
+                    if (content) {
+                        content.style.minHeight = 'auto';
+                    }
+                });
+                
+                // 强制重排以获取实际高度
+                void grid.offsetHeight;
+                
+                // 找出所有解说内容区域的最大高度
+                let maxHeight = 0;
+                cards.forEach(function(card) {
+                    const content = card.querySelector('.culture-explanation-content');
+                    if (content) {
+                        const height = content.offsetHeight;
+                        if (height > maxHeight) {
+                            maxHeight = height;
+                        }
+                    }
+                });
+                
+                // 设置所有解说内容区域的最小高度为最大高度
+                cards.forEach(function(card) {
+                    const content = card.querySelector('.culture-explanation-content');
+                    if (content) {
+                        content.style.minHeight = maxHeight + 'px';
+                    }
+                });
+            });
+        }
+        
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            alignScoringSections();
+        });
+        
+        // 窗口大小改变时重新对齐
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() {
+                alignScoringSections();
+            }, 250);
+        });
+    </script>
 
 </body>
 </html>
