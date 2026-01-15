@@ -178,6 +178,7 @@ require_once 'session_check.php';
             background: white;
             table-layout: fixed;
             font-size: 15px;
+            border: 2px solid #000;
         }
 
         .evaluation-table thead {
@@ -189,7 +190,7 @@ require_once 'session_check.php';
             padding: 18px 12px;
             text-align: center;
             font-weight: 600;
-            border-right: 1px solid rgba(255,255,255,0.2);
+            border: 2px solid #000;
             word-wrap: break-word;
             font-size: 15px;
         }
@@ -203,8 +204,7 @@ require_once 'session_check.php';
 
         .evaluation-table td {
             padding: 15px 12px;
-            border-bottom: 1px solid #e5e7eb;
-            border-right: 1px solid #e5e7eb;
+            border: 2px solid #000;
             text-align: center;
             word-wrap: break-word;
             font-size: 14px;
@@ -418,10 +418,11 @@ require_once 'session_check.php';
             width: 100%;
             border-collapse: collapse;
             font-size: 16px;
+            border: 2px solid #000;
         }
 
         #pdf-content .evaluation-table th {
-            border: 1px solid #000;
+            border: 2px solid #000;
             padding: 18px 12px;
             text-align: center;
             font-weight: 600;
@@ -438,7 +439,7 @@ require_once 'session_check.php';
         }
 
         #pdf-content .evaluation-table td {
-            border: 1px solid #000;
+            border: 2px solid #000;
             padding: 18px 12px;
             text-align: center;
             min-height: 50px;
@@ -481,20 +482,21 @@ require_once 'session_check.php';
             border-collapse: collapse;
             margin-bottom: 30px;
             page-break-inside: avoid;
+            border: 2px solid #000;
         }
 
         #pdf-content #kitchen-rubrics table th {
             background: #ff5c00;
             color: white;
             padding: 15px;
-            border: 1px solid #000;
+            border: 2px solid #000;
             font-weight: 600;
             text-align: center;
         }
 
         #pdf-content #kitchen-rubrics table td {
             padding: 15px;
-            border: 1px solid #000;
+            border: 2px solid #000;
             vertical-align: top;
             line-height: 1.6;
         }
@@ -745,11 +747,11 @@ require_once 'session_check.php';
                     
                     html += `
                         <div class="rubric-page" data-page="${pageIndex + 2}" style="margin-top: ${isFirstOnPage && !isFirstPage ? '0' : '30px'}; ${pageBreak}">
-                            <table style="width: 100%; border-collapse: collapse; margin-bottom: ${titleIndex < pageTitles.length - 1 ? '30px' : '20px'}; font-size: 15px;">
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: ${titleIndex < pageTitles.length - 1 ? '30px' : '20px'}; font-size: 15px; border: 2px solid #000;">
                                 <thead>
                                     <tr>
-                                        <th style="width: 80px; padding: 15px; text-align: center; background: #ff5c00; color: white; border: 1px solid #000; font-weight: 600;">分数</th>
-                                        <th style="padding: 15px; text-align: center; background: #ff5c00; color: white; border: 1px solid #000; font-weight: 600; font-size: 18px;">${title}</th>
+                                        <th style="width: 80px; padding: 15px; text-align: center; background: #ff5c00; color: white; border: 2px solid #000; font-weight: 600;">分数</th>
+                                        <th style="padding: 15px; text-align: center; background: #ff5c00; color: white; border: 2px solid #000; font-weight: 600; font-size: 18px;">${title}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -758,8 +760,8 @@ require_once 'session_check.php';
                     kitchenRubrics[title].forEach(item => {
                         html += `
                             <tr>
-                                <td style="width: 80px; padding: 15px; text-align: center; border: 1px solid #000; font-size: 18px; font-weight: 600; vertical-align: top;">${item.score}</td>
-                                <td style="padding: 15px; border: 1px solid #000; line-height: 1.6; vertical-align: top;">${item.desc}</td>
+                                <td style="width: 80px; padding: 15px; text-align: center; border: 2px solid #000; font-size: 18px; font-weight: 600; vertical-align: top;">${item.score}</td>
+                                <td style="padding: 15px; border: 2px solid #000; line-height: 1.6; vertical-align: top;">${item.desc}</td>
                             </tr>
                         `;
                     });
