@@ -472,12 +472,14 @@ require_once 'session_check.php';
             opacity: 0.9;
         }
 
-        /* Kitchen评分标准表样式 */
-        #pdf-content #kitchen-rubrics {
+        /* Kitchen和Service评分标准表样式 */
+        #pdf-content #kitchen-rubrics,
+        #pdf-content #service-rubrics {
             margin-top: 40px;
         }
 
-        #pdf-content #kitchen-rubrics table {
+        #pdf-content #kitchen-rubrics table,
+        #pdf-content #service-rubrics table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 30px;
@@ -485,7 +487,8 @@ require_once 'session_check.php';
             border: 2px solid #000;
         }
 
-        #pdf-content #kitchen-rubrics table th {
+        #pdf-content #kitchen-rubrics table th,
+        #pdf-content #service-rubrics table th {
             background: #ff5c00;
             color: white;
             padding: 15px;
@@ -494,7 +497,8 @@ require_once 'session_check.php';
             text-align: center;
         }
 
-        #pdf-content #kitchen-rubrics table td {
+        #pdf-content #kitchen-rubrics table td,
+        #pdf-content #service-rubrics table td {
             padding: 15px;
             border: 2px solid #000;
             vertical-align: top;
@@ -685,6 +689,45 @@ require_once 'session_check.php';
         let employees = [];
         let criteria = [];
 
+        // Service部门评分标准数据
+        const serviceRubrics = {
+            '工作态度': [
+                { score: 1, desc: '在工作态度上有很多不足，如招呼（いらっしゃいませ、谢谢ありがとうございました）明显不够，团队配合度也差，主动性不足。经常跟不上节奏或对招呼、安排有抗拒心理。' },
+                { score: 2, desc: '招呼与团队配合偶尔会不一致，有时会漏掉吆喝或说话声音太小，需要主管提醒。对公司的安排配合度也不够，主动性也偏低。' },
+                { score: 3, desc: '工作态度基本达标。能够完成招呼动作，配合公司安排，但偶尔在节奏上会不一致或需要提醒。有一些主动性，但还有改进空间。' },
+                { score: 4, desc: '整体招呼表现良好。大多时候能与团队保持节奏，配合公司安排。有良好的主动性，愿意在需要时帮忙。' },
+                { score: 5, desc: '整体工作态度非常稳定。能够与团队同步进行招呼，让氛围更有活力。高度配合公司安排，主动协助同事，展现出很强的主动性。' }
+            ],
+            '形象整洁': [
+                { score: 1, desc: '形象整洁度有明显不足，如制服不整齐、头发凌乱、仪容不专业、精神状态低落等，都影响整体服务形象。' },
+                { score: 2, desc: '仪容的稳定度不够，有时出现头发不整齐、制服不够干净或不够挺，指甲、配饰上也偶尔未符合要求。精神状态也偏弱，站姿不够挺直。' },
+                { score: 3, desc: '整体形象符合基本要求，但在细节上需要更多注意，例如头发偶尔会散落、制服略显皱折，或站姿不够精神。' },
+                { score: 4, desc: '仪容整体保持得很好，制服整洁、头发固定得体，指甲和配饰也符合要求。偶尔会出现一些小细节需要注意（如领口或袖口），但不影响整体专业度。' },
+                { score: 5, desc: '整体形象非常整洁且专业。制服始终干净平整，仪容保持良好，头发、指甲和个人气味都符合日式餐厅标准。站姿精神、态度端正，让顾客一看到你就感到舒服和安心。' }
+            ],
+            '效率与准确度': [
+                { score: 1, desc: '效率与准确度明显不足。点餐经常出现错误或遗漏，POS操作慢且容易出错，对顾客需求的感知能力弱，优先级混乱，多任务处理能力差，容易遗漏特殊要求，结账也容易出现错误。动作不连贯、混乱，错误率高。' },
+                { score: 2, desc: '点餐准确度不稳定，容易出现遗漏或错误。POS操作在高峰期容易出错或偏慢，眼观能力弱，优先级不清晰，多任务处理不够，偶尔会漏掉特殊要求或结账错误。动作不够顺畅，走重复路线或停顿过久。' },
+                { score: 3, desc: '点餐基本正确，但偶尔会出现遗漏或混乱，需要重新确认。出餐顺序有时跟不上厨房，POS操作速度尚可但高峰期容易有小错误，眼观能力需要加强，多任务处理达到标准但高峰期容易慌张，特殊要求有时会被遗漏，结账速度偶尔偏慢。动作偶尔会有重复路径或绕路。' },
+                { score: 4, desc: '点餐准确度大多时候都很好，偶尔需要重新确认。出餐顺序掌握良好，与厨房和前台节奏一致，POS操作在高峰期也能应对，错误少。眼观能力好，能注意到大部分顾客需求并合理安排优先级。多任务处理大多顺畅，只是高峰期节奏可能会稍微加快。特殊要求记录和结账都保持准确。整体动作自然，流畅度还有提升空间。' },
+                { score: 5, desc: '点餐清晰准确，会主动确认，几乎零错误。出餐顺序掌握非常稳定，知道什么时候出什么。POS操作非常熟练，高峰期也能快速无误。眼观能力强，能发现需要帮助的桌子并按照紧急程度安排优先级。多任务处理能力出色，忙时动作依然流畅不慌张。能准确记录顾客需求，结账快速无误。整体动作连贯，路线清晰，错误率极低。' }
+            ],
+            '团队协作': [
+                { score: 1, desc: '团队协作有明显不足。分工不够稳定，缺乏主动观察能力，沟通经常断开，对现场节奏的掌握差（忙时混乱、闲时被动），补位意识弱需要提醒，沟通不清晰导致误解或延误。' },
+                { score: 2, desc: '团队协作主动性不够。分工部分完成，协作经常断开，需要提醒才能跟上节奏，主动观察能力弱，经常漏掉顾客需求或现场情况，现场节奏不稳定（忙时容易慌张），补位习惯不够（只专注自己的工作），沟通有时不清晰导致信息传递慢或重复。' },
+                { score: 3, desc: '团队协作表现基本达标。能够执行分工与协作，但偶尔需要同事提醒才能进入状态。有一些主动观察能力但不够稳定，有时会漏掉顾客求助信号。现场节奏需要进一步加强，容易被忙碌打断。补位能力有时能做到但忙时容易忘记。' },
+                { score: 4, desc: '团队内配合良好。能够按照分工完成自己的角色，并顺利交接给同事。主动观察能力好，大多时候能注意到顾客需求。现场节奏相对稳定，能够根据需要调整。有补位习惯，但偶尔会因为忙碌而忽略细节。' },
+                { score: 5, desc: '团队协作表现非常出色。分工非常清晰，即使忙碌时也能与同事顺畅协作。观察能力强，能主动发现顾客或现场需求。现场节奏掌握非常好，忙时能加速，不忙时会主动整理环境。补位习惯非常好，看到同事忙碌会自动接手，不需要主管指示。现场沟通简洁、快速、准确，让整个服务流程更顺畅。' }
+            ],
+            '服务态度': [
+                { score: 1, desc: '服务态度在很多方面都有不足，如笑容明显不够，对顾客的态度和语气冷淡，容易在互动中显得不耐烦。身体语言也明显不足，如站姿不稳定、动作匆忙、节奏混乱，容易影响顾客感知。' },
+                { score: 2, desc: '服务态度偶尔达标但不够稳定。笑容往往不够，对顾客的语气有时平淡或不耐烦。身体语言也需要加强，如站姿松散、动作过快，上菜或收桌有时显得匆忙。' },
+                { score: 3, desc: '服务表现基本达标，能够保持基本笑容和礼貌语气。整体态度友善，但有时因为忙碌，笑容减少，语气稍微急促。身体语言方面，有时站姿不够挺直，动作过快或显得匆忙。' },
+                { score: 4, desc: '服务态度表现良好，大多时候有笑容，对顾客的语气和态度保持礼貌友善。身体语言也相对稳定，站姿自然，动作不慌不忙。' },
+                { score: 5, desc: '服务态度非常出色。笑容自然友善，让顾客感到舒服。语气温和有礼，对顾客始终保持耐心。身体语言非常专业，包括站姿挺直、节奏稳定、上菜和收桌动作轻柔不匆忙，与顾客互动时保持适当距离，让人感到被尊重。' }
+            ]
+        };
+
         // Kitchen部门评分标准数据
         const kitchenRubrics = {
             '出餐速度与效率': [
@@ -723,6 +766,60 @@ require_once 'session_check.php';
                 { score: 5, desc: '无论是厨房内部、前台还是寿司巴，你都能保持顺畅的沟通与节奏配合。忙碌时会主动补位、支援同事，不需要主管安排。你总是能快速回应、协助并维持稳定情绪，让整个厨房节奏更顺畅。' }
             ]
         };
+
+        // 生成Service评分标准表HTML（分页）
+        function generateServiceRubrics() {
+            let html = '<div id="service-rubrics" style="display: none;">';
+            
+            const rubricPages = [
+                // 第二页：工作态度和形象整洁
+                ['工作态度', '形象整洁'],
+                // 第三页：效率与准确度和团队协作
+                ['效率与准确度', '团队协作'],
+                // 第四页：服务态度
+                ['服务态度']
+            ];
+            
+            rubricPages.forEach((pageTitles, pageIndex) => {
+                pageTitles.forEach((title, titleIndex) => {
+                    const isFirstOnPage = titleIndex === 0;
+                    const isFirstPage = pageIndex === 0;
+                    
+                    // 为每个页面添加分页标记
+                    const pageBreak = isFirstOnPage && !isFirstPage ? 'page-break-before: always;' : '';
+                    
+                    html += `
+                        <div class="rubric-page" data-page="${pageIndex + 2}" style="margin-top: ${isFirstOnPage && !isFirstPage ? '0' : '30px'}; ${pageBreak}">
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: ${titleIndex < pageTitles.length - 1 ? '30px' : '20px'}; font-size: 15px; border: 2px solid #000;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 80px; padding: 15px; text-align: center; background: #ff5c00; color: white; border: 2px solid #000; font-weight: 600;">分数</th>
+                                        <th style="padding: 15px; text-align: center; background: #ff5c00; color: white; border: 2px solid #000; font-weight: 600; font-size: 18px;">${title}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+                    
+                    serviceRubrics[title].forEach(item => {
+                        html += `
+                            <tr>
+                                <td style="width: 80px; padding: 15px; text-align: center; border: 2px solid #000; font-size: 18px; font-weight: 600; vertical-align: top;">${item.score}</td>
+                                <td style="padding: 15px; border: 2px solid #000; line-height: 1.6; vertical-align: top;">${item.desc}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                });
+            });
+            
+            html += '</div>';
+            return html;
+        }
 
         // 生成Kitchen评分标准表HTML（分四页）
         function generateKitchenRubrics() {
@@ -948,9 +1045,12 @@ require_once 'session_check.php';
 
             html += `</tbody></table>`;
             
-            // 如果是kitchen部门，添加评分标准表到PDF内容
+            // 如果是kitchen或service部门，添加评分标准表到PDF内容
             if (department === 'kitchen') {
                 const rubricsHtml = generateKitchenRubrics().replace('style="display: none;"', '');
+                html += rubricsHtml;
+            } else if (department === 'service_line') {
+                const rubricsHtml = generateServiceRubrics().replace('style="display: none;"', '');
                 html += rubricsHtml;
             }
             
@@ -1143,9 +1243,12 @@ require_once 'session_check.php';
 
             const department = document.getElementById('department').value;
             
-            // 如果是kitchen部门，需要分页生成
+            // 如果是kitchen或service部门，需要分页生成
             if (department === 'kitchen') {
                 await downloadKitchenPDF(pdfContent);
+                return;
+            } else if (department === 'service_line') {
+                await downloadServicePDF(pdfContent);
                 return;
             }
 
@@ -1316,6 +1419,101 @@ require_once 'session_check.php';
 
                 const evaluationDate = document.getElementById('evaluation_date').value;
                 const fileName = `考核表单_KITCHEN_${evaluationDate}.pdf`;
+
+                pdf.save(fileName);
+                showMessage('PDF下载成功', 'success');
+            } catch (error) {
+                console.error('生成PDF失败:', error);
+                showMessage('生成PDF失败: ' + error.message, 'error');
+            } finally {
+                pdfContent.style.display = originalDisplay;
+            }
+        }
+
+        // 生成Service部门PDF（分页）
+        async function downloadServicePDF(pdfContent) {
+            // 确保评分标准表已添加
+            let existingRubrics = pdfContent.querySelector('#service-rubrics');
+            if (!existingRubrics) {
+                const rubricsHtml = generateServiceRubrics().replace('style="display: none;"', '');
+                pdfContent.innerHTML += rubricsHtml;
+                existingRubrics = pdfContent.querySelector('#service-rubrics');
+            }
+            if (existingRubrics) {
+                existingRubrics.style.display = 'block';
+            }
+
+            // 显示加载提示
+            showMessage('正在生成PDF，请稍候...', 'success');
+
+            const originalDisplay = pdfContent.style.display;
+            pdfContent.style.display = 'block';
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('l', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const marginX = 8;
+                const marginY = 8;
+                const availableWidth = pdfWidth - marginX * 2;
+                const availableHeight = pdfHeight - marginY * 2;
+
+                // 第一页：员工考核表
+                const formHeader = pdfContent.querySelector('.form-header');
+                const deptBanner = pdfContent.querySelector('[style*="background: #ff5c00"]');
+                const formTable = pdfContent.querySelector('.evaluation-table');
+                
+                const formContainer = document.createElement('div');
+                formContainer.style.width = '1300px';
+                formContainer.style.padding = '40px 50px';
+                formContainer.style.background = 'white';
+                
+                if (formHeader) formContainer.appendChild(formHeader.cloneNode(true));
+                if (deptBanner) formContainer.appendChild(deptBanner.cloneNode(true));
+                if (formTable) formContainer.appendChild(formTable.cloneNode(true));
+                
+                formContainer.style.position = 'absolute';
+                formContainer.style.left = '-9999px';
+                document.body.appendChild(formContainer);
+
+                const formCanvas = await html2canvas(formContainer, {
+                    scale: 2.5,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#ffffff',
+                    width: formContainer.scrollWidth,
+                    height: formContainer.scrollHeight
+                });
+
+                const formRatio = Math.min(availableWidth / formCanvas.width, availableHeight / formCanvas.height);
+                const formScaledWidth = formCanvas.width * formRatio;
+                const formScaledHeight = formCanvas.height * formRatio;
+                const formXOffset = (pdfWidth - formScaledWidth) / 2;
+                const formYOffset = marginY;
+
+                pdf.addImage(formCanvas.toDataURL('image/png', 1.0), 'PNG', formXOffset, formYOffset, formScaledWidth, formScaledHeight);
+                document.body.removeChild(formContainer);
+
+                // 第二页：工作态度和形象整洁
+                pdf.addPage();
+                const page2Divs = pdfContent.querySelectorAll('#service-rubrics .rubric-page[data-page="2"]');
+                await addRubricPage(pdf, page2Divs, pdfWidth, pdfHeight, marginX, marginY, availableWidth, availableHeight);
+
+                // 第三页：效率与准确度和团队协作
+                pdf.addPage();
+                const page3Divs = pdfContent.querySelectorAll('#service-rubrics .rubric-page[data-page="3"]');
+                await addRubricPage(pdf, page3Divs, pdfWidth, pdfHeight, marginX, marginY, availableWidth, availableHeight);
+
+                // 第四页：服务态度
+                pdf.addPage();
+                const page4Divs = pdfContent.querySelectorAll('#service-rubrics .rubric-page[data-page="4"]');
+                await addRubricPage(pdf, page4Divs, pdfWidth, pdfHeight, marginX, marginY, availableWidth, availableHeight);
+
+                const evaluationDate = document.getElementById('evaluation_date').value;
+                const fileName = `考核表单_SERVICE LINE_${evaluationDate}.pdf`;
 
                 pdf.save(fileName);
                 showMessage('PDF下载成功', 'success');
