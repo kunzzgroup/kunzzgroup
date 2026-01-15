@@ -569,9 +569,9 @@ require_once 'session_check.php';
     <div class="container">
         <div class="header">
             <h1>考核表单管理</h1>
-            <a href="dashboard.php" class="back-button">
+            <!-- <a href="dashboard.php" class="back-button">
                 <i class="fas fa-arrow-left"></i> 返回
-            </a>
+            </a> -->
         </div>
 
         <div id="message" class="message"></div>
