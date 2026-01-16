@@ -1623,7 +1623,8 @@ header('Expires: 0');
             box-shadow: 0 2px 8px rgba(88, 62, 4, 0.1);
             display: flex;
             flex-direction: column;
-            /* Removed min-height: 300px; */
+            margin-bottom: 20px;
+
         }
 
         .category-header {
