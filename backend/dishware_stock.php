@@ -1452,7 +1452,7 @@ header('Expires: 0');
         .stock-table.transposed th,
         .stock-table.transposed td {
             width: auto !important;
-            min-width: 120px; /* Default min-width for content cells - reduced for smaller screens */
+            min-width: 140px; /* Default min-width for content cells */
             white-space: nowrap;
         }
 
@@ -1479,7 +1479,7 @@ header('Expires: 0');
             text-align: center;
             border: 1px solid #d1d5db;
             background: white;
-            min-width: 120px; /* Minimum width for data columns - reduced for smaller screens */
+            min-width: 180px; /* Minimum width for data columns */
             max-width: none;
             overflow: hidden;
             word-wrap: break-word;
@@ -1490,14 +1490,14 @@ header('Expires: 0');
         /* 照片列 - 使用原始尺寸 */
         #stock-table.transposed tr[data-row="照片"] td,
         .stock-table.transposed tr[data-row="照片"] td { 
-            min-width: 140px; /* 足够的宽度以容纳照片尺寸 - 减小最小值适应小屏幕 */
+            min-width: 180px; /* 足够的宽度以容纳原始照片尺寸 */
             padding: clamp(4px, 0.42vw, 8px);
         }
         
         #stock-table.transposed tr[data-row="照片"] td img.product-photo,
         .stock-table.transposed tr[data-row="照片"] td img.product-photo {
-            width: clamp(80px, 3.13vw, 150px) !important;
-            height: clamp(80px, 3.13vw, 150px) !important;
+            width: clamp(120px, 3.13vw, 150px) !important;
+            height: clamp(120px, 3.13vw, 150px) !important;
             object-fit: cover;
             border-radius: clamp(4px, 0.42vw, 8px);
             border: 1px solid #e5e7eb;
@@ -1508,8 +1508,8 @@ header('Expires: 0');
         
         #stock-table.transposed tr[data-row="照片"] td .no-photo,
         .stock-table.transposed tr[data-row="照片"] td .no-photo {
-            width: clamp(80px, 3.13vw, 150px) !important;
-            height: clamp(80px, 3.13vw, 150px) !important;
+            width: clamp(120px, 3.13vw, 150px) !important;
+            height: clamp(120px, 3.13vw, 150px) !important;
             display: flex;
             margin: 0 auto;
             max-width: 100%;
@@ -1523,7 +1523,7 @@ header('Expires: 0');
             word-break: break-word;
             text-align: center !important;
             padding: clamp(4px, 0.42vw, 8px) clamp(8px, 0.83vw, 16px);
-            min-width: 150px; /* 减小最小值适应小屏幕 */
+            min-width: 200px;
         }
         
         /* 其他列的最小宽度设置 */
