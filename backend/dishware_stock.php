@@ -1485,18 +1485,17 @@ header('Expires: 0');
             box-sizing: border-box;
         }
 
-        /* 照片列 - 固定尺寸防止重叠 */
+        /* 照片列 - 使用原始尺寸 */
         #stock-table.transposed tr[data-row="照片"] td,
         .stock-table.transposed tr[data-row="照片"] td { 
-            min-width: 100px; 
-            max-width: 100px;
+            min-width: 180px; /* 足够的宽度以容纳原始照片尺寸 */
             padding: clamp(4px, 0.42vw, 8px);
         }
         
         #stock-table.transposed tr[data-row="照片"] td img.product-photo,
         .stock-table.transposed tr[data-row="照片"] td img.product-photo {
-            width: clamp(30px, 3.13vw, 60px) !important;
-            height: clamp(30px, 3.13vw, 60px) !important;
+            width: clamp(120px, 3.13vw, 150px) !important;
+            height: clamp(120px, 3.13vw, 150px) !important;
             object-fit: cover;
             border-radius: clamp(4px, 0.42vw, 8px);
             border: 1px solid #e5e7eb;
@@ -1507,8 +1506,8 @@ header('Expires: 0');
         
         #stock-table.transposed tr[data-row="照片"] td .no-photo,
         .stock-table.transposed tr[data-row="照片"] td .no-photo {
-            width: clamp(30px, 3.13vw, 60px) !important;
-            height: clamp(30px, 3.13vw, 60px) !important;
+            width: clamp(120px, 3.13vw, 150px) !important;
+            height: clamp(120px, 3.13vw, 150px) !important;
             display: flex;
             margin: 0 auto;
             max-width: 100%;
