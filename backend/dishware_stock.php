@@ -1573,6 +1573,40 @@ header('Expires: 0');
         #stock-table.transposed tr[data-row="操作"] td,
         .stock-table.transposed tr[data-row="操作"] td { min-width: 110px; }
 
+        /* 小屏幕时减小列宽 - 不影响默认页面大小 */
+        @media (max-width: 1400px) {
+            /* 内容单元格 - 减小最小宽度 */
+            #stock-table.transposed td,
+            .stock-table.transposed td {
+                min-width: 140px;
+            }
+            
+            /* 照片列 - 减小最小宽度 */
+            #stock-table.transposed tr[data-row="照片"] td,
+            .stock-table.transposed tr[data-row="照片"] td { 
+                min-width: 140px;
+            }
+            
+            /* 照片尺寸 - 减小最小值但保持最大值 */
+            #stock-table.transposed tr[data-row="照片"] td img.product-photo,
+            .stock-table.transposed tr[data-row="照片"] td img.product-photo {
+                width: clamp(80px, 7.8vw, 150px) !important;
+                height: clamp(80px, 7.8vw, 150px) !important;
+            }
+            
+            #stock-table.transposed tr[data-row="照片"] td .no-photo,
+            .stock-table.transposed tr[data-row="照片"] td .no-photo {
+                width: clamp(80px, 7.8vw, 150px) !important;
+                height: clamp(80px, 7.8vw, 150px) !important;
+            }
+            
+            /* 产品名称列 - 减小最小宽度 */
+            #stock-table.transposed tr[data-row="产品名称"] td,
+            .stock-table.transposed tr[data-row="产品名称"] td { 
+                min-width: 150px;
+            }
+        }
+
         /* 分类容器样式 - 用于全部分类显示 */
         .categories-container {
             display: flex;
