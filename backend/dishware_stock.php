@@ -1467,8 +1467,10 @@ header('Expires: 0');
             color: #fff;
             text-align: center;
             min-width: 110px;
-            width: 110px;
+            max-width: 110px;
+            width: 110px !important;
             border: 1px solid #d1d5db;
+            box-sizing: border-box;
         }
 
         /* 内容单元格 */
