@@ -1387,15 +1387,15 @@ header('Expires: 0');
 
     /* 操作按钮样式 */
     .action-btn {
-        width: 28px;
-        height: 28px;
+        width: clamp(22px, 1.46vw, 28px);
+        height: clamp(22px, 1.46vw, 28px);
         border: none;
         border-radius: 4px;
         cursor: pointer;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 12px;
+        font-size: clamp(8px, 0.625vw, 12px);
         color: white;
         transition: all 0.2s;
         margin: 0 2px;
