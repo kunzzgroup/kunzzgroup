@@ -1519,7 +1519,7 @@ header('Expires: 0');
             white-space: normal;
             word-wrap: break-word;
             word-break: break-word;
-            text-align: left !important;
+            text-align: center !important;
             padding: clamp(4px, 0.42vw, 8px) clamp(8px, 0.83vw, 16px);
             min-width: 200px;
         }
