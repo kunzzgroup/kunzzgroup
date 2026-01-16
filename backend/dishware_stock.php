@@ -1550,6 +1550,7 @@ header('Expires: 0');
             justify-content: center;
             width: auto;
             margin: 0 auto;
+            gap: clamp(4px, 0.42vw, 8px); /* RM和数字之间的间距 */
         }
         
         #stock-table.transposed tr[data-row="尺寸"] td,
