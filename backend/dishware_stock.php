@@ -1438,16 +1438,12 @@ header('Expires: 0');
             table-layout: auto !important;
             width: max-content !important;
             min-width: 100% !important;
+            border-collapse: separate;
+            border-spacing: 0;
         }
 
         #stock-table.transposed thead {
             display: none;
-        }
-
-        /* 覆盖原本的固定列宽规则，避免 nth-child 影响转置表 */
-        #stock-table.transposed th,
-        #stock-table.transposed td {
-            width: auto !important;
         }
 
         /* 左侧"表头列"固定 */
@@ -1462,32 +1458,37 @@ header('Expires: 0');
             min-width: 110px;
             width: 110px;
             border: 1px solid #d1d5db;
+            padding: clamp(4px, 0.42vw, 8px) clamp(6px, 0.63vw, 12px);
         }
 
-        /* 内容单元格基础样式 */
+        /* 内容单元格基础样式 - 每个产品列（td列）都有固定的最小宽度 */
         #stock-table.transposed td {
             text-align: center;
             border: 1px solid #d1d5db;
             background: white;
             padding: clamp(2px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px);
             vertical-align: middle;
+            /* 每个产品列的最小宽度 - 同一列的所有td会共享这个宽度 */
+            min-width: 120px;
+            /* 允许内容过长时自动扩展 */
+            max-width: none;
+            /* 确保内容不会溢出到其他单元格 */
+            overflow: visible;
+            word-wrap: break-word;
+            word-break: break-word;
         }
 
-        /* 为每一行（对应原来的每一列）设置最小宽度和默认宽度 */
+        /* 特定行的样式调整 - 这些只影响内容，不影响列宽 */
         #stock-table.transposed tr[data-row="NO"] td { 
-            min-width: 50px; 
-            width: 50px;
-            max-width: 50px;
             white-space: nowrap;
         }
+        
         #stock-table.transposed tr[data-row="照片"] td { 
-            min-width: 80px; 
-            width: 80px;
-            max-width: 80px;
             white-space: nowrap;
             text-align: center !important;
             vertical-align: middle !important;
         }
+        
         /* 确保照片单元格内的图片不重叠 */
         #stock-table.transposed tr[data-row="照片"] td img.product-photo {
             width: clamp(30px, 3.13vw, 60px) !important;
@@ -1506,67 +1507,35 @@ header('Expires: 0');
             margin: 0 auto;
             max-width: 100%;
         }
+        
+        /* 产品名称行 - 允许自动扩展，内容左对齐 */
         #stock-table.transposed tr[data-row="产品名称"] td { 
-            min-width: 150px;
             white-space: normal;
             word-wrap: break-word;
             word-break: break-word;
-            /* 允许自动扩展，不设置 max-width */
+            text-align: left !important;
+            padding: clamp(4px, 0.42vw, 8px) clamp(8px, 0.83vw, 16px);
         }
-        #stock-table.transposed tr[data-row="编号"] td { 
-            min-width: 100px;
-            width: 100px;
+        
+        #stock-table.transposed tr[data-row="编号"] td,
+        #stock-table.transposed tr[data-row="分类"] td,
+        #stock-table.transposed tr[data-row="单价"] td,
+        #stock-table.transposed tr[data-row="文化楼"] td,
+        #stock-table.transposed tr[data-row="中央"] td,
+        #stock-table.transposed tr[data-row="总数"] td,
+        #stock-table.transposed tr[data-row="操作"] td { 
             white-space: nowrap;
         }
-        #stock-table.transposed tr[data-row="分类"] td { 
-            min-width: 80px;
-            width: 80px;
-            white-space: nowrap;
-        }
+        
         #stock-table.transposed tr[data-row="尺寸"] td { 
-            min-width: 120px;
             white-space: normal;
             word-wrap: break-word;
-            /* 允许自动扩展 */
+            word-break: break-word;
         }
-        #stock-table.transposed tr[data-row="单价"] td { 
-            min-width: 90px;
-            width: 90px;
-            white-space: nowrap;
-        }
-        #stock-table.transposed tr[data-row="文化楼"] td { 
-            min-width: 80px;
-            width: 80px;
-            white-space: nowrap;
-        }
-        #stock-table.transposed tr[data-row="中央"] td { 
-            min-width: 80px;
-            width: 80px;
-            white-space: nowrap;
-        }
-        #stock-table.transposed tr[data-row="J1"] td { 
-            min-width: 60px;
-            width: 60px;
-            white-space: nowrap;
-        }
-        #stock-table.transposed tr[data-row="J2"] td { 
-            min-width: 60px;
-            width: 60px;
-            white-space: nowrap;
-        }
+        
+        #stock-table.transposed tr[data-row="J1"] td,
+        #stock-table.transposed tr[data-row="J2"] td,
         #stock-table.transposed tr[data-row="J3"] td { 
-            min-width: 60px;
-            width: 60px;
-            white-space: nowrap;
-        }
-        #stock-table.transposed tr[data-row="总数"] td { 
-            min-width: 80px;
-            width: 80px;
-            white-space: nowrap;
-        }
-        #stock-table.transposed tr[data-row="操作"] td { 
-            min-width: 100px;
-            width: 100px;
             white-space: nowrap;
         }
 
