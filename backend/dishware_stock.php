@@ -1496,8 +1496,8 @@ header('Expires: 0');
         
         #stock-table.transposed tr[data-row="照片"] td img.product-photo,
         .stock-table.transposed tr[data-row="照片"] td img.product-photo {
-            width: clamp(120px, 3.13vw, 150px) !important;
-            height: clamp(120px, 3.13vw, 150px) !important;
+            width: clamp(100px, 7.8vw, 150px) !important;
+            height: clamp(100px, 7.8vw, 150px) !important;
             object-fit: cover;
             border-radius: clamp(4px, 0.42vw, 8px);
             border: 1px solid #e5e7eb;
