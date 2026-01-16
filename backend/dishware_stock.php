@@ -1468,25 +1468,31 @@ header('Expires: 0');
             background: white;
             padding: clamp(2px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px);
             vertical-align: middle;
-            /* 每个产品列的最小宽度 - 同一列的所有td会共享这个宽度 */
-            min-width: 120px;
+            /* 每个产品列的最小宽度 - 根据照片大小(最大60px) + padding(24px) + 安全边距，设置为至少100px */
+            /* 但考虑到产品名称可能很长，设置更大的最小宽度180px */
+            min-width: 180px;
             /* 允许内容过长时自动扩展 */
             max-width: none;
             /* 确保内容不会溢出到其他单元格 */
-            overflow: visible;
+            overflow: hidden;
             word-wrap: break-word;
             word-break: break-word;
+            /* 确保同一列的所有单元格共享相同的宽度 */
+            box-sizing: border-box;
         }
 
         /* 特定行的样式调整 - 这些只影响内容，不影响列宽 */
         #stock-table.transposed tr[data-row="NO"] td { 
             white-space: nowrap;
+            /* NO列可以更窄，但整列宽度由其他行决定 */
         }
         
         #stock-table.transposed tr[data-row="照片"] td { 
             white-space: nowrap;
             text-align: center !important;
             vertical-align: middle !important;
+            /* 照片列的最小宽度应该能容纳照片(60px) + padding(24px) = 至少84px */
+            /* 但整列宽度由所有行中最大的内容决定，所以这里只设置内容样式 */
         }
         
         /* 确保照片单元格内的图片不重叠 */
@@ -1515,6 +1521,8 @@ header('Expires: 0');
             word-break: break-word;
             text-align: left !important;
             padding: clamp(4px, 0.42vw, 8px) clamp(8px, 0.83vw, 16px);
+            /* 产品名称列需要更大的最小宽度，但会随内容自动扩展 */
+            min-width: 200px;
         }
         
         #stock-table.transposed tr[data-row="编号"] td,
