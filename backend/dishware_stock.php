@@ -1630,7 +1630,7 @@ header('Expires: 0');
         .category-header {
             background: #636363;
             color: white;
-            padding: clamp(12px, 1.25vw, 20px) clamp(16px, 1.67vw, 24px);
+            padding: clamp(10px, 1.04vw, 20px) clamp(16px, 1.25vw, 24px);
             font-size: clamp(18px, 2.08vw, 24px);
             font-weight: 600;
             border-radius: 10px 10px 0 0;
