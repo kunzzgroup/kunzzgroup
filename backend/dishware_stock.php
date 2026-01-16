@@ -1508,8 +1508,8 @@ header('Expires: 0');
         
         #stock-table.transposed tr[data-row="照片"] td .no-photo,
         .stock-table.transposed tr[data-row="照片"] td .no-photo {
-            width: clamp(120px, 3.13vw, 150px) !important;
-            height: clamp(120px, 3.13vw, 150px) !important;
+            width: clamp(100px, 7.8vw, 150px) !important;
+            height: clamp(100px, 7.8vw, 150px) !important;
             display: flex;
             margin: 0 auto;
             max-width: 100%;
