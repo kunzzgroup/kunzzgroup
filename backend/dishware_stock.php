@@ -1544,6 +1544,14 @@ header('Expires: 0');
             white-space: nowrap;
         }
         
+        /* 单价行的货币显示居中 */
+        #stock-table.transposed tr[data-row="单价"] td .currency-display,
+        .stock-table.transposed tr[data-row="单价"] td .currency-display {
+            justify-content: center;
+            width: auto;
+            margin: 0 auto;
+        }
+        
         #stock-table.transposed tr[data-row="尺寸"] td,
         .stock-table.transposed tr[data-row="尺寸"] td { 
             white-space: normal;
