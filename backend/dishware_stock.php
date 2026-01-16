@@ -24,14 +24,14 @@ header('Expires: 0');
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: #faf7f2;
             color: #111827;
-            overflow-y: hidden;
+            overflow-y: auto;
         }
         
         .container {
             max-width: 1800px;
             margin: 0 auto;
             padding: clamp(16px, 1.25vw, 24px) 24px;
-            height: 100vh;
+            min-height: 100vh;
         }
         
         .header {
@@ -1475,6 +1475,94 @@ header('Expires: 0');
         #stock-table.transposed tr[data-row="照片"] td { min-width: 90px; }
         #stock-table.transposed tr[data-row="操作"] td { min-width: 110px; }
 
+        /* 分类容器样式 - 用于全部分类显示 */
+        .categories-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            padding: 0;
+            overflow-y: auto;
+            max-height: 68vh;
+            min-height: 400px;
+        }
+
+        .category-section {
+            background: white;
+            border-radius: 12px;
+            border: 2px solid #000000ff;
+            box-shadow: 0 2px 8px rgba(88, 62, 4, 0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: 300px;
+        }
+
+        .category-header {
+            background: #636363;
+            color: white;
+            padding: clamp(12px, 1.25vw, 20px) clamp(16px, 1.67vw, 24px);
+            font-size: clamp(18px, 2.08vw, 24px);
+            font-weight: 600;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+        }
+
+        .category-header .category-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .category-header .category-count {
+            font-size: clamp(12px, 1.04vw, 16px);
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+        .category-table-wrapper {
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 500px;
+            flex: 1;
+        }
+
+        .category-table-wrapper::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+
+        .category-table-wrapper::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .category-table-wrapper::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .category-table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* 隐藏默认表格容器当显示分类容器时 */
+        .table-container.hide-for-categories {
+            display: none;
+        }
+
+        /* 显示分类容器 */
+        #categories-container {
+            display: none;
+        }
+
+        #categories-container.show {
+            display: block;
+        }
+
     </style>
 </head>
 <body>
@@ -1568,32 +1656,38 @@ header('Expires: 0');
         <div id="page-content">
             <!-- 库存管理页面 -->
             <div id="stock-page" class="page-content">
-        <div class="table-container">
-            <div class="table-scroll-container">
-                <table class="stock-table" id="stock-table">
-                    <thead>
-                        <tr>
-                            <th>No.</th>
-                            <th>照片</th>
-                            <th>产品名称</th>
-                            <th>编号</th>
-                            <th>分类</th>
-                            <th>尺寸</th>
-                            <th>单价</th>
-                            <th>文化楼</th>
-                            <th>中央</th>
-                            <th>J1</th>
-                            <th>J2</th>
-                            <th>J3</th>
-                            <th>总数</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="stock-tbody">
-                        <!-- Dynamic content -->
-                    </tbody>
-                </table>
+                <!-- 单个分类或搜索结果的表格容器 -->
+                <div class="table-container" id="single-table-container">
+                    <div class="table-scroll-container">
+                        <table class="stock-table" id="stock-table">
+                            <thead>
+                                <tr>
+                                    <th>No.</th>
+                                    <th>照片</th>
+                                    <th>产品名称</th>
+                                    <th>编号</th>
+                                    <th>分类</th>
+                                    <th>尺寸</th>
+                                    <th>单价</th>
+                                    <th>文化楼</th>
+                                    <th>中央</th>
+                                    <th>J1</th>
+                                    <th>J2</th>
+                                    <th>J3</th>
+                                    <th>总数</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stock-tbody">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
                     </div>
+                </div>
+                
+                <!-- 全部分类的容器（按分类分组显示） -->
+                <div id="categories-container" class="categories-container">
+                    <!-- 动态生成分类容器 -->
                 </div>
             </div>
 
@@ -3120,6 +3214,15 @@ header('Expires: 0');
 
         // 平滑更新表格
         async function smoothUpdateTable() {
+            const categoryFilter = document.getElementById('category-filter')?.value || '';
+            const searchTerm = document.getElementById('unified-filter')?.value || '';
+            
+            // 如果选择"全部分类"且没有搜索关键词，直接调用按分类渲染函数
+            if (!categoryFilter && !searchTerm) {
+                renderStockTableByCategory();
+                return;
+            }
+            
             const tbody = document.getElementById('stock-tbody');
             if (!tbody) return;
             
@@ -3140,6 +3243,15 @@ header('Expires: 0');
         function searchData() {
             const searchTerm = document.getElementById('unified-filter').value.toLowerCase();
             const categoryFilter = document.getElementById('category-filter').value;
+            
+            // 如果没有搜索关键词和分类过滤，使用全部数据
+            if (!searchTerm && !categoryFilter) {
+                filteredData = sortByCodeNumber(stockData);
+                // 直接调用按分类渲染函数
+                renderStockTableByCategory();
+                updateStats();
+                return;
+            }
             
             filteredData = stockData.filter(item => {
                 const searchText = [
@@ -3188,7 +3300,9 @@ header('Expires: 0');
             
             // 保持按编号排序
             filteredData = sortByCodeNumber(stockData);
-            smoothUpdateTable();
+            
+            // 重置后显示全部分类（按分类分组显示）
+            renderStockTableByCategory();
             updateStats();
         }
 
@@ -3278,9 +3392,26 @@ header('Expires: 0');
 
         // 渲染库存表格（转置：表头在左，内容向右横向滚动）
         function renderStockTable() {
+            // 检查是否选择"全部分类"
+            const categoryFilter = document.getElementById('category-filter')?.value || '';
+            const searchTerm = document.getElementById('unified-filter')?.value || '';
+            
+            // 如果选择"全部分类"且没有搜索关键词，按分类分组显示
+            if (!categoryFilter && !searchTerm) {
+                renderStockTableByCategory();
+                return;
+            }
+            
+            // 否则使用原来的单表格显示方式
             const table = document.getElementById('stock-table');
             const tbody = document.getElementById('stock-tbody');
             if (!table || !tbody) return;
+            
+            // 显示单表格容器，隐藏分类容器
+            const singleTableContainer = document.getElementById('single-table-container');
+            const categoriesContainer = document.getElementById('categories-container');
+            if (singleTableContainer) singleTableContainer.style.display = 'block';
+            if (categoriesContainer) categoriesContainer.classList.remove('show');
 
             // 先把 filteredData 展平为“展示行”（原本表格的一行）数组
             const displayRows = [];
@@ -3445,6 +3576,253 @@ header('Expires: 0');
             });
 
             tbody.innerHTML = html;
+        }
+
+        // 按分类分组渲染库存表格
+        function renderStockTableByCategory() {
+            const categoriesContainer = document.getElementById('categories-container');
+            const singleTableContainer = document.getElementById('single-table-container');
+            
+            if (!categoriesContainer) return;
+            
+            // 显示分类容器，隐藏单表格容器
+            categoriesContainer.classList.add('show');
+            if (singleTableContainer) singleTableContainer.style.display = 'none';
+            
+            // 如果没有数据，显示空状态
+            if (!stockData || stockData.length === 0) {
+                categoriesContainer.innerHTML = `
+                    <div class="category-section">
+                        <div class="category-header">
+                            <div class="category-title">暂无数据</div>
+                        </div>
+                        <div class="category-table-wrapper" style="padding: 40px; text-align: center; color: #6b7280;">
+                            <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.5; margin-bottom: 16px;"></i>
+                            <div>暂无库存数据</div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 按分类分组数据
+            const categoryGroups = {};
+            
+            stockData.forEach((item) => {
+                let category = '';
+                
+                if (item.item_type === 'set') {
+                    // 套装使用套装自己的分类，如果没有则使用SET
+                    category = item.category || 'SET';
+                    
+                    // 如果套装中有items，也可以按items的分类分组
+                    if (item.items && item.items.length > 0) {
+                        // 对于套装，我们可以使用套装中的第一个item的分类
+                        const firstItemCategory = item.items[0].category || item.category || 'SET';
+                        category = firstItemCategory;
+                    }
+                } else {
+                    category = item.category || '未分类';
+                }
+                
+                if (!categoryGroups[category]) {
+                    categoryGroups[category] = [];
+                }
+                categoryGroups[category].push(item);
+            });
+            
+            // 对分类进行排序（中文分类排在最后）
+            const sortedCategories = Object.keys(categoryGroups).sort((a, b) => {
+                const isChineseA = /[\u4e00-\u9fa5]/.test(a);
+                const isChineseB = /[\u4e00-\u9fa5]/.test(b);
+                
+                if (isChineseA && !isChineseB) return 1;
+                if (!isChineseA && isChineseB) return -1;
+                if (isChineseA && isChineseB) return a.localeCompare(b, 'zh-CN');
+                return a.localeCompare(b);
+            });
+            
+            // 生成HTML
+            let html = '';
+            
+            sortedCategories.forEach((category) => {
+                const items = categoryGroups[category];
+                // 对每个分类内的项目进行排序
+                const sortedItems = sortByCodeNumber(items);
+                
+                html += `
+                    <div class="category-section">
+                        <div class="category-header">
+                            <div class="category-title">
+                                <span>${category}</span>
+                                <span class="category-count">(${sortedItems.length} 项)</span>
+                            </div>
+                        </div>
+                        <div class="category-table-wrapper">
+                            ${renderCategoryTable(sortedItems)}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            categoriesContainer.innerHTML = html;
+        }
+        
+        // 渲染单个分类的表格
+        function renderCategoryTable(items) {
+            if (!items || items.length === 0) {
+                return '<div style="padding: 40px; text-align: center; color: #6b7280;">该分类暂无数据</div>';
+            }
+            
+            // 先把 items 展平为"展示行"数组
+            const displayRows = [];
+            let rowIndex = 1;
+            
+            function currencyHtml(val) {
+                return `
+                    <div class="currency-display">
+                        <span class="currency-symbol">RM</span>
+                        <span class="currency-amount">${formatCurrency(val)}</span>
+                    </div>
+                `;
+            }
+            
+            function photoHtmlFrom(path, altText, iconClass = 'fa-image') {
+                return path
+                    ? `<img src="${path}" alt="${altText || ''}" class="product-photo">`
+                    : `<div class="no-photo"><i class="fas ${iconClass}"></i></div>`;
+            }
+            
+            items.forEach((item) => {
+                if (item.item_type === 'set') {
+                    const set = item;
+                    const setPrice = typeof set.set_price !== 'undefined' ? set.set_price : (set.unit_price || 0);
+                    const displayIndex = rowIndex++;
+                    
+                    if (set.items && Array.isArray(set.items) && set.items.length > 0) {
+                        set.items.forEach((setItem) => {
+                            const totalQty = parseInt(setItem.total_quantity) || 0;
+                            const totalClass = totalQty > 0 ? 'positive-value' : 'zero-value';
+                            
+                            displayRows.push({
+                                no: String(displayIndex),
+                                photo: photoHtmlFrom(setItem.photo_path, setItem.product_name || '', 'fa-image'),
+                                product_name: `<strong>${setItem.product_name || '-'}</strong>`,
+                                code_number: setItem.code_number || '-',
+                                category: setItem.category || set.category || '-',
+                                size: setItem.size || '-',
+                                unit_price: currencyHtml(setPrice),
+                                wenhua: String(setItem.wenhua_quantity || 0),
+                                central: String(setItem.central_quantity || 0),
+                                j1: String(setItem.j1_quantity || 0),
+                                j2: String(setItem.j2_quantity || 0),
+                                j3: String(setItem.j3_quantity || 0),
+                                total: `<span class="${totalClass}">${totalQty}</span>`,
+                                actions: `
+                                    <button class="action-btn edit-btn" onclick="openEditModal(${setItem.id})" title="编辑">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn delete-btn" onclick="deleteDishwareFromSet(${setItem.id}, ${set.id})" title="删除">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                `
+                            });
+                        });
+                    } else {
+                        const wenhuaQuantity = parseInt(set.wenhua_quantity) || 0;
+                        const centralQuantity = parseInt(set.central_quantity) || 0;
+                        const j1Quantity = parseInt(set.j1_quantity) || 0;
+                        const j2Quantity = parseInt(set.j2_quantity) || 0;
+                        const j3Quantity = parseInt(set.j3_quantity) || 0;
+                        const totalQty = parseInt(set.total_quantity) || (wenhuaQuantity + centralQuantity + j1Quantity + j2Quantity + j3Quantity);
+                        const totalClass = totalQty > 0 ? 'positive-value' : 'zero-value';
+                        
+                        displayRows.push({
+                            no: String(displayIndex),
+                            photo: photoHtmlFrom(set.photo_path, set.product_name || set.set_name || '', 'fa-box'),
+                            product_name: `<strong>${set.product_name || set.set_name || '-'}</strong>`,
+                            code_number: set.code_number || set.set_code || '-',
+                            category: set.category || 'SET',
+                            size: '-',
+                            unit_price: currencyHtml(setPrice),
+                            wenhua: String(wenhuaQuantity),
+                            central: String(centralQuantity),
+                            j1: String(j1Quantity),
+                            j2: String(j2Quantity),
+                            j3: String(j3Quantity),
+                            total: `<span class="${totalClass}">${totalQty}</span>`,
+                            actions: `
+                                <button class="action-btn edit-btn" onclick="editSet(${set.id})" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete-btn" onclick="deleteSet(${set.id})" title="删除">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            `
+                        });
+                    }
+                } else {
+                    const totalQty = parseInt(item.total_quantity) || 0;
+                    const totalClass = totalQty > 0 ? 'positive-value' : 'zero-value';
+                    
+                    displayRows.push({
+                        no: String(rowIndex++),
+                        photo: photoHtmlFrom(item.photo_path, item.product_name || '', 'fa-image'),
+                        product_name: `<strong>${item.product_name || '-'}</strong>`,
+                        code_number: item.code_number || '-',
+                        category: item.category || '-',
+                        size: item.size || '-',
+                        unit_price: currencyHtml(item.unit_price || 0),
+                        wenhua: String(item.wenhua_quantity || 0),
+                        central: String(item.central_quantity || 0),
+                        j1: String(item.j1_quantity || 0),
+                        j2: String(item.j2_quantity || 0),
+                        j3: String(item.j3_quantity || 0),
+                        total: `<span class="${totalClass}">${totalQty}</span>`,
+                        actions: `
+                            <button class="action-btn edit-btn" onclick="openEditModal(${item.id})" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteDishware(${item.id})" title="删除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        `
+                    });
+                }
+            });
+            
+            // 转置渲染：左侧是"字段名"，右侧每一列是一个"展示行"
+            const fieldDefs = [
+                { label: 'NO', key: 'no' },
+                { label: '照片', key: 'photo' },
+                { label: '产品名称', key: 'product_name' },
+                { label: '编号', key: 'code_number' },
+                { label: '分类', key: 'category' },
+                { label: '尺寸', key: 'size' },
+                { label: '单价', key: 'unit_price' },
+                { label: '文化楼', key: 'wenhua' },
+                { label: '中央', key: 'central' },
+                { label: 'J1', key: 'j1' },
+                { label: 'J2', key: 'j2' },
+                { label: 'J3', key: 'j3' },
+                { label: '总数', key: 'total' },
+                { label: '操作', key: 'actions' }
+            ];
+            
+            let tableHtml = '<table class="stock-table transposed">';
+            
+            fieldDefs.forEach((f) => {
+                tableHtml += `<tr data-row="${f.label}"><th class="row-header">${f.label}</th>`;
+                displayRows.forEach((r) => {
+                    const cell = (r && typeof r[f.key] !== 'undefined') ? r[f.key] : '-';
+                    tableHtml += `<td>${cell}</td>`;
+                });
+                tableHtml += `</tr>`;
+            });
+            
+            tableHtml += '</table>';
+            
+            return tableHtml;
         }
 
         // 打开编辑模态框
