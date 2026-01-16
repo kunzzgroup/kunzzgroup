@@ -31,8 +31,8 @@ header('Expires: 0');
             max-width: 1800px;
             margin: 0 auto;
             padding: clamp(16px, 1.25vw, 24px) 24px;
-            height: 100vh;
-            overflow-y: auto;
+            height: 100vh; /* Keep original height */
+            overflow-y: auto; /* Allow container to scroll vertically */
         }
         
         .header {
@@ -1433,27 +1433,32 @@ header('Expires: 0');
             border-radius: 4px;
         }
 
-        /* 转置表格：表头在左侧，内容向右横向滚动（仅用于总库存表 #stock-table） */
-        #stock-table.transposed {
+        /* 转置表格：表头在左侧，内容向右横向滚动（用于总库存表和分类表格） */
+        #stock-table.transposed,
+        .stock-table.transposed {
             table-layout: auto !important;
             width: max-content !important;
             min-width: 100% !important;
         }
 
-        #stock-table.transposed thead {
+        #stock-table.transposed thead,
+        .stock-table.transposed thead {
             display: none;
         }
 
         /* 覆盖原本的固定列宽规则，避免 nth-child 影响转置表 */
         #stock-table.transposed th,
-        #stock-table.transposed td {
+        #stock-table.transposed td,
+        .stock-table.transposed th,
+        .stock-table.transposed td {
             width: auto !important;
-            min-width: 140px;
+            min-width: 140px; /* Default min-width for content cells */
             white-space: nowrap;
         }
 
-        /* 左侧“表头列”固定 */
-        #stock-table.transposed th.row-header {
+        /* 左侧"表头列"固定 */
+        #stock-table.transposed th.row-header,
+        .stock-table.transposed th.row-header {
             position: sticky !important;
             left: 0;
             top: unset !important;
@@ -1462,19 +1467,101 @@ header('Expires: 0');
             color: #fff;
             text-align: center;
             min-width: 110px;
+            width: 110px;
             border: 1px solid #d1d5db;
         }
 
         /* 内容单元格 */
-        #stock-table.transposed td {
+        #stock-table.transposed td,
+        .stock-table.transposed td {
             text-align: center;
             border: 1px solid #d1d5db;
             background: white;
+            min-width: 180px; /* Minimum width for data columns */
+            max-width: none;
+            overflow: hidden;
+            word-wrap: break-word;
+            word-break: break-word;
+            box-sizing: border-box;
         }
 
-        /* 特殊行：照片/操作稍窄些 */
-        #stock-table.transposed tr[data-row="照片"] td { min-width: 90px; }
-        #stock-table.transposed tr[data-row="操作"] td { min-width: 110px; }
+        /* 照片列 - 固定尺寸防止重叠 */
+        #stock-table.transposed tr[data-row="照片"] td,
+        .stock-table.transposed tr[data-row="照片"] td { 
+            min-width: 100px; 
+            max-width: 100px;
+            padding: clamp(4px, 0.42vw, 8px);
+        }
+        
+        #stock-table.transposed tr[data-row="照片"] td img.product-photo,
+        .stock-table.transposed tr[data-row="照片"] td img.product-photo {
+            width: clamp(30px, 3.13vw, 60px) !important;
+            height: clamp(30px, 3.13vw, 60px) !important;
+            object-fit: cover;
+            border-radius: clamp(4px, 0.42vw, 8px);
+            border: 1px solid #e5e7eb;
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+        }
+        
+        #stock-table.transposed tr[data-row="照片"] td .no-photo,
+        .stock-table.transposed tr[data-row="照片"] td .no-photo {
+            width: clamp(30px, 3.13vw, 60px) !important;
+            height: clamp(30px, 3.13vw, 60px) !important;
+            display: flex;
+            margin: 0 auto;
+            max-width: 100%;
+        }
+        
+        /* 产品名称列 - 允许自动扩展 */
+        #stock-table.transposed tr[data-row="产品名称"] td,
+        .stock-table.transposed tr[data-row="产品名称"] td { 
+            white-space: normal;
+            word-wrap: break-word;
+            word-break: break-word;
+            text-align: left !important;
+            padding: clamp(4px, 0.42vw, 8px) clamp(8px, 0.83vw, 16px);
+            min-width: 200px;
+        }
+        
+        /* 其他列的最小宽度设置 */
+        #stock-table.transposed tr[data-row="编号"] td,
+        #stock-table.transposed tr[data-row="分类"] td,
+        #stock-table.transposed tr[data-row="单价"] td,
+        #stock-table.transposed tr[data-row="文化楼"] td,
+        #stock-table.transposed tr[data-row="中央"] td,
+        #stock-table.transposed tr[data-row="总数"] td,
+        #stock-table.transposed tr[data-row="操作"] td,
+        .stock-table.transposed tr[data-row="编号"] td,
+        .stock-table.transposed tr[data-row="分类"] td,
+        .stock-table.transposed tr[data-row="单价"] td,
+        .stock-table.transposed tr[data-row="文化楼"] td,
+        .stock-table.transposed tr[data-row="中央"] td,
+        .stock-table.transposed tr[data-row="总数"] td,
+        .stock-table.transposed tr[data-row="操作"] td { 
+            white-space: nowrap;
+        }
+        
+        #stock-table.transposed tr[data-row="尺寸"] td,
+        .stock-table.transposed tr[data-row="尺寸"] td { 
+            white-space: normal;
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+        
+        #stock-table.transposed tr[data-row="J1"] td,
+        #stock-table.transposed tr[data-row="J2"] td,
+        #stock-table.transposed tr[data-row="J3"] td,
+        .stock-table.transposed tr[data-row="J1"] td,
+        .stock-table.transposed tr[data-row="J2"] td,
+        .stock-table.transposed tr[data-row="J3"] td { 
+            white-space: nowrap;
+        }
+        
+        /* 操作列特殊宽度 */
+        #stock-table.transposed tr[data-row="操作"] td,
+        .stock-table.transposed tr[data-row="操作"] td { min-width: 110px; }
 
         /* 分类容器样式 - 用于全部分类显示 */
         .categories-container {
@@ -1482,6 +1569,7 @@ header('Expires: 0');
             flex-direction: column;
             gap: 24px;
             padding: 0;
+            /* Removed overflow-y: auto; max-height: 68vh; min-height: 400px; */
         }
 
         .category-section {
@@ -1491,6 +1579,7 @@ header('Expires: 0');
             box-shadow: 0 2px 8px rgba(88, 62, 4, 0.1);
             display: flex;
             flex-direction: column;
+            /* Removed min-height: 300px; */
         }
 
         .category-header {
@@ -1503,6 +1592,7 @@ header('Expires: 0');
             display: flex;
             align-items: center;
             justify-content: space-between;
+            /* Removed position: sticky; top: 0; z-index: 200; */
         }
 
         .category-header .category-title {
@@ -1518,8 +1608,9 @@ header('Expires: 0');
         }
 
         .category-table-wrapper {
-            overflow-x: auto;
-            overflow-y: visible;
+            overflow-x: auto; /* Keep horizontal scrolling */
+            overflow-y: visible; /* Allow content to expand vertically */
+            /* Removed max-height: 500px; flex: 1; */
         }
 
         .category-table-wrapper::-webkit-scrollbar {
