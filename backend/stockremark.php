@@ -343,12 +343,16 @@ require_once 'session_check.php';
         .price-variants-table td:nth-child(1) { 
             width: 46%; 
             text-align: center;
+            font-size: clamp(7px, 1.04vw, 20px);
+            font-weight: 700;
         }
 
         .price-variants-table th:nth-child(2),
         .price-variants-table td:nth-child(2) { 
             width: 55%; 
             text-align: center;
+            font-size: clamp(7px, 1.04vw, 20px);
+            font-weight: 700;
         }
 
         .price-variants-table tr:hover {
