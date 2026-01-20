@@ -215,10 +215,10 @@ require_once 'session_check.php';
             transform: translateY(-1px);
         }
 
-        /* 货品组容器 - 始终保持4列 */
+        /* 货品组容器 - 始终保持3列 */
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: clamp(14px, 1.25vw, 24px);
             margin-bottom: clamp(14px, 1.25vw, 24px);
             min-width: 0; /* 允许内容缩小 */
@@ -572,7 +572,7 @@ require_once 'session_check.php';
                 gap: 16px;
             }
 
-            /* 保持4列，不改变列数 */
+            /* 保持3列，不改变列数 */
 
             .product-header {
                 flex-direction: column;
