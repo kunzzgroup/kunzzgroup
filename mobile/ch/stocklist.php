@@ -97,8 +97,8 @@ if (!isset($_SESSION['user_id'])) {
         
         // API配置
         const API_BASE_URL = '../../stockapi.php';
-        const SYSTEM_TYPE = 'J1';
-        const STOCK_EDIT_API = '../../j1/j1stockeditmobile_api.php';
+        const SYSTEM_TYPE = 'J3';
+        const STOCK_EDIT_API = '../../j3/j3stockeditmobile_api.php';
         
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
