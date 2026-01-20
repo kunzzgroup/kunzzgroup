@@ -490,6 +490,11 @@ require_once 'session_check.php';
             box-sizing: border-box; /* 添加这行 */
         }
 
+        /* 备注编号：输入自动显示为大写 */
+        .remark-number-input-wrapper input {
+            text-transform: uppercase;
+        }
+
         /* 编辑状态下的价格输入框样式 */
         .currency-input-edit {
             text-align: right;
@@ -2286,9 +2291,9 @@ require_once 'session_check.php';
                 <div class="form-group">
                     <label for="add-remark-number">备注编号</label>
                     <div class="remark-number-input-wrapper" style="display: flex; align-items: center; border: 1px solid #d1d5db; border-radius: 8px; background: white; padding: 0;" id="add-remark-wrapper">
-                        <input type="text" id="add-remark-prefix" class="form-input" placeholder="" style="border: none; border-radius: 8px 0 0 8px; width: 30px; text-align: center; background: transparent;" disabled>
+                        <input type="text" id="add-remark-prefix" class="form-input" placeholder="" style="border: none; border-radius: 8px 0 0 8px; width: 30px; text-align: center; background: transparent;" oninput="this.value = this.value.toUpperCase();" disabled>
                         <span style="padding: 0 4px; color: #6b7280; font-weight: bold;">-</span>
-                        <input type="text" id="add-remark-suffix" class="form-input" placeholder="" style="border: none; border-radius: 0 8px 8px 0; width: 30px; text-align: center; background: transparent;" disabled>
+                        <input type="text" id="add-remark-suffix" class="form-input" placeholder="" style="border: none; border-radius: 0 8px 8px 0; width: 30px; text-align: center; background: transparent;" oninput="this.value = this.value.toUpperCase();" disabled>
                     </div>
                     <input type="hidden" id="add-remark-number">
                 </div>
@@ -5409,8 +5414,8 @@ require_once 'session_check.php';
 
         // 获取表单中的完整备注编号
         function getFormRemarkNumber() {
-            const prefix = document.getElementById('add-remark-prefix').value.trim();
-            const suffix = document.getElementById('add-remark-suffix').value.trim();
+            const prefix = (document.getElementById('add-remark-prefix')?.value || '').trim().toUpperCase();
+            const suffix = (document.getElementById('add-remark-suffix')?.value || '').trim().toUpperCase();
             return (prefix || suffix) ? `${prefix}-${suffix}` : '';
         }
 
@@ -5449,7 +5454,11 @@ require_once 'session_check.php';
                     suffixInput.disabled = false;
                     
                     // 绑定输入事件
-                    prefixInput.oninput = suffixInput.oninput = () => updateNewRowRemarkNumber(rowId);
+                    prefixInput.oninput = suffixInput.oninput = () => {
+                        prefixInput.value = (prefixInput.value || '').toUpperCase();
+                        suffixInput.value = (suffixInput.value || '').toUpperCase();
+                        updateNewRowRemarkNumber(rowId);
+                    };
                 } else {
                     wrapper.style.opacity = '0.5';
                     wrapper.setAttribute('data-disabled', 'true');
@@ -5474,11 +5483,13 @@ require_once 'session_check.php';
                     <input type="text" class="table-input remark-prefix" value="${prefix}" placeholder="" 
                         style="border: none; border-radius: 4px 0 0 4px; width: clamp(14px, 1.56vw, 30px); text-align: center; background: transparent; padding: 0px;" 
                         ${disabled ? 'disabled' : ''} 
+                        oninput="this.value = this.value.toUpperCase();"
                         onchange="updateRemarkNumber(${recordId})">
                     <span style="padding: 0px; color: #6b7280; font-weight: bold;">-</span>
                     <input type="text" class="table-input remark-suffix" value="${suffix}" placeholder="" 
                         style="border: none; border-radius: 0 4px 4px 0; width: clamp(16px, 1.56vw, 30px); text-align: center; background: transparent; padding: 0px;" 
                         ${disabled ? 'disabled' : ''} 
+                        oninput="this.value = this.value.toUpperCase();"
                         onchange="updateRemarkNumber(${recordId})">
                 </div>
             `;
@@ -5506,8 +5517,10 @@ require_once 'session_check.php';
             const prefixInput = wrapper.querySelector('.remark-prefix');
             const suffixInput = wrapper.querySelector('.remark-suffix');
             
-            const prefix = prefixInput.value.trim();
-            const suffix = suffixInput.value.trim();
+            const prefix = (prefixInput.value || '').trim().toUpperCase();
+            const suffix = (suffixInput.value || '').trim().toUpperCase();
+            prefixInput.value = prefix;
+            suffixInput.value = suffix;
             const fullValue = (prefix || suffix) ? `${prefix}-${suffix}` : '';
             
             updateField(recordId, 'remark_number', fullValue);
@@ -5519,8 +5532,10 @@ require_once 'session_check.php';
             const suffixInput = document.getElementById(`${rowId}-remark-suffix`);
             
             if (prefixInput && suffixInput) {
-                const prefix = prefixInput.value.trim();
-                const suffix = suffixInput.value.trim();
+                const prefix = (prefixInput.value || '').trim().toUpperCase();
+                const suffix = (suffixInput.value || '').trim().toUpperCase();
+                prefixInput.value = prefix;
+                suffixInput.value = suffix;
                 const fullValue = (prefix || suffix) ? `${prefix}-${suffix}` : '';
                 
                 // 更新隐藏的完整值（用于保存）
@@ -5646,7 +5661,7 @@ require_once 'session_check.php';
                 code_number: codeInput ? codeInput.value : '',
                 remark: document.getElementById(`${rowId}-remark`) ? document.getElementById(`${rowId}-remark`).value : '',
                 product_remark_checked: document.getElementById(`${rowId}-product-remark`) ? document.getElementById(`${rowId}-product-remark`).checked : false,
-                remark_number: document.getElementById(`${rowId}-remark-number`) ? document.getElementById(`${rowId}-remark-number`).value.trim() : '',
+                remark_number: document.getElementById(`${rowId}-remark-number`) ? document.getElementById(`${rowId}-remark-number`).value.trim().toUpperCase() : '',
                 type: document.getElementById(`${rowId}-type`) ? document.getElementById(`${rowId}-type`).value : ''
             };
 
@@ -5831,7 +5846,7 @@ require_once 'session_check.php';
                 code_number: document.getElementById('add-code-number').value,
                 remark: document.getElementById('add-remark').value,
                 product_remark_checked: document.getElementById('add-product-remark').checked,
-                remark_number: getFormRemarkNumber().trim(),
+                remark_number: getFormRemarkNumber().trim().toUpperCase(),
                 type: document.getElementById('add-type').value
             };
 
