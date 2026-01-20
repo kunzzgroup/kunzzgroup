@@ -6764,9 +6764,16 @@ require_once 'session_check.php';
                 const rawValue = option ? (option[displayField] ?? '') : '';
                 let label = rawValue;
 
-                // 如果有 product_name + product_code（同名多编号场景），显示为：NAME (CODE)
-                if (option && option.product_name && option.product_code && displayField === 'product_name') {
-                    label = `${option.product_name} (${option.product_code})`;
+                // 货品名称：优先显示 supplier（NAME (SUPPLIER)），没有 supplier 再回退显示编号（NAME (CODE)）
+                if (option && option.product_name && displayField === 'product_name') {
+                    const supplier = option.supplier ? String(option.supplier).trim() : '';
+                    if (supplier) {
+                        label = `${option.product_name} (${supplier})`;
+                    } else if (option.product_code) {
+                        label = `${option.product_name} (${option.product_code})`;
+                    } else {
+                        label = `${option.product_name}`;
+                    }
                 }
 
                 // 如果是 code_number 且有 product_name，显示：CODE (NAME) 便于识别
@@ -6777,6 +6784,7 @@ require_once 'session_check.php';
                 const attrs = [
                     `data-value="${escapeAttr(rawValue)}"`,
                     option && option.product_code ? `data-product-code="${escapeAttr(option.product_code)}"` : '',
+                    option && option.supplier ? `data-supplier="${escapeAttr(option.supplier)}"` : '',
                     option && option.code_number ? `data-code-number="${escapeAttr(option.code_number)}"` : ''
                 ].filter(Boolean).join(' ');
 
@@ -6984,7 +6992,8 @@ require_once 'session_check.php';
                     filteredOptions = options.filter(option => {
                         const name = String(option?.product_name ?? '').toLowerCase();
                         const code = String(option?.product_code ?? '').toLowerCase();
-                        return name.includes(searchTerm) || code.includes(searchTerm);
+                        const supplier = String(option?.supplier ?? '').toLowerCase();
+                        return name.includes(searchTerm) || code.includes(searchTerm) || supplier.includes(searchTerm);
                     });
                 } else if (type === 'receiver') {
                     options = receiverOptions;

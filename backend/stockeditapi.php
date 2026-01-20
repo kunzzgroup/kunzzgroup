@@ -607,7 +607,7 @@ function handleGet() {
         
         case 'products_list':
             // 获取所有唯一的产品名称和对应的product_code列表（只显示已批准的货品）
-            $stmt = $pdo->prepare("SELECT DISTINCT product_name, product_code FROM stock_data WHERE product_name IS NOT NULL AND product_name != '' AND approver IS NOT NULL AND approver != '' ORDER BY product_name");
+            $stmt = $pdo->prepare("SELECT DISTINCT product_name, product_code, supplier FROM stock_data WHERE product_name IS NOT NULL AND product_name != '' AND approver IS NOT NULL AND approver != '' ORDER BY product_name, product_code");
             $stmt->execute();
             $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
