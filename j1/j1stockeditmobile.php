@@ -1988,9 +1988,9 @@ require_once '../backend/session_check.php';
     <div class="container">
         <div class="header">
             <div>
-                <h1 id="page-title">进出货 - J3 - 手机版</h1>
+                <h1 id="page-title">进出货 - J1 - 手机版</h1>
             </div>
-            <a class="back-button" href="../backend/stockeditall.php?system=j3">
+            <a class="back-button" href="../backend/stockeditall.php?system=j1">
                 <i class="fas fa-arrow-left"></i>
                 返回上一页
             </a>
@@ -2251,7 +2251,6 @@ require_once '../backend/session_check.php';
                         <option value="">请选择系统</option>
                         <option value="j1">J1</option>
                         <option value="j2">J2</option>
-                        <option value="j3">J3</option>
                     </select>
                 </div>
 
@@ -2292,8 +2291,8 @@ require_once '../backend/session_check.php';
 
     <script>
         // API 配置
-        let API_BASE_URL = 'j3stockeditmobile_api.php';
-        let currentStockType = 'j3';
+        let API_BASE_URL = 'j1stockeditmobile_api.php';
+        let currentStockType = 'j1';
         
         // 应用状态
         let stockData = [];
@@ -3040,13 +3039,13 @@ require_once '../backend/session_check.php';
 
             // selector-button 初始化代码已删除
 
-            // 控制Type字段的启用状态（J3始终启用）
+            // 控制Type字段的启用状态（J1始终启用）
             const typeSelect = document.getElementById('add-type');
             if (typeSelect) {
                 typeSelect.disabled = false;
             }
 
-            // 隐藏导出按钮（J3不需要）
+            // 隐藏导出按钮（J1手机版不需要）
             const exportButton = document.querySelector('.btn-warning[onclick="exportData()"]');
             if (exportButton) {
                 exportButton.style.display = 'none';
@@ -3083,7 +3082,6 @@ require_once '../backend/session_check.php';
                 // Central页面显示所有选项
                 options += `<option value="j1" ${selectedValue === 'j1' ? 'selected' : ''}>J1</option>`;
                 options += `<option value="j2" ${selectedValue === 'j2' ? 'selected' : ''}>J2</option>`;
-                options += `<option value="j3" ${selectedValue === 'j3' ? 'selected' : ''}>J3</option>`;
                 options += `<option value="central" ${selectedValue === 'central' ? 'selected' : ''}>中央</option>`;
             } else if (currentStockType === 'j1') {
                 // J1页面只显示J1选项
@@ -3091,9 +3089,6 @@ require_once '../backend/session_check.php';
             } else if (currentStockType === 'j2') {
                 // J2页面只显示J2选项
                 options += `<option value="j2" ${selectedValue === 'j2' ? 'selected' : ''}>J2</option>`;
-            } else if (currentStockType === 'j3') {
-                // J3页面只显示J3选项
-                options += `<option value="j3" ${selectedValue === 'j3' ? 'selected' : ''}>J3</option>`;
             }
             
             return options;
@@ -6623,7 +6618,7 @@ require_once '../backend/session_check.php';
                 
                 // 根据记录数量决定使用单页还是多页模板
                 const recordCount = outData.length;
-                const useMultiPage = (exportSystem === 'j1' && recordCount > 27) || (exportSystem === 'j2' && recordCount > 24) || (exportSystem === 'j3' && recordCount > 24);
+                const useMultiPage = (exportSystem === 'j1' && recordCount > 27) || (exportSystem === 'j2' && recordCount > 24);
                 
                 if (useMultiPage) {
                     // 使用多页模板
@@ -6721,8 +6716,6 @@ require_once '../backend/session_check.php';
                 let templateFile;
                 if (exportSystem === 'j2') {
                     templateFile = `../invoice/invoice/j2invoice.pdf?ts=${Date.now()}`;
-                } else if (exportSystem === 'j3') {
-                    templateFile = `../invoice/invoice/j3invoice.pdf?ts=${Date.now()}`;
                 } else {
                     templateFile = `../invoice/invoice/j1invoice.pdf?ts=${Date.now()}`;
                 }
@@ -6804,7 +6797,7 @@ require_once '../backend/session_check.php';
                             font: boldFont,
                         });
                     }
-                } else if (exportSystem === 'j2') {
+                } else {
                     // J2模板的日期位置
                     page.drawText(` ${currentDate}`, {
                         x: 495.5, // J2模板DATE冒号后面的位置 (可根据需要调整)
@@ -6824,26 +6817,6 @@ require_once '../backend/session_check.php';
                             font: boldFont,
                         });
                     }
-                } else if (exportSystem === 'j3') {
-                    // J3模板的日期位置
-                    page.drawText(` ${currentDate}`, {
-                        x: 495.5, // J3模板DATE冒号后面的位置
-                        y: height - 110.5, // J3模板的Y坐标
-                        size: fontSize,
-                        color: textColor,
-                        font: boldFont,
-                    });
-                    
-                    // J3模板的发票号码位置
-                    if (invoiceNumber) {
-                        page.drawText(invoiceNumber, {
-                            x: 500, // J3模板Invoice No位置
-                            y: height - 96.5, // 调整到Invoice No行
-                            size: fontSize,
-                            color: textColor,
-                            font: boldFont,
-                        });
-                    }
                 }
                 
                 // 计算总金额
@@ -6854,12 +6827,9 @@ require_once '../backend/session_check.php';
                 if (exportSystem === 'j1') {
                     yPosition = height - 162; // J1模板的起始Y坐标
                     lineHeight = 20; // J1模板的行高
-                } else if (exportSystem === 'j2') {
+                } else {
                     yPosition = height - 202; // J2模板的起始Y坐标
                     lineHeight = 20; // J2模板的行高
-                } else { // j3
-                    yPosition = height - 202; // J3模板的起始Y坐标
-                    lineHeight = 20; // J3模板的行高
                 }
 
                 // 清除缓存并强制刷新 - 版本 2.0
@@ -6977,39 +6947,6 @@ require_once '../backend/session_check.php';
                         color: textColor,
                         font: boldFont,
                     });
-                } else if (exportSystem === 'j3') {
-                    // J3模板：计算subtotal, charge 15%, 和最终total
-                    const subtotal = grandTotal;
-                    const charge = subtotal * 0.15;
-                    const finalTotal = subtotal + charge;
-                    
-                    // 填入Subtotal
-                    const subtotalText = formatCurrencyForPDF(subtotal);
-                    page.drawText(subtotalText, {
-                        x: getRightAlignedX(subtotalText, 588, 8),
-                        y: height - 681, // 调整到Subtotal行
-                        size: smallFontSize,
-                        color: textColor,
-                    });
-                    
-                    // 填入Charge 15%
-                    const chargeText = formatCurrencyForPDF(charge);
-                    page.drawText(chargeText, {
-                        x: getRightAlignedX(chargeText, 585.5, 8),
-                        y: height - 692, // 调整到Charge行
-                        size: smallFontSize,
-                        color: textColor,
-                    });
-                    
-                    // 填入最终Total
-                    const finalTotalText = formatCurrencyForPDF(finalTotal);
-                    page.drawText(finalTotalText, {
-                        x: getRightAlignedX(finalTotalText, 580, 8),
-                        y: height - 708, // 调整到最终Total行
-                        size: fontSize,
-                        color: textColor,
-                        font: boldFont,
-                    });
                 } else {
                     // J1模板：只显示总计
                     const totalText = formatCurrencyForPDF(grandTotal);
@@ -7078,8 +7015,6 @@ require_once '../backend/session_check.php';
                         // 第一页使用 (1) 模板
                         if (exportSystem === 'j2') {
                             templateFile = `../invoice/invoice/j2invoiceMulti(1).pdf?ts=${Date.now()}`;
-                        } else if (exportSystem === 'j3') {
-                            templateFile = `../invoice/invoice/j3invoiceMulti(1).pdf?ts=${Date.now()}`;
                         } else {
                             templateFile = `../invoice/invoice/j1invoiceMulti(1).pdf?ts=${Date.now()}`;
                         }
@@ -7087,8 +7022,6 @@ require_once '../backend/session_check.php';
                         // 后续页使用 (2) 模板
                         if (exportSystem === 'j2') {
                             templateFile = `../invoice/invoice/j2invoiceMulti(2).pdf?ts=${Date.now()}`;
-                        } else if (exportSystem === 'j3') {
-                            templateFile = `../invoice/invoice/j3invoiceMulti(2).pdf?ts=${Date.now()}`;
                         } else {
                             templateFile = `../invoice/invoice/j1invoiceMulti(2).pdf?ts=${Date.now()}`;
                         }
@@ -7198,26 +7131,6 @@ require_once '../backend/session_check.php';
                                     font: boldFont,
                                 });
                             }
-                        } else if (exportSystem === 'j3') {
-                            // J3模板的日期位置
-                            page.drawText(` ${currentDate}`, {
-                                x: 495.5,
-                                y: height - 110.5,
-                                size: fontSize,
-                                color: textColor,
-                                font: boldFont,
-                            });
-                            
-                            // J3模板的发票号码位置
-                            if (invoiceNumber) {
-                                page.drawText(invoiceNumber, {
-                                    x: 500,
-                                    y: height - 96.5,
-                                    size: fontSize,
-                                    color: textColor,
-                                    font: boldFont,
-                                });
-                            }
                         }
                         
                         // 计算当前页的数据范围
@@ -7234,18 +7147,11 @@ require_once '../backend/session_check.php';
                                 yPosition = height - 162;  // J1第二页位置
                             }
                             lineHeight = 20;
-                        } else if (exportSystem === 'j2') {
+                        } else {
                             if (pageIndex === 0) {
                                 yPosition = height - 202; // J2第一页位置（原来的位置）
                             } else {
                                 yPosition = height - 202; // J2第二页位置（可调整这个数值）
-                            }
-                            lineHeight = 20;
-                        } else { // j3
-                            if (pageIndex === 0) {
-                                yPosition = height - 202; // J3第一页位置
-                            } else {
-                                yPosition = height - 202; // J3第二页位置
                             }
                             lineHeight = 20;
                         }
@@ -7326,39 +7232,6 @@ require_once '../backend/session_check.php';
                         if (pageIndex === totalPages - 1) {
                             if (exportSystem === 'j2') {
                                 // J2模板：计算subtotal, charge 15%, 和最终total
-                                const subtotal = grandTotal;
-                                const charge = subtotal * 0.15;
-                                const finalTotal = subtotal + charge;
-                                
-                                // 填入Subtotal
-                                const subtotalText = formatCurrencyForPDF(subtotal);
-                                page.drawText(subtotalText, {
-                                    x: getRightAlignedX(subtotalText, 588, 8),
-                                    y: height - 681,
-                                    size: smallFontSize,
-                                    color: textColor,
-                                });
-                                
-                                // 填入Charge 15%
-                                const chargeText = formatCurrencyForPDF(charge);
-                                page.drawText(chargeText, {
-                                    x: getRightAlignedX(chargeText, 585.5, 8),
-                                    y: height - 692,
-                                    size: smallFontSize,
-                                    color: textColor,
-                                });
-                                
-                                // 填入最终Total
-                                const finalTotalText = formatCurrencyForPDF(finalTotal);
-                                page.drawText(finalTotalText, {
-                                    x: getRightAlignedX(finalTotalText, 580, 8),
-                                    y: height - 708,
-                                    size: fontSize,
-                                    color: textColor,
-                                    font: boldFont,
-                                });
-                            } else if (exportSystem === 'j3') {
-                                // J3模板：计算subtotal, charge 15%, 和最终total
                                 const subtotal = grandTotal;
                                 const charge = subtotal * 0.15;
                                 const finalTotal = subtotal + charge;

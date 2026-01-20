@@ -45,7 +45,7 @@ function sendResponse($success, $message = "", $data = null) {
 
 // 如果缺少表则自动创建
 function ensureTables(PDO $pdo) {
-    $pdo->exec("CREATE TABLE IF NOT EXISTS `j3stockeditmobile_data` (
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `j1stockeditmobile_data` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
       `date` date NOT NULL,
       `time` time NOT NULL,
@@ -61,7 +61,7 @@ function ensureTables(PDO $pdo) {
       KEY `idx_code_number` (`code_number`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 
-    $pdo->exec("CREATE TABLE IF NOT EXISTS `j3stocklist_total` (
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `j1stocklist_total` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
       `product_name` varchar(255) NOT NULL,
       `code_number` varchar(100) DEFAULT NULL,
@@ -98,7 +98,7 @@ switch ($method) {
 
 // 处理 GET 请求
 function handleGet() {
-    global $pdo;
+    global $pdo, $dbname, $dbuser;
     
     $action = $_GET['action'] ?? 'list';
 
@@ -128,7 +128,7 @@ function handleGet() {
 
             // 不设置默认日期范围：未提供日期参数时返回全部记录
 
-            $sql = "SELECT * FROM j3stockeditmobile_data WHERE 1=1";
+            $sql = "SELECT * FROM j1stockeditmobile_data WHERE 1=1";
             $params = [];
             
             if ($searchDate) {
@@ -184,7 +184,7 @@ function handleGet() {
                 sendResponse(false, "缺少记录ID");
             }
             
-            $stmt = $pdo->prepare("SELECT * FROM j3stockeditmobile_data WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT * FROM j1stockeditmobile_data WHERE id = ?");
             $stmt->execute([$id]);
             $record = $stmt->fetch(PDO::FETCH_ASSOC);
             
@@ -196,8 +196,8 @@ function handleGet() {
             break;
             
         case 'codenumbers':
-            // 获取所有唯一的code_number和对应的product_name列表（J3 分配，包含多系统分配，且不过滤 approver）
-            $stmt = $pdo->prepare("SELECT DISTINCT product_code as code_number, product_name FROM stock_data WHERE product_code IS NOT NULL AND product_code != '' AND (system_assign = 'J3' OR system_assign LIKE '%J3%') ORDER BY product_code");
+            // 获取所有唯一的code_number和对应的product_name列表（J1 分配，包含多系统分配，且不过滤 approver）
+            $stmt = $pdo->prepare("SELECT DISTINCT product_code as code_number, product_name FROM stock_data WHERE product_code IS NOT NULL AND product_code != '' AND (system_assign = 'J1' OR system_assign LIKE '%J1%') ORDER BY product_code");
             $stmt->execute();
             $codeNumbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
@@ -205,8 +205,8 @@ function handleGet() {
             break;
         
         case 'products_list':
-            // 获取所有唯一的产品名称和对应的product_code列表（J3 分配，包含多系统分配，且不过滤 approver）
-            $stmt = $pdo->prepare("SELECT DISTINCT product_name, product_code FROM stock_data WHERE product_name IS NOT NULL AND product_name != '' AND (system_assign = 'J3' OR system_assign LIKE '%J3%') ORDER BY product_name");
+            // 获取所有唯一的产品名称和对应的product_code列表（J1 分配，包含多系统分配，且不过滤 approver）
+            $stmt = $pdo->prepare("SELECT DISTINCT product_name, product_code FROM stock_data WHERE product_name IS NOT NULL AND product_name != '' AND (system_assign = 'J1' OR system_assign LIKE '%J1%') ORDER BY product_name");
             $stmt->execute();
             $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
@@ -220,7 +220,7 @@ function handleGet() {
                 sendResponse(false, "缺少编号参数");
             }
             
-            $stmt = $pdo->prepare("SELECT DISTINCT product_name, product_code FROM stock_data WHERE product_code = ? AND (system_assign = 'J3' OR system_assign LIKE '%J3%') LIMIT 1");
+            $stmt = $pdo->prepare("SELECT DISTINCT product_name, product_code FROM stock_data WHERE product_code = ? AND (system_assign = 'J1' OR system_assign LIKE '%J1%') LIMIT 1");
             $stmt->execute([$codeNumber]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             
@@ -241,7 +241,7 @@ function handleGet() {
                 sendResponse(false, "缺少产品名称参数");
             }
             
-            $stmt = $pdo->prepare("SELECT DISTINCT product_code, product_name FROM stock_data WHERE product_name = ? AND (system_assign = 'J3' OR system_assign LIKE '%J3%') LIMIT 1");
+            $stmt = $pdo->prepare("SELECT DISTINCT product_code, product_name FROM stock_data WHERE product_name = ? AND (system_assign = 'J1' OR system_assign LIKE '%J1%') LIMIT 1");
             $stmt->execute([$productName]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             
@@ -256,7 +256,7 @@ function handleGet() {
             break;
             
         case 'stocklist_total':
-            // 从 j3stockeditmobile_data 表直接计算库存总数
+            // 从 j1stockeditmobile_data 表直接计算库存总数
             try {
                 // 按产品名称和编号分组，计算每个产品的库存总数
                 // 注意：这里包含所有产品，即使库存为0也会显示
@@ -266,7 +266,7 @@ function handleGet() {
                             SUM(in_quantity) as total_in,
                             SUM(out_quantity) as total_out,
                             SUM(in_quantity) - SUM(out_quantity) as total_qty
-                        FROM j3stockeditmobile_data
+                        FROM j1stockeditmobile_data
                         GROUP BY product_name, code_number
                         ORDER BY product_name";
                 
@@ -327,7 +327,7 @@ function handlePost() {
         // 开始事务
         $pdo->beginTransaction();
         
-        $sql = "INSERT INTO j3stockeditmobile_data 
+        $sql = "INSERT INTO j1stockeditmobile_data 
                 (date, time, product_name, code_number, in_quantity, out_quantity) 
                 VALUES (?, ?, ?, ?, ?, ?)";
 
@@ -350,7 +350,7 @@ function handlePost() {
         $pdo->commit();
         
         // 获取新创建的记录
-        $stmt = $pdo->prepare("SELECT * FROM j3stockeditmobile_data WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT * FROM j1stockeditmobile_data WHERE id = ?");
         $stmt->execute([$newId]);
         $newRecord = $stmt->fetch(PDO::FETCH_ASSOC);
         
@@ -373,7 +373,7 @@ function handlePut() {
     
     try {
         // 获取旧记录用于计算差值
-        $oldStmt = $pdo->prepare("SELECT * FROM j3stockeditmobile_data WHERE id = ?");
+        $oldStmt = $pdo->prepare("SELECT * FROM j1stockeditmobile_data WHERE id = ?");
         $oldStmt->execute([$data['id']]);
         $oldRecord = $oldStmt->fetch(PDO::FETCH_ASSOC);
         
@@ -383,7 +383,7 @@ function handlePut() {
         
         $pdo->beginTransaction();
         
-        $sql = "UPDATE j3stockeditmobile_data 
+        $sql = "UPDATE j1stockeditmobile_data 
                 SET date = ?, time = ?, product_name = ?, code_number = ?, 
                     in_quantity = ?, out_quantity = ?
                 WHERE id = ?";
@@ -420,7 +420,7 @@ function handlePut() {
         $pdo->commit();
         
         // 获取更新后的记录
-        $stmt = $pdo->prepare("SELECT * FROM j3stockeditmobile_data WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT * FROM j1stockeditmobile_data WHERE id = ?");
         $stmt->execute([$data['id']]);
         $updatedRecord = $stmt->fetch(PDO::FETCH_ASSOC);
         
@@ -444,7 +444,7 @@ function handleDelete() {
     
     try {
         // 获取要删除的记录用于更新库存总数
-        $getStmt = $pdo->prepare("SELECT * FROM j3stockeditmobile_data WHERE id = ?");
+        $getStmt = $pdo->prepare("SELECT * FROM j1stockeditmobile_data WHERE id = ?");
         $getStmt->execute([$id]);
         $record = $getStmt->fetch(PDO::FETCH_ASSOC);
         
@@ -455,7 +455,7 @@ function handleDelete() {
         $pdo->beginTransaction();
         
         // 删除记录
-        $stmt = $pdo->prepare("DELETE FROM j3stockeditmobile_data WHERE id = ?");
+        $stmt = $pdo->prepare("DELETE FROM j1stockeditmobile_data WHERE id = ?");
         $stmt->execute([$id]);
         
         // 更新库存总数（撤销被删除记录的影响）
@@ -495,7 +495,7 @@ function updateStocklistTotal($productName, $codeNumber, $inQty, $outQty, $isAdd
     
     try {
         // 查找或创建库存总数记录
-        $stmt = $pdo->prepare("SELECT * FROM j3stocklist_total WHERE product_name = ? AND code_number = ?");
+        $stmt = $pdo->prepare("SELECT * FROM j1stocklist_total WHERE product_name = ? AND code_number = ?");
         $stmt->execute([$productName, $codeNumber]);
         $existing = $stmt->fetch(PDO::FETCH_ASSOC);
         
@@ -511,16 +511,16 @@ function updateStocklistTotal($productName, $codeNumber, $inQty, $outQty, $isAdd
             
             // 如果总数小于等于0，删除记录而不是保留为0
             if ($newTotal <= 0) {
-                $deleteStmt = $pdo->prepare("DELETE FROM j3stocklist_total WHERE id = ?");
+                $deleteStmt = $pdo->prepare("DELETE FROM j1stocklist_total WHERE id = ?");
                 $deleteStmt->execute([$existing['id']]);
             } else {
-                $updateStmt = $pdo->prepare("UPDATE j3stocklist_total SET total_qty = ?, last_updated = NOW() WHERE id = ?");
+                $updateStmt = $pdo->prepare("UPDATE j1stocklist_total SET total_qty = ?, last_updated = NOW() WHERE id = ?");
                 $updateStmt->execute([$newTotal, $existing['id']]);
             }
         } else {
             // 创建新记录
             if ($netQty > 0 || $isAdd) {
-                $insertStmt = $pdo->prepare("INSERT INTO j3stocklist_total (product_name, code_number, total_qty) VALUES (?, ?, ?)");
+                $insertStmt = $pdo->prepare("INSERT INTO j1stocklist_total (product_name, code_number, total_qty) VALUES (?, ?, ?)");
                 $insertStmt->execute([$productName, $codeNumber, $netQty > 0 ? $netQty : 0]);
             }
         }
