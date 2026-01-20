@@ -2572,6 +2572,23 @@ require_once 'session_check.php';
             }
         }
 
+        // 新增记录弹窗：备注 placeholder（仅 J1/J2/J3 修改，中央保持原样）
+        function updateAddRemarkPlaceholder() {
+            const remarkInput = document.getElementById('add-remark');
+            if (!remarkInput) return;
+
+            if (!remarkInput.dataset.defaultPlaceholder) {
+                remarkInput.dataset.defaultPlaceholder = remarkInput.getAttribute('placeholder') || '';
+            }
+
+            if (currentStockType === 'j1' || currentStockType === 'j2' || currentStockType === 'j3') {
+                remarkInput.placeholder = '发票号码/损耗';
+            } else {
+                // central：恢复为页面原本的 placeholder（不改动中央的文案）
+                remarkInput.placeholder = remarkInput.dataset.defaultPlaceholder || '输入备注...';
+            }
+        }
+
         // 初始化日历
         function initCalendar() {
             const today = new Date();
@@ -3372,6 +3389,9 @@ require_once 'session_check.php';
             if (mobileSelector) {
                 mobileSelector.style.display = currentStockType === 'j3' ? 'inline-flex' : 'none';
             }
+
+            // 初始化时同步备注 placeholder
+            updateAddRemarkPlaceholder();
         }
 
         // 设置实时搜索
@@ -3433,6 +3453,9 @@ require_once 'session_check.php';
                     document.getElementById('current-stock-type').textContent = 'J3';
                     break;
             }
+
+            // 切换系统时同步新增记录弹窗“备注”placeholder
+            updateAddRemarkPlaceholder();
 
             const exportButton = document.querySelector('.btn-warning[onclick="exportData()"]');
             if (exportButton) {
