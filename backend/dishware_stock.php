@@ -1703,7 +1703,7 @@ header('Expires: 0');
             <div class="controls">
                 <div class="view-selector">
                     <button class="selector-button" onclick="toggleViewSelector()">
-                        <span id="current-view">总库存</span>
+                        <span id="current-view">dd总库存</span>
                         <i class="fas fa-chevron-down"></i>
                     </button>
                     <div class="selector-dropdown" id="view-selector-dropdown">
