@@ -2129,7 +2129,7 @@ require_once 'session_check.php';
                     <a id="mobile-link-button" class="selector-button" href="../j3/j3stockeditmobile.php">手机版</a>
                 </div>
                 <div class="mobile-selector" id="mobile-selector-j1" style="display: none;">
-                    <button id="mobile-button-j1" class="selector-button" type="button">手机版</button>
+                    <a id="mobile-link-button-j1" class="selector-button" href="../j1/j1stockeditmobile.php">手机版</a>
                 </div>
                 <div class="view-selector">
                     <button class="selector-button" onclick="toggleViewSelector()">
