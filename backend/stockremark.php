@@ -240,7 +240,7 @@ require_once 'session_check.php';
             background: #f99e00;
             color: white;
             padding: 2px;
-            font-size: clamp(9px, 0.94vw, 18px);
+            font-size: clamp(10px, 1.04vw, 20px);
             font-weight: 600;
             display: flex;
             flex-direction: column;
