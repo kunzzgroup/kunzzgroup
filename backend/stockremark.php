@@ -1216,19 +1216,19 @@ require_once 'session_check.php';
                 if (hasKilo) {
                     // 如果是kilo单位，显示总量和总数
                     totalDisplay = `<div style="display: flex; flex-direction: column; gap: 4px; margin-top: 6px; align-items: flex-start;">
-                        <span style="color:rgb(0, 0, 0); font-weight: 800; padding: 2px 6px; border-radius: 4px; font-size: clamp(13px, 0.94vw, 18px);">总数: ${rowCount}</span>
-                        <span style="color:rgb(0, 0, 0); font-weight: 800; padding: 2px 5px; border-radius: 4px; font-size: clamp(13px, 0.94vw, 18px);">总量: ${product.total_quantity}</span>
+                        <span style="color:rgb(0, 0, 0); font-weight: 800; padding: 2px 0px; border-radius: 4px; font-size: clamp(13px, 0.94vw, 18px);">总数: ${rowCount}</span>
+                        <span style="color:rgb(0, 0, 0); font-weight: 800; padding: 2px 0px; border-radius: 4px; font-size: clamp(13px, 0.94vw, 18px);">总量: ${product.total_quantity}</span>
                     </div>`;
                 } else if (needsPiecesTotal) {
                     const totalPieces = rowCount * 10;
                     totalDisplay = `<div style="display: flex; flex-direction: column; gap: 4px; margin-top: 6px; align-items: flex-start;">
-                        <span style="color:rgb(0, 0, 0); font-weight: 800; padding: 2px 6px; border-radius: 4px; font-size: clamp(13px, 0.94vw, 18px);">总数: ${rowCount}</span>
-                        <span style="color:rgb(0, 0, 0); font-weight: 800; padding: 2px 5px; border-radius: 4px; font-size: clamp(13px, 0.94vw, 18px);">总量: ${totalPieces}</span>
+                        <span style="color:rgb(0, 0, 0); font-weight: 800; padding: 2px 0px; border-radius: 4px; font-size: clamp(13px, 0.94vw, 18px);">总数: ${rowCount}</span>
+                        <span style="color:rgb(0, 0, 0); font-weight: 800; padding: 2px 0px; border-radius: 4px; font-size: clamp(13px, 0.94vw, 18px);">总量: ${totalPieces}</span>
                     </div>`;
                 } else {
                     // 如果不是kilo单位，只显示总数
                     totalDisplay = `<div style="margin-top: 6px;">
-                        <span style="color:rgb(0, 0, 0); font-weight: 800; padding: 2px 6px; border-radius: 4px; font-size: clamp(13px, 0.94vw, 18px);">总数: ${rowCount}</span>
+                        <span style="color:rgb(0, 0, 0); font-weight: 800; padding: 2px 0px; border-radius: 4px; font-size: clamp(13px, 0.94vw, 18px);">总数: ${rowCount}</span>
                     </div>`;
                 }
                 
