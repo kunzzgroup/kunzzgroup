@@ -351,6 +351,10 @@ require_once 'session_check.php';
             font-weight: 700;
         }
 
+        .price-variants-table th:nth-child(2){
+            font-weight: 800 !important; 
+        }
+
         .price-variants-table th:nth-child(2),
         .price-variants-table td:nth-child(2) { 
             width: 55%; 
