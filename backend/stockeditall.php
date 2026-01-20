@@ -3390,7 +3390,8 @@ require_once 'session_check.php';
 
             const mobileSelector = document.getElementById('mobile-selector');
             if (mobileSelector) {
-                mobileSelector.style.display = currentStockType === 'j3' ? 'inline-flex' : 'none';
+                // 按需求：隐藏 J3 页“手机版”按钮
+                mobileSelector.style.display = 'none';
             }
             const mobileSelectorJ1 = document.getElementById('mobile-selector-j1');
             if (mobileSelectorJ1) {
@@ -3470,7 +3471,8 @@ require_once 'session_check.php';
 
             const mobileSelector = document.getElementById('mobile-selector');
             if (mobileSelector) {
-                mobileSelector.style.display = stockType === 'j3' ? 'inline-flex' : 'none';
+                // 按需求：隐藏 J3 页“手机版”按钮
+                mobileSelector.style.display = 'none';
             }
             const mobileSelectorJ1 = document.getElementById('mobile-selector-j1');
             if (mobileSelectorJ1) {
