@@ -2523,7 +2523,7 @@ require_once 'session_check.php';
             }
         }
 
-        // 新增记录弹窗：备注 placeholder（中央保持原样，J1/J2/J3改为“发票号码/损耗”）
+        // 新增记录弹窗：备注 placeholder（中央保持原样，J1/J2/J3改为“输入备注（发票号码/损耗）”）
         let defaultNewRecordRemarkPlaceholder = null;
         function updateNewRecordRemarkPlaceholder() {
             const input = document.getElementById('new-record-remark');
@@ -2536,7 +2536,7 @@ require_once 'session_check.php';
             if (currentStockType === 'central') {
                 input.placeholder = defaultNewRecordRemarkPlaceholder;
             } else {
-                input.placeholder = '发票号码/损耗';
+                input.placeholder = '输入备注（发票号码/损耗）';
             }
         }
         
