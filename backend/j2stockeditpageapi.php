@@ -494,6 +494,15 @@ function handlePost() {
         }
     }
 
+    // 同名多编号场景：当同时提交 product_name + code_number 时，必须确保它们在 stock_data 中是一一对应
+    if (!empty($data['product_name']) && !empty($data['code_number'])) {
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM stock_data WHERE product_name = ? AND product_code = ?");
+        $stmt->execute([$data['product_name'], $data['code_number']]);
+        if ($stmt->fetchColumn() == 0) {
+            sendResponse(false, "货品编号与货品名称不匹配，请从下拉列表重新选择正确组合");
+        }
+    }
+
     // 验证 target_system 枚举值
     if (!empty($data['target_system']) && !in_array($data['target_system'], ['j2', 'Central', 'central'])) {
         sendResponse(false, "target_system 只能选择 j2 或 Central");

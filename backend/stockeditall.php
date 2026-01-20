@@ -5746,6 +5746,26 @@ require_once 'session_check.php';
                     }
                     throw new Error(errorMsg);
                 }
+
+                // 同名多编号时，必须选择对应的编号，并确保编号与名称匹配
+                const sameNameRows = window.productOptions.filter(p => p.product_name === formData.product_name);
+                if (sameNameRows.length > 1) {
+                    const allowedCodes = sameNameRows.map(p => p.product_code).filter(Boolean);
+                    if (!formData.code_number) {
+                        const errorMsg = `该货品名称存在多个编号，请先选择对应的货品编号（例如：${allowedCodes.slice(0, 5).join(', ')}）`;
+                        if (!skipTableRefresh) {
+                            showAlert(errorMsg, 'error');
+                        }
+                        throw new Error(errorMsg);
+                    }
+                    if (allowedCodes.length > 0 && !allowedCodes.includes(formData.code_number)) {
+                        const errorMsg = '货品编号与货品名称不匹配，请从下拉列表重新选择正确组合';
+                        if (!skipTableRefresh) {
+                            showAlert(errorMsg, 'error');
+                        }
+                        throw new Error(errorMsg);
+                    }
+                }
             }
 
             // 验证编号是否存在于数据库中
@@ -6709,6 +6729,21 @@ require_once 'session_check.php';
             `;
         }
 
+        // 安全转义（用于 HTML 文本 / 属性）
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function escapeAttr(value) {
+            // 属性里同样使用 HTML 转义即可
+            return escapeHtml(value);
+        }
+
         // 生成下拉选项
         function generateComboboxOptions(options, displayField) {
             if (!options || options.length === 0) {
@@ -6718,18 +6753,37 @@ require_once 'session_check.php';
             // 如果是收货人选项，直接使用字符串数组
             if (Array.isArray(options) && typeof options[0] === 'string') {
                 return options.map(option => 
-                    `<div class="combobox-option" data-value="${option}">
-                        ${option}
+                    `<div class="combobox-option" data-value="${escapeAttr(option)}">
+                        ${escapeHtml(option)}
                     </div>`
                 ).join('');
             }
             
             // 其他情况，使用对象数组
-            return options.map(option => 
-                `<div class="combobox-option" data-value="${option[displayField]}">
-                    ${option[displayField]}
-                </div>`
-            ).join('');
+            return options.map(option => {
+                const rawValue = option ? (option[displayField] ?? '') : '';
+                let label = rawValue;
+
+                // 如果有 product_name + product_code（同名多编号场景），显示为：NAME (CODE)
+                if (option && option.product_name && option.product_code && displayField === 'product_name') {
+                    label = `${option.product_name} (${option.product_code})`;
+                }
+
+                // 如果是 code_number 且有 product_name，显示：CODE (NAME) 便于识别
+                if (option && option.code_number && option.product_name && displayField === 'code_number') {
+                    label = `${option.code_number} (${option.product_name})`;
+                }
+
+                const attrs = [
+                    `data-value="${escapeAttr(rawValue)}"`,
+                    option && option.product_code ? `data-product-code="${escapeAttr(option.product_code)}"` : '',
+                    option && option.code_number ? `data-code-number="${escapeAttr(option.code_number)}"` : ''
+                ].filter(Boolean).join(' ');
+
+                return `<div class="combobox-option" ${attrs}>
+                    ${escapeHtml(label)}
+                </div>`;
+            }).join('');
         }
 
         // 计算下拉列表位置
@@ -6927,9 +6981,11 @@ require_once 'session_check.php';
                     options = window.productOptions;
                     displayField = 'product_name';
                     if (!options) return;
-                    filteredOptions = options.filter(option => 
-                        option[displayField].toLowerCase().includes(searchTerm)
-                    );
+                    filteredOptions = options.filter(option => {
+                        const name = String(option?.product_name ?? '').toLowerCase();
+                        const code = String(option?.product_code ?? '').toLowerCase();
+                        return name.includes(searchTerm) || code.includes(searchTerm);
+                    });
                 } else if (type === 'receiver') {
                     options = receiverOptions;
                     if (!options) return;
@@ -7142,9 +7198,37 @@ require_once 'session_check.php';
                     updatePriceOptions(container, product_name);
                 }
             } else if (type === 'product') {
-                const result = await getCodeByProduct(value);
-                if (result) {
-                    const { product_code, specification, supplier, category } = result;
+                // 优先使用选项中携带的 product_code（同名多编号时必须用这个，避免只靠名字反查）
+                const selectedProductCode = optionElement.dataset.productCode || '';
+
+                let resolved = null;
+                if (selectedProductCode) {
+                    // 通过 code 精准获取规格/供应商/类型
+                    const byCode = await getProductByCode(selectedProductCode);
+                    resolved = {
+                        product_code: selectedProductCode,
+                        specification: byCode?.specification ?? '',
+                        supplier: byCode?.supplier ?? '',
+                        category: byCode?.category ?? ''
+                    };
+                    // 记录一下，便于后续调试/联动
+                    input.dataset.selectedProductCode = selectedProductCode;
+                } else {
+                    // 回退：仍按名字查（可能会命中最小编号），但正常从下拉选择时应不会走到这里
+                    const byName = await getCodeByProduct(value);
+                    if (byName) {
+                        resolved = {
+                            product_code: byName.product_code,
+                            specification: byName.specification,
+                            supplier: byName.supplier,
+                            category: byName.category
+                        };
+                        input.dataset.selectedProductCode = byName.product_code || '';
+                    }
+                }
+
+                if (resolved) {
+                    const { product_code, specification, supplier, category } = resolved;
                     const containerId = input.closest('.combobox-container').id;
                     const isNewRow = containerId.includes('new-');
                     
