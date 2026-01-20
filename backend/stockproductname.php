@@ -9,6 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 
 // 获取用户权限 - 直接检查注册码
 $canApprove = false;
+$currentApplicant = '';
 if (isset($_SESSION['user_id'])) {
     // 这里需要连接数据库检查用户的注册码
     $host = 'localhost';
@@ -23,13 +24,21 @@ if (isset($_SESSION['user_id'])) {
         $allowedCodes = ['SUPPORT88', 'IT4567', 'QX0EQP', 'HR2025','AZGQOY','IT7890'];
         $userId = $_SESSION['user_id'];
         
-        $stmt = $pdo->prepare("SELECT registration_code FROM users WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT registration_code, nickname, username_cn, username FROM users WHERE id = ?");
         $stmt->execute([$userId]);
-        $userCode = $stmt->fetchColumn();
+        $userRow = $stmt->fetch(PDO::FETCH_ASSOC);
+        $userCode = $userRow['registration_code'] ?? null;
+        
+        // 申请人：优先昵称，其次中文名，最后英文名
+        $nickname = trim((string)($userRow['nickname'] ?? ''));
+        $usernameCn = trim((string)($userRow['username_cn'] ?? ''));
+        $username = trim((string)($userRow['username'] ?? ''));
+        $currentApplicant = $nickname !== '' ? $nickname : ($usernameCn !== '' ? $usernameCn : $username);
         
         $canApprove = $userCode && in_array($userCode, $allowedCodes);
     } catch (PDOException $e) {
         $canApprove = false;
+        $currentApplicant = '';
     }
 }
 ?>
@@ -1242,6 +1251,7 @@ if (isset($_SESSION['user_id'])) {
         }
 
         const API_BASE_URL = 'stockapi.php';  // 如果在同一目录
+        const CURRENT_USER_APPLICANT = <?php echo json_encode($currentApplicant, JSON_UNESCAPED_UNICODE); ?>;
         
         // 应用状态
         let stockData = [];
@@ -1997,8 +2007,8 @@ if (isset($_SESSION['user_id'])) {
                             value="${data.supplier || ''}" placeholder="供应商名称" required ${!isNewRow ? 'readonly disabled' : ''}>
                     </td>
                     <td>
-                        <input type="text" class="excel-input text-input ${!isNewRow ? 'readonly' : ''}" data-field="applicant" data-row="${rowId}" 
-                            value="${data.applicant || ''}" placeholder="申请人" required ${!isNewRow ? 'readonly disabled' : ''}>
+                        <input type="text" class="excel-input text-input readonly" data-field="applicant" data-row="${rowId}" 
+                            value="${data.applicant || CURRENT_USER_APPLICANT || ''}" placeholder="申请人" required readonly disabled>
                     </td>
                     <td>
                         ${createMultiSelectSystemAssign(data.system_assign || '', rowId, !isNewRow)}
@@ -2087,8 +2097,8 @@ if (isset($_SESSION['user_id'])) {
                             value="${data.supplier || ''}" placeholder="供应商名称" required ${!isNewRow ? 'readonly disabled' : ''}>
                     </td>
                     <td>
-                        <input type="text" class="excel-input text-input ${!isNewRow ? 'readonly' : ''}" data-field="applicant" data-row="${rowId}" 
-                            value="${data.applicant || ''}" placeholder="申请人" required ${!isNewRow ? 'readonly disabled' : ''}>
+                        <input type="text" class="excel-input text-input readonly" data-field="applicant" data-row="${rowId}" 
+                            value="${data.applicant || CURRENT_USER_APPLICANT || ''}" placeholder="申请人" required readonly disabled>
                     </td>
                     <td>
                         <select class="excel-select readonly" data-field="system_assign" data-row="${rowId}" disabled>
@@ -2140,7 +2150,7 @@ if (isset($_SESSION['user_id'])) {
                 specification: '',
                 category: '',
                 supplier: '',
-                applicant: '',
+                applicant: CURRENT_USER_APPLICANT || '',
                 system_assign: defaultSystemAssign,  // 根据当前系统设置默认值
                 approver: ''
             };
@@ -2788,6 +2798,13 @@ if (isset($_SESSION['user_id'])) {
                 // 处理输入框
                 const inputs = row.querySelectorAll(`input[data-row="${rowId}"]`);
                 inputs.forEach(input => {
+                    // 申请人始终由系统自动填写，不允许编辑
+                    if (input.dataset.field === 'applicant') {
+                        input.classList.add('readonly');
+                        input.setAttribute('readonly', 'readonly');
+                        input.setAttribute('disabled', 'disabled');
+                        return;
+                    }
                     if (readonly) {
                         input.classList.add('readonly');
                         input.setAttribute('readonly', 'readonly');

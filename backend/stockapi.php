@@ -5,6 +5,11 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
+// 启动 session（用于获取当前登录用户）
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 // 处理预检请求
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     ob_end_clean();
@@ -21,6 +26,10 @@ $dbname = 'u690174784_kunzz';
 $dbuser = 'u690174784_kunzz';
 $dbpass = 'Kunzz1688';
 
+// 获取请求方法和数据
+$method = $_SERVER['REQUEST_METHOD'];
+$data = json_decode(file_get_contents("php://input"), true);
+
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -35,10 +44,6 @@ try {
 error_log("数据库连接成功");
 error_log("请求方法: " . $method);
 
-// 获取请求方法和数据
-$method = $_SERVER['REQUEST_METHOD'];
-$data = json_decode(file_get_contents("php://input"), true);
-
 function sendResponse($success, $message = "", $data = null) {
     ob_end_clean();
     echo json_encode([
@@ -47,6 +52,21 @@ function sendResponse($success, $message = "", $data = null) {
         "data" => $data
     ]);
     exit;
+}
+
+function getCurrentApplicantName(PDO $pdo): string {
+    if (!isset($_SESSION['user_id'])) {
+        return '';
+    }
+    $userId = $_SESSION['user_id'];
+    $stmt = $pdo->prepare("SELECT nickname, username_cn, username FROM users WHERE id = ?");
+    $stmt->execute([$userId]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+    $nickname = trim((string)($row['nickname'] ?? ''));
+    if ($nickname !== '') return $nickname;
+    $usernameCn = trim((string)($row['username_cn'] ?? ''));
+    if ($usernameCn !== '') return $usernameCn;
+    return trim((string)($row['username'] ?? ''));
 }
 
 // 路由处理
@@ -306,9 +326,15 @@ function handlePost() {
     if (!$data) {
         sendResponse(false, "无效的数据格式");
     }
+
+    // 新增记录必须是已登录用户（用于自动写入申请人昵称）
+    if (!isset($_SESSION['user_id'])) {
+        sendResponse(false, "用户未登录");
+    }
     
     // 验证必填字段
-    $required_fields = ['product_code', 'product_name', 'specification', 'supplier', 'applicant'];
+    // applicant 由系统根据登录账号自动写入（不信任前端传值）
+    $required_fields = ['product_code', 'product_name', 'specification', 'supplier'];
     foreach ($required_fields as $field) {
         if (empty($data[$field])) {
             sendResponse(false, "缺少必填字段：$field");
@@ -319,6 +345,11 @@ function handlePost() {
         // 自动设置date和time字段
         $currentDate = date('Y-m-d');
         $currentTime = date('H:i:s');
+
+        $applicant = getCurrentApplicantName($pdo);
+        if ($applicant === '') {
+            sendResponse(false, "无法获取当前账号昵称（申请人）");
+        }
         
         $sql = "INSERT INTO stock_data 
                 (date, time, product_code, product_name, specification, category, supplier, applicant, system_assign, freezer_category, approver) 
@@ -334,7 +365,7 @@ function handlePost() {
             $data['specification'],
             $data['category'] ?? null,  // 添加 category 字段
             $data['supplier'],
-            $data['applicant'],
+            $applicant,
             $data['system_assign'] ?? null,  // 添加 system_assign 字段
             $data['freezer_category'] ?? null,  // 添加 freezer_category 字段
             $data['approver'] ?? null
@@ -360,7 +391,9 @@ function handleApprove() {
     global $pdo, $data;
     
     // 检查用户权限
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
     if (!isset($_SESSION['user_id'])) {
         sendResponse(false, "用户未登录");
     }
