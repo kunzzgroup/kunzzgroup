@@ -2522,6 +2522,23 @@ require_once 'session_check.php';
                     break;
             }
         }
+
+        // 新增记录弹窗：备注 placeholder（中央保持原样，J1/J2/J3改为“发票号码/损耗”）
+        let defaultNewRecordRemarkPlaceholder = null;
+        function updateNewRecordRemarkPlaceholder() {
+            const input = document.getElementById('new-record-remark');
+            if (!input) return;
+
+            if (defaultNewRecordRemarkPlaceholder === null) {
+                defaultNewRecordRemarkPlaceholder = input.placeholder || '';
+            }
+
+            if (currentStockType === 'central') {
+                input.placeholder = defaultNewRecordRemarkPlaceholder;
+            } else {
+                input.placeholder = '发票号码/损耗';
+            }
+        }
         
         // 应用状态
         let stockData = [];
@@ -3372,6 +3389,9 @@ require_once 'session_check.php';
             if (mobileSelector) {
                 mobileSelector.style.display = currentStockType === 'j3' ? 'inline-flex' : 'none';
             }
+
+            // 初始化：根据当前系统更新“新增记录”弹窗备注 placeholder
+            updateNewRecordRemarkPlaceholder();
         }
 
         // 设置实时搜索
@@ -3409,6 +3429,7 @@ require_once 'session_check.php';
                 }
             }
             currentStockType = stockType;
+            updateNewRecordRemarkPlaceholder();
             
             // 更新API地址
             switch(stockType) {
