@@ -339,6 +339,10 @@ require_once 'session_check.php';
             vertical-align: middle;
         }
 
+        .price-variants-table th:nth-child(1){
+            font-weight: 800 !important; 
+        }
+
         .price-variants-table th:nth-child(1),
         .price-variants-table td:nth-child(1) { 
             width: 46%; 
