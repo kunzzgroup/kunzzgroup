@@ -1223,7 +1223,7 @@ require_once 'session_check.php';
                         <div class="product-group">
                             <div class="product-header">
                                 <div class="product-info-item">
-                                    <div style="font-weight: 600;">${product.product_name}</div>
+                                    <div style="font-weight: 800;">${product.product_name}</div>
                                     ${totalDisplay}
                                 </div>
                             </div>
