@@ -2539,7 +2539,7 @@ require_once 'session_check.php';
             if (currentStockType === 'central') {
                 input.placeholder = defaultNewRecordRemarkPlaceholder;
             } else {
-                input.placeholder = '输入备注（发票号码/损耗）';
+                input.placeholder = '输入备注（发票号码 / 损耗）';
             }
         }
         
