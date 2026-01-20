@@ -240,7 +240,7 @@ require_once 'session_check.php';
             background: linear-gradient(to bottom, #fda100, #ffbe4f, #ffe5b9);
             color: white;
             padding: 2px;
-            padding-left: 12px;
+            padding-left: clamp(6px, 0.625vw, 12px);
             font-size: clamp(15px, 1.04vw, 20px);
             font-weight: 800;
             display: flex;
