@@ -1758,7 +1758,6 @@ header('Expires: 0');
             display: flex;
             flex-direction: row;
             gap: 20px;
-            padding: 20px;
             width: 100%;
             /* 确保至少显示三个容器，每个容器最小宽度 */
             min-width: calc(3 * 600px + 2 * 20px + 40px); /* 3个容器 + 2个gap + padding */
@@ -1919,7 +1918,7 @@ header('Expires: 0');
             display: flex;
             flex-direction: row;
             gap: 20px;
-            padding: 20px;
+            padding: 20px 0px;
             align-items: flex-start;
             width: 100%;
             /* 确保至少显示三个容器，每个容器最小宽度 */
