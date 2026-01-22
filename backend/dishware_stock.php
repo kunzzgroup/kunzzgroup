@@ -1919,9 +1919,7 @@ header('Expires: 0');
                     <div class="selector-dropdown" id="view-selector-dropdown">
                         <div class="dropdown-item active" onclick="switchPage('stock')">总库存</div>
                         <div class="dropdown-item" onclick="switchPage('sets')">套装管理</div>
-                        <div class="dropdown-item" onclick="switchPage('j1')">J1破损</div>
-                        <div class="dropdown-item" onclick="switchPage('j2')">J2破损</div>
-                        <div class="dropdown-item" onclick="switchPage('j3')">J3破损</div>
+                        <div class="dropdown-item" onclick="switchPage('break_records')">破损记录</div>
                     </div>
                 </div>
             </div>
@@ -2063,83 +2061,29 @@ header('Expires: 0');
                 </div>
             </div>
 
-            <!-- J1 打破记录页面 -->
-            <div id="j1-page" class="page-content" style="display: none;">
+            <!-- 破损记录页面（合并J1、J2、J3） -->
+            <div id="break-records-page" class="page-content" style="display: none;">
                 <div class="table-container">
                     <div class="table-scroll-container">
-                        <table class="stock-table" id="j1-table">
+                        <table class="stock-table" id="break-records-table">
                             <thead>
                                 <tr>
-                                    <th>日期</th>
                                     <th>No.</th>
                                     <th>产品名称</th>
                                     <th>编号</th>
                                     <th>分类</th>
                                     <th>尺寸</th>
-                                    <th>当前库存</th>
-                                    <th>破损数量</th>
+                                    <th>J1破损数量</th>
+                                    <th>J2破损数量</th>
+                                    <th>J3破损数量</th>
                                     <th>单价</th>
-                                    <th>总价</th>
+                                    <th>J1总价</th>
+                                    <th>J2总价</th>
+                                    <th>J3总价</th>
                                     <th>操作</th>
                                 </tr>
                             </thead>
-                            <tbody id="j1-tbody">
-                                <!-- Dynamic content -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- J2 打破记录页面 -->
-            <div id="j2-page" class="page-content" style="display: none;">
-                <div class="table-container">
-                    <div class="table-scroll-container">
-                        <table class="stock-table" id="j2-table">
-                            <thead>
-                                <tr>
-                                    <th>日期</th>
-                                    <th>No.</th>
-                                    <th>产品名称</th>
-                                    <th>编号</th>
-                                    <th>分类</th>
-                                    <th>尺寸</th>
-                                    <th>当前库存</th>
-                                    <th>破损数量</th>
-                                    <th>单价</th>
-                                    <th>总价</th>
-                                    <th>操作</th>
-                                </tr>
-                            </thead>
-                            <tbody id="j2-tbody">
-                                <!-- Dynamic content -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- J3 打破记录页面 -->
-            <div id="j3-page" class="page-content" style="display: none;">
-                <div class="table-container">
-                    <div class="table-scroll-container">
-                        <table class="stock-table" id="j3-table">
-                            <thead>
-                                <tr>
-                                    <th>日期</th>
-                                    <th>No.</th>
-                                    <th>产品名称</th>
-                                    <th>编号</th>
-                                    <th>分类</th>
-                                    <th>尺寸</th>
-                                    <th>当前库存</th>
-                                    <th>破损数量</th>
-                                    <th>单价</th>
-                                    <th>总价</th>
-                                    <th>操作</th>
-                                </tr>
-                            </thead>
-                            <tbody id="j3-tbody">
+                            <tbody id="break-records-tbody">
                                 <!-- Dynamic content -->
                             </tbody>
                         </table>
@@ -3260,12 +3204,10 @@ header('Expires: 0');
             
             // 更新下拉按钮文本
             const currentView = document.getElementById('current-view');
-            const pageNames = {
+                const pageNames = {
                 'stock': '总库存',
                 'sets': '套装管理',
-                'j1': 'J1破损',
-                'j2': 'J2破损',
-                'j3': 'J3破损'
+                'break_records': '破损记录'
             };
             
             if (currentView) {
@@ -3325,27 +3267,11 @@ header('Expires: 0');
                         addButton.style.display = 'inline-flex';
                     }
                     break;
-                case 'j1':
-                    if (title) title.textContent = 'J1破损';
+                case 'break_records':
+                    if (title) title.textContent = '破损记录';
                     if (addButton) {
                         addButton.innerHTML = '<i class="fas fa-plus"></i> 记录破损';
-                        addButton.onclick = () => openBreakModal('j1');
-                        addButton.style.display = 'inline-flex';
-                    }
-                    break;
-                case 'j2':
-                    if (title) title.textContent = 'J2破损';
-                    if (addButton) {
-                        addButton.innerHTML = '<i class="fas fa-plus"></i> 记录破损';
-                        addButton.onclick = () => openBreakModal('j2');
-                        addButton.style.display = 'inline-flex';
-                    }
-                    break;
-                case 'j3':
-                    if (title) title.textContent = 'J3破损';
-                    if (addButton) {
-                        addButton.innerHTML = '<i class="fas fa-plus"></i> 记录破损';
-                        addButton.onclick = () => openBreakModal('j3');
+                        addButton.onclick = () => openBreakModal('j1'); // 默认打开J1，用户可以在模态框中选择店铺
                         addButton.style.display = 'inline-flex';
                     }
                     break;
@@ -3361,41 +3287,181 @@ header('Expires: 0');
                 case 'sets':
                     loadSetsData();
                     break;
-                case 'j1':
-                case 'j2':
-                case 'j3':
-                    loadBreakRecords(pageType);
+                case 'break_records':
+                    loadAllBreakRecords();
                     break;
             }
         }
 
-        // 加载打破记录
-        async function loadBreakRecords(shopType) {
-            console.log('loadBreakRecords 被调用，shopType:', shopType);
+        // 加载所有破损记录（J1、J2、J3合并）
+        async function loadAllBreakRecords() {
             try {
-                const result = await apiCall(`?action=damage_records&shop_type=${shopType}`);
+                // 同时加载三个店铺的破损记录
+                const [j1Result, j2Result, j3Result] = await Promise.all([
+                    apiCall('?action=damage_records&shop_type=j1'),
+                    apiCall('?action=damage_records&shop_type=j2'),
+                    apiCall('?action=damage_records&shop_type=j3')
+                ]);
                 
-                if (result.success) {
-                    const records = result.data || [];
-                    console.log('成功获取破损记录，数量:', records.length);
-                    // 存储破损记录数据
-                    breakRecordsData[shopType] = records;
-                    renderBreakRecordsTable(shopType, records);
-                    updateStats();
-                } else {
-                    console.error('获取破损记录失败:', result.message);
-                    showAlert('获取破损记录失败: ' + (result.message || '未知错误'), 'error');
-                    renderBreakRecordsTable(shopType, []);
-                }
+                // 存储各店铺的破损记录数据
+                breakRecordsData.j1 = j1Result.success ? (j1Result.data || []) : [];
+                breakRecordsData.j2 = j2Result.success ? (j2Result.data || []) : [];
+                breakRecordsData.j3 = j3Result.success ? (j3Result.data || []) : [];
+                
+                // 渲染合并后的表格
+                renderMergedBreakRecordsTable();
+                updateStats();
                 
             } catch (error) {
                 console.error('加载破损记录时发生错误:', error);
                 showAlert('加载破损记录失败: ' + error.message, 'error');
-                renderBreakRecordsTable(shopType, []);
+                renderMergedBreakRecordsTable();
             }
         }
 
-        // 渲染破损记录表格
+        // 渲染合并后的破损记录表格（J1、J2、J3合并显示）
+        function renderMergedBreakRecordsTable() {
+            const tbody = document.getElementById('break-records-tbody');
+            if (!tbody) {
+                console.error('找不到tbody元素: break-records-tbody');
+                return;
+            }
+            
+            // 获取所有碗碟的唯一列表（从三个店铺的记录中）
+            const allDishwareMap = new Map();
+            
+            // 合并三个店铺的记录
+            ['j1', 'j2', 'j3'].forEach(shopType => {
+                const records = breakRecordsData[shopType] || [];
+                records.forEach(record => {
+                    const key = record.dishware_id || record.code_number;
+                    if (!allDishwareMap.has(key)) {
+                        allDishwareMap.set(key, {
+                            dishware_id: record.dishware_id,
+                            product_name: record.product_name,
+                            code_number: record.code_number,
+                            category: record.category,
+                            size: record.size,
+                            unit_price: record.unit_price || 0,
+                            j1_break: 0,
+                            j2_break: 0,
+                            j3_break: 0,
+                            j1_total: 0,
+                            j2_total: 0,
+                            j3_total: 0,
+                            j1_record_id: null,
+                            j2_record_id: null,
+                            j3_record_id: null
+                        });
+                    }
+                    
+                    const item = allDishwareMap.get(key);
+                    if (shopType === 'j1') {
+                        item.j1_break = record.break_quantity || 0;
+                        item.j1_total = record.total_price || 0;
+                        item.j1_record_id = record.id;
+                    } else if (shopType === 'j2') {
+                        item.j2_break = record.break_quantity || 0;
+                        item.j2_total = record.total_price || 0;
+                        item.j2_record_id = record.id;
+                    } else if (shopType === 'j3') {
+                        item.j3_break = record.break_quantity || 0;
+                        item.j3_total = record.total_price || 0;
+                        item.j3_record_id = record.id;
+                    }
+                });
+            });
+            
+            const allItems = Array.from(allDishwareMap.values());
+            
+            if (allItems.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="13" class="no-data">
+                            <i class="fas fa-inbox"></i>
+                            <div>暂无破损记录</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // 按产品名称排序
+            allItems.sort((a, b) => {
+                const nameA = a.product_name || '';
+                const nameB = b.product_name || '';
+                return naturalSort(nameA, nameB);
+            });
+            
+            let tableRows = '';
+            
+            allItems.forEach((item, index) => {
+                tableRows += `
+                    <tr>
+                        <td data-label="NO" class="text-center">${index + 1}</td>
+                        <td data-label="产品名称"><strong>${item.product_name || '-'}</strong></td>
+                        <td data-label="编号" class="text-center">${item.code_number || '-'}</td>
+                        <td data-label="分类" class="text-center">${item.category || '-'}</td>
+                        <td data-label="尺寸" class="text-center">${item.size || '-'}</td>
+                        <td data-label="J1破损数量" class="text-center">
+                            <input type="number" class="quantity-input" 
+                                   value="${item.j1_break}" 
+                                   onchange="updateBreakQuantity(${item.j1_record_id || 0}, this.value, 'j1', ${item.dishware_id || 0})"
+                                   min="0" ${!item.j1_record_id ? 'placeholder="0"' : ''}>
+                        </td>
+                        <td data-label="J2破损数量" class="text-center">
+                            <input type="number" class="quantity-input" 
+                                   value="${item.j2_break}" 
+                                   onchange="updateBreakQuantity(${item.j2_record_id || 0}, this.value, 'j2', ${item.dishware_id || 0})"
+                                   min="0" ${!item.j2_record_id ? 'placeholder="0"' : ''}>
+                        </td>
+                        <td data-label="J3破损数量" class="text-center">
+                            <input type="number" class="quantity-input" 
+                                   value="${item.j3_break}" 
+                                   onchange="updateBreakQuantity(${item.j3_record_id || 0}, this.value, 'j3', ${item.dishware_id || 0})"
+                                   min="0" ${!item.j3_record_id ? 'placeholder="0"' : ''}>
+                        </td>
+                        <td data-label="单价" class="text-center">
+                            <div class="currency-display">
+                                <span class="currency-symbol">RM</span>
+                                <span class="currency-amount">${formatCurrency(item.unit_price || 0)}</span>
+                            </div>
+                        </td>
+                        <td data-label="J1总价" class="text-center">
+                            <div class="currency-display">
+                                <span class="currency-symbol">RM</span>
+                                <span class="currency-amount">${formatCurrency(item.j1_total || 0)}</span>
+                            </div>
+                        </td>
+                        <td data-label="J2总价" class="text-center">
+                            <div class="currency-display">
+                                <span class="currency-symbol">RM</span>
+                                <span class="currency-amount">${formatCurrency(item.j2_total || 0)}</span>
+                            </div>
+                        </td>
+                        <td data-label="J3总价" class="text-center">
+                            <div class="currency-display">
+                                <span class="currency-symbol">RM</span>
+                                <span class="currency-amount">${formatCurrency(item.j3_total || 0)}</span>
+                            </div>
+                        </td>
+                        <td data-label="操作" class="text-center">
+                            <button class="action-btn edit-btn" onclick="editBreakRecord(${item.j1_record_id || item.j2_record_id || item.j3_record_id || 0})" title="编辑" ${!item.j1_record_id && !item.j2_record_id && !item.j3_record_id ? 'style="display:none;"' : ''}>
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteBreakRecord(${item.j1_record_id || item.j2_record_id || item.j3_record_id || 0})" title="删除" ${!item.j1_record_id && !item.j2_record_id && !item.j3_record_id ? 'style="display:none;"' : ''}>
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = tableRows;
+            console.log('合并破损记录表格已更新，行数:', allItems.length);
+        }
+
+        // 渲染破损记录表格（保留用于向后兼容）
         function renderBreakRecordsTable(shopType, records) {
             console.log('renderBreakRecordsTable 被调用，shopType:', shopType, 'records数量:', records.length);
             const tbody = document.getElementById(`${shopType}-tbody`);
@@ -3419,7 +3485,6 @@ header('Expires: 0');
             let tableRows = '';
             
             records.forEach((record, index) => {
-                // 照片显示
                 tableRows += `
                     <tr data-id="${record.id}">
                         <td data-label="日期" class="text-center">${formatDate(record.break_date || record.created_at)}</td>
@@ -3731,8 +3796,11 @@ header('Expires: 0');
                         // 如果在库存页面，刷新库存数据
                         console.log('刷新库存数据');
                         loadStockData(true, false);
+                    } else if (currentPage === 'break_records') {
+                        // 如果在合并破损记录页面，重新加载所有破损记录
+                        await loadAllBreakRecords();
                     } else if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') {
-                        // 如果在破损记录页面，刷新破损记录数据
+                        // 如果在破损记录页面，刷新破损记录数据（向后兼容）
                         console.log('刷新破损记录数据，页面类型:', currentPage);
                         loadBreakRecords(currentPage);
                     } else {
@@ -3771,6 +3839,9 @@ header('Expires: 0');
                     if (currentPage === 'stock') {
                         // 如果在库存页面，刷新库存数据
                         loadStockData(true, false);
+                    } else if (currentPage === 'break_records') {
+                        // 如果在合并破损记录页面，重新加载所有破损记录
+                        await loadAllBreakRecords();
                     } else {
                         // 如果在破损记录页面，刷新破损记录数据
                         loadBreakRecords(shopType);
@@ -3784,34 +3855,80 @@ header('Expires: 0');
             }
         }
 
-        // 更新破损数量
-        async function updateBreakQuantity(recordId, newQuantity) {
+        // 更新破损数量（支持合并表格格式）
+        async function updateBreakQuantity(recordId, newQuantity, shopType = null, dishwareId = null) {
             try {
-                const result = await apiCall('', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'update_damage_record',
-                        id: recordId,
-                        break_quantity: parseInt(newQuantity)
-                    })
-                });
-                
-                if (result.success) {
-                    showAlert('破损数量更新成功', 'success');
+                // 如果recordId为0或null，说明是新建记录
+                if (!recordId || recordId === 0) {
+                    if (!shopType || !dishwareId) {
+                        showAlert('缺少必要参数', 'error');
+                        return;
+                    }
                     
-                    // 刷新当前页面的数据
-                    if (currentPage === 'stock') {
-                        // 如果在库存页面，刷新库存数据
-                        loadStockData(true, false);
+                    // 从库存数据中获取单价
+                    let unitPrice = 0;
+                    const dishwareItem = stockData.find(item => item.id == dishwareId);
+                    if (dishwareItem) {
+                        unitPrice = parseFloat(dishwareItem.unit_price) || 0;
+                    }
+                    
+                    const breakQuantity = parseInt(newQuantity) || 0;
+                    const totalPrice = unitPrice * breakQuantity;
+                    
+                    // 创建新记录
+                    const result = await apiCall('', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'add_damage_record',
+                            dishware_id: dishwareId,
+                            shop_type: shopType,
+                            break_quantity: breakQuantity,
+                            unit_price: unitPrice,
+                            total_price: totalPrice,
+                            recorded_by: 'system'
+                        })
+                    });
+                    
+                    if (result.success) {
+                        showAlert('破损记录添加成功', 'success');
+                        // 重新加载所有破损记录
+                        if (currentPage === 'break_records') {
+                            await loadAllBreakRecords();
+                        }
                     } else {
-                        // 如果在破损记录页面，刷新破损记录数据
-                        loadBreakRecords(currentPage);
+                        showAlert('添加失败: ' + (result.message || '未知错误'), 'error');
                     }
                 } else {
-                    showAlert('更新失败: ' + (result.message || '未知错误'), 'error');
+                    // 更新现有记录
+                    const result = await apiCall('', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'update_damage_record',
+                            id: recordId,
+                            break_quantity: parseInt(newQuantity) || 0
+                        })
+                    });
+                    
+                    if (result.success) {
+                        showAlert('破损数量更新成功', 'success');
+                        
+                        // 刷新当前页面的数据
+                        if (currentPage === 'stock') {
+                            loadStockData(true, false);
+                        } else if (currentPage === 'break_records') {
+                            await loadAllBreakRecords();
+                        } else {
+                            loadBreakRecords(currentPage);
+                        }
+                    } else {
+                        showAlert('更新失败: ' + (result.message || '未知错误'), 'error');
+                    }
                 }
             } catch (error) {
                 console.error('更新破损数量时发生错误:', error);
@@ -3848,6 +3965,9 @@ header('Expires: 0');
                     if (currentPage === 'stock') {
                         // 如果在库存页面，刷新库存数据
                         loadStockData(true, false);
+                    } else if (currentPage === 'break_records') {
+                        // 如果在合并破损记录页面，重新加载所有破损记录
+                        await loadAllBreakRecords();
                     } else {
                         // 如果在破损记录页面，刷新破损记录数据
                         loadBreakRecords(currentPage);
@@ -4390,8 +4510,20 @@ header('Expires: 0');
                  // 套装管理页面使用套装数据
                  displayedRecords = setsData.length;
                  totalRecords = setsData.length;
+             } else if (currentPage === 'break_records') {
+                 // 合并破损记录页面：统计所有唯一的碗碟数量
+                 const allDishwareSet = new Set();
+                 ['j1', 'j2', 'j3'].forEach(shopType => {
+                     const records = breakRecordsData[shopType] || [];
+                     records.forEach(record => {
+                         const key = record.dishware_id || record.code_number;
+                         allDishwareSet.add(key);
+                     });
+                 });
+                 displayedRecords = allDishwareSet.size;
+                 totalRecords = allDishwareSet.size;
              } else if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') {
-                 // 破损记录页面使用破损记录数据
+                 // 破损记录页面使用破损记录数据（向后兼容）
                  const records = breakRecordsData[currentPage] || [];
                  displayedRecords = records.length;
                  totalRecords = records.length;
