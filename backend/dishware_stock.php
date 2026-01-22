@@ -1040,6 +1040,48 @@ header('Expires: 0');
             border: 2px solid #583e04;
         }
 
+        /* 餐厅店面管理模态框特殊样式 */
+        #restaurantModal .modal-content {
+            max-width: 900px;
+            width: 95%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #restaurantModal .modal-body {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #restaurantModal .table-container {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        #restaurantModal .table-scroll-container {
+            flex: 1;
+            overflow-x: auto;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        #restaurantModal .stock-table {
+            width: 100%;
+            table-layout: auto;
+        }
+
+        #restaurantModal .stock-table th,
+        #restaurantModal .stock-table td {
+            white-space: nowrap;
+            padding: 12px 8px;
+        }
+
         .modal-header {
             display: flex;
             justify-content: space-between;
@@ -2163,21 +2205,23 @@ header('Expires: 0');
                         添加餐厅店面
                     </button>
                 </div>
-                <div class="table-container">
-                    <table class="stock-table" id="restaurants-table">
-                        <thead>
-                            <tr>
-                                <th>序号</th>
-                                <th>餐厅店面名称</th>
-                                <th>代码</th>
-                                <th>显示顺序</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="restaurants-tbody">
-                            <!-- 动态填充 -->
-                        </tbody>
-                    </table>
+                <div class="table-container" style="max-height: 60vh; overflow: hidden;">
+                    <div class="table-scroll-container" style="max-height: 60vh;">
+                        <table class="stock-table" id="restaurants-table">
+                            <thead>
+                                <tr>
+                                    <th style="min-width: 60px;">序号</th>
+                                    <th style="min-width: 150px;">餐厅店面名称</th>
+                                    <th style="min-width: 100px;">代码</th>
+                                    <th style="min-width: 100px;">显示顺序</th>
+                                    <th style="min-width: 120px;">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="restaurants-tbody">
+                                <!-- 动态填充 -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
             <div class="modal-actions">
@@ -5456,11 +5500,11 @@ header('Expires: 0');
                         if (result.data && result.data.length > 0) {
                             tbody.innerHTML = result.data.map((restaurant, index) => `
                                 <tr>
-                                    <td>${index + 1}</td>
+                                    <td style="text-align: center;">${index + 1}</td>
                                     <td>${restaurant.name}</td>
                                     <td>${restaurant.code}</td>
-                                    <td>${restaurant.display_order || 0}</td>
-                                    <td>
+                                    <td style="text-align: center;">${restaurant.display_order || 0}</td>
+                                    <td style="text-align: center; white-space: nowrap;">
                                         <button class="action-btn edit-btn" onclick="editRestaurant(${restaurant.id})" title="编辑">
                                             <i class="fas fa-edit"></i>
                                         </button>
