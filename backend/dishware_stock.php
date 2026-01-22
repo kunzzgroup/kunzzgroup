@@ -582,32 +582,6 @@ header('Expires: 0');
             color: white !important;
         }
 
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            #setModal .modal-content {
-                width: 98%;
-                margin: 10px;
-            }
-            
-            #setModal .modal-form {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            #setModal .set-item-row {
-                flex-direction: column;
-                gap: 12px;
-            }
-            
-            #setModal .dishware-select {
-                width: 100%;
-            }
-            
-            #setModal .btn-remove {
-                width: 100%;
-                justify-content: center;
-            }
-        }
         
         .btn-success {
             background-color: #10b981;
@@ -810,23 +784,6 @@ header('Expires: 0');
         #j3-table th:nth-child(10), #j3-table td:nth-child(10) { width: 90px; } /* Total Price */
         #j3-table th:nth-child(11), #j3-table td:nth-child(11) { width: 100px; } /* Actions */
 
-        /* 响应式列宽调整 */
-        @media (max-width: 1200px) {
-            .stock-table th:nth-child(1), .stock-table td:nth-child(1) { width: 40px; }  /* No. */
-            .stock-table th:nth-child(2), .stock-table td:nth-child(2) { width: 60px; }  /* Photo */
-            .stock-table th:nth-child(3), .stock-table td:nth-child(3) { width: 150px; } /* Product Name */
-            .stock-table th:nth-child(4), .stock-table td:nth-child(4) { width: 80px; } /* Code */
-            .stock-table th:nth-child(5), .stock-table td:nth-child(5) { width: 60px; } /* Category */
-            .stock-table th:nth-child(6), .stock-table td:nth-child(6) { width: 100px; } /* Size */
-            .stock-table th:nth-child(7), .stock-table td:nth-child(7) { width: 80px; } /* Price */
-            .stock-table th:nth-child(8), .stock-table td:nth-child(8) { width: 70px; } /* 文化楼 */
-            .stock-table th:nth-child(9), .stock-table td:nth-child(9) { width: 70px; } /* 中央 */
-            .stock-table th:nth-child(10), .stock-table td:nth-child(10) { width: 50px; } /* J1 */
-            .stock-table th:nth-child(11), .stock-table td:nth-child(11) { width: 50px; } /* J2 */
-            .stock-table th:nth-child(12), .stock-table td:nth-child(12) { width: 50px; } /* J3 */
-            .stock-table th:nth-child(13), .stock-table td:nth-child(13) { width: 70px; } /* Total */
-            .stock-table th:nth-child(14), .stock-table td:nth-child(14) { width: 80px; } /* Actions */
-        }
 
         .table-container {
             position: relative;
@@ -1143,39 +1100,6 @@ header('Expires: 0');
             font-size: 11px;
         }
 
-        /* 响应式调整 - 小屏幕时保持所有列可见 */
-        @media (max-width: 768px) {
-            #restaurantModal .modal-content {
-                width: 98vw;
-                min-width: 450px;
-                padding: 12px;
-            }
-            
-            #restaurantModal .stock-table th,
-            #restaurantModal .stock-table td {
-                padding: 6px 4px;
-                font-size: 12px;
-            }
-            
-            #restaurantModal .stock-table th:nth-child(1),
-            #restaurantModal .stock-table td:nth-child(1) {
-                width: 50px;
-                min-width: 50px;
-                max-width: 50px;
-            }
-            
-            #restaurantModal .stock-table th:nth-child(2),
-            #restaurantModal .stock-table td:nth-child(2) {
-                min-width: 120px;
-            }
-            
-            #restaurantModal .stock-table th:nth-child(3),
-            #restaurantModal .stock-table td:nth-child(3) {
-                width: 110px;
-                min-width: 110px;
-                max-width: 110px;
-            }
-        }
 
         .modal-header {
             display: flex;
@@ -1348,36 +1272,6 @@ header('Expires: 0');
             border-top: 2px solid #e5e7eb;
         }
 
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 16px;
-                align-items: flex-start;
-            }
-            
-            .header h1 {
-                font-size: 32px;
-            }
-            
-            .filter-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .filter-actions {
-                flex-direction: column;
-                width: 100%;
-            }
-            
-            .action-buttons {
-                flex-direction: column;
-                gap: 12px;
-            }
-            
-            .stats-info {
-                flex-direction: column;
-                gap: 8px;
-                align-items: flex-start;
-            }
 
         .stat-item {
             min-width: auto;
@@ -1710,39 +1604,6 @@ header('Expires: 0');
         #stock-table.transposed tr[data-row="操作"] td,
         .stock-table.transposed tr[data-row="操作"] td { min-width: 110px; }
 
-        /* 小屏幕时减小列宽 - 不影响默认页面大小 */
-        @media (max-width: 1400px) {
-            /* 内容单元格 - 减小最小宽度 */
-            #stock-table.transposed td,
-            .stock-table.transposed td {
-                min-width: 120px;
-            }
-            
-            /* 照片列 - 减小最小宽度 */
-            #stock-table.transposed tr[data-row="照片"] td,
-            .stock-table.transposed tr[data-row="照片"] td { 
-                min-width: 120px;
-            }
-            
-            /* 照片尺寸 - 减小最小值但保持最大值 */
-            #stock-table.transposed tr[data-row="照片"] td img.product-photo,
-            .stock-table.transposed tr[data-row="照片"] td img.product-photo {
-                width: clamp(90px, 7.8vw, 150px) !important;
-                height: clamp(90px, 7.8vw, 150px) !important;
-            }
-            
-            #stock-table.transposed tr[data-row="照片"] td .no-photo,
-            .stock-table.transposed tr[data-row="照片"] td .no-photo {
-                width: clamp(90px, 7.8vw, 150px) !important;
-                height: clamp(90px, 7.8vw, 150px) !important;
-            }
-            
-            /* 产品名称列 - 减小最小宽度 */
-            #stock-table.transposed tr[data-row="产品名称"] td,
-            .stock-table.transposed tr[data-row="产品名称"] td { 
-                min-width: 130px;
-            }
-        }
 
         /* 破损记录容器样式 - 多个表格左右排列 */
         .break-records-container {
