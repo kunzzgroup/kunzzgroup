@@ -2777,14 +2777,22 @@ header('Expires: 0');
 
             if (draggedRow !== this && this.hasAttribute('data-restaurant-row')) {
                 const table = this.closest('table');
-                if (!table) return false;
+                if (!table || !draggedRow) return false;
+                
+                // 获取父节点（可能是 tbody 或 table）
+                const parentNode = draggedRow.parentNode;
+                if (!parentNode || parentNode !== this.parentNode) {
+                    console.error('拖拽行和目标行不在同一个父节点下');
+                    this.classList.remove('drag-over');
+                    return false;
+                }
                 
                 // 获取所有餐厅行（在拖拽前的位置）
-                const allRestaurantRows = Array.from(table.querySelectorAll('tr[data-restaurant-row]'));
+                const allRestaurantRows = Array.from(parentNode.querySelectorAll('tr[data-restaurant-row]'));
                 const draggedIndex = allRestaurantRows.indexOf(draggedRow);
                 const targetIndex = allRestaurantRows.indexOf(this);
                 
-                if (draggedIndex === -1 || targetIndex === -1) {
+                if (draggedIndex === -1 || targetIndex === -1 || draggedIndex === targetIndex) {
                     this.classList.remove('drag-over');
                     return false;
                 }
@@ -2793,24 +2801,41 @@ header('Expires: 0');
                 const originalOrder = allRestaurantRows.map(row => parseInt(row.getAttribute('data-restaurant-id')));
                 
                 // 移动DOM元素（立即更新UI）
-                if (draggedIndex < targetIndex) {
-                    // 向下拖拽
-                    if (this.nextSibling) {
-                        table.insertBefore(draggedRow, this.nextSibling);
+                try {
+                    // 先移除 draggedRow（如果它还在 DOM 中）
+                    if (draggedRow.parentNode === parentNode) {
+                        if (draggedIndex < targetIndex) {
+                            // 向下拖拽：插入到目标行的下一个兄弟节点之前
+                            const nextSibling = this.nextSibling;
+                            if (nextSibling && nextSibling.parentNode === parentNode) {
+                                parentNode.insertBefore(draggedRow, nextSibling);
+                            } else {
+                                // 如果没有下一个兄弟节点，追加到末尾
+                                parentNode.appendChild(draggedRow);
+                            }
+                        } else {
+                            // 向上拖拽：插入到目标行之前
+                            parentNode.insertBefore(draggedRow, this);
+                        }
                     } else {
-                        table.appendChild(draggedRow);
+                        console.error('拖拽行已不在父节点中');
+                        this.classList.remove('drag-over');
+                        return false;
                     }
-                } else {
-                    // 向上拖拽
-                    table.insertBefore(draggedRow, this);
+                    
+                    // 获取新的顺序
+                    const newRestaurantRows = Array.from(parentNode.querySelectorAll('tr[data-restaurant-row]'));
+                    const newOrder = newRestaurantRows.map(row => parseInt(row.getAttribute('data-restaurant-id')));
+                    
+                    // 更新顺序到数据库
+                    updateRestaurantOrder(newOrder, originalOrder);
+                } catch (error) {
+                    console.error('移动行时发生错误:', error);
+                    // 如果失败，恢复原始顺序
+                    restoreRestaurantOrder(originalOrder);
+                    this.classList.remove('drag-over');
+                    return false;
                 }
-                
-                // 获取新的顺序
-                const newRestaurantRows = Array.from(table.querySelectorAll('tr[data-restaurant-row]'));
-                const newOrder = newRestaurantRows.map(row => parseInt(row.getAttribute('data-restaurant-id')));
-                
-                // 更新顺序到数据库
-                updateRestaurantOrder(newOrder, originalOrder);
             }
             
             this.classList.remove('drag-over');
@@ -2902,7 +2927,11 @@ header('Expires: 0');
         function restoreRestaurantOrder(originalOrder) {
             const tables = document.querySelectorAll('.stock-table.transposed');
             tables.forEach(table => {
-                const rows = Array.from(table.querySelectorAll('tr[data-restaurant-row]'));
+                // 获取父节点（可能是 tbody 或 table）
+                const tbody = table.querySelector('tbody');
+                const parentNode = tbody || table;
+                
+                const rows = Array.from(parentNode.querySelectorAll('tr[data-restaurant-row]'));
                 const rowMap = new Map();
                 rows.forEach(row => {
                     const id = parseInt(row.getAttribute('data-restaurant-id'));
@@ -2912,8 +2941,8 @@ header('Expires: 0');
                 // 按照原始顺序重新排列
                 originalOrder.forEach(id => {
                     const row = rowMap.get(id);
-                    if (row && row.parentNode) {
-                        table.appendChild(row);
+                    if (row && row.parentNode === parentNode) {
+                        parentNode.appendChild(row);
                     }
                 });
             });
