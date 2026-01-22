@@ -1066,20 +1066,56 @@ header('Expires: 0');
 
         #restaurantModal .table-scroll-container {
             flex: 1;
-            overflow-x: auto;
+            overflow-x: hidden;
             overflow-y: auto;
             min-height: 0;
         }
 
         #restaurantModal .stock-table {
             width: 100%;
-            table-layout: auto;
+            table-layout: fixed;
         }
 
         #restaurantModal .stock-table th,
         #restaurantModal .stock-table td {
+            padding: 10px 8px;
+            word-wrap: break-word;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #restaurantModal .stock-table th:nth-child(1),
+        #restaurantModal .stock-table td:nth-child(1) {
+            text-align: center;
+            width: 10%;
+        }
+
+        #restaurantModal .stock-table th:nth-child(2),
+        #restaurantModal .stock-table td:nth-child(2) {
+            width: 30%;
+        }
+
+        #restaurantModal .stock-table th:nth-child(3),
+        #restaurantModal .stock-table td:nth-child(3) {
+            width: 20%;
+        }
+
+        #restaurantModal .stock-table th:nth-child(4),
+        #restaurantModal .stock-table td:nth-child(4) {
+            text-align: center;
+            width: 20%;
+        }
+
+        #restaurantModal .stock-table th:nth-child(5),
+        #restaurantModal .stock-table td:nth-child(5) {
+            text-align: center;
+            width: 20%;
             white-space: nowrap;
-            padding: 12px 8px;
+        }
+
+        #restaurantModal .stock-table .action-btn {
+            margin: 0 4px;
+            padding: 6px 10px;
         }
 
         .modal-header {
@@ -2206,15 +2242,15 @@ header('Expires: 0');
                     </button>
                 </div>
                 <div class="table-container" style="max-height: 60vh; overflow: hidden;">
-                    <div class="table-scroll-container" style="max-height: 60vh;">
-                        <table class="stock-table" id="restaurants-table">
+                    <div class="table-scroll-container" style="max-height: 60vh; overflow-x: hidden;">
+                        <table class="stock-table" id="restaurants-table" style="width: 100%; table-layout: fixed;">
                             <thead>
                                 <tr>
-                                    <th style="min-width: 60px;">序号</th>
-                                    <th style="min-width: 150px;">餐厅店面名称</th>
-                                    <th style="min-width: 100px;">代码</th>
-                                    <th style="min-width: 100px;">显示顺序</th>
-                                    <th style="min-width: 120px;">操作</th>
+                                    <th style="width: 10%;">序号</th>
+                                    <th style="width: 30%;">餐厅店面名称</th>
+                                    <th style="width: 20%;">代码</th>
+                                    <th style="width: 20%;">显示顺序</th>
+                                    <th style="width: 20%;">操作</th>
                                 </tr>
                             </thead>
                             <tbody id="restaurants-tbody">
@@ -5500,11 +5536,11 @@ header('Expires: 0');
                         if (result.data && result.data.length > 0) {
                             tbody.innerHTML = result.data.map((restaurant, index) => `
                                 <tr>
-                                    <td style="text-align: center;">${index + 1}</td>
+                                    <td>${index + 1}</td>
                                     <td>${restaurant.name}</td>
                                     <td>${restaurant.code}</td>
-                                    <td style="text-align: center;">${restaurant.display_order || 0}</td>
-                                    <td style="text-align: center; white-space: nowrap;">
+                                    <td>${restaurant.display_order || 0}</td>
+                                    <td>
                                         <button class="action-btn edit-btn" onclick="editRestaurant(${restaurant.id})" title="编辑">
                                             <i class="fas fa-edit"></i>
                                         </button>
