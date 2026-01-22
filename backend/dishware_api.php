@@ -957,10 +957,19 @@ function getSetStockList() {
         $restaurants_stmt->execute();
         $restaurants = $restaurants_stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // 获取套装基本信息
-        $sql = "SELECT ds.id, ds.set_name, ds.set_code, ds.set_price
+        // 获取套装基本信息（包含 items_list）
+        $sql = "SELECT ds.id, ds.set_name, ds.set_code, ds.set_price,
+                       GROUP_CONCAT(
+                           CONCAT(di.product_name, ' (', di.code_number, ')') 
+                           ORDER BY dsi.sort_order 
+                           SEPARATOR ', '
+                       ) as items_list,
+                       COUNT(dsi.dishware_id) as items_count
                 FROM dishware_sets ds
+                LEFT JOIN dishware_set_items dsi ON ds.id = dsi.set_id
+                LEFT JOIN dishware_info di ON dsi.dishware_id = di.id
                 WHERE ds.is_active = 1
+                GROUP BY ds.id
                 ORDER BY ds.set_name";
         
         $stmt = $pdo->prepare($sql);
@@ -970,6 +979,10 @@ function getSetStockList() {
         // 为每个套装获取各餐厅店面的库存
         foreach ($results as &$item) {
             $item['formatted_price'] = number_format($item['set_price'], 2);
+            // 如果 items_list 为空，设置为 null
+            if (empty($item['items_list'])) {
+                $item['items_list'] = null;
+            }
             $item['restaurant_stocks'] = [];
             $total_quantity = 0;
             
