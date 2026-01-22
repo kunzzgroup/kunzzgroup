@@ -2154,7 +2154,7 @@ header('Expires: 0');
         <div class="modal-content" style="max-width: 900px;">
             <div class="modal-header">
                 <h2 class="modal-title">管理餐厅店面</h2>
-                <span class="close" onclick="closeModal()">&times;</span>
+                <span class="close" onclick="closeRestaurantModal()">&times;</span>
             </div>
             <div class="modal-body">
                 <div style="margin-bottom: 20px;">
@@ -2181,7 +2181,7 @@ header('Expires: 0');
                 </div>
             </div>
             <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeModal()">关闭</button>
+                <button type="button" class="btn btn-secondary" onclick="closeRestaurantModal()">关闭</button>
             </div>
         </div>
     </div>
@@ -4424,7 +4424,7 @@ header('Expires: 0');
         function closeModal() {
             console.log('closeModal 函数被调用');
             try {
-                const modals = ['editModal', 'addModal', 'damageModal', 'setModal'];
+                const modals = ['editModal', 'addModal', 'damageModal', 'setModal', 'restaurantModal', 'addRestaurantModal'];
                 modals.forEach(modalId => {
                     const modal = document.getElementById(modalId);
                     if (modal) {
@@ -4863,7 +4863,7 @@ header('Expires: 0');
             // Escape键关闭模态框或重置搜索
             if (e.key === 'Escape') {
                 // 检查是否有模态框打开
-                const modals = ['editModal', 'addModal', 'damageModal', 'setModal'];
+                const modals = ['editModal', 'addModal', 'damageModal', 'setModal', 'restaurantModal', 'addRestaurantModal'];
                 let modalOpen = false;
                 
                 modals.forEach(modalId => {
@@ -4887,9 +4887,11 @@ header('Expires: 0');
             const addModal = document.getElementById('addModal');
             const damageModal = document.getElementById('damageModal');
             const setModal = document.getElementById('setModal');
+            const restaurantModal = document.getElementById('restaurantModal');
+            const addRestaurantModal = document.getElementById('addRestaurantModal');
             
             // 处理模态框关闭
-            if (event.target == editModal || event.target == addModal || event.target == damageModal || event.target == setModal) {
+            if (event.target == editModal || event.target == addModal || event.target == damageModal || event.target == setModal || event.target == restaurantModal || event.target == addRestaurantModal) {
                 closeModal();
             }
             
@@ -5432,8 +5434,16 @@ header('Expires: 0');
         function closeRestaurantModal() {
             const modal = document.getElementById('restaurantModal');
             const addModal = document.getElementById('addRestaurantModal');
-            if (modal) modal.style.display = 'none';
-            if (addModal) addModal.style.display = 'none';
+            if (modal) {
+                modal.style.display = 'none';
+                console.log('餐厅店面管理模态框已关闭');
+            }
+            if (addModal) {
+                addModal.style.display = 'none';
+                console.log('添加餐厅店面模态框已关闭');
+            }
+            // 也调用通用的 closeModal 以确保所有模态框都被关闭
+            closeModal();
         }
 
         // 加载餐厅店面列表
