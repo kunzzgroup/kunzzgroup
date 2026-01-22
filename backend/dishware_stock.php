@@ -2773,25 +2773,44 @@ header('Expires: 0');
             if (e.stopPropagation) {
                 e.stopPropagation();
             }
+            e.preventDefault();
 
             if (draggedRow !== this && this.hasAttribute('data-restaurant-row')) {
-                const targetRestaurantId = this.getAttribute('data-restaurant-id');
                 const table = this.closest('table');
+                if (!table) return false;
                 
-                // 获取所有餐厅行
+                // 获取所有餐厅行（在拖拽前的位置）
                 const allRestaurantRows = Array.from(table.querySelectorAll('tr[data-restaurant-row]'));
                 const draggedIndex = allRestaurantRows.indexOf(draggedRow);
                 const targetIndex = allRestaurantRows.indexOf(this);
                 
-                // 移动行
+                if (draggedIndex === -1 || targetIndex === -1) {
+                    this.classList.remove('drag-over');
+                    return false;
+                }
+                
+                // 保存原始顺序（用于失败时恢复）
+                const originalOrder = allRestaurantRows.map(row => parseInt(row.getAttribute('data-restaurant-id')));
+                
+                // 移动DOM元素（立即更新UI）
                 if (draggedIndex < targetIndex) {
-                    table.insertBefore(draggedRow, this.nextSibling);
+                    // 向下拖拽
+                    if (this.nextSibling) {
+                        table.insertBefore(draggedRow, this.nextSibling);
+                    } else {
+                        table.appendChild(draggedRow);
+                    }
                 } else {
+                    // 向上拖拽
                     table.insertBefore(draggedRow, this);
                 }
                 
-                // 更新顺序
-                updateRestaurantOrder();
+                // 获取新的顺序
+                const newRestaurantRows = Array.from(table.querySelectorAll('tr[data-restaurant-row]'));
+                const newOrder = newRestaurantRows.map(row => parseInt(row.getAttribute('data-restaurant-id')));
+                
+                // 更新顺序到数据库
+                updateRestaurantOrder(newOrder, originalOrder);
             }
             
             this.classList.remove('drag-over');
@@ -2808,27 +2827,26 @@ header('Expires: 0');
         }
 
         // 更新餐厅店面顺序
-        async function updateRestaurantOrder() {
-            const table = document.querySelector('.stock-table.transposed');
-            if (!table) return;
+        async function updateRestaurantOrder(newOrder, originalOrder = null) {
+            if (!newOrder || newOrder.length === 0) return;
             
-            const restaurantRows = Array.from(table.querySelectorAll('tr[data-restaurant-row]'));
-            const restaurantIds = restaurantRows.map(row => parseInt(row.getAttribute('data-restaurant-id')));
-            
-            if (restaurantIds.length === 0) return;
+            // 如果顺序没有变化，不需要更新
+            if (originalOrder && JSON.stringify(newOrder) === JSON.stringify(originalOrder)) {
+                return;
+            }
             
             try {
                 const result = await apiCall('', {
                     method: 'POST',
                     body: JSON.stringify({
                         action: 'update_restaurant_order',
-                        orders: restaurantIds
+                        orders: newOrder
                     })
                 });
                 
                 if (result.success) {
                     // 更新本地 restaurants 数组的顺序
-                    const newOrder = restaurantIds.map((id, index) => {
+                    const sortedRestaurants = newOrder.map((id, index) => {
                         const restaurant = restaurants.find(r => r.id == id);
                         if (restaurant) {
                             restaurant.display_order = index + 1;
@@ -2836,31 +2854,69 @@ header('Expires: 0');
                         return restaurant;
                     }).filter(r => r);
                     
-                    restaurants = newOrder;
+                    // 保持其他餐厅（如果有新添加的）
+                    const otherRestaurants = restaurants.filter(r => !newOrder.includes(r.id));
+                    restaurants = [...sortedRestaurants, ...otherRestaurants].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
                     
-                    // 重新加载数据以更新显示
+                    // 重新加载数据以更新所有表格的显示
                     if (currentPage === 'stock') {
                         await loadStockData(true);
                     } else if (currentPage === 'sets') {
                         await loadSetsData();
                     }
                     
+                    // 重新初始化拖拽功能
+                    setTimeout(() => {
+                        initDragAndDrop();
+                    }, 100);
+                    
                     showAlert('餐厅店面顺序已更新', 'success');
                 } else {
                     showAlert('更新顺序失败: ' + (result.message || '未知错误'), 'error');
-                    // 如果失败，重新加载数据恢复原顺序
-                    if (currentPage === 'stock') {
-                        await loadStockData(true);
+                    // 如果失败，恢复原始顺序
+                    if (originalOrder) {
+                        restoreRestaurantOrder(originalOrder);
+                    } else {
+                        // 如果不知道原始顺序，重新加载数据
+                        if (currentPage === 'stock') {
+                            await loadStockData(true);
+                        }
                     }
                 }
             } catch (error) {
                 console.error('更新餐厅店面顺序时发生错误:', error);
                 showAlert('更新顺序失败: ' + error.message, 'error');
-                // 如果失败，重新加载数据恢复原顺序
-                if (currentPage === 'stock') {
-                    await loadStockData(true);
+                // 如果失败，恢复原始顺序
+                if (originalOrder) {
+                    restoreRestaurantOrder(originalOrder);
+                } else {
+                    // 如果不知道原始顺序，重新加载数据
+                    if (currentPage === 'stock') {
+                        await loadStockData(true);
+                    }
                 }
             }
+        }
+
+        // 恢复餐厅店面顺序（当更新失败时）
+        function restoreRestaurantOrder(originalOrder) {
+            const tables = document.querySelectorAll('.stock-table.transposed');
+            tables.forEach(table => {
+                const rows = Array.from(table.querySelectorAll('tr[data-restaurant-row]'));
+                const rowMap = new Map();
+                rows.forEach(row => {
+                    const id = parseInt(row.getAttribute('data-restaurant-id'));
+                    rowMap.set(id, row);
+                });
+                
+                // 按照原始顺序重新排列
+                originalOrder.forEach(id => {
+                    const row = rowMap.get(id);
+                    if (row && row.parentNode) {
+                        table.appendChild(row);
+                    }
+                });
+            });
         }
 
         // 设置页面切换器
@@ -4099,7 +4155,7 @@ header('Expires: 0');
                             const totalQty = parseInt(setItem.total_quantity) || 0;
                             const totalClass = totalQty > 0 ? 'positive-value' : 'zero-value';
 
-                            displayRows.push({
+                            const rowData = {
                                 no: String(displayIndex),
                                 photo: photoHtmlFrom(setItem.photo_path, setItem.product_name || '', 'fa-image'),
                                 product_name: `<strong>${setItem.product_name || '-'}</strong>`,
@@ -4107,11 +4163,6 @@ header('Expires: 0');
                                 category: setItem.category || set.category || '-',
                                 size: setItem.size || '-',
                                 unit_price: currencyHtml(setPrice),
-                                wenhua: String(setItem.wenhua_quantity || 0),
-                                central: String(setItem.central_quantity || 0),
-                                j1: String(setItem.j1_quantity || 0),
-                                j2: String(setItem.j2_quantity || 0),
-                                j3: String(setItem.j3_quantity || 0),
                                 total: `<span class="${totalClass}">${totalQty}</span>`,
                                 actions: `
                                     <button class="action-btn edit-btn" onclick="openEditModal(${setItem.id})" title="编辑">
@@ -4121,18 +4172,15 @@ header('Expires: 0');
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 `
-                            });
+                            };
+                            fillRestaurantStocks(rowData, setItem);
+                            displayRows.push(rowData);
                         });
                     } else {
-                        const wenhuaQuantity = parseInt(set.wenhua_quantity) || 0;
-                        const centralQuantity = parseInt(set.central_quantity) || 0;
-                        const j1Quantity = parseInt(set.j1_quantity) || 0;
-                        const j2Quantity = parseInt(set.j2_quantity) || 0;
-                        const j3Quantity = parseInt(set.j3_quantity) || 0;
-                        const totalQty = parseInt(set.total_quantity) || (wenhuaQuantity + centralQuantity + j1Quantity + j2Quantity + j3Quantity);
+                        const totalQty = parseInt(set.total_quantity) || 0;
                         const totalClass = totalQty > 0 ? 'positive-value' : 'zero-value';
-
-                        displayRows.push({
+                        
+                        const rowData = {
                             no: String(displayIndex),
                             photo: photoHtmlFrom(set.photo_path, set.product_name || set.set_name || '', 'fa-box'),
                             product_name: `<strong>${set.product_name || set.set_name || '-'}</strong>`,
@@ -4140,11 +4188,6 @@ header('Expires: 0');
                             category: set.category || 'SET',
                             size: '-',
                             unit_price: currencyHtml(setPrice),
-                            wenhua: String(wenhuaQuantity),
-                            central: String(centralQuantity),
-                            j1: String(j1Quantity),
-                            j2: String(j2Quantity),
-                            j3: String(j3Quantity),
                             total: `<span class="${totalClass}">${totalQty}</span>`,
                             actions: `
                                 <button class="action-btn edit-btn" onclick="editSet(${set.id})" title="编辑">
@@ -4154,13 +4197,15 @@ header('Expires: 0');
                                     <i class="fas fa-trash"></i>
                                 </button>
                             `
-                        });
+                        };
+                        fillRestaurantStocks(rowData, set);
+                        displayRows.push(rowData);
                     }
                 } else {
                     const totalQty = parseInt(item.total_quantity) || 0;
                     const totalClass = totalQty > 0 ? 'positive-value' : 'zero-value';
-
-                    displayRows.push({
+                    
+                    const rowData = {
                         no: String(rowIndex++),
                         photo: photoHtmlFrom(item.photo_path, item.product_name || '', 'fa-image'),
                         product_name: `<strong>${item.product_name || '-'}</strong>`,
@@ -4168,11 +4213,6 @@ header('Expires: 0');
                         category: item.category || '-',
                         size: item.size || '-',
                         unit_price: currencyHtml(item.unit_price || 0),
-                        wenhua: String(item.wenhua_quantity || 0),
-                        central: String(item.central_quantity || 0),
-                        j1: String(item.j1_quantity || 0),
-                        j2: String(item.j2_quantity || 0),
-                        j3: String(item.j3_quantity || 0),
                         total: `<span class="${totalClass}">${totalQty}</span>`,
                         actions: `
                             <button class="action-btn edit-btn" onclick="openEditModal(${item.id})" title="编辑">
@@ -4182,7 +4222,9 @@ header('Expires: 0');
                                 <i class="fas fa-trash"></i>
                             </button>
                         `
-                    });
+                    };
+                    fillRestaurantStocks(rowData, item);
+                    displayRows.push(rowData);
                 }
             });
 
@@ -4191,26 +4233,18 @@ header('Expires: 0');
             const thead = table.querySelector('thead');
             if (thead) thead.innerHTML = '';
 
-            const fieldDefs = [
-                { label: 'NO', key: 'no' },
-                { label: '照片', key: 'photo' },
-                { label: '产品名称', key: 'product_name' },
-                { label: '编号', key: 'code_number' },
-                { label: '分类', key: 'category' },
-                { label: '尺寸', key: 'size' },
-                { label: '单价', key: 'unit_price' },
-                { label: '文化楼', key: 'wenhua' },
-                { label: '中央', key: 'central' },
-                { label: 'J1', key: 'j1' },
-                { label: 'J2', key: 'j2' },
-                { label: 'J3', key: 'j3' },
-                { label: '总数', key: 'total' },
-                { label: '操作', key: 'actions' }
-            ];
+            // 使用动态字段定义（包含餐厅店面）
+            const fieldDefs = getDynamicFieldDefs();
 
             let html = '';
             fieldDefs.forEach((f) => {
-                html += `<tr data-row="${f.label}"><th class="row-header">${f.label}</th>`;
+                // 检查是否是餐厅店面行
+                const isRestaurantRow = f.restaurantId !== undefined;
+                const rowAttributes = isRestaurantRow 
+                    ? `data-row="${f.label}" data-restaurant-row data-restaurant-id="${f.restaurantId}" draggable="true"`
+                    : `data-row="${f.label}"`;
+                
+                html += `<tr ${rowAttributes}><th class="row-header">${f.label}</th>`;
                 displayRows.forEach((r) => {
                     const cell = (r && typeof r[f.key] !== 'undefined') ? r[f.key] : '-';
                     html += `<td>${cell}</td>`;
@@ -4219,6 +4253,10 @@ header('Expires: 0');
             });
 
             tbody.innerHTML = html;
+            // 初始化拖拽排序功能
+            setTimeout(() => {
+                initDragAndDrop();
+            }, 100);
         }
 
         // 按分类分组渲染库存表格
@@ -4349,7 +4387,7 @@ header('Expires: 0');
                             const totalQty = parseInt(setItem.total_quantity) || 0;
                             const totalClass = totalQty > 0 ? 'positive-value' : 'zero-value';
                             
-                            displayRows.push({
+                            const rowData = {
                                 no: String(displayIndex),
                                 photo: photoHtmlFrom(setItem.photo_path, setItem.product_name || '', 'fa-image'),
                                 product_name: `<strong>${setItem.product_name || '-'}</strong>`,
@@ -4357,11 +4395,6 @@ header('Expires: 0');
                                 category: setItem.category || set.category || '-',
                                 size: setItem.size || '-',
                                 unit_price: currencyHtml(setPrice),
-                                wenhua: String(setItem.wenhua_quantity || 0),
-                                central: String(setItem.central_quantity || 0),
-                                j1: String(setItem.j1_quantity || 0),
-                                j2: String(setItem.j2_quantity || 0),
-                                j3: String(setItem.j3_quantity || 0),
                                 total: `<span class="${totalClass}">${totalQty}</span>`,
                                 actions: `
                                     <button class="action-btn edit-btn" onclick="openEditModal(${setItem.id})" title="编辑">
@@ -4371,7 +4404,9 @@ header('Expires: 0');
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 `
-                            });
+                            };
+                            fillRestaurantStocks(rowData, setItem);
+                            displayRows.push(rowData);
                         });
                     } else {
                         const totalQty = parseInt(set.total_quantity) || 0;
