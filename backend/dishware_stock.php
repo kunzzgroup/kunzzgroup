@@ -1823,35 +1823,35 @@ header('Expires: 0');
             white-space: nowrap;
         }
 
-        /* 固定列宽 */
+        /* 固定列宽（使用百分比） */
         .break-record-table th:nth-child(1),
         .break-record-table td:nth-child(1) {
-            width: 60px; /* No. */
+            width: 8%; /* No. */
         }
 
         .break-record-table th:nth-child(2),
         .break-record-table td:nth-child(2) {
-            width: 150px; /* 编号 */
+            width: 25%; /* 编号 */
         }
 
         .break-record-table th:nth-child(3),
         .break-record-table td:nth-child(3) {
-            width: 120px; /* 破损数量 */
+            width: 18%; /* 破损数量 */
         }
 
         .break-record-table th:nth-child(4),
         .break-record-table td:nth-child(4) {
-            width: 100px; /* 单价 */
+            width: 15%; /* 单价 */
         }
 
         .break-record-table th:nth-child(5),
         .break-record-table td:nth-child(5) {
-            width: 100px; /* 总价 */
+            width: 15%; /* 总价 */
         }
 
         .break-record-table th:nth-child(6),
         .break-record-table td:nth-child(6) {
-            width: 100px; /* 操作 */
+            width: 19%; /* 操作 */
         }
 
         .break-record-table td {
@@ -2019,35 +2019,35 @@ header('Expires: 0');
             white-space: nowrap;
         }
 
-        /* 固定列宽 */
+        /* 固定列宽（使用百分比） */
         .break-record-table th:nth-child(1),
         .break-record-table td:nth-child(1) {
-            width: 60px; /* No. */
+            width: 8%; /* No. */
         }
 
         .break-record-table th:nth-child(2),
         .break-record-table td:nth-child(2) {
-            width: 150px; /* 编号 */
+            width: 25%; /* 编号 */
         }
 
         .break-record-table th:nth-child(3),
         .break-record-table td:nth-child(3) {
-            width: 120px; /* 破损数量 */
+            width: 18%; /* 破损数量 */
         }
 
         .break-record-table th:nth-child(4),
         .break-record-table td:nth-child(4) {
-            width: 100px; /* 单价 */
+            width: 15%; /* 单价 */
         }
 
         .break-record-table th:nth-child(5),
         .break-record-table td:nth-child(5) {
-            width: 100px; /* 总价 */
+            width: 15%; /* 总价 */
         }
 
         .break-record-table th:nth-child(6),
         .break-record-table td:nth-child(6) {
-            width: 100px; /* 操作 */
+            width: 19%; /* 操作 */
         }
 
         .break-record-table td {
