@@ -1996,13 +1996,6 @@ header('Expires: 0');
             background-color: #f3f4f6;
         }
 
-        /* 响应式：小屏幕时垂直排列 */
-        @media (max-width: 1400px) {
-            .break-records-container {
-                flex-direction: column;
-            }
-        }
-
         /* 拖拽排序样式 */
         .stock-table.transposed tr[data-restaurant-row] {
             user-select: none;
