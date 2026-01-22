@@ -687,6 +687,13 @@ header('Expires: 0');
             font-size: 14px;
         }
 
+        .stock-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #636363;
+        }
+
         .stock-table th {
             background: #636363;
             color: white;
@@ -812,6 +819,9 @@ header('Expires: 0');
         }
 
         .table-container {
+            position: relative;
+            overflow-y: auto;
+            max-height: calc(100vh - 300px); /* 根据实际页面高度调整 */
             background: white;
             border-radius: 4px;
             box-shadow: 0 4px 12px rgba(88, 62, 4, 0.1);
@@ -830,6 +840,8 @@ header('Expires: 0');
             flex: 1;
             position: relative;
             transition: opacity 0.2s ease; /* 添加平滑过渡效果 */
+            /* 确保 sticky 定位在滚动容器内工作 */
+            height: 100%;
         }
 
         /* 自定义滚动条样式 */
