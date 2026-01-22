@@ -192,6 +192,9 @@ function handlePost() {
         case 'delete_restaurant':
             deleteRestaurant();
             break;
+        case 'update_restaurant_order':
+            updateRestaurantOrder();
+            break;
         default:
             sendResponse(false, "无效的操作");
     }
@@ -1541,6 +1544,46 @@ function getRestaurants() {
     }
 }
 
+// 生成餐厅店面代码
+function generateRestaurantCode($name, $addSuffix = false) {
+    global $pdo;
+    
+    // 移除空格和特殊字符，转换为小写
+    $code = preg_replace('/[^a-zA-Z0-9_]/', '', strtolower($name));
+    
+    // 如果代码为空或太短，使用默认值
+    if (empty($code) || strlen($code) < 2) {
+        $code = 'restaurant_' . time();
+    }
+    
+    // 如果代码太长，截断
+    if (strlen($code) > 50) {
+        $code = substr($code, 0, 50);
+    }
+    
+    // 检查代码是否已存在
+    if ($addSuffix) {
+        $counter = 1;
+        $original_code = $code;
+        while (true) {
+            $check_sql = "SELECT id FROM dishware_restaurant_locations WHERE code = ?";
+            $check_stmt = $pdo->prepare($check_sql);
+            $check_stmt->execute([$code]);
+            if (!$check_stmt->fetch()) {
+                break;
+            }
+            $code = $original_code . '_' . $counter;
+            $counter++;
+            if ($counter > 100) {
+                $code = $original_code . '_' . time();
+                break;
+            }
+        }
+    }
+    
+    return $code;
+}
+
 // 添加餐厅店面
 function addRestaurant() {
     global $pdo, $data;
@@ -1548,24 +1591,23 @@ function addRestaurant() {
     $postData = !empty($data) ? $data : $_POST;
     
     $name = $postData['name'] ?? '';
-    $code = $postData['code'] ?? '';
-    $display_order = $postData['display_order'] ?? 0;
     
     if (empty($name)) {
         sendResponse(false, "缺少餐厅店面名称");
     }
     
-    if (empty($code)) {
-        sendResponse(false, "缺少餐厅店面代码");
-    }
-    
-    // 验证代码格式（只允许字母、数字和下划线）
-    if (!preg_match('/^[a-zA-Z0-9_]+$/', $code)) {
-        sendResponse(false, "餐厅店面代码只能包含字母、数字和下划线");
-    }
-    
     try {
         $pdo->beginTransaction();
+        
+        // 自动生成代码（基于名称）
+        $code = generateRestaurantCode($name);
+        
+        // 获取当前最大的display_order，新添加的排在最后
+        $max_order_sql = "SELECT MAX(display_order) as max_order FROM dishware_restaurant_locations";
+        $max_order_stmt = $pdo->prepare($max_order_sql);
+        $max_order_stmt->execute();
+        $max_order_result = $max_order_stmt->fetch(PDO::FETCH_ASSOC);
+        $display_order = ($max_order_result['max_order'] ?? 0) + 1;
         
         // 插入餐厅店面
         $sql = "INSERT INTO dishware_restaurant_locations (name, code, display_order) VALUES (?, ?, ?)";
@@ -1606,7 +1648,47 @@ function addRestaurant() {
     } catch (PDOException $e) {
         $pdo->rollBack();
         if ($e->getCode() == 23000) {
-            sendResponse(false, "餐厅店面代码已存在");
+            // 如果代码冲突，尝试添加数字后缀
+            $code = generateRestaurantCode($name, true);
+            try {
+                $pdo->beginTransaction();
+                $max_order_sql = "SELECT MAX(display_order) as max_order FROM dishware_restaurant_locations";
+                $max_order_stmt = $pdo->prepare($max_order_sql);
+                $max_order_stmt->execute();
+                $max_order_result = $max_order_stmt->fetch(PDO::FETCH_ASSOC);
+                $display_order = ($max_order_result['max_order'] ?? 0) + 1;
+                
+                $sql = "INSERT INTO dishware_restaurant_locations (name, code, display_order) VALUES (?, ?, ?)";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$name, $code, $display_order]);
+                $restaurant_id = $pdo->lastInsertId();
+                
+                // 创建库存记录（同上）
+                $dishware_sql = "SELECT id FROM dishware_info";
+                $dishware_stmt = $pdo->prepare($dishware_sql);
+                $dishware_stmt->execute();
+                $dishwares = $dishware_stmt->fetchAll(PDO::FETCH_ASSOC);
+                foreach ($dishwares as $dishware) {
+                    $stock_sql = "INSERT INTO dishware_stock_by_restaurant (dishware_id, restaurant_id, quantity) VALUES (?, ?, 0)";
+                    $stock_stmt = $pdo->prepare($stock_sql);
+                    $stock_stmt->execute([$dishware['id'], $restaurant_id]);
+                }
+                $set_sql = "SELECT id FROM dishware_sets WHERE is_active = 1";
+                $set_stmt = $pdo->prepare($set_sql);
+                $set_stmt->execute();
+                $sets = $set_stmt->fetchAll(PDO::FETCH_ASSOC);
+                foreach ($sets as $set) {
+                    $set_stock_sql = "INSERT INTO dishware_set_stock_by_restaurant (set_id, restaurant_id, quantity) VALUES (?, ?, 0)";
+                    $set_stock_stmt = $pdo->prepare($set_stock_sql);
+                    $set_stock_stmt->execute([$set['id'], $restaurant_id]);
+                }
+                
+                $pdo->commit();
+                sendResponse(true, "添加餐厅店面成功", ['id' => $restaurant_id]);
+            } catch (PDOException $e2) {
+                $pdo->rollBack();
+                sendResponse(false, "添加餐厅店面失败：" . $e2->getMessage());
+            }
         } else {
             sendResponse(false, "添加餐厅店面失败：" . $e->getMessage());
         }
@@ -1619,8 +1701,6 @@ function updateRestaurant() {
     
     $id = $data['id'] ?? $_POST['id'] ?? '';
     $name = $data['name'] ?? $_POST['name'] ?? '';
-    $code = $data['code'] ?? $_POST['code'] ?? '';
-    $display_order = $data['display_order'] ?? $_POST['display_order'] ?? 0;
     
     if (empty($id)) {
         sendResponse(false, "缺少餐厅店面ID");
@@ -1630,32 +1710,55 @@ function updateRestaurant() {
         sendResponse(false, "缺少餐厅店面名称");
     }
     
-    if (empty($code)) {
-        sendResponse(false, "缺少餐厅店面代码");
-    }
-    
-    // 验证代码格式
-    if (!preg_match('/^[a-zA-Z0-9_]+$/', $code)) {
-        sendResponse(false, "餐厅店面代码只能包含字母、数字和下划线");
-    }
-    
     try {
         $sql = "UPDATE dishware_restaurant_locations SET 
-                name = ?, code = ?, display_order = ?, 
+                name = ?, 
                 updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?";
         
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$name, $code, $display_order, $id]);
+        $stmt->execute([$name, $id]);
         
         sendResponse(true, "更新餐厅店面成功");
         
     } catch (PDOException $e) {
-        if ($e->getCode() == 23000) {
-            sendResponse(false, "餐厅店面代码已存在");
-        } else {
-            sendResponse(false, "更新餐厅店面失败：" . $e->getMessage());
+        sendResponse(false, "更新餐厅店面失败：" . $e->getMessage());
+    }
+}
+
+// 更新餐厅店面顺序
+function updateRestaurantOrder() {
+    global $pdo, $data;
+    
+    $orders = $data['orders'] ?? $_POST['orders'] ?? [];
+    
+    if (empty($orders) || !is_array($orders)) {
+        sendResponse(false, "缺少顺序数据");
+    }
+    
+    try {
+        $pdo->beginTransaction();
+        
+        foreach ($orders as $order) {
+            if (!isset($order['id']) || !isset($order['display_order'])) {
+                continue;
+            }
+            
+            $sql = "UPDATE dishware_restaurant_locations SET 
+                    display_order = ?, 
+                    updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?";
+            
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$order['display_order'], $order['id']]);
         }
+        
+        $pdo->commit();
+        sendResponse(true, "更新餐厅店面顺序成功");
+        
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        sendResponse(false, "更新餐厅店面顺序失败：" . $e->getMessage());
     }
 }
 
