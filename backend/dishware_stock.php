@@ -3501,12 +3501,20 @@ header('Expires: 0');
         // API 调用函数
         async function apiCall(endpoint, options = {}) {
             try {
+                // 合并headers，确保Content-Type正确设置
+                const headers = {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                };
+                
+                // 如果是FormData，不设置Content-Type（让浏览器自动设置）
+                if (options.body instanceof FormData) {
+                    delete headers['Content-Type'];
+                }
+                
                 const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...options.headers
-                    },
-                    ...options
+                    ...options,
+                    headers: headers
                 });
                 
                 if (!response.ok) {
@@ -5672,7 +5680,7 @@ header('Expires: 0');
             }
             
             try {
-                const result = await apiCall('dishware_api.php', {
+                const result = await apiCall('', {
                     method: 'POST',
                     body: JSON.stringify({
                         action: 'delete_restaurant',
@@ -5739,7 +5747,7 @@ header('Expires: 0');
                             data.id = restaurantId;
                         }
                         
-                        const result = await apiCall('dishware_api.php', {
+                        const result = await apiCall('', {
                             method: 'POST',
                             body: JSON.stringify(data)
                         });
