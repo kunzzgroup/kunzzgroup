@@ -27,6 +27,28 @@ INSERT INTO `dishware_restaurant_locations` (`name`, `code`, `display_order`, `i
 ON DUPLICATE KEY UPDATE `name` = VALUES(`name`);
 
 -- 3. 创建碗碟库存关联表（替代原来的固定列结构）
+-- 如果表已存在，先删除旧的外键约束
+SET @dbname = DATABASE();
+SET @constraint_name = 'fk_dishware_stock_by_restaurant_restaurant';
+SET @table_name = 'dishware_stock_by_restaurant';
+
+-- 检查并删除旧的外键约束（如果存在）
+SET @sql = (SELECT IF(
+  (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    WHERE
+      (constraint_name = @constraint_name)
+      AND (table_schema = @dbname)
+      AND (table_name = @table_name)
+  ) > 0,
+  CONCAT('ALTER TABLE `', @table_name, '` DROP FOREIGN KEY `', @constraint_name, '`'),
+  'SELECT 1'
+));
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- 创建表（如果不存在）
 CREATE TABLE IF NOT EXISTS `dishware_stock_by_restaurant` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `dishware_id` int(11) NOT NULL COMMENT '碗碟ID',
@@ -41,7 +63,43 @@ CREATE TABLE IF NOT EXISTS `dishware_stock_by_restaurant` (
   CONSTRAINT `fk_dishware_stock_by_restaurant_restaurant` FOREIGN KEY (`restaurant_id`) REFERENCES `dishware_restaurant_locations` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='碗碟库存按餐厅店面关联表';
 
+-- 如果表已存在但外键约束不存在，添加外键约束
+SET @constraint_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+  WHERE constraint_name = @constraint_name
+  AND table_schema = @dbname
+  AND table_name = @table_name);
+
+SET @sql = (SELECT IF(
+  @constraint_exists = 0,
+  CONCAT('ALTER TABLE `', @table_name, '` ADD CONSTRAINT `', @constraint_name, '` FOREIGN KEY (`restaurant_id`) REFERENCES `dishware_restaurant_locations` (`id`) ON DELETE CASCADE'),
+  'SELECT 1'
+));
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
 -- 4. 创建套装库存关联表（替代原来的固定列结构）
+-- 如果表已存在，先删除旧的外键约束
+SET @constraint_name = 'fk_dishware_set_stock_by_restaurant_restaurant';
+SET @table_name = 'dishware_set_stock_by_restaurant';
+
+-- 检查并删除旧的外键约束（如果存在）
+SET @sql = (SELECT IF(
+  (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    WHERE
+      (constraint_name = @constraint_name)
+      AND (table_schema = @dbname)
+      AND (table_name = @table_name)
+  ) > 0,
+  CONCAT('ALTER TABLE `', @table_name, '` DROP FOREIGN KEY `', @constraint_name, '`'),
+  'SELECT 1'
+));
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- 创建表（如果不存在）
 CREATE TABLE IF NOT EXISTS `dishware_set_stock_by_restaurant` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `set_id` int(11) NOT NULL COMMENT '套装ID',
@@ -55,6 +113,21 @@ CREATE TABLE IF NOT EXISTS `dishware_set_stock_by_restaurant` (
   CONSTRAINT `fk_dishware_set_stock_by_restaurant_set` FOREIGN KEY (`set_id`) REFERENCES `dishware_sets` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_dishware_set_stock_by_restaurant_restaurant` FOREIGN KEY (`restaurant_id`) REFERENCES `dishware_restaurant_locations` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='套装库存按餐厅店面关联表';
+
+-- 如果表已存在但外键约束不存在，添加外键约束
+SET @constraint_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+  WHERE constraint_name = @constraint_name
+  AND table_schema = @dbname
+  AND table_name = @table_name);
+
+SET @sql = (SELECT IF(
+  @constraint_exists = 0,
+  CONCAT('ALTER TABLE `', @table_name, '` ADD CONSTRAINT `', @constraint_name, '` FOREIGN KEY (`restaurant_id`) REFERENCES `dishware_restaurant_locations` (`id`) ON DELETE CASCADE'),
+  'SELECT 1'
+));
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- 5. 迁移现有数据到新表结构
 -- 迁移碗碟库存数据
