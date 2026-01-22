@@ -2094,9 +2094,7 @@ header('Expires: 0');
                     <div class="selector-dropdown" id="view-selector-dropdown">
                         <div class="dropdown-item active" onclick="switchPage('stock')">总库存</div>
                         <div class="dropdown-item" onclick="switchPage('sets')">套装管理</div>
-                        <div class="dropdown-item" onclick="switchPage('j1')">J1破损</div>
-                        <div class="dropdown-item" onclick="switchPage('j2')">J2破损</div>
-                        <div class="dropdown-item" onclick="switchPage('j3')">J3破损</div>
+                        <div class="dropdown-item" onclick="switchPage('j1')">破损记录</div>
                     </div>
                 </div>
             </div>
