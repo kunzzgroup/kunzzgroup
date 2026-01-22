@@ -1761,7 +1761,7 @@ header('Expires: 0');
             padding: 20px;
             width: 100%;
             /* 确保至少显示三个容器，每个容器最小宽度 */
-            min-width: calc(3 * 400px + 2 * 20px + 40px); /* 3个容器 + 2个gap + padding */
+            min-width: calc(3 * 500px + 2 * 20px + 40px); /* 3个容器 + 2个gap + padding */
         }
 
         .break-record-section {
@@ -1771,9 +1771,9 @@ header('Expires: 0');
             box-shadow: 0 2px 8px rgba(88, 62, 4, 0.1);
             display: flex;
             flex-direction: column;
-            flex: 0 0 400px; /* 固定宽度，不缩放 */
-            min-width: 400px;
-            max-width: 400px;
+            flex: 0 0 500px; /* 固定宽度，不缩放 */
+            min-width: 500px;
+            max-width: 500px;
         }
 
         .break-record-header {
@@ -1923,7 +1923,7 @@ header('Expires: 0');
             align-items: flex-start;
             width: 100%;
             /* 确保至少显示三个容器，每个容器最小宽度 */
-            min-width: calc(3 * 400px + 2 * 20px + 40px); /* 3个容器 + 2个gap + padding */
+            min-width: calc(3 * 500px + 2 * 20px + 40px); /* 3个容器 + 2个gap + padding */
         }
 
         .break-record-section {
@@ -1933,9 +1933,9 @@ header('Expires: 0');
             box-shadow: 0 2px 8px rgba(88, 62, 4, 0.1);
             display: flex;
             flex-direction: column;
-            flex: 0 0 400px; /* 固定宽度，不缩放 */
-            min-width: 400px;
-            max-width: 400px;
+            flex: 0 0 500px; /* 固定宽度，不缩放 */
+            min-width: 500px;
+            max-width: 500px;
         }
 
         .break-record-header {
