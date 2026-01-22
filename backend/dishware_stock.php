@@ -1828,6 +1828,11 @@ header('Expires: 0');
         .stock-table.transposed tr[data-restaurant-row] th.row-header:first-child {
             position: relative;
             cursor: move;
+            transition: background-color 0.2s ease;
+        }
+
+        .stock-table.transposed tr[data-restaurant-row] th.row-header:first-child:hover {
+            background-color: #f3f4f6 !important;
         }
 
         .stock-table.transposed tr[data-restaurant-row] th.row-header:first-child::before {
@@ -1838,10 +1843,17 @@ header('Expires: 0');
             font-size: 16px;
             cursor: move;
             pointer-events: none;
+            transition: color 0.2s ease;
         }
 
-        .stock-table.transposed tr[data-restaurant-row]:hover th.row-header:first-child::before {
+        .stock-table.transposed tr[data-restaurant-row]:hover th.row-header:first-child::before,
+        .stock-table.transposed tr[data-restaurant-row] th.row-header:first-child:hover::before {
             color: #f99e00;
+        }
+
+        /* 当鼠标悬停在NO列时，整行也高亮 */
+        .stock-table.transposed tr[data-restaurant-row] th.row-header:first-child:hover ~ td {
+            background-color: #f3f4f6;
         }
 
         /* 其他列不可拖动 */
