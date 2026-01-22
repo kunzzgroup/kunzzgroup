@@ -572,6 +572,16 @@ header('Expires: 0');
             background-color: #059669;
         }
 
+        /* 管理餐厅店面按钮样式 */
+        #manage-restaurants-btn {
+            color: white !important;
+        }
+
+        #manage-restaurants-btn i,
+        #manage-restaurants-btn .fas {
+            color: white !important;
+        }
+
         /* 响应式设计 */
         @media (max-width: 768px) {
             #setModal .modal-content {
@@ -1962,8 +1972,8 @@ header('Expires: 0');
             </div>
             
             <div class="header-right-section">
-                <button class="btn btn-info" onclick="openRestaurantModal()" id="manage-restaurants-btn" style="background-color: #17a2b8; border-color: #17a2b8;">
-                    <i class="fas fa-store"></i>
+                <button class="btn btn-info" onclick="openRestaurantModal()" id="manage-restaurants-btn" style="background-color: #17a2b8; border-color: #17a2b8; color: white;">
+                    <i class="fas fa-store" style="color: white;"></i>
                     管理餐厅店面
                 </button>
                 
