@@ -1808,7 +1808,6 @@ header('Expires: 0');
 
         /* 拖拽排序样式 */
         .stock-table.transposed tr[data-restaurant-row] {
-            cursor: move;
             user-select: none;
         }
 
@@ -1825,11 +1824,13 @@ header('Expires: 0');
             border-top: 3px solid #f99e00;
         }
 
-        .stock-table.transposed tr[data-restaurant-row] th.row-header {
+        /* 只有NO列的单元格可以拖动 */
+        .stock-table.transposed tr[data-restaurant-row] th.row-header[data-row="NO"] {
             position: relative;
+            cursor: move;
         }
 
-        .stock-table.transposed tr[data-restaurant-row] th.row-header::before {
+        .stock-table.transposed tr[data-restaurant-row] th.row-header[data-row="NO"]::before {
             content: '☰';
             position: absolute;
             left: 8px;
@@ -1838,8 +1839,13 @@ header('Expires: 0');
             cursor: move;
         }
 
-        .stock-table.transposed tr[data-restaurant-row]:hover th.row-header::before {
+        .stock-table.transposed tr[data-restaurant-row]:hover th.row-header[data-row="NO"]::before {
             color: #f99e00;
+        }
+
+        /* 其他列不可拖动 */
+        .stock-table.transposed tr[data-restaurant-row] th.row-header:not([data-row="NO"]) {
+            cursor: default;
         }
 
     </style>
@@ -2730,7 +2736,14 @@ header('Expires: 0');
                 const restaurantRows = document.querySelectorAll('.stock-table.transposed tr[data-restaurant-row]');
                 
                 restaurantRows.forEach(row => {
-                    row.addEventListener('dragstart', handleDragStart);
+                    // 只给NO列的单元格添加拖拽事件
+                    const noCell = row.querySelector('th.row-header[data-row="NO"]');
+                    if (noCell) {
+                        noCell.setAttribute('draggable', 'true');
+                        noCell.addEventListener('dragstart', handleDragStart.bind(row));
+                    }
+                    
+                    // 整行仍然需要处理拖拽事件（用于drop目标）
                     row.addEventListener('dragover', handleDragOver);
                     row.addEventListener('dragenter', handleDragEnter);
                     row.addEventListener('dragleave', handleDragLeave);
@@ -2744,6 +2757,7 @@ header('Expires: 0');
         let draggedRestaurantId = null;
 
         function handleDragStart(e) {
+            // this 是行元素（通过 bind 绑定）
             draggedRow = this;
             draggedRestaurantId = this.getAttribute('data-restaurant-id');
             this.classList.add('dragging');
@@ -4270,10 +4284,15 @@ header('Expires: 0');
                 // 检查是否是餐厅店面行
                 const isRestaurantRow = f.restaurantId !== undefined;
                 const rowAttributes = isRestaurantRow 
-                    ? `data-row="${f.label}" data-restaurant-row data-restaurant-id="${f.restaurantId}" draggable="true"`
+                    ? `data-row="${f.label}" data-restaurant-row data-restaurant-id="${f.restaurantId}"`
                     : `data-row="${f.label}"`;
                 
-                html += `<tr ${rowAttributes}><th class="row-header">${f.label}</th>`;
+                // 只有NO列需要draggable属性（但实际拖拽事件会绑定到NO列的单元格）
+                const thAttributes = (isRestaurantRow && f.label === 'NO') 
+                    ? `class="row-header" data-row="NO"`
+                    : `class="row-header"`;
+                
+                html += `<tr ${rowAttributes}><th ${thAttributes}>${f.label}</th>`;
                 displayRows.forEach((r) => {
                     const cell = (r && typeof r[f.key] !== 'undefined') ? r[f.key] : '-';
                     html += `<td>${cell}</td>`;
@@ -4498,10 +4517,15 @@ header('Expires: 0');
                 // 检查是否是餐厅店面行
                 const isRestaurantRow = f.restaurantId !== undefined;
                 const rowAttributes = isRestaurantRow 
-                    ? `data-row="${f.label}" data-restaurant-row data-restaurant-id="${f.restaurantId}" draggable="true"`
+                    ? `data-row="${f.label}" data-restaurant-row data-restaurant-id="${f.restaurantId}"`
                     : `data-row="${f.label}"`;
                 
-                tableHtml += `<tr ${rowAttributes}><th class="row-header">${f.label}</th>`;
+                // 只有NO列需要特殊处理（拖拽手柄会通过JS添加）
+                const thAttributes = (isRestaurantRow && f.label === 'NO') 
+                    ? `class="row-header" data-row="NO"`
+                    : `class="row-header"`;
+                
+                tableHtml += `<tr ${rowAttributes}><th ${thAttributes}>${f.label}</th>`;
                 displayRows.forEach((r) => {
                     const cell = (r && typeof r[f.key] !== 'undefined') ? r[f.key] : '-';
                     tableHtml += `<td>${cell}</td>`;
