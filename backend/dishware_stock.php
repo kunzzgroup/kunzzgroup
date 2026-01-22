@@ -1762,6 +1762,11 @@ header('Expires: 0');
             </div>
             
             <div class="header-right-section">
+                <button class="btn btn-info" onclick="openRestaurantModal()" id="manage-restaurants-btn" style="background-color: #17a2b8; border-color: #17a2b8;">
+                    <i class="fas fa-store"></i>
+                    管理餐厅店面
+                </button>
+                
                 <button class="btn btn-success" onclick="openAddModal()" id="add-dishware-btn">
                     <i class="fas fa-plus"></i>
                     添加碗碟
@@ -2064,27 +2069,8 @@ header('Expires: 0');
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>库存数量</label>
-                        <div class="quantity-row">
-                            <div class="quantity-field">
-                                <label>文化楼数量</label>
-                                <input type="number" id="edit-wenhua" min="0" class="quantity-input">
-                            </div>
-                            <div class="quantity-field">
-                                <label>中央数量</label>
-                                <input type="number" id="edit-central" min="0" class="quantity-input">
-                            </div>
-                            <div class="quantity-field">
-                                <label>J1数量</label>
-                                <input type="number" id="edit-j1" min="0" class="quantity-input">
-                            </div>
-                            <div class="quantity-field">
-                                <label>J2数量</label>
-                                <input type="number" id="edit-j2" min="0" class="quantity-input">
-                            </div>
-                            <div class="quantity-field">
-                                <label>J3数量</label>
-                                <input type="number" id="edit-j3" min="0" class="quantity-input">
-                            </div>
+                        <div class="quantity-row" id="edit-restaurant-quantities">
+                            <!-- 动态生成餐厅店面输入框 -->
                         </div>
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
@@ -2163,6 +2149,78 @@ header('Expires: 0');
         </div>
     </div>
 
+    <!-- 餐厅店面管理模态框 -->
+    <div id="restaurantModal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2 class="modal-title">管理餐厅店面</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 20px;">
+                    <button class="btn btn-success" onclick="openAddRestaurantModal()">
+                        <i class="fas fa-plus"></i>
+                        添加餐厅店面
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table class="stock-table" id="restaurants-table">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>餐厅店面名称</th>
+                                <th>代码</th>
+                                <th>显示顺序</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="restaurants-tbody">
+                            <!-- 动态填充 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑餐厅店面模态框 -->
+    <div id="addRestaurantModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="restaurant-modal-title">添加餐厅店面</h2>
+                <span class="close" onclick="closeRestaurantModal()">&times;</span>
+            </div>
+            <form id="restaurant-form">
+                <input type="hidden" id="restaurant-id" name="id">
+                <div class="modal-form" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="required">餐厅店面名称</label>
+                        <input type="text" id="restaurant-name" name="name" required placeholder="例如：新店">
+                    </div>
+                    <div class="form-group">
+                        <label class="required">代码</label>
+                        <input type="text" id="restaurant-code" name="code" required placeholder="例如：newshop" pattern="[a-zA-Z0-9_]+" title="只能包含字母、数字和下划线">
+                        <small style="color: #6b7280; font-size: 12px;">只能包含字母、数字和下划线</small>
+                    </div>
+                    <div class="form-group">
+                        <label>显示顺序</label>
+                        <input type="number" id="restaurant-display-order" name="display_order" min="0" value="0">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeRestaurantModal()">取消</button>
+                    <button type="submit" class="btn btn-primary" id="restaurant-submit-btn">
+                        <i class="fas fa-save"></i>
+                        保存
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- 套装管理模态框 -->
     <div id="setModal" class="modal">
         <div class="modal-content">
@@ -2225,6 +2283,7 @@ header('Expires: 0');
             j2: [],
             j3: []
         }; // 存储各店铺的破损记录数据
+        let restaurants = []; // 存储餐厅店面列表
 
         // 自然排序函数，正确处理字母和数字混合
         function naturalSort(a, b) {
@@ -2344,7 +2403,8 @@ header('Expires: 0');
         }
 
         // 初始化应用
-        function initApp() {
+        async function initApp() {
+            await loadRestaurants(); // 先加载餐厅店面列表
             loadStockData();
             setupEventListeners();
             setupRealTimeSearch();
@@ -2364,6 +2424,147 @@ header('Expires: 0');
                     });
                 });
             }, 1000);
+        }
+
+        // 加载餐厅店面列表
+        async function loadRestaurants() {
+            try {
+                const result = await apiCall('?action=restaurants');
+                if (result.success) {
+                    restaurants = result.data || [];
+                    console.log('餐厅店面加载成功:', restaurants);
+                    // 更新表格头部
+                    updateTableHeaders();
+                    // 更新编辑模态框的输入框
+                    updateEditModalRestaurantInputs();
+                } else {
+                    console.error('加载餐厅店面失败:', result.message);
+                    // 如果加载失败，使用默认的餐厅店面
+                    restaurants = [
+                        { id: 1, name: '文化楼', code: 'wenhua', display_order: 1 },
+                        { id: 2, name: '中央', code: 'central', display_order: 2 },
+                        { id: 3, name: 'J1', code: 'j1', display_order: 3 },
+                        { id: 4, name: 'J2', code: 'j2', display_order: 4 },
+                        { id: 5, name: 'J3', code: 'j3', display_order: 5 }
+                    ];
+                }
+            } catch (error) {
+                console.error('加载餐厅店面时发生错误:', error);
+                // 使用默认的餐厅店面
+                restaurants = [
+                    { id: 1, name: '文化楼', code: 'wenhua', display_order: 1 },
+                    { id: 2, name: '中央', code: 'central', display_order: 2 },
+                    { id: 3, name: 'J1', code: 'j1', display_order: 3 },
+                    { id: 4, name: 'J2', code: 'j2', display_order: 4 },
+                    { id: 5, name: 'J3', code: 'j3', display_order: 5 }
+                ];
+            }
+        }
+
+        // 获取动态字段定义（包含动态餐厅店面列）
+        function getDynamicFieldDefs() {
+            const baseFields = [
+                { label: 'NO', key: 'no' },
+                { label: '照片', key: 'photo' },
+                { label: '产品名称', key: 'product_name' },
+                { label: '编号', key: 'code_number' },
+                { label: '分类', key: 'category' },
+                { label: '尺寸', key: 'size' },
+                { label: '单价', key: 'unit_price' }
+            ];
+            
+            // 添加动态餐厅店面列
+            const restaurantFields = restaurants
+                .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+                .map(restaurant => ({
+                    label: restaurant.name,
+                    key: restaurant.code
+                }));
+            
+            // 添加总数和操作列
+            const endFields = [
+                { label: '总数', key: 'total' },
+                { label: '操作', key: 'actions' }
+            ];
+            
+            return [...baseFields, ...restaurantFields, ...endFields];
+        }
+
+        // 填充餐厅店面数据到行对象
+        function fillRestaurantStocks(rowData, item) {
+            restaurants.forEach(restaurant => {
+                const fieldName = restaurant.code + '_quantity';
+                rowData[restaurant.code] = String(item[fieldName] || item.restaurant_stocks?.[restaurant.code] || 0);
+            });
+            return rowData;
+        }
+
+        // 更新编辑模态框中的餐厅店面输入框
+        function updateEditModalRestaurantInputs() {
+            const container = document.getElementById('edit-restaurant-quantities');
+            if (!container) return;
+            
+            container.innerHTML = restaurants
+                .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+                .map(restaurant => `
+                    <div class="quantity-field">
+                        <label>${restaurant.name}数量</label>
+                        <input type="number" id="edit-${restaurant.code}" min="0" class="quantity-input" data-restaurant-code="${restaurant.code}">
+                    </div>
+                `).join('');
+        }
+
+        // 填充编辑模态框的餐厅店面数据
+        function fillEditModalRestaurantData(item) {
+            restaurants.forEach(restaurant => {
+                const fieldName = restaurant.code + '_quantity';
+                const input = document.getElementById(`edit-${restaurant.code}`);
+                if (input) {
+                    input.value = item[fieldName] || item.restaurant_stocks?.[restaurant.code] || 0;
+                }
+            });
+        }
+
+        // 获取编辑模态框的餐厅店面数据
+        function getEditModalRestaurantData() {
+            const data = {};
+            restaurants.forEach(restaurant => {
+                const input = document.getElementById(`edit-${restaurant.code}`);
+                if (input) {
+                    const fieldName = restaurant.code + '_quantity';
+                    data[fieldName] = parseInt(input.value) || 0;
+                }
+            });
+            return data;
+        }
+
+        // 更新表格头部（用于普通表格，非转置表格）
+        function updateTableHeaders() {
+            // 更新总库存表格头部
+            const stockTable = document.querySelector('#stock-table thead tr');
+            if (stockTable) {
+                const baseHeaders = ['No.', '照片', '产品名称', '编号', '分类', '尺寸', '单价'];
+                const restaurantHeaders = restaurants
+                    .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+                    .map(r => r.name);
+                const endHeaders = ['总数', '操作'];
+                
+                const allHeaders = [...baseHeaders, ...restaurantHeaders, ...endHeaders];
+                stockTable.innerHTML = allHeaders.map(h => `<th>${h}</th>`).join('');
+            }
+            
+            // 更新套装管理表格头部
+            const setsTable = document.querySelector('#sets-table thead tr');
+            if (setsTable) {
+                const baseHeaders = ['序号', '套装名称', '套装编号', '包含项目', '单价 (RM)'];
+                const restaurantHeaders = restaurants
+                    .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+                    .map(r => r.name);
+                const endHeaders = ['总库存', '操作'];
+                
+                const allHeaders = [...baseHeaders, ...restaurantHeaders, ...endHeaders];
+                setsTable.innerHTML = allHeaders.map(h => `<th>${h}</th>`).join('');
+            }
         }
 
         // 设置页面切换器
@@ -3209,6 +3410,10 @@ header('Expires: 0');
                     // 处理单个碗碟库存数据
                     if (stockResult.success) {
                         const individualItems = stockResult.data.items || [];
+                        // 更新餐厅店面列表（如果API返回了）
+                        if (stockResult.data.restaurants && stockResult.data.restaurants.length > 0) {
+                            restaurants = stockResult.data.restaurants;
+                        }
                         // 过滤掉已经在套装中的碗碟，避免重复显示
                         const filteredIndividualItems = individualItems.filter(item => !item.is_in_set);
                         filteredIndividualItems.forEach(item => {
@@ -3220,6 +3425,10 @@ header('Expires: 0');
                     // 处理套装库存数据
                     if (setsResult.success) {
                         const setItems = setsResult.data.items || [];
+                        // 更新餐厅店面列表（如果API返回了）
+                        if (setsResult.data.restaurants && setsResult.data.restaurants.length > 0) {
+                            restaurants = setsResult.data.restaurants;
+                        }
                         console.log('加载套装数据 - 套装数量:', setItems.length);
                         
                         // 为每个套装加载详细信息
@@ -3857,15 +4066,10 @@ header('Expires: 0');
                             });
                         });
                     } else {
-                        const wenhuaQuantity = parseInt(set.wenhua_quantity) || 0;
-                        const centralQuantity = parseInt(set.central_quantity) || 0;
-                        const j1Quantity = parseInt(set.j1_quantity) || 0;
-                        const j2Quantity = parseInt(set.j2_quantity) || 0;
-                        const j3Quantity = parseInt(set.j3_quantity) || 0;
-                        const totalQty = parseInt(set.total_quantity) || (wenhuaQuantity + centralQuantity + j1Quantity + j2Quantity + j3Quantity);
+                        const totalQty = parseInt(set.total_quantity) || 0;
                         const totalClass = totalQty > 0 ? 'positive-value' : 'zero-value';
                         
-                        displayRows.push({
+                        const rowData = {
                             no: String(displayIndex),
                             photo: photoHtmlFrom(set.photo_path, set.product_name || set.set_name || '', 'fa-box'),
                             product_name: `<strong>${set.product_name || set.set_name || '-'}</strong>`,
@@ -3873,11 +4077,6 @@ header('Expires: 0');
                             category: set.category || 'SET',
                             size: '-',
                             unit_price: currencyHtml(setPrice),
-                            wenhua: String(wenhuaQuantity),
-                            central: String(centralQuantity),
-                            j1: String(j1Quantity),
-                            j2: String(j2Quantity),
-                            j3: String(j3Quantity),
                             total: `<span class="${totalClass}">${totalQty}</span>`,
                             actions: `
                                 <button class="action-btn edit-btn" onclick="editSet(${set.id})" title="编辑">
@@ -3887,13 +4086,15 @@ header('Expires: 0');
                                     <i class="fas fa-trash"></i>
                                 </button>
                             `
-                        });
+                        };
+                        fillRestaurantStocks(rowData, set);
+                        displayRows.push(rowData);
                     }
                 } else {
                     const totalQty = parseInt(item.total_quantity) || 0;
                     const totalClass = totalQty > 0 ? 'positive-value' : 'zero-value';
                     
-                    displayRows.push({
+                    const rowData = {
                         no: String(rowIndex++),
                         photo: photoHtmlFrom(item.photo_path, item.product_name || '', 'fa-image'),
                         product_name: `<strong>${item.product_name || '-'}</strong>`,
@@ -3901,11 +4102,6 @@ header('Expires: 0');
                         category: item.category || '-',
                         size: item.size || '-',
                         unit_price: currencyHtml(item.unit_price || 0),
-                        wenhua: String(item.wenhua_quantity || 0),
-                        central: String(item.central_quantity || 0),
-                        j1: String(item.j1_quantity || 0),
-                        j2: String(item.j2_quantity || 0),
-                        j3: String(item.j3_quantity || 0),
                         total: `<span class="${totalClass}">${totalQty}</span>`,
                         actions: `
                             <button class="action-btn edit-btn" onclick="openEditModal(${item.id})" title="编辑">
@@ -3915,27 +4111,14 @@ header('Expires: 0');
                                 <i class="fas fa-trash"></i>
                             </button>
                         `
-                    });
+                    };
+                    fillRestaurantStocks(rowData, item);
+                    displayRows.push(rowData);
                 }
             });
             
             // 转置渲染：左侧是"字段名"，右侧每一列是一个"展示行"
-            const fieldDefs = [
-                { label: 'NO', key: 'no' },
-                { label: '照片', key: 'photo' },
-                { label: '产品名称', key: 'product_name' },
-                { label: '编号', key: 'code_number' },
-                { label: '分类', key: 'category' },
-                { label: '尺寸', key: 'size' },
-                { label: '单价', key: 'unit_price' },
-                { label: '文化楼', key: 'wenhua' },
-                { label: '中央', key: 'central' },
-                { label: 'J1', key: 'j1' },
-                { label: 'J2', key: 'j2' },
-                { label: 'J3', key: 'j3' },
-                { label: '总数', key: 'total' },
-                { label: '操作', key: 'actions' }
-            ];
+            const fieldDefs = getDynamicFieldDefs();
             
             let tableHtml = '<table class="stock-table transposed">';
             
@@ -3980,6 +4163,9 @@ header('Expires: 0');
             }
             
             currentEditId = id;
+            
+            // 确保餐厅店面输入框已更新
+            updateEditModalRestaurantInputs();
             
             // 填充表单数据
             document.getElementById('edit-product-name').value = item.product_name || '';
@@ -4053,11 +4239,8 @@ header('Expires: 0');
             document.getElementById('edit-code-number').value = codeNumber;
             document.getElementById('edit-size').value = item.size || '';
             document.getElementById('edit-unit-price').value = item.unit_price || '';
-            document.getElementById('edit-wenhua').value = item.wenhua_quantity || 0;
-            document.getElementById('edit-central').value = item.central_quantity || 0;
-            document.getElementById('edit-j1').value = item.j1_quantity || 0;
-            document.getElementById('edit-j2').value = item.j2_quantity || 0;
-            document.getElementById('edit-j3').value = item.j3_quantity || 0;
+            // 使用动态餐厅店面填充
+            fillEditModalRestaurantData(item);
             
             // 重置删除标记
             const deletePhotoFlag = document.getElementById('delete-photo-flag');
@@ -4415,11 +4598,11 @@ header('Expires: 0');
             formData.append('category', form.category.value);
             formData.append('size', form.size.value);
             formData.append('unit_price', form.unit_price.value);
-            formData.append('wenhua_quantity', form.querySelector('#edit-wenhua').value);
-            formData.append('central_quantity', form.querySelector('#edit-central').value);
-            formData.append('j1_quantity', form.querySelector('#edit-j1').value);
-            formData.append('j2_quantity', form.querySelector('#edit-j2').value);
-            formData.append('j3_quantity', form.querySelector('#edit-j3').value);
+            // 使用动态餐厅店面数据
+            const restaurantData = getEditModalRestaurantData();
+            Object.keys(restaurantData).forEach(key => {
+                formData.append(key, restaurantData[key]);
+            });
             
             // 检查是否要删除当前照片
             const deletePhotoFlag = document.getElementById('delete-photo-flag');
@@ -4470,11 +4653,7 @@ header('Expires: 0');
                     const stockUpdateData = {
                         action: 'update_stock',
                         dishware_id: currentEditId,
-                        wenhua_quantity: parseInt(form.querySelector('#edit-wenhua').value) || 0,
-                        central_quantity: parseInt(form.querySelector('#edit-central').value) || 0,
-                        j1_quantity: parseInt(form.querySelector('#edit-j1').value) || 0,
-                        j2_quantity: parseInt(form.querySelector('#edit-j2').value) || 0,
-                        j3_quantity: parseInt(form.querySelector('#edit-j3').value) || 0
+                        ...getEditModalRestaurantData()
                     };
                     
                     const stockResponse = await fetch(API_BASE_URL, {
@@ -5238,6 +5417,208 @@ header('Expires: 0');
                 showAlert('保存套装失败: ' + error.message, 'error');
             }
         }
+        // ========== 餐厅店面管理相关函数 ==========
+        
+        // 打开餐厅店面管理模态框
+        function openRestaurantModal() {
+            const modal = document.getElementById('restaurantModal');
+            if (modal) {
+                modal.style.display = 'block';
+                loadRestaurantsList();
+            }
+        }
+
+        // 关闭餐厅店面管理模态框
+        function closeRestaurantModal() {
+            const modal = document.getElementById('restaurantModal');
+            const addModal = document.getElementById('addRestaurantModal');
+            if (modal) modal.style.display = 'none';
+            if (addModal) addModal.style.display = 'none';
+        }
+
+        // 加载餐厅店面列表
+        async function loadRestaurantsList() {
+            try {
+                const result = await apiCall('?action=restaurants');
+                if (result.success) {
+                    const tbody = document.getElementById('restaurants-tbody');
+                    if (tbody) {
+                        if (result.data && result.data.length > 0) {
+                            tbody.innerHTML = result.data.map((restaurant, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>${restaurant.name}</td>
+                                    <td>${restaurant.code}</td>
+                                    <td>${restaurant.display_order || 0}</td>
+                                    <td>
+                                        <button class="action-btn edit-btn" onclick="editRestaurant(${restaurant.id})" title="编辑">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="action-btn delete-btn" onclick="deleteRestaurant(${restaurant.id})" title="删除">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('');
+                        } else {
+                            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #6b7280;">暂无餐厅店面数据</td></tr>';
+                        }
+                    }
+                } else {
+                    showAlert('加载餐厅店面列表失败: ' + (result.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('加载餐厅店面列表时发生错误:', error);
+                showAlert('加载餐厅店面列表失败: ' + error.message, 'error');
+            }
+        }
+
+        // 打开添加/编辑餐厅店面模态框
+        function openAddRestaurantModal(restaurantId = null) {
+            const modal = document.getElementById('addRestaurantModal');
+            const form = document.getElementById('restaurant-form');
+            const title = document.getElementById('restaurant-modal-title');
+            
+            if (modal && form) {
+                if (restaurantId) {
+                    // 编辑模式
+                    if (title) title.textContent = '编辑餐厅店面';
+                    loadRestaurantData(restaurantId);
+                } else {
+                    // 添加模式
+                    if (title) title.textContent = '添加餐厅店面';
+                    form.reset();
+                    document.getElementById('restaurant-id').value = '';
+                }
+                modal.style.display = 'block';
+            }
+        }
+
+        // 加载餐厅店面数据（用于编辑）
+        async function loadRestaurantData(restaurantId) {
+            try {
+                const result = await apiCall('?action=restaurants');
+                if (result.success) {
+                    const restaurant = result.data.find(r => r.id == restaurantId);
+                    if (restaurant) {
+                        document.getElementById('restaurant-id').value = restaurant.id;
+                        document.getElementById('restaurant-name').value = restaurant.name;
+                        document.getElementById('restaurant-code').value = restaurant.code;
+                        document.getElementById('restaurant-display-order').value = restaurant.display_order || 0;
+                    }
+                }
+            } catch (error) {
+                console.error('加载餐厅店面数据失败:', error);
+                showAlert('加载餐厅店面数据失败', 'error');
+            }
+        }
+
+        // 编辑餐厅店面
+        function editRestaurant(restaurantId) {
+            openAddRestaurantModal(restaurantId);
+        }
+
+        // 删除餐厅店面
+        async function deleteRestaurant(restaurantId) {
+            if (!confirm('确定要删除这个餐厅店面吗？删除后该店面的库存数据将被移除。')) {
+                return;
+            }
+            
+            try {
+                const result = await apiCall('dishware_api.php', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'delete_restaurant',
+                        id: restaurantId
+                    })
+                });
+                
+                if (result.success) {
+                    showAlert('删除餐厅店面成功', 'success');
+                    await loadRestaurants(); // 重新加载餐厅店面列表
+                    loadRestaurantsList(); // 刷新管理界面
+                    // 重新加载库存数据以更新表格
+                    if (currentPage === 'stock') {
+                        loadStockData();
+                    } else if (currentPage === 'sets') {
+                        loadSetsData();
+                    }
+                } else {
+                    showAlert('删除餐厅店面失败: ' + (result.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('删除餐厅店面时发生错误:', error);
+                showAlert('删除餐厅店面失败: ' + error.message, 'error');
+            }
+        }
+
+        // 餐厅店面表单提交
+        document.addEventListener('DOMContentLoaded', function() {
+            const restaurantForm = document.getElementById('restaurant-form');
+            if (restaurantForm) {
+                restaurantForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const restaurantId = document.getElementById('restaurant-id').value;
+                    const name = document.getElementById('restaurant-name').value.trim();
+                    const code = document.getElementById('restaurant-code').value.trim();
+                    const displayOrder = parseInt(document.getElementById('restaurant-display-order').value) || 0;
+                    
+                    if (!name) {
+                        showAlert('请输入餐厅店面名称', 'error');
+                        return;
+                    }
+                    
+                    if (!code) {
+                        showAlert('请输入餐厅店面代码', 'error');
+                        return;
+                    }
+                    
+                    if (!/^[a-zA-Z0-9_]+$/.test(code)) {
+                        showAlert('餐厅店面代码只能包含字母、数字和下划线', 'error');
+                        return;
+                    }
+                    
+                    try {
+                        const action = restaurantId ? 'update_restaurant' : 'add_restaurant';
+                        const data = {
+                            action: action,
+                            name: name,
+                            code: code,
+                            display_order: displayOrder
+                        };
+                        
+                        if (restaurantId) {
+                            data.id = restaurantId;
+                        }
+                        
+                        const result = await apiCall('dishware_api.php', {
+                            method: 'POST',
+                            body: JSON.stringify(data)
+                        });
+                        
+                        if (result.success) {
+                            showAlert(restaurantId ? '更新餐厅店面成功' : '添加餐厅店面成功', 'success');
+                            closeRestaurantModal();
+                            await loadRestaurants(); // 重新加载餐厅店面列表
+                            loadRestaurantsList(); // 刷新管理界面
+                            // 重新加载库存数据以更新表格
+                            if (currentPage === 'stock') {
+                                loadStockData();
+                            } else if (currentPage === 'sets') {
+                                loadSetsData();
+                            }
+                        } else {
+                            showAlert((restaurantId ? '更新' : '添加') + '餐厅店面失败: ' + (result.message || '未知错误'), 'error');
+                        }
+                    } catch (error) {
+                        console.error('保存餐厅店面时发生错误:', error);
+                        showAlert((restaurantId ? '更新' : '添加') + '餐厅店面失败: ' + error.message, 'error');
+                    }
+                });
+            }
+        });
+
     </script>
 </body>
 </html>

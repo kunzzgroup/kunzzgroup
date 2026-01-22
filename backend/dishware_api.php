@@ -120,6 +120,9 @@ function handleGet() {
         case 'set_damage_records':
             getSetBreakRecords();
             break;
+        case 'restaurants':
+            getRestaurants();
+            break;
         default:
             sendResponse(false, "无效的操作");
     }
@@ -179,6 +182,15 @@ function handlePost() {
             break;
         case 'remove_item_from_set':
             removeItemFromSet();
+            break;
+        case 'add_restaurant':
+            addRestaurant();
+            break;
+        case 'update_restaurant':
+            updateRestaurant();
+            break;
+        case 'delete_restaurant':
+            deleteRestaurant();
             break;
         default:
             sendResponse(false, "无效的操作");
@@ -249,14 +261,19 @@ function getStockList() {
     global $pdo;
     
     try {
+        // 首先获取所有活跃的餐厅店面
+        $restaurants_sql = "SELECT id, name, code, display_order FROM restaurants WHERE is_active = 1 ORDER BY display_order";
+        $restaurants_stmt = $pdo->prepare($restaurants_sql);
+        $restaurants_stmt->execute();
+        $restaurants = $restaurants_stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // 获取碗碟基本信息
         $sql = "SELECT di.id, di.product_name, di.code_number, di.category, di.size, di.unit_price, di.photo_path,
-                       ds.wenhua_quantity, ds.central_quantity, ds.j1_quantity, ds.j2_quantity, ds.j3_quantity, ds.total_quantity,
                        CASE 
                            WHEN dsi.dishware_id IS NOT NULL THEN 1 
                            ELSE 0 
                        END as is_in_set
                 FROM dishware_info di
-                LEFT JOIN dishware_stock ds ON di.id = ds.dishware_id
                 LEFT JOIN dishware_set_items dsi ON di.id = dsi.dishware_id
                 LEFT JOIN dishware_sets dsets ON dsi.set_id = dsets.id AND dsets.is_active = 1
                 ORDER BY di.product_name";
@@ -265,13 +282,37 @@ function getStockList() {
         $stmt->execute();
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // 格式化数据
+        // 为每个碗碟获取各餐厅店面的库存
         foreach ($results as &$item) {
             $item['formatted_price'] = number_format($item['unit_price'], 2);
+            $item['restaurant_stocks'] = [];
+            $total_quantity = 0;
+            
+            // 获取每个餐厅店面的库存
+            foreach ($restaurants as $restaurant) {
+                $stock_sql = "SELECT quantity FROM dishware_stock_by_restaurant 
+                             WHERE dishware_id = ? AND restaurant_id = ?";
+                $stock_stmt = $pdo->prepare($stock_sql);
+                $stock_stmt->execute([$item['id'], $restaurant['id']]);
+                $stock = $stock_stmt->fetch(PDO::FETCH_ASSOC);
+                
+                $quantity = $stock ? (int)$stock['quantity'] : 0;
+                $item['restaurant_stocks'][$restaurant['code']] = $quantity;
+                $total_quantity += $quantity;
+            }
+            
+            $item['total_quantity'] = $total_quantity;
+            
+            // 为了向后兼容，保留旧的字段名（从restaurant_stocks中提取）
+            foreach ($restaurants as $restaurant) {
+                $field_name = $restaurant['code'] . '_quantity';
+                $item[$field_name] = $item['restaurant_stocks'][$restaurant['code']];
+            }
         }
         
         $data = [
-            'items' => $results
+            'items' => $results,
+            'restaurants' => $restaurants
         ];
         
         sendResponse(true, "获取库存列表成功", $data);
@@ -347,12 +388,30 @@ function addDishware() {
         
         $dishware_id = $pdo->lastInsertId();
         
-        // 创建对应的库存记录
-        $sql = "INSERT INTO dishware_stock (dishware_id, wenhua_quantity, central_quantity, j1_quantity, j2_quantity, j3_quantity) 
-                VALUES (?, 0, 0, 0, 0, 0)";
+        // 创建对应的库存记录（使用新的关联表结构）
+        // 获取所有活跃的餐厅店面
+        $restaurants_sql = "SELECT id FROM restaurants WHERE is_active = 1";
+        $restaurants_stmt = $pdo->prepare($restaurants_sql);
+        $restaurants_stmt->execute();
+        $restaurants = $restaurants_stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$dishware_id]);
+        // 为每个餐厅店面创建初始库存记录
+        foreach ($restaurants as $restaurant) {
+            $stock_sql = "INSERT INTO dishware_stock_by_restaurant (dishware_id, restaurant_id, quantity) 
+                         VALUES (?, ?, 0)";
+            $stock_stmt = $pdo->prepare($stock_sql);
+            $stock_stmt->execute([$dishware_id, $restaurant['id']]);
+        }
+        
+        // 为了向后兼容，同时创建旧表记录
+        try {
+            $old_sql = "INSERT INTO dishware_stock (dishware_id, wenhua_quantity, central_quantity, j1_quantity, j2_quantity, j3_quantity) 
+                        VALUES (?, 0, 0, 0, 0, 0)";
+            $old_stmt = $pdo->prepare($old_sql);
+            $old_stmt->execute([$dishware_id]);
+        } catch (PDOException $e) {
+            // 如果旧表不存在，忽略
+        }
         
         $pdo->commit();
         sendResponse(true, "添加碗碟成功", ['id' => $dishware_id]);
@@ -418,40 +477,64 @@ function updateStock() {
     
     // 支持从POST和PUT请求中获取数据
     $dishware_id = $data['dishware_id'] ?? $_POST['dishware_id'] ?? '';
-    $wenhua_quantity = $data['wenhua_quantity'] ?? $_POST['wenhua_quantity'] ?? 0;
-    $central_quantity = $data['central_quantity'] ?? $_POST['central_quantity'] ?? 0;
-    $j1_quantity = $data['j1_quantity'] ?? $_POST['j1_quantity'] ?? 0;
-    $j2_quantity = $data['j2_quantity'] ?? $_POST['j2_quantity'] ?? 0;
-    $j3_quantity = $data['j3_quantity'] ?? $_POST['j3_quantity'] ?? 0;
     
     if (empty($dishware_id)) {
         sendResponse(false, "缺少碗碟ID");
     }
     
     try {
-        $sql = "INSERT INTO dishware_stock (dishware_id, wenhua_quantity, central_quantity, j1_quantity, j2_quantity, j3_quantity) 
-                VALUES (?, ?, ?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE 
-                wenhua_quantity = VALUES(wenhua_quantity),
-                central_quantity = VALUES(central_quantity),
-                j1_quantity = VALUES(j1_quantity),
-                j2_quantity = VALUES(j2_quantity),
-                j3_quantity = VALUES(j3_quantity),
-                last_updated = CURRENT_TIMESTAMP";
+        $pdo->beginTransaction();
         
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            $dishware_id,
-            $wenhua_quantity,
-            $central_quantity,
-            $j1_quantity,
-            $j2_quantity,
-            $j3_quantity
-        ]);
+        // 获取所有活跃的餐厅店面
+        $restaurants_sql = "SELECT id, code FROM restaurants WHERE is_active = 1";
+        $restaurants_stmt = $pdo->prepare($restaurants_sql);
+        $restaurants_stmt->execute();
+        $restaurants = $restaurants_stmt->fetchAll(PDO::FETCH_ASSOC);
         
+        // 更新每个餐厅店面的库存
+        foreach ($restaurants as $restaurant) {
+            $field_name = $restaurant['code'] . '_quantity';
+            $quantity = $data[$field_name] ?? $_POST[$field_name] ?? 0;
+            
+            // 使用新的关联表结构
+            $sql = "INSERT INTO dishware_stock_by_restaurant (dishware_id, restaurant_id, quantity) 
+                    VALUES (?, ?, ?)
+                    ON DUPLICATE KEY UPDATE 
+                    quantity = VALUES(quantity),
+                    last_updated = CURRENT_TIMESTAMP";
+            
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$dishware_id, $restaurant['id'], $quantity]);
+        }
+        
+        // 为了向后兼容，同时更新旧表（如果存在）
+        $wenhua_quantity = $data['wenhua_quantity'] ?? $_POST['wenhua_quantity'] ?? 0;
+        $central_quantity = $data['central_quantity'] ?? $_POST['central_quantity'] ?? 0;
+        $j1_quantity = $data['j1_quantity'] ?? $_POST['j1_quantity'] ?? 0;
+        $j2_quantity = $data['j2_quantity'] ?? $_POST['j2_quantity'] ?? 0;
+        $j3_quantity = $data['j3_quantity'] ?? $_POST['j3_quantity'] ?? 0;
+        
+        try {
+            $old_sql = "INSERT INTO dishware_stock (dishware_id, wenhua_quantity, central_quantity, j1_quantity, j2_quantity, j3_quantity) 
+                        VALUES (?, ?, ?, ?, ?, ?)
+                        ON DUPLICATE KEY UPDATE 
+                        wenhua_quantity = VALUES(wenhua_quantity),
+                        central_quantity = VALUES(central_quantity),
+                        j1_quantity = VALUES(j1_quantity),
+                        j2_quantity = VALUES(j2_quantity),
+                        j3_quantity = VALUES(j3_quantity),
+                        last_updated = CURRENT_TIMESTAMP";
+            $old_stmt = $pdo->prepare($old_sql);
+            $old_stmt->execute([$dishware_id, $wenhua_quantity, $central_quantity, $j1_quantity, $j2_quantity, $j3_quantity]);
+        } catch (PDOException $e) {
+            // 如果旧表不存在或出错，忽略（向后兼容）
+        }
+        
+        $pdo->commit();
         sendResponse(true, "更新库存成功");
         
     } catch (PDOException $e) {
+        $pdo->rollBack();
         sendResponse(false, "更新库存失败：" . $e->getMessage());
     }
 }
@@ -842,10 +925,15 @@ function getSetStockList() {
     global $pdo;
     
     try {
-        $sql = "SELECT ds.id, ds.set_name, ds.set_code, ds.set_price,
-                       dss.wenhua_quantity, dss.central_quantity, dss.j1_quantity, dss.j2_quantity, dss.j3_quantity, dss.total_quantity
+        // 首先获取所有活跃的餐厅店面
+        $restaurants_sql = "SELECT id, name, code, display_order FROM restaurants WHERE is_active = 1 ORDER BY display_order";
+        $restaurants_stmt = $pdo->prepare($restaurants_sql);
+        $restaurants_stmt->execute();
+        $restaurants = $restaurants_stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // 获取套装基本信息
+        $sql = "SELECT ds.id, ds.set_name, ds.set_code, ds.set_price
                 FROM dishware_sets ds
-                LEFT JOIN dishware_set_stock dss ON ds.id = dss.set_id
                 WHERE ds.is_active = 1
                 ORDER BY ds.set_name";
         
@@ -853,13 +941,37 @@ function getSetStockList() {
         $stmt->execute();
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // 格式化数据
+        // 为每个套装获取各餐厅店面的库存
         foreach ($results as &$item) {
             $item['formatted_price'] = number_format($item['set_price'], 2);
+            $item['restaurant_stocks'] = [];
+            $total_quantity = 0;
+            
+            // 获取每个餐厅店面的库存
+            foreach ($restaurants as $restaurant) {
+                $stock_sql = "SELECT quantity FROM dishware_set_stock_by_restaurant 
+                             WHERE set_id = ? AND restaurant_id = ?";
+                $stock_stmt = $pdo->prepare($stock_sql);
+                $stock_stmt->execute([$item['id'], $restaurant['id']]);
+                $stock = $stock_stmt->fetch(PDO::FETCH_ASSOC);
+                
+                $quantity = $stock ? (int)$stock['quantity'] : 0;
+                $item['restaurant_stocks'][$restaurant['code']] = $quantity;
+                $total_quantity += $quantity;
+            }
+            
+            $item['total_quantity'] = $total_quantity;
+            
+            // 为了向后兼容，保留旧的字段名
+            foreach ($restaurants as $restaurant) {
+                $field_name = $restaurant['code'] . '_quantity';
+                $item[$field_name] = $item['restaurant_stocks'][$restaurant['code']];
+            }
         }
         
         $data = [
-            'items' => $results
+            'items' => $results,
+            'restaurants' => $restaurants
         ];
         
         sendResponse(true, "获取套装库存列表成功", $data);
@@ -916,12 +1028,30 @@ function addDishwareSet() {
             }
         }
         
-        // 创建对应的库存记录
-        $stock_sql = "INSERT INTO dishware_set_stock (set_id, wenhua_quantity, central_quantity, j1_quantity, j2_quantity, j3_quantity) 
-                      VALUES (?, 0, 0, 0, 0, 0)";
+        // 创建对应的库存记录（使用新的关联表结构）
+        // 获取所有活跃的餐厅店面
+        $restaurants_sql = "SELECT id FROM restaurants WHERE is_active = 1";
+        $restaurants_stmt = $pdo->prepare($restaurants_sql);
+        $restaurants_stmt->execute();
+        $restaurants = $restaurants_stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        $stock_stmt = $pdo->prepare($stock_sql);
-        $stock_stmt->execute([$set_id]);
+        // 为每个餐厅店面创建初始库存记录
+        foreach ($restaurants as $restaurant) {
+            $stock_sql = "INSERT INTO dishware_set_stock_by_restaurant (set_id, restaurant_id, quantity) 
+                         VALUES (?, ?, 0)";
+            $stock_stmt = $pdo->prepare($stock_sql);
+            $stock_stmt->execute([$set_id, $restaurant['id']]);
+        }
+        
+        // 为了向后兼容，同时创建旧表记录
+        try {
+            $old_stock_sql = "INSERT INTO dishware_set_stock (set_id, wenhua_quantity, central_quantity, j1_quantity, j2_quantity, j3_quantity) 
+                              VALUES (?, 0, 0, 0, 0, 0)";
+            $old_stock_stmt = $pdo->prepare($old_stock_sql);
+            $old_stock_stmt->execute([$set_id]);
+        } catch (PDOException $e) {
+            // 如果旧表不存在，忽略
+        }
         
         $pdo->commit();
         sendResponse(true, "添加套装成功", ['id' => $set_id]);
@@ -1039,40 +1169,64 @@ function updateSetStock() {
     
     // 支持从POST和PUT请求中获取数据
     $set_id = $data['set_id'] ?? $_POST['set_id'] ?? '';
-    $wenhua_quantity = $data['wenhua_quantity'] ?? $_POST['wenhua_quantity'] ?? 0;
-    $central_quantity = $data['central_quantity'] ?? $_POST['central_quantity'] ?? 0;
-    $j1_quantity = $data['j1_quantity'] ?? $_POST['j1_quantity'] ?? 0;
-    $j2_quantity = $data['j2_quantity'] ?? $_POST['j2_quantity'] ?? 0;
-    $j3_quantity = $data['j3_quantity'] ?? $_POST['j3_quantity'] ?? 0;
     
     if (empty($set_id)) {
         sendResponse(false, "缺少套装ID");
     }
     
     try {
-        $sql = "INSERT INTO dishware_set_stock (set_id, wenhua_quantity, central_quantity, j1_quantity, j2_quantity, j3_quantity) 
-                VALUES (?, ?, ?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE 
-                wenhua_quantity = VALUES(wenhua_quantity),
-                central_quantity = VALUES(central_quantity),
-                j1_quantity = VALUES(j1_quantity),
-                j2_quantity = VALUES(j2_quantity),
-                j3_quantity = VALUES(j3_quantity),
-                last_updated = CURRENT_TIMESTAMP";
+        $pdo->beginTransaction();
         
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            $set_id,
-            $wenhua_quantity,
-            $central_quantity,
-            $j1_quantity,
-            $j2_quantity,
-            $j3_quantity
-        ]);
+        // 获取所有活跃的餐厅店面
+        $restaurants_sql = "SELECT id, code FROM restaurants WHERE is_active = 1";
+        $restaurants_stmt = $pdo->prepare($restaurants_sql);
+        $restaurants_stmt->execute();
+        $restaurants = $restaurants_stmt->fetchAll(PDO::FETCH_ASSOC);
         
+        // 更新每个餐厅店面的库存
+        foreach ($restaurants as $restaurant) {
+            $field_name = $restaurant['code'] . '_quantity';
+            $quantity = $data[$field_name] ?? $_POST[$field_name] ?? 0;
+            
+            // 使用新的关联表结构
+            $sql = "INSERT INTO dishware_set_stock_by_restaurant (set_id, restaurant_id, quantity) 
+                    VALUES (?, ?, ?)
+                    ON DUPLICATE KEY UPDATE 
+                    quantity = VALUES(quantity),
+                    last_updated = CURRENT_TIMESTAMP";
+            
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$set_id, $restaurant['id'], $quantity]);
+        }
+        
+        // 为了向后兼容，同时更新旧表
+        $wenhua_quantity = $data['wenhua_quantity'] ?? $_POST['wenhua_quantity'] ?? 0;
+        $central_quantity = $data['central_quantity'] ?? $_POST['central_quantity'] ?? 0;
+        $j1_quantity = $data['j1_quantity'] ?? $_POST['j1_quantity'] ?? 0;
+        $j2_quantity = $data['j2_quantity'] ?? $_POST['j2_quantity'] ?? 0;
+        $j3_quantity = $data['j3_quantity'] ?? $_POST['j3_quantity'] ?? 0;
+        
+        try {
+            $old_sql = "INSERT INTO dishware_set_stock (set_id, wenhua_quantity, central_quantity, j1_quantity, j2_quantity, j3_quantity) 
+                        VALUES (?, ?, ?, ?, ?, ?)
+                        ON DUPLICATE KEY UPDATE 
+                        wenhua_quantity = VALUES(wenhua_quantity),
+                        central_quantity = VALUES(central_quantity),
+                        j1_quantity = VALUES(j1_quantity),
+                        j2_quantity = VALUES(j2_quantity),
+                        j3_quantity = VALUES(j3_quantity),
+                        last_updated = CURRENT_TIMESTAMP";
+            $old_stmt = $pdo->prepare($old_sql);
+            $old_stmt->execute([$set_id, $wenhua_quantity, $central_quantity, $j1_quantity, $j2_quantity, $j3_quantity]);
+        } catch (PDOException $e) {
+            // 如果旧表不存在，忽略
+        }
+        
+        $pdo->commit();
         sendResponse(true, "更新套装库存成功");
         
     } catch (PDOException $e) {
+        $pdo->rollBack();
         sendResponse(false, "更新套装库存失败：" . $e->getMessage());
     }
 }
@@ -1367,6 +1521,201 @@ function removeItemFromSet() {
     } catch (PDOException $e) {
         $pdo->rollBack();
         sendResponse(false, "从套装中移除碗碟失败：" . $e->getMessage());
+    }
+}
+
+// 获取所有餐厅店面
+function getRestaurants() {
+    global $pdo;
+    
+    try {
+        $sql = "SELECT * FROM restaurants WHERE is_active = 1 ORDER BY display_order, id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        sendResponse(true, "获取餐厅店面列表成功", $results);
+        
+    } catch (PDOException $e) {
+        sendResponse(false, "获取餐厅店面列表失败：" . $e->getMessage());
+    }
+}
+
+// 添加餐厅店面
+function addRestaurant() {
+    global $pdo, $data;
+    
+    $postData = !empty($data) ? $data : $_POST;
+    
+    $name = $postData['name'] ?? '';
+    $code = $postData['code'] ?? '';
+    $display_order = $postData['display_order'] ?? 0;
+    
+    if (empty($name)) {
+        sendResponse(false, "缺少餐厅店面名称");
+    }
+    
+    if (empty($code)) {
+        sendResponse(false, "缺少餐厅店面代码");
+    }
+    
+    // 验证代码格式（只允许字母、数字和下划线）
+    if (!preg_match('/^[a-zA-Z0-9_]+$/', $code)) {
+        sendResponse(false, "餐厅店面代码只能包含字母、数字和下划线");
+    }
+    
+    try {
+        $pdo->beginTransaction();
+        
+        // 插入餐厅店面
+        $sql = "INSERT INTO restaurants (name, code, display_order) VALUES (?, ?, ?)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$name, $code, $display_order]);
+        
+        $restaurant_id = $pdo->lastInsertId();
+        
+        // 为所有现有的碗碟创建该餐厅店面的库存记录
+        $dishware_sql = "SELECT id FROM dishware_info";
+        $dishware_stmt = $pdo->prepare($dishware_sql);
+        $dishware_stmt->execute();
+        $dishwares = $dishware_stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        foreach ($dishwares as $dishware) {
+            $stock_sql = "INSERT INTO dishware_stock_by_restaurant (dishware_id, restaurant_id, quantity) 
+                         VALUES (?, ?, 0)";
+            $stock_stmt = $pdo->prepare($stock_sql);
+            $stock_stmt->execute([$dishware['id'], $restaurant_id]);
+        }
+        
+        // 为所有现有的套装创建该餐厅店面的库存记录
+        $set_sql = "SELECT id FROM dishware_sets WHERE is_active = 1";
+        $set_stmt = $pdo->prepare($set_sql);
+        $set_stmt->execute();
+        $sets = $set_stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        foreach ($sets as $set) {
+            $set_stock_sql = "INSERT INTO dishware_set_stock_by_restaurant (set_id, restaurant_id, quantity) 
+                             VALUES (?, ?, 0)";
+            $set_stock_stmt = $pdo->prepare($set_stock_sql);
+            $set_stock_stmt->execute([$set['id'], $restaurant_id]);
+        }
+        
+        $pdo->commit();
+        sendResponse(true, "添加餐厅店面成功", ['id' => $restaurant_id]);
+        
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        if ($e->getCode() == 23000) {
+            sendResponse(false, "餐厅店面代码已存在");
+        } else {
+            sendResponse(false, "添加餐厅店面失败：" . $e->getMessage());
+        }
+    }
+}
+
+// 更新餐厅店面
+function updateRestaurant() {
+    global $pdo, $data;
+    
+    $id = $data['id'] ?? $_POST['id'] ?? '';
+    $name = $data['name'] ?? $_POST['name'] ?? '';
+    $code = $data['code'] ?? $_POST['code'] ?? '';
+    $display_order = $data['display_order'] ?? $_POST['display_order'] ?? 0;
+    
+    if (empty($id)) {
+        sendResponse(false, "缺少餐厅店面ID");
+    }
+    
+    if (empty($name)) {
+        sendResponse(false, "缺少餐厅店面名称");
+    }
+    
+    if (empty($code)) {
+        sendResponse(false, "缺少餐厅店面代码");
+    }
+    
+    // 验证代码格式
+    if (!preg_match('/^[a-zA-Z0-9_]+$/', $code)) {
+        sendResponse(false, "餐厅店面代码只能包含字母、数字和下划线");
+    }
+    
+    try {
+        $sql = "UPDATE restaurants SET 
+                name = ?, code = ?, display_order = ?, 
+                updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$name, $code, $display_order, $id]);
+        
+        sendResponse(true, "更新餐厅店面成功");
+        
+    } catch (PDOException $e) {
+        if ($e->getCode() == 23000) {
+            sendResponse(false, "餐厅店面代码已存在");
+        } else {
+            sendResponse(false, "更新餐厅店面失败：" . $e->getMessage());
+        }
+    }
+}
+
+// 删除餐厅店面（软删除）
+function deleteRestaurant() {
+    global $pdo, $data;
+    
+    $id = $data['id'] ?? $_POST['id'] ?? '';
+    
+    if (empty($id)) {
+        sendResponse(false, "缺少餐厅店面ID");
+    }
+    
+    try {
+        // 检查是否有库存数据
+        $stock_check = "SELECT COUNT(*) as count FROM dishware_stock_by_restaurant WHERE restaurant_id = ?";
+        $stock_stmt = $pdo->prepare($stock_check);
+        $stock_stmt->execute([$id]);
+        $stock_result = $stock_stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $set_stock_check = "SELECT COUNT(*) as count FROM dishware_set_stock_by_restaurant WHERE restaurant_id = ?";
+        $set_stock_stmt = $pdo->prepare($set_stock_check);
+        $set_stock_stmt->execute([$id]);
+        $set_stock_result = $set_stock_stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $total_stock = ($stock_result['count'] ?? 0) + ($set_stock_result['count'] ?? 0);
+        
+        if ($total_stock > 0) {
+            // 软删除（设置为不活跃）
+            $sql = "UPDATE restaurants SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$id]);
+            sendResponse(true, "餐厅店面已停用（存在库存数据）");
+        } else {
+            // 如果没有库存数据，可以硬删除
+            $pdo->beginTransaction();
+            
+            // 删除关联的库存记录
+            $delete_stock_sql = "DELETE FROM dishware_stock_by_restaurant WHERE restaurant_id = ?";
+            $delete_stock_stmt = $pdo->prepare($delete_stock_sql);
+            $delete_stock_stmt->execute([$id]);
+            
+            $delete_set_stock_sql = "DELETE FROM dishware_set_stock_by_restaurant WHERE restaurant_id = ?";
+            $delete_set_stock_stmt = $pdo->prepare($delete_set_stock_sql);
+            $delete_set_stock_stmt->execute([$id]);
+            
+            // 删除餐厅店面
+            $delete_sql = "DELETE FROM restaurants WHERE id = ?";
+            $delete_stmt = $pdo->prepare($delete_sql);
+            $delete_stmt->execute([$id]);
+            
+            $pdo->commit();
+            sendResponse(true, "删除餐厅店面成功");
+        }
+        
+    } catch (PDOException $e) {
+        if (isset($pdo) && $pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        sendResponse(false, "删除餐厅店面失败：" . $e->getMessage());
     }
 }
 ?>
