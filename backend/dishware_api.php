@@ -262,7 +262,7 @@ function getStockList() {
     
     try {
         // 首先获取所有活跃的餐厅店面
-        $restaurants_sql = "SELECT id, name, code, display_order FROM restaurants WHERE is_active = 1 ORDER BY display_order";
+        $restaurants_sql = "SELECT id, name, code, display_order FROM dishware_restaurant_locations WHERE is_active = 1 ORDER BY display_order";
         $restaurants_stmt = $pdo->prepare($restaurants_sql);
         $restaurants_stmt->execute();
         $restaurants = $restaurants_stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -390,7 +390,7 @@ function addDishware() {
         
         // 创建对应的库存记录（使用新的关联表结构）
         // 获取所有活跃的餐厅店面
-        $restaurants_sql = "SELECT id FROM restaurants WHERE is_active = 1";
+        $restaurants_sql = "SELECT id FROM dishware_restaurant_locations WHERE is_active = 1";
         $restaurants_stmt = $pdo->prepare($restaurants_sql);
         $restaurants_stmt->execute();
         $restaurants = $restaurants_stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -486,7 +486,7 @@ function updateStock() {
         $pdo->beginTransaction();
         
         // 获取所有活跃的餐厅店面
-        $restaurants_sql = "SELECT id, code FROM restaurants WHERE is_active = 1";
+        $restaurants_sql = "SELECT id, code FROM dishware_restaurant_locations WHERE is_active = 1";
         $restaurants_stmt = $pdo->prepare($restaurants_sql);
         $restaurants_stmt->execute();
         $restaurants = $restaurants_stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -926,7 +926,7 @@ function getSetStockList() {
     
     try {
         // 首先获取所有活跃的餐厅店面
-        $restaurants_sql = "SELECT id, name, code, display_order FROM restaurants WHERE is_active = 1 ORDER BY display_order";
+        $restaurants_sql = "SELECT id, name, code, display_order FROM dishware_restaurant_locations WHERE is_active = 1 ORDER BY display_order";
         $restaurants_stmt = $pdo->prepare($restaurants_sql);
         $restaurants_stmt->execute();
         $restaurants = $restaurants_stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -1030,7 +1030,7 @@ function addDishwareSet() {
         
         // 创建对应的库存记录（使用新的关联表结构）
         // 获取所有活跃的餐厅店面
-        $restaurants_sql = "SELECT id FROM restaurants WHERE is_active = 1";
+        $restaurants_sql = "SELECT id FROM dishware_restaurant_locations WHERE is_active = 1";
         $restaurants_stmt = $pdo->prepare($restaurants_sql);
         $restaurants_stmt->execute();
         $restaurants = $restaurants_stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -1178,7 +1178,7 @@ function updateSetStock() {
         $pdo->beginTransaction();
         
         // 获取所有活跃的餐厅店面
-        $restaurants_sql = "SELECT id, code FROM restaurants WHERE is_active = 1";
+        $restaurants_sql = "SELECT id, code FROM dishware_restaurant_locations WHERE is_active = 1";
         $restaurants_stmt = $pdo->prepare($restaurants_sql);
         $restaurants_stmt->execute();
         $restaurants = $restaurants_stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -1529,7 +1529,7 @@ function getRestaurants() {
     global $pdo;
     
     try {
-        $sql = "SELECT * FROM restaurants WHERE is_active = 1 ORDER BY display_order, id";
+        $sql = "SELECT * FROM dishware_restaurant_locations WHERE is_active = 1 ORDER BY display_order, id";
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -1568,7 +1568,7 @@ function addRestaurant() {
         $pdo->beginTransaction();
         
         // 插入餐厅店面
-        $sql = "INSERT INTO restaurants (name, code, display_order) VALUES (?, ?, ?)";
+        $sql = "INSERT INTO dishware_restaurant_locations (name, code, display_order) VALUES (?, ?, ?)";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$name, $code, $display_order]);
         
@@ -1640,7 +1640,7 @@ function updateRestaurant() {
     }
     
     try {
-        $sql = "UPDATE restaurants SET 
+        $sql = "UPDATE dishware_restaurant_locations SET 
                 name = ?, code = ?, display_order = ?, 
                 updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?";
@@ -1685,7 +1685,7 @@ function deleteRestaurant() {
         
         if ($total_stock > 0) {
             // 软删除（设置为不活跃）
-            $sql = "UPDATE restaurants SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+            $sql = "UPDATE dishware_restaurant_locations SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$id]);
             sendResponse(true, "餐厅店面已停用（存在库存数据）");
@@ -1703,7 +1703,7 @@ function deleteRestaurant() {
             $delete_set_stock_stmt->execute([$id]);
             
             // 删除餐厅店面
-            $delete_sql = "DELETE FROM restaurants WHERE id = ?";
+            $delete_sql = "DELETE FROM dishware_restaurant_locations WHERE id = ?";
             $delete_stmt = $pdo->prepare($delete_sql);
             $delete_stmt->execute([$id]);
             
