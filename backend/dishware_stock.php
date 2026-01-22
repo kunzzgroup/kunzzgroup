@@ -3446,9 +3446,8 @@ header('Expires: 0');
                 case 'j3':
                     if (title) title.textContent = '破损记录';
                     if (addButton) {
-                        addButton.innerHTML = '<i class="fas fa-plus"></i> 记录破损';
-                        addButton.onclick = () => openBreakModal(currentPage);
-                        addButton.style.display = 'inline-flex';
+                        // 隐藏顶部的"记录破损"按钮，因为每个容器都有自己的按钮
+                        addButton.style.display = 'none';
                     }
                     // 加载所有破损记录
                     loadAllBreakRecords();
@@ -3623,8 +3622,13 @@ header('Expires: 0');
                 html += `
                     <div class="break-record-section">
                         <div class="break-record-header">
-                            <span>${restaurant.name}破损</span>
-                            <span style="font-size: 12px; opacity: 0.9;">(${records.length} 项)</span>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span>${restaurant.name}破损</span>
+                                <span style="font-size: 12px; opacity: 0.9;">(${records.length} 项)</span>
+                            </div>
+                            <button class="btn btn-success" onclick="openBreakModal('${shopType}')" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">
+                                <i class="fas fa-plus"></i> 记录破损
+                            </button>
                         </div>
                         <div class="break-record-table-wrapper">
                             <table class="break-record-table" id="${shopType}-break-table">
