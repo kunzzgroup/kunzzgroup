@@ -1069,53 +1069,110 @@ header('Expires: 0');
             overflow-x: hidden;
             overflow-y: auto;
             min-height: 0;
+            width: 100%;
         }
 
         #restaurantModal .stock-table {
             width: 100%;
-            table-layout: fixed;
+            table-layout: auto;
+            border-collapse: collapse;
         }
 
         #restaurantModal .stock-table th,
         #restaurantModal .stock-table td {
-            padding: 10px 8px;
+            padding: 8px 6px;
             word-wrap: break-word;
             overflow: hidden;
             text-overflow: ellipsis;
+            box-sizing: border-box;
         }
 
+        /* 序号列 - 紧凑，自动调整 */
         #restaurantModal .stock-table th:nth-child(1),
         #restaurantModal .stock-table td:nth-child(1) {
             text-align: center;
-            width: 10%;
+            width: auto;
+            min-width: 45px;
+            max-width: 60px;
         }
 
+        /* 餐厅店面名称列 - 自适应，占用剩余空间 */
         #restaurantModal .stock-table th:nth-child(2),
         #restaurantModal .stock-table td:nth-child(2) {
-            width: 30%;
+            width: auto;
+            min-width: 90px;
         }
 
+        /* 代码列 - 紧凑 */
         #restaurantModal .stock-table th:nth-child(3),
         #restaurantModal .stock-table td:nth-child(3) {
-            width: 20%;
+            width: auto;
+            min-width: 70px;
         }
 
+        /* 显示顺序列 - 紧凑 */
         #restaurantModal .stock-table th:nth-child(4),
         #restaurantModal .stock-table td:nth-child(4) {
             text-align: center;
-            width: 20%;
+            width: auto;
+            min-width: 60px;
+            max-width: 80px;
         }
 
+        /* 操作列 - 紧凑，但确保按钮可见 */
         #restaurantModal .stock-table th:nth-child(5),
         #restaurantModal .stock-table td:nth-child(5) {
             text-align: center;
-            width: 20%;
+            width: auto;
+            min-width: 90px;
+            max-width: 120px;
             white-space: nowrap;
         }
 
         #restaurantModal .stock-table .action-btn {
-            margin: 0 4px;
-            padding: 6px 10px;
+            margin: 0 2px;
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
+        /* 响应式调整 - 小屏幕时进一步压缩 */
+        @media (max-width: 768px) {
+            #restaurantModal .modal-content {
+                width: 98%;
+                padding: 16px;
+            }
+            
+            #restaurantModal .stock-table th,
+            #restaurantModal .stock-table td {
+                padding: 6px 4px;
+                font-size: 13px;
+            }
+            
+            #restaurantModal .stock-table th:nth-child(1),
+            #restaurantModal .stock-table td:nth-child(1) {
+                width: 8%;
+                min-width: 40px;
+            }
+            
+            #restaurantModal .stock-table th:nth-child(2),
+            #restaurantModal .stock-table td:nth-child(2) {
+                min-width: 80px;
+            }
+            
+            #restaurantModal .stock-table th:nth-child(3),
+            #restaurantModal .stock-table td:nth-child(3) {
+                min-width: 60px;
+            }
+            
+            #restaurantModal .stock-table th:nth-child(4),
+            #restaurantModal .stock-table td:nth-child(4) {
+                min-width: 60px;
+            }
+            
+            #restaurantModal .stock-table th:nth-child(5),
+            #restaurantModal .stock-table td:nth-child(5) {
+                min-width: 90px;
+            }
         }
 
         .modal-header {
@@ -2242,15 +2299,15 @@ header('Expires: 0');
                     </button>
                 </div>
                 <div class="table-container" style="max-height: 60vh; overflow: hidden;">
-                    <div class="table-scroll-container" style="max-height: 60vh; overflow-x: hidden;">
-                        <table class="stock-table" id="restaurants-table" style="width: 100%; table-layout: fixed;">
+                    <div class="table-scroll-container" style="max-height: 60vh; overflow-x: hidden; overflow-y: auto;">
+                        <table class="stock-table" id="restaurants-table" style="width: 100%; table-layout: auto;">
                             <thead>
                                 <tr>
-                                    <th style="width: 10%;">序号</th>
-                                    <th style="width: 30%;">餐厅店面名称</th>
-                                    <th style="width: 20%;">代码</th>
-                                    <th style="width: 20%;">显示顺序</th>
-                                    <th style="width: 20%;">操作</th>
+                                    <th>序号</th>
+                                    <th>餐厅店面名称</th>
+                                    <th>代码</th>
+                                    <th>显示顺序</th>
+                                    <th>操作</th>
                                 </tr>
                             </thead>
                             <tbody id="restaurants-tbody">
