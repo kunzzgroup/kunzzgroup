@@ -4290,11 +4290,14 @@ header('Expires: 0');
             const currentRowCount = tbody.querySelectorAll('tr:not(.new-row)').length;
             const newRowIndex = currentRowCount + tbody.querySelectorAll('tr.new-row').length + 1;
             
-            // 生成产品选择选项
+            // 生成产品选择选项（只显示编号）
             let productOptions = '<option value="">请选择产品</option>';
             if (stockData && stockData.length > 0) {
                 stockData.forEach(item => {
-                    productOptions += `<option value="${item.id}" data-code="${item.code_number || ''}" data-price="${item.unit_price || 0}">${item.product_name || ''}</option>`;
+                    const code = item.code_number || '';
+                    // 只显示编号，如果没有编号则显示产品名称作为备选
+                    const displayText = code || item.product_name || '';
+                    productOptions += `<option value="${item.id}" data-code="${code}" data-price="${item.unit_price || 0}">${displayText}</option>`;
                 });
             }
             
