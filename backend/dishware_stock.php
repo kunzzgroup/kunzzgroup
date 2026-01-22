@@ -2027,7 +2027,7 @@ header('Expires: 0');
 
         .break-record-table th:nth-child(2),
         .break-record-table td:nth-child(2) {
-            width: 25%; /* 编号 */
+            width: 10%; /* 编号 */
         }
 
         .break-record-table th:nth-child(3),
@@ -2047,7 +2047,7 @@ header('Expires: 0');
 
         .break-record-table th:nth-child(6),
         .break-record-table td:nth-child(6) {
-            width: 19%; /* 操作 */
+            width: 13%; /* 操作 */
         }
 
         .break-record-table td {
@@ -3782,7 +3782,7 @@ header('Expires: 0');
                                     <tr>
                                         <th>No.</th>
                                         <th>编号</th>
-                                        <th>${restaurant.name.toUpperCase()}破损数量</th>
+                                        <th>数量</th>
                                         <th>单价</th>
                                         <th>总价</th>
                                         <th>操作</th>
