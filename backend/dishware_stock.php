@@ -1836,7 +1836,7 @@ header('Expires: 0');
 
         .break-record-table th:nth-child(3),
         .break-record-table td:nth-child(3) {
-            width: 18%; /* 破损数量 */
+            width: 13%; /* 破损数量 */
         }
 
         .break-record-table th:nth-child(4),
