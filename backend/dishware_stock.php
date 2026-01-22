@@ -3505,26 +3505,51 @@ header('Expires: 0');
             }
         }
 
-        // 加载所有店铺的破损记录
+        // 加载所有店铺的破损记录（只加载J开头的餐厅）
         async function loadAllBreakRecords() {
             try {
-                // 同时加载三个店铺的数据
-                const [j1Result, j2Result, j3Result] = await Promise.all([
-                    apiCall('?action=damage_records&shop_type=j1'),
-                    apiCall('?action=damage_records&shop_type=j2'),
-                    apiCall('?action=damage_records&shop_type=j3')
-                ]);
+                // 获取所有餐厅列表，筛选出J开头的餐厅（排除"中央"和"文化楼"）
+                const jRestaurants = restaurants.filter(r => {
+                    const name = r.name.toLowerCase();
+                    const lowerName = r.name.toLowerCase();
+                    // 只显示J开头的餐厅，排除"中央"和"文化楼"
+                    return lowerName.startsWith('j') && 
+                           lowerName !== '中央' && 
+                           lowerName !== '文化楼' &&
+                           name !== 'wenhua' && 
+                           name !== 'central';
+                }).sort((a, b) => {
+                    // 按名称排序（J1, J2, J3, J4...）
+                    const nameA = a.name.toLowerCase();
+                    const nameB = b.name.toLowerCase();
+                    const numA = parseInt(nameA.replace('j', '')) || 0;
+                    const numB = parseInt(nameB.replace('j', '')) || 0;
+                    return numA - numB;
+                });
+
+                // 同时加载所有J开头店铺的数据
+                const promises = jRestaurants.map(restaurant => {
+                    const shopType = restaurant.name.toLowerCase();
+                    return apiCall(`?action=damage_records&shop_type=${shopType}`).then(result => ({
+                        shopType: shopType,
+                        restaurant: restaurant,
+                        result: result
+                    }));
+                });
+
+                const results = await Promise.all(promises);
 
                 // 存储数据
-                if (j1Result.success) {
-                    breakRecordsData['j1'] = j1Result.data || [];
-                }
-                if (j2Result.success) {
-                    breakRecordsData['j2'] = j2Result.data || [];
-                }
-                if (j3Result.success) {
-                    breakRecordsData['j3'] = j3Result.data || [];
-                }
+                results.forEach(({ shopType, result }) => {
+                    if (result.success) {
+                        breakRecordsData[shopType] = result.data || [];
+                    } else {
+                        breakRecordsData[shopType] = [];
+                    }
+                });
+
+                // 存储J餐厅列表供渲染使用
+                window.jRestaurantsForBreak = jRestaurants;
 
                 // 渲染合并页面
                 renderMergedBreakRecordsPage();
@@ -3549,37 +3574,62 @@ header('Expires: 0');
                 return;
             }
 
-            const shops = [
-                { id: 'j1', name: 'J1破损' },
-                { id: 'j2', name: 'J2破损' },
-                { id: 'j3', name: 'J3破损' }
-            ];
+            // 使用动态获取的J餐厅列表
+            const jRestaurants = window.jRestaurantsForBreak || restaurants.filter(r => {
+                const name = r.name.toLowerCase();
+                const lowerName = r.name.toLowerCase();
+                // 只显示J开头的餐厅，排除"中央"和"文化楼"
+                return lowerName.startsWith('j') && 
+                       lowerName !== '中央' && 
+                       lowerName !== '文化楼' &&
+                       name !== 'wenhua' && 
+                       name !== 'central';
+            }).sort((a, b) => {
+                const nameA = a.name.toLowerCase();
+                const nameB = b.name.toLowerCase();
+                const numA = parseInt(nameA.replace('j', '')) || 0;
+                const numB = parseInt(nameB.replace('j', '')) || 0;
+                return numA - numB;
+            });
+
+            if (jRestaurants.length === 0) {
+                containers.forEach(container => {
+                    container.innerHTML = `
+                        <div style="padding: 40px; text-align: center; color: #6b7280;">
+                            <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.5; margin-bottom: 16px;"></i>
+                            <div>暂无J开头的餐厅店面</div>
+                        </div>
+                    `;
+                });
+                return;
+            }
 
             let html = '';
             
-            shops.forEach(shop => {
-                const records = breakRecordsData[shop.id] || [];
+            jRestaurants.forEach(restaurant => {
+                const shopType = restaurant.name.toLowerCase();
+                const records = breakRecordsData[shopType] || [];
                 
                 html += `
                     <div class="break-record-section">
                         <div class="break-record-header">
-                            <span>${shop.name}</span>
+                            <span>${restaurant.name}破损</span>
                             <span style="font-size: 12px; opacity: 0.9;">(${records.length} 项)</span>
                         </div>
                         <div class="break-record-table-wrapper">
-                            <table class="break-record-table" id="${shop.id}-break-table">
+                            <table class="break-record-table" id="${shopType}-break-table">
                                 <thead>
                                     <tr>
                                         <th>No.</th>
                                         <th>编号</th>
-                                        <th>${shop.id.toUpperCase()}破损数量</th>
+                                        <th>${restaurant.name.toUpperCase()}破损数量</th>
                                         <th>单价</th>
                                         <th>总价</th>
                                         <th>操作</th>
                                     </tr>
                                 </thead>
-                                <tbody id="${shop.id}-break-tbody">
-                                    ${renderBreakRecordsRows(records, shop.id)}
+                                <tbody id="${shopType}-break-tbody">
+                                    ${renderBreakRecordsRows(records, shopType)}
                                 </tbody>
                             </table>
                         </div>
@@ -3912,9 +3962,14 @@ header('Expires: 0');
                     } else if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') {
                         // 如果在破损记录页面，刷新破损记录数据
                         console.log('刷新破损记录数据，页面类型:', currentPage);
-                        loadBreakRecords(currentPage);
+                        loadAllBreakRecords();
                     } else {
                         console.warn('未知的页面类型:', currentPage);
+                    }
+                    
+                    // 同时刷新总库存页面（如果已加载），确保库存同步
+                    if (document.getElementById('stock-table')) {
+                        loadStockData(true, false);
                     }
                 } else {
                     showAlert('添加失败: ' + (result.message || '未知错误'), 'error');
@@ -3988,6 +4043,11 @@ header('Expires: 0');
                         // 如果在破损记录页面，刷新所有破损记录数据
                         loadAllBreakRecords();
                     }
+                    
+                    // 同时刷新总库存页面（如果已加载），确保库存同步
+                    if (document.getElementById('stock-table')) {
+                        loadStockData(true, false);
+                    }
                 } else {
                     showAlert('更新失败: ' + (result.message || '未知错误'), 'error');
                 }
@@ -4029,6 +4089,11 @@ header('Expires: 0');
                     } else {
                         // 如果在破损记录页面，刷新所有破损记录数据
                         loadAllBreakRecords();
+                    }
+                    
+                    // 同时刷新总库存页面（如果已加载），确保库存同步
+                    if (document.getElementById('stock-table')) {
+                        loadStockData(true, false);
                     }
                 } else {
                     showAlert('删除失败: ' + (result.message || '未知错误'), 'error');
@@ -6411,11 +6476,18 @@ header('Expires: 0');
                     showAlert('删除餐厅店面成功', 'success');
                     await loadRestaurants(); // 重新加载餐厅店面列表
                     loadRestaurantsList(); // 刷新管理界面
+                    // 如果当前在破损页面，刷新破损记录页面
+                    if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') {
+                        loadAllBreakRecords();
+                    }
                     // 重新加载库存数据以更新表格
                     if (currentPage === 'stock') {
                         loadStockData();
-                    } else                     if (currentPage === 'sets') {
+                    } else if (currentPage === 'sets') {
                         loadSetsData();
+                    } else if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') {
+                        // 如果在破损页面，刷新破损记录页面
+                        loadAllBreakRecords();
                     }
                     // 更新表头（确保餐厅列顺序正确）
                     updateTableHeaders();
@@ -6467,11 +6539,14 @@ header('Expires: 0');
                             // 重新加载库存数据以更新表格
                             if (currentPage === 'stock') {
                                 loadStockData();
-                            } else                     if (currentPage === 'sets') {
-                        loadSetsData();
-                    }
-                    // 更新表头（确保餐厅列顺序正确）
-                    updateTableHeaders();
+                            } else if (currentPage === 'sets') {
+                                loadSetsData();
+                            } else if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') {
+                                // 如果在破损页面，刷新破损记录页面
+                                loadAllBreakRecords();
+                            }
+                            // 更新表头（确保餐厅列顺序正确）
+                            updateTableHeaders();
                         } else {
                             showAlert((restaurantId ? '更新' : '添加') + '餐厅店面失败: ' + (result.message || '未知错误'), 'error');
                         }
