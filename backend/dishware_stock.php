@@ -1919,7 +1919,9 @@ header('Expires: 0');
                     <div class="selector-dropdown" id="view-selector-dropdown">
                         <div class="dropdown-item active" onclick="switchPage('stock')">总库存</div>
                         <div class="dropdown-item" onclick="switchPage('sets')">套装管理</div>
-                        <div class="dropdown-item" onclick="switchPage('break-records')">破损记录</div>
+                        <div class="dropdown-item" onclick="switchPage('j1')">J1破损</div>
+                        <div class="dropdown-item" onclick="switchPage('j2')">J2破损</div>
+                        <div class="dropdown-item" onclick="switchPage('j3')">J3破损</div>
                     </div>
                 </div>
             </div>
@@ -2061,11 +2063,11 @@ header('Expires: 0');
                 </div>
             </div>
 
-            <!-- 破损记录页面（合并J1、J2、J3） -->
-            <div id="break-records-page" class="page-content" style="display: none;">
+            <!-- J1 打破记录页面 -->
+            <div id="j1-page" class="page-content" style="display: none;">
                 <div class="table-container">
                     <div class="table-scroll-container">
-                        <table class="stock-table" id="break-records-table">
+                        <table class="stock-table" id="j1-table">
                             <thead>
                                 <tr>
                                     <th>日期</th>
@@ -2075,21 +2077,69 @@ header('Expires: 0');
                                     <th>分类</th>
                                     <th>尺寸</th>
                                     <th>当前库存</th>
-                                    <th>J1破损数量</th>
-                                    <th>J1单价</th>
-                                    <th>J1总价</th>
-                                    <th>J1操作</th>
-                                    <th>J2破损数量</th>
-                                    <th>J2单价</th>
-                                    <th>J2总价</th>
-                                    <th>J2操作</th>
-                                    <th>J3破损数量</th>
-                                    <th>J3单价</th>
-                                    <th>J3总价</th>
-                                    <th>J3操作</th>
+                                    <th>破损数量</th>
+                                    <th>单价</th>
+                                    <th>总价</th>
+                                    <th>操作</th>
                                 </tr>
                             </thead>
-                            <tbody id="break-records-tbody">
+                            <tbody id="j1-tbody">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- J2 打破记录页面 -->
+            <div id="j2-page" class="page-content" style="display: none;">
+                <div class="table-container">
+                    <div class="table-scroll-container">
+                        <table class="stock-table" id="j2-table">
+                            <thead>
+                                <tr>
+                                    <th>日期</th>
+                                    <th>No.</th>
+                                    <th>产品名称</th>
+                                    <th>编号</th>
+                                    <th>分类</th>
+                                    <th>尺寸</th>
+                                    <th>当前库存</th>
+                                    <th>破损数量</th>
+                                    <th>单价</th>
+                                    <th>总价</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="j2-tbody">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- J3 打破记录页面 -->
+            <div id="j3-page" class="page-content" style="display: none;">
+                <div class="table-container">
+                    <div class="table-scroll-container">
+                        <table class="stock-table" id="j3-table">
+                            <thead>
+                                <tr>
+                                    <th>日期</th>
+                                    <th>No.</th>
+                                    <th>产品名称</th>
+                                    <th>编号</th>
+                                    <th>分类</th>
+                                    <th>尺寸</th>
+                                    <th>当前库存</th>
+                                    <th>破损数量</th>
+                                    <th>单价</th>
+                                    <th>总价</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="j3-tbody">
                                 <!-- Dynamic content -->
                             </tbody>
                         </table>
@@ -3213,7 +3263,9 @@ header('Expires: 0');
             const pageNames = {
                 'stock': '总库存',
                 'sets': '套装管理',
-                'break-records': '破损记录'
+                'j1': 'J1破损',
+                'j2': 'J2破损',
+                'j3': 'J3破损'
             };
             
             if (currentView) {
@@ -3273,15 +3325,27 @@ header('Expires: 0');
                         addButton.style.display = 'inline-flex';
                     }
                     break;
-                case 'break-records':
-                    if (title) title.textContent = '破损记录';
+                case 'j1':
+                    if (title) title.textContent = 'J1破损';
                     if (addButton) {
-                        // 可以添加一个下拉菜单让用户选择J1、J2或J3
                         addButton.innerHTML = '<i class="fas fa-plus"></i> 记录破损';
-                        addButton.onclick = () => {
-                            // 显示选择店铺的提示，或者直接打开J1（可以后续改进）
-                            openBreakModal('j1');
-                        };
+                        addButton.onclick = () => openBreakModal('j1');
+                        addButton.style.display = 'inline-flex';
+                    }
+                    break;
+                case 'j2':
+                    if (title) title.textContent = 'J2破损';
+                    if (addButton) {
+                        addButton.innerHTML = '<i class="fas fa-plus"></i> 记录破损';
+                        addButton.onclick = () => openBreakModal('j2');
+                        addButton.style.display = 'inline-flex';
+                    }
+                    break;
+                case 'j3':
+                    if (title) title.textContent = 'J3破损';
+                    if (addButton) {
+                        addButton.innerHTML = '<i class="fas fa-plus"></i> 记录破损';
+                        addButton.onclick = () => openBreakModal('j3');
                         addButton.style.display = 'inline-flex';
                     }
                     break;
@@ -3297,39 +3361,15 @@ header('Expires: 0');
                 case 'sets':
                     loadSetsData();
                     break;
-                case 'break-records':
-                    loadCombinedBreakRecords();
+                case 'j1':
+                case 'j2':
+                case 'j3':
+                    loadBreakRecords(pageType);
                     break;
             }
         }
 
-        // 加载合并的破损记录（J1、J2、J3）
-        async function loadCombinedBreakRecords() {
-            try {
-                // 同时加载三个店铺的破损记录
-                const [j1Result, j2Result, j3Result] = await Promise.all([
-                    apiCall('?action=damage_records&shop_type=j1'),
-                    apiCall('?action=damage_records&shop_type=j2'),
-                    apiCall('?action=damage_records&shop_type=j3')
-                ]);
-                
-                // 存储破损记录数据
-                breakRecordsData.j1 = j1Result.success ? (j1Result.data || []) : [];
-                breakRecordsData.j2 = j2Result.success ? (j2Result.data || []) : [];
-                breakRecordsData.j3 = j3Result.success ? (j3Result.data || []) : [];
-                
-                // 渲染合并表格
-                renderCombinedBreakRecordsTable();
-                updateStats();
-                
-            } catch (error) {
-                console.error('加载破损记录时发生错误:', error);
-                showAlert('加载破损记录失败: ' + error.message, 'error');
-                renderCombinedBreakRecordsTable();
-            }
-        }
-
-        // 加载单个店铺的破损记录（保留用于向后兼容）
+        // 加载打破记录
         async function loadBreakRecords(shopType) {
             console.log('loadBreakRecords 被调用，shopType:', shopType);
             try {
@@ -3355,191 +3395,7 @@ header('Expires: 0');
             }
         }
 
-        // 渲染合并的破损记录表格（J1、J2、J3作为三个列）
-        function renderCombinedBreakRecordsTable() {
-            const tbody = document.getElementById('break-records-tbody');
-            if (!tbody) {
-                console.error('找不到tbody元素: break-records-tbody');
-                return;
-            }
-            
-            const j1Records = breakRecordsData.j1 || [];
-            const j2Records = breakRecordsData.j2 || [];
-            const j3Records = breakRecordsData.j3 || [];
-            
-            // 合并所有记录，按产品名称和编号分组
-            const allRecordsMap = new Map();
-            
-            // 处理J1记录
-            j1Records.forEach(record => {
-                const key = `${record.product_name}_${record.code_number}`;
-                if (!allRecordsMap.has(key)) {
-                    allRecordsMap.set(key, {
-                        product_name: record.product_name,
-                        code_number: record.code_number,
-                        category: record.category,
-                        size: record.size,
-                        current_stock: record.current_stock || 0,
-                        j1: null,
-                        j2: null,
-                        j3: null
-                    });
-                }
-                allRecordsMap.get(key).j1 = record;
-            });
-            
-            // 处理J2记录
-            j2Records.forEach(record => {
-                const key = `${record.product_name}_${record.code_number}`;
-                if (!allRecordsMap.has(key)) {
-                    allRecordsMap.set(key, {
-                        product_name: record.product_name,
-                        code_number: record.code_number,
-                        category: record.category,
-                        size: record.size,
-                        current_stock: record.current_stock || 0,
-                        j1: null,
-                        j2: null,
-                        j3: null
-                    });
-                }
-                allRecordsMap.get(key).j2 = record;
-            });
-            
-            // 处理J3记录
-            j3Records.forEach(record => {
-                const key = `${record.product_name}_${record.code_number}`;
-                if (!allRecordsMap.has(key)) {
-                    allRecordsMap.set(key, {
-                        product_name: record.product_name,
-                        code_number: record.code_number,
-                        category: record.category,
-                        size: record.size,
-                        current_stock: record.current_stock || 0,
-                        j1: null,
-                        j2: null,
-                        j3: null
-                    });
-                }
-                allRecordsMap.get(key).j3 = record;
-            });
-            
-            const allRecords = Array.from(allRecordsMap.values());
-            
-            if (allRecords.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="19" class="no-data">
-                            <i class="fas fa-inbox"></i>
-                            <div>暂无破损记录</div>
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            let tableRows = '';
-            let rowIndex = 1;
-            
-            allRecords.forEach((item) => {
-                // 获取日期（使用第一个有记录的日期）
-                const record = item.j1 || item.j2 || item.j3;
-                const date = record ? formatDate(record.break_date || record.created_at) : '-';
-                
-                // J1列
-                const j1BreakQty = item.j1 ? item.j1.break_quantity : '';
-                const j1UnitPrice = item.j1 ? item.j1.unit_price : 0;
-                const j1TotalPrice = item.j1 ? item.j1.total_price : 0;
-                const j1Actions = item.j1 ? `
-                    <button class="action-btn edit-btn" onclick="editBreakRecord(${item.j1.id})" title="编辑">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="action-btn delete-btn" onclick="deleteBreakRecord(${item.j1.id})" title="删除">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                ` : '-';
-                
-                // J2列
-                const j2BreakQty = item.j2 ? item.j2.break_quantity : '';
-                const j2UnitPrice = item.j2 ? item.j2.unit_price : 0;
-                const j2TotalPrice = item.j2 ? item.j2.total_price : 0;
-                const j2Actions = item.j2 ? `
-                    <button class="action-btn edit-btn" onclick="editBreakRecord(${item.j2.id})" title="编辑">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="action-btn delete-btn" onclick="deleteBreakRecord(${item.j2.id})" title="删除">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                ` : '-';
-                
-                // J3列
-                const j3BreakQty = item.j3 ? item.j3.break_quantity : '';
-                const j3UnitPrice = item.j3 ? item.j3.unit_price : 0;
-                const j3TotalPrice = item.j3 ? item.j3.total_price : 0;
-                const j3Actions = item.j3 ? `
-                    <button class="action-btn edit-btn" onclick="editBreakRecord(${item.j3.id})" title="编辑">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="action-btn delete-btn" onclick="deleteBreakRecord(${item.j3.id})" title="删除">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                ` : '-';
-                
-                tableRows += `
-                    <tr>
-                        <td data-label="日期" class="text-center">${date}</td>
-                        <td data-label="NO" class="text-center">${rowIndex++}</td>
-                        <td data-label="产品名称"><strong>${item.product_name}</strong></td>
-                        <td data-label="编号" class="text-center">${item.code_number || '-'}</td>
-                        <td data-label="分类" class="text-center">${item.category || '-'}</td>
-                        <td data-label="尺寸" class="text-center">${item.size || '-'}</td>
-                        <td data-label="当前库存" class="text-center">
-                            <input type="number" class="quantity-input" 
-                                   value="${item.current_stock}" 
-                                   readonly style="background: #f3f4f6;">
-                        </td>
-                        <!-- J1列 -->
-                        <td data-label="J1破损数量" class="text-center">
-                            ${item.j1 ? `<input type="number" class="quantity-input" value="${j1BreakQty}" onchange="updateBreakQuantity(${item.j1.id}, this.value)" min="0">` : '-'}
-                        </td>
-                        <td data-label="J1单价" class="text-center">
-                            ${item.j1 ? `<div class="currency-display"><span class="currency-symbol">RM</span><span class="currency-amount">${formatCurrency(j1UnitPrice)}</span></div>` : '-'}
-                        </td>
-                        <td data-label="J1总价" class="text-center">
-                            ${item.j1 ? `<div class="currency-display"><span class="currency-symbol">RM</span><span class="currency-amount">${formatCurrency(j1TotalPrice)}</span></div>` : '-'}
-                        </td>
-                        <td data-label="J1操作" class="text-center">${j1Actions}</td>
-                        <!-- J2列 -->
-                        <td data-label="J2破损数量" class="text-center">
-                            ${item.j2 ? `<input type="number" class="quantity-input" value="${j2BreakQty}" onchange="updateBreakQuantity(${item.j2.id}, this.value)" min="0">` : '-'}
-                        </td>
-                        <td data-label="J2单价" class="text-center">
-                            ${item.j2 ? `<div class="currency-display"><span class="currency-symbol">RM</span><span class="currency-amount">${formatCurrency(j2UnitPrice)}</span></div>` : '-'}
-                        </td>
-                        <td data-label="J2总价" class="text-center">
-                            ${item.j2 ? `<div class="currency-display"><span class="currency-symbol">RM</span><span class="currency-amount">${formatCurrency(j2TotalPrice)}</span></div>` : '-'}
-                        </td>
-                        <td data-label="J2操作" class="text-center">${j2Actions}</td>
-                        <!-- J3列 -->
-                        <td data-label="J3破损数量" class="text-center">
-                            ${item.j3 ? `<input type="number" class="quantity-input" value="${j3BreakQty}" onchange="updateBreakQuantity(${item.j3.id}, this.value)" min="0">` : '-'}
-                        </td>
-                        <td data-label="J3单价" class="text-center">
-                            ${item.j3 ? `<div class="currency-display"><span class="currency-symbol">RM</span><span class="currency-amount">${formatCurrency(j3UnitPrice)}</span></div>` : '-'}
-                        </td>
-                        <td data-label="J3总价" class="text-center">
-                            ${item.j3 ? `<div class="currency-display"><span class="currency-symbol">RM</span><span class="currency-amount">${formatCurrency(j3TotalPrice)}</span></div>` : '-'}
-                        </td>
-                        <td data-label="J3操作" class="text-center">${j3Actions}</td>
-                    </tr>
-                `;
-            });
-            
-            tbody.innerHTML = tableRows;
-            console.log('合并破损记录表格已更新，行数:', allRecords.length);
-        }
-
-        // 渲染单个店铺的破损记录表格（保留用于向后兼容）
+        // 渲染破损记录表格
         function renderBreakRecordsTable(shopType, records) {
             console.log('renderBreakRecordsTable 被调用，shopType:', shopType, 'records数量:', records.length);
             const tbody = document.getElementById(`${shopType}-tbody`);
@@ -3950,11 +3806,8 @@ header('Expires: 0');
                     if (currentPage === 'stock') {
                         // 如果在库存页面，刷新库存数据
                         loadStockData(true, false);
-                    } else if (currentPage === 'break-records') {
-                        // 如果在合并破损记录页面，刷新合并数据
-                        loadCombinedBreakRecords();
                     } else {
-                        // 如果在单个破损记录页面，刷新单个店铺数据
+                        // 如果在破损记录页面，刷新破损记录数据
                         loadBreakRecords(currentPage);
                     }
                 } else {
@@ -3974,15 +3827,6 @@ header('Expires: 0');
 
         // 删除破损记录
         async function deleteBreakRecord(recordId) {
-            // 确定记录属于哪个店铺
-            let shopType = null;
-            if (breakRecordsData.j1 && breakRecordsData.j1.find(r => r.id == recordId)) {
-                shopType = 'j1';
-            } else if (breakRecordsData.j2 && breakRecordsData.j2.find(r => r.id == recordId)) {
-                shopType = 'j2';
-            } else if (breakRecordsData.j3 && breakRecordsData.j3.find(r => r.id == recordId)) {
-                shopType = 'j3';
-            }
             if (!confirm('确定要删除此破损记录吗？此操作不可恢复！')) return;
             
             try {
@@ -4004,11 +3848,8 @@ header('Expires: 0');
                     if (currentPage === 'stock') {
                         // 如果在库存页面，刷新库存数据
                         loadStockData(true, false);
-                    } else if (currentPage === 'break-records') {
-                        // 如果在合并破损记录页面，刷新合并数据
-                        loadCombinedBreakRecords();
                     } else {
-                        // 如果在单个破损记录页面，刷新单个店铺数据
+                        // 如果在破损记录页面，刷新破损记录数据
                         loadBreakRecords(currentPage);
                     }
                 } else {
@@ -4549,21 +4390,11 @@ header('Expires: 0');
                  // 套装管理页面使用套装数据
                  displayedRecords = setsData.length;
                  totalRecords = setsData.length;
-            } else if (currentPage === 'break-records') {
-                // 破损记录页面使用合并的破损记录数据
-                const j1Records = breakRecordsData.j1 || [];
-                const j2Records = breakRecordsData.j2 || [];
-                const j3Records = breakRecordsData.j3 || [];
-                // 合并所有记录（去重）
-                const allRecordsMap = new Map();
-                [...j1Records, ...j2Records, ...j3Records].forEach(record => {
-                    const key = `${record.product_name}_${record.code_number}`;
-                    if (!allRecordsMap.has(key)) {
-                        allRecordsMap.set(key, record);
-                    }
-                });
-                displayedRecords = allRecordsMap.size;
-                totalRecords = allRecordsMap.size;
+             } else if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') {
+                 // 破损记录页面使用破损记录数据
+                 const records = breakRecordsData[currentPage] || [];
+                 displayedRecords = records.length;
+                 totalRecords = records.length;
              } else {
                  // 默认情况
                  displayedRecords = 0;
