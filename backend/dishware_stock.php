@@ -1042,121 +1042,124 @@ header('Expires: 0');
 
         /* 餐厅店面管理模态框特殊样式 */
         #restaurantModal .modal-content {
-            max-width: 900px;
-            width: 95%;
+            max-width: 95vw;
+            width: auto;
+            min-width: 500px;
             max-height: 90vh;
             display: flex;
             flex-direction: column;
+            padding: 20px;
         }
 
         #restaurantModal .modal-body {
             flex: 1;
-            overflow: hidden;
+            overflow: visible;
             display: flex;
             flex-direction: column;
+            min-width: 0;
+            width: 100%;
         }
 
         #restaurantModal .table-container {
-            flex: 1;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            min-height: 0;
+            overflow: visible;
+            display: block;
+            width: 100%;
+            min-width: 0;
         }
 
         #restaurantModal .table-scroll-container {
-            flex: 1;
-            overflow-x: hidden;
-            overflow-y: auto;
-            min-height: 0;
+            overflow: visible;
             width: 100%;
+            max-height: 60vh;
+            overflow-y: auto;
+            overflow-x: visible;
         }
 
         #restaurantModal .stock-table {
-            width: 100%;
+            width: auto;
+            min-width: 100%;
             table-layout: auto;
             border-collapse: collapse;
         }
 
         #restaurantModal .stock-table th,
         #restaurantModal .stock-table td {
-            padding: 8px 6px;
-            word-wrap: break-word;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            padding: 8px 8px;
             box-sizing: border-box;
+            white-space: nowrap;
         }
 
-        /* 序号列 - 紧凑，自动调整 */
+        /* 序号列 - 固定宽度 */
         #restaurantModal .stock-table th:nth-child(1),
         #restaurantModal .stock-table td:nth-child(1) {
             text-align: center;
-            width: auto;
-            min-width: 45px;
-            max-width: 60px;
+            width: 50px;
+            min-width: 50px;
+            max-width: 50px;
         }
 
-        /* 餐厅店面名称列 - 自适应，占用剩余空间 */
+        /* 餐厅店面名称列 - 自适应 */
         #restaurantModal .stock-table th:nth-child(2),
         #restaurantModal .stock-table td:nth-child(2) {
-            width: auto;
-            min-width: 90px;
+            min-width: 120px;
+            white-space: normal;
         }
 
-        /* 代码列 - 紧凑 */
+        /* 代码列 - 固定宽度 */
         #restaurantModal .stock-table th:nth-child(3),
         #restaurantModal .stock-table td:nth-child(3) {
-            width: auto;
-            min-width: 70px;
+            min-width: 80px;
         }
 
-        /* 显示顺序列 - 紧凑 */
+        /* 显示顺序列 - 固定宽度 */
         #restaurantModal .stock-table th:nth-child(4),
         #restaurantModal .stock-table td:nth-child(4) {
             text-align: center;
-            width: auto;
-            min-width: 60px;
-            max-width: 80px;
+            width: 90px;
+            min-width: 90px;
+            max-width: 90px;
         }
 
-        /* 操作列 - 紧凑，但确保按钮可见 */
+        /* 操作列 - 固定宽度 */
         #restaurantModal .stock-table th:nth-child(5),
         #restaurantModal .stock-table td:nth-child(5) {
             text-align: center;
-            width: auto;
-            min-width: 90px;
-            max-width: 120px;
+            width: 110px;
+            min-width: 110px;
+            max-width: 110px;
             white-space: nowrap;
         }
 
         #restaurantModal .stock-table .action-btn {
             margin: 0 2px;
-            padding: 4px 8px;
-            font-size: 12px;
+            padding: 4px 6px;
+            font-size: 11px;
         }
 
-        /* 响应式调整 - 小屏幕时进一步压缩 */
+        /* 响应式调整 - 小屏幕时保持所有列可见 */
         @media (max-width: 768px) {
             #restaurantModal .modal-content {
-                width: 98%;
-                padding: 16px;
+                width: 98vw;
+                min-width: 450px;
+                padding: 12px;
             }
             
             #restaurantModal .stock-table th,
             #restaurantModal .stock-table td {
                 padding: 6px 4px;
-                font-size: 13px;
+                font-size: 12px;
             }
             
             #restaurantModal .stock-table th:nth-child(1),
             #restaurantModal .stock-table td:nth-child(1) {
-                width: 8%;
+                width: 40px;
                 min-width: 40px;
+                max-width: 40px;
             }
             
             #restaurantModal .stock-table th:nth-child(2),
             #restaurantModal .stock-table td:nth-child(2) {
-                min-width: 80px;
+                min-width: 90px;
             }
             
             #restaurantModal .stock-table th:nth-child(3),
@@ -1166,12 +1169,16 @@ header('Expires: 0');
             
             #restaurantModal .stock-table th:nth-child(4),
             #restaurantModal .stock-table td:nth-child(4) {
-                min-width: 60px;
+                width: 70px;
+                min-width: 70px;
+                max-width: 70px;
             }
             
             #restaurantModal .stock-table th:nth-child(5),
             #restaurantModal .stock-table td:nth-child(5) {
-                min-width: 90px;
+                width: 100px;
+                min-width: 100px;
+                max-width: 100px;
             }
         }
 
@@ -2298,9 +2305,9 @@ header('Expires: 0');
                         添加餐厅店面
                     </button>
                 </div>
-                <div class="table-container" style="max-height: 60vh; overflow: hidden;">
-                    <div class="table-scroll-container" style="max-height: 60vh; overflow-x: hidden; overflow-y: auto;">
-                        <table class="stock-table" id="restaurants-table" style="width: 100%; table-layout: auto;">
+                <div class="table-container">
+                    <div class="table-scroll-container">
+                        <table class="stock-table" id="restaurants-table">
                             <thead>
                                 <tr>
                                     <th>序号</th>
