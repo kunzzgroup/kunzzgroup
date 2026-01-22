@@ -2086,10 +2086,81 @@ header('Expires: 0');
             width: 100%;
             max-width: 100%;
             padding: 4px 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            border: none;
+            background: transparent;
             font-size: 14px;
             box-sizing: border-box;
+            outline: none;
+        }
+
+        .break-record-table tr.new-row input:focus,
+        .break-record-table tr.new-row select:focus {
+            background: #f0f0f0;
+            border-radius: 2px;
+        }
+
+        /* Combobox 样式 */
+        .combobox-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .combobox-input {
+            width: 100%;
+            padding: 4px 24px 4px 8px;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .combobox-input:focus {
+            background: #f0f0f0;
+            border-radius: 2px;
+        }
+
+        .combobox-arrow {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: #999;
+            font-size: 12px;
+        }
+
+        .combobox-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .combobox-dropdown.show {
+            display: block;
+        }
+
+        .combobox-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .combobox-option:hover {
+            background: #f0f0f0;
+        }
+
+        .combobox-option.selected {
+            background: #e3f2fd;
         }
 
         /* 弹窗样式 */
@@ -4371,30 +4442,58 @@ header('Expires: 0');
                 });
             }
             
+            // 生成编号选项（用于combobox）
+            let codeOptions = [];
+            if (stockData && stockData.length > 0) {
+                stockData.forEach(item => {
+                    const code = item.code_number || '';
+                    if (code) {
+                        codeOptions.push({
+                            code: code,
+                            id: item.id,
+                            price: item.unit_price || 0
+                        });
+                    }
+                });
+            }
+            
             row.innerHTML = `
                 <td class="text-center">${newRowIndex}</td>
                 <td class="text-center">
-                    <select class="break-product-select" id="${rowId}-product" 
-                            onchange="handleBreakProductChange('${rowId}', this.value)"
-                            style="width: 100%; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
-                        ${productOptions}
-                    </select>
-                    <input type="text" class="break-code-input" id="${rowId}-code" placeholder="编号" readonly 
-                           style="background: #f3f4f6; width: 100%; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; margin-top: 4px; font-size: 12px; display: none;">
+                    <div class="combobox-container" id="${rowId}-code-combo">
+                        <input 
+                            type="text" 
+                            class="combobox-input break-code-input" 
+                            id="${rowId}-code"
+                            placeholder="输入或选择编号..."
+                            autocomplete="off"
+                            data-row-id="${rowId}"
+                            data-field="code"
+                        />
+                        <i class="fas fa-chevron-down combobox-arrow"></i>
+                        <div class="combobox-dropdown" id="${rowId}-code-dropdown">
+                            ${codeOptions.map(opt => `<div class="combobox-option" data-value="${opt.code}" data-id="${opt.id}" data-price="${opt.price}">${opt.code}</div>`).join('')}
+                        </div>
+                    </div>
                 </td>
                 <td class="text-center">
-                    <input type="number" class="break-quantity-input" id="${rowId}-quantity" 
-                           placeholder="0" min="0" value="0" 
-                           onchange="calculateBreakRowTotal('${rowId}')" 
-                           style="width: 100%; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    <input type="text" 
+                           class="break-quantity-input" 
+                           id="${rowId}-quantity" 
+                           placeholder="0" 
+                           value="" 
+                           onblur="calculateBreakRowTotal('${rowId}')" 
+                           style="width: 100%; padding: 4px 8px; border: none; background: transparent; text-align: center; font-size: 14px; outline: none;">
                 </td>
                 <td class="text-center">
                     <div class="currency-display">
                         <span class="currency-symbol">RM</span>
-                        <input type="number" class="break-price-input" id="${rowId}-price" 
-                               step="0.01" min="0" value="0" 
-                               onchange="calculateBreakRowTotal('${rowId}')" 
-                               style="width: 80px; border: 1px solid #ddd; border-radius: 4px; padding: 4px 8px; text-align: center; font-size: 14px;">
+                        <input type="text" 
+                               class="break-price-input" 
+                               id="${rowId}-price" 
+                               value="" 
+                               onblur="calculateBreakRowTotal('${rowId}')" 
+                               style="width: 80px; border: none; background: transparent; text-align: center; font-size: 14px; outline: none;">
                     </div>
                 </td>
                 <td class="text-center">
@@ -4413,56 +4512,112 @@ header('Expires: 0');
                 </td>
             `;
             
+            // 绑定combobox事件
+            setTimeout(() => {
+                bindBreakComboboxEvents(rowId);
+            }, 100);
+            
             tbody.appendChild(row);
         }
 
-        // 处理产品选择变化
-        function handleBreakProductChange(rowId, productId) {
-            const productSelect = document.getElementById(`${rowId}-product`);
-            const selectedOption = productSelect.options[productSelect.selectedIndex];
+        // 绑定破损记录combobox事件
+        function bindBreakComboboxEvents(rowId) {
             const codeInput = document.getElementById(`${rowId}-code`);
-            const priceInput = document.getElementById(`${rowId}-price`);
+            const codeDropdown = document.getElementById(`${rowId}-code-dropdown`);
+            const container = document.getElementById(`${rowId}-code-combo`);
             
-            if (selectedOption && selectedOption.value) {
-                const code = selectedOption.getAttribute('data-code') || '';
-                const price = parseFloat(selectedOption.getAttribute('data-price') || 0).toFixed(2);
-                codeInput.value = code;
-                priceInput.value = price;
-                // 显示编号输入框
-                codeInput.style.display = 'block';
-                // 更新产品选择框显示为编号
-                productSelect.style.display = 'none';
-                calculateBreakRowTotal(rowId);
-            } else {
-                codeInput.value = '';
-                priceInput.value = '0.00';
-                codeInput.style.display = 'none';
-                productSelect.style.display = 'block';
-                calculateBreakRowTotal(rowId);
-            }
+            if (!codeInput || !codeDropdown || !container) return;
+            
+            // 显示下拉
+            codeInput.addEventListener('focus', () => {
+                codeDropdown.classList.add('show');
+                filterBreakComboboxOptions(codeInput, codeDropdown);
+            });
+            
+            // 输入过滤
+            codeInput.addEventListener('input', () => {
+                filterBreakComboboxOptions(codeInput, codeDropdown);
+                codeDropdown.classList.add('show');
+            });
+            
+            // 选择选项
+            codeDropdown.querySelectorAll('.combobox-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    const code = option.dataset.value;
+                    const productId = option.dataset.id;
+                    const price = parseFloat(option.dataset.price || 0);
+                    
+                    codeInput.value = code;
+                    codeInput.dataset.productId = productId;
+                    codeDropdown.classList.remove('show');
+                    
+                    // 更新单价
+                    const priceInput = document.getElementById(`${rowId}-price`);
+                    if (priceInput) {
+                        priceInput.value = price.toFixed(2);
+                    }
+                    
+                    calculateBreakRowTotal(rowId);
+                });
+            });
+            
+            // 点击外部关闭
+            const closeHandler = (e) => {
+                if (!container.contains(e.target)) {
+                    codeDropdown.classList.remove('show');
+                }
+            };
+            setTimeout(() => {
+                document.addEventListener('click', closeHandler);
+                codeInput._closeHandler = closeHandler;
+            }, 100);
+        }
+
+        // 过滤combobox选项
+        function filterBreakComboboxOptions(input, dropdown) {
+            if (!dropdown) return;
+            
+            const searchTerm = input.value.toLowerCase();
+            const options = dropdown.querySelectorAll('.combobox-option');
+            
+            options.forEach(option => {
+                const text = option.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    option.style.display = '';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
         }
 
         // 计算破损记录行总价
         function calculateBreakRowTotal(rowId) {
-            const quantity = parseFloat(document.getElementById(`${rowId}-quantity`).value) || 0;
-            const price = parseFloat(document.getElementById(`${rowId}-price`).value) || 0;
+            const quantityInput = document.getElementById(`${rowId}-quantity`);
+            const priceInput = document.getElementById(`${rowId}-price`);
+            const totalSpan = document.getElementById(`${rowId}-total`);
+            
+            if (!quantityInput || !priceInput || !totalSpan) return;
+            
+            const quantity = parseFloat(quantityInput.value) || 0;
+            const price = parseFloat(priceInput.value) || 0;
             const total = quantity * price;
-            document.getElementById(`${rowId}-total`).textContent = total.toFixed(2);
+            totalSpan.textContent = total.toFixed(2);
         }
 
         // 保存新破损记录行
         async function saveNewBreakRow(rowId, shopType) {
-            const productSelect = document.getElementById(`${rowId}-product`);
+            const codeInput = document.getElementById(`${rowId}-code`);
             const quantityInput = document.getElementById(`${rowId}-quantity`);
             const priceInput = document.getElementById(`${rowId}-price`);
             
-            const productId = productSelect.value;
-            const quantity = parseInt(quantityInput.value) || 0;
+            const productId = codeInput.dataset.productId;
+            const code = codeInput.value.trim();
+            const quantity = parseFloat(quantityInput.value) || 0;
             const price = parseFloat(priceInput.value) || 0;
             
             // 验证
-            if (!productId) {
-                showAlert('请选择产品', 'error');
+            if (!code || !productId) {
+                showAlert('请输入或选择编号', 'error');
                 return;
             }
             
