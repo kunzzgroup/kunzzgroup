@@ -63,12 +63,27 @@ CREATE TABLE IF NOT EXISTS `dishware_stock_by_restaurant` (
   CONSTRAINT `fk_dishware_stock_by_restaurant_restaurant` FOREIGN KEY (`restaurant_id`) REFERENCES `dishware_restaurant_locations` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='碗碟库存按餐厅店面关联表';
 
--- 如果表已存在但外键约束不存在，添加外键约束
+-- 如果表已存在但外键约束不存在，先清理无效数据，然后添加外键约束
 SET @constraint_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
   WHERE constraint_name = @constraint_name
   AND table_schema = @dbname
   AND table_name = @table_name);
 
+-- 如果表已存在，先删除无效的 restaurant_id 数据（不在 dishware_restaurant_locations 表中的）
+SET @table_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES
+  WHERE table_schema = @dbname
+  AND table_name = @table_name);
+
+SET @sql = (SELECT IF(
+  @table_exists > 0,
+  CONCAT('DELETE dsbr FROM `', @table_name, '` dsbr LEFT JOIN `dishware_restaurant_locations` drl ON dsbr.`restaurant_id` = drl.`id` WHERE drl.`id` IS NULL'),
+  'SELECT 1'
+));
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- 添加外键约束（如果不存在）
 SET @sql = (SELECT IF(
   @constraint_exists = 0,
   CONCAT('ALTER TABLE `', @table_name, '` ADD CONSTRAINT `', @constraint_name, '` FOREIGN KEY (`restaurant_id`) REFERENCES `dishware_restaurant_locations` (`id`) ON DELETE CASCADE'),
@@ -114,12 +129,27 @@ CREATE TABLE IF NOT EXISTS `dishware_set_stock_by_restaurant` (
   CONSTRAINT `fk_dishware_set_stock_by_restaurant_restaurant` FOREIGN KEY (`restaurant_id`) REFERENCES `dishware_restaurant_locations` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='套装库存按餐厅店面关联表';
 
--- 如果表已存在但外键约束不存在，添加外键约束
+-- 如果表已存在但外键约束不存在，先清理无效数据，然后添加外键约束
 SET @constraint_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
   WHERE constraint_name = @constraint_name
   AND table_schema = @dbname
   AND table_name = @table_name);
 
+-- 如果表已存在，先删除无效的 restaurant_id 数据（不在 dishware_restaurant_locations 表中的）
+SET @table_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES
+  WHERE table_schema = @dbname
+  AND table_name = @table_name);
+
+SET @sql = (SELECT IF(
+  @table_exists > 0,
+  CONCAT('DELETE dsbr FROM `', @table_name, '` dsbr LEFT JOIN `dishware_restaurant_locations` drl ON dsbr.`restaurant_id` = drl.`id` WHERE drl.`id` IS NULL'),
+  'SELECT 1'
+));
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- 添加外键约束（如果不存在）
 SET @sql = (SELECT IF(
   @constraint_exists = 0,
   CONCAT('ALTER TABLE `', @table_name, '` ADD CONSTRAINT `', @constraint_name, '` FOREIGN KEY (`restaurant_id`) REFERENCES `dishware_restaurant_locations` (`id`) ON DELETE CASCADE'),
