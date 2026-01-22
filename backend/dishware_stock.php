@@ -2000,6 +2000,59 @@ header('Expires: 0');
             background-color: #f3f4f6;
         }
 
+        /* 新行样式 */
+        .break-record-table tr.new-row {
+            background-color: #e8f5e9;
+        }
+
+        .break-record-table tr.new-row:hover {
+            background-color: #c8e6c9;
+        }
+
+        .break-record-table tr.new-row td {
+            padding: 8px;
+        }
+
+        .break-record-table tr.new-row input,
+        .break-record-table tr.new-row select {
+            width: 100%;
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        /* 弹窗样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-overlay .modal-content {
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+        }
+
         /* 拖拽排序样式 */
         .stock-table.transposed tr[data-restaurant-row] {
             user-select: none;
@@ -2468,6 +2521,29 @@ header('Expires: 0');
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- 添加破损记录行数选择弹窗 -->
+    <div id="break-rows-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 class="modal-title">新增破损记录</h3>
+                <button class="modal-close" onclick="closeBreakRowsModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="break-rows-count" style="display: block; margin-bottom: 8px; font-weight: 600;">要创建的行数 *</label>
+                    <input type="number" id="break-rows-count" class="form-input" min="1" max="50" value="1" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+            </div>
+            <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="closeBreakRowsModal()">取消</button>
+                <button class="btn btn-primary" onclick="createMultipleBreakRows()">
+                    <i class="fas fa-plus"></i>
+                    创建记录
+                </button>
+            </div>
         </div>
     </div>
 
@@ -3626,7 +3702,7 @@ header('Expires: 0');
                                 <span>${restaurant.name}破损</span>
                                 <span style="font-size: 12px; opacity: 0.9;">(${records.length} 项)</span>
                             </div>
-                            <button class="btn btn-success" onclick="openBreakModal('${shopType}')" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">
+                            <button class="btn btn-success" onclick="openBreakRowsModal('${shopType}')" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">
                                 <i class="fas fa-plus"></i> 记录破损
                             </button>
                         </div>
@@ -4115,6 +4191,272 @@ header('Expires: 0');
             } catch (error) {
                 console.error('删除破损记录时发生错误:', error);
                 showAlert('删除破损记录失败: ' + error.message, 'error');
+            }
+        }
+
+        // 当前选中的餐厅类型（用于创建新行）
+        let currentBreakShopType = null;
+
+        // 打开破损记录行数选择弹窗
+        function openBreakRowsModal(shopType) {
+            currentBreakShopType = shopType;
+            const modal = document.getElementById('break-rows-modal');
+            if (modal) {
+                modal.classList.add('show');
+                document.getElementById('break-rows-count').value = 1;
+            }
+        }
+
+        // 关闭破损记录行数选择弹窗
+        function closeBreakRowsModal() {
+            const modal = document.getElementById('break-rows-modal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }
+
+        // 点击弹窗外部关闭弹窗
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('break-rows-modal');
+            if (event.target === modal) {
+                closeBreakRowsModal();
+            }
+        });
+
+        // 创建多行破损记录
+        function createMultipleBreakRows() {
+            const rowsCount = parseInt(document.getElementById('break-rows-count').value);
+            
+            // 验证输入
+            if (!rowsCount || rowsCount < 1 || rowsCount > 50) {
+                showAlert('请输入有效的行数（1-50）', 'error');
+                return;
+            }
+            
+            if (!currentBreakShopType) {
+                showAlert('餐厅类型未设置', 'error');
+                return;
+            }
+            
+            // 关闭弹窗
+            closeBreakRowsModal();
+            
+            // 检查stockData是否已加载
+            if (!stockData || stockData.length === 0) {
+                showAlert('正在加载碗碟数据，请稍后再试', 'warning');
+                loadStockData(true, false).then(() => {
+                    setTimeout(() => {
+                        createMultipleBreakRows();
+                    }, 500);
+                });
+                return;
+            }
+            
+            // 创建指定数量的行
+            for (let i = 0; i < rowsCount; i++) {
+                addNewBreakRow(currentBreakShopType);
+            }
+            
+            // 滚动到表格底部
+            setTimeout(() => {
+                const tbody = document.getElementById(`${currentBreakShopType}-break-tbody`);
+                if (tbody) {
+                    tbody.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }
+            }, 100);
+            
+            showAlert(`成功创建 ${rowsCount} 行记录`, 'success');
+        }
+
+        // 添加新行到破损记录表格
+        function addNewBreakRow(shopType) {
+            const tbody = document.getElementById(`${shopType}-break-tbody`);
+            if (!tbody) {
+                console.error(`找不到表格tbody: ${shopType}-break-tbody`);
+                return;
+            }
+            
+            // 如果tbody中只有"暂无破损记录"的行，先清空
+            const noDataRow = tbody.querySelector('tr td.no-data');
+            if (noDataRow) {
+                tbody.innerHTML = '';
+            }
+            
+            const row = document.createElement('tr');
+            row.className = 'new-row';
+            const rowId = 'new-break-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            
+            // 获取当前行数（用于显示序号）
+            const currentRowCount = tbody.querySelectorAll('tr:not(.new-row)').length;
+            const newRowIndex = currentRowCount + tbody.querySelectorAll('tr.new-row').length + 1;
+            
+            // 生成产品选择选项
+            let productOptions = '<option value="">请选择产品</option>';
+            if (stockData && stockData.length > 0) {
+                stockData.forEach(item => {
+                    productOptions += `<option value="${item.id}" data-code="${item.code_number || ''}" data-price="${item.unit_price || 0}">${item.product_name || ''}</option>`;
+                });
+            }
+            
+            row.innerHTML = `
+                <td class="text-center">${newRowIndex}</td>
+                <td class="text-center">
+                    <select class="break-product-select" id="${rowId}-product" 
+                            onchange="handleBreakProductChange('${rowId}', this.value)"
+                            style="width: 100%; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                        ${productOptions}
+                    </select>
+                    <input type="text" class="break-code-input" id="${rowId}-code" placeholder="编号" readonly 
+                           style="background: #f3f4f6; width: 100%; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; margin-top: 4px; font-size: 12px; display: none;">
+                </td>
+                <td class="text-center">
+                    <input type="number" class="break-quantity-input" id="${rowId}-quantity" 
+                           placeholder="0" min="0" value="0" 
+                           onchange="calculateBreakRowTotal('${rowId}')" 
+                           style="width: 100%; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                </td>
+                <td class="text-center">
+                    <div class="currency-display">
+                        <span class="currency-symbol">RM</span>
+                        <input type="number" class="break-price-input" id="${rowId}-price" 
+                               step="0.01" min="0" value="0" 
+                               onchange="calculateBreakRowTotal('${rowId}')" 
+                               style="width: 80px; border: 1px solid #ddd; border-radius: 4px; padding: 4px 8px; text-align: center; font-size: 14px;">
+                    </div>
+                </td>
+                <td class="text-center">
+                    <div class="currency-display">
+                        <span class="currency-symbol">RM</span>
+                        <span class="currency-amount" id="${rowId}-total">0.00</span>
+                    </div>
+                </td>
+                <td class="text-center">
+                    <button class="action-btn save-btn" onclick="saveNewBreakRow('${rowId}', '${shopType}')" title="保存" style="background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-right: 4px;">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button class="action-btn cancel-btn" onclick="cancelNewBreakRow('${rowId}', '${shopType}')" title="取消" style="background: #6c757d; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </td>
+            `;
+            
+            tbody.appendChild(row);
+        }
+
+        // 处理产品选择变化
+        function handleBreakProductChange(rowId, productId) {
+            const productSelect = document.getElementById(`${rowId}-product`);
+            const selectedOption = productSelect.options[productSelect.selectedIndex];
+            const codeInput = document.getElementById(`${rowId}-code`);
+            const priceInput = document.getElementById(`${rowId}-price`);
+            
+            if (selectedOption && selectedOption.value) {
+                const code = selectedOption.getAttribute('data-code') || '';
+                const price = parseFloat(selectedOption.getAttribute('data-price') || 0).toFixed(2);
+                codeInput.value = code;
+                priceInput.value = price;
+                // 显示编号输入框
+                codeInput.style.display = 'block';
+                // 更新产品选择框显示为编号
+                productSelect.style.display = 'none';
+                calculateBreakRowTotal(rowId);
+            } else {
+                codeInput.value = '';
+                priceInput.value = '0.00';
+                codeInput.style.display = 'none';
+                productSelect.style.display = 'block';
+                calculateBreakRowTotal(rowId);
+            }
+        }
+
+        // 计算破损记录行总价
+        function calculateBreakRowTotal(rowId) {
+            const quantity = parseFloat(document.getElementById(`${rowId}-quantity`).value) || 0;
+            const price = parseFloat(document.getElementById(`${rowId}-price`).value) || 0;
+            const total = quantity * price;
+            document.getElementById(`${rowId}-total`).textContent = total.toFixed(2);
+        }
+
+        // 保存新破损记录行
+        async function saveNewBreakRow(rowId, shopType) {
+            const productSelect = document.getElementById(`${rowId}-product`);
+            const quantityInput = document.getElementById(`${rowId}-quantity`);
+            const priceInput = document.getElementById(`${rowId}-price`);
+            
+            const productId = productSelect.value;
+            const quantity = parseInt(quantityInput.value) || 0;
+            const price = parseFloat(priceInput.value) || 0;
+            
+            // 验证
+            if (!productId) {
+                showAlert('请选择产品', 'error');
+                return;
+            }
+            
+            if (quantity <= 0) {
+                showAlert('请输入有效的破损数量', 'error');
+                return;
+            }
+            
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const result = await apiCall('', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'add_damage_record',
+                        dishware_id: productId,
+                        shop_type: shopType,
+                        break_quantity: quantity,
+                        unit_price: price,
+                        total_price: quantity * price,
+                        break_date: today,
+                        recorded_by: 'system'
+                    })
+                });
+                
+                if (result.success) {
+                    showAlert('破损记录添加成功', 'success');
+                    // 移除新行
+                    const row = document.getElementById(`${rowId}-product`).closest('tr');
+                    if (row) {
+                        row.remove();
+                    }
+                    // 刷新破损记录数据
+                    loadAllBreakRecords();
+                    // 刷新总库存
+                    if (document.getElementById('stock-table')) {
+                        loadStockData(true, false);
+                    }
+                } else {
+                    showAlert('添加失败: ' + (result.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('保存破损记录时发生错误:', error);
+                showAlert('保存破损记录失败: ' + error.message, 'error');
+            }
+        }
+
+        // 取消新破损记录行
+        function cancelNewBreakRow(rowId, shopType) {
+            const row = document.getElementById(`${rowId}-product`).closest('tr');
+            if (row) {
+                row.remove();
+            }
+            
+            // 如果表格为空，显示"暂无破损记录"
+            const tbody = document.getElementById(`${shopType}-break-tbody`);
+            if (tbody && tbody.children.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="no-data" style="padding: 40px; text-align: center; color: #6b7280;">
+                            <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.5; margin-bottom: 16px;"></i>
+                            <div>暂无破损记录</div>
+                        </td>
+                    </tr>
+                `;
             }
         }
 
