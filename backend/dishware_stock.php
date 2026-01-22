@@ -1758,9 +1758,10 @@ header('Expires: 0');
             display: flex;
             flex-direction: row;
             gap: 20px;
-            padding: 0;
-            overflow-x: auto;
-            overflow-y: visible;
+            padding: 20px;
+            width: 100%;
+            /* 确保至少显示三个容器，每个容器最小宽度 */
+            min-width: calc(3 * 400px + 2 * 20px + 40px); /* 3个容器 + 2个gap + padding */
         }
 
         .break-record-section {
@@ -1770,9 +1771,9 @@ header('Expires: 0');
             box-shadow: 0 2px 8px rgba(88, 62, 4, 0.1);
             display: flex;
             flex-direction: column;
-            flex: 1;
+            flex: 0 0 400px; /* 固定宽度，不缩放 */
             min-width: 400px;
-            max-width: calc(33.33% - 14px);
+            max-width: 400px;
         }
 
         .break-record-header {
@@ -1917,9 +1918,12 @@ header('Expires: 0');
         .break-records-container {
             display: flex;
             flex-direction: row;
-            gap: 24px;
-            padding: 0;
+            gap: 20px;
+            padding: 20px;
             align-items: flex-start;
+            width: 100%;
+            /* 确保至少显示三个容器，每个容器最小宽度 */
+            min-width: calc(3 * 400px + 2 * 20px + 40px); /* 3个容器 + 2个gap + padding */
         }
 
         .break-record-section {
@@ -1929,8 +1933,9 @@ header('Expires: 0');
             box-shadow: 0 2px 8px rgba(88, 62, 4, 0.1);
             display: flex;
             flex-direction: column;
-            flex: 1;
-            min-width: 0; /* 允许flex项目缩小 */
+            flex: 0 0 400px; /* 固定宽度，不缩放 */
+            min-width: 400px;
+            max-width: 400px;
         }
 
         .break-record-header {
@@ -2231,21 +2236,27 @@ header('Expires: 0');
 
             <!-- 合并的破损记录页面（J1、J2、J3左右排列） -->
             <div id="j1-page" class="page-content" style="display: none;">
-                <div id="break-records-container" class="break-records-container">
-                    <!-- 动态生成三个店铺的表格 -->
+                <div class="table-scroll-container" style="overflow-x: auto; overflow-y: visible; width: 100%;">
+                    <div id="break-records-container" class="break-records-container">
+                        <!-- 动态生成三个店铺的表格 -->
+                    </div>
                 </div>
             </div>
             
             <!-- J2和J3页面指向同一个合并页面 -->
             <div id="j2-page" class="page-content" style="display: none;">
-                <div id="break-records-container-j2" class="break-records-container">
-                    <!-- 动态生成三个店铺的表格 -->
+                <div class="table-scroll-container" style="overflow-x: auto; overflow-y: visible; width: 100%;">
+                    <div id="break-records-container-j2" class="break-records-container">
+                        <!-- 动态生成三个店铺的表格 -->
+                    </div>
                 </div>
             </div>
             
             <div id="j3-page" class="page-content" style="display: none;">
-                <div id="break-records-container-j3" class="break-records-container">
-                    <!-- 动态生成三个店铺的表格 -->
+                <div class="table-scroll-container" style="overflow-x: auto; overflow-y: visible; width: 100%;">
+                    <div id="break-records-container-j3" class="break-records-container">
+                        <!-- 动态生成三个店铺的表格 -->
+                    </div>
                 </div>
             </div>
         </div>
