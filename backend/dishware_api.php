@@ -2002,14 +2002,19 @@ function getTransferRecords() {
         $restaurant = $restaurant_stmt->fetch(PDO::FETCH_ASSOC);
         $restaurant_id = $restaurant ? $restaurant['id'] : null;
         
-        // 获取该餐厅的所有转卖记录（包括出货和进货）
+        // 获取该餐厅的转卖记录
+        // 如果是转出餐厅，只显示出货记录（record_type='out'）
+        // 如果是转入餐厅，只显示进货记录（record_type='in'）
         $sql = "SELECT dtr.*, di.product_name, di.code_number, di.category, di.size, di.photo_path, di.unit_price,
                        from_r.name as from_restaurant_name, to_r.name as to_restaurant_name
                 FROM dishware_transfer_records dtr
                 LEFT JOIN dishware_info di ON dtr.dishware_id = di.id
                 LEFT JOIN dishware_restaurant_locations from_r ON dtr.from_restaurant_id = from_r.id
                 LEFT JOIN dishware_restaurant_locations to_r ON dtr.to_restaurant_id = to_r.id
-                WHERE (dtr.from_shop_type = ? OR dtr.to_shop_type = ?)
+                WHERE (
+                    (dtr.from_shop_type = ? AND dtr.record_type = 'out') OR 
+                    (dtr.to_shop_type = ? AND dtr.record_type = 'in')
+                )
                 ORDER BY dtr.transfer_date ASC, dtr.created_at ASC";
         
         $stmt = $pdo->prepare($sql);
