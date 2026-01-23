@@ -123,6 +123,9 @@ function handleGet() {
         case 'restaurants':
             getRestaurants();
             break;
+        case 'transfer_records':
+            getTransferRecords();
+            break;
         default:
             sendResponse(false, "无效的操作");
     }
@@ -158,6 +161,15 @@ function handlePost() {
             break;
         case 'delete_damage_record':
             deleteBreakRecord();
+            break;
+        case 'add_transfer_record':
+            addTransferRecord();
+            break;
+        case 'update_transfer_record':
+            updateTransferRecord();
+            break;
+        case 'delete_transfer_record':
+            deleteTransferRecord();
             break;
         case 'add_set':
             addDishwareSet();
@@ -1969,6 +1981,390 @@ function deleteRestaurant() {
             $pdo->rollBack();
         }
         sendResponse(false, "删除餐厅店面失败：" . $e->getMessage());
+    }
+}
+
+// 获取转卖记录
+function getTransferRecords() {
+    global $pdo;
+    
+    $shop_type = $_GET['shop_type'] ?? '';
+    
+    if (empty($shop_type)) {
+        sendResponse(false, "缺少店铺类型参数");
+    }
+    
+    try {
+        // 首先根据shop_type找到对应的restaurant_id
+        $restaurant_sql = "SELECT id FROM dishware_restaurant_locations WHERE LOWER(name) = LOWER(?) AND is_active = 1";
+        $restaurant_stmt = $pdo->prepare($restaurant_sql);
+        $restaurant_stmt->execute([$shop_type]);
+        $restaurant = $restaurant_stmt->fetch(PDO::FETCH_ASSOC);
+        $restaurant_id = $restaurant ? $restaurant['id'] : null;
+        
+        // 获取该餐厅的所有转卖记录（包括出货和进货）
+        $sql = "SELECT dtr.*, di.product_name, di.code_number, di.category, di.size, di.photo_path, di.unit_price,
+                       from_r.name as from_restaurant_name, to_r.name as to_restaurant_name
+                FROM dishware_transfer_records dtr
+                LEFT JOIN dishware_info di ON dtr.dishware_id = di.id
+                LEFT JOIN dishware_restaurant_locations from_r ON dtr.from_restaurant_id = from_r.id
+                LEFT JOIN dishware_restaurant_locations to_r ON dtr.to_restaurant_id = to_r.id
+                WHERE (dtr.from_shop_type = ? OR dtr.to_shop_type = ?)
+                ORDER BY dtr.transfer_date ASC, dtr.created_at ASC";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$shop_type, $shop_type]);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // 添加当前库存字段
+        foreach ($results as &$result) {
+            if ($restaurant_id) {
+                $stock_sql = "SELECT quantity FROM dishware_stock_by_restaurant 
+                             WHERE dishware_id = ? AND restaurant_id = ?";
+                $stock_stmt = $pdo->prepare($stock_sql);
+                $stock_stmt->execute([$result['dishware_id'], $restaurant_id]);
+                $stock = $stock_stmt->fetch(PDO::FETCH_ASSOC);
+                $result['current_stock'] = $stock ? $stock['quantity'] : 0;
+            } else {
+                $result['current_stock'] = 0;
+            }
+        }
+        
+        sendResponse(true, "获取转卖记录成功", $results);
+        
+    } catch (PDOException $e) {
+        sendResponse(false, "获取转卖记录失败：" . $e->getMessage());
+    }
+}
+
+// 添加转卖记录
+function addTransferRecord() {
+    global $pdo, $data;
+    
+    $postData = $data ?? $_POST;
+    
+    $dishware_id = $postData['dishware_id'] ?? '';
+    $from_shop_type = $postData['from_shop_type'] ?? '';
+    $to_shop_type = $postData['to_shop_type'] ?? '';
+    $quantity = $postData['quantity'] ?? 0;
+    $unit_price = $postData['unit_price'] ?? 0;
+    $transfer_date = $postData['transfer_date'] ?? date('Y-m-d');
+    
+    if (empty($dishware_id) || empty($from_shop_type) || empty($to_shop_type) || $quantity <= 0) {
+        sendResponse(false, "缺少必要参数");
+    }
+    
+    if ($from_shop_type === $to_shop_type) {
+        sendResponse(false, "转出和转入餐厅不能相同");
+    }
+    
+    try {
+        $pdo->beginTransaction();
+        
+        // 获取餐厅ID
+        $from_restaurant_sql = "SELECT id FROM dishware_restaurant_locations WHERE LOWER(name) = LOWER(?) AND is_active = 1";
+        $from_restaurant_stmt = $pdo->prepare($from_restaurant_sql);
+        $from_restaurant_stmt->execute([$from_shop_type]);
+        $from_restaurant = $from_restaurant_stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $to_restaurant_sql = "SELECT id FROM dishware_restaurant_locations WHERE LOWER(name) = LOWER(?) AND is_active = 1";
+        $to_restaurant_stmt = $pdo->prepare($to_restaurant_sql);
+        $to_restaurant_stmt->execute([$to_shop_type]);
+        $to_restaurant = $to_restaurant_stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$from_restaurant || !$to_restaurant) {
+            sendResponse(false, "找不到指定的餐厅");
+        }
+        
+        $total_price = $quantity * $unit_price;
+        
+        // 插入出货记录
+        $out_sql = "INSERT INTO dishware_transfer_records 
+                   (dishware_id, from_restaurant_id, to_restaurant_id, from_shop_type, to_shop_type, 
+                    quantity, unit_price, total_price, transfer_date, record_type, recorded_by)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'out', ?)";
+        $out_stmt = $pdo->prepare($out_sql);
+        $out_stmt->execute([
+            $dishware_id,
+            $from_restaurant['id'],
+            $to_restaurant['id'],
+            $from_shop_type,
+            $to_shop_type,
+            $quantity,
+            $unit_price,
+            $total_price,
+            $transfer_date,
+            $postData['recorded_by'] ?? 'system'
+        ]);
+        
+        $out_record_id = $pdo->lastInsertId();
+        
+        // 插入进货记录（关联出货记录）
+        $in_sql = "INSERT INTO dishware_transfer_records 
+                  (dishware_id, from_restaurant_id, to_restaurant_id, from_shop_type, to_shop_type, 
+                   quantity, unit_price, total_price, transfer_date, record_type, related_record_id, recorded_by)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'in', ?, ?)";
+        $in_stmt = $pdo->prepare($in_sql);
+        $in_stmt->execute([
+            $dishware_id,
+            $from_restaurant['id'],
+            $to_restaurant['id'],
+            $from_shop_type,
+            $to_shop_type,
+            $quantity,
+            $unit_price,
+            $total_price,
+            $transfer_date,
+            $out_record_id,
+            $postData['recorded_by'] ?? 'system'
+        ]);
+        
+        $in_record_id = $pdo->lastInsertId();
+        
+        // 更新库存：转出餐厅减少，转入餐厅增加
+        // 转出餐厅减少
+        $update_from_sql = "INSERT INTO dishware_stock_by_restaurant (dishware_id, restaurant_id, quantity) 
+                           VALUES (?, ?, GREATEST(0, COALESCE((SELECT quantity FROM dishware_stock_by_restaurant WHERE dishware_id = ? AND restaurant_id = ?), 0) - ?))
+                           ON DUPLICATE KEY UPDATE 
+                           quantity = GREATEST(0, quantity - ?),
+                           last_updated = CURRENT_TIMESTAMP";
+        $update_from_stmt = $pdo->prepare($update_from_sql);
+        $update_from_stmt->execute([
+            $dishware_id,
+            $from_restaurant['id'],
+            $dishware_id,
+            $from_restaurant['id'],
+            $quantity,
+            $quantity
+        ]);
+        
+        // 转入餐厅增加
+        $update_to_sql = "INSERT INTO dishware_stock_by_restaurant (dishware_id, restaurant_id, quantity) 
+                         VALUES (?, ?, COALESCE((SELECT quantity FROM dishware_stock_by_restaurant WHERE dishware_id = ? AND restaurant_id = ?), 0) + ?)
+                         ON DUPLICATE KEY UPDATE 
+                         quantity = quantity + ?,
+                         last_updated = CURRENT_TIMESTAMP";
+        $update_to_stmt = $pdo->prepare($update_to_sql);
+        $update_to_stmt->execute([
+            $dishware_id,
+            $to_restaurant['id'],
+            $dishware_id,
+            $to_restaurant['id'],
+            $quantity,
+            $quantity
+        ]);
+        
+        $pdo->commit();
+        sendResponse(true, "添加转卖记录成功", ['out_record_id' => $out_record_id, 'in_record_id' => $in_record_id]);
+        
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        sendResponse(false, "添加转卖记录失败：" . $e->getMessage());
+    }
+}
+
+// 更新转卖记录（只允许更新出货记录）
+function updateTransferRecord() {
+    global $pdo, $data;
+    
+    $id = $data['id'] ?? $_POST['id'] ?? '';
+    $quantity = $data['quantity'] ?? $_POST['quantity'] ?? '';
+    $unit_price = $data['unit_price'] ?? $_POST['unit_price'] ?? '';
+    $to_shop_type = $data['to_shop_type'] ?? $_POST['to_shop_type'] ?? '';
+    
+    if (empty($id)) {
+        sendResponse(false, "缺少记录ID");
+    }
+    
+    try {
+        $pdo->beginTransaction();
+        
+        // 获取原记录信息
+        $old_sql = "SELECT * FROM dishware_transfer_records WHERE id = ? AND record_type = 'out'";
+        $old_stmt = $pdo->prepare($old_sql);
+        $old_stmt->execute([$id]);
+        $old_record = $old_stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$old_record) {
+            sendResponse(false, "记录不存在或不允许编辑");
+        }
+        
+        // 如果改变了转入餐厅，需要更新
+        $new_to_shop_type = $to_shop_type ?: $old_record['to_shop_type'];
+        $new_quantity = $quantity ?: $old_record['quantity'];
+        $new_unit_price = $unit_price ?: $old_record['unit_price'];
+        $new_total_price = $new_quantity * $new_unit_price;
+        
+        // 获取新的转入餐厅ID（如果改变了）
+        $to_restaurant_sql = "SELECT id FROM dishware_restaurant_locations WHERE LOWER(name) = LOWER(?) AND is_active = 1";
+        $to_restaurant_stmt = $pdo->prepare($to_restaurant_sql);
+        $to_restaurant_stmt->execute([$new_to_shop_type]);
+        $new_to_restaurant = $to_restaurant_stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$new_to_restaurant) {
+            sendResponse(false, "找不到指定的转入餐厅");
+        }
+        
+        // 恢复原库存
+        $quantity_diff = $old_record['quantity'] - $new_quantity;
+        $to_restaurant_changed = ($new_to_shop_type !== $old_record['to_shop_type']);
+        
+        // 恢复转出餐厅库存（增加）
+        $restore_from_sql = "UPDATE dishware_stock_by_restaurant 
+                            SET quantity = quantity + ?,
+                                last_updated = CURRENT_TIMESTAMP
+                            WHERE dishware_id = ? AND restaurant_id = ?";
+        $restore_from_stmt = $pdo->prepare($restore_from_sql);
+        $restore_from_stmt->execute([$old_record['quantity'], $old_record['dishware_id'], $old_record['from_restaurant_id']]);
+        
+        // 恢复原转入餐厅库存（减少）
+        $restore_to_sql = "UPDATE dishware_stock_by_restaurant 
+                          SET quantity = GREATEST(0, quantity - ?),
+                              last_updated = CURRENT_TIMESTAMP
+                          WHERE dishware_id = ? AND restaurant_id = ?";
+        $restore_to_stmt = $pdo->prepare($restore_to_sql);
+        $restore_to_stmt->execute([$old_record['quantity'], $old_record['dishware_id'], $old_record['to_restaurant_id']]);
+        
+        // 更新出货记录
+        $update_out_sql = "UPDATE dishware_transfer_records SET 
+                          to_restaurant_id = ?,
+                          to_shop_type = ?,
+                          quantity = ?,
+                          unit_price = ?,
+                          total_price = ?,
+                          updated_at = CURRENT_TIMESTAMP
+                          WHERE id = ?";
+        $update_out_stmt = $pdo->prepare($update_out_sql);
+        $update_out_stmt->execute([
+            $new_to_restaurant['id'],
+            $new_to_shop_type,
+            $new_quantity,
+            $new_unit_price,
+            $new_total_price,
+            $id
+        ]);
+        
+        // 更新关联的进货记录
+        $in_record_sql = "SELECT id FROM dishware_transfer_records WHERE related_record_id = ?";
+        $in_record_stmt = $pdo->prepare($in_record_sql);
+        $in_record_stmt->execute([$id]);
+        $in_record = $in_record_stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($in_record) {
+            $update_in_sql = "UPDATE dishware_transfer_records SET 
+                            to_restaurant_id = ?,
+                            to_shop_type = ?,
+                            quantity = ?,
+                            unit_price = ?,
+                            total_price = ?,
+                            updated_at = CURRENT_TIMESTAMP
+                            WHERE id = ?";
+            $update_in_stmt = $pdo->prepare($update_in_sql);
+            $update_in_stmt->execute([
+                $new_to_restaurant['id'],
+                $new_to_shop_type,
+                $new_quantity,
+                $new_unit_price,
+                $new_total_price,
+                $in_record['id']
+            ]);
+        }
+        
+        // 更新新库存
+        // 转出餐厅减少
+        $update_from_sql = "UPDATE dishware_stock_by_restaurant 
+                          SET quantity = GREATEST(0, quantity - ?),
+                              last_updated = CURRENT_TIMESTAMP
+                          WHERE dishware_id = ? AND restaurant_id = ?";
+        $update_from_stmt = $pdo->prepare($update_from_sql);
+        $update_from_stmt->execute([$new_quantity, $old_record['dishware_id'], $old_record['from_restaurant_id']]);
+        
+        // 新转入餐厅增加
+        $update_to_sql = "INSERT INTO dishware_stock_by_restaurant (dishware_id, restaurant_id, quantity) 
+                         VALUES (?, ?, COALESCE((SELECT quantity FROM dishware_stock_by_restaurant WHERE dishware_id = ? AND restaurant_id = ?), 0) + ?)
+                         ON DUPLICATE KEY UPDATE 
+                         quantity = quantity + ?,
+                         last_updated = CURRENT_TIMESTAMP";
+        $update_to_stmt = $pdo->prepare($update_to_sql);
+        $update_to_stmt->execute([
+            $old_record['dishware_id'],
+            $new_to_restaurant['id'],
+            $old_record['dishware_id'],
+            $new_to_restaurant['id'],
+            $new_quantity,
+            $new_quantity
+        ]);
+        
+        $pdo->commit();
+        sendResponse(true, "更新转卖记录成功");
+        
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        sendResponse(false, "更新转卖记录失败：" . $e->getMessage());
+    }
+}
+
+// 删除转卖记录（只允许删除出货记录，会自动删除关联的进货记录）
+function deleteTransferRecord() {
+    global $pdo, $data;
+    
+    $id = $data['id'] ?? $_POST['id'] ?? '';
+    
+    if (empty($id)) {
+        sendResponse(false, "缺少记录ID");
+    }
+    
+    try {
+        $pdo->beginTransaction();
+        
+        // 获取记录信息
+        $record_sql = "SELECT * FROM dishware_transfer_records WHERE id = ?";
+        $record_stmt = $pdo->prepare($record_sql);
+        $record_stmt->execute([$id]);
+        $record = $record_stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$record) {
+            sendResponse(false, "记录不存在");
+        }
+        
+        // 只允许删除出货记录
+        if ($record['record_type'] !== 'out') {
+            sendResponse(false, "只能删除出货记录");
+        }
+        
+        // 恢复库存
+        // 转出餐厅增加
+        $restore_from_sql = "UPDATE dishware_stock_by_restaurant 
+                            SET quantity = quantity + ?,
+                                last_updated = CURRENT_TIMESTAMP
+                            WHERE dishware_id = ? AND restaurant_id = ?";
+        $restore_from_stmt = $pdo->prepare($restore_from_sql);
+        $restore_from_stmt->execute([$record['quantity'], $record['dishware_id'], $record['from_restaurant_id']]);
+        
+        // 转入餐厅减少
+        $restore_to_sql = "UPDATE dishware_stock_by_restaurant 
+                          SET quantity = GREATEST(0, quantity - ?),
+                              last_updated = CURRENT_TIMESTAMP
+                          WHERE dishware_id = ? AND restaurant_id = ?";
+        $restore_to_stmt = $pdo->prepare($restore_to_sql);
+        $restore_to_stmt->execute([$record['quantity'], $record['dishware_id'], $record['to_restaurant_id']]);
+        
+        // 删除关联的进货记录
+        $delete_in_sql = "DELETE FROM dishware_transfer_records WHERE related_record_id = ?";
+        $delete_in_stmt = $pdo->prepare($delete_in_sql);
+        $delete_in_stmt->execute([$id]);
+        
+        // 删除出货记录
+        $delete_out_sql = "DELETE FROM dishware_transfer_records WHERE id = ?";
+        $delete_out_stmt = $pdo->prepare($delete_out_sql);
+        $delete_out_stmt->execute([$id]);
+        
+        $pdo->commit();
+        sendResponse(true, "删除转卖记录成功");
+        
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        sendResponse(false, "删除转卖记录失败：" . $e->getMessage());
     }
 }
 ?>

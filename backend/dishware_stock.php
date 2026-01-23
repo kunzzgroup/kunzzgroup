@@ -2356,6 +2356,7 @@ header('Expires: 0');
                         <div class="dropdown-item active" onclick="switchPage('stock')">总库存</div>
                         <div class="dropdown-item" onclick="switchPage('sets')">套装管理</div>
                         <div class="dropdown-item" onclick="switchPage('j1')">破损记录</div>
+                        <div class="dropdown-item" onclick="switchPage('transfer')">碗碟转卖</div>
                     </div>
                 </div>
             </div>
@@ -2519,6 +2520,15 @@ header('Expires: 0');
                 <div class="table-scroll-container" style="overflow-x: auto; overflow-y: visible; width: 100%;">
                     <div id="break-records-container-j3" class="break-records-container">
                         <!-- 动态生成三个店铺的表格 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 碗碟转卖页面 -->
+            <div id="transfer-page" class="page-content" style="display: none;">
+                <div class="table-scroll-container" style="overflow-x: auto; overflow-y: visible; width: 100%;">
+                    <div id="transfer-records-container" class="break-records-container">
+                        <!-- 动态生成餐厅的转卖记录表格 -->
                     </div>
                 </div>
             </div>
@@ -2821,6 +2831,26 @@ header('Expires: 0');
         </div>
     </div>
 
+    <!-- 转卖记录行数选择弹窗 -->
+    <div id="transfer-rows-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>添加转卖记录</h2>
+                <span class="close" onclick="closeTransferRowsModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>要添加的行数：</label>
+                    <input type="number" id="transfer-rows-count" min="1" max="50" value="1" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="createMultipleTransferRows()">确定</button>
+                <button class="btn btn-secondary" onclick="closeTransferRowsModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 套装管理模态框 -->
     <div id="setModal" class="modal">
         <div class="modal-content">
@@ -2879,6 +2909,11 @@ header('Expires: 0');
         let originalEditData = new Map(); // 存储原始数据用于取消编辑
         let currentPage = 'stock'; // 当前页面
         let breakRecordsData = {
+            j1: [],
+            j2: [],
+            j3: []
+        };
+        let transferRecordsData = {
             j1: [],
             j2: [],
             j3: []
@@ -3664,7 +3699,8 @@ header('Expires: 0');
                 'sets': '套装管理',
                 'j1': '破损记录',
                 'j2': '破损记录',
-                'j3': '破损记录'
+                'j3': '破损记录',
+                'transfer': '碗碟转卖'
             };
             
             if (currentView) {
@@ -3691,6 +3727,14 @@ header('Expires: 0');
             const currentPageElement = document.getElementById(pageId);
             if (currentPageElement) {
                 currentPageElement.style.display = 'block';
+            }
+            
+            // 如果是转卖页面，显示transfer-page
+            if (pageType === 'transfer') {
+                const transferPage = document.getElementById('transfer-page');
+                if (transferPage) {
+                    transferPage.style.display = 'block';
+                }
             }
             
             // 根据页面类型更新页面标题和按钮
@@ -3739,6 +3783,15 @@ header('Expires: 0');
                     // 加载所有破损记录
                     loadAllBreakRecords();
                     break;
+                case 'transfer':
+                    if (title) title.textContent = '碗碟转卖';
+                    if (addButton) {
+                        // 隐藏顶部的按钮，因为每个容器都有自己的按钮
+                        addButton.style.display = 'none';
+                    }
+                    // 加载所有转卖记录
+                    loadAllTransferRecords();
+                    break;
             }
         }
 
@@ -3755,6 +3808,9 @@ header('Expires: 0');
                 case 'j2':
                 case 'j3':
                     loadAllBreakRecords();
+                    break;
+                case 'transfer':
+                    loadAllTransferRecords();
                     break;
             }
         }
@@ -4760,9 +4816,13 @@ header('Expires: 0');
 
         // 点击弹窗外部关闭弹窗
         document.addEventListener('click', function(event) {
-            const modal = document.getElementById('break-rows-modal');
-            if (event.target === modal) {
+            const breakModal = document.getElementById('break-rows-modal');
+            if (event.target === breakModal) {
                 closeBreakRowsModal();
+            }
+            const transferModal = document.getElementById('transfer-rows-modal');
+            if (event.target === transferModal) {
+                closeTransferRowsModal();
             }
         });
 
@@ -5007,12 +5067,26 @@ header('Expires: 0');
                             }
                         }
                     } else {
-                        // 新行模式：更新单价输入框
+                        // 检查是破损记录还是转卖记录
                         const priceInput = document.getElementById(`${rowId}-price`);
                         if (priceInput) {
+                            // 转卖记录或破损记录的新行模式：更新单价输入框
                             priceInput.value = price.toFixed(2);
+                            // 计算总价
+                            if (row && row.classList.contains('new-row')) {
+                                // 检查是否有calculateTransferRowTotal函数（转卖记录）
+                                if (typeof calculateTransferRowTotal === 'function') {
+                                    calculateTransferRowTotal(rowId);
+                                } else {
+                                    calculateBreakRowTotal(rowId);
+                                }
+                            } else {
+                                calculateBreakRowTotal(rowId);
+                            }
+                        } else {
+                            // 如果没有找到价格输入框，尝试计算总价
+                            calculateBreakRowTotal(rowId);
                         }
-                        calculateBreakRowTotal(rowId);
                     }
                 });
             });
@@ -7659,6 +7733,553 @@ header('Expires: 0');
             }
         });
 
+        // ==================== 碗碟转卖功能 ====================
+        
+        // 加载所有餐厅的转卖记录
+        async function loadAllTransferRecords() {
+            try {
+                // 获取所有餐厅列表，筛选出J开头的餐厅（排除"中央"和"文化楼"）
+                const jRestaurants = restaurants.filter(r => {
+                    const name = r.name.toLowerCase();
+                    const lowerName = r.name.toLowerCase();
+                    return lowerName.startsWith('j') && 
+                           lowerName !== '中央' && 
+                           lowerName !== '文化楼' &&
+                           name !== 'wenhua' && 
+                           name !== 'central';
+                }).sort((a, b) => {
+                    const nameA = a.name.toLowerCase();
+                    const nameB = b.name.toLowerCase();
+                    const numA = parseInt(nameA.replace('j', '')) || 0;
+                    const numB = parseInt(nameB.replace('j', '')) || 0;
+                    return numA - numB;
+                });
+
+                // 同时加载所有J开头店铺的数据
+                const promises = jRestaurants.map(restaurant => {
+                    const shopType = restaurant.name.toLowerCase();
+                    return apiCall(`?action=transfer_records&shop_type=${shopType}`).then(result => ({
+                        shopType: shopType,
+                        restaurant: restaurant,
+                        result: result
+                    }));
+                });
+
+                const results = await Promise.all(promises);
+
+                // 存储数据
+                results.forEach(({ shopType, result }) => {
+                    if (result.success) {
+                        transferRecordsData[shopType] = result.data || [];
+                    } else {
+                        transferRecordsData[shopType] = [];
+                    }
+                });
+
+                // 存储J餐厅列表供渲染使用
+                window.jRestaurantsForTransfer = jRestaurants;
+
+                // 渲染合并页面
+                renderMergedTransferRecordsPage();
+                updateStats();
+            } catch (error) {
+                console.error('加载转卖记录时发生错误:', error);
+                showAlert('加载转卖记录失败: ' + error.message, 'error');
+            }
+        }
+
+        // 渲染合并的转卖记录页面
+        function renderMergedTransferRecordsPage() {
+            const container = document.getElementById('transfer-records-container');
+            if (!container) {
+                console.error('找不到转卖记录容器');
+                return;
+            }
+
+            // 使用动态获取的J餐厅列表
+            const jRestaurants = window.jRestaurantsForTransfer || restaurants.filter(r => {
+                const name = r.name.toLowerCase();
+                const lowerName = r.name.toLowerCase();
+                return lowerName.startsWith('j') && 
+                       lowerName !== '中央' && 
+                       lowerName !== '文化楼' &&
+                       name !== 'wenhua' && 
+                       name !== 'central';
+            }).sort((a, b) => {
+                const nameA = a.name.toLowerCase();
+                const nameB = b.name.toLowerCase();
+                const numA = parseInt(nameA.replace('j', '')) || 0;
+                const numB = parseInt(nameB.replace('j', '')) || 0;
+                return numA - numB;
+            });
+
+            if (jRestaurants.length === 0) {
+                container.innerHTML = `
+                    <div style="padding: 40px; text-align: center; color: #6b7280;">
+                        <i class="fas fa-inbox" style="font-size: clamp(42px, 2.5vw, 48px); opacity: 0.5; margin-bottom: clamp(8px, 0.83vw, 16px);"></i>
+                        <div>暂无J开头的餐厅店面</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            
+            jRestaurants.forEach(restaurant => {
+                const shopType = restaurant.name.toLowerCase();
+                const records = transferRecordsData[shopType] || [];
+                
+                html += `
+                    <div class="break-record-section">
+                        <div class="break-record-header">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span>${restaurant.name}转卖</span>
+                                <span style="font-size: 12px; opacity: 0.9;">(${records.length} 项)</span>
+                            </div>
+                            <button class="btn btn-success" onclick="openTransferRowsModal('${shopType}')" style="padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
+                                <i class="fas fa-plus"></i> 转卖碗碟
+                            </button>
+                        </div>
+                        <div class="break-record-table-wrapper">
+                            <table class="break-record-table" id="${shopType}-transfer-table">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>编号</th>
+                                        <th>数量</th>
+                                        <th>进出</th>
+                                        <th>单价</th>
+                                        <th>总价</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="${shopType}-transfer-tbody">
+                                    ${renderTransferRecordsRows(records, shopType)}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // 渲染转卖记录行
+        function renderTransferRecordsRows(records, shopId) {
+            if (records.length === 0) {
+                return `
+                    <tr>
+                        <td colspan="7" class="no-data" style="padding: clamp(20px, 2.76vw, 53px); text-align: center; color: #6b7280;">
+                            <i class="fas fa-inbox" style="font-size: clamp(42px, 2.5vw, 48px); opacity: 0.5; margin-bottom: clamp(8px, 0.83vw, 16px);"></i>
+                            <div>暂无转卖记录</div>
+                        </td>
+                    </tr>
+                `;
+            }
+
+            let rows = '';
+            records.forEach((record, index) => {
+                const isInRecord = record.record_type === 'in';
+                const isOutRecord = record.record_type === 'out';
+                const transferDirection = isOutRecord 
+                    ? `转给 ${record.to_restaurant_name || record.to_shop_type.toUpperCase()}` 
+                    : `来自 ${record.from_restaurant_name || record.from_shop_type.toUpperCase()}`;
+                
+                rows += `
+                    <tr data-id="${record.id}" data-shop="${shopId}" data-type="${record.record_type}" data-related="${record.related_record_id || ''}">
+                        <td class="text-center">${index + 1}</td>
+                        <td class="text-center">${record.code_number || '-'}</td>
+                        <td class="text-center">
+                            ${isInRecord ? 
+                                `<span>${record.quantity}</span>` :
+                                `<input type="number" class="quantity-input" 
+                                       value="${record.quantity}" 
+                                       onchange="updateTransferQuantity(${record.id}, this.value, '${shopId}')"
+                                       min="0" style="width: clamp(40px, 2.92vw, 56px);">`
+                            }
+                        </td>
+                        <td class="text-center">${transferDirection}</td>
+                        <td class="text-center">
+                            <div class="currency-display">
+                                <span class="currency-symbol">RM</span>
+                                <span class="currency-amount">${formatCurrency(record.unit_price || 0)}</span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div class="currency-display">
+                                <span class="currency-symbol">RM</span>
+                                <span class="currency-amount">${formatCurrency(record.total_price || 0)}</span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            ${isInRecord ? 
+                                '<span style="color: #6b7280; font-size: 12px;">自动生成</span>' :
+                                `
+                                <button class="action-btn edit-btn" onclick="editTransferRecord(${record.id}, '${shopId}')" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete-btn" onclick="deleteTransferRecord(${record.id}, '${shopId}')" title="删除">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                `
+                            }
+                        </td>
+                    </tr>
+                `;
+            });
+
+            return rows;
+        }
+
+        // 当前选中的餐厅类型（用于创建新行）
+        let currentTransferShopType = null;
+
+        // 打开转卖记录行数选择弹窗
+        function openTransferRowsModal(shopType) {
+            currentTransferShopType = shopType;
+            const modal = document.getElementById('transfer-rows-modal');
+            if (modal) {
+                modal.classList.add('show');
+                document.getElementById('transfer-rows-count').value = 1;
+            }
+        }
+
+        // 关闭转卖记录行数选择弹窗
+        function closeTransferRowsModal() {
+            const modal = document.getElementById('transfer-rows-modal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }
+
+        // 创建多行转卖记录
+        function createMultipleTransferRows() {
+            const rowsCount = parseInt(document.getElementById('transfer-rows-count').value);
+            
+            if (!rowsCount || rowsCount < 1 || rowsCount > 50) {
+                showAlert('请输入有效的行数（1-50）', 'error');
+                return;
+            }
+            
+            if (!currentTransferShopType) {
+                showAlert('餐厅类型未设置', 'error');
+                return;
+            }
+            
+            closeTransferRowsModal();
+            
+            if (!stockData || stockData.length === 0) {
+                showAlert('正在加载碗碟数据，请稍后再试', 'warning');
+                loadStockData(true, false).then(() => {
+                    setTimeout(() => {
+                        createMultipleTransferRows();
+                    }, 500);
+                });
+                return;
+            }
+            
+            for (let i = 0; i < rowsCount; i++) {
+                addNewTransferRow(currentTransferShopType);
+            }
+            
+            setTimeout(() => {
+                const tbody = document.getElementById(`${currentTransferShopType}-transfer-tbody`);
+                if (tbody) {
+                    tbody.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }
+            }, 100);
+            
+            showAlert(`成功创建 ${rowsCount} 行记录`, 'success');
+        }
+
+        // 添加新行到转卖记录表格
+        function addNewTransferRow(shopType) {
+            const tbody = document.getElementById(`${shopType}-transfer-tbody`);
+            if (!tbody) {
+                console.error(`找不到表格tbody: ${shopType}-transfer-tbody`);
+                return;
+            }
+            
+            const noDataRow = tbody.querySelector('tr td.no-data');
+            if (noDataRow) {
+                tbody.innerHTML = '';
+            }
+            
+            const row = document.createElement('tr');
+            row.className = 'new-row';
+            const rowId = 'new-transfer-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            
+            const currentRowCount = tbody.querySelectorAll('tr:not(.new-row)').length;
+            const newRowIndex = currentRowCount + tbody.querySelectorAll('tr.new-row').length + 1;
+            
+            // 生成编号选项（用于combobox）
+            let codeOptions = [];
+            if (stockData && stockData.length > 0) {
+                stockData.forEach(item => {
+                    const code = item.code_number || '';
+                    if (code) {
+                        codeOptions.push({
+                            code: code,
+                            id: item.id,
+                            price: item.unit_price || 0
+                        });
+                    }
+                });
+            }
+            
+            // 生成餐厅选项（用于进出下拉列表）
+            let restaurantOptions = '';
+            const jRestaurants = window.jRestaurantsForTransfer || restaurants.filter(r => {
+                const name = r.name.toLowerCase();
+                return name.startsWith('j') && name !== shopType;
+            });
+            jRestaurants.forEach(r => {
+                restaurantOptions += `<option value="${r.name.toLowerCase()}">${r.name}</option>`;
+            });
+            
+            row.innerHTML = `
+                <td class="text-center">${newRowIndex}</td>
+                <td class="text-center">
+                    <div class="combobox-container" id="${rowId}-code-combo">
+                        <input 
+                            type="text" 
+                            class="combobox-input break-code-input" 
+                            id="${rowId}-code"
+                            placeholder="输入或选择编号..."
+                            autocomplete="off"
+                            data-row-id="${rowId}"
+                            data-field="code"
+                        />
+                        <i class="fas fa-chevron-down combobox-arrow"></i>
+                        <div class="combobox-dropdown" id="${rowId}-code-dropdown">
+                            ${codeOptions.map(opt => `<div class="combobox-option" data-value="${opt.code}" data-id="${opt.id}" data-price="${opt.price}">${opt.code}</div>`).join('')}
+                        </div>
+                    </div>
+                </td>
+                <td class="text-center">
+                    <input type="text" 
+                           class="break-quantity-input" 
+                           id="${rowId}-quantity" 
+                           placeholder="0" 
+                           value="" 
+                           onblur="calculateTransferRowTotal('${rowId}')" 
+                           style="width: 100%; padding: 4px 8px; border: none; background: transparent; text-align: center; outline: none;">
+                </td>
+                <td class="text-center">
+                    <select class="transfer-to-select" id="${rowId}-to" style="width: 100%; padding: 4px 8px; border: none; background: transparent; text-align: center; outline: none; font-size: clamp(8px, 0.74vw, 14px);">
+                        <option value="">选择餐厅</option>
+                        ${restaurantOptions}
+                    </select>
+                </td>
+                <td class="text-center">
+                    <div class="currency-display">
+                        <span class="currency-symbol">RM</span>
+                        <input type="text" class="break-price-input" id="${rowId}-price" 
+                               value="" onblur="calculateTransferRowTotal('${rowId}')" 
+                               style="width: 80px; border: none; background: transparent; text-align: center; outline: none;">
+                    </div>
+                </td>
+                <td class="text-center">
+                    <div class="currency-display">
+                        <span class="currency-symbol">RM</span>
+                        <span class="currency-amount" id="${rowId}-total">0.00</span>
+                    </div>
+                </td>
+                <td class="text-center">
+                    <button class="action-btn save-btn" onclick="saveNewTransferRow('${rowId}', '${shopType}')" title="保存" style="background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-right: 4px;">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button class="action-btn cancel-btn" onclick="cancelNewTransferRow('${rowId}', '${shopType}')" title="取消" style="background: #6c757d; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </td>
+            `;
+            
+            tbody.appendChild(row);
+            
+            // 绑定combobox事件
+            setTimeout(() => {
+                bindBreakComboboxEvents(rowId);
+            }, 100);
+        }
+
+        // 计算转卖记录行总价
+        function calculateTransferRowTotal(rowId) {
+            const quantityInput = document.getElementById(`${rowId}-quantity`);
+            const priceInput = document.getElementById(`${rowId}-price`);
+            const totalSpan = document.getElementById(`${rowId}-total`);
+            
+            if (!quantityInput || !priceInput || !totalSpan) return;
+            
+            const quantity = parseFloat(quantityInput.value) || 0;
+            const price = parseFloat(priceInput.value) || 0;
+            const total = quantity * price;
+            totalSpan.textContent = total.toFixed(2);
+        }
+
+        // 保存新转卖记录行
+        async function saveNewTransferRow(rowId, shopType) {
+            const codeInput = document.getElementById(`${rowId}-code`);
+            const quantityInput = document.getElementById(`${rowId}-quantity`);
+            const priceInput = document.getElementById(`${rowId}-price`);
+            const toSelect = document.getElementById(`${rowId}-to`);
+            
+            if (!codeInput || !quantityInput || !priceInput || !toSelect) {
+                showAlert('找不到输入元素，请刷新页面后重试', 'error');
+                return;
+            }
+            
+            const productId = codeInput.dataset.productId;
+            const code = codeInput.value.trim();
+            const quantity = parseFloat(quantityInput.value) || 0;
+            const price = parseFloat(priceInput.value) || 0;
+            const toShopType = toSelect.value;
+            
+            if (!code || !productId) {
+                showAlert('请输入或选择编号', 'error');
+                return;
+            }
+            
+            if (!toShopType) {
+                showAlert('请选择转卖给哪间餐厅', 'error');
+                return;
+            }
+            
+            if (quantity <= 0) {
+                showAlert('请输入有效的转卖数量', 'error');
+                return;
+            }
+            
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const result = await apiCall('', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'add_transfer_record',
+                        dishware_id: productId,
+                        from_shop_type: shopType,
+                        to_shop_type: toShopType,
+                        quantity: quantity,
+                        unit_price: price,
+                        transfer_date: today,
+                        recorded_by: 'system'
+                    })
+                });
+                
+                if (result.success) {
+                    showAlert('转卖记录添加成功', 'success');
+                    
+                    // 移除当前保存的行
+                    if (codeInput) {
+                        const row = codeInput.closest('tr');
+                        if (row) {
+                            const closeHandler = codeInput._closeHandler;
+                            if (closeHandler) {
+                                document.removeEventListener('click', closeHandler);
+                            }
+                            const codeDropdown = document.getElementById(`${rowId}-code-dropdown`);
+                            if (codeDropdown && codeDropdown.parentElement === document.body) {
+                                document.body.removeChild(codeDropdown);
+                            }
+                            row.remove();
+                        }
+                    }
+                    
+                    // 刷新所有转卖记录（因为会自动生成进货记录）
+                    loadAllTransferRecords();
+                    
+                    // 刷新总库存
+                    if (document.getElementById('stock-table')) {
+                        loadStockData(true, false);
+                    }
+                } else {
+                    showAlert('添加失败: ' + (result.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('保存转卖记录时发生错误:', error);
+                showAlert('保存转卖记录失败: ' + error.message, 'error');
+            }
+        }
+
+        // 取消新转卖记录行
+        function cancelNewTransferRow(rowId, shopType) {
+            const codeInput = document.getElementById(`${rowId}-code`);
+            if (!codeInput) {
+                return;
+            }
+            
+            const row = codeInput.closest('tr');
+            if (row) {
+                const closeHandler = codeInput._closeHandler;
+                if (closeHandler) {
+                    document.removeEventListener('click', closeHandler);
+                }
+                const codeDropdown = document.getElementById(`${rowId}-code-dropdown`);
+                if (codeDropdown && codeDropdown.parentElement === document.body) {
+                    document.body.removeChild(codeDropdown);
+                }
+                row.remove();
+                
+                // 检查是否还有数据
+                const tbody = document.getElementById(`${shopType}-transfer-tbody`);
+                if (tbody && tbody.querySelectorAll('tr').length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="no-data" style="padding: clamp(20px, 2.76vw, 53px); text-align: center; color: #6b7280;">
+                                <i class="fas fa-inbox" style="font-size: clamp(42px, 2.5vw, 48px); opacity: 0.5; margin-bottom: clamp(8px, 0.83vw, 16px);"></i>
+                                <div>暂无转卖记录</div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+        }
+
+        // 更新转卖数量
+        async function updateTransferQuantity(recordId, newQuantity, shopId) {
+            // 这个功能可以后续实现，目前先不处理
+        }
+
+        // 编辑转卖记录
+        function editTransferRecord(recordId, shopId) {
+            // 这个功能可以后续实现，目前先不处理
+            showAlert('编辑功能待实现', 'info');
+        }
+
+        // 删除转卖记录
+        async function deleteTransferRecord(recordId, shopId) {
+            if (!confirm('确定要删除此转卖记录吗？此操作不可恢复！')) return;
+            
+            try {
+                const result = await apiCall('', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'delete_transfer_record',
+                        id: recordId
+                    })
+                });
+                
+                if (result.success) {
+                    showAlert('转卖记录删除成功', 'success');
+                    loadAllTransferRecords();
+                    if (document.getElementById('stock-table')) {
+                        loadStockData(true, false);
+                    }
+                } else {
+                    showAlert('删除失败: ' + (result.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('删除转卖记录时发生错误:', error);
+                showAlert('删除转卖记录失败: ' + error.message, 'error');
+            }
+        }
     </script>
 </body>
 </html>
