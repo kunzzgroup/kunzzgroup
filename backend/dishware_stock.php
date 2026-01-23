@@ -2133,7 +2133,7 @@ header('Expires: 0');
         .transfer-to-select option,
         .transfer-to-select-edit option {
             text-align: center !important;
-            padding: 4px 0px;
+            padding: 4px 8px;
         }
 
         /* 新行样式 */
