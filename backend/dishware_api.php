@@ -2195,9 +2195,9 @@ function updateTransferRecord() {
         }
         
         // 如果改变了转入餐厅，需要更新
-        $new_to_shop_type = !empty($to_shop_type) ? $to_shop_type : $old_record['to_shop_type'];
-        $new_quantity = !empty($quantity) && $quantity !== '' ? $quantity : $old_record['quantity'];
-        $new_unit_price = !empty($unit_price) && $unit_price !== '' ? $unit_price : $old_record['unit_price'];
+        $new_to_shop_type = $to_shop_type ?: $old_record['to_shop_type'];
+        $new_quantity = $quantity ?: $old_record['quantity'];
+        $new_unit_price = $unit_price ?: $old_record['unit_price'];
         $new_total_price = $new_quantity * $new_unit_price;
         
         // 获取新的转入餐厅ID（如果改变了）
