@@ -1888,6 +1888,23 @@ header('Expires: 0');
             position: relative; /* 为下拉菜单提供定位上下文 */
         }
 
+        /* 修复 border-collapse: separate 后的边框重叠问题 */
+        .break-record-table td {
+            border-top: none;
+        }
+
+        .break-record-table td + td {
+            border-left: none;
+        }
+
+        .break-record-table tbody tr:first-child td {
+            border-top: 1px solid #d1d5db;
+        }
+
+        .break-record-table tbody tr td:first-child {
+            border-left: 1px solid #d1d5db;
+        }
+
         .break-record-table tr:nth-child(even) {
             background-color: #f9fafb;
         }
@@ -2086,12 +2103,44 @@ header('Expires: 0');
             position: relative; /* 为下拉菜单提供定位上下文 */
         }
 
+        /* 修复 border-collapse: separate 后的边框重叠问题 */
+        .break-record-table td {
+            border-top: none;
+        }
+
+        .break-record-table td + td {
+            border-left: none;
+        }
+
+        .break-record-table tbody tr:first-child td {
+            border-top: 1px solid #d1d5db;
+        }
+
+        .break-record-table tbody tr td:first-child {
+            border-left: 1px solid #d1d5db;
+        }
+
         .break-record-table tr:nth-child(even) {
             background-color: #f9fafb;
         }
 
         .break-record-table tr:hover {
             background-color: #f3f4f6;
+        }
+
+        /* 为最后一行的单元格添加底部圆角，匹配容器圆角 */
+        .break-record-table tbody tr:last-child td:first-child {
+            border-bottom-left-radius: 12px;
+        }
+
+        .break-record-table tbody tr:last-child td:last-child {
+            border-bottom-right-radius: 12px;
+        }
+
+        /* 处理"暂无破损记录"的情况 */
+        .break-record-table tbody tr td.no-data {
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
         }
 
         /* 新行样式 */
