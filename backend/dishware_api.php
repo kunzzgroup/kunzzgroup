@@ -2194,10 +2194,6 @@ function updateTransferRecord() {
             sendResponse(false, "记录不存在或不允许编辑");
         }
         
-        // 检查是否更新了产品ID（dishware_id）
-        $new_dishware_id = $data['dishware_id'] ?? $_POST['dishware_id'] ?? $old_record['dishware_id'];
-        $dishware_id_changed = ($new_dishware_id != $old_record['dishware_id']);
-        
         // 如果改变了转入餐厅，需要更新
         $new_to_shop_type = $to_shop_type ?: $old_record['to_shop_type'];
         $new_quantity = $quantity ?: $old_record['quantity'];
@@ -2218,115 +2214,24 @@ function updateTransferRecord() {
         $quantity_diff = $old_record['quantity'] - $new_quantity;
         $to_restaurant_changed = ($new_to_shop_type !== $old_record['to_shop_type']);
         
-        // 如果产品ID改变了，需要调整两个产品的库存
-        if ($dishware_id_changed) {
-            // 恢复原产品的库存
-            // 转出餐厅增加原产品
-            $restore_from_old_sql = "UPDATE dishware_stock_by_restaurant 
-                                SET quantity = quantity + ?,
-                                    last_updated = CURRENT_TIMESTAMP
-                                WHERE dishware_id = ? AND restaurant_id = ?";
-            $restore_from_old_stmt = $pdo->prepare($restore_from_old_sql);
-            $restore_from_old_stmt->execute([$old_record['quantity'], $old_record['dishware_id'], $old_record['from_restaurant_id']]);
-            
-            // 原转入餐厅减少原产品
-            $restore_to_old_sql = "UPDATE dishware_stock_by_restaurant 
-                              SET quantity = GREATEST(0, quantity - ?),
-                                  last_updated = CURRENT_TIMESTAMP
-                              WHERE dishware_id = ? AND restaurant_id = ?";
-            $restore_to_old_stmt = $pdo->prepare($restore_to_old_sql);
-            $restore_to_old_stmt->execute([$old_record['quantity'], $old_record['dishware_id'], $old_record['to_restaurant_id']]);
-            
-            // 更新新产品的库存
-            // 转出餐厅减少新产品
-            $update_from_new_sql = "INSERT INTO dishware_stock_by_restaurant (dishware_id, restaurant_id, quantity) 
-                                   VALUES (?, ?, GREATEST(0, COALESCE((SELECT quantity FROM dishware_stock_by_restaurant WHERE dishware_id = ? AND restaurant_id = ?), 0) - ?))
-                                   ON DUPLICATE KEY UPDATE 
-                                   quantity = GREATEST(0, quantity - ?),
-                                   last_updated = CURRENT_TIMESTAMP";
-            $update_from_new_stmt = $pdo->prepare($update_from_new_sql);
-            $update_from_new_stmt->execute([
-                $new_dishware_id,
-                $old_record['from_restaurant_id'],
-                $new_dishware_id,
-                $old_record['from_restaurant_id'],
-                $new_quantity,
-                $new_quantity
-            ]);
-            
-            // 新转入餐厅增加新产品
-            $update_to_new_sql = "INSERT INTO dishware_stock_by_restaurant (dishware_id, restaurant_id, quantity) 
-                                 VALUES (?, ?, COALESCE((SELECT quantity FROM dishware_stock_by_restaurant WHERE dishware_id = ? AND restaurant_id = ?), 0) + ?)
-                                 ON DUPLICATE KEY UPDATE 
-                                 quantity = quantity + ?,
-                                 last_updated = CURRENT_TIMESTAMP";
-            $update_to_new_stmt = $pdo->prepare($update_to_new_sql);
-            $update_to_new_stmt->execute([
-                $new_dishware_id,
-                $new_to_restaurant['id'],
-                $new_dishware_id,
-                $new_to_restaurant['id'],
-                $new_quantity,
-                $new_quantity
-            ]);
-        } else {
-            // 产品ID没改变，只调整数量
-            // 恢复转出餐厅库存（增加原数量）
-            $restore_from_sql = "UPDATE dishware_stock_by_restaurant 
-                                SET quantity = quantity + ?,
-                                    last_updated = CURRENT_TIMESTAMP
-                                WHERE dishware_id = ? AND restaurant_id = ?";
-            $restore_from_stmt = $pdo->prepare($restore_from_sql);
-            $restore_from_stmt->execute([$old_record['quantity'], $old_record['dishware_id'], $old_record['from_restaurant_id']]);
-            
-            // 恢复原转入餐厅库存（减少原数量）
-            $restore_to_sql = "UPDATE dishware_stock_by_restaurant 
-                              SET quantity = GREATEST(0, quantity - ?),
-                                  last_updated = CURRENT_TIMESTAMP
-                              WHERE dishware_id = ? AND restaurant_id = ?";
-            $restore_to_stmt = $pdo->prepare($restore_to_sql);
-            $restore_to_stmt->execute([$old_record['quantity'], $old_record['dishware_id'], $old_record['to_restaurant_id']]);
-            
-            // 更新新库存
-            // 转出餐厅减少新数量
-            $update_from_sql = "UPDATE dishware_stock_by_restaurant 
-                              SET quantity = GREATEST(0, quantity - ?),
-                                  last_updated = CURRENT_TIMESTAMP
-                              WHERE dishware_id = ? AND restaurant_id = ?";
-            $update_from_stmt = $pdo->prepare($update_from_sql);
-            $update_from_stmt->execute([$new_quantity, $old_record['dishware_id'], $old_record['from_restaurant_id']]);
-            
-            // 如果转入餐厅改变了，需要处理两个餐厅的库存
-            if ($to_restaurant_changed) {
-                // 新转入餐厅增加新数量
-                $update_to_sql = "INSERT INTO dishware_stock_by_restaurant (dishware_id, restaurant_id, quantity) 
-                                 VALUES (?, ?, COALESCE((SELECT quantity FROM dishware_stock_by_restaurant WHERE dishware_id = ? AND restaurant_id = ?), 0) + ?)
-                                 ON DUPLICATE KEY UPDATE 
-                                 quantity = quantity + ?,
-                                 last_updated = CURRENT_TIMESTAMP";
-                $update_to_stmt = $pdo->prepare($update_to_sql);
-                $update_to_stmt->execute([
-                    $old_record['dishware_id'],
-                    $new_to_restaurant['id'],
-                    $old_record['dishware_id'],
-                    $new_to_restaurant['id'],
-                    $new_quantity,
-                    $new_quantity
-                ]);
-            } else {
-                // 转入餐厅没改变，只增加数量差异
-                $update_to_sql = "UPDATE dishware_stock_by_restaurant 
-                                 SET quantity = quantity + ?,
-                                     last_updated = CURRENT_TIMESTAMP
-                                 WHERE dishware_id = ? AND restaurant_id = ?";
-                $update_to_stmt = $pdo->prepare($update_to_sql);
-                $update_to_stmt->execute([$quantity_diff, $old_record['dishware_id'], $old_record['to_restaurant_id']]);
-            }
-        }
+        // 恢复转出餐厅库存（增加）
+        $restore_from_sql = "UPDATE dishware_stock_by_restaurant 
+                            SET quantity = quantity + ?,
+                                last_updated = CURRENT_TIMESTAMP
+                            WHERE dishware_id = ? AND restaurant_id = ?";
+        $restore_from_stmt = $pdo->prepare($restore_from_sql);
+        $restore_from_stmt->execute([$old_record['quantity'], $old_record['dishware_id'], $old_record['from_restaurant_id']]);
+        
+        // 恢复原转入餐厅库存（减少）
+        $restore_to_sql = "UPDATE dishware_stock_by_restaurant 
+                          SET quantity = GREATEST(0, quantity - ?),
+                              last_updated = CURRENT_TIMESTAMP
+                          WHERE dishware_id = ? AND restaurant_id = ?";
+        $restore_to_stmt = $pdo->prepare($restore_to_sql);
+        $restore_to_stmt->execute([$old_record['quantity'], $old_record['dishware_id'], $old_record['to_restaurant_id']]);
         
         // 更新出货记录
         $update_out_sql = "UPDATE dishware_transfer_records SET 
-                          dishware_id = ?,
                           to_restaurant_id = ?,
                           to_shop_type = ?,
                           quantity = ?,
@@ -2336,7 +2241,6 @@ function updateTransferRecord() {
                           WHERE id = ?";
         $update_out_stmt = $pdo->prepare($update_out_sql);
         $update_out_stmt->execute([
-            $new_dishware_id,
             $new_to_restaurant['id'],
             $new_to_shop_type,
             $new_quantity,
@@ -2353,7 +2257,6 @@ function updateTransferRecord() {
         
         if ($in_record) {
             $update_in_sql = "UPDATE dishware_transfer_records SET 
-                            dishware_id = ?,
                             to_restaurant_id = ?,
                             to_shop_type = ?,
                             quantity = ?,
@@ -2363,7 +2266,6 @@ function updateTransferRecord() {
                             WHERE id = ?";
             $update_in_stmt = $pdo->prepare($update_in_sql);
             $update_in_stmt->execute([
-                $new_dishware_id,
                 $new_to_restaurant['id'],
                 $new_to_shop_type,
                 $new_quantity,
@@ -2372,6 +2274,31 @@ function updateTransferRecord() {
                 $in_record['id']
             ]);
         }
+        
+        // 更新新库存
+        // 转出餐厅减少
+        $update_from_sql = "UPDATE dishware_stock_by_restaurant 
+                          SET quantity = GREATEST(0, quantity - ?),
+                              last_updated = CURRENT_TIMESTAMP
+                          WHERE dishware_id = ? AND restaurant_id = ?";
+        $update_from_stmt = $pdo->prepare($update_from_sql);
+        $update_from_stmt->execute([$new_quantity, $old_record['dishware_id'], $old_record['from_restaurant_id']]);
+        
+        // 新转入餐厅增加
+        $update_to_sql = "INSERT INTO dishware_stock_by_restaurant (dishware_id, restaurant_id, quantity) 
+                         VALUES (?, ?, COALESCE((SELECT quantity FROM dishware_stock_by_restaurant WHERE dishware_id = ? AND restaurant_id = ?), 0) + ?)
+                         ON DUPLICATE KEY UPDATE 
+                         quantity = quantity + ?,
+                         last_updated = CURRENT_TIMESTAMP";
+        $update_to_stmt = $pdo->prepare($update_to_sql);
+        $update_to_stmt->execute([
+            $old_record['dishware_id'],
+            $new_to_restaurant['id'],
+            $old_record['dishware_id'],
+            $new_to_restaurant['id'],
+            $new_quantity,
+            $new_quantity
+        ]);
         
         $pdo->commit();
         sendResponse(true, "更新转卖记录成功");
