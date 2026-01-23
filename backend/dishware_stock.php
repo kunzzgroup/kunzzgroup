@@ -2030,12 +2030,12 @@ header('Expires: 0');
 
         .break-record-table th:nth-child(2),
         .break-record-table td:nth-child(2) {
-            width: 10%; /* 编号 */
+            width: 13%; /* 编号 */
         }
 
         .break-record-table th:nth-child(3),
         .break-record-table td:nth-child(3) {
-            width: 18%; /* 破损数量 */
+            width: 10%; /* 破损数量 */
         }
 
         .break-record-table th:nth-child(4),
@@ -3917,7 +3917,7 @@ header('Expires: 0');
                             <input type="number" class="quantity-input" 
                                    value="${record.break_quantity}" 
                                    onchange="updateBreakQuantity(${record.id}, this.value, '${shopId}')"
-                                   min="0" style="width: clamp(60px, 5.21vw, 80px);">
+                                   min="0" style="width: clamp(40px, 3.13vw, 60px);">
                         </td>
                         <td class="text-center">
                             <div class="currency-display">
@@ -4543,7 +4543,7 @@ header('Expires: 0');
                             <input type="number" class="quantity-input" 
                                    value="${record.break_quantity}" 
                                    onchange="updateBreakQuantity(${record.id}, this.value, '${shopId}')"
-                                   min="0" style="width: clamp(60px, 5.21vw, 80px);">
+                                   min="0" style="width: clamp(40px, 3.13vw, 60px);">
                         </td>
                         <td class="text-center">
                             <div class="currency-display">
