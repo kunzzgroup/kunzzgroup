@@ -4099,7 +4099,7 @@ header('Expires: 0');
         }
 
         // 刷新单个餐厅的破损记录（保留新行）
-        async function refreshSingleRestaurantBreakRecords(shopType) {
+        async function refreshSingleRestaurantBreakRecords(shopType, excludeRecordId = null) {
             try {
                 // 只加载对应餐厅的数据
                 const result = await apiCall(`?action=damage_records&shop_type=${shopType}`);
@@ -4130,12 +4130,74 @@ header('Expires: 0');
                         };
                     });
                     
-                    // 重新渲染该餐厅的表格行（不包括新行）
+                    // 保存所有正在编辑的行（.editing-row）及其数据，排除当前保存的行
+                    const editingRows = Array.from(tbody.querySelectorAll('tr.editing-row'));
+                    const editingRowsData = editingRows
+                        .filter(row => {
+                            const recordId = row.dataset.id;
+                            return recordId && recordId != excludeRecordId;
+                        })
+                        .map(row => {
+                            const recordId = row.dataset.id;
+                            const codeInput = row.querySelector('.break-code-input');
+                            const quantitySpan = row.querySelector('.editable-quantity');
+                            const codeRowId = codeInput?.id?.replace('-code', '') || '';
+                            
+                            // 保存完整的行HTML和状态
+                            return {
+                                recordId: recordId,
+                                rowHtml: row.outerHTML, // 保存完整的行HTML
+                                codeRowId: codeRowId,
+                                code: codeInput?.value || '',
+                                quantity: quantitySpan?.textContent?.trim() || '',
+                                productId: codeInput?.dataset?.productId || '',
+                                originalCode: row.dataset.originalCode || '',
+                                originalQuantity: row.dataset.originalQuantity || ''
+                            };
+                        });
+                    
+                    // 重新渲染该餐厅的表格行（不包括新行和正在编辑的行）
                     const records = breakRecordsData[shopType] || [];
                     const rowsHtml = renderBreakRecordsRows(records, shopType);
                     
                     // 清空tbody并添加已保存的记录
                     tbody.innerHTML = rowsHtml;
+                    
+                    // 恢复正在编辑的行 - 直接替换对应行的HTML
+                    editingRowsData.forEach(({ recordId, rowHtml, codeRowId, code, quantity, productId }) => {
+                        const restoredRow = tbody.querySelector(`tr[data-id="${recordId}"][data-shop="${shopType}"]`);
+                        if (restoredRow) {
+                            // 创建临时容器来解析保存的HTML
+                            const tempDiv = document.createElement('div');
+                            tempDiv.innerHTML = rowHtml;
+                            const savedRow = tempDiv.querySelector('tr');
+                            
+                            if (savedRow) {
+                                // 恢复输入框的值
+                                const codeInput = savedRow.querySelector('.break-code-input');
+                                const quantitySpan = savedRow.querySelector('.editable-quantity');
+                                
+                                if (codeInput) {
+                                    codeInput.value = code;
+                                    if (productId) {
+                                        codeInput.dataset.productId = productId;
+                                        codeInput.setAttribute('data-product-id', productId);
+                                    }
+                                }
+                                if (quantitySpan) {
+                                    quantitySpan.textContent = quantity;
+                                }
+                                
+                                // 替换当前行
+                                restoredRow.replaceWith(savedRow);
+                                
+                                // 重新绑定事件
+                                setTimeout(() => {
+                                    bindBreakComboboxEvents(codeRowId);
+                                }, 100);
+                            }
+                        }
+                    });
                     
                     // 重新添加所有新行
                     newRowsData.forEach(({ row, rowId, code, quantity, price, productId }) => {
@@ -4867,9 +4929,9 @@ header('Expires: 0');
                 
                 if (result.success) {
                     showAlert('破损记录更新成功', 'success');
-                    // 退出编辑模式并刷新数据
+                    // 退出编辑模式并只刷新当前餐厅的数据，保留其他正在编辑的行
                     row.classList.remove('editing-row');
-                    loadAllBreakRecords();
+                    await refreshSingleRestaurantBreakRecords(shopId, recordId);
                     // 刷新总库存
                     if (document.getElementById('stock-table')) {
                         loadStockData(true, false);
