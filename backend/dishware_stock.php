@@ -8496,12 +8496,15 @@ header('Expires: 0');
                 }
                 
                 // 如果编号改变了，需要获取新的产品信息
-                let unitPrice = newPrice;
+                let unitPrice = newPrice || 0;
                 if (newCode !== row.dataset.originalCode) {
                     const newProduct = stockData.find(item => item.code_number === newCode);
                     if (newProduct) {
                         unitPrice = newProduct.unit_price || 0;
                     }
+                } else if (!newPrice || newPrice === 0) {
+                    // 如果编号没改变但价格为空，使用原价格
+                    unitPrice = record.unit_price || 0;
                 }
                 
                 const totalPrice = newQuantity * unitPrice;
