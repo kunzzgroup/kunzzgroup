@@ -2017,6 +2017,23 @@ header('Expires: 0');
         #transfer-records-container.single-restaurant .break-record-section {
             margin: 0 auto;
         }
+        
+        /* 破损记录页面选择单个餐厅时的样式 */
+        .break-records-container.single-restaurant,
+        #break-records-container.single-restaurant,
+        #break-records-container-j2.single-restaurant,
+        #break-records-container-j3.single-restaurant {
+            justify-content: center;
+            min-width: auto;
+            width: 100%;
+        }
+        
+        .break-records-container.single-restaurant .break-record-section,
+        #break-records-container.single-restaurant .break-record-section,
+        #break-records-container-j2.single-restaurant .break-record-section,
+        #break-records-container-j3.single-restaurant .break-record-section {
+            margin: 0 auto;
+        }
 
         .break-record-section {
             background: white;
@@ -3838,7 +3855,8 @@ header('Expires: 0');
                         // 隐藏顶部的"记录破损"按钮，因为每个容器都有自己的按钮
                         addButton.style.display = 'none';
                     }
-                    restoreCategoryFilter();
+                    // 将分类下拉菜单改为餐厅选择
+                    updateCategoryFilterToRestaurantForBreak();
                     // 加载所有破损记录
                     loadAllBreakRecords();
                     break;
@@ -3970,6 +3988,8 @@ header('Expires: 0');
 
                 // 渲染合并页面
                 renderMergedBreakRecordsPage();
+                // 应用餐厅过滤
+                filterBreakRecordsByRestaurant();
                 updateStats();
             } catch (error) {
                 console.error('加载破损记录时发生错误:', error);
@@ -5523,6 +5543,60 @@ header('Expires: 0');
             }
         }
 
+        // 将分类下拉菜单改为餐厅选择（破损记录页面）
+        function updateCategoryFilterToRestaurantForBreak() {
+            const categoryFilterDiv = document.querySelector('.category-filter');
+            const categorySelect = document.getElementById('category-filter');
+            
+            if (!categoryFilterDiv || !categorySelect) return;
+            
+            // 保存原始分类选项（用于恢复）
+            if (!categorySelect.dataset.originalHTML) {
+                categorySelect.dataset.originalHTML = categorySelect.innerHTML;
+            }
+            
+            // 更新标签
+            const label = categoryFilterDiv.querySelector('span');
+            if (label) {
+                label.textContent = '餐厅';
+            }
+            
+            // 更新下拉菜单为餐厅列表
+            let restaurantOptions = '<option value="">全部餐厅</option>';
+            const jRestaurants = window.jRestaurantsForBreak || restaurants.filter(r => {
+                const name = r.name.toLowerCase();
+                return name.startsWith('j') && 
+                       name !== '中央' && 
+                       name !== '文化楼' &&
+                       name !== 'wenhua' && 
+                       name !== 'central';
+            }).sort((a, b) => {
+                const nameA = a.name.toLowerCase();
+                const nameB = b.name.toLowerCase();
+                const numA = parseInt(nameA.replace('j', '')) || 0;
+                const numB = parseInt(nameB.replace('j', '')) || 0;
+                return numA - numB;
+            });
+            
+            jRestaurants.forEach(restaurant => {
+                restaurantOptions += `<option value="${restaurant.name.toLowerCase()}">${restaurant.name}</option>`;
+            });
+            
+            categorySelect.innerHTML = restaurantOptions;
+            categorySelect.value = breakRestaurantFilter || '';
+            
+            // 移除旧的事件监听器，添加新的事件监听器
+            categorySelect.removeEventListener('change', handleCategoryFilterChange);
+            categorySelect.removeEventListener('change', handleTransferRestaurantFilterChange);
+            categorySelect.removeEventListener('change', handleBreakRestaurantFilterChange);
+            categorySelect.addEventListener('change', handleBreakRestaurantFilterChange);
+            
+            // 应用当前的餐厅过滤
+            setTimeout(() => {
+                filterBreakRecordsByRestaurant();
+            }, 100);
+        }
+        
         // 将分类下拉菜单改为餐厅选择（转卖页面）
         function updateCategoryFilterToRestaurant() {
             const categoryFilterDiv = document.querySelector('.category-filter');
@@ -5594,8 +5668,9 @@ header('Expires: 0');
                 categorySelect.innerHTML = categorySelect.dataset.originalHTML;
             }
             
-            // 移除转卖页面的事件监听器，恢复分类过滤事件
+            // 移除转卖和破损页面的事件监听器，恢复分类过滤事件
             categorySelect.removeEventListener('change', handleTransferRestaurantFilterChange);
+            categorySelect.removeEventListener('change', handleBreakRestaurantFilterChange);
             categorySelect.addEventListener('change', handleCategoryFilterChange);
         }
         
@@ -5608,9 +5683,73 @@ header('Expires: 0');
             filterTransferRecordsByRestaurant();
         }
         
+        // 处理破损记录页面餐厅过滤变化
+        function handleBreakRestaurantFilterChange() {
+            const categorySelect = document.getElementById('category-filter');
+            if (!categorySelect) return;
+            
+            breakRestaurantFilter = categorySelect.value || '';
+            filterBreakRecordsByRestaurant();
+        }
+        
         // 处理分类过滤变化（库存页面）
         function handleCategoryFilterChange() {
             searchData();
+        }
+        
+        // 根据选择的餐厅过滤破损记录
+        function filterBreakRecordsByRestaurant() {
+            // 获取所有破损记录容器
+            const containers = [
+                document.getElementById('break-records-container'),
+                document.getElementById('break-records-container-j2'),
+                document.getElementById('break-records-container-j3')
+            ].filter(c => c !== null);
+            
+            if (containers.length === 0) return;
+            
+            containers.forEach(container => {
+                const scrollContainer = container?.closest('.table-scroll-container');
+                
+                if (!breakRestaurantFilter) {
+                    // 显示所有餐厅，恢复原始布局
+                    container.classList.remove('single-restaurant');
+                    if (scrollContainer) {
+                        scrollContainer.style.overflowX = 'auto';
+                        scrollContainer.style.overflowY = 'visible';
+                    }
+                    
+                    const sections = container.querySelectorAll('.break-record-section');
+                    sections.forEach(section => {
+                        section.style.display = '';
+                        section.style.margin = '';
+                    });
+                } else {
+                    // 只显示选中的餐厅，居中显示
+                    container.classList.add('single-restaurant');
+                    if (scrollContainer) {
+                        scrollContainer.style.overflowX = 'hidden';
+                        scrollContainer.style.overflowY = 'visible';
+                    }
+                    
+                    const sections = container.querySelectorAll('.break-record-section');
+                    sections.forEach(section => {
+                        const header = section.querySelector('.break-record-header');
+                        if (header) {
+                            const titleSpan = header.querySelector('span');
+                            if (titleSpan) {
+                                // 获取餐厅名称（移除"破损"文字）
+                                const restaurantName = titleSpan.textContent.replace('破损', '').trim().toLowerCase();
+                                if (restaurantName === breakRestaurantFilter) {
+                                    section.style.display = '';
+                                } else {
+                                    section.style.display = 'none';
+                                }
+                            }
+                        }
+                    });
+                }
+            });
         }
         
         // 根据选择的餐厅过滤转卖记录
@@ -5684,10 +5823,13 @@ header('Expires: 0');
                 // 移除所有可能的事件监听器
                 categorySelect.removeEventListener('change', handleCategoryFilterChange);
                 categorySelect.removeEventListener('change', handleTransferRestaurantFilterChange);
+                categorySelect.removeEventListener('change', handleBreakRestaurantFilterChange);
                 
                 // 根据当前页面添加相应的事件监听器
                 if (currentPage === 'transfer') {
                     categorySelect.addEventListener('change', handleTransferRestaurantFilterChange);
+                } else if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') {
+                    categorySelect.addEventListener('change', handleBreakRestaurantFilterChange);
                 } else {
                     categorySelect.addEventListener('change', handleCategoryFilterChange);
                 }
@@ -8310,6 +8452,9 @@ header('Expires: 0');
         
         // 转卖页面餐厅过滤状态
         let transferRestaurantFilter = '';
+        
+        // 破损记录页面餐厅过滤状态
+        let breakRestaurantFilter = '';
 
         // 打开转卖记录行数选择弹窗
         function openTransferRowsModal(shopType) {
