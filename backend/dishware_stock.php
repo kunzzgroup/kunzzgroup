@@ -383,6 +383,17 @@ header('Expires: 0');
             text-align: center;
         }
 
+        /* 隐藏 number 输入框的上下箭头（总库存页面） */
+        .quantity-input::-webkit-outer-spin-button,
+        .quantity-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .quantity-input {
+            -moz-appearance: textfield; /* Firefox */
+        }
+
         .btn-remove {
             padding: 8px 12px;
             background-color: #ef4444;
@@ -1005,6 +1016,17 @@ header('Expires: 0');
             border-radius: 4px;
             text-align: center;
             font-size: clamp(8px, 0.74vw, 12px); /* 使用响应式字体大小 */
+        }
+
+        /* 隐藏 number 输入框的上下箭头 */
+        .quantity-input::-webkit-outer-spin-button,
+        .quantity-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .quantity-input {
+            -moz-appearance: textfield; /* Firefox */
         }
 
         .quantity-input:focus {
@@ -2096,6 +2118,17 @@ header('Expires: 0');
             font-size: clamp(8px, 0.74vw, 14px); /* 使用响应式字体大小，与其他行一致 */
             box-sizing: border-box;
             outline: none;
+        }
+
+        /* 隐藏新行中 number 输入框的上下箭头 */
+        .break-record-table tr.new-row input[type="number"]::-webkit-outer-spin-button,
+        .break-record-table tr.new-row input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .break-record-table tr.new-row input[type="number"] {
+            -moz-appearance: textfield; /* Firefox */
         }
 
         .break-record-table tr.new-row input:focus,
