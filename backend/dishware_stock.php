@@ -8395,15 +8395,19 @@ header('Expires: 0');
 
         // 编辑转卖记录 - 进入编辑模式
         function editTransferRecord(recordId, shopId) {
+            console.log('editTransferRecord called:', recordId, shopId);
+            
             // 找到对应的行
             const row = document.querySelector(`tr[data-id="${recordId}"][data-shop="${shopId}"]`);
             if (!row) {
+                console.error('找不到行，recordId:', recordId, 'shopId:', shopId);
                 showAlert('找不到要编辑的记录', 'error');
                 return;
             }
             
             // 检查是否已经在编辑中
             if (row.classList.contains('editing-row')) {
+                console.log('已经在编辑模式中');
                 return;
             }
             
@@ -8429,11 +8433,15 @@ header('Expires: 0');
             
             // 获取当前记录数据
             const cells = row.querySelectorAll('td');
-            if (cells.length < 7) return;
+            if (cells.length < 7) {
+                console.error('表格列数不正确:', cells.length);
+                row.classList.remove('editing-row');
+                return;
+            }
             
             // 保存原始数据
             const originalCode = cells[1].textContent.trim();
-            const quantityInput = cells[2].querySelector('.quantity-input');
+            const quantityInput = cells[2].querySelector('.quantity-input, .transfer-quantity-input');
             const originalQuantity = quantityInput ? quantityInput.value : '0';
             const originalToShop = row.dataset.toShop || '';
             row.dataset.originalCode = originalCode;
@@ -8542,6 +8550,23 @@ header('Expires: 0');
             
             // 替换操作按钮为保存和取消
             const actionCell = cells[6];
+            if (!actionCell) {
+                console.error('找不到操作列单元格，cells.length:', cells.length);
+                row.classList.remove('editing-row');
+                return;
+            }
+            
+            // 确保操作列有正确的ID
+            if (!actionCell.id) {
+                actionCell.id = `transfer-action-${recordId}`;
+            }
+            
+            // 保存原始按钮HTML
+            if (!actionCell.dataset.originalHtml) {
+                actionCell.dataset.originalHtml = actionCell.innerHTML;
+            }
+            
+            // 替换为保存和取消按钮
             actionCell.innerHTML = `
                 <button class="action-btn save-btn" onclick="saveEditTransferRecord(${recordId}, '${shopId}', '${codeRowId}')" title="保存" style="background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-right: 4px;">
                     <i class="fas fa-check"></i>
@@ -8550,6 +8575,8 @@ header('Expires: 0');
                     <i class="fas fa-times"></i>
                 </button>
             `;
+            
+            console.log('操作按钮已替换为保存和取消按钮');
             
             // 绑定 combobox 事件
             setTimeout(() => {
@@ -8566,7 +8593,10 @@ header('Expires: 0');
         
         // 计算编辑转卖记录的总价
         function calculateEditTransferTotal(codeRowId) {
-            const quantityInput = document.querySelector(`tr.editing-row input.quantity-input`);
+            const row = document.querySelector(`tr.editing-row`);
+            if (!row) return;
+            
+            const quantityInput = row.querySelector('input.quantity-input, input.transfer-quantity-input');
             const priceInput = document.getElementById(`${codeRowId}-price`);
             const totalSpan = document.getElementById(`${codeRowId}-total`);
             
@@ -8591,7 +8621,7 @@ header('Expires: 0');
             
             // 获取编辑后的值
             const codeInput = document.getElementById(`${codeRowId}-code`);
-            const quantityInput = cells[2].querySelector('.quantity-input');
+            const quantityInput = cells[2].querySelector('.quantity-input, .transfer-quantity-input');
             const toSelect = document.getElementById(`${codeRowId}-to`);
             const priceInput = document.getElementById(`${codeRowId}-price`);
             
@@ -8713,9 +8743,12 @@ header('Expires: 0');
                         <td class="text-center">${record.code_number || '-'}</td>
                         <td class="text-center">
                             ${isOutRecord ? 
-                                `<input type="number" class="quantity-input" 
+                                `<input type="number" class="quantity-input transfer-quantity-input" 
                                        value="${record.quantity}" 
-                                       onchange="updateTransferQuantity(${record.id}, this.value, '${shopId}')"
+                                       data-record-id="${record.id}"
+                                       data-shop-id="${shopId}"
+                                       data-original-value="${record.quantity}"
+                                       onchange="showTransferSaveButtons(${record.id}, '${shopId}')"
                                        min="0" style="width: clamp(40px, 2.92vw, 56px);">` :
                                 `<span>${record.quantity}</span>`
                             }
@@ -8733,7 +8766,7 @@ header('Expires: 0');
                                 <span class="currency-amount">${formatCurrency(record.total_price || 0)}</span>
                             </div>
                         </td>
-                        <td class="text-center">
+                        <td class="text-center" id="transfer-action-${record.id}">
                             ${isOutRecord ? 
                                 `
                                 <button class="action-btn edit-btn" onclick="editTransferRecord(${record.id}, '${shopId}')" title="编辑">
