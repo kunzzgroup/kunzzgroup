@@ -2123,16 +2123,6 @@ header('Expires: 0');
             background-color: #f3f4f6;
         }
 
-        /* 转卖记录过滤按钮样式 */
-        .transfer-filter-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-        }
-        
-        .transfer-filter-btn:active {
-            transform: translateY(0);
-        }
-
         /* 转卖记录下拉列表样式 - 居中选项 */
         .transfer-to-select,
         .transfer-to-select-edit {
@@ -8034,26 +8024,20 @@ header('Expires: 0');
                                 <span>${restaurant.name}转卖</span>
                                 <span style="font-size: 12px; opacity: 0.9;">(${records.length} 项)</span>
                                 <div style="display: flex; gap: 4px; margin-left: 8px;">
-                                    <button class="transfer-filter-btn" 
+                                    <button class="btn ${filterType === 'all' ? 'btn-primary' : 'btn-secondary'}" 
                                             onclick="setTransferFilter('${shopType}', 'all')" 
-                                            data-filter="all"
-                                            data-shop="${shopType}"
-                                            style="padding: clamp(4px, 0.42vw, 8px) clamp(12px, 1.25vw, 24px); font-size: clamp(10px, 0.83vw, 16px); white-space: nowrap; border: none; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; ${filterType === 'all' ? 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);' : 'background: #e5e7eb; color: #6b7280;'}">
-                                        全部
+                                            style="padding: clamp(2px, 0.21vw, 4px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
+                                        全部 (${allRecords.length})
                                     </button>
-                                    <button class="transfer-filter-btn" 
+                                    <button class="btn ${filterType === 'out' ? 'btn-primary' : 'btn-secondary'}" 
                                             onclick="setTransferFilter('${shopType}', 'out')" 
-                                            data-filter="out"
-                                            data-shop="${shopType}"
-                                            style="padding: clamp(4px, 0.42vw, 8px) clamp(12px, 1.25vw, 24px); font-size: clamp(10px, 0.83vw, 16px); white-space: nowrap; border: none; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; ${filterType === 'out' ? 'background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; box-shadow: 0 2px 8px rgba(245, 87, 108, 0.4);' : 'background: #e5e7eb; color: #6b7280;'}">
-                                        转卖
+                                            style="padding: clamp(2px, 0.21vw, 4px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
+                                        转卖 (${outCount})
                                     </button>
-                                    <button class="transfer-filter-btn" 
+                                    <button class="btn ${filterType === 'in' ? 'btn-primary' : 'btn-secondary'}" 
                                             onclick="setTransferFilter('${shopType}', 'in')" 
-                                            data-filter="in"
-                                            data-shop="${shopType}"
-                                            style="padding: clamp(4px, 0.42vw, 8px) clamp(12px, 1.25vw, 24px); font-size: clamp(10px, 0.83vw, 16px); white-space: nowrap; border: none; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; ${filterType === 'in' ? 'background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; box-shadow: 0 2px 8px rgba(79, 172, 254, 0.4);' : 'background: #e5e7eb; color: #6b7280;'}">
-                                        来自
+                                            style="padding: clamp(2px, 0.21vw, 4px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
+                                        来自 (${inCount})
                                     </button>
                                 </div>
                             </div>
@@ -8304,39 +8288,15 @@ header('Expires: 0');
                 }
                 
                 // 更新按钮状态
-                const buttons = header.querySelectorAll('.transfer-filter-btn[data-shop="' + shopType + '"]');
+                const buttons = header.querySelectorAll('button[onclick*="setTransferFilter"]');
                 buttons.forEach(btn => {
-                    const btnFilter = btn.getAttribute('data-filter');
-                    if (btnFilter === 'all') {
-                        if (filterType === 'all') {
-                            btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-                            btn.style.color = 'white';
-                            btn.style.boxShadow = '0 2px 8px rgba(102, 126, 234, 0.4)';
-                        } else {
-                            btn.style.background = '#e5e7eb';
-                            btn.style.color = '#6b7280';
-                            btn.style.boxShadow = 'none';
-                        }
-                    } else if (btnFilter === 'out') {
-                        if (filterType === 'out') {
-                            btn.style.background = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
-                            btn.style.color = 'white';
-                            btn.style.boxShadow = '0 2px 8px rgba(245, 87, 108, 0.4)';
-                        } else {
-                            btn.style.background = '#e5e7eb';
-                            btn.style.color = '#6b7280';
-                            btn.style.boxShadow = 'none';
-                        }
-                    } else if (btnFilter === 'in') {
-                        if (filterType === 'in') {
-                            btn.style.background = 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
-                            btn.style.color = 'white';
-                            btn.style.boxShadow = '0 2px 8px rgba(79, 172, 254, 0.4)';
-                        } else {
-                            btn.style.background = '#e5e7eb';
-                            btn.style.color = '#6b7280';
-                            btn.style.boxShadow = 'none';
-                        }
+                    const onclick = btn.getAttribute('onclick');
+                    if (onclick.includes("'all'")) {
+                        btn.className = filterType === 'all' ? 'btn btn-primary' : 'btn btn-secondary';
+                    } else if (onclick.includes("'out'")) {
+                        btn.className = filterType === 'out' ? 'btn btn-primary' : 'btn btn-secondary';
+                    } else if (onclick.includes("'in'")) {
+                        btn.className = filterType === 'in' ? 'btn btn-primary' : 'btn btn-secondary';
                     }
                 });
             }
