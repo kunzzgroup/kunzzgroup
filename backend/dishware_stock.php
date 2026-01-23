@@ -3933,7 +3933,7 @@ header('Expires: 0');
                 return `
                     <tr>
                         <td colspan="6" class="no-data" style="padding: clamp(20px, 2.76vw, 53px); text-align: center; color: #6b7280;">
-                            <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.5; margin-bottom: clamp(8px, 0.83vw, 16px);"></i>
+                            <i class="fas fa-inbox" style="font-size: clamp(42px, 2.5vw, 48px); opacity: 0.5; margin-bottom: clamp(8px, 0.83vw, 16px);"></i>
                             <div>暂无破损记录</div>
                         </td>
                     </tr>
