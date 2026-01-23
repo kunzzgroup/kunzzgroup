@@ -2082,7 +2082,7 @@ header('Expires: 0');
         }
 
         .break-record-table tr.new-row td {
-            padding: clamp(2px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); /* 使用响应式padding，与其他行一致 */
+            padding: 8px;
             font-size: clamp(8px, 0.74vw, 14px); /* 使用响应式字体大小，与其他行一致 */
         }
 
@@ -2090,14 +2090,12 @@ header('Expires: 0');
         .break-record-table tr.new-row select {
             width: 100%;
             max-width: 100%;
-            padding: clamp(2px, 0.21vw, 4px) clamp(4px, 0.42vw, 8px); /* 减少padding，保持输入框不高 */
+            padding: 4px 8px;
             border: none;
             background: transparent;
             font-size: clamp(8px, 0.74vw, 14px); /* 使用响应式字体大小，与其他行一致 */
             box-sizing: border-box;
             outline: none;
-            height: auto; /* 自动高度 */
-            line-height: 1.4; /* 行高 */
         }
 
         .break-record-table tr.new-row input:focus,
@@ -2124,14 +2122,12 @@ header('Expires: 0');
 
         .combobox-input {
             width: 100%;
-            padding: clamp(2px, 0.21vw, 4px) 24px clamp(2px, 0.21vw, 4px) 8px; /* 减少上下padding，保持输入框不高 */
+            padding: 4px 24px 4px 8px;
             border: none;
             background: transparent;
             font-size: clamp(8px, 0.74vw, 14px); /* 使用响应式字体大小 */
             outline: none;
             box-sizing: border-box;
-            height: auto; /* 自动高度 */
-            line-height: 1.4; /* 行高 */
         }
 
         .combobox-input:focus {
@@ -2156,8 +2152,7 @@ header('Expires: 0');
             background: white;
             border: 1px solid #ddd;
             border-radius: 4px;
-            max-height: 200px; /* 下拉列表有足够的高度 */
-            min-height: 100px; /* 最小高度，确保有足够空间显示选项 */
+            max-height: 200px;
             overflow-y: auto;
             overflow-x: hidden; /* 隐藏水平溢出 */
             z-index: 99999 !important; /* 最高优先级，确保显示在最上层 */
@@ -2171,12 +2166,11 @@ header('Expires: 0');
         }
 
         .combobox-option {
-            padding: clamp(4px, 0.42vw, 8px) clamp(6px, 0.63vw, 12px); /* 响应式padding */
+            padding: 8px 12px;
             cursor: pointer;
             font-size: clamp(8px, 0.74vw, 14px); /* 使用响应式字体大小 */
             white-space: nowrap; /* 防止文本换行 */
             overflow: visible; /* 允许文本完整显示 */
-            min-height: clamp(20px, 1.56vw, 32px); /* 确保选项有足够的高度 */
         }
 
         .combobox-option:hover {
