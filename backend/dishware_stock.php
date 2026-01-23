@@ -4606,11 +4606,12 @@ header('Expires: 0');
                 </div>
             `;
             
-            // 数量列：由 span 改为可编辑输入框（仅编辑模式下可改）
+            // 数量列：使用 contenteditable span（直接编辑，不显示输入框）
             cells[2].innerHTML = `
-                <input type="number" class="quantity-input break-quantity-input" 
-                       value="${originalQuantity}" min="0" 
-                       style="width: clamp(40px, 2.92vw, 56px);">
+                <span contenteditable="true" class="editable-quantity" 
+                      id="edit-${recordId}-qty"
+                      style="display: inline-block; min-width: 40px; padding: 2px 4px; border: 1px solid #ccc; border-radius: 4px; background: #fff; outline: none; text-align: center;"
+                      oninput="this.textContent = this.textContent.replace(/[^0-9.]/g, '');">${originalQuantity}</span>
             `;
             
             // 替换操作按钮为保存和取消
@@ -4643,16 +4644,16 @@ header('Expires: 0');
             
             // 获取编辑后的值
             const codeInput = document.getElementById(`${codeRowId}-code`);
-            const quantityInput = cells[2].querySelector('.quantity-input');
+            const quantitySpan = document.getElementById(`edit-${recordId}-qty`) || cells[2].querySelector('.editable-quantity');
             
-            if (!codeInput || !quantityInput) {
+            if (!codeInput || !quantitySpan) {
                 showAlert('找不到输入元素', 'error');
                 return;
             }
             
             const newCode = codeInput.value.trim();
             const productId = codeInput.dataset.productId || codeInput.getAttribute('data-product-id');
-            const newQuantity = parseFloat(quantityInput.value) || 0;
+            const newQuantity = parseFloat(quantitySpan.textContent.trim()) || 0;
             
             // 验证
             if (!newCode || !productId) {
@@ -5085,9 +5086,11 @@ header('Expires: 0');
                                     </div>
                                 `;
                                 // 重新计算总价
-                                const quantityInput = cells[2].querySelector('.quantity-input');
-                                if (quantityInput) {
-                                    const quantity = parseFloat(quantityInput.value) || 0;
+                                const quantityEl = cells[2].querySelector('.quantity-input') || cells[2].querySelector('.editable-quantity');
+                                if (quantityEl) {
+                                    const quantity = quantityEl.classList.contains('quantity-input') 
+                                        ? parseFloat(quantityEl.value) || 0
+                                        : parseFloat(quantityEl.textContent.trim()) || 0;
                                     const totalPrice = quantity * price;
                                     const totalCell = cells[4];
                                     totalCell.innerHTML = `
@@ -8518,11 +8521,12 @@ header('Expires: 0');
                 </div>
             `;
             
-            // 数量列：由 span 改为可编辑输入框（仅编辑模式下可改）
+            // 数量列：使用 contenteditable span（直接编辑，不显示输入框）
             cells[2].innerHTML = `
-                <input type="number" class="quantity-input transfer-quantity-input" 
-                       id="${codeRowId}-qty" value="${originalQuantity}" min="0" 
-                       style="width: clamp(40px, 2.92vw, 56px);">
+                <span contenteditable="true" class="editable-quantity" 
+                      id="${codeRowId}-qty"
+                      style="display: inline-block; min-width: 40px; padding: 2px 4px; border: 1px solid #ccc; border-radius: 4px; background: #fff; outline: none; text-align: center;"
+                      oninput="this.textContent = this.textContent.replace(/[^0-9.]/g, ''); calculateEditTransferTotal('${codeRowId}');">${originalQuantity}</span>
             `;
             
             // 编辑进出列 - 改为下拉列表
@@ -8606,12 +8610,7 @@ header('Expires: 0');
                 bindBreakComboboxEvents(codeRowId);
             }, 100);
             
-            // 绑定数量输入框的 change 事件，自动计算总价
-            const qtyInput = document.getElementById(`${codeRowId}-qty`);
-            if (qtyInput) {
-                qtyInput.addEventListener('change', () => calculateEditTransferTotal(codeRowId));
-                qtyInput.addEventListener('input', () => calculateEditTransferTotal(codeRowId));
-            }
+            // contenteditable span 的 input 事件已在 HTML 中通过 oninput 绑定
             } catch (error) {
                 console.error('编辑转卖记录时发生错误:', error);
                 row.classList.remove('editing-row');
@@ -8624,13 +8623,13 @@ header('Expires: 0');
             const row = document.querySelector(`tr.editing-row`);
             if (!row) return;
             
-            const quantityInput = row.querySelector('input.quantity-input, input.transfer-quantity-input');
+            const quantitySpan = document.getElementById(`${codeRowId}-qty`);
             const priceInput = document.getElementById(`${codeRowId}-price`);
             const totalSpan = document.getElementById(`${codeRowId}-total`);
             
-            if (!quantityInput || !priceInput || !totalSpan) return;
+            if (!quantitySpan || !priceInput || !totalSpan) return;
             
-            const quantity = parseFloat(quantityInput.value) || 0;
+            const quantity = parseFloat(quantitySpan.textContent.trim()) || 0;
             const price = parseFloat(priceInput.value) || 0;
             const total = quantity * price;
             totalSpan.textContent = total.toFixed(2);
@@ -8649,18 +8648,18 @@ header('Expires: 0');
             
             // 获取编辑后的值
             const codeInput = document.getElementById(`${codeRowId}-code`);
-            const quantityInput = cells[2].querySelector('.quantity-input, .transfer-quantity-input');
+            const quantitySpan = document.getElementById(`${codeRowId}-qty`) || cells[2].querySelector('.editable-quantity');
             const toSelect = document.getElementById(`${codeRowId}-to`);
             const priceInput = document.getElementById(`${codeRowId}-price`);
             
-            if (!codeInput || !quantityInput || !toSelect || !priceInput) {
+            if (!codeInput || !quantitySpan || !toSelect || !priceInput) {
                 showAlert('找不到输入元素', 'error');
                 return;
             }
             
             const newCode = codeInput.value.trim();
             const productId = codeInput.dataset.productId || codeInput.getAttribute('data-product-id');
-            const newQuantity = parseFloat(quantityInput.value) || 0;
+            const newQuantity = parseFloat(quantitySpan.textContent.trim()) || 0;
             const newToShopType = toSelect.value;
             const newPrice = parseFloat(priceInput.value) || 0;
             
