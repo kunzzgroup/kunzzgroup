@@ -5066,7 +5066,7 @@ header('Expires: 0');
             if (tbody && tbody.children.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="6" class="no-data" style="padding: 30px; text-align: center; color: #6b7280;">
+                        <td colspan="6" class="no-data" style="padding: 40px; text-align: center; color: #6b7280;">
                             <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.5; margin-bottom: 16px;"></i>
                             <div>暂无破损记录</div>
                         </td>
