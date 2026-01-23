@@ -2877,18 +2877,21 @@ header('Expires: 0');
     <div id="transfer-rows-modal" class="modal-overlay">
         <div class="modal-content" style="max-width: 400px;">
             <div class="modal-header">
-                <h2>添加转卖记录</h2>
-                <span class="close" onclick="closeTransferRowsModal()">&times;</span>
+                <h3 class="modal-title">新增转卖记录</h3>
+                <button class="modal-close" onclick="closeTransferRowsModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>要添加的行数：</label>
-                    <input type="number" id="transfer-rows-count" min="1" max="50" value="1" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <label for="transfer-rows-count" style="display: block; margin-bottom: 8px; font-weight: 600;">要创建的行数 *</label>
+                    <input type="number" id="transfer-rows-count" class="form-input" min="1" max="50" value="1" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" onclick="createMultipleTransferRows()">确定</button>
+            <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
                 <button class="btn btn-secondary" onclick="closeTransferRowsModal()">取消</button>
+                <button class="btn btn-primary" onclick="createMultipleTransferRows()">
+                    <i class="fas fa-plus"></i>
+                    创建记录
+                </button>
             </div>
         </div>
     </div>
