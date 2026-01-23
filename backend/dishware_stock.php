@@ -7894,9 +7894,13 @@ header('Expires: 0');
             records.forEach((record, index) => {
                 const isInRecord = record.record_type === 'in';
                 const isOutRecord = record.record_type === 'out';
+                // 进出列：只显示餐厅名称，不显示"转给"或"来自"
                 const transferDirection = isOutRecord 
-                    ? `转给 ${record.to_restaurant_name || record.to_shop_type.toUpperCase()}` 
-                    : `来自 ${record.from_restaurant_name || record.from_shop_type.toUpperCase()}`;
+                    ? (record.to_restaurant_name || record.to_shop_type.toUpperCase()) 
+                    : (record.from_restaurant_name || record.from_shop_type.toUpperCase());
+                
+                // 根据记录类型设置价格颜色：转卖（out）=红色，来自（in）=绿色
+                const priceColor = isOutRecord ? '#dc3545' : '#28a745';
                 
                 rows += `
                     <tr data-id="${record.id}" data-shop="${shopId}" data-type="${record.record_type}" data-related="${record.related_record_id || ''}">
@@ -7918,13 +7922,13 @@ header('Expires: 0');
                         <td class="text-center">
                             <div class="currency-display">
                                 <span class="currency-symbol">RM</span>
-                                <span class="currency-amount">${formatCurrency(record.unit_price || 0)}</span>
+                                <span class="currency-amount" style="color: ${priceColor};">${formatCurrency(record.unit_price || 0)}</span>
                             </div>
                         </td>
                         <td class="text-center">
                             <div class="currency-display">
                                 <span class="currency-symbol">RM</span>
-                                <span class="currency-amount">${formatCurrency(record.total_price || 0)}</span>
+                                <span class="currency-amount" style="color: ${priceColor};">${formatCurrency(record.total_price || 0)}</span>
                             </div>
                         </td>
                         <td class="text-center" id="transfer-action-${record.id}">
@@ -8740,9 +8744,13 @@ header('Expires: 0');
                     // 重新渲染该行
                     const tbody = row.parentElement;
                     const isOutRecord = record.record_type === 'out';
+                    // 进出列：只显示餐厅名称，不显示"转给"或"来自"
                     const transferDirection = isOutRecord 
-                        ? `转给 ${record.to_restaurant_name || record.to_shop_type.toUpperCase()}` 
-                        : `来自 ${record.from_restaurant_name || record.from_shop_type.toUpperCase()}`;
+                        ? (record.to_restaurant_name || record.to_shop_type.toUpperCase()) 
+                        : (record.from_restaurant_name || record.from_shop_type.toUpperCase());
+                    
+                    // 根据记录类型设置价格颜色：转卖（out）=红色，来自（in）=绿色
+                    const priceColor = isOutRecord ? '#dc3545' : '#28a745';
                     
                     const newRow = document.createElement('tr');
                     newRow.setAttribute('data-id', record.id);
@@ -8768,13 +8776,13 @@ header('Expires: 0');
                         <td class="text-center">
                             <div class="currency-display">
                                 <span class="currency-symbol">RM</span>
-                                <span class="currency-amount">${formatCurrency(record.unit_price || 0)}</span>
+                                <span class="currency-amount" style="color: ${priceColor};">${formatCurrency(record.unit_price || 0)}</span>
                             </div>
                         </td>
                         <td class="text-center">
                             <div class="currency-display">
                                 <span class="currency-symbol">RM</span>
-                                <span class="currency-amount">${formatCurrency(record.total_price || 0)}</span>
+                                <span class="currency-amount" style="color: ${priceColor};">${formatCurrency(record.total_price || 0)}</span>
                             </div>
                         </td>
                         <td class="text-center" id="transfer-action-${record.id}">
