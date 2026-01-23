@@ -2115,6 +2115,18 @@ header('Expires: 0');
             position: relative; /* 为下拉菜单提供定位上下文 */
         }
 
+        /* 转卖记录下拉列表样式 - 确保选项文本居中 */
+        .transfer-to-select,
+        .transfer-to-select-edit {
+            text-align: center !important;
+            text-align-last: center !important;
+        }
+
+        .transfer-to-select option,
+        .transfer-to-select-edit option {
+            text-align: center !important;
+        }
+
         .break-record-table tr:nth-child(even) {
             background-color: #f9fafb;
         }
@@ -8099,7 +8111,7 @@ header('Expires: 0');
                            style="width: 100%; padding: 4px 8px; border: none; background: transparent; text-align: center; outline: none;">
                 </td>
                 <td class="text-center">
-                    <select class="transfer-to-select" id="${rowId}-to" style="width: 100%; padding: 4px 8px; border: none; background: transparent; text-align: center; outline: none; font-size: clamp(8px, 0.74vw, 14px);">
+                    <select class="transfer-to-select" id="${rowId}-to" style="width: 100%; padding: 4px 8px; border: none; background: transparent; text-align: center; text-align-last: center; outline: none; font-size: clamp(8px, 0.74vw, 14px);">
                         <option value="">选择餐厅</option>
                         ${restaurantOptions}
                     </select>
@@ -8542,7 +8554,7 @@ header('Expires: 0');
                 restaurantOptions += `<option value="${rName}" ${rName === currentToShop ? 'selected' : ''}>${r.name}</option>`;
             });
             toCell.innerHTML = `
-                <select class="transfer-to-select-edit" id="${codeRowId}-to" style="width: 100%; padding: 4px 8px; border: none; background: transparent; text-align: center; outline: none; font-size: clamp(8px, 0.74vw, 14px);">
+                <select class="transfer-to-select-edit" id="${codeRowId}-to" style="width: 100%; padding: 4px 8px; border: none; background: transparent; text-align: center; text-align-last: center; outline: none; font-size: clamp(8px, 0.74vw, 14px);">
                     <option value="">选择餐厅</option>
                     ${restaurantOptions}
                 </select>
