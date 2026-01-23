@@ -6397,7 +6397,12 @@ header('Expires: 0');
                                     <button class="action-btn delete-btn" onclick="deleteDishwareFromSet(${setItem.id}, ${set.id})" title="删除">
                                         <i class="fas fa-trash"></i>
                                     </button>
-                                `
+                                `,
+                                // 添加套装标识，用于合并显示
+                                set_id: set.id,
+                                set_category: setItem.category || set.category || '-',
+                                set_size: setItem.size || '-',
+                                set_price: setPrice
                             };
                             fillRestaurantStocks(rowData, setItem);
                             displayRows.push(rowData);
@@ -6471,10 +6476,55 @@ header('Expires: 0');
                     : `data-row="${f.label}"`;
                 
                 html += `<tr ${rowAttributes}><th class="row-header">${f.label}</th>`;
-                displayRows.forEach((r) => {
-                    const cell = (r && typeof r[f.key] !== 'undefined') ? r[f.key] : '-';
-                    html += `<td>${cell}</td>`;
-                });
+                
+                // 对于分类、尺寸、单价行，检查是否需要合并套装项目
+                if ((f.key === 'category' || f.key === 'size' || f.key === 'unit_price') && displayRows.length > 0) {
+                    let i = 0;
+                    while (i < displayRows.length) {
+                        const currentRow = displayRows[i];
+                        const currentSetId = currentRow.set_id;
+                        const currentValue = currentRow[f.key] || '-';
+                        
+                        // 如果当前行属于套装，检查后续行是否也属于同一套装且值相同
+                        if (currentSetId && (f.key === 'category' || f.key === 'size' || f.key === 'unit_price')) {
+                            let mergeCount = 1;
+                            let j = i + 1;
+                            
+                            // 检查后续行是否属于同一套装且值相同
+                            while (j < displayRows.length) {
+                                const nextRow = displayRows[j];
+                                if (nextRow.set_id === currentSetId && 
+                                    (nextRow[f.key] || '-') === currentValue) {
+                                    mergeCount++;
+                                    j++;
+                                } else {
+                                    break;
+                                }
+                            }
+                            
+                            // 如果有多列需要合并，使用colspan（在转置表格中，合并列）
+                            if (mergeCount > 1) {
+                                html += `<td colspan="${mergeCount}" style="vertical-align: middle; text-align: center;">${currentValue}</td>`;
+                                // 跳过已合并的列
+                                i += mergeCount;
+                            } else {
+                                html += `<td>${currentValue}</td>`;
+                                i++;
+                            }
+                        } else {
+                            // 非套装项目或不需要合并的字段，正常渲染
+                            html += `<td>${currentValue}</td>`;
+                            i++;
+                        }
+                    }
+                } else {
+                    // 其他字段正常渲染
+                    displayRows.forEach((r) => {
+                        const cell = (r && typeof r[f.key] !== 'undefined') ? r[f.key] : '-';
+                        html += `<td>${cell}</td>`;
+                    });
+                }
+                
                 html += `</tr>`;
             });
 
@@ -6612,7 +6662,7 @@ header('Expires: 0');
                         set.items.forEach((setItem) => {
                             const totalQty = parseInt(setItem.total_quantity) || 0;
                             const totalClass = totalQty > 0 ? 'positive-value' : 'zero-value';
-                            
+
                             const rowData = {
                                 no: String(displayIndex),
                                 photo: photoHtmlFrom(setItem.photo_path, setItem.product_name || '', 'fa-image'),
@@ -6629,7 +6679,12 @@ header('Expires: 0');
                                     <button class="action-btn delete-btn" onclick="deleteDishwareFromSet(${setItem.id}, ${set.id})" title="删除">
                                         <i class="fas fa-trash"></i>
                                     </button>
-                                `
+                                `,
+                                // 添加套装标识，用于合并显示
+                                set_id: set.id,
+                                set_category: setItem.category || set.category || '-',
+                                set_size: setItem.size || '-',
+                                set_price: setPrice
                             };
                             fillRestaurantStocks(rowData, setItem);
                             displayRows.push(rowData);
@@ -6699,10 +6754,55 @@ header('Expires: 0');
                     : `data-row="${f.label}"`;
                 
                 tableHtml += `<tr ${rowAttributes}><th class="row-header">${f.label}</th>`;
-                displayRows.forEach((r) => {
-                    const cell = (r && typeof r[f.key] !== 'undefined') ? r[f.key] : '-';
-                    tableHtml += `<td>${cell}</td>`;
-                });
+                
+                // 对于分类、尺寸、单价行，检查是否需要合并套装项目
+                if ((f.key === 'category' || f.key === 'size' || f.key === 'unit_price') && displayRows.length > 0) {
+                    let i = 0;
+                    while (i < displayRows.length) {
+                        const currentRow = displayRows[i];
+                        const currentSetId = currentRow.set_id;
+                        const currentValue = currentRow[f.key] || '-';
+                        
+                        // 如果当前行属于套装，检查后续行是否也属于同一套装且值相同
+                        if (currentSetId && (f.key === 'category' || f.key === 'size' || f.key === 'unit_price')) {
+                            let mergeCount = 1;
+                            let j = i + 1;
+                            
+                            // 检查后续行是否属于同一套装且值相同
+                            while (j < displayRows.length) {
+                                const nextRow = displayRows[j];
+                                if (nextRow.set_id === currentSetId && 
+                                    (nextRow[f.key] || '-') === currentValue) {
+                                    mergeCount++;
+                                    j++;
+                                } else {
+                                    break;
+                                }
+                            }
+                            
+                            // 如果有多列需要合并，使用colspan（在转置表格中，合并列）
+                            if (mergeCount > 1) {
+                                tableHtml += `<td colspan="${mergeCount}" style="vertical-align: middle; text-align: center;">${currentValue}</td>`;
+                                // 跳过已合并的列
+                                i += mergeCount;
+                            } else {
+                                tableHtml += `<td>${currentValue}</td>`;
+                                i++;
+                            }
+                        } else {
+                            // 非套装项目或不需要合并的字段，正常渲染
+                            tableHtml += `<td>${currentValue}</td>`;
+                            i++;
+                        }
+                    }
+                } else {
+                    // 其他字段正常渲染
+                    displayRows.forEach((r) => {
+                        const cell = (r && typeof r[f.key] !== 'undefined') ? r[f.key] : '-';
+                        tableHtml += `<td>${cell}</td>`;
+                    });
+                }
+                
                 tableHtml += `</tr>`;
             });
             
