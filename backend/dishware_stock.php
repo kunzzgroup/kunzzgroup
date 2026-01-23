@@ -2157,7 +2157,8 @@ header('Expires: 0');
             z-index: 99999 !important; /* 最高优先级，确保显示在最上层 */
             display: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            width: clamp(60px, 100%, 100px); /* 使用 clamp，最小值60px，最大值100px */
+            min-width: 150px; /* 最小宽度，确保能显示完整文本 */
+            width: auto; /* 自动宽度，根据内容调整，但不超过最小宽度 */
         }
 
         .combobox-dropdown.show {
@@ -4551,10 +4552,10 @@ header('Expires: 0');
                 codeDropdown.style.position = 'fixed';
                 codeDropdown.style.top = (rect.bottom + window.scrollY) + 'px';
                 codeDropdown.style.left = rect.left + 'px';
-                // 使用 clamp 设置宽度，最小值60px，最大值100px
-                const inputWidth = rect.width;
-                const clampedWidth = Math.min(Math.max(60, inputWidth), 100);
-                codeDropdown.style.width = clampedWidth + 'px';
+                // 设置宽度，比输入框稍宽一些，确保能显示完整文本
+                const dropdownWidth = Math.max(rect.width, 150);
+                codeDropdown.style.width = dropdownWidth + 'px';
+                codeDropdown.style.minWidth = '150px';
                 codeDropdown.classList.add('show');
                 filterBreakComboboxOptions(codeInput, codeDropdown);
             };
@@ -4607,10 +4608,9 @@ header('Expires: 0');
                     const rect = codeInput.getBoundingClientRect();
                     codeDropdown.style.top = (rect.bottom + window.scrollY) + 'px';
                     codeDropdown.style.left = rect.left + 'px';
-                    // 使用 clamp 更新宽度，最小值60px，最大值100px
-                    const inputWidth = rect.width;
-                    const clampedWidth = Math.min(Math.max(60, inputWidth), 100);
-                    codeDropdown.style.width = clampedWidth + 'px';
+                    // 更新宽度
+                    const dropdownWidth = Math.max(rect.width, 150);
+                    codeDropdown.style.width = dropdownWidth + 'px';
                 }
             };
             window.addEventListener('scroll', updatePosition, true);
