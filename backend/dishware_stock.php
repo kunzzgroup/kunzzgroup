@@ -2076,7 +2076,7 @@ header('Expires: 0');
 
         #transfer-page .break-record-table th:nth-child(2),
         #transfer-page .break-record-table td:nth-child(2) {
-            width: 15%; /* 编号 */
+            width: 12%; /* 编号 */
         }
 
         #transfer-page .break-record-table th:nth-child(3),
