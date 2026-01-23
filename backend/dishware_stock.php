@@ -5083,8 +5083,24 @@ header('Expires: 0');
                         if (isTransferEdit) {
                             // 转卖记录编辑模式：更新单价显示（只读，自动从产品信息获取）
                             const priceSpan = document.getElementById(`${codeRowId}-price`);
+                            const priceSymbol = document.querySelector(`#${codeRowId}-price`).parentElement.querySelector('.currency-symbol');
                             if (priceSpan) {
                                 priceSpan.textContent = price.toFixed(2);
+                                // 检查是否是转卖（out）记录，如果是则显示负号
+                                const row = codeInput.closest('tr');
+                                if (row && row.dataset.type === 'out') {
+                                    if (priceSymbol) {
+                                        priceSymbol.textContent = '-RM';
+                                        priceSymbol.style.color = '#dc3545';
+                                        priceSpan.style.color = '#dc3545';
+                                    }
+                                } else {
+                                    if (priceSymbol) {
+                                        priceSymbol.textContent = 'RM';
+                                        priceSymbol.style.color = '#000000';
+                                        priceSpan.style.color = '#000000';
+                                    }
+                                }
                             }
                             calculateEditTransferTotal(codeRowId);
                         } else {
@@ -7954,13 +7970,13 @@ header('Expires: 0');
                         <td class="text-center">${transferDirection}</td>
                         <td class="text-center">
                             <div class="currency-display">
-                                <span class="currency-symbol" style="color: ${priceColor};">RM</span>
+                                <span class="currency-symbol" style="color: ${priceColor};">${isOutRecord ? '-' : ''}RM</span>
                                 <span class="currency-amount" style="color: ${priceColor};">${formatCurrency(record.unit_price || 0)}</span>
                             </div>
                         </td>
                         <td class="text-center">
                             <div class="currency-display">
-                                <span class="currency-symbol" style="color: ${priceColor};">RM</span>
+                                <span class="currency-symbol" style="color: ${priceColor};">${isOutRecord ? '-' : ''}RM</span>
                                 <span class="currency-amount" style="color: ${priceColor};">${formatCurrency(record.total_price || 0)}</span>
                             </div>
                         </td>
@@ -8577,10 +8593,11 @@ header('Expires: 0');
             // 编辑单价列 - 只读显示（自动从产品信息获取）
             const priceCell = cells[4];
             const currentPrice = parseFloat(record.unit_price) || 0;
+            const isOutRecordEdit = record.record_type === 'out';
             priceCell.innerHTML = `
                 <div class="currency-display">
-                    <span class="currency-symbol">RM</span>
-                    <span class="currency-amount" id="${codeRowId}-price">${currentPrice.toFixed(2)}</span>
+                    <span class="currency-symbol" style="color: ${isOutRecordEdit ? '#dc3545' : '#000000'};">${isOutRecordEdit ? '-' : ''}RM</span>
+                    <span class="currency-amount" id="${codeRowId}-price" style="color: ${isOutRecordEdit ? '#dc3545' : '#000000'};">${currentPrice.toFixed(2)}</span>
                 </div>
             `;
             
@@ -8589,8 +8606,8 @@ header('Expires: 0');
             const currentTotal = parseFloat(record.total_price) || 0;
             totalCell.innerHTML = `
                 <div class="currency-display">
-                    <span class="currency-symbol">RM</span>
-                    <span class="currency-amount" id="${codeRowId}-total">${currentTotal.toFixed(2)}</span>
+                    <span class="currency-symbol" style="color: ${isOutRecordEdit ? '#dc3545' : '#000000'};">${isOutRecordEdit ? '-' : ''}RM</span>
+                    <span class="currency-amount" id="${codeRowId}-total" style="color: ${isOutRecordEdit ? '#dc3545' : '#000000'};">${currentTotal.toFixed(2)}</span>
                 </div>
             `;
             
@@ -8796,13 +8813,13 @@ header('Expires: 0');
                         <td class="text-center">${transferDirection}</td>
                         <td class="text-center">
                             <div class="currency-display">
-                                <span class="currency-symbol" style="color: ${priceColor};">RM</span>
+                                <span class="currency-symbol" style="color: ${priceColor};">${isOutRecord ? '-' : ''}RM</span>
                                 <span class="currency-amount" style="color: ${priceColor};">${formatCurrency(record.unit_price || 0)}</span>
                             </div>
                         </td>
                         <td class="text-center">
                             <div class="currency-display">
-                                <span class="currency-symbol" style="color: ${priceColor};">RM</span>
+                                <span class="currency-symbol" style="color: ${priceColor};">${isOutRecord ? '-' : ''}RM</span>
                                 <span class="currency-amount" style="color: ${priceColor};">${formatCurrency(record.total_price || 0)}</span>
                             </div>
                         </td>
