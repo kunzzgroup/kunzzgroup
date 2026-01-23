@@ -2086,7 +2086,7 @@ header('Expires: 0');
 
         #transfer-page .break-record-table th:nth-child(4),
         #transfer-page .break-record-table td:nth-child(4) {
-            width: 12%; /* 进出 */
+            width: 8%; /* 进出 */
         }
 
         #transfer-page .break-record-table th:nth-child(5),
@@ -2101,7 +2101,7 @@ header('Expires: 0');
 
         #transfer-page .break-record-table th:nth-child(7),
         #transfer-page .break-record-table td:nth-child(7) {
-            width: 25%; /* 操作 */
+            width: 14%; /* 操作 */
         }
 
         .break-record-table td {
