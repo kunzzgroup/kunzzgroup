@@ -8024,20 +8024,20 @@ header('Expires: 0');
                                 <span>${restaurant.name}转卖</span>
                                 <span style="font-size: 12px; opacity: 0.9;">(${records.length} 项)</span>
                                 <div style="display: flex; gap: 4px; margin-left: 8px;">
-                                    <button class="btn ${filterType === 'all' ? 'btn-primary' : 'btn-secondary'}" 
+                                    <button class="btn" 
                                             onclick="setTransferFilter('${shopType}', 'all')" 
-                                            style="padding: clamp(2px, 0.21vw, 4px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
-                                        全部 (${allRecords.length})
+                                            style="padding: clamp(2px, 0.21vw, 4px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap; background: ${filterType === 'all' ? '#f99e00' : 'white'}; color: ${filterType === 'all' ? 'white' : '#333'}; border: 1px solid #ddd;">
+                                        全部
                                     </button>
-                                    <button class="btn ${filterType === 'out' ? 'btn-primary' : 'btn-secondary'}" 
+                                    <button class="btn" 
                                             onclick="setTransferFilter('${shopType}', 'out')" 
-                                            style="padding: clamp(2px, 0.21vw, 4px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
-                                        转卖 (${outCount})
+                                            style="padding: clamp(2px, 0.21vw, 4px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap; background: ${filterType === 'out' ? '#f99e00' : 'white'}; color: ${filterType === 'out' ? 'white' : '#333'}; border: 1px solid #ddd;">
+                                        转卖
                                     </button>
-                                    <button class="btn ${filterType === 'in' ? 'btn-primary' : 'btn-secondary'}" 
+                                    <button class="btn" 
                                             onclick="setTransferFilter('${shopType}', 'in')" 
-                                            style="padding: clamp(2px, 0.21vw, 4px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
-                                        来自 (${inCount})
+                                            style="padding: clamp(2px, 0.21vw, 4px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap; background: ${filterType === 'in' ? '#f99e00' : 'white'}; color: ${filterType === 'in' ? 'white' : '#333'}; border: 1px solid #ddd;">
+                                        来自
                                     </button>
                                 </div>
                             </div>
@@ -8292,11 +8292,14 @@ header('Expires: 0');
                 buttons.forEach(btn => {
                     const onclick = btn.getAttribute('onclick');
                     if (onclick.includes("'all'")) {
-                        btn.className = filterType === 'all' ? 'btn btn-primary' : 'btn btn-secondary';
+                        btn.style.background = filterType === 'all' ? '#f99e00' : 'white';
+                        btn.style.color = filterType === 'all' ? 'white' : '#333';
                     } else if (onclick.includes("'out'")) {
-                        btn.className = filterType === 'out' ? 'btn btn-primary' : 'btn btn-secondary';
+                        btn.style.background = filterType === 'out' ? '#f99e00' : 'white';
+                        btn.style.color = filterType === 'out' ? 'white' : '#333';
                     } else if (onclick.includes("'in'")) {
-                        btn.className = filterType === 'in' ? 'btn btn-primary' : 'btn btn-secondary';
+                        btn.style.background = filterType === 'in' ? '#f99e00' : 'white';
+                        btn.style.color = filterType === 'in' ? 'white' : '#333';
                     }
                 });
             }
