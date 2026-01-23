@@ -4093,7 +4093,7 @@ header('Expires: 0');
                             <div style="display: flex; align-items: center; gap: 12px;">
                                 <span>${restaurant.name}破损</span>
                                 <span style="font-size: 12px; opacity: 0.9;">(${records.length} 项)</span>
-                                <span style="font-size: 12px; opacity: 0.9;">总破损：RM ${formatCurrency(totalBreakAmount)}</span>
+                                <span style="font-size: clamp(14px, 0.94vw, 18px); opacity: 0.9;">总破损：RM ${formatCurrency(totalBreakAmount)}</span>
                             </div>
                             <button class="btn btn-success" onclick="openBreakRowsModal('${shopType}')" style="padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
                                 <i class="fas fa-plus"></i> 记录破损
