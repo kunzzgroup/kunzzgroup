@@ -2157,8 +2157,7 @@ header('Expires: 0');
             z-index: 99999 !important; /* 最高优先级，确保显示在最上层 */
             display: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            min-width: 150px; /* 最小宽度，确保能显示完整文本 */
-            width: auto; /* 自动宽度，根据内容调整，但不超过最小宽度 */
+            width: clamp(60px, 5.21vw, 100px); /* 使用 clamp 设置宽度 */
         }
 
         .combobox-dropdown.show {
@@ -4552,10 +4551,7 @@ header('Expires: 0');
                 codeDropdown.style.position = 'fixed';
                 codeDropdown.style.top = (rect.bottom + window.scrollY) + 'px';
                 codeDropdown.style.left = rect.left + 'px';
-                // 设置宽度，比输入框稍宽一些，确保能显示完整文本
-                const dropdownWidth = Math.max(rect.width, 150);
-                codeDropdown.style.width = dropdownWidth + 'px';
-                codeDropdown.style.minWidth = '150px';
+                // 使用 CSS clamp，不需要设置 JavaScript 宽度
                 codeDropdown.classList.add('show');
                 filterBreakComboboxOptions(codeInput, codeDropdown);
             };
@@ -4608,9 +4604,7 @@ header('Expires: 0');
                     const rect = codeInput.getBoundingClientRect();
                     codeDropdown.style.top = (rect.bottom + window.scrollY) + 'px';
                     codeDropdown.style.left = rect.left + 'px';
-                    // 更新宽度
-                    const dropdownWidth = Math.max(rect.width, 150);
-                    codeDropdown.style.width = dropdownWidth + 'px';
+                    // 宽度由 CSS clamp 控制，不需要更新
                 }
             };
             window.addEventListener('scroll', updatePosition, true);
