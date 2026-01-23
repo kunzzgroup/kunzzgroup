@@ -2424,7 +2424,6 @@ header('Expires: 0');
                     </button>
                     <div class="selector-dropdown" id="view-selector-dropdown">
                         <div class="dropdown-item active" onclick="switchPage('stock')">总库存</div>
-                        <div class="dropdown-item" onclick="switchPage('sets')">套装管理</div>
                         <div class="dropdown-item" onclick="switchPage('j1')">破损记录</div>
                         <div class="dropdown-item" onclick="switchPage('transfer')">碗碟转卖</div>
                     </div>
@@ -2504,66 +2503,79 @@ header('Expires: 0');
         <div id="page-content">
             <!-- 库存管理页面 -->
             <div id="stock-page" class="page-content">
-                <!-- 单个分类或搜索结果的表格容器 -->
-                <div class="table-container" id="single-table-container">
-                    <div class="table-scroll-container">
-                        <table class="stock-table" id="stock-table">
-                            <thead>
-                                <tr>
-                                    <th>No.</th>
-                                    <th>照片</th>
-                                    <th>产品名称</th>
-                                    <th>编号</th>
-                                    <th>分类</th>
-                                    <th>尺寸</th>
-                                    <th>单价</th>
-                                    <th>文化楼</th>
-                                    <th>中央</th>
-                                    <th>J1</th>
-                                    <th>J2</th>
-                                    <th>J3</th>
-                                    <th>总数</th>
-                                    <th>操作</th>
-                                </tr>
-                            </thead>
-                            <tbody id="stock-tbody">
-                                <!-- Dynamic content -->
-                            </tbody>
-                        </table>
+                <!-- 视图切换按钮 -->
+                <div style="display: flex; gap: 8px; margin-bottom: 16px; padding: 0 20px;">
+                    <button class="btn" id="stock-view-btn" onclick="switchStockView('dishware')" style="background: #f99e00; color: white; border: 1px solid #ddd; padding: clamp(4px, 0.42vw, 8px) clamp(12px, 1.25vw, 24px); font-size: clamp(10px, 0.83vw, 16px);">
+                        碗碟
+                    </button>
+                    <button class="btn" id="sets-view-btn" onclick="switchStockView('sets')" style="background: white; color: #333; border: 1px solid #ddd; padding: clamp(4px, 0.42vw, 8px) clamp(12px, 1.25vw, 24px); font-size: clamp(10px, 0.83vw, 16px);">
+                        套装
+                    </button>
+                </div>
+                
+                <!-- 碗碟视图 -->
+                <div id="dishware-view">
+                    <!-- 单个分类或搜索结果的表格容器 -->
+                    <div class="table-container" id="single-table-container">
+                        <div class="table-scroll-container">
+                            <table class="stock-table" id="stock-table">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>照片</th>
+                                        <th>产品名称</th>
+                                        <th>编号</th>
+                                        <th>分类</th>
+                                        <th>尺寸</th>
+                                        <th>单价</th>
+                                        <th>文化楼</th>
+                                        <th>中央</th>
+                                        <th>J1</th>
+                                        <th>J2</th>
+                                        <th>J3</th>
+                                        <th>总数</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stock-tbody">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- 全部分类的容器（按分类分组显示） -->
+                    <div id="categories-container" class="categories-container">
+                        <!-- 动态生成分类容器 -->
                     </div>
                 </div>
                 
-                <!-- 全部分类的容器（按分类分组显示） -->
-                <div id="categories-container" class="categories-container">
-                    <!-- 动态生成分类容器 -->
-                </div>
-            </div>
-
-            <!-- 套装管理页面 -->
-            <div id="sets-page" class="page-content" style="display: none;">
-                <div class="table-container">
-                    <div class="table-scroll-container">
-                        <table class="stock-table" id="sets-table">
-                            <thead>
-                                <tr>
-                                    <th>序号</th>
-                                    <th>套装名称</th>
-                                    <th>套装编号</th>
-                                    <th>包含项目</th>
-                                    <th>单价 (RM)</th>
-                                    <th>文华楼</th>
-                                    <th>中央</th>
-                                    <th>J1</th>
-                                    <th>J2</th>
-                                    <th>J3</th>
-                                    <th>总库存</th>
-                                    <th>操作</th>
-                                </tr>
-                            </thead>
-                            <tbody id="sets-tbody">
-                                <!-- 动态填充 -->
-                            </tbody>
-                        </table>
+                <!-- 套装视图 -->
+                <div id="sets-view" style="display: none;">
+                    <div class="table-container">
+                        <div class="table-scroll-container">
+                            <table class="stock-table" id="sets-table">
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>套装名称</th>
+                                        <th>套装编号</th>
+                                        <th>包含项目</th>
+                                        <th>单价 (RM)</th>
+                                        <th>文华楼</th>
+                                        <th>中央</th>
+                                        <th>J1</th>
+                                        <th>J2</th>
+                                        <th>J3</th>
+                                        <th>总库存</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sets-tbody">
+                                    <!-- 动态填充 -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2981,6 +2993,7 @@ header('Expires: 0');
         let editingRowIds = new Set(); // 存储正在编辑的行ID
         let originalEditData = new Map(); // 存储原始数据用于取消编辑
         let currentPage = 'stock'; // 当前页面
+        let stockViewType = 'dishware'; // 总库存页面的视图类型：'dishware' 或 'sets'
         let breakRecordsData = {
             j1: [],
             j2: [],
@@ -3118,6 +3131,11 @@ header('Expires: 0');
             setupRealTimeSearch();
             setupPageSwitcher();
             setupSetFormSubmit();
+            
+            // 初始化总库存页面的视图切换按钮
+            if (currentPage === 'stock') {
+                switchStockView(stockViewType);
+            }
             
             // 测试模态框关闭功能
             console.log('应用初始化完成，测试模态框功能...');
@@ -3676,7 +3694,7 @@ header('Expires: 0');
                         if (document.getElementById('sets-table')) {
                             await loadSetsData();
                         }
-                    } else if (currentPage === 'sets') {
+                    } else if (currentPage === 'stock' && stockViewType === 'sets') {
                         await loadSetsData();
                         // 同时更新总库存页面（如果已加载）
                         if (document.getElementById('stock-table')) {
@@ -3769,7 +3787,6 @@ header('Expires: 0');
             const currentView = document.getElementById('current-view');
             const pageNames = {
                 'stock': '总库存',
-                'sets': '套装管理',
                 'j1': '破损记录',
                 'j2': '破损记录',
                 'j3': '破损记录',
@@ -3784,7 +3801,10 @@ header('Expires: 0');
             document.querySelectorAll('.dropdown-item').forEach(item => {
                 item.classList.remove('active');
             });
-            document.querySelector(`.dropdown-item[onclick*="'${pageType}'"]`).classList.add('active');
+            const activeItem = document.querySelector(`.dropdown-item[onclick*="'${pageType}'"]`);
+            if (activeItem) {
+                activeItem.classList.add('active');
+            }
             
             // 隐藏所有页面
             const pages = document.querySelectorAll('.page-content');
@@ -3810,6 +3830,11 @@ header('Expires: 0');
                 }
             }
             
+            // 如果是总库存页面，根据视图类型显示相应内容
+            if (pageType === 'stock') {
+                switchStockView(stockViewType);
+            }
+            
             // 根据页面类型更新页面标题和按钮
             updatePageHeader(pageType);
             
@@ -3831,20 +3856,8 @@ header('Expires: 0');
             switch(pageType) {
                 case 'stock':
                     if (title) title.textContent = '总库存';
-                    if (addButton) {
-                        addButton.innerHTML = '<i class="fas fa-plus"></i> 添加碗碟';
-                        addButton.onclick = () => openAddModal();
-                        addButton.style.display = 'inline-flex';
-                    }
-                    restoreCategoryFilter();
-                    break;
-                case 'sets':
-                    if (title) title.textContent = '套装管理';
-                    if (addButton) {
-                        addButton.innerHTML = '<i class="fas fa-plus"></i> 添加套装';
-                        addButton.onclick = () => openSetModal();
-                        addButton.style.display = 'inline-flex';
-                    }
+                    updateStockViewButton();
+                    updateStockAddButton();
                     restoreCategoryFilter();
                     break;
                 case 'j1':
@@ -3878,14 +3891,102 @@ header('Expires: 0');
             }
         }
 
+        // 切换总库存页面的视图（碗碟/套装）
+        function switchStockView(viewType) {
+            stockViewType = viewType;
+            
+            const dishwareView = document.getElementById('dishware-view');
+            const setsView = document.getElementById('sets-view');
+            const stockViewBtn = document.getElementById('stock-view-btn');
+            const setsViewBtn = document.getElementById('sets-view-btn');
+            
+            if (viewType === 'dishware') {
+                if (dishwareView) dishwareView.style.display = '';
+                if (setsView) setsView.style.display = 'none';
+                if (stockViewBtn) {
+                    stockViewBtn.style.background = '#f99e00';
+                    stockViewBtn.style.color = 'white';
+                }
+                if (setsViewBtn) {
+                    setsViewBtn.style.background = 'white';
+                    setsViewBtn.style.color = '#333';
+                }
+                // 加载碗碟数据
+                loadStockData();
+            } else if (viewType === 'sets') {
+                if (dishwareView) dishwareView.style.display = 'none';
+                if (setsView) setsView.style.display = '';
+                if (stockViewBtn) {
+                    stockViewBtn.style.background = 'white';
+                    stockViewBtn.style.color = '#333';
+                }
+                if (setsViewBtn) {
+                    setsViewBtn.style.background = '#f99e00';
+                    setsViewBtn.style.color = 'white';
+                }
+                // 加载套装数据
+                loadSetsData();
+            }
+            
+            updateStockAddButton();
+            updateStats();
+        }
+        
+        // 更新总库存页面的视图切换按钮状态
+        function updateStockViewButton() {
+            if (currentPage !== 'stock') return;
+            
+            const stockViewBtn = document.getElementById('stock-view-btn');
+            const setsViewBtn = document.getElementById('sets-view-btn');
+            
+            if (stockViewType === 'dishware') {
+                if (stockViewBtn) {
+                    stockViewBtn.style.background = '#f99e00';
+                    stockViewBtn.style.color = 'white';
+                }
+                if (setsViewBtn) {
+                    setsViewBtn.style.background = 'white';
+                    setsViewBtn.style.color = '#333';
+                }
+            } else {
+                if (stockViewBtn) {
+                    stockViewBtn.style.background = 'white';
+                    stockViewBtn.style.color = '#333';
+                }
+                if (setsViewBtn) {
+                    setsViewBtn.style.background = '#f99e00';
+                    setsViewBtn.style.color = 'white';
+                }
+            }
+        }
+        
+        // 更新总库存页面的添加按钮
+        function updateStockAddButton() {
+            if (currentPage !== 'stock') return;
+            
+            const addButton = document.getElementById('add-dishware-btn');
+            if (!addButton) return;
+            
+            if (stockViewType === 'dishware') {
+                addButton.innerHTML = '<i class="fas fa-plus"></i> 添加碗碟';
+                addButton.onclick = () => openAddModal();
+                addButton.style.display = 'inline-flex';
+            } else {
+                addButton.innerHTML = '<i class="fas fa-plus"></i> 添加套装';
+                addButton.onclick = () => openSetModal();
+                addButton.style.display = 'inline-flex';
+            }
+        }
+
         // 加载页面数据
         function loadPageData(pageType) {
             switch(pageType) {
                 case 'stock':
-                    loadStockData();
-                    break;
-                case 'sets':
-                    loadSetsData();
+                    if (stockViewType === 'dishware') {
+                        loadStockData();
+                    } else {
+                        loadSetsData();
+                    }
                     break;
                 case 'j1':
                 case 'j2':
@@ -6193,8 +6294,8 @@ header('Expires: 0');
                  // 库存页面使用库存数据
                  displayedRecords = filteredData.length;
                  totalRecords = stockData.length;
-             } else if (currentPage === 'sets') {
-                 // 套装管理页面使用套装数据
+             } else if (currentPage === 'stock' && stockViewType === 'sets') {
+                 // 总库存页面的套装视图使用套装数据
                  displayedRecords = setsData.length;
                  totalRecords = setsData.length;
              } else if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') {
@@ -7783,7 +7884,14 @@ header('Expires: 0');
                 
                 if (result.success) {
                     showAlert('删除套装成功', 'success');
-                    loadSetsData();
+                    // 刷新数据
+                    if (currentPage === 'stock' && stockViewType === 'sets') {
+                        loadSetsData();
+                    } else if (currentPage === 'stock') {
+                        // 如果在总库存页面但不在套装视图，也刷新套装数据（因为可能影响库存）
+                        loadSetsData();
+                        loadStockData(true);
+                    }
                 } else {
                     showAlert('删除失败: ' + (result.message || '未知错误'), 'error');
                 }
@@ -7907,7 +8015,14 @@ header('Expires: 0');
                 if (result.success) {
                     showAlert(data.action === 'add_set' ? '添加套装成功' : '更新套装成功', 'success');
                     closeModal();
-                    loadSetsData();
+                    // 刷新数据
+                    if (currentPage === 'stock' && stockViewType === 'sets') {
+                        loadSetsData();
+                    } else if (currentPage === 'stock') {
+                        // 如果在总库存页面但不在套装视图，也刷新套装数据（因为可能影响库存）
+                        loadSetsData();
+                        loadStockData(true);
+                    }
                 } else {
                     showAlert((data.action === 'add_set' ? '添加' : '更新') + '失败: ' + (result.message || '未知错误'), 'error');
                 }
@@ -8047,7 +8162,7 @@ header('Expires: 0');
                     // 重新加载库存数据以更新表格
                     if (currentPage === 'stock') {
                         loadStockData();
-                    } else if (currentPage === 'sets') {
+                    } else if (currentPage === 'stock' && stockViewType === 'sets') {
                         loadSetsData();
                     } else if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') {
                         // 如果在破损页面，刷新破损记录页面
@@ -8103,7 +8218,7 @@ header('Expires: 0');
                             // 重新加载库存数据以更新表格
                             if (currentPage === 'stock') {
                                 loadStockData();
-                            } else if (currentPage === 'sets') {
+                            } else if (currentPage === 'stock' && stockViewType === 'sets') {
                                 loadSetsData();
                             } else if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') {
                                 // 如果在破损页面，刷新破损记录页面
