@@ -2083,6 +2083,7 @@ header('Expires: 0');
 
         .break-record-table tr.new-row td {
             padding: 8px;
+            font-size: clamp(8px, 0.74vw, 14px); /* 使用响应式字体大小，与其他行一致 */
         }
 
         .break-record-table tr.new-row input,
@@ -2092,7 +2093,7 @@ header('Expires: 0');
             padding: 4px 8px;
             border: none;
             background: transparent;
-            font-size: 14px;
+            font-size: clamp(8px, 0.74vw, 14px); /* 使用响应式字体大小，与其他行一致 */
             box-sizing: border-box;
             outline: none;
         }
@@ -2124,7 +2125,7 @@ header('Expires: 0');
             padding: 4px 24px 4px 8px;
             border: none;
             background: transparent;
-            font-size: 14px;
+            font-size: clamp(8px, 0.74vw, 14px); /* 使用响应式字体大小 */
             outline: none;
             box-sizing: border-box;
         }
@@ -2167,7 +2168,7 @@ header('Expires: 0');
         .combobox-option {
             padding: 8px 12px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: clamp(8px, 0.74vw, 14px); /* 使用响应式字体大小 */
             white-space: nowrap; /* 防止文本换行 */
             overflow: visible; /* 允许文本完整显示 */
         }
@@ -4500,7 +4501,7 @@ header('Expires: 0');
                            placeholder="0" 
                            value="" 
                            onblur="calculateBreakRowTotal('${rowId}')" 
-                           style="width: 100%; padding: 4px 8px; border: none; background: transparent; text-align: center; font-size: 14px; outline: none;">
+                           style="width: 100%; padding: 4px 8px; border: none; background: transparent; text-align: center; outline: none;">
                 </td>
                 <td class="text-center">
                     <div class="currency-display">
@@ -4510,7 +4511,7 @@ header('Expires: 0');
                                id="${rowId}-price" 
                                value="" 
                                onblur="calculateBreakRowTotal('${rowId}')" 
-                               style="width: 80px; border: none; background: transparent; text-align: center; font-size: 14px; outline: none;">
+                               style="width: 80px; border: none; background: transparent; text-align: center; outline: none;"
                     </div>
                 </td>
                 <td class="text-center">
