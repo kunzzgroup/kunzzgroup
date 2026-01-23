@@ -4651,6 +4651,12 @@ header('Expires: 0');
             const quantityInput = document.getElementById(`${rowId}-quantity`);
             const priceInput = document.getElementById(`${rowId}-price`);
             
+            // 验证元素是否存在
+            if (!codeInput || !quantityInput || !priceInput) {
+                showAlert('找不到输入元素，请刷新页面后重试', 'error');
+                return;
+            }
+            
             const productId = codeInput.dataset.productId;
             const code = codeInput.value.trim();
             const quantity = parseFloat(quantityInput.value) || 0;
@@ -4688,10 +4694,18 @@ header('Expires: 0');
                 
                 if (result.success) {
                     showAlert('破损记录添加成功', 'success');
-                    // 移除新行
-                    const row = document.getElementById(`${rowId}-product`).closest('tr');
-                    if (row) {
-                        row.remove();
+                    // 移除新行 - 使用 code 输入框来找到行
+                    const codeInput = document.getElementById(`${rowId}-code`);
+                    if (codeInput) {
+                        const row = codeInput.closest('tr');
+                        if (row) {
+                            // 移除事件监听器（如果有）
+                            const closeHandler = codeInput._closeHandler;
+                            if (closeHandler) {
+                                document.removeEventListener('click', closeHandler);
+                            }
+                            row.remove();
+                        }
                     }
                     // 刷新破损记录数据
                     loadAllBreakRecords();
