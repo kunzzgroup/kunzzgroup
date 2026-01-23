@@ -7908,7 +7908,8 @@ header('Expires: 0');
                                 `<input type="number" class="quantity-input" 
                                        value="${record.quantity}" 
                                        onchange="updateTransferQuantity(${record.id}, this.value, '${shopId}')"
-                                       min="0" style="width: clamp(40px, 2.92vw, 56px);">`
+                                       min="0" 
+                                       style="width: clamp(40px, 2.92vw, 56px); padding: clamp(2px, 0.31vw, 4px) clamp(4px, 0.42vw, 8px); border: 1px solid #d1d5db; border-radius: 4px; text-align: center; font-size: clamp(8px, 0.74vw, 12px);">`
                             }
                         </td>
                         <td class="text-center">${transferDirection}</td>
@@ -8251,9 +8252,69 @@ header('Expires: 0');
             }
         }
 
-        // 更新转卖数量
+        // 更新转卖数量（直接保存，类似破损记录）
         async function updateTransferQuantity(recordId, newQuantity, shopId) {
-            // 这个功能可以后续实现，目前先不处理
+            const newQty = parseFloat(newQuantity) || 0;
+            
+            if (newQty < 0) {
+                showAlert('请输入有效的转卖数量', 'error');
+                return;
+            }
+            
+            try {
+                // 获取当前记录信息
+                const records = transferRecordsData[shopId] || [];
+                const record = records.find(r => r.id == recordId);
+                
+                if (!record) {
+                    showAlert('找不到记录数据', 'error');
+                    return;
+                }
+                
+                // 只允许更新出货记录
+                if (record.record_type !== 'out') {
+                    showAlert('只能更新出货记录', 'error');
+                    return;
+                }
+                
+                const unitPrice = record.unit_price || 0;
+                const totalPrice = newQty * unitPrice;
+                
+                // 更新转卖记录（只更新数量，不更新其他字段）
+                const result = await apiCall('', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'update_transfer_record',
+                        id: recordId,
+                        quantity: newQty,
+                        unit_price: unitPrice,
+                        total_price: totalPrice
+                        // 不传 to_shop_type，保持原值
+                    })
+                });
+                
+                if (result.success) {
+                    showAlert('转卖数量更新成功', 'success');
+                    
+                    // 刷新转卖记录数据
+                    if (currentPage === 'transfer') {
+                        loadAllTransferRecords();
+                    }
+                    
+                    // 同时刷新总库存页面（如果已加载），确保库存同步
+                    if (document.getElementById('stock-table')) {
+                        loadStockData(true, false);
+                    }
+                } else {
+                    showAlert('更新失败: ' + (result.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('更新转卖数量时发生错误:', error);
+                showAlert('更新转卖数量失败: ' + error.message, 'error');
+            }
         }
 
         // 编辑转卖记录 - 进入编辑模式
