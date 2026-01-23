@@ -3875,7 +3875,7 @@ header('Expires: 0');
                 containers.forEach(container => {
                     container.innerHTML = `
                         <div style="padding: 40px; text-align: center; color: #6b7280;">
-                            <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.5; margin-bottom: 16px;"></i>
+                            <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.5; margin-bottom: clamp(8px, 0.83vw, 16px);"></i>
                             <div>暂无J开头的餐厅店面</div>
                         </div>
                     `;
@@ -3933,7 +3933,7 @@ header('Expires: 0');
                 return `
                     <tr>
                         <td colspan="6" class="no-data" style="padding: clamp(16px, 1.56vw, 30px); text-align: center; color: #6b7280;">
-                            <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.5; margin-bottom: 16px;"></i>
+                            <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.5; margin-bottom: clamp(8px, 0.83vw, 16px);"></i>
                             <div>暂无破损记录</div>
                         </td>
                     </tr>
@@ -5067,7 +5067,7 @@ header('Expires: 0');
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="6" class="no-data" style="padding: 40px; text-align: center; color: #6b7280;">
-                            <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.5; margin-bottom: 16px;"></i>
+                            <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.5; margin-bottom: clamp(8px, 0.83vw, 16px);"></i>
                             <div>暂无破损记录</div>
                         </td>
                     </tr>
