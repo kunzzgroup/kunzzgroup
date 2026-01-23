@@ -665,7 +665,7 @@ function getBreakRecords() {
                 FROM dishware_break_records dbr
                 LEFT JOIN dishware_info di ON dbr.dishware_id = di.id
                 WHERE dbr.shop_type = ?
-                ORDER BY dbr.break_date DESC, dbr.created_at DESC";
+                ORDER BY dbr.break_date ASC, dbr.created_at ASC";
         
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$shop_type]);
