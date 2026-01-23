@@ -3192,8 +3192,8 @@ header('Expires: 0');
             const baseFields = [
                 { label: 'NO', key: 'no' },
                 { label: '照片', key: 'photo' },
-                { label: '产品名称', key: 'product_name' },
                 { label: '编号', key: 'code_number' },
+                { label: '产品名称', key: 'product_name' },
                 { label: '分类', key: 'category' },
                 { label: '尺寸', key: 'size' },
                 { label: '单价', key: 'unit_price' }
