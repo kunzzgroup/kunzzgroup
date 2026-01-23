@@ -7900,7 +7900,7 @@ header('Expires: 0');
                     : (record.from_restaurant_name || record.from_shop_type.toUpperCase());
                 
                 // 根据记录类型设置价格颜色：转卖（out）=红色，来自（in）=绿色
-                const priceColor = isOutRecord ? '#dc3545' : '#28a745';
+                const priceColor = isOutRecord ? '#dc3545' : '#000000';
                 
                 rows += `
                     <tr data-id="${record.id}" data-shop="${shopId}" data-type="${record.record_type}" data-related="${record.related_record_id || ''}">
@@ -8750,7 +8750,7 @@ header('Expires: 0');
                         : (record.from_restaurant_name || record.from_shop_type.toUpperCase());
                     
                     // 根据记录类型设置价格颜色：转卖（out）=红色，来自（in）=绿色
-                    const priceColor = isOutRecord ? '#dc3545' : '#28a745';
+                    const priceColor = isOutRecord ? '#dc3545' : '#000000';
                     
                     const newRow = document.createElement('tr');
                     newRow.setAttribute('data-id', record.id);
