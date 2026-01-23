@@ -2141,7 +2141,7 @@ header('Expires: 0');
         .combobox-container {
             position: relative;
             width: 100%;
-            z-index: 0; /* 降低层级，确保下拉列表显示在上方 */
+            z-index: 1; /* 正常层级，可以被侧边栏覆盖 */
         }
 
         /* 只让下拉菜单显示在最上层，输入框保持正常层级 */
@@ -2151,7 +2151,6 @@ header('Expires: 0');
 
         .break-record-table tr.new-row .combobox-dropdown {
             z-index: 99999 !important; /* 只有下拉菜单使用最高优先级 */
-            background: white !important; /* 确保下拉列表有白色背景，完全覆盖输入框 */
         }
 
         .combobox-input {
@@ -2163,7 +2162,7 @@ header('Expires: 0');
             outline: none;
             box-sizing: border-box;
             position: relative;
-            z-index: 0; /* 降低层级，确保下拉列表显示在上方 */
+            z-index: 1; /* 正常层级，可以被侧边栏覆盖 */
         }
 
         .combobox-input:focus {
@@ -2182,8 +2181,10 @@ header('Expires: 0');
         }
 
         .combobox-dropdown {
-            position: fixed; /* 使用 fixed 定位，确保完全覆盖输入框 */
-            background: white !important; /* 确保下拉列表有白色背景，完全覆盖输入框 */
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
             border: 1px solid #ddd;
             border-radius: 4px;
             max-height: 200px;
