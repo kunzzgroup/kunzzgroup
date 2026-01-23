@@ -1846,35 +1846,59 @@ header('Expires: 0');
             white-space: nowrap;
         }
 
-        /* 固定列宽（使用百分比） */
-        .break-record-table th:nth-child(1),
-        .break-record-table td:nth-child(1) {
+        /* 固定列宽（使用百分比）- 破损记录页面（6列） */
+        #j1-page .break-record-table th:nth-child(1),
+        #j1-page .break-record-table td:nth-child(1),
+        #j2-page .break-record-table th:nth-child(1),
+        #j2-page .break-record-table td:nth-child(1),
+        #j3-page .break-record-table th:nth-child(1),
+        #j3-page .break-record-table td:nth-child(1) {
             width: 8%; /* No. */
         }
 
-        .break-record-table th:nth-child(2),
-        .break-record-table td:nth-child(2) {
+        #j1-page .break-record-table th:nth-child(2),
+        #j1-page .break-record-table td:nth-child(2),
+        #j2-page .break-record-table th:nth-child(2),
+        #j2-page .break-record-table td:nth-child(2),
+        #j3-page .break-record-table th:nth-child(2),
+        #j3-page .break-record-table td:nth-child(2) {
             width: 25%; /* 编号 */
         }
 
-        .break-record-table th:nth-child(3),
-        .break-record-table td:nth-child(3) {
+        #j1-page .break-record-table th:nth-child(3),
+        #j1-page .break-record-table td:nth-child(3),
+        #j2-page .break-record-table th:nth-child(3),
+        #j2-page .break-record-table td:nth-child(3),
+        #j3-page .break-record-table th:nth-child(3),
+        #j3-page .break-record-table td:nth-child(3) {
             width: 13%; /* 破损数量 */
         }
 
-        .break-record-table th:nth-child(4),
-        .break-record-table td:nth-child(4) {
-            width: 15%; /* 单价 */
+        #j1-page .break-record-table th:nth-child(4),
+        #j1-page .break-record-table td:nth-child(4),
+        #j2-page .break-record-table th:nth-child(4),
+        #j2-page .break-record-table td:nth-child(4),
+        #j3-page .break-record-table th:nth-child(4),
+        #j3-page .break-record-table td:nth-child(4) {
+            width: 18%; /* 单价 */
         }
 
-        .break-record-table th:nth-child(5),
-        .break-record-table td:nth-child(5) {
-            width: 15%; /* 总价 */
+        #j1-page .break-record-table th:nth-child(5),
+        #j1-page .break-record-table td:nth-child(5),
+        #j2-page .break-record-table th:nth-child(5),
+        #j2-page .break-record-table td:nth-child(5),
+        #j3-page .break-record-table th:nth-child(5),
+        #j3-page .break-record-table td:nth-child(5) {
+            width: 18%; /* 总价 */
         }
 
-        .break-record-table th:nth-child(6),
-        .break-record-table td:nth-child(6) {
-            width: 19%; /* 操作 */
+        #j1-page .break-record-table th:nth-child(6),
+        #j1-page .break-record-table td:nth-child(6),
+        #j2-page .break-record-table th:nth-child(6),
+        #j2-page .break-record-table td:nth-child(6),
+        #j3-page .break-record-table th:nth-child(6),
+        #j3-page .break-record-table td:nth-child(6) {
+            width: 18%; /* 操作 */
         }
 
         .break-record-table td {
@@ -2044,35 +2068,40 @@ header('Expires: 0');
             white-space: nowrap;
         }
 
-        /* 固定列宽（使用百分比） */
-        .break-record-table th:nth-child(1),
-        .break-record-table td:nth-child(1) {
+        /* 固定列宽（使用百分比）- 转卖页面（7列） */
+        #transfer-page .break-record-table th:nth-child(1),
+        #transfer-page .break-record-table td:nth-child(1) {
             width: 8%; /* No. */
         }
 
-        .break-record-table th:nth-child(2),
-        .break-record-table td:nth-child(2) {
-            width: 13%; /* 编号 */
+        #transfer-page .break-record-table th:nth-child(2),
+        #transfer-page .break-record-table td:nth-child(2) {
+            width: 15%; /* 编号 */
         }
 
-        .break-record-table th:nth-child(3),
-        .break-record-table td:nth-child(3) {
-            width: 10%; /* 破损数量 */
+        #transfer-page .break-record-table th:nth-child(3),
+        #transfer-page .break-record-table td:nth-child(3) {
+            width: 10%; /* 数量 */
         }
 
-        .break-record-table th:nth-child(4),
-        .break-record-table td:nth-child(4) {
+        #transfer-page .break-record-table th:nth-child(4),
+        #transfer-page .break-record-table td:nth-child(4) {
+            width: 12%; /* 进出 */
+        }
+
+        #transfer-page .break-record-table th:nth-child(5),
+        #transfer-page .break-record-table td:nth-child(5) {
             width: 15%; /* 单价 */
         }
 
-        .break-record-table th:nth-child(5),
-        .break-record-table td:nth-child(5) {
+        #transfer-page .break-record-table th:nth-child(6),
+        #transfer-page .break-record-table td:nth-child(6) {
             width: 15%; /* 总价 */
         }
 
-        .break-record-table th:nth-child(6),
-        .break-record-table td:nth-child(6) {
-            width: 13%; /* 操作 */
+        #transfer-page .break-record-table th:nth-child(7),
+        #transfer-page .break-record-table td:nth-child(7) {
+            width: 25%; /* 操作 */
         }
 
         .break-record-table td {
