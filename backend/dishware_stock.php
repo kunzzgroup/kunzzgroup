@@ -5081,10 +5081,10 @@ header('Expires: 0');
                         const isTransferEdit = row.querySelector('.transfer-to-select-edit');
                         
                         if (isTransferEdit) {
-                            // 转卖记录编辑模式：更新单价输入框
-                            const priceInput = document.getElementById(`${codeRowId}-price`);
-                            if (priceInput) {
-                                priceInput.value = price.toFixed(2);
+                            // 转卖记录编辑模式：更新单价显示（只读，自动从产品信息获取）
+                            const priceSpan = document.getElementById(`${codeRowId}-price`);
+                            if (priceSpan) {
+                                priceSpan.textContent = price.toFixed(2);
                             }
                             calculateEditTransferTotal(codeRowId);
                         } else {
@@ -5117,23 +5117,30 @@ header('Expires: 0');
                         }
                     } else {
                         // 检查是破损记录还是转卖记录
-                        const priceInput = document.getElementById(`${rowId}-price`);
-                        if (priceInput) {
-                            // 转卖记录或破损记录的新行模式：更新单价输入框
-                            priceInput.value = price.toFixed(2);
-                            // 计算总价
-                            if (row && row.classList.contains('new-row')) {
-                                // 检查是否有calculateTransferRowTotal函数（转卖记录）
+                        const priceEl = document.getElementById(`${rowId}-price`);
+                        if (priceEl) {
+                            // 检查是转卖记录（span）还是破损记录（input）
+                            const isTransferRow = priceEl.tagName === 'SPAN' || priceEl.classList.contains('currency-amount');
+                            
+                            if (isTransferRow) {
+                                // 转卖记录新行模式：更新单价显示（span）
+                                priceEl.textContent = price.toFixed(2);
+                                // 计算总价
                                 if (typeof calculateTransferRowTotal === 'function') {
                                     calculateTransferRowTotal(rowId);
+                                }
+                            } else {
+                                // 破损记录新行模式：更新单价输入框
+                                priceEl.value = price.toFixed(2);
+                                // 计算总价
+                                if (row && row.classList.contains('new-row')) {
+                                    calculateBreakRowTotal(rowId);
                                 } else {
                                     calculateBreakRowTotal(rowId);
                                 }
-                            } else {
-                                calculateBreakRowTotal(rowId);
                             }
                         } else {
-                            // 如果没有找到价格输入框，尝试计算总价
+                            // 如果没有找到价格元素，尝试计算总价
                             calculateBreakRowTotal(rowId);
                         }
                     }
@@ -8120,9 +8127,7 @@ header('Expires: 0');
                 <td class="text-center">
                     <div class="currency-display">
                         <span class="currency-symbol">RM</span>
-                        <input type="text" class="break-price-input" id="${rowId}-price" 
-                               value="" onblur="calculateTransferRowTotal('${rowId}')" 
-                               style="width: 80px; border: none; background: transparent; text-align: center; outline: none;">
+                        <span class="currency-amount" id="${rowId}-price">0.00</span>
                     </div>
                 </td>
                 <td class="text-center">
@@ -8152,13 +8157,13 @@ header('Expires: 0');
         // 计算转卖记录行总价
         function calculateTransferRowTotal(rowId) {
             const quantityInput = document.getElementById(`${rowId}-quantity`);
-            const priceInput = document.getElementById(`${rowId}-price`);
+            const priceSpan = document.getElementById(`${rowId}-price`);
             const totalSpan = document.getElementById(`${rowId}-total`);
             
-            if (!quantityInput || !priceInput || !totalSpan) return;
+            if (!quantityInput || !priceSpan || !totalSpan) return;
             
             const quantity = parseFloat(quantityInput.value) || 0;
-            const price = parseFloat(priceInput.value) || 0;
+            const price = parseFloat(priceSpan.textContent.trim()) || 0;
             const total = quantity * price;
             totalSpan.textContent = total.toFixed(2);
         }
@@ -8167,10 +8172,10 @@ header('Expires: 0');
         async function saveNewTransferRow(rowId, shopType) {
             const codeInput = document.getElementById(`${rowId}-code`);
             const quantityInput = document.getElementById(`${rowId}-quantity`);
-            const priceInput = document.getElementById(`${rowId}-price`);
+            const priceSpan = document.getElementById(`${rowId}-price`);
             const toSelect = document.getElementById(`${rowId}-to`);
             
-            if (!codeInput || !quantityInput || !priceInput || !toSelect) {
+            if (!codeInput || !quantityInput || !priceSpan || !toSelect) {
                 showAlert('找不到输入元素，请刷新页面后重试', 'error');
                 return;
             }
@@ -8178,7 +8183,6 @@ header('Expires: 0');
             const productId = codeInput.dataset.productId;
             const code = codeInput.value.trim();
             const quantity = parseFloat(quantityInput.value) || 0;
-            const price = parseFloat(priceInput.value) || 0;
             const toShopType = toSelect.value;
             
             if (!code || !productId) {
@@ -8196,6 +8200,15 @@ header('Expires: 0');
                 return;
             }
             
+            // 单价从产品信息中自动获取
+            const product = stockData.find(item => item.id == productId || item.code_number === code);
+            if (!product) {
+                showAlert('找不到产品信息', 'error');
+                return;
+            }
+            
+            const unitPrice = product.unit_price || 0;
+            
             try {
                 const today = new Date().toISOString().split('T')[0];
                 const result = await apiCall('', {
@@ -8209,7 +8222,7 @@ header('Expires: 0');
                         from_shop_type: shopType,
                         to_shop_type: toShopType,
                         quantity: quantity,
-                        unit_price: price,
+                        unit_price: unitPrice,
                         transfer_date: today,
                         recorded_by: 'system'
                     })
@@ -8561,16 +8574,13 @@ header('Expires: 0');
                 </select>
             `;
             
-            // 编辑单价列 - 改为可编辑输入框
+            // 编辑单价列 - 只读显示（自动从产品信息获取）
             const priceCell = cells[4];
             const currentPrice = parseFloat(record.unit_price) || 0;
             priceCell.innerHTML = `
                 <div class="currency-display">
                     <span class="currency-symbol">RM</span>
-                    <input type="text" class="break-price-input" id="${codeRowId}-price" 
-                           value="${currentPrice.toFixed(2)}" 
-                           onblur="calculateEditTransferTotal('${codeRowId}')" 
-                           style="width: 80px; border: none; background: transparent; text-align: center; outline: none;">
+                    <span class="currency-amount" id="${codeRowId}-price">${currentPrice.toFixed(2)}</span>
                 </div>
             `;
             
@@ -8637,13 +8647,13 @@ header('Expires: 0');
             if (!row) return;
             
             const quantitySpan = document.getElementById(`${codeRowId}-qty`);
-            const priceInput = document.getElementById(`${codeRowId}-price`);
+            const priceSpan = document.getElementById(`${codeRowId}-price`);
             const totalSpan = document.getElementById(`${codeRowId}-total`);
             
-            if (!quantitySpan || !priceInput || !totalSpan) return;
+            if (!quantitySpan || !priceSpan || !totalSpan) return;
             
             const quantity = parseFloat(quantitySpan.textContent.trim()) || 0;
-            const price = parseFloat(priceInput.value) || 0;
+            const price = parseFloat(priceSpan.textContent.trim()) || 0;
             const total = quantity * price;
             totalSpan.textContent = total.toFixed(2);
         }
@@ -8663,9 +8673,8 @@ header('Expires: 0');
             const codeInput = document.getElementById(`${codeRowId}-code`);
             const quantitySpan = document.getElementById(`${codeRowId}-qty`) || cells[2].querySelector('.editable-quantity');
             const toSelect = document.getElementById(`${codeRowId}-to`);
-            const priceInput = document.getElementById(`${codeRowId}-price`);
             
-            if (!codeInput || !quantitySpan || !toSelect || !priceInput) {
+            if (!codeInput || !quantitySpan || !toSelect) {
                 showAlert('找不到输入元素', 'error');
                 return;
             }
@@ -8674,7 +8683,6 @@ header('Expires: 0');
             const productId = codeInput.dataset.productId || codeInput.getAttribute('data-product-id');
             const newQuantity = parseFloat(quantitySpan.textContent.trim()) || 0;
             const newToShopType = toSelect.value;
-            const newPrice = parseFloat(priceInput.value) || 0;
             
             // 验证
             if (!newCode || !productId) {
@@ -8702,15 +8710,14 @@ header('Expires: 0');
                     return;
                 }
                 
-                // 如果编号改变了，需要获取新的产品信息
-                let unitPrice = newPrice;
-                if (newCode !== row.dataset.originalCode) {
-                    const newProduct = stockData.find(item => item.code_number === newCode);
-                    if (newProduct) {
-                        unitPrice = newProduct.unit_price || 0;
-                    }
+                // 单价始终从产品信息中自动获取
+                const product = stockData.find(item => item.id == productId || item.code_number === newCode);
+                if (!product) {
+                    showAlert('找不到产品信息', 'error');
+                    return;
                 }
                 
+                const unitPrice = product.unit_price || 0;
                 const totalPrice = newQuantity * unitPrice;
                 
                 // 更新转卖记录
