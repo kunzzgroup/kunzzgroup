@@ -2154,12 +2154,11 @@ header('Expires: 0');
             border-radius: 4px;
             max-height: 200px;
             overflow-y: auto;
-            overflow-x: visible; /* 允许水平溢出 */
+            overflow-x: hidden; /* 隐藏水平溢出 */
             z-index: 99999 !important; /* 最高优先级，确保显示在最上层 */
             display: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            min-width: 200px; /* 最小宽度，确保能显示完整文本 */
-            width: auto; /* 自动宽度，根据内容调整 */
+            width: 100%; /* 与输入框一样宽 */
         }
 
         .combobox-dropdown.show {
@@ -2171,8 +2170,8 @@ header('Expires: 0');
             cursor: pointer;
             font-size: 14px;
             white-space: nowrap; /* 防止文本换行 */
-            overflow: visible; /* 允许文本溢出显示 */
-            min-width: 100%; /* 至少与容器一样宽 */
+            overflow: hidden; /* 隐藏溢出 */
+            text-overflow: ellipsis; /* 文本过长时显示省略号 */
         }
 
         .combobox-option:hover {
@@ -4554,10 +4553,9 @@ header('Expires: 0');
                 codeDropdown.style.position = 'fixed';
                 codeDropdown.style.top = (rect.bottom + window.scrollY) + 'px';
                 codeDropdown.style.left = rect.left + 'px';
-                // 设置最小宽度，确保能显示完整文本
-                const minWidth = Math.max(rect.width, 200);
-                codeDropdown.style.minWidth = minWidth + 'px';
-                codeDropdown.style.width = 'auto'; // 自动宽度，根据内容调整
+                // 宽度与输入框一样
+                codeDropdown.style.width = rect.width + 'px';
+                codeDropdown.style.minWidth = '';
                 codeDropdown.classList.add('show');
                 filterBreakComboboxOptions(codeInput, codeDropdown);
             };
@@ -4610,9 +4608,8 @@ header('Expires: 0');
                     const rect = codeInput.getBoundingClientRect();
                     codeDropdown.style.top = (rect.bottom + window.scrollY) + 'px';
                     codeDropdown.style.left = rect.left + 'px';
-                    // 更新最小宽度
-                    const minWidth = Math.max(rect.width, 200);
-                    codeDropdown.style.minWidth = minWidth + 'px';
+                    // 更新宽度
+                    codeDropdown.style.width = rect.width + 'px';
                 }
             };
             window.addEventListener('scroll', updatePosition, true);
