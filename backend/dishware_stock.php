@@ -5042,28 +5042,40 @@ header('Expires: 0');
                     // 如果是编辑模式，需要找到对应的价格输入框
                     const row = codeInput.closest('tr');
                     if (row && row.classList.contains('editing-row')) {
-                        // 编辑模式：更新单价显示（只读）
-                        const cells = row.querySelectorAll('td');
-                        if (cells.length >= 4) {
-                            const priceCell = cells[3];
-                            priceCell.innerHTML = `
-                                <div class="currency-display">
-                                    <span class="currency-symbol">RM</span>
-                                    <span class="currency-amount">${price.toFixed(2)}</span>
-                                </div>
-                            `;
-                            // 重新计算总价
-                            const quantityInput = cells[2].querySelector('.quantity-input');
-                            if (quantityInput) {
-                                const quantity = parseFloat(quantityInput.value) || 0;
-                                const totalPrice = quantity * price;
-                                const totalCell = cells[4];
-                                totalCell.innerHTML = `
+                        // 检查是破损记录还是转卖记录的编辑模式
+                        const isTransferEdit = row.querySelector('.transfer-to-select-edit');
+                        
+                        if (isTransferEdit) {
+                            // 转卖记录编辑模式：更新单价输入框
+                            const priceInput = document.getElementById(`${codeRowId}-price`);
+                            if (priceInput) {
+                                priceInput.value = price.toFixed(2);
+                            }
+                            calculateEditTransferTotal(codeRowId);
+                        } else {
+                            // 破损记录编辑模式：更新单价显示（只读）
+                            const cells = row.querySelectorAll('td');
+                            if (cells.length >= 4) {
+                                const priceCell = cells[3];
+                                priceCell.innerHTML = `
                                     <div class="currency-display">
                                         <span class="currency-symbol">RM</span>
-                                        <span class="currency-amount">${totalPrice.toFixed(2)}</span>
+                                        <span class="currency-amount">${price.toFixed(2)}</span>
                                     </div>
                                 `;
+                                // 重新计算总价
+                                const quantityInput = cells[2].querySelector('.quantity-input');
+                                if (quantityInput) {
+                                    const quantity = parseFloat(quantityInput.value) || 0;
+                                    const totalPrice = quantity * price;
+                                    const totalCell = cells[4];
+                                    totalCell.innerHTML = `
+                                        <div class="currency-display">
+                                            <span class="currency-symbol">RM</span>
+                                            <span class="currency-amount">${totalPrice.toFixed(2)}</span>
+                                        </div>
+                                    `;
+                                }
                             }
                         }
                     } else {
@@ -8244,10 +8256,363 @@ header('Expires: 0');
             // 这个功能可以后续实现，目前先不处理
         }
 
-        // 编辑转卖记录
+        // 编辑转卖记录 - 进入编辑模式
         function editTransferRecord(recordId, shopId) {
-            // 这个功能可以后续实现，目前先不处理
-            showAlert('编辑功能待实现', 'info');
+            // 找到对应的行
+            const row = document.querySelector(`tr[data-id="${recordId}"][data-shop="${shopId}"]`);
+            if (!row) {
+                showAlert('找不到要编辑的记录', 'error');
+                return;
+            }
+            
+            // 检查是否已经在编辑中
+            if (row.classList.contains('editing-row')) {
+                return;
+            }
+            
+            // 检查是否是进货记录（不允许编辑）
+            if (row.dataset.type === 'in') {
+                showAlert('进货记录不允许编辑', 'error');
+                return;
+            }
+            
+            // 检查stockData是否已加载
+            if (!stockData || stockData.length === 0) {
+                showAlert('正在加载碗碟数据，请稍后再试', 'warning');
+                loadStockData(true, false).then(() => {
+                    setTimeout(() => {
+                        editTransferRecord(recordId, shopId);
+                    }, 500);
+                });
+                return;
+            }
+            
+            // 标记为编辑中
+            row.classList.add('editing-row');
+            
+            // 获取当前记录数据
+            const cells = row.querySelectorAll('td');
+            if (cells.length < 7) return;
+            
+            // 保存原始数据
+            const originalCode = cells[1].textContent.trim();
+            const quantityInput = cells[2].querySelector('.quantity-input');
+            const originalQuantity = quantityInput ? quantityInput.value : '0';
+            const originalToShop = row.dataset.toShop || '';
+            row.dataset.originalCode = originalCode;
+            row.dataset.originalQuantity = originalQuantity;
+            row.dataset.originalToShop = originalToShop;
+            
+            // 获取当前记录信息（从 transferRecordsData 中查找）
+            const records = transferRecordsData[shopId] || [];
+            const record = records.find(r => r.id == recordId);
+            
+            if (!record) {
+                showAlert('找不到记录数据', 'error');
+                row.classList.remove('editing-row');
+                return;
+            }
+            
+            // 生成编号选项（用于combobox）
+            let codeOptions = [];
+            if (stockData && stockData.length > 0) {
+                stockData.forEach(item => {
+                    const code = item.code_number || '';
+                    if (code) {
+                        codeOptions.push({
+                            code: code,
+                            id: item.id,
+                            price: item.unit_price || 0
+                        });
+                    }
+                });
+            }
+            
+            // 找到当前编号对应的产品ID
+            const currentProduct = stockData.find(item => item.code_number === originalCode);
+            const currentProductId = currentProduct ? currentProduct.id : '';
+            
+            // 编辑编号列 - 使用 combobox
+            const codeCell = cells[1];
+            const codeRowId = `edit-transfer-${recordId}-${Date.now()}`;
+            codeCell.innerHTML = `
+                <div class="combobox-container" id="${codeRowId}-code-combo">
+                    <input 
+                        type="text" 
+                        class="combobox-input break-code-input" 
+                        id="${codeRowId}-code"
+                        value="${originalCode}"
+                        placeholder="输入或选择编号..."
+                        autocomplete="off"
+                        data-row-id="${codeRowId}"
+                        data-field="code"
+                        data-product-id="${currentProductId}"
+                    />
+                    <i class="fas fa-chevron-down combobox-arrow"></i>
+                    <div class="combobox-dropdown" id="${codeRowId}-code-dropdown">
+                        ${codeOptions.map(opt => `<div class="combobox-option" data-value="${opt.code}" data-id="${opt.id}" data-price="${opt.price}">${opt.code}</div>`).join('')}
+                    </div>
+                </div>
+            `;
+            
+            // 数量列已经是输入框，保持可编辑状态
+            if (quantityInput) {
+                quantityInput.readOnly = false;
+                quantityInput.style.background = 'transparent';
+            }
+            
+            // 编辑进出列 - 改为下拉列表
+            const toCell = cells[3];
+            let restaurantOptions = '';
+            const jRestaurants = window.jRestaurantsForTransfer || restaurants.filter(r => {
+                const name = r.name.toLowerCase();
+                return name.startsWith('j') && name !== shopId;
+            });
+            const currentToShop = record.to_shop_type || record.to_shop_type || '';
+            jRestaurants.forEach(r => {
+                const rName = r.name.toLowerCase();
+                restaurantOptions += `<option value="${rName}" ${rName === currentToShop ? 'selected' : ''}>${r.name}</option>`;
+            });
+            toCell.innerHTML = `
+                <select class="transfer-to-select-edit" id="${codeRowId}-to" style="width: 100%; padding: 4px 8px; border: none; background: transparent; text-align: center; outline: none; font-size: clamp(8px, 0.74vw, 14px);">
+                    <option value="">选择餐厅</option>
+                    ${restaurantOptions}
+                </select>
+            `;
+            
+            // 编辑单价列 - 改为可编辑输入框
+            const priceCell = cells[4];
+            const currentPrice = record.unit_price || 0;
+            priceCell.innerHTML = `
+                <div class="currency-display">
+                    <span class="currency-symbol">RM</span>
+                    <input type="text" class="break-price-input" id="${codeRowId}-price" 
+                           value="${currentPrice.toFixed(2)}" 
+                           onblur="calculateEditTransferTotal('${codeRowId}')" 
+                           style="width: 80px; border: none; background: transparent; text-align: center; outline: none;">
+                </div>
+            `;
+            
+            // 总价列保持显示，但会动态更新
+            const totalCell = cells[5];
+            const currentTotal = record.total_price || 0;
+            totalCell.innerHTML = `
+                <div class="currency-display">
+                    <span class="currency-symbol">RM</span>
+                    <span class="currency-amount" id="${codeRowId}-total">${currentTotal.toFixed(2)}</span>
+                </div>
+            `;
+            
+            // 替换操作按钮为保存和取消
+            const actionCell = cells[6];
+            actionCell.innerHTML = `
+                <button class="action-btn save-btn" onclick="saveEditTransferRecord(${recordId}, '${shopId}', '${codeRowId}')" title="保存" style="background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-right: 4px;">
+                    <i class="fas fa-check"></i>
+                </button>
+                <button class="action-btn cancel-btn" onclick="cancelEditTransferRecord(${recordId}, '${shopId}')" title="取消" style="background: #6c757d; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            // 绑定 combobox 事件
+            setTimeout(() => {
+                bindBreakComboboxEvents(codeRowId);
+            }, 100);
+            
+            // 绑定数量输入框的change事件，自动计算总价
+            if (quantityInput) {
+                quantityInput.onchange = () => {
+                    calculateEditTransferTotal(codeRowId);
+                };
+            }
+        }
+        
+        // 计算编辑转卖记录的总价
+        function calculateEditTransferTotal(codeRowId) {
+            const quantityInput = document.querySelector(`tr.editing-row input.quantity-input`);
+            const priceInput = document.getElementById(`${codeRowId}-price`);
+            const totalSpan = document.getElementById(`${codeRowId}-total`);
+            
+            if (!quantityInput || !priceInput || !totalSpan) return;
+            
+            const quantity = parseFloat(quantityInput.value) || 0;
+            const price = parseFloat(priceInput.value) || 0;
+            const total = quantity * price;
+            totalSpan.textContent = total.toFixed(2);
+        }
+        
+        // 保存编辑的转卖记录
+        async function saveEditTransferRecord(recordId, shopId, codeRowId) {
+            const row = document.querySelector(`tr[data-id="${recordId}"][data-shop="${shopId}"]`);
+            if (!row) {
+                showAlert('找不到要保存的记录', 'error');
+                return;
+            }
+            
+            const cells = row.querySelectorAll('td');
+            if (cells.length < 7) return;
+            
+            // 获取编辑后的值
+            const codeInput = document.getElementById(`${codeRowId}-code`);
+            const quantityInput = cells[2].querySelector('.quantity-input');
+            const toSelect = document.getElementById(`${codeRowId}-to`);
+            const priceInput = document.getElementById(`${codeRowId}-price`);
+            
+            if (!codeInput || !quantityInput || !toSelect || !priceInput) {
+                showAlert('找不到输入元素', 'error');
+                return;
+            }
+            
+            const newCode = codeInput.value.trim();
+            const productId = codeInput.dataset.productId || codeInput.getAttribute('data-product-id');
+            const newQuantity = parseFloat(quantityInput.value) || 0;
+            const newToShopType = toSelect.value;
+            const newPrice = parseFloat(priceInput.value) || 0;
+            
+            // 验证
+            if (!newCode || !productId) {
+                showAlert('请输入或选择编号', 'error');
+                return;
+            }
+            
+            if (!newToShopType) {
+                showAlert('请选择转卖给哪间餐厅', 'error');
+                return;
+            }
+            
+            if (newQuantity <= 0) {
+                showAlert('请输入有效的转卖数量', 'error');
+                return;
+            }
+            
+            try {
+                // 获取当前记录以获取单价
+                const records = transferRecordsData[shopId] || [];
+                const record = records.find(r => r.id == recordId);
+                
+                if (!record) {
+                    showAlert('找不到记录数据', 'error');
+                    return;
+                }
+                
+                // 如果编号改变了，需要获取新的产品信息
+                let unitPrice = newPrice;
+                if (newCode !== row.dataset.originalCode) {
+                    const newProduct = stockData.find(item => item.code_number === newCode);
+                    if (newProduct) {
+                        unitPrice = newProduct.unit_price || 0;
+                    }
+                }
+                
+                const totalPrice = newQuantity * unitPrice;
+                
+                // 更新转卖记录
+                const result = await apiCall('', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'update_transfer_record',
+                        id: recordId,
+                        dishware_id: productId,
+                        to_shop_type: newToShopType,
+                        quantity: newQuantity,
+                        unit_price: unitPrice,
+                        total_price: totalPrice
+                    })
+                });
+                
+                if (result.success) {
+                    showAlert('转卖记录更新成功', 'success');
+                    // 退出编辑模式并刷新数据
+                    row.classList.remove('editing-row');
+                    loadAllTransferRecords();
+                    // 刷新总库存
+                    if (document.getElementById('stock-table')) {
+                        loadStockData(true, false);
+                    }
+                } else {
+                    showAlert('更新失败: ' + (result.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('保存编辑的转卖记录时发生错误:', error);
+                showAlert('保存失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 取消编辑转卖记录
+        function cancelEditTransferRecord(recordId, shopId) {
+            const row = document.querySelector(`tr[data-id="${recordId}"][data-shop="${shopId}"]`);
+            if (!row) {
+                return;
+            }
+            
+            // 退出编辑模式
+            row.classList.remove('editing-row');
+            
+            // 重新渲染该行（恢复到原始状态）
+            const records = transferRecordsData[shopId] || [];
+            const record = records.find(r => r.id == recordId);
+            
+            if (record) {
+                // 找到该行在数组中的索引
+                const index = records.findIndex(r => r.id == recordId);
+                if (index !== -1) {
+                    // 重新渲染该行
+                    const tbody = row.parentElement;
+                    const isOutRecord = record.record_type === 'out';
+                    const transferDirection = isOutRecord 
+                        ? `转给 ${record.to_restaurant_name || record.to_shop_type.toUpperCase()}` 
+                        : `来自 ${record.from_restaurant_name || record.from_shop_type.toUpperCase()}`;
+                    
+                    const newRow = document.createElement('tr');
+                    newRow.setAttribute('data-id', record.id);
+                    newRow.setAttribute('data-shop', shopId);
+                    newRow.setAttribute('data-type', record.record_type);
+                    newRow.setAttribute('data-related', record.related_record_id || '');
+                    newRow.innerHTML = `
+                        <td class="text-center">${index + 1}</td>
+                        <td class="text-center">${record.code_number || '-'}</td>
+                        <td class="text-center">
+                            ${isOutRecord ? 
+                                `<input type="number" class="quantity-input" 
+                                       value="${record.quantity}" 
+                                       onchange="updateTransferQuantity(${record.id}, this.value, '${shopId}')"
+                                       min="0" style="width: clamp(40px, 2.92vw, 56px);">` :
+                                `<span>${record.quantity}</span>`
+                            }
+                        </td>
+                        <td class="text-center">${transferDirection}</td>
+                        <td class="text-center">
+                            <div class="currency-display">
+                                <span class="currency-symbol">RM</span>
+                                <span class="currency-amount">${formatCurrency(record.unit_price || 0)}</span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div class="currency-display">
+                                <span class="currency-symbol">RM</span>
+                                <span class="currency-amount">${formatCurrency(record.total_price || 0)}</span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            ${isOutRecord ? 
+                                `
+                                <button class="action-btn edit-btn" onclick="editTransferRecord(${record.id}, '${shopId}')" title="编辑">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete-btn" onclick="deleteTransferRecord(${record.id}, '${shopId}')" title="删除">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                ` :
+                                '<span style="color: #6b7280; font-size: 12px;">自动生成</span>'
+                            }
+                        </td>
+                    `;
+                    row.replaceWith(newRow);
+                }
+            }
         }
 
         // 删除转卖记录
