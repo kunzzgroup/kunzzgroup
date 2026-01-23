@@ -7905,9 +7905,12 @@ header('Expires: 0');
                         <td class="text-center">
                             ${isInRecord ? 
                                 `<span>${record.quantity}</span>` :
-                                `<input type="number" class="quantity-input" 
+                                `<input type="number" class="quantity-input transfer-quantity-input" 
                                        value="${record.quantity}" 
-                                       onchange="updateTransferQuantity(${record.id}, this.value, '${shopId}')"
+                                       data-record-id="${record.id}"
+                                       data-shop-id="${shopId}"
+                                       data-original-value="${record.quantity}"
+                                       onchange="showTransferSaveButtons(${record.id}, '${shopId}')"
                                        min="0" style="width: clamp(40px, 2.92vw, 56px);">`
                             }
                         </td>
@@ -7924,7 +7927,7 @@ header('Expires: 0');
                                 <span class="currency-amount">${formatCurrency(record.total_price || 0)}</span>
                             </div>
                         </td>
-                        <td class="text-center">
+                        <td class="text-center" id="transfer-action-${record.id}">
                             ${isInRecord ? 
                                 '<span style="color: #6b7280; font-size: 12px;">自动生成</span>' :
                                 `
@@ -8251,9 +8254,143 @@ header('Expires: 0');
             }
         }
 
-        // 更新转卖数量
-        async function updateTransferQuantity(recordId, newQuantity, shopId) {
-            // 这个功能可以后续实现，目前先不处理
+        // 显示转卖记录的保存/取消按钮（当数量改变时）
+        function showTransferSaveButtons(recordId, shopId) {
+            const actionCell = document.getElementById(`transfer-action-${recordId}`);
+            if (!actionCell) return;
+            
+            // 检查是否已经在编辑模式
+            const row = document.querySelector(`tr[data-id="${recordId}"][data-shop="${shopId}"]`);
+            if (row && row.classList.contains('editing-row')) {
+                return; // 如果已经在编辑模式，不显示保存/取消按钮
+            }
+            
+            // 保存原始按钮HTML（如果还没有保存）
+            if (!actionCell.dataset.originalHtml) {
+                actionCell.dataset.originalHtml = actionCell.innerHTML;
+            }
+            
+            // 显示保存和取消按钮
+            actionCell.innerHTML = `
+                <button class="action-btn save-btn" onclick="saveTransferQuantity(${recordId}, '${shopId}')" title="保存" style="background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-right: 4px;">
+                    <i class="fas fa-check"></i>
+                </button>
+                <button class="action-btn cancel-btn" onclick="cancelTransferQuantity(${recordId}, '${shopId}')" title="取消" style="background: #6c757d; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+        }
+        
+        // 保存转卖数量
+        async function saveTransferQuantity(recordId, shopId) {
+            const row = document.querySelector(`tr[data-id="${recordId}"][data-shop="${shopId}"]`);
+            if (!row) {
+                showAlert('找不到要保存的记录', 'error');
+                return;
+            }
+            
+            const quantityInput = row.querySelector('.transfer-quantity-input');
+            if (!quantityInput) {
+                showAlert('找不到数量输入框', 'error');
+                return;
+            }
+            
+            const newQuantity = parseFloat(quantityInput.value) || 0;
+            
+            if (newQuantity <= 0) {
+                showAlert('请输入有效的转卖数量', 'error');
+                return;
+            }
+            
+            try {
+                // 获取当前记录
+                const records = transferRecordsData[shopId] || [];
+                const record = records.find(r => r.id == recordId);
+                
+                if (!record) {
+                    showAlert('找不到记录数据', 'error');
+                    return;
+                }
+                
+                const unitPrice = record.unit_price || 0;
+                const totalPrice = newQuantity * unitPrice;
+                
+                // 更新转卖记录
+                const result = await apiCall('', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'update_transfer_record',
+                        id: recordId,
+                        dishware_id: record.dishware_id,
+                        to_shop_type: record.to_shop_type,
+                        quantity: newQuantity,
+                        unit_price: unitPrice,
+                        total_price: totalPrice
+                    })
+                });
+                
+                if (result.success) {
+                    showAlert('转卖记录更新成功', 'success');
+                    // 更新原始值
+                    quantityInput.dataset.originalValue = newQuantity;
+                    // 恢复操作按钮
+                    restoreTransferActionButtons(recordId, shopId);
+                    // 刷新数据
+                    loadAllTransferRecords();
+                    // 刷新总库存
+                    if (document.getElementById('stock-table')) {
+                        loadStockData(true, false);
+                    }
+                } else {
+                    showAlert('更新失败: ' + (result.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('保存转卖数量时发生错误:', error);
+                showAlert('保存失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 取消转卖数量修改
+        function cancelTransferQuantity(recordId, shopId) {
+            const row = document.querySelector(`tr[data-id="${recordId}"][data-shop="${shopId}"]`);
+            if (!row) {
+                return;
+            }
+            
+            const quantityInput = row.querySelector('.transfer-quantity-input');
+            if (quantityInput) {
+                // 恢复原始值
+                const originalValue = quantityInput.dataset.originalValue || quantityInput.value;
+                quantityInput.value = originalValue;
+            }
+            
+            // 恢复操作按钮
+            restoreTransferActionButtons(recordId, shopId);
+        }
+        
+        // 恢复转卖记录的操作按钮
+        function restoreTransferActionButtons(recordId, shopId) {
+            const actionCell = document.getElementById(`transfer-action-${recordId}`);
+            if (!actionCell) return;
+            
+            // 如果有保存的原始HTML，恢复它
+            if (actionCell.dataset.originalHtml) {
+                actionCell.innerHTML = actionCell.dataset.originalHtml;
+                delete actionCell.dataset.originalHtml;
+            } else {
+                // 否则使用默认的编辑和删除按钮
+                actionCell.innerHTML = `
+                    <button class="action-btn edit-btn" onclick="editTransferRecord(${recordId}, '${shopId}')" title="编辑">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn delete-btn" onclick="deleteTransferRecord(${recordId}, '${shopId}')" title="删除">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+            }
         }
 
         // 编辑转卖记录 - 进入编辑模式
