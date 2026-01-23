@@ -8428,16 +8428,18 @@ header('Expires: 0');
                 return;
             }
             
-            // 标记为编辑中
-            row.classList.add('editing-row');
-            
-            // 获取当前记录数据
-            const cells = row.querySelectorAll('td');
-            if (cells.length < 7) {
-                console.error('表格列数不正确:', cells.length);
-                row.classList.remove('editing-row');
-                return;
-            }
+            try {
+                // 标记为编辑中
+                row.classList.add('editing-row');
+                
+                // 获取当前记录数据
+                const cells = row.querySelectorAll('td');
+                console.log('表格列数:', cells.length);
+                if (cells.length < 7) {
+                    console.error('表格列数不正确:', cells.length, '需要7列');
+                    row.classList.remove('editing-row');
+                    return;
+                }
             
             // 保存原始数据
             const originalCode = cells[1].textContent.trim();
@@ -8527,7 +8529,7 @@ header('Expires: 0');
             
             // 编辑单价列 - 改为可编辑输入框
             const priceCell = cells[4];
-            const currentPrice = record.unit_price || 0;
+            const currentPrice = parseFloat(record.unit_price) || 0;
             priceCell.innerHTML = `
                 <div class="currency-display">
                     <span class="currency-symbol">RM</span>
@@ -8540,7 +8542,7 @@ header('Expires: 0');
             
             // 总价列保持显示，但会动态更新
             const totalCell = cells[5];
-            const currentTotal = record.total_price || 0;
+            const currentTotal = parseFloat(record.total_price) || 0;
             totalCell.innerHTML = `
                 <div class="currency-display">
                     <span class="currency-symbol">RM</span>
@@ -8549,12 +8551,15 @@ header('Expires: 0');
             `;
             
             // 替换操作按钮为保存和取消
+            console.log('准备替换操作按钮，cells.length:', cells.length);
             const actionCell = cells[6];
             if (!actionCell) {
-                console.error('找不到操作列单元格，cells.length:', cells.length);
+                console.error('找不到操作列单元格，cells.length:', cells.length, 'cells:', cells);
                 row.classList.remove('editing-row');
                 return;
             }
+            
+            console.log('找到操作列单元格，当前内容:', actionCell.innerHTML);
             
             // 确保操作列有正确的ID
             if (!actionCell.id) {
@@ -8567,7 +8572,7 @@ header('Expires: 0');
             }
             
             // 替换为保存和取消按钮
-            actionCell.innerHTML = `
+            const saveCancelButtons = `
                 <button class="action-btn save-btn" onclick="saveEditTransferRecord(${recordId}, '${shopId}', '${codeRowId}')" title="保存" style="background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-right: 4px;">
                     <i class="fas fa-check"></i>
                 </button>
@@ -8576,7 +8581,8 @@ header('Expires: 0');
                 </button>
             `;
             
-            console.log('操作按钮已替换为保存和取消按钮');
+            actionCell.innerHTML = saveCancelButtons;
+            console.log('操作按钮已替换为保存和取消按钮，新内容:', actionCell.innerHTML);
             
             // 绑定 combobox 事件
             setTimeout(() => {
@@ -8588,6 +8594,11 @@ header('Expires: 0');
                 quantityInput.onchange = () => {
                     calculateEditTransferTotal(codeRowId);
                 };
+            }
+            } catch (error) {
+                console.error('编辑转卖记录时发生错误:', error);
+                row.classList.remove('editing-row');
+                showAlert('编辑失败: ' + error.message, 'error');
             }
         }
         
