@@ -4322,6 +4322,17 @@ header('Expires: 0');
                 return;
             }
             
+            // 检查stockData是否已加载
+            if (!stockData || stockData.length === 0) {
+                showAlert('正在加载碗碟数据，请稍后再试', 'warning');
+                loadStockData(true, false).then(() => {
+                    setTimeout(() => {
+                        editBreakRecord(recordId, shopId);
+                    }, 500);
+                });
+                return;
+            }
+            
             // 标记为编辑中
             row.classList.add('editing-row');
             
