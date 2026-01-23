@@ -6374,12 +6374,13 @@ header('Expires: 0');
                 if (item.item_type === 'set') {
                     const set = item;
                     const setPrice = typeof set.set_price !== 'undefined' ? set.set_price : (set.unit_price || 0);
-                    const displayIndex = rowIndex++;
 
                     if (set.items && Array.isArray(set.items) && set.items.length > 0) {
                         set.items.forEach((setItem) => {
                             const totalQty = parseInt(setItem.total_quantity) || 0;
                             const totalClass = totalQty > 0 ? 'positive-value' : 'zero-value';
+                            // 每个套装项目都有独立的序号
+                            const displayIndex = rowIndex++;
 
                             const rowData = {
                                 no: String(displayIndex),
@@ -6410,6 +6411,8 @@ header('Expires: 0');
                     } else {
                         const totalQty = parseInt(set.total_quantity) || 0;
                         const totalClass = totalQty > 0 ? 'positive-value' : 'zero-value';
+                        // 套装没有items时，也使用独立的序号
+                        const displayIndex = rowIndex++;
                         
                         const rowData = {
                             no: String(displayIndex),
@@ -6656,12 +6659,13 @@ header('Expires: 0');
                 if (item.item_type === 'set') {
                     const set = item;
                     const setPrice = typeof set.set_price !== 'undefined' ? set.set_price : (set.unit_price || 0);
-                    const displayIndex = rowIndex++;
                     
                     if (set.items && Array.isArray(set.items) && set.items.length > 0) {
                         set.items.forEach((setItem) => {
                             const totalQty = parseInt(setItem.total_quantity) || 0;
                             const totalClass = totalQty > 0 ? 'positive-value' : 'zero-value';
+                            // 每个套装项目都有独立的序号
+                            const displayIndex = rowIndex++;
 
                             const rowData = {
                                 no: String(displayIndex),
@@ -6692,6 +6696,8 @@ header('Expires: 0');
                     } else {
                         const totalQty = parseInt(set.total_quantity) || 0;
                         const totalClass = totalQty > 0 ? 'positive-value' : 'zero-value';
+                        // 套装没有items时，也使用独立的序号
+                        const displayIndex = rowIndex++;
                         
                         const rowData = {
                             no: String(displayIndex),
