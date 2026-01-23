@@ -2142,15 +2142,18 @@ header('Expires: 0');
             position: relative;
             width: 100%;
             z-index: 1; /* 正常层级，可以被侧边栏覆盖 */
+            isolation: isolate; /* 创建新的层叠上下文，但不影响下拉列表 */
         }
 
         /* 只让下拉菜单显示在最上层，输入框保持正常层级 */
         .break-record-table tr.new-row .combobox-container {
             z-index: 1; /* 正常层级，可以被侧边栏覆盖 */
+            isolation: isolate; /* 创建新的层叠上下文 */
         }
 
         .break-record-table tr.new-row .combobox-dropdown {
-            z-index: 99999 !important; /* 只有下拉菜单使用最高优先级 */
+            z-index: 999999 !important; /* 提高优先级，确保显示在所有元素之上 */
+            position: fixed !important; /* 使用 fixed 定位，脱离文档流 */
         }
 
         .combobox-input {
@@ -2181,7 +2184,7 @@ header('Expires: 0');
         }
 
         .combobox-dropdown {
-            position: absolute;
+            position: fixed; /* 使用 fixed 定位，脱离文档流，避免被其他元素覆盖 */
             top: 100%;
             left: 0;
             background: white;
@@ -2190,10 +2193,11 @@ header('Expires: 0');
             max-height: 200px;
             overflow-y: auto;
             overflow-x: hidden; /* 隐藏水平溢出 */
-            z-index: 99999 !important; /* 最高优先级，确保显示在最上层 */
+            z-index: 999999 !important; /* 提高优先级，确保显示在所有元素之上 */
             display: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             width: clamp(60px, 5.21vw, 100px); /* 使用 clamp 设置宽度 */
+            pointer-events: auto; /* 确保可以点击 */
         }
 
         .combobox-dropdown.show {
@@ -4844,6 +4848,7 @@ header('Expires: 0');
                 codeDropdown.style.position = 'fixed';
                 codeDropdown.style.top = (rect.bottom + window.scrollY) + 'px';
                 codeDropdown.style.left = rect.left + 'px';
+                codeDropdown.style.zIndex = '999999'; // 确保最高优先级
                 // 使用 CSS clamp，不需要设置 JavaScript 宽度
                 codeDropdown.classList.add('show');
                 filterBreakComboboxOptions(codeInput, codeDropdown);
@@ -4924,8 +4929,10 @@ header('Expires: 0');
             const updatePosition = () => {
                 if (codeDropdown.classList.contains('show')) {
                     const rect = codeInput.getBoundingClientRect();
+                    codeDropdown.style.position = 'fixed';
                     codeDropdown.style.top = (rect.bottom + window.scrollY) + 'px';
                     codeDropdown.style.left = rect.left + 'px';
+                    codeDropdown.style.zIndex = '999999'; // 确保最高优先级
                     // 宽度由 CSS clamp 控制，不需要更新
                 }
             };
