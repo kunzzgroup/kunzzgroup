@@ -4606,8 +4606,12 @@ header('Expires: 0');
                 </div>
             `;
             
-            // 数量列：保持为文本显示，不显示输入框
-            cells[2].innerHTML = `<span>${originalQuantity}</span>`;
+            // 数量列：由 span 改为可编辑输入框（仅编辑模式下可改）
+            cells[2].innerHTML = `
+                <input type="number" class="quantity-input break-quantity-input" 
+                       value="${originalQuantity}" min="0" 
+                       style="width: clamp(40px, 2.92vw, 56px);">
+            `;
             
             // 替换操作按钮为保存和取消
             const actionCell = cells[5];
@@ -4639,16 +4643,16 @@ header('Expires: 0');
             
             // 获取编辑后的值
             const codeInput = document.getElementById(`${codeRowId}-code`);
-            const quantitySpan = cells[2].querySelector('span');
+            const quantityInput = cells[2].querySelector('.quantity-input');
             
-            if (!codeInput || !quantitySpan) {
+            if (!codeInput || !quantityInput) {
                 showAlert('找不到输入元素', 'error');
                 return;
             }
             
             const newCode = codeInput.value.trim();
             const productId = codeInput.dataset.productId || codeInput.getAttribute('data-product-id');
-            const newQuantity = parseFloat(quantitySpan.textContent.trim()) || 0;
+            const newQuantity = parseFloat(quantityInput.value) || 0;
             
             // 验证
             if (!newCode || !productId) {
@@ -5081,9 +5085,9 @@ header('Expires: 0');
                                     </div>
                                 `;
                                 // 重新计算总价
-                                const quantitySpan = cells[2].querySelector('span');
-                                if (quantitySpan) {
-                                    const quantity = parseFloat(quantitySpan.textContent.trim()) || 0;
+                                const quantityInput = cells[2].querySelector('.quantity-input');
+                                if (quantityInput) {
+                                    const quantity = parseFloat(quantityInput.value) || 0;
                                     const totalPrice = quantity * price;
                                     const totalCell = cells[4];
                                     totalCell.innerHTML = `
@@ -8514,8 +8518,12 @@ header('Expires: 0');
                 </div>
             `;
             
-            // 数量列：保持为文本显示，不显示输入框
-            cells[2].innerHTML = `<span id="${codeRowId}-qty">${originalQuantity}</span>`;
+            // 数量列：由 span 改为可编辑输入框（仅编辑模式下可改）
+            cells[2].innerHTML = `
+                <input type="number" class="quantity-input transfer-quantity-input" 
+                       id="${codeRowId}-qty" value="${originalQuantity}" min="0" 
+                       style="width: clamp(40px, 2.92vw, 56px);">
+            `;
             
             // 编辑进出列 - 改为下拉列表
             const toCell = cells[3];
@@ -8598,11 +8606,11 @@ header('Expires: 0');
                 bindBreakComboboxEvents(codeRowId);
             }, 100);
             
-            // 绑定单价输入框的 change 事件，自动计算总价（数量列不再有输入框）
-            const priceInput = document.getElementById(`${codeRowId}-price`);
-            if (priceInput) {
-                priceInput.addEventListener('change', () => calculateEditTransferTotal(codeRowId));
-                priceInput.addEventListener('input', () => calculateEditTransferTotal(codeRowId));
+            // 绑定数量输入框的 change 事件，自动计算总价
+            const qtyInput = document.getElementById(`${codeRowId}-qty`);
+            if (qtyInput) {
+                qtyInput.addEventListener('change', () => calculateEditTransferTotal(codeRowId));
+                qtyInput.addEventListener('input', () => calculateEditTransferTotal(codeRowId));
             }
             } catch (error) {
                 console.error('编辑转卖记录时发生错误:', error);
@@ -8616,13 +8624,13 @@ header('Expires: 0');
             const row = document.querySelector(`tr.editing-row`);
             if (!row) return;
             
-            const quantitySpan = document.getElementById(`${codeRowId}-qty`) || row.querySelector('td:nth-child(3) span');
+            const quantityInput = row.querySelector('input.quantity-input, input.transfer-quantity-input');
             const priceInput = document.getElementById(`${codeRowId}-price`);
             const totalSpan = document.getElementById(`${codeRowId}-total`);
             
-            if (!quantitySpan || !priceInput || !totalSpan) return;
+            if (!quantityInput || !priceInput || !totalSpan) return;
             
-            const quantity = parseFloat(quantitySpan.textContent.trim()) || 0;
+            const quantity = parseFloat(quantityInput.value) || 0;
             const price = parseFloat(priceInput.value) || 0;
             const total = quantity * price;
             totalSpan.textContent = total.toFixed(2);
@@ -8641,18 +8649,18 @@ header('Expires: 0');
             
             // 获取编辑后的值
             const codeInput = document.getElementById(`${codeRowId}-code`);
-            const quantitySpan = document.getElementById(`${codeRowId}-qty`) || cells[2].querySelector('span');
+            const quantityInput = cells[2].querySelector('.quantity-input, .transfer-quantity-input');
             const toSelect = document.getElementById(`${codeRowId}-to`);
             const priceInput = document.getElementById(`${codeRowId}-price`);
             
-            if (!codeInput || !quantitySpan || !toSelect || !priceInput) {
+            if (!codeInput || !quantityInput || !toSelect || !priceInput) {
                 showAlert('找不到输入元素', 'error');
                 return;
             }
             
             const newCode = codeInput.value.trim();
             const productId = codeInput.dataset.productId || codeInput.getAttribute('data-product-id');
-            const newQuantity = parseFloat(quantitySpan.textContent.trim()) || 0;
+            const newQuantity = parseFloat(quantityInput.value) || 0;
             const newToShopType = toSelect.value;
             const newPrice = parseFloat(priceInput.value) || 0;
             
