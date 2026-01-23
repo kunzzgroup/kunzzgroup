@@ -7863,6 +7863,93 @@ header('Expires: 0');
             }
         }
 
+        // 刷新单个餐厅的转卖记录（保留新行）
+        async function refreshSingleRestaurantTransferRecords(shopType) {
+            try {
+                // 只加载对应餐厅的数据
+                const result = await apiCall(`?action=transfer_records&shop_type=${shopType}`);
+                
+                if (result.success) {
+                    // 更新数据
+                    transferRecordsData[shopType] = result.data || [];
+                    
+                    // 找到对应的表格tbody
+                    const tbody = document.getElementById(`${shopType}-transfer-tbody`);
+                    if (!tbody) return;
+                    
+                    // 保存所有新行（.new-row）及其数据
+                    const newRows = Array.from(tbody.querySelectorAll('tr.new-row'));
+                    const newRowsData = newRows.map(row => {
+                        const codeInput = row.querySelector('.break-code-input');
+                        const quantityInput = row.querySelector('.break-quantity-input');
+                        const toSelect = row.querySelector('.transfer-to-select');
+                        const rowId = codeInput?.id?.replace('-code', '') || '';
+                        const priceSpan = rowId ? row.querySelector(`#${rowId}-price`) : null;
+                        const totalSpan = rowId ? row.querySelector(`#${rowId}-total`) : null;
+                        
+                        return {
+                            row: row.cloneNode(true), // 克隆节点
+                            rowId: rowId,
+                            code: codeInput?.value || '',
+                            quantity: quantityInput?.value || '',
+                            price: priceSpan?.textContent?.trim() || '0.00',
+                            total: totalSpan?.textContent?.trim() || '0.00',
+                            toShop: toSelect?.value || '',
+                            productId: codeInput?.dataset?.productId || ''
+                        };
+                    });
+                    
+                    // 重新渲染该餐厅的表格行（不包括新行）
+                    const records = transferRecordsData[shopType] || [];
+                    const rowsHtml = renderTransferRecordsRows(records, shopType);
+                    
+                    // 清空tbody并添加已保存的记录
+                    tbody.innerHTML = rowsHtml;
+                    
+                    // 重新添加所有新行
+                    newRowsData.forEach(({ row, rowId, code, quantity, price, total, toShop, productId }) => {
+                        if (row && rowId) {
+                            // 恢复输入框的值
+                            const clonedCodeInput = row.querySelector('.break-code-input');
+                            const clonedQuantityInput = row.querySelector('.break-quantity-input');
+                            const clonedPriceSpan = row.querySelector(`#${rowId}-price`);
+                            const clonedTotalSpan = row.querySelector(`#${rowId}-total`);
+                            const clonedToSelect = row.querySelector('.transfer-to-select');
+                            
+                            if (clonedCodeInput) {
+                                clonedCodeInput.value = code;
+                                if (productId) {
+                                    clonedCodeInput.dataset.productId = productId;
+                                    clonedCodeInput.setAttribute('data-product-id', productId);
+                                }
+                            }
+                            if (clonedQuantityInput) {
+                                clonedQuantityInput.value = quantity;
+                            }
+                            if (clonedPriceSpan) {
+                                clonedPriceSpan.textContent = price;
+                            }
+                            if (clonedTotalSpan) {
+                                clonedTotalSpan.textContent = total;
+                            }
+                            if (clonedToSelect) {
+                                clonedToSelect.value = toShop;
+                            }
+                            
+                            tbody.appendChild(row);
+                            
+                            // 重新绑定事件
+                            setTimeout(() => {
+                                bindBreakComboboxEvents(rowId);
+                            }, 100);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('刷新单个餐厅转卖记录时发生错误:', error);
+            }
+        }
+
         // 渲染合并的转卖记录页面
         function renderMergedTransferRecordsPage() {
             const container = document.getElementById('transfer-records-container');
@@ -8266,8 +8353,10 @@ header('Expires: 0');
                         }
                     }
                     
-                    // 刷新所有转卖记录（因为会自动生成进货记录）
-                    loadAllTransferRecords();
+                    // 刷新转卖记录（只刷新相关餐厅，保留其他新行）
+                    // 需要刷新转出餐厅和接收餐厅的数据
+                    await refreshSingleRestaurantTransferRecords(shopType);
+                    await refreshSingleRestaurantTransferRecords(toShopType);
                     
                     // 刷新总库存
                     if (document.getElementById('stock-table')) {
