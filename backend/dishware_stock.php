@@ -1789,9 +1789,10 @@ header('Expires: 0');
 
         .break-record-table-wrapper {
             overflow-x: auto;
-            overflow-y: auto;
+            overflow-y: visible; /* 改为 visible，允许下拉菜单溢出 */
             flex: 1;
             max-height: calc(100vh - 350px);
+            position: relative; /* 为下拉菜单提供定位上下文 */
         }
 
         .break-record-table {
@@ -1860,8 +1861,9 @@ header('Expires: 0');
             border: 1px solid #d1d5db;
             text-align: center;
             vertical-align: middle;
-            overflow: hidden;
+            overflow: visible; /* 改为 visible，允许下拉菜单显示 */
             text-overflow: ellipsis;
+            position: relative; /* 为下拉菜单提供定位上下文 */
         }
 
         .break-record-table tr:nth-child(even) {
@@ -1985,9 +1987,10 @@ header('Expires: 0');
 
         .break-record-table-wrapper {
             overflow-x: auto;
-            overflow-y: auto;
+            overflow-y: visible; /* 改为 visible，允许下拉菜单溢出 */
             flex: 1;
             max-height: calc(100vh - 350px);
+            position: relative; /* 为下拉菜单提供定位上下文 */
         }
 
         .break-record-table {
@@ -2056,8 +2059,9 @@ header('Expires: 0');
             border: 1px solid #d1d5db;
             text-align: center;
             vertical-align: middle;
-            overflow: hidden;
+            overflow: visible; /* 改为 visible，允许下拉菜单显示 */
             text-overflow: ellipsis;
+            position: relative; /* 为下拉菜单提供定位上下文 */
         }
 
         .break-record-table tr:nth-child(even) {
@@ -2103,6 +2107,16 @@ header('Expires: 0');
         .combobox-container {
             position: relative;
             width: 100%;
+            z-index: 1; /* 确保容器有定位上下文 */
+        }
+
+        /* 确保新行中的 combobox 下拉菜单显示在最上层 */
+        .break-record-table tr.new-row .combobox-container {
+            z-index: 100000 !important; /* 非常高的 z-index */
+        }
+
+        .break-record-table tr.new-row .combobox-dropdown {
+            z-index: 99999 !important; /* 最高优先级 */
         }
 
         .combobox-input {
@@ -2140,7 +2154,7 @@ header('Expires: 0');
             border-radius: 4px;
             max-height: 200px;
             overflow-y: auto;
-            z-index: 1000;
+            z-index: 99999 !important; /* 最高优先级，确保显示在最上层 */
             display: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
@@ -4528,16 +4542,25 @@ header('Expires: 0');
             
             if (!codeInput || !codeDropdown || !container) return;
             
-            // 显示下拉
-            codeInput.addEventListener('focus', () => {
+            // 显示下拉（使用 fixed 定位）
+            const showDropdown = () => {
+                const rect = codeInput.getBoundingClientRect();
+                codeDropdown.style.position = 'fixed';
+                codeDropdown.style.top = (rect.bottom + window.scrollY) + 'px';
+                codeDropdown.style.left = rect.left + 'px';
+                codeDropdown.style.width = rect.width + 'px';
                 codeDropdown.classList.add('show');
                 filterBreakComboboxOptions(codeInput, codeDropdown);
-            });
+            };
+            
+            codeInput.addEventListener('focus', showDropdown);
             
             // 输入过滤
             codeInput.addEventListener('input', () => {
                 filterBreakComboboxOptions(codeInput, codeDropdown);
-                codeDropdown.classList.add('show');
+                if (!codeDropdown.classList.contains('show')) {
+                    showDropdown();
+                }
             });
             
             // 选择选项
@@ -4563,7 +4586,7 @@ header('Expires: 0');
             
             // 点击外部关闭
             const closeHandler = (e) => {
-                if (!container.contains(e.target)) {
+                if (!container.contains(e.target) && !codeDropdown.contains(e.target)) {
                     codeDropdown.classList.remove('show');
                 }
             };
@@ -4571,6 +4594,17 @@ header('Expires: 0');
                 document.addEventListener('click', closeHandler);
                 codeInput._closeHandler = closeHandler;
             }, 100);
+            
+            // 窗口滚动时更新位置
+            const updatePosition = () => {
+                if (codeDropdown.classList.contains('show')) {
+                    const rect = codeInput.getBoundingClientRect();
+                    codeDropdown.style.top = (rect.bottom + window.scrollY) + 'px';
+                    codeDropdown.style.left = rect.left + 'px';
+                }
+            };
+            window.addEventListener('scroll', updatePosition, true);
+            window.addEventListener('resize', updatePosition);
         }
 
         // 过滤combobox选项
