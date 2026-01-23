@@ -4308,10 +4308,256 @@ header('Expires: 0');
             }
         }
 
-        // 编辑破损记录
+        // 编辑破损记录 - 进入编辑模式
         function editBreakRecord(recordId, shopId = null) {
-            // 这里可以实现编辑破损记录的模态框
-            showAlert('编辑功能待实现', 'info');
+            // 找到对应的行
+            const row = document.querySelector(`tr[data-id="${recordId}"][data-shop="${shopId}"]`);
+            if (!row) {
+                showAlert('找不到要编辑的记录', 'error');
+                return;
+            }
+            
+            // 检查是否已经在编辑中
+            if (row.classList.contains('editing-row')) {
+                return;
+            }
+            
+            // 标记为编辑中
+            row.classList.add('editing-row');
+            
+            // 获取当前记录数据
+            const cells = row.querySelectorAll('td');
+            if (cells.length < 6) return;
+            
+            // 保存原始数据
+            const originalCode = cells[1].textContent.trim();
+            const quantityInput = cells[2].querySelector('.quantity-input');
+            const originalQuantity = quantityInput ? quantityInput.value : '0';
+            row.dataset.originalCode = originalCode;
+            row.dataset.originalQuantity = originalQuantity;
+            
+            // 获取当前记录信息（从 breakRecordsData 中查找）
+            const records = breakRecordsData[shopId] || [];
+            const record = records.find(r => r.id == recordId);
+            
+            if (!record) {
+                showAlert('找不到记录数据', 'error');
+                row.classList.remove('editing-row');
+                return;
+            }
+            
+            // 生成编号选项（用于combobox）
+            let codeOptions = [];
+            if (stockData && stockData.length > 0) {
+                stockData.forEach(item => {
+                    const code = item.code_number || '';
+                    if (code) {
+                        codeOptions.push({
+                            code: code,
+                            id: item.id,
+                            price: item.unit_price || 0
+                        });
+                    }
+                });
+            }
+            
+            // 找到当前编号对应的产品ID
+            const currentProduct = stockData.find(item => item.code_number === originalCode);
+            const currentProductId = currentProduct ? currentProduct.id : '';
+            
+            // 编辑编号列 - 使用 combobox
+            const codeCell = cells[1];
+            const codeRowId = `edit-${recordId}-${Date.now()}`;
+            codeCell.innerHTML = `
+                <div class="combobox-container" id="${codeRowId}-code-combo">
+                    <input 
+                        type="text" 
+                        class="combobox-input break-code-input" 
+                        id="${codeRowId}-code"
+                        value="${originalCode}"
+                        placeholder="输入或选择编号..."
+                        autocomplete="off"
+                        data-row-id="${codeRowId}"
+                        data-field="code"
+                        data-product-id="${currentProductId}"
+                    />
+                    <i class="fas fa-chevron-down combobox-arrow"></i>
+                    <div class="combobox-dropdown" id="${codeRowId}-code-dropdown">
+                        ${codeOptions.map(opt => `<div class="combobox-option" data-value="${opt.code}" data-id="${opt.id}" data-price="${opt.price}">${opt.code}</div>`).join('')}
+                    </div>
+                </div>
+            `;
+            
+            // 数量列已经是输入框，保持可编辑状态
+            // 但需要确保可以编辑
+            if (quantityInput) {
+                quantityInput.readOnly = false;
+                quantityInput.style.background = 'transparent';
+            }
+            
+            // 替换操作按钮为保存和取消
+            const actionCell = cells[5];
+            actionCell.innerHTML = `
+                <button class="action-btn save-btn" onclick="saveEditBreakRecord(${recordId}, '${shopId}', '${codeRowId}')" title="保存" style="background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-right: 4px;">
+                    <i class="fas fa-check"></i>
+                </button>
+                <button class="action-btn cancel-btn" onclick="cancelEditBreakRecord(${recordId}, '${shopId}')" title="取消" style="background: #6c757d; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            // 绑定 combobox 事件
+            setTimeout(() => {
+                bindBreakComboboxEvents(codeRowId);
+            }, 100);
+        }
+        
+        // 保存编辑的破损记录
+        async function saveEditBreakRecord(recordId, shopId, codeRowId) {
+            const row = document.querySelector(`tr[data-id="${recordId}"][data-shop="${shopId}"]`);
+            if (!row) {
+                showAlert('找不到要保存的记录', 'error');
+                return;
+            }
+            
+            const cells = row.querySelectorAll('td');
+            if (cells.length < 6) return;
+            
+            // 获取编辑后的值
+            const codeInput = document.getElementById(`${codeRowId}-code`);
+            const quantityInput = cells[2].querySelector('.quantity-input');
+            
+            if (!codeInput || !quantityInput) {
+                showAlert('找不到输入元素', 'error');
+                return;
+            }
+            
+            const newCode = codeInput.value.trim();
+            const productId = codeInput.dataset.productId || codeInput.getAttribute('data-product-id');
+            const newQuantity = parseFloat(quantityInput.value) || 0;
+            
+            // 验证
+            if (!newCode || !productId) {
+                showAlert('请输入或选择编号', 'error');
+                return;
+            }
+            
+            if (newQuantity < 0) {
+                showAlert('请输入有效的破损数量', 'error');
+                return;
+            }
+            
+            try {
+                // 获取当前记录以获取单价
+                const records = breakRecordsData[shopId] || [];
+                const record = records.find(r => r.id == recordId);
+                
+                if (!record) {
+                    showAlert('找不到记录数据', 'error');
+                    return;
+                }
+                
+                // 如果编号改变了，需要获取新的产品信息
+                let unitPrice = record.unit_price || 0;
+                if (newCode !== row.dataset.originalCode) {
+                    const newProduct = stockData.find(item => item.code_number === newCode);
+                    if (newProduct) {
+                        unitPrice = newProduct.unit_price || 0;
+                    }
+                }
+                
+                const totalPrice = newQuantity * unitPrice;
+                
+                // 更新破损记录
+                const result = await apiCall('', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'update_damage_record',
+                        id: recordId,
+                        dishware_id: productId,
+                        break_quantity: newQuantity,
+                        unit_price: unitPrice,
+                        total_price: totalPrice
+                    })
+                });
+                
+                if (result.success) {
+                    showAlert('破损记录更新成功', 'success');
+                    // 退出编辑模式并刷新数据
+                    row.classList.remove('editing-row');
+                    loadAllBreakRecords();
+                    // 刷新总库存
+                    if (document.getElementById('stock-table')) {
+                        loadStockData(true, false);
+                    }
+                } else {
+                    showAlert('更新失败: ' + (result.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('保存编辑的破损记录时发生错误:', error);
+                showAlert('保存失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 取消编辑破损记录
+        function cancelEditBreakRecord(recordId, shopId) {
+            const row = document.querySelector(`tr[data-id="${recordId}"][data-shop="${shopId}"]`);
+            if (!row) {
+                return;
+            }
+            
+            // 退出编辑模式
+            row.classList.remove('editing-row');
+            
+            // 重新渲染该行（恢复到原始状态）
+            const records = breakRecordsData[shopId] || [];
+            const record = records.find(r => r.id == recordId);
+            
+            if (record) {
+                // 找到该行在数组中的索引
+                const index = records.findIndex(r => r.id == recordId);
+                if (index !== -1) {
+                    // 重新渲染该行
+                    const tbody = row.parentElement;
+                    const newRow = document.createElement('tr');
+                    newRow.setAttribute('data-id', record.id);
+                    newRow.setAttribute('data-shop', shopId);
+                    newRow.innerHTML = `
+                        <td class="text-center">${index + 1}</td>
+                        <td class="text-center">${record.code_number || '-'}</td>
+                        <td class="text-center">
+                            <input type="number" class="quantity-input" 
+                                   value="${record.break_quantity}" 
+                                   onchange="updateBreakQuantity(${record.id}, this.value, '${shopId}')"
+                                   min="0" style="width: clamp(60px, 5.21vw, 80px);">
+                        </td>
+                        <td class="text-center">
+                            <div class="currency-display">
+                                <span class="currency-symbol">RM</span>
+                                <span class="currency-amount">${formatCurrency(record.unit_price || 0)}</span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div class="currency-display">
+                                <span class="currency-symbol">RM</span>
+                                <span class="currency-amount">${formatCurrency(record.total_price || 0)}</span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <button class="action-btn edit-btn" onclick="editBreakRecord(${record.id}, '${shopId}')" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteBreakRecord(${record.id}, '${shopId}')" title="删除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    row.replaceWith(newRow);
+                }
+            }
         }
 
         // 删除破损记录
@@ -4578,15 +4824,44 @@ header('Expires: 0');
                     
                     codeInput.value = code;
                     codeInput.dataset.productId = productId;
+                    codeInput.setAttribute('data-product-id', productId);
                     codeDropdown.classList.remove('show');
                     
-                    // 更新单价
-                    const priceInput = document.getElementById(`${rowId}-price`);
-                    if (priceInput) {
-                        priceInput.value = price.toFixed(2);
+                    // 如果是编辑模式，需要找到对应的价格输入框
+                    const row = codeInput.closest('tr');
+                    if (row && row.classList.contains('editing-row')) {
+                        // 编辑模式：更新单价显示（只读）
+                        const cells = row.querySelectorAll('td');
+                        if (cells.length >= 4) {
+                            const priceCell = cells[3];
+                            priceCell.innerHTML = `
+                                <div class="currency-display">
+                                    <span class="currency-symbol">RM</span>
+                                    <span class="currency-amount">${price.toFixed(2)}</span>
+                                </div>
+                            `;
+                            // 重新计算总价
+                            const quantityInput = cells[2].querySelector('.quantity-input');
+                            if (quantityInput) {
+                                const quantity = parseFloat(quantityInput.value) || 0;
+                                const totalPrice = quantity * price;
+                                const totalCell = cells[4];
+                                totalCell.innerHTML = `
+                                    <div class="currency-display">
+                                        <span class="currency-symbol">RM</span>
+                                        <span class="currency-amount">${totalPrice.toFixed(2)}</span>
+                                    </div>
+                                `;
+                            }
+                        }
+                    } else {
+                        // 新行模式：更新单价输入框
+                        const priceInput = document.getElementById(`${rowId}-price`);
+                        if (priceInput) {
+                            priceInput.value = price.toFixed(2);
+                        }
+                        calculateBreakRowTotal(rowId);
                     }
-                    
-                    calculateBreakRowTotal(rowId);
                 });
             });
             

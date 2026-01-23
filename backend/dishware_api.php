@@ -834,22 +834,74 @@ function updateBreakRecord() {
         $unit_price = $data['unit_price'] ?? $_POST['unit_price'] ?? $old_record['unit_price'];
         $total_price = $unit_price * $break_quantity;
         
+        // 检查是否更新了产品ID（dishware_id）
+        $new_dishware_id = $data['dishware_id'] ?? $_POST['dishware_id'] ?? $old_record['dishware_id'];
+        $dishware_id_changed = ($new_dishware_id != $old_record['dishware_id']);
+        
         $sql = "UPDATE dishware_break_records SET 
-                break_quantity = ?, unit_price = ?, total_price = ?, 
-                updated_at = CURRENT_TIMESTAMP
-                WHERE id = ?";
+                break_quantity = ?, unit_price = ?, total_price = ?";
+        
+        // 如果产品ID改变了，也更新它
+        if ($dishware_id_changed) {
+            $sql .= ", dishware_id = ?";
+        }
+        
+        $sql .= ", updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+        
+        $params = [$break_quantity, $unit_price, $total_price];
+        if ($dishware_id_changed) {
+            $params[] = $new_dishware_id;
+        }
+        $params[] = $id;
         
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            $break_quantity,
-            $unit_price,
-            $total_price,
-            $id
-        ]);
+        $stmt->execute($params);
         
-        // 更新库存（调整差异）- 使用新的动态餐厅结构
-        $quantity_diff = $break_quantity - $old_record['break_quantity'];
-        if ($quantity_diff != 0) {
+        // 如果产品ID改变了，需要调整两个产品的库存
+        if ($dishware_id_changed) {
+            // 首先根据shop_type找到对应的restaurant_id
+            $restaurant_sql = "SELECT id FROM dishware_restaurant_locations WHERE LOWER(name) = LOWER(?) AND is_active = 1";
+            $restaurant_stmt = $pdo->prepare($restaurant_sql);
+            $restaurant_stmt->execute([$old_record['shop_type']]);
+            $restaurant = $restaurant_stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($restaurant) {
+                // 恢复旧产品的库存（增加破损数量）
+                $restore_sql = "INSERT INTO dishware_stock_by_restaurant (dishware_id, restaurant_id, quantity) 
+                              VALUES (?, ?, COALESCE((SELECT quantity FROM dishware_stock_by_restaurant WHERE dishware_id = ? AND restaurant_id = ?), 0) + ?)
+                              ON DUPLICATE KEY UPDATE 
+                              quantity = quantity + ?,
+                              last_updated = CURRENT_TIMESTAMP";
+                $restore_stmt = $pdo->prepare($restore_sql);
+                $restore_stmt->execute([
+                    $old_record['dishware_id'],
+                    $restaurant['id'],
+                    $old_record['dishware_id'],
+                    $restaurant['id'],
+                    $old_record['break_quantity'],
+                    $old_record['break_quantity']
+                ]);
+                
+                // 减少新产品的库存（减少新破损数量）
+                $deduct_sql = "INSERT INTO dishware_stock_by_restaurant (dishware_id, restaurant_id, quantity) 
+                              VALUES (?, ?, GREATEST(0, COALESCE((SELECT quantity FROM dishware_stock_by_restaurant WHERE dishware_id = ? AND restaurant_id = ?), 0) - ?))
+                              ON DUPLICATE KEY UPDATE 
+                              quantity = GREATEST(0, quantity - ?),
+                              last_updated = CURRENT_TIMESTAMP";
+                $deduct_stmt = $pdo->prepare($deduct_sql);
+                $deduct_stmt->execute([
+                    $new_dishware_id,
+                    $restaurant['id'],
+                    $new_dishware_id,
+                    $restaurant['id'],
+                    $break_quantity,
+                    $break_quantity
+                ]);
+            }
+        } else {
+            // 更新库存（调整差异）- 使用新的动态餐厅结构
+            $quantity_diff = $break_quantity - $old_record['break_quantity'];
+            if ($quantity_diff != 0) {
             // 首先根据shop_type找到对应的restaurant_id
             $restaurant_sql = "SELECT id FROM dishware_restaurant_locations WHERE LOWER(name) = LOWER(?) AND is_active = 1";
             $restaurant_stmt = $pdo->prepare($restaurant_sql);
@@ -906,6 +958,7 @@ function updateBreakRecord() {
                 ]);
             } catch (PDOException $e) {
                 // 如果旧表不存在，忽略错误
+            }
             }
         }
         
