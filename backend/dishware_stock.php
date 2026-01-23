@@ -4123,12 +4123,7 @@ header('Expires: 0');
                     <tr data-id="${record.id}" data-shop="${shopId}">
                         <td class="text-center">${index + 1}</td>
                         <td class="text-center">${record.code_number || '-'}</td>
-                        <td class="text-center">
-                            <input type="number" class="quantity-input" 
-                                   value="${record.break_quantity}" 
-                                   onchange="updateBreakQuantity(${record.id}, this.value, '${shopId}')"
-                                   min="0" style="width: clamp(40px, 2.92vw, 56px);">
-                        </td>
+                        <td class="text-center"><span>${record.break_quantity}</span></td>
                         <td class="text-center">
                             <div class="currency-display">
                                 <span class="currency-symbol">RM</span>
@@ -4552,8 +4547,10 @@ header('Expires: 0');
             
             // 保存原始数据
             const originalCode = cells[1].textContent.trim();
-            const quantityInput = cells[2].querySelector('.quantity-input');
-            const originalQuantity = quantityInput ? quantityInput.value : '0';
+            const quantityEl = cells[2].querySelector('.quantity-input') || cells[2].querySelector('span');
+            const originalQuantity = quantityEl && quantityEl.classList.contains('quantity-input')
+                ? quantityEl.value
+                : (quantityEl ? quantityEl.textContent.trim() : '0');
             row.dataset.originalCode = originalCode;
             row.dataset.originalQuantity = originalQuantity;
             
@@ -4609,12 +4606,12 @@ header('Expires: 0');
                 </div>
             `;
             
-            // 数量列已经是输入框，保持可编辑状态
-            // 但需要确保可以编辑
-            if (quantityInput) {
-                quantityInput.readOnly = false;
-                quantityInput.style.background = 'transparent';
-            }
+            // 数量列：由 span 改为可编辑输入框（仅编辑模式下可改）
+            cells[2].innerHTML = `
+                <input type="number" class="quantity-input break-quantity-input" 
+                       value="${originalQuantity}" min="0" 
+                       style="width: clamp(40px, 2.92vw, 56px);">
+            `;
             
             // 替换操作按钮为保存和取消
             const actionCell = cells[5];
@@ -4749,12 +4746,7 @@ header('Expires: 0');
                     newRow.innerHTML = `
                         <td class="text-center">${index + 1}</td>
                         <td class="text-center">${record.code_number || '-'}</td>
-                        <td class="text-center">
-                            <input type="number" class="quantity-input" 
-                                   value="${record.break_quantity}" 
-                                   onchange="updateBreakQuantity(${record.id}, this.value, '${shopId}')"
-                                   min="0" style="width: clamp(40px, 2.92vw, 56px);">
-                        </td>
+                        <td class="text-center"><span>${record.break_quantity}</span></td>
                         <td class="text-center">
                             <div class="currency-display">
                                 <span class="currency-symbol">RM</span>
@@ -7935,18 +7927,7 @@ header('Expires: 0');
                     <tr data-id="${record.id}" data-shop="${shopId}" data-type="${record.record_type}" data-related="${record.related_record_id || ''}">
                         <td class="text-center">${index + 1}</td>
                         <td class="text-center">${record.code_number || '-'}</td>
-                        <td class="text-center">
-                            ${isInRecord ? 
-                                `<span>${record.quantity}</span>` :
-                                `<input type="number" class="quantity-input transfer-quantity-input" 
-                                       value="${record.quantity}" 
-                                       data-record-id="${record.id}"
-                                       data-shop-id="${shopId}"
-                                       data-original-value="${record.quantity}"
-                                       onchange="showTransferSaveButtons(${record.id}, '${shopId}')"
-                                       min="0" style="width: clamp(40px, 2.92vw, 56px);">`
-                            }
-                        </td>
+                        <td class="text-center"><span>${record.quantity}</span></td>
                         <td class="text-center">${transferDirection}</td>
                         <td class="text-center">
                             <div class="currency-display">
@@ -8476,8 +8457,10 @@ header('Expires: 0');
             
             // 保存原始数据
             const originalCode = cells[1].textContent.trim();
-            const quantityInput = cells[2].querySelector('.quantity-input, .transfer-quantity-input');
-            const originalQuantity = quantityInput ? quantityInput.value : '0';
+            const quantityEl = cells[2].querySelector('.quantity-input, .transfer-quantity-input') || cells[2].querySelector('span');
+            const originalQuantity = quantityEl && (quantityEl.classList.contains('quantity-input') || quantityEl.classList.contains('transfer-quantity-input'))
+                ? quantityEl.value
+                : (quantityEl ? quantityEl.textContent.trim() : '0');
             const originalToShop = row.dataset.toShop || '';
             row.dataset.originalCode = originalCode;
             row.dataset.originalQuantity = originalQuantity;
@@ -8535,11 +8518,12 @@ header('Expires: 0');
                 </div>
             `;
             
-            // 数量列已经是输入框，保持可编辑状态
-            if (quantityInput) {
-                quantityInput.readOnly = false;
-                quantityInput.style.background = 'transparent';
-            }
+            // 数量列：由 span 改为可编辑输入框（仅编辑模式下可改）
+            cells[2].innerHTML = `
+                <input type="number" class="quantity-input transfer-quantity-input" 
+                       id="${codeRowId}-qty" value="${originalQuantity}" min="0" 
+                       style="width: clamp(40px, 2.92vw, 56px);">
+            `;
             
             // 编辑进出列 - 改为下拉列表
             const toCell = cells[3];
@@ -8622,11 +8606,11 @@ header('Expires: 0');
                 bindBreakComboboxEvents(codeRowId);
             }, 100);
             
-            // 绑定数量输入框的change事件，自动计算总价
-            if (quantityInput) {
-                quantityInput.onchange = () => {
-                    calculateEditTransferTotal(codeRowId);
-                };
+            // 绑定数量输入框的 change 事件，自动计算总价
+            const qtyInput = document.getElementById(`${codeRowId}-qty`);
+            if (qtyInput) {
+                qtyInput.addEventListener('change', () => calculateEditTransferTotal(codeRowId));
+                qtyInput.addEventListener('input', () => calculateEditTransferTotal(codeRowId));
             }
             } catch (error) {
                 console.error('编辑转卖记录时发生错误:', error);
@@ -8789,18 +8773,7 @@ header('Expires: 0');
                     newRow.innerHTML = `
                         <td class="text-center">${index + 1}</td>
                         <td class="text-center">${record.code_number || '-'}</td>
-                        <td class="text-center">
-                            ${isOutRecord ? 
-                                `<input type="number" class="quantity-input transfer-quantity-input" 
-                                       value="${record.quantity}" 
-                                       data-record-id="${record.id}"
-                                       data-shop-id="${shopId}"
-                                       data-original-value="${record.quantity}"
-                                       onchange="showTransferSaveButtons(${record.id}, '${shopId}')"
-                                       min="0" style="width: clamp(40px, 2.92vw, 56px);">` :
-                                `<span>${record.quantity}</span>`
-                            }
-                        </td>
+                        <td class="text-center"><span>${record.quantity}</span></td>
                         <td class="text-center">${transferDirection}</td>
                         <td class="text-center">
                             <div class="currency-display">
