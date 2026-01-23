@@ -3856,6 +3856,81 @@ header('Expires: 0');
             }
         }
 
+        // 刷新单个餐厅的破损记录（保留新行）
+        async function refreshSingleRestaurantBreakRecords(shopType) {
+            try {
+                // 只加载对应餐厅的数据
+                const result = await apiCall(`?action=damage_records&shop_type=${shopType}`);
+                
+                if (result.success) {
+                    // 更新数据
+                    breakRecordsData[shopType] = result.data || [];
+                    
+                    // 找到对应的表格tbody
+                    const tbody = document.getElementById(`${shopType}-break-tbody`);
+                    if (!tbody) return;
+                    
+                    // 保存所有新行（.new-row）及其数据
+                    const newRows = Array.from(tbody.querySelectorAll('tr.new-row'));
+                    const newRowsData = newRows.map(row => {
+                        const codeInput = row.querySelector('.break-code-input');
+                        const quantityInput = row.querySelector('.break-quantity-input');
+                        const priceInput = row.querySelector('.break-price-input');
+                        const rowId = codeInput?.id?.replace('-code', '') || '';
+                        
+                        return {
+                            row: row.cloneNode(true), // 克隆节点
+                            rowId: rowId,
+                            code: codeInput?.value || '',
+                            quantity: quantityInput?.value || '',
+                            price: priceInput?.value || '',
+                            productId: codeInput?.dataset?.productId || ''
+                        };
+                    });
+                    
+                    // 重新渲染该餐厅的表格行（不包括新行）
+                    const records = breakRecordsData[shopType] || [];
+                    const rowsHtml = renderBreakRecordsRows(records, shopType);
+                    
+                    // 清空tbody并添加已保存的记录
+                    tbody.innerHTML = rowsHtml;
+                    
+                    // 重新添加所有新行
+                    newRowsData.forEach(({ row, rowId, code, quantity, price, productId }) => {
+                        if (row && rowId) {
+                            // 恢复输入框的值
+                            const clonedCodeInput = row.querySelector('.break-code-input');
+                            const clonedQuantityInput = row.querySelector('.break-quantity-input');
+                            const clonedPriceInput = row.querySelector('.break-price-input');
+                            
+                            if (clonedCodeInput) {
+                                clonedCodeInput.value = code;
+                                if (productId) {
+                                    clonedCodeInput.dataset.productId = productId;
+                                    clonedCodeInput.setAttribute('data-product-id', productId);
+                                }
+                            }
+                            if (clonedQuantityInput) {
+                                clonedQuantityInput.value = quantity;
+                            }
+                            if (clonedPriceInput) {
+                                clonedPriceInput.value = price;
+                            }
+                            
+                            tbody.appendChild(row);
+                            
+                            // 重新绑定事件
+                            setTimeout(() => {
+                                bindBreakComboboxEvents(rowId);
+                            }, 100);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('刷新单个餐厅破损记录时发生错误:', error);
+            }
+        }
+
         // 渲染合并的破损记录页面
         function renderMergedBreakRecordsPage() {
             // 更新所有可能的容器
@@ -5060,7 +5135,8 @@ header('Expires: 0');
                 
                 if (result.success) {
                     showAlert('破损记录添加成功', 'success');
-                    // 移除新行 - 使用 code 输入框来找到行
+                    
+                    // 移除当前保存的行
                     const codeInput = document.getElementById(`${rowId}-code`);
                     if (codeInput) {
                         const row = codeInput.closest('tr');
@@ -5070,11 +5146,18 @@ header('Expires: 0');
                             if (closeHandler) {
                                 document.removeEventListener('click', closeHandler);
                             }
+                            // 移除下拉列表（如果在body下）
+                            const codeDropdown = document.getElementById(`${rowId}-code-dropdown`);
+                            if (codeDropdown && codeDropdown.parentElement === document.body) {
+                                document.body.removeChild(codeDropdown);
+                            }
                             row.remove();
                         }
                     }
-                    // 刷新破损记录数据
-                    loadAllBreakRecords();
+                    
+                    // 只刷新对应餐厅的数据，保留其他新行
+                    refreshSingleRestaurantBreakRecords(shopType);
+                    
                     // 刷新总库存
                     if (document.getElementById('stock-table')) {
                         loadStockData(true, false);
