@@ -2172,6 +2172,12 @@ header('Expires: 0');
             z-index: 1; /* 低层级，确保下拉列表可以覆盖 */
         }
 
+        /* 确保输入框的占位符文本不会覆盖下拉列表 */
+        .combobox-input::placeholder {
+            z-index: 0;
+            position: relative;
+        }
+
         .combobox-input:focus {
             background: #f0f0f0;
             border-radius: 2px;
@@ -2202,6 +2208,9 @@ header('Expires: 0');
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             width: clamp(60px, 5.21vw, 100px); /* 使用 clamp 设置宽度 */
             pointer-events: auto !important; /* 确保可以点击 */
+            /* 确保下拉列表在body下时也能正确显示 */
+            margin: 0;
+            padding: 0;
         }
 
         .combobox-dropdown.show {
@@ -4846,14 +4855,24 @@ header('Expires: 0');
             
             if (!codeInput || !codeDropdown || !container) return;
             
+            // 将下拉列表移到body下，避免被表格元素覆盖
+            if (codeDropdown.parentElement !== document.body) {
+                document.body.appendChild(codeDropdown);
+            }
+            
             // 显示下拉（使用 fixed 定位）
             const showDropdown = () => {
                 const rect = codeInput.getBoundingClientRect();
+                // 确保下拉列表在body下
+                if (codeDropdown.parentElement !== document.body) {
+                    document.body.appendChild(codeDropdown);
+                }
                 codeDropdown.style.position = 'fixed';
                 codeDropdown.style.top = (rect.bottom + window.scrollY) + 'px';
                 codeDropdown.style.left = rect.left + 'px';
                 codeDropdown.style.zIndex = '2147483647'; // 使用最大z-index值
                 codeDropdown.style.backgroundColor = 'white'; // 确保背景色
+                codeDropdown.style.width = codeDropdown.style.width || 'clamp(60px, 5.21vw, 100px)';
                 // 使用 CSS clamp，不需要设置 JavaScript 宽度
                 codeDropdown.classList.add('show');
                 filterBreakComboboxOptions(codeInput, codeDropdown);
@@ -4880,6 +4899,10 @@ header('Expires: 0');
                     codeInput.dataset.productId = productId;
                     codeInput.setAttribute('data-product-id', productId);
                     codeDropdown.classList.remove('show');
+                    // 选择后将下拉列表移回原位置
+                    if (codeDropdown.parentElement === document.body && codeDropdown._originalParent) {
+                        codeDropdown._originalParent.appendChild(codeDropdown);
+                    }
                     
                     // 如果是编辑模式，需要找到对应的价格输入框
                     const row = codeInput.closest('tr');
@@ -4923,6 +4946,10 @@ header('Expires: 0');
             const closeHandler = (e) => {
                 if (!container.contains(e.target) && !codeDropdown.contains(e.target)) {
                     codeDropdown.classList.remove('show');
+                    // 关闭时将下拉列表移回原位置
+                    if (codeDropdown.parentElement === document.body && container) {
+                        container.appendChild(codeDropdown);
+                    }
                 }
             };
             setTimeout(() => {
@@ -4934,6 +4961,10 @@ header('Expires: 0');
             const updatePosition = () => {
                 if (codeDropdown.classList.contains('show')) {
                     const rect = codeInput.getBoundingClientRect();
+                    // 确保下拉列表在body下
+                    if (codeDropdown.parentElement !== document.body) {
+                        document.body.appendChild(codeDropdown);
+                    }
                     codeDropdown.style.position = 'fixed';
                     codeDropdown.style.top = (rect.bottom + window.scrollY) + 'px';
                     codeDropdown.style.left = rect.left + 'px';
@@ -4944,6 +4975,9 @@ header('Expires: 0');
             };
             window.addEventListener('scroll', updatePosition, true);
             window.addEventListener('resize', updatePosition);
+            
+            // 保存原始父元素引用，以便关闭时移回
+            codeDropdown._originalParent = container;
         }
 
         // 过滤combobox选项
