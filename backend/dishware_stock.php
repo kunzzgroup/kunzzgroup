@@ -4082,12 +4082,18 @@ header('Expires: 0');
                 const shopType = restaurant.name.toLowerCase();
                 const records = breakRecordsData[shopType] || [];
                 
+                // 计算总破损金额
+                const totalBreakAmount = records.reduce((sum, record) => {
+                    return sum + (parseFloat(record.total_price) || 0);
+                }, 0);
+                
                 html += `
                     <div class="break-record-section">
                         <div class="break-record-header">
                             <div style="display: flex; align-items: center; gap: 12px;">
                                 <span>${restaurant.name}破损</span>
                                 <span style="font-size: 12px; opacity: 0.9;">(${records.length} 项)</span>
+                                <span style="font-size: 12px; opacity: 0.9;">总破损：RM ${formatCurrency(totalBreakAmount)}</span>
                             </div>
                             <button class="btn btn-success" onclick="openBreakRowsModal('${shopType}')" style="padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
                                 <i class="fas fa-plus"></i> 记录破损
