@@ -7921,13 +7921,13 @@ header('Expires: 0');
                         <td class="text-center">${transferDirection}</td>
                         <td class="text-center">
                             <div class="currency-display">
-                                <span class="currency-symbol">RM</span>
+                                <span class="currency-symbol" style="color: ${priceColor};">RM</span>
                                 <span class="currency-amount" style="color: ${priceColor};">${formatCurrency(record.unit_price || 0)}</span>
                             </div>
                         </td>
                         <td class="text-center">
                             <div class="currency-display">
-                                <span class="currency-symbol">RM</span>
+                                <span class="currency-symbol" style="color: ${priceColor};">RM</span>
                                 <span class="currency-amount" style="color: ${priceColor};">${formatCurrency(record.total_price || 0)}</span>
                             </div>
                         </td>
@@ -8775,13 +8775,13 @@ header('Expires: 0');
                         <td class="text-center">${transferDirection}</td>
                         <td class="text-center">
                             <div class="currency-display">
-                                <span class="currency-symbol">RM</span>
+                                <span class="currency-symbol" style="color: ${priceColor};">RM</span>
                                 <span class="currency-amount" style="color: ${priceColor};">${formatCurrency(record.unit_price || 0)}</span>
                             </div>
                         </td>
                         <td class="text-center">
                             <div class="currency-display">
-                                <span class="currency-symbol">RM</span>
+                                <span class="currency-symbol" style="color: ${priceColor};">RM</span>
                                 <span class="currency-amount" style="color: ${priceColor};">${formatCurrency(record.total_price || 0)}</span>
                             </div>
                         </td>
