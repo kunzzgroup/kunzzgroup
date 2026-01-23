@@ -2123,6 +2123,19 @@ header('Expires: 0');
             background-color: #f3f4f6;
         }
 
+        /* 转卖记录下拉列表样式 - 居中选项 */
+        .transfer-to-select,
+        .transfer-to-select-edit {
+            text-align: center !important;
+            text-align-last: center !important; /* 居中最后一行（选中的选项） */
+        }
+
+        .transfer-to-select option,
+        .transfer-to-select-edit option {
+            text-align: center !important;
+            padding: 4px 8px;
+        }
+
         /* 新行样式 */
         .break-record-table tr.new-row {
             background-color: #e8f5e9;
@@ -8067,7 +8080,7 @@ header('Expires: 0');
                 return name.startsWith('j') && name !== shopType;
             });
             jRestaurants.forEach(r => {
-                restaurantOptions += `<option value="${r.name.toLowerCase()}">${r.name}</option>`;
+                restaurantOptions += `<option value="${r.name.toLowerCase()}" style="text-align: center;">${r.name}</option>`;
             });
             
             row.innerHTML = `
@@ -8099,8 +8112,8 @@ header('Expires: 0');
                            style="width: 100%; padding: 4px 8px; border: none; background: transparent; text-align: center; outline: none;">
                 </td>
                 <td class="text-center">
-                    <select class="transfer-to-select" id="${rowId}-to" style="width: 100%; padding: 4px 8px; border: none; background: transparent; text-align: center; outline: none; font-size: clamp(8px, 0.74vw, 14px);">
-                        <option value="">选择餐厅</option>
+                    <select class="transfer-to-select" id="${rowId}-to" style="width: 100%; padding: 4px 8px; border: none; background: transparent; text-align: center; text-align-last: center; outline: none; font-size: clamp(8px, 0.74vw, 14px);">
+                        <option value="" style="text-align: center;">选择餐厅</option>
                         ${restaurantOptions}
                     </select>
                 </td>
@@ -8539,11 +8552,11 @@ header('Expires: 0');
             const currentToShop = record.to_shop_type || record.to_shop_type || '';
             jRestaurants.forEach(r => {
                 const rName = r.name.toLowerCase();
-                restaurantOptions += `<option value="${rName}" ${rName === currentToShop ? 'selected' : ''}>${r.name}</option>`;
+                restaurantOptions += `<option value="${rName}" ${rName === currentToShop ? 'selected' : ''} style="text-align: center;">${r.name}</option>`;
             });
             toCell.innerHTML = `
-                <select class="transfer-to-select-edit" id="${codeRowId}-to" style="width: 100%; padding: 4px 8px; border: none; background: transparent; text-align: center; outline: none; font-size: clamp(8px, 0.74vw, 14px);">
-                    <option value="">选择餐厅</option>
+                <select class="transfer-to-select-edit" id="${codeRowId}-to" style="width: 100%; padding: 4px 8px; border: none; background: transparent; text-align: center; text-align-last: center; outline: none; font-size: clamp(8px, 0.74vw, 14px);">
+                    <option value="" style="text-align: center;">选择餐厅</option>
                     ${restaurantOptions}
                 </select>
             `;
