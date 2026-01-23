@@ -5509,7 +5509,19 @@ header('Expires: 0');
                     }
                     
                     // 只刷新对应餐厅的数据，保留其他新行
-                    refreshSingleRestaurantBreakRecords(shopType);
+                    // 添加延迟确保后端数据已提交
+                    setTimeout(async () => {
+                        await refreshSingleRestaurantBreakRecords(shopType);
+                        
+                        // 验证记录是否已加载
+                        const records = breakRecordsData[shopType] || [];
+                        const savedRecordId = result.data?.id;
+                        if (savedRecordId && !records.find(r => r.id == savedRecordId)) {
+                            console.warn('保存的记录未在刷新后找到，尝试重新加载所有记录');
+                            // 如果刷新后找不到新记录，重新加载所有记录
+                            loadAllBreakRecords();
+                        }
+                    }, 300);
                     
                     // 刷新总库存
                     if (document.getElementById('stock-table')) {

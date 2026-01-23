@@ -776,44 +776,60 @@ function addBreakRecord() {
         
         if ($restaurant) {
             // 使用新的动态餐厅结构更新库存
-            $update_sql = "INSERT INTO dishware_stock_by_restaurant (dishware_id, restaurant_id, quantity) 
-                          VALUES (?, ?, GREATEST(0, COALESCE((SELECT quantity FROM dishware_stock_by_restaurant WHERE dishware_id = ? AND restaurant_id = ?), 0) - ?))
-                          ON DUPLICATE KEY UPDATE 
-                          quantity = GREATEST(0, quantity - ?),
-                          last_updated = CURRENT_TIMESTAMP";
-            
-            $update_stmt = $pdo->prepare($update_sql);
-            $update_stmt->execute([
-                $postData['dishware_id'],
-                $restaurant['id'],
-                $postData['dishware_id'],
-                $restaurant['id'],
-                $postData['break_quantity'],
-                $postData['break_quantity']
-            ]);
+            try {
+                $update_sql = "INSERT INTO dishware_stock_by_restaurant (dishware_id, restaurant_id, quantity) 
+                              VALUES (?, ?, GREATEST(0, COALESCE((SELECT quantity FROM dishware_stock_by_restaurant WHERE dishware_id = ? AND restaurant_id = ?), 0) - ?))
+                              ON DUPLICATE KEY UPDATE 
+                              quantity = GREATEST(0, quantity - ?),
+                              last_updated = CURRENT_TIMESTAMP";
+                
+                $update_stmt = $pdo->prepare($update_sql);
+                $update_stmt->execute([
+                    $postData['dishware_id'],
+                    $restaurant['id'],
+                    $postData['dishware_id'],
+                    $restaurant['id'],
+                    $postData['break_quantity'],
+                    $postData['break_quantity']
+                ]);
+            } catch (PDOException $e) {
+                // 记录错误但不回滚事务，确保破损记录能保存
+                error_log("更新库存失败 (新表): " . $e->getMessage() . " - shop_type: " . $postData['shop_type'] . ", restaurant_id: " . ($restaurant['id'] ?? 'null'));
+            }
+        } else {
+            // 如果找不到restaurant_id，记录警告
+            error_log("警告: 找不到对应的restaurant_id - shop_type: " . $postData['shop_type']);
         }
         
-        // 为了向后兼容，同时更新旧表（如果存在）
+        // 为了向后兼容，同时更新旧表（如果存在）- 仅对j1, j2, j3有效
         $stock_field = $postData['shop_type'] . '_quantity';
-        try {
-            $old_update_sql = "UPDATE dishware_stock SET 
-                             $stock_field = GREATEST(0, $stock_field - ?),
-                             last_updated = CURRENT_TIMESTAMP
-                             WHERE dishware_id = ?";
-            $old_update_stmt = $pdo->prepare($old_update_sql);
-            $old_update_stmt->execute([
-                $postData['break_quantity'],
-                $postData['dishware_id']
-            ]);
-        } catch (PDOException $e) {
-            // 如果旧表不存在，忽略错误
+        if (in_array(strtolower($postData['shop_type']), ['j1', 'j2', 'j3'])) {
+            try {
+                $old_update_sql = "UPDATE dishware_stock SET 
+                                 $stock_field = GREATEST(0, $stock_field - ?),
+                                 last_updated = CURRENT_TIMESTAMP
+                                 WHERE dishware_id = ?";
+                $old_update_stmt = $pdo->prepare($old_update_sql);
+                $old_update_stmt->execute([
+                    $postData['break_quantity'],
+                    $postData['dishware_id']
+                ]);
+            } catch (PDOException $e) {
+                // 如果旧表不存在或字段不存在，忽略错误
+                error_log("更新库存失败 (旧表): " . $e->getMessage());
+            }
         }
         
         $pdo->commit();
+        
+        // 记录成功日志
+        error_log("添加破损记录成功 - ID: $record_id, shop_type: " . $postData['shop_type'] . ", dishware_id: " . $postData['dishware_id']);
+        
         sendResponse(true, "添加破损记录成功", ['id' => $record_id]);
         
     } catch (PDOException $e) {
         $pdo->rollBack();
+        error_log("添加破损记录失败: " . $e->getMessage() . " - shop_type: " . ($postData['shop_type'] ?? 'null') . ", dishware_id: " . ($postData['dishware_id'] ?? 'null'));
         sendResponse(false, "添加破损记录失败：" . $e->getMessage());
     }
 }
