@@ -8521,54 +8521,43 @@ header('Expires: 0');
                 </div>
             `;
             
-            // 获取记录类型以设置颜色
-            const isOutRecord = record.record_type === 'out';
-            
             // 数量列：使用 contenteditable span（直接编辑，不显示输入框）
             cells[2].innerHTML = `
                 <span contenteditable="true" class="editable-quantity" 
                       id="${codeRowId}-qty"
-                      style="display: inline-block; min-width: 40px; padding: 2px 4px; border: 1px solid #d1d5db; border-radius: 4px; background: #fff; outline: none; text-align: center; font-size: clamp(8px, 0.74vw, 14px);"
+                      style="display: inline-block; min-width: 40px; padding: 2px 4px; border: 1px solid #ccc; border-radius: 4px; background: #fff; outline: none; text-align: center;"
                       oninput="this.textContent = this.textContent.replace(/[^0-9.]/g, ''); calculateEditTransferTotal('${codeRowId}');">${originalQuantity}</span>
             `;
             
-            // 编辑进出列 - 改为下拉列表（仅转卖记录可编辑）
+            // 编辑进出列 - 改为下拉列表
             const toCell = cells[3];
-            if (isOutRecord) {
-                let restaurantOptions = '';
-                const jRestaurants = window.jRestaurantsForTransfer || restaurants.filter(r => {
-                    const name = r.name.toLowerCase();
-                    return name.startsWith('j') && name !== shopId;
-                });
-                const currentToShop = record.to_shop_type || '';
-                jRestaurants.forEach(r => {
-                    const rName = r.name.toLowerCase();
-                    restaurantOptions += `<option value="${rName}" ${rName === currentToShop ? 'selected' : ''}>${r.name}</option>`;
-                });
-                toCell.innerHTML = `
-                    <select class="transfer-to-select-edit" id="${codeRowId}-to" 
-                            style="width: 100%; padding: 4px 24px 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; background: #fff; text-align: center; outline: none; font-size: clamp(8px, 0.74vw, 14px); cursor: pointer; appearance: none; -webkit-appearance: none; -moz-appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"10\" viewBox=\"0 0 10 10\"><path fill=\"%23666\" d=\"M5 7L1 3h8z\"/></svg>'); background-repeat: no-repeat; background-position: right 6px center;">
-                        <option value="">选择餐厅</option>
-                        ${restaurantOptions}
-                    </select>
-                `;
-            } else {
-                // 来自记录不可编辑
-                toCell.innerHTML = `<span>${record.from_restaurant_name || record.from_shop_type.toUpperCase()}</span>`;
-            }
+            let restaurantOptions = '';
+            const jRestaurants = window.jRestaurantsForTransfer || restaurants.filter(r => {
+                const name = r.name.toLowerCase();
+                return name.startsWith('j') && name !== shopId;
+            });
+            const currentToShop = record.to_shop_type || record.to_shop_type || '';
+            jRestaurants.forEach(r => {
+                const rName = r.name.toLowerCase();
+                restaurantOptions += `<option value="${rName}" ${rName === currentToShop ? 'selected' : ''}>${r.name}</option>`;
+            });
+            toCell.innerHTML = `
+                <select class="transfer-to-select-edit" id="${codeRowId}-to" style="width: 100%; padding: 4px 8px; border: none; background: transparent; text-align: center; outline: none; font-size: clamp(8px, 0.74vw, 14px);">
+                    <option value="">选择餐厅</option>
+                    ${restaurantOptions}
+                </select>
+            `;
             
             // 编辑单价列 - 改为可编辑输入框
             const priceCell = cells[4];
             const currentPrice = parseFloat(record.unit_price) || 0;
-            const priceColor = isOutRecord ? '#dc3545' : '#000000';
             priceCell.innerHTML = `
                 <div class="currency-display">
-                    <span class="currency-symbol" style="color: ${priceColor};">RM</span>
+                    <span class="currency-symbol">RM</span>
                     <input type="text" class="break-price-input" id="${codeRowId}-price" 
                            value="${currentPrice.toFixed(2)}" 
                            onblur="calculateEditTransferTotal('${codeRowId}')" 
-                           oninput="calculateEditTransferTotal('${codeRowId}')"
-                           style="width: 80px; border: 1px solid #d1d5db; border-radius: 4px; background: #fff; text-align: center; outline: none; padding: 2px 4px; font-size: clamp(8px, 0.74vw, 14px); color: ${priceColor};">
+                           style="width: 80px; border: none; background: transparent; text-align: center; outline: none;">
                 </div>
             `;
             
@@ -8577,8 +8566,8 @@ header('Expires: 0');
             const currentTotal = parseFloat(record.total_price) || 0;
             totalCell.innerHTML = `
                 <div class="currency-display">
-                    <span class="currency-symbol" style="color: ${priceColor};">RM</span>
-                    <span class="currency-amount" id="${codeRowId}-total" style="color: ${priceColor}; font-size: clamp(8px, 0.74vw, 14px);">${currentTotal.toFixed(2)}</span>
+                    <span class="currency-symbol">RM</span>
+                    <span class="currency-amount" id="${codeRowId}-total">${currentTotal.toFixed(2)}</span>
                 </div>
             `;
             
@@ -8644,15 +8633,6 @@ header('Expires: 0');
             const price = parseFloat(priceInput.value) || 0;
             const total = quantity * price;
             totalSpan.textContent = total.toFixed(2);
-            
-            // 保持总价颜色与单价一致
-            const recordType = row.dataset.type;
-            const priceColor = recordType === 'out' ? '#dc3545' : '#000000';
-            totalSpan.style.color = priceColor;
-            const totalSymbol = totalSpan.parentElement.querySelector('.currency-symbol');
-            if (totalSymbol) {
-                totalSymbol.style.color = priceColor;
-            }
         }
         
         // 保存编辑的转卖记录
