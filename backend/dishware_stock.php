@@ -1003,8 +1003,13 @@ header('Expires: 0');
             padding: clamp(2px, 0.31vw, 4px) clamp(4px, 0.42vw, 8px);
             border: 1px solid #d1d5db;
             border-radius: 4px;
-            text-align: center;
+            text-align: center !important; /* 确保数字居中 */
             font-size: clamp(8px, 0.74vw, 12px); /* 使用响应式字体大小 */
+        }
+
+        /* 破损记录表格中的数量输入框 */
+        .break-record-table .quantity-input {
+            text-align: center !important; /* 确保数字居中 */
         }
 
         .quantity-input:focus {
@@ -2096,6 +2101,7 @@ header('Expires: 0');
             font-size: clamp(8px, 0.74vw, 14px); /* 使用响应式字体大小，与其他行一致 */
             box-sizing: border-box;
             outline: none;
+            text-align: center; /* 确保数字居中 */
         }
 
         .break-record-table tr.new-row input:focus,
@@ -3917,7 +3923,7 @@ header('Expires: 0');
                             <input type="number" class="quantity-input" 
                                    value="${record.break_quantity}" 
                                    onchange="updateBreakQuantity(${record.id}, this.value, '${shopId}')"
-                                   min="0" style="width: clamp(40px, 2.92vw, 56px);">
+                                   min="0" style="width: clamp(40px, 2.92vw, 56px); text-align: center !important;">
                         </td>
                         <td class="text-center">
                             <div class="currency-display">
@@ -4543,7 +4549,7 @@ header('Expires: 0');
                             <input type="number" class="quantity-input" 
                                    value="${record.break_quantity}" 
                                    onchange="updateBreakQuantity(${record.id}, this.value, '${shopId}')"
-                                   min="0" style="width: clamp(40px, 2.92vw, 56px);">
+                                   min="0" style="width: clamp(40px, 2.92vw, 56px); text-align: center !important;">
                         </td>
                         <td class="text-center">
                             <div class="currency-display">
