@@ -3917,7 +3917,7 @@ header('Expires: 0');
                             <input type="number" class="quantity-input" 
                                    value="${record.break_quantity}" 
                                    onchange="updateBreakQuantity(${record.id}, this.value, '${shopId}')"
-                                   min="0" style="width: clamp(40px, 3.13vw, 60px);">
+                                   min="0" style="width: clamp(40px, 2.92vw, 56px);">
                         </td>
                         <td class="text-center">
                             <div class="currency-display">
@@ -4543,7 +4543,7 @@ header('Expires: 0');
                             <input type="number" class="quantity-input" 
                                    value="${record.break_quantity}" 
                                    onchange="updateBreakQuantity(${record.id}, this.value, '${shopId}')"
-                                   min="0" style="width: clamp(40px, 3.13vw, 60px);">
+                                   min="0" style="width: clamp(40px, 2.92vw, 56px);">
                         </td>
                         <td class="text-center">
                             <div class="currency-display">
