@@ -7904,9 +7904,15 @@ header('Expires: 0');
                         };
                     });
                     
+                    // 根据过滤状态筛选记录
+                    const allRecords = transferRecordsData[shopType] || [];
+                    const filterType = transferFilterState[shopType] || 'all';
+                    const filteredRecords = filterType === 'all' 
+                        ? allRecords 
+                        : allRecords.filter(r => r.record_type === filterType);
+                    
                     // 重新渲染该餐厅的表格行（不包括新行）
-                    const records = transferRecordsData[shopType] || [];
-                    const rowsHtml = renderTransferRecordsRows(records, shopType);
+                    const rowsHtml = renderTransferRecordsRows(filteredRecords, shopType);
                     
                     // 清空tbody并添加已保存的记录
                     tbody.innerHTML = rowsHtml;
@@ -7994,7 +8000,22 @@ header('Expires: 0');
             
             jRestaurants.forEach(restaurant => {
                 const shopType = restaurant.name.toLowerCase();
-                const records = transferRecordsData[shopType] || [];
+                const allRecords = transferRecordsData[shopType] || [];
+                
+                // 初始化过滤状态
+                if (!transferFilterState[shopType]) {
+                    transferFilterState[shopType] = 'all';
+                }
+                
+                // 根据过滤状态筛选记录
+                const filterType = transferFilterState[shopType];
+                const records = filterType === 'all' 
+                    ? allRecords 
+                    : allRecords.filter(r => r.record_type === filterType);
+                
+                // 计算转卖和来自的数量
+                const outCount = allRecords.filter(r => r.record_type === 'out').length;
+                const inCount = allRecords.filter(r => r.record_type === 'in').length;
                 
                 html += `
                     <div class="break-record-section">
@@ -8002,6 +8023,23 @@ header('Expires: 0');
                             <div style="display: flex; align-items: center; gap: 12px;">
                                 <span>${restaurant.name}转卖</span>
                                 <span style="font-size: 12px; opacity: 0.9;">(${records.length} 项)</span>
+                                <div style="display: flex; gap: 4px; margin-left: 8px;">
+                                    <button class="btn ${filterType === 'all' ? 'btn-primary' : 'btn-secondary'}" 
+                                            onclick="setTransferFilter('${shopType}', 'all')" 
+                                            style="padding: clamp(2px, 0.21vw, 4px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
+                                        全部 (${allRecords.length})
+                                    </button>
+                                    <button class="btn ${filterType === 'out' ? 'btn-primary' : 'btn-secondary'}" 
+                                            onclick="setTransferFilter('${shopType}', 'out')" 
+                                            style="padding: clamp(2px, 0.21vw, 4px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
+                                        转卖 (${outCount})
+                                    </button>
+                                    <button class="btn ${filterType === 'in' ? 'btn-primary' : 'btn-secondary'}" 
+                                            onclick="setTransferFilter('${shopType}', 'in')" 
+                                            style="padding: clamp(2px, 0.21vw, 4px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
+                                        来自 (${inCount})
+                                    </button>
+                                </div>
                             </div>
                             <button class="btn btn-success" onclick="openTransferRowsModal('${shopType}')" style="padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
                                 <i class="fas fa-plus"></i> 转卖碗碟
@@ -8097,6 +8135,9 @@ header('Expires: 0');
 
         // 当前选中的餐厅类型（用于创建新行）
         let currentTransferShopType = null;
+        
+        // 转卖记录过滤状态：'all' = 全部, 'out' = 转卖, 'in' = 来自
+        const transferFilterState = {};
 
         // 打开转卖记录行数选择弹窗
         function openTransferRowsModal(shopType) {
@@ -8154,6 +8195,111 @@ header('Expires: 0');
             }, 100);
             
             showAlert(`成功创建 ${rowsCount} 行记录`, 'success');
+        }
+
+        // 设置转卖记录过滤状态
+        function setTransferFilter(shopType, filterType) {
+            transferFilterState[shopType] = filterType;
+            
+            // 重新渲染该餐厅的表格
+            const tbody = document.getElementById(`${shopType}-transfer-tbody`);
+            if (!tbody) return;
+            
+            // 保存所有新行（.new-row）及其数据
+            const newRows = Array.from(tbody.querySelectorAll('tr.new-row'));
+            const newRowsData = newRows.map(row => {
+                const codeInput = row.querySelector('.break-code-input');
+                const quantityInput = row.querySelector('.break-quantity-input');
+                const toSelect = row.querySelector('.transfer-to-select');
+                const rowId = codeInput?.id?.replace('-code', '') || '';
+                const priceSpan = rowId ? row.querySelector(`#${rowId}-price`) : null;
+                const totalSpan = rowId ? row.querySelector(`#${rowId}-total`) : null;
+                
+                return {
+                    row: row.cloneNode(true),
+                    rowId: rowId,
+                    code: codeInput?.value || '',
+                    quantity: quantityInput?.value || '',
+                    price: priceSpan?.textContent?.trim() || '0.00',
+                    total: totalSpan?.textContent?.trim() || '0.00',
+                    toShop: toSelect?.value || '',
+                    productId: codeInput?.dataset?.productId || ''
+                };
+            });
+            
+            // 根据过滤状态筛选记录
+            const allRecords = transferRecordsData[shopType] || [];
+            const filteredRecords = filterType === 'all' 
+                ? allRecords 
+                : allRecords.filter(r => r.record_type === filterType);
+            
+            // 重新渲染表格行
+            const rowsHtml = renderTransferRecordsRows(filteredRecords, shopType);
+            tbody.innerHTML = rowsHtml;
+            
+            // 重新添加所有新行
+            newRowsData.forEach(({ row, rowId, code, quantity, price, total, toShop, productId }) => {
+                if (row && rowId) {
+                    const clonedCodeInput = row.querySelector('.break-code-input');
+                    const clonedQuantityInput = row.querySelector('.break-quantity-input');
+                    const clonedPriceSpan = row.querySelector(`#${rowId}-price`);
+                    const clonedTotalSpan = row.querySelector(`#${rowId}-total`);
+                    const clonedToSelect = row.querySelector('.transfer-to-select');
+                    
+                    if (clonedCodeInput) {
+                        clonedCodeInput.value = code;
+                        if (productId) {
+                            clonedCodeInput.dataset.productId = productId;
+                            clonedCodeInput.setAttribute('data-product-id', productId);
+                        }
+                    }
+                    if (clonedQuantityInput) {
+                        clonedQuantityInput.value = quantity;
+                    }
+                    if (clonedPriceSpan) {
+                        clonedPriceSpan.textContent = price;
+                    }
+                    if (clonedTotalSpan) {
+                        clonedTotalSpan.textContent = total;
+                    }
+                    if (clonedToSelect) {
+                        clonedToSelect.value = toShop;
+                    }
+                    
+                    tbody.appendChild(row);
+                    
+                    setTimeout(() => {
+                        bindBreakComboboxEvents(rowId);
+                    }, 100);
+                }
+            });
+            
+            // 更新标题中的项数和按钮状态
+            const header = document.querySelector(`#${shopType}-transfer-table`)?.closest('.break-record-section')?.querySelector('.break-record-header');
+            if (header) {
+                const allRecords = transferRecordsData[shopType] || [];
+                const outCount = allRecords.filter(r => r.record_type === 'out').length;
+                const inCount = allRecords.filter(r => r.record_type === 'in').length;
+                
+                // 更新项数显示
+                const countSpan = header.querySelector('span[style*="font-size: 12px"]');
+                if (countSpan) {
+                    countSpan.textContent = `(${filteredRecords.length} 项)`;
+                }
+                
+                // 更新按钮状态
+                const buttons = header.querySelectorAll('button[onclick*="setTransferFilter"]');
+                buttons.forEach(btn => {
+                    const onclick = btn.getAttribute('onclick');
+                    if (onclick.includes("'all'")) {
+                        btn.className = filterType === 'all' ? 'btn btn-primary' : 'btn btn-secondary';
+                    } else if (onclick.includes("'out'")) {
+                        btn.className = filterType === 'out' ? 'btn btn-primary' : 'btn btn-secondary';
+                    } else if (onclick.includes("'in'")) {
+                        btn.className = filterType === 'in' ? 'btn btn-primary' : 'btn btn-secondary';
+                    }
+                });
+            }
         }
 
         // 添加新行到转卖记录表格
