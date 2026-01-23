@@ -2006,6 +2006,17 @@ header('Expires: 0');
             /* 确保至少显示三个容器，每个容器最小宽度 */
             min-width: calc(3 * 600px + 2 * 20px + 40px); /* 3个容器 + 2个gap + padding */
         }
+        
+        /* 转卖页面选择单个餐厅时的样式 */
+        #transfer-records-container.single-restaurant {
+            justify-content: center;
+            min-width: auto;
+            width: 100%;
+        }
+        
+        #transfer-records-container.single-restaurant .break-record-section {
+            margin: 0 auto;
+        }
 
         .break-record-section {
             background: white;
@@ -5605,16 +5616,30 @@ header('Expires: 0');
         // 根据选择的餐厅过滤转卖记录
         function filterTransferRecordsByRestaurant() {
             const container = document.getElementById('transfer-records-container');
+            const scrollContainer = container?.closest('.table-scroll-container');
             if (!container) return;
             
             if (!transferRestaurantFilter) {
-                // 显示所有餐厅
+                // 显示所有餐厅，恢复原始布局
+                container.classList.remove('single-restaurant');
+                if (scrollContainer) {
+                    scrollContainer.style.overflowX = 'auto';
+                    scrollContainer.style.overflowY = 'visible';
+                }
+                
                 const sections = container.querySelectorAll('.break-record-section');
                 sections.forEach(section => {
                     section.style.display = '';
+                    section.style.margin = '';
                 });
             } else {
-                // 只显示选中的餐厅
+                // 只显示选中的餐厅，居中显示
+                container.classList.add('single-restaurant');
+                if (scrollContainer) {
+                    scrollContainer.style.overflowX = 'hidden';
+                    scrollContainer.style.overflowY = 'visible';
+                }
+                
                 const sections = container.querySelectorAll('.break-record-section');
                 sections.forEach(section => {
                     const header = section.querySelector('.break-record-header');
