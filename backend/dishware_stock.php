@@ -7946,11 +7946,14 @@ header('Expires: 0');
                 // 根据记录类型设置价格颜色：转卖（out）=红色，来自（in）=绿色
                 const priceColor = isOutRecord ? '#dc3545' : '#000000';
                 
+                // 转卖（out）记录的数量显示为负数
+                const displayQuantity = isOutRecord ? `-${record.quantity}` : record.quantity;
+                
                 rows += `
                     <tr data-id="${record.id}" data-shop="${shopId}" data-type="${record.record_type}" data-related="${record.related_record_id || ''}">
                         <td class="text-center">${index + 1}</td>
                         <td class="text-center">${record.code_number || '-'}</td>
-                        <td class="text-center"><span>${record.quantity}</span></td>
+                        <td class="text-center"><span>${displayQuantity}</span></td>
                         <td class="text-center">${transferDirection}</td>
                         <td class="text-center">
                             <div class="currency-display">
@@ -8487,9 +8490,13 @@ header('Expires: 0');
             // 保存原始数据
             const originalCode = cells[1].textContent.trim();
             const quantityEl = cells[2].querySelector('.quantity-input, .transfer-quantity-input') || cells[2].querySelector('span');
-            const originalQuantity = quantityEl && (quantityEl.classList.contains('quantity-input') || quantityEl.classList.contains('transfer-quantity-input'))
+            let originalQuantity = quantityEl && (quantityEl.classList.contains('quantity-input') || quantityEl.classList.contains('transfer-quantity-input'))
                 ? quantityEl.value
                 : (quantityEl ? quantityEl.textContent.trim() : '0');
+            // 如果数量是负数（转卖记录显示），去掉负号
+            if (originalQuantity.startsWith('-')) {
+                originalQuantity = originalQuantity.substring(1);
+            }
             const originalToShop = row.dataset.toShop || '';
             row.dataset.originalCode = originalCode;
             row.dataset.originalQuantity = originalQuantity;
@@ -8548,11 +8555,13 @@ header('Expires: 0');
             `;
             
             // 数量列：使用 contenteditable span（直接编辑，不显示输入框）
+            // 转卖（out）记录的数量显示为负数
+            const displayQuantity = record.record_type === 'out' ? `-${originalQuantity}` : originalQuantity;
             cells[2].innerHTML = `
                 <span contenteditable="true" class="editable-quantity" 
                       id="${codeRowId}-qty"
                       style="display: inline-block; min-width: 40px; padding: 2px 4px; border: 1px solid #ccc; border-radius: 4px; background: #fff; outline: none; text-align: center;"
-                      oninput="this.textContent = this.textContent.replace(/[^0-9.]/g, ''); calculateEditTransferTotal('${codeRowId}');">${originalQuantity}</span>
+                      oninput="this.textContent = this.textContent.replace(/[^0-9.-]/g, ''); calculateEditTransferTotal('${codeRowId}');">${displayQuantity}</span>
             `;
             
             // 编辑进出列 - 改为下拉列表
@@ -8652,7 +8661,12 @@ header('Expires: 0');
             
             if (!quantitySpan || !priceSpan || !totalSpan) return;
             
-            const quantity = parseFloat(quantitySpan.textContent.trim()) || 0;
+            // 获取数量，如果是负数（转卖记录显示），去掉负号
+            let quantityText = quantitySpan.textContent.trim();
+            if (quantityText.startsWith('-')) {
+                quantityText = quantityText.substring(1);
+            }
+            const quantity = parseFloat(quantityText) || 0;
             const price = parseFloat(priceSpan.textContent.trim()) || 0;
             const total = quantity * price;
             totalSpan.textContent = total.toFixed(2);
@@ -8681,7 +8695,12 @@ header('Expires: 0');
             
             const newCode = codeInput.value.trim();
             const productId = codeInput.dataset.productId || codeInput.getAttribute('data-product-id');
-            const newQuantity = parseFloat(quantitySpan.textContent.trim()) || 0;
+            // 获取数量，如果是负数（转卖记录显示），去掉负号
+            let quantityText = quantitySpan.textContent.trim();
+            if (quantityText.startsWith('-')) {
+                quantityText = quantityText.substring(1);
+            }
+            const newQuantity = parseFloat(quantityText) || 0;
             const newToShopType = toSelect.value;
             
             // 验证
@@ -8784,6 +8803,9 @@ header('Expires: 0');
                     // 根据记录类型设置价格颜色：转卖（out）=红色，来自（in）=绿色
                     const priceColor = isOutRecord ? '#dc3545' : '#000000';
                     
+                    // 转卖（out）记录的数量显示为负数
+                    const displayQuantity = isOutRecord ? `-${record.quantity}` : record.quantity;
+                    
                     const newRow = document.createElement('tr');
                     newRow.setAttribute('data-id', record.id);
                     newRow.setAttribute('data-shop', shopId);
@@ -8792,7 +8814,7 @@ header('Expires: 0');
                     newRow.innerHTML = `
                         <td class="text-center">${index + 1}</td>
                         <td class="text-center">${record.code_number || '-'}</td>
-                        <td class="text-center"><span>${record.quantity}</span></td>
+                        <td class="text-center"><span>${displayQuantity}</span></td>
                         <td class="text-center">${transferDirection}</td>
                         <td class="text-center">
                             <div class="currency-display">
