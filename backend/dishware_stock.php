@@ -2031,7 +2031,6 @@ header('Expires: 0');
         .break-record-table th:nth-child(2),
         .break-record-table td:nth-child(2) {
             width: 10%; /* 编号 */
-            min-width: 100px; /* 确保有足够宽度显示完整编码 */
         }
 
         .break-record-table th:nth-child(3),
@@ -2063,24 +2062,6 @@ header('Expires: 0');
             overflow: visible; /* 改为 visible，允许下拉菜单显示 */
             text-overflow: ellipsis;
             position: relative; /* 为下拉菜单提供定位上下文 */
-        }
-
-        /* 编辑模式下，编号列允许内容完整显示 */
-        .break-record-table tr.editing-row td:nth-child(2) {
-            overflow: visible;
-            text-overflow: clip;
-            white-space: nowrap;
-        }
-
-        .break-record-table tr.editing-row .combobox-container {
-            min-width: 100px; /* 确保有足够宽度显示完整编码 */
-            width: 100%;
-        }
-
-        .break-record-table tr.editing-row .combobox-input {
-            min-width: 100px; /* 确保输入框有足够宽度显示完整编码 */
-            text-overflow: clip;
-            overflow: visible;
         }
 
         .break-record-table tr:nth-child(even) {
@@ -2141,7 +2122,6 @@ header('Expires: 0');
 
         .combobox-input {
             width: 100%;
-            min-width: 80px; /* 确保有足够宽度显示完整编码 */
             padding: 4px 24px 4px 8px;
             border: none;
             background: transparent;
@@ -2150,9 +2130,6 @@ header('Expires: 0');
             box-sizing: border-box;
             position: relative;
             z-index: 1; /* 正常层级，可以被侧边栏覆盖 */
-            text-overflow: clip; /* 不截断文本 */
-            overflow: visible; /* 允许文本完整显示 */
-            white-space: nowrap; /* 不换行 */
         }
 
         .combobox-input:focus {
