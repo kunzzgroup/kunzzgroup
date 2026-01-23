@@ -4513,7 +4513,7 @@ header('Expires: 0');
                                id="${rowId}-price" 
                                value="" 
                                onblur="calculateBreakRowTotal('${rowId}')" 
-                               style="width: 80px; border: none; background: transparent; text-align: center; outline: none;"
+                               style="width: 80px; border: none; background: transparent; text-align: center; outline: none;">
                     </div>
                 </td>
                 <td class="text-center">
@@ -4710,8 +4710,21 @@ header('Expires: 0');
 
         // 取消新破损记录行
         function cancelNewBreakRow(rowId, shopType) {
-            const row = document.getElementById(`${rowId}-product`).closest('tr');
+            // 通过 code 输入框找到行
+            const codeInput = document.getElementById(`${rowId}-code`);
+            if (!codeInput) {
+                console.error('找不到code输入框:', rowId);
+                return;
+            }
+            
+            const row = codeInput.closest('tr');
             if (row) {
+                // 移除事件监听器（如果有）
+                const closeHandler = codeInput._closeHandler;
+                if (closeHandler) {
+                    document.removeEventListener('click', closeHandler);
+                }
+                
                 row.remove();
             }
             
