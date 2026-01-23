@@ -376,10 +376,10 @@ header('Expires: 0');
 
         .quantity-input {
             flex: 1;
-            padding: 8px 12px;
+            padding: clamp(4px, 0.42vw, 8px) clamp(6px, 0.63vw, 12px);
             border: 1px solid #d1d5db;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: clamp(8px, 0.74vw, 14px); /* 使用响应式字体大小 */
             text-align: center;
         }
 
@@ -1000,11 +1000,11 @@ header('Expires: 0');
         /* 数量输入框 */
         .quantity-input {
             width: 80px;
-            padding: 4px 8px;
+            padding: clamp(2px, 0.31vw, 4px) clamp(4px, 0.42vw, 8px);
             border: 1px solid #d1d5db;
             border-radius: 4px;
             text-align: center;
-            font-size: 12px;
+            font-size: clamp(8px, 0.74vw, 12px); /* 使用响应式字体大小 */
         }
 
         .quantity-input:focus {
@@ -3861,7 +3861,7 @@ header('Expires: 0');
                                 <span>${restaurant.name}破损</span>
                                 <span style="font-size: 12px; opacity: 0.9;">(${records.length} 项)</span>
                             </div>
-                            <button class="btn btn-success" onclick="openBreakRowsModal('${shopType}')" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">
+                            <button class="btn btn-success" onclick="openBreakRowsModal('${shopType}')" style="padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
                                 <i class="fas fa-plus"></i> 记录破损
                             </button>
                         </div>
@@ -3915,7 +3915,7 @@ header('Expires: 0');
                             <input type="number" class="quantity-input" 
                                    value="${record.break_quantity}" 
                                    onchange="updateBreakQuantity(${record.id}, this.value, '${shopId}')"
-                                   min="0" style="width: 80px;">
+                                   min="0" style="width: clamp(60px, 5.21vw, 80px);">
                         </td>
                         <td class="text-center">
                             <div class="currency-display">
