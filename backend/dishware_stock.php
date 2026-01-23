@@ -2148,7 +2148,6 @@ header('Expires: 0');
             position: absolute;
             top: 100%;
             left: 0;
-            right: 0;
             background: white;
             border: 1px solid #ddd;
             border-radius: 4px;
@@ -2158,7 +2157,8 @@ header('Expires: 0');
             z-index: 99999 !important; /* 最高优先级，确保显示在最上层 */
             display: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            width: 100%; /* 与输入框一样宽 */
+            min-width: 150px; /* 最小宽度，确保能显示完整文本 */
+            width: auto; /* 自动宽度，根据内容调整，但不超过最小宽度 */
         }
 
         .combobox-dropdown.show {
@@ -2170,8 +2170,7 @@ header('Expires: 0');
             cursor: pointer;
             font-size: 14px;
             white-space: nowrap; /* 防止文本换行 */
-            overflow: hidden; /* 隐藏溢出 */
-            text-overflow: ellipsis; /* 文本过长时显示省略号 */
+            overflow: visible; /* 允许文本完整显示 */
         }
 
         .combobox-option:hover {
@@ -4553,9 +4552,10 @@ header('Expires: 0');
                 codeDropdown.style.position = 'fixed';
                 codeDropdown.style.top = (rect.bottom + window.scrollY) + 'px';
                 codeDropdown.style.left = rect.left + 'px';
-                // 宽度与输入框一样
-                codeDropdown.style.width = rect.width + 'px';
-                codeDropdown.style.minWidth = '';
+                // 设置宽度，比输入框稍宽一些，确保能显示完整文本
+                const dropdownWidth = Math.max(rect.width, 150);
+                codeDropdown.style.width = dropdownWidth + 'px';
+                codeDropdown.style.minWidth = '150px';
                 codeDropdown.classList.add('show');
                 filterBreakComboboxOptions(codeInput, codeDropdown);
             };
@@ -4609,7 +4609,8 @@ header('Expires: 0');
                     codeDropdown.style.top = (rect.bottom + window.scrollY) + 'px';
                     codeDropdown.style.left = rect.left + 'px';
                     // 更新宽度
-                    codeDropdown.style.width = rect.width + 'px';
+                    const dropdownWidth = Math.max(rect.width, 150);
+                    codeDropdown.style.width = dropdownWidth + 'px';
                 }
             };
             window.addEventListener('scroll', updatePosition, true);
