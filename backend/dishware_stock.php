@@ -374,6 +374,27 @@ header('Expires: 0');
             font-size: 14px;
         }
 
+        /* 编辑模式下的输入框样式（类似 stockeditall） */
+        .table-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-size: clamp(8px, 0.74vw, 14px);
+            padding: 8px 4px;
+            transition: all 0.2s;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .table-input:focus {
+            background: #fff;
+            border: 2px solid #583e04;
+            outline: none;
+            z-index: 5;
+            position: relative;
+        }
+
         .quantity-input {
             flex: 1;
             padding: clamp(4px, 0.42vw, 8px) clamp(6px, 0.63vw, 12px);
@@ -4606,11 +4627,10 @@ header('Expires: 0');
                 </div>
             `;
             
-            // 数量列：由 span 改为可编辑输入框（仅编辑模式下可改）
+            // 数量列：由 span 改为可编辑输入框（仅编辑模式下可改，样式类似 stockeditall）
             cells[2].innerHTML = `
-                <input type="number" class="quantity-input break-quantity-input" 
-                       value="${originalQuantity}" min="0" 
-                       style="width: clamp(40px, 2.92vw, 56px);">
+                <input type="number" class="quantity-input break-quantity-input table-input" 
+                       value="${originalQuantity}" min="0">
             `;
             
             // 替换操作按钮为保存和取消
@@ -8518,11 +8538,10 @@ header('Expires: 0');
                 </div>
             `;
             
-            // 数量列：由 span 改为可编辑输入框（仅编辑模式下可改）
+            // 数量列：由 span 改为可编辑输入框（仅编辑模式下可改，样式类似 stockeditall）
             cells[2].innerHTML = `
-                <input type="number" class="quantity-input transfer-quantity-input" 
-                       id="${codeRowId}-qty" value="${originalQuantity}" min="0" 
-                       style="width: clamp(40px, 2.92vw, 56px);">
+                <input type="number" class="quantity-input transfer-quantity-input table-input" 
+                       id="${codeRowId}-qty" value="${originalQuantity}" min="0">
             `;
             
             // 编辑进出列 - 改为下拉列表
