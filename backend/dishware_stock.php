@@ -4143,10 +4143,10 @@ header('Expires: 0');
                             const quantitySpan = row.querySelector('.editable-quantity');
                             const codeRowId = codeInput?.id?.replace('-code', '') || '';
                             
-                            // 保存完整的行HTML和状态
+                            // 保存完整的行节点（克隆）
                             return {
                                 recordId: recordId,
-                                rowHtml: row.outerHTML, // 保存完整的行HTML
+                                rowClone: row.cloneNode(true), // 深度克隆整个行节点
                                 codeRowId: codeRowId,
                                 code: codeInput?.value || '',
                                 quantity: quantitySpan?.textContent?.trim() || '',
@@ -4163,39 +4163,35 @@ header('Expires: 0');
                     // 清空tbody并添加已保存的记录
                     tbody.innerHTML = rowsHtml;
                     
-                    // 恢复正在编辑的行 - 直接替换对应行的HTML
-                    editingRowsData.forEach(({ recordId, rowHtml, codeRowId, code, quantity, productId }) => {
+                    // 恢复正在编辑的行 - 直接替换对应行
+                    editingRowsData.forEach(({ recordId, rowClone, codeRowId, code, quantity, productId }) => {
                         const restoredRow = tbody.querySelector(`tr[data-id="${recordId}"][data-shop="${shopType}"]`);
-                        if (restoredRow) {
-                            // 创建临时容器来解析保存的HTML
-                            const tempDiv = document.createElement('div');
-                            tempDiv.innerHTML = rowHtml;
-                            const savedRow = tempDiv.querySelector('tr');
+                        if (restoredRow && rowClone) {
+                            // 从克隆的行中恢复输入框的值
+                            const codeInput = rowClone.querySelector('.break-code-input');
+                            const quantitySpan = rowClone.querySelector('.editable-quantity');
                             
-                            if (savedRow) {
-                                // 恢复输入框的值
-                                const codeInput = savedRow.querySelector('.break-code-input');
-                                const quantitySpan = savedRow.querySelector('.editable-quantity');
-                                
-                                if (codeInput) {
-                                    codeInput.value = code;
-                                    if (productId) {
-                                        codeInput.dataset.productId = productId;
-                                        codeInput.setAttribute('data-product-id', productId);
-                                    }
+                            if (codeInput) {
+                                codeInput.value = code;
+                                if (productId) {
+                                    codeInput.dataset.productId = productId;
+                                    codeInput.setAttribute('data-product-id', productId);
                                 }
-                                if (quantitySpan) {
-                                    quantitySpan.textContent = quantity;
-                                }
-                                
-                                // 替换当前行
-                                restoredRow.replaceWith(savedRow);
-                                
-                                // 重新绑定事件
-                                setTimeout(() => {
-                                    bindBreakComboboxEvents(codeRowId);
-                                }, 100);
                             }
+                            if (quantitySpan) {
+                                quantitySpan.textContent = quantity;
+                            }
+                            
+                            // 确保行有 editing-row 类
+                            rowClone.classList.add('editing-row');
+                            
+                            // 替换当前行
+                            restoredRow.replaceWith(rowClone);
+                            
+                            // 重新绑定事件
+                            setTimeout(() => {
+                                bindBreakComboboxEvents(codeRowId);
+                            }, 100);
                         }
                     });
                     
