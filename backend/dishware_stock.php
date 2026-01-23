@@ -2097,6 +2097,8 @@ header('Expires: 0');
         /* 新行样式 */
         .break-record-table tr.new-row {
             background-color: #e8f5e9;
+            position: static; /* 改为 static，避免创建层叠上下文 */
+            z-index: auto; /* 确保不会创建层叠上下文覆盖下拉列表 */
         }
 
         .break-record-table tr.new-row:hover {
@@ -2106,6 +2108,8 @@ header('Expires: 0');
         .break-record-table tr.new-row td {
             padding: 8px;
             font-size: clamp(8px, 0.74vw, 14px); /* 使用响应式字体大小，与其他行一致 */
+            position: static; /* 改为 static，避免创建层叠上下文 */
+            z-index: auto; /* 确保不会创建层叠上下文覆盖下拉列表 */
         }
 
         .break-record-table tr.new-row input,
@@ -2118,6 +2122,8 @@ header('Expires: 0');
             font-size: clamp(8px, 0.74vw, 14px); /* 使用响应式字体大小，与其他行一致 */
             box-sizing: border-box;
             outline: none;
+            position: relative;
+            z-index: 1; /* 低层级，确保下拉列表可以覆盖 */
         }
 
         /* 隐藏新行中 number 输入框的上下箭头 */
@@ -2141,18 +2147,16 @@ header('Expires: 0');
         .combobox-container {
             position: relative;
             width: 100%;
-            z-index: 1; /* 正常层级，可以被侧边栏覆盖 */
-            isolation: isolate; /* 创建新的层叠上下文，但不影响下拉列表 */
+            z-index: 1; /* 低层级，确保下拉列表可以覆盖 */
         }
 
         /* 只让下拉菜单显示在最上层，输入框保持正常层级 */
         .break-record-table tr.new-row .combobox-container {
-            z-index: 1; /* 正常层级，可以被侧边栏覆盖 */
-            isolation: isolate; /* 创建新的层叠上下文 */
+            z-index: 1; /* 低层级，确保下拉列表可以覆盖 */
         }
 
         .break-record-table tr.new-row .combobox-dropdown {
-            z-index: 999999 !important; /* 提高优先级，确保显示在所有元素之上 */
+            z-index: 2147483647 !important; /* 使用最大z-index值，确保显示在所有元素之上 */
             position: fixed !important; /* 使用 fixed 定位，脱离文档流 */
         }
 
@@ -2165,7 +2169,7 @@ header('Expires: 0');
             outline: none;
             box-sizing: border-box;
             position: relative;
-            z-index: 1; /* 正常层级，可以被侧边栏覆盖 */
+            z-index: 1; /* 低层级，确保下拉列表可以覆盖 */
         }
 
         .combobox-input:focus {
@@ -2184,20 +2188,20 @@ header('Expires: 0');
         }
 
         .combobox-dropdown {
-            position: fixed; /* 使用 fixed 定位，脱离文档流，避免被其他元素覆盖 */
+            position: fixed !important; /* 使用 fixed 定位，脱离文档流，避免被其他元素覆盖 */
             top: 100%;
             left: 0;
-            background: white;
+            background: white !important;
             border: 1px solid #ddd;
             border-radius: 4px;
             max-height: 200px;
             overflow-y: auto;
             overflow-x: hidden; /* 隐藏水平溢出 */
-            z-index: 999999 !important; /* 提高优先级，确保显示在所有元素之上 */
+            z-index: 2147483647 !important; /* 使用最大z-index值，确保显示在所有元素之上 */
             display: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             width: clamp(60px, 5.21vw, 100px); /* 使用 clamp 设置宽度 */
-            pointer-events: auto; /* 确保可以点击 */
+            pointer-events: auto !important; /* 确保可以点击 */
         }
 
         .combobox-dropdown.show {
@@ -4848,7 +4852,8 @@ header('Expires: 0');
                 codeDropdown.style.position = 'fixed';
                 codeDropdown.style.top = (rect.bottom + window.scrollY) + 'px';
                 codeDropdown.style.left = rect.left + 'px';
-                codeDropdown.style.zIndex = '999999'; // 确保最高优先级
+                codeDropdown.style.zIndex = '2147483647'; // 使用最大z-index值
+                codeDropdown.style.backgroundColor = 'white'; // 确保背景色
                 // 使用 CSS clamp，不需要设置 JavaScript 宽度
                 codeDropdown.classList.add('show');
                 filterBreakComboboxOptions(codeInput, codeDropdown);
@@ -4932,7 +4937,8 @@ header('Expires: 0');
                     codeDropdown.style.position = 'fixed';
                     codeDropdown.style.top = (rect.bottom + window.scrollY) + 'px';
                     codeDropdown.style.left = rect.left + 'px';
-                    codeDropdown.style.zIndex = '999999'; // 确保最高优先级
+                    codeDropdown.style.zIndex = '2147483647'; // 使用最大z-index值
+                    codeDropdown.style.backgroundColor = 'white'; // 确保背景色
                     // 宽度由 CSS clamp 控制，不需要更新
                 }
             };
