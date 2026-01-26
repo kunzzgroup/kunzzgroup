@@ -555,6 +555,11 @@ function updateStock() {
     // 支持从POST和PUT请求中获取数据
     $dishware_id = $data['dishware_id'] ?? $_POST['dishware_id'] ?? '';
     
+    // 调试日志
+    error_log("updateStock - dishware_id: " . $dishware_id);
+    error_log("updateStock - data: " . json_encode($data));
+    error_log("updateStock - POST: " . json_encode($_POST));
+    
     if (empty($dishware_id)) {
         sendResponse(false, "缺少碗碟ID");
     }
@@ -572,6 +577,9 @@ function updateStock() {
         // 获取所有餐厅店面，按显示顺序
         $restaurants_list = $pdo->query("SELECT id FROM dishware_restaurant_locations WHERE is_active = 1 ORDER BY display_order")->fetchAll(PDO::FETCH_ASSOC);
         
+        error_log("updateStock - restaurants_list count: " . count($restaurants_list));
+        error_log("updateStock - restaurant_quantities: " . (isset($data['restaurant_quantities']) ? json_encode($data['restaurant_quantities']) : 'not set'));
+        
         // 如果提供了按顺序的数组
         if (isset($data['restaurant_quantities']) && is_array($data['restaurant_quantities'])) {
             foreach ($restaurants_list as $index => $restaurant) {
@@ -584,7 +592,9 @@ function updateStock() {
                         last_updated = CURRENT_TIMESTAMP";
                 
                 $stmt = $pdo->prepare($sql);
-                $stmt->execute([$dishware_id, $restaurant['id'], $quantity]);
+                $result = $stmt->execute([$dishware_id, $restaurant['id'], $quantity]);
+                
+                error_log("updateStock - Updated dishware_id=$dishware_id, restaurant_id={$restaurant['id']}, quantity=$quantity, result=" . ($result ? 'success' : 'failed'));
             }
         } else {
             // 向后兼容：支持按餐厅ID的格式

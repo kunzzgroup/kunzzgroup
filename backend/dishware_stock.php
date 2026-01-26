@@ -3430,14 +3430,26 @@ header('Expires: 0');
             const data = {
                 restaurant_quantities: []
             };
-            restaurants
-                .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
-                .forEach((restaurant) => {
-                    const input = document.getElementById(`edit-restaurant-${restaurant.id}`);
-                    if (input) {
-                        data.restaurant_quantities.push(parseInt(input.value) || 0);
-                    }
-                });
+            const sortedRestaurants = [...restaurants].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+            sortedRestaurants.forEach((restaurant) => {
+                const input = document.getElementById(`edit-restaurant-${restaurant.id}`);
+                if (input) {
+                    const value = parseInt(input.value) || 0;
+                    data.restaurant_quantities.push(value);
+                } else {
+                    // 如果找不到输入框，记录警告并添加0
+                    console.warn(`找不到餐厅 ${restaurant.name} (ID: ${restaurant.id}) 的输入框，使用默认值0`);
+                    data.restaurant_quantities.push(0);
+                }
+            });
+            
+            // 调试日志
+            console.log('获取编辑模态框餐厅数据:', {
+                restaurants_count: sortedRestaurants.length,
+                quantities_count: data.restaurant_quantities.length,
+                quantities: data.restaurant_quantities
+            });
+            
             return data;
         }
 
@@ -6282,6 +6294,21 @@ header('Expires: 0');
                                             const stockItem = stockResult.success ? 
                                                 stockResult.data.items.find(si => si.id == item.id) : null;
                                             
+                                            // 调试日志：检查是否找到库存数据
+                                            if (!stockItem) {
+                                                console.warn(`套装中的碗碟 ${item.id} (${item.product_name || item.code_number}) 未在库存列表中找到`, {
+                                                    itemId: item.id,
+                                                    itemIdType: typeof item.id,
+                                                    stockItemIds: stockResult.success ? stockResult.data.items.map(si => ({id: si.id, type: typeof si.id})) : [],
+                                                    totalStockItems: stockResult.success ? stockResult.data.items.length : 0
+                                                });
+                                            } else {
+                                                console.log(`套装中的碗碟 ${item.id} 找到库存数据:`, {
+                                                    restaurant_stocks: stockItem.restaurant_stocks,
+                                                    total_quantity: stockItem.total_quantity
+                                                });
+                                            }
+                                            
                                             if (stockItem) {
                                                 // 复制库存数量信息（向后兼容旧字段）
                                                 item.wenhua_quantity = stockItem.wenhua_quantity || 0;
@@ -7929,11 +7956,19 @@ header('Expires: 0');
                 
                 if (result.success) {
                     // 同时更新库存
+                    const restaurantData = getEditModalRestaurantData();
                     const stockUpdateData = {
                         action: 'update_stock',
                         dishware_id: currentEditId,
-                        ...getEditModalRestaurantData()
+                        ...restaurantData
                     };
+                    
+                    // 调试日志：检查发送的库存数据
+                    console.log('更新库存数据:', {
+                        dishware_id: currentEditId,
+                        restaurant_quantities: restaurantData.restaurant_quantities,
+                        restaurants_count: restaurants.length
+                    });
                     
                     const stockResponse = await fetch(API_BASE_URL, {
                         method: 'POST',
@@ -7945,9 +7980,13 @@ header('Expires: 0');
                     
                     const stockResult = await stockResponse.json();
                     
+                    // 调试日志：检查更新结果
+                    console.log('库存更新结果:', stockResult);
+                    
                     if (stockResult.success) {
                         showAlert('碗碟信息和库存更新成功！', 'success');
                     } else {
+                        console.error('库存更新失败:', stockResult);
                         showAlert('碗碟信息更新成功，但库存更新失败：' + stockResult.message, 'warning');
                     }
                     
@@ -7991,10 +8030,12 @@ header('Expires: 0');
                     }
                     
                     closeModal();
-                    // 平滑重新加载数据，不显示加载状态
+                    // 强制重新加载数据，确保获取最新库存（特别是套装中的碗碟）
+                    // 增加延迟确保数据库事务已提交
                     setTimeout(() => {
+                        console.log('重新加载库存数据（编辑保存后）...');
                         loadStockData(true, false);
-                    }, 200);
+                    }, 500);
                 } else {
                     showAlert('更新失败：' + result.message, 'error');
                 }
