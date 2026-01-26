@@ -784,6 +784,29 @@ header('Expires: 0');
         .stock-table th:nth-child(13), .stock-table td:nth-child(13) { width: 80px; } /* Total */
         .stock-table th:nth-child(14), .stock-table td:nth-child(14) { width: 100px; } /* Actions */
 
+        /* 套装表格列宽（使用百分比） */
+        #sets-table {
+            table-layout: fixed;
+            width: 100%;
+        }
+        
+        /* 基础列（固定位置） */
+        #sets-table th:nth-child(1), #sets-table td:nth-child(1) { width: 4%; }  /* 序号 */
+        #sets-table th:nth-child(2), #sets-table td:nth-child(2) { width: 8%; }  /* 套装名称 */
+        #sets-table th:nth-child(3), #sets-table td:nth-child(3) { width: 8%; }  /* 套装编号 */
+        #sets-table th:nth-child(4), #sets-table td:nth-child(4) { width: 26%; } /* 包含项目 */
+        #sets-table th:nth-child(5), #sets-table td:nth-child(5) { width: 8%; }  /* 单价 (RM) */
+        
+        /* 餐厅列（动态，每个餐厅列）- 使用属性选择器 */
+        #sets-table th[data-restaurant-header], 
+        #sets-table td[data-restaurant-id] { 
+            width: 4.5%; 
+        }
+        
+        /* 最后两列（总库存和操作） */
+        #sets-table th:nth-last-child(2), #sets-table td:nth-last-child(2) { width: 6%; }  /* 总库存 */
+        #sets-table th:last-child, #sets-table td:last-child { width: 7%; }  /* 操作 */
+
         /* 破损记录表格列宽 */
         #j1-table th:nth-child(1), #j1-table td:nth-child(1) { width: 100px; } /* Date */
         #j1-table th:nth-child(2), #j1-table td:nth-child(2) { width: 50px; }  /* No. */
@@ -7736,7 +7759,7 @@ header('Expires: 0');
                 // 获取餐厅库存数据
                 const restaurantStocks = sortedRestaurants.map(r => {
                     const stock = set.restaurant_stocks?.[r.id] || 0;
-                    return `<td data-label="${r.name}">${stock}</td>`;
+                    return `<td data-label="${r.name}" data-restaurant-id="${r.id}">${stock}</td>`;
                 }).join('');
                 
                 const totalStock = sortedRestaurants.reduce((sum, r) => {
