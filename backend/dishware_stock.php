@@ -7303,19 +7303,18 @@ header('Expires: 0');
             
             members.forEach((member, index) => {
                 const isCurrent = member.id == currentEditId;
-                // 只显示碗碟的code_number，确保不是套装编号
+                // 只显示碗碟的code_number，不显示中文名字
                 let displayCode = (member.code_number || '').trim();
                 // 如果code_number是套装编号格式（SET开头），不显示
                 if (displayCode.toUpperCase().startsWith('SET')) {
                     displayCode = '';
                 }
-                const displayName = member.product_name || '';
                 html += `
                     <span style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: ${isCurrent ? '#fef3c7' : '#e0e7ff'}; border-radius: 4px; font-size: 12px;">
-                        ${displayCode || '未知编号'}${displayName ? ' - ' + displayName : ''}
+                        ${displayCode || '未知编号'}${isCurrent ? ' <span style="color: #f59e0b; font-weight: 600;">(当前)</span>' : ''}
                         ${!isCurrent ? `<button type="button" onclick="removeSetMember(${member.id})" style="background: none; border: none; color: #dc2626; cursor: pointer; padding: 0; margin-left: 4px;" title="移除">
                             <i class="fas fa-times"></i>
-                        </button>` : '<span style="color: #f59e0b; font-weight: 600;">(当前)</span>'}
+                        </button>` : ''}
                     </span>
                 `;
             });
