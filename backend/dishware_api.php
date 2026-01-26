@@ -114,6 +114,9 @@ function handleGet() {
         case 'set_detail':
             getDishwareSetDetail();
             break;
+        case 'dishware_set_info':
+            getDishwareSetInfo();
+            break;
         case 'set_stock':
             getSetStockList();
             break;
@@ -194,6 +197,9 @@ function handlePost() {
             break;
         case 'remove_item_from_set':
             removeItemFromSet();
+            break;
+        case 'update_dishware_set_relation':
+            updateDishwareSetRelation();
             break;
         case 'add_restaurant':
             addRestaurant();
@@ -2386,6 +2392,203 @@ function deleteTransferRecord() {
     } catch (PDOException $e) {
         $pdo->rollBack();
         sendResponse(false, "删除转卖记录失败：" . $e->getMessage());
+    }
+}
+
+// 获取碗碟的套装信息
+function getDishwareSetInfo() {
+    global $pdo;
+    
+    $dishware_id = $_GET['dishware_id'] ?? '';
+    
+    if (empty($dishware_id)) {
+        sendResponse(false, "缺少碗碟ID");
+        return;
+    }
+    
+    try {
+        // 查找该碗碟所属的套装
+        $sql = "SELECT ds.id as set_id, ds.set_name, ds.set_code, 
+                       GROUP_CONCAT(
+                           CONCAT(di.id, ':', di.product_name, ' (', di.code_number, ')') 
+                           ORDER BY dsi.sort_order 
+                           SEPARATOR '|'
+                       ) as set_members
+                FROM dishware_set_items dsi
+                INNER JOIN dishware_sets ds ON dsi.set_id = ds.id
+                INNER JOIN dishware_set_items dsi2 ON ds.id = dsi2.set_id
+                INNER JOIN dishware_info di ON dsi2.dishware_id = di.id
+                WHERE dsi.dishware_id = ? AND ds.is_active = 1
+                GROUP BY ds.id, ds.set_name, ds.set_code";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$dishware_id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($result) {
+            // 解析套装成员
+            $members = [];
+            if ($result['set_members']) {
+                $memberStrings = explode('|', $result['set_members']);
+                foreach ($memberStrings as $memberStr) {
+                    $parts = explode(':', $memberStr, 2);
+                    if (count($parts) === 2) {
+                        $members[] = [
+                            'id' => $parts[0],
+                            'display' => $parts[1]
+                        ];
+                    }
+                }
+            }
+            $result['members'] = $members;
+            unset($result['set_members']);
+        }
+        
+        sendResponse(true, "获取套装信息成功", $result);
+        
+    } catch (PDOException $e) {
+        sendResponse(false, "获取套装信息失败：" . $e->getMessage());
+    }
+}
+
+// 更新碗碟的套装关系
+function updateDishwareSetRelation() {
+    global $pdo, $data;
+    
+    $postData = !empty($data) ? $data : $_POST;
+    
+    $dishware_id = $postData['dishware_id'] ?? '';
+    $member_ids = $postData['member_ids'] ?? []; // 要组成套装的碗碟ID数组
+    
+    if (empty($dishware_id)) {
+        sendResponse(false, "缺少碗碟ID");
+        return;
+    }
+    
+    try {
+        $pdo->beginTransaction();
+        
+        // 如果member_ids为空，表示从套装中移除
+        if (empty($member_ids) || !is_array($member_ids)) {
+            // 查找该碗碟所属的套装
+            $findSetSql = "SELECT set_id FROM dishware_set_items WHERE dishware_id = ?";
+            $findSetStmt = $pdo->prepare($findSetSql);
+            $findSetStmt->execute([$dishware_id]);
+            $setItems = $findSetStmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // 从所有套装中移除该碗碟
+            foreach ($setItems as $item) {
+                $deleteSql = "DELETE FROM dishware_set_items WHERE set_id = ? AND dishware_id = ?";
+                $deleteStmt = $pdo->prepare($deleteSql);
+                $deleteStmt->execute([$item['set_id'], $dishware_id]);
+                
+                // 检查套装是否还有其他成员，如果没有则删除套装
+                $checkSql = "SELECT COUNT(*) as count FROM dishware_set_items WHERE set_id = ?";
+                $checkStmt = $pdo->prepare($checkSql);
+                $checkStmt->execute([$item['set_id']]);
+                $count = $checkStmt->fetch(PDO::FETCH_ASSOC)['count'];
+                
+                if ($count == 0) {
+                    $deleteSetSql = "DELETE FROM dishware_sets WHERE id = ?";
+                    $deleteSetStmt = $pdo->prepare($deleteSetSql);
+                    $deleteSetStmt->execute([$item['set_id']]);
+                }
+            }
+            
+            $pdo->commit();
+            sendResponse(true, "已从套装中移除");
+            return;
+        }
+        
+        // 确保当前碗碟也在member_ids中
+        if (!in_array($dishware_id, $member_ids)) {
+            $member_ids[] = $dishware_id;
+        }
+        
+        // 去重并排序
+        $member_ids = array_unique(array_map('intval', $member_ids));
+        sort($member_ids);
+        
+        // 检查这些碗碟是否已经属于其他套装
+        $checkSql = "SELECT DISTINCT set_id FROM dishware_set_items WHERE dishware_id IN (" . 
+                    implode(',', array_fill(0, count($member_ids), '?')) . ")";
+        $checkStmt = $pdo->prepare($checkSql);
+        $checkStmt->execute($member_ids);
+        $existingSets = $checkStmt->fetchAll(PDO::FETCH_COLUMN);
+        
+        $set_id = null;
+        
+        if (!empty($existingSets)) {
+            // 如果所有碗碟都属于同一个套装，使用该套装
+            if (count($existingSets) === 1) {
+                $set_id = $existingSets[0];
+            } else {
+                // 如果属于多个套装，合并到第一个套装
+                $set_id = $existingSets[0];
+                // 从其他套装中移除这些碗碟
+                for ($i = 1; $i < count($existingSets); $i++) {
+                    $deleteSql = "DELETE FROM dishware_set_items WHERE set_id = ? AND dishware_id IN (" . 
+                                implode(',', array_fill(0, count($member_ids), '?')) . ")";
+                    $deleteStmt = $pdo->prepare($deleteSql);
+                    $deleteStmt->execute(array_merge([$existingSets[$i]], $member_ids));
+                }
+            }
+        }
+        
+        // 如果没有套装，创建新套装
+        if (!$set_id) {
+            // 生成套装编号
+            $setCode = 'SET' . time();
+            
+            // 获取第一个碗碟的信息作为套装名称
+            $firstDishwareSql = "SELECT product_name, code_number FROM dishware_info WHERE id = ?";
+            $firstDishwareStmt = $pdo->prepare($firstDishwareSql);
+            $firstDishwareStmt->execute([$member_ids[0]]);
+            $firstDishware = $firstDishwareStmt->fetch(PDO::FETCH_ASSOC);
+            
+            $setName = ($firstDishware['product_name'] ?? '套装') . ' 套装';
+            
+            // 计算套装总价
+            $priceSql = "SELECT SUM(unit_price) as total_price FROM dishware_info WHERE id IN (" . 
+                       implode(',', array_fill(0, count($member_ids), '?')) . ")";
+            $priceStmt = $pdo->prepare($priceSql);
+            $priceStmt->execute($member_ids);
+            $priceResult = $priceStmt->fetch(PDO::FETCH_ASSOC);
+            $setPrice = $priceResult['total_price'] ?? 0;
+            
+            $insertSetSql = "INSERT INTO dishware_sets (set_name, set_code, set_price, description) VALUES (?, ?, ?, ?)";
+            $insertSetStmt = $pdo->prepare($insertSetSql);
+            $insertSetStmt->execute([$setName, $setCode, $setPrice, '']);
+            $set_id = $pdo->lastInsertId();
+        }
+        
+        // 删除该套装中现有的所有成员
+        $deleteSql = "DELETE FROM dishware_set_items WHERE set_id = ?";
+        $deleteStmt = $pdo->prepare($deleteSql);
+        $deleteStmt->execute([$set_id]);
+        
+        // 添加所有成员到套装
+        foreach ($member_ids as $index => $member_id) {
+            $insertSql = "INSERT INTO dishware_set_items (set_id, dishware_id, quantity_in_set, sort_order) VALUES (?, ?, 1, ?)";
+            $insertStmt = $pdo->prepare($insertSql);
+            $insertStmt->execute([$set_id, $member_id, $index + 1]);
+        }
+        
+        // 更新套装总价
+        $updatePriceSql = "UPDATE dishware_sets SET set_price = (
+            SELECT SUM(unit_price) FROM dishware_info WHERE id IN (
+                SELECT dishware_id FROM dishware_set_items WHERE set_id = ?
+            )
+        ) WHERE id = ?";
+        $updatePriceStmt = $pdo->prepare($updatePriceSql);
+        $updatePriceStmt->execute([$set_id, $set_id]);
+        
+        $pdo->commit();
+        sendResponse(true, "套装关系更新成功", ['set_id' => $set_id]);
+        
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        sendResponse(false, "更新套装关系失败：" . $e->getMessage());
     }
 }
 ?>
