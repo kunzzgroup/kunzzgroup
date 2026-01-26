@@ -6283,13 +6283,27 @@ header('Expires: 0');
                                                 stockResult.data.items.find(si => si.id === item.id) : null;
                                             
                                             if (stockItem) {
-                                                // 复制库存数量信息
+                                                // 复制库存数量信息（向后兼容旧字段）
                                                 item.wenhua_quantity = stockItem.wenhua_quantity || 0;
                                                 item.central_quantity = stockItem.central_quantity || 0;
                                                 item.j1_quantity = stockItem.j1_quantity || 0;
                                                 item.j2_quantity = stockItem.j2_quantity || 0;
                                                 item.j3_quantity = stockItem.j3_quantity || 0;
                                                 item.total_quantity = stockItem.total_quantity || 0;
+                                                
+                                                // 复制新的restaurant_stocks字段（重要：用于正确显示各餐厅店面的数量）
+                                                if (stockItem.restaurant_stocks) {
+                                                    item.restaurant_stocks = { ...stockItem.restaurant_stocks };
+                                                }
+                                                
+                                                // 复制按索引的字段（向后兼容）
+                                                if (stockItem.restaurant_0_quantity !== undefined) {
+                                                    let index = 0;
+                                                    while (stockItem['restaurant_' + index + '_quantity'] !== undefined) {
+                                                        item['restaurant_' + index + '_quantity'] = stockItem['restaurant_' + index + '_quantity'];
+                                                        index++;
+                                                    }
+                                                }
                                                 
                                                 // 使用单个碗碟的最新信息（包括尺寸）
                                                 item.size = stockItem.size || item.size || '';
@@ -6304,6 +6318,7 @@ header('Expires: 0');
                                                 item.j2_quantity = 0;
                                                 item.j3_quantity = 0;
                                                 item.total_quantity = 0;
+                                                item.restaurant_stocks = {};
                                             }
                                             
                                             // 套装中的碗碟使用套装的价格

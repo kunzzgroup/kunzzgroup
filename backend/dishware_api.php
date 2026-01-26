@@ -358,9 +358,9 @@ function getDishwareDetail() {
     }
     
     try {
-        $sql = "SELECT di.*, ds.wenhua_quantity, ds.central_quantity, ds.j1_quantity, ds.j2_quantity, ds.j3_quantity, ds.total_quantity
+        // 获取碗碟基本信息
+        $sql = "SELECT di.*
                 FROM dishware_info di
-                LEFT JOIN dishware_stock ds ON di.id = ds.dishware_id
                 WHERE di.id = ?";
         
         $stmt = $pdo->prepare($sql);
@@ -369,6 +369,58 @@ function getDishwareDetail() {
         
         if (!$result) {
             sendResponse(false, "碗碟不存在");
+        }
+        
+        // 获取所有活跃的餐厅店面
+        $restaurants_sql = "SELECT id, name, display_order FROM dishware_restaurant_locations WHERE is_active = 1 ORDER BY display_order";
+        $restaurants_stmt = $pdo->prepare($restaurants_sql);
+        $restaurants_stmt->execute();
+        $restaurants = $restaurants_stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // 获取各餐厅店面的库存（使用新的关联表结构）
+        $result['restaurant_stocks'] = [];
+        $total_quantity = 0;
+        
+        foreach ($restaurants as $restaurant) {
+            $stock_sql = "SELECT quantity FROM dishware_stock_by_restaurant 
+                         WHERE dishware_id = ? AND restaurant_id = ?";
+            $stock_stmt = $pdo->prepare($stock_sql);
+            $stock_stmt->execute([$id, $restaurant['id']]);
+            $stock = $stock_stmt->fetch(PDO::FETCH_ASSOC);
+            
+            $quantity = $stock ? (int)$stock['quantity'] : 0;
+            $result['restaurant_stocks'][$restaurant['id']] = $quantity;
+            $total_quantity += $quantity;
+        }
+        
+        $result['total_quantity'] = $total_quantity;
+        
+        // 为了向后兼容，也添加按索引的字段
+        $index = 0;
+        foreach ($restaurants as $restaurant) {
+            $quantity = $result['restaurant_stocks'][$restaurant['id']] ?? 0;
+            $result['restaurant_' . $index . '_quantity'] = $quantity;
+            $index++;
+        }
+        
+        // 为了向后兼容，也添加旧字段（从旧表中获取，如果存在）
+        try {
+            $old_sql = "SELECT wenhua_quantity, central_quantity, j1_quantity, j2_quantity, j3_quantity 
+                       FROM dishware_stock 
+                       WHERE dishware_id = ?";
+            $old_stmt = $pdo->prepare($old_sql);
+            $old_stmt->execute([$id]);
+            $old_stock = $old_stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($old_stock) {
+                $result['wenhua_quantity'] = $old_stock['wenhua_quantity'] ?? 0;
+                $result['central_quantity'] = $old_stock['central_quantity'] ?? 0;
+                $result['j1_quantity'] = $old_stock['j1_quantity'] ?? 0;
+                $result['j2_quantity'] = $old_stock['j2_quantity'] ?? 0;
+                $result['j3_quantity'] = $old_stock['j3_quantity'] ?? 0;
+            }
+        } catch (PDOException $e) {
+            // 如果旧表不存在，忽略错误
         }
         
         $result['formatted_price'] = number_format($result['unit_price'], 2);
