@@ -2509,6 +2509,31 @@ function updateDishwareSetRelation() {
         $member_ids = array_unique(array_map('intval', $member_ids));
         sort($member_ids);
         
+        // 检查是否只剩下当前碗碟（只有一个成员且是当前碗碟）
+        if (count($member_ids) === 1 && $member_ids[0] == $dishware_id) {
+            // 查找该碗碟所属的套装并删除
+            $findSetSql = "SELECT set_id FROM dishware_set_items WHERE dishware_id = ?";
+            $findSetStmt = $pdo->prepare($findSetSql);
+            $findSetStmt->execute([$dishware_id]);
+            $setItems = $findSetStmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            foreach ($setItems as $item) {
+                // 删除套装中的所有成员
+                $deleteSql = "DELETE FROM dishware_set_items WHERE set_id = ?";
+                $deleteStmt = $pdo->prepare($deleteSql);
+                $deleteStmt->execute([$item['set_id']]);
+                
+                // 删除套装
+                $deleteSetSql = "DELETE FROM dishware_sets WHERE id = ?";
+                $deleteSetStmt = $pdo->prepare($deleteSetSql);
+                $deleteSetStmt->execute([$item['set_id']]);
+            }
+            
+            $pdo->commit();
+            sendResponse(true, "套装已自动删除（只剩一个成员）", ['set_id' => null, 'deleted' => true]);
+            return;
+        }
+        
         // 检查这些碗碟是否已经属于其他套装
         $checkSql = "SELECT DISTINCT set_id FROM dishware_set_items WHERE dishware_id IN (" . 
                     implode(',', array_fill(0, count($member_ids), '?')) . ")";
