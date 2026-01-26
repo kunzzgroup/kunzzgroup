@@ -1437,6 +1437,11 @@ header('Expires: 0');
             transition: all 0.2s;
             cursor: pointer;
             margin-top: clamp(4px, 0.42vw, 8px);
+            position: relative;
+            min-height: clamp(200px, 20.83vw, 400px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .photo-upload-area:hover {
@@ -1467,11 +1472,21 @@ header('Expires: 0');
         }
 
         .photo-preview {
-            max-width: clamp(100px, 7.81vw, 150px);
-            max-height: clamp(100px, 7.81vw, 150px);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
             border-radius: clamp(4px, 0.42vw, 8px);
-            margin-top: clamp(6px, 0.63vw, 12px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+        
+        /* 当有照片预览时，隐藏上传提示 */
+        .photo-upload-area:has(.photo-preview[style*="display: block"]) .photo-upload-icon,
+        .photo-upload-area:has(.photo-preview[style*="display: block"]) .photo-upload-text,
+        .photo-upload-area:has(.photo-preview[style*="display: block"]) .photo-upload-hint {
+            display: none;
         }
 
         .file-input {
@@ -7187,10 +7202,30 @@ header('Expires: 0');
                 deletePhotoFlag.value = '0';
             }
             
-            // 隐藏新照片预览
+            // 处理照片预览
             const preview = document.getElementById('edit-photo-preview');
-            if (preview) {
-                preview.style.display = 'none';
+            const uploadArea = preview?.closest('.photo-upload-area');
+            if (preview && uploadArea) {
+                // 如果碗碟已有照片，显示照片并隐藏上传提示
+                if (item.photo_path) {
+                    preview.src = item.photo_path;
+                    preview.style.display = 'block';
+                    const icon = uploadArea.querySelector('.photo-upload-icon');
+                    const text = uploadArea.querySelector('.photo-upload-text');
+                    const hint = uploadArea.querySelector('.photo-upload-hint');
+                    if (icon) icon.style.display = 'none';
+                    if (text) text.style.display = 'none';
+                    if (hint) hint.style.display = 'none';
+                } else {
+                    // 如果没有照片，隐藏预览并显示上传提示
+                    preview.style.display = 'none';
+                    const icon = uploadArea.querySelector('.photo-upload-icon');
+                    const text = uploadArea.querySelector('.photo-upload-text');
+                    const hint = uploadArea.querySelector('.photo-upload-hint');
+                    if (icon) icon.style.display = '';
+                    if (text) text.style.display = '';
+                    if (hint) hint.style.display = '';
+                }
             }
             
             document.getElementById('editModal').style.display = 'block';
@@ -7470,9 +7505,17 @@ header('Expires: 0');
             const reader = new FileReader();
             reader.onload = function(e) {
                 const preview = document.getElementById('add-photo-preview');
-                if (preview) {
+                const uploadArea = preview?.closest('.photo-upload-area');
+                if (preview && uploadArea) {
                     preview.src = e.target.result;
                     preview.style.display = 'block';
+                    // 隐藏上传提示
+                    const icon = uploadArea.querySelector('.photo-upload-icon');
+                    const text = uploadArea.querySelector('.photo-upload-text');
+                    const hint = uploadArea.querySelector('.photo-upload-hint');
+                    if (icon) icon.style.display = 'none';
+                    if (text) text.style.display = 'none';
+                    if (hint) hint.style.display = 'none';
                 }
             };
             reader.readAsDataURL(file);
@@ -7483,9 +7526,17 @@ header('Expires: 0');
             const reader = new FileReader();
             reader.onload = function(e) {
                 const preview = document.getElementById('edit-photo-preview');
-                if (preview) {
+                const uploadArea = preview?.closest('.photo-upload-area');
+                if (preview && uploadArea) {
                     preview.src = e.target.result;
                     preview.style.display = 'block';
+                    // 隐藏上传提示
+                    const icon = uploadArea.querySelector('.photo-upload-icon');
+                    const text = uploadArea.querySelector('.photo-upload-text');
+                    const hint = uploadArea.querySelector('.photo-upload-hint');
+                    if (icon) icon.style.display = 'none';
+                    if (text) text.style.display = 'none';
+                    if (hint) hint.style.display = 'none';
                 }
             };
             reader.readAsDataURL(file);
@@ -7654,8 +7705,16 @@ header('Expires: 0');
             document.getElementById('add-form').reset();
             selectedPhoto = null;
             const preview = document.getElementById('add-photo-preview');
-            if (preview) {
+            const uploadArea = preview?.closest('.photo-upload-area');
+            if (preview && uploadArea) {
                 preview.style.display = 'none';
+                // 恢复上传提示
+                const icon = uploadArea.querySelector('.photo-upload-icon');
+                const text = uploadArea.querySelector('.photo-upload-text');
+                const hint = uploadArea.querySelector('.photo-upload-hint');
+                if (icon) icon.style.display = '';
+                if (text) text.style.display = '';
+                if (hint) hint.style.display = '';
             }
         }
 
@@ -7665,8 +7724,16 @@ header('Expires: 0');
             document.getElementById('edit-form').reset();
             selectedEditPhoto = null;
             const preview = document.getElementById('edit-photo-preview');
-                if (preview) {
+            const uploadArea = preview?.closest('.photo-upload-area');
+            if (preview && uploadArea) {
                 preview.style.display = 'none';
+                // 恢复上传提示
+                const icon = uploadArea.querySelector('.photo-upload-icon');
+                const text = uploadArea.querySelector('.photo-upload-text');
+                const hint = uploadArea.querySelector('.photo-upload-hint');
+                if (icon) icon.style.display = '';
+                if (text) text.style.display = '';
+                if (hint) hint.style.display = '';
             }
             const deletePhotoFlag = document.getElementById('delete-photo-flag');
             if (deletePhotoFlag) {
