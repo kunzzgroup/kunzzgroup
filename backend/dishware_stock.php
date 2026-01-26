@@ -2896,6 +2896,7 @@ header('Expires: 0');
                         </div>
                         <input type="file" id="edit-photo" name="photo" class="file-input" accept="image/*">
                         <input type="hidden" id="delete-photo-flag" name="delete_photo" value="0">
+                        <input type="hidden" id="edit-current-photo-path" name="current_photo_path" value="">
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>套装设置</label>
@@ -3398,7 +3399,7 @@ header('Expires: 0');
             if (!container) return;
             
             // 按display_order排序
-            const sortedRestaurants = [...restaurants].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+            const sortedRestaurants = [...(restaurants || [])].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
             
             container.innerHTML = sortedRestaurants
                 .map((restaurant, index) => `
@@ -3411,18 +3412,22 @@ header('Expires: 0');
 
         // 填充编辑模态框的餐厅店面数据
         function fillEditModalRestaurantData(item) {
-            restaurants
-                .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
-                .forEach((restaurant, index) => {
-                    const input = document.getElementById(`edit-restaurant-${restaurant.id}`);
-                    if (input) {
-                        // 优先从restaurant_stocks中获取，否则使用索引字段
-                        const quantity = item.restaurant_stocks?.[restaurant.id] || 
-                                       item['restaurant_' + index + '_quantity'] || 
-                                       0;
-                        input.value = quantity;
+            const sorted = [...(restaurants || [])].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+            sorted.forEach((restaurant, index) => {
+                const input = document.getElementById(`edit-restaurant-${restaurant.id}`);
+                if (input) {
+                    // 优先 restaurant_stocks[id]，支持数字/字符串键；其次按索引字段
+                    let quantity = 0;
+                    if (item && item.restaurant_stocks) {
+                        const rid = restaurant.id;
+                        quantity = item.restaurant_stocks[rid] ?? item.restaurant_stocks[String(rid)] ?? 0;
                     }
-                });
+                    if (quantity === 0 && item && item['restaurant_' + index + '_quantity'] != null) {
+                        quantity = item['restaurant_' + index + '_quantity'];
+                    }
+                    input.value = Math.max(0, parseInt(quantity) || 0);
+                }
+            });
         }
 
         // 获取编辑模态框的餐厅店面数据
@@ -3430,7 +3435,7 @@ header('Expires: 0');
             const data = {
                 restaurant_quantities: []
             };
-            const sortedRestaurants = [...restaurants].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+            const sortedRestaurants = [...(restaurants || [])].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
             sortedRestaurants.forEach((restaurant) => {
                 const input = document.getElementById(`edit-restaurant-${restaurant.id}`);
                 if (input) {
@@ -7161,47 +7166,45 @@ header('Expires: 0');
             window.currentSetId = null;
             window.currentSetMembers = [];
             
+            // 若餐厅列表为空，先拉取餐厅数据（避免编辑弹窗在未加载库存时打开）
+            if (!restaurants || restaurants.length === 0) {
+                try {
+                    const rRes = await fetch(`${API_BASE_URL}?action=restaurants`);
+                    const rJson = await rRes.json();
+                    if (rJson.success && rJson.data && rJson.data.length) {
+                        restaurants = rJson.data;
+                    }
+                } catch (e) {
+                    console.warn('获取餐厅列表失败:', e);
+                }
+            }
+            
             // 确保餐厅店面输入框已更新
             updateEditModalRestaurantInputs();
             
-            // 通过API获取碗碟的完整信息，确保获取的是碗碟本身的属性，而不是套装的属性
+            // 始终通过 API 获取碗碟详情（含库存、照片），确保显示已保存的数据
             let item = null;
+            let usedApi = false;
             try {
                 const response = await fetch(`${API_BASE_URL}?action=detail&id=${id}`);
                 const result = await response.json();
                 if (result.success && result.data) {
                     item = result.data;
-                } else {
-                    // 如果API获取失败，从stockData中查找
-                    item = stockData.find(item => item.id == id && item.item_type !== 'set');
-                    if (!item) {
-                        // 如果在stockData中找不到，可能在套装中，需要从套装数据中查找
-                        const allSets = stockData.filter(item => item.item_type === 'set');
-                        for (const set of allSets) {
-                            if (set.items && set.items.length > 0) {
-                                const foundItem = set.items.find(setItem => setItem.id == id);
-                                if (foundItem) {
-                                    item = foundItem;
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                    usedApi = true;
                 }
             } catch (error) {
-                console.error('获取碗碟详情失败，使用本地数据:', error);
-                // 如果API获取失败，从stockData中查找
-                item = stockData.find(item => item.id == id && item.item_type !== 'set');
+                console.warn('获取碗碟详情 API 失败，使用本地数据:', error);
+            }
+            
+            if (!item) {
+                // API 失败或未返回数据时，从 stockData 查找
+                item = stockData.find(i => i.id == id && i.item_type !== 'set') || null;
                 if (!item) {
-                    // 如果在stockData中找不到，可能在套装中，需要从套装数据中查找
-                    const allSets = stockData.filter(item => item.item_type === 'set');
+                    const allSets = stockData.filter(i => i.item_type === 'set');
                     for (const set of allSets) {
-                        if (set.items && set.items.length > 0) {
-                            const foundItem = set.items.find(setItem => setItem.id == id);
-                            if (foundItem) {
-                                item = foundItem;
-                                break;
-                            }
+                        if (set.items && set.items.length) {
+                            const found = set.items.find(si => si.id == id);
+                            if (found) { item = found; break; }
                         }
                     }
                 }
@@ -7304,6 +7307,19 @@ header('Expires: 0');
             const deletePhotoFlag = document.getElementById('delete-photo-flag');
             if (deletePhotoFlag) {
                 deletePhotoFlag.value = '0';
+            }
+            
+            // 保存当前照片路径，提交时若未上传新照片且未删除则保留
+            const currentPhotoPathInput = document.getElementById('edit-current-photo-path');
+            if (currentPhotoPathInput) {
+                currentPhotoPathInput.value = item.photo_path || '';
+            }
+            
+            // 清除上一次选择的新照片，避免误用
+            selectedEditPhoto = null;
+            const editPhotoInput = document.getElementById('edit-photo');
+            if (editPhotoInput) {
+                editPhotoInput.value = '';
             }
             
             // 处理照片预览
@@ -7827,6 +7843,8 @@ header('Expires: 0');
         function resetEditForm() {
             document.getElementById('edit-form').reset();
             selectedEditPhoto = null;
+            const currentPhotoPathInput = document.getElementById('edit-current-photo-path');
+            if (currentPhotoPathInput) currentPhotoPathInput.value = '';
             const preview = document.getElementById('edit-photo-preview');
             const uploadArea = preview?.closest('.photo-upload-area');
             if (preview && uploadArea) {
@@ -7975,10 +7993,9 @@ header('Expires: 0');
             const deletePhotoFlag = document.getElementById('delete-photo-flag');
             if (deletePhotoFlag && deletePhotoFlag.value === '1') {
                 formData.append('delete_photo', '1');
-            }
-            
-            // 如果有新照片，先上传照片
-            if (selectedEditPhoto) {
+                formData.append('photo_path', '');  // 删除时传空
+            } else if (selectedEditPhoto) {
+                // 如果有新照片，先上传照片
                 try {
                     const photoFormData = new FormData();
                     photoFormData.append('action', 'upload_photo');
@@ -7993,14 +8010,19 @@ header('Expires: 0');
                     
                     if (photoResult.success) {
                         formData.append('photo_path', photoResult.data.photo_path);
-                } else {
+                    } else {
                         showAlert('照片上传失败：' + photoResult.message, 'error');
                         return;
-                }
-            } catch (error) {
+                    }
+                } catch (error) {
                     showAlert('照片上传失败：' + error.message, 'error');
                     return;
                 }
+            } else {
+                // 未上传新照片且未删除：保留原照片，传递当前 photo_path
+                const currentPhotoPathInput = document.getElementById('edit-current-photo-path');
+                const currentPath = currentPhotoPathInput ? currentPhotoPathInput.value : '';
+                formData.append('photo_path', currentPath);
             }
             
             // 提交更新
