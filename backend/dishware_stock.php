@@ -1326,17 +1326,53 @@ header('Expires: 0');
         
         /* 数量行样式 */
         .quantity-row {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
             gap: clamp(6px, 0.63vw, 12px);
-            flex-wrap: wrap;
+            row-gap: clamp(8px, 0.83vw, 16px);
         }
         
         .quantity-field {
             display: flex;
             flex-direction: column;
             gap: clamp(2px, 0.21vw, 4px);
-            flex: 1;
-            min-width: clamp(100px, 6.25vw, 120px);
+        }
+        
+        /* 第二行的J4、J5、J6排列在文华楼、中央、J1下面 */
+        .quantity-field:nth-child(6) {
+            grid-column: 1;
+            grid-row: 2;
+        }
+        
+        .quantity-field:nth-child(7) {
+            grid-column: 2;
+            grid-row: 2;
+        }
+        
+        .quantity-field:nth-child(8) {
+            grid-column: 3;
+            grid-row: 2;
+        }
+        
+        /* 如果还有更多餐厅，继续排列 */
+        .quantity-field:nth-child(9) {
+            grid-column: 4;
+            grid-row: 2;
+        }
+        
+        .quantity-field:nth-child(10) {
+            grid-column: 5;
+            grid-row: 2;
+        }
+        
+        .quantity-field:nth-child(11) {
+            grid-column: 1;
+            grid-row: 3;
+        }
+        
+        .quantity-field:nth-child(12) {
+            grid-column: 2;
+            grid-row: 3;
         }
         
         .quantity-field label {
@@ -3345,8 +3381,10 @@ header('Expires: 0');
             const container = document.getElementById('edit-restaurant-quantities');
             if (!container) return;
             
-            container.innerHTML = restaurants
-                .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+            // 按display_order排序
+            const sortedRestaurants = [...restaurants].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+            
+            container.innerHTML = sortedRestaurants
                 .map((restaurant, index) => `
                     <div class="quantity-field">
                         <label>${restaurant.name}数量</label>
