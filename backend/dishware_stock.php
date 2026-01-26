@@ -6997,20 +6997,54 @@ header('Expires: 0');
         }
 
         // 打开编辑模态框
-        function openEditModal(id) {
-            // 首先在stockData中查找
-            let item = stockData.find(item => item.id == id);
+        async function openEditModal(id) {
+            currentEditId = id;
             
-            // 如果在stockData中找不到，可能在套装中，需要从套装数据中查找
-            if (!item) {
-                // 查找所有套装数据
-                const allSets = stockData.filter(item => item.item_type === 'set');
-                for (const set of allSets) {
-                    if (set.items && set.items.length > 0) {
-                        const foundItem = set.items.find(setItem => setItem.id == id);
-                        if (foundItem) {
-                            item = foundItem;
-                            break;
+            // 初始化套装相关变量
+            window.currentSetId = null;
+            window.currentSetMembers = [];
+            
+            // 确保餐厅店面输入框已更新
+            updateEditModalRestaurantInputs();
+            
+            // 通过API获取碗碟的完整信息，确保获取的是碗碟本身的属性，而不是套装的属性
+            let item = null;
+            try {
+                const response = await fetch(`${API_BASE_URL}?action=detail&id=${id}`);
+                const result = await response.json();
+                if (result.success && result.data) {
+                    item = result.data;
+                } else {
+                    // 如果API获取失败，从stockData中查找
+                    item = stockData.find(item => item.id == id && item.item_type !== 'set');
+                    if (!item) {
+                        // 如果在stockData中找不到，可能在套装中，需要从套装数据中查找
+                        const allSets = stockData.filter(item => item.item_type === 'set');
+                        for (const set of allSets) {
+                            if (set.items && set.items.length > 0) {
+                                const foundItem = set.items.find(setItem => setItem.id == id);
+                                if (foundItem) {
+                                    item = foundItem;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('获取碗碟详情失败，使用本地数据:', error);
+                // 如果API获取失败，从stockData中查找
+                item = stockData.find(item => item.id == id && item.item_type !== 'set');
+                if (!item) {
+                    // 如果在stockData中找不到，可能在套装中，需要从套装数据中查找
+                    const allSets = stockData.filter(item => item.item_type === 'set');
+                    for (const set of allSets) {
+                        if (set.items && set.items.length > 0) {
+                            const foundItem = set.items.find(setItem => setItem.id == id);
+                            if (foundItem) {
+                                item = foundItem;
+                                break;
+                            }
                         }
                     }
                 }
@@ -7022,20 +7056,15 @@ header('Expires: 0');
                 return;
             }
             
-            currentEditId = id;
-            
-            // 初始化套装相关变量
-            window.currentSetId = null;
-            window.currentSetMembers = [];
-            
-            // 确保餐厅店面输入框已更新
-            updateEditModalRestaurantInputs();
-            
-            // 填充表单数据
+            // 填充表单数据（使用碗碟本身的属性，确保不是套装的属性）
             document.getElementById('edit-product-name').value = item.product_name || '';
             
-            // 获取分类（优先使用item.category）
+            // 获取分类（优先使用item.category，确保不是SET）
             let category = item.category || '';
+            // 如果分类是SET，说明可能是套装的属性，尝试从code_number中提取
+            if (category === 'SET' || category === 'set') {
+                category = '';
+            }
             
             // 解析现有编号，分离分类和数字部分
             const fullCode = item.code_number || '';
@@ -7053,8 +7082,10 @@ header('Expires: 0');
                         const englishCategoryMatch = fullCode.match(/^([A-Z]{2,3})/);
                         if (englishCategoryMatch) {
                             const extractedCategory = englishCategoryMatch[1];
-                            // 如果提取的分类与item.category相同，移除它
-                            if (extractedCategory === category) {
+                            // 如果提取的分类是SET，跳过
+                            if (extractedCategory === 'SET') {
+                                codeNumber = fullCode;
+                            } else if (extractedCategory === category) {
                                 codeNumber = fullCode.substring(extractedCategory.length);
                             } else {
                                 // 分类不匹配，保留原编号
@@ -7083,8 +7114,14 @@ header('Expires: 0');
                     // 先尝试匹配英文分类（2-3个大写字母）
                     const englishCategoryMatch = fullCode.match(/^([A-Z]{2,3})/);
                     if (englishCategoryMatch) {
-                        category = englishCategoryMatch[1];
-                        codeNumber = fullCode.substring(category.length);
+                        const extractedCategory = englishCategoryMatch[1];
+                        // 如果提取的分类是SET，不设置分类，保留完整编号
+                        if (extractedCategory === 'SET') {
+                            codeNumber = fullCode;
+                        } else {
+                            category = extractedCategory;
+                            codeNumber = fullCode.substring(category.length);
+                        }
                     } else {
                         // 尝试匹配中文分类（中文字符）
                         const chineseCategoryMatch = fullCode.match(/^([\u4e00-\u9fa5]+)/);
