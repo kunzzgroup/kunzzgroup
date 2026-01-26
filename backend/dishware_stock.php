@@ -792,10 +792,10 @@ header('Expires: 0');
         
         /* 基础列（固定位置） */
         #sets-table th:nth-child(1), #sets-table td:nth-child(1) { width: 4%; }  /* 序号 */
-        #sets-table th:nth-child(2), #sets-table td:nth-child(2) { width: 8%; }  /* 套装名称 */
-        #sets-table th:nth-child(3), #sets-table td:nth-child(3) { width: 8%; }  /* 套装编号 */
-        #sets-table th:nth-child(4), #sets-table td:nth-child(4) { width: 26%; } /* 包含项目 */
-        #sets-table th:nth-child(5), #sets-table td:nth-child(5) { width: 8%; }  /* 单价 (RM) */
+        #sets-table th:nth-child(2), #sets-table td:nth-child(2) { width: 5%; }  /* 套装名称 */
+        #sets-table th:nth-child(3), #sets-table td:nth-child(3) { width: 6%; }  /* 套装编号 */
+        #sets-table th:nth-child(4), #sets-table td:nth-child(4) { width: 30%; } /* 包含项目 */
+        #sets-table th:nth-child(5), #sets-table td:nth-child(5) { width: 6%; }  /* 单价 (RM) */
         
         /* 餐厅列（动态，每个餐厅列）- 使用属性选择器 */
         #sets-table th[data-restaurant-header], 
