@@ -1100,11 +1100,69 @@ header('Expires: 0');
         .modal-content {
             background-color: white;
             margin: 1% auto;
-            padding: 24px;
-            border-radius: 12px;
+            padding: clamp(12px, 1.25vw, 24px);
+            border-radius: clamp(6px, 0.63vw, 12px);
             width: 90%;
             max-width: 600px;
             border: 2px solid #583e04;
+        }
+        
+        /* 编辑模态框响应式样式 */
+        #editModal .modal-content {
+            max-width: clamp(400px, 41.67vw, 800px);
+            max-height: clamp(500px, 52.08vw, 90vh);
+            padding: clamp(12px, 1.25vw, 24px);
+            border-radius: clamp(6px, 0.63vw, 12px);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        /* 套装设置区域响应式样式 */
+        #set-settings-container {
+            border: 1px solid #ddd !important;
+            border-radius: clamp(4px, 0.42vw, 8px) !important;
+            padding: clamp(8px, 0.83vw, 16px) !important;
+            background: #f9fafb !important;
+        }
+        
+        #set-settings-container > div {
+            margin-bottom: clamp(6px, 0.63vw, 12px) !important;
+        }
+        
+        #set-settings-container > div > div {
+            gap: clamp(4px, 0.42vw, 8px) !important;
+            margin-bottom: clamp(4px, 0.42vw, 8px) !important;
+        }
+        
+        #set-settings-container span,
+        #set-settings-container label {
+            font-size: clamp(12px, 0.73vw, 14px) !important;
+        }
+        
+        #set-member-select {
+            padding: clamp(6px, 0.42vw, 8px) !important;
+            border-radius: clamp(3px, 0.21vw, 4px) !important;
+            font-size: clamp(12px, 0.73vw, 14px) !important;
+        }
+        
+        #set-settings-container button {
+            padding: clamp(6px, 0.42vw, 8px) clamp(12px, 0.83vw, 16px) !important;
+            font-size: clamp(12px, 0.73vw, 14px) !important;
+        }
+        
+        #selected-set-members {
+            margin-top: clamp(6px, 0.63vw, 12px) !important;
+        }
+        
+        #selected-set-members span {
+            padding: clamp(3px, 0.21vw, 4px) clamp(6px, 0.42vw, 8px) !important;
+            border-radius: clamp(3px, 0.21vw, 4px) !important;
+            font-size: clamp(10px, 0.63vw, 12px) !important;
+        }
+        
+        #set-settings-container > div:last-child {
+            margin-top: clamp(6px, 0.63vw, 12px) !important;
+            padding-top: clamp(6px, 0.63vw, 12px) !important;
         }
 
         /* 餐厅店面管理模态框特殊样式 */
@@ -1226,20 +1284,20 @@ header('Expires: 0');
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
+            margin-bottom: clamp(12px, 1.25vw, 24px);
+            padding-bottom: clamp(8px, 0.83vw, 16px);
             border-bottom: 2px solid #e5e7eb;
         }
 
         .modal-title {
-            font-size: 20px;
+            font-size: clamp(14px, 1.04vw, 20px);
             font-weight: 600;
             color: #583e04;
         }
 
         .close {
             color: #6b7280;
-            font-size: 28px;
+            font-size: clamp(20px, 1.46vw, 28px);
             font-weight: bold;
             cursor: pointer;
         }
@@ -1250,18 +1308,18 @@ header('Expires: 0');
 
         .modal-form {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(clamp(150px, 10.42vw, 200px), 1fr));
+            gap: clamp(8px, 0.83vw, 16px);
         }
 
         .modal-form .form-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: clamp(4px, 0.42vw, 8px);
         }
 
         .modal-form label {
-            font-size: 14px;
+            font-size: clamp(12px, 0.73vw, 14px);
             font-weight: 600;
             color: #583e04;
         }
@@ -1269,29 +1327,29 @@ header('Expires: 0');
         /* 数量行样式 */
         .quantity-row {
             display: flex;
-            gap: 12px;
+            gap: clamp(6px, 0.63vw, 12px);
             flex-wrap: wrap;
         }
         
         .quantity-field {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: clamp(2px, 0.21vw, 4px);
             flex: 1;
-            min-width: 120px;
+            min-width: clamp(100px, 6.25vw, 120px);
         }
         
         .quantity-field label {
-            font-size: 12px;
+            font-size: clamp(10px, 0.63vw, 12px);
             font-weight: 500;
             color: #6b7280;
         }
         
         .quantity-field input {
-            padding: 6px 8px;
+            padding: clamp(4px, 0.31vw, 6px) clamp(6px, 0.42vw, 8px);
             border: 1px solid #d1d5db;
-            border-radius: 4px;
-            font-size: 13px;
+            border-radius: clamp(3px, 0.21vw, 4px);
+            font-size: clamp(11px, 0.68vw, 13px);
             text-align: center;
         }
         
@@ -1303,10 +1361,10 @@ header('Expires: 0');
         
 
         .modal-form input {
-            padding: 8px 12px;
+            padding: clamp(6px, 0.42vw, 8px) clamp(8px, 0.63vw, 12px);
             border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 14px;
+            border-radius: clamp(4px, 0.31vw, 6px);
+            font-size: clamp(12px, 0.73vw, 14px);
         }
 
         .modal-form input:focus {
@@ -1321,10 +1379,10 @@ header('Expires: 0');
         }
 
         .modal-form select {
-            padding: 8px 12px;
+            padding: clamp(6px, 0.42vw, 8px) clamp(8px, 0.63vw, 12px);
             border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 14px;
+            border-radius: clamp(4px, 0.31vw, 6px);
+            font-size: clamp(12px, 0.73vw, 14px);
         }
 
         .modal-form select:focus {
@@ -1336,13 +1394,13 @@ header('Expires: 0');
         /* 照片上传区域 */
         .photo-upload-area {
             border: 2px dashed #d1d5db;
-            border-radius: 8px;
-            padding: 24px;
+            border-radius: clamp(4px, 0.42vw, 8px);
+            padding: clamp(12px, 1.25vw, 24px);
             text-align: center;
             background: #f9fafb;
             transition: all 0.2s;
             cursor: pointer;
-            margin-top: 8px;
+            margin-top: clamp(4px, 0.42vw, 8px);
         }
 
         .photo-upload-area:hover {
@@ -1356,27 +1414,27 @@ header('Expires: 0');
         }
 
         .photo-upload-icon {
-            font-size: 32px;
+            font-size: clamp(20px, 1.67vw, 32px);
             color: #9ca3af;
-            margin-bottom: 12px;
+            margin-bottom: clamp(6px, 0.63vw, 12px);
         }
 
         .photo-upload-text {
-            font-size: 14px;
+            font-size: clamp(12px, 0.73vw, 14px);
             color: #6b7280;
-            margin-bottom: 6px;
+            margin-bottom: clamp(3px, 0.31vw, 6px);
         }
 
         .photo-upload-hint {
-            font-size: 12px;
+            font-size: clamp(10px, 0.63vw, 12px);
             color: #9ca3af;
         }
 
         .photo-preview {
-            max-width: 150px;
-            max-height: 150px;
-            border-radius: 8px;
-            margin-top: 12px;
+            max-width: clamp(100px, 7.81vw, 150px);
+            max-height: clamp(100px, 7.81vw, 150px);
+            border-radius: clamp(4px, 0.42vw, 8px);
+            margin-top: clamp(6px, 0.63vw, 12px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
@@ -1386,10 +1444,10 @@ header('Expires: 0');
 
         .modal-actions {
             display: flex;
-            gap: 12px;
+            gap: clamp(6px, 0.63vw, 12px);
             justify-content: flex-end;
-            margin-top: 24px;
-            padding-top: 16px;
+            margin-top: clamp(12px, 1.25vw, 24px);
+            padding-top: clamp(8px, 0.83vw, 16px);
             border-top: 2px solid #e5e7eb;
         }
 
@@ -2718,7 +2776,7 @@ header('Expires: 0');
 
     <!-- 编辑碗碟信息模态框 -->
     <div id="editModal" class="modal">
-        <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title">编辑碗碟信息</h2>
                 <span class="close" onclick="closeModal()">&times;</span>
