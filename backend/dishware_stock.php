@@ -3413,6 +3413,12 @@ header('Expires: 0');
         // 填充编辑模态框的餐厅店面数据
         function fillEditModalRestaurantData(item) {
             const sorted = [...(restaurants || [])].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+            console.log('fillEditModalRestaurantData 开始填充:', {
+                restaurants_count: sorted.length,
+                item_restaurant_stocks: item?.restaurant_stocks,
+                item_keys: item ? Object.keys(item).filter(k => k.startsWith('restaurant_')) : []
+            });
+            
             sorted.forEach((restaurant, index) => {
                 const input = document.getElementById(`edit-restaurant-${restaurant.id}`);
                 if (input) {
@@ -3420,14 +3426,36 @@ header('Expires: 0');
                     let quantity = 0;
                     if (item && item.restaurant_stocks) {
                         const rid = restaurant.id;
-                        quantity = item.restaurant_stocks[rid] ?? item.restaurant_stocks[String(rid)] ?? 0;
+                        const ridStr = String(rid);
+                        // 尝试多种键格式：数字、字符串、以及可能的其他格式
+                        quantity = item.restaurant_stocks[rid] ?? 
+                                  item.restaurant_stocks[ridStr] ?? 
+                                  item.restaurant_stocks[parseInt(rid)] ??
+                                  0;
                     }
-                    if (quantity === 0 && item && item['restaurant_' + index + '_quantity'] != null) {
+                    // 如果从restaurant_stocks没找到，尝试索引字段
+                    if ((quantity === 0 || quantity === null || quantity === undefined) && item && item['restaurant_' + index + '_quantity'] != null) {
                         quantity = item['restaurant_' + index + '_quantity'];
                     }
-                    input.value = Math.max(0, parseInt(quantity) || 0);
+                    const finalValue = Math.max(0, parseInt(quantity) || 0);
+                    input.value = finalValue;
+                    console.log(`填充餐厅 ${restaurant.name} (ID: ${restaurant.id}, index: ${index}):`, {
+                        restaurant_id: restaurant.id,
+                        restaurant_id_type: typeof restaurant.id,
+                        restaurant_stocks_keys: item?.restaurant_stocks ? Object.keys(item.restaurant_stocks) : [],
+                        from_restaurant_stocks_num: item?.restaurant_stocks?.[restaurant.id],
+                        from_restaurant_stocks_str: item?.restaurant_stocks?.[String(restaurant.id)],
+                        from_index_field: item?.['restaurant_' + index + '_quantity'],
+                        final_value: finalValue,
+                        input_id: input.id,
+                        input_value_set: input.value
+                    });
+                } else {
+                    console.warn(`找不到餐厅 ${restaurant.name} (ID: ${restaurant.id}) 的输入框`);
                 }
             });
+            
+            console.log('fillEditModalRestaurantData 填充完成');
         }
 
         // 获取编辑模态框的餐厅店面数据
@@ -7186,14 +7214,27 @@ header('Expires: 0');
             let item = null;
             let usedApi = false;
             try {
-                const response = await fetch(`${API_BASE_URL}?action=detail&id=${id}`);
+                const detailUrl = `${API_BASE_URL}?action=detail&id=${id}`;
+                console.log('正在获取碗碟详情:', detailUrl);
+                const response = await fetch(detailUrl);
                 const result = await response.json();
+                console.log('详情API返回结果:', {
+                    success: result.success,
+                    hasData: !!result.data,
+                    dataKeys: result.data ? Object.keys(result.data) : [],
+                    restaurant_stocks: result.data?.restaurant_stocks,
+                    total_quantity: result.data?.total_quantity,
+                    photo_path: result.data?.photo_path
+                });
                 if (result.success && result.data) {
                     item = result.data;
                     usedApi = true;
+                    console.log('使用API数据填充表单，restaurant_stocks:', item.restaurant_stocks);
+                } else {
+                    console.warn('详情API返回失败或数据为空:', result);
                 }
             } catch (error) {
-                console.warn('获取碗碟详情 API 失败，使用本地数据:', error);
+                console.error('获取碗碟详情 API 失败:', error);
             }
             
             if (!item) {
@@ -7300,6 +7341,18 @@ header('Expires: 0');
             document.getElementById('edit-code-number').value = codeNumber;
             document.getElementById('edit-size').value = item.size || '';
             document.getElementById('edit-unit-price').value = item.unit_price || '';
+            
+            // 调试：检查item数据
+            console.log('准备填充表单，item数据:', {
+                id: item.id,
+                product_name: item.product_name,
+                hasRestaurantStocks: !!item.restaurant_stocks,
+                restaurant_stocks: item.restaurant_stocks,
+                restaurant_0_quantity: item.restaurant_0_quantity,
+                restaurant_1_quantity: item.restaurant_1_quantity,
+                restaurants_count: restaurants ? restaurants.length : 0
+            });
+            
             // 使用动态餐厅店面填充
             fillEditModalRestaurantData(item);
             

@@ -389,11 +389,15 @@ function getDishwareDetail() {
             $stock = $stock_stmt->fetch(PDO::FETCH_ASSOC);
             
             $quantity = $stock ? (int)$stock['quantity'] : 0;
-            $result['restaurant_stocks'][$restaurant['id']] = $quantity;
+            // 确保使用整数作为键（JSON会保持为数字）
+            $result['restaurant_stocks'][(int)$restaurant['id']] = $quantity;
             $total_quantity += $quantity;
         }
         
         $result['total_quantity'] = $total_quantity;
+        
+        // 调试日志
+        error_log("getDishwareDetail - dishware_id: $id, restaurant_stocks: " . json_encode($result['restaurant_stocks']));
         
         // 为了向后兼容，也添加按索引的字段
         $index = 0;
