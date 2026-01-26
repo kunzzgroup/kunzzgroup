@@ -7167,7 +7167,7 @@ header('Expires: 0');
                 loadAvailableDishwareForSet(dishwareId);
                 
                 // 更新已选择的套装成员显示
-                updateSelectedSetMembersDisplay();
+                await updateSelectedSetMembersDisplay();
                 
             } catch (error) {
                 console.error('加载套装信息失败:', error);
@@ -7210,7 +7210,7 @@ header('Expires: 0');
         }
         
         // 添加套装成员
-        function addSetMember() {
+        async function addSetMember() {
             const select = document.getElementById('set-member-select');
             if (!select || !select.value) {
                 showAlert('请选择要添加的碗碟', 'warning');
@@ -7235,14 +7235,14 @@ header('Expires: 0');
             }
             
             // 更新显示
-            updateSelectedSetMembersDisplay();
+            await updateSelectedSetMembersDisplay();
             
             // 清空选择
             select.value = '';
         }
         
         // 更新已选择的套装成员显示
-        function updateSelectedSetMembersDisplay() {
+        async function updateSelectedSetMembersDisplay() {
             const container = document.getElementById('selected-set-members');
             if (!container) return;
             
@@ -7252,8 +7252,10 @@ header('Expires: 0');
             }
             
             // 获取成员信息
-            const members = window.currentSetMembers.map(id => {
-                const item = stockData.find(i => i.id == id);
+            const members = [];
+            for (const id of window.currentSetMembers) {
+                let item = stockData.find(i => i.id == id && i.item_type !== 'set');
+                
                 if (!item) {
                     // 如果在stockData中找不到，可能在套装中查找
                     const allSets = stockData.filter(i => i.item_type === 'set');
@@ -7261,13 +7263,35 @@ header('Expires: 0');
                         if (set.items && set.items.length > 0) {
                             const foundItem = set.items.find(setItem => setItem.id == id);
                             if (foundItem) {
-                                return foundItem;
+                                item = foundItem;
+                                break;
                             }
                         }
                     }
                 }
-                return item;
-            }).filter(item => item);
+                
+                // 如果code_number是空的或看起来像套装编号（SET开头），通过API获取正确的数据
+                if (!item || !item.code_number || item.code_number.toUpperCase().startsWith('SET')) {
+                    try {
+                        const response = await fetch(`${API_BASE_URL}?action=detail&id=${id}`);
+                        const result = await response.json();
+                        if (result.success && result.data) {
+                            // 使用API返回的数据，确保code_number是正确的
+                            item = {
+                                ...item,
+                                ...result.data,
+                                code_number: result.data.code_number || item?.code_number || ''
+                            };
+                        }
+                    } catch (error) {
+                        console.error('获取碗碟详情失败:', error);
+                    }
+                }
+                
+                if (item) {
+                    members.push(item);
+                }
+            }
             
             if (members.length === 0) {
                 container.innerHTML = '';
@@ -7279,12 +7303,16 @@ header('Expires: 0');
             
             members.forEach((member, index) => {
                 const isCurrent = member.id == currentEditId;
-                // 只显示碗碟的code_number，不显示套装编号
-                const displayCode = member.code_number || '';
+                // 只显示碗碟的code_number，确保不是套装编号
+                let displayCode = (member.code_number || '').trim();
+                // 如果code_number是套装编号格式（SET开头），不显示
+                if (displayCode.toUpperCase().startsWith('SET')) {
+                    displayCode = '';
+                }
                 const displayName = member.product_name || '';
                 html += `
                     <span style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: ${isCurrent ? '#fef3c7' : '#e0e7ff'}; border-radius: 4px; font-size: 12px;">
-                        ${displayCode}${displayName ? ' - ' + displayName : ''}
+                        ${displayCode || '未知编号'}${displayName ? ' - ' + displayName : ''}
                         ${!isCurrent ? `<button type="button" onclick="removeSetMember(${member.id})" style="background: none; border: none; color: #dc2626; cursor: pointer; padding: 0; margin-left: 4px;" title="移除">
                             <i class="fas fa-times"></i>
                         </button>` : '<span style="color: #f59e0b; font-weight: 600;">(当前)</span>'}
@@ -7297,11 +7325,11 @@ header('Expires: 0');
         }
         
         // 移除套装成员
-        function removeSetMember(memberId) {
+        async function removeSetMember(memberId) {
             if (!window.currentSetMembers) return;
             
             window.currentSetMembers = window.currentSetMembers.filter(id => id != memberId);
-            updateSelectedSetMembersDisplay();
+            await updateSelectedSetMembersDisplay();
         }
         
         // 从套装中移除
