@@ -1099,20 +1099,12 @@ header('Expires: 0');
 
         .modal-content {
             background-color: white;
-            margin: clamp(1%, 2vh, 5%) auto;
-            padding: clamp(12px, 2vw, 24px);
-            border-radius: clamp(8px, 1vw, 12px);
-            width: clamp(300px, 90%, 800px);
-            max-width: 800px;
-            max-height: clamp(400px, 95vh, 900px);
-            overflow-y: auto;
+            margin: 1% auto;
+            padding: 24px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
             border: 2px solid #583e04;
-            box-sizing: border-box;
-        }
-        
-        /* 编辑模态框特殊样式 */
-        #editModal .modal-content {
-            max-width: clamp(500px, 90%, 800px);
         }
 
         /* 餐厅店面管理模态框特殊样式 */
@@ -1234,20 +1226,20 @@ header('Expires: 0');
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: clamp(12px, 2vh, 24px);
-            padding-bottom: clamp(8px, 1.5vh, 16px);
+            margin-bottom: 24px;
+            padding-bottom: 16px;
             border-bottom: 2px solid #e5e7eb;
         }
 
         .modal-title {
-            font-size: clamp(16px, 2vw, 20px);
+            font-size: 20px;
             font-weight: 600;
             color: #583e04;
         }
 
         .close {
             color: #6b7280;
-            font-size: clamp(20px, 3vw, 28px);
+            font-size: 28px;
             font-weight: bold;
             cursor: pointer;
         }
@@ -1258,18 +1250,18 @@ header('Expires: 0');
 
         .modal-form {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(clamp(150px, 20vw, 200px), 1fr));
-            gap: clamp(8px, 1.5vw, 16px);
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
         }
 
         .modal-form .form-group {
             display: flex;
             flex-direction: column;
-            gap: clamp(4px, 0.8vw, 8px);
+            gap: 8px;
         }
 
         .modal-form label {
-            font-size: clamp(12px, 1.5vw, 14px);
+            font-size: 14px;
             font-weight: 600;
             color: #583e04;
         }
@@ -1277,29 +1269,29 @@ header('Expires: 0');
         /* 数量行样式 */
         .quantity-row {
             display: flex;
-            gap: clamp(6px, 1.2vw, 12px);
+            gap: 12px;
             flex-wrap: wrap;
         }
         
         .quantity-field {
             display: flex;
             flex-direction: column;
-            gap: clamp(2px, 0.5vw, 4px);
+            gap: 4px;
             flex: 1;
-            min-width: clamp(100px, 15vw, 120px);
+            min-width: 120px;
         }
         
         .quantity-field label {
-            font-size: clamp(10px, 1.2vw, 12px);
+            font-size: 12px;
             font-weight: 500;
             color: #6b7280;
         }
         
         .quantity-field input {
-            padding: clamp(4px, 0.8vw, 6px) clamp(6px, 1vw, 8px);
+            padding: 6px 8px;
             border: 1px solid #d1d5db;
-            border-radius: clamp(3px, 0.5vw, 4px);
-            font-size: clamp(11px, 1.3vw, 13px);
+            border-radius: 4px;
+            font-size: 13px;
             text-align: center;
         }
         
@@ -1311,10 +1303,10 @@ header('Expires: 0');
         
 
         .modal-form input {
-            padding: clamp(6px, 1vw, 8px) clamp(8px, 1.5vw, 12px);
+            padding: 8px 12px;
             border: 1px solid #d1d5db;
-            border-radius: clamp(4px, 0.8vw, 6px);
-            font-size: clamp(12px, 1.5vw, 14px);
+            border-radius: 6px;
+            font-size: 14px;
         }
 
         .modal-form input:focus {
@@ -1329,10 +1321,10 @@ header('Expires: 0');
         }
 
         .modal-form select {
-            padding: clamp(6px, 1vw, 8px) clamp(8px, 1.5vw, 12px);
+            padding: 8px 12px;
             border: 1px solid #d1d5db;
-            border-radius: clamp(4px, 0.8vw, 6px);
-            font-size: clamp(12px, 1.5vw, 14px);
+            border-radius: 6px;
+            font-size: 14px;
         }
 
         .modal-form select:focus {
@@ -1344,13 +1336,13 @@ header('Expires: 0');
         /* 照片上传区域 */
         .photo-upload-area {
             border: 2px dashed #d1d5db;
-            border-radius: clamp(6px, 1vw, 8px);
-            padding: clamp(12px, 2vw, 24px);
+            border-radius: 8px;
+            padding: 24px;
             text-align: center;
             background: #f9fafb;
             transition: all 0.2s;
             cursor: pointer;
-            margin-top: clamp(4px, 0.8vw, 8px);
+            margin-top: 8px;
         }
 
         .photo-upload-area:hover {
@@ -1364,27 +1356,27 @@ header('Expires: 0');
         }
 
         .photo-upload-icon {
-            font-size: clamp(24px, 3vw, 32px);
+            font-size: 32px;
             color: #9ca3af;
-            margin-bottom: clamp(6px, 1.2vw, 12px);
+            margin-bottom: 12px;
         }
 
         .photo-upload-text {
-            font-size: clamp(12px, 1.5vw, 14px);
+            font-size: 14px;
             color: #6b7280;
-            margin-bottom: clamp(3px, 0.6vw, 6px);
+            margin-bottom: 6px;
         }
 
         .photo-upload-hint {
-            font-size: clamp(10px, 1.2vw, 12px);
+            font-size: 12px;
             color: #9ca3af;
         }
 
         .photo-preview {
-            max-width: clamp(100px, 15vw, 150px);
-            max-height: clamp(100px, 15vw, 150px);
-            border-radius: clamp(6px, 1vw, 8px);
-            margin-top: clamp(6px, 1.2vw, 12px);
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: 8px;
+            margin-top: 12px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
@@ -1394,52 +1386,11 @@ header('Expires: 0');
 
         .modal-actions {
             display: flex;
-            gap: clamp(6px, 1.2vw, 12px);
+            gap: 12px;
             justify-content: flex-end;
-            margin-top: clamp(12px, 2vh, 24px);
-            padding-top: clamp(8px, 1.5vh, 16px);
+            margin-top: 24px;
+            padding-top: 16px;
             border-top: 2px solid #e5e7eb;
-        }
-        
-        .modal-actions .btn {
-            padding: clamp(6px, 1vw, 10px) clamp(12px, 2vw, 20px);
-            font-size: clamp(12px, 1.5vw, 14px);
-            border-radius: clamp(4px, 0.8vw, 6px);
-        }
-        
-        /* 套装设置容器响应式样式 */
-        #set-settings-container {
-            border: 1px solid #ddd;
-            border-radius: clamp(6px, 1vw, 8px);
-            padding: clamp(12px, 1.5vw, 16px);
-            background: #f9fafb;
-            font-size: clamp(12px, 1.5vw, 14px);
-        }
-        
-        #set-settings-container > div {
-            margin-bottom: clamp(8px, 1.2vw, 12px);
-        }
-        
-        #set-settings-container span,
-        #set-settings-container label {
-            font-size: clamp(12px, 1.5vw, 14px);
-        }
-        
-        #set-settings-container select {
-            padding: clamp(6px, 1vw, 8px);
-            border: 1px solid #ddd;
-            border-radius: clamp(3px, 0.5vw, 4px);
-            font-size: clamp(12px, 1.5vw, 14px);
-        }
-        
-        #set-settings-container button {
-            padding: clamp(6px, 1vw, 8px) clamp(12px, 1.5vw, 16px);
-            font-size: clamp(11px, 1.4vw, 13px);
-            white-space: nowrap;
-        }
-        
-        #set-settings-container .btn i {
-            font-size: clamp(11px, 1.4vw, 13px);
         }
 
         @media (max-width: 768px) {
@@ -2767,7 +2718,7 @@ header('Expires: 0');
 
     <!-- 编辑碗碟信息模态框 -->
     <div id="editModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 800px;">
             <div class="modal-header">
                 <h2 class="modal-title">编辑碗碟信息</h2>
                 <span class="close" onclick="closeModal()">&times;</span>
@@ -2838,27 +2789,27 @@ header('Expires: 0');
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>套装设置</label>
-                        <div id="set-settings-container">
-                            <div>
-                                <div style="display: flex; align-items: center; gap: clamp(4px, 0.8vw, 8px); margin-bottom: clamp(4px, 0.8vw, 8px); flex-wrap: wrap;">
+                        <div id="set-settings-container" style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; background: #f9fafb;">
+                            <div style="margin-bottom: 12px;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                                     <span style="font-weight: 600;">当前套装成员：</span>
                                     <span id="current-set-members" style="color: #666;">暂无</span>
                                 </div>
-                                <div style="display: flex; align-items: center; gap: clamp(4px, 0.8vw, 8px); flex-wrap: wrap;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
                                     <label style="font-weight: 600; margin: 0;">添加套装成员：</label>
-                                    <select id="set-member-select" style="flex: 1; min-width: clamp(150px, 30vw, 250px);">
+                                    <select id="set-member-select" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                                         <option value="">请选择要加入套装的碗碟</option>
                                     </select>
-                                    <button type="button" onclick="addSetMember()" class="btn btn-primary">
+                                    <button type="button" onclick="addSetMember()" class="btn btn-primary" style="padding: 8px 16px; white-space: nowrap;">
                                         <i class="fas fa-plus"></i> 添加
                                     </button>
                                 </div>
                             </div>
-                            <div id="selected-set-members" style="margin-top: clamp(8px, 1.2vw, 12px);">
+                            <div id="selected-set-members" style="margin-top: 12px;">
                                 <!-- 动态显示已选择的套装成员 -->
                             </div>
-                            <div style="margin-top: clamp(8px, 1.2vw, 12px); padding-top: clamp(8px, 1.2vw, 12px); border-top: 1px solid #ddd;">
-                                <button type="button" onclick="removeFromSet()" class="btn btn-secondary">
+                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #ddd;">
+                                <button type="button" onclick="removeFromSet()" class="btn btn-secondary" style="padding: 8px 16px;">
                                     <i class="fas fa-unlink"></i> 从套装中移除
                                 </button>
                             </div>
