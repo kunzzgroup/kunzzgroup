@@ -805,7 +805,7 @@ header('Expires: 0');
         
         /* 最后两列（总库存和操作） */
         #sets-table th:nth-last-child(2), #sets-table td:nth-last-child(2) { width: 6%; }  /* 总库存 */
-        #sets-table th:last-child, #sets-table td:last-child { width: 7%; }  /* 操作 */
+        #sets-table th:last-child, #sets-table td:last-child { width: 6%; }  /* 操作 */
 
         /* 破损记录表格列宽 */
         #j1-table th:nth-child(1), #j1-table td:nth-child(1) { width: 100px; } /* Date */
