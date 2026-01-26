@@ -6289,23 +6289,44 @@ header('Expires: 0');
                                     
                                     // 为套装中的每个货品加载库存信息
                                     if (setDetail.items && setDetail.items.length > 0) {
+                                        // 确保 stockResult 已加载且包含所有数据（包括套装中的碗碟）
+                                        if (!stockResult.success || !stockResult.data || !stockResult.data.items) {
+                                            console.error('库存数据未加载或格式错误:', stockResult);
+                                        } else {
+                                            console.log(`准备为套装 ${setItem.id} 的 ${setDetail.items.length} 个碗碟加载库存数据，库存列表中共有 ${stockResult.data.items.length} 个碗碟`);
+                                        }
+                                        
                                         for (const item of setDetail.items) {
                                             // 从单个碗碟库存数据中查找对应的库存信息（用 == 避免 id 字符串/数字类型不一致导致匹配失败）
-                                            const stockItem = stockResult.success ? 
-                                                stockResult.data.items.find(si => si.id == item.id) : null;
+                                            // 确保 item.id 和 stockItem.id 都转换为数字进行比较
+                                            const itemId = parseInt(item.id) || item.id;
+                                            const stockItem = stockResult.success && stockResult.data && stockResult.data.items ? 
+                                                stockResult.data.items.find(si => {
+                                                    const siId = parseInt(si.id) || si.id;
+                                                    return siId == itemId || si.id == item.id;
+                                                }) : null;
                                             
                                             // 调试日志：检查是否找到库存数据
                                             if (!stockItem) {
                                                 console.warn(`套装中的碗碟 ${item.id} (${item.product_name || item.code_number}) 未在库存列表中找到`, {
                                                     itemId: item.id,
                                                     itemIdType: typeof item.id,
-                                                    stockItemIds: stockResult.success ? stockResult.data.items.map(si => ({id: si.id, type: typeof si.id})) : [],
-                                                    totalStockItems: stockResult.success ? stockResult.data.items.length : 0
+                                                    itemIdParsed: itemId,
+                                                    stockItemIds: stockResult.success && stockResult.data && stockResult.data.items ? 
+                                                        stockResult.data.items.slice(0, 5).map(si => ({id: si.id, type: typeof si.id, parsed: parseInt(si.id) || si.id})) : [],
+                                                    totalStockItems: stockResult.success && stockResult.data && stockResult.data.items ? stockResult.data.items.length : 0,
+                                                    isInSetItems: stockResult.success && stockResult.data && stockResult.data.items ? 
+                                                        stockResult.data.items.filter(si => {
+                                                            const siId = parseInt(si.id) || si.id;
+                                                            return siId == itemId || si.id == item.id;
+                                                        }).length : 0
                                                 });
                                             } else {
-                                                console.log(`套装中的碗碟 ${item.id} 找到库存数据:`, {
+                                                console.log(`套装中的碗碟 ${item.id} (${item.product_name || item.code_number}) 找到库存数据:`, {
                                                     restaurant_stocks: stockItem.restaurant_stocks,
-                                                    total_quantity: stockItem.total_quantity
+                                                    total_quantity: stockItem.total_quantity,
+                                                    hasRestaurantStocks: !!stockItem.restaurant_stocks,
+                                                    restaurantStocksKeys: stockItem.restaurant_stocks ? Object.keys(stockItem.restaurant_stocks) : []
                                                 });
                                             }
                                             
@@ -6338,14 +6359,54 @@ header('Expires: 0');
                                                 item.code_number = stockItem.code_number || item.code_number || '';
                                                 item.category = stockItem.category || item.category || '';
                                             } else {
-                                                // 如果没有找到库存信息，设置为0
-                                                item.wenhua_quantity = 0;
-                                                item.central_quantity = 0;
-                                                item.j1_quantity = 0;
-                                                item.j2_quantity = 0;
-                                                item.j3_quantity = 0;
-                                                item.total_quantity = 0;
-                                                item.restaurant_stocks = {};
+                                                // 如果没有找到库存信息，尝试直接从API获取该碗碟的库存
+                                                console.warn(`尝试直接从API获取碗碟 ${item.id} 的库存数据...`);
+                                                try {
+                                                    const detailResponse = await fetch(`${API_BASE_URL}?action=detail&id=${item.id}`);
+                                                    const detailResult = await detailResponse.json();
+                                                    if (detailResult.success && detailResult.data) {
+                                                        const detailData = detailResult.data;
+                                                        // 使用详情API返回的库存数据
+                                                        if (detailData.restaurant_stocks) {
+                                                            item.restaurant_stocks = { ...detailData.restaurant_stocks };
+                                                        }
+                                                        item.total_quantity = detailData.total_quantity || 0;
+                                                        
+                                                        // 复制按索引的字段
+                                                        if (detailData.restaurant_0_quantity !== undefined) {
+                                                            let index = 0;
+                                                            while (detailData['restaurant_' + index + '_quantity'] !== undefined) {
+                                                                item['restaurant_' + index + '_quantity'] = detailData['restaurant_' + index + '_quantity'];
+                                                                index++;
+                                                            }
+                                                        }
+                                                        
+                                                        console.log(`从详情API获取到碗碟 ${item.id} 的库存数据:`, {
+                                                            restaurant_stocks: item.restaurant_stocks,
+                                                            total_quantity: item.total_quantity
+                                                        });
+                                                    } else {
+                                                        // 如果API也获取不到，设置为0
+                                                        console.error(`无法从详情API获取碗碟 ${item.id} 的库存数据`);
+                                                        item.wenhua_quantity = 0;
+                                                        item.central_quantity = 0;
+                                                        item.j1_quantity = 0;
+                                                        item.j2_quantity = 0;
+                                                        item.j3_quantity = 0;
+                                                        item.total_quantity = 0;
+                                                        item.restaurant_stocks = {};
+                                                    }
+                                                } catch (apiError) {
+                                                    console.error(`获取碗碟 ${item.id} 详情失败:`, apiError);
+                                                    // 如果API调用失败，设置为0
+                                                    item.wenhua_quantity = 0;
+                                                    item.central_quantity = 0;
+                                                    item.j1_quantity = 0;
+                                                    item.j2_quantity = 0;
+                                                    item.j3_quantity = 0;
+                                                    item.total_quantity = 0;
+                                                    item.restaurant_stocks = {};
+                                                }
                                             }
                                             
                                             // 套装中的碗碟使用套装的价格
