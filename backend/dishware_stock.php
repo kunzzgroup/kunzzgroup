@@ -1099,7 +1099,7 @@ header('Expires: 0');
 
         .modal-content {
             background-color: white;
-            margin: 1% auto;
+            margin: 2% auto;
             padding: clamp(12px, 1.25vw, 24px);
             border-radius: clamp(6px, 0.63vw, 12px);
             width: 90%;
