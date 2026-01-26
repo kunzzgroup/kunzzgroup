@@ -381,23 +381,36 @@ function getDishwareDetail() {
         $result['restaurant_stocks'] = [];
         $total_quantity = 0;
         
+        // 先查询所有库存记录（一次性查询，提高效率）
+        $all_stocks_sql = "SELECT restaurant_id, quantity FROM dishware_stock_by_restaurant 
+                          WHERE dishware_id = ?";
+        $all_stocks_stmt = $pdo->prepare($all_stocks_sql);
+        $all_stocks_stmt->execute([$id]);
+        $all_stocks = $all_stocks_stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // 创建快速查找映射
+        $stock_map = [];
+        foreach ($all_stocks as $stock) {
+            $stock_map[(int)$stock['restaurant_id']] = (int)$stock['quantity'];
+        }
+        
         foreach ($restaurants as $restaurant) {
-            $stock_sql = "SELECT quantity FROM dishware_stock_by_restaurant 
-                         WHERE dishware_id = ? AND restaurant_id = ?";
-            $stock_stmt = $pdo->prepare($stock_sql);
-            $stock_stmt->execute([$id, $restaurant['id']]);
-            $stock = $stock_stmt->fetch(PDO::FETCH_ASSOC);
+            $restaurant_id = (int)$restaurant['id'];
+            $quantity = isset($stock_map[$restaurant_id]) ? $stock_map[$restaurant_id] : 0;
             
-            $quantity = $stock ? (int)$stock['quantity'] : 0;
-            // 确保使用整数作为键（JSON会保持为数字）
-            $result['restaurant_stocks'][(int)$restaurant['id']] = $quantity;
+            // 同时使用字符串和数字键，确保前端能正确读取（JSON中数字键会变成字符串）
+            $result['restaurant_stocks'][$restaurant_id] = $quantity;
+            $result['restaurant_stocks'][(string)$restaurant_id] = $quantity;
             $total_quantity += $quantity;
         }
         
         $result['total_quantity'] = $total_quantity;
         
         // 调试日志
-        error_log("getDishwareDetail - dishware_id: $id, restaurant_stocks: " . json_encode($result['restaurant_stocks']));
+        error_log("getDishwareDetail - dishware_id: $id");
+        error_log("getDishwareDetail - found " . count($all_stocks) . " stock records");
+        error_log("getDishwareDetail - restaurant_stocks: " . json_encode($result['restaurant_stocks']));
+        error_log("getDishwareDetail - total_quantity: " . $total_quantity);
         
         // 为了向后兼容，也添加按索引的字段
         $index = 0;
@@ -557,12 +570,25 @@ function updateStock() {
     global $pdo, $data;
     
     // 支持从POST和PUT请求中获取数据
+    // 如果$data为空（可能是JSON解析失败），尝试从php://input重新解析
+    if (empty($data) || !is_array($data)) {
+        $raw_input = file_get_contents("php://input");
+        if (!empty($raw_input)) {
+            $decoded = json_decode($raw_input, true);
+            if (is_array($decoded)) {
+                $data = $decoded;
+            }
+        }
+    }
+    
     $dishware_id = $data['dishware_id'] ?? $_POST['dishware_id'] ?? '';
     
     // 调试日志
     error_log("updateStock - dishware_id: " . $dishware_id);
+    error_log("updateStock - data type: " . gettype($data));
     error_log("updateStock - data: " . json_encode($data));
     error_log("updateStock - POST: " . json_encode($_POST));
+    error_log("updateStock - Content-Type: " . ($_SERVER['CONTENT_TYPE'] ?? 'not set'));
     
     if (empty($dishware_id)) {
         sendResponse(false, "缺少碗碟ID");
@@ -586,8 +612,9 @@ function updateStock() {
         
         // 如果提供了按顺序的数组
         if (isset($data['restaurant_quantities']) && is_array($data['restaurant_quantities'])) {
+            $update_count = 0;
             foreach ($restaurants_list as $index => $restaurant) {
-                $quantity = $data['restaurant_quantities'][$index] ?? 0;
+                $quantity = isset($data['restaurant_quantities'][$index]) ? (int)$data['restaurant_quantities'][$index] : 0;
                 
                 $sql = "INSERT INTO dishware_stock_by_restaurant (dishware_id, restaurant_id, quantity) 
                         VALUES (?, ?, ?)
@@ -598,8 +625,13 @@ function updateStock() {
                 $stmt = $pdo->prepare($sql);
                 $result = $stmt->execute([$dishware_id, $restaurant['id'], $quantity]);
                 
-                error_log("updateStock - Updated dishware_id=$dishware_id, restaurant_id={$restaurant['id']}, quantity=$quantity, result=" . ($result ? 'success' : 'failed'));
+                if ($result) {
+                    $update_count++;
+                }
+                
+                error_log("updateStock - dishware_id=$dishware_id, restaurant_id={$restaurant['id']}, index=$index, quantity=$quantity, result=" . ($result ? 'success' : 'failed'));
             }
+            error_log("updateStock - 总共更新了 $update_count / " . count($restaurants_list) . " 个餐厅的库存");
         } else {
             // 向后兼容：支持按餐厅ID的格式
             foreach ($restaurants_list as $restaurant) {

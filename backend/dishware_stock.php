@@ -3424,17 +3424,35 @@ header('Expires: 0');
                 if (input) {
                     // 优先 restaurant_stocks[id]，支持数字/字符串键；其次按索引字段
                     let quantity = 0;
-                    if (item && item.restaurant_stocks) {
+                    if (item && item.restaurant_stocks && typeof item.restaurant_stocks === 'object') {
                         const rid = restaurant.id;
+                        const ridNum = parseInt(rid);
                         const ridStr = String(rid);
-                        // 尝试多种键格式：数字、字符串、以及可能的其他格式
+                        
+                        // 尝试所有可能的键格式
                         quantity = item.restaurant_stocks[rid] ?? 
+                                  item.restaurant_stocks[ridNum] ??
                                   item.restaurant_stocks[ridStr] ?? 
-                                  item.restaurant_stocks[parseInt(rid)] ??
+                                  item.restaurant_stocks[String(ridNum)] ??
                                   0;
-                    }
-                    // 如果从restaurant_stocks没找到，尝试索引字段
-                    if ((quantity === 0 || quantity === null || quantity === undefined) && item && item['restaurant_' + index + '_quantity'] != null) {
+                        
+                        // 如果还是0，检查是否是真正的0值（不是undefined）
+                        if (quantity === 0) {
+                            // 检查是否存在该键（即使值为0）
+                            const hasKey = rid in item.restaurant_stocks || 
+                                         ridNum in item.restaurant_stocks ||
+                                         ridStr in item.restaurant_stocks ||
+                                         String(ridNum) in item.restaurant_stocks;
+                            if (!hasKey) {
+                                // 键不存在，尝试索引字段
+                                if (item['restaurant_' + index + '_quantity'] != null) {
+                                    quantity = item['restaurant_' + index + '_quantity'];
+                                }
+                            }
+                            // 如果hasKey为true，quantity就是0，这是正确的值
+                        }
+                    } else if (item && item['restaurant_' + index + '_quantity'] != null) {
+                        // 如果没有restaurant_stocks，直接使用索引字段
                         quantity = item['restaurant_' + index + '_quantity'];
                     }
                     const finalValue = Math.max(0, parseInt(quantity) || 0);
@@ -7223,15 +7241,43 @@ header('Expires: 0');
                     hasData: !!result.data,
                     dataKeys: result.data ? Object.keys(result.data) : [],
                     restaurant_stocks: result.data?.restaurant_stocks,
+                    restaurant_stocks_type: typeof result.data?.restaurant_stocks,
+                    restaurant_stocks_keys: result.data?.restaurant_stocks ? Object.keys(result.data.restaurant_stocks) : [],
+                    restaurant_stocks_values: result.data?.restaurant_stocks ? Object.values(result.data.restaurant_stocks) : [],
                     total_quantity: result.data?.total_quantity,
-                    photo_path: result.data?.photo_path
+                    photo_path: result.data?.photo_path,
+                    has_restaurant_0: result.data?.restaurant_0_quantity != null,
+                    restaurant_0_value: result.data?.restaurant_0_quantity
                 });
                 if (result.success && result.data) {
                     item = result.data;
                     usedApi = true;
-                    console.log('使用API数据填充表单，restaurant_stocks:', item.restaurant_stocks);
+                    
+                    // 检查restaurant_stocks是否为空对象
+                    const stocksEmpty = !item.restaurant_stocks || 
+                                      (typeof item.restaurant_stocks === 'object' && 
+                                       Object.keys(item.restaurant_stocks).length === 0);
+                    
+                    if (stocksEmpty) {
+                        console.warn('⚠️ API返回的restaurant_stocks为空，尝试使用索引字段');
+                        // 如果restaurant_stocks为空，尝试从索引字段构建
+                        if (restaurants && restaurants.length > 0) {
+                            item.restaurant_stocks = {};
+                            restaurants.forEach((r, idx) => {
+                                const idxKey = 'restaurant_' + idx + '_quantity';
+                                if (item[idxKey] != null) {
+                                    const qty = parseInt(item[idxKey]) || 0;
+                                    item.restaurant_stocks[r.id] = qty;
+                                    item.restaurant_stocks[String(r.id)] = qty;
+                                }
+                            });
+                            console.log('从索引字段重建restaurant_stocks:', item.restaurant_stocks);
+                        }
+                    }
+                    
+                    console.log('✅ 使用API数据填充表单，restaurant_stocks:', item.restaurant_stocks);
                 } else {
-                    console.warn('详情API返回失败或数据为空:', result);
+                    console.warn('❌ 详情API返回失败或数据为空:', result);
                 }
             } catch (error) {
                 console.error('获取碗碟详情 API 失败:', error);
@@ -7239,6 +7285,7 @@ header('Expires: 0');
             
             if (!item) {
                 // API 失败或未返回数据时，从 stockData 查找
+                console.warn('⚠️ API未返回数据，使用本地stockData作为备用');
                 item = stockData.find(i => i.id == id && i.item_type !== 'set') || null;
                 if (!item) {
                     const allSets = stockData.filter(i => i.item_type === 'set');
@@ -7249,10 +7296,34 @@ header('Expires: 0');
                         }
                     }
                 }
+                
+                if (item) {
+                    console.log('使用本地数据:', {
+                        hasRestaurantStocks: !!item.restaurant_stocks,
+                        restaurant_stocks: item.restaurant_stocks,
+                        restaurant_0_quantity: item.restaurant_0_quantity
+                    });
+                    
+                    // 如果本地数据也没有restaurant_stocks，尝试从索引字段构建
+                    if (!item.restaurant_stocks || Object.keys(item.restaurant_stocks).length === 0) {
+                        if (restaurants && restaurants.length > 0) {
+                            item.restaurant_stocks = {};
+                            restaurants.forEach((r, idx) => {
+                                const idxKey = 'restaurant_' + idx + '_quantity';
+                                if (item[idxKey] != null) {
+                                    const qty = parseInt(item[idxKey]) || 0;
+                                    item.restaurant_stocks[r.id] = qty;
+                                    item.restaurant_stocks[String(r.id)] = qty;
+                                }
+                            });
+                            console.log('从本地数据索引字段重建restaurant_stocks:', item.restaurant_stocks);
+                        }
+                    }
+                }
             }
             
             if (!item) {
-                console.error('找不到ID为', id, '的碗碟数据');
+                console.error('❌ 找不到ID为', id, '的碗碟数据');
                 showAlert('找不到碗碟数据', 'error');
                 return;
             }
