@@ -6278,9 +6278,9 @@ header('Expires: 0');
                                     // 为套装中的每个货品加载库存信息
                                     if (setDetail.items && setDetail.items.length > 0) {
                                         for (const item of setDetail.items) {
-                                            // 从单个碗碟库存数据中查找对应的库存信息
+                                            // 从单个碗碟库存数据中查找对应的库存信息（用 == 避免 id 字符串/数字类型不一致导致匹配失败）
                                             const stockItem = stockResult.success ? 
-                                                stockResult.data.items.find(si => si.id === item.id) : null;
+                                                stockResult.data.items.find(si => si.id == item.id) : null;
                                             
                                             if (stockItem) {
                                                 // 复制库存数量信息（向后兼容旧字段）
