@@ -7131,12 +7131,24 @@ header('Expires: 0');
                 const result = await response.json();
                 
                 if (result.success && result.data) {
-                    // 显示当前套装成员
+                    // 显示当前套装成员（只显示碗碟的code，不显示套装编号）
                     const members = result.data.members || [];
-                    const memberNames = members.map(m => m.display).join(', ');
+                    // 从display中提取code_number（格式：product_name (code_number)）
+                    const memberCodes = members.map(m => {
+                        if (m.display) {
+                            // 提取括号中的code_number
+                            const match = m.display.match(/\(([^)]+)\)/);
+                            if (match && match[1]) {
+                                return match[1];
+                            }
+                            // 如果没有括号，尝试从display中提取
+                            return m.display.split(' (')[1]?.replace(')', '') || m.display;
+                        }
+                        return '';
+                    }).filter(code => code).join(', ');
                     const currentSetMembersEl = document.getElementById('current-set-members');
                     if (currentSetMembersEl) {
-                        currentSetMembersEl.textContent = memberNames || '暂无';
+                        currentSetMembersEl.textContent = memberCodes || '暂无';
                     }
                     
                     // 保存当前套装ID和成员ID
@@ -7267,9 +7279,12 @@ header('Expires: 0');
             
             members.forEach((member, index) => {
                 const isCurrent = member.id == currentEditId;
+                // 只显示碗碟的code_number，不显示套装编号
+                const displayCode = member.code_number || '';
+                const displayName = member.product_name || '';
                 html += `
                     <span style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: ${isCurrent ? '#fef3c7' : '#e0e7ff'}; border-radius: 4px; font-size: 12px;">
-                        ${member.code_number || ''} - ${member.product_name || ''}
+                        ${displayCode}${displayName ? ' - ' + displayName : ''}
                         ${!isCurrent ? `<button type="button" onclick="removeSetMember(${member.id})" style="background: none; border: none; color: #dc2626; cursor: pointer; padding: 0; margin-left: 4px;" title="移除">
                             <i class="fas fa-times"></i>
                         </button>` : '<span style="color: #f59e0b; font-weight: 600;">(当前)</span>'}
