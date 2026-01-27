@@ -71,7 +71,7 @@ if (!isset($_SESSION['user_id'])) {
                     <table>
                         <thead>
                             <tr>
-                                <th scope="col" class="product-code-column" style="width: 200px !important; min-width: 200px !important; text-align: left !important;">货品编号</th>
+                                <th scope="col" class="product-code-column" style="width: 140px !important; min-width: 140px !important; text-align: left !important;">货品编号</th>
                                 <th scope="col" style="text-align: left !important;">名字</th>
                                 <th scope="col">数量</th>
                                 <th scope="col" class="actions-column" aria-label="操作"></th>
@@ -258,7 +258,7 @@ if (!isset($_SESSION['user_id'])) {
                 const isEditing = editingRowIds.has(item.id);
                 return `
                 <tr>
-                    <td class="product-code-cell" style="width: 200px !important; min-width: 200px !important;">${escapeHtml(item.product_code || '')}</td>
+                    <td class="product-code-cell" style="width: 140px !important; min-width: 140px !important;">${escapeHtml(item.product_code || '')}</td>
                     <td>${escapeHtml(item.product_name || '')}</td>
                     <td class="qty">
                         <input 
