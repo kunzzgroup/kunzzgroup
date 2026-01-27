@@ -217,7 +217,7 @@ body {
 table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: auto;
+    table-layout: fixed;
 }
 
 thead th {
@@ -231,41 +231,78 @@ thead th {
 }
 
 thead th.product-code-column {
-    width: 90px !important;
-    min-width: 90px !important;
+    width: 80px !important;
+    min-width: 80px !important;
+    max-width: 80px !important;
     text-align: left !important;
 }
 
 thead th:nth-child(2) {
     text-align: left !important;
-    min-width: 200px !important;
+    width: 130px !important;
+    min-width: 130px !important;
+    max-width: 130px !important;
 }
 
 thead th:nth-child(3) {
     text-align: right;
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: 70px !important;
+}
+
+thead th.actions-column {
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
 }
 
 tbody td.product-code-cell,
 tbody td:nth-child(1) {
-    width: 90px !important;
-    min-width: 90px !important;
+    width: 80px !important;
+    min-width: 80px !important;
+    max-width: 80px !important;
 }
 
 tbody td:nth-child(2) {
-    min-width: 200px !important;
+    width: 130px !important;
+    min-width: 130px !important;
+    max-width: 130px !important;
+}
+
+tbody td:nth-child(3) {
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: 70px !important;
+}
+
+tbody td.actions {
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
 }
 
 table th.product-code-column,
 table td.product-code-cell,
 table th:nth-child(1),
 table td:nth-child(1) {
-    width: 90px !important;
-    min-width: 90px !important;
+    width: 80px !important;
+    min-width: 80px !important;
+    max-width: 80px !important;
 }
 
 table th:nth-child(2),
 table td:nth-child(2) {
-    min-width: 200px !important;
+    width: 130px !important;
+    min-width: 130px !important;
+    max-width: 130px !important;
+}
+
+table th:nth-child(3),
+table td:nth-child(3) {
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: 70px !important;
 }
 
 thead th,

@@ -71,10 +71,10 @@ if (!isset($_SESSION['user_id'])) {
                     <table>
                         <thead>
                             <tr>
-                                <th scope="col" class="product-code-column" style="width: 90px !important; min-width: 90px !important; text-align: left !important;">货品编号</th>
-                                <th scope="col" style="text-align: left !important; min-width: 200px !important;">名字</th>
-                                <th scope="col">数量</th>
-                                <th scope="col" class="actions-column" aria-label="操作"></th>
+                                <th scope="col" class="product-code-column" style="width: 80px !important; min-width: 80px !important; max-width: 80px !important; text-align: left !important;">货品编号</th>
+                                <th scope="col" style="text-align: left !important; width: 130px !important; min-width: 130px !important; max-width: 130px !important;">名字</th>
+                                <th scope="col" style="width: 70px !important; min-width: 70px !important; max-width: 70px !important;">数量</th>
+                                <th scope="col" class="actions-column" style="width: 50px !important; min-width: 50px !important; max-width: 50px !important;" aria-label="操作"></th>
                             </tr>
                         </thead>
                         <tbody id="stock-tbody">
@@ -258,8 +258,8 @@ if (!isset($_SESSION['user_id'])) {
                 const isEditing = editingRowIds.has(item.id);
                 return `
                 <tr>
-                    <td class="product-code-cell" style="width: 90px !important; min-width: 90px !important;">${escapeHtml(item.product_code || '')}</td>
-                    <td style="min-width: 200px !important;">${escapeHtml(item.product_name || '')}</td>
+                    <td class="product-code-cell" style="width: 80px !important; min-width: 80px !important; max-width: 80px !important;">${escapeHtml(item.product_code || '')}</td>
+                    <td style="width: 130px !important; min-width: 130px !important; max-width: 130px !important; word-wrap: break-word; overflow-wrap: break-word;">${escapeHtml(item.product_name || '')}</td>
                     <td class="qty">
                         <input 
                             type="number" 
