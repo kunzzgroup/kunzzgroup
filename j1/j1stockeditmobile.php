@@ -2006,7 +2006,7 @@ require_once '../backend/session_check.php';
     <div class="container">
         <div class="header">
             <div>
-                <h1 id="page-title"> J1出货记录- 手机版</h1>
+                <h1 id="page-title"> J1 出货记录 - 手机版</h1>
             </div>
             <a class="back-button" href="../backend/stockeditall.php?system=j1">
                 <i class="fas fa-arrow-left"></i>
