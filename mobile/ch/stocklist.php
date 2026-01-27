@@ -71,10 +71,10 @@ if (!isset($_SESSION['user_id'])) {
                     <table>
                         <thead>
                             <tr>
-                                <th scope="col" class="product-code-column" style="width: 65px !important; min-width: 65px !important; max-width: 65px !important; text-align: left !important;">货品编号</th>
-                                <th scope="col" style="text-align: left !important; width: 130px !important; min-width: 130px !important; max-width: 130px !important;">名字</th>
-                                <th scope="col" style="width: 55px !important; min-width: 55px !important; max-width: 55px !important;">数量</th>
-                                <th scope="col" class="actions-column" style="width: 50px !important; min-width: 50px !important; max-width: 50px !important;" aria-label="操作"></th>
+                                <th scope="col" class="product-code-column" style="width: 60px !important; min-width: 60px !important; max-width: 60px !important; text-align: left !important; padding: 10px 4px !important;">货品编号</th>
+                                <th scope="col" style="text-align: left !important; width: 100px !important; min-width: 100px !important; max-width: 100px !important; padding: 10px 6px !important;">名字</th>
+                                <th scope="col" style="width: 50px !important; min-width: 50px !important; max-width: 50px !important; padding: 10px 4px !important;">数量</th>
+                                <th scope="col" class="actions-column" style="width: 45px !important; min-width: 45px !important; max-width: 45px !important; padding: 10px 2px !important;" aria-label="操作"></th>
                             </tr>
                         </thead>
                         <tbody id="stock-tbody">
@@ -258,9 +258,9 @@ if (!isset($_SESSION['user_id'])) {
                 const isEditing = editingRowIds.has(item.id);
                 return `
                 <tr>
-                    <td class="product-code-cell" style="width: 65px !important; min-width: 65px !important; max-width: 65px !important;">${escapeHtml(item.product_code || '')}</td>
-                    <td style="width: 130px !important; min-width: 130px !important; max-width: 130px !important; word-wrap: break-word; overflow-wrap: break-word;">${escapeHtml(item.product_name || '')}</td>
-                    <td class="qty">
+                    <td class="product-code-cell" style="width: 60px !important; min-width: 60px !important; max-width: 60px !important; padding: 8px 4px !important;">${escapeHtml(item.product_code || '')}</td>
+                    <td style="width: 100px !important; min-width: 100px !important; max-width: 100px !important; padding: 8px 6px !important; word-wrap: break-word; overflow-wrap: break-word;">${escapeHtml(item.product_name || '')}</td>
+                    <td class="qty" style="width: 50px !important; min-width: 50px !important; max-width: 50px !important; padding: 8px 4px !important;">
                         <input 
                             type="number" 
                             class="qty-input ${isEditing ? 'editing' : ''}" 
@@ -271,10 +271,10 @@ if (!isset($_SESSION['user_id'])) {
                             onchange="updateQty(${item.id}, this.value)"
                             onfocus="this.select()"
                             ${isEditing ? '' : 'readonly'}
-                            style="border: none; background: transparent; font-size: 15px; padding: 4px 8px; width: 80px; text-align: right; pointer-events: ${isEditing ? 'auto' : 'none'}; ${isEditing ? 'background: #fff; border: 1px solid #583e04; border-radius: 4px;' : ''}"
+                            style="border: none; background: transparent; font-size: 13px; padding: 2px 4px; width: 100%; max-width: 42px; text-align: right; pointer-events: ${isEditing ? 'auto' : 'none'}; ${isEditing ? 'background: #fff; border: 1px solid #583e04; border-radius: 4px;' : ''}"
                         >
                     </td>
-                    <td class="actions">
+                    <td class="actions" style="width: 45px !important; min-width: 45px !important; max-width: 45px !important; padding: 8px 2px !important;">
                         ${isEditing ? 
                             `<button class="edit-button" onclick="saveRecord(${item.id})" title="保存" style="background: #2aa745;">
                                 <img src="../images/icons/edit.svg" alt="" aria-hidden="true" style="filter: brightness(0) invert(1);">
