@@ -26,7 +26,7 @@ if (!isset($_SESSION['user_id'])) {
 
         <main class="page-content">
             <section class="form-section">
-                <div class="selects-row" style="display: flex !important; flex-direction: row !important; gap: 12px; width: 100%;">
+                <div class="selects-row">
                     <div class="select-group">
                         <label for="freezer-category" class="sr-only">冰箱分类</label>
                         <div class="select-wrapper">

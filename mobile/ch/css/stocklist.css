@@ -92,23 +92,26 @@ body {
     position: sticky;
     top: 0;
     z-index: 20;
-    padding: 16px 24px;
-    margin: 0 -24px;
+    padding: 16px 0;
+    margin: 0;
     background: #f4f7f2;
     border-bottom: 1px solid var(--border-color);
     box-shadow: 0 10px 20px rgba(44, 44, 44, 0.05);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .selects-row {
-    display: flex !important;
-    flex-direction: row !important;
+    display: flex;
+    flex-direction: row;
     gap: 12px;
     width: 100%;
+    align-items: stretch;
 }
 
 .select-group {
     display: flex;
-    flex: 1;
+    flex: 1 1 0;
     min-width: 0;
 }
 
