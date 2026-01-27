@@ -3415,6 +3415,12 @@ header('Expires: 0');
             });
         }
 
+        /** 从 rowData 生成各餐厅数量字符串（与 display_order 一致），用于 data-quantities */
+        function rowDataToQuantitiesString(rowData) {
+            const sorted = [...(restaurants || [])].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+            return sorted.map((r, i) => String(rowData['restaurant_' + i] ?? '0')).join(',');
+        }
+
         // 更新编辑模态框中的餐厅店面输入框
         function updateEditModalRestaurantInputs() {
             const container = document.getElementById('edit-restaurant-quantities');
@@ -6800,21 +6806,21 @@ header('Expires: 0');
                                 size: setItem.size || '-',
                                 unit_price: currencyHtml(setPrice),
                                 total: `<span class="${totalClass}">${totalQty}</span>`,
-                                actions: `
-                                    <button class="action-btn edit-btn" onclick="openEditModal(${setItem.id})" title="编辑">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="action-btn delete-btn" onclick="deleteDishwareFromSet(${setItem.id}, ${set.id})" title="删除">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                `,
-                                // 添加套装标识，用于合并显示
                                 set_id: set.id,
                                 set_category: setItem.category || set.category || '-',
                                 set_size: setItem.size || '-',
                                 set_price: setPrice
                             };
                             fillRestaurantStocks(rowData, setItem);
+                            const setItemQtyStr = rowDataToQuantitiesString(rowData);
+                            rowData.actions = `
+                                    <button class="action-btn edit-btn" data-quantities="${setItemQtyStr}" onclick="openEditModal(${setItem.id}, this)" title="编辑">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn delete-btn" onclick="deleteDishwareFromSet(${setItem.id}, ${set.id})" title="删除">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                `;
                             storeEditQuantitiesCache(setItem.id, rowData);
                             displayRows.push(rowData);
                         });
@@ -6857,23 +6863,24 @@ header('Expires: 0');
                         category: item.category || '-',
                         size: item.size || '-',
                         unit_price: currencyHtml(item.unit_price || 0),
-                        total: `<span class="${totalClass}">${totalQty}</span>`,
-                        actions: `
-                            <button class="action-btn edit-btn" onclick="openEditModal(${item.id})" title="编辑">
+                        total: `<span class="${totalClass}">${totalQty}</span>`
+                    };
+                    fillRestaurantStocks(rowData, item);
+                    const itemQtyStr = rowDataToQuantitiesString(rowData);
+                    rowData.actions = `
+                            <button class="action-btn edit-btn" data-quantities="${itemQtyStr}" onclick="openEditModal(${item.id}, this)" title="编辑">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="action-btn delete-btn" onclick="deleteDishware(${item.id})" title="删除">
                                 <i class="fas fa-trash"></i>
                             </button>
-                        `
-                    };
-                    fillRestaurantStocks(rowData, item);
+                        `;
                     storeEditQuantitiesCache(item.id, rowData);
                     displayRows.push(rowData);
                 }
             });
 
-            // 转置渲染：左侧是“字段名”，右侧每一列是一个“展示行”
+            // 转置渲染：左侧是"字段名"，右侧每一列是一个"展示行"
             table.classList.add('transposed');
             const thead = table.querySelector('thead');
             if (thead) thead.innerHTML = '';
@@ -7087,21 +7094,21 @@ header('Expires: 0');
                                 size: setItem.size || '-',
                                 unit_price: currencyHtml(setPrice),
                                 total: `<span class="${totalClass}">${totalQty}</span>`,
-                                actions: `
-                                    <button class="action-btn edit-btn" onclick="openEditModal(${setItem.id})" title="编辑">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="action-btn delete-btn" onclick="deleteDishwareFromSet(${setItem.id}, ${set.id})" title="删除">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                `,
-                                // 添加套装标识，用于合并显示
                                 set_id: set.id,
                                 set_category: setItem.category || set.category || '-',
                                 set_size: setItem.size || '-',
                                 set_price: setPrice
                             };
                             fillRestaurantStocks(rowData, setItem);
+                            const setItemQtyStr = rowDataToQuantitiesString(rowData);
+                            rowData.actions = `
+                                    <button class="action-btn edit-btn" data-quantities="${setItemQtyStr}" onclick="openEditModal(${setItem.id}, this)" title="编辑">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn delete-btn" onclick="deleteDishwareFromSet(${setItem.id}, ${set.id})" title="删除">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                `;
                             storeEditQuantitiesCache(setItem.id, rowData);
                             displayRows.push(rowData);
                         });
@@ -7144,17 +7151,18 @@ header('Expires: 0');
                         category: item.category || '-',
                         size: item.size || '-',
                         unit_price: currencyHtml(item.unit_price || 0),
-                        total: `<span class="${totalClass}">${totalQty}</span>`,
-                        actions: `
-                            <button class="action-btn edit-btn" onclick="openEditModal(${item.id})" title="编辑">
+                        total: `<span class="${totalClass}">${totalQty}</span>`
+                    };
+                    fillRestaurantStocks(rowData, item);
+                    const itemQtyStr = rowDataToQuantitiesString(rowData);
+                    rowData.actions = `
+                            <button class="action-btn edit-btn" data-quantities="${itemQtyStr}" onclick="openEditModal(${item.id}, this)" title="编辑">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="action-btn delete-btn" onclick="deleteDishware(${item.id})" title="删除">
                                 <i class="fas fa-trash"></i>
                             </button>
-                        `
-                    };
-                    fillRestaurantStocks(rowData, item);
+                        `;
                     storeEditQuantitiesCache(item.id, rowData);
                     displayRows.push(rowData);
                 }
@@ -7230,8 +7238,8 @@ header('Expires: 0');
             return tableHtml;
         }
 
-        // 打开编辑模态框
-        async function openEditModal(id) {
+        // 打开编辑模态框；editBtn 为被点击的编辑按钮，若有 data-quantities 则优先用它填充数量（与表格显示一致）
+        async function openEditModal(id, editBtn) {
             currentEditId = id;
             
             // 初始化套装相关变量
@@ -7402,10 +7410,18 @@ header('Expires: 0');
             document.getElementById('edit-size').value = item.size || '';
             document.getElementById('edit-unit-price').value = item.unit_price || '';
             
-            // 数量输入：优先用表格渲染时写入的缓存（与表格显示完全一致），否则用 item
-            const cachedQtys = editQuantitiesCache.get(String(id)) ?? editQuantitiesCache.get(Number(id));
-            if (cachedQtys && Array.isArray(cachedQtys) && cachedQtys.length > 0) {
-                fillEditModalQuantitiesFromCache(cachedQtys);
+            // 数量输入：优先用编辑按钮的 data-quantities（与表格显示完全一致），其次缓存，否则用 item
+            const btn = editBtn && (editBtn.classList?.contains('edit-btn') ? editBtn : editBtn?.closest?.('.edit-btn'));
+            let qtyArr = null;
+            if (btn && typeof btn.dataset !== 'undefined' && btn.dataset.quantities) {
+                const raw = String(btn.dataset.quantities).split(',');
+                if (raw.length > 0) qtyArr = raw.map((v) => String(v).trim());
+            }
+            if (!qtyArr || qtyArr.length === 0) {
+                qtyArr = editQuantitiesCache.get(String(id)) ?? editQuantitiesCache.get(Number(id));
+            }
+            if (qtyArr && Array.isArray(qtyArr) && qtyArr.length > 0) {
+                fillEditModalQuantitiesFromCache(qtyArr);
             } else {
                 fillEditModalRestaurantData(item);
             }
