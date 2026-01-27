@@ -99,13 +99,21 @@ body {
     box-shadow: 0 10px 20px rgba(44, 44, 44, 0.05);
 }
 
+.filters-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
 .select-group {
     display: flex;
+    flex: 1;
 }
 
 .select-wrapper {
     position: relative;
     width: 100%;
+    flex: 1;
 }
 
 .select-wrapper select {
