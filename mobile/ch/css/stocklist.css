@@ -231,13 +231,14 @@ thead th {
 }
 
 thead th.product-code-column {
-    width: 110px !important;
-    min-width: 110px !important;
+    width: 90px !important;
+    min-width: 90px !important;
     text-align: left !important;
 }
 
 thead th:nth-child(2) {
     text-align: left !important;
+    min-width: 200px !important;
 }
 
 thead th:nth-child(3) {
@@ -246,16 +247,25 @@ thead th:nth-child(3) {
 
 tbody td.product-code-cell,
 tbody td:nth-child(1) {
-    width: 110px !important;
-    min-width: 110px !important;
+    width: 90px !important;
+    min-width: 90px !important;
+}
+
+tbody td:nth-child(2) {
+    min-width: 200px !important;
 }
 
 table th.product-code-column,
 table td.product-code-cell,
 table th:nth-child(1),
 table td:nth-child(1) {
-    width: 110px !important;
-    min-width: 110px !important;
+    width: 90px !important;
+    min-width: 90px !important;
+}
+
+table th:nth-child(2),
+table td:nth-child(2) {
+    min-width: 200px !important;
 }
 
 thead th,
