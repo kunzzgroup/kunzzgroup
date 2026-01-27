@@ -7228,102 +7228,65 @@ header('Expires: 0');
             // 确保餐厅店面输入框已更新
             updateEditModalRestaurantInputs();
             
-            // 始终通过 API 获取碗碟详情（含库存、照片），确保显示已保存的数据
+            // 优先使用主表格的数据源（stockData），确保弹窗显示的数量与表格一致
             let item = null;
-            let usedApi = false;
-            try {
-                const detailUrl = `${API_BASE_URL}?action=detail&id=${id}`;
-                console.log('正在获取碗碟详情:', detailUrl);
-                const response = await fetch(detailUrl);
-                const result = await response.json();
-                console.log('详情API返回结果:', {
-                    success: result.success,
-                    hasData: !!result.data,
-                    dataKeys: result.data ? Object.keys(result.data) : [],
-                    restaurant_stocks: result.data?.restaurant_stocks,
-                    restaurant_stocks_type: typeof result.data?.restaurant_stocks,
-                    restaurant_stocks_keys: result.data?.restaurant_stocks ? Object.keys(result.data.restaurant_stocks) : [],
-                    restaurant_stocks_values: result.data?.restaurant_stocks ? Object.values(result.data.restaurant_stocks) : [],
-                    total_quantity: result.data?.total_quantity,
-                    photo_path: result.data?.photo_path,
-                    has_restaurant_0: result.data?.restaurant_0_quantity != null,
-                    restaurant_0_value: result.data?.restaurant_0_quantity
-                });
-                if (result.success && result.data) {
-                    item = result.data;
-                    usedApi = true;
-                    
-                    // 检查restaurant_stocks是否为空对象
-                    const stocksEmpty = !item.restaurant_stocks || 
-                                      (typeof item.restaurant_stocks === 'object' && 
-                                       Object.keys(item.restaurant_stocks).length === 0);
-                    
-                    if (stocksEmpty) {
-                        console.warn('⚠️ API返回的restaurant_stocks为空，尝试使用索引字段');
-                        // 如果restaurant_stocks为空，尝试从索引字段构建
-                        if (restaurants && restaurants.length > 0) {
-                            item.restaurant_stocks = {};
-                            restaurants.forEach((r, idx) => {
-                                const idxKey = 'restaurant_' + idx + '_quantity';
-                                if (item[idxKey] != null) {
-                                    const qty = parseInt(item[idxKey]) || 0;
-                                    item.restaurant_stocks[r.id] = qty;
-                                    item.restaurant_stocks[String(r.id)] = qty;
-                                }
-                            });
-                            console.log('从索引字段重建restaurant_stocks:', item.restaurant_stocks);
-                        }
-                    }
-                    
-                    console.log('✅ 使用API数据填充表单，restaurant_stocks:', item.restaurant_stocks);
-                } else {
-                    console.warn('❌ 详情API返回失败或数据为空:', result);
-                }
-            } catch (error) {
-                console.error('获取碗碟详情 API 失败:', error);
-            }
             
-            if (!item) {
-                // API 失败或未返回数据时，从 stockData 查找
-                console.warn('⚠️ API未返回数据，使用本地stockData作为备用');
-                item = stockData.find(i => i.id == id && i.item_type !== 'set') || null;
-                if (!item) {
+            function findItemInStockData() {
+                let found = stockData.find(i => i.id == id && i.item_type !== 'set') || null;
+                if (!found) {
                     const allSets = stockData.filter(i => i.item_type === 'set');
                     for (const set of allSets) {
                         if (set.items && set.items.length) {
-                            const found = set.items.find(si => si.id == id);
-                            if (found) { item = found; break; }
+                            const f = set.items.find(si => si.id == id);
+                            if (f) { found = f; break; }
                         }
                     }
                 }
-                
-                if (item) {
-                    console.log('使用本地数据:', {
-                        hasRestaurantStocks: !!item.restaurant_stocks,
-                        restaurant_stocks: item.restaurant_stocks,
-                        restaurant_0_quantity: item.restaurant_0_quantity
-                    });
-                    
-                    // 如果本地数据也没有restaurant_stocks，尝试从索引字段构建
-                    if (!item.restaurant_stocks || Object.keys(item.restaurant_stocks).length === 0) {
-                        if (restaurants && restaurants.length > 0) {
-                            item.restaurant_stocks = {};
-                            restaurants.forEach((r, idx) => {
-                                const idxKey = 'restaurant_' + idx + '_quantity';
-                                if (item[idxKey] != null) {
-                                    const qty = parseInt(item[idxKey]) || 0;
-                                    item.restaurant_stocks[r.id] = qty;
-                                    item.restaurant_stocks[String(r.id)] = qty;
-                                }
-                            });
-                            console.log('从本地数据索引字段重建restaurant_stocks:', item.restaurant_stocks);
-                        }
+                return found;
+            }
+            
+            item = findItemInStockData();
+            
+            if (item) {
+                // 使用表格数据源，与主表格显示完全一致
+                if (!item.restaurant_stocks || (typeof item.restaurant_stocks === 'object' && Object.keys(item.restaurant_stocks).length === 0)) {
+                    if (restaurants && restaurants.length > 0) {
+                        item.restaurant_stocks = {};
+                        restaurants.forEach((r, idx) => {
+                            const idxKey = 'restaurant_' + idx + '_quantity';
+                            const qty = item[idxKey] != null ? (parseInt(item[idxKey]) || 0) : 0;
+                            item.restaurant_stocks[r.id] = qty;
+                            item.restaurant_stocks[String(r.id)] = qty;
+                        });
                     }
                 }
             }
             
             if (!item) {
-                console.error('❌ 找不到ID为', id, '的碗碟数据');
+                // 本地未找到时，从 API 获取
+                try {
+                    const response = await fetch(`${API_BASE_URL}?action=detail&id=${id}`);
+                    const result = await response.json();
+                    if (result.success && result.data) {
+                        item = result.data;
+                        if (!item.restaurant_stocks || (typeof item.restaurant_stocks === 'object' && Object.keys(item.restaurant_stocks).length === 0)) {
+                            if (restaurants && restaurants.length > 0) {
+                                item.restaurant_stocks = {};
+                                restaurants.forEach((r, idx) => {
+                                    const idxKey = 'restaurant_' + idx + '_quantity';
+                                    const qty = item[idxKey] != null ? (parseInt(item[idxKey]) || 0) : 0;
+                                    item.restaurant_stocks[r.id] = qty;
+                                    item.restaurant_stocks[String(r.id)] = qty;
+                                });
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('获取碗碟详情失败:', e);
+                }
+            }
+            
+            if (!item) {
                 showAlert('找不到碗碟数据', 'error');
                 return;
             }
