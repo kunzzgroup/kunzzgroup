@@ -287,6 +287,11 @@ require_once '../backend/session_check.php';
             background-color: #e5ebf8ff;
         }
 
+        /* 确保"暂无数据"行不影响表头列宽 */
+        .stock-table td[colspan] {
+            box-sizing: border-box;
+        }
+
         /* 确保显示文本和编辑输入框对齐 */
         .stock-table td span {
             display: inline-block;
@@ -461,6 +466,7 @@ require_once '../backend/session_check.php';
         .stock-table th:nth-child(2), .stock-table td:nth-child(2) { width: 7%; } /* 货品编号 */
         .stock-table th:nth-child(3), .stock-table td:nth-child(3) { width: 25%; } /* 货品 */
         .stock-table th:nth-child(4), .stock-table td:nth-child(4) { width: 10%; }  /* 出货 */
+        .stock-table th:nth-child(5), .stock-table td:nth-child(5) { width: 8%; } /* 操作 */
         .stock-table th:nth-child(6), .stock-table td:nth-child(6) { width: 6%; } /* 收货单位 */
         .stock-table th:nth-child(7), .stock-table td:nth-child(7) { width: 5%; } /* 规格 */
         .stock-table th:nth-child(10), .stock-table td:nth-child(10) { width: 6%; } /* 类型 */
@@ -3892,7 +3898,8 @@ require_once '../backend/session_check.php';
             tbody.innerHTML = '';
             
             if (stockData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="padding: 20px; color: #6b7280;">暂无数据</td></tr>';
+                // 使用正确的colspan="5"来匹配5列表格，确保列宽与表头一致
+                tbody.innerHTML = '<tr><td colspan="5" style="padding: 20px; color: #6b7280; text-align: center; width: 100%;">暂无数据</td></tr>';
                 return;
             }
             
