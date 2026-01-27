@@ -260,7 +260,7 @@ if (!isset($_SESSION['user_id'])) {
                 <tr>
                     <td class="product-code-cell" style="width: 60px !important; min-width: 60px !important; max-width: 60px !important; padding: 8px 4px !important;">${escapeHtml(item.product_code || '')}</td>
                     <td style="width: 100px !important; min-width: 100px !important; max-width: 100px !important; padding: 8px 6px !important; word-wrap: break-word; overflow-wrap: break-word;">${escapeHtml(item.product_name || '')}</td>
-                    <td class="qty" style="width: 50px !important; min-width: 50px !important; max-width: 50px !important; padding: 8px 4px !important;">
+                    <td class="qty" style="width: 50px !important; min-width: 50px !important; max-width: 50px !important; padding: 8px 4px !important; text-align: right !important;">
                         <input 
                             type="number" 
                             class="qty-input ${isEditing ? 'editing' : ''}" 

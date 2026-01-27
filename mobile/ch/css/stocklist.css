@@ -286,6 +286,7 @@ tbody td:nth-child(3) {
     min-width: 50px !important;
     max-width: 50px !important;
     padding: 8px 4px !important;
+    text-align: right !important;
 }
 
 tbody td.actions {
@@ -316,6 +317,7 @@ table td:nth-child(3) {
     width: 50px !important;
     min-width: 50px !important;
     max-width: 50px !important;
+    text-align: right !important;
 }
 
 table th.actions-column,
@@ -348,7 +350,7 @@ tbody tr:last-child td {
 }
 
 .qty {
-    text-align: right;
+    text-align: right !important;
     font-variant-numeric: tabular-nums;
 }
 
