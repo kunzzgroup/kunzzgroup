@@ -217,7 +217,6 @@ body {
 table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed;
 }
 
 thead th {
@@ -230,20 +229,18 @@ thead th {
     letter-spacing: 0.04em;
 }
 
-table thead th:first-child {
-    min-width: 200px !important;
-    width: 200px !important;
-    max-width: 200px !important;
+thead th:first-child {
+    min-width: 120px;
+    width: 140px;
 }
 
-table thead th:nth-child(3) {
+thead th:nth-child(3) {
     text-align: right;
 }
 
-table tbody td:first-child {
-    min-width: 200px !important;
-    width: 200px !important;
-    max-width: 200px !important;
+tbody td:first-child {
+    min-width: 120px;
+    width: 140px;
     word-break: break-word;
 }
 
