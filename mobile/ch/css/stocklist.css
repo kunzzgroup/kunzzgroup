@@ -229,14 +229,18 @@ thead th {
     letter-spacing: 0.04em;
 }
 
+thead th:nth-child(2) {
+    text-align: left;
+}
+
 thead th:nth-child(3) {
     text-align: right;
 }
 
 .product-code-column,
 .product-code-cell {
-    min-width: 120px;
-    width: 25%;
+    min-width: 160px;
+    width: 30%;
 }
 
 thead th,
