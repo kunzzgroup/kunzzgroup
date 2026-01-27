@@ -49,6 +49,7 @@ function getJ1StockSummary($startDate = null, $endDate = null) {
         // 如果提供了结束日期，计算到该日期为止的所有库存（包括历史累计）
         if ($endDate) {
             // 计算到结束日期为止的所有库存
+            // 合并 j1stockedit_data 和 j1stockeditmobile_data 两个表的数据
             $sql = "SELECT 
                         product_name,
                         specification,
@@ -59,17 +60,34 @@ function getJ1StockSummary($startDate = null, $endDate = null) {
                         SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
                         (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
                          SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
-                    FROM j1stockedit_data 
-                    WHERE product_name IS NOT NULL AND product_name != ''
-                    AND date <= ?
+                    FROM (
+                        SELECT product_name, specification, price, code_number, type, in_quantity, out_quantity
+                        FROM j1stockedit_data 
+                        WHERE product_name IS NOT NULL AND product_name != ''
+                        AND date <= ?
+                        UNION ALL
+                        SELECT 
+                            m.product_name,
+                            COALESCE(s.specification, NULL) as specification,
+                            COALESCE(s.price, 0) as price,
+                            m.code_number,
+                            COALESCE(s.category, NULL) as type,
+                            m.in_quantity,
+                            m.out_quantity
+                        FROM j1stockeditmobile_data m
+                        LEFT JOIN stock_data s ON (s.product_name = m.product_name OR s.product_code = m.code_number)
+                        WHERE m.product_name IS NOT NULL AND m.product_name != ''
+                        AND m.date <= ?
+                    ) AS combined_data
                     GROUP BY product_name, specification, price, code_number, type
                     HAVING current_stock != 0
                     ORDER BY product_name ASC, price ASC";
             
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([$endDate]);
+            $stmt->execute([$endDate, $endDate]);
         } else {
             // 没有日期范围，返回所有库存
+            // 合并 j1stockedit_data 和 j1stockeditmobile_data 两个表的数据
             $sql = "SELECT 
                         product_name,
                         specification,
@@ -80,8 +98,23 @@ function getJ1StockSummary($startDate = null, $endDate = null) {
                         SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
                         (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
                          SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
-                    FROM j1stockedit_data 
-                    WHERE product_name IS NOT NULL AND product_name != ''
+                    FROM (
+                        SELECT product_name, specification, price, code_number, type, in_quantity, out_quantity
+                        FROM j1stockedit_data 
+                        WHERE product_name IS NOT NULL AND product_name != ''
+                        UNION ALL
+                        SELECT 
+                            m.product_name,
+                            COALESCE(s.specification, NULL) as specification,
+                            COALESCE(s.price, 0) as price,
+                            m.code_number,
+                            COALESCE(s.category, NULL) as type,
+                            m.in_quantity,
+                            m.out_quantity
+                        FROM j1stockeditmobile_data m
+                        LEFT JOIN stock_data s ON (s.product_name = m.product_name OR s.product_code = m.code_number)
+                        WHERE m.product_name IS NOT NULL AND m.product_name != ''
+                    ) AS combined_data
                     GROUP BY product_name, specification, price, code_number, type
                     HAVING current_stock != 0
                     ORDER BY product_name ASC, price ASC";
