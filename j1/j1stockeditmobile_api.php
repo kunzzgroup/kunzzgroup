@@ -256,17 +256,24 @@ function handleGet() {
             break;
             
         case 'stocklist_total':
-            // 从 j1stockeditmobile_data 表直接计算库存总数
+            // 合并 j1stockeditmobile_data 和 j1stockedit_data 两个表的数据来计算库存总数
             try {
-                // 按产品名称和编号分组，计算每个产品的库存总数
-                // 注意：这里包含所有产品，即使库存为0也会显示
+                // 合并两个表的数据，按产品名称和编号分组，计算每个产品的库存总数
                 $sql = "SELECT 
                             product_name,
                             code_number,
                             SUM(in_quantity) as total_in,
                             SUM(out_quantity) as total_out,
                             SUM(in_quantity) - SUM(out_quantity) as total_qty
-                        FROM j1stockeditmobile_data
+                        FROM (
+                            SELECT product_name, code_number, in_quantity, out_quantity
+                            FROM j1stockeditmobile_data
+                            WHERE product_name IS NOT NULL AND product_name != ''
+                            UNION ALL
+                            SELECT product_name, code_number, in_quantity, out_quantity
+                            FROM j1stockedit_data
+                            WHERE product_name IS NOT NULL AND product_name != ''
+                        ) AS combined_data
                         GROUP BY product_name, code_number
                         ORDER BY product_name";
                 
@@ -282,7 +289,7 @@ function handleGet() {
                     $totalQty += $qty;
                     $items[] = [
                         'product_name' => $item['product_name'],
-                        'code_number' => $item['code_number'],
+                        'code_number' => $item['code_number'] ?? null,
                         'total_qty' => number_format($qty, 3, '.', '')
                     ];
                 }
