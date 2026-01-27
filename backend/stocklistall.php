@@ -2321,51 +2321,6 @@ require_once 'session_check.php';
             }
         }
 
-        // 合并J1移动端数据到总库存数据
-        function mergeJ1MobileData(originalData, mobileData) {
-            if (!mobileData || !mobileData.items || mobileData.items.length === 0) {
-                return originalData;
-            }
-            
-            // 创建移动端数据的映射表，使用 product_name + code_number 作为键
-            const mobileDataMap = new Map();
-            mobileData.items.forEach(item => {
-                const key = `${(item.product_name || '').trim()}|${(item.code_number || '').trim()}`;
-                const qty = parseFloat(item.total_qty || 0);
-                if (mobileDataMap.has(key)) {
-                    // 如果已存在，累加数量
-                    mobileDataMap.set(key, mobileDataMap.get(key) + qty);
-                } else {
-                    mobileDataMap.set(key, qty);
-                }
-            });
-            
-            // 合并数据：将移动端的数量累加到原有数据中
-            const mergedData = originalData.map(item => {
-                const key = `${(item.product_name || '').trim()}|${(item.code_number || '').trim()}`;
-                const mobileQty = mobileDataMap.get(key) || 0;
-                const originalQty = parseFloat(item.total_stock || 0);
-                const mergedQty = originalQty + mobileQty;
-                
-                // 重新计算总价
-                const price = parseFloat(item.price || 0);
-                const mergedTotalPrice = mergedQty * price;
-                
-                return {
-                    ...item,
-                    total_stock: mergedQty,
-                    formatted_stock: mergedQty.toFixed(item.specification && item.specification.trim().toLowerCase() === 'kilo' ? 3 : 2),
-                    total_price: mergedTotalPrice,
-                    formatted_total_price: mergedTotalPrice.toFixed(2),
-                    // 标记移动端数量，用于显示（可选）
-                    mobile_qty: mobileQty,
-                    original_qty: originalQty
-                };
-            });
-            
-            return mergedData;
-        }
-        
         // 修改 loadData 函数
         async function loadData(system) {
             if (isLoading[system]) return;
@@ -2389,63 +2344,6 @@ require_once 'session_check.php';
                         stockData[system] = result.data.products || [];
                     } else {
                         stockData[system] = result.data.summary || [];
-                        
-                        // J1系统：合并移动端数据
-                        if (system === 'j1') {
-                            try {
-                                // 获取移动端库存数据
-                                const mobileApiUrl = '../j1/j1stockeditmobile_api.php';
-                                const mobileResponse = await fetch(`${mobileApiUrl}?action=stocklist_total`, {
-                                    headers: {
-                                        'Content-Type': 'application/json'
-                                    }
-                                });
-                                
-                                if (mobileResponse.ok) {
-                                    const mobileResult = await mobileResponse.json();
-                                    if (mobileResult.success && mobileResult.data) {
-                                        // 合并移动端数据
-                                        stockData[system] = mergeJ1MobileData(stockData[system], mobileResult.data);
-                                        
-                                        // 重新计算总价值和类型统计
-                                        let totalValue = 0;
-                                        const typeStats = {
-                                            'Kitchen': 0,
-                                            'Sushi Bar': 0,
-                                            'Drinks': 0,
-                                            'Sake': 0
-                                        };
-                                        
-                                        stockData[system].forEach(item => {
-                                            const price = parseFloat(item.total_price || 0);
-                                            totalValue += price;
-                                            
-                                            const type = item.type || '';
-                                            if (type && typeStats.hasOwnProperty(type)) {
-                                                typeStats[type] += price;
-                                            }
-                                        });
-                                        
-                                        // 更新汇总卡片数据
-                                        result.data.total_value = totalValue;
-                                        result.data.formatted_total_value = totalValue.toFixed(2);
-                                        result.data.type_stats = {
-                                            kitchen: typeStats['Kitchen'],
-                                            sushi_bar: typeStats['Sushi Bar'],
-                                            drinks: typeStats['Drinks'],
-                                            sake: typeStats['Sake'],
-                                            formatted_kitchen: typeStats['Kitchen'].toFixed(2),
-                                            formatted_sushi_bar: typeStats['Sushi Bar'].toFixed(2),
-                                            formatted_drinks: typeStats['Drinks'].toFixed(2),
-                                            formatted_sake: typeStats['Sake'].toFixed(2)
-                                        };
-                                    }
-                                }
-                            } catch (mobileError) {
-                                console.warn('获取J1移动端数据失败，仅使用原有数据:', mobileError);
-                                // 如果获取移动端数据失败，继续使用原有数据
-                            }
-                        }
                         
                         // J2系统过滤掉Sake类型的数据
                         if (system === 'j2') {
