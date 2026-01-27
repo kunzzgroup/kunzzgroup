@@ -347,6 +347,17 @@ function handlePost() {
         // 更新库存总数表
         updateStocklistTotal($data['product_name'], $data['code_number'] ?? null, floatval($data['in_quantity'] ?? 0), floatval($data['out_quantity'] ?? 0), true);
         
+        // 同步到 j1stockedit_data 表
+        $mobileRecord = [
+            'date' => $data['date'],
+            'time' => $data['time'],
+            'product_name' => $data['product_name'],
+            'code_number' => $data['code_number'] ?? null,
+            'in_quantity' => floatval($data['in_quantity'] ?? 0),
+            'out_quantity' => floatval($data['out_quantity'] ?? 0)
+        ];
+        syncToJ1StockEditData('create', $mobileRecord);
+        
         $pdo->commit();
         
         // 获取新创建的记录
@@ -417,6 +428,17 @@ function handlePut() {
             true
         );
         
+        // 同步到 j1stockedit_data 表
+        $updatedMobileRecord = [
+            'date' => $data['date'] ?? $oldRecord['date'],
+            'time' => $data['time'] ?? $oldRecord['time'],
+            'product_name' => $data['product_name'] ?? $oldRecord['product_name'],
+            'code_number' => $data['code_number'] ?? $oldRecord['code_number'],
+            'in_quantity' => floatval($data['in_quantity'] ?? $oldRecord['in_quantity']),
+            'out_quantity' => floatval($data['out_quantity'] ?? $oldRecord['out_quantity'])
+        ];
+        syncToJ1StockEditData('update', $updatedMobileRecord, $oldRecord);
+        
         $pdo->commit();
         
         // 获取更新后的记录
@@ -473,6 +495,9 @@ function handleDelete() {
                 -$outQty, // 撤销出库（负数出库 = 加回库存）
                 true
             );
+            
+            // 同步删除 j1stockedit_data 表中的对应记录
+            syncToJ1StockEditData('delete', $record);
         }
         
         $pdo->commit();
@@ -482,6 +507,167 @@ function handleDelete() {
     } catch (PDOException $e) {
         $pdo->rollBack();
         sendResponse(false, "删除记录失败：" . $e->getMessage());
+    }
+}
+
+// 获取产品信息（specification, price, type）
+function getProductInfo($productName, $codeNumber) {
+    global $pdo;
+    
+    $specification = null;
+    $price = 0;
+    $type = null;
+    
+    try {
+        // 从 stock_data 表获取产品信息
+        if (!empty($productName)) {
+            $stmt = $pdo->prepare("SELECT specification, category FROM stock_data WHERE product_name = ? LIMIT 1");
+            $stmt->execute([$productName]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($result) {
+                $specification = $result['specification'] ?? null;
+                $type = $result['category'] ?? null;
+            }
+        } elseif (!empty($codeNumber)) {
+            $stmt = $pdo->prepare("SELECT specification, category FROM stock_data WHERE product_code = ? LIMIT 1");
+            $stmt->execute([$codeNumber]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($result) {
+                $specification = $result['specification'] ?? null;
+                $type = $result['category'] ?? null;
+            }
+        }
+        
+        // 从 j1stockedit_data 表获取最近的价格
+        if (!empty($productName)) {
+            $priceStmt = $pdo->prepare("SELECT price FROM j1stockedit_data WHERE product_name = ? AND price > 0 ORDER BY date DESC, time DESC LIMIT 1");
+            $priceStmt->execute([$productName]);
+            $priceResult = $priceStmt->fetch(PDO::FETCH_ASSOC);
+            if ($priceResult) {
+                $price = floatval($priceResult['price'] ?? 0);
+            }
+        }
+    } catch (PDOException $e) {
+        error_log("获取产品信息失败: " . $e->getMessage());
+    }
+    
+    return [
+        'specification' => $specification,
+        'price' => $price,
+        'type' => $type
+    ];
+}
+
+// 同步数据到 j1stockedit_data 表
+function syncToJ1StockEditData($action, $mobileRecord, $oldRecord = null) {
+    global $pdo;
+    
+    try {
+        $productName = $mobileRecord['product_name'] ?? null;
+        $codeNumber = $mobileRecord['code_number'] ?? null;
+        
+        if (empty($productName)) {
+            return; // 如果没有产品名称，无法同步
+        }
+        
+        // 获取产品信息
+        $productInfo = getProductInfo($productName, $codeNumber);
+        $specification = $productInfo['specification'];
+        $price = $productInfo['price'];
+        $type = $productInfo['type'];
+        
+        if ($action === 'create') {
+            // 创建新记录到 j1stockedit_data
+            $sql = "INSERT INTO j1stockedit_data 
+                    (date, time, product_name, code_number, in_quantity, out_quantity, 
+                     specification, price, receiver, remark, target_system, type) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                $mobileRecord['date'],
+                $mobileRecord['time'],
+                $productName,
+                $codeNumber,
+                floatval($mobileRecord['in_quantity'] ?? 0),
+                floatval($mobileRecord['out_quantity'] ?? 0),
+                $specification,
+                $price,
+                null, // receiver 设为 null（移动端操作）
+                null, // remark 设为 null
+                'j1', // target_system 设为 'j1'
+                $type
+            ]);
+            
+        } elseif ($action === 'update') {
+            // 更新 j1stockedit_data 中的记录
+            // 通过 date, time, product_name 匹配记录（移动端记录）
+            $updateSql = "UPDATE j1stockedit_data 
+                         SET date = ?, time = ?, code_number = ?, 
+                             in_quantity = ?, out_quantity = ?,
+                             specification = ?, price = ?, type = ?
+                         WHERE product_name = ? AND date = ? AND time = ? 
+                         AND target_system = 'j1' AND receiver IS NULL
+                         ORDER BY id DESC LIMIT 1";
+            
+            $updateStmt = $pdo->prepare($updateSql);
+            $updateStmt->execute([
+                $mobileRecord['date'],
+                $mobileRecord['time'],
+                $codeNumber,
+                floatval($mobileRecord['in_quantity'] ?? 0),
+                floatval($mobileRecord['out_quantity'] ?? 0),
+                $specification,
+                $price,
+                $type,
+                $productName,
+                $oldRecord ? $oldRecord['date'] : $mobileRecord['date'],
+                $oldRecord ? $oldRecord['time'] : $mobileRecord['time']
+            ]);
+            
+            // 如果没有找到匹配的记录，创建新记录
+            if ($updateStmt->rowCount() === 0) {
+                $insertSql = "INSERT INTO j1stockedit_data 
+                             (date, time, product_name, code_number, in_quantity, out_quantity, 
+                              specification, price, receiver, remark, target_system, type) 
+                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                
+                $insertStmt = $pdo->prepare($insertSql);
+                $insertStmt->execute([
+                    $mobileRecord['date'],
+                    $mobileRecord['time'],
+                    $productName,
+                    $codeNumber,
+                    floatval($mobileRecord['in_quantity'] ?? 0),
+                    floatval($mobileRecord['out_quantity'] ?? 0),
+                    $specification,
+                    $price,
+                    null,
+                    null,
+                    'j1',
+                    $type
+                ]);
+            }
+            
+        } elseif ($action === 'delete') {
+            // 删除 j1stockedit_data 中的对应记录
+            // 通过 date, time, product_name 匹配记录
+            $deleteSql = "DELETE FROM j1stockedit_data 
+                         WHERE product_name = ? AND date = ? AND time = ? 
+                         AND target_system = 'j1' AND receiver IS NULL
+                         ORDER BY id DESC LIMIT 1";
+            
+            $deleteStmt = $pdo->prepare($deleteSql);
+            $deleteStmt->execute([
+                $productName,
+                $mobileRecord['date'],
+                $mobileRecord['time']
+            ]);
+        }
+        
+    } catch (PDOException $e) {
+        error_log("同步到 j1stockedit_data 失败: " . $e->getMessage());
+        // 不抛出异常，避免影响主流程
     }
 }
 
