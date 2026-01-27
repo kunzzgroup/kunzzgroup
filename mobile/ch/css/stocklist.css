@@ -102,17 +102,19 @@ body {
 }
 
 .selects-row {
-    display: flex;
-    flex-direction: row;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
     gap: 12px;
     width: 100%;
     align-items: stretch;
 }
 
-.select-group {
-    display: flex;
-    flex: 1 1 0;
+.selects-row .select-group {
+    display: flex !important;
+    flex: 1 1 0 !important;
     min-width: 0;
+    width: auto !important;
 }
 
 .select-wrapper {
