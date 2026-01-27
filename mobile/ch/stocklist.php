@@ -56,6 +56,16 @@ if (!isset($_SESSION['user_id'])) {
                     </div>
                 </div>
 
+                <div class="select-group">
+                    <label for="product-category" class="sr-only">货品类型</label>
+                    <div class="select-wrapper">
+                        <select id="product-category" name="product-category">
+                            <option value="">全部</option>
+                        </select>
+                        <span class="select-icon" aria-hidden="true"></span>
+                    </div>
+                </div>
+
                 <div class="input-group search-group">
                     <label for="search" class="sr-only">按商品名称搜索</label>
                     <input id="search" type="text" placeholder="按商品名称搜索">
@@ -94,6 +104,7 @@ if (!isset($_SESSION['user_id'])) {
         let productList = [];
         let stockData = [];
         let selectedFreezerCategory = '';
+        let selectedProductCategory = '';
         let editingRowIds = new Set();
         
         // API配置
@@ -105,6 +116,9 @@ if (!isset($_SESSION['user_id'])) {
         document.addEventListener('DOMContentLoaded', function() {
             // 冰箱分类变化事件
             document.getElementById('freezer-category').addEventListener('change', handleCategoryChange);
+            
+            // 货品类型变化事件
+            document.getElementById('product-category').addEventListener('change', handleProductCategoryChange);
             
             // 搜索按钮点击事件
             document.querySelector('.btn-search').addEventListener('click', handleSearch);
@@ -174,6 +188,7 @@ if (!isset($_SESSION['user_id'])) {
                         product_code: item.product_code || '',
                         product_name: item.product_name || '',
                         freezer_category: item.freezer_category || '',
+                        category: item.category || '',
                         qty: '0.00',
                         original_qty: '0.00'
                     }));
@@ -195,6 +210,9 @@ if (!isset($_SESSION['user_id'])) {
                     } catch (e) {
                         console.warn('合并库存总数失败:', e);
                     }
+                    
+                    // 更新货品类型下拉选项（在合并库存总数之后）
+                    updateProductCategoryOptions();
                     
                     generateTable();
                 } else {
@@ -223,6 +241,48 @@ if (!isset($_SESSION['user_id'])) {
             }
         }
         
+        // 处理货品类型变化
+        function handleProductCategoryChange() {
+            const selectElement = document.getElementById('product-category');
+            if (selectElement) {
+                selectedProductCategory = selectElement.value;
+                console.log('货品类型已更改:', selectedProductCategory);
+                generateTable();
+            }
+        }
+        
+        // 更新货品类型下拉选项
+        function updateProductCategoryOptions() {
+            const categorySelect = document.getElementById('product-category');
+            if (!categorySelect) return;
+            
+            // 获取所有唯一的货品类型
+            const categories = [...new Set(stockData.map(item => item.category).filter(cat => cat && cat.trim() !== ''))].sort();
+            
+            // 保存当前选中的值
+            const currentValue = categorySelect.value;
+            
+            // 清空选项（保留"全部"选项）
+            categorySelect.innerHTML = '<option value="">全部</option>';
+            
+            // 添加所有货品类型选项
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categorySelect.appendChild(option);
+            });
+            
+            // 恢复之前选中的值（如果还存在）
+            if (currentValue && categories.includes(currentValue)) {
+                categorySelect.value = currentValue;
+                selectedProductCategory = currentValue;
+            } else {
+                categorySelect.value = '';
+                selectedProductCategory = '';
+            }
+        }
+        
         // 生成表格
         function generateTable() {
             const tbody = document.getElementById('stock-tbody');
@@ -238,13 +298,29 @@ if (!isset($_SESSION['user_id'])) {
                 return;
             }
             
-            // 根据搜索条件过滤数据
+            // 根据搜索条件和过滤条件过滤数据
             const searchTerm = document.getElementById('search').value.toLowerCase().trim();
+            const productCategorySelect = document.getElementById('product-category');
+            const selectedCategory = productCategorySelect ? productCategorySelect.value : '';
+            
             const filteredData = stockData.filter(item => {
-                if (!searchTerm) return true;
-                const code = (item.product_code || '').toLowerCase();
-                const name = (item.product_name || '').toLowerCase();
-                return code.includes(searchTerm) || name.includes(searchTerm);
+                // 搜索过滤
+                if (searchTerm) {
+                    const code = (item.product_code || '').toLowerCase();
+                    const name = (item.product_name || '').toLowerCase();
+                    if (!code.includes(searchTerm) && !name.includes(searchTerm)) {
+                        return false;
+                    }
+                }
+                
+                // 货品类型过滤
+                if (selectedCategory && selectedCategory !== '') {
+                    if (item.category !== selectedCategory) {
+                        return false;
+                    }
+                }
+                
+                return true;
             });
             
             // 按产品名称排序
