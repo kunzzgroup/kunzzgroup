@@ -101,19 +101,24 @@ body {
 
 .filters-row {
     display: flex;
+    flex-direction: row;
     gap: 12px;
     align-items: flex-start;
+    width: 100%;
 }
 
 .select-group {
     display: flex;
+    flex-direction: column;
     flex: 1;
+    min-width: 0;
 }
 
 .select-wrapper {
     position: relative;
     width: 100%;
     flex: 1;
+    min-width: 0;
 }
 
 .select-wrapper select {
