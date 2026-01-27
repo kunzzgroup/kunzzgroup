@@ -124,7 +124,7 @@ body {
 }
 
 .select-wrapper select {
-    width: 100%;
+    width: 204px;
     height: 48px;
     padding: 0 48px 0 16px;
     border: 1px solid var(--border-color);
@@ -136,7 +136,6 @@ body {
     -webkit-appearance: none;
     -moz-appearance: none;
     cursor: pointer;
-    width: 204px;
 }
 
 .select-wrapper select:focus {
