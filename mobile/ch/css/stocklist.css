@@ -217,6 +217,7 @@ body {
 table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
 }
 
 thead th {
@@ -229,8 +230,13 @@ thead th {
     letter-spacing: 0.04em;
 }
 
+thead th:nth-child(1) {
+    width: 180px;
+    min-width: 180px;
+}
+
 thead th:nth-child(2) {
-    text-align: left;
+    text-align: left !important;
 }
 
 thead th:nth-child(3) {
@@ -239,8 +245,9 @@ thead th:nth-child(3) {
 
 .product-code-column,
 .product-code-cell {
-    min-width: 160px;
-    width: 30%;
+    width: 180px !important;
+    min-width: 180px !important;
+    max-width: 180px;
 }
 
 thead th,
