@@ -229,11 +229,6 @@ thead th {
     letter-spacing: 0.04em;
 }
 
-thead th:nth-child(1) {
-    min-width: 100px;
-    width: 100px;
-}
-
 thead th:nth-child(3) {
     text-align: right;
 }
@@ -252,12 +247,6 @@ tbody td {
     padding: 10px;
     border-bottom: 1px solid rgba(216, 208, 197, 0.6);
     font-size: 15px;
-}
-
-tbody td:nth-child(1) {
-    min-width: 100px;
-    width: 100px;
-    white-space: nowrap;
 }
 
 tbody tr:nth-child(odd) {
