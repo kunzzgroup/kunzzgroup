@@ -217,7 +217,7 @@ body {
 table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed;
+    table-layout: auto;
 }
 
 thead th {
@@ -231,9 +231,8 @@ thead th {
 }
 
 thead th.product-code-column {
-    width: 280px !important;
-    min-width: 280px !important;
-    max-width: 280px !important;
+    width: 200px !important;
+    min-width: 200px !important;
     text-align: left !important;
 }
 
@@ -247,18 +246,16 @@ thead th:nth-child(3) {
 
 tbody td.product-code-cell,
 tbody td:nth-child(1) {
-    width: 280px !important;
-    min-width: 280px !important;
-    max-width: 280px !important;
+    width: 200px !important;
+    min-width: 200px !important;
 }
 
 table th.product-code-column,
 table td.product-code-cell,
 table th:nth-child(1),
 table td:nth-child(1) {
-    width: 280px !important;
-    min-width: 280px !important;
-    max-width: 280px !important;
+    width: 200px !important;
+    min-width: 200px !important;
 }
 
 thead th,
