@@ -3167,6 +3167,8 @@ header('Expires: 0');
             j3: []
         }; // 存储各店铺的破损记录数据
         let restaurants = []; // 存储餐厅店面列表
+        /** 编辑弹窗数量缓存：dishwareId -> 各餐厅数量数组(与 display_order 一致)，渲染表格时写入，打开编辑时直接用来填充 */
+        let editQuantitiesCache = new Map();
 
         // 自然排序函数，正确处理字母和数字混合
         function naturalSort(a, b) {
@@ -3391,6 +3393,26 @@ header('Expires: 0');
                     rowData['restaurant_' + index] = String(quantity);
                 });
             return rowData;
+        }
+
+        /** 将当前行的各餐厅数量存入缓存，供打开编辑弹窗时直接填充（与表格显示完全一致） */
+        function storeEditQuantitiesCache(dishwareId, rowData) {
+            if (!dishwareId || !rowData) return;
+            const sorted = [...(restaurants || [])].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+            const arr = sorted.map((r, i) => String(rowData['restaurant_' + i] || '0'));
+            editQuantitiesCache.set(String(dishwareId), arr);
+            editQuantitiesCache.set(Number(dishwareId), arr);
+        }
+
+        /** 从缓存填充编辑弹窗的数量输入（与表格显示完全一致） */
+        function fillEditModalQuantitiesFromCache(cachedArr) {
+            const sorted = [...(restaurants || [])].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+            sorted.forEach((restaurant, index) => {
+                const input = document.getElementById(`edit-restaurant-${restaurant.id}`);
+                if (input && Array.isArray(cachedArr) && cachedArr[index] != null) {
+                    input.value = String(Math.max(0, parseInt(cachedArr[index]) || 0));
+                }
+            });
         }
 
         // 更新编辑模态框中的餐厅店面输入框
@@ -6793,6 +6815,7 @@ header('Expires: 0');
                                 set_price: setPrice
                             };
                             fillRestaurantStocks(rowData, setItem);
+                            storeEditQuantitiesCache(setItem.id, rowData);
                             displayRows.push(rowData);
                         });
                     } else {
@@ -6845,6 +6868,7 @@ header('Expires: 0');
                         `
                     };
                     fillRestaurantStocks(rowData, item);
+                    storeEditQuantitiesCache(item.id, rowData);
                     displayRows.push(rowData);
                 }
             });
@@ -7078,6 +7102,7 @@ header('Expires: 0');
                                 set_price: setPrice
                             };
                             fillRestaurantStocks(rowData, setItem);
+                            storeEditQuantitiesCache(setItem.id, rowData);
                             displayRows.push(rowData);
                         });
                     } else {
@@ -7130,10 +7155,11 @@ header('Expires: 0');
                         `
                     };
                     fillRestaurantStocks(rowData, item);
+                    storeEditQuantitiesCache(item.id, rowData);
                     displayRows.push(rowData);
                 }
             });
-            
+
             // 转置渲染：左侧是"字段名"，右侧每一列是一个"展示行"
             const fieldDefs = getDynamicFieldDefs();
             
@@ -7376,19 +7402,13 @@ header('Expires: 0');
             document.getElementById('edit-size').value = item.size || '';
             document.getElementById('edit-unit-price').value = item.unit_price || '';
             
-            // 调试：检查item数据
-            console.log('准备填充表单，item数据:', {
-                id: item.id,
-                product_name: item.product_name,
-                hasRestaurantStocks: !!item.restaurant_stocks,
-                restaurant_stocks: item.restaurant_stocks,
-                restaurant_0_quantity: item.restaurant_0_quantity,
-                restaurant_1_quantity: item.restaurant_1_quantity,
-                restaurants_count: restaurants ? restaurants.length : 0
-            });
-            
-            // 使用动态餐厅店面填充
-            fillEditModalRestaurantData(item);
+            // 数量输入：优先用表格渲染时写入的缓存（与表格显示完全一致），否则用 item
+            const cachedQtys = editQuantitiesCache.get(String(id)) ?? editQuantitiesCache.get(Number(id));
+            if (cachedQtys && Array.isArray(cachedQtys) && cachedQtys.length > 0) {
+                fillEditModalQuantitiesFromCache(cachedQtys);
+            } else {
+                fillEditModalRestaurantData(item);
+            }
             
             // 重置删除标记
             const deletePhotoFlag = document.getElementById('delete-photo-flag');
