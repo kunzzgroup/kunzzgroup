@@ -459,8 +459,8 @@ require_once '../backend/session_check.php';
         /* 响应式表格列宽 */
         .stock-table th:nth-child(1), .stock-table td:nth-child(1) { width: 5%; } /* 日期 */
         .stock-table th:nth-child(2), .stock-table td:nth-child(2) { width: 7%; } /* 货品编号 */
-        .stock-table th:nth-child(3), .stock-table td:nth-child(3) { width: 16%; } /* 货品 */
-        .stock-table th:nth-child(4), .stock-table td:nth-child(4) { width: 5%; }  /* 出货 */
+        .stock-table th:nth-child(3), .stock-table td:nth-child(3) { width: 25%; } /* 货品 */
+        .stock-table th:nth-child(4), .stock-table td:nth-child(4) { width: 10%; }  /* 出货 */
         .stock-table th:nth-child(6), .stock-table td:nth-child(6) { width: 6%; } /* 收货单位 */
         .stock-table th:nth-child(7), .stock-table td:nth-child(7) { width: 5%; } /* 规格 */
         .stock-table th:nth-child(10), .stock-table td:nth-child(10) { width: 6%; } /* 类型 */
@@ -964,7 +964,20 @@ require_once '../backend/session_check.php';
 
         /* 货品名称列稍宽 */
         .product-name-col {
-            min-width: 150px !important;
+            min-width: 200px !important;
+            width: 25% !important;
+        }
+        
+        /* 出货列 */
+        .stock-table th:nth-child(4), .stock-table td:nth-child(4) {
+            min-width: 120px !important;
+            width: 10% !important;
+        }
+        
+        /* 操作列 */
+        .stock-table th:nth-child(5), .stock-table td:nth-child(5) {
+            min-width: 60px !important;
+            width: 8% !important;
         }
 
         .receiver-col {
@@ -2211,9 +2224,9 @@ require_once '../backend/session_check.php';
                     <tr>
                         <th style="min-width: 100px;">日期</th>
                         <th style="min-width: 100px;">货品编号</th>
-                        <th class="product-name-col">货品</th>
-                        <th style="min-width: 80px;">出货</th>
-                        <th style="min-width: 80px;" id="action-header">操作</th>
+                        <th class="product-name-col" style="min-width: 200px;">货品</th>
+                        <th style="min-width: 120px;">出货</th>
+                        <th style="min-width: 60px;" id="action-header">操作</th>
                     </tr>
                 </thead>
                 <tbody id="stock-tbody">
