@@ -3404,50 +3404,52 @@ header('Expires: 0');
             editQuantitiesCache.set(Number(dishwareId), arr);
         }
 
-        /** 从缓存填充编辑弹窗的数量输入（与表格显示完全一致） */
+        /** 从缓存/数组填充编辑弹窗的数量输入（与表格显示完全一致） */
         function fillEditModalQuantitiesFromCache(cachedArr) {
             const sorted = [...(restaurants || [])].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
-            console.log('fillEditModalQuantitiesFromCache 开始填充:', {
-                restaurants_count: sorted.length,
-                cachedArr_length: cachedArr?.length,
-                cachedArr: cachedArr
-            });
             sorted.forEach((restaurant, index) => {
                 const input = document.getElementById(`edit-restaurant-${restaurant.id}`);
                 if (input && Array.isArray(cachedArr) && cachedArr[index] != null) {
-                    const value = String(Math.max(0, parseInt(cachedArr[index]) || 0));
-                    input.value = value;
-                    console.log(`填充餐厅 ${restaurant.name} (ID: ${restaurant.id}, index: ${index}):`, {
-                        from_cache: cachedArr[index],
-                        final_value: value,
-                        input_id: input.id,
-                        input_found: !!input
-                    });
-                } else {
-                    console.warn(`无法填充餐厅 ${restaurant.name} (ID: ${restaurant.id}, index: ${index}):`, {
-                        input_found: !!input,
-                        cachedArr_isArray: Array.isArray(cachedArr),
-                        cachedArr_index: cachedArr?.[index]
-                    });
+                    input.value = String(Math.max(0, parseInt(cachedArr[index], 10) || 0));
                 }
             });
-            console.log('fillEditModalQuantitiesFromCache 填充完成');
         }
 
         /** 从 rowData 生成各餐厅数量字符串（与 display_order 一致），用于 data-quantities */
         function rowDataToQuantitiesString(rowData) {
             const sorted = [...(restaurants || [])].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
-            const qtyStr = sorted.map((r, i) => {
-                const qty = String(rowData['restaurant_' + i] ?? '0');
-                return qty;
-            }).join(',');
-            console.log('rowDataToQuantitiesString 生成:', {
-                restaurants_count: sorted.length,
-                restaurants: sorted.map(r => `${r.name}(id:${r.id})`),
-                rowData_keys: Object.keys(rowData).filter(k => k.startsWith('restaurant_')),
-                quantities_string: qtyStr
+            return sorted.map((r, i) => String(rowData['restaurant_' + i] ?? '0')).join(',');
+        }
+
+        /**
+         * 从当前表格 DOM 读取该产品列的各餐厅数量（与表格显示完全一致），用于填充编辑弹窗。
+         * @param {HTMLElement} editBtn - 被点击的编辑按钮（或其子元素）
+         * @returns {number[]|null} 各餐厅数量数组（按 display_order），无法读取时返回 null
+         */
+        function getQuantitiesFromTableDOM(editBtn) {
+            const btn = editBtn && (editBtn.classList?.contains('edit-btn') ? editBtn : editBtn?.closest?.('.edit-btn'));
+            if (!btn) return null;
+            const td = btn.closest('td');
+            const table = btn.closest('table.stock-table');
+            if (!td || !table) return null;
+            const colIndex = td.cellIndex;
+            const restaurantRows = table.querySelectorAll('tr[data-restaurant-row]');
+            if (!restaurantRows.length) return null;
+            const sorted = [...(restaurants || [])].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+            const byId = {};
+            restaurantRows.forEach((tr) => {
+                const rid = tr.getAttribute('data-restaurant-id');
+                if (rid == null) return;
+                const cell = tr.cells[colIndex];
+                if (!cell) return;
+                const text = (cell.textContent || '').trim().replace(/\s+/g, '');
+                const num = Math.max(0, parseInt(text, 10) || 0);
+                byId[rid] = num;
+                const ridStr = String(rid);
+                if (ridStr !== rid) byId[ridStr] = num;
             });
-            return qtyStr;
+            const arr = sorted.map((r) => byId[r.id] ?? byId[String(r.id)] ?? 0);
+            return arr.length ? arr : null;
         }
 
         // 更新编辑模态框中的餐厅店面输入框
@@ -3470,67 +3472,32 @@ header('Expires: 0');
         // 填充编辑模态框的餐厅店面数据
         function fillEditModalRestaurantData(item) {
             const sorted = [...(restaurants || [])].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
-            console.log('fillEditModalRestaurantData 开始填充:', {
-                restaurants_count: sorted.length,
-                item_restaurant_stocks: item?.restaurant_stocks,
-                item_keys: item ? Object.keys(item).filter(k => k.startsWith('restaurant_')) : []
-            });
-            
             sorted.forEach((restaurant, index) => {
                 const input = document.getElementById(`edit-restaurant-${restaurant.id}`);
                 if (input) {
-                    // 优先 restaurant_stocks[id]，支持数字/字符串键；其次按索引字段
                     let quantity = 0;
                     if (item && item.restaurant_stocks && typeof item.restaurant_stocks === 'object') {
                         const rid = restaurant.id;
-                        const ridNum = parseInt(rid);
+                        const ridNum = parseInt(rid, 10);
                         const ridStr = String(rid);
-                        
-                        // 尝试所有可能的键格式
                         quantity = item.restaurant_stocks[rid] ?? 
                                   item.restaurant_stocks[ridNum] ??
                                   item.restaurant_stocks[ridStr] ?? 
-                                  item.restaurant_stocks[String(ridNum)] ??
+                                  item.restaurant_stocks[String(ridNum)] ?? 
                                   0;
-                        
-                        // 如果还是0，检查是否是真正的0值（不是undefined）
                         if (quantity === 0) {
-                            // 检查是否存在该键（即使值为0）
-                            const hasKey = rid in item.restaurant_stocks || 
-                                         ridNum in item.restaurant_stocks ||
-                                         ridStr in item.restaurant_stocks ||
-                                         String(ridNum) in item.restaurant_stocks;
-                            if (!hasKey) {
-                                // 键不存在，尝试索引字段
-                                if (item['restaurant_' + index + '_quantity'] != null) {
-                                    quantity = item['restaurant_' + index + '_quantity'];
-                                }
+                            const hasKey = rid in item.restaurant_stocks || ridNum in item.restaurant_stocks ||
+                                         ridStr in item.restaurant_stocks || String(ridNum) in item.restaurant_stocks;
+                            if (!hasKey && item['restaurant_' + index + '_quantity'] != null) {
+                                quantity = item['restaurant_' + index + '_quantity'];
                             }
-                            // 如果hasKey为true，quantity就是0，这是正确的值
                         }
                     } else if (item && item['restaurant_' + index + '_quantity'] != null) {
-                        // 如果没有restaurant_stocks，直接使用索引字段
                         quantity = item['restaurant_' + index + '_quantity'];
                     }
-                    const finalValue = Math.max(0, parseInt(quantity) || 0);
-                    input.value = finalValue;
-                    console.log(`填充餐厅 ${restaurant.name} (ID: ${restaurant.id}, index: ${index}):`, {
-                        restaurant_id: restaurant.id,
-                        restaurant_id_type: typeof restaurant.id,
-                        restaurant_stocks_keys: item?.restaurant_stocks ? Object.keys(item.restaurant_stocks) : [],
-                        from_restaurant_stocks_num: item?.restaurant_stocks?.[restaurant.id],
-                        from_restaurant_stocks_str: item?.restaurant_stocks?.[String(restaurant.id)],
-                        from_index_field: item?.['restaurant_' + index + '_quantity'],
-                        final_value: finalValue,
-                        input_id: input.id,
-                        input_value_set: input.value
-                    });
-                } else {
-                    console.warn(`找不到餐厅 ${restaurant.name} (ID: ${restaurant.id}) 的输入框`);
+                    input.value = String(Math.max(0, parseInt(quantity, 10) || 0));
                 }
             });
-            
-            console.log('fillEditModalRestaurantData 填充完成');
         }
 
         // 获取编辑模态框的餐厅店面数据
@@ -7439,61 +7406,21 @@ header('Expires: 0');
             document.getElementById('edit-size').value = item.size || '';
             document.getElementById('edit-unit-price').value = item.unit_price || '';
             
-            // 数量输入：优先用编辑按钮的 data-quantities（与表格显示完全一致），其次缓存，否则用 item
-            // 确保找到按钮元素（可能点击的是按钮内的图标）
-            let btn = null;
-            if (editBtn) {
-                if (editBtn.classList && editBtn.classList.contains('edit-btn')) {
-                    btn = editBtn;
-                } else if (editBtn.closest) {
-                    btn = editBtn.closest('.edit-btn');
-                } else if (editBtn.parentElement) {
-                    // 降级方案：如果 closest 不支持，尝试 parentElement
-                    let el = editBtn;
-                    while (el && !el.classList?.contains('edit-btn')) {
-                        el = el.parentElement;
-                    }
-                    btn = el;
-                }
-            }
-            console.log('openEditModal 数量填充 - 开始:', {
-                id: id,
-                editBtn_provided: !!editBtn,
-                editBtn_tagName: editBtn?.tagName,
-                editBtn_className: editBtn?.className,
-                btn_found: !!btn,
-                btn_tagName: btn?.tagName,
-                btn_className: btn?.className,
-                btn_dataset_quantities: btn?.dataset?.quantities,
-                btn_attributes: btn ? Array.from(btn.attributes).map(a => `${a.name}="${a.value}"`).join(', ') : null,
-                restaurants_count: restaurants?.length
-            });
-            
-            let qtyArr = null;
-            if (btn && typeof btn.dataset !== 'undefined' && btn.dataset.quantities) {
-                const raw = String(btn.dataset.quantities).split(',');
-                if (raw.length > 0) {
-                    qtyArr = raw.map((v) => String(v).trim());
-                    console.log('从按钮 data-quantities 获取数量:', {
-                        raw_string: btn.dataset.quantities,
-                        parsed_array: qtyArr
-                    });
+            // 数量输入：优先从表格 DOM 读取当前列的各餐厅数量（与表格显示完全一致），其次按钮 data-quantities、缓存、item
+            let qtyArr = getQuantitiesFromTableDOM(editBtn);
+            if (!qtyArr || qtyArr.length === 0) {
+                const btn = editBtn && (editBtn.classList?.contains('edit-btn') ? editBtn : editBtn?.closest?.('.edit-btn'));
+                if (btn && btn.dataset?.quantities) {
+                    const raw = String(btn.dataset.quantities).split(',');
+                    if (raw.length > 0) qtyArr = raw.map((v) => String(v).trim());
                 }
             }
             if (!qtyArr || qtyArr.length === 0) {
                 qtyArr = editQuantitiesCache.get(String(id)) ?? editQuantitiesCache.get(Number(id));
-                console.log('从缓存获取数量:', {
-                    cache_hit: !!qtyArr,
-                    cached_array: qtyArr
-                });
             }
-            if (qtyArr && Array.isArray(qtyArr) && qtyArr.length > 0) {
-                console.log('使用缓存/按钮数据填充数量');
+            if (qtyArr && qtyArr.length > 0) {
                 fillEditModalQuantitiesFromCache(qtyArr);
             } else {
-                console.log('使用 item.restaurant_stocks 填充数量:', {
-                    item_restaurant_stocks: item?.restaurant_stocks
-                });
                 fillEditModalRestaurantData(item);
             }
             
