@@ -1155,14 +1155,6 @@ if (isset($_SESSION['user_id'])) {
                     <label>搜索货品</label>
                     <input type="text" class="filter-input" id="product-search-filter" placeholder="输入关键字搜索...">
                 </div>
-                <div class="filter-item">
-                    <label>批准状态</label>
-                    <select class="filter-input" id="approval-status-filter">
-                        <option value="">所有状态</option>
-                        <option value="approved">已批准</option>
-                        <option value="pending">待批准</option>
-                    </select>
-                </div>
             </div>
             
             <div class="filter-group">
@@ -1648,7 +1640,6 @@ if (isset($_SESSION['user_id'])) {
             try {
                 // 获取搜索参数
                 const productSearch = document.getElementById('product-search-filter').value.trim();
-                const approvalStatus = document.getElementById('approval-status-filter').value.trim();
 
                 // 构建URL参数
                 const params = new URLSearchParams();
@@ -1666,7 +1657,6 @@ if (isset($_SESSION['user_id'])) {
                 }
 
                 if (productSearch) params.append('product_search', productSearch);
-                if (approvalStatus) params.append('approval_status', approvalStatus);
                 
                 const url = `${API_BASE_URL}?${params.toString()}`;
                 console.log('请求URL:', url);
@@ -1711,7 +1701,6 @@ if (isset($_SESSION['user_id'])) {
         // 实时搜索功能
         function initRealTimeSearch() {
             const productSearchInput = document.getElementById('product-search-filter');
-            const approvalStatusSelect = document.getElementById('approval-status-filter');
             
             // 防抖函数
             function debounce(func, delay) {
@@ -1729,17 +1718,11 @@ if (isset($_SESSION['user_id'])) {
             if (productSearchInput) {
                 productSearchInput.addEventListener('input', debouncedSearch);
             }
-            
-            // 为批准状态选择框添加实时搜索
-            if (approvalStatusSelect) {
-                approvalStatusSelect.addEventListener('change', loadStockData);
-            }
         }
 
         // 清空过滤器函数（保留但简化）
         function clearFilters() {
             document.getElementById('product-search-filter').value = '';
-            document.getElementById('approval-status-filter').value = '';
             
             showAlert('过滤器已清空，重新加载所有数据', 'info');
             loadStockData();
@@ -1926,15 +1909,33 @@ if (isset($_SESSION['user_id'])) {
             const tbody = document.getElementById('excel-tbody');
             tbody.innerHTML = '';
             
-            // 按货品名称的第一个字母排序
-            const sortedData = [...stockData].sort((a, b) => {
+            // 先分离待批准和已批准的数据
+            const pendingData = [];
+            const approvedData = [];
+            
+            stockData.forEach(item => {
+                if (item.approver) {
+                    approvedData.push(item);
+                } else {
+                    pendingData.push(item);
+                }
+            });
+            
+            // 分别对待批准和已批准的数据按货品名称排序
+            const sortByName = (a, b) => {
                 const nameA = (a.product_name || '').trim().toLowerCase();
                 const nameB = (b.product_name || '').trim().toLowerCase();
                 
                 if (nameA < nameB) return -1;
                 if (nameA > nameB) return 1;
                 return 0;
-            });
+            };
+            
+            pendingData.sort(sortByName);
+            approvedData.sort(sortByName);
+            
+            // 合并数据：待批准的在前面，已批准的在后面
+            const sortedData = [...pendingData, ...approvedData];
             
             sortedData.forEach((item, index) => {
                 const row = createStockRow(item, index);
@@ -2426,7 +2427,6 @@ if (isset($_SESSION['user_id'])) {
         function clearFilters() {
             document.getElementById('product-code-filter').value = '';
             document.getElementById('product-name-filter').value = '';
-            document.getElementById('approval-status-filter').value = '';
             
             showAlert('过滤器已清空，重新加载所有数据', 'info');
             loadStockData();
