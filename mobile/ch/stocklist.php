@@ -71,6 +71,7 @@ if (!isset($_SESSION['user_id'])) {
                     <table>
                         <thead>
                             <tr>
+                                <th scope="col">货品编号</th>
                                 <th scope="col">名字</th>
                                 <th scope="col">数量</th>
                                 <th scope="col" class="actions-column" aria-label="操作"></th>
@@ -78,7 +79,7 @@ if (!isset($_SESSION['user_id'])) {
                         </thead>
                         <tbody id="stock-tbody">
                             <tr>
-                                <td colspan="3" style="text-align: center; padding: 40px; color: #6b7280;">加载中...</td>
+                                <td colspan="4" style="text-align: center; padding: 40px; color: #6b7280;">加载中...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -204,7 +205,7 @@ if (!isset($_SESSION['user_id'])) {
                 console.error('加载产品列表失败:', error);
                 document.getElementById('stock-tbody').innerHTML = `
                     <tr>
-                        <td colspan="3" style="text-align: center; padding: 40px; color: #ef4444;">
+                        <td colspan="4" style="text-align: center; padding: 40px; color: #ef4444;">
                             加载失败: ${error.message}
                         </td>
                     </tr>
@@ -229,7 +230,7 @@ if (!isset($_SESSION['user_id'])) {
             if (stockData.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="3" style="text-align: center; padding: 40px; color: #6b7280;">
+                        <td colspan="4" style="text-align: center; padding: 40px; color: #6b7280;">
                             没有找到产品
                         </td>
                     </tr>
@@ -257,6 +258,7 @@ if (!isset($_SESSION['user_id'])) {
                 const isEditing = editingRowIds.has(item.id);
                 return `
                 <tr>
+                    <td>${escapeHtml(item.product_code || '')}</td>
                     <td>${escapeHtml(item.product_name || '')}</td>
                     <td class="qty">
                         <input 
