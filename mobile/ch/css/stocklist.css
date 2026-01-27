@@ -230,8 +230,8 @@ thead th {
 }
 
 thead th:first-child {
-    min-width: 120px;
-    width: 140px;
+    min-width: 160px;
+    width: 180px;
 }
 
 thead th:nth-child(3) {
@@ -239,8 +239,8 @@ thead th:nth-child(3) {
 }
 
 tbody td:first-child {
-    min-width: 120px;
-    width: 140px;
+    min-width: 160px;
+    width: 180px;
     word-break: break-word;
 }
 
