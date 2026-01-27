@@ -252,6 +252,7 @@ thead th:nth-child(3) {
     min-width: 50px !important;
     max-width: 50px !important;
     padding: 10px 10px !important;
+    padding-right: 10px !important;
 }
 
 thead th.actions-column {
@@ -285,7 +286,8 @@ tbody td:nth-child(3) {
     width: 50px !important;
     min-width: 50px !important;
     max-width: 50px !important;
-    padding: 8px 4px !important;
+    padding: 8px 10px !important;
+    padding-right: 10px !important;
 }
 
 tbody td.actions {
