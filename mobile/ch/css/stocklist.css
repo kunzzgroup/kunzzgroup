@@ -229,23 +229,8 @@ thead th {
     letter-spacing: 0.04em;
 }
 
-thead th:first-child {
-    min-width: 120px;
-    width: 140px;
-}
-
-thead th:nth-child(3) {
+thead th:nth-child(2) {
     text-align: right;
-}
-
-tbody td:first-child {
-    min-width: 120px;
-    width: 140px;
-    word-break: break-word;
-}
-
-tbody td:nth-child(2) {
-    text-align: left;
 }
 
 thead th,
