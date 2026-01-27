@@ -99,6 +99,17 @@ body {
     box-shadow: 0 10px 20px rgba(44, 44, 44, 0.05);
 }
 
+.filters-row {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
+
+.filters-row .select-group {
+    display: flex;
+    flex: 1;
+}
+
 .select-group {
     display: flex;
 }
