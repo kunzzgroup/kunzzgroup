@@ -229,7 +229,7 @@ thead th {
     letter-spacing: 0.04em;
 }
 
-thead th:nth-child(3) {
+thead th:nth-child(2) {
     text-align: right;
 }
 
@@ -260,12 +260,6 @@ tbody tr:last-child td {
 .qty {
     text-align: right;
     font-variant-numeric: tabular-nums;
-}
-
-.product-code-column,
-.product-code {
-    min-width: 120px;
-    width: 150px;
 }
 
 .actions,
