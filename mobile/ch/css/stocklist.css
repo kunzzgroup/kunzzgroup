@@ -229,19 +229,6 @@ thead th {
     letter-spacing: 0.04em;
 }
 
-/* 货品编号列 - 设置最小宽度使其更宽 */
-thead th:nth-child(1),
-tbody td:nth-child(1) {
-    min-width: 100px;
-    width: 120px;
-}
-
-/* 名字列的表头 - 确保左对齐 */
-thead th:nth-child(2) {
-    text-align: left;
-}
-
-/* 数量列 - 右对齐 */
 thead th:nth-child(3) {
     text-align: right;
 }
