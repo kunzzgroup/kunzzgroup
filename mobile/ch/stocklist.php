@@ -73,7 +73,7 @@ if (!isset($_SESSION['user_id'])) {
                             <tr>
                                 <th scope="col" class="product-code-column" style="width: 60px !important; min-width: 60px !important; max-width: 60px !important; text-align: left !important; padding: 10px 4px !important;">货品编号</th>
                                 <th scope="col" style="text-align: left !important; width: 100px !important; min-width: 100px !important; max-width: 100px !important; padding: 10px 6px !important;">名字</th>
-                                <th scope="col" style="width: 50px !important; min-width: 50px !important; max-width: 50px !important; padding: 10px 4px !important;">数量</th>
+                                <th scope="col" style="width: 50px !important; min-width: 50px !important; max-width: 50px !important; padding: 10px 4px !important; text-align: right !important;">数量</th>
                                 <th scope="col" class="actions-column" style="width: 45px !important; min-width: 45px !important; max-width: 45px !important; padding: 10px 2px !important;" aria-label="操作"></th>
                             </tr>
                         </thead>

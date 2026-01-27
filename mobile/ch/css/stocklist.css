@@ -247,7 +247,7 @@ thead th:nth-child(2) {
 }
 
 thead th:nth-child(3) {
-    text-align: right;
+    text-align: right !important;
     width: 50px !important;
     min-width: 50px !important;
     max-width: 50px !important;
