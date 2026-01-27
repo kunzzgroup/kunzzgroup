@@ -3421,35 +3421,6 @@ header('Expires: 0');
             return sorted.map((r, i) => String(rowData['restaurant_' + i] ?? '0')).join(',');
         }
 
-        /** 从表格 DOM 读取当前行各餐厅数量（与页面显示完全一致），editBtn 为被点击的编辑按钮 */
-        function readQuantitiesFromTable(editBtn) {
-            const btn = editBtn && (editBtn.classList?.contains('edit-btn') ? editBtn : editBtn.closest?.('.edit-btn'));
-            if (!btn) return null;
-            const td = btn.closest('td');
-            const table = btn.closest('table.stock-table');
-            if (!td || !table) return null;
-            const row = td.parentElement;
-            const tds = row.querySelectorAll('td');
-            const colIndex = Array.from(tds).indexOf(td);
-            if (colIndex < 0) return null;
-            const restaurantRows = table.querySelectorAll('tr[data-restaurant-row]');
-            if (restaurantRows.length === 0) return null;
-            const out = [];
-            for (let i = 0; i < restaurantRows.length; i++) {
-                const tr = restaurantRows[i];
-                const cells = tr.querySelectorAll('td');
-                const cell = cells[colIndex];
-                let val = 0;
-                if (cell) {
-                    const t = (cell.textContent || '').trim().replace(/\s+/g, '');
-                    const n = parseInt(t, 10);
-                    if (!isNaN(n)) val = Math.max(0, n);
-                }
-                out.push(String(val));
-            }
-            return out.length > 0 ? out : null;
-        }
-
         // 更新编辑模态框中的餐厅店面输入框
         function updateEditModalRestaurantInputs() {
             const container = document.getElementById('edit-restaurant-quantities');
@@ -7439,17 +7410,12 @@ header('Expires: 0');
             document.getElementById('edit-size').value = item.size || '';
             document.getElementById('edit-unit-price').value = item.unit_price || '';
             
-            // 数量输入：优先从表格 DOM 读取（与页面显示完全一致），其次 data-quantities / 缓存，否则用 item
+            // 数量输入：优先用编辑按钮的 data-quantities（与表格显示完全一致），其次缓存，否则用 item
+            const btn = editBtn && (editBtn.classList?.contains('edit-btn') ? editBtn : editBtn?.closest?.('.edit-btn'));
             let qtyArr = null;
-            if (editBtn) {
-                qtyArr = readQuantitiesFromTable(editBtn);
-            }
-            if (!qtyArr || qtyArr.length === 0) {
-                const btn = editBtn && (editBtn.classList?.contains('edit-btn') ? editBtn : editBtn?.closest?.('.edit-btn'));
-                if (btn && typeof btn.dataset !== 'undefined' && btn.dataset.quantities) {
-                    const raw = String(btn.dataset.quantities).split(',');
-                    if (raw.length > 0) qtyArr = raw.map((v) => String(v).trim());
-                }
+            if (btn && typeof btn.dataset !== 'undefined' && btn.dataset.quantities) {
+                const raw = String(btn.dataset.quantities).split(',');
+                if (raw.length > 0) qtyArr = raw.map((v) => String(v).trim());
             }
             if (!qtyArr || qtyArr.length === 0) {
                 qtyArr = editQuantitiesCache.get(String(id)) ?? editQuantitiesCache.get(Number(id));
