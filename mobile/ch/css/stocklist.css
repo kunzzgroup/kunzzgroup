@@ -117,6 +117,13 @@ body {
     width: auto !important;
 }
 
+/* 确保三个选择器平均分配宽度 */
+.selects-row .select-group:nth-child(1),
+.selects-row .select-group:nth-child(2),
+.selects-row .select-group:nth-child(3) {
+    flex: 1 1 33.333% !important;
+}
+
 .select-wrapper {
     position: relative;
     width: 100%;
