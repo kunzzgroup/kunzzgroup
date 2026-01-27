@@ -100,19 +100,22 @@ body {
 }
 
 .selects-row {
-    display: flex;
+    display: flex !important;
+    flex-direction: row !important;
     gap: 12px;
+    width: 100%;
 }
 
 .select-group {
     display: flex;
     flex: 1;
+    min-width: 0;
 }
 
 .select-wrapper {
     position: relative;
     width: 100%;
-    flex: 1;
+    min-width: 0;
 }
 
 .select-wrapper select {
