@@ -66,16 +66,6 @@ if (!isset($_SESSION['user_id'])) {
                             <span class="select-icon" aria-hidden="true"></span>
                         </div>
                     </div>
-
-                    <div class="select-group">
-                        <label for="additional-filter" class="sr-only">其他筛选</label>
-                        <div class="select-wrapper">
-                            <select id="additional-filter" name="additional-filter">
-                                <option value="">全部</option>
-                            </select>
-                            <span class="select-icon" aria-hidden="true"></span>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="input-group search-group">
