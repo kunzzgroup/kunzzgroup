@@ -231,23 +231,29 @@ thead th {
 }
 
 thead th:nth-child(1) {
-    width: 180px;
-    min-width: 180px;
+    width: 220px !important;
+    min-width: 220px !important;
 }
 
 thead th:nth-child(2) {
     text-align: left !important;
+    width: auto;
 }
 
 thead th:nth-child(3) {
     text-align: right;
+    width: 100px;
+}
+
+thead th:nth-child(4) {
+    width: 50px;
 }
 
 .product-code-column,
 .product-code-cell {
-    width: 180px !important;
-    min-width: 180px !important;
-    max-width: 180px;
+    width: 220px !important;
+    min-width: 220px !important;
+    max-width: 220px !important;
 }
 
 thead th,
