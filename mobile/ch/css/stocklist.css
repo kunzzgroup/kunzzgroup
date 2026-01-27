@@ -229,7 +229,7 @@ thead th {
     letter-spacing: 0.04em;
 }
 
-thead th:nth-child(2) {
+thead th:nth-child(3) {
     text-align: right;
 }
 
