@@ -26,45 +26,43 @@ if (!isset($_SESSION['user_id'])) {
 
         <main class="page-content">
             <section class="form-section">
-                <div class="filters-row">
-                    <div class="select-group">
-                        <label for="freezer-category" class="sr-only">冰箱分类</label>
-                        <div class="select-wrapper">
-                            <select id="freezer-category" name="freezer-category">
-                                <option value="">全部</option>
-                                <option value="K1-1">K1-1</option>
-                                <option value="K1-2">K1-2</option>
-                                <option value="K1-3">K1-3</option>
-                                <option value="K1-4">K1-4</option>
-                                <option value="K1-5">K1-5</option>
-                                <option value="K1-6">K1-6</option>
-                                <option value="K1-7">K1-7</option>
-                                <option value="C-1">C-1</option>
-                                <option value="KDI-1">KDI-1</option>
-                                <option value="KDI-2">KDI-2</option>
-                                <option value="KDI-3">KDI-3</option>
-                                <option value="KDI-4">KDI-4</option>
-                                <option value="S1-1">S1-1</option>
-                                <option value="S1-2">S1-2</option>
-                                <option value="S1-3">S1-3</option>
-                                <option value="S1-4">S1-4</option>
-                                <option value="SBS-1">SBS-1</option>
-                                <option value="SBS-2">SBS-2</option>
-                                <option value="SBDI-1">SBDI-1</option>
-                                <option value="SBDI-2">SBDI-2</option>
-                            </select>
-                            <span class="select-icon" aria-hidden="true"></span>
-                        </div>
+                <div class="select-group">
+                    <label for="freezer-category" class="sr-only">冰箱分类</label>
+                    <div class="select-wrapper">
+                        <select id="freezer-category" name="freezer-category">
+                            <option value="">全部</option>
+                            <option value="K1-1">K1-1</option>
+                            <option value="K1-2">K1-2</option>
+                            <option value="K1-3">K1-3</option>
+                            <option value="K1-4">K1-4</option>
+                            <option value="K1-5">K1-5</option>
+                            <option value="K1-6">K1-6</option>
+                            <option value="K1-7">K1-7</option>
+                            <option value="C-1">C-1</option>
+                            <option value="KDI-1">KDI-1</option>
+                            <option value="KDI-2">KDI-2</option>
+                            <option value="KDI-3">KDI-3</option>
+                            <option value="KDI-4">KDI-4</option>
+                            <option value="S1-1">S1-1</option>
+                            <option value="S1-2">S1-2</option>
+                            <option value="S1-3">S1-3</option>
+                            <option value="S1-4">S1-4</option>
+                            <option value="SBS-1">SBS-1</option>
+                            <option value="SBS-2">SBS-2</option>
+                            <option value="SBDI-1">SBDI-1</option>
+                            <option value="SBDI-2">SBDI-2</option>
+                        </select>
+                        <span class="select-icon" aria-hidden="true"></span>
                     </div>
+                </div>
 
-                    <div class="select-group">
-                        <label for="product-category" class="sr-only">货品类型</label>
-                        <div class="select-wrapper">
-                            <select id="product-category" name="product-category">
-                                <option value="">全部</option>
-                            </select>
-                            <span class="select-icon" aria-hidden="true"></span>
-                        </div>
+                <div class="select-group">
+                    <label for="product-category" class="sr-only">货品类型</label>
+                    <div class="select-wrapper">
+                        <select id="product-category" name="product-category">
+                            <option value="">全部</option>
+                        </select>
+                        <span class="select-icon" aria-hidden="true"></span>
                     </div>
                 </div>
 
