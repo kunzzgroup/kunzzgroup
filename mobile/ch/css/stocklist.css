@@ -104,21 +104,18 @@ body {
     flex-direction: row !important;
     gap: 12px;
     width: 100%;
-    align-items: stretch;
 }
 
 .select-group {
     display: flex;
-    flex: 1 1 0;
+    flex: 1;
     min-width: 0;
-    width: 50%;
 }
 
 .select-wrapper {
     position: relative;
     width: 100%;
     min-width: 0;
-    flex: 1;
 }
 
 .select-wrapper select {
