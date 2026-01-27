@@ -100,14 +100,16 @@ body {
 }
 
 .filters-row {
-    display: flex;
+    display: flex !important;
+    flex-direction: row !important;
     gap: 12px;
     width: 100%;
 }
 
 .filters-row .select-group {
-    display: flex;
+    display: flex !important;
     flex: 1;
+    min-width: 0;
 }
 
 .select-group {
