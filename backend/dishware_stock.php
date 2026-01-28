@@ -4806,7 +4806,7 @@ header('Expires: 0');
             return [...ascii, ...nonAscii];
         }
 
-        /** 套装破损单价规则：仅数量最少的单品记价，其余为 0 */
+        /** 套装破损单价规则：仅数量最少的单品记价，其余为 0；若多个同为最少则都记价 */
         function getEffectiveUnitPriceForBreak(item) {
             if (!item) return 0;
             const raw = parseFloat(item.unit_price) || 0;
@@ -4823,6 +4823,7 @@ header('Expires: 0');
                     const t = parseFloat(m.total_quantity) || 0;
                     if (t < minQ) minQ = t;
                 }
+                /* 数量 ≤ 最小值则记价；多个同为最少（如 8,8,10 的两个 8）均记价 */
                 return q <= minQ ? raw : 0;
             }
             return raw;
