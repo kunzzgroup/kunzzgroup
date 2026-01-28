@@ -219,6 +219,9 @@ if (!isset($_SESSION['user_id'])) {
                     // 更新货品类型下拉选项（在合并库存总数之后）
                     updateProductCategoryOptions();
                     
+                    // 更新冰箱分类选项（根据当前选择的货品类型）
+                    updateFreezerCategoryOptions();
+                    
                     generateTable();
                 } else {
                     throw new Error(result.message || '加载失败');
@@ -261,15 +264,20 @@ if (!isset($_SESSION['user_id'])) {
                 selectedProductCategory = selectElement.value;
                 console.log('货品类型已更改:', selectedProductCategory);
                 
-                // 自动重置冰箱分类为"全部"
+                // 根据选择的货品类型更新冰箱分类选项
+                updateFreezerCategoryOptions();
+                
+                // 检查当前选中的冰箱分类是否仍然有效
                 const freezerCategorySelect = document.getElementById('freezer-category');
-                if (freezerCategorySelect && freezerCategorySelect.value !== '') {
-                    freezerCategorySelect.value = '';
-                    selectedFreezerCategory = '';
-                    
-                    // 如果之前有冰箱分类过滤，需要重新加载完整的产品列表
-                    loadProductList();
-                    return; // loadProductList会调用generateTable，所以直接返回
+                if (freezerCategorySelect) {
+                    const currentFreezerValue = freezerCategorySelect.value;
+                    // 检查当前值是否还在选项中
+                    const optionExists = Array.from(freezerCategorySelect.options).some(opt => opt.value === currentFreezerValue);
+                    if (!optionExists && currentFreezerValue !== '') {
+                        // 如果当前选中的冰箱分类不在新列表中，重置为"全部"
+                        freezerCategorySelect.value = '';
+                        selectedFreezerCategory = '';
+                    }
                 }
                 
                 generateTable();
@@ -305,6 +313,91 @@ if (!isset($_SESSION['user_id'])) {
             } else {
                 categorySelect.value = '';
                 selectedProductCategory = '';
+            }
+            
+            // 更新冰箱分类选项（根据当前选择的货品类型）
+            updateFreezerCategoryOptions();
+        }
+        
+        // 更新冰箱分类下拉选项（根据选中的货品类型过滤）
+        function updateFreezerCategoryOptions() {
+            const freezerCategorySelect = document.getElementById('freezer-category');
+            if (!freezerCategorySelect) return;
+            
+            // 所有可用的冰箱分类选项
+            const allFreezerCategories = [
+                { value: 'K1-1', text: 'K1-1' },
+                { value: 'K1-2', text: 'K1-2' },
+                { value: 'K1-3', text: 'K1-3' },
+                { value: 'K1-4', text: 'K1-4' },
+                { value: 'K1-5', text: 'K1-5' },
+                { value: 'K1-6', text: 'K1-6' },
+                { value: 'K1-7', text: 'K1-7' },
+                { value: 'C-1', text: 'C-1' },
+                { value: 'KDI-1', text: 'KDI-1' },
+                { value: 'KDI-2', text: 'KDI-2' },
+                { value: 'KDI-3', text: 'KDI-3' },
+                { value: 'KDI-4', text: 'KDI-4' },
+                { value: 'S1-1', text: 'S1-1' },
+                { value: 'S1-2', text: 'S1-2' },
+                { value: 'S1-3', text: 'S1-3' },
+                { value: 'S1-4', text: 'S1-4' },
+                { value: 'SBS-1', text: 'SBS-1' },
+                { value: 'SBS-2', text: 'SBS-2' },
+                { value: 'SBDI-1', text: 'SBDI-1' },
+                { value: 'SBDI-2', text: 'SBDI-2' }
+            ];
+            
+            // 保存当前选中的值
+            const currentValue = freezerCategorySelect.value;
+            
+            // 如果没有选择货品类型，显示所有冰箱分类
+            if (!selectedProductCategory || selectedProductCategory === '') {
+                freezerCategorySelect.innerHTML = '<option value="">全部</option>';
+                allFreezerCategories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.value;
+                    option.textContent = cat.text;
+                    freezerCategorySelect.appendChild(option);
+                });
+            } else {
+                // 如果选择了货品类型，只显示包含该类型产品的冰箱分类
+                // 从完整产品列表中找出包含该类型的冰箱分类
+                const validFreezerCategories = new Set();
+                
+                allProductList.forEach(item => {
+                    if (item.category === selectedProductCategory && item.freezer_category) {
+                        // 支持逗号分隔的多个冰箱分类
+                        const freezerCats = String(item.freezer_category).split(',').map(c => c.trim()).filter(Boolean);
+                        freezerCats.forEach(cat => validFreezerCategories.add(cat));
+                    }
+                });
+                
+                // 清空选项（保留"全部"选项）
+                freezerCategorySelect.innerHTML = '<option value="">全部</option>';
+                
+                // 只添加有效的冰箱分类选项
+                allFreezerCategories.forEach(cat => {
+                    if (validFreezerCategories.has(cat.value)) {
+                        const option = document.createElement('option');
+                        option.value = cat.value;
+                        option.textContent = cat.text;
+                        freezerCategorySelect.appendChild(option);
+                    }
+                });
+            }
+            
+            // 恢复之前选中的值（如果还存在）
+            const optionExists = Array.from(freezerCategorySelect.options).some(opt => opt.value === currentValue);
+            if (currentValue && optionExists) {
+                freezerCategorySelect.value = currentValue;
+                selectedFreezerCategory = currentValue;
+            } else {
+                if (currentValue !== '') {
+                    // 如果之前的值不在新列表中，重置为"全部"
+                    freezerCategorySelect.value = '';
+                    selectedFreezerCategory = '';
+                }
             }
         }
         
