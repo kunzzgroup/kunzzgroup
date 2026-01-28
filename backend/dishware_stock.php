@@ -4777,20 +4777,22 @@ header('Expires: 0');
             document.getElementById('damageModal').style.display = 'block';
         }
 
-        /** 获取全部单品碗碟（含套装内的单品如 AG001、AG002），不包含套装编号（如 SETxxx） */
+        /** 获取全部单品碗碟（含套装内的单品如 AG001、AG002），不包含套装编号（如 SETxxx），按编号 A-Z 排序 */
         function getAllSingleDishwareForBreak() {
+            let list = [];
             const raw = (allDishwareForBreak && allDishwareForBreak.length) ? allDishwareForBreak : [];
             if (raw.length > 0) {
-                return raw.filter(item => {
+                list = raw.filter(item => {
                     const c = (item.code_number || '').trim().toUpperCase();
                     return c && !c.startsWith('SET');
                 });
+            } else {
+                (stockData || []).filter(item => item.item_type === 'individual').forEach(item => list.push(item));
+                (stockData || []).filter(item => item.item_type === 'set').forEach(set => {
+                    if (set.items && set.items.length) list.push(...set.items);
+                });
             }
-            const list = [];
-            (stockData || []).filter(item => item.item_type === 'individual').forEach(item => list.push(item));
-            (stockData || []).filter(item => item.item_type === 'set').forEach(set => {
-                if (set.items && set.items.length) list.push(...set.items);
-            });
+            list.sort((a, b) => naturalSort((a.code_number || '').trim(), (b.code_number || '').trim()));
             return list;
         }
 
