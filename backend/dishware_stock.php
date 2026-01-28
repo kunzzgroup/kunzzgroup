@@ -6433,6 +6433,7 @@ header('Expires: 0');
                                                 item.product_name = stockItem.product_name || item.product_name || '';
                                                 item.code_number = stockItem.code_number || item.code_number || '';
                                                 item.category = stockItem.category || item.category || '';
+                                                // 保留单品自身单价，不用套装总价覆盖
                                             } else {
                                                 // 如果没有找到库存信息，尝试直接从API获取该碗碟的库存
                                                 console.warn(`尝试直接从API获取碗碟 ${item.id} 的库存数据...`);
@@ -6483,9 +6484,7 @@ header('Expires: 0');
                                                     item.restaurant_stocks = {};
                                                 }
                                             }
-                                            
-                                            // 套装中的碗碟使用套装的价格
-                                            item.unit_price = setDetail.set_price;
+                                            // 不覆盖 unit_price：保留每个单品在 dishware_info 中的原单价，不做相加
                                         }
                                     }
                                 }
@@ -6792,6 +6791,8 @@ header('Expires: 0');
                             const totalClass = totalQty > 0 ? 'positive-value' : 'zero-value';
                             // 每个套装项目都有独立的序号
                             const displayIndex = rowIndex++;
+                            // 单价用单品自身单价，不叠加套装总价
+                            const itemPrice = parseFloat(setItem.unit_price) || 0;
 
                             const rowData = {
                                 no: String(displayIndex),
@@ -6800,7 +6801,7 @@ header('Expires: 0');
                                 code_number: setItem.code_number || '-',
                                 category: setItem.category || set.category || '-',
                                 size: setItem.size || '-',
-                                unit_price: currencyHtml(setPrice),
+                                unit_price: currencyHtml(itemPrice),
                                 total: `<span class="${totalClass}">${totalQty}</span>`,
                                 set_id: set.id,
                                 set_category: setItem.category || set.category || '-',
@@ -6894,8 +6895,8 @@ header('Expires: 0');
                 
                 html += `<tr ${rowAttributes}><th class="row-header">${f.label}</th>`;
                 
-                // 对于分类、尺寸、单价行，检查是否需要合并套装项目
-                if ((f.key === 'category' || f.key === 'size' || f.key === 'unit_price') && displayRows.length > 0) {
+                // 仅对分类、尺寸行合并套装列；单价不合并，每列显示各自单品价格
+                if ((f.key === 'category' || f.key === 'size') && displayRows.length > 0) {
                     let i = 0;
                     while (i < displayRows.length) {
                         const currentRow = displayRows[i];
@@ -6903,7 +6904,7 @@ header('Expires: 0');
                         const currentValue = currentRow[f.key] || '-';
                         
                         // 如果当前行属于套装，检查后续行是否也属于同一套装且值相同
-                        if (currentSetId && (f.key === 'category' || f.key === 'size' || f.key === 'unit_price')) {
+                        if (currentSetId && (f.key === 'category' || f.key === 'size')) {
                             let mergeCount = 1;
                             let j = i + 1;
                             
@@ -7080,6 +7081,8 @@ header('Expires: 0');
                             const totalClass = totalQty > 0 ? 'positive-value' : 'zero-value';
                             // 每个套装项目都有独立的序号
                             const displayIndex = rowIndex++;
+                            // 单价用单品自身单价，不叠加套装总价
+                            const itemPrice = parseFloat(setItem.unit_price) || 0;
 
                             const rowData = {
                                 no: String(displayIndex),
@@ -7088,7 +7091,7 @@ header('Expires: 0');
                                 code_number: setItem.code_number || '-',
                                 category: setItem.category || set.category || '-',
                                 size: setItem.size || '-',
-                                unit_price: currencyHtml(setPrice),
+                                unit_price: currencyHtml(itemPrice),
                                 total: `<span class="${totalClass}">${totalQty}</span>`,
                                 set_id: set.id,
                                 set_category: setItem.category || set.category || '-',
@@ -7178,8 +7181,8 @@ header('Expires: 0');
                 
                 tableHtml += `<tr ${rowAttributes}><th class="row-header">${f.label}</th>`;
                 
-                // 对于分类、尺寸、单价行，检查是否需要合并套装项目
-                if ((f.key === 'category' || f.key === 'size' || f.key === 'unit_price') && displayRows.length > 0) {
+                // 仅对分类、尺寸行合并套装列；单价不合并，每列显示各自单品价格
+                if ((f.key === 'category' || f.key === 'size') && displayRows.length > 0) {
                     let i = 0;
                     while (i < displayRows.length) {
                         const currentRow = displayRows[i];
@@ -7187,7 +7190,7 @@ header('Expires: 0');
                         const currentValue = currentRow[f.key] || '-';
                         
                         // 如果当前行属于套装，检查后续行是否也属于同一套装且值相同
-                        if (currentSetId && (f.key === 'category' || f.key === 'size' || f.key === 'unit_price')) {
+                        if (currentSetId && (f.key === 'category' || f.key === 'size')) {
                             let mergeCount = 1;
                             let j = i + 1;
                             
