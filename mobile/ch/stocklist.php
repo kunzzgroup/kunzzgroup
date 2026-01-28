@@ -26,45 +26,25 @@ if (!isset($_SESSION['user_id'])) {
 
         <main class="page-content">
             <section class="form-section">
-                <div class="selects-row" style="display: flex !important; flex-direction: row !important; gap: 12px; width: 100%;">
-                    <div class="select-group">
-                        <label for="freezer-category" class="sr-only">冰箱分类</label>
-                        <div class="select-wrapper">
-                            <select id="freezer-category" name="freezer-category">
-                                <option value="">全部</option>
-                                <option value="K1-1">K1-1</option>
-                                <option value="K1-2">K1-2</option>
-                                <option value="K1-3">K1-3</option>
-                                <option value="K1-4">K1-4</option>
-                                <option value="K1-5">K1-5</option>
-                                <option value="K1-6">K1-6</option>
-                                <option value="K1-7">K1-7</option>
-                                <option value="C-1">C-1</option>
-                                <option value="KDI-1">KDI-1</option>
-                                <option value="KDI-2">KDI-2</option>
-                                <option value="KDI-3">KDI-3</option>
-                                <option value="KDI-4">KDI-4</option>
-                                <option value="S1-1">S1-1</option>
-                                <option value="S1-2">S1-2</option>
-                                <option value="S1-3">S1-3</option>
-                                <option value="S1-4">S1-4</option>
-                                <option value="SBS-1">SBS-1</option>
-                                <option value="SBS-2">SBS-2</option>
-                                <option value="SBDI-1">SBDI-1</option>
-                                <option value="SBDI-2">SBDI-2</option>
-                            </select>
-                            <span class="select-icon" aria-hidden="true"></span>
-                        </div>
+                <div class="filter-group">
+                    <label for="filter-type" class="sr-only">筛选类型</label>
+                    <div class="select-wrapper">
+                        <select id="filter-type" name="filter-type">
+                            <option value="">选择筛选类型</option>
+                            <option value="freezer">冰箱区</option>
+                            <option value="category">类型</option>
+                        </select>
+                        <span class="select-icon" aria-hidden="true"></span>
                     </div>
+                </div>
 
-                    <div class="select-group">
-                        <label for="product-category" class="sr-only">货品类型</label>
-                        <div class="select-wrapper">
-                            <select id="product-category" name="product-category">
-                                <option value="">全部</option>
-                            </select>
-                            <span class="select-icon" aria-hidden="true"></span>
-                        </div>
+                <div class="filter-group" id="filter-value-group" style="display: none;">
+                    <label for="filter-value" class="sr-only">筛选值</label>
+                    <div class="select-wrapper">
+                        <select id="filter-value" name="filter-value">
+                            <option value="">全部</option>
+                        </select>
+                        <span class="select-icon" aria-hidden="true"></span>
                     </div>
                 </div>
 
@@ -105,9 +85,34 @@ if (!isset($_SESSION['user_id'])) {
         // 全局变量
         let productList = [];
         let stockData = [];
-        let selectedFreezerCategory = '';
-        let selectedProductCategory = '';
+        let selectedFilterType = '';
+        let selectedFilterValue = '';
         let editingRowIds = new Set();
+        
+        // 冰箱分类选项
+        const freezerCategories = [
+            { value: '', text: '全部' },
+            { value: 'K1-1', text: 'K1-1' },
+            { value: 'K1-2', text: 'K1-2' },
+            { value: 'K1-3', text: 'K1-3' },
+            { value: 'K1-4', text: 'K1-4' },
+            { value: 'K1-5', text: 'K1-5' },
+            { value: 'K1-6', text: 'K1-6' },
+            { value: 'K1-7', text: 'K1-7' },
+            { value: 'C-1', text: 'C-1' },
+            { value: 'KDI-1', text: 'KDI-1' },
+            { value: 'KDI-2', text: 'KDI-2' },
+            { value: 'KDI-3', text: 'KDI-3' },
+            { value: 'KDI-4', text: 'KDI-4' },
+            { value: 'S1-1', text: 'S1-1' },
+            { value: 'S1-2', text: 'S1-2' },
+            { value: 'S1-3', text: 'S1-3' },
+            { value: 'S1-4', text: 'S1-4' },
+            { value: 'SBS-1', text: 'SBS-1' },
+            { value: 'SBS-2', text: 'SBS-2' },
+            { value: 'SBDI-1', text: 'SBDI-1' },
+            { value: 'SBDI-2', text: 'SBDI-2' }
+        ];
         
         // API配置
         const API_BASE_URL = '../../stockapi.php';
@@ -116,11 +121,11 @@ if (!isset($_SESSION['user_id'])) {
         
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
-            // 冰箱分类变化事件
-            document.getElementById('freezer-category').addEventListener('change', handleCategoryChange);
+            // 筛选类型变化事件
+            document.getElementById('filter-type').addEventListener('change', handleFilterTypeChange);
             
-            // 货品类型变化事件
-            document.getElementById('product-category').addEventListener('change', handleProductCategoryChange);
+            // 筛选值变化事件
+            document.getElementById('filter-value').addEventListener('change', handleFilterValueChange);
             
             // 搜索按钮点击事件
             document.querySelector('.btn-search').addEventListener('click', handleSearch);
@@ -149,8 +154,7 @@ if (!isset($_SESSION['user_id'])) {
                 params.append('action', 'list');
                 params.append('system_assign', SYSTEM_TYPE);
                 
-                const freezerCategorySelect = document.getElementById('freezer-category');
-                const currentFreezerCategory = freezerCategorySelect ? freezerCategorySelect.value : (selectedFreezerCategory || '');
+                // 不再需要从select获取，使用全局变量
                 
                 const apiUrl = `${API_BASE_URL}?${params.toString()}`;
                 console.log('完整的API请求URL:', apiUrl);
@@ -173,16 +177,16 @@ if (!isset($_SESSION['user_id'])) {
                     productList = result.data || [];
                     console.log('接收到产品数据数量:', productList.length);
                     
-                    if (currentFreezerCategory) {
-                        // 客户端按多分类过滤：支持逗号分隔
-                        const selected = currentFreezerCategory.trim();
+                    // 应用筛选（在客户端过滤）
+                    if (selectedFilterType === 'freezer' && selectedFilterValue) {
+                        const selected = selectedFilterValue.trim();
                         const matchesCategory = (val) => {
                             if (!val) return false;
                             const parts = String(val).split(',').map(v => v.trim()).filter(Boolean);
                             return parts.includes(selected);
                         };
                         productList = productList.filter(p => matchesCategory(p.freezer_category));
-                        console.log('应用客户端分类过滤后数量:', productList.length);
+                        console.log('应用冰箱分类过滤后数量:', productList.length);
                     }
                     
                     stockData = productList.map(item => ({
@@ -213,8 +217,10 @@ if (!isset($_SESSION['user_id'])) {
                         console.warn('合并库存总数失败:', e);
                     }
                     
-                    // 更新货品类型下拉选项（在合并库存总数之后）
-                    updateProductCategoryOptions();
+                    // 更新筛选值选项（在合并库存总数之后）
+                    if (selectedFilterType === 'category') {
+                        updateProductCategoryOptions();
+                    }
                     
                     generateTable();
                 } else {
@@ -233,55 +239,96 @@ if (!isset($_SESSION['user_id'])) {
             }
         }
         
-        // 处理冰箱分类变化
-        function handleCategoryChange() {
-            const selectElement = document.getElementById('freezer-category');
-            if (selectElement) {
-                selectedFreezerCategory = selectElement.value;
-                console.log('冰箱分类已更改:', selectedFreezerCategory);
+        // 处理筛选类型变化
+        function handleFilterTypeChange() {
+            const filterTypeSelect = document.getElementById('filter-type');
+            const filterValueGroup = document.getElementById('filter-value-group');
+            const filterValueSelect = document.getElementById('filter-value');
+            
+            if (!filterTypeSelect || !filterValueGroup || !filterValueSelect) return;
+            
+            selectedFilterType = filterTypeSelect.value;
+            selectedFilterValue = '';
+            
+            if (selectedFilterType === '') {
+                // 隐藏筛选值选择器
+                filterValueGroup.style.display = 'none';
+                filterValueSelect.innerHTML = '<option value="">全部</option>';
                 loadProductList();
+                return;
             }
+            
+            // 显示筛选值选择器
+            filterValueGroup.style.display = 'block';
+            
+            // 根据筛选类型更新选项
+            filterValueSelect.innerHTML = '<option value="">全部</option>';
+            
+            if (selectedFilterType === 'freezer') {
+                // 显示冰箱分类选项
+                freezerCategories.forEach(item => {
+                    if (item.value !== '') { // 跳过"全部"，因为已经添加了
+                        const option = document.createElement('option');
+                        option.value = item.value;
+                        option.textContent = item.text;
+                        filterValueSelect.appendChild(option);
+                    }
+                });
+            } else if (selectedFilterType === 'category') {
+                // 显示货品类型选项（需要从stockData中获取）
+                updateProductCategoryOptions();
+            }
+            
+            filterValueSelect.value = '';
+            generateTable();
         }
         
-        // 处理货品类型变化
-        function handleProductCategoryChange() {
-            const selectElement = document.getElementById('product-category');
-            if (selectElement) {
-                selectedProductCategory = selectElement.value;
-                console.log('货品类型已更改:', selectedProductCategory);
-                generateTable();
+        // 处理筛选值变化
+        function handleFilterValueChange() {
+            const filterValueSelect = document.getElementById('filter-value');
+            if (filterValueSelect) {
+                selectedFilterValue = filterValueSelect.value;
+                console.log('筛选值已更改:', selectedFilterType, selectedFilterValue);
+                
+                if (selectedFilterType === 'freezer') {
+                    // 冰箱分类变化需要重新加载产品列表
+                    loadProductList();
+                } else if (selectedFilterType === 'category') {
+                    // 货品类型变化只需要重新生成表格
+                    generateTable();
+                }
             }
         }
         
         // 更新货品类型下拉选项
         function updateProductCategoryOptions() {
-            const categorySelect = document.getElementById('product-category');
-            if (!categorySelect) return;
+            const filterValueSelect = document.getElementById('filter-value');
+            if (!filterValueSelect) return;
             
             // 获取所有唯一的货品类型
             const categories = [...new Set(stockData.map(item => item.category).filter(cat => cat && cat.trim() !== ''))].sort();
             
             // 保存当前选中的值
-            const currentValue = categorySelect.value;
+            const currentValue = filterValueSelect.value;
             
             // 清空选项（保留"全部"选项）
-            categorySelect.innerHTML = '<option value="">全部</option>';
+            filterValueSelect.innerHTML = '<option value="">全部</option>';
             
             // 添加所有货品类型选项
             categories.forEach(category => {
                 const option = document.createElement('option');
                 option.value = category;
                 option.textContent = category;
-                categorySelect.appendChild(option);
+                filterValueSelect.appendChild(option);
             });
             
             // 恢复之前选中的值（如果还存在）
             if (currentValue && categories.includes(currentValue)) {
-                categorySelect.value = currentValue;
-                selectedProductCategory = currentValue;
+                filterValueSelect.value = currentValue;
+                selectedFilterValue = currentValue;
             } else {
-                categorySelect.value = '';
-                selectedProductCategory = '';
+                filterValueSelect.value = '';
+                selectedFilterValue = '';
             }
         }
         
@@ -302,8 +349,6 @@ if (!isset($_SESSION['user_id'])) {
             
             // 根据搜索条件和过滤条件过滤数据
             const searchTerm = document.getElementById('search').value.toLowerCase().trim();
-            const productCategorySelect = document.getElementById('product-category');
-            const selectedCategory = productCategorySelect ? productCategorySelect.value : '';
             
             const filteredData = stockData.filter(item => {
                 // 搜索过滤
@@ -315,9 +360,9 @@ if (!isset($_SESSION['user_id'])) {
                     }
                 }
                 
-                // 货品类型过滤
-                if (selectedCategory && selectedCategory !== '') {
-                    if (item.category !== selectedCategory) {
+                // 根据筛选类型和值进行过滤
+                if (selectedFilterType === 'category' && selectedFilterValue && selectedFilterValue !== '') {
+                    if (item.category !== selectedFilterValue) {
                         return false;
                     }
                 }
