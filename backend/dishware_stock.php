@@ -1602,14 +1602,16 @@ header('Expires: 0');
 
     .header-search {
         display: flex;
-        align-items: center;
-        gap: clamp(6px, 0.63vw, 12px);
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
     }
 
     .category-filter {
         display: flex;
-        align-items: center;
-        gap: clamp(6px, 0.63vw, 12px);
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
     }
 
     .break-date-filter {
