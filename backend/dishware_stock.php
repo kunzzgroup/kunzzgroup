@@ -5253,9 +5253,9 @@ header('Expires: 0');
             const currentProduct = allSingles.find(item => item.code_number === originalCode) || stockData.find(item => item.code_number === originalCode);
             const currentProductId = currentProduct ? currentProduct.id : '';
             
+            // 编辑编号列 - 使用 combobox
             const codeCell = cells[1];
             const codeRowId = `edit-${recordId}-${Date.now()}`;
-            row.dataset.codeRowId = codeRowId;
             codeCell.innerHTML = `
                 <div class="combobox-container" id="${codeRowId}-code-combo">
                     <input 
@@ -5276,11 +5276,12 @@ header('Expires: 0');
                 </div>
             `;
             
+            // 数量列：使用 contenteditable span（直接编辑，不显示输入框）
             cells[2].innerHTML = `
                 <span contenteditable="true" class="editable-quantity" 
                       id="edit-${recordId}-qty"
                       style="display: inline-block; min-width: 40px; padding: 2px 4px; border: 1px solid #ccc; border-radius: 4px; background: #fff; outline: none; text-align: center;"
-                      oninput="this.textContent = this.textContent.replace(/[^0-9.]/g, ''); recalcEditBreakRowTotal(this);">${originalQuantity}</span>
+                      oninput="this.textContent = this.textContent.replace(/[^0-9.]/g, '');">${originalQuantity}</span>
             `;
             
             // 替换操作按钮为保存和取消
@@ -5382,38 +5383,6 @@ header('Expires: 0');
                 console.error('保存编辑的破损记录时发生错误:', error);
                 showAlert('保存失败: ' + error.message, 'error');
             }
-        }
-        
-        // 编辑时数量变化，重算总价（同一产品用 当前库存 + 原破损数量 作为 qtyBefore）
-        function recalcEditBreakRowTotal(quantityEl) {
-            const row = quantityEl && quantityEl.closest ? quantityEl.closest('tr') : null;
-            if (!row || !row.classList.contains('editing-row')) return;
-            const codeRowId = row.dataset.codeRowId;
-            const recordId = row.dataset.id || row.getAttribute('data-id');
-            const shopId = row.dataset.shop || row.getAttribute('data-shop');
-            const codeInput = codeRowId ? document.getElementById(codeRowId + '-code') : null;
-            const cells = row.querySelectorAll('td');
-            if (!codeRowId || !codeInput || !shopId || cells.length < 5) return;
-            const productId = codeInput.dataset.productId || codeInput.getAttribute('data-product-id');
-            const quantity = parseFloat(quantityEl.textContent.trim()) || 0;
-            const records = (breakRecordsData && breakRecordsData[shopId]) ? breakRecordsData[shopId] : [];
-            const record = recordId ? records.find(function(r) { return r.id == recordId; }) : null;
-            const allSingles = getAllSingleDishwareForBreak();
-            const product = productId ? (allSingles.find(item => item.id == productId) || (stockData || []).find(item => item.id == productId)) : null;
-            const raw = product ? (parseFloat(product.unit_price) || 0) : 0;
-            let qtyBefore = 0;
-            if (product && shopId && typeof getMemberQuantityForShop === 'function') {
-                const currentQ = getMemberQuantityForShop(product, shopId);
-                const sameProduct = record && (record.dishware_id == productId || (record.dishware_id && record.dishware_id.toString() === productId.toString()));
-                qtyBefore = sameProduct ? currentQ + (record.break_quantity || 0) : currentQ;
-            }
-            const chargeable = product && shopId && typeof getChargeableQuantityForBreak === 'function'
-                ? getChargeableQuantityForBreak(product, shopId, quantity, qtyBefore) : quantity;
-            const totalPrice = chargeable * raw;
-            const priceCell = cells[3];
-            const totalCell = cells[4];
-            priceCell.innerHTML = '<div class="currency-display"><span class="currency-symbol">RM</span><span class="currency-amount">' + raw.toFixed(2) + '</span></div>';
-            totalCell.innerHTML = '<div class="currency-display"><span class="currency-symbol">RM</span><span class="currency-amount">' + totalPrice.toFixed(2) + '</span></div>';
         }
         
         // 取消编辑破损记录
@@ -5789,7 +5758,7 @@ header('Expires: 0');
                             }
                             calculateEditTransferTotal(codeRowId);
                         } else {
-                            // 破损记录编辑模式：更新单价显示，总价 = 计费数量 × 单价；同一产品时 qtyBefore = 当前库存 + 原破损数量
+                            // 破损记录编辑模式：更新单价显示，总价 = 计费数量 × 单价
                             const cells = row.querySelectorAll('td');
                             if (cells.length >= 5) {
                                 const priceCell = cells[3];
@@ -5806,17 +5775,9 @@ header('Expires: 0');
                                         ? parseFloat(quantityEl.value) || 0
                                         : parseFloat(quantityEl.textContent.trim()) || 0;
                                     const shopId = row.dataset.shop || '';
-                                    const recordId = row.dataset.id || row.getAttribute('data-id');
-                                    const records = (typeof breakRecordsData !== 'undefined' && breakRecordsData[shopId]) ? breakRecordsData[shopId] : [];
-                                    const record = recordId ? records.find(function(r) { return r.id == recordId; }) : null;
                                     const allSingles = typeof getAllSingleDishwareForBreak === 'function' ? getAllSingleDishwareForBreak() : [];
                                     const product = productId ? (allSingles.find(item => item.id == productId) || ((typeof stockData !== 'undefined' && stockData) || []).find(item => item.id == productId)) : null;
-                                    let qtyBefore = 0;
-                                    if (product && shopId && typeof getMemberQuantityForShop === 'function') {
-                                        const currentQ = getMemberQuantityForShop(product, shopId);
-                                        const sameProduct = record && (record.dishware_id == productId || (record.dishware_id && record.dishware_id.toString() === productId.toString()));
-                                        qtyBefore = sameProduct ? currentQ + (record.break_quantity || 0) : currentQ;
-                                    }
+                                    const qtyBefore = product && shopId ? (typeof getMemberQuantityForShop === 'function' ? getMemberQuantityForShop(product, shopId) : 0) : 0;
                                     const chargeable = product && shopId && typeof getChargeableQuantityForBreak === 'function'
                                         ? getChargeableQuantityForBreak(product, shopId, quantity, qtyBefore) : quantity;
                                     const totalPrice = chargeable * raw;
