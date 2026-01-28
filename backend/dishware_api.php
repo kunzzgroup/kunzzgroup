@@ -108,6 +108,9 @@ function handleGet() {
         case 'damage_records':
             getBreakRecords();
             break;
+        case 'monthly_reset_break_check':
+            monthlyResetBreakCheck();
+            break;
         case 'sets':
             getDishwareSets();
             break;
@@ -832,6 +835,35 @@ function getBreakRecords() {
         
     } catch (PDOException $e) {
         sendResponse(false, "获取破损记录失败：" . $e->getMessage());
+    }
+}
+
+// 每月1号自动清空破损记录：当天首次访问破损记录页时执行重置，之后当月不再重置
+function monthlyResetBreakCheck() {
+    global $pdo;
+    $file = __DIR__ . '/last_break_reset_ym.txt';
+    $now = new DateTime('now', new DateTimeZone('Asia/Kuala_Lumpur'));
+    $ym = $now->format('Y-m');
+    $day = (int) $now->format('d');
+    if ($day !== 1) {
+        sendResponse(true, "非每月1号，无需重置", ['reset_done' => false]);
+        return;
+    }
+    $last = @file_get_contents($file);
+    $last = $last ? trim($last) : '';
+    if ($last === $ym) {
+        sendResponse(true, "本月已重置", ['reset_done' => false]);
+        return;
+    }
+    try {
+        $pdo->exec("DELETE FROM dishware_break_records");
+        $pdo->exec("DELETE FROM dishware_set_break_records");
+        if (@file_put_contents($file, $ym) === false) {
+            error_log("monthlyResetBreakCheck: 无法写入 " . $file);
+        }
+        sendResponse(true, "每月1号已清空破损记录", ['reset_done' => true]);
+    } catch (PDOException $e) {
+        sendResponse(false, "清空破损记录失败：" . $e->getMessage());
     }
 }
 

@@ -4405,6 +4405,12 @@ header('Expires: 0');
         // 加载所有店铺的破损记录（只加载J开头的餐厅）
         async function loadAllBreakRecords() {
             try {
+                // 每月1号首次加载时先执行清空检查，清空后本月不再重置
+                try {
+                    await apiCall('?action=monthly_reset_break_check');
+                } catch (e) {
+                    console.warn('月度重置检查失败:', e);
+                }
                 // 获取所有餐厅列表，筛选出J开头的餐厅（排除"中央"和"文化楼"）
                 const jRestaurants = restaurants.filter(r => {
                     const name = r.name.toLowerCase();
