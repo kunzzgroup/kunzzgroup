@@ -4775,19 +4775,6 @@ header('Expires: 0');
             document.getElementById('damageModal').style.display = 'block';
         }
 
-        /** 破损记录编号下拉：单品 + 已设成套装的碗碟（套装内成员），不包含套装编号 */
-        function getBreakSelectableItems() {
-            const data = stockData || [];
-            const out = [];
-            const individuals = data.filter(item => item.item_type === 'individual');
-            out.push(...individuals);
-            const sets = data.filter(item => item.item_type === 'set');
-            sets.forEach(s => {
-                if (s.items && s.items.length) out.push(...s.items);
-            });
-            return out;
-        }
-
         // 填充破损记录选择框
         function populateDamageSelects() {
             const codeSelect = document.getElementById('damage-code-select');
@@ -4809,12 +4796,12 @@ header('Expires: 0');
                 return;
             }
             
-            // 全部碗碟（单品 + 已设成套装的碗碟），不显示套装编号
-            const allSelectable = getBreakSelectableItems();
+            // 仅显示全部单品碗碟，不显示套装编号
+            const individualItems = stockData.filter(item => item.item_type === 'individual');
             
             // 填充编号选择框
             const uniqueCodes = new Set();
-            allSelectable.forEach(item => {
+            individualItems.forEach(item => {
                 if (item.code_number && !uniqueCodes.has(item.code_number)) {
                     uniqueCodes.add(item.code_number);
                     const option = document.createElement('option');
@@ -4828,7 +4815,7 @@ header('Expires: 0');
             });
             
             // 填充产品选择框
-            allSelectable.forEach(item => {
+            individualItems.forEach(item => {
                 if (item.id && item.product_name) {
                     const option = document.createElement('option');
                     option.value = item.product_name;
@@ -5152,10 +5139,10 @@ header('Expires: 0');
                 return;
             }
             
-            // 生成编号选项（单品 + 套装内碗碟，不显示套装编号）
-            const allSelectable = getBreakSelectableItems();
+            // 生成编号选项（仅单品碗碟，不显示套装编号）
             let codeOptions = [];
-            allSelectable.forEach(item => {
+            const individualsForBreak = (stockData || []).filter(item => item.item_type === 'individual');
+            individualsForBreak.forEach(item => {
                 const code = item.code_number || '';
                 if (code) {
                     codeOptions.push({
@@ -5166,7 +5153,7 @@ header('Expires: 0');
                 }
             });
             
-            const currentProduct = allSelectable.find(item => item.code_number === originalCode) || stockData.find(item => item.code_number === originalCode);
+            const currentProduct = individualsForBreak.find(item => item.code_number === originalCode) || stockData.find(item => item.code_number === originalCode);
             const currentProductId = currentProduct ? currentProduct.id : '';
             
             // 编辑编号列 - 使用 combobox
@@ -5262,11 +5249,10 @@ header('Expires: 0');
                     return;
                 }
                 
-                // 如果编号改变了，需要获取新的产品信息（含套装内碗碟）
+                // 如果编号改变了，需要获取新的产品信息
                 let unitPrice = record.unit_price || 0;
                 if (newCode !== row.dataset.originalCode) {
-                    const sel = getBreakSelectableItems();
-                    const newProduct = sel.find(item => item.code_number === newCode);
+                    const newProduct = stockData.find(item => item.code_number === newCode);
                     if (newProduct) {
                         unitPrice = newProduct.unit_price || 0;
                     }
@@ -5502,17 +5488,17 @@ header('Expires: 0');
             const currentRowCount = tbody.querySelectorAll('tr:not(.new-row)').length;
             const newRowIndex = currentRowCount + tbody.querySelectorAll('tr.new-row').length + 1;
             
-            // 全部碗碟（单品 + 套装内碗碟），不显示套装编号
-            const allSelectable = getBreakSelectableItems();
+            // 仅单品碗碟，不显示套装编号
+            const individualsForBreak = (stockData || []).filter(item => item.item_type === 'individual');
             let productOptions = '<option value="">请选择产品</option>';
-            allSelectable.forEach(item => {
+            individualsForBreak.forEach(item => {
                 const code = item.code_number || '';
                 const displayText = code || item.product_name || '';
                 productOptions += `<option value="${item.id}" data-code="${code}" data-price="${item.unit_price || 0}">${displayText}</option>`;
             });
             
             let codeOptions = [];
-            allSelectable.forEach(item => {
+            individualsForBreak.forEach(item => {
                 const code = item.code_number || '';
                 if (code) {
                     codeOptions.push({
