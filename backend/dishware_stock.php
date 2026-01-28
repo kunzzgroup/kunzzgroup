@@ -6895,8 +6895,8 @@ header('Expires: 0');
                 
                 html += `<tr ${rowAttributes}><th class="row-header">${f.label}</th>`;
                 
-                // 仅对分类、尺寸行合并套装列；单价不合并，每列显示各自单品价格
-                if ((f.key === 'category' || f.key === 'size') && displayRows.length > 0) {
+                // 分类、尺寸、单价：同套装且值相同时合并列；单价用单品原价，不相加
+                if ((f.key === 'category' || f.key === 'size' || f.key === 'unit_price') && displayRows.length > 0) {
                     let i = 0;
                     while (i < displayRows.length) {
                         const currentRow = displayRows[i];
@@ -6904,7 +6904,7 @@ header('Expires: 0');
                         const currentValue = currentRow[f.key] || '-';
                         
                         // 如果当前行属于套装，检查后续行是否也属于同一套装且值相同
-                        if (currentSetId && (f.key === 'category' || f.key === 'size')) {
+                        if (currentSetId && (f.key === 'category' || f.key === 'size' || f.key === 'unit_price')) {
                             let mergeCount = 1;
                             let j = i + 1;
                             
@@ -7181,8 +7181,8 @@ header('Expires: 0');
                 
                 tableHtml += `<tr ${rowAttributes}><th class="row-header">${f.label}</th>`;
                 
-                // 仅对分类、尺寸行合并套装列；单价不合并，每列显示各自单品价格
-                if ((f.key === 'category' || f.key === 'size') && displayRows.length > 0) {
+                // 分类、尺寸、单价：同套装且值相同时合并列；单价用单品原价，不相加
+                if ((f.key === 'category' || f.key === 'size' || f.key === 'unit_price') && displayRows.length > 0) {
                     let i = 0;
                     while (i < displayRows.length) {
                         const currentRow = displayRows[i];
@@ -7190,7 +7190,7 @@ header('Expires: 0');
                         const currentValue = currentRow[f.key] || '-';
                         
                         // 如果当前行属于套装，检查后续行是否也属于同一套装且值相同
-                        if (currentSetId && (f.key === 'category' || f.key === 'size')) {
+                        if (currentSetId && (f.key === 'category' || f.key === 'size' || f.key === 'unit_price')) {
                             let mergeCount = 1;
                             let j = i + 1;
                             
