@@ -112,16 +112,15 @@ body {
 
 .selects-row .select-group {
     display: flex !important;
-    flex: 0 0 auto !important;
+    flex: 1 1 0 !important;
     min-width: 0;
     width: auto !important;
 }
 
 .select-wrapper {
     position: relative;
-    width: 204px;
+    width: 100%;
     min-width: 0;
-    flex-shrink: 0;
 }
 
 .select-wrapper select {
@@ -136,8 +135,7 @@ body {
     -webkit-appearance: none;
     -moz-appearance: none;
     cursor: pointer;
-    width: 204px !important;
-    box-sizing: border-box;
+    width: 204px;
 }
 
 .select-wrapper select:focus {
