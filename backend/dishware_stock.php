@@ -4792,8 +4792,13 @@ header('Expires: 0');
                     if (set.items && set.items.length) list.push(...set.items);
                 });
             }
-            list.sort((a, b) => naturalSort((a.code_number || '').trim(), (b.code_number || '').trim()));
-            return list;
+            const code = (item) => (item.code_number || '').trim();
+            const isAsciiStart = (c) => /^[A-Za-z0-9]/.test(c);
+            const ascii = list.filter(item => isAsciiStart(code(item)));
+            const nonAscii = list.filter(item => !isAsciiStart(code(item)));
+            ascii.sort((a, b) => naturalSort(code(a), code(b)));
+            nonAscii.sort((a, b) => naturalSort(code(a), code(b)));
+            return [...ascii, ...nonAscii];
         }
 
         // 填充破损记录选择框
