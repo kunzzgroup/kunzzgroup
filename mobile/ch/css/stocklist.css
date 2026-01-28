@@ -136,6 +136,7 @@ body {
     -webkit-appearance: none;
     -moz-appearance: none;
     cursor: pointer;
+    width: 204px;
 }
 
 .select-wrapper select:focus {
