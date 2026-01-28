@@ -1606,93 +1606,10 @@ header('Expires: 0');
         gap: clamp(6px, 0.63vw, 12px);
     }
 
-    .category-filter,
-    .break-month-filter {
+    .category-filter {
         display: flex;
         align-items: center;
         gap: clamp(6px, 0.63vw, 12px);
-    }
-
-    /* 破损记录月份 - KPI 风格快速选择 */
-    .break-quick-select-wrap {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-    .break-quick-select-label {
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        font-size: clamp(8px, 0.74vw, 14px);
-        font-weight: 600;
-        color: #000000ff;
-        white-space: nowrap;
-        cursor: default;
-    }
-    .break-quick-select-dropdown {
-        position: relative;
-    }
-    .break-quick-select-btn {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: clamp(4px, 0.42vw, 8px) clamp(10px, 1.04vw, 20px);
-        font-size: clamp(8px, 0.74vw, 14px);
-        font-weight: 600;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        background-color: #f99e00;
-        color: white;
-        transition: all 0.2s;
-    }
-    .break-quick-select-btn:hover {
-        background-color: #f98500;
-    }
-    .break-quick-select-menu {
-        display: none;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        margin-top: 4px;
-        background: white;
-        border: 2px solid #000000ff;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(88, 62, 4, 0.15);
-        z-index: 1000;
-        min-width: 100%;
-        box-sizing: border-box;
-    }
-    .break-quick-select-menu.show {
-        display: block;
-    }
-    .break-quick-select-item {
-        display: block;
-        width: 100%;
-        padding: clamp(6px, 0.52vw, 10px) clamp(10px, 1.04vw, 20px);
-        border: none;
-        background: transparent;
-        color: #000000ff;
-        cursor: pointer;
-        font-size: clamp(8px, 0.74vw, 14px);
-        font-weight: 600;
-        text-align: left;
-        transition: background-color 0.2s;
-        box-sizing: border-box;
-    }
-    .break-quick-select-item:hover {
-        background-color: rgba(88, 62, 4, 0.1);
-    }
-    .break-quick-select-item:first-child {
-        border-radius: 6px 6px 0 0;
-    }
-    .break-quick-select-item:last-child {
-        border-radius: 0 0 6px 6px;
-    }
-    .break-quick-select-item-none {
-        font-weight: 700;
-        border-bottom: 1px solid #e5e7eb;
     }
 
     .header-stats {
@@ -2660,37 +2577,6 @@ header('Expires: 0');
                     <span style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #000000ff; white-space: nowrap;">搜索</span>
                     <input type="text" id="unified-filter" class="unified-search-input" 
                         placeholder="搜索碗碟名称、编号或分类...">
-                </div>
-                
-                <div class="break-month-filter" id="break-month-filter" style="display: none;">
-                    <div class="break-quick-select-wrap">
-                        <label class="break-quick-select-label">
-                            <i class="fas fa-clock" style="color: #000000ff;"></i>
-                            快速选择
-                        </label>
-                        <div class="break-quick-select-dropdown">
-                            <button type="button" class="break-quick-select-btn" onclick="toggleBreakQuickSelectDropdown()">
-                                <i class="fas fa-calendar-alt"></i>
-                                <span id="break-quick-select-text">月份</span>
-                                <i class="fas fa-chevron-down"></i>
-                            </button>
-                            <div class="break-quick-select-menu" id="break-quick-select-menu">
-                                <button type="button" class="break-quick-select-item break-quick-select-item-none" data-value="none" onclick="selectBreakQuickRange('none')">无</button>
-                                <button type="button" class="break-quick-select-item" data-value="1" onclick="selectBreakQuickRange(1)">1月</button>
-                                <button type="button" class="break-quick-select-item" data-value="2" onclick="selectBreakQuickRange(2)">2月</button>
-                                <button type="button" class="break-quick-select-item" data-value="3" onclick="selectBreakQuickRange(3)">3月</button>
-                                <button type="button" class="break-quick-select-item" data-value="4" onclick="selectBreakQuickRange(4)">4月</button>
-                                <button type="button" class="break-quick-select-item" data-value="5" onclick="selectBreakQuickRange(5)">5月</button>
-                                <button type="button" class="break-quick-select-item" data-value="6" onclick="selectBreakQuickRange(6)">6月</button>
-                                <button type="button" class="break-quick-select-item" data-value="7" onclick="selectBreakQuickRange(7)">7月</button>
-                                <button type="button" class="break-quick-select-item" data-value="8" onclick="selectBreakQuickRange(8)">8月</button>
-                                <button type="button" class="break-quick-select-item" data-value="9" onclick="selectBreakQuickRange(9)">9月</button>
-                                <button type="button" class="break-quick-select-item" data-value="10" onclick="selectBreakQuickRange(10)">10月</button>
-                                <button type="button" class="break-quick-select-item" data-value="11" onclick="selectBreakQuickRange(11)">11月</button>
-                                <button type="button" class="break-quick-select-item" data-value="12" onclick="selectBreakQuickRange(12)">12月</button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
                 
                 <div class="category-filter">
@@ -4659,10 +4545,7 @@ header('Expires: 0');
             
             jRestaurants.forEach(restaurant => {
                 const shopType = restaurant.name.toLowerCase();
-                let records = breakRecordsData[shopType] || [];
-                if (breakMonthFilter) {
-                    records = records.filter(r => (String(r.break_date || '').substring(0, 7)) === breakMonthFilter);
-                }
+                const records = breakRecordsData[shopType] || [];
                 
                 // 计算总破损金额
                 const totalBreakAmount = records.reduce((sum, record) => {
@@ -6101,20 +5984,8 @@ header('Expires: 0');
         function updateCategoryFilterToRestaurantForBreak() {
             const categoryFilterDiv = document.querySelector('.category-filter');
             const categorySelect = document.getElementById('category-filter');
-            const monthFilterEl = document.getElementById('break-month-filter');
             
             if (!categoryFilterDiv || !categorySelect) return;
-            
-            // 显示 KPI 风格快速选择（今年 1–12 月），放在餐厅筛选前
-            if (monthFilterEl) monthFilterEl.style.display = 'flex';
-            const now = new Date();
-            const yyyy = now.getFullYear();
-            const mm = String(now.getMonth() + 1).padStart(2, '0');
-            const defaultMonth = `${yyyy}-${mm}`;
-            if (!breakMonthFilter) {
-                breakMonthFilter = defaultMonth;
-            }
-            updateBreakQuickSelectButtonText();
             
             // 保存原始分类选项（用于恢复）
             if (!categorySelect.dataset.originalHTML) {
@@ -6157,61 +6028,18 @@ header('Expires: 0');
             categorySelect.removeEventListener('change', handleBreakRestaurantFilterChange);
             categorySelect.addEventListener('change', handleBreakRestaurantFilterChange);
             
-            // 应用当前的餐厅过滤与月份过滤
+            // 应用当前的餐厅过滤
             setTimeout(() => {
                 filterBreakRecordsByRestaurant();
             }, 100);
-        }
-        
-        function toggleBreakQuickSelectDropdown() {
-            const menu = document.getElementById('break-quick-select-menu');
-            const viewDropdown = document.getElementById('view-selector-dropdown');
-            if (viewDropdown) viewDropdown.classList.remove('show');
-            if (menu) menu.classList.toggle('show');
-        }
-        
-        function updateBreakQuickSelectButtonText() {
-            const el = document.getElementById('break-quick-select-text');
-            if (!el) return;
-            if (!breakMonthFilter) {
-                el.textContent = '月份';
-                return;
-            }
-            const [y, m] = breakMonthFilter.split('-');
-            const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-            el.textContent = months[parseInt(m, 10) - 1] || '月份';
-        }
-        
-        function selectBreakQuickRange(val) {
-            const menu = document.getElementById('break-quick-select-menu');
-            if (menu) menu.classList.remove('show');
-            const yyyy = new Date().getFullYear();
-            if (val === 'none' || val === '') {
-                breakMonthFilter = '';
-            } else {
-                const m = parseInt(val, 10);
-                if (m >= 1 && m <= 12) {
-                    breakMonthFilter = `${yyyy}-${String(m).padStart(2, '0')}`;
-                }
-            }
-            updateBreakQuickSelectButtonText();
-            renderMergedBreakRecordsPage();
-            filterBreakRecordsByRestaurant();
-            updateStats();
         }
         
         // 将分类下拉菜单改为餐厅选择（转卖页面）
         function updateCategoryFilterToRestaurant() {
             const categoryFilterDiv = document.querySelector('.category-filter');
             const categorySelect = document.getElementById('category-filter');
-            const monthFilterEl = document.getElementById('break-month-filter');
             
             if (!categoryFilterDiv || !categorySelect) return;
-            
-            // 隐藏破损记录快速选择并关闭下拉（转卖页不显示）
-            if (monthFilterEl) monthFilterEl.style.display = 'none';
-            const breakMenu = document.getElementById('break-quick-select-menu');
-            if (breakMenu) breakMenu.classList.remove('show');
             
             // 保存原始分类选项（用于恢复）
             if (!categorySelect.dataset.originalHTML) {
@@ -6263,14 +6091,8 @@ header('Expires: 0');
         function restoreCategoryFilter() {
             const categoryFilterDiv = document.querySelector('.category-filter');
             const categorySelect = document.getElementById('category-filter');
-            const monthFilterEl = document.getElementById('break-month-filter');
             
             if (!categoryFilterDiv || !categorySelect) return;
-            
-            // 隐藏破损记录快速选择并关闭下拉
-            if (monthFilterEl) monthFilterEl.style.display = 'none';
-            const breakMenu = document.getElementById('break-quick-select-menu');
-            if (breakMenu) breakMenu.classList.remove('show');
             
             // 恢复标签
             const label = categoryFilterDiv.querySelector('span');
@@ -6903,21 +6725,10 @@ header('Expires: 0');
                  displayedRecords = setsData.length;
                  totalRecords = setsData.length;
              } else if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') {
-                 // 破损记录页面：按月份（及餐厅）过滤后计数
-                 const jRestaurants = window.jRestaurantsForBreak || [];
-                 let filtered = [];
-                 jRestaurants.forEach(r => {
-                     const shopType = r.name.toLowerCase();
-                     let recs = breakRecordsData[shopType] || [];
-                     if (breakMonthFilter) {
-                         recs = recs.filter(x => (String(x.break_date || '').substring(0, 7)) === breakMonthFilter);
-                     }
-                     if (!breakRestaurantFilter || shopType === breakRestaurantFilter) {
-                         filtered = filtered.concat(recs);
-                     }
-                 });
-                 displayedRecords = filtered.length;
-                 totalRecords = filtered.length;
+                 // 破损记录页面使用破损记录数据
+                 const records = breakRecordsData[currentPage] || [];
+                 displayedRecords = records.length;
+                 totalRecords = records.length;
              } else {
                  // 默认情况
                  displayedRecords = 0;
@@ -8661,10 +8472,6 @@ header('Expires: 0');
             if (!event.target.closest('.view-selector')) {
                 document.getElementById('view-selector-dropdown').classList.remove('show');
             }
-            if (!event.target.closest('.break-month-filter')) {
-                const breakMenu = document.getElementById('break-quick-select-menu');
-                if (breakMenu) breakMenu.classList.remove('show');
-            }
         });
 
         // 确保所有模态框关闭按钮都能正常工作
@@ -9761,8 +9568,6 @@ header('Expires: 0');
         
         // 破损记录页面餐厅过滤状态
         let breakRestaurantFilter = '';
-        // 破损记录页面月份过滤（YYYY-MM），空为不过滤
-        let breakMonthFilter = '';
 
         // 打开转卖记录行数选择弹窗
         function openTransferRowsModal(shopType) {
