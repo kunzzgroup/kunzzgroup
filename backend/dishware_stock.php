@@ -4796,24 +4796,12 @@ header('Expires: 0');
                 return;
             }
             
-            // 收集所有单个碗碟（包括套装中的碗碟）
-            const allIndividualItems = [];
-            
-            // 添加独立的单个碗碟
+            // 仅显示全部单品碗碟，不显示套装编号
             const individualItems = stockData.filter(item => item.item_type === 'individual');
-            allIndividualItems.push(...individualItems);
-            
-            // 添加套装中的碗碟
-            const setItems = stockData.filter(item => item.item_type === 'set');
-            setItems.forEach(set => {
-                if (set.items && set.items.length > 0) {
-                    allIndividualItems.push(...set.items);
-                }
-            });
             
             // 填充编号选择框
             const uniqueCodes = new Set();
-            allIndividualItems.forEach(item => {
+            individualItems.forEach(item => {
                 if (item.code_number && !uniqueCodes.has(item.code_number)) {
                     uniqueCodes.add(item.code_number);
                     const option = document.createElement('option');
@@ -4827,7 +4815,7 @@ header('Expires: 0');
             });
             
             // 填充产品选择框
-            allIndividualItems.forEach(item => {
+            individualItems.forEach(item => {
                 if (item.id && item.product_name) {
                     const option = document.createElement('option');
                     option.value = item.product_name;
@@ -5151,23 +5139,21 @@ header('Expires: 0');
                 return;
             }
             
-            // 生成编号选项（用于combobox）
+            // 生成编号选项（仅单品碗碟，不显示套装编号）
             let codeOptions = [];
-            if (stockData && stockData.length > 0) {
-                stockData.forEach(item => {
-                    const code = item.code_number || '';
-                    if (code) {
-                        codeOptions.push({
-                            code: code,
-                            id: item.id,
-                            price: item.unit_price || 0
-                        });
-                    }
-                });
-            }
+            const individualsForBreak = (stockData || []).filter(item => item.item_type === 'individual');
+            individualsForBreak.forEach(item => {
+                const code = item.code_number || '';
+                if (code) {
+                    codeOptions.push({
+                        code: code,
+                        id: item.id,
+                        price: item.unit_price || 0
+                    });
+                }
+            });
             
-            // 找到当前编号对应的产品ID
-            const currentProduct = stockData.find(item => item.code_number === originalCode);
+            const currentProduct = individualsForBreak.find(item => item.code_number === originalCode) || stockData.find(item => item.code_number === originalCode);
             const currentProductId = currentProduct ? currentProduct.id : '';
             
             // 编辑编号列 - 使用 combobox
@@ -5502,31 +5488,26 @@ header('Expires: 0');
             const currentRowCount = tbody.querySelectorAll('tr:not(.new-row)').length;
             const newRowIndex = currentRowCount + tbody.querySelectorAll('tr.new-row').length + 1;
             
-            // 生成产品选择选项（只显示编号）
+            // 仅单品碗碟，不显示套装编号
+            const individualsForBreak = (stockData || []).filter(item => item.item_type === 'individual');
             let productOptions = '<option value="">请选择产品</option>';
-            if (stockData && stockData.length > 0) {
-                stockData.forEach(item => {
-                    const code = item.code_number || '';
-                    // 只显示编号，如果没有编号则显示产品名称作为备选
-                    const displayText = code || item.product_name || '';
-                    productOptions += `<option value="${item.id}" data-code="${code}" data-price="${item.unit_price || 0}">${displayText}</option>`;
-                });
-            }
+            individualsForBreak.forEach(item => {
+                const code = item.code_number || '';
+                const displayText = code || item.product_name || '';
+                productOptions += `<option value="${item.id}" data-code="${code}" data-price="${item.unit_price || 0}">${displayText}</option>`;
+            });
             
-            // 生成编号选项（用于combobox）
             let codeOptions = [];
-            if (stockData && stockData.length > 0) {
-                stockData.forEach(item => {
-                    const code = item.code_number || '';
-                    if (code) {
-                        codeOptions.push({
-                            code: code,
-                            id: item.id,
-                            price: item.unit_price || 0
-                        });
-                    }
-                });
-            }
+            individualsForBreak.forEach(item => {
+                const code = item.code_number || '';
+                if (code) {
+                    codeOptions.push({
+                        code: code,
+                        id: item.id,
+                        price: item.unit_price || 0
+                    });
+                }
+            });
             
             row.innerHTML = `
                 <td class="text-center">${newRowIndex}</td>
