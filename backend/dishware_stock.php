@@ -2649,14 +2649,18 @@ header('Expires: 0');
                                 <i class="fas fa-chevron-down"></i>
                             </button>
                             <div class="dropdown-menu break-quick-select-dropdown" id="break-quick-select-dropdown" style="display: none; position: absolute; top: 100%; left: 0; z-index: 1000; min-width: 120px; background: #fff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-top: 4px;">
-                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('today')">今天</button>
-                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('yesterday')">昨天</button>
-                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('thisWeek')">本周</button>
-                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('lastWeek')">上周</button>
-                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('thisMonth')">这个月</button>
-                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('lastMonth')">上个月</button>
-                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('thisYear')">今年</button>
-                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('lastYear')">去年</button>
+                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month1')">1月</button>
+                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month2')">2月</button>
+                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month3')">3月</button>
+                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month4')">4月</button>
+                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month5')">5月</button>
+                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month6')">6月</button>
+                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month7')">7月</button>
+                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month8')">8月</button>
+                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month9')">9月</button>
+                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month10')">10月</button>
+                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month11')">11月</button>
+                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month12')">12月</button>
                             </div>
                         </div>
                     </div>
@@ -6169,64 +6173,23 @@ header('Expires: 0');
         }
 
         function selectBreakQuickRange(range) {
-            const today = new Date();
-            let startDate, endDate;
+            const m = /^month(\d+)$/.exec(range);
+            if (!m) return;
+            const month = parseInt(m[1], 10);
+            if (month < 1 || month > 12) return;
+            const y = new Date().getFullYear();
             const pad = (n) => String(n).padStart(2, '0');
-            const fmt = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-            switch (range) {
-                case 'today':
-                    startDate = endDate = new Date(today);
-                    break;
-                case 'yesterday':
-                    const yd = new Date(today);
-                    yd.setDate(yd.getDate() - 1);
-                    startDate = endDate = yd;
-                    break;
-                case 'thisWeek':
-                    const tw = new Date(today);
-                    const dow = tw.getDay();
-                    const toMon = dow === 0 ? 6 : dow - 1;
-                    tw.setDate(tw.getDate() - toMon);
-                    startDate = tw;
-                    endDate = new Date(today);
-                    break;
-                case 'lastWeek':
-                    const lwe = new Date(today);
-                    const ldow = lwe.getDay();
-                    lwe.setDate(lwe.getDate() - (ldow === 0 ? 0 : ldow) - 1);
-                    const lws = new Date(lwe);
-                    lws.setDate(lws.getDate() - 6);
-                    startDate = lws;
-                    endDate = lwe;
-                    break;
-                case 'thisMonth':
-                    startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-                    endDate = new Date(today);
-                    break;
-                case 'lastMonth':
-                    startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-                    endDate = new Date(today.getFullYear(), today.getMonth(), 0);
-                    break;
-                case 'thisYear':
-                    startDate = new Date(today.getFullYear(), 0, 1);
-                    endDate = new Date(today);
-                    break;
-                case 'lastYear':
-                    startDate = new Date(today.getFullYear() - 1, 0, 1);
-                    endDate = new Date(today.getFullYear() - 1, 11, 31);
-                    break;
-                default:
-                    return;
-            }
-            breakDateRange = { startDate: fmt(startDate), endDate: fmt(endDate) };
-            breakMonthValue = { year: startDate.getFullYear(), month: startDate.getMonth() + 1 };
+            const first = `${y}-${pad(month)}-01`;
+            const lastDay = new Date(y, month, 0).getDate();
+            const last = `${y}-${pad(month)}-${pad(lastDay)}`;
+            breakDateRange = { startDate: first, endDate: last };
+            breakMonthValue = { year: y, month: month };
             const yearSelect = document.getElementById('break-year-select');
             const monthSelect = document.getElementById('break-month-select');
-            if (yearSelect) yearSelect.value = breakMonthValue.year;
-            if (monthSelect) monthSelect.value = String(breakMonthValue.month);
-            const texts = { today: '今天', yesterday: '昨天', thisWeek: '本周', lastWeek: '上周', thisMonth: '这个月', lastMonth: '上个月', thisYear: '今年', lastYear: '去年' };
+            if (yearSelect) yearSelect.value = y;
+            if (monthSelect) monthSelect.value = String(month);
             const q = document.getElementById('break-quick-select-text');
-            if (q) q.textContent = texts[range] || '时段';
+            if (q) q.textContent = month + '月';
             const d = document.getElementById('break-quick-select-dropdown');
             if (d) d.classList.remove('show');
             if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') loadAllBreakRecords();
