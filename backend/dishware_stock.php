@@ -4652,7 +4652,10 @@ header('Expires: 0');
                 const allSingles = getAllSingleDishwareForBreak();
                 const totalBreakAmount = records.reduce((sum, record) => {
                     const ch = record.chargeable_quantity != null ? record.chargeable_quantity : (record.break_quantity || 0);
-                    return sum + ch * (record.unit_price || 0);
+                    let u = record.unit_price || 0;
+                    const st = parseFloat(record.total_price) || 0;
+                    if (ch > 0 && st > 0 && !(u > 0)) u = st / ch;
+                    return sum + ch * u;
                 }, 0);
                 
                 html += `
@@ -4709,8 +4712,13 @@ header('Expires: 0');
             let rows = '';
             records.forEach((record, index) => {
                 const ch = record.chargeable_quantity != null ? record.chargeable_quantity : (record.break_quantity || 0);
-                const unitPrice = record.unit_price || 0;
-                const rowTotal = ch * unitPrice;
+                let unitPrice = record.unit_price || 0;
+                let rowTotal = ch * unitPrice;
+                const st = parseFloat(record.total_price) || 0;
+                if (ch > 0 && st > 0 && !(unitPrice > 0)) {
+                    unitPrice = st / ch;
+                    rowTotal = st;
+                }
                 rows += `
                     <tr data-id="${record.id}" data-shop="${shopId}">
                         <td class="text-center">${index + 1}</td>
@@ -4996,21 +5004,23 @@ header('Expires: 0');
         }
 
 
-        // 计算破损记录总价（计费数量 = 仅「从最少再往下扣」的部分）
+        // 计算破损记录总价（计费数量 = 仅「从最少再往下扣」的部分）；有计费时同步显示单价
         function calculateDamageTotal() {
             const quantity = parseFloat(document.getElementById('damage-quantity').value) || 0;
             const totalEl = document.getElementById('damage-total-price');
+            const unitEl = document.getElementById('damage-unit-price');
             const shopType = window.currentShopType || '';
             const dishwareId = window.currentDishwareId;
             const allSingles = getAllSingleDishwareForBreak();
             const product = allSingles.find(item => item.id == dishwareId) || (stockData || []).find(item => item.id == dishwareId);
-            let rawPrice = parseFloat(document.getElementById('damage-unit-price').value) || 0;
+            let rawPrice = parseFloat(unitEl && unitEl.value) || 0;
             if (product) {
                 rawPrice = parseFloat(product.unit_price) || 0;
                 const qtyBefore = getMemberQuantityForShop(product, shopType);
                 const chargeable = getChargeableQuantityForBreak(product, shopType, quantity, qtyBefore);
                 const totalPrice = chargeable * rawPrice;
                 totalEl.value = formatCurrency(totalPrice);
+                if (unitEl) unitEl.value = chargeable > 0 ? formatCurrency(rawPrice) : formatCurrency(0);
                 return;
             }
             totalEl.value = formatCurrency(quantity * rawPrice);
@@ -5393,8 +5403,13 @@ header('Expires: 0');
                     const index = records.findIndex(r => r.id == recordId);
                 if (index !== -1) {
                     const ch = record.chargeable_quantity != null ? record.chargeable_quantity : (record.break_quantity || 0);
-                    const unitPrice = record.unit_price || 0;
-                    const rowTotal = ch * unitPrice;
+                    let unitPrice = record.unit_price || 0;
+                    let rowTotal = ch * unitPrice;
+                    const st = parseFloat(record.total_price) || 0;
+                    if (ch > 0 && st > 0 && !(unitPrice > 0)) {
+                        unitPrice = st / ch;
+                        rowTotal = st;
+                    }
                     const tbody = row.parentElement;
                     const newRow = document.createElement('tr');
                     newRow.setAttribute('data-id', record.id);
@@ -5863,7 +5878,7 @@ header('Expires: 0');
             });
         }
 
-        // 计算破损记录行总价（计费数量 = 仅「从最少再往下扣」的部分）
+        // 计算破损记录行总价（计费数量 = 仅「从最少再往下扣」的部分）；有计费时同步显示单价
         function calculateBreakRowTotal(rowId) {
             const quantityInput = document.getElementById(`${rowId}-quantity`);
             const priceInput = document.getElementById(`${rowId}-price`);
@@ -5882,6 +5897,9 @@ header('Expires: 0');
             const chargeable = product && shopType ? getChargeableQuantityForBreak(product, shopType, quantity, qtyBefore) : quantity;
             const total = chargeable * raw;
             totalSpan.textContent = total.toFixed(2);
+            if (priceInput) {
+                priceInput.value = chargeable > 0 ? raw.toFixed(2) : '0.00';
+            }
         }
 
         // 保存新破损记录行
