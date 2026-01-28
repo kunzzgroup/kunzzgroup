@@ -13,7 +13,7 @@ if (!isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>库存列表 - KUNZZ HOLDINGS</title>
-    <link rel="stylesheet" href="css/stocklist.css">
+    <link rel="stylesheet" href="css/stocklist.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <div class="stocklist-page">
@@ -26,7 +26,7 @@ if (!isset($_SESSION['user_id'])) {
 
         <main class="page-content">
             <section class="form-section">
-                <div class="selects-row" style="display: flex !important; flex-direction: row !important; gap: 12px; width: 100%;">
+                <div class="selects-row">
                     <div class="select-group">
                         <label for="product-category" class="sr-only">货品类型</label>
                         <div class="select-wrapper">

@@ -113,8 +113,33 @@ body {
 .selects-row .select-group {
     display: flex !important;
     flex: 1 1 0 !important;
+    min-width: 0 !important;
+    width: 50% !important;
+    max-width: 50% !important;
+}
+
+.selects-row .select-wrapper {
+    position: relative;
+    width: 100% !important;
     min-width: 0;
-    width: 100%;
+    flex: 1;
+}
+
+.selects-row .select-wrapper select {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 48px;
+    padding: 0 48px 0 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    background: #ffffff;
+    font-size: 16px;
+    color: var(--text-color);
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    box-sizing: border-box;
 }
 
 .select-wrapper {
