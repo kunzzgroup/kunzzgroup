@@ -1620,9 +1620,8 @@ header('Expires: 0');
     .break-month-picker,
     .break-quick-select {
         display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: clamp(6px, 0.63vw, 12px);
+        flex-direction: column;
+        gap: 4px;
     }
     .break-month-picker > div,
     .break-quick-select > div {
