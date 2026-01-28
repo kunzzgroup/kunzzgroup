@@ -2991,16 +2991,16 @@ header('Expires: 0');
                         <label>套装设置</label>
                         <div id="set-settings-container" style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; background: #f9fafb;">
                             <div style="margin-bottom: 12px;">
-                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                                    <span style="font-weight: 600;">当前套装成员：</span>
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+                                    <span style="font-weight: 600; white-space: nowrap; flex-shrink: 0;">当前套装成员：</span>
                                     <span id="current-set-members" style="color: #666;">暂无</span>
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <label style="font-weight: 600; margin: 0;">添加套装成员：</label>
-                                    <select id="set-member-select" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                    <label style="font-weight: 600; margin: 0; white-space: nowrap; flex-shrink: 0;">添加套装成员：</label>
+                                    <select id="set-member-select" style="flex: 1; min-width: 180px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                                         <option value="">请选择要加入套装的碗碟</option>
                                     </select>
-                                    <button type="button" onclick="addSetMember()" class="btn btn-primary" style="padding: 8px 16px; white-space: nowrap;">
+                                    <button type="button" onclick="addSetMember()" class="btn btn-primary" style="padding: 8px 16px; white-space: nowrap; flex-shrink: 0;">
                                         <i class="fas fa-plus"></i> 添加
                                     </button>
                                 </div>
@@ -7890,8 +7890,8 @@ header('Expires: 0');
                 return;
             }
             
-            let html = '<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">';
-            html += '<span style="font-weight: 600; margin-right: 8px;">已选择成员：</span>';
+            let html = '<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px;">';
+            html += '<span style="font-weight: 600; margin-right: 8px; white-space: nowrap; flex-shrink: 0;">已选择成员：</span>';
             
             members.forEach((member, index) => {
                 const isCurrent = member.id == currentEditId;
