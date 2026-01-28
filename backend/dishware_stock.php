@@ -4651,9 +4651,8 @@ header('Expires: 0');
                 const records = breakRecordsData[shopType] || [];
                 const allSingles = getAllSingleDishwareForBreak();
                 const totalBreakAmount = records.reduce((sum, record) => {
-                    const product = allSingles.find(item => (item.code_number || '').trim() === (record.code_number || '').trim());
-                    const effPrice = product ? getEffectiveUnitPriceForBreak(product, shopType) : (record.unit_price || 0);
-                    return sum + (record.break_quantity || 0) * effPrice;
+                    const ch = record.chargeable_quantity != null ? record.chargeable_quantity : (record.break_quantity || 0);
+                    return sum + ch * (record.unit_price || 0);
                 }, 0);
                 
                 html += `
@@ -4708,11 +4707,10 @@ header('Expires: 0');
             }
 
             let rows = '';
-            const allSingles = getAllSingleDishwareForBreak();
             records.forEach((record, index) => {
-                const product = allSingles.find(item => (item.code_number || '').trim() === (record.code_number || '').trim());
-                const effPrice = product ? getEffectiveUnitPriceForBreak(product, shopId) : (record.unit_price || 0);
-                const effTotal = (record.break_quantity || 0) * effPrice;
+                const ch = record.chargeable_quantity != null ? record.chargeable_quantity : (record.break_quantity || 0);
+                const unitPrice = record.unit_price || 0;
+                const rowTotal = ch * unitPrice;
                 rows += `
                     <tr data-id="${record.id}" data-shop="${shopId}">
                         <td class="text-center">${index + 1}</td>
@@ -4721,13 +4719,13 @@ header('Expires: 0');
                         <td class="text-center">
                             <div class="currency-display">
                                 <span class="currency-symbol">RM</span>
-                                <span class="currency-amount">${formatCurrency(effPrice)}</span>
+                                <span class="currency-amount">${formatCurrency(unitPrice)}</span>
                             </div>
                         </td>
                         <td class="text-center">
                             <div class="currency-display">
                                 <span class="currency-symbol">RM</span>
-                                <span class="currency-amount">${formatCurrency(effTotal)}</span>
+                                <span class="currency-amount">${formatCurrency(rowTotal)}</span>
                             </div>
                         </td>
                         <td class="text-center">
@@ -4835,6 +4833,35 @@ header('Expires: 0');
             return raw;
         }
 
+        /**
+         * 套装破损计费数量：仅「从最少再往下扣」的部分计费，「从多于最少扣到等于最少」的部分不计费。
+         * @param {object} item - 单品（含 unit_price）
+         * @param {string} shopType - 店面 j1/j2/j3
+         * @param {number} breakQuantity - 本次破损数量
+         * @param {number} quantityBeforeBreak - 破损前该单品在该店面的数量
+         * @returns {number} 计费数量
+         */
+        function getChargeableQuantityForBreak(item, shopType, breakQuantity, quantityBeforeBreak) {
+            if (!item || breakQuantity <= 0) return 0;
+            const q = quantityBeforeBreak;
+            const id = item.id;
+            const code = (item.code_number || '').trim();
+            const sets = (stockData || []).filter(x => x.item_type === 'set');
+            for (const s of sets) {
+                if (!s.items || !s.items.length) continue;
+                const member = s.items.find(m => m.id == id || ((m.code_number || '').trim() === code));
+                if (!member) continue;
+                let minQ = Infinity;
+                for (const m of s.items) {
+                    const t = getMemberQuantityForShop(m, shopType);
+                    if (t < minQ) minQ = t;
+                }
+                const excess = Math.max(0, q - minQ);
+                return Math.max(0, breakQuantity - excess);
+            }
+            return breakQuantity;
+        }
+
         // 填充破损记录选择框
         function populateDamageSelects() {
             const codeSelect = document.getElementById('damage-code-select');
@@ -4858,7 +4885,6 @@ header('Expires: 0');
             }
             
             const shopType = window.currentShopType || '';
-            // 全部单品（含套装内单品），不显示套装编号；套装仅最少数量单品记价（按当前店面数量）
             const uniqueCodes = new Set();
             allSingles.forEach(item => {
                 if (item.code_number && !uniqueCodes.has(item.code_number)) {
@@ -4868,7 +4894,9 @@ header('Expires: 0');
                     option.textContent = item.code_number;
                     option.dataset.productName = item.product_name;
                     option.dataset.dishwareId = item.id;
+                    const raw = parseFloat(item.unit_price) || 0;
                     option.dataset.price = getEffectiveUnitPriceForBreak(item, shopType);
+                    option.dataset.rawPrice = raw;
                     codeSelect.appendChild(option);
                 }
             });
@@ -4876,12 +4904,14 @@ header('Expires: 0');
             allSingles.forEach(item => {
                 if (item.id && item.product_name) {
                     const eff = getEffectiveUnitPriceForBreak(item, shopType);
+                    const raw = parseFloat(item.unit_price) || 0;
                     const option = document.createElement('option');
                     option.value = item.product_name;
                     option.textContent = `${item.product_name} (${item.code_number || '无编号'}) - RM${formatCurrency(eff)}`;
                     option.dataset.codeNumber = item.code_number;
                     option.dataset.dishwareId = item.id;
                     option.dataset.price = eff;
+                    option.dataset.rawPrice = raw;
                     productSelect.appendChild(option);
                 }
             });
@@ -4966,13 +4996,24 @@ header('Expires: 0');
         }
 
 
-        // 计算破损记录总价
+        // 计算破损记录总价（计费数量 = 仅「从最少再往下扣」的部分）
         function calculateDamageTotal() {
             const quantity = parseFloat(document.getElementById('damage-quantity').value) || 0;
-            const unitPrice = parseFloat(document.getElementById('damage-unit-price').value) || 0;
-            const totalPrice = quantity * unitPrice;
-            
-            document.getElementById('damage-total-price').value = formatCurrency(totalPrice);
+            const totalEl = document.getElementById('damage-total-price');
+            const shopType = window.currentShopType || '';
+            const dishwareId = window.currentDishwareId;
+            const allSingles = getAllSingleDishwareForBreak();
+            const product = allSingles.find(item => item.id == dishwareId) || (stockData || []).find(item => item.id == dishwareId);
+            let rawPrice = parseFloat(document.getElementById('damage-unit-price').value) || 0;
+            if (product) {
+                rawPrice = parseFloat(product.unit_price) || 0;
+                const qtyBefore = getMemberQuantityForShop(product, shopType);
+                const chargeable = getChargeableQuantityForBreak(product, shopType, quantity, qtyBefore);
+                const totalPrice = chargeable * rawPrice;
+                totalEl.value = formatCurrency(totalPrice);
+                return;
+            }
+            totalEl.value = formatCurrency(quantity * rawPrice);
         }
 
         // 处理破损记录表单提交
@@ -4987,39 +5028,25 @@ header('Expires: 0');
             const form = event.target;
             const formData = new FormData(form);
             
-            const breakQuantity = formData.get('break_quantity');
-            const unitPrice = formData.get('unit_price');
-            const totalPrice = formData.get('total_price');
+            const breakQuantity = parseInt(formData.get('break_quantity'), 10) || 0;
             const breakDate = formData.get('break_date');
-            
-            // 获取dishware_id
             const dishwareId = window.currentDishwareId;
+            const shopType = window.currentShopType;
             
-            // 调试信息
-            console.log('--- 破损记录表单提交调试 ---');
-            console.log('dishwareId:', dishwareId);
-            console.log('typeof dishwareId:', typeof dishwareId);
-            console.log('breakQuantity:', breakQuantity);
-            console.log('unitPrice:', unitPrice);
-            console.log('totalPrice:', totalPrice);
-            
-            // 额外调试：检查选择框状态
-            const codeSelect = document.getElementById('damage-code-select');
-            const productSelect = document.getElementById('damage-product-select');
-            console.log('编号选择框值:', codeSelect ? codeSelect.value : '未找到元素');
-            console.log('产品选择框值:', productSelect ? productSelect.value : '未找到元素');
-            console.log('--- 调试结束 ---');
-            
-            // 更严格的验证
             if (!dishwareId) {
                 showAlert('请选择产品', 'error');
                 return;
             }
-            
             if (!breakQuantity || breakQuantity <= 0) {
                 showAlert('请输入有效的破损数量', 'error');
                 return;
             }
+            
+            const allSingles = getAllSingleDishwareForBreak();
+            const product = allSingles.find(item => item.id == dishwareId) || (stockData || []).find(item => item.id == dishwareId);
+            const rawPrice = product ? (parseFloat(product.unit_price) || 0) : 0;
+            const qtyBefore = product ? getMemberQuantityForShop(product, shopType) : 0;
+            const chargeable = product ? getChargeableQuantityForBreak(product, shopType, breakQuantity, qtyBefore) : breakQuantity;
             
             try {
                 const result = await apiCall('', {
@@ -5030,10 +5057,10 @@ header('Expires: 0');
                     body: JSON.stringify({
                         action: 'add_damage_record',
                         dishware_id: dishwareId,
-                        shop_type: window.currentShopType,
-                        break_quantity: parseInt(breakQuantity),
-                        unit_price: parseFloat(unitPrice) || 0,
-                        total_price: parseFloat(totalPrice) || 0,
+                        shop_type: shopType,
+                        break_quantity: breakQuantity,
+                        chargeable_quantity: chargeable,
+                        unit_price: rawPrice,
                         break_date: breakDate,
                         recorded_by: 'system'
                     })
@@ -5198,16 +5225,17 @@ header('Expires: 0');
                 return;
             }
             
-            // 生成编号选项（全部单品含套装内单品，不显示套装编号）
             let codeOptions = [];
             const allSingles = getAllSingleDishwareForBreak();
             allSingles.forEach(item => {
                 const code = item.code_number || '';
                 if (code) {
+                    const raw = parseFloat(item.unit_price) || 0;
                     codeOptions.push({
                         code: code,
                         id: item.id,
-                        price: getEffectiveUnitPriceForBreak(item, shopId)
+                        price: getEffectiveUnitPriceForBreak(item, shopId),
+                        rawPrice: raw
                     });
                 }
             });
@@ -5233,7 +5261,7 @@ header('Expires: 0');
                     />
                     <i class="fas fa-chevron-down combobox-arrow"></i>
                     <div class="combobox-dropdown" id="${codeRowId}-code-dropdown">
-                        ${codeOptions.map(opt => `<div class="combobox-option" data-value="${opt.code}" data-id="${opt.id}" data-price="${opt.price}">${opt.code}</div>`).join('')}
+                        ${codeOptions.map(opt => `<div class="combobox-option" data-value="${opt.code}" data-id="${opt.id}" data-price="${opt.price}" data-raw-price="${opt.rawPrice}">${opt.code}</div>`).join('')}
                     </div>
                 </div>
             `;
@@ -5299,26 +5327,21 @@ header('Expires: 0');
             }
             
             try {
-                // 获取当前记录以获取单价
                 const records = breakRecordsData[shopId] || [];
                 const record = records.find(r => r.id == recordId);
-                
                 if (!record) {
                     showAlert('找不到记录数据', 'error');
                     return;
                 }
                 
-                // 如果编号改变了，需要获取新的产品信息（含套装内单品）；单价用套装规则
-                let unitPrice = record.unit_price || 0;
                 const allSingles = getAllSingleDishwareForBreak();
-                const product = allSingles.find(item => item.code_number === newCode) || stockData.find(item => item.code_number === newCode);
-                if (product) {
-                    unitPrice = getEffectiveUnitPriceForBreak(product, shopId);
-                }
+                const product = allSingles.find(item => item.code_number === newCode) || (stockData || []).find(item => item.code_number === newCode);
+                const rawPrice = product ? (parseFloat(product.unit_price) || 0) : (record.unit_price || 0);
+                const sameProduct = record.dishware_id == productId;
+                const currentQ = product ? getMemberQuantityForShop(product, shopId) : 0;
+                const qtyBefore = sameProduct ? currentQ + (record.break_quantity || 0) : currentQ;
+                const chargeable = product ? getChargeableQuantityForBreak(product, shopId, newQuantity, qtyBefore) : newQuantity;
                 
-                const totalPrice = newQuantity * unitPrice;
-                
-                // 更新破损记录
                 const result = await apiCall('', {
                     method: 'POST',
                     headers: {
@@ -5329,8 +5352,8 @@ header('Expires: 0');
                         id: recordId,
                         dishware_id: productId,
                         break_quantity: newQuantity,
-                        unit_price: unitPrice,
-                        total_price: totalPrice
+                        chargeable_quantity: chargeable,
+                        unit_price: rawPrice
                     })
                 });
                 
@@ -5369,10 +5392,9 @@ header('Expires: 0');
             if (record) {
                     const index = records.findIndex(r => r.id == recordId);
                 if (index !== -1) {
-                    const allSingles = getAllSingleDishwareForBreak();
-                    const product = allSingles.find(item => (item.code_number || '').trim() === (record.code_number || '').trim());
-                    const effPrice = product ? getEffectiveUnitPriceForBreak(product, shopId) : (record.unit_price || 0);
-                    const effTotal = (record.break_quantity || 0) * effPrice;
+                    const ch = record.chargeable_quantity != null ? record.chargeable_quantity : (record.break_quantity || 0);
+                    const unitPrice = record.unit_price || 0;
+                    const rowTotal = ch * unitPrice;
                     const tbody = row.parentElement;
                     const newRow = document.createElement('tr');
                     newRow.setAttribute('data-id', record.id);
@@ -5384,13 +5406,13 @@ header('Expires: 0');
                         <td class="text-center">
                             <div class="currency-display">
                                 <span class="currency-symbol">RM</span>
-                                <span class="currency-amount">${formatCurrency(effPrice)}</span>
+                                <span class="currency-amount">${formatCurrency(unitPrice)}</span>
                             </div>
                         </td>
                         <td class="text-center">
                             <div class="currency-display">
                                 <span class="currency-symbol">RM</span>
-                                <span class="currency-amount">${formatCurrency(effTotal)}</span>
+                                <span class="currency-amount">${formatCurrency(rowTotal)}</span>
                             </div>
                         </td>
                         <td class="text-center">
@@ -5542,29 +5564,31 @@ header('Expires: 0');
             
             const row = document.createElement('tr');
             row.className = 'new-row';
+            row.dataset.shopType = shopType;
             const rowId = 'new-break-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
             
-            // 获取当前行数（用于显示序号）
             const currentRowCount = tbody.querySelectorAll('tr:not(.new-row)').length;
             const newRowIndex = currentRowCount + tbody.querySelectorAll('tr.new-row').length + 1;
             
-            // 全部单品（含套装内单品如 AG001、AG002），不显示套装编号
             const allSingles = getAllSingleDishwareForBreak();
             let productOptions = '<option value="">请选择产品</option>';
             allSingles.forEach(item => {
                 const code = item.code_number || '';
                 const displayText = code || item.product_name || '';
-                productOptions += `<option value="${item.id}" data-code="${code}" data-price="${getEffectiveUnitPriceForBreak(item, shopType)}">${displayText}</option>`;
+                const raw = parseFloat(item.unit_price) || 0;
+                productOptions += `<option value="${item.id}" data-code="${code}" data-price="${getEffectiveUnitPriceForBreak(item, shopType)}" data-raw-price="${raw}">${displayText}</option>`;
             });
             
             let codeOptions = [];
             allSingles.forEach(item => {
                 const code = item.code_number || '';
                 if (code) {
+                    const raw = parseFloat(item.unit_price) || 0;
                     codeOptions.push({
                         code: code,
                         id: item.id,
-                        price: getEffectiveUnitPriceForBreak(item, shopType)
+                        price: getEffectiveUnitPriceForBreak(item, shopType),
+                        rawPrice: raw
                     });
                 }
             });
@@ -5584,7 +5608,7 @@ header('Expires: 0');
                         />
                         <i class="fas fa-chevron-down combobox-arrow"></i>
                         <div class="combobox-dropdown" id="${rowId}-code-dropdown">
-                            ${codeOptions.map(opt => `<div class="combobox-option" data-value="${opt.code}" data-id="${opt.id}" data-price="${opt.price}">${opt.code}</div>`).join('')}
+                            ${codeOptions.map(opt => `<div class="combobox-option" data-value="${opt.code}" data-id="${opt.id}" data-price="${opt.price}" data-raw-price="${opt.rawPrice}">${opt.code}</div>`).join('')}
                         </div>
                     </div>
                 </td>
@@ -5719,23 +5743,29 @@ header('Expires: 0');
                             }
                             calculateEditTransferTotal(codeRowId);
                         } else {
-                            // 破损记录编辑模式：更新单价显示（只读）
+                            // 破损记录编辑模式：更新单价显示，总价 = 计费数量 × 单价
                             const cells = row.querySelectorAll('td');
-                            if (cells.length >= 4) {
+                            if (cells.length >= 5) {
                                 const priceCell = cells[3];
+                                const raw = parseFloat(option.dataset.rawPrice || 0) || price;
                                 priceCell.innerHTML = `
                                     <div class="currency-display">
                                         <span class="currency-symbol">RM</span>
-                                        <span class="currency-amount">${price.toFixed(2)}</span>
+                                        <span class="currency-amount">${raw.toFixed(2)}</span>
                                     </div>
                                 `;
-                                // 重新计算总价
                                 const quantityEl = cells[2].querySelector('.quantity-input') || cells[2].querySelector('.editable-quantity');
                                 if (quantityEl) {
                                     const quantity = quantityEl.classList.contains('quantity-input') 
                                         ? parseFloat(quantityEl.value) || 0
                                         : parseFloat(quantityEl.textContent.trim()) || 0;
-                                    const totalPrice = quantity * price;
+                                    const shopId = row.dataset.shop || '';
+                                    const allSingles = typeof getAllSingleDishwareForBreak === 'function' ? getAllSingleDishwareForBreak() : [];
+                                    const product = productId ? (allSingles.find(item => item.id == productId) || ((typeof stockData !== 'undefined' && stockData) || []).find(item => item.id == productId)) : null;
+                                    const qtyBefore = product && shopId ? (typeof getMemberQuantityForShop === 'function' ? getMemberQuantityForShop(product, shopId) : 0) : 0;
+                                    const chargeable = product && shopId && typeof getChargeableQuantityForBreak === 'function'
+                                        ? getChargeableQuantityForBreak(product, shopId, quantity, qtyBefore) : quantity;
+                                    const totalPrice = chargeable * raw;
                                     const totalCell = cells[4];
                                     totalCell.innerHTML = `
                                         <div class="currency-display">
@@ -5833,17 +5863,24 @@ header('Expires: 0');
             });
         }
 
-        // 计算破损记录行总价
+        // 计算破损记录行总价（计费数量 = 仅「从最少再往下扣」的部分）
         function calculateBreakRowTotal(rowId) {
             const quantityInput = document.getElementById(`${rowId}-quantity`);
             const priceInput = document.getElementById(`${rowId}-price`);
             const totalSpan = document.getElementById(`${rowId}-total`);
-            
-            if (!quantityInput || !priceInput || !totalSpan) return;
+            const codeInput = document.getElementById(`${rowId}-code`);
+            if (!quantityInput || !totalSpan) return;
             
             const quantity = parseFloat(quantityInput.value) || 0;
-            const price = parseFloat(priceInput.value) || 0;
-            const total = quantity * price;
+            const row = quantityInput.closest('tr');
+            const shopType = row && row.dataset.shopType ? row.dataset.shopType : '';
+            const productId = codeInput && codeInput.dataset.productId;
+            const allSingles = getAllSingleDishwareForBreak();
+            const product = productId ? (allSingles.find(item => item.id == productId) || (stockData || []).find(item => item.id == productId)) : null;
+            const raw = product ? (parseFloat(product.unit_price) || 0) : (parseFloat(priceInput && priceInput.value) || 0);
+            const qtyBefore = product && shopType ? getMemberQuantityForShop(product, shopType) : 0;
+            const chargeable = product && shopType ? getChargeableQuantityForBreak(product, shopType, quantity, qtyBefore) : quantity;
+            const total = chargeable * raw;
             totalSpan.textContent = total.toFixed(2);
         }
 
@@ -5851,10 +5888,8 @@ header('Expires: 0');
         async function saveNewBreakRow(rowId, shopType) {
             const codeInput = document.getElementById(`${rowId}-code`);
             const quantityInput = document.getElementById(`${rowId}-quantity`);
-            const priceInput = document.getElementById(`${rowId}-price`);
             
-            // 验证元素是否存在
-            if (!codeInput || !quantityInput || !priceInput) {
+            if (!codeInput || !quantityInput) {
                 showAlert('找不到输入元素，请刷新页面后重试', 'error');
                 return;
             }
@@ -5862,18 +5897,21 @@ header('Expires: 0');
             const productId = codeInput.dataset.productId;
             const code = codeInput.value.trim();
             const quantity = parseFloat(quantityInput.value) || 0;
-            const price = parseFloat(priceInput.value) || 0;
             
-            // 验证
             if (!code || !productId) {
                 showAlert('请输入或选择编号', 'error');
                 return;
             }
-            
             if (quantity <= 0) {
                 showAlert('请输入有效的破损数量', 'error');
                 return;
             }
+            
+            const allSingles = getAllSingleDishwareForBreak();
+            const product = allSingles.find(item => item.id == productId) || (stockData || []).find(item => item.id == productId);
+            const rawPrice = product ? (parseFloat(product.unit_price) || 0) : 0;
+            const qtyBefore = product ? getMemberQuantityForShop(product, shopType) : 0;
+            const chargeable = product ? getChargeableQuantityForBreak(product, shopType, quantity, qtyBefore) : quantity;
             
             try {
                 const today = new Date().toISOString().split('T')[0];
@@ -5887,8 +5925,8 @@ header('Expires: 0');
                         dishware_id: productId,
                         shop_type: shopType,
                         break_quantity: quantity,
-                        unit_price: price,
-                        total_price: quantity * price,
+                        chargeable_quantity: chargeable,
+                        unit_price: rawPrice,
                         break_date: today,
                         recorded_by: 'system'
                     })

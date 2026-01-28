@@ -822,13 +822,14 @@ function getBreakRecords() {
                 }
             }
             
-            // 如果没有存储的单价，使用碗碟信息中的单价
             if (empty($result['unit_price'])) {
                 $result['unit_price'] = $result['unit_price'] ?? 0;
             }
-            
-            // 计算总价
-            $result['total_price'] = $result['unit_price'] * $result['break_quantity'];
+            $chargeable = isset($result['chargeable_quantity']) && $result['chargeable_quantity'] !== null
+                ? (int) $result['chargeable_quantity'] : null;
+            $result['total_price'] = $chargeable !== null
+                ? $result['unit_price'] * $chargeable
+                : $result['unit_price'] * $result['break_quantity'];
         }
         
         sendResponse(true, "获取破损记录成功", $results);
@@ -890,19 +891,21 @@ function addBreakRecord() {
     try {
         $pdo->beginTransaction();
         
-        // 插入破损记录
         $unit_price = $postData['unit_price'] ?? 0;
-        $total_price = $unit_price * $postData['break_quantity'];
+        $chargeable = isset($postData['chargeable_quantity']) ? (int) $postData['chargeable_quantity'] : null;
+        $chargeable = $chargeable !== null ? $chargeable : (int) $postData['break_quantity'];
+        $total_price = $unit_price * $chargeable;
         $break_date = $postData['break_date'] ?? date('Y-m-d');
         
-        $sql = "INSERT INTO dishware_break_records (dishware_id, shop_type, break_quantity, unit_price, total_price, break_date, recorded_by) 
-                VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO dishware_break_records (dishware_id, shop_type, break_quantity, chargeable_quantity, unit_price, total_price, break_date, recorded_by) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
             $postData['dishware_id'],
             $postData['shop_type'],
             $postData['break_quantity'],
+            $chargeable,
             $unit_price,
             $total_price,
             $break_date,
@@ -1002,25 +1005,24 @@ function updateBreakRecord() {
             sendResponse(false, "记录不存在");
         }
         
-        // 更新记录
         $unit_price = $data['unit_price'] ?? $_POST['unit_price'] ?? $old_record['unit_price'];
-        $total_price = $unit_price * $break_quantity;
+        $chargeable = isset($data['chargeable_quantity']) ? (int) $data['chargeable_quantity'] : (isset($_POST['chargeable_quantity']) ? (int) $_POST['chargeable_quantity'] : null);
+        $chargeable = $chargeable !== null ? $chargeable : (int) $break_quantity;
+        $total_price = $unit_price * $chargeable;
         
-        // 检查是否更新了产品ID（dishware_id）
         $new_dishware_id = $data['dishware_id'] ?? $_POST['dishware_id'] ?? $old_record['dishware_id'];
         $dishware_id_changed = ($new_dishware_id != $old_record['dishware_id']);
         
         $sql = "UPDATE dishware_break_records SET 
-                break_quantity = ?, unit_price = ?, total_price = ?";
+                break_quantity = ?, chargeable_quantity = ?, unit_price = ?, total_price = ?";
         
-        // 如果产品ID改变了，也更新它
         if ($dishware_id_changed) {
             $sql .= ", dishware_id = ?";
         }
         
         $sql .= ", updated_at = CURRENT_TIMESTAMP WHERE id = ?";
         
-        $params = [$break_quantity, $unit_price, $total_price];
+        $params = [$break_quantity, $chargeable, $unit_price, $total_price];
         if ($dishware_id_changed) {
             $params[] = $new_dishware_id;
         }
