@@ -2726,14 +2726,14 @@ header('Expires: 0');
             <!-- 库存管理页面 -->
             <div id="stock-page" class="page-content">
                 <!-- 视图切换按钮 -->
-                <div style="display: flex; gap: 8px; margin-bottom: 16px; padding: 0 20px;">
+                <!-- <div style="display: flex; gap: 8px; margin-bottom: 16px; padding: 0 20px;">
                     <button class="btn" id="stock-view-btn" onclick="switchStockView('dishware')" style="background: #f99e00; color: white; border: 1px solid #ddd; padding: clamp(4px, 0.42vw, 8px) clamp(12px, 1.25vw, 24px); font-size: clamp(10px, 0.83vw, 16px);">
                         碗碟
                     </button>
                     <button class="btn" id="sets-view-btn" onclick="switchStockView('sets')" style="background: white; color: #333; border: 1px solid #ddd; padding: clamp(4px, 0.42vw, 8px) clamp(12px, 1.25vw, 24px); font-size: clamp(10px, 0.83vw, 16px);">
                         套装
                     </button>
-                </div>
+                </div> -->
                 
                 <!-- 碗碟视图 -->
                 <div id="dishware-view">
