@@ -4847,9 +4847,10 @@ header('Expires: 0');
          * @param {string} shopType - 店面 j1/j2/j3
          * @param {number} breakQuantity - 本次破损数量
          * @param {number} quantityBeforeBreak - 破损前该单品在该店面的数量
+         * @param {object} [minQuantityOverrides] - 可选。编辑时用「破损前」算 min：{ [id]: qty, [code]: qty }，缺省用当前库存
          * @returns {number} 计费数量
          */
-        function getChargeableQuantityForBreak(item, shopType, breakQuantity, quantityBeforeBreak) {
+        function getChargeableQuantityForBreak(item, shopType, breakQuantity, quantityBeforeBreak, minQuantityOverrides) {
             if (!item || breakQuantity <= 0) return 0;
             const q = quantityBeforeBreak;
             const id = item.id;
@@ -4861,7 +4862,12 @@ header('Expires: 0');
                 if (!member) continue;
                 let minQ = Infinity;
                 for (const m of s.items) {
-                    const t = getMemberQuantityForShop(m, shopType);
+                    let t;
+                    if (minQuantityOverrides && (minQuantityOverrides[m.id] !== undefined || minQuantityOverrides[(m.code_number || '').trim()] !== undefined)) {
+                        t = minQuantityOverrides[m.id] ?? minQuantityOverrides[(m.code_number || '').trim()] ?? getMemberQuantityForShop(m, shopType);
+                    } else {
+                        t = getMemberQuantityForShop(m, shopType);
+                    }
                     if (t < minQ) minQ = t;
                 }
                 const excess = Math.max(0, q - minQ);
@@ -5350,7 +5356,14 @@ header('Expires: 0');
                 const sameProduct = record.dishware_id == productId;
                 const currentQ = product ? getMemberQuantityForShop(product, shopId) : 0;
                 const qtyBefore = sameProduct ? currentQ + (record.break_quantity || 0) : currentQ;
-                const chargeable = product ? getChargeableQuantityForBreak(product, shopId, newQuantity, qtyBefore) : newQuantity;
+                let minOverrides = null;
+                if (sameProduct && product && qtyBefore > 0) {
+                    minOverrides = {};
+                    minOverrides[product.id] = qtyBefore;
+                    const c = (product.code_number || '').trim();
+                    if (c) minOverrides[c] = qtyBefore;
+                }
+                const chargeable = product ? getChargeableQuantityForBreak(product, shopId, newQuantity, qtyBefore, minOverrides) : newQuantity;
                 
                 const result = await apiCall('', {
                     method: 'POST',
