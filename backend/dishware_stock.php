@@ -8197,18 +8197,13 @@ header('Expires: 0');
                         showAlert('碗碟信息更新成功，但库存更新失败：' + stockResult.message, 'warning');
                     }
                     
-                    // 保存套装关系
+                    // 保存套装关系：始终发送当前剩余成员列表，后端会同步为精确此列表（移除几个就移除几个）
                     if (window.currentSetMembers && window.currentSetMembers.length > 0) {
                         try {
-                            // 检查是否只剩下当前碗碟
-                            const onlyCurrentDishware = window.currentSetMembers.length === 1 && 
-                                                         window.currentSetMembers[0] == currentEditId;
-                            
                             const setRelationData = {
                                 action: 'update_dishware_set_relation',
                                 dishware_id: currentEditId,
-                                member_ids: onlyCurrentDishware ? [] : window.currentSetMembers, // 如果只剩当前碗碟，传空数组以删除套装
-                                delete_set_if_single: onlyCurrentDishware // 标记是否需要删除套装
+                                member_ids: window.currentSetMembers
                             };
                             
                             const setResponse = await fetch(API_BASE_URL, {
@@ -8222,11 +8217,7 @@ header('Expires: 0');
                             const setResult = await setResponse.json();
                             
                             if (setResult.success) {
-                                if (onlyCurrentDishware) {
-                                    showAlert('碗碟信息、库存更新成功，套装已自动删除！', 'success');
-                                } else {
-                                    showAlert('碗碟信息、库存和套装关系更新成功！', 'success');
-                                }
+                                showAlert('碗碟信息、库存和套装关系更新成功！', 'success');
                             } else {
                                 showAlert('碗碟信息和库存更新成功，但套装关系更新失败：' + setResult.message, 'warning');
                             }
