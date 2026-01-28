@@ -4652,7 +4652,7 @@ header('Expires: 0');
                 const allSingles = getAllSingleDishwareForBreak();
                 const totalBreakAmount = records.reduce((sum, record) => {
                     const product = allSingles.find(item => (item.code_number || '').trim() === (record.code_number || '').trim());
-                    const effPrice = product ? getEffectiveUnitPriceForBreak(product) : (record.unit_price || 0);
+                    const effPrice = product ? getEffectiveUnitPriceForBreak(product, shopType) : (record.unit_price || 0);
                     return sum + (record.break_quantity || 0) * effPrice;
                 }, 0);
                 
@@ -4711,7 +4711,7 @@ header('Expires: 0');
             const allSingles = getAllSingleDishwareForBreak();
             records.forEach((record, index) => {
                 const product = allSingles.find(item => (item.code_number || '').trim() === (record.code_number || '').trim());
-                const effPrice = product ? getEffectiveUnitPriceForBreak(product) : (record.unit_price || 0);
+                const effPrice = product ? getEffectiveUnitPriceForBreak(product, shopId) : (record.unit_price || 0);
                 const effTotal = (record.break_quantity || 0) * effPrice;
                 rows += `
                     <tr data-id="${record.id}" data-shop="${shopId}">
@@ -4760,23 +4760,16 @@ header('Expires: 0');
                 return;
             }
             
-            // 设置模态框标题
             const modalTitle = document.getElementById('damage-modal-title');
             modalTitle.textContent = `添加 ${shopType.toUpperCase()} 破损记录`;
+            window.currentShopType = shopType;
             
-            // 填充编号和产品选择下拉框
             populateDamageSelects();
             
-            // 设置默认日期为今天
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('damage-date').value = today;
-            
-            // 清空表单（但保留日期）
             document.getElementById('damage-form').reset();
             document.getElementById('damage-date').value = today;
-            
-            // 存储当前店铺类型
-            window.currentShopType = shopType;
             
             // 显示模态框
             document.getElementById('damageModal').style.display = 'block';
@@ -4806,8 +4799,22 @@ header('Expires: 0');
             return [...ascii, ...nonAscii];
         }
 
-        /** 套装破损单价规则：仅数量最少的单品记价，其余为 0；若多个同为最少则都记价 */
-        function getEffectiveUnitPriceForBreak(item) {
+        /** 按店面取套装成员数量（用于破损记价时的最少判断） */
+        function getMemberQuantityForShop(member, shopType) {
+            if (!shopType) return parseFloat(member.total_quantity) || 0;
+            const rest = (restaurants || []).find(r => (r.name || '').toLowerCase() === shopType);
+            if (rest && member.restaurant_stocks && typeof member.restaurant_stocks === 'object') {
+                const rid = rest.id;
+                const q = member.restaurant_stocks[rid] ?? member.restaurant_stocks[String(rid)];
+                if (q != null) return parseFloat(q) || 0;
+            }
+            const leg = member[shopType + '_quantity'];
+            if (leg != null) return parseFloat(leg) || 0;
+            return parseFloat(member.total_quantity) || 0;
+        }
+
+        /** 套装破损单价规则：仅数量最少的单品记价，其余为 0；若多个同为最少则都记价。按当前店面数量判断。 */
+        function getEffectiveUnitPriceForBreak(item, shopType) {
             if (!item) return 0;
             const raw = parseFloat(item.unit_price) || 0;
             const id = item.id;
@@ -4817,13 +4824,12 @@ header('Expires: 0');
                 if (!s.items || !s.items.length) continue;
                 const member = s.items.find(m => m.id == id || ((m.code_number || '').trim() === code));
                 if (!member) continue;
-                const q = parseFloat(member.total_quantity) || 0;
+                const q = getMemberQuantityForShop(member, shopType);
                 let minQ = Infinity;
                 for (const m of s.items) {
-                    const t = parseFloat(m.total_quantity) || 0;
+                    const t = getMemberQuantityForShop(m, shopType);
                     if (t < minQ) minQ = t;
                 }
-                /* 数量 ≤ 最小值则记价；多个同为最少（如 8,8,10 的两个 8）均记价 */
                 return q <= minQ ? raw : 0;
             }
             return raw;
@@ -4851,7 +4857,8 @@ header('Expires: 0');
                 return;
             }
             
-            // 全部单品（含套装内单品），不显示套装编号；套装仅最少数量单品记价
+            const shopType = window.currentShopType || '';
+            // 全部单品（含套装内单品），不显示套装编号；套装仅最少数量单品记价（按当前店面数量）
             const uniqueCodes = new Set();
             allSingles.forEach(item => {
                 if (item.code_number && !uniqueCodes.has(item.code_number)) {
@@ -4861,15 +4868,14 @@ header('Expires: 0');
                     option.textContent = item.code_number;
                     option.dataset.productName = item.product_name;
                     option.dataset.dishwareId = item.id;
-                    option.dataset.price = getEffectiveUnitPriceForBreak(item);
+                    option.dataset.price = getEffectiveUnitPriceForBreak(item, shopType);
                     codeSelect.appendChild(option);
                 }
             });
             
-            // 填充产品选择框
             allSingles.forEach(item => {
                 if (item.id && item.product_name) {
-                    const eff = getEffectiveUnitPriceForBreak(item);
+                    const eff = getEffectiveUnitPriceForBreak(item, shopType);
                     const option = document.createElement('option');
                     option.value = item.product_name;
                     option.textContent = `${item.product_name} (${item.code_number || '无编号'}) - RM${formatCurrency(eff)}`;
@@ -5201,7 +5207,7 @@ header('Expires: 0');
                     codeOptions.push({
                         code: code,
                         id: item.id,
-                        price: getEffectiveUnitPriceForBreak(item)
+                        price: getEffectiveUnitPriceForBreak(item, shopId)
                     });
                 }
             });
@@ -5307,7 +5313,7 @@ header('Expires: 0');
                 const allSingles = getAllSingleDishwareForBreak();
                 const product = allSingles.find(item => item.code_number === newCode) || stockData.find(item => item.code_number === newCode);
                 if (product) {
-                    unitPrice = getEffectiveUnitPriceForBreak(product);
+                    unitPrice = getEffectiveUnitPriceForBreak(product, shopId);
                 }
                 
                 const totalPrice = newQuantity * unitPrice;
@@ -5361,11 +5367,11 @@ header('Expires: 0');
             const record = records.find(r => r.id == recordId);
             
             if (record) {
-                const index = records.findIndex(r => r.id == recordId);
+                    const index = records.findIndex(r => r.id == recordId);
                 if (index !== -1) {
                     const allSingles = getAllSingleDishwareForBreak();
                     const product = allSingles.find(item => (item.code_number || '').trim() === (record.code_number || '').trim());
-                    const effPrice = product ? getEffectiveUnitPriceForBreak(product) : (record.unit_price || 0);
+                    const effPrice = product ? getEffectiveUnitPriceForBreak(product, shopId) : (record.unit_price || 0);
                     const effTotal = (record.break_quantity || 0) * effPrice;
                     const tbody = row.parentElement;
                     const newRow = document.createElement('tr');
@@ -5548,7 +5554,7 @@ header('Expires: 0');
             allSingles.forEach(item => {
                 const code = item.code_number || '';
                 const displayText = code || item.product_name || '';
-                productOptions += `<option value="${item.id}" data-code="${code}" data-price="${getEffectiveUnitPriceForBreak(item)}">${displayText}</option>`;
+                productOptions += `<option value="${item.id}" data-code="${code}" data-price="${getEffectiveUnitPriceForBreak(item, shopType)}">${displayText}</option>`;
             });
             
             let codeOptions = [];
@@ -5558,7 +5564,7 @@ header('Expires: 0');
                     codeOptions.push({
                         code: code,
                         id: item.id,
-                        price: getEffectiveUnitPriceForBreak(item)
+                        price: getEffectiveUnitPriceForBreak(item, shopType)
                     });
                 }
             });
