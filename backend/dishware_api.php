@@ -764,6 +764,8 @@ function getBreakRecords() {
     global $pdo;
     
     $shop_type = $_GET['shop_type'] ?? '';
+    $start_date = $_GET['start_date'] ?? '';
+    $end_date = $_GET['end_date'] ?? '';
     
     if (empty($shop_type)) {
         sendResponse(false, "缺少店铺类型参数");
@@ -780,11 +782,17 @@ function getBreakRecords() {
         $sql = "SELECT dbr.*, di.product_name, di.code_number, di.category, di.size, di.photo_path, di.unit_price
                 FROM dishware_break_records dbr
                 LEFT JOIN dishware_info di ON dbr.dishware_id = di.id
-                WHERE dbr.shop_type = ?
-                ORDER BY dbr.break_date ASC, dbr.created_at ASC";
+                WHERE dbr.shop_type = ?";
+        $params = [$shop_type];
+        if (!empty($start_date) && !empty($end_date)) {
+            $sql .= " AND dbr.break_date BETWEEN ? AND ?";
+            $params[] = $start_date;
+            $params[] = $end_date;
+        }
+        $sql .= " ORDER BY dbr.break_date ASC, dbr.created_at ASC";
         
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$shop_type]);
+        $stmt->execute($params);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         // 添加当前库存字段和计算总价

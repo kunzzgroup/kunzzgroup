@@ -1612,6 +1612,40 @@ header('Expires: 0');
         gap: clamp(6px, 0.63vw, 12px);
     }
 
+    .break-date-filter {
+        display: flex;
+        align-items: center;
+        gap: clamp(12px, 1.25vw, 24px);
+    }
+    .break-month-picker,
+    .break-quick-select {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .break-month-picker > div,
+    .break-quick-select > div {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .break-quick-select-dropdown.show {
+        display: block !important;
+    }
+    .break-quick-select-dropdown .dropdown-item {
+        display: block;
+        width: 100%;
+        padding: 8px 12px;
+        text-align: left;
+        border: none;
+        background: none;
+        cursor: pointer;
+        font-size: 13px;
+    }
+    .break-quick-select-dropdown .dropdown-item:hover {
+        background: #f3f4f6;
+    }
+
     .header-stats {
         margin-top: 0px;
         display: flex;
@@ -2577,6 +2611,55 @@ header('Expires: 0');
                     <span style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #000000ff; white-space: nowrap;">搜索</span>
                     <input type="text" id="unified-filter" class="unified-search-input" 
                         placeholder="搜索碗碟名称、编号或分类...">
+                </div>
+                
+                <!-- 破损记录页：月份选择 + 快速选择（仅 j1/j2/j3 时显示） -->
+                <div id="break-date-filter" class="break-date-filter" style="display: none;">
+                    <div class="break-month-picker">
+                        <span style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #000000ff; white-space: nowrap;"><i class="fas fa-calendar" style="margin-right: 4px;"></i>选择年份和月份</span>
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <select id="break-year-select" class="unified-search-input" style="width: 72px;">
+                                <!-- 动态填充 -->
+                            </select>
+                            <span style="font-size: 12px;">年</span>
+                            <select id="break-month-select" class="unified-search-input" style="width: 64px;">
+                                <option value="">无</option>
+                                <option value="1">1月</option>
+                                <option value="2">2月</option>
+                                <option value="3">3月</option>
+                                <option value="4">4月</option>
+                                <option value="5">5月</option>
+                                <option value="6">6月</option>
+                                <option value="7">7月</option>
+                                <option value="8">8月</option>
+                                <option value="9">9月</option>
+                                <option value="10">10月</option>
+                                <option value="11">11月</option>
+                                <option value="12">12月</option>
+                            </select>
+                            <span style="font-size: 12px;">月</span>
+                        </div>
+                    </div>
+                    <div class="break-quick-select">
+                        <span style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #000000ff; white-space: nowrap;"><i class="fas fa-clock" style="margin-right: 4px;"></i>快速选择</span>
+                        <div class="dropdown" style="position: relative;">
+                            <button type="button" class="btn btn-warning break-quick-select-btn" id="break-quick-select-btn" onclick="toggleBreakQuickSelectDropdown()" style="padding: clamp(4px, 0.42vw, 8px) clamp(10px, 0.83vw, 16px); font-size: clamp(8px, 0.74vw, 14px);">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span id="break-quick-select-text">时段</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="dropdown-menu break-quick-select-dropdown" id="break-quick-select-dropdown" style="display: none; position: absolute; top: 100%; left: 0; z-index: 1000; min-width: 120px; background: #fff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-top: 4px;">
+                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('today')">今天</button>
+                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('yesterday')">昨天</button>
+                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('thisWeek')">本周</button>
+                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('lastWeek')">上周</button>
+                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('thisMonth')">这个月</button>
+                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('lastMonth')">上个月</button>
+                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('thisYear')">今年</button>
+                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('lastYear')">去年</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="category-filter">
@@ -4118,6 +4201,11 @@ header('Expires: 0');
         function updatePageHeader(pageType) {
             const title = document.getElementById('page-title');
             const addButton = document.getElementById('add-dishware-btn');
+            const breakDateFilter = document.getElementById('break-date-filter');
+            
+            if (breakDateFilter) {
+                breakDateFilter.style.display = (pageType === 'j1' || pageType === 'j2' || pageType === 'j3') ? 'flex' : 'none';
+            }
             
             switch(pageType) {
                 case 'stock':
@@ -4134,6 +4222,7 @@ header('Expires: 0');
                         // 隐藏顶部的"记录破损"按钮，因为每个容器都有自己的按钮
                         addButton.style.display = 'none';
                     }
+                    initBreakDateFilter();
                     // 将分类下拉菜单改为餐厅选择
                     updateCategoryFilterToRestaurantForBreak();
                     // 加载所有破损记录
@@ -4269,11 +4358,11 @@ header('Expires: 0');
         async function loadBreakRecords(shopType) {
             console.log('loadBreakRecords 被调用，shopType:', shopType);
             try {
-                // 同时加载J1、J2、J3的破损记录
+                const dateParams = breakDateRange ? `&start_date=${encodeURIComponent(breakDateRange.startDate)}&end_date=${encodeURIComponent(breakDateRange.endDate)}` : '';
                 const [j1Result, j2Result, j3Result] = await Promise.all([
-                    apiCall('?action=damage_records&shop_type=j1'),
-                    apiCall('?action=damage_records&shop_type=j2'),
-                    apiCall('?action=damage_records&shop_type=j3')
+                    apiCall(`?action=damage_records&shop_type=j1${dateParams}`),
+                    apiCall(`?action=damage_records&shop_type=j2${dateParams}`),
+                    apiCall(`?action=damage_records&shop_type=j3${dateParams}`)
                 ]);
                 
                 // 存储破损记录数据
@@ -4329,10 +4418,10 @@ header('Expires: 0');
                     return numA - numB;
                 });
 
-                // 同时加载所有J开头店铺的数据
+                const dateParams = breakDateRange ? `&start_date=${encodeURIComponent(breakDateRange.startDate)}&end_date=${encodeURIComponent(breakDateRange.endDate)}` : '';
                 const promises = jRestaurants.map(restaurant => {
                     const shopType = restaurant.name.toLowerCase();
-                    return apiCall(`?action=damage_records&shop_type=${shopType}`).then(result => ({
+                    return apiCall(`?action=damage_records&shop_type=${shopType}${dateParams}`).then(result => ({
                         shopType: shopType,
                         restaurant: restaurant,
                         result: result
@@ -4367,8 +4456,8 @@ header('Expires: 0');
         // 刷新单个餐厅的破损记录（保留新行）
         async function refreshSingleRestaurantBreakRecords(shopType, excludeRecordId = null) {
             try {
-                // 只加载对应餐厅的数据
-                const result = await apiCall(`?action=damage_records&shop_type=${shopType}`);
+                const dateParams = breakDateRange ? `&start_date=${encodeURIComponent(breakDateRange.startDate)}&end_date=${encodeURIComponent(breakDateRange.endDate)}` : '';
+                const result = await apiCall(`?action=damage_records&shop_type=${shopType}${dateParams}`);
                 
                 if (result.success) {
                     // 更新数据
@@ -6033,7 +6122,125 @@ header('Expires: 0');
                 filterBreakRecordsByRestaurant();
             }, 100);
         }
-        
+
+        // 初始化破损记录日期筛选（月份选择 + 快速选择）
+        function initBreakDateFilter() {
+            const yearSelect = document.getElementById('break-year-select');
+            const monthSelect = document.getElementById('break-month-select');
+            if (!yearSelect || !monthSelect) return;
+            const y = new Date().getFullYear();
+            if (!yearSelect.options.length) {
+                for (let i = y - 5; i <= y + 1; i++) {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.textContent = i;
+                    yearSelect.appendChild(opt);
+                }
+            }
+            yearSelect.value = breakMonthValue.year || y;
+            monthSelect.value = breakMonthValue.month != null ? String(breakMonthValue.month) : '';
+            yearSelect.onchange = () => { breakMonthValue.year = yearSelect.value ? parseInt(yearSelect.value, 10) : null; applyBreakDateFromMonthPicker(); };
+            monthSelect.onchange = () => { breakMonthValue.month = monthSelect.value ? parseInt(monthSelect.value, 10) : null; applyBreakDateFromMonthPicker(); };
+        }
+
+        function applyBreakDateFromMonthPicker() {
+            const yearSelect = document.getElementById('break-year-select');
+            const monthSelect = document.getElementById('break-month-select');
+            const y = yearSelect?.value ? parseInt(yearSelect.value, 10) : null;
+            const m = monthSelect?.value ? parseInt(monthSelect.value, 10) : null;
+            if (!y || !m) {
+                breakDateRange = null;
+                breakMonthValue = { year: y, month: m };
+            } else {
+                breakMonthValue = { year: y, month: m };
+                const first = `${y}-${String(m).padStart(2, '0')}-01`;
+                const last = new Date(y, m, 0).getDate();
+                breakDateRange = { startDate: first, endDate: `${y}-${String(m).padStart(2, '0')}-${String(last).padStart(2, '0')}` };
+            }
+            const q = document.getElementById('break-quick-select-text');
+            if (q) q.textContent = '时段';
+            if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') loadAllBreakRecords();
+        }
+
+        function toggleBreakQuickSelectDropdown() {
+            const d = document.getElementById('break-quick-select-dropdown');
+            if (!d) return;
+            d.classList.toggle('show');
+        }
+
+        function selectBreakQuickRange(range) {
+            const today = new Date();
+            let startDate, endDate;
+            const pad = (n) => String(n).padStart(2, '0');
+            const fmt = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+            switch (range) {
+                case 'today':
+                    startDate = endDate = new Date(today);
+                    break;
+                case 'yesterday':
+                    const yd = new Date(today);
+                    yd.setDate(yd.getDate() - 1);
+                    startDate = endDate = yd;
+                    break;
+                case 'thisWeek':
+                    const tw = new Date(today);
+                    const dow = tw.getDay();
+                    const toMon = dow === 0 ? 6 : dow - 1;
+                    tw.setDate(tw.getDate() - toMon);
+                    startDate = tw;
+                    endDate = new Date(today);
+                    break;
+                case 'lastWeek':
+                    const lwe = new Date(today);
+                    const ldow = lwe.getDay();
+                    lwe.setDate(lwe.getDate() - (ldow === 0 ? 0 : ldow) - 1);
+                    const lws = new Date(lwe);
+                    lws.setDate(lws.getDate() - 6);
+                    startDate = lws;
+                    endDate = lwe;
+                    break;
+                case 'thisMonth':
+                    startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                    endDate = new Date(today);
+                    break;
+                case 'lastMonth':
+                    startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                    endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+                    break;
+                case 'thisYear':
+                    startDate = new Date(today.getFullYear(), 0, 1);
+                    endDate = new Date(today);
+                    break;
+                case 'lastYear':
+                    startDate = new Date(today.getFullYear() - 1, 0, 1);
+                    endDate = new Date(today.getFullYear() - 1, 11, 31);
+                    break;
+                default:
+                    return;
+            }
+            breakDateRange = { startDate: fmt(startDate), endDate: fmt(endDate) };
+            breakMonthValue = { year: startDate.getFullYear(), month: startDate.getMonth() + 1 };
+            const yearSelect = document.getElementById('break-year-select');
+            const monthSelect = document.getElementById('break-month-select');
+            if (yearSelect) yearSelect.value = breakMonthValue.year;
+            if (monthSelect) monthSelect.value = String(breakMonthValue.month);
+            const texts = { today: '今天', yesterday: '昨天', thisWeek: '本周', lastWeek: '上周', thisMonth: '这个月', lastMonth: '上个月', thisYear: '今年', lastYear: '去年' };
+            const q = document.getElementById('break-quick-select-text');
+            if (q) q.textContent = texts[range] || '时段';
+            const d = document.getElementById('break-quick-select-dropdown');
+            if (d) d.classList.remove('show');
+            if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') loadAllBreakRecords();
+        }
+
+        // 打开破损记录页面时，点击外部关闭快速选择下拉
+        document.addEventListener('click', function(e) {
+            const btn = document.getElementById('break-quick-select-btn');
+            const dd = document.getElementById('break-quick-select-dropdown');
+            if (dd && dd.classList.contains('show') && btn && !btn.contains(e.target) && !dd.contains(e.target)) {
+                dd.classList.remove('show');
+            }
+        });
+
         // 将分类下拉菜单改为餐厅选择（转卖页面）
         function updateCategoryFilterToRestaurant() {
             const categoryFilterDiv = document.querySelector('.category-filter');
@@ -9568,6 +9775,11 @@ header('Expires: 0');
         
         // 破损记录页面餐厅过滤状态
         let breakRestaurantFilter = '';
+
+        /** 破损记录日期范围 { startDate, endDate }，null 表示不过滤 */
+        let breakDateRange = null;
+        /** 破损记录月份选择 { year, month } */
+        let breakMonthValue = { year: null, month: null };
 
         // 打开转卖记录行数选择弹窗
         function openTransferRowsModal(shopType) {
