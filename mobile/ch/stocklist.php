@@ -38,14 +38,9 @@ if (!isset($_SESSION['user_id'])) {
                     </div>
                 </div>
 
-                <div class="filter-group" id="filter-value-group" style="display: none;">
-                    <label for="filter-value" class="sr-only">筛选值</label>
-                    <div class="select-wrapper">
-                        <select id="filter-value" name="filter-value">
-                            <option value="">全部</option>
-                        </select>
-                        <span class="select-icon" aria-hidden="true"></span>
-                    </div>
+                <div class="filter-options" id="filter-options-group" style="display: none;">
+                    <button type="button" class="filter-option-btn" data-value="" onclick="selectFilterOption('')">全部</button>
+                    <div class="filter-options-list" id="filter-options-list"></div>
                 </div>
 
                 <div class="input-group search-group">
@@ -123,9 +118,6 @@ if (!isset($_SESSION['user_id'])) {
         document.addEventListener('DOMContentLoaded', function() {
             // 筛选类型变化事件
             document.getElementById('filter-type').addEventListener('change', handleFilterTypeChange);
-            
-            // 筛选值变化事件
-            document.getElementById('filter-value').addEventListener('change', handleFilterValueChange);
             
             // 搜索按钮点击事件
             document.querySelector('.btn-search').addEventListener('click', handleSearch);
@@ -220,6 +212,12 @@ if (!isset($_SESSION['user_id'])) {
                     // 更新筛选值选项（在合并库存总数之后）
                     if (selectedFilterType === 'category') {
                         updateProductCategoryOptions();
+                    } else if (selectedFilterType === 'freezer') {
+                        // 如果选择了冰箱区，确保选项按钮已显示
+                        const filterOptionsGroup = document.getElementById('filter-options-group');
+                        if (filterOptionsGroup && filterOptionsGroup.style.display !== 'none') {
+                            handleFilterTypeChange();
+                        }
                     }
                     
                     generateTable();
@@ -242,94 +240,99 @@ if (!isset($_SESSION['user_id'])) {
         // 处理筛选类型变化
         function handleFilterTypeChange() {
             const filterTypeSelect = document.getElementById('filter-type');
-            const filterValueGroup = document.getElementById('filter-value-group');
-            const filterValueSelect = document.getElementById('filter-value');
+            const filterOptionsGroup = document.getElementById('filter-options-group');
+            const filterOptionsList = document.getElementById('filter-options-list');
             
-            if (!filterTypeSelect || !filterValueGroup || !filterValueSelect) return;
+            if (!filterTypeSelect || !filterOptionsGroup || !filterOptionsList) return;
             
             selectedFilterType = filterTypeSelect.value;
             selectedFilterValue = '';
             
             if (selectedFilterType === '') {
-                // 隐藏筛选值选择器
-                filterValueGroup.style.display = 'none';
-                filterValueSelect.innerHTML = '<option value="">全部</option>';
+                // 隐藏选项列表
+                filterOptionsGroup.style.display = 'none';
+                filterOptionsList.innerHTML = '';
                 loadProductList();
                 return;
             }
             
-            // 显示筛选值选择器
-            filterValueGroup.style.display = 'block';
+            // 显示选项列表
+            filterOptionsGroup.style.display = 'flex';
+            filterOptionsList.innerHTML = '';
             
-            // 根据筛选类型更新选项
-            filterValueSelect.innerHTML = '<option value="">全部</option>';
+            // 重置所有按钮状态
+            const allButtons = filterOptionsGroup.querySelectorAll('.filter-option-btn');
+            allButtons.forEach(btn => btn.classList.remove('active'));
             
             if (selectedFilterType === 'freezer') {
-                // 显示冰箱分类选项
+                // 显示冰箱分类选项按钮
                 freezerCategories.forEach(item => {
                     if (item.value !== '') { // 跳过"全部"，因为已经添加了
-                        const option = document.createElement('option');
-                        option.value = item.value;
-                        option.textContent = item.text;
-                        filterValueSelect.appendChild(option);
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'filter-option-btn';
+                        btn.setAttribute('data-value', item.value);
+                        btn.textContent = item.text;
+                        btn.onclick = function() { selectFilterOption(item.value); };
+                        filterOptionsList.appendChild(btn);
                     }
                 });
             } else if (selectedFilterType === 'category') {
-                // 显示货品类型选项（需要从stockData中获取）
+                // 显示货品类型选项按钮（需要从stockData中获取）
                 updateProductCategoryOptions();
             }
             
-            filterValueSelect.value = '';
             generateTable();
         }
         
-        // 处理筛选值变化
-        function handleFilterValueChange() {
-            const filterValueSelect = document.getElementById('filter-value');
-            if (filterValueSelect) {
-                selectedFilterValue = filterValueSelect.value;
-                console.log('筛选值已更改:', selectedFilterType, selectedFilterValue);
-                
-                if (selectedFilterType === 'freezer') {
-                    // 冰箱分类变化需要重新加载产品列表
-                    loadProductList();
-                } else if (selectedFilterType === 'category') {
-                    // 货品类型变化只需要重新生成表格
-                    generateTable();
-                }
+        // 选择筛选选项
+        function selectFilterOption(value) {
+            selectedFilterValue = value;
+            console.log('筛选值已更改:', selectedFilterType, selectedFilterValue);
+            
+            // 更新按钮状态
+            const filterOptionsGroup = document.getElementById('filter-options-group');
+            if (filterOptionsGroup) {
+                const buttons = filterOptionsGroup.querySelectorAll('.filter-option-btn');
+                buttons.forEach(btn => {
+                    if (btn.getAttribute('data-value') === value) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+            
+            if (selectedFilterType === 'freezer') {
+                // 冰箱分类变化需要重新加载产品列表
+                loadProductList();
+            } else if (selectedFilterType === 'category') {
+                // 货品类型变化只需要重新生成表格
+                generateTable();
             }
         }
         
-        // 更新货品类型下拉选项
+        // 更新货品类型选项按钮
         function updateProductCategoryOptions() {
-            const filterValueSelect = document.getElementById('filter-value');
-            if (!filterValueSelect) return;
+            const filterOptionsList = document.getElementById('filter-options-list');
+            if (!filterOptionsList) return;
             
             // 获取所有唯一的货品类型
             const categories = [...new Set(stockData.map(item => item.category).filter(cat => cat && cat.trim() !== ''))].sort();
             
-            // 保存当前选中的值
-            const currentValue = filterValueSelect.value;
+            // 清空选项列表
+            filterOptionsList.innerHTML = '';
             
-            // 清空选项（保留"全部"选项）
-            filterValueSelect.innerHTML = '<option value="">全部</option>';
-            
-            // 添加所有货品类型选项
+            // 添加所有货品类型选项按钮
             categories.forEach(category => {
-                const option = document.createElement('option');
-                option.value = category;
-                option.textContent = category;
-                filterValueSelect.appendChild(option);
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'filter-option-btn';
+                btn.setAttribute('data-value', category);
+                btn.textContent = category;
+                btn.onclick = function() { selectFilterOption(category); };
+                filterOptionsList.appendChild(btn);
             });
-            
-            // 恢复之前选中的值（如果还存在）
-            if (currentValue && categories.includes(currentValue)) {
-                filterValueSelect.value = currentValue;
-                selectedFilterValue = currentValue;
-            } else {
-                filterValueSelect.value = '';
-                selectedFilterValue = '';
-            }
         }
         
         // 生成表格
