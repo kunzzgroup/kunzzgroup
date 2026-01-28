@@ -9947,20 +9947,19 @@ header('Expires: 0');
             const currentRowCount = tbody.querySelectorAll('tr:not(.new-row)').length;
             const newRowIndex = currentRowCount + tbody.querySelectorAll('tr.new-row').length + 1;
             
-            // 生成编号选项（用于combobox）
+            // 生成编号选项（与破损记录一致：全部单品含套装内、无SET、A-Z 中文排最后）
+            const allSingles = getAllSingleDishwareForBreak();
             let codeOptions = [];
-            if (stockData && stockData.length > 0) {
-                stockData.forEach(item => {
-                    const code = item.code_number || '';
-                    if (code) {
-                        codeOptions.push({
-                            code: code,
-                            id: item.id,
-                            price: item.unit_price || 0
-                        });
-                    }
-                });
-            }
+            allSingles.forEach(item => {
+                const code = item.code_number || '';
+                if (code) {
+                    codeOptions.push({
+                        code: code,
+                        id: item.id,
+                        price: item.unit_price || 0
+                    });
+                }
+            });
             
             // 生成餐厅选项（用于进出下拉列表）
             let restaurantOptions = '';
@@ -10082,8 +10081,9 @@ header('Expires: 0');
                 return;
             }
             
-            // 单价从产品信息中自动获取
-            const product = stockData.find(item => item.id == productId || item.code_number === code);
+            // 单价从产品信息中自动获取（含套装内单品）
+            const allSingles = getAllSingleDishwareForBreak();
+            const product = allSingles.find(item => item.id == productId || item.code_number === code) || stockData.find(item => item.id == productId || item.code_number === code);
             if (!product) {
                 showAlert('找不到产品信息', 'error');
                 return;
@@ -10389,23 +10389,21 @@ header('Expires: 0');
                 return;
             }
             
-            // 生成编号选项（用于combobox）
+            // 生成编号选项（与破损记录一致：全部单品含套装内、无SET、A-Z 中文排最后）
+            const allSingles = getAllSingleDishwareForBreak();
             let codeOptions = [];
-            if (stockData && stockData.length > 0) {
-                stockData.forEach(item => {
-                    const code = item.code_number || '';
-                    if (code) {
-                        codeOptions.push({
-                            code: code,
-                            id: item.id,
-                            price: item.unit_price || 0
-                        });
-                    }
-                });
-            }
+            allSingles.forEach(item => {
+                const code = item.code_number || '';
+                if (code) {
+                    codeOptions.push({
+                        code: code,
+                        id: item.id,
+                        price: item.unit_price || 0
+                    });
+                }
+            });
             
-            // 找到当前编号对应的产品ID
-            const currentProduct = stockData.find(item => item.code_number === originalCode);
+            const currentProduct = allSingles.find(item => item.code_number === originalCode) || stockData.find(item => item.code_number === originalCode);
             const currentProductId = currentProduct ? currentProduct.id : '';
             
             // 编辑编号列 - 使用 combobox
@@ -10595,8 +10593,9 @@ header('Expires: 0');
                     return;
                 }
                 
-                // 单价始终从产品信息中自动获取
-                const product = stockData.find(item => item.id == productId || item.code_number === newCode);
+                // 单价始终从产品信息中自动获取（含套装内单品）
+                const allSingles = getAllSingleDishwareForBreak();
+                const product = allSingles.find(item => item.id == productId || item.code_number === newCode) || stockData.find(item => item.id == productId || item.code_number === newCode);
                 if (!product) {
                     showAlert('找不到产品信息', 'error');
                     return;
