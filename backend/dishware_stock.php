@@ -3258,6 +3258,8 @@ header('Expires: 0');
         let restaurants = []; // 存储餐厅店面列表
         /** 编辑弹窗数量缓存：dishwareId -> 各餐厅数量数组(与 display_order 一致)，渲染表格时写入，打开编辑时直接用来填充 */
         let editQuantitiesCache = new Map();
+        /** 全部碗碟（含 is_in_set），用于破损记录编号下拉，确保套装内单品如 AG001、AG002 均显示 */
+        let allDishwareForBreak = [];
 
         // 自然排序函数，正确处理字母和数字混合
         function naturalSort(a, b) {
@@ -4777,10 +4779,16 @@ header('Expires: 0');
 
         /** 获取全部单品碗碟（含套装内的单品如 AG001、AG002），不包含套装编号（如 SETxxx） */
         function getAllSingleDishwareForBreak() {
-            if (!stockData || !stockData.length) return [];
+            const raw = (allDishwareForBreak && allDishwareForBreak.length) ? allDishwareForBreak : [];
+            if (raw.length > 0) {
+                return raw.filter(item => {
+                    const c = (item.code_number || '').trim().toUpperCase();
+                    return c && !c.startsWith('SET');
+                });
+            }
             const list = [];
-            (stockData.filter(item => item.item_type === 'individual') || []).forEach(item => list.push(item));
-            (stockData.filter(item => item.item_type === 'set') || []).forEach(set => {
+            (stockData || []).filter(item => item.item_type === 'individual').forEach(item => list.push(item));
+            (stockData || []).filter(item => item.item_type === 'set').forEach(set => {
                 if (set.items && set.items.length) list.push(...set.items);
             });
             return list;
@@ -5258,10 +5266,11 @@ header('Expires: 0');
                     return;
                 }
                 
-                // 如果编号改变了，需要获取新的产品信息
+                // 如果编号改变了，需要获取新的产品信息（含套装内单品）
                 let unitPrice = record.unit_price || 0;
                 if (newCode !== row.dataset.originalCode) {
-                    const newProduct = stockData.find(item => item.code_number === newCode);
+                    const allSingles = getAllSingleDishwareForBreak();
+                    const newProduct = allSingles.find(item => item.code_number === newCode) || stockData.find(item => item.code_number === newCode);
                     if (newProduct) {
                         unitPrice = newProduct.unit_price || 0;
                     }
@@ -6500,6 +6509,8 @@ header('Expires: 0');
                     // 处理单个碗碟库存数据
                     if (stockResult.success) {
                         const individualItems = stockResult.data.items || [];
+                        // 破损记录编号下拉：使用完整列表（含 is_in_set），确保套装内单品如 AG001、AG002 都显示
+                        allDishwareForBreak = individualItems.slice();
                         // 更新餐厅店面列表（如果API返回了）
                         if (stockResult.data.restaurants && stockResult.data.restaurants.length > 0) {
                             restaurants = stockResult.data.restaurants;
@@ -6720,6 +6731,7 @@ header('Expires: 0');
             } catch (error) {
                 stockData = [];
                 filteredData = [];
+                allDishwareForBreak = [];
                 console.error('加载数据时发生错误:', error);
                 showAlert('加载数据失败: ' + error.message, 'error');
                 renderStockTable();
