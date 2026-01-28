@@ -242,6 +242,14 @@ if (!isset($_SESSION['user_id'])) {
             if (selectElement) {
                 selectedFreezerCategory = selectElement.value;
                 console.log('冰箱分类已更改:', selectedFreezerCategory);
+                
+                // 自动重置货品类型为"全部"
+                const productCategorySelect = document.getElementById('product-category');
+                if (productCategorySelect) {
+                    productCategorySelect.value = '';
+                    selectedProductCategory = '';
+                }
+                
                 loadProductList();
             }
         }
@@ -252,6 +260,18 @@ if (!isset($_SESSION['user_id'])) {
             if (selectElement) {
                 selectedProductCategory = selectElement.value;
                 console.log('货品类型已更改:', selectedProductCategory);
+                
+                // 自动重置冰箱分类为"全部"
+                const freezerCategorySelect = document.getElementById('freezer-category');
+                if (freezerCategorySelect && freezerCategorySelect.value !== '') {
+                    freezerCategorySelect.value = '';
+                    selectedFreezerCategory = '';
+                    
+                    // 如果之前有冰箱分类过滤，需要重新加载完整的产品列表
+                    loadProductList();
+                    return; // loadProductList会调用generateTable，所以直接返回
+                }
+                
                 generateTable();
             }
         }
