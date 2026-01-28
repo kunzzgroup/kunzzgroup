@@ -4665,9 +4665,14 @@ header('Expires: 0');
                                 <span>${restaurant.name}</span>
                                 <span style="font-size: clamp(14px, 0.94vw, 18px); opacity: 0.9;">总破损：RM ${formatCurrency(totalBreakAmount)}</span>
                             </div>
-                            <button class="btn btn-success" onclick="openBreakRowsModal('${shopType}')" style="padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
-                                <i class="fas fa-plus"></i> 记录破损
-                            </button>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <button class="btn btn-primary" onclick="batchSaveBreakRows('${shopType}')" style="padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap; background: #0d6efd;">
+                                    <i class="fas fa-save"></i> 批量保存
+                                </button>
+                                <button class="btn btn-success" onclick="openBreakRowsModal('${shopType}')" style="padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
+                                    <i class="fas fa-plus"></i> 记录破损
+                                </button>
+                            </div>
                         </div>
                         <div class="break-record-table-wrapper">
                             <table class="break-record-table" id="${shopType}-break-table">
@@ -5913,6 +5918,78 @@ header('Expires: 0');
             if (priceInput) {
                 priceInput.value = chargeable > 0 ? raw.toFixed(2) : '0.00';
             }
+        }
+
+        // 批量保存当前店面的所有新增破损行
+        async function batchSaveBreakRows(shopType) {
+            const tbody = document.getElementById(`${shopType}-break-tbody`);
+            if (!tbody) return;
+            const newRows = Array.from(tbody.querySelectorAll('tr.new-row'));
+            if (newRows.length === 0) {
+                showAlert('没有待保存的新增记录', 'warning');
+                return;
+            }
+            const today = new Date().toISOString().split('T')[0];
+            const allSingles = getAllSingleDishwareForBreak();
+            const rowsToRemove = [];
+            for (const row of newRows) {
+                const codeInput = row.querySelector('input[id$="-code"]');
+                const quantityInput = row.querySelector('input.break-quantity-input');
+                if (!codeInput || !quantityInput) continue;
+                const rowId = codeInput.id.replace(/-code$/, '');
+                const productId = codeInput.dataset.productId;
+                const code = (codeInput.value || '').trim();
+                const quantity = parseFloat(quantityInput.value) || 0;
+                if (!code || !productId) {
+                    showAlert('请填写编号或选择产品', 'error');
+                    return;
+                }
+                if (quantity <= 0) {
+                    showAlert('请输入有效的破损数量', 'error');
+                    return;
+                }
+                const product = allSingles.find(item => item.id == productId) || (stockData || []).find(item => item.id == productId);
+                const rawPrice = product ? (parseFloat(product.unit_price) || 0) : 0;
+                const qtyBefore = product ? getMemberQuantityForShop(product, shopType) : 0;
+                const chargeable = product ? getChargeableQuantityForBreak(product, shopType, quantity, qtyBefore) : quantity;
+                try {
+                    const result = await apiCall('', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'add_damage_record',
+                            dishware_id: productId,
+                            shop_type: shopType,
+                            break_quantity: quantity,
+                            chargeable_quantity: chargeable,
+                            unit_price: rawPrice,
+                            break_date: today,
+                            recorded_by: 'system'
+                        })
+                    });
+                    if (!result.success) {
+                        showAlert('批量保存失败: ' + (result.message || '未知错误'), 'error');
+                        return;
+                    }
+                    rowsToRemove.push({ row, rowId });
+                } catch (e) {
+                    showAlert('批量保存失败: ' + (e.message || '网络错误'), 'error');
+                    return;
+                }
+            }
+            for (const { row, rowId } of rowsToRemove) {
+                const codeInput = document.getElementById(`${rowId}-code`);
+                if (codeInput) {
+                    const closeHandler = codeInput._closeHandler;
+                    if (closeHandler) document.removeEventListener('click', closeHandler);
+                    const codeDropdown = document.getElementById(`${rowId}-code-dropdown`);
+                    if (codeDropdown && codeDropdown.parentElement === document.body) document.body.removeChild(codeDropdown);
+                }
+                row.remove();
+            }
+            showAlert(`成功保存 ${rowsToRemove.length} 条破损记录`, 'success');
+            await refreshSingleRestaurantBreakRecords(shopType);
+            if (document.getElementById('stock-table')) loadStockData(true, false);
         }
 
         // 保存新破损记录行
