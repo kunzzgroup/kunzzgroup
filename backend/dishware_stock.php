@@ -3468,18 +3468,20 @@ header('Expires: 0');
                     </div>
                 `).join('');
             
-            // 防止数量为 0 时点击被清空：focus 后若为空则还原为 0，blur 时同理
+            // 数量为 0 时点击即清空，方便直接输入新数字；失焦时若为空则还原为 0
             container.querySelectorAll('.quantity-input').forEach((input) => {
-                const ensureZero = () => {
+                input.addEventListener('focus', () => {
+                    const v = String(input.value || '').trim();
+                    if (v === '0' || v === '') {
+                        input.value = '';
+                    }
+                });
+                input.addEventListener('blur', () => {
                     const v = String(input.value || '').trim();
                     if (v === '' || isNaN(parseInt(v, 10))) {
                         input.value = '0';
                     }
-                };
-                input.addEventListener('focus', () => {
-                    setTimeout(ensureZero, 0);
                 });
-                input.addEventListener('blur', ensureZero);
             });
         }
 
