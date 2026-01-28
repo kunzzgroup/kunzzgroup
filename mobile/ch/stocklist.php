@@ -176,6 +176,7 @@ if (!isset($_SESSION['user_id'])) {
                     productList = [...allProductList]; // 复制完整列表
                     console.log('接收到产品数据数量:', productList.length);
                     
+                    // 应用冰箱分类过滤
                     if (currentFreezerCategory) {
                         // 客户端按多分类过滤：支持逗号分隔
                         const selected = currentFreezerCategory.trim();
@@ -186,6 +187,14 @@ if (!isset($_SESSION['user_id'])) {
                         };
                         productList = productList.filter(p => matchesCategory(p.freezer_category));
                         console.log('应用客户端分类过滤后数量:', productList.length);
+                    }
+                    
+                    // 应用货品类型过滤（如果选择了）
+                    const productCategorySelect = document.getElementById('product-category');
+                    const currentProductCategory = productCategorySelect ? productCategorySelect.value : (selectedProductCategory || '');
+                    if (currentProductCategory && currentProductCategory !== '') {
+                        productList = productList.filter(p => p.category === currentProductCategory);
+                        console.log('应用货品类型过滤后数量:', productList.length);
                     }
                     
                     stockData = productList.map(item => ({
@@ -246,13 +255,7 @@ if (!isset($_SESSION['user_id'])) {
                 selectedFreezerCategory = selectElement.value;
                 console.log('冰箱分类已更改:', selectedFreezerCategory);
                 
-                // 自动重置货品类型为"全部"
-                const productCategorySelect = document.getElementById('product-category');
-                if (productCategorySelect) {
-                    productCategorySelect.value = '';
-                    selectedProductCategory = '';
-                }
-                
+                // 不再自动重置货品类型，允许同时使用两个筛选条件
                 loadProductList();
             }
         }
@@ -280,7 +283,12 @@ if (!isset($_SESSION['user_id'])) {
                     }
                 }
                 
-                generateTable();
+                // 如果选择了货品类型，需要重新加载产品列表以应用过滤
+                if (selectedProductCategory && selectedProductCategory !== '') {
+                    loadProductList();
+                } else {
+                    generateTable();
+                }
             }
         }
         
