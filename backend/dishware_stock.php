@@ -3467,6 +3467,20 @@ header('Expires: 0');
                         <input type="number" id="edit-restaurant-${restaurant.id}" min="0" class="quantity-input" data-restaurant-id="${restaurant.id}">
                     </div>
                 `).join('');
+            
+            // 防止数量为 0 时点击被清空：focus 后若为空则还原为 0，blur 时同理
+            container.querySelectorAll('.quantity-input').forEach((input) => {
+                const ensureZero = () => {
+                    const v = String(input.value || '').trim();
+                    if (v === '' || isNaN(parseInt(v, 10))) {
+                        input.value = '0';
+                    }
+                };
+                input.addEventListener('focus', () => {
+                    setTimeout(ensureZero, 0);
+                });
+                input.addEventListener('blur', ensureZero);
+            });
         }
 
         // 填充编辑模态框的餐厅店面数据
