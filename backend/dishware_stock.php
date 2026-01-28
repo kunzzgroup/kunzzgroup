@@ -1606,7 +1606,8 @@ header('Expires: 0');
         gap: clamp(6px, 0.63vw, 12px);
     }
 
-    .category-filter {
+    .category-filter,
+    .break-month-filter {
         display: flex;
         align-items: center;
         gap: clamp(6px, 0.63vw, 12px);
@@ -2577,6 +2578,12 @@ header('Expires: 0');
                     <span style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #000000ff; white-space: nowrap;">搜索</span>
                     <input type="text" id="unified-filter" class="unified-search-input" 
                         placeholder="搜索碗碟名称、编号或分类...">
+                </div>
+                
+                <div class="break-month-filter" id="break-month-filter" style="display: none;">
+                    <span style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #000000ff; white-space: nowrap;">月份</span>
+                    <input type="month" id="break-month-input" class="unified-search-input" title="选择月份">
+                    <button type="button" id="break-month-all-btn" class="unified-search-input" style="padding: clamp(4px, 0.42vw, 8px) 10px; cursor: pointer; white-space: nowrap;">全部</button>
                 </div>
                 
                 <div class="category-filter">
@@ -4545,7 +4552,10 @@ header('Expires: 0');
             
             jRestaurants.forEach(restaurant => {
                 const shopType = restaurant.name.toLowerCase();
-                const records = breakRecordsData[shopType] || [];
+                let records = breakRecordsData[shopType] || [];
+                if (breakMonthFilter) {
+                    records = records.filter(r => (String(r.break_date || '').substring(0, 7)) === breakMonthFilter);
+                }
                 
                 // 计算总破损金额
                 const totalBreakAmount = records.reduce((sum, record) => {
@@ -5984,8 +5994,32 @@ header('Expires: 0');
         function updateCategoryFilterToRestaurantForBreak() {
             const categoryFilterDiv = document.querySelector('.category-filter');
             const categorySelect = document.getElementById('category-filter');
+            const monthFilterEl = document.getElementById('break-month-filter');
+            const monthInput = document.getElementById('break-month-input');
             
             if (!categoryFilterDiv || !categorySelect) return;
+            
+            // 显示月份选择器，放在餐厅筛选前
+            if (monthFilterEl) monthFilterEl.style.display = 'flex';
+            if (monthInput) {
+                const now = new Date();
+                const yyyy = now.getFullYear();
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const defaultMonth = `${yyyy}-${mm}`;
+                if (!breakMonthFilter) {
+                    breakMonthFilter = defaultMonth;
+                    monthInput.value = defaultMonth;
+                } else {
+                    monthInput.value = breakMonthFilter;
+                }
+                monthInput.removeEventListener('change', handleBreakMonthFilterChange);
+                monthInput.addEventListener('change', handleBreakMonthFilterChange);
+            }
+            const monthAllBtn = document.getElementById('break-month-all-btn');
+            if (monthAllBtn) {
+                monthAllBtn.removeEventListener('click', handleBreakMonthAllClick);
+                monthAllBtn.addEventListener('click', handleBreakMonthAllClick);
+            }
             
             // 保存原始分类选项（用于恢复）
             if (!categorySelect.dataset.originalHTML) {
@@ -6028,18 +6062,44 @@ header('Expires: 0');
             categorySelect.removeEventListener('change', handleBreakRestaurantFilterChange);
             categorySelect.addEventListener('change', handleBreakRestaurantFilterChange);
             
-            // 应用当前的餐厅过滤
+            // 应用当前的餐厅过滤与月份过滤
             setTimeout(() => {
                 filterBreakRecordsByRestaurant();
             }, 100);
+        }
+        
+        function handleBreakMonthFilterChange() {
+            const monthInput = document.getElementById('break-month-input');
+            if (!monthInput) return;
+            breakMonthFilter = (monthInput.value || '').trim();
+            renderMergedBreakRecordsPage();
+            filterBreakRecordsByRestaurant();
+            updateStats();
+        }
+        
+        function handleBreakMonthAllClick() {
+            breakMonthFilter = '';
+            const monthInput = document.getElementById('break-month-input');
+            if (monthInput) monthInput.value = '';
+            renderMergedBreakRecordsPage();
+            filterBreakRecordsByRestaurant();
+            updateStats();
         }
         
         // 将分类下拉菜单改为餐厅选择（转卖页面）
         function updateCategoryFilterToRestaurant() {
             const categoryFilterDiv = document.querySelector('.category-filter');
             const categorySelect = document.getElementById('category-filter');
+            const monthFilterEl = document.getElementById('break-month-filter');
+            const monthInput = document.getElementById('break-month-input');
             
             if (!categoryFilterDiv || !categorySelect) return;
+            
+            // 隐藏破损记录月份选择器（转卖页不显示）
+            if (monthFilterEl) monthFilterEl.style.display = 'none';
+            if (monthInput) monthInput.removeEventListener('change', handleBreakMonthFilterChange);
+            const monthAllBtn = document.getElementById('break-month-all-btn');
+            if (monthAllBtn) monthAllBtn.removeEventListener('click', handleBreakMonthAllClick);
             
             // 保存原始分类选项（用于恢复）
             if (!categorySelect.dataset.originalHTML) {
@@ -6091,8 +6151,16 @@ header('Expires: 0');
         function restoreCategoryFilter() {
             const categoryFilterDiv = document.querySelector('.category-filter');
             const categorySelect = document.getElementById('category-filter');
+            const monthFilterEl = document.getElementById('break-month-filter');
+            const monthInput = document.getElementById('break-month-input');
             
             if (!categoryFilterDiv || !categorySelect) return;
+            
+            // 隐藏破损记录月份选择器
+            if (monthFilterEl) monthFilterEl.style.display = 'none';
+            if (monthInput) monthInput.removeEventListener('change', handleBreakMonthFilterChange);
+            const monthAllBtn = document.getElementById('break-month-all-btn');
+            if (monthAllBtn) monthAllBtn.removeEventListener('click', handleBreakMonthAllClick);
             
             // 恢复标签
             const label = categoryFilterDiv.querySelector('span');
@@ -6725,10 +6793,21 @@ header('Expires: 0');
                  displayedRecords = setsData.length;
                  totalRecords = setsData.length;
              } else if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') {
-                 // 破损记录页面使用破损记录数据
-                 const records = breakRecordsData[currentPage] || [];
-                 displayedRecords = records.length;
-                 totalRecords = records.length;
+                 // 破损记录页面：按月份（及餐厅）过滤后计数
+                 const jRestaurants = window.jRestaurantsForBreak || [];
+                 let filtered = [];
+                 jRestaurants.forEach(r => {
+                     const shopType = r.name.toLowerCase();
+                     let recs = breakRecordsData[shopType] || [];
+                     if (breakMonthFilter) {
+                         recs = recs.filter(x => (String(x.break_date || '').substring(0, 7)) === breakMonthFilter);
+                     }
+                     if (!breakRestaurantFilter || shopType === breakRestaurantFilter) {
+                         filtered = filtered.concat(recs);
+                     }
+                 });
+                 displayedRecords = filtered.length;
+                 totalRecords = filtered.length;
              } else {
                  // 默认情况
                  displayedRecords = 0;
@@ -9568,6 +9647,8 @@ header('Expires: 0');
         
         // 破损记录页面餐厅过滤状态
         let breakRestaurantFilter = '';
+        // 破损记录页面月份过滤（YYYY-MM），空为不过滤
+        let breakMonthFilter = '';
 
         // 打开转卖记录行数选择弹窗
         function openTransferRowsModal(shopType) {
