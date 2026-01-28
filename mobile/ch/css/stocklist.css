@@ -101,20 +101,12 @@ body {
     box-sizing: border-box;
 }
 
-.selects-row {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    gap: 12px;
-    width: 100%;
-    align-items: stretch;
+#filter-options-wrapper {
+    display: none;
 }
 
-.selects-row .select-group {
-    display: flex !important;
-    flex: 1 1 0 !important;
-    min-width: 0;
-    width: auto !important;
+#filter-options-wrapper.show {
+    display: block !important;
 }
 
 .select-wrapper {
