@@ -4775,6 +4775,17 @@ header('Expires: 0');
             document.getElementById('damageModal').style.display = 'block';
         }
 
+        /** 获取全部单品碗碟（含套装内的单品如 AG001、AG002），不包含套装编号（如 SETxxx） */
+        function getAllSingleDishwareForBreak() {
+            if (!stockData || !stockData.length) return [];
+            const list = [];
+            (stockData.filter(item => item.item_type === 'individual') || []).forEach(item => list.push(item));
+            (stockData.filter(item => item.item_type === 'set') || []).forEach(set => {
+                if (set.items && set.items.length) list.push(...set.items);
+            });
+            return list;
+        }
+
         // 填充破损记录选择框
         function populateDamageSelects() {
             const codeSelect = document.getElementById('damage-code-select');
@@ -4791,17 +4802,15 @@ header('Expires: 0');
             
             console.log('填充破损记录选择框，stockData长度:', stockData.length);
             
-            if (!stockData || stockData.length === 0) {
-                console.warn('stockData为空或未加载');
+            const allSingles = getAllSingleDishwareForBreak();
+            if (!allSingles.length) {
+                console.warn('无单品碗碟数据');
                 return;
             }
             
-            // 仅显示全部单品碗碟，不显示套装编号
-            const individualItems = stockData.filter(item => item.item_type === 'individual');
-            
-            // 填充编号选择框
+            // 全部单品（含套装内单品），不显示套装编号
             const uniqueCodes = new Set();
-            individualItems.forEach(item => {
+            allSingles.forEach(item => {
                 if (item.code_number && !uniqueCodes.has(item.code_number)) {
                     uniqueCodes.add(item.code_number);
                     const option = document.createElement('option');
@@ -4815,7 +4824,7 @@ header('Expires: 0');
             });
             
             // 填充产品选择框
-            individualItems.forEach(item => {
+            allSingles.forEach(item => {
                 if (item.id && item.product_name) {
                     const option = document.createElement('option');
                     option.value = item.product_name;
@@ -5139,10 +5148,10 @@ header('Expires: 0');
                 return;
             }
             
-            // 生成编号选项（仅单品碗碟，不显示套装编号）
+            // 生成编号选项（全部单品含套装内单品，不显示套装编号）
             let codeOptions = [];
-            const individualsForBreak = (stockData || []).filter(item => item.item_type === 'individual');
-            individualsForBreak.forEach(item => {
+            const allSingles = getAllSingleDishwareForBreak();
+            allSingles.forEach(item => {
                 const code = item.code_number || '';
                 if (code) {
                     codeOptions.push({
@@ -5153,7 +5162,7 @@ header('Expires: 0');
                 }
             });
             
-            const currentProduct = individualsForBreak.find(item => item.code_number === originalCode) || stockData.find(item => item.code_number === originalCode);
+            const currentProduct = allSingles.find(item => item.code_number === originalCode) || stockData.find(item => item.code_number === originalCode);
             const currentProductId = currentProduct ? currentProduct.id : '';
             
             // 编辑编号列 - 使用 combobox
@@ -5488,17 +5497,17 @@ header('Expires: 0');
             const currentRowCount = tbody.querySelectorAll('tr:not(.new-row)').length;
             const newRowIndex = currentRowCount + tbody.querySelectorAll('tr.new-row').length + 1;
             
-            // 仅单品碗碟，不显示套装编号
-            const individualsForBreak = (stockData || []).filter(item => item.item_type === 'individual');
+            // 全部单品（含套装内单品如 AG001、AG002），不显示套装编号
+            const allSingles = getAllSingleDishwareForBreak();
             let productOptions = '<option value="">请选择产品</option>';
-            individualsForBreak.forEach(item => {
+            allSingles.forEach(item => {
                 const code = item.code_number || '';
                 const displayText = code || item.product_name || '';
                 productOptions += `<option value="${item.id}" data-code="${code}" data-price="${item.unit_price || 0}">${displayText}</option>`;
             });
             
             let codeOptions = [];
-            individualsForBreak.forEach(item => {
+            allSingles.forEach(item => {
                 const code = item.code_number || '';
                 if (code) {
                     codeOptions.push({
