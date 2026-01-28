@@ -28,6 +28,16 @@ if (!isset($_SESSION['user_id'])) {
             <section class="form-section">
                 <div class="selects-row" style="display: flex !important; flex-direction: row !important; gap: 12px; width: 100%;">
                     <div class="select-group">
+                        <label for="product-category" class="sr-only">货品类型</label>
+                        <div class="select-wrapper">
+                            <select id="product-category" name="product-category">
+                                <option value="">全部</option>
+                            </select>
+                            <span class="select-icon" aria-hidden="true"></span>
+                        </div>
+                    </div>
+
+                    <div class="select-group">
                         <label for="freezer-category" class="sr-only">冰箱分类</label>
                         <div class="select-wrapper">
                             <select id="freezer-category" name="freezer-category">
@@ -52,16 +62,6 @@ if (!isset($_SESSION['user_id'])) {
                                 <option value="SBS-2">SBS-2</option>
                                 <option value="SBDI-1">SBDI-1</option>
                                 <option value="SBDI-2">SBDI-2</option>
-                            </select>
-                            <span class="select-icon" aria-hidden="true"></span>
-                        </div>
-                    </div>
-
-                    <div class="select-group">
-                        <label for="product-category" class="sr-only">货品类型</label>
-                        <div class="select-wrapper">
-                            <select id="product-category" name="product-category">
-                                <option value="">全部</option>
                             </select>
                             <span class="select-icon" aria-hidden="true"></span>
                         </div>
