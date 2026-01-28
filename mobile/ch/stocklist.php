@@ -104,6 +104,7 @@ if (!isset($_SESSION['user_id'])) {
     <script>
         // 全局变量
         let productList = [];
+        let allProductList = []; // 保存完整的原始产品列表（未过滤的）
         let stockData = [];
         let selectedFreezerCategory = '';
         let selectedProductCategory = '';
@@ -170,7 +171,9 @@ if (!isset($_SESSION['user_id'])) {
                 const result = JSON.parse(responseText);
                 
                 if (result.success) {
-                    productList = result.data || [];
+                    // 保存完整的原始产品列表（用于提取所有类型选项）
+                    allProductList = result.data || [];
+                    productList = [...allProductList]; // 复制完整列表
                     console.log('接收到产品数据数量:', productList.length);
                     
                     if (currentFreezerCategory) {
@@ -258,8 +261,8 @@ if (!isset($_SESSION['user_id'])) {
             const categorySelect = document.getElementById('product-category');
             if (!categorySelect) return;
             
-            // 获取所有唯一的货品类型
-            const categories = [...new Set(stockData.map(item => item.category).filter(cat => cat && cat.trim() !== ''))].sort();
+            // 从完整的原始产品列表中获取所有唯一的货品类型（不受冰箱区过滤影响）
+            const categories = [...new Set(allProductList.map(item => item.category).filter(cat => cat && cat.trim() !== ''))].sort();
             
             // 保存当前选中的值
             const currentValue = categorySelect.value;
