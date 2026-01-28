@@ -4649,10 +4649,11 @@ header('Expires: 0');
             jRestaurants.forEach(restaurant => {
                 const shopType = restaurant.name.toLowerCase();
                 const records = breakRecordsData[shopType] || [];
-                
-                // 计算总破损金额
+                const allSingles = getAllSingleDishwareForBreak();
                 const totalBreakAmount = records.reduce((sum, record) => {
-                    return sum + (parseFloat(record.total_price) || 0);
+                    const product = allSingles.find(item => (item.code_number || '').trim() === (record.code_number || '').trim());
+                    const effPrice = product ? getEffectiveUnitPriceForBreak(product) : (record.unit_price || 0);
+                    return sum + (record.break_quantity || 0) * effPrice;
                 }, 0);
                 
                 html += `
@@ -4707,7 +4708,11 @@ header('Expires: 0');
             }
 
             let rows = '';
+            const allSingles = getAllSingleDishwareForBreak();
             records.forEach((record, index) => {
+                const product = allSingles.find(item => (item.code_number || '').trim() === (record.code_number || '').trim());
+                const effPrice = product ? getEffectiveUnitPriceForBreak(product) : (record.unit_price || 0);
+                const effTotal = (record.break_quantity || 0) * effPrice;
                 rows += `
                     <tr data-id="${record.id}" data-shop="${shopId}">
                         <td class="text-center">${index + 1}</td>
@@ -4716,13 +4721,13 @@ header('Expires: 0');
                         <td class="text-center">
                             <div class="currency-display">
                                 <span class="currency-symbol">RM</span>
-                                <span class="currency-amount">${formatCurrency(record.unit_price || 0)}</span>
+                                <span class="currency-amount">${formatCurrency(effPrice)}</span>
                             </div>
                         </td>
                         <td class="text-center">
                             <div class="currency-display">
                                 <span class="currency-symbol">RM</span>
-                                <span class="currency-amount">${formatCurrency(record.total_price || 0)}</span>
+                                <span class="currency-amount">${formatCurrency(effTotal)}</span>
                             </div>
                         </td>
                         <td class="text-center">
@@ -4801,6 +4806,28 @@ header('Expires: 0');
             return [...ascii, ...nonAscii];
         }
 
+        /** 套装破损单价规则：仅数量最少的单品记价，其余为 0 */
+        function getEffectiveUnitPriceForBreak(item) {
+            if (!item) return 0;
+            const raw = parseFloat(item.unit_price) || 0;
+            const id = item.id;
+            const code = (item.code_number || '').trim();
+            const sets = (stockData || []).filter(x => x.item_type === 'set');
+            for (const s of sets) {
+                if (!s.items || !s.items.length) continue;
+                const member = s.items.find(m => m.id == id || ((m.code_number || '').trim() === code));
+                if (!member) continue;
+                const q = parseFloat(member.total_quantity) || 0;
+                let minQ = Infinity;
+                for (const m of s.items) {
+                    const t = parseFloat(m.total_quantity) || 0;
+                    if (t < minQ) minQ = t;
+                }
+                return q <= minQ ? raw : 0;
+            }
+            return raw;
+        }
+
         // 填充破损记录选择框
         function populateDamageSelects() {
             const codeSelect = document.getElementById('damage-code-select');
@@ -4823,7 +4850,7 @@ header('Expires: 0');
                 return;
             }
             
-            // 全部单品（含套装内单品），不显示套装编号
+            // 全部单品（含套装内单品），不显示套装编号；套装仅最少数量单品记价
             const uniqueCodes = new Set();
             allSingles.forEach(item => {
                 if (item.code_number && !uniqueCodes.has(item.code_number)) {
@@ -4833,7 +4860,7 @@ header('Expires: 0');
                     option.textContent = item.code_number;
                     option.dataset.productName = item.product_name;
                     option.dataset.dishwareId = item.id;
-                    option.dataset.price = item.unit_price;
+                    option.dataset.price = getEffectiveUnitPriceForBreak(item);
                     codeSelect.appendChild(option);
                 }
             });
@@ -4841,12 +4868,13 @@ header('Expires: 0');
             // 填充产品选择框
             allSingles.forEach(item => {
                 if (item.id && item.product_name) {
+                    const eff = getEffectiveUnitPriceForBreak(item);
                     const option = document.createElement('option');
                     option.value = item.product_name;
-                    option.textContent = `${item.product_name} (${item.code_number || '无编号'}) - RM${formatCurrency(item.unit_price)}`;
+                    option.textContent = `${item.product_name} (${item.code_number || '无编号'}) - RM${formatCurrency(eff)}`;
                     option.dataset.codeNumber = item.code_number;
                     option.dataset.dishwareId = item.id;
-                    option.dataset.price = item.unit_price;
+                    option.dataset.price = eff;
                     productSelect.appendChild(option);
                 }
             });
@@ -5172,7 +5200,7 @@ header('Expires: 0');
                     codeOptions.push({
                         code: code,
                         id: item.id,
-                        price: item.unit_price || 0
+                        price: getEffectiveUnitPriceForBreak(item)
                     });
                 }
             });
@@ -5273,14 +5301,12 @@ header('Expires: 0');
                     return;
                 }
                 
-                // 如果编号改变了，需要获取新的产品信息（含套装内单品）
+                // 如果编号改变了，需要获取新的产品信息（含套装内单品）；单价用套装规则
                 let unitPrice = record.unit_price || 0;
-                if (newCode !== row.dataset.originalCode) {
-                    const allSingles = getAllSingleDishwareForBreak();
-                    const newProduct = allSingles.find(item => item.code_number === newCode) || stockData.find(item => item.code_number === newCode);
-                    if (newProduct) {
-                        unitPrice = newProduct.unit_price || 0;
-                    }
+                const allSingles = getAllSingleDishwareForBreak();
+                const product = allSingles.find(item => item.code_number === newCode) || stockData.find(item => item.code_number === newCode);
+                if (product) {
+                    unitPrice = getEffectiveUnitPriceForBreak(product);
                 }
                 
                 const totalPrice = newQuantity * unitPrice;
@@ -5334,10 +5360,12 @@ header('Expires: 0');
             const record = records.find(r => r.id == recordId);
             
             if (record) {
-                // 找到该行在数组中的索引
                 const index = records.findIndex(r => r.id == recordId);
                 if (index !== -1) {
-                    // 重新渲染该行
+                    const allSingles = getAllSingleDishwareForBreak();
+                    const product = allSingles.find(item => (item.code_number || '').trim() === (record.code_number || '').trim());
+                    const effPrice = product ? getEffectiveUnitPriceForBreak(product) : (record.unit_price || 0);
+                    const effTotal = (record.break_quantity || 0) * effPrice;
                     const tbody = row.parentElement;
                     const newRow = document.createElement('tr');
                     newRow.setAttribute('data-id', record.id);
@@ -5349,13 +5377,13 @@ header('Expires: 0');
                         <td class="text-center">
                             <div class="currency-display">
                                 <span class="currency-symbol">RM</span>
-                                <span class="currency-amount">${formatCurrency(record.unit_price || 0)}</span>
+                                <span class="currency-amount">${formatCurrency(effPrice)}</span>
                             </div>
                         </td>
                         <td class="text-center">
                             <div class="currency-display">
                                 <span class="currency-symbol">RM</span>
-                                <span class="currency-amount">${formatCurrency(record.total_price || 0)}</span>
+                                <span class="currency-amount">${formatCurrency(effTotal)}</span>
                             </div>
                         </td>
                         <td class="text-center">
@@ -5519,7 +5547,7 @@ header('Expires: 0');
             allSingles.forEach(item => {
                 const code = item.code_number || '';
                 const displayText = code || item.product_name || '';
-                productOptions += `<option value="${item.id}" data-code="${code}" data-price="${item.unit_price || 0}">${displayText}</option>`;
+                productOptions += `<option value="${item.id}" data-code="${code}" data-price="${getEffectiveUnitPriceForBreak(item)}">${displayText}</option>`;
             });
             
             let codeOptions = [];
@@ -5529,7 +5557,7 @@ header('Expires: 0');
                     codeOptions.push({
                         code: code,
                         id: item.id,
-                        price: item.unit_price || 0
+                        price: getEffectiveUnitPriceForBreak(item)
                     });
                 }
             });
