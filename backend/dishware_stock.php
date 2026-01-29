@@ -1025,6 +1025,35 @@ header('Expires: 0');
             margin: 0 auto; /* 确保在单元格中居中 */
         }
 
+        /* 照片悬停 tooltip：约 0.15s 后显示，比原生 title 快 */
+        .photo-tooltip-wrap {
+            position: relative;
+            display: inline-block;
+        }
+        .photo-tooltip-wrap::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 50%;
+            bottom: 100%;
+            transform: translateX(-50%) translateY(-6px);
+            padding: 6px 10px;
+            background: #1f2937;
+            color: #fff;
+            font-size: 13px;
+            white-space: nowrap;
+            border-radius: 6px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.12s ease;
+            transition-delay: 0.12s;
+            z-index: 9999;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .photo-tooltip-wrap:hover::after {
+            opacity: 1;
+            transition-delay: 0s;
+        }
+
         /* 确保照片单元格内容居中 */
         .stock-table td:nth-child(2) {
             text-align: center !important;
@@ -7147,9 +7176,11 @@ header('Expires: 0');
 
             function photoHtmlFrom(path, altText, iconClass = 'fa-image') {
                 const tooltip = (altText || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                return path
-                    ? `<img src="${path}" alt="${tooltip || ''}" class="product-photo" title="${tooltip || '照片'}">`
-                    : `<div class="no-photo" title="${tooltip || '无照片'}"><i class="fas ${iconClass}"></i></div>`;
+                const label = tooltip || (path ? '照片' : '无照片');
+                const inner = path
+                    ? `<img src="${path}" alt="${label}" class="product-photo">`
+                    : `<div class="no-photo"><i class="fas ${iconClass}"></i></div>`;
+                return `<span class="photo-tooltip-wrap" data-tooltip="${label}">${inner}</span>`;
             }
 
             if (!filteredData || filteredData.length === 0) {
@@ -7451,9 +7482,11 @@ header('Expires: 0');
             
             function photoHtmlFrom(path, altText, iconClass = 'fa-image') {
                 const tooltip = (altText || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                return path
-                    ? `<img src="${path}" alt="${tooltip || ''}" class="product-photo" title="${tooltip || '照片'}">`
-                    : `<div class="no-photo" title="${tooltip || '无照片'}"><i class="fas ${iconClass}"></i></div>`;
+                const label = tooltip || (path ? '照片' : '无照片');
+                const inner = path
+                    ? `<img src="${path}" alt="${label}" class="product-photo">`
+                    : `<div class="no-photo"><i class="fas ${iconClass}"></i></div>`;
+                return `<span class="photo-tooltip-wrap" data-tooltip="${label}">${inner}</span>`;
             }
             
             items.forEach((item) => {
