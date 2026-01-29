@@ -2002,7 +2002,7 @@ header('Expires: 0');
         .stock-table.transposed tr[data-row="总数"] td,
         .stock-table.transposed tr[data-row="操作"] th.row-header,
         .stock-table.transposed tr[data-row="操作"] td {
-            background: #4b5563 !important;
+            background: #636363 !important;
             color: #fff;
         }
         /* 总数、操作行：第二列起边框与上方一致，浅灰 #d1d5db */
