@@ -1034,8 +1034,8 @@ header('Expires: 0');
             content: attr(data-tooltip);
             position: absolute;
             left: 50%;
-            bottom: 100%;
-            transform: translateX(-50%) translateY(-6px);
+            top: 100%;
+            transform: translateX(-50%) translateY(6px);
             padding: 6px 10px;
             background: #1f2937;
             color: #fff;
@@ -1054,10 +1054,11 @@ header('Expires: 0');
             transition-delay: 0s;
         }
 
-        /* 确保照片单元格内容居中 */
+        /* 确保照片单元格内容居中；overflow:visible 以便悬停 tooltip 可见 */
         .stock-table td:nth-child(2) {
             text-align: center !important;
             vertical-align: middle !important;
+            overflow: visible;
         }
 
         /* 数量输入框 */
@@ -1844,11 +1845,12 @@ header('Expires: 0');
             box-sizing: border-box;
         }
 
-        /* 照片列 - 使用原始尺寸 */
+        /* 照片列 - 使用原始尺寸；overflow:visible 以便悬停 tooltip 不被裁切 */
         #stock-table.transposed tr[data-row="照片"] td,
         .stock-table.transposed tr[data-row="照片"] td { 
-            min-width: 180px; /* 足够的宽度以容纳原始照片尺寸 */
+            min-width: 180px;
             padding: clamp(4px, 0.42vw, 8px);
+            overflow: visible;
         }
         
         #stock-table.transposed tr[data-row="照片"] td img.product-photo,
