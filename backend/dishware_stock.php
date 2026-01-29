@@ -722,7 +722,7 @@ header('Expires: 0');
             text-align: center;
             font-size: clamp(8px, 0.74vw, 14px);
             font-weight: 600;
-            border: 1px solid #d1d5db;
+            border: 1px solid #ff5c00;
             position: sticky;
             top: 0;
             z-index: 100;
@@ -733,7 +733,7 @@ header('Expires: 0');
         .stock-table td {
             padding: clamp(2px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px);
             font-size: clamp(8px, 0.74vw, 14px);
-            border: 1px solid #d1d5db;
+            border: 1px solid #ff5c00;
             text-align: center;
             vertical-align: middle;
         }
@@ -1952,7 +1952,7 @@ header('Expires: 0');
             min-width: 110px;
             max-width: 110px;
             width: 110px !important;
-            border: 1px solid #d1d5db;
+            border: 1px solid #ff5c00;
             box-sizing: border-box;
         }
 
@@ -1960,7 +1960,7 @@ header('Expires: 0');
         #stock-table.transposed td,
         .stock-table.transposed td {
             text-align: center;
-            border: 1px solid #d1d5db;
+            border: 1px solid #ff5c00;
             background: white;
             min-width: 180px; /* Minimum width for data columns */
             max-width: none;
@@ -1990,25 +1990,25 @@ header('Expires: 0');
         /* 仅套装列在照片行的列线为虚线；套装之间的边界为实线 */
         #stock-table.transposed tr[data-row="照片"] td[data-col-bg="0"],
         .stock-table.transposed tr[data-row="照片"] td[data-col-bg="0"] {
-            border-left: 1px dashed #d1d5db !important;
-            border-right: 1px dashed #d1d5db !important;
+            border-left: 1px dashed #ff5c00 !important;
+            border-right: 1px dashed #ff5c00 !important;
         }
         /* 套装最左、最右整列边界线加粗（全行） */
         #stock-table.transposed td[data-col-last-in-set="1"],
         .stock-table.transposed td[data-col-last-in-set="1"] {
-            border-right: 2px solid #d1d5db !important;
+            border-right: 2px solid #ff5c00 !important;
         }
         #stock-table.transposed td[data-col-first-in-set="1"],
         .stock-table.transposed td[data-col-first-in-set="1"] {
-            border-left: 2px solid #d1d5db !important;
+            border-left: 2px solid #ff5c00 !important;
         }
         #stock-table.transposed tr[data-row="照片"] td[data-col-last-in-set="1"],
         .stock-table.transposed tr[data-row="照片"] td[data-col-last-in-set="1"] {
-            border-right: 2px solid #d1d5db !important;
+            border-right: 2px solid #ff5c00 !important;
         }
         #stock-table.transposed tr[data-row="照片"] td[data-col-first-in-set="1"],
         .stock-table.transposed tr[data-row="照片"] td[data-col-first-in-set="1"] {
-            border-left: 2px solid #d1d5db !important;
+            border-left: 2px solid #ff5c00 !important;
         }
         
         #stock-table.transposed tr[data-row="照片"] td img.product-photo,
@@ -2017,7 +2017,7 @@ header('Expires: 0');
             height: clamp(100px, 7.8vw, 150px) !important;
             object-fit: cover;
             border-radius: clamp(4px, 0.42vw, 8px);
-            border: 1px solid #e5e7eb;
+            border: 1px solid #ff5c00;
             display: block;
             margin: 0 auto;
             max-width: 100%;
@@ -2153,19 +2153,19 @@ header('Expires: 0');
             background: #636363 !important;
             color: #fff;
         }
-        /* 总数、操作行：第二列起边框与上方一致，浅灰 #d1d5db */
+        /* 总数、操作行：第二列起边框与表格一致 #ff5c00 */
         #stock-table.transposed tr[data-row="总数"] td,
         #stock-table.transposed tr[data-row="操作"] td,
         .stock-table.transposed tr[data-row="总数"] td,
         .stock-table.transposed tr[data-row="操作"] td {
-            border: 1px solid #d1d5db !important;
+            border: 1px solid #ff5c00 !important;
         }
-        /* 操作行（最后一行）底线加粗，浅灰与上方一致 */
+        /* 操作行（最后一行）底线加粗 */
         #stock-table.transposed tr[data-row="操作"] th.row-header,
         #stock-table.transposed tr[data-row="操作"] td,
         .stock-table.transposed tr[data-row="操作"] th.row-header,
         .stock-table.transposed tr[data-row="操作"] td {
-            border-bottom: 2px solid #d1d5db !important;
+            border-bottom: 2px solid #ff5c00 !important;
         }
 
         /* 小屏幕时减小列宽 - 不影响默认页面大小 */
@@ -2224,7 +2224,7 @@ header('Expires: 0');
         .break-record-section {
             background: white;
             border-radius: 12px;
-            border: 2px solid #000000ff;
+            border: 2px solid #ff5c00;
             box-shadow: 0 2px 8px rgba(88, 62, 4, 0.1);
             display: flex;
             flex-direction: column;
@@ -2275,7 +2275,7 @@ header('Expires: 0');
             text-align: center;
             font-size: clamp(8px, 0.74vw, 14px);
             font-weight: 600;
-            border: 1px solid #d1d5db;
+            border: 1px solid #ff5c00;
             position: sticky;
             top: 0;
             z-index: 100;
@@ -2340,7 +2340,7 @@ header('Expires: 0');
         .break-record-table td {
             padding: clamp(2px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px);
             font-size: clamp(8px, 0.74vw, 14px);
-            border: 1px solid #d1d5db;
+            border: 1px solid #ff5c00;
             text-align: center;
             vertical-align: middle;
             overflow: visible; /* 改为 visible，允许下拉菜单显示 */
@@ -2359,7 +2359,7 @@ header('Expires: 0');
         .category-section {
             background: white;
             border-radius: 12px;
-            border: 2px solid #000000ff;
+            border: 2px solid #ff5c00;
             box-shadow: 0 2px 8px rgba(88, 62, 4, 0.1);
             display: flex;
             flex-direction: column;
@@ -2474,7 +2474,7 @@ header('Expires: 0');
         .break-record-section {
             background: white;
             border-radius: 12px;
-            border: 2px solid #000000ff;
+            border: 2px solid #ff5c00;
             box-shadow: 0 2px 8px rgba(88, 62, 4, 0.1);
             display: flex;
             flex-direction: column;
@@ -2525,7 +2525,7 @@ header('Expires: 0');
             text-align: center;
             font-size: clamp(8px, 0.74vw, 14px);
             font-weight: 600;
-            border: 1px solid #d1d5db;
+            border: 1px solid #ff5c00;
             position: sticky;
             top: 0;
             z-index: 100;
@@ -2571,7 +2571,7 @@ header('Expires: 0');
         .break-record-table td {
             padding: clamp(2px, 0.31vw, 6px) 0px;
             font-size: clamp(8px, 0.74vw, 14px);
-            border: 1px solid #d1d5db;
+            border: 1px solid #ff5c00;
             text-align: center;
             vertical-align: middle;
             overflow: visible; /* 改为 visible，允许下拉菜单显示 */
