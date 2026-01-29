@@ -1862,11 +1862,11 @@ header('Expires: 0');
             padding: clamp(4px, 0.42vw, 8px);
             overflow: visible;
         }
-        /* 仅套装列在照片行的列线为虚线；套装之间的边界为实线 */
+        /* 仅套装列在照片行的列线为虚线（细密黑虚线，与参考图一致）；套装之间的边界为实线 */
         #stock-table.transposed tr[data-row="照片"] td[data-col-bg="0"],
         .stock-table.transposed tr[data-row="照片"] td[data-col-bg="0"] {
-            border-left: 1px dotted #d1d5db !important;
-            border-right: 1px dotted #d1d5db !important;
+            border-left: 1px dashed #333 !important;
+            border-right: 1px dashed #333 !important;
         }
         #stock-table.transposed tr[data-row="照片"] td[data-col-last-in-set="1"],
         .stock-table.transposed tr[data-row="照片"] td[data-col-last-in-set="1"] {
