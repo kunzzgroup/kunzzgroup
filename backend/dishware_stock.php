@@ -1996,19 +1996,19 @@ header('Expires: 0');
         /* 套装最左、最右整列边界线加粗（全行） */
         #stock-table.transposed td[data-col-last-in-set="1"],
         .stock-table.transposed td[data-col-last-in-set="1"] {
-            border-right: 2px solid #636363 !important;
+            border-right: 2px solid #d1d5db !important;
         }
         #stock-table.transposed td[data-col-first-in-set="1"],
         .stock-table.transposed td[data-col-first-in-set="1"] {
-            border-left: 2px solid #636363 !important;
+            border-left: 2px solid #d1d5db !important;
         }
         #stock-table.transposed tr[data-row="照片"] td[data-col-last-in-set="1"],
         .stock-table.transposed tr[data-row="照片"] td[data-col-last-in-set="1"] {
-            border-right: 2px solid #636363 !important;
+            border-right: 2px solid #d1d5db !important;
         }
         #stock-table.transposed tr[data-row="照片"] td[data-col-first-in-set="1"],
         .stock-table.transposed tr[data-row="照片"] td[data-col-first-in-set="1"] {
-            border-left: 2px solid #636363 !important;
+            border-left: 2px solid #d1d5db !important;
         }
         
         #stock-table.transposed tr[data-row="照片"] td img.product-photo,
@@ -7816,19 +7816,16 @@ header('Expires: 0');
                                     break;
                                 }
                             }
-                            const lastAttr = colLastInSet[i + mergeCount - 1] ? ' data-col-last-in-set="1"' : '';
-                            const firstAttr = colFirstInSet[i] ? ' data-col-first-in-set="1"' : '';
+                            
                             if (mergeCount > 1) {
-                                html += `<td data-col-bg="${bg}" colspan="${mergeCount}"${firstAttr}${lastAttr} style="vertical-align: middle; text-align: center;">${currentValue}</td>`;
+                                html += `<td data-col-bg="${bg}" colspan="${mergeCount}" style="vertical-align: middle; text-align: center;">${currentValue}</td>`;
                                 i += mergeCount;
                             } else {
-                                html += `<td data-col-bg="${bg}"${firstAttr}${lastAttr}>${currentValue}</td>`;
+                                html += `<td data-col-bg="${bg}">${currentValue}</td>`;
                                 i++;
                             }
                         } else {
-                            const lastAttr = colLastInSet[i] ? ' data-col-last-in-set="1"' : '';
-                            const firstAttr = colFirstInSet[i] ? ' data-col-first-in-set="1"' : '';
-                            html += `<td data-col-bg="${bg}"${firstAttr}${lastAttr}>${currentValue}</td>`;
+                            html += `<td data-col-bg="${bg}">${currentValue}</td>`;
                             i++;
                         }
                     }
@@ -8120,19 +8117,16 @@ header('Expires: 0');
                                     break;
                                 }
                             }
-                            const lastAttr = colLastInSet[i + mergeCount - 1] ? ' data-col-last-in-set="1"' : '';
-                            const firstAttr = colFirstInSet[i] ? ' data-col-first-in-set="1"' : '';
+                            
                             if (mergeCount > 1) {
-                                tableHtml += `<td data-col-bg="${bg}" colspan="${mergeCount}"${firstAttr}${lastAttr} style="vertical-align: middle; text-align: center;">${currentValue}</td>`;
+                                tableHtml += `<td data-col-bg="${bg}" colspan="${mergeCount}" style="vertical-align: middle; text-align: center;">${currentValue}</td>`;
                                 i += mergeCount;
                             } else {
-                                tableHtml += `<td data-col-bg="${bg}"${firstAttr}${lastAttr}>${currentValue}</td>`;
+                                tableHtml += `<td data-col-bg="${bg}">${currentValue}</td>`;
                                 i++;
                             }
                         } else {
-                            const lastAttr = colLastInSet[i] ? ' data-col-last-in-set="1"' : '';
-                            const firstAttr = colFirstInSet[i] ? ' data-col-first-in-set="1"' : '';
-                            tableHtml += `<td data-col-bg="${bg}"${firstAttr}${lastAttr}>${currentValue}</td>`;
+                            tableHtml += `<td data-col-bg="${bg}">${currentValue}</td>`;
                             i++;
                         }
                     }
