@@ -2878,7 +2878,7 @@ header('Expires: 0');
     <div class="container">
         <div class="header">
             <div>
-                <h1 id="page-title">碗碟库存管理</h1>
+                <h1 id="page-title">总库存</h1>
             </div>
             <div class="controls">
                 <div class="view-selector">
@@ -3685,7 +3685,8 @@ header('Expires: 0');
             setupPageSwitcher();
             setupSetFormSubmit();
             
-            // 初始化总库存页面的视图切换按钮
+            // 初始化总库存页面的视图切换按钮，并更新页面头部（标题、类型筛选显示等）
+            updatePageHeader(currentPage);
             if (currentPage === 'stock') {
                 switchStockView(stockViewType);
             }
