@@ -1862,32 +1862,14 @@ header('Expires: 0');
             padding: clamp(4px, 0.42vw, 8px);
             overflow: visible;
         }
-        /* 套装照片合并格：框起来一起 */
-        .photo-set-inner {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            gap: clamp(8px, 0.83vw, 16px);
-            padding: clamp(8px, 0.83vw, 16px);
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            background: #fff;
-        }
-        .photo-set-inner .product-photo { margin: 0; }
-        .photo-set-inner .no-photo { margin: 0; }
-        /* 仅套装列在照片行的列线为白色；紧邻单品时右侧线浅灰（同分类、尺寸）；合并后仅对单格生效 */
-        #stock-table.transposed tr[data-row="照片"] td[data-col-bg="0"]:not(.photo-set-cell),
-        .stock-table.transposed tr[data-row="照片"] td[data-col-bg="0"]:not(.photo-set-cell) {
+        /* 仅套装列在照片行的列线为白色；紧邻单品时右侧线浅灰（同分类、尺寸） */
+        #stock-table.transposed tr[data-row="照片"] td[data-col-bg="0"],
+        .stock-table.transposed tr[data-row="照片"] td[data-col-bg="0"] {
             border-left: 1px solid #fff !important;
             border-right: 1px solid #fff !important;
         }
-        #stock-table.transposed tr[data-row="照片"] td[data-col-bg="0"]:not(.photo-set-cell):has(+ td[data-col-bg="1"]),
-        .stock-table.transposed tr[data-row="照片"] td[data-col-bg="0"]:not(.photo-set-cell):has(+ td[data-col-bg="1"]) {
-            border-right: 1px solid #d1d5db !important;
-        }
-        #stock-table.transposed tr[data-row="照片"] td.photo-set-cell:has(+ td[data-col-bg="1"]),
-        .stock-table.transposed tr[data-row="照片"] td.photo-set-cell:has(+ td[data-col-bg="1"]) {
+        #stock-table.transposed tr[data-row="照片"] td[data-col-bg="0"]:has(+ td[data-col-bg="1"]),
+        .stock-table.transposed tr[data-row="照片"] td[data-col-bg="0"]:has(+ td[data-col-bg="1"]) {
             border-right: 1px solid #d1d5db !important;
         }
         
@@ -7470,32 +7452,6 @@ header('Expires: 0');
                             i++;
                         }
                     }
-                } else if (f.key === 'photo' && displayRows.length > 0) {
-                    let i = 0;
-                    while (i < displayRows.length) {
-                        const r = displayRows[i];
-                        const bg = colGroupParity[i] != null ? colGroupParity[i] : 0;
-                        const sid = r.set_id;
-                        if (sid) {
-                            let mergeCount = 1;
-                            while (i + mergeCount < displayRows.length && displayRows[i + mergeCount].set_id === sid) mergeCount++;
-                            const photos = [];
-                            for (let k = 0; k < mergeCount; k++) photos.push(displayRows[i + k].photo || '-');
-                            const inner = mergeCount > 1
-                                ? `<div class="photo-set-inner">${photos.join('')}</div>`
-                                : (photos[0] || '-');
-                            if (mergeCount > 1) {
-                                html += `<td data-col-bg="${bg}" colspan="${mergeCount}" class="photo-set-cell" style="vertical-align: middle;">${inner}</td>`;
-                            } else {
-                                html += `<td data-col-bg="${bg}">${inner}</td>`;
-                            }
-                            i += mergeCount;
-                        } else {
-                            const cell = (r && typeof r.photo !== 'undefined') ? r.photo : '-';
-                            html += `<td data-col-bg="${bg}">${cell}</td>`;
-                            i++;
-                        }
-                    }
                 } else {
                     displayRows.forEach((r, ci) => {
                         const cell = (r && typeof r[f.key] !== 'undefined') ? r[f.key] : '-';
@@ -7782,32 +7738,6 @@ header('Expires: 0');
                             }
                         } else {
                             tableHtml += `<td data-col-bg="${bg}">${currentValue}</td>`;
-                            i++;
-                        }
-                    }
-                } else if (f.key === 'photo' && displayRows.length > 0) {
-                    let i = 0;
-                    while (i < displayRows.length) {
-                        const r = displayRows[i];
-                        const bg = colGroupParity[i] != null ? colGroupParity[i] : 0;
-                        const sid = r.set_id;
-                        if (sid) {
-                            let mergeCount = 1;
-                            while (i + mergeCount < displayRows.length && displayRows[i + mergeCount].set_id === sid) mergeCount++;
-                            const photos = [];
-                            for (let k = 0; k < mergeCount; k++) photos.push(displayRows[i + k].photo || '-');
-                            const inner = mergeCount > 1
-                                ? `<div class="photo-set-inner">${photos.join('')}</div>`
-                                : (photos[0] || '-');
-                            if (mergeCount > 1) {
-                                tableHtml += `<td data-col-bg="${bg}" colspan="${mergeCount}" class="photo-set-cell" style="vertical-align: middle;">${inner}</td>`;
-                            } else {
-                                tableHtml += `<td data-col-bg="${bg}">${inner}</td>`;
-                            }
-                            i += mergeCount;
-                        } else {
-                            const cell = (r && typeof r.photo !== 'undefined') ? r.photo : '-';
-                            tableHtml += `<td data-col-bg="${bg}">${cell}</td>`;
                             i++;
                         }
                     }
