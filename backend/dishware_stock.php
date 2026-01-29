@@ -1845,6 +1845,16 @@ header('Expires: 0');
             box-sizing: border-box;
         }
 
+        /* 数据列交替背景：灰白、白、灰白、白 */
+        #stock-table.transposed tr td:nth-child(2n),
+        .stock-table.transposed tr td:nth-child(2n) {
+            background: #f3f4f6;
+        }
+        #stock-table.transposed tr td:nth-child(2n+1),
+        .stock-table.transposed tr td:nth-child(2n+1) {
+            background: #fff;
+        }
+
         /* 照片列 - 使用原始尺寸；overflow:visible 以便悬停 tooltip 不被裁切 */
         #stock-table.transposed tr[data-row="照片"] td,
         .stock-table.transposed tr[data-row="照片"] td { 
