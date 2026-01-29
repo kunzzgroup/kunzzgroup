@@ -1649,6 +1649,20 @@ header('Expires: 0');
         align-items: center;
         gap: clamp(12px, 1.25vw, 24px);
     }
+
+    .break-selection-display {
+        padding: 10px 16px;
+        margin-bottom: 12px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: clamp(12px, 1vw, 14px);
+        color: #334155;
+    }
+    .break-selection-display .break-selection-label {
+        font-weight: 600;
+        margin-right: 6px;
+    }
     .break-month-picker,
     .break-quick-select {
         display: flex;
@@ -3042,6 +3056,10 @@ header('Expires: 0');
 
             <!-- 合并的破损记录页面（J1、J2、J3左右排列） -->
             <div id="j1-page" class="page-content" style="display: none;">
+                <div id="break-selection-display" class="break-selection-display" style="display: none;">
+                    <span class="break-selection-label">当前筛选：</span>
+                    <span id="break-selection-display-text">选择年份和月份</span>
+                </div>
                 <div class="table-scroll-container" style="overflow-x: auto; overflow-y: visible; width: 100%;">
                     <div id="break-records-container" class="break-records-container">
                         <!-- 动态生成三个店铺的表格 -->
@@ -4473,7 +4491,7 @@ header('Expires: 0');
                         window._breakDateFilterInited = true;
                     }
                     updateCategoryFilterToRestaurantForBreak();
-                    // 加载所有破损记录
+                    if (typeof updateBreakSelectionDisplay === 'function') updateBreakSelectionDisplay();
                     loadAllBreakRecords();
                     break;
                 case 'transfer':
@@ -6665,10 +6683,12 @@ header('Expires: 0');
 
             function updateTriggerText() {
                 const t = document.getElementById('break-month-picker-text');
-                if (!t) return;
-                const { year, month } = breakMonthValue;
-                if (year != null && month != null) t.textContent = `${year}年${month}月`;
-                else t.textContent = '选择年份和月份';
+                if (t) {
+                    const { year, month } = breakMonthValue;
+                    if (year != null && month != null) t.textContent = `${year}年${month}月`;
+                    else t.textContent = '选择年份和月份';
+                }
+                if (typeof window.updateBreakSelectionDisplay === 'function') window.updateBreakSelectionDisplay();
             }
 
             function renderPopup() {
@@ -6793,7 +6813,27 @@ header('Expires: 0');
             if (q) q.textContent = '时段';
             if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') loadAllBreakRecords();
             if (currentPage === 'transfer') loadAllTransferRecords();
+            if (typeof window.updateBreakSelectionDisplay === 'function') window.updateBreakSelectionDisplay();
         }
+
+        function updateBreakSelectionDisplay() {
+            const el = document.getElementById('break-selection-display');
+            const textEl = document.getElementById('break-selection-display-text');
+            if (!el || !textEl) return;
+            const onBreak = currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3';
+            if (!onBreak) {
+                el.style.display = 'none';
+                return;
+            }
+            const { year, month } = breakMonthValue;
+            if (year != null && month != null) {
+                textEl.textContent = `${year}年${month}月`;
+            } else {
+                textEl.textContent = '未选择';
+            }
+            el.style.display = 'block';
+        }
+        window.updateBreakSelectionDisplay = updateBreakSelectionDisplay;
 
         function toggleBreakQuickSelectDropdown() {
             const d = document.getElementById('break-quick-select-dropdown');
@@ -6821,6 +6861,7 @@ header('Expires: 0');
             if (d) d.classList.remove('show');
             if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') loadAllBreakRecords();
             if (currentPage === 'transfer') loadAllTransferRecords();
+            if (typeof window.updateBreakSelectionDisplay === 'function') window.updateBreakSelectionDisplay();
         }
 
         // 打开破损记录页面时，点击外部关闭快速选择下拉、年月选择弹层
