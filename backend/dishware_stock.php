@@ -47,6 +47,10 @@ header('Expires: 0');
             font-weight: bold;
             color: #000000ff;
         }
+        #page-title .break-title-ym {
+            font-size: 1.15em;
+            font-weight: 700;
+        }
         
         .header .controls {
             display: flex;
@@ -1650,18 +1654,6 @@ header('Expires: 0');
         gap: clamp(12px, 1.25vw, 24px);
     }
 
-    .break-selection-display {
-        padding: 10px 16px;
-        margin-bottom: 12px;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        color: #334155;
-    }
-    .break-selection-display #break-selection-display-text {
-        font-size: clamp(16px, 1.4vw, 20px);
-        font-weight: 700;
-    }
     .break-month-picker,
     .break-quick-select {
         display: flex;
@@ -3094,9 +3086,6 @@ header('Expires: 0');
 
             <!-- 合并的破损记录页面（J1、J2、J3左右排列） -->
             <div id="j1-page" class="page-content" style="display: none;">
-                <div id="break-selection-display" class="break-selection-display" style="display: none;">
-                    <span id="break-selection-display-text">选择年份和月份</span>
-                </div>
                 <div class="table-scroll-container" style="overflow-x: auto; overflow-y: visible; width: 100%;">
                     <div id="break-records-container" class="break-records-container">
                         <!-- 动态生成三个店铺的表格 -->
@@ -4518,6 +4507,7 @@ header('Expires: 0');
                 case 'j1':
                 case 'j2':
                 case 'j3':
+                    /* 标题由 updateBreakSelectionDisplay 设为 "破损记录" 或 "破损记录 - YYYY年M月" */
                     if (title) title.textContent = '破损记录';
                     if (addButton) {
                         // 隐藏顶部的"记录破损"按钮，因为每个容器都有自己的按钮
@@ -6854,21 +6844,16 @@ header('Expires: 0');
         }
 
         function updateBreakSelectionDisplay() {
-            const el = document.getElementById('break-selection-display');
-            const textEl = document.getElementById('break-selection-display-text');
-            if (!el || !textEl) return;
+            const title = document.getElementById('page-title');
+            if (!title) return;
             const onBreak = currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3';
-            if (!onBreak) {
-                el.style.display = 'none';
-                return;
-            }
+            if (!onBreak) return;
             const { year, month } = breakMonthValue;
             if (year != null && month != null) {
-                textEl.textContent = `${year}年${month}月`;
+                title.innerHTML = `破损记录 <span class="break-title-ym">- ${year}年${month}月</span>`;
             } else {
-                textEl.textContent = '未选择';
+                title.textContent = '破损记录';
             }
-            el.style.display = 'block';
         }
         window.updateBreakSelectionDisplay = updateBreakSelectionDisplay;
 
