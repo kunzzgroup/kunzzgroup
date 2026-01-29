@@ -1874,7 +1874,11 @@ header('Expires: 0');
             max-width: 100%;
         }
         
-        /* 产品名称列 - 允许自动扩展 */
+        /* 产品名称列 - 隐藏（用户要求不显示餐品名字行） */
+        #stock-table.transposed tr[data-row="产品名称"],
+        .stock-table.transposed tr[data-row="产品名称"] {
+            display: none !important;
+        }
         #stock-table.transposed tr[data-row="产品名称"] td,
         .stock-table.transposed tr[data-row="产品名称"] td { 
             white-space: normal;
