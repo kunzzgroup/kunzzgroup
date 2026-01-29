@@ -1845,10 +1845,10 @@ header('Expires: 0');
             box-sizing: border-box;
         }
 
-        /* 数据列背景：套装暖杏色，单品淡薰衣草灰，舒适区分（无绿） */
+        /* 数据列背景：套装暖金杏，单品淡薰衣草灰，舒适区分 */
         #stock-table.transposed tr td[data-col-bg="0"],
         .stock-table.transposed tr td[data-col-bg="0"] {
-            background: #fff5eb;
+            background: #fff8e7;
         }
         #stock-table.transposed tr td[data-col-bg="1"],
         .stock-table.transposed tr td[data-col-bg="1"] {
