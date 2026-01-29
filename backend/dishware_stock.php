@@ -1845,10 +1845,10 @@ header('Expires: 0');
             box-sizing: border-box;
         }
 
-        /* 数据列背景：套装列灰白色，非套装列白色 */
+        /* 数据列背景：套装列 #fffaf1，非套装列白色 */
         #stock-table.transposed tr td[data-col-bg="0"],
         .stock-table.transposed tr td[data-col-bg="0"] {
-            background: #f3f4f6;
+            background: #fffaf1;
         }
         #stock-table.transposed tr td[data-col-bg="1"],
         .stock-table.transposed tr td[data-col-bg="1"] {
