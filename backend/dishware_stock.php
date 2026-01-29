@@ -956,8 +956,8 @@ header('Expires: 0');
         }
 
         .positive-value {
-            color: #10b981;
-            font-weight: 600;
+            color:rgb(255, 255, 255);
+            font-weight: 700;
         }
 
         .zero-value {
