@@ -7816,16 +7816,19 @@ header('Expires: 0');
                                     break;
                                 }
                             }
-                            
+                            const lastAttr = colLastInSet[i + mergeCount - 1] ? ' data-col-last-in-set="1"' : '';
+                            const firstAttr = colFirstInSet[i] ? ' data-col-first-in-set="1"' : '';
                             if (mergeCount > 1) {
-                                html += `<td data-col-bg="${bg}" colspan="${mergeCount}" style="vertical-align: middle; text-align: center;">${currentValue}</td>`;
+                                html += `<td data-col-bg="${bg}" colspan="${mergeCount}"${firstAttr}${lastAttr} style="vertical-align: middle; text-align: center;">${currentValue}</td>`;
                                 i += mergeCount;
                             } else {
-                                html += `<td data-col-bg="${bg}">${currentValue}</td>`;
+                                html += `<td data-col-bg="${bg}"${firstAttr}${lastAttr}>${currentValue}</td>`;
                                 i++;
                             }
                         } else {
-                            html += `<td data-col-bg="${bg}">${currentValue}</td>`;
+                            const lastAttr = colLastInSet[i] ? ' data-col-last-in-set="1"' : '';
+                            const firstAttr = colFirstInSet[i] ? ' data-col-first-in-set="1"' : '';
+                            html += `<td data-col-bg="${bg}"${firstAttr}${lastAttr}>${currentValue}</td>`;
                             i++;
                         }
                     }
@@ -8117,16 +8120,19 @@ header('Expires: 0');
                                     break;
                                 }
                             }
-                            
+                            const lastAttr = colLastInSet[i + mergeCount - 1] ? ' data-col-last-in-set="1"' : '';
+                            const firstAttr = colFirstInSet[i] ? ' data-col-first-in-set="1"' : '';
                             if (mergeCount > 1) {
-                                tableHtml += `<td data-col-bg="${bg}" colspan="${mergeCount}" style="vertical-align: middle; text-align: center;">${currentValue}</td>`;
+                                tableHtml += `<td data-col-bg="${bg}" colspan="${mergeCount}"${firstAttr}${lastAttr} style="vertical-align: middle; text-align: center;">${currentValue}</td>`;
                                 i += mergeCount;
                             } else {
-                                tableHtml += `<td data-col-bg="${bg}">${currentValue}</td>`;
+                                tableHtml += `<td data-col-bg="${bg}"${firstAttr}${lastAttr}>${currentValue}</td>`;
                                 i++;
                             }
                         } else {
-                            tableHtml += `<td data-col-bg="${bg}">${currentValue}</td>`;
+                            const lastAttr = colLastInSet[i] ? ' data-col-last-in-set="1"' : '';
+                            const firstAttr = colFirstInSet[i] ? ' data-col-first-in-set="1"' : '';
+                            tableHtml += `<td data-col-bg="${bg}"${firstAttr}${lastAttr}>${currentValue}</td>`;
                             i++;
                         }
                     }
