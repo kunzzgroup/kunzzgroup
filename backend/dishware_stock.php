@@ -1855,12 +1855,14 @@ header('Expires: 0');
             background: #f5f5fa;
         }
 
-        /* 照片列 - 使用原始尺寸；overflow:visible 以便悬停 tooltip 不被裁切 */
+        /* 照片列 - 使用原始尺寸；overflow:visible 以便悬停 tooltip 不被裁切；列线白色 */
         #stock-table.transposed tr[data-row="照片"] td,
         .stock-table.transposed tr[data-row="照片"] td { 
             min-width: 180px;
             padding: clamp(4px, 0.42vw, 8px);
             overflow: visible;
+            border-left: 1px solid #fff !important;
+            border-right: 1px solid #fff !important;
         }
         
         #stock-table.transposed tr[data-row="照片"] td img.product-photo,
