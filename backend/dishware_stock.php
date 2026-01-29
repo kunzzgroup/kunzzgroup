@@ -1993,22 +1993,39 @@ header('Expires: 0');
             border-left: 1px dashed #d1d5db !important;
             border-right: 1px dashed #d1d5db !important;
         }
-        /* 套装最左、最右整列边界线加粗（全行） */
+        /* 套装最左、最右整列边界线加粗（全行），#636363 */
         #stock-table.transposed td[data-col-last-in-set="1"],
         .stock-table.transposed td[data-col-last-in-set="1"] {
-            border-right: 2px solid #d1d5db !important;
+            border-right: 2px solid #636363 !important;
         }
         #stock-table.transposed td[data-col-first-in-set="1"],
         .stock-table.transposed td[data-col-first-in-set="1"] {
-            border-left: 2px solid #d1d5db !important;
+            border-left: 2px solid #636363 !important;
         }
         #stock-table.transposed tr[data-row="照片"] td[data-col-last-in-set="1"],
         .stock-table.transposed tr[data-row="照片"] td[data-col-last-in-set="1"] {
-            border-right: 2px solid #d1d5db !important;
+            border-right: 2px solid #636363 !important;
         }
         #stock-table.transposed tr[data-row="照片"] td[data-col-first-in-set="1"],
         .stock-table.transposed tr[data-row="照片"] td[data-col-first-in-set="1"] {
-            border-left: 2px solid #d1d5db !important;
+            border-left: 2px solid #636363 !important;
+        }
+        /* 分类、尺寸、单价行：套装边界线加粗（显式覆盖，避免被覆盖） */
+        #stock-table.transposed tr[data-row="分类"] td[data-col-first-in-set="1"],
+        #stock-table.transposed tr[data-row="尺寸"] td[data-col-first-in-set="1"],
+        #stock-table.transposed tr[data-row="单价"] td[data-col-first-in-set="1"],
+        .stock-table.transposed tr[data-row="分类"] td[data-col-first-in-set="1"],
+        .stock-table.transposed tr[data-row="尺寸"] td[data-col-first-in-set="1"],
+        .stock-table.transposed tr[data-row="单价"] td[data-col-first-in-set="1"] {
+            border-left: 2px solid #636363 !important;
+        }
+        #stock-table.transposed tr[data-row="分类"] td[data-col-last-in-set="1"],
+        #stock-table.transposed tr[data-row="尺寸"] td[data-col-last-in-set="1"],
+        #stock-table.transposed tr[data-row="单价"] td[data-col-last-in-set="1"],
+        .stock-table.transposed tr[data-row="分类"] td[data-col-last-in-set="1"],
+        .stock-table.transposed tr[data-row="尺寸"] td[data-col-last-in-set="1"],
+        .stock-table.transposed tr[data-row="单价"] td[data-col-last-in-set="1"] {
+            border-right: 2px solid #636363 !important;
         }
         
         #stock-table.transposed tr[data-row="照片"] td img.product-photo,
@@ -2159,6 +2176,19 @@ header('Expires: 0');
         .stock-table.transposed tr[data-row="总数"] td,
         .stock-table.transposed tr[data-row="操作"] td {
             border: 1px solid #d1d5db !important;
+        }
+        /* 总数、操作行：套装最左最右列边界线加粗 #636363，覆盖上方 1px */
+        #stock-table.transposed tr[data-row="总数"] td[data-col-first-in-set="1"],
+        #stock-table.transposed tr[data-row="操作"] td[data-col-first-in-set="1"],
+        .stock-table.transposed tr[data-row="总数"] td[data-col-first-in-set="1"],
+        .stock-table.transposed tr[data-row="操作"] td[data-col-first-in-set="1"] {
+            border-left: 2px solid #636363 !important;
+        }
+        #stock-table.transposed tr[data-row="总数"] td[data-col-last-in-set="1"],
+        #stock-table.transposed tr[data-row="操作"] td[data-col-last-in-set="1"],
+        .stock-table.transposed tr[data-row="总数"] td[data-col-last-in-set="1"],
+        .stock-table.transposed tr[data-row="操作"] td[data-col-last-in-set="1"] {
+            border-right: 2px solid #636363 !important;
         }
         /* 操作行（最后一行）底线加粗，浅灰与上方一致 */
         #stock-table.transposed tr[data-row="操作"] th.row-header,
@@ -8117,16 +8147,19 @@ header('Expires: 0');
                                     break;
                                 }
                             }
-                            
+                            const lastAttr = colLastInSet[i + mergeCount - 1] ? ' data-col-last-in-set="1"' : '';
+                            const firstAttr = colFirstInSet[i] ? ' data-col-first-in-set="1"' : '';
                             if (mergeCount > 1) {
-                                tableHtml += `<td data-col-bg="${bg}" colspan="${mergeCount}" style="vertical-align: middle; text-align: center;">${currentValue}</td>`;
+                                tableHtml += `<td data-col-bg="${bg}" colspan="${mergeCount}"${firstAttr}${lastAttr} style="vertical-align: middle; text-align: center;">${currentValue}</td>`;
                                 i += mergeCount;
                             } else {
-                                tableHtml += `<td data-col-bg="${bg}">${currentValue}</td>`;
+                                tableHtml += `<td data-col-bg="${bg}"${firstAttr}${lastAttr}>${currentValue}</td>`;
                                 i++;
                             }
                         } else {
-                            tableHtml += `<td data-col-bg="${bg}">${currentValue}</td>`;
+                            const lastAttr = colLastInSet[i] ? ' data-col-last-in-set="1"' : '';
+                            const firstAttr = colFirstInSet[i] ? ' data-col-first-in-set="1"' : '';
+                            tableHtml += `<td data-col-bg="${bg}"${firstAttr}${lastAttr}>${currentValue}</td>`;
                             i++;
                         }
                     }
