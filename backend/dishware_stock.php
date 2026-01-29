@@ -6569,10 +6569,13 @@ header('Expires: 0');
             const yearNext = document.getElementById('break-picker-year-next');
             const grid = document.getElementById('break-picker-month-grid');
             const clearBtn = document.getElementById('break-picker-clear');
+            const footer = clearBtn && clearBtn.closest('.break-picker-footer');
             if (!trigger || !popup || !grid) return;
 
             const y = new Date().getFullYear();
             if (breakMonthValue.year == null) breakMonthValue.year = y;
+
+            let pickerView = 'months'; // 'months' | 'years'
 
             function updateTriggerText() {
                 const t = document.getElementById('break-month-picker-text');
@@ -6584,26 +6587,49 @@ header('Expires: 0');
 
             function renderPopup() {
                 const yr = breakMonthValue.year ?? y;
-                if (yearDisplay) yearDisplay.textContent = yr;
+                if (yearDisplay) yearDisplay.textContent = pickerView === 'years' ? '选择年份' : String(yr);
+
+                yearPrev.style.visibility = pickerView === 'years' ? 'hidden' : 'visible';
+                yearNext.style.visibility = pickerView === 'years' ? 'hidden' : 'visible';
+                if (footer) footer.style.display = pickerView === 'years' ? 'none' : 'block';
+
                 grid.innerHTML = '';
-                for (let m = 1; m <= 12; m++) {
-                    const btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = 'break-picker-month-btn' + (breakMonthValue.month === m ? ' selected' : '');
-                    btn.textContent = m + '月';
-                    btn.dataset.month = String(m);
-                    btn.addEventListener('click', () => {
-                        breakMonthValue.year = yr;
-                        breakMonthValue.month = m;
-                        applyBreakDateFromMonthPicker();
-                        updateTriggerText();
-                        closeBreakMonthPickerPopup();
-                    });
-                    grid.appendChild(btn);
+                if (pickerView === 'years') {
+                    for (let i = 0; i < 12; i++) {
+                        const yrVal = y - i;
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'break-picker-month-btn' + (breakMonthValue.year === yrVal ? ' selected' : '');
+                        btn.textContent = yrVal + '年';
+                        btn.dataset.year = String(yrVal);
+                        btn.addEventListener('click', () => {
+                            breakMonthValue.year = yrVal;
+                            pickerView = 'months';
+                            renderPopup();
+                        });
+                        grid.appendChild(btn);
+                    }
+                } else {
+                    for (let m = 1; m <= 12; m++) {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'break-picker-month-btn' + (breakMonthValue.month === m ? ' selected' : '');
+                        btn.textContent = m + '月';
+                        btn.dataset.month = String(m);
+                        btn.addEventListener('click', () => {
+                            breakMonthValue.year = yr;
+                            breakMonthValue.month = m;
+                            applyBreakDateFromMonthPicker();
+                            updateTriggerText();
+                            closeBreakMonthPickerPopup();
+                        });
+                        grid.appendChild(btn);
+                    }
                 }
             }
 
             function openBreakMonthPickerPopup() {
+                pickerView = 'months';
                 popup.style.display = 'block';
                 trigger.setAttribute('aria-expanded', 'true');
                 renderPopup();
@@ -6620,14 +6646,24 @@ header('Expires: 0');
                 if (popup.style.display === 'none' || !popup.style.display) openBreakMonthPickerPopup();
                 else closeBreakMonthPickerPopup();
             });
+
+            yearDisplay.addEventListener('click', (e) => {
+                e.stopPropagation();
+                pickerView = pickerView === 'months' ? 'years' : 'months';
+                renderPopup();
+            });
+            yearDisplay.style.cursor = 'pointer';
+
             yearPrev.addEventListener('click', (e) => {
                 e.stopPropagation();
+                if (pickerView !== 'months') return;
                 const yr = breakMonthValue.year ?? y;
                 breakMonthValue.year = Math.max(yr - 1, y - 20);
                 renderPopup();
             });
             yearNext.addEventListener('click', (e) => {
                 e.stopPropagation();
+                if (pickerView !== 'months') return;
                 const yr = breakMonthValue.year ?? y;
                 breakMonthValue.year = Math.min(yr + 1, y + 2);
                 renderPopup();
