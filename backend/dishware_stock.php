@@ -6576,6 +6576,7 @@ header('Expires: 0');
             if (breakMonthValue.year == null) breakMonthValue.year = y;
 
             let pickerView = 'months'; // 'months' | 'years'
+            let yearWindowStart = 2021; // 年份视窗起始，默认从 2021 开始；箭头切换 12 年区间
 
             function updateTriggerText() {
                 const t = document.getElementById('break-month-picker-text');
@@ -6589,14 +6590,14 @@ header('Expires: 0');
                 const yr = breakMonthValue.year ?? y;
                 if (yearDisplay) yearDisplay.textContent = pickerView === 'years' ? '选择年份' : String(yr);
 
-                yearPrev.style.visibility = pickerView === 'years' ? 'hidden' : 'visible';
-                yearNext.style.visibility = pickerView === 'years' ? 'hidden' : 'visible';
+                yearPrev.style.visibility = 'visible';
+                yearNext.style.visibility = 'visible';
                 if (footer) footer.style.display = pickerView === 'years' ? 'none' : 'block';
 
                 grid.innerHTML = '';
                 if (pickerView === 'years') {
                     for (let i = 0; i < 12; i++) {
-                        const yrVal = y - i;
+                        const yrVal = yearWindowStart + i;
                         const btn = document.createElement('button');
                         btn.type = 'button';
                         btn.className = 'break-picker-month-btn' + (breakMonthValue.year === yrVal ? ' selected' : '');
@@ -6649,21 +6650,35 @@ header('Expires: 0');
 
             yearDisplay.addEventListener('click', (e) => {
                 e.stopPropagation();
-                pickerView = pickerView === 'months' ? 'years' : 'months';
+                if (pickerView === 'months') {
+                    pickerView = 'years';
+                    const yr = breakMonthValue.year ?? y;
+                    yearWindowStart = Math.max(2021, yr - 11);
+                } else {
+                    pickerView = 'months';
+                }
                 renderPopup();
             });
             yearDisplay.style.cursor = 'pointer';
 
             yearPrev.addEventListener('click', (e) => {
                 e.stopPropagation();
-                if (pickerView !== 'months') return;
+                if (pickerView === 'years') {
+                    yearWindowStart = Math.max(2021, yearWindowStart - 12);
+                    renderPopup();
+                    return;
+                }
                 const yr = breakMonthValue.year ?? y;
                 breakMonthValue.year = Math.max(yr - 1, y - 20);
                 renderPopup();
             });
             yearNext.addEventListener('click', (e) => {
                 e.stopPropagation();
-                if (pickerView !== 'months') return;
+                if (pickerView === 'years') {
+                    yearWindowStart += 12;
+                    renderPopup();
+                    return;
+                }
                 const yr = breakMonthValue.year ?? y;
                 breakMonthValue.year = Math.min(yr + 1, y + 2);
                 renderPopup();
