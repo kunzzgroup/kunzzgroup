@@ -1993,13 +1993,22 @@ header('Expires: 0');
             border-left: 1px dashed #d1d5db !important;
             border-right: 1px dashed #d1d5db !important;
         }
+        /* 套装最左、最右整列边界线加粗（全行） */
+        #stock-table.transposed td[data-col-last-in-set="1"],
+        .stock-table.transposed td[data-col-last-in-set="1"] {
+            border-right: 2px solid #d1d5db !important;
+        }
+        #stock-table.transposed td[data-col-first-in-set="1"],
+        .stock-table.transposed td[data-col-first-in-set="1"] {
+            border-left: 2px solid #d1d5db !important;
+        }
         #stock-table.transposed tr[data-row="照片"] td[data-col-last-in-set="1"],
         .stock-table.transposed tr[data-row="照片"] td[data-col-last-in-set="1"] {
-            border-right: 1px solid #d1d5db !important;
+            border-right: 2px solid #d1d5db !important;
         }
         #stock-table.transposed tr[data-row="照片"] td[data-col-first-in-set="1"],
         .stock-table.transposed tr[data-row="照片"] td[data-col-first-in-set="1"] {
-            border-left: 1px solid #d1d5db !important;
+            border-left: 2px solid #d1d5db !important;
         }
         
         #stock-table.transposed tr[data-row="照片"] td img.product-photo,
