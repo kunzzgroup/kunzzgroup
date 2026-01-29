@@ -1845,13 +1845,13 @@ header('Expires: 0');
             box-sizing: border-box;
         }
 
-        /* 数据列交替背景：灰白、白、灰白、白 */
-        #stock-table.transposed tr td:nth-child(2n),
-        .stock-table.transposed tr td:nth-child(2n) {
+        /* 数据列交替背景：按套装分组，同套装同色，灰白/白交替 */
+        #stock-table.transposed tr td[data-col-bg="0"],
+        .stock-table.transposed tr td[data-col-bg="0"] {
             background: #f3f4f6;
         }
-        #stock-table.transposed tr td:nth-child(2n+1),
-        .stock-table.transposed tr td:nth-child(2n+1) {
+        #stock-table.transposed tr td[data-col-bg="1"],
+        .stock-table.transposed tr td[data-col-bg="1"] {
             background: #fff;
         }
 
@@ -7314,12 +7314,26 @@ header('Expires: 0');
             const thead = table.querySelector('thead');
             if (thead) thead.innerHTML = '';
 
-            // 使用动态字段定义（包含餐厅店面）
-            const fieldDefs = getDynamicFieldDefs();
+            // 按套装分组列：同套装连续列同色，灰白/白交替
+            const colGroupParity = [];
+            let idx = 0;
+            let parity = 0;
+            while (idx < displayRows.length) {
+                const r = displayRows[idx];
+                const sid = r.set_id;
+                let end = idx;
+                if (sid) {
+                    while (end + 1 < displayRows.length && displayRows[end + 1].set_id === sid) end++;
+                }
+                const p = parity % 2;
+                for (let c = idx; c <= end; c++) colGroupParity[c] = p;
+                parity++;
+                idx = end + 1;
+            }
 
+            const fieldDefs = getDynamicFieldDefs();
             let html = '';
             fieldDefs.forEach((f) => {
-                // 检查是否是餐厅店面行
                 const isRestaurantRow = f.restaurantId !== undefined;
                 const rowAttributes = isRestaurantRow 
                     ? `data-row="${f.label}" data-restaurant-row data-restaurant-id="${f.restaurantId}"`
@@ -7327,20 +7341,17 @@ header('Expires: 0');
                 
                 html += `<tr ${rowAttributes}><th class="row-header">${f.label}</th>`;
                 
-                // 分类、尺寸、单价：同套装且值相同时合并列；单价用单品原价，不相加
                 if ((f.key === 'category' || f.key === 'size' || f.key === 'unit_price') && displayRows.length > 0) {
                     let i = 0;
                     while (i < displayRows.length) {
                         const currentRow = displayRows[i];
                         const currentSetId = currentRow.set_id;
                         const currentValue = currentRow[f.key] || '-';
+                        const bg = colGroupParity[i] != null ? colGroupParity[i] : 0;
                         
-                        // 如果当前行属于套装，检查后续行是否也属于同一套装且值相同
                         if (currentSetId && (f.key === 'category' || f.key === 'size' || f.key === 'unit_price')) {
                             let mergeCount = 1;
                             let j = i + 1;
-                            
-                            // 检查后续行是否属于同一套装且值相同
                             while (j < displayRows.length) {
                                 const nextRow = displayRows[j];
                                 if (nextRow.set_id === currentSetId && 
@@ -7352,26 +7363,23 @@ header('Expires: 0');
                                 }
                             }
                             
-                            // 如果有多列需要合并，使用colspan（在转置表格中，合并列）
                             if (mergeCount > 1) {
-                                html += `<td colspan="${mergeCount}" style="vertical-align: middle; text-align: center;">${currentValue}</td>`;
-                                // 跳过已合并的列
+                                html += `<td data-col-bg="${bg}" colspan="${mergeCount}" style="vertical-align: middle; text-align: center;">${currentValue}</td>`;
                                 i += mergeCount;
                             } else {
-                                html += `<td>${currentValue}</td>`;
+                                html += `<td data-col-bg="${bg}">${currentValue}</td>`;
                                 i++;
                             }
                         } else {
-                            // 非套装项目或不需要合并的字段，正常渲染
-                            html += `<td>${currentValue}</td>`;
+                            html += `<td data-col-bg="${bg}">${currentValue}</td>`;
                             i++;
                         }
                     }
                 } else {
-                    // 其他字段正常渲染
-                    displayRows.forEach((r) => {
+                    displayRows.forEach((r, ci) => {
                         const cell = (r && typeof r[f.key] !== 'undefined') ? r[f.key] : '-';
-                        html += `<td>${cell}</td>`;
+                        const bg = colGroupParity[ci] != null ? colGroupParity[ci] : 0;
+                        html += `<td data-col-bg="${bg}">${cell}</td>`;
                     });
                 }
                 
@@ -7602,13 +7610,27 @@ header('Expires: 0');
                 }
             });
 
-            // 转置渲染：左侧是"字段名"，右侧每一列是一个"展示行"
+            // 按套装分组列：同套装连续列同色，灰白/白交替
+            const colGroupParity = [];
+            let gidx = 0;
+            let gparity = 0;
+            while (gidx < displayRows.length) {
+                const r = displayRows[gidx];
+                const sid = r.set_id;
+                let end = gidx;
+                if (sid) {
+                    while (end + 1 < displayRows.length && displayRows[end + 1].set_id === sid) end++;
+                }
+                const p = gparity % 2;
+                for (let c = gidx; c <= end; c++) colGroupParity[c] = p;
+                gparity++;
+                gidx = end + 1;
+            }
+
             const fieldDefs = getDynamicFieldDefs();
-            
             let tableHtml = '<table class="stock-table transposed">';
             
             fieldDefs.forEach((f) => {
-                // 检查是否是餐厅店面行
                 const isRestaurantRow = f.restaurantId !== undefined;
                 const rowAttributes = isRestaurantRow 
                     ? `data-row="${f.label}" data-restaurant-row data-restaurant-id="${f.restaurantId}"`
@@ -7616,20 +7638,17 @@ header('Expires: 0');
                 
                 tableHtml += `<tr ${rowAttributes}><th class="row-header">${f.label}</th>`;
                 
-                // 分类、尺寸、单价：同套装且值相同时合并列；单价用单品原价，不相加
                 if ((f.key === 'category' || f.key === 'size' || f.key === 'unit_price') && displayRows.length > 0) {
                     let i = 0;
                     while (i < displayRows.length) {
                         const currentRow = displayRows[i];
                         const currentSetId = currentRow.set_id;
                         const currentValue = currentRow[f.key] || '-';
+                        const bg = colGroupParity[i] != null ? colGroupParity[i] : 0;
                         
-                        // 如果当前行属于套装，检查后续行是否也属于同一套装且值相同
                         if (currentSetId && (f.key === 'category' || f.key === 'size' || f.key === 'unit_price')) {
                             let mergeCount = 1;
                             let j = i + 1;
-                            
-                            // 检查后续行是否属于同一套装且值相同
                             while (j < displayRows.length) {
                                 const nextRow = displayRows[j];
                                 if (nextRow.set_id === currentSetId && 
@@ -7641,26 +7660,23 @@ header('Expires: 0');
                                 }
                             }
                             
-                            // 如果有多列需要合并，使用colspan（在转置表格中，合并列）
                             if (mergeCount > 1) {
-                                tableHtml += `<td colspan="${mergeCount}" style="vertical-align: middle; text-align: center;">${currentValue}</td>`;
-                                // 跳过已合并的列
+                                tableHtml += `<td data-col-bg="${bg}" colspan="${mergeCount}" style="vertical-align: middle; text-align: center;">${currentValue}</td>`;
                                 i += mergeCount;
                             } else {
-                                tableHtml += `<td>${currentValue}</td>`;
+                                tableHtml += `<td data-col-bg="${bg}">${currentValue}</td>`;
                                 i++;
                             }
                         } else {
-                            // 非套装项目或不需要合并的字段，正常渲染
-                            tableHtml += `<td>${currentValue}</td>`;
+                            tableHtml += `<td data-col-bg="${bg}">${currentValue}</td>`;
                             i++;
                         }
                     }
                 } else {
-                    // 其他字段正常渲染
-                    displayRows.forEach((r) => {
+                    displayRows.forEach((r, ci) => {
                         const cell = (r && typeof r[f.key] !== 'undefined') ? r[f.key] : '-';
-                        tableHtml += `<td>${cell}</td>`;
+                        const bg = colGroupParity[ci] != null ? colGroupParity[ci] : 0;
+                        tableHtml += `<td data-col-bg="${bg}">${cell}</td>`;
                     });
                 }
                 
