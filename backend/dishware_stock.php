@@ -10416,7 +10416,6 @@ header('Expires: 0');
                         <div class="break-record-header">
                             <div style="display: flex; align-items: center; gap: 12px;">
                                 <span>${restaurant.name}转卖</span>
-                                <span style="font-size: 12px; opacity: 0.9;">(${records.length} 项)</span>
                                 <div style="display: flex; gap: 4px; margin-left: 8px;">
                                     <button class="btn" 
                                             onclick="setTransferFilter('${shopType}', 'all')" 
@@ -10684,19 +10683,9 @@ header('Expires: 0');
                 }
             });
             
-            // 更新标题中的项数和按钮状态
+            // 更新标题中的按钮状态
             const header = document.querySelector(`#${shopType}-transfer-table`)?.closest('.break-record-section')?.querySelector('.break-record-header');
             if (header) {
-                const allRecords = transferRecordsData[shopType] || [];
-                const outCount = allRecords.filter(r => r.record_type === 'out').length;
-                const inCount = allRecords.filter(r => r.record_type === 'in').length;
-                
-                // 更新项数显示
-                const countSpan = header.querySelector('span[style*="font-size: 12px"]');
-                if (countSpan) {
-                    countSpan.textContent = `(${filteredRecords.length} 项)`;
-                }
-                
                 // 更新按钮状态
                 const buttons = header.querySelectorAll('button[onclick*="setTransferFilter"]');
                 buttons.forEach(btn => {
