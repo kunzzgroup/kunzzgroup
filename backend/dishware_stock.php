@@ -1862,11 +1862,19 @@ header('Expires: 0');
             padding: clamp(4px, 0.42vw, 8px);
             overflow: visible;
         }
-        /* 仅套装列在照片行的列线为虚线 */
+        /* 仅套装列在照片行的列线为虚线；套装之间的边界为实线 */
         #stock-table.transposed tr[data-row="照片"] td[data-col-bg="0"],
         .stock-table.transposed tr[data-row="照片"] td[data-col-bg="0"] {
             border-left: 1px dotted #d1d5db !important;
             border-right: 1px dotted #d1d5db !important;
+        }
+        #stock-table.transposed tr[data-row="照片"] td[data-col-last-in-set="1"],
+        .stock-table.transposed tr[data-row="照片"] td[data-col-last-in-set="1"] {
+            border-right: 1px solid #d1d5db !important;
+        }
+        #stock-table.transposed tr[data-row="照片"] td[data-col-first-in-set="1"],
+        .stock-table.transposed tr[data-row="照片"] td[data-col-first-in-set="1"] {
+            border-left: 1px solid #d1d5db !important;
         }
         
         #stock-table.transposed tr[data-row="照片"] td img.product-photo,
@@ -7399,6 +7407,17 @@ header('Expires: 0');
             for (let c = 0; c < displayRows.length; c++) {
                 colGroupParity[c] = displayRows[c].set_id ? 0 : 1;
             }
+            // 套装边界：最后一列 of 套装 / 第一列 of 套装（且非首列），用于照片行列线 套装间实线
+            const colLastInSet = [];
+            const colFirstInSet = [];
+            for (let i = 0; i < displayRows.length; i++) {
+                const r = displayRows[i];
+                const sid = r.set_id;
+                const next = displayRows[i + 1];
+                const prev = displayRows[i - 1];
+                colLastInSet[i] = !!(sid && (!next || next.set_id !== sid));
+                colFirstInSet[i] = !!(sid && i > 0 && (!prev || prev.set_id !== sid));
+            }
 
             const fieldDefs = getDynamicFieldDefs();
             let html = '';
@@ -7452,7 +7471,9 @@ header('Expires: 0');
                     displayRows.forEach((r, ci) => {
                         const cell = (r && typeof r[f.key] !== 'undefined') ? r[f.key] : '-';
                         const bg = colGroupParity[ci] != null ? colGroupParity[ci] : 0;
-                        html += `<td data-col-bg="${bg}">${cell}</td>`;
+                        const lastAttr = colLastInSet[ci] ? ' data-col-last-in-set="1"' : '';
+                        const firstAttr = colFirstInSet[ci] ? ' data-col-first-in-set="1"' : '';
+                        html += `<td data-col-bg="${bg}"${firstAttr}${lastAttr}>${cell}</td>`;
                     });
                 }
                 
@@ -7688,6 +7709,16 @@ header('Expires: 0');
             for (let c = 0; c < displayRows.length; c++) {
                 colGroupParity[c] = displayRows[c].set_id ? 0 : 1;
             }
+            const colLastInSet = [];
+            const colFirstInSet = [];
+            for (let i = 0; i < displayRows.length; i++) {
+                const r = displayRows[i];
+                const sid = r.set_id;
+                const next = displayRows[i + 1];
+                const prev = displayRows[i - 1];
+                colLastInSet[i] = !!(sid && (!next || next.set_id !== sid));
+                colFirstInSet[i] = !!(sid && i > 0 && (!prev || prev.set_id !== sid));
+            }
 
             const fieldDefs = getDynamicFieldDefs();
             let tableHtml = '<table class="stock-table transposed">';
@@ -7741,7 +7772,9 @@ header('Expires: 0');
                     displayRows.forEach((r, ci) => {
                         const cell = (r && typeof r[f.key] !== 'undefined') ? r[f.key] : '-';
                         const bg = colGroupParity[ci] != null ? colGroupParity[ci] : 0;
-                        tableHtml += `<td data-col-bg="${bg}">${cell}</td>`;
+                        const lastAttr = colLastInSet[ci] ? ' data-col-last-in-set="1"' : '';
+                        const firstAttr = colFirstInSet[ci] ? ' data-col-first-in-set="1"' : '';
+                        tableHtml += `<td data-col-bg="${bg}"${firstAttr}${lastAttr}>${cell}</td>`;
                     });
                 }
                 
