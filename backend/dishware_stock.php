@@ -2005,19 +2005,31 @@ header('Expires: 0');
             background: #4b5563 !important;
             color: #fff;
         }
-        /* 总数、操作行：第二列起边框与上方一致，浅灰 #d1d5db */
+        /* 总数、操作行：列线浅灰 #d1d5db，行线深灰 #636363 不改 */
         #stock-table.transposed tr[data-row="总数"] td,
         #stock-table.transposed tr[data-row="操作"] td,
         .stock-table.transposed tr[data-row="总数"] td,
         .stock-table.transposed tr[data-row="操作"] td {
-            border: 1px solid #d1d5db !important;
+            border-left: 1px solid #d1d5db !important;
+            border-right: 1px solid #d1d5db !important;
+            border-top: 1px solid #636363 !important;
+            border-bottom: 1px solid #636363 !important;
         }
-        /* 操作行（最后一行）底线加粗，浅灰与上方一致 */
+        #stock-table.transposed tr[data-row="总数"] th.row-header,
+        #stock-table.transposed tr[data-row="操作"] th.row-header,
+        .stock-table.transposed tr[data-row="总数"] th.row-header,
+        .stock-table.transposed tr[data-row="操作"] th.row-header {
+            border-left: 1px solid #d1d5db !important;
+            border-right: 1px solid #d1d5db !important;
+            border-top: 1px solid #636363 !important;
+            border-bottom: 1px solid #636363 !important;
+        }
+        /* 操作行（最后一行）底线加粗，保持深灰 #636363 */
         #stock-table.transposed tr[data-row="操作"] th.row-header,
         #stock-table.transposed tr[data-row="操作"] td,
         .stock-table.transposed tr[data-row="操作"] th.row-header,
         .stock-table.transposed tr[data-row="操作"] td {
-            border-bottom: 2px solid #d1d5db !important;
+            border-bottom: 2px solid #636363 !important;
         }
 
         /* 小屏幕时减小列宽 - 不影响默认页面大小 */
