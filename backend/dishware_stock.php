@@ -4522,6 +4522,7 @@ header('Expires: 0');
                     loadAllBreakRecords();
                     break;
                 case 'transfer':
+                    /* 标题由 updateBreakSelectionDisplay 设为 "碗碟转卖" 或 "碗碟转卖 - YYYY年M月" */
                     if (title) title.textContent = '碗碟转卖';
                     if (addButton) {
                         addButton.style.display = 'none';
@@ -4531,6 +4532,7 @@ header('Expires: 0');
                         window._breakDateFilterInited = true;
                     }
                     updateCategoryFilterToRestaurant();
+                    if (typeof updateBreakSelectionDisplay === 'function') updateBreakSelectionDisplay();
                     loadAllTransferRecords();
                     break;
                 default:
@@ -6847,12 +6849,14 @@ header('Expires: 0');
             const title = document.getElementById('page-title');
             if (!title) return;
             const onBreak = currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3';
-            if (!onBreak) return;
+            const onTransfer = currentPage === 'transfer';
+            if (!onBreak && !onTransfer) return;
             const { year, month } = breakMonthValue;
+            const base = onTransfer ? '碗碟转卖' : '破损记录';
             if (year != null && month != null) {
-                title.innerHTML = `破损记录 <span class="break-title-ym">- ${year}年${month}月</span>`;
+                title.innerHTML = `${base} <span class="break-title-ym">- ${year}年${month}月</span>`;
             } else {
-                title.textContent = '破损记录';
+                title.textContent = base;
             }
         }
         window.updateBreakSelectionDisplay = updateBreakSelectionDisplay;
