@@ -1845,14 +1845,14 @@ header('Expires: 0');
             box-sizing: border-box;
         }
 
-        /* 数据列背景：套装列 #fffaf1，非套装列白色 */
+        /* 数据列背景：套装暖杏色，单品淡蓝白，舒适区分 */
         #stock-table.transposed tr td[data-col-bg="0"],
         .stock-table.transposed tr td[data-col-bg="0"] {
-            background: #fffaf1;
+            background: #fef6eb;
         }
         #stock-table.transposed tr td[data-col-bg="1"],
         .stock-table.transposed tr td[data-col-bg="1"] {
-            background: #fff;
+            background: #f5f9ff;
         }
 
         /* 照片列 - 使用原始尺寸；overflow:visible 以便悬停 tooltip 不被裁切 */
