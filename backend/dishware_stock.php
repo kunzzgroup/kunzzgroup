@@ -48,7 +48,7 @@ header('Expires: 0');
             color: #000000ff;
         }
         #page-title .break-title-ym {
-            font-size: 1.15em;
+            font-size: 0.92em;
             font-weight: 700;
         }
         
