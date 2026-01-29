@@ -1855,12 +1855,16 @@ header('Expires: 0');
             background: #f5f5fa;
         }
 
-        /* 照片列 - 使用原始尺寸；overflow:visible 以便悬停 tooltip 不被裁切；列线白色 */
+        /* 照片列 - 使用原始尺寸；overflow:visible 以便悬停 tooltip 不被裁切 */
         #stock-table.transposed tr[data-row="照片"] td,
         .stock-table.transposed tr[data-row="照片"] td { 
             min-width: 180px;
             padding: clamp(4px, 0.42vw, 8px);
             overflow: visible;
+        }
+        /* 仅套装列在照片行的列线为白色 */
+        #stock-table.transposed tr[data-row="照片"] td[data-col-bg="0"],
+        .stock-table.transposed tr[data-row="照片"] td[data-col-bg="0"] {
             border-left: 1px solid #fff !important;
             border-right: 1px solid #fff !important;
         }
