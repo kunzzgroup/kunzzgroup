@@ -2878,7 +2878,7 @@ header('Expires: 0');
     <div class="container">
         <div class="header">
             <div>
-                <h1 id="page-title">总库存</h1>
+                <h1 id="page-title">碗碟库存管理</h1>
             </div>
             <div class="controls">
                 <div class="view-selector">
