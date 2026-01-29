@@ -1946,6 +1946,54 @@ header('Expires: 0');
         #stock-table.transposed tr[data-row="操作"] td,
         .stock-table.transposed tr[data-row="操作"] td { min-width: 110px; }
 
+        /* NO 行：浅灰 */
+        #stock-table.transposed tr[data-row="NO"] th.row-header,
+        #stock-table.transposed tr[data-row="NO"] td,
+        .stock-table.transposed tr[data-row="NO"] th.row-header,
+        .stock-table.transposed tr[data-row="NO"] td {
+            background: #f3f4f6 !important;
+            color: #374151;
+        }
+        /* 照片、编号、分类、尺寸、单价：白色 */
+        #stock-table.transposed tr[data-row="照片"] th.row-header,
+        #stock-table.transposed tr[data-row="照片"] td,
+        #stock-table.transposed tr[data-row="编号"] th.row-header,
+        #stock-table.transposed tr[data-row="编号"] td,
+        #stock-table.transposed tr[data-row="分类"] th.row-header,
+        #stock-table.transposed tr[data-row="分类"] td,
+        #stock-table.transposed tr[data-row="尺寸"] th.row-header,
+        #stock-table.transposed tr[data-row="尺寸"] td,
+        #stock-table.transposed tr[data-row="单价"] th.row-header,
+        #stock-table.transposed tr[data-row="单价"] td,
+        .stock-table.transposed tr[data-row="照片"] th.row-header,
+        .stock-table.transposed tr[data-row="照片"] td,
+        .stock-table.transposed tr[data-row="编号"] th.row-header,
+        .stock-table.transposed tr[data-row="编号"] td,
+        .stock-table.transposed tr[data-row="分类"] th.row-header,
+        .stock-table.transposed tr[data-row="分类"] td,
+        .stock-table.transposed tr[data-row="尺寸"] th.row-header,
+        .stock-table.transposed tr[data-row="尺寸"] td,
+        .stock-table.transposed tr[data-row="单价"] th.row-header,
+        .stock-table.transposed tr[data-row="单价"] td {
+            background: #fff !important;
+            color: #374151;
+        }
+        /* 餐厅行：浅灰、白、浅灰、白 交替 */
+        #stock-table.transposed tr[data-restaurant-row][data-restaurant-alt="0"] th.row-header,
+        #stock-table.transposed tr[data-restaurant-row][data-restaurant-alt="0"] td,
+        .stock-table.transposed tr[data-restaurant-row][data-restaurant-alt="0"] th.row-header,
+        .stock-table.transposed tr[data-restaurant-row][data-restaurant-alt="0"] td {
+            background: #f3f4f6 !important;
+            color: #374151;
+        }
+        #stock-table.transposed tr[data-restaurant-row][data-restaurant-alt="1"] th.row-header,
+        #stock-table.transposed tr[data-restaurant-row][data-restaurant-alt="1"] td,
+        .stock-table.transposed tr[data-restaurant-row][data-restaurant-alt="1"] th.row-header,
+        .stock-table.transposed tr[data-restaurant-row][data-restaurant-alt="1"] td {
+            background: #fff !important;
+            color: #374151;
+        }
+
         /* 小屏幕时减小列宽 - 不影响默认页面大小 */
         @media (max-width: 1400px) {
             /* 内容单元格 - 减小最小宽度 */
@@ -7322,12 +7370,16 @@ header('Expires: 0');
 
             const fieldDefs = getDynamicFieldDefs();
             let html = '';
+            let restaurantIndex = 0;
             fieldDefs.forEach((f) => {
                 const isRestaurantRow = f.restaurantId !== undefined;
-                const rowAttributes = isRestaurantRow 
+                let rowAttributes = isRestaurantRow 
                     ? `data-row="${f.label}" data-restaurant-row data-restaurant-id="${f.restaurantId}"`
                     : `data-row="${f.label}"`;
-                
+                if (isRestaurantRow) {
+                    rowAttributes += ` data-restaurant-alt="${restaurantIndex % 2}"`;
+                    restaurantIndex++;
+                }
                 html += `<tr ${rowAttributes}><th class="row-header">${f.label}</th>`;
                 
                 if ((f.key === 'category' || f.key === 'size' || f.key === 'unit_price') && displayRows.length > 0) {
@@ -7607,13 +7659,16 @@ header('Expires: 0');
 
             const fieldDefs = getDynamicFieldDefs();
             let tableHtml = '<table class="stock-table transposed">';
-            
+            let restaurantIndex = 0;
             fieldDefs.forEach((f) => {
                 const isRestaurantRow = f.restaurantId !== undefined;
-                const rowAttributes = isRestaurantRow 
+                let rowAttributes = isRestaurantRow 
                     ? `data-row="${f.label}" data-restaurant-row data-restaurant-id="${f.restaurantId}"`
                     : `data-row="${f.label}"`;
-                
+                if (isRestaurantRow) {
+                    rowAttributes += ` data-restaurant-alt="${restaurantIndex % 2}"`;
+                    restaurantIndex++;
+                }
                 tableHtml += `<tr ${rowAttributes}><th class="row-header">${f.label}</th>`;
                 
                 if ((f.key === 'category' || f.key === 'size' || f.key === 'unit_price') && displayRows.length > 0) {
