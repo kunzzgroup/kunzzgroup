@@ -1993,7 +1993,7 @@ header('Expires: 0');
             background: #fff !important;
             color: #374151;
         }
-        /* 总数、操作行：灰色 */
+        /* 总数、操作行：深灰色 */
         #stock-table.transposed tr[data-row="总数"] th.row-header,
         #stock-table.transposed tr[data-row="总数"] td,
         #stock-table.transposed tr[data-row="操作"] th.row-header,
@@ -2002,8 +2002,8 @@ header('Expires: 0');
         .stock-table.transposed tr[data-row="总数"] td,
         .stock-table.transposed tr[data-row="操作"] th.row-header,
         .stock-table.transposed tr[data-row="操作"] td {
-            background: #f3f4f6 !important;
-            color: #374151;
+            background: #4b5563 !important;
+            color: #fff;
         }
 
         /* 小屏幕时减小列宽 - 不影响默认页面大小 */
