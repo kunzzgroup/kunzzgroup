@@ -7146,9 +7146,10 @@ header('Expires: 0');
             }
 
             function photoHtmlFrom(path, altText, iconClass = 'fa-image') {
+                const tooltip = (altText || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 return path
-                    ? `<img src="${path}" alt="${altText || ''}" class="product-photo">`
-                    : `<div class="no-photo"><i class="fas ${iconClass}"></i></div>`;
+                    ? `<img src="${path}" alt="${tooltip || ''}" class="product-photo" title="${tooltip || '照片'}">`
+                    : `<div class="no-photo" title="${tooltip || '无照片'}"><i class="fas ${iconClass}"></i></div>`;
             }
 
             if (!filteredData || filteredData.length === 0) {
@@ -7449,9 +7450,10 @@ header('Expires: 0');
             }
             
             function photoHtmlFrom(path, altText, iconClass = 'fa-image') {
+                const tooltip = (altText || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 return path
-                    ? `<img src="${path}" alt="${altText || ''}" class="product-photo">`
-                    : `<div class="no-photo"><i class="fas ${iconClass}"></i></div>`;
+                    ? `<img src="${path}" alt="${tooltip || ''}" class="product-photo" title="${tooltip || '照片'}">`
+                    : `<div class="no-photo" title="${tooltip || '无照片'}"><i class="fas ${iconClass}"></i></div>`;
             }
             
             items.forEach((item) => {
