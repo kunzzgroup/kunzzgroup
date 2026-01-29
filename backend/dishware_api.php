@@ -2151,6 +2151,8 @@ function getTransferRecords() {
     global $pdo;
     
     $shop_type = $_GET['shop_type'] ?? '';
+    $start_date = $_GET['start_date'] ?? '';
+    $end_date = $_GET['end_date'] ?? '';
     
     if (empty($shop_type)) {
         sendResponse(false, "缺少店铺类型参数");
@@ -2164,9 +2166,6 @@ function getTransferRecords() {
         $restaurant = $restaurant_stmt->fetch(PDO::FETCH_ASSOC);
         $restaurant_id = $restaurant ? $restaurant['id'] : null;
         
-        // 获取该餐厅的转卖记录
-        // 如果是转出餐厅，只显示出货记录（record_type='out'）
-        // 如果是转入餐厅，只显示进货记录（record_type='in'）
         $sql = "SELECT dtr.*, di.product_name, di.code_number, di.category, di.size, di.photo_path, di.unit_price,
                        from_r.name as from_restaurant_name, to_r.name as to_restaurant_name
                 FROM dishware_transfer_records dtr
@@ -2176,11 +2175,17 @@ function getTransferRecords() {
                 WHERE (
                     (dtr.from_shop_type = ? AND dtr.record_type = 'out') OR 
                     (dtr.to_shop_type = ? AND dtr.record_type = 'in')
-                )
-                ORDER BY dtr.transfer_date ASC, dtr.created_at ASC";
+                )";
+        $params = [$shop_type, $shop_type];
+        if (!empty($start_date) && !empty($end_date)) {
+            $sql .= " AND dtr.transfer_date BETWEEN ? AND ?";
+            $params[] = $start_date;
+            $params[] = $end_date;
+        }
+        $sql .= " ORDER BY dtr.transfer_date ASC, dtr.created_at ASC";
         
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$shop_type, $shop_type]);
+        $stmt->execute($params);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         // 添加当前库存字段

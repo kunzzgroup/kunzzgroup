@@ -4450,7 +4450,7 @@ header('Expires: 0');
             const breakDateFilter = document.getElementById('break-date-filter');
             
             if (breakDateFilter) {
-                breakDateFilter.style.display = (pageType === 'j1' || pageType === 'j2' || pageType === 'j3') ? 'flex' : 'none';
+                breakDateFilter.style.display = (pageType === 'j1' || pageType === 'j2' || pageType === 'j3' || pageType === 'transfer') ? 'flex' : 'none';
             }
             
             switch(pageType) {
@@ -4468,8 +4468,10 @@ header('Expires: 0');
                         // 隐藏顶部的"记录破损"按钮，因为每个容器都有自己的按钮
                         addButton.style.display = 'none';
                     }
-                    initBreakDateFilter();
-                    // 将分类下拉菜单改为餐厅选择
+                    if (!window._breakDateFilterInited) {
+                        initBreakDateFilter();
+                        window._breakDateFilterInited = true;
+                    }
                     updateCategoryFilterToRestaurantForBreak();
                     // 加载所有破损记录
                     loadAllBreakRecords();
@@ -4477,12 +4479,13 @@ header('Expires: 0');
                 case 'transfer':
                     if (title) title.textContent = '碗碟转卖';
                     if (addButton) {
-                        // 隐藏顶部的按钮，因为每个容器都有自己的按钮
                         addButton.style.display = 'none';
                     }
-                    // 将分类下拉菜单改为餐厅选择
+                    if (!window._breakDateFilterInited) {
+                        initBreakDateFilter();
+                        window._breakDateFilterInited = true;
+                    }
                     updateCategoryFilterToRestaurant();
-                    // 加载所有转卖记录
                     loadAllTransferRecords();
                     break;
                 default:
@@ -6707,6 +6710,7 @@ header('Expires: 0');
             const q = document.getElementById('break-quick-select-text');
             if (q) q.textContent = '时段';
             if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') loadAllBreakRecords();
+            if (currentPage === 'transfer') loadAllTransferRecords();
         }
 
         function toggleBreakQuickSelectDropdown() {
@@ -6734,6 +6738,7 @@ header('Expires: 0');
             const d = document.getElementById('break-quick-select-dropdown');
             if (d) d.classList.remove('show');
             if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') loadAllBreakRecords();
+            if (currentPage === 'transfer') loadAllTransferRecords();
         }
 
         // 打开破损记录页面时，点击外部关闭快速选择下拉、年月选择弹层
@@ -6905,6 +6910,13 @@ header('Expires: 0');
             });
         }
         
+        // 转卖页面：按搜索关键词过滤并重新渲染
+        function applyTransferSearchAndRender() {
+            if (currentPage !== 'transfer') return;
+            renderMergedTransferRecordsPage();
+            filterTransferRecordsByRestaurant();
+        }
+
         // 根据选择的餐厅过滤转卖记录
         function filterTransferRecordsByRestaurant() {
             const container = document.getElementById('transfer-records-container');
@@ -6964,11 +6976,11 @@ header('Expires: 0');
                     clearTimeout(debounceTimer);
                     debounceTimer = setTimeout(() => {
                         if (currentPage === 'transfer') {
-                            // 转卖页面不执行搜索
+                            applyTransferSearchAndRender();
                             return;
                         }
                         searchData();
-                    }, 300); // 300ms延迟
+                    }, 300);
                 });
             }
             
@@ -10008,10 +10020,10 @@ header('Expires: 0');
                     return numA - numB;
                 });
 
-                // 同时加载所有J开头店铺的数据
+                const dateParams = breakDateRange ? `&start_date=${encodeURIComponent(breakDateRange.startDate)}&end_date=${encodeURIComponent(breakDateRange.endDate)}` : '';
                 const promises = jRestaurants.map(restaurant => {
                     const shopType = restaurant.name.toLowerCase();
-                    return apiCall(`?action=transfer_records&shop_type=${shopType}`).then(result => ({
+                    return apiCall(`?action=transfer_records&shop_type=${shopType}${dateParams}`).then(result => ({
                         shopType: shopType,
                         restaurant: restaurant,
                         result: result
@@ -10046,8 +10058,8 @@ header('Expires: 0');
         // 刷新单个餐厅的转卖记录（保留新行）
         async function refreshSingleRestaurantTransferRecords(shopType) {
             try {
-                // 只加载对应餐厅的数据
-                const result = await apiCall(`?action=transfer_records&shop_type=${shopType}`);
+                const dateParams = breakDateRange ? `&start_date=${encodeURIComponent(breakDateRange.startDate)}&end_date=${encodeURIComponent(breakDateRange.endDate)}` : '';
+                const result = await apiCall(`?action=transfer_records&shop_type=${shopType}${dateParams}`);
                 
                 if (result.success) {
                     // 更新数据
@@ -10173,22 +10185,26 @@ header('Expires: 0');
 
             let html = '';
             
+            const searchTerm = (document.getElementById('unified-filter')?.value || '').toLowerCase().trim();
+            
             jRestaurants.forEach(restaurant => {
                 const shopType = restaurant.name.toLowerCase();
-                const allRecords = transferRecordsData[shopType] || [];
-                
-                // 初始化过滤状态
-                if (!transferFilterState[shopType]) {
-                    transferFilterState[shopType] = 'all';
+                let allRecords = transferRecordsData[shopType] || [];
+                if (searchTerm) {
+                    allRecords = allRecords.filter(r => {
+                        const name = (r.product_name || '').toLowerCase();
+                        const code = (r.code_number || '').toLowerCase();
+                        const cat = (r.category || '').toLowerCase();
+                        return name.includes(searchTerm) || code.includes(searchTerm) || cat.includes(searchTerm);
+                    });
                 }
                 
-                // 根据过滤状态筛选记录
+                if (!transferFilterState[shopType]) transferFilterState[shopType] = 'all';
                 const filterType = transferFilterState[shopType];
                 const records = filterType === 'all' 
                     ? allRecords 
                     : allRecords.filter(r => r.record_type === filterType);
                 
-                // 计算转卖和来自的数量
                 const outCount = allRecords.filter(r => r.record_type === 'out').length;
                 const inCount = allRecords.filter(r => r.record_type === 'in').length;
                 
