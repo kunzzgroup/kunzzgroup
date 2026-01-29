@@ -2080,6 +2080,12 @@ header('Expires: 0');
             white-space: nowrap;
         }
         
+        /* 编号行：数据加粗 */
+        #stock-table.transposed tr[data-row="编号"] td,
+        .stock-table.transposed tr[data-row="编号"] td {
+            font-weight: 700;
+        }
+
         /* 单价行的货币显示居中 */
         #stock-table.transposed tr[data-row="单价"] td .currency-display,
         .stock-table.transposed tr[data-row="单价"] td .currency-display {
