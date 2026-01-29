@@ -10711,12 +10711,14 @@ header('Expires: 0');
                 }
             });
             
-            // 生成餐厅选项（用于进出下拉列表）
+            // 生成餐厅选项（用于进出下拉列表）；排除当前店铺，不能转给自己
             let restaurantOptions = '';
-            const jRestaurants = window.jRestaurantsForTransfer || restaurants.filter(r => {
+            const raw = window.jRestaurantsForTransfer || restaurants.filter(r => {
                 const name = r.name.toLowerCase();
-                return name.startsWith('j') && name !== shopType;
+                return name.startsWith('j');
             });
+            const excludeSelf = (shopType || '').toLowerCase();
+            const jRestaurants = raw.filter(r => r.name.toLowerCase() !== excludeSelf);
             jRestaurants.forEach(r => {
                 restaurantOptions += `<option value="${r.name.toLowerCase()}" style="text-align: center;">${r.name}</option>`;
             });
@@ -11187,12 +11189,12 @@ header('Expires: 0');
                       oninput="this.textContent = this.textContent.replace(/[^0-9.]/g, ''); calculateEditTransferTotal('${codeRowId}');">${originalQuantity}</span>
             `;
             
-            // 编辑进出列 - 改为下拉列表
+            // 编辑进出列 - 改为下拉列表（编辑时保留可选当前店，以便来自记录 to=当前店）
             const toCell = cells[3];
             let restaurantOptions = '';
             const jRestaurants = window.jRestaurantsForTransfer || restaurants.filter(r => {
                 const name = r.name.toLowerCase();
-                return name.startsWith('j') && name !== shopId;
+                return name.startsWith('j');
             });
             const currentToShop = record.to_shop_type || record.to_shop_type || '';
             jRestaurants.forEach(r => {
