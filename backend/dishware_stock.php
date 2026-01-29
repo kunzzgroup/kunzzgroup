@@ -1661,6 +1661,117 @@ header('Expires: 0');
         align-items: center;
         gap: 6px;
     }
+    .break-month-picker-inner {
+        display: flex;
+        align-items: center;
+    }
+    .break-month-picker-trigger {
+        display: inline-flex;
+        align-items: center;
+        padding: clamp(4px, 0.42vw, 8px) 10px;
+        border: 1px solid #d1d5db;
+        border-radius: clamp(4px, 0.42vw, 8px);
+        font-size: clamp(8px, 0.74vw, 14px);
+        background: #fff;
+        cursor: pointer;
+        color: #111;
+        min-width: 160px;
+        justify-content: space-between;
+    }
+    .break-month-picker-trigger:hover {
+        border-color: #9ca3af;
+    }
+    .break-month-picker-trigger:focus {
+        outline: none;
+        border-color: #000000ff;
+        box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+    }
+    .break-month-picker-popup {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        margin-top: 6px;
+        min-width: 220px;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+        z-index: 1100;
+        padding: 12px 14px;
+    }
+    .break-picker-year-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+    .break-picker-year-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        background: #f9fafb;
+        color: #374151;
+        cursor: pointer;
+        font-size: 12px;
+    }
+    .break-picker-year-btn:hover {
+        background: #f3f4f6;
+        border-color: #d1d5db;
+    }
+    #break-picker-year-display {
+        font-size: 16px;
+        font-weight: 600;
+        color: #111;
+        min-width: 48px;
+        text-align: center;
+    }
+    .break-picker-month-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+        margin-bottom: 10px;
+    }
+    .break-picker-month-btn {
+        padding: 8px 4px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #fff;
+        color: #374151;
+        font-size: 13px;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s;
+    }
+    .break-picker-month-btn:hover {
+        background: #f3f4f6;
+        border-color: #d1d5db;
+    }
+    .break-picker-month-btn.selected {
+        background: #3b82f6;
+        border-color: #3b82f6;
+        color: #fff;
+    }
+    .break-picker-footer {
+        text-align: center;
+        padding-top: 6px;
+        border-top: 1px solid #f3f4f6;
+    }
+    .break-picker-clear-btn {
+        padding: 4px 12px;
+        border: none;
+        background: none;
+        color: #6b7280;
+        font-size: 13px;
+        cursor: pointer;
+    }
+    .break-picker-clear-btn:hover {
+        color: #111;
+        text-decoration: underline;
+    }
     .break-quick-select-dropdown.show {
         display: block !important;
     }
@@ -2752,27 +2863,21 @@ header('Expires: 0');
                 <div id="break-date-filter" class="break-date-filter" style="display: none;">
                     <div class="break-month-picker">
                         <span style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #000000ff; white-space: nowrap;"><i class="fas fa-calendar" style="margin-right: 4px;"></i>选择年份和月份</span>
-                        <div style="display: flex; align-items: center; gap: 4px;">
-                            <select id="break-year-select" class="unified-search-input" style="width: 72px;">
-                                <!-- 动态填充 -->
-                            </select>
-                            <span style="font-size: 12px;">年</span>
-                            <select id="break-month-select" class="unified-search-input" style="width: 64px;">
-                                <option value="">无</option>
-                                <option value="1">1月</option>
-                                <option value="2">2月</option>
-                                <option value="3">3月</option>
-                                <option value="4">4月</option>
-                                <option value="5">5月</option>
-                                <option value="6">6月</option>
-                                <option value="7">7月</option>
-                                <option value="8">8月</option>
-                                <option value="9">9月</option>
-                                <option value="10">10月</option>
-                                <option value="11">11月</option>
-                                <option value="12">12月</option>
-                            </select>
-                            <span style="font-size: 12px;">月</span>
+                        <div class="break-month-picker-inner" style="position: relative;">
+                            <button type="button" id="break-month-picker-trigger" class="break-month-picker-trigger" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-calendar" style="margin-right: 6px;"></i>
+                                <span id="break-month-picker-text">选择年份和月份</span>
+                                <i class="fas fa-chevron-down" style="margin-left: 6px;"></i>
+                            </button>
+                            <div id="break-month-picker-popup" class="break-month-picker-popup" style="display: none;" role="dialog" aria-label="选择年份和月份">
+                                <div class="break-picker-year-row">
+                                    <button type="button" class="break-picker-year-btn" id="break-picker-year-prev" aria-label="上一年"><i class="fas fa-chevron-up"></i></button>
+                                    <span id="break-picker-year-display">2026</span>
+                                    <button type="button" class="break-picker-year-btn" id="break-picker-year-next" aria-label="下一年"><i class="fas fa-chevron-down"></i></button>
+                                </div>
+                                <div class="break-picker-month-grid" id="break-picker-month-grid"></div>
+                                <div class="break-picker-footer"><button type="button" id="break-picker-clear" class="break-picker-clear-btn">无</button></div>
+                            </div>
                         </div>
                     </div>
                     <div class="break-quick-select">
@@ -6455,39 +6560,98 @@ header('Expires: 0');
             }, 100);
         }
 
-        // 初始化破损记录日期筛选（月份选择 + 快速选择）
+        // 初始化破损记录日期筛选（年月选择弹层 + 快速选择）
         function initBreakDateFilter() {
-            const yearSelect = document.getElementById('break-year-select');
-            const monthSelect = document.getElementById('break-month-select');
-            if (!yearSelect || !monthSelect) return;
+            const trigger = document.getElementById('break-month-picker-trigger');
+            const popup = document.getElementById('break-month-picker-popup');
+            const yearDisplay = document.getElementById('break-picker-year-display');
+            const yearPrev = document.getElementById('break-picker-year-prev');
+            const yearNext = document.getElementById('break-picker-year-next');
+            const grid = document.getElementById('break-picker-month-grid');
+            const clearBtn = document.getElementById('break-picker-clear');
+            if (!trigger || !popup || !grid) return;
+
             const y = new Date().getFullYear();
-            if (!yearSelect.options.length) {
-                for (let i = y - 5; i <= y + 1; i++) {
-                    const opt = document.createElement('option');
-                    opt.value = i;
-                    opt.textContent = i;
-                    yearSelect.appendChild(opt);
+            if (breakMonthValue.year == null) breakMonthValue.year = y;
+
+            function updateTriggerText() {
+                const t = document.getElementById('break-month-picker-text');
+                if (!t) return;
+                const { year, month } = breakMonthValue;
+                if (year != null && month != null) t.textContent = `${year}年${month}月`;
+                else t.textContent = '选择年份和月份';
+            }
+
+            function renderPopup() {
+                const yr = breakMonthValue.year ?? y;
+                if (yearDisplay) yearDisplay.textContent = yr;
+                grid.innerHTML = '';
+                for (let m = 1; m <= 12; m++) {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'break-picker-month-btn' + (breakMonthValue.month === m ? ' selected' : '');
+                    btn.textContent = m + '月';
+                    btn.dataset.month = String(m);
+                    btn.addEventListener('click', () => {
+                        breakMonthValue.year = yr;
+                        breakMonthValue.month = m;
+                        applyBreakDateFromMonthPicker();
+                        updateTriggerText();
+                        closeBreakMonthPickerPopup();
+                    });
+                    grid.appendChild(btn);
                 }
             }
-            yearSelect.value = breakMonthValue.year || y;
-            monthSelect.value = breakMonthValue.month != null ? String(breakMonthValue.month) : '';
-            yearSelect.onchange = () => { breakMonthValue.year = yearSelect.value ? parseInt(yearSelect.value, 10) : null; applyBreakDateFromMonthPicker(); };
-            monthSelect.onchange = () => { breakMonthValue.month = monthSelect.value ? parseInt(monthSelect.value, 10) : null; applyBreakDateFromMonthPicker(); };
+
+            function openBreakMonthPickerPopup() {
+                popup.style.display = 'block';
+                trigger.setAttribute('aria-expanded', 'true');
+                renderPopup();
+            }
+            function closeBreakMonthPickerPopup() {
+                popup.style.display = 'none';
+                trigger.setAttribute('aria-expanded', 'false');
+            }
+
+            window.closeBreakMonthPickerPopup = closeBreakMonthPickerPopup;
+
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (popup.style.display === 'none' || !popup.style.display) openBreakMonthPickerPopup();
+                else closeBreakMonthPickerPopup();
+            });
+            yearPrev.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const yr = breakMonthValue.year ?? y;
+                breakMonthValue.year = Math.max(yr - 1, y - 20);
+                renderPopup();
+            });
+            yearNext.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const yr = breakMonthValue.year ?? y;
+                breakMonthValue.year = Math.min(yr + 1, y + 2);
+                renderPopup();
+            });
+            clearBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                breakMonthValue.month = null;
+                breakDateRange = null;
+                applyBreakDateFromMonthPicker();
+                updateTriggerText();
+                closeBreakMonthPickerPopup();
+            });
+
+            updateTriggerText();
         }
 
         function applyBreakDateFromMonthPicker() {
-            const yearSelect = document.getElementById('break-year-select');
-            const monthSelect = document.getElementById('break-month-select');
-            const y = yearSelect?.value ? parseInt(yearSelect.value, 10) : null;
-            const m = monthSelect?.value ? parseInt(monthSelect.value, 10) : null;
-            if (!y || !m) {
+            const { year: yr, month: m } = breakMonthValue;
+            if (!yr || !m) {
                 breakDateRange = null;
-                breakMonthValue = { year: y, month: m };
             } else {
-                breakMonthValue = { year: y, month: m };
-                const first = `${y}-${String(m).padStart(2, '0')}-01`;
-                const last = new Date(y, m, 0).getDate();
-                breakDateRange = { startDate: first, endDate: `${y}-${String(m).padStart(2, '0')}-${String(last).padStart(2, '0')}` };
+                const first = `${yr}-${String(m).padStart(2, '0')}-01`;
+                const last = new Date(yr, m, 0).getDate();
+                breakDateRange = { startDate: first, endDate: `${yr}-${String(m).padStart(2, '0')}-${String(last).padStart(2, '0')}` };
             }
             const q = document.getElementById('break-quick-select-text');
             if (q) q.textContent = '时段';
@@ -6505,17 +6669,15 @@ header('Expires: 0');
             if (!m) return;
             const month = parseInt(m[1], 10);
             if (month < 1 || month > 12) return;
-            const y = new Date().getFullYear();
+            const year = new Date().getFullYear();
             const pad = (n) => String(n).padStart(2, '0');
-            const first = `${y}-${pad(month)}-01`;
-            const lastDay = new Date(y, month, 0).getDate();
-            const last = `${y}-${pad(month)}-${pad(lastDay)}`;
+            const first = `${year}-${pad(month)}-01`;
+            const lastDay = new Date(year, month, 0).getDate();
+            const last = `${year}-${pad(month)}-${pad(lastDay)}`;
             breakDateRange = { startDate: first, endDate: last };
-            breakMonthValue = { year: y, month: month };
-            const yearSelect = document.getElementById('break-year-select');
-            const monthSelect = document.getElementById('break-month-select');
-            if (yearSelect) yearSelect.value = y;
-            if (monthSelect) monthSelect.value = String(month);
+            breakMonthValue = { year, month };
+            const t = document.getElementById('break-month-picker-text');
+            if (t) t.textContent = `${year}年${month}月`;
             const q = document.getElementById('break-quick-select-text');
             if (q) q.textContent = month + '月';
             const d = document.getElementById('break-quick-select-dropdown');
@@ -6523,12 +6685,17 @@ header('Expires: 0');
             if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') loadAllBreakRecords();
         }
 
-        // 打开破损记录页面时，点击外部关闭快速选择下拉
+        // 打开破损记录页面时，点击外部关闭快速选择下拉、年月选择弹层
         document.addEventListener('click', function(e) {
             const btn = document.getElementById('break-quick-select-btn');
             const dd = document.getElementById('break-quick-select-dropdown');
             if (dd && dd.classList.contains('show') && btn && !btn.contains(e.target) && !dd.contains(e.target)) {
                 dd.classList.remove('show');
+            }
+            const trigger = document.getElementById('break-month-picker-trigger');
+            const popup = document.getElementById('break-month-picker-popup');
+            if (popup && popup.style.display === 'block' && trigger && !trigger.contains(e.target) && !popup.contains(e.target)) {
+                if (typeof window.closeBreakMonthPickerPopup === 'function') window.closeBreakMonthPickerPopup();
             }
         });
 
