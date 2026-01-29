@@ -1845,7 +1845,7 @@ header('Expires: 0');
             box-sizing: border-box;
         }
 
-        /* 数据列交替背景：按套装分组，同套装同色，灰白/白交替 */
+        /* 数据列背景：套装列灰白色，非套装列白色 */
         #stock-table.transposed tr td[data-col-bg="0"],
         .stock-table.transposed tr td[data-col-bg="0"] {
             background: #f3f4f6;
@@ -7314,21 +7314,10 @@ header('Expires: 0');
             const thead = table.querySelector('thead');
             if (thead) thead.innerHTML = '';
 
-            // 按套装分组列：同套装连续列同色，灰白/白交替
+            // 列背景：套装列灰白色，非套装列白色
             const colGroupParity = [];
-            let idx = 0;
-            let parity = 0;
-            while (idx < displayRows.length) {
-                const r = displayRows[idx];
-                const sid = r.set_id;
-                let end = idx;
-                if (sid) {
-                    while (end + 1 < displayRows.length && displayRows[end + 1].set_id === sid) end++;
-                }
-                const p = parity % 2;
-                for (let c = idx; c <= end; c++) colGroupParity[c] = p;
-                parity++;
-                idx = end + 1;
+            for (let c = 0; c < displayRows.length; c++) {
+                colGroupParity[c] = displayRows[c].set_id ? 0 : 1;
             }
 
             const fieldDefs = getDynamicFieldDefs();
@@ -7610,21 +7599,10 @@ header('Expires: 0');
                 }
             });
 
-            // 按套装分组列：同套装连续列同色，灰白/白交替
+            // 列背景：套装列灰白色，非套装列白色
             const colGroupParity = [];
-            let gidx = 0;
-            let gparity = 0;
-            while (gidx < displayRows.length) {
-                const r = displayRows[gidx];
-                const sid = r.set_id;
-                let end = gidx;
-                if (sid) {
-                    while (end + 1 < displayRows.length && displayRows[end + 1].set_id === sid) end++;
-                }
-                const p = gparity % 2;
-                for (let c = gidx; c <= end; c++) colGroupParity[c] = p;
-                gparity++;
-                gidx = end + 1;
+            for (let c = 0; c < displayRows.length; c++) {
+                colGroupParity[c] = displayRows[c].set_id ? 0 : 1;
             }
 
             const fieldDefs = getDynamicFieldDefs();
