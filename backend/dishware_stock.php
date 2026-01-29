@@ -2109,6 +2109,12 @@ header('Expires: 0');
         #stock-table.transposed tr[data-row="操作"] td,
         .stock-table.transposed tr[data-row="操作"] td { min-width: 110px; }
 
+        /* 总库存表格：所有数据单元格加粗 */
+        #stock-table.transposed td,
+        .stock-table.transposed td {
+            font-weight: 700 !important;
+        }
+
         /* NO 行：浅灰 */
         #stock-table.transposed tr[data-row="NO"] th.row-header,
         #stock-table.transposed tr[data-row="NO"] td,
