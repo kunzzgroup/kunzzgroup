@@ -1862,11 +1862,15 @@ header('Expires: 0');
             padding: clamp(4px, 0.42vw, 8px);
             overflow: visible;
         }
-        /* 仅套装列在照片行的列线为白色 */
+        /* 仅套装列在照片行的列线为白色；紧邻单品时右侧线浅灰（同分类、尺寸） */
         #stock-table.transposed tr[data-row="照片"] td[data-col-bg="0"],
         .stock-table.transposed tr[data-row="照片"] td[data-col-bg="0"] {
             border-left: 1px solid #fff !important;
             border-right: 1px solid #fff !important;
+        }
+        #stock-table.transposed tr[data-row="照片"] td[data-col-bg="0"]:has(+ td[data-col-bg="1"]),
+        .stock-table.transposed tr[data-row="照片"] td[data-col-bg="0"]:has(+ td[data-col-bg="1"]) {
+            border-right: 1px solid #d1d5db !important;
         }
         
         #stock-table.transposed tr[data-row="照片"] td img.product-photo,
