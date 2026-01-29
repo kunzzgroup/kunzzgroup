@@ -6233,6 +6233,88 @@ header('Expires: 0');
             if (document.getElementById('stock-table')) loadStockData(true, false);
         }
 
+        // 批量保存当前店面的所有新增转卖行
+        async function batchSaveTransferRows(shopType) {
+            const tbody = document.getElementById(`${shopType}-transfer-tbody`);
+            if (!tbody) return;
+            const newRows = Array.from(tbody.querySelectorAll('tr.new-row'));
+            if (newRows.length === 0) {
+                showAlert('没有待保存的新增转卖记录', 'warning');
+                return;
+            }
+            const today = new Date().toISOString().split('T')[0];
+            const allSingles = getAllSingleDishwareForBreak();
+            const rowsToRemove = [];
+            const shopsToRefresh = new Set([shopType]);
+            for (const row of newRows) {
+                const codeInput = row.querySelector('input[id$="-code"]');
+                const quantityInput = row.querySelector('input.break-quantity-input');
+                const toSelect = row.querySelector('.transfer-to-select');
+                if (!codeInput || !quantityInput || !toSelect) continue;
+                const rowId = codeInput.id.replace(/-code$/, '');
+                const productId = codeInput.dataset.productId;
+                const code = (codeInput.value || '').trim();
+                const quantity = parseFloat(quantityInput.value) || 0;
+                const toShopType = (toSelect.value || '').trim();
+                if (!code || !productId) {
+                    showAlert('请填写编号或选择产品', 'error');
+                    return;
+                }
+                if (!toShopType) {
+                    showAlert('请选择转卖给哪间餐厅', 'error');
+                    return;
+                }
+                if (quantity <= 0) {
+                    showAlert('请输入有效的转卖数量', 'error');
+                    return;
+                }
+                const product = allSingles.find(item => item.id == productId || item.code_number === code) || (stockData || []).find(item => item.id == productId || item.code_number === code);
+                if (!product) {
+                    showAlert('找不到产品信息：' + code, 'error');
+                    return;
+                }
+                const unitPrice = parseFloat(product.unit_price) || 0;
+                try {
+                    const result = await apiCall('', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'add_transfer_record',
+                            dishware_id: productId,
+                            from_shop_type: shopType,
+                            to_shop_type: toShopType,
+                            quantity: quantity,
+                            unit_price: unitPrice,
+                            transfer_date: today,
+                            recorded_by: 'system'
+                        })
+                    });
+                    if (!result.success) {
+                        showAlert('批量保存失败: ' + (result.message || '未知错误'), 'error');
+                        return;
+                    }
+                    rowsToRemove.push({ row, rowId });
+                    shopsToRefresh.add(toShopType);
+                } catch (e) {
+                    showAlert('批量保存失败: ' + (e.message || '网络错误'), 'error');
+                    return;
+                }
+            }
+            for (const { row, rowId } of rowsToRemove) {
+                const codeInput = document.getElementById(`${rowId}-code`);
+                if (codeInput) {
+                    const closeHandler = codeInput._closeHandler;
+                    if (closeHandler) document.removeEventListener('click', closeHandler);
+                    const codeDropdown = document.getElementById(`${rowId}-code-dropdown`);
+                    if (codeDropdown && codeDropdown.parentElement === document.body) document.body.removeChild(codeDropdown);
+                }
+                row.remove();
+            }
+            showAlert(`成功保存 ${rowsToRemove.length} 条转卖记录`, 'success');
+            for (const s of shopsToRefresh) await refreshSingleRestaurantTransferRecords(s);
+            if (document.getElementById('stock-table')) loadStockData(true, false);
+        }
+
         // 保存新破损记录行
         async function saveNewBreakRow(rowId, shopType) {
             const codeInput = document.getElementById(`${rowId}-code`);
@@ -10232,9 +10314,14 @@ header('Expires: 0');
                                     </button>
                                 </div>
                             </div>
-                            <button class="btn btn-success" onclick="openTransferRowsModal('${shopType}')" style="padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
-                                <i class="fas fa-plus"></i> 转卖碗碟
-                            </button>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <button class="btn btn-primary" onclick="batchSaveTransferRows('${shopType}')" style="padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap; background: #0d6efd;">
+                                    <i class="fas fa-save"></i> 批量保存
+                                </button>
+                                <button class="btn btn-success" onclick="openTransferRowsModal('${shopType}')" style="padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
+                                    <i class="fas fa-plus"></i> 转卖碗碟
+                                </button>
+                            </div>
                         </div>
                         <div class="break-record-table-wrapper">
                             <table class="break-record-table" id="${shopType}-transfer-table">
