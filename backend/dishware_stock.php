@@ -1996,19 +1996,19 @@ header('Expires: 0');
         /* 套装最左、最右整列边界线加粗（全行），#636363 */
         #stock-table.transposed td[data-col-last-in-set="1"],
         .stock-table.transposed td[data-col-last-in-set="1"] {
-            border-right: 2px solid #636363 !important;
+            border-right: 2px solid #d1d5db !important;
         }
         #stock-table.transposed td[data-col-first-in-set="1"],
         .stock-table.transposed td[data-col-first-in-set="1"] {
-            border-left: 2px solid #636363 !important;
+            border-left: 2px solid #d1d5db !important;
         }
         #stock-table.transposed tr[data-row="照片"] td[data-col-last-in-set="1"],
         .stock-table.transposed tr[data-row="照片"] td[data-col-last-in-set="1"] {
-            border-right: 2px solid #636363 !important;
+            border-right: 2px solid #d1d5db !important;
         }
         #stock-table.transposed tr[data-row="照片"] td[data-col-first-in-set="1"],
         .stock-table.transposed tr[data-row="照片"] td[data-col-first-in-set="1"] {
-            border-left: 2px solid #636363 !important;
+            border-left: 2px solid #d1d5db !important;
         }
         /* 分类、尺寸、单价行：套装边界线加粗（显式覆盖，避免被覆盖） */
         #stock-table.transposed tr[data-row="分类"] td[data-col-first-in-set="1"],
@@ -2017,7 +2017,7 @@ header('Expires: 0');
         .stock-table.transposed tr[data-row="分类"] td[data-col-first-in-set="1"],
         .stock-table.transposed tr[data-row="尺寸"] td[data-col-first-in-set="1"],
         .stock-table.transposed tr[data-row="单价"] td[data-col-first-in-set="1"] {
-            border-left: 2px solid #636363 !important;
+            border-left: 2px solid #d1d5db !important;
         }
         #stock-table.transposed tr[data-row="分类"] td[data-col-last-in-set="1"],
         #stock-table.transposed tr[data-row="尺寸"] td[data-col-last-in-set="1"],
@@ -2025,7 +2025,7 @@ header('Expires: 0');
         .stock-table.transposed tr[data-row="分类"] td[data-col-last-in-set="1"],
         .stock-table.transposed tr[data-row="尺寸"] td[data-col-last-in-set="1"],
         .stock-table.transposed tr[data-row="单价"] td[data-col-last-in-set="1"] {
-            border-right: 2px solid #636363 !important;
+            border-right: 2px solid #d1d5db !important;
         }
         
         #stock-table.transposed tr[data-row="照片"] td img.product-photo,
@@ -2182,13 +2182,13 @@ header('Expires: 0');
         #stock-table.transposed tr[data-row="操作"] td[data-col-first-in-set="1"],
         .stock-table.transposed tr[data-row="总数"] td[data-col-first-in-set="1"],
         .stock-table.transposed tr[data-row="操作"] td[data-col-first-in-set="1"] {
-            border-left: 2px solid #636363 !important;
+            border-left: 2px solid #d1d5db !important;
         }
         #stock-table.transposed tr[data-row="总数"] td[data-col-last-in-set="1"],
         #stock-table.transposed tr[data-row="操作"] td[data-col-last-in-set="1"],
         .stock-table.transposed tr[data-row="总数"] td[data-col-last-in-set="1"],
         .stock-table.transposed tr[data-row="操作"] td[data-col-last-in-set="1"] {
-            border-right: 2px solid #636363 !important;
+            border-right: 2px solid #d1d5db !important;
         }
         /* 操作行（最后一行）底线加粗，浅灰与上方一致 */
         #stock-table.transposed tr[data-row="操作"] th.row-header,
