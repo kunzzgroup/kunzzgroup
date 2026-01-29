@@ -2005,19 +2005,19 @@ header('Expires: 0');
             background: #4b5563 !important;
             color: #fff;
         }
-        /* 总数、操作行：第二列起边框 #636363，列线明显 */
+        /* 总数、操作行：第二列起边框与上方一致，浅灰 #d1d5db */
         #stock-table.transposed tr[data-row="总数"] td,
         #stock-table.transposed tr[data-row="操作"] td,
         .stock-table.transposed tr[data-row="总数"] td,
         .stock-table.transposed tr[data-row="操作"] td {
-            border: 1px solid #636363 !important;
+            border: 1px solid #d1d5db !important;
         }
-        /* 操作行（最后一行）底线加粗，确保最后一条横线可见 */
+        /* 操作行（最后一行）底线加粗，浅灰与上方一致 */
         #stock-table.transposed tr[data-row="操作"] th.row-header,
         #stock-table.transposed tr[data-row="操作"] td,
         .stock-table.transposed tr[data-row="操作"] th.row-header,
         .stock-table.transposed tr[data-row="操作"] td {
-            border-bottom: 2px solid #636363 !important;
+            border-bottom: 2px solid #d1d5db !important;
         }
 
         /* 小屏幕时减小列宽 - 不影响默认页面大小 */
