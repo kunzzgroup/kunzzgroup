@@ -11513,7 +11513,11 @@ header('Expires: 0');
                 
                 if (result.success) {
                     showAlert('转卖记录删除成功', 'success');
-                    loadAllTransferRecords();
+                    if (currentPage === 'transfer' && shopId) {
+                        await refreshSingleRestaurantTransferRecords(shopId);
+                    } else {
+                        loadAllTransferRecords();
+                    }
                     if (document.getElementById('stock-table')) {
                         loadStockData(true, false);
                     }
