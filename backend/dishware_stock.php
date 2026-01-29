@@ -1035,7 +1035,7 @@ header('Expires: 0');
             position: absolute;
             left: 50%;
             bottom: 0;
-            transform: translateX(-50%) translateY(calc(-100% + 20px));
+            transform: translateX(-50%) translateY(calc(-100% + 50px));
             padding: 6px 10px;
             background: #1f2937;
             color: #fff;
