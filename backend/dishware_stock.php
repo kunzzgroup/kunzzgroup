@@ -5800,16 +5800,17 @@ header('Expires: 0');
                 if (result.success) {
                     showAlert('破损记录删除成功', 'success');
                     
-                    // 刷新当前页面的数据
                     if (currentPage === 'stock') {
-                        // 如果在库存页面，刷新库存数据
                         loadStockData(true, false);
-                    } else {
-                        // 如果在破损记录页面，刷新所有破损记录数据
-                        loadAllBreakRecords();
+                    } else if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') {
+                        // 破损记录页：只刷新被删记录所在餐厅的表格，保留未保存的新行
+                        if (shopId) {
+                            await refreshSingleRestaurantBreakRecords(shopId, recordId);
+                        } else {
+                            loadAllBreakRecords();
+                        }
                     }
                     
-                    // 同时刷新总库存页面（如果已加载），确保库存同步
                     if (document.getElementById('stock-table')) {
                         loadStockData(true, false);
                     }
