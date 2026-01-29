@@ -1648,6 +1648,13 @@ header('Expires: 0');
         gap: 4px;
     }
 
+    .item-type-filter {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
     .break-date-filter {
         display: flex;
         align-items: center;
@@ -2977,6 +2984,14 @@ header('Expires: 0');
                         <option value="用具">用具</option>
                     </select>
                 </div>
+                <div class="item-type-filter" id="item-type-filter-wrap" style="display: none;">
+                    <span style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #000000ff; white-space: nowrap;">类型</span>
+                    <select id="item-type-filter" class="unified-search-input">
+                        <option value="all">全部</option>
+                        <option value="single">单品</option>
+                        <option value="set">套装</option>
+                    </select>
+                </div>
             </div>
             
             <div class="header-right-section">
@@ -3527,6 +3542,7 @@ header('Expires: 0');
         let originalEditData = new Map(); // 存储原始数据用于取消编辑
         let currentPage = 'stock'; // 当前页面
         let stockViewType = 'dishware'; // 总库存页面的视图类型：'dishware' 或 'sets'
+        let stockItemFilter = 'all'; // 总库存页面类型筛选：'all' | 'single' | 'set'（全部/单品/套装）
         let breakRecordsData = {
             j1: [],
             j2: [],
@@ -4503,6 +4519,8 @@ header('Expires: 0');
                     updateStockViewButton();
                     updateStockAddButton();
                     restoreCategoryFilter();
+                    const itemTypeWrap = document.getElementById('item-type-filter-wrap');
+                    if (itemTypeWrap) itemTypeWrap.style.display = '';
                     break;
                 case 'j1':
                 case 'j2':
@@ -4518,6 +4536,8 @@ header('Expires: 0');
                         window._breakDateFilterInited = true;
                     }
                     updateCategoryFilterToRestaurantForBreak();
+                    const itemTypeWrapBreak = document.getElementById('item-type-filter-wrap');
+                    if (itemTypeWrapBreak) itemTypeWrapBreak.style.display = 'none';
                     if (typeof updateBreakSelectionDisplay === 'function') updateBreakSelectionDisplay();
                     loadAllBreakRecords();
                     break;
@@ -4532,12 +4552,16 @@ header('Expires: 0');
                         window._breakDateFilterInited = true;
                     }
                     updateCategoryFilterToRestaurant();
+                    const itemTypeWrapTransfer = document.getElementById('item-type-filter-wrap');
+                    if (itemTypeWrapTransfer) itemTypeWrapTransfer.style.display = 'none';
                     if (typeof updateBreakSelectionDisplay === 'function') updateBreakSelectionDisplay();
                     loadAllTransferRecords();
                     break;
                 default:
                     // 其他页面恢复分类下拉菜单
                     restoreCategoryFilter();
+                    const itemTypeWrapDef = document.getElementById('item-type-filter-wrap');
+                    if (itemTypeWrapDef) itemTypeWrapDef.style.display = 'none';
                     break;
             }
         }
@@ -6979,8 +7003,15 @@ header('Expires: 0');
             categorySelect.removeEventListener('change', handleTransferRestaurantFilterChange);
             categorySelect.removeEventListener('change', handleBreakRestaurantFilterChange);
             categorySelect.addEventListener('change', handleCategoryFilterChange);
+
+            const itemTypeSelect = document.getElementById('item-type-filter');
+            if (itemTypeSelect) {
+                itemTypeSelect.removeEventListener('change', handleItemTypeFilterChange);
+                itemTypeSelect.addEventListener('change', handleItemTypeFilterChange);
+                if (stockItemFilter) itemTypeSelect.value = stockItemFilter;
+            }
         }
-        
+
         // 处理转卖页面餐厅过滤变化
         function handleTransferRestaurantFilterChange() {
             const categorySelect = document.getElementById('category-filter');
@@ -7002,6 +7033,14 @@ header('Expires: 0');
         // 处理分类过滤变化（库存页面）
         function handleCategoryFilterChange() {
             searchData();
+        }
+
+        // 处理类型筛选变化（全部/单品/套装）
+        function handleItemTypeFilterChange() {
+            const el = document.getElementById('item-type-filter');
+            if (el) stockItemFilter = el.value || 'all';
+            smoothUpdateTable();
+            updateStats();
         }
         
         // 根据选择的餐厅过滤破损记录
@@ -7470,6 +7509,16 @@ header('Expires: 0');
             tbody.style.opacity = '1';
         }
 
+        // 根据类型筛选（全部/单品/套装）得到用于展示的数据
+        function getStockDataForDisplay(base) {
+            if (!base || !Array.isArray(base)) return [];
+            const f = document.getElementById('item-type-filter');
+            const filterVal = (f && f.value) ? f.value : stockItemFilter;
+            if (filterVal === 'single') return base.filter(x => x.item_type === 'individual');
+            if (filterVal === 'set') return base.filter(x => x.item_type === 'set');
+            return base;
+        }
+
         // 搜索数据
         function searchData() {
             const searchTerm = document.getElementById('unified-filter').value.toLowerCase();
@@ -7596,9 +7645,9 @@ header('Expires: 0');
          function updateStats() {
              let displayedRecords, totalRecords;
              
-             if (currentPage === 'stock') {
-                 // 库存页面使用库存数据
-                 displayedRecords = filteredData.length;
+             if (currentPage === 'stock' && stockViewType === 'dishware') {
+                 // 库存页面碗碟视图：显示记录按类型筛选后数量
+                 displayedRecords = getStockDataForDisplay(filteredData || stockData).length;
                  totalRecords = stockData.length;
              } else if (currentPage === 'stock' && stockViewType === 'sets') {
                  // 总库存页面的套装视图使用套装数据
@@ -7666,7 +7715,8 @@ header('Expires: 0');
                 return `<span class="photo-tooltip-wrap" data-tooltip="${label}">${inner}</span>`;
             }
 
-            if (!filteredData || filteredData.length === 0) {
+            const dataToShow = getStockDataForDisplay(filteredData);
+            if (!dataToShow || dataToShow.length === 0) {
                 table.classList.remove('transposed');
                 tbody.innerHTML = `
                     <tr>
@@ -7679,7 +7729,7 @@ header('Expires: 0');
                 return;
             }
 
-            filteredData.forEach((item) => {
+            dataToShow.forEach((item) => {
                 if (item.item_type === 'set') {
                     const set = item;
                     const setPrice = typeof set.set_price !== 'undefined' ? set.set_price : (set.unit_price || 0);
@@ -7877,8 +7927,8 @@ header('Expires: 0');
             categoriesContainer.classList.add('show');
             if (singleTableContainer) singleTableContainer.style.display = 'none';
             
-            // 如果没有数据，显示空状态
-            if (!stockData || stockData.length === 0) {
+            const dataToShow = getStockDataForDisplay(stockData);
+            if (!dataToShow || dataToShow.length === 0) {
                 categoriesContainer.innerHTML = `
                     <div class="category-section">
                         <div class="category-header">
@@ -7896,7 +7946,7 @@ header('Expires: 0');
             // 按分类分组数据
             const categoryGroups = {};
             
-            stockData.forEach((item) => {
+            dataToShow.forEach((item) => {
                 let category = '';
                 
                 if (item.item_type === 'set') {
