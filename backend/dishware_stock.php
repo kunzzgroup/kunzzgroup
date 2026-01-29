@@ -2005,6 +2005,13 @@ header('Expires: 0');
             background: #4b5563 !important;
             color: #fff;
         }
+        /* 总数、操作行：第二列起边框 #636363 */
+        #stock-table.transposed tr[data-row="总数"] td,
+        #stock-table.transposed tr[data-row="操作"] td,
+        .stock-table.transposed tr[data-row="总数"] td,
+        .stock-table.transposed tr[data-row="操作"] td {
+            border-color: #636363 !important;
+        }
 
         /* 小屏幕时减小列宽 - 不影响默认页面大小 */
         @media (max-width: 1400px) {
