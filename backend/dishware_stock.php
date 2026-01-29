@@ -1656,12 +1656,11 @@ header('Expires: 0');
         background: #f8fafc;
         border: 1px solid #e2e8f0;
         border-radius: 8px;
-        font-size: clamp(12px, 1vw, 14px);
         color: #334155;
     }
-    .break-selection-display .break-selection-label {
-        font-weight: 600;
-        margin-right: 6px;
+    .break-selection-display #break-selection-display-text {
+        font-size: clamp(16px, 1.4vw, 20px);
+        font-weight: 700;
     }
     .break-month-picker,
     .break-quick-select {
@@ -3096,7 +3095,6 @@ header('Expires: 0');
             <!-- 合并的破损记录页面（J1、J2、J3左右排列） -->
             <div id="j1-page" class="page-content" style="display: none;">
                 <div id="break-selection-display" class="break-selection-display" style="display: none;">
-                    <span class="break-selection-label">当前筛选：</span>
                     <span id="break-selection-display-text">选择年份和月份</span>
                 </div>
                 <div class="table-scroll-container" style="overflow-x: auto; overflow-y: visible; width: 100%;">
