@@ -2369,6 +2369,9 @@ if (isset($_SESSION['user_id'])) {
                     }
                 }
             }
+
+            // 保存时申请人始终使用当前登录用户的昵称（谁编辑保存就显示谁）
+            data.applicant = CURRENT_USER_APPLICANT || data.applicant || '';
             
             return data;
         }
@@ -2949,6 +2952,19 @@ if (isset($_SESSION['user_id'])) {
                 }
                 
                 if (result.success) {
+                    // 保存后申请人已更新为当前用户，同步更新该行显示及内存数据
+                    const row = document.querySelector(`input[data-row="${rowId}"]`)?.closest('tr');
+                    if (row) {
+                        const applicantInput = row.querySelector('input[data-field="applicant"]');
+                        if (applicantInput) {
+                            applicantInput.value = CURRENT_USER_APPLICANT || '';
+                        }
+                    }
+                    const dataIdx = stockData.findIndex(item => item.id == rowId);
+                    if (dataIdx >= 0) {
+                        stockData[dataIdx].applicant = CURRENT_USER_APPLICANT || '';
+                    }
+
                     // 根据页面类型显示不同的提示信息
                     if (currentSystem === 'overview') {
                         showAlert('记录保存成功', 'success');
@@ -2956,7 +2972,6 @@ if (isset($_SESSION['user_id'])) {
                         showAlert('记录保存成功，需要在总览页面重新批准', 'success');
                         
                         // 系统页面：如果是编辑现有记录，更新状态列显示为"待批准"
-                        const row = document.querySelector(`input[data-row="${rowId}"]`)?.closest('tr');
                         if (row) {
                             const statusCell = row.querySelector('td:nth-child(9)');
                             if (statusCell) {

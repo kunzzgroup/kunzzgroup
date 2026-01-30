@@ -456,6 +456,12 @@ function handlePut() {
     }
     
     try {
+        // 更新时申请人始终改为当前登录用户的昵称（谁编辑保存就显示谁）
+        $applicant = getCurrentApplicantName($pdo);
+        if ($applicant === '') {
+            sendResponse(false, "无法获取当前账号昵称（申请人）");
+        }
+
         $sql = "UPDATE stock_data 
                 SET product_code = ?, product_name = ?, specification = ?, category = ?, supplier = ?, 
                     applicant = ?, system_assign = ?, freezer_category = ?, approver = ?
@@ -469,7 +475,7 @@ function handlePut() {
             $data['specification'],
             $data['category'] ?? null,  // 添加 category 字段
             $data['supplier'],
-            $data['applicant'],
+            $applicant,
             $data['system_assign'] ?? null,  // 添加 system_assign 字段
             $data['freezer_category'] ?? null,  // 添加 freezer_category 字段
             $data['approver'] ?? null,
