@@ -6361,18 +6361,86 @@ header('Expires: 0');
             saveBtn.style.display = (newCount >= 2 || editCount >= 2) ? 'inline-block' : 'none';
         }
 
-        // 批量保存当前店面的所有新增破损行
+        // 批量保存当前店面的所有新增行与编辑行
         async function batchSaveBreakRows(shopType) {
             const tbody = document.getElementById(`${shopType}-break-tbody`);
             if (!tbody) return;
+            const editingRows = Array.from(tbody.querySelectorAll('tr.editing-row'));
             const newRows = Array.from(tbody.querySelectorAll('tr.new-row'));
-            if (newRows.length === 0) {
-                showAlert('没有待保存的新增记录', 'warning');
+            if (editingRows.length === 0 && newRows.length === 0) {
+                showAlert('没有待保存的新增或编辑记录', 'warning');
                 return;
             }
-            const today = new Date().toISOString().split('T')[0];
             const allSingles = getAllSingleDishwareForBreak();
+            const today = new Date().toISOString().split('T')[0];
             const rowsToRemove = [];
+
+            // 1. 先保存所有编辑行
+            for (const row of editingRows) {
+                const recordId = row.dataset.id;
+                const shopId = shopType;
+                if (!recordId) continue;
+                const codeInput = row.querySelector('input[id$="-code"]');
+                const codeRowId = codeInput ? codeInput.id.replace(/-code$/, '') : '';
+                const quantitySpan = document.getElementById(`edit-${recordId}-qty`) || row.querySelector('.editable-quantity');
+                if (!codeInput || !quantitySpan) {
+                    showAlert('编辑行数据不完整，请重试', 'error');
+                    return;
+                }
+                const newCode = (codeInput.value || '').trim();
+                const productId = codeInput.dataset.productId || codeInput.getAttribute('data-product-id');
+                const newQuantity = parseFloat(quantitySpan.textContent.trim()) || 0;
+                if (!newCode || !productId) {
+                    showAlert('请填写编号或选择产品', 'error');
+                    return;
+                }
+                if (newQuantity < 0) {
+                    showAlert('请输入有效的破损数量', 'error');
+                    return;
+                }
+                const records = breakRecordsData[shopId] || [];
+                const record = records.find(r => r.id == recordId);
+                if (!record) {
+                    showAlert('找不到记录数据', 'error');
+                    return;
+                }
+                const product = allSingles.find(item => item.code_number === newCode) || (stockData || []).find(item => item.code_number === newCode);
+                const rawPrice = product ? (parseFloat(product.unit_price) || 0) : (record.unit_price || 0);
+                const sameProduct = record.dishware_id == productId;
+                const currentQ = product ? getMemberQuantityForShop(product, shopId) : 0;
+                const qtyBefore = sameProduct ? currentQ + (record.break_quantity || 0) : currentQ;
+                let minOverrides = null;
+                if (sameProduct && product && qtyBefore > 0) {
+                    minOverrides = {};
+                    minOverrides[product.id] = qtyBefore;
+                    const c = (product.code_number || '').trim();
+                    if (c) minOverrides[c] = qtyBefore;
+                }
+                const chargeable = product ? getChargeableQuantityForBreak(product, shopId, newQuantity, qtyBefore, minOverrides) : newQuantity;
+                try {
+                    const result = await apiCall('', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'update_damage_record',
+                            id: recordId,
+                            dishware_id: productId,
+                            break_quantity: newQuantity,
+                            chargeable_quantity: chargeable,
+                            unit_price: rawPrice
+                        })
+                    });
+                    if (!result.success) {
+                        showAlert('批量保存失败: ' + (result.message || '未知错误'), 'error');
+                        return;
+                    }
+                } catch (e) {
+                    showAlert('批量保存失败: ' + (e.message || '网络错误'), 'error');
+                    return;
+                }
+            }
+
+            // 2. 再保存所有新增行
             for (const row of newRows) {
                 const codeInput = row.querySelector('input[id$="-code"]');
                 const quantityInput = row.querySelector('input.break-quantity-input');
@@ -6428,25 +6496,95 @@ header('Expires: 0');
                 }
                 row.remove();
             }
-            showAlert(`成功保存 ${rowsToRemove.length} 条破损记录`, 'success');
+            const totalSaved = editingRows.length + rowsToRemove.length;
+            showAlert(`成功保存 ${totalSaved} 条破损记录`, 'success');
             await refreshSingleRestaurantBreakRecords(shopType);
             if (document.getElementById('stock-table')) loadStockData(true, false);
             if (typeof updateBatchSaveButtonVisibilityBreak === 'function') updateBatchSaveButtonVisibilityBreak(shopType);
         }
 
-        // 批量保存当前店面的所有新增转卖行
+        // 批量保存当前店面的所有新增与编辑转卖行
         async function batchSaveTransferRows(shopType) {
             const tbody = document.getElementById(`${shopType}-transfer-tbody`);
             if (!tbody) return;
+            const editingRows = Array.from(tbody.querySelectorAll('tr.editing-row'));
             const newRows = Array.from(tbody.querySelectorAll('tr.new-row'));
-            if (newRows.length === 0) {
-                showAlert('没有待保存的新增转卖记录', 'warning');
+            if (editingRows.length === 0 && newRows.length === 0) {
+                showAlert('没有待保存的新增或编辑转卖记录', 'warning');
                 return;
             }
             const today = new Date().toISOString().split('T')[0];
             const allSingles = getAllSingleDishwareForBreak();
             const rowsToRemove = [];
             const shopsToRefresh = new Set([shopType]);
+
+            // 1. 先保存所有编辑行
+            for (const row of editingRows) {
+                const recordId = row.dataset.id;
+                const shopId = shopType;
+                if (!recordId) continue;
+                const codeInput = row.querySelector('input[id$="-code"]');
+                const codeRowId = codeInput ? codeInput.id.replace(/-code$/, '') : '';
+                const quantitySpan = document.getElementById(`${codeRowId}-qty`) || row.querySelector('.editable-quantity');
+                const toSelect = document.getElementById(`${codeRowId}-to`);
+                if (!codeInput || !quantitySpan || !toSelect) {
+                    showAlert('编辑行数据不完整，请重试', 'error');
+                    return;
+                }
+                const newCode = (codeInput.value || '').trim();
+                const productId = codeInput.dataset.productId || codeInput.getAttribute('data-product-id');
+                const newQuantity = parseFloat(quantitySpan.textContent.trim()) || 0;
+                const newToShopType = (toSelect.value || '').trim();
+                if (!newCode || !productId) {
+                    showAlert('请输入或选择编号', 'error');
+                    return;
+                }
+                if (!newToShopType) {
+                    showAlert('请选择转卖给哪间餐厅', 'error');
+                    return;
+                }
+                if (newQuantity <= 0) {
+                    showAlert('请输入有效的转卖数量', 'error');
+                    return;
+                }
+                const records = transferRecordsData[shopId] || [];
+                const record = records.find(r => r.id == recordId);
+                if (!record) {
+                    showAlert('找不到记录数据', 'error');
+                    return;
+                }
+                const product = allSingles.find(item => item.id == productId || item.code_number === newCode) || (stockData || []).find(item => item.id == productId || item.code_number === newCode);
+                if (!product) {
+                    showAlert('找不到产品信息', 'error');
+                    return;
+                }
+                const unitPrice = parseFloat(product.unit_price) || 0;
+                const totalPrice = newQuantity * unitPrice;
+                try {
+                    const result = await apiCall('', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'update_transfer_record',
+                            id: recordId,
+                            dishware_id: productId,
+                            to_shop_type: newToShopType,
+                            quantity: newQuantity,
+                            unit_price: unitPrice,
+                            total_price: totalPrice
+                        })
+                    });
+                    if (!result.success) {
+                        showAlert('批量保存失败: ' + (result.message || '未知错误'), 'error');
+                        return;
+                    }
+                } catch (e) {
+                    showAlert('批量保存失败: ' + (e.message || '网络错误'), 'error');
+                    return;
+                }
+            }
+
+            // 2. 再保存所有新增行
             for (const row of newRows) {
                 const codeInput = row.querySelector('input[id$="-code"]');
                 const quantityInput = row.querySelector('input.break-quantity-input');
@@ -6511,7 +6649,8 @@ header('Expires: 0');
                 }
                 row.remove();
             }
-            showAlert(`成功保存 ${rowsToRemove.length} 条转卖记录`, 'success');
+            const totalSaved = editingRows.length + rowsToRemove.length;
+            showAlert(`成功保存 ${totalSaved} 条转卖记录`, 'success');
             for (const s of shopsToRefresh) await refreshSingleRestaurantTransferRecords(s);
             if (document.getElementById('stock-table')) loadStockData(true, false);
             for (const s of shopsToRefresh) { if (typeof updateBatchSaveButtonVisibilityTransfer === 'function') updateBatchSaveButtonVisibilityTransfer(s); }
