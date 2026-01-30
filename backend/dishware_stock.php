@@ -6348,7 +6348,7 @@ header('Expires: 0');
             if (!tbody || !saveBtn) return;
             const newCount = tbody.querySelectorAll('tr.new-row').length;
             const editCount = tbody.querySelectorAll('tr.editing-row').length;
-            saveBtn.style.display = (newCount >= 1 || editCount >= 2) ? 'inline-block' : 'none';
+            saveBtn.style.display = (newCount >= 2 || editCount >= 2) ? 'inline-block' : 'none';
         }
 
         // 更新转卖页批量保存按钮可见性：有新增行或 2+ 行在编辑时显示
@@ -6358,7 +6358,7 @@ header('Expires: 0');
             if (!tbody || !saveBtn) return;
             const newCount = tbody.querySelectorAll('tr.new-row').length;
             const editCount = tbody.querySelectorAll('tr.editing-row').length;
-            saveBtn.style.display = (newCount >= 1 || editCount >= 2) ? 'inline-block' : 'none';
+            saveBtn.style.display = (newCount >= 2 || editCount >= 2) ? 'inline-block' : 'none';
         }
 
         // 批量保存当前店面的所有新增破损行
