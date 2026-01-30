@@ -4791,8 +4791,8 @@ header('Expires: 0');
             }
         }
 
-        // 刷新单个餐厅的破损记录（保留新行）
-        async function refreshSingleRestaurantBreakRecords(shopType, excludeRecordId = null) {
+        // 刷新单个餐厅的破损记录（保留新行）。skipRestoreEditing：批量保存后为 true，不再恢复编辑行，直接显示已保存状态
+        async function refreshSingleRestaurantBreakRecords(shopType, excludeRecordId = null, skipRestoreEditing = false) {
             try {
                 const dateParams = breakDateRange ? `&start_date=${encodeURIComponent(breakDateRange.startDate)}&end_date=${encodeURIComponent(breakDateRange.endDate)}` : '';
                 const result = await apiCall(`?action=damage_records&shop_type=${shopType}${dateParams}`);
@@ -4823,8 +4823,8 @@ header('Expires: 0');
                         };
                     });
                     
-                    // 保存所有正在编辑的行（.editing-row）及其数据，排除当前保存的行
-                    const editingRows = Array.from(tbody.querySelectorAll('tr.editing-row'));
+                    // 保存所有正在编辑的行（.editing-row）及其数据；批量保存后不恢复编辑行
+                    const editingRows = skipRestoreEditing ? [] : Array.from(tbody.querySelectorAll('tr.editing-row'));
                     const editingRowsData = editingRows
                         .filter(row => {
                             const recordId = row.dataset.id;
@@ -4836,10 +4836,9 @@ header('Expires: 0');
                             const quantitySpan = row.querySelector('.editable-quantity');
                             const codeRowId = codeInput?.id?.replace('-code', '') || '';
                             
-                            // 保存完整的行节点（克隆）
                             return {
                                 recordId: recordId,
-                                rowClone: row.cloneNode(true), // 深度克隆整个行节点
+                                rowClone: row.cloneNode(true),
                                 codeRowId: codeRowId,
                                 code: codeInput?.value || '',
                                 quantity: quantitySpan?.textContent?.trim() || '',
@@ -4856,14 +4855,12 @@ header('Expires: 0');
                     // 清空tbody并添加已保存的记录
                     tbody.innerHTML = rowsHtml;
                     
-                    // 恢复正在编辑的行 - 直接替换对应行
+                    // 恢复正在编辑的行（批量保存后跳过，直接显示已保存状态）
                     editingRowsData.forEach(({ recordId, rowClone, codeRowId, code, quantity, productId }) => {
                         const restoredRow = tbody.querySelector(`tr[data-id="${recordId}"][data-shop="${shopType}"]`);
                         if (restoredRow && rowClone) {
-                            // 从克隆的行中恢复输入框的值
                             const codeInput = rowClone.querySelector('.break-code-input');
                             const quantitySpan = rowClone.querySelector('.editable-quantity');
-                            
                             if (codeInput) {
                                 codeInput.value = code;
                                 if (productId) {
@@ -4871,20 +4868,10 @@ header('Expires: 0');
                                     codeInput.setAttribute('data-product-id', productId);
                                 }
                             }
-                            if (quantitySpan) {
-                                quantitySpan.textContent = quantity;
-                            }
-                            
-                            // 确保行有 editing-row 类
+                            if (quantitySpan) quantitySpan.textContent = quantity;
                             rowClone.classList.add('editing-row');
-                            
-                            // 替换当前行
                             restoredRow.replaceWith(rowClone);
-                            
-                            // 重新绑定事件
-                            setTimeout(() => {
-                                bindBreakComboboxEvents(codeRowId);
-                            }, 100);
+                            setTimeout(() => { bindBreakComboboxEvents(codeRowId); }, 100);
                         }
                     });
                     
@@ -6498,7 +6485,7 @@ header('Expires: 0');
             }
             const totalSaved = editingRows.length + rowsToRemove.length;
             showAlert(`成功保存 ${totalSaved} 条破损记录`, 'success');
-            await refreshSingleRestaurantBreakRecords(shopType);
+            await refreshSingleRestaurantBreakRecords(shopType, null, true);
             if (document.getElementById('stock-table')) loadStockData(true, false);
             if (typeof updateBatchSaveButtonVisibilityBreak === 'function') updateBatchSaveButtonVisibilityBreak(shopType);
         }
