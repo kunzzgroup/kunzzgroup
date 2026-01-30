@@ -3564,6 +3564,11 @@ header('Expires: 0');
         let editQuantitiesCache = new Map();
         /** 全部碗碟（含 is_in_set），用于破损记录编号下拉，确保套装内单品如 AG001、AG002 均显示 */
         let allDishwareForBreak = [];
+        /** 批量删除模式：{ shopType: boolean } */
+        let breakBatchDeleteMode = {};
+        let transferBatchDeleteMode = {};
+        let breakBatchDeleteSelected = {};  // { shopType: Set<recordId> }
+        let transferBatchDeleteSelected = {};
 
         // 自然排序函数，正确处理字母和数字混合
         function naturalSort(a, b) {
@@ -4913,6 +4918,7 @@ header('Expires: 0');
                             }, 100);
                         }
                     });
+                    if (typeof updateBatchSaveButtonVisibilityBreak === 'function') updateBatchSaveButtonVisibilityBreak(shopType);
                 }
             } catch (error) {
                 console.error('刷新单个餐厅破损记录时发生错误:', error);
@@ -4985,8 +4991,17 @@ header('Expires: 0');
                                 <span style="font-size: clamp(14px, 0.94vw, 18px); opacity: 0.9;">总破损：RM ${formatCurrency(totalBreakAmount)}</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <button class="btn btn-primary" onclick="batchSaveBreakRows('${shopType}')" style="padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap; background: #0d6efd;">
+                                <button class="btn btn-primary" id="batch-save-break-${shopType}" onclick="batchSaveBreakRows('${shopType}')" style="display: none; padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap; background: #0d6efd;">
                                     <i class="fas fa-save"></i> 批量保存
+                                </button>
+                                <button class="btn btn-danger" id="batch-delete-break-${shopType}" onclick="toggleBatchDeleteBreak('${shopType}')" style="padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap; background: #dc3545;">
+                                    <i class="fas fa-trash-alt"></i> 批量删除
+                                </button>
+                                <button class="btn btn-success" id="confirm-batch-delete-break-${shopType}" onclick="confirmBatchDeleteBreak('${shopType}')" style="display: none; padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
+                                    <i class="fas fa-check"></i> 确认删除
+                                </button>
+                                <button class="btn btn-secondary" id="cancel-batch-delete-break-${shopType}" onclick="cancelBatchDeleteBreak('${shopType}')" style="display: none; padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
+                                    <i class="fas fa-times"></i> 取消
                                 </button>
                                 <button class="btn btn-success" onclick="openBreakRowsModal('${shopType}')" style="padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
                                     <i class="fas fa-plus"></i> 记录破损
@@ -5629,6 +5644,7 @@ header('Expires: 0');
             setTimeout(() => {
                 bindBreakComboboxEvents(codeRowId);
             }, 100);
+            if (typeof updateBatchSaveButtonVisibilityBreak === 'function') updateBatchSaveButtonVisibilityBreak(shopId);
         }
         
         // 保存编辑的破损记录
@@ -5706,13 +5722,10 @@ header('Expires: 0');
                 
                 if (result.success) {
                     showAlert('破损记录更新成功', 'success');
-                    // 退出编辑模式并只刷新当前餐厅的数据，保留其他正在编辑的行
                     row.classList.remove('editing-row');
                     await refreshSingleRestaurantBreakRecords(shopId, recordId);
-                    // 刷新总库存
-                    if (document.getElementById('stock-table')) {
-                        loadStockData(true, false);
-                    }
+                    if (document.getElementById('stock-table')) loadStockData(true, false);
+                    if (typeof updateBatchSaveButtonVisibilityBreak === 'function') updateBatchSaveButtonVisibilityBreak(shopId);
                 } else {
                     showAlert('更新失败: ' + (result.message || '未知错误'), 'error');
                 }
@@ -5779,6 +5792,7 @@ header('Expires: 0');
                     row.replaceWith(newRow);
                 }
             }
+            if (typeof updateBatchSaveButtonVisibilityBreak === 'function') updateBatchSaveButtonVisibilityBreak(shopId);
         }
 
         // 删除破损记录
@@ -5821,6 +5835,91 @@ header('Expires: 0');
                 console.error('删除破损记录时发生错误:', error);
                 showAlert('删除破损记录失败: ' + error.message, 'error');
             }
+        }
+
+        function toggleBatchDeleteBreak(shopType) {
+            if (breakBatchDeleteMode[shopType]) return;
+            breakBatchDeleteMode[shopType] = true;
+            breakBatchDeleteSelected[shopType] = new Set();
+            const delBtn = document.getElementById(`batch-delete-break-${shopType}`);
+            const confirmBtn = document.getElementById(`confirm-batch-delete-break-${shopType}`);
+            const cancelBtn = document.getElementById(`cancel-batch-delete-break-${shopType}`);
+            if (delBtn) delBtn.style.display = 'none';
+            if (confirmBtn) { confirmBtn.style.display = 'inline-block'; confirmBtn.disabled = true; confirmBtn.innerHTML = '<i class="fas fa-check"></i> 确认删除'; }
+            if (cancelBtn) cancelBtn.style.display = 'inline-block';
+            const table = document.getElementById(`${shopType}-break-table`);
+            if (!table) return;
+            const headerRow = table.querySelector('thead tr');
+            const opTh = headerRow && headerRow.querySelector('th:nth-child(6)');
+            if (opTh) { opTh.dataset.originalText = opTh.textContent; opTh.textContent = '选择'; }
+            const tbody = document.getElementById(`${shopType}-break-tbody`);
+            if (!tbody) return;
+            tbody.querySelectorAll('tr').forEach(tr => {
+                if (tr.classList.contains('new-row') || tr.classList.contains('editing-row') || tr.querySelector('td.no-data')) return;
+                const recordId = tr.dataset.id;
+                if (!recordId) return;
+                const opTd = tr.querySelector('td:nth-child(6)');
+                if (!opTd) return;
+                opTd.dataset.originalHtml = opTd.innerHTML;
+                opTd.innerHTML = `<input type="checkbox" class="break-batch-delete-cb" data-record-id="${recordId}" onchange="toggleBreakRecordSelection('${shopType}', ${recordId}, this.checked)">`;
+            });
+            showAlert('批量删除模式已启用，请勾选要删除的记录', 'info');
+        }
+
+        function toggleBreakRecordSelection(shopType, recordId, checked) {
+            if (!breakBatchDeleteSelected[shopType]) breakBatchDeleteSelected[shopType] = new Set();
+            if (checked) breakBatchDeleteSelected[shopType].add(recordId); else breakBatchDeleteSelected[shopType].delete(recordId);
+            const confirmBtn = document.getElementById(`confirm-batch-delete-break-${shopType}`);
+            if (confirmBtn) {
+                const n = breakBatchDeleteSelected[shopType].size;
+                confirmBtn.disabled = n === 0;
+                confirmBtn.innerHTML = n > 0 ? `<i class="fas fa-check"></i> 确认删除 (${n})` : '<i class="fas fa-check"></i> 确认删除';
+            }
+        }
+
+        function cancelBatchDeleteBreak(shopType) {
+            if (!breakBatchDeleteMode[shopType]) return;
+            breakBatchDeleteMode[shopType] = false;
+            breakBatchDeleteSelected[shopType] = new Set();
+            const delBtn = document.getElementById(`batch-delete-break-${shopType}`);
+            const confirmBtn = document.getElementById(`confirm-batch-delete-break-${shopType}`);
+            const cancelBtn = document.getElementById(`cancel-batch-delete-break-${shopType}`);
+            if (delBtn) delBtn.style.display = 'inline-block';
+            if (confirmBtn) { confirmBtn.style.display = 'none'; confirmBtn.disabled = true; }
+            if (cancelBtn) cancelBtn.style.display = 'none';
+            const table = document.getElementById(`${shopType}-break-table`);
+            if (!table) return;
+            const headerRow = table.querySelector('thead tr');
+            const opTh = headerRow && headerRow.querySelector('th:nth-child(6)');
+            if (opTh && opTh.dataset.originalText) { opTh.textContent = opTh.dataset.originalText; delete opTh.dataset.originalText; }
+            const tbody = document.getElementById(`${shopType}-break-tbody`);
+            if (!tbody) return;
+            tbody.querySelectorAll('tr').forEach(tr => {
+                const opTd = tr.querySelector('td:nth-child(6)');
+                if (opTd && opTd.dataset.originalHtml) { opTd.innerHTML = opTd.dataset.originalHtml; delete opTd.dataset.originalHtml; }
+            });
+        }
+
+        async function confirmBatchDeleteBreak(shopType) {
+            const sel = breakBatchDeleteSelected[shopType];
+            if (!sel || sel.size === 0) { showAlert('请至少选择一条记录', 'error'); return; }
+            if (!confirm(`确定要删除选中的 ${sel.size} 条破损记录吗？此操作不可恢复！`)) return;
+            const confirmBtn = document.getElementById(`confirm-batch-delete-break-${shopType}`);
+            const origHtml = confirmBtn ? confirmBtn.innerHTML : '';
+            if (confirmBtn) { confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 删除中...'; confirmBtn.disabled = true; }
+            let ok = 0, err = 0;
+            for (const recordId of sel) {
+                try {
+                    const result = await apiCall('', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete_damage_record', id: recordId }) });
+                    if (result.success) ok++; else err++;
+                } catch (e) { err++; }
+            }
+            cancelBatchDeleteBreak(shopType);
+            if (confirmBtn) { confirmBtn.innerHTML = origHtml; confirmBtn.disabled = false; }
+            showAlert(err > 0 ? `已删除 ${ok} 条，失败 ${err} 条` : `成功删除 ${ok} 条破损记录`, err > 0 ? 'warning' : 'success');
+            await refreshSingleRestaurantBreakRecords(shopType);
+            if (document.getElementById('stock-table')) loadStockData(true, false);
+            if (typeof updateBatchSaveButtonVisibilityBreak === 'function') updateBatchSaveButtonVisibilityBreak(shopType);
         }
 
         // 当前选中的餐厅类型（用于创建新行）
@@ -5899,6 +5998,7 @@ header('Expires: 0');
             }, 100);
             
             showAlert(`成功创建 ${rowsCount} 行记录`, 'success');
+            if (typeof updateBatchSaveButtonVisibilityBreak === 'function' && currentBreakShopType) updateBatchSaveButtonVisibilityBreak(currentBreakShopType);
         }
 
         // 添加新行到破损记录表格
@@ -6007,6 +6107,7 @@ header('Expires: 0');
             }, 100);
             
             tbody.appendChild(row);
+            if (typeof updateBatchSaveButtonVisibilityBreak === 'function') updateBatchSaveButtonVisibilityBreak(shopType);
         }
 
         // 绑定破损记录combobox事件
@@ -6240,6 +6341,26 @@ header('Expires: 0');
             }
         }
 
+        // 更新破损记录页批量保存按钮可见性：有新增行或 2+ 行在编辑时显示
+        function updateBatchSaveButtonVisibilityBreak(shopType) {
+            const tbody = document.getElementById(`${shopType}-break-tbody`);
+            const saveBtn = document.getElementById(`batch-save-break-${shopType}`);
+            if (!tbody || !saveBtn) return;
+            const newCount = tbody.querySelectorAll('tr.new-row').length;
+            const editCount = tbody.querySelectorAll('tr.editing-row').length;
+            saveBtn.style.display = (newCount >= 1 || editCount >= 2) ? 'inline-block' : 'none';
+        }
+
+        // 更新转卖页批量保存按钮可见性：有新增行或 2+ 行在编辑时显示
+        function updateBatchSaveButtonVisibilityTransfer(shopType) {
+            const tbody = document.getElementById(`${shopType}-transfer-tbody`);
+            const saveBtn = document.getElementById(`batch-save-transfer-${shopType}`);
+            if (!tbody || !saveBtn) return;
+            const newCount = tbody.querySelectorAll('tr.new-row').length;
+            const editCount = tbody.querySelectorAll('tr.editing-row').length;
+            saveBtn.style.display = (newCount >= 1 || editCount >= 2) ? 'inline-block' : 'none';
+        }
+
         // 批量保存当前店面的所有新增破损行
         async function batchSaveBreakRows(shopType) {
             const tbody = document.getElementById(`${shopType}-break-tbody`);
@@ -6310,6 +6431,7 @@ header('Expires: 0');
             showAlert(`成功保存 ${rowsToRemove.length} 条破损记录`, 'success');
             await refreshSingleRestaurantBreakRecords(shopType);
             if (document.getElementById('stock-table')) loadStockData(true, false);
+            if (typeof updateBatchSaveButtonVisibilityBreak === 'function') updateBatchSaveButtonVisibilityBreak(shopType);
         }
 
         // 批量保存当前店面的所有新增转卖行
@@ -6392,6 +6514,7 @@ header('Expires: 0');
             showAlert(`成功保存 ${rowsToRemove.length} 条转卖记录`, 'success');
             for (const s of shopsToRefresh) await refreshSingleRestaurantTransferRecords(s);
             if (document.getElementById('stock-table')) loadStockData(true, false);
+            for (const s of shopsToRefresh) { if (typeof updateBatchSaveButtonVisibilityTransfer === 'function') updateBatchSaveButtonVisibilityTransfer(s); }
         }
 
         // 保存新破损记录行
@@ -6524,6 +6647,7 @@ header('Expires: 0');
                     </tr>
                 `;
             }
+            if (typeof updateBatchSaveButtonVisibilityBreak === 'function') updateBatchSaveButtonVisibilityBreak(shopType);
         }
 
         // 设置套装行hover效果
@@ -10352,6 +10476,7 @@ header('Expires: 0');
                             }, 100);
                         }
                     });
+                    if (typeof updateBatchSaveButtonVisibilityTransfer === 'function') updateBatchSaveButtonVisibilityTransfer(shopType);
                 }
             } catch (error) {
                 console.error('刷新单个餐厅转卖记录时发生错误:', error);
@@ -10442,8 +10567,17 @@ header('Expires: 0');
                                 </div>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <button class="btn btn-primary" onclick="batchSaveTransferRows('${shopType}')" style="padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap; background: #0d6efd;">
+                                <button class="btn btn-primary" id="batch-save-transfer-${shopType}" onclick="batchSaveTransferRows('${shopType}')" style="display: none; padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap; background: #0d6efd;">
                                     <i class="fas fa-save"></i> 批量保存
+                                </button>
+                                <button class="btn btn-danger" id="batch-delete-transfer-${shopType}" onclick="toggleBatchDeleteTransfer('${shopType}')" style="padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap; background: #dc3545;">
+                                    <i class="fas fa-trash-alt"></i> 批量删除
+                                </button>
+                                <button class="btn btn-success" id="confirm-batch-delete-transfer-${shopType}" onclick="confirmBatchDeleteTransfer('${shopType}')" style="display: none; padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
+                                    <i class="fas fa-check"></i> 确认删除
+                                </button>
+                                <button class="btn btn-secondary" id="cancel-batch-delete-transfer-${shopType}" onclick="cancelBatchDeleteTransfer('${shopType}')" style="display: none; padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
+                                    <i class="fas fa-times"></i> 取消
                                 </button>
                                 <button class="btn btn-success" onclick="openTransferRowsModal('${shopType}')" style="padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
                                     <i class="fas fa-plus"></i> 转卖碗碟
@@ -10819,6 +10953,7 @@ header('Expires: 0');
             setTimeout(() => {
                 bindBreakComboboxEvents(rowId);
             }, 100);
+            if (typeof updateBatchSaveButtonVisibilityTransfer === 'function') updateBatchSaveButtonVisibilityTransfer(shopType);
         }
 
         // 计算转卖记录行总价
@@ -10965,6 +11100,7 @@ header('Expires: 0');
                     `;
                 }
             }
+            if (typeof updateBatchSaveButtonVisibilityTransfer === 'function') updateBatchSaveButtonVisibilityTransfer(shopType);
         }
 
         // 显示转卖记录的保存/取消按钮（当数量改变时）
@@ -11301,7 +11437,7 @@ header('Expires: 0');
             setTimeout(() => {
                 bindBreakComboboxEvents(codeRowId);
             }, 100);
-            
+            if (typeof updateBatchSaveButtonVisibilityTransfer === 'function') updateBatchSaveButtonVisibilityTransfer(shopId);
             // contenteditable span 的 input 事件已在 HTML 中通过 oninput 绑定
             } catch (error) {
                 console.error('编辑转卖记录时发生错误:', error);
@@ -11493,6 +11629,92 @@ header('Expires: 0');
                     row.replaceWith(newRow);
                 }
             }
+            if (typeof updateBatchSaveButtonVisibilityTransfer === 'function') updateBatchSaveButtonVisibilityTransfer(shopId);
+        }
+
+        function toggleBatchDeleteTransfer(shopType) {
+            if (transferBatchDeleteMode[shopType]) return;
+            transferBatchDeleteMode[shopType] = true;
+            transferBatchDeleteSelected[shopType] = new Set();
+            const delBtn = document.getElementById(`batch-delete-transfer-${shopType}`);
+            const confirmBtn = document.getElementById(`confirm-batch-delete-transfer-${shopType}`);
+            const cancelBtn = document.getElementById(`cancel-batch-delete-transfer-${shopType}`);
+            if (delBtn) delBtn.style.display = 'none';
+            if (confirmBtn) { confirmBtn.style.display = 'inline-block'; confirmBtn.disabled = true; confirmBtn.innerHTML = '<i class="fas fa-check"></i> 确认删除'; }
+            if (cancelBtn) cancelBtn.style.display = 'inline-block';
+            const table = document.getElementById(`${shopType}-transfer-table`);
+            if (!table) return;
+            const headerRow = table.querySelector('thead tr');
+            const opTh = headerRow && headerRow.querySelector('th:nth-child(7)');
+            if (opTh) { opTh.dataset.originalText = opTh.textContent; opTh.textContent = '选择'; }
+            const tbody = document.getElementById(`${shopType}-transfer-tbody`);
+            if (!tbody) return;
+            tbody.querySelectorAll('tr').forEach(tr => {
+                if (tr.classList.contains('new-row') || tr.classList.contains('editing-row') || tr.querySelector('td.no-data')) return;
+                const recordId = tr.dataset.id;
+                if (!recordId) return;
+                const opTd = tr.querySelector('td:nth-child(7)');
+                if (!opTd) return;
+                opTd.dataset.originalHtml = opTd.innerHTML;
+                opTd.innerHTML = `<input type="checkbox" class="transfer-batch-delete-cb" data-record-id="${recordId}" onchange="toggleTransferRecordSelection('${shopType}', ${recordId}, this.checked)">`;
+            });
+            showAlert('批量删除模式已启用，请勾选要删除的记录', 'info');
+        }
+
+        function toggleTransferRecordSelection(shopType, recordId, checked) {
+            if (!transferBatchDeleteSelected[shopType]) transferBatchDeleteSelected[shopType] = new Set();
+            if (checked) transferBatchDeleteSelected[shopType].add(recordId); else transferBatchDeleteSelected[shopType].delete(recordId);
+            const confirmBtn = document.getElementById(`confirm-batch-delete-transfer-${shopType}`);
+            if (confirmBtn) {
+                const n = transferBatchDeleteSelected[shopType].size;
+                confirmBtn.disabled = n === 0;
+                confirmBtn.innerHTML = n > 0 ? `<i class="fas fa-check"></i> 确认删除 (${n})` : '<i class="fas fa-check"></i> 确认删除';
+            }
+        }
+
+        function cancelBatchDeleteTransfer(shopType) {
+            if (!transferBatchDeleteMode[shopType]) return;
+            transferBatchDeleteMode[shopType] = false;
+            transferBatchDeleteSelected[shopType] = new Set();
+            const delBtn = document.getElementById(`batch-delete-transfer-${shopType}`);
+            const confirmBtn = document.getElementById(`confirm-batch-delete-transfer-${shopType}`);
+            const cancelBtn = document.getElementById(`cancel-batch-delete-transfer-${shopType}`);
+            if (delBtn) delBtn.style.display = 'inline-block';
+            if (confirmBtn) { confirmBtn.style.display = 'none'; confirmBtn.disabled = true; }
+            if (cancelBtn) cancelBtn.style.display = 'none';
+            const table = document.getElementById(`${shopType}-transfer-table`);
+            if (!table) return;
+            const headerRow = table.querySelector('thead tr');
+            const opTh = headerRow && headerRow.querySelector('th:nth-child(7)');
+            if (opTh && opTh.dataset.originalText) { opTh.textContent = opTh.dataset.originalText; delete opTh.dataset.originalText; }
+            const tbody = document.getElementById(`${shopType}-transfer-tbody`);
+            if (!tbody) return;
+            tbody.querySelectorAll('tr').forEach(tr => {
+                const opTd = tr.querySelector('td:nth-child(7)');
+                if (opTd && opTd.dataset.originalHtml) { opTd.innerHTML = opTd.dataset.originalHtml; delete opTd.dataset.originalHtml; }
+            });
+        }
+
+        async function confirmBatchDeleteTransfer(shopType) {
+            const sel = transferBatchDeleteSelected[shopType];
+            if (!sel || sel.size === 0) { showAlert('请至少选择一条记录', 'error'); return; }
+            if (!confirm(`确定要删除选中的 ${sel.size} 条转卖记录吗？此操作不可恢复！`)) return;
+            const confirmBtn = document.getElementById(`confirm-batch-delete-transfer-${shopType}`);
+            const origHtml = confirmBtn ? confirmBtn.innerHTML : '';
+            if (confirmBtn) { confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 删除中...'; confirmBtn.disabled = true; }
+            let ok = 0, err = 0;
+            for (const recordId of sel) {
+                try {
+                    const result = await apiCall('', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete_transfer_record', id: recordId }) });
+                    if (result.success) ok++; else err++;
+                } catch (e) { err++; }
+            }
+            cancelBatchDeleteTransfer(shopType);
+            if (confirmBtn) { confirmBtn.innerHTML = origHtml; confirmBtn.disabled = false; }
+            showAlert(err > 0 ? `已删除 ${ok} 条，失败 ${err} 条` : `成功删除 ${ok} 条转卖记录`, err > 0 ? 'warning' : 'success');
+            await refreshSingleRestaurantTransferRecords(shopType);
+            if (document.getElementById('stock-table')) loadStockData(true, false);
+            if (typeof updateBatchSaveButtonVisibilityTransfer === 'function') updateBatchSaveButtonVisibilityTransfer(shopType);
         }
 
         // 删除转卖记录
