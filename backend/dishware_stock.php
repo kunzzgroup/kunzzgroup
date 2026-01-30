@@ -4981,7 +4981,7 @@ header('Expires: 0');
                                 <button class="btn btn-primary" id="batch-save-break-${shopType}" onclick="batchSaveBreakRows('${shopType}')" style="display: none; padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap; background: #0d6efd;">
                                     <i class="fas fa-save"></i> 批量保存
                                 </button>
-                                <button class="btn btn-danger" id="batch-delete-break-${shopType}" onclick="toggleBatchDeleteBreak('${shopType}')" style="padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap; background: #dc3545;">
+                                <button class="btn btn-danger" id="batch-delete-break-${shopType}" onclick="toggleBatchDeleteBreak('${shopType}')" style="padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap; background: #dc3545; color: white;">
                                     <i class="fas fa-trash-alt"></i> 批量删除
                                 </button>
                                 <button class="btn btn-success" id="confirm-batch-delete-break-${shopType}" onclick="confirmBatchDeleteBreak('${shopType}')" style="display: none; padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
@@ -10696,7 +10696,7 @@ header('Expires: 0');
                                 <button class="btn btn-primary" id="batch-save-transfer-${shopType}" onclick="batchSaveTransferRows('${shopType}')" style="display: none; padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap; background: #0d6efd;">
                                     <i class="fas fa-save"></i> 批量保存
                                 </button>
-                                <button class="btn btn-danger" id="batch-delete-transfer-${shopType}" onclick="toggleBatchDeleteTransfer('${shopType}')" style="padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap; background: #dc3545;">
+                                <button class="btn btn-danger" id="batch-delete-transfer-${shopType}" onclick="toggleBatchDeleteTransfer('${shopType}')" style="padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap; background: #dc3545; color: white;">
                                     <i class="fas fa-trash-alt"></i> 批量删除
                                 </button>
                                 <button class="btn btn-success" id="confirm-batch-delete-transfer-${shopType}" onclick="confirmBatchDeleteTransfer('${shopType}')" style="display: none; padding: clamp(3px, 0.31vw, 6px) clamp(6px, 0.63vw, 12px); font-size: clamp(8px, 0.74vw, 12px); white-space: nowrap;">
