@@ -152,8 +152,12 @@ function handleGet() {
             }
 
             // 产品搜索（搜索所有相关字段：货品编号、货品名字、规格、货品类型、供应商、申请人、系统分配）
+            // Drinks 与 Service Line 等效：搜索 service/line/ser 时也匹配 category='Drinks'
             if ($productSearch) {
-                $sql .= " AND (product_code LIKE ? OR product_name LIKE ? OR specification LIKE ? OR category LIKE ? OR supplier LIKE ? OR applicant LIKE ? OR system_assign LIKE ?)";
+                $productSearchLower = strtolower($productSearch);
+                $searchMatchesServiceLine = (strpos($productSearchLower, 'service') !== false || strpos($productSearchLower, 'line') !== false || strpos($productSearchLower, 'ser') !== false);
+                $categoryCondition = $searchMatchesServiceLine ? "(category LIKE ? OR category = 'Drinks')" : "category LIKE ?";
+                $sql .= " AND (product_code LIKE ? OR product_name LIKE ? OR specification LIKE ? OR $categoryCondition OR supplier LIKE ? OR applicant LIKE ? OR system_assign LIKE ?)";
                 $params[] = "%$productSearch%";
                 $params[] = "%$productSearch%";
                 $params[] = "%$productSearch%";
