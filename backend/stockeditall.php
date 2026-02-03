@@ -471,7 +471,7 @@ require_once 'session_check.php';
         .stock-table th:nth-child(7), .stock-table td:nth-child(7) { width: 5%; } /* 规格 */
         .stock-table th:nth-child(8), .stock-table td:nth-child(8) { width: 10%; } /* 单价 */
         .stock-table th:nth-child(9), .stock-table td:nth-child(9) { width: 12%; } /* 总价 */
-        .stock-table th:nth-child(10), .stock-table td:nth-child(10) { width: 6%; } /* 类型 */
+        .stock-table th:nth-child(10), .stock-table td:nth-child(10) { width: 8%; } /* 类型 */
         .stock-table th:nth-child(11), .stock-table td:nth-child(11) { width: 5%; } /* 产品备注 checkbox */
         .stock-table th:nth-child(12), .stock-table td:nth-child(12) { width: 6%; } /* 备注编号 */
         .stock-table th:nth-child(13), .stock-table td:nth-child(13) { width: 13%; } /* 名字/收货人 */
