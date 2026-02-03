@@ -2100,7 +2100,7 @@ require_once '../backend/session_check.php';
                         <option value="">请选择类型</option>
                         <option value="Kitchen">Kitchen</option>
                         <option value="Sushi Bar">Sushi Bar</option>
-                        <option value="Drinks">Drinks</option>
+                        <option value="Service Line">Service Line</option>
                         <option value="Sake">Sake</option>
                     </select>
                 </div>
@@ -7510,10 +7510,10 @@ require_once '../backend/session_check.php';
 
         // 生成Type选项
         function generateTypeOptions(selectedValue = '') {
-            const typeOptions = ['Kitchen', 'Sushi Bar', 'Drinks', 'Sake'];
+            const typeOptions = ['Kitchen', 'Sushi Bar', 'Service Line', 'Sake'];
             let options = '<option value="">请选择类型</option>';
             typeOptions.forEach(type => {
-                const selected = type === selectedValue ? 'selected' : '';
+                const selected = (type === selectedValue || (type === 'Service Line' && selectedValue === 'Drinks')) ? 'selected' : '';
                 options += `<option value="${type}" ${selected}>${type}</option>`;
             });
             return options;

@@ -100,7 +100,7 @@ function getJ3StockSummary($startDate = null, $endDate = null) {
         $typeStats = [
             'Kitchen' => 0,
             'Sushi Bar' => 0,
-            'Drinks' => 0,
+            'Service Line' => 0,
             'Sake' => 0
         ];
         
@@ -109,6 +109,8 @@ function getJ3StockSummary($startDate = null, $endDate = null) {
             $price = floatval($row['price']);
             $totalPrice = $currentStock * $price;
             $type = $row['type'] ?? '';
+            // Drinks 与 Service Line 合并统计
+            if ($type === 'Drinks') $type = 'Service Line';
             
             // 使用原始数值累加，不进行四舍五入
             $totalValue += $totalPrice;
@@ -141,11 +143,11 @@ function getJ3StockSummary($startDate = null, $endDate = null) {
             'type_stats' => [
                 'kitchen' => $typeStats['Kitchen'],
                 'sushi_bar' => $typeStats['Sushi Bar'],
-                'drinks' => $typeStats['Drinks'],
+                'service_line' => $typeStats['Service Line'],
                 'sake' => $typeStats['Sake'],
                 'formatted_kitchen' => number_format($typeStats['Kitchen'], 2),
                 'formatted_sushi_bar' => number_format($typeStats['Sushi Bar'], 2),
-                'formatted_drinks' => number_format($typeStats['Drinks'], 2),
+                'formatted_service_line' => number_format($typeStats['Service Line'], 2),
                 'formatted_sake' => number_format($typeStats['Sake'], 2)
             ]
         ];

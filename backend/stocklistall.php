@@ -1547,8 +1547,8 @@ require_once 'session_check.php';
                 
                 <div class="type-grid-container">
                     <div class="type-grid-item">
-                        <div class="grid-title">Drinks</div>
-                        <div class="grid-value" id="j1-drinks-value">0.00</div>
+                        <div class="grid-title">Service Line</div>
+                        <div class="grid-value" id="j1-service-line-value">0.00</div>
                     </div>
                     <div class="type-grid-item">
                         <div class="grid-title">Sake</div>
@@ -1624,8 +1624,8 @@ require_once 'session_check.php';
                 
                 <div class="type-grid-container">
                     <div class="type-grid-item">
-                        <div class="grid-title">Drinks</div>
-                        <div class="grid-value" id="j2-drinks-value">0.00</div>
+                        <div class="grid-title">Service Line</div>
+                        <div class="grid-value" id="j2-service-line-value">0.00</div>
                     </div>
                     <div class="type-grid-item" style="display: none;">
                         <div class="grid-title">Sake</div>
@@ -1701,8 +1701,8 @@ require_once 'session_check.php';
                 
                 <div class="type-grid-container">
                     <div class="type-grid-item">
-                        <div class="grid-title">Drinks</div>
-                        <div class="grid-value" id="j3-drinks-value">0.00</div>
+                        <div class="grid-title">Service Line</div>
+                        <div class="grid-value" id="j3-service-line-value">0.00</div>
                     </div>
                     <div class="type-grid-item">
                         <div class="grid-title">Sake</div>
@@ -2600,15 +2600,15 @@ require_once 'session_check.php';
             
             // 只为 J1、J2、J3 更新类型统计
             if (system !== 'central' && data.type_stats) {
-                const drinksEl = document.getElementById(`${system}-drinks-value`);
+                const serviceLineEl = document.getElementById(`${system}-service-line-value`);
                 const sakeEl = document.getElementById(`${system}-sake-value`);
                 const kitchenEl = document.getElementById(`${system}-kitchen-value`);
                 const sushiBarEl = document.getElementById(`${system}-sushi-bar-value`);
                 
                 // 更新数值并检查是否为负数
-                if (drinksEl) {
-                    drinksEl.textContent = data.type_stats.formatted_drinks || '0.00';
-                    drinksEl.classList.toggle('negative', data.type_stats.drinks < 0);
+                if (serviceLineEl) {
+                    serviceLineEl.textContent = data.type_stats.formatted_service_line || '0.00';
+                    serviceLineEl.classList.toggle('negative', data.type_stats.service_line < 0);
                 }
                 // J2系统不显示sake统计
                 if (sakeEl && system !== 'j2') {

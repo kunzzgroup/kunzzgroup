@@ -1971,8 +1971,8 @@
                     <select id="add-type" class="form-select">
                         <option value="">请选择类型</option>
                         <option value="Kitchen">Kitchen</option>
-                        <option value="SushiBar">SushiBar</option>
-                        <option value="Drink">Drink</option>
+                        <option value="Sushi Bar">Sushi Bar</option>
+                        <option value="Service Line">Service Line</option>
                         <option value="Sake">Sake</option>
                     </select>
                 </div>
@@ -3638,7 +3638,7 @@
                                     ${generateTypeOptions(record.type)}
                                 </select>`
                             ) :
-                            `<span>${record.type || '-'}</span>`
+                            `<span>${(record.type === 'Drinks' || record.type === 'Drink' ? 'Service Line' : record.type) || '-'}</span>`
                         }
                     </td>
                     <td style="text-align: center;">
@@ -3818,8 +3818,8 @@
                     <select class="table-select" id="${rowId}-type" ${currentStockType === 'central' ? 'disabled' : ''}>
                         <option value="">请选择类型</option>
                         <option value="Kitchen">Kitchen</option>
-                        <option value="SushiBar">SushiBar</option>
-                        <option value="Drink">Drink</option>
+                        <option value="Sushi Bar">Sushi Bar</option>
+                        <option value="Service Line">Service Line</option>
                         <option value="Sake">Sake</option>
                     </select>
                 </td>
@@ -6921,10 +6921,10 @@
 
         // 生成Type选项
         function generateTypeOptions(selectedValue = '') {
-            const typeOptions = ['Kitchen', 'SushiBar', 'Drink', 'Sake'];
+            const typeOptions = ['Kitchen', 'Sushi Bar', 'Service Line', 'Sake'];
             let options = '<option value="">请选择类型</option>';
             typeOptions.forEach(type => {
-                const selected = type === selectedValue ? 'selected' : '';
+                const selected = (type === selectedValue || (type === 'Service Line' && (selectedValue === 'Drinks' || selectedValue === 'Drink'))) ? 'selected' : '';
                 options += `<option value="${type}" ${selected}>${type}</option>`;
             });
             return options;
