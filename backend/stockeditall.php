@@ -4537,7 +4537,7 @@ require_once 'session_check.php';
                                 (record.specification && record.specification.toLowerCase().includes(unifiedSearch)) ||
                                 (record.price && record.price.toString().includes(unifiedSearch)) ||
                                 (total.toFixed(2).includes(unifiedSearch)) || // 搜索计算出的总价
-                                (record.type && record.type.toLowerCase().includes(unifiedSearch)) ||
+                                ((record.type === 'Drinks' ? 'Service Line' : record.type) || '').toLowerCase().includes(unifiedSearch) ||
                                 (record.remark && record.remark.toLowerCase().includes(unifiedSearch)) ||
                                 (record.remark_number && record.remark_number.toLowerCase().includes(unifiedSearch)) // 添加备注编号搜索
                             );
