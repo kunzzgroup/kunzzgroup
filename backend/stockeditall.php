@@ -4192,17 +4192,9 @@ require_once 'session_check.php';
                 }
             }
             
-            // 只在非编辑模式下清空出货相关字段
-            // 编辑模式下更换货品时，保留所有数量、价格等信息
+            // 只在非编辑模式下清空部分字段（规格和类型会根据新货品自动更新）
+            // 用户要求：出货格子已填写的数量在更换货品时保留，不清空
             if (!isEditMode) {
-                // 清空出货相关字段，但不清空规格和类型
-                // 规格和类型会在后面根据新选择的货品自动更新
-                const outQtyInput = container.querySelector('input[id*="-out-qty"], input[data-field="out_quantity"]');
-                if (outQtyInput) {
-                    outQtyInput.value = '';
-                    outQtyInput.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-                
                 const priceInput = container.querySelector('input[id*="-price"], input[data-field="price"]');
                 if (priceInput) {
                     priceInput.value = '';
@@ -4228,13 +4220,11 @@ require_once 'session_check.php';
                 // 更新单价选项
                 updatePriceOptions(container, '');
                 
-                // 如果是新增行，清空相关字段
                 if (recordId) {
-                    updateField(parseInt(recordId), 'out_quantity', '');
                     updateField(parseInt(recordId), 'price', '');
                     updateField(parseInt(recordId), 'receiver', '');
                     updateField(parseInt(recordId), 'target_system', '');
-                    // 注意：不清空 specification 和 type，它们会自动更新
+                    // 注意：不清空 out_quantity（出货数量保留）、specification 和 type
                 }
             }
             
@@ -4366,17 +4356,8 @@ require_once 'session_check.php';
             // 判断是否为编辑模式（检查是否在编辑中的行）
             const isEditMode = recordId && editingRowIds.has(parseInt(recordId));
             
-            // 只在非编辑模式下清空出货相关字段
-            // 编辑模式下更换货品时，保留所有数量、价格等信息
+            // 只在非编辑模式下清空部分字段；出货数量在更换货品/编号时保留
             if (!isEditMode) {
-                // 清空出货相关字段，但不清空规格和类型
-                // 规格和类型会在后面根据新选择的货品自动更新
-                const outQtyInput = container.querySelector('input[id*="-out-qty"], input[data-field="out_quantity"]');
-                if (outQtyInput) {
-                    outQtyInput.value = '';
-                    outQtyInput.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-                
                 const priceInput = container.querySelector('input[id*="-price"], input[data-field="price"]');
                 if (priceInput) {
                     priceInput.value = '';
@@ -4399,16 +4380,12 @@ require_once 'session_check.php';
                     targetSelect.required = false;
                 }
                 
-                // 更新单价选项
                 updatePriceOptions(container, '');
                 
-                // 如果是新增行，清空相关字段
                 if (recordId) {
-                    updateField(parseInt(recordId), 'out_quantity', '');
                     updateField(parseInt(recordId), 'price', '');
                     updateField(parseInt(recordId), 'receiver', '');
                     updateField(parseInt(recordId), 'target_system', '');
-                    // 注意：不清空 specification 和 type，它们会自动更新
                 }
             }
             
@@ -7051,22 +7028,11 @@ require_once 'session_check.php';
             const recordId = input.dataset.recordId;
             const container = input.closest('tr') || input.closest('.form-container') || document;
             
-            // 只有选择货品编号或货品名称时才清空出货相关字段
+            // 选择货品编号或货品名称时，只清空单价/总价/收货人/目标，出货数量保留
             if (type === 'code' || type === 'product') {
-                // 判断是否为编辑模式（检查是否在编辑中的行）
                 const isEditMode = recordId && editingRowIds.has(parseInt(recordId));
                 
-                // 只在非编辑模式下清空出货相关字段
-                // 编辑模式下更换货品时，保留所有数量、价格等信息
                 if (!isEditMode) {
-                    // 清空出货相关字段，但不清空规格和类型
-                    // 规格和类型会在后面根据新选择的货品自动更新
-                    const outQtyInput = container.querySelector('input[id*="-out-qty"], input[data-field="out_quantity"]');
-                    if (outQtyInput) {
-                        outQtyInput.value = '';
-                        outQtyInput.dispatchEvent(new Event('change', { bubbles: true }));
-                    }
-                    
                     const priceInput = container.querySelector('input[id*="-price"], input[data-field="price"]');
                     if (priceInput) {
                         priceInput.value = '';
@@ -7089,16 +7055,13 @@ require_once 'session_check.php';
                         targetSelect.required = false;
                     }
                     
-                    // 更新单价选项
                     updatePriceOptions(container, '');
                     
-                    // 如果是新增行，清空数据库中的相关字段
                     if (recordId) {
-                        updateField(parseInt(recordId), 'out_quantity', '');
                         updateField(parseInt(recordId), 'price', '');
                         updateField(parseInt(recordId), 'receiver', '');
                         updateField(parseInt(recordId), 'target_system', '');
-                        // 注意：不清空 specification 和 type，它们会自动更新
+                        // 出货数量 out_quantity 不清空，用户已填写的数量保留
                     }
                 }
             }
