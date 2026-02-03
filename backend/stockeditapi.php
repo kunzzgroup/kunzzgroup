@@ -737,7 +737,9 @@ function handleGet() {
 
         case 'product_prices_with_stock':
             // 获取指定产品的价格列表，并检查每个价格对应的库存是否足够
+            // 支持 code_number：同一货品名多供应商时，按编号/供应商只返回该供应商的价格
             $productName = $_GET['product_name'] ?? null;
+            $codeNumber = $_GET['code_number'] ?? null;
             $requiredQty = floatval($_GET['required_qty'] ?? 0);
             
             if (!$productName) {
@@ -745,11 +747,17 @@ function handleGet() {
             }
             
             if ($requiredQty <= 0) {
-                sendResponse(false, "出库数量必须大于0");
+                $requiredQty = 1; // 仅用于展示价格选项时允许 0，按 1 处理
             }
             
             try {
-                // 获取该产品所有不同价格的库存情况（包括价格为0的记录）
+                // 有 code_number 时按「货品名+编号」过滤，只返回该供应商的价格
+                $whereClause = "product_name = ?";
+                $params = [$productName];
+                if ($codeNumber !== null && $codeNumber !== '') {
+                    $whereClause .= " AND code_number = ?";
+                    $params[] = $codeNumber;
+                }
                 $sql = "SELECT 
                             price,
                             SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
@@ -757,13 +765,13 @@ function handleGet() {
                             (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
                             SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as available_stock
                         FROM stockinout_data 
-                        WHERE product_name = ?
+                        WHERE {$whereClause}
                         GROUP BY price
                         HAVING available_stock > 0
                         ORDER BY price DESC";
                 
                 $stmt = $pdo->prepare($sql);
-                $stmt->execute([$productName]);
+                $stmt->execute($params);
                 $priceStockData = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 
                 // 处理结果，确保数据格式正确
