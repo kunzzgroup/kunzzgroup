@@ -467,6 +467,7 @@ if (!isset($_SESSION['user_id'])) {
                             type="number" 
                             class="qty-input ${isEditing ? 'editing' : ''}" 
                             value="${item.qty}" 
+                            min="0"
                             step="0.01"
                             data-id="${item.id}"
                             data-original="${item.original_qty}"
@@ -502,11 +503,15 @@ if (!isset($_SESSION['user_id'])) {
         }
         
         
-        // 更新数量
+        // 更新数量（不允许负数）
         function updateQty(id, newQty) {
             const item = stockData.find(i => i.id == id);
             if (item) {
-                item.qty = parseFloat(newQty) || 0;
+                let num = parseFloat(newQty);
+                if (isNaN(num) || num < 0) {
+                    num = 0;
+                }
+                item.qty = num;
                 
                 const originalQty = parseFloat(item.original_qty) || 0;
                 const soldQty = originalQty - item.qty;
@@ -571,7 +576,13 @@ if (!isset($_SESSION['user_id'])) {
 
             try {
                 const originalQty = parseFloat(record.original_qty) || 0;
-                const currentQty = parseFloat(record.qty) || 0;
+                let currentQty = parseFloat(record.qty) || 0;
+                if (currentQty < 0) {
+                    alert('数量不能为负数！');
+                    record.qty = 0;
+                    generateTable();
+                    return;
+                }
                 const soldQty = originalQty - currentQty;
                 
                 if (currentQty > originalQty) {
