@@ -1497,7 +1497,7 @@ if (isset($_SESSION['user_id'])) {
                     <select class="excel-select ${!isNewRow ? 'readonly' : ''}" data-field="category" data-row="${rowId}" 
                         required ${!isNewRow ? 'disabled' : ''}>
                         <option value="">选择类型</option>
-                        <option value="Drinks" ${data.category === 'Drinks' ? 'selected' : ''}>Drinks</option>
+                        <option value="Service Line" ${(data.category === 'Service Line' || data.category === 'Drinks') ? 'selected' : ''}>Service Line</option>
                         <option value="Sake" ${data.category === 'Sake' ? 'selected' : ''}>Sake</option>
                         <option value="Kitchen" ${data.category === 'Kitchen' ? 'selected' : ''}>Kitchen</option>
                         <option value="Sushi Bar" ${data.category === 'Sushi Bar' ? 'selected' : ''}>Sushi Bar</option>
