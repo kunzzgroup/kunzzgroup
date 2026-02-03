@@ -3980,14 +3980,17 @@ require_once 'session_check.php';
             updatePriceOptions(container, '');
         }
 
-        // 更新单价选项的辅助函数
+        // 更新单价选项的辅助函数（同一货品多供应商时，按当前行的编号过滤只显示该供应商价格）
         async function updatePriceOptions(container, productName) {
             const priceSelect = container.querySelector('select[id*="-price"], select[data-field="price"]');
             if (priceSelect) {
                 if (productName) {
                     try {
-                        // 使用带库存信息的API，设置required_qty为1以确保显示所有价格
-                        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=1`);
+                        const row = container.closest('tr');
+                        const codeInput = row ? row.querySelector('.combobox[data-type="code"] .combobox-input, input[id*="-code_number-input"]') : null;
+                        const codeNumber = codeInput && codeInput.value ? codeInput.value.trim() : '';
+                        const codeParam = codeNumber ? `&code_number=${encodeURIComponent(codeNumber)}` : '';
+                        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=1${codeParam}`);
                         if (result.success && result.data && result.data.length > 0) {
                             let options = '<option value="">请选择价格</option>';
                             // 始终保留手动输入价格选项
@@ -4045,8 +4048,9 @@ require_once 'session_check.php';
 
             const record = stockData.find(r => r.id === recordId);
             const outQty = record ? parseFloat(record.out_quantity || 0) : 0;
+            const codeNumber = record && record.code_number ? String(record.code_number).trim() : '';
 
-            await loadProductPricesWithStock(productName, selectId, '', outQty);
+            await loadProductPricesWithStock(productName, selectId, '', outQty, codeNumber);
 
             priceSelect.value = '';
             priceSelect.dataset.productName = productName;
@@ -4954,7 +4958,8 @@ require_once 'session_check.php';
                         const inQty = parseFloat(record.in_quantity || 0);
                         // 只有纯出库时才加载价格选项（带库存检查）
                         if (outQty > 0 && inQty === 0) {
-                            loadProductPricesWithStock(record.product_name, `price-select-${record.id}`, (record.price_raw ?? record.price), outQty);
+                            const codeNum = record.code_number ? String(record.code_number).trim() : '';
+                            loadProductPricesWithStock(record.product_name, `price-select-${record.id}`, (record.price_raw ?? record.price), outQty, codeNum);
                         }
                     }
                 });
@@ -7621,11 +7626,17 @@ require_once 'session_check.php';
         }
     </script>
     <script>
-        // 加载货品的所有进货价格选项
+        // 加载货品的所有进货价格选项（按编号过滤只显示该供应商价格）
         async function loadProductPrices(productName, selectElementId, currentPrice = '') {
             try {
-                // 使用带库存信息的API，设置required_qty为1以确保显示所有价格
-                const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=1`);
+                let codeNumber = '';
+                const m = selectElementId && selectElementId.match(/^price-select-(\d+)$/);
+                if (m && typeof stockData !== 'undefined') {
+                    const rec = stockData.find(r => r.id === parseInt(m[1], 10));
+                    if (rec && rec.code_number) codeNumber = String(rec.code_number).trim();
+                }
+                const codeParam = codeNumber ? `&code_number=${encodeURIComponent(codeNumber)}` : '';
+                const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=1${codeParam}`);
                 const selectElement = document.getElementById(selectElementId);
                 
                 if (!selectElement) return;
@@ -7692,10 +7703,18 @@ require_once 'session_check.php';
             });
         }
 
-        // 3. 新增函数：加载新行货品价格选项（带库存检查）
+        // 3. 新增函数：加载新行货品价格选项（带库存检查，按编号过滤只显示该供应商价格）
         async function loadNewRowProductPricesWithStock(productName, selectElementId, currentPrice = '', requiredQty = 0) {
             try {
-                const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=${requiredQty}`);
+                let codeNumber = '';
+                const selectEl = document.getElementById(selectElementId);
+                if (selectEl) {
+                    const row = selectEl.closest('tr');
+                    const codeInput = row ? row.querySelector('.combobox[data-type="code"] .combobox-input, input[id*="-code_number-input"]') : null;
+                    if (codeInput && codeInput.value) codeNumber = codeInput.value.trim();
+                }
+                const codeParam = codeNumber ? `&code_number=${encodeURIComponent(codeNumber)}` : '';
+                const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=${requiredQty}${codeParam}`);
                 const selectElement = document.getElementById(selectElementId);
                 
                 if (!selectElement) return;
@@ -7731,10 +7750,11 @@ require_once 'session_check.php';
 
         window.loadAddFormProductPricesWithStock = async function(productName, requiredQty = 0) {
             try {
-                // 使用required_qty=1来获取所有有库存的价格，即使requiredQty为0也要检查库存
                 const checkQty = requiredQty > 0 ? requiredQty : 1;
-                console.log('加载价格，货品:', productName, '需要数量:', requiredQty, '检查数量:', checkQty);
-                const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=${checkQty}`);
+                const addCodeEl = document.getElementById('add-code-number');
+                const codeNumber = addCodeEl && addCodeEl.value ? String(addCodeEl.value).trim() : '';
+                const codeParam = codeNumber ? `&code_number=${encodeURIComponent(codeNumber)}` : '';
+                const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=${checkQty}${codeParam}`);
                 const selectElement = document.getElementById('add-price-select');
                 const priceInput = document.getElementById('add-price');
                 
@@ -7856,9 +7876,18 @@ require_once 'session_check.php';
             }
         }
 
-        async function loadProductPricesWithStock(productName, selectElementId, currentPrice = '', requiredQty = 0) {
+        async function loadProductPricesWithStock(productName, selectElementId, currentPrice = '', requiredQty = 0, codeNumber = '') {
             try {
-                const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=${requiredQty}`);
+                let code = codeNumber;
+                if (!code && selectElementId) {
+                    const m = selectElementId.match(/^price-select-(\d+)$/);
+                    if (m) {
+                        const rec = stockData.find(r => r.id === parseInt(m[1], 10));
+                        if (rec && rec.code_number) code = String(rec.code_number).trim();
+                    }
+                }
+                const codeParam = code ? `&code_number=${encodeURIComponent(code)}` : '';
+                const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=${requiredQty}${codeParam}`);
                 const selectElement = document.getElementById(selectElementId);
                 
                 if (!selectElement) return;
@@ -7975,11 +8004,13 @@ require_once 'session_check.php';
             }
         }
 
-        // 加载新增表单的价格选项
+        // 加载新增表单的价格选项（按编号过滤只显示该供应商价格）
         async function loadAddFormProductPrices(productName) {
             try {
-                // 使用带库存信息的API，设置required_qty为1以确保显示所有价格
-                const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=1`);
+                const addCodeEl = document.getElementById('add-code-number');
+                const codeNumber = addCodeEl && addCodeEl.value ? String(addCodeEl.value).trim() : '';
+                const codeParam = codeNumber ? `&code_number=${encodeURIComponent(codeNumber)}` : '';
+                const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=1${codeParam}`);
                 const selectElement = document.getElementById('add-price-select');
                 
                 if (!selectElement) return;
@@ -8192,11 +8223,18 @@ require_once 'session_check.php';
             }
         }
 
-        // 加载新行货品价格选项
+        // 加载新行货品价格选项（按编号过滤只显示该供应商价格）
         async function loadNewRowProductPrices(productName, selectElementId, currentPrice = '') {
             try {
-                // 使用带库存信息的API，设置required_qty为1以确保显示所有价格
-                const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=1`);
+                let codeNumber = '';
+                const selectEl = document.getElementById(selectElementId);
+                if (selectEl) {
+                    const row = selectEl.closest('tr');
+                    const codeInput = row ? row.querySelector('.combobox[data-type="code"] .combobox-input, input[id*="-code_number-input"]') : null;
+                    if (codeInput && codeInput.value) codeNumber = codeInput.value.trim();
+                }
+                const codeParam = codeNumber ? `&code_number=${encodeURIComponent(codeNumber)}` : '';
+                const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=1${codeParam}`);
                 const selectElement = document.getElementById(selectElementId);
                 
                 if (!selectElement) return;
