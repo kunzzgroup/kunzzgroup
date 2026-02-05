@@ -2676,8 +2676,8 @@ require_once 'session_check.php';
                     return /^[\u4e00-\u9fff]{2,}$/.test(value);
                     
                 case 'email':
-                    // 必须包含@
-                    return /^[a-z0-9]+@[a-z0-9]+\.[a-z0-9]+$/.test(value);
+                    // 通用邮箱格式：支持 Gmail、Outlook、QQ、企业邮箱等（含点、子域名、大小写）
+                    return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value);
                     
                 default:
                     return true;
