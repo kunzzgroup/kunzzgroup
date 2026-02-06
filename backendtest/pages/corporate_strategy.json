@@ -1,0 +1,27 @@
+{
+    "companyOverview": {
+        "companyName": "KUNZZ HOLDINGS SDN BHD",
+        "planTitle": "Corporate Strategic Plan",
+        "strategyStartYear": 2024,
+        "strategyEndYear": 2029,
+        "ultimateGoal": ""
+    },
+    "organizationStructure": {
+        "ceo": {"name": "", "title": "CEO"},
+        "pa": {"name": "", "title": "PA"},
+        "cLevel": []
+    },
+    "internalOrganization": {
+        "departments": []
+    },
+    "timeline": [],
+    "corporateCore": {
+        "mission": "",
+        "vision": "",
+        "culture": [],
+        "values": []
+    },
+    "cultureExplanation": [],
+    "valuesExplanation": [],
+    "strategicObjectives": []
+}
