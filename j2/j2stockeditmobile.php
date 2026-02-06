@@ -2006,9 +2006,9 @@ require_once '../backend/session_check.php';
     <div class="container">
         <div class="header">
             <div>
-                <h1 id="page-title"> 手机出货记录 - J2</h1>
+                <h1 id="page-title"> 手机出货记录 - J1</h1>
             </div>
-            <a class="back-button" href="../backend/stockeditall.php?system=j2">
+            <a class="back-button" href="../backend/stockeditall.php?system=j1">
                 <i class="fas fa-arrow-left"></i>
                 返回上一页
             </a>
@@ -2304,8 +2304,8 @@ require_once '../backend/session_check.php';
 
     <script>
         // API 配置
-        let API_BASE_URL = 'j2stockeditmobile_api.php';
-        let currentStockType = 'j2';
+        let API_BASE_URL = 'j1stockeditmobile_api.php';
+        let currentStockType = 'j1';
         
         // 应用状态
         let stockData = [];
@@ -3052,13 +3052,13 @@ require_once '../backend/session_check.php';
 
             // selector-button 初始化代码已删除
 
-            // 控制Type字段的启用状态（J2始终启用）
+            // 控制Type字段的启用状态（J1始终启用）
             const typeSelect = document.getElementById('add-type');
             if (typeSelect) {
                 typeSelect.disabled = false;
             }
 
-            // 隐藏导出按钮（J2手机版不需要）
+            // 隐藏导出按钮（J1手机版不需要）
             const exportButton = document.querySelector('.btn-warning[onclick="exportData()"]');
             if (exportButton) {
                 exportButton.style.display = 'none';
