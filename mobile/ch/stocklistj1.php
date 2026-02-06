@@ -21,7 +21,7 @@ if (!isset($_SESSION['user_id'])) {
             <a class="logout-button" href="login.html" aria-label="退出登录">
                 <img src="../images/icons/logout.svg" alt="" aria-hidden="true">
             </a>
-            <h1>库存列表</h1>
+            <h1>库存列表 (J1)</h1>
         </header>
 
         <main class="page-content">
