@@ -6,7 +6,7 @@ ob_start();
 header('Content-Type: text/html; charset=UTF-8');
 
 // 加载JSON数据 - 文件在backend目录中
-$jsonFile = __DIR__ . 'backend/corporate_strategy.json';
+$jsonFile = __DIR__ . '../backend/corporate_strategy.json';
 $strategyData = null;
 
 if (file_exists($jsonFile)) {
