@@ -1,221 +1,380 @@
-﻿<!-- 页面标题 -->
-<div class="header">
-    <h1 class="header-title">企业蓝图</h1>
-</div>
+﻿
+            <!-- 页面标题 -->
+            <div class="header">
+                <h1 class="header-title">企业蓝图</h1>
+            </div>
 
-<div id="blueprint-content">
-    <!-- Header Section - 新设计 -->
-    <div class="section">
-        <div class="header-panel">
-            <!-- 飘动的模糊圆球 -->
-            <div class="floating-orb floating-orb-1"></div>
-            <div class="floating-orb floating-orb-2"></div>
-            <div class="floating-orb floating-orb-3"></div>
-            <div class="floating-orb floating-orb-4"></div>
-            <div class="floating-orb floating-orb-5"></div>
+            <?php if ($strategyData): ?>
+                <!-- Header Section - 新设计 -->
+                <div class="section">
+                    <div class="header-panel">
+                        <!-- 飘动的模糊圆球 -->
+                        <div class="floating-orb floating-orb-1"></div>
+                        <div class="floating-orb floating-orb-2"></div>
+                        <div class="floating-orb floating-orb-3"></div>
+                        <div class="floating-orb floating-orb-4"></div>
+                        <div class="floating-orb floating-orb-5"></div>
+                        
+                        <!-- Logo - 居中显示 -->
+                        <div class="header-logo-container">
+                            <div class="header-logo">
+                                <img src="/backendtest/images/images/logo.png" alt="Logo" id="header-logo-img">
+                                <!-- 图片加载失败时的备用占位符 -->
+                                <div class="logo-fallback" style="display: none;"></div>
+                            </div>
+                        </div>
 
-            <!-- Logo - 居中显示 -->
-            <div class="header-logo-container">
-                <div class="header-logo">
-                    <img src="/backendtest/images/images/logo.png" alt="Logo" id="header-logo-img">
-                    <div class="logo-fallback" style="display: none;"></div>
+                        <!-- 文本内容 - 居中显示 -->
+                        <div class="header-text-content">
+                            <div class="company-name-large"><span class="dynamic-text"></span>
+                <div class="section">
+                    <div class="orgchart-container-wrapper">
+                        <h1 class="orgchart-title-wrapper">高层组织架构图</h1>
+                        <div id="orgchart-container" style="width: 100%; min-height: 600px;"></div>
+                    </div>
                 </div>
-            </div>
+                <?php endif; ?>
+                
+                <?php
+                // 转换内部组织架构数据为 OrgChart.js 所需的树形格式
+                // 返回每个部门作为独立的树形结构数组
+                function convertInternalOrgToOrgChartFormat($internalOrgData) {
+                    if (empty($internalOrgData) || empty($internalOrgData['departments'])) {
+                        return [];
+                    }
+                    
+                    $departmentTrees = [];
+                    $departments = $internalOrgData['departments'];
+                    
+                    foreach ($departments as $deptIndex => $dept) {
+                        $deptName = $dept['name'] ?? '';
+                        $positions = $dept['positions'] ?? [];
+                        
+                        if (empty($positions)) {
+                            continue;
+                        }
+                        
+                        // 部门根节点（使用第一个职位作为部门头）
+                        $firstPosition = $positions[0];
+                        $deptTitle = $firstPosition['title'] ?? $deptName;
+                        $deptNameValue = $firstPosition['name'] ?? '';
+                        
+                        $deptRootNode = [
+                            'id' => 'dept_' . $deptIndex,
+                            'name' => $deptNameValue ?: '—',
+                            'title' => $deptTitle,
+                            'level' => 'department',
+                            'departmentName' => $deptName, // 保存部门名称用于显示
+                            'children' => []
+                        ];
+                        
+                        // 添加该部门的其他职位作为子节点
+                        for ($i = 1; $i < count($positions); $i++) {
+                            $pos = $positions[$i];
+                            $posTitle = $pos['title'] ?? '';
+                            $posName = $pos['name'] ?? '';
+                            
+                            $posNode = [
+                                'id' => 'dept_' . $deptIndex . '_pos_' . $i,
+                                'name' => $posName ?: '—',
+                                'title' => $posTitle,
+                                'level' => 'position'
+                            ];
+                            
+                            $deptRootNode['children'][] = $posNode;
+                        }
+                        
+                        $departmentTrees[] = $deptRootNode;
+                    }
+                    
+                    return $departmentTrees;
+                }
+                
+                // 内部组织架构数据 - 从JSON读取
+                $internalOrgData = $strategyData['internalOrganization'] ?? null;
+                
+                $internalOrgChartData = $internalOrgData ? convertInternalOrgToOrgChartFormat($internalOrgData) : [];
+                if (!empty($internalOrgChartData) && is_array($internalOrgChartData)):
+                ?>
 
-            <!-- 文本内容 - 居中显示 -->
-            <div class="header-text-content">
-                <div class="company-name-large" id="company-name-display">KUNZZ HOLDINGS SDN BHD</div>
-                <div class="company-subtitle">企业蓝图 · 战略计划</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Timeline Section -->
-    <div class="section" id="timeline-section" style="display: none;">
-        <div class="timeline-container">
-            <div class="timeline-header">
-                <div class="timeline-main-title">以终为始</div>
-            </div>
-
-            <div class="timeline-wrapper">
-                <!-- Map-style SVG path -->
-                <svg class="map-timeline-svg" viewBox="0 0 600 600" preserveAspectRatio="none">
-                    <defs>
-                        <linearGradient id="routeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" style="stop-color:rgba(255, 92, 0, 0.3);stop-opacity:1" />
-                            <stop offset="50%" style="stop-color:#ff5c00;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:rgba(255, 92, 0, 0.3);stop-opacity:1" />
-                        </linearGradient>
-                    </defs>
-                    <path class="map-route-glow" d="M 15 300 Q 180 180, 300 300 Q 420 420, 585 300"
-                        stroke="url(#routeGradient)" />
-                    <path class="map-route-path" d="M 15 300 Q 180 180, 300 300 Q 420 420, 585 300" stroke="#ff5c00" />
-                </svg>
-
-                <!-- Map milestones -->
-                <div id="milestone-list"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Corporate Core Section -->
-    <div class="section" id="core-section" style="display: none;">
-        <div class="core-header">
-            <div class="core-main-title">企业核心</div>
-        </div>
-        <div class="core-grid" id="core-grid">
-            <!-- JS will render core cards here -->
-        </div>
-    </div>
-
-    <!-- Culture Explanation -->
-    <div class="section" id="culture-explanation-section" style="display: none;">
-        <div class="culture-explanation-header">
-            <div class="culture-explanation-title-cn">文化解说&考核</div>
-        </div>
-        <div class="culture-explanation-grid" id="culture-explanation-list">
-            <!-- JS will render culture cards here -->
-        </div>
-    </div>
-
-    <!-- Values Explanation -->
-    <div class="section" id="values-explanation-section" style="display: none;">
-        <div class="values-explanation-header">
-            <div class="values-explanation-title-cn">价值观解说&考核</div>
-        </div>
-        <div class="culture-explanation-grid" id="values-explanation-list">
-            <!-- JS will render value cards here -->
-        </div>
-    </div>
-
-    <!-- High-Level Organization Structure -->
-    <div class="section" id="org-section" style="display: none;">
-        <div class="orgchart-container-wrapper">
-            <h1 class="orgchart-title-wrapper">高层组织架构图</h1>
-            <div id="orgchart-container" style="width: 100%; min-height: 600px;"></div>
-        </div>
-    </div>
-
-    <!-- Internal Organization Structure -->
-    <div class="section" id="internal-org-section" style="display: none;">
-        <div class="orgchart-container-wrapper">
-            <h1 class="orgchart-title-wrapper">内部组织架构图</h1>
-            <div class="internal-dept-buttons" id="internal-dept-buttons">
-                <!-- JS will render buttons here -->
-            </div>
-            <div id="internal-orgchart-container" style="width: 100%; min-height: 600px;">
-                <!-- JS will render chart wrappers here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Strategic Objectives -->
-    <div class="section" id="strategic-objectives-section" style="display: none;">
-        <div class="strategic-objectives-section">
-            <div class="strategic-bg-decor"></div>
-            <div class="strategic-container">
-                <header class="strategic-header">
-                    <div class="strategic-header-content">
-                        <div class="strategic-header-left">
-                            <div class="strategic-badge">
-                                <svg class="strategy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <path d="M12 6v6l4 2" />
-                                </svg>
-                                <span>最终目标</span>
-                            </div>
-                            <h1 class="strategic-main-title" id="ultimate-goal-header">
-                                <span id="strategy-end-year"></span>年
-                                <span class="strategic-year" id="ultimate-goal-text"></span>
-                            </h1>
+                <!-- 内部组织架构图 -->
+                <div class="section">
+                    <div class="orgchart-container-wrapper">
+                        <h1 class="orgchart-title-wrapper">内部组织架构图</h1>
+                        
+                        <!-- 部门切换按钮组 -->
+                        <div class="internal-dept-buttons">
+                            <?php foreach ($internalOrgChartData as $deptIndex => $deptTree): ?>
+                                <button 
+                                    class="internal-dept-btn <?php echo $deptIndex === 0 ? 'active' : ''; ?>" 
+                                    data-dept-index="<?php echo $deptIndex; ?>"
+                                    onclick="switchInternalDept(<?php echo $deptIndex; ?>)"
+                                >
+                                    <?php echo htmlspecialchars($deptTree['departmentName'] ?? ''); ?>
+                                </button>
+                            <?php endforeach; ?>
+                        </div>
+                        
+                        <!-- 组织架构图容器 -->
+                        <div id="internal-orgchart-container" style="width: 100%; min-height: 600px;">
+                            <?php foreach ($internalOrgChartData as $deptIndex => $deptTree): ?>
+                                <div class="internal-dept-chart-wrapper <?php echo $deptIndex === 0 ? 'active' : ''; ?>" data-dept-index="<?php echo $deptIndex; ?>">
+                                    <div class="internal-dept-orgchart" id="internal-dept-chart-<?php echo $deptIndex; ?>" style="width: 100%; min-height: 500px;"></div>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
-                </header>
+                </div>
+                <?php endif; ?>
 
-                <main class="strategic-main">
-                    <div class="strategic-list-wrapper">
-                        <h2 class="strategic-list-title">
-                            策略 · 检核
-                            <span class="strategic-list-count" id="strategicListCount">0</span>
-                        </h2>
-                        <div class="strategic-list" id="strategicList">
-                            <!-- JS will render strategy cards here -->
-                        </div>
-                    </div>
+                <!-- Strategic Objectives -->
+                <?php 
+                $strategicObjectives = $strategyData['strategicObjectives'] ?? [];
+                $ultimateGoal = $strategyData['companyOverview']['ultimateGoal'] ?? '';
+                $strategyEndYear = $strategyData['companyOverview']['strategyEndYear'] ?? date('Y') + 5;
+                
+                // 将所有年份的目标合并到一个数组中，用于显示
+                $allObjectives = [];
+                foreach ($strategicObjectives as $year => $objectives) {
+                    foreach ($objectives as $obj) {
+                        $allObjectives[] = array_merge($obj, ['year' => $year]);
+                    }
+                }
+                ?>
+                <?php if (!empty($allObjectives)): ?>
+                <div class="strategic-objectives-section">
+                    <!-- 背景装饰 -->
+                    <div class="strategic-bg-decor"></div>
+                    
+                    <div class="strategic-container">
+                        <!-- 头部区域 -->
+                        <header class="strategic-header">
+                            <div class="strategic-header-content">
+                                <div class="strategic-header-left">
+                                    <div class="strategic-badge">
+                                        <svg class="strategy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <path d="M12 6v6l4 2"/>
+                                        </svg>
+                                        <span>最终目标</span>
+                                    </div>
+                                    <h1 class="strategic-main-title">
+                                        <?php echo htmlspecialchars($strategyEndYear); ?>年
+                                        <?php if (!empty($ultimateGoal)): ?>
+                                        <span class="strategic-year"><?php echo htmlspecialchars($ultimateGoal); ?></span>
+                                        <?php endif; ?>
+                                    </h1>
+                                    </div>
+                                </div>
+                        </header>
 
-                    <div class="strategic-details" id="strategicDetails">
-                        <!-- Details header and body placeholders -->
-                        <div class="details-header">
-                            <svg class="details-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                                <circle cx="9" cy="7" r="4" />
-                                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                            </svg>
-                            <div>
-                                <div class="details-badge" id="detailsBadge">—</div>
-                                <h2 class="details-title" id="detailsTitle">—</h2>
-                            </div>
-                        </div>
-                        <div class="details-body">
-                            <div class="details-section">
-                                <h4 class="details-section-title">
-                                    <svg class="details-section-icon" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2">
-                                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                                    </svg>
+                        <!-- 主要内容区域 -->
+                        <main class="strategic-main">
+                            <!-- 策略列表 -->
+                            <div class="strategic-list-wrapper">
+                                <h2 class="strategic-list-title">
                                     策略 · 检核
-                                </h4>
-                                <div class="measure-item">
-                                    <div class="measure-header">
-                                        <span class="measure-badge">D1</span>
-                                        <span class="measure-label">关键指标</span>
-                                    </div>
-                                    <ul class="measure-list" id="measureList"></ul>
+                                    <span class="strategic-list-count" id="strategicListCount">5</span>
+                                </h2>
+                                <div class="strategic-list" id="strategicList">
+                                    <div id="strategicList"></div>
                                 </div>
                             </div>
-                            <div class="details-section">
-                                <h4 class="details-section-title">
-                                    <svg class="details-section-icon" viewBox="0 0 24 24" fill="none"
-                                        stroke="currentColor" stroke-width="2">
-                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                                        <line x1="16" y1="2" x2="16" y2="6" />
-                                        <line x1="8" y1="2" x2="8" y2="6" />
-                                        <line x1="3" y1="10" x2="21" y2="10" />
+
+                            <!-- 详细视图 -->
+                            <div class="strategic-details" id="strategicDetails">
+                                <div class="details-header">
+                                    <svg class="details-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="9" cy="7" r="4"/>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                                     </svg>
-                                    行动计划
-                                </h4>
-                                <div class="execution-plan">
-                                    <div class="execution-pic">
-                                        <div class="execution-pic-icon">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                                                <circle cx="12" cy="7" r="4" />
-                                            </svg>
-                                        </div>
-                                        <div class="execution-pic-info">
-                                            <span class="execution-pic-label">负责人</span>
-                                            <span class="execution-pic-name" id="picName">—</span>
-                                        </div>
+                                    <div>
+                                        <div class="details-badge" id="detailsBadge">人事部</div>
+                                        <h2 class="details-title" id="detailsTitle">建立高效且有吸引力的人才管理体系</h2>
                                     </div>
-                                    <div class="execution-dates">
-                                        <div class="execution-date-item">
-                                            <span class="execution-date-label">开始日期</span>
-                                            <span class="execution-date-value" id="startDate">—</span>
+                                </div>
+
+                                <div class="details-body">
+                                    <!-- 指标和措施 -->
+                                    <div class="details-section">
+                                        <h4 class="details-section-title">
+                                            <svg class="details-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                                            </svg>
+                                            策略 · 检核
+                                        </h4>
+                                        
+                                        <div class="measure-item">
+                                            <div class="measure-header">
+                                                <span class="measure-badge">D1</span>
+                                                <span class="measure-label">关键指标</span>
+                                            </div>
+                                            <ul class="measure-list" id="measureList">
+                                                <li class="measure-list-item">
+                                                    <div class="measure-dot"></div>
+                                                    <span class="measure-text">人才引进与储备</span>
+                                                </li>
+                                                <li class="measure-list-item">
+                                                    <div class="measure-dot"></div>
+                                                    <span class="measure-text">文化宣传</span>
+                                                </li>
+                                        </ul>
+                                    </div>
+                                    </div>
+
+                                    <!-- 执行计划 -->
+                                    <div class="details-section">
+                                        <h4 class="details-section-title">
+                                            <svg class="details-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                                <line x1="3" y1="10" x2="21" y2="10"/>
+                                            </svg>
+                                            行动计划
+                                        </h4>
+                                        
+                                        <div class="execution-plan">
+                                            <div class="execution-pic">
+                                                <div class="execution-pic-icon">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                                        <circle cx="12" cy="7" r="4"/>
+                                                    </svg>
                                         </div>
-                                        <div class="execution-date-item execution-date-divider">
-                                            <span class="execution-date-label">完成日期</span>
-                                            <span class="execution-date-value" id="endDate">—</span>
+                                                <div class="execution-pic-info">
+                                                    <span class="execution-pic-label">负责人</span>
+                                                    <span class="execution-pic-name" id="picName">Paris</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="execution-dates">
+                                                <div class="execution-date-item">
+                                                    <span class="execution-date-label">开始日期</span>
+                                                    <span class="execution-date-value" id="startDate">—</span>
                                         </div>
+                                                <div class="execution-date-item execution-date-divider">
+                                                    <span class="execution-date-label">完成日期</span>
+                                                    <span class="execution-date-value" id="endDate">—</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </main>
-            </div>
-        </div>
-    </div>
-</div>
+                </div>
+                        </main>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
+                <script>
+                // 从PHP传递的战略目标数据
+                const strategiesData = <?php echo json_encode($allObjectives, JSON_UNESCAPED_UNICODE); ?>;
+                
+                // 转换数据格式以匹配原有结构
+                const formattedStrategiesData = strategiesData.map((obj, index) => ({
+                    deptName: 'S' + (index + 1) + '-' + (obj.department || ''),
+                    deptDisplay: obj.department || '',
+                    strategy: obj.strategy || '',
+                    department: obj.department || '',
+                    pic: obj.pic || '',
+                    startDate: obj.startDate || '',
+                    endDate: obj.endDate || '',
+                    dashboardMetrics: obj.dashboardMetrics || [],
+                    year: obj.year || ''
+                }));
+                
+                function selectStrategy(index) {
+                    const strategy = formattedStrategiesData[index];
+                    if (!strategy) return;
+                    
+                    // 更新卡片状态
+                    document.querySelectorAll('.strategy-card').forEach((card, i) => {
+                        if (i === index) {
+                            card.classList.add('active');
+                            card.querySelector('.strategy-check').style.display = 'block';
+                        } else {
+                            card.classList.remove('active');
+                            card.querySelector('.strategy-check').style.display = 'none';
+                        }
+                    });
+                    
+                    // 更新详细视图
+                    const detailsEl = document.getElementById('strategicDetails');
+                    detailsEl.classList.add('hidden');
+                    
+                    setTimeout(() => {
+                        // 更新内容
+                        document.getElementById('detailsTitle').textContent = strategy.strategy;
+                        document.getElementById('detailsBadge').textContent = strategy.deptDisplay || strategy.deptName || 'Selected Pillar';
+                        document.getElementById('picName').textContent = strategy.pic || '—';
+                        
+                        // 格式化日期
+                        const formatDate = (dateStr) => {
+                            if (!dateStr) return '—';
+                            try {
+                                const date = new Date(dateStr);
+                                const year = date.getFullYear();
+                                const month = String(date.getMonth() + 1).padStart(2, '0');
+                                const day = String(date.getDate()).padStart(2, '0');
+                                return `${year}-${month}-${day}`;
+                            } catch (e) {
+                                return dateStr;
+                            }
+                        };
+                        
+                        document.getElementById('startDate').textContent = formatDate(strategy.startDate);
+                        document.getElementById('endDate').textContent = formatDate(strategy.endDate);
+                        
+                        // 更新指标
+                        const metricsList = document.getElementById('measureList');
+                        if (metricsList) {
+                            if (strategy.dashboardMetrics && strategy.dashboardMetrics.length > 0) {
+                                metricsList.innerHTML = strategy.dashboardMetrics.map(metric => 
+                                    `<li class="measure-list-item">
+                                        <div class="measure-dot"></div>
+                                        <span class="measure-text">${metric}</span>
+                                    </li>`
+                                ).join('');
+                            } else {
+                                metricsList.innerHTML = '<li class="measure-list-item"><span class="measure-text">暂无指标</span></li>';
+                            }
+                        }
+                        
+                        detailsEl.classList.remove('hidden');
+                    }, 300);
+                }
+                
+                // 初始化动画
+                document.addEventListener('DOMContentLoaded', function() {
+                    const cards = document.querySelectorAll('.strategy-card');
+                    cards.forEach((card, index) => {
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateX(-30px)';
+                        setTimeout(() => {
+                            card.style.transition = 'all 0.8s ease';
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateX(0)';
+                        }, 300 + (index * 100));
+                    });
+
+                    // 更新策略总数
+                    const countEl = document.getElementById('strategicListCount');
+                    if (countEl) {
+                        countEl.textContent = formattedStrategiesData.length.toString();
+                    }
+                });
+                </script>
+
+            <?php else: ?>
+                <!-- 如果没有JSON数据，显示错误信息 -->
+                <div class="card">
+                    <p style="text-align: center; color: #6b7280; padding: 40px;">
+                        无法加载战略计划数据。请确保 corporate_strategy.json 文件存在于backend目录且格式正确。
+                    </p>
+                </div>
+            <?php endif; ?>
+
+        
