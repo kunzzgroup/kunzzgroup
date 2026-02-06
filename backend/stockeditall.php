@@ -3924,6 +3924,15 @@ require_once 'session_check.php';
             return null;
         }
 
+        // 将 API 返回的 category 规范化为类型下拉选项值（Service Line / Kitchen / Sushi Bar / Sake）
+        function normalizeCategoryForType(category) {
+            if (category == null || category === '') return '';
+            const c = String(category).trim();
+            if (c === 'Drinks' || c.toLowerCase() === 'service line') return 'Service Line';
+            if (['Kitchen', 'Sushi Bar', 'Service Line', 'Sake'].indexOf(c) !== -1) return c;
+            return c;
+        }
+
         // 生成货品名称下拉选项
         function generateProductOptions(selectedValue = '') {
             if (!window.productOptions) return '<option value="">加载中...</option>';
@@ -4260,6 +4269,7 @@ require_once 'session_check.php';
                     }
                     
                     // 如果是在编辑模式，更新数据
+                    const normalizedCategory = normalizeCategoryForType(category);
                     const row = selectElement.closest('tr');
                     if (row && !row.classList.contains('new-row')) {
                         const recordId = parseInt(selectElement.getAttribute('data-record-id'));
@@ -4268,8 +4278,8 @@ require_once 'session_check.php';
                             if (specification) {
                                 updateField(recordId, 'specification', specification);
                             }
-                            if (category) {
-                                updateField(recordId, 'type', category);
+                            if (normalizedCategory) {
+                                updateField(recordId, 'type', normalizedCategory);
                             }
                         }
                     }
@@ -4283,11 +4293,18 @@ require_once 'session_check.php';
                         }
                     }
                     
-                    // 自动填充类型
-                    if (category) {
+                    // 自动填充类型（规范化以匹配下拉选项，中央/新增表单也需显式设置 add-type）
+                    if (normalizedCategory) {
+                        if (selectElement.id === 'add-product-name') {
+                            const addTypeEl = document.getElementById('add-type');
+                            if (addTypeEl) {
+                                addTypeEl.value = normalizedCategory;
+                                addTypeEl.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+                        }
                         const typeSelect = container.querySelector('select[id$="-type"], select[onchange*="type"]');
                         if (typeSelect) {
-                            typeSelect.value = category;
+                            typeSelect.value = normalizedCategory;
                             typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
                         }
                     }
@@ -4428,8 +4445,8 @@ require_once 'session_check.php';
                             if (specification) {
                                 updateField(recordId, 'specification', specification);
                             }
-                            if (category) {
-                                updateField(recordId, 'type', category);
+                            if (normalizeCategoryForType(category)) {
+                                updateField(recordId, 'type', normalizeCategoryForType(category));
                             }
                         }
                     }
@@ -4443,11 +4460,19 @@ require_once 'session_check.php';
                         }
                     }
                     
-                    // 自动填充类型
-                    if (category) {
+                    // 自动填充类型（规范化以匹配下拉选项，新增表单显式设置 add-type）
+                    const normalizedCategory = normalizeCategoryForType(category);
+                    if (normalizedCategory) {
+                        if (selectElement.id === 'add-code-number') {
+                            const addTypeEl = document.getElementById('add-type');
+                            if (addTypeEl) {
+                                addTypeEl.value = normalizedCategory;
+                                addTypeEl.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+                        }
                         const typeSelect = container.querySelector('select[id$="-type"], select[onchange*="type"]');
                         if (typeSelect) {
-                            typeSelect.value = category;
+                            typeSelect.value = normalizedCategory;
                             typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
                         }
                     }
@@ -7107,6 +7132,7 @@ require_once 'session_check.php';
                         relatedInputId = `combo-product_name-${recordId}-input`;
                     }
                     
+                    const normalizedCategoryCode = normalizeCategoryForType(category);
                     const relatedInput = document.getElementById(relatedInputId);
                     if (relatedInput) {
                         relatedInput.value = product_name;
@@ -7115,8 +7141,8 @@ require_once 'session_check.php';
                             if (specification) {
                                 updateField(parseInt(recordId), 'specification', specification);
                             }
-                            if (category) {
-                                updateField(parseInt(recordId), 'type', category);
+                            if (normalizedCategoryCode) {
+                                updateField(parseInt(recordId), 'type', normalizedCategoryCode);
                             }
                         }
                     }
@@ -7131,12 +7157,13 @@ require_once 'session_check.php';
                         }
                     }
                     
-                    // 自动填充类型
-                    if (category) {
+                    // 自动填充类型（规范化以匹配下拉选项）
+                    const normalizedCategory = normalizedCategoryCode;
+                    if (normalizedCategory) {
                         const row = input.closest('tr');
                         const typeSelect = row ? row.querySelector('select[id$="-type"], select[onchange*="type"]') : null;
                         if (typeSelect) {
-                            typeSelect.value = category;
+                            typeSelect.value = normalizedCategory;
                             typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
                         }
                     }
@@ -7231,6 +7258,7 @@ require_once 'session_check.php';
                         relatedInputId = `combo-code_number-${recordId}-input`;
                     }
                     
+                    const normalizedCategoryProduct = normalizeCategoryForType(category);
                     const relatedInput = document.getElementById(relatedInputId);
                     if (relatedInput) {
                         relatedInput.value = product_code;
@@ -7239,8 +7267,8 @@ require_once 'session_check.php';
                             if (specification) {
                                 updateField(parseInt(recordId), 'specification', specification);
                             }
-                            if (category) {
-                                updateField(parseInt(recordId), 'type', category);
+                            if (normalizedCategoryProduct) {
+                                updateField(parseInt(recordId), 'type', normalizedCategoryProduct);
                             }
                         }
                     }
@@ -7255,12 +7283,13 @@ require_once 'session_check.php';
                         }
                     }
                     
-                    // 自动填充类型
-                    if (category) {
+                    // 自动填充类型（规范化以匹配下拉选项）
+                    const normalizedCategory = normalizedCategoryProduct;
+                    if (normalizedCategory) {
                         const row = input.closest('tr');
                         const typeSelect = row ? row.querySelector('select[id$="-type"], select[onchange*="type"]') : null;
                         if (typeSelect) {
-                            typeSelect.value = category;
+                            typeSelect.value = normalizedCategory;
                             typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
                         }
                     }

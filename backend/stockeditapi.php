@@ -584,21 +584,27 @@ function handleGet() {
             break;
 
         case 'product_by_code':
-            // 根据code_number获取对应的product_name、specification和supplier
+            // 根据code_number获取对应的product_name、specification、supplier和category
             $codeNumber = $_GET['code_number'] ?? null;
             if (!$codeNumber) {
                 sendResponse(false, "缺少编号参数");
             }
             
-            $stmt = $pdo->prepare("SELECT DISTINCT product_name, specification, supplier FROM stock_data WHERE product_code = ? LIMIT 1");
+            $stmt = $pdo->prepare("SELECT DISTINCT product_name, specification, supplier, category FROM stock_data WHERE product_code = ? LIMIT 1");
             $stmt->execute([$codeNumber]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if ($result) {
+                $category = trim((string)($result['category'] ?? ''));
+                // 兼容旧数据与大小写：Drinks / service line / Service line 等统一为 Service Line
+                if (strtolower($category) === 'service line' || $category === 'Drinks') {
+                    $category = 'Service Line';
+                }
                 sendResponse(true, "产品名称获取成功", [
                     'product_name' => $result['product_name'],
                     'specification' => $result['specification'],
-                    'supplier' => $result['supplier']
+                    'supplier' => $result['supplier'],
+                    'category' => $category
                 ]);
             } else {
                 sendResponse(false, "未找到对应的产品名称");
@@ -615,21 +621,27 @@ function handleGet() {
             break;
 
         case 'code_by_product':
-            // 根据product_name获取对应的product_code、specification和supplier
+            // 根据product_name获取对应的product_code、specification、supplier和category
             $productName = $_GET['product_name'] ?? null;
             if (!$productName) {
                 sendResponse(false, "缺少产品名称参数");
             }
             
-            $stmt = $pdo->prepare("SELECT DISTINCT product_code, specification, supplier FROM stock_data WHERE product_name = ? LIMIT 1");
+            $stmt = $pdo->prepare("SELECT DISTINCT product_code, specification, supplier, category FROM stock_data WHERE product_name = ? LIMIT 1");
             $stmt->execute([$productName]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if ($result) {
+                $category = trim((string)($result['category'] ?? ''));
+                // 兼容旧数据与大小写：Drinks / service line / Service line 等统一为 Service Line
+                if (strtolower($category) === 'service line' || $category === 'Drinks') {
+                    $category = 'Service Line';
+                }
                 sendResponse(true, "产品编号获取成功", [
                     'product_code' => $result['product_code'],
                     'specification' => $result['specification'],
-                    'supplier' => $result['supplier']
+                    'supplier' => $result['supplier'],
+                    'category' => $category
                 ]);
             } else {
                 sendResponse(false, "未找到对应的产品编号");
