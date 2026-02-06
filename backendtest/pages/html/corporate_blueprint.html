@@ -1,0 +1,221 @@
+﻿<!-- 页面标题 -->
+<div class="header">
+    <h1 class="header-title">企业蓝图</h1>
+</div>
+
+<div id="blueprint-content">
+    <!-- Header Section - 新设计 -->
+    <div class="section">
+        <div class="header-panel">
+            <!-- 飘动的模糊圆球 -->
+            <div class="floating-orb floating-orb-1"></div>
+            <div class="floating-orb floating-orb-2"></div>
+            <div class="floating-orb floating-orb-3"></div>
+            <div class="floating-orb floating-orb-4"></div>
+            <div class="floating-orb floating-orb-5"></div>
+
+            <!-- Logo - 居中显示 -->
+            <div class="header-logo-container">
+                <div class="header-logo">
+                    <img src="/backendtest/images/images/logo.png" alt="Logo" id="header-logo-img">
+                    <div class="logo-fallback" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- 文本内容 - 居中显示 -->
+            <div class="header-text-content">
+                <div class="company-name-large" id="company-name-display">KUNZZ HOLDINGS SDN BHD</div>
+                <div class="company-subtitle">企业蓝图 · 战略计划</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline Section -->
+    <div class="section" id="timeline-section" style="display: none;">
+        <div class="timeline-container">
+            <div class="timeline-header">
+                <div class="timeline-main-title">以终为始</div>
+            </div>
+
+            <div class="timeline-wrapper">
+                <!-- Map-style SVG path -->
+                <svg class="map-timeline-svg" viewBox="0 0 600 600" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="routeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:rgba(255, 92, 0, 0.3);stop-opacity:1" />
+                            <stop offset="50%" style="stop-color:#ff5c00;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:rgba(255, 92, 0, 0.3);stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <path class="map-route-glow" d="M 15 300 Q 180 180, 300 300 Q 420 420, 585 300"
+                        stroke="url(#routeGradient)" />
+                    <path class="map-route-path" d="M 15 300 Q 180 180, 300 300 Q 420 420, 585 300" stroke="#ff5c00" />
+                </svg>
+
+                <!-- Map milestones -->
+                <div id="milestone-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Corporate Core Section -->
+    <div class="section" id="core-section" style="display: none;">
+        <div class="core-header">
+            <div class="core-main-title">企业核心</div>
+        </div>
+        <div class="core-grid" id="core-grid">
+            <!-- JS will render core cards here -->
+        </div>
+    </div>
+
+    <!-- Culture Explanation -->
+    <div class="section" id="culture-explanation-section" style="display: none;">
+        <div class="culture-explanation-header">
+            <div class="culture-explanation-title-cn">文化解说&考核</div>
+        </div>
+        <div class="culture-explanation-grid" id="culture-explanation-list">
+            <!-- JS will render culture cards here -->
+        </div>
+    </div>
+
+    <!-- Values Explanation -->
+    <div class="section" id="values-explanation-section" style="display: none;">
+        <div class="values-explanation-header">
+            <div class="values-explanation-title-cn">价值观解说&考核</div>
+        </div>
+        <div class="culture-explanation-grid" id="values-explanation-list">
+            <!-- JS will render value cards here -->
+        </div>
+    </div>
+
+    <!-- High-Level Organization Structure -->
+    <div class="section" id="org-section" style="display: none;">
+        <div class="orgchart-container-wrapper">
+            <h1 class="orgchart-title-wrapper">高层组织架构图</h1>
+            <div id="orgchart-container" style="width: 100%; min-height: 600px;"></div>
+        </div>
+    </div>
+
+    <!-- Internal Organization Structure -->
+    <div class="section" id="internal-org-section" style="display: none;">
+        <div class="orgchart-container-wrapper">
+            <h1 class="orgchart-title-wrapper">内部组织架构图</h1>
+            <div class="internal-dept-buttons" id="internal-dept-buttons">
+                <!-- JS will render buttons here -->
+            </div>
+            <div id="internal-orgchart-container" style="width: 100%; min-height: 600px;">
+                <!-- JS will render chart wrappers here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Strategic Objectives -->
+    <div class="section" id="strategic-objectives-section" style="display: none;">
+        <div class="strategic-objectives-section">
+            <div class="strategic-bg-decor"></div>
+            <div class="strategic-container">
+                <header class="strategic-header">
+                    <div class="strategic-header-content">
+                        <div class="strategic-header-left">
+                            <div class="strategic-badge">
+                                <svg class="strategy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M12 6v6l4 2" />
+                                </svg>
+                                <span>最终目标</span>
+                            </div>
+                            <h1 class="strategic-main-title" id="ultimate-goal-header">
+                                <span id="strategy-end-year"></span>年
+                                <span class="strategic-year" id="ultimate-goal-text"></span>
+                            </h1>
+                        </div>
+                    </div>
+                </header>
+
+                <main class="strategic-main">
+                    <div class="strategic-list-wrapper">
+                        <h2 class="strategic-list-title">
+                            策略 · 检核
+                            <span class="strategic-list-count" id="strategicListCount">0</span>
+                        </h2>
+                        <div class="strategic-list" id="strategicList">
+                            <!-- JS will render strategy cards here -->
+                        </div>
+                    </div>
+
+                    <div class="strategic-details" id="strategicDetails">
+                        <!-- Details header and body placeholders -->
+                        <div class="details-header">
+                            <svg class="details-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                            </svg>
+                            <div>
+                                <div class="details-badge" id="detailsBadge">—</div>
+                                <h2 class="details-title" id="detailsTitle">—</h2>
+                            </div>
+                        </div>
+                        <div class="details-body">
+                            <div class="details-section">
+                                <h4 class="details-section-title">
+                                    <svg class="details-section-icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2">
+                                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                                    </svg>
+                                    策略 · 检核
+                                </h4>
+                                <div class="measure-item">
+                                    <div class="measure-header">
+                                        <span class="measure-badge">D1</span>
+                                        <span class="measure-label">关键指标</span>
+                                    </div>
+                                    <ul class="measure-list" id="measureList"></ul>
+                                </div>
+                            </div>
+                            <div class="details-section">
+                                <h4 class="details-section-title">
+                                    <svg class="details-section-icon" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                        <line x1="16" y1="2" x2="16" y2="6" />
+                                        <line x1="8" y1="2" x2="8" y2="6" />
+                                        <line x1="3" y1="10" x2="21" y2="10" />
+                                    </svg>
+                                    行动计划
+                                </h4>
+                                <div class="execution-plan">
+                                    <div class="execution-pic">
+                                        <div class="execution-pic-icon">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                                <circle cx="12" cy="7" r="4" />
+                                            </svg>
+                                        </div>
+                                        <div class="execution-pic-info">
+                                            <span class="execution-pic-label">负责人</span>
+                                            <span class="execution-pic-name" id="picName">—</span>
+                                        </div>
+                                    </div>
+                                    <div class="execution-dates">
+                                        <div class="execution-date-item">
+                                            <span class="execution-date-label">开始日期</span>
+                                            <span class="execution-date-value" id="startDate">—</span>
+                                        </div>
+                                        <div class="execution-date-item execution-date-divider">
+                                            <span class="execution-date-label">完成日期</span>
+                                            <span class="execution-date-value" id="endDate">—</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+</div>
