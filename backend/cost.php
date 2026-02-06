@@ -1803,29 +1803,26 @@ $avatarLetter = strtoupper($username[0]);
             const currentMonth = today.getMonth() + 1;
             const currentDay = today.getDate();
 
-            // 计算本周的开始日期（周一）
-            const thisWeekStart = new Date(today);
-            const dayOfWeek = thisWeekStart.getDay();
-            const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-            thisWeekStart.setDate(thisWeekStart.getDate() - daysToMonday);
-            thisWeekStart.setHours(0, 0, 0, 0);
+            // 计算当月1号
+            const firstDayOfMonth = new Date(currentYear, currentMonth - 1, 1);
+            firstDayOfMonth.setHours(0, 0, 0, 0);
 
-            // 初始化日历选择器默认值为本周（周一到今天）
-            calendarStartDate = new Date(thisWeekStart);
+            // 初始化日历选择器默认值为当月1号到今天
+            calendarStartDate = new Date(firstDayOfMonth);
             calendarEndDate = new Date(today);
 
             // 格式化日期范围
-            const startYear = thisWeekStart.getFullYear();
-            const startMonth = thisWeekStart.getMonth() + 1;
-            const startDay = thisWeekStart.getDate();
+            const startYear = firstDayOfMonth.getFullYear();
+            const startMonth = firstDayOfMonth.getMonth() + 1;
+            const startDay = firstDayOfMonth.getDate();
 
-            // 正确设置dateRange为本周
+            // 正确设置dateRange为当月1号到今天
             dateRange = {
                 startDate: `${startYear}-${String(startMonth).padStart(2, '0')}-${String(startDay).padStart(2, '0')}`,
                 endDate: `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`
             };
     
-            // 设置开始和结束日期初始值为本周
+            // 设置开始和结束日期初始值为当月1号到今天
             startDateValue = {
                 year: startYear,
                 month: startMonth,
