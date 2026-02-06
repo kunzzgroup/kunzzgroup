@@ -2686,8 +2686,8 @@ require_once '../core/session_check.php';
 
         // 页面加载时获取数据
         document.addEventListener('DOMContentLoaded', function() {
-            // 启动会话自动刷新
-            startSessionRefresh();
+            // 启动会话自动刷新 (暂时禁用，因缺失API文件)
+            // startSessionRefresh();
             
             loadCodesAndUsers();
             
@@ -2713,13 +2713,14 @@ require_once '../core/session_check.php';
             // 每5分钟刷新一次会话
             sessionRefreshInterval = setInterval(async () => {
                 try {
-                    const response = await fetch('session_refresh_api.php');
-                    const result = await response.json();
+                    // 文件缺失，暂时注释
+                    // const response = await fetch('../api/session_refresh_api.php');
+                    // const result = await response.json();
                     
-                    if (!result.success && result.code === 'SESSION_EXPIRED') {
-                        clearInterval(sessionRefreshInterval);
-                        showSessionExpiredMessage();
-                    }
+                    // if (!result.success && result.code === 'SESSION_EXPIRED') {
+                    //    clearInterval(sessionRefreshInterval);
+                    //    showSessionExpiredMessage();
+                    // }
                 } catch (error) {
                     console.error('会话刷新失败:', error);
                 }
@@ -2741,7 +2742,7 @@ require_once '../core/session_check.php';
                         <div style="background: #ffebee; border: 1px solid #f44336; border-radius: 8px; padding: 20px; margin: 10px;">
                             <h3 style="color: #C62828; margin: 0 0 10px 0;">🔒 会话已过期</h3>
                             <p style="margin: 0 0 15px 0;">您的登录会话已过期，请重新登录以继续使用。</p>
-                            <button onclick="window.location.href='../frontend/login.php'" 
+                            <button onclick="window.location.href='../frontend/login.html'" 
                                     style="background: #C62828; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
                                 重新登录
                             </button>
@@ -2756,7 +2757,8 @@ require_once '../core/session_check.php';
             const tableBody = document.getElementById('tableBody');
             
             try {
-                const response = await fetch('generatecodeapi.php?action=list');
+                // Fixed relative path
+                const response = await fetch('../api/generatecodeapi.php?action=list');
                 const result = await response.json();
 
                 if (result.success) {
