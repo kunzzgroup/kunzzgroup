@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-include_once '../media_config.php';
+
 
 // 处理语言版本切换
 $language = isset($_GET['lang']) ? $_GET['lang'] : 'zh';
