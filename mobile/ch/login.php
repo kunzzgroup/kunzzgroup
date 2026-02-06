@@ -63,7 +63,7 @@ if ($result->num_rows === 1) {
             setcookie('remember_token', '', time() - 3600, "/");
         }
 
-        header("Location: stocklist.php");
+        header("Location: stocklistj1.php");
         exit();
 
     } else {
