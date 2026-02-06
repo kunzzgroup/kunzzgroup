@@ -2006,9 +2006,9 @@ require_once '../backend/session_check.php';
     <div class="container">
         <div class="header">
             <div>
-                <h1 id="page-title"> 手机出货记录 - J1</h1>
+                <h1 id="page-title"> 手机出货记录 - J2</h1>
             </div>
-            <a class="back-button" href="../backend/stockeditall.php?system=j1">
+            <a class="back-button" href="../backend/stockeditall.php?system=j2">
                 <i class="fas fa-arrow-left"></i>
                 返回上一页
             </a>
@@ -2275,7 +2275,7 @@ require_once '../backend/session_check.php';
                 <div class="export-form-group">
                     <label for="export-invoice-suffix">发票号码后三位 *</label>
                     <input type="text" id="export-invoice-suffix" placeholder="输入三位数字（例如：001）" maxlength="3" pattern="[0-9]{3}" required>
-                    <small style="color: #6b7280; font-size: 12px;">格式示例：J1-2510-001（店面-年月-序号）</small>
+                    <small style="color: #6b7280; font-size: 12px;">格式示例：J2-2510-001（店面-年月-序号）</small>
                 </div>
 
                 
@@ -2304,8 +2304,8 @@ require_once '../backend/session_check.php';
 
     <script>
         // API 配置
-        let API_BASE_URL = 'j1stockeditmobile_api.php';
-        let currentStockType = 'j1';
+        let API_BASE_URL = 'j2stockeditmobile_api.php';
+        let currentStockType = 'j2';
         
         // 应用状态
         let stockData = [];

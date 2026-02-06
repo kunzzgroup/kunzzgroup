@@ -12,7 +12,7 @@ if (!isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>库存列表 - KUNZZ HOLDINGS</title>
+    <title>库存列表 J2 - KUNZZ HOLDINGS</title>
     <link rel="stylesheet" href="css/stocklist.css?v=<?php echo time(); ?>">
 </head>
 <body>
@@ -21,7 +21,7 @@ if (!isset($_SESSION['user_id'])) {
             <a class="logout-button" href="login.html" aria-label="退出登录">
                 <img src="../images/icons/logout.svg" alt="" aria-hidden="true">
             </a>
-            <h1>库存列表</h1>
+            <h1>库存列表 (J2)</h1>
         </header>
 
         <main class="page-content">
@@ -110,10 +110,10 @@ if (!isset($_SESSION['user_id'])) {
         let selectedProductCategory = '';
         let editingRowIds = new Set();
         
-        // API配置
+        // API配置 - J2 数据库
         const API_BASE_URL = '../../stockapi.php';
-        const SYSTEM_TYPE = 'J1';
-        const STOCK_EDIT_API = '../../j1/j1stockeditmobile_api.php';
+        const SYSTEM_TYPE = 'J2';
+        const STOCK_EDIT_API = '../../j2/j2stockeditmobile_api.php';
         
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
@@ -664,4 +664,3 @@ if (!isset($_SESSION['user_id'])) {
     </script>
 </body>
 </html>
-
