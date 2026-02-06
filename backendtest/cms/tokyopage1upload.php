@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 
 // 处理文件上传
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
-    $uploadDir = '../images/images/';
+    $uploadDir = '../../images/images/';
     $configFile = '../media_config.json';
     
     // 确保上传目录存在
@@ -71,7 +71,7 @@ if (file_exists('media_config.json')) {
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tokyo Japanese Cuisine页面管理 - KUNZZ HOLDINGS</title>
@@ -292,8 +292,8 @@ if (file_exists('media_config.json')) {
         </div>
         
         <div class="breadcrumb">
-            <a href="dashboard.php">仪表板</a> > 
-            <a href="media_manager.php">媒体管理</a> > 
+            <a href="../pages/dashboard.php">仪表板</a> > 
+            <a href="../cms/media_manager.php">媒体管理</a> > 
             <span>Tokyo Japanese Cuisine 页面</span>
         </div>
         

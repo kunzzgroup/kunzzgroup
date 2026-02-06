@@ -193,6 +193,6 @@ echo "</ol>";
 echo "</div>";
 
 echo "<hr>";
-echo "<p><a href='schedule_manager.php' style='color: #f99e00; font-weight: bold;'>← 返回排班管理</a></p>";
+echo "<p><a href='../modules/schedule_manager.php' style='color: #f99e00; font-weight: bold;'>← 返回排班管理</a></p>";
 echo "</body></html>";
 ?>

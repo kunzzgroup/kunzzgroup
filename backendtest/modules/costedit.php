@@ -140,7 +140,7 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>餐厅成本管理后台 - Excel模式</title>
@@ -1124,12 +1124,12 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                     </button>
                     <div class="report-dropdown-menu" id="report-type-dropdown">
                         <?php if (in_array('kpi', $reportPermissions, true)): ?>
-                        <a href="kpiedit.php" class="report-dropdown-item">
+                        <a href="../modules/kpiedit.php" class="report-dropdown-item">
                             <i class="fas fa-chart-line"></i> <?php echo $reportLabelMap['kpi']; ?>
                         </a>
                         <?php endif; ?>
                         <?php if (in_array('cost', $reportPermissions, true)): ?>
-                        <a href="costedit.php" class="report-dropdown-item">
+                        <a href="../modules/costedit.php" class="report-dropdown-item">
                             <i class="fas fa-chart-pie"></i> <?php echo $reportLabelMap['cost']; ?>
                         </a>
                         <?php endif; ?>
@@ -1268,7 +1268,7 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
 
     <script>
         // API 配置
-        const API_BASE_URL = 'costapi.php';
+        const API_BASE_URL = '../api/costapi.php';
 
         // ===== 页面版本标识（用于确认是否加载到最新代码，排查缓存/OPcache）=====
         const COSTEDIT_BUILD_ID = '2025-12-18_02';

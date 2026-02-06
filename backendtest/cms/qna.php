@@ -4,13 +4,13 @@ require_once '../core/session_check.php';
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <title>问卷回答 - KUNZZ HOLDINGS</title>
     <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
-    <script src="get_fontkit.php"></script>
+    <script src="../core/get_fontkit.php"></script>
     <style>
         * {
             margin: 0;
@@ -623,7 +623,7 @@ require_once '../core/session_check.php';
         // 加载用户的问卷回答
         async function loadUserResponse() {
             try {
-                const res = await fetch('qnaapi.php', {
+                const res = await fetch('../api/qnaapi.php', {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' }
                 });
@@ -688,7 +688,7 @@ require_once '../core/session_check.php';
                     data[`question${i}`] = formData.get(`question${i}`) || '';
                 }
 
-                const res = await fetch('qnaapi.php', {
+                const res = await fetch('../api/qnaapi.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)

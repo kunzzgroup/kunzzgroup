@@ -36,7 +36,7 @@ if (isset($_SESSION['user_id'])) {
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>库存产品管理后台 - J2</title>
@@ -1131,7 +1131,7 @@ if (isset($_SESSION['user_id'])) {
         // 检查用户权限的函数
         async function checkUserPermissions() {
             try {
-                const response = await fetch('check_permissions.php');
+                const response = await fetch('../core/check_permissions.php');
                 const result = await response.json();
                 return result.canApprove || false;
             } catch (error) {
@@ -1148,7 +1148,7 @@ if (isset($_SESSION['user_id'])) {
             userCanApprove = await checkUserPermissions();
         }
 
-        const API_BASE_URL = 'stockapi.php';  // 如果在同一目录
+        const API_BASE_URL = '../api/stockapi.php';  // 如果在同一目录
         const SYSTEM_TYPE = 'J2';  // 当前系统类型
         
         // 应用状态
@@ -1217,13 +1217,13 @@ if (isset($_SESSION['user_id'])) {
         function switchView(viewType) {
             if (viewType === 'list') {
                 // 跳转到总库存页面
-                window.location.href = 'stocklistall.php';
+                window.location.href = '../modules/stocklistall.php';
             } else if (viewType === 'records') {
                 // 跳转到进出货页面
-                window.location.href = 'stockeditall.php';
+                window.location.href = '../modules/stockeditall.php';
             } else if (viewType === 'remark') {
                 // 跳转到货品备注页面
-                window.location.href = 'stockremark.php';
+                window.location.href = '../modules/stockremark.php';
             } else {
                 // 保持在当前页面（货品种类）
                 hideViewDropdown();
@@ -1247,11 +1247,11 @@ if (isset($_SESSION['user_id'])) {
         // 切换系统
         function switchSystem(system) {
             const systemPages = {
-                'overview': 'stockproductname.php',
-                'central': 'centerstockproductname.php',
-                'j1': 'j1stockproductname.php',
-                'j2': 'j2stockproductname.php',
-                'j3': 'j3stockproductname.php'
+                'overview': '../modules/stockproductname.php',
+                'central': '../modules/centerstockproductname.php',
+                'j1': '../modules/j1stockproductname.php',
+                'j2': '../modules/j2stockproductname.php',
+                'j3': '../modules/j3stockproductname.php'
             };
             
             if (systemPages[system]) {

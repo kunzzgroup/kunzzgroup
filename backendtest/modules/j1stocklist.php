@@ -5,7 +5,7 @@ require_once '../core/session_check.php';
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>J1库存汇总 - 库存管理系统</title>
@@ -667,7 +667,7 @@ require_once '../core/session_check.php';
 
     <script>
         // API 配置
-        const API_BASE_URL = 'j1stocklistapi.php';
+        const API_BASE_URL = '../api/j1stocklistapi.php';
         
         // 应用状态
         let stockData = [];

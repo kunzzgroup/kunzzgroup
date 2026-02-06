@@ -5,7 +5,7 @@ require_once '../core/session_check.php';
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -1195,7 +1195,7 @@ require_once '../core/session_check.php';
                     }
                 });
 
-                const res = await fetch('evaluation_form_api.php', {
+                const res = await fetch('../api/evaluation_form_api.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'save_standards', items })
@@ -1491,7 +1491,7 @@ require_once '../core/session_check.php';
             });
 
             try {
-                const response = await fetch('evaluation_form_api.php', {
+                const response = await fetch('../api/evaluation_form_api.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

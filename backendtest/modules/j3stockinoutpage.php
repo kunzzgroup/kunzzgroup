@@ -5,7 +5,7 @@ require_once '../core/session_check.php';
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>库存管理系统</title>
@@ -2418,7 +2418,7 @@ require_once '../core/session_check.php';
 
     <script>
         // API 配置
-        let API_BASE_URL = 'j3stockeditpageapi.php';
+        let API_BASE_URL = '../api/j3stockeditpageapi.php';
         let currentStockType = 'j3';
         
         // 应用状态
@@ -3221,7 +3221,7 @@ require_once '../core/session_check.php';
 
         function switchStock(stockType, event = null) {
             currentStockType = 'j3';
-            API_BASE_URL = 'j3stockeditpageapi.php';
+            API_BASE_URL = '../api/j3stockeditpageapi.php';
             document.getElementById('page-title').textContent = '进出货 - J3';
             document.getElementById('current-stock-type').textContent = 'J3';
 
@@ -3285,16 +3285,16 @@ require_once '../core/session_check.php';
         function switchView(viewType) {
             if (viewType === 'list') {
                 // 直接跳转到库存清单页面，不带参数
-                window.location.href = 'j3stocklist.php';
+                window.location.href = '../modules/j3stocklist.php';
             } else if (viewType === 'remark') {
                 // 跳转到备注页面
-                window.location.href = 'stockremark.php';
+                window.location.href = '../modules/stockremark.php';
             } else if (viewType === 'product') {
                 // 跳转到货品种类页面
-                window.location.href = 'stockproductname.php';
+                window.location.href = '../modules/stockproductname.php';
             } else if (viewType === 'sot') {
                 // 跳转到货品异常页面
-                window.location.href = 'stocksot.php';
+                window.location.href = '../modules/stocksot.php';
             } else {
                 // 保持在当前页面（库存记录）
                 hideViewDropdown();
@@ -3318,7 +3318,7 @@ require_once '../core/session_check.php';
 
         // 返回仪表盘
         function goBack() {
-            window.location.href = 'dashboard.php';
+            window.location.href = '../pages/dashboard.php';
         }
 
         // 点击其他地方关闭下拉菜单

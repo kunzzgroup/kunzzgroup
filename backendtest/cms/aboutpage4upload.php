@@ -38,7 +38,7 @@ if (!$configFile) {
     error_log("信息：找到配置文件: $configFile");
 }
 
-$uploadDir = '../images/images/';
+$uploadDir = '../../images/images/';
 
 // 安全写入：规范化为扁平结构 + 文件锁 + 原子重命名
 function normalizeToFlatArray($raw) {
@@ -451,7 +451,7 @@ if (file_exists($configFile) && is_readable($configFile)) {
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $isEnglish ? 'Timeline Management' : '发展历史管理'; ?> - KUNZZ HOLDINGS</title>
@@ -899,8 +899,8 @@ if (file_exists($configFile) && is_readable($configFile)) {
         </div>
         
         <div class="breadcrumb">
-            <a href="dashboard.php"><?php echo $isEnglish ? 'Dashboard' : '仪表板'; ?></a> > 
-            <a href="media_manager.php"><?php echo $isEnglish ? 'Media Management' : '媒体管理'; ?></a> > 
+            <a href="../pages/dashboard.php"><?php echo $isEnglish ? 'Dashboard' : '仪表板'; ?></a> > 
+            <a href="../cms/media_manager.php"><?php echo $isEnglish ? 'Media Management' : '媒体管理'; ?></a> > 
             <span><?php echo $isEnglish ? 'Timeline Management' : '发展历史管理'; ?></span>
         </div>
         

@@ -5,7 +5,7 @@ require_once '../core/session_check.php';
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>库存管理系统</title>
@@ -1853,11 +1853,11 @@ require_once '../core/session_check.php';
 
         // API配置
         const API_CONFIG = {
-            central: 'stocklistapi.php',
-            j1: 'j1stocklistapi.php',
-            j2: 'j2stocklistapi.php',
-            j3: 'j3stocklistapi.php',
-            remark: 'stockremarkapi.php'
+            central: '../api/stocklistapi.php',
+            j1: '../api/j1stocklistapi.php',
+            j2: '../api/j2stocklistapi.php',
+            j3: '../api/j3stocklistapi.php',
+            remark: '../api/stockremarkapi.php'
         };
 
         const SYSTEM_NAMES = {
@@ -1951,7 +1951,7 @@ require_once '../core/session_check.php';
             if (urlSystem && ['central', 'j1', 'j2', 'j3'].includes(urlSystem)) {
                 // 再次检查权限，确保URL中的系统是被允许的
                 try {
-                    const res = await fetch('generatecodeapi.php', {
+                    const res = await fetch('../api/generatecodeapi.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ action: 'get_page_permissions' })
@@ -2042,7 +2042,7 @@ require_once '../core/session_check.php';
                         return;
                     }
                 } else {
-                    const res = await fetch('generatecodeapi.php', {
+                    const res = await fetch('../api/generatecodeapi.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ action: 'get_page_permissions' })
@@ -2109,7 +2109,7 @@ require_once '../core/session_check.php';
 
         async function applyPagePermissions() {
             try {
-                const res = await fetch('generatecodeapi.php', {
+                const res = await fetch('../api/generatecodeapi.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'get_page_permissions' })
@@ -2182,10 +2182,10 @@ require_once '../core/session_check.php';
                     const viewToOpen = viewOrder.find(view => allowedViews.has(view));
                     if (viewToOpen) {
                         const viewRedirectMap = {
-                            records: 'stockeditall.php',
-                            remark: 'stockremark.php',
-                            product: 'stockproductname.php',
-                            sot: 'stocksot.php'
+                            records: '../modules/stockeditall.php',
+                            remark: '../modules/stockremark.php',
+                            product: '../modules/stockproductname.php',
+                            sot: '../modules/stocksot.php'
                         };
                         const targetUrl = viewRedirectMap[viewToOpen];
                         if (targetUrl) {
@@ -2205,25 +2205,25 @@ require_once '../core/session_check.php';
             
             if (view === 'records') {
                 // 跳转到库存记录页面
-                window.location.href = 'stockeditall.php';
+                window.location.href = '../modules/stockeditall.php';
                 return;
             }
             
             if (view === 'remark') {
                 // 跳转到Remark页面
-                window.location.href = 'stockremark.php';
+                window.location.href = '../modules/stockremark.php';
                 return;
             }
             
             if (view === 'product') {
                 // 跳转到货品种类页面
-                window.location.href = 'stockproductname.php';
+                window.location.href = '../modules/stockproductname.php';
                 return;
             }
             
             if (view === 'sot') {
                 // 跳转到货品异常页面
-                window.location.href = 'stocksot.php';
+                window.location.href = '../modules/stocksot.php';
                 return;
             }
             
@@ -2244,7 +2244,7 @@ require_once '../core/session_check.php';
 
         // 返回仪表盘
         function goBack() {
-            window.location.href = 'dashboard.php';
+            window.location.href = '../pages/dashboard.php';
         }
 
         // 会话自动刷新机制
@@ -3474,7 +3474,7 @@ require_once '../core/session_check.php';
 
         // 跳转到最低库存设置页面
         function goToMinimumSettings() {
-            window.open('stockminimum.php', '_blank');
+            window.open('../modules/stockminimum.php', '_blank');
         }
 
         // 点击弹窗外部关闭

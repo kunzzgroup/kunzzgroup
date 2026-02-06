@@ -5,7 +5,7 @@ require_once '../core/session_check.php';
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>库存价格分析 - 库存管理系统</title>
@@ -858,7 +858,7 @@ require_once '../core/session_check.php';
 
     <script>
         // API 配置
-        let API_BASE_URL = 'stockremarkapi.php';
+        let API_BASE_URL = '../api/stockremarkapi.php';
         const STOCK_VIEW_OPTIONS = [
             { value: 'list', label: '总库存' },
             { value: 'records', label: '进出货' },
@@ -919,7 +919,7 @@ require_once '../core/session_check.php';
 
         async function applyPagePermissions() {
             try {
-                const res = await fetch('generatecodeapi.php', {
+                const res = await fetch('../api/generatecodeapi.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'get_page_permissions' })
@@ -934,15 +934,15 @@ require_once '../core/session_check.php';
                 if (allowedViews.size > 0 && !allowedViews.has('remark')) {
                     const viewOrder = ['remark', 'records', 'product', 'sot', 'list'];
                     const viewRedirectMap = {
-                        list: 'stocklistall.php',
-                        records: 'stockeditall.php',
-                        remark: 'stockremark.php',
-                        product: 'stockproductname.php',
-                        sot: 'stocksot.php'
+                        list: '../modules/stocklistall.php',
+                        records: '../modules/stockeditall.php',
+                        remark: '../modules/stockremark.php',
+                        product: '../modules/stockproductname.php',
+                        sot: '../modules/stocksot.php'
                     };
                     const viewToOpen = viewOrder.find(view => allowedViews.has(view));
                     if (viewToOpen) {
-                        const base = viewRedirectMap[viewToOpen] || 'stocklistall.php';
+                        const base = viewRedirectMap[viewToOpen] || '../modules/stocklistall.php';
                         window.location.href = base;
                     }
                 }
@@ -981,15 +981,15 @@ require_once '../core/session_check.php';
 
         function switchView(viewType) {
             if (viewType === 'list') {
-                window.location.href = 'stocklistall.php';
+                window.location.href = '../modules/stocklistall.php';
             } else if (viewType === 'records') {
-                window.location.href = 'stockeditall.php';
+                window.location.href = '../modules/stockeditall.php';
             } else if (viewType === 'product') {
                 // 跳转到货品种类页面
-                window.location.href = 'stockproductname.php';
+                window.location.href = '../modules/stockproductname.php';
             } else if (viewType === 'sot') {
                 // 跳转到货品异常页面
-                window.location.href = 'stocksot.php';
+                window.location.href = '../modules/stocksot.php';
             } else {
                 // 保持在当前页面（库存价格分析）
                 hideViewDropdown();
@@ -1006,7 +1006,7 @@ require_once '../core/session_check.php';
 
         // 返回仪表盘
         function goBack() {
-            window.location.href = 'dashboard.php';
+            window.location.href = '../pages/dashboard.php';
         }
 
         // API 调用函数

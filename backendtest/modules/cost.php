@@ -57,7 +57,7 @@ $avatarLetter = strtoupper($username[0]);
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>餐厅成本管理系统</title>    
@@ -1468,10 +1468,10 @@ $avatarLetter = strtoupper($username[0]);
                                 <i class="fas fa-chevron-down"></i>
                             </button>
                             <div class="report-dropdown-menu" id="report-type-dropdown">
-                                <a href="kpi.php" class="report-dropdown-item">
+                                <a href="../modules/kpi.php" class="report-dropdown-item">
                                     <i class="fas fa-chart-line"></i> KPI 报表
                                 </a>
-                                <a href="cost.php" class="report-dropdown-item">
+                                <a href="../modules/cost.php" class="report-dropdown-item">
                                     <i class="fas fa-chart-pie"></i> 成本报表
                                 </a>
                             </div>
@@ -1727,7 +1727,7 @@ $avatarLetter = strtoupper($username[0]);
 
     <script>
         // API 配置
-        const API_BASE_URL = 'costapi.php';
+        const API_BASE_URL = '../api/costapi.php';
         
         // 应用状态
         let actualData = [];

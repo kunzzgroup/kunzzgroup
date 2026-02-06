@@ -52,7 +52,7 @@ if (is_dir($upload_dir)) {
 }
 
 // 测试API文件
-$api_files = ['dishware_api.php', 'dishware_upload.php', 'dishware_stock.php', 'dishware_index.php'];
+$api_files = ['../api/dishware_api.php', '../cms/dishware_upload.php', '../modules/dishware_stock.php', '../modules/dishware_index.php'];
 foreach ($api_files as $file) {
     if (file_exists($file)) {
         echo "<p style='color: green;'>✅ 文件 $file 存在</p>";
@@ -89,9 +89,9 @@ try {
 
 echo "<hr>";
 echo "<h2>快速链接</h2>";
-echo "<p><a href='dishware_index.php' style='color: blue;'>🏠 系统首页</a></p>";
-echo "<p><a href='dishware_upload.php' style='color: blue;'>📤 上传碗碟信息</a></p>";
-echo "<p><a href='dishware_stock.php' style='color: blue;'>📊 库存管理</a></p>";
+echo "<p><a href='../modules/dishware_index.php' style='color: blue;'>🏠 系统首页</a></p>";
+echo "<p><a href='../cms/dishware_upload.php' style='color: blue;'>📤 上传碗碟信息</a></p>";
+echo "<p><a href='../modules/dishware_stock.php' style='color: blue;'>📊 库存管理</a></p>";
 
 echo "<hr>";
 echo "<p><small>测试完成时间: " . date('Y-m-d H:i:s') . "</small></p>";

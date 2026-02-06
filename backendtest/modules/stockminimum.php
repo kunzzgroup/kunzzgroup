@@ -4,7 +4,7 @@ session_start();
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>最低库存设置 - 库存管理系统</title>
@@ -703,7 +703,7 @@ session_start();
             if (!product) return;
 
             try {
-                const response = await fetch('stockminimumapi.php', {
+                const response = await fetch('../api/stockminimumapi.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -748,7 +748,7 @@ session_start();
             });
 
             try {
-                const response = await fetch('stockminimumapi.php', {
+                const response = await fetch('../api/stockminimumapi.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -844,7 +844,7 @@ session_start();
                 }
             }
             
-            window.location.href = 'stocklistall.php';
+            window.location.href = '../modules/stocklistall.php';
         }
 
         // 完全替换现有的 showAlert 函数

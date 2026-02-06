@@ -5,7 +5,7 @@ require_once '../core/session_check.php';
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -2846,7 +2846,7 @@ require_once '../core/session_check.php';
 
         // 返回仪表盘
         function goBack() {
-            window.location.href = 'dashboard.php';
+            window.location.href = '../pages/dashboard.php';
         }
 
         // 显示数据
@@ -3249,7 +3249,7 @@ require_once '../core/session_check.php';
             submitBtn.disabled = true;
             
             try {
-                const response = await fetch('generatecodeapi.php', {
+                const response = await fetch('../api/generatecodeapi.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -3378,7 +3378,7 @@ require_once '../core/session_check.php';
         // 删除行数据
         async function deleteRow(id) {
             try {
-                const response = await fetch('generatecodeapi.php', {
+                const response = await fetch('../api/generatecodeapi.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -3498,7 +3498,7 @@ require_once '../core/session_check.php';
             submitBtn.disabled = true;
             
             try {
-                const response = await fetch('generatecodeapi.php', {
+                const response = await fetch('../api/generatecodeapi.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -3554,7 +3554,7 @@ require_once '../core/session_check.php';
             cancelBtn.disabled = true;
             
             try {
-                const response = await fetch('generatecodeapi.php', {
+                const response = await fetch('../api/generatecodeapi.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -4331,7 +4331,7 @@ require_once '../core/session_check.php';
                 // 先设置默认全选（所有checkbox都是active且全选）
                 setDefaultAllPermissions();
                 
-                const res = await fetch('generatecodeapi.php', {
+                const res = await fetch('../api/generatecodeapi.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'get_permissions', user_id: userId })
@@ -4462,7 +4462,7 @@ require_once '../core/session_check.php';
             btn.disabled = true;
             
             try {
-                const res = await fetch('generatecodeapi.php', {
+                const res = await fetch('../api/generatecodeapi.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

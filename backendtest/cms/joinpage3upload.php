@@ -151,7 +151,7 @@ if (isset($_GET['success'])) {
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $isEnglish ? 'Job Positions Management' : '招聘职位管理'; ?> - KUNZZ HOLDINGS</title>
@@ -746,8 +746,8 @@ if (isset($_GET['success'])) {
         </div>
         
         <div class="breadcrumb">
-            <a href="dashboard.php"><?php echo $isEnglish ? 'Dashboard' : '仪表板'; ?></a> > 
-            <a href="media_manager.php"><?php echo $isEnglish ? 'Media Management' : '媒体管理'; ?></a> > 
+            <a href="../pages/dashboard.php"><?php echo $isEnglish ? 'Dashboard' : '仪表板'; ?></a> > 
+            <a href="../cms/media_manager.php"><?php echo $isEnglish ? 'Media Management' : '媒体管理'; ?></a> > 
             <span><?php echo $isEnglish ? 'Job Positions Management' : '招聘职位管理'; ?></span>
         </div>
         

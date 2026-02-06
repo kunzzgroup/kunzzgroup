@@ -346,7 +346,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>企业蓝图管理 - KUNZZ HOLDINGS</title>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <style>
         * {
             margin: 0;
@@ -1318,7 +1318,7 @@ Implementation Timeline Adherence (%)"><?php echo htmlspecialchars(implode("\n",
                 <!-- 固定操作按钮 -->
                 <div class="fixed-actions">
                     <button type="submit" class="btn">保存更改</button>
-                    <a href="corporate_blueprint.php" class="btn btn-secondary">返回查看</a>
+                    <a href="../modules/corporate_blueprint.php" class="btn btn-secondary">返回查看</a>
                 </div>
             </form>
         </div>

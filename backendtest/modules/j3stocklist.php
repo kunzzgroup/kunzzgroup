@@ -5,7 +5,7 @@ require_once '../core/session_check.php';
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>库存管理系统</title>
@@ -1408,7 +1408,7 @@ require_once '../core/session_check.php';
         let isLoading = { j3: false };
 
         // API配置（仅 J3）
-        const API_CONFIG = { j3: 'j3stocklistapi.php' };
+        const API_CONFIG = { j3: '../api/j3stocklistapi.php' };
 
         // 初始化应用
         function initApp() {
@@ -1443,11 +1443,11 @@ require_once '../core/session_check.php';
         function switchView(view, e) {
             if (e) e.stopPropagation();
             if (view === 'records') {
-                window.location.href = 'j3stockinoutpage.php';
+                window.location.href = '../modules/j3stockinoutpage.php';
                 return;
             }
             if (view === 'product') {
-                window.location.href = 'stockproductname.php';
+                window.location.href = '../modules/stockproductname.php';
                 return;
             }
             // list = 当前页
@@ -1467,7 +1467,7 @@ require_once '../core/session_check.php';
 
         // 返回仪表盘
         function goBack() {
-            window.location.href = 'dashboard.php';
+            window.location.href = '../pages/dashboard.php';
         }
 
         // 会话自动刷新机制

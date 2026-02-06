@@ -70,7 +70,7 @@ $canSeeHR = true;
 $canSeeResource = true;
 $canSeeVisual = true;
 $canSeeBrand = true;
-$kpiUploadDefaultPage = 'kpiedit.php'; // 默认跳转到kpiedit.php
+$kpiUploadDefaultPage = '../modules/kpiedit.php'; // 默认跳转到kpiedit.php
 $submenuVisibility = [
     'analytics' => [
         'kpi_report' => true,
@@ -147,7 +147,7 @@ if (isset($_SESSION['user_id'])) {
                     $uploadTypes = array_values(array_intersect($pagePerms['kpi_upload']['type'] ?? [], ['kpi', 'cost']));
                     // 如果只有cost权限，默认跳转到costedit.php
                     if (count($uploadTypes) === 1 && $uploadTypes[0] === 'cost') {
-                        $kpiUploadDefaultPage = 'costedit.php';
+                        $kpiUploadDefaultPage = '../modules/costedit.php';
                     }
                     // 如果只有kpi权限，或者两者都有，默认跳转到kpiedit.php（已经是默认值）
                 }
@@ -1018,7 +1018,7 @@ body.sidebar-transition {
         <?php if ($canSeeBrand): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="brand-items">
-                <img src="../images/images/网页照片上传.svg" alt="" class="section-icon">
+                <img src="../../images/images/网页照片上传.svg" alt="" class="section-icon">
                 集团架构
                 <span class="section-arrow">⮞</span>
             </div>
@@ -1034,7 +1034,7 @@ body.sidebar-transition {
                             <div class="submenu-title">KUNZZ HOLDINGS SDN BHD</div>
                         </div>
                         <div class="submenu-content">
-                            <a href="corporate_blueprint.php" class="submenu-item">企业蓝图</a>
+                            <a href="../modules/corporate_blueprint.php" class="submenu-item">企业蓝图</a>
                         </div>
                     </div>
                 </div>
@@ -1117,14 +1117,14 @@ body.sidebar-transition {
         <?php if ($canSeeAnalytics): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="analytics-items">
-                <img src="../images/images/运营分析与报表.svg" alt="" class="section-icon">
+                <img src="../../images/images/运营分析与报表.svg" alt="" class="section-icon">
                 营收数据
                 <span class="section-arrow">⮞</span>
             </div>
             <div class="dropdown-menu-items" id="analytics-items">
                 <?php if (!empty($submenuVisibility['analytics']['kpi_report'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="kpi.php" class="informationmenu-item">
+                    <a href="../modules/kpi.php" class="informationmenu-item">
                         KPI报表
                     </a>
                 </div>
@@ -1143,23 +1143,23 @@ body.sidebar-transition {
         <?php if ($canSeeHR): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="hr-items">
-                <img src="../images/images/人事与资源管理.svg" alt="" class="section-icon">
+                <img src="../../images/images/人事与资源管理.svg" alt="" class="section-icon">
                 人事管理
             </div>
             <div class="dropdown-menu-items" id="hr-items">               
                 <?php if (!empty($submenuVisibility['hr']['staff_management'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="generatecode.php" class="informationmenu-item">
+                    <a href="../migration/generatecode.php" class="informationmenu-item">
                         职员管理
                     </a>
                 </div>
                 <div class="menu-item-wrapper">
-                    <a href="qna.php" class="informationmenu-item">
+                    <a href="../cms/qna.php" class="informationmenu-item">
                         问卷回答
                     </a>
                 </div>
                 <div class="menu-item-wrapper">
-                    <a href="evaluation_form.php" class="informationmenu-item">
+                    <a href="../modules/evaluation_form.php" class="informationmenu-item">
                         考核表单
                     </a>
                 </div>
@@ -1171,28 +1171,28 @@ body.sidebar-transition {
         <?php if ($canSeeResource): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="resource-items">
-                <img src="../images/images/资源库管理.svg" alt="" class="section-icon">
+                <img src="../../images/images/资源库管理.svg" alt="" class="section-icon">
                 资源总库
                 <span class="section-arrow">⮞</span>
             </div>
             <div class="dropdown-menu-items" id="resource-items">               
                 <?php if (!empty($submenuVisibility['resource']['stock_inventory'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="stocklistall.php" class="informationmenu-item" id="stock-link" onclick="redirectToAllowedStockPage(event)">
+                    <a href="../modules/stocklistall.php" class="informationmenu-item" id="stock-link" onclick="redirectToAllowedStockPage(event)">
                         库存
                     </a>
                 </div>
                 <?php endif; ?>
                 <?php if (!empty($submenuVisibility['resource']['dishware'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="dishware_stock.php" class="informationmenu-item">
+                    <a href="../modules/dishware_stock.php" class="informationmenu-item">
                         碗碟
                     </a>
                 </div>
                 <?php endif; ?>
                 <?php if (!empty($submenuVisibility['resource']['price_comparison'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="price.php" class="informationmenu-item">
+                    <a href="../modules/price.php" class="informationmenu-item">
                         价格对比
                     </a>
                 </div>
@@ -1204,13 +1204,13 @@ body.sidebar-transition {
         <?php if ($canSeeVisual): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="photoupload-items">
-                <img src="../images/images/网页照片上传.svg" alt="" class="section-icon">
+                <img src="../../images/images/网页照片上传.svg" alt="" class="section-icon">
                 视觉管理
                 <span class="section-arrow">⮞</span>
             </div>
             <div class="dropdown-menu-items" id="photoupload-items">
                 <div class="menu-item-wrapper">
-                    <a href="bgmusicupload.php" class="informationmenu-item">
+                    <a href="../cms/bgmusicupload.php" class="informationmenu-item">
                         背景音乐
                     </a>
                 </div>
@@ -1224,7 +1224,7 @@ body.sidebar-transition {
                             <div class="submenu-title">首页</div>
                         </div>
                         <div class="submenu-content">
-                            <a href="homepage1upload.php" class="submenu-item">第一页</a>
+                            <a href="../cms/homepage1upload.php" class="submenu-item">第一页</a>
                         </div>
                     </div>
                 </div>
@@ -1238,8 +1238,8 @@ body.sidebar-transition {
                             <div class="submenu-title">关于我们</div>
                         </div>
                         <div class="submenu-content">
-                            <a href="aboutpage1upload.php" class="submenu-item">第一页</a>
-                            <a href="aboutpage4upload.php" class="submenu-item">第四页</a>
+                            <a href="../cms/aboutpage1upload.php" class="submenu-item">第一页</a>
+                            <a href="../cms/aboutpage4upload.php" class="submenu-item">第四页</a>
                         </div>
                     </div>
                 </div>
@@ -1253,8 +1253,8 @@ body.sidebar-transition {
                             <div class="submenu-title">旗下品牌</div>
                         </div>
                         <div class="submenu-content">
-                            <a href="tokyopage1upload.php" class="submenu-item">第一页</a>
-                            <a href="tokyopage5upload.php" class="submenu-item">第五页</a>
+                            <a href="../cms/tokyopage1upload.php" class="submenu-item">第一页</a>
+                            <a href="../cms/tokyopage5upload.php" class="submenu-item">第五页</a>
                         </div>
                     </div>
                 </div>
@@ -1268,14 +1268,14 @@ body.sidebar-transition {
                             <div class="submenu-title">加入我们</div>
                         </div>
                         <div class="submenu-content">
-                            <a href="joinpage1upload.php" class="submenu-item">第一页</a>
-                            <a href="joinpage2upload.php" class="submenu-item">第二页</a>
-                            <a href="joinpage3upload.php" class="submenu-item">第三页</a>
+                            <a href="../cms/joinpage1upload.php" class="submenu-item">第一页</a>
+                            <a href="../cms/joinpage2upload.php" class="submenu-item">第二页</a>
+                            <a href="../cms/joinpage3upload.php" class="submenu-item">第三页</a>
                         </div>
                     </div>
                 </div>
                 <div class="menu-item-wrapper">
-                    <a href="corporate_blueprint_edit.php" class="informationmenu-item">
+                    <a href="../modules/corporate_blueprint_edit.php" class="informationmenu-item">
                         企业蓝图管理
                     </a>
                 </div>
@@ -1284,7 +1284,7 @@ body.sidebar-transition {
         <?php endif; ?>
 
         <div class="informationmenu-footer">
-            <button class="logout-btn" onclick="location.href='logout.php'">
+            <button class="logout-btn" onclick="location.href='../core/logout.php'">
                 登出
             </button>
         </div>
@@ -1526,7 +1526,7 @@ body.sidebar-transition {
     async function redirectToAllowedStockPage(event) {
         event.preventDefault();
         try {
-            const res = await fetch('generatecodeapi.php', {
+            const res = await fetch('../api/generatecodeapi.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'get_page_permissions' })
@@ -1536,11 +1536,11 @@ body.sidebar-transition {
             let targetView = 'list';
             const viewOrder = ['list', 'records', 'remark', 'product', 'sot'];
             const viewRedirectMap = {
-                list: 'stocklistall.php',
-                records: 'stockeditall.php',
-                remark: 'stockremark.php',
-                product: 'stockproductname.php',
-                sot: 'stocksot.php'
+                list: '../modules/stocklistall.php',
+                records: '../modules/stockeditall.php',
+                remark: '../modules/stockremark.php',
+                product: '../modules/stockproductname.php',
+                sot: '../modules/stocksot.php'
             };
             
             if (data.success && data.page_permissions && data.page_permissions.stock_inventory) {

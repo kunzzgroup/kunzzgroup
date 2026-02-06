@@ -45,7 +45,7 @@ if (isset($_SESSION['user_id'])) {
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>库存货品管理后台 - Excel模式</title>
@@ -1225,7 +1225,7 @@ if (isset($_SESSION['user_id'])) {
         // 检查用户权限的函数
         async function checkUserPermissions() {
             try {
-                const response = await fetch('check_permissions.php');
+                const response = await fetch('../core/check_permissions.php');
                 const result = await response.json();
                 return result.canApprove || false;
             } catch (error) {
@@ -1242,7 +1242,7 @@ if (isset($_SESSION['user_id'])) {
             userCanApprove = await checkUserPermissions();
         }
 
-        const API_BASE_URL = 'stockapi.php';  // 如果在同一目录
+        const API_BASE_URL = '../api/stockapi.php';  // 如果在同一目录
         const CURRENT_USER_APPLICANT = <?php echo json_encode($currentApplicant, JSON_UNESCAPED_UNICODE); ?>;
         
         // 应用状态
@@ -1366,7 +1366,7 @@ if (isset($_SESSION['user_id'])) {
         // 应用页面权限，隐藏不允许的下拉选项，并自动切换到允许的系统
         async function applyPagePermissions() {
             try {
-                const res = await fetch('generatecodeapi.php', {
+                const res = await fetch('../api/generatecodeapi.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'get_page_permissions' })
@@ -1407,15 +1407,15 @@ if (isset($_SESSION['user_id'])) {
                 if (allowedViews.size > 0 && !allowedViews.has('product')) {
                     const viewOrder = ['product', 'records', 'remark', 'sot', 'list'];
                     const viewRedirectMap = {
-                        list: 'stocklistall.php',
-                        records: 'stockeditall.php',
-                        remark: 'stockremark.php',
-                        product: 'stockproductname.php',
-                        sot: 'stocksot.php'
+                        list: '../modules/stocklistall.php',
+                        records: '../modules/stockeditall.php',
+                        remark: '../modules/stockremark.php',
+                        product: '../modules/stockproductname.php',
+                        sot: '../modules/stocksot.php'
                     };
                     const viewToOpen = viewOrder.find(view => allowedViews.has(view));
                     if (viewToOpen) {
-                        const base = viewRedirectMap[viewToOpen] || 'stocklistall.php';
+                        const base = viewRedirectMap[viewToOpen] || '../modules/stocklistall.php';
                         const param = currentSystem && currentSystem !== 'overview' ? `?system=${currentSystem}` : '';
                         window.location.href = `${base}${param}`;
                         return true;
@@ -1451,16 +1451,16 @@ if (isset($_SESSION['user_id'])) {
         function switchView(viewType) {
             if (viewType === 'list') {
                 // 跳转到总库存页面
-                window.location.href = 'stocklistall.php';
+                window.location.href = '../modules/stocklistall.php';
             } else if (viewType === 'records') {
                 // 跳转到进出货页面
-                window.location.href = 'stockeditall.php';
+                window.location.href = '../modules/stockeditall.php';
             } else if (viewType === 'remark') {
                 // 跳转到货品备注页面
-                window.location.href = 'stockremark.php';
+                window.location.href = '../modules/stockremark.php';
             } else if (viewType === 'sot') {
                 // 跳转到货品异常页面
-                window.location.href = 'stocksot.php';
+                window.location.href = '../modules/stocksot.php';
             } else {
                 // 保持在当前页面（货品种类）
                 hideViewDropdown();

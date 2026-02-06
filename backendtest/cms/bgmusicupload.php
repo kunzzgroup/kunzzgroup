@@ -141,7 +141,7 @@ function formatFileSize($bytes) {
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>背景音乐管理 - KUNZZ HOLDINGS</title>
@@ -442,8 +442,8 @@ function formatFileSize($bytes) {
         </div>
         
         <div class="breadcrumb">
-            <a href="dashboard.php">仪表板</a> > 
-            <a href="media_manager.php">媒体管理</a> > 
+            <a href="../pages/dashboard.php">仪表板</a> > 
+            <a href="../cms/media_manager.php">媒体管理</a> > 
             <span>背景音乐</span>
         </div>
         

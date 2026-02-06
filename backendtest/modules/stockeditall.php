@@ -5,7 +5,7 @@ require_once '../core/session_check.php';
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>库存管理系统</title>
@@ -2503,7 +2503,7 @@ require_once '../core/session_check.php';
         let cachedStockAllowedSystems = new Set();
         let cachedStockAllowedViews = new Set();
 
-        let API_BASE_URL = 'stockeditapi.php';
+        let API_BASE_URL = '../api/stockeditapi.php';
         let currentStockType = 'central';
         const urlParams = new URLSearchParams(window.location.search);
         const requestedStockType = urlParams.get('system');
@@ -2512,16 +2512,16 @@ require_once '../core/session_check.php';
             currentStockType = requestedStockType;
             switch (currentStockType) {
                 case 'central':
-                    API_BASE_URL = 'stockeditapi.php';
+                    API_BASE_URL = '../api/stockeditapi.php';
                     break;
                 case 'j1':
-                    API_BASE_URL = 'j1stockeditpageapi.php';
+                    API_BASE_URL = '../api/j1stockeditpageapi.php';
                     break;
                 case 'j2':
-                    API_BASE_URL = 'j2stockeditpageapi.php';
+                    API_BASE_URL = '../api/j2stockeditpageapi.php';
                     break;
                 case 'j3':
-                    API_BASE_URL = 'j3stockeditpageapi.php';
+                    API_BASE_URL = '../api/j3stockeditpageapi.php';
                     break;
             }
         }
@@ -3442,22 +3442,22 @@ require_once '../core/session_check.php';
             // 更新API地址
             switch(stockType) {
                 case 'central':
-                    API_BASE_URL = 'stockeditapi.php';
+                    API_BASE_URL = '../api/stockeditapi.php';
                     document.getElementById('page-title').textContent = '进出货 - 中央';
                     document.getElementById('current-stock-type').textContent = '中央';
                     break;
                 case 'j1':
-                    API_BASE_URL = 'j1stockeditpageapi.php';
+                    API_BASE_URL = '../api/j1stockeditpageapi.php';
                     document.getElementById('page-title').textContent = '进出货 - J1';
                     document.getElementById('current-stock-type').textContent = 'J1';
                     break;
                 case 'j2':
-                    API_BASE_URL = 'j2stockeditpageapi.php';
+                    API_BASE_URL = '../api/j2stockeditpageapi.php';
                     document.getElementById('page-title').textContent = '进出货 - J2';
                     document.getElementById('current-stock-type').textContent = 'J2';
                     break;
                 case 'j3':
-                    API_BASE_URL = 'j3stockeditpageapi.php';
+                    API_BASE_URL = '../api/j3stockeditpageapi.php';
                     document.getElementById('page-title').textContent = '进出货 - J3';
                     document.getElementById('current-stock-type').textContent = 'J3';
                     break;
@@ -3592,7 +3592,7 @@ require_once '../core/session_check.php';
         // 应用页面权限，隐藏不允许的下拉选项，并自动切换到允许的系统
         async function applyPagePermissions() {
             try {
-                const res = await fetch('generatecodeapi.php', {
+                const res = await fetch('../api/generatecodeapi.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'get_page_permissions' })
@@ -3613,15 +3613,15 @@ require_once '../core/session_check.php';
                 if (allowedViews.size > 0 && !allowedViews.has('records')) {
                     const viewOrder = ['records', 'remark', 'product', 'sot', 'list'];
                     const viewRedirectMap = {
-                        list: 'stocklistall.php',
-                        records: 'stockeditall.php',
-                        remark: 'stockremark.php',
-                        product: 'stockproductname.php',
-                        sot: 'stocksot.php'
+                        list: '../modules/stocklistall.php',
+                        records: '../modules/stockeditall.php',
+                        remark: '../modules/stockremark.php',
+                        product: '../modules/stockproductname.php',
+                        sot: '../modules/stocksot.php'
                     };
                     const viewToOpen = viewOrder.find(view => allowedViews.has(view));
                     if (viewToOpen) {
-                        const base = viewRedirectMap[viewToOpen] || 'stocklistall.php';
+                        const base = viewRedirectMap[viewToOpen] || '../modules/stocklistall.php';
                         const param = currentStockType ? `?system=${currentStockType}` : '';
                         window.location.href = `${base}${param}`;
                         return true;
@@ -3643,22 +3643,22 @@ require_once '../core/session_check.php';
                             // 更新API地址
                             switch(firstAllowed) {
                                 case 'central':
-                                    API_BASE_URL = 'stockeditapi.php';
+                                    API_BASE_URL = '../api/stockeditapi.php';
                                     document.getElementById('page-title').textContent = '进出货 - 中央';
                                     document.getElementById('current-stock-type').textContent = '中央';
                                     break;
                                 case 'j1':
-                                    API_BASE_URL = 'j1stockeditpageapi.php';
+                                    API_BASE_URL = '../api/j1stockeditpageapi.php';
                                     document.getElementById('page-title').textContent = '进出货 - J1';
                                     document.getElementById('current-stock-type').textContent = 'J1';
                                     break;
                                 case 'j2':
-                                    API_BASE_URL = 'j2stockeditpageapi.php';
+                                    API_BASE_URL = '../api/j2stockeditpageapi.php';
                                     document.getElementById('page-title').textContent = '进出货 - J2';
                                     document.getElementById('current-stock-type').textContent = 'J2';
                                     break;
                                 case 'j3':
-                                    API_BASE_URL = 'j3stockeditpageapi.php';
+                                    API_BASE_URL = '../api/j3stockeditpageapi.php';
                                     document.getElementById('page-title').textContent = '进出货 - J3';
                                     document.getElementById('current-stock-type').textContent = 'J3';
                                     break;
@@ -3729,16 +3729,16 @@ require_once '../core/session_check.php';
         function switchView(viewType) {
             if (viewType === 'list') {
                 // 直接跳转到库存清单页面，不带参数
-                window.location.href = 'stocklistall.php';
+                window.location.href = '../modules/stocklistall.php';
             } else if (viewType === 'remark') {
                 // 跳转到备注页面
-                window.location.href = 'stockremark.php';
+                window.location.href = '../modules/stockremark.php';
             } else if (viewType === 'product') {
                 // 跳转到货品种类页面
-                window.location.href = 'stockproductname.php';
+                window.location.href = '../modules/stockproductname.php';
             } else if (viewType === 'sot') {
                 // 跳转到货品异常页面
-                window.location.href = 'stocksot.php';
+                window.location.href = '../modules/stocksot.php';
             } else {
                 // 保持在当前页面（库存记录）
                 hideViewDropdown();
@@ -3779,7 +3779,7 @@ require_once '../core/session_check.php';
 
         // 返回仪表盘
         function goBack() {
-            window.location.href = 'dashboard.php';
+            window.location.href = '../pages/dashboard.php';
         }
 
         // 点击其他地方关闭下拉菜单

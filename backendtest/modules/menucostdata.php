@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>菜单成本数据管理</title>
@@ -643,7 +643,7 @@
         // 加载数据
         async function loadData() {
             try {
-                const response = await fetch('menucostdata_api.php');
+                const response = await fetch('../api/menucostdata_api.php');
                 const result = await response.json();
                 
                 if (result.success) {
@@ -940,7 +940,7 @@
             }
 
             try {
-                const response = await fetch('menucostdata_api.php', {
+                const response = await fetch('../api/menucostdata_api.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1014,7 +1014,7 @@
             }
 
             try {
-                const response = await fetch('menucostdata_api.php', {
+                const response = await fetch('../api/menucostdata_api.php', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'

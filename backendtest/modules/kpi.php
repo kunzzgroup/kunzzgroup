@@ -57,7 +57,7 @@ $avatarLetter = strtoupper($username[0]);
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>餐厅KPI管理系统</title>    
@@ -1456,10 +1456,10 @@ $avatarLetter = strtoupper($username[0]);
                                 <i class="fas fa-chevron-down"></i>
                             </button>
                             <div class="report-dropdown-menu" id="report-type-dropdown">
-                                <a href="kpi.php" class="report-dropdown-item">
+                                <a href="../modules/kpi.php" class="report-dropdown-item">
                                     <i class="fas fa-chart-line"></i> KPI 报表
                                 </a>
-                                <a href="cost.php" class="report-dropdown-item">
+                                <a href="../modules/cost.php" class="report-dropdown-item">
                                     <i class="fas fa-chart-pie"></i> 成本报表
                                 </a>
                             </div>
@@ -1526,7 +1526,7 @@ $avatarLetter = strtoupper($username[0]);
                         <div class="card-body">
                             <div class="kpi-card-vertical">
                                 <div class="icon dynamic-color">
-                                    <img src="../images/images/table.svg" alt="桌子图标" style="width: clamp(30px, 2.1vw, 40px); height: clamp(28px, 1.98vw, 38px); filter: brightness(0);">
+                                    <img src="../../images/images/table.svg" alt="桌子图标" style="width: clamp(30px, 2.1vw, 40px); height: clamp(28px, 1.98vw, 38px); filter: brightness(0);">
                                 </div>
                                 <div>
                                     <p class="kpi-label">桌子总数</p>
@@ -1692,7 +1692,7 @@ $avatarLetter = strtoupper($username[0]);
 
     <script>
         // API 配置
-        const API_BASE_URL = 'kpiapi.php';
+        const API_BASE_URL = '../api/kpiapi.php';
         
         // 应用状态
         let actualData = [];

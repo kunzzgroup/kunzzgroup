@@ -5,7 +5,7 @@ require_once '../core/session_check.php';
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>货品异常 - 库存管理系统</title>
@@ -1542,9 +1542,9 @@ require_once '../core/session_check.php';
     </div>
 
     <script>
-        const API_BASE_URL = 'stocksotapi.php';
-        const PRODUCT_API_URL = 'stockapi.php';
-        const PRICE_API_URL = 'stockeditapi.php';  // 价格API使用stockeditapi
+        const API_BASE_URL = '../api/stocksotapi.php';
+        const PRODUCT_API_URL = '../api/stockapi.php';
+        const PRICE_API_URL = '../api/stockeditapi.php';  // 价格API使用stockeditapi
         const STOCK_VIEW_OPTIONS = [
             { value: 'list', label: '总库存' },
             { value: 'records', label: '进出货' },
@@ -1624,7 +1624,7 @@ require_once '../core/session_check.php';
 
         async function applyPagePermissions() {
             try {
-                const res = await fetch('generatecodeapi.php', {
+                const res = await fetch('../api/generatecodeapi.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'get_page_permissions' })
@@ -1639,15 +1639,15 @@ require_once '../core/session_check.php';
                 if (allowedViews.size > 0 && !allowedViews.has('sot')) {
                     const viewOrder = ['sot', 'records', 'product', 'remark', 'list'];
                     const viewRedirectMap = {
-                        list: 'stocklistall.php',
-                        records: 'stockeditall.php',
-                        remark: 'stockremark.php',
-                        product: 'stockproductname.php',
-                        sot: 'stocksot.php'
+                        list: '../modules/stocklistall.php',
+                        records: '../modules/stockeditall.php',
+                        remark: '../modules/stockremark.php',
+                        product: '../modules/stockproductname.php',
+                        sot: '../modules/stocksot.php'
                     };
                     const viewToOpen = viewOrder.find(view => allowedViews.has(view));
                     if (viewToOpen) {
-                        const base = viewRedirectMap[viewToOpen] || 'stocklistall.php';
+                        const base = viewRedirectMap[viewToOpen] || '../modules/stocklistall.php';
                         window.location.href = base;
                     }
                 }
@@ -2113,13 +2113,13 @@ require_once '../core/session_check.php';
 
         function switchView(viewType) {
             if (viewType === 'list') {
-                window.location.href = 'stocklistall.php';
+                window.location.href = '../modules/stocklistall.php';
             } else if (viewType === 'records') {
-                window.location.href = 'stockeditall.php';
+                window.location.href = '../modules/stockeditall.php';
             } else if (viewType === 'remark') {
-                window.location.href = 'stockremark.php';
+                window.location.href = '../modules/stockremark.php';
             } else if (viewType === 'product') {
-                window.location.href = 'stockproductname.php';
+                window.location.href = '../modules/stockproductname.php';
             } else {
                 hideViewDropdown();
             }

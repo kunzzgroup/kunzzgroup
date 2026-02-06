@@ -21,7 +21,7 @@ if (file_exists($jsonFile)) {
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>企业蓝图</title>
@@ -2950,7 +2950,7 @@ if (file_exists($jsonFile)) {
             transform: translate(-50%, -50%);
             width: clamp(600px, 62.5vw, 1000px);
             height: clamp(600px, 62.5vw, 1000px);
-            background: url('../images/images/logo.png') no-repeat center;
+            background: url('../../images/images/logo.png') no-repeat center;
             background-size: contain;
             opacity: 0.08;
             z-index: 0;
@@ -3121,7 +3121,7 @@ if (file_exists($jsonFile)) {
                         <div class="header-logo-container">
                             <div class="header-logo">
                                 <?php 
-                                $logoPath = '../images/images/logo.png';
+                                $logoPath = '../../images/images/logo.png';
                                 $logoFullPath = __DIR__ . '/../images/images/logo.png';
                                 if (file_exists($logoFullPath)): 
                                 ?>

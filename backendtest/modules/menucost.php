@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>菜单成本管理</title>
@@ -354,7 +354,7 @@
     <div class="container">
         <div class="header">
             <h1>菜单成本管理</h1>
-            <a href="dashboard.php" class="back-button">
+            <a href="../pages/dashboard.php" class="back-button">
                 <i class="fas fa-arrow-left"></i>
                 返回
             </a>
@@ -641,7 +641,7 @@
             }
 
             try {
-                const response = await fetch('menucost_api.php', {
+                const response = await fetch('../api/menucost_api.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

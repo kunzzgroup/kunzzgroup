@@ -82,7 +82,7 @@ if (isset($_SESSION['user_id'])) {
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KUNZZ HOLDINGS</title>
@@ -385,7 +385,7 @@ updatePageIndicator(0);
   window.addEventListener('load', () => {
     // 创建一个虚拟图片对象检测背景图是否加载完成
     const bgImg = new Image();
-    bgImg.src = "../images/images/封面7.png";
+    bgImg.src = "../../images/images/封面7.png";
 
     bgImg.onload = function () {
 

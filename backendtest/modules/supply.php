@@ -5,7 +5,7 @@ require_once '../core/session_check.php';
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>供应商价格对比</title>
@@ -2796,7 +2796,7 @@ require_once '../core/session_check.php';
             
             // 如果选择餐厅对比，直接跳转到 price.php
             if (mode === 'restaurant') {
-                window.location.href = 'price.php';
+                window.location.href = '../modules/price.php';
                 return;
             }
         }
