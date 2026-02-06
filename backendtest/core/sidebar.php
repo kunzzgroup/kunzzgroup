@@ -34,7 +34,7 @@ if (isset($_SESSION['user_id'])) {
         setcookie('remember_token', '', time() - 60, "/");
 
         // 跳转登录页
-        header("Location: index.php");
+        header("Location: login.php");
         exit();
     }
 
