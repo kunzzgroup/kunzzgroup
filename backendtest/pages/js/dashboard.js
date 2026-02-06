@@ -1,11 +1,8 @@
 window.PAGE_NAME = "dashboard";
 
 async function loadView() {
-    const r = await fetch(window.BASE_URL + "pages/html/" + window.PAGE_NAME + ".html", {
-        credentials: "same-origin",
-        headers: {
-            "X-Requested-With": "XMLHttpRequest"
-        }
+    const r = await fetch(BASE_URL + "pages/html/" + PAGE_NAME + ".html", {
+        credentials: "same-origin"
     });
     document.getElementById("app").innerHTML = await r.text();
     initializeComponents();

@@ -33,7 +33,6 @@ if ($result->num_rows === 1) {
 
     if (password_verify($password, $user['password'])) {
         // ✅ 登录成功，设置 Session
-        session_regenerate_id(true);
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
         $_SESSION['position'] = $user['position'];

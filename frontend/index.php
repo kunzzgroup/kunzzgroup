@@ -381,3 +381,4 @@ window.addEventListener('load', () => {
     <?php echo getBgMusicHtml(); ?>
 </body>
 </html>
+</html>

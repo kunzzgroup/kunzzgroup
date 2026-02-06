@@ -7,9 +7,7 @@ $canViewAnalytics = isset($canViewAnalytics) ? $canViewAnalytics : true;
 ?>
 
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+session_start();
 
 // 超时时间（秒）
 define('SESSION_TIMEOUT', 60);
