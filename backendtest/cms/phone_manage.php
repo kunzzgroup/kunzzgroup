@@ -862,7 +862,7 @@ require_once '../core/session_check.php';
     // 加载员工数据
     async function loadEmployees() {
         try {
-            const response = await fetch(`schedule_api.php?action=get_employees&restaurant=${currentRestaurant}`);
+            const response = await fetch(`../api/schedule_api.php?action=get_employees&restaurant=${currentRestaurant}`);
             const result = await response.json();
             if (result.success) {
                 employees = result.data;
@@ -1629,7 +1629,7 @@ require_once '../core/session_check.php';
                 ? { id, name, phone, position, work_area: workArea }
                 : { name, phone, position, work_area: workArea, restaurant: currentRestaurant };
             
-            const response = await fetch(`schedule_api.php?action=${action}`, {
+            const response = await fetch(`../api/schedule_api.php?action=${action}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestData)
@@ -1659,7 +1659,7 @@ require_once '../core/session_check.php';
         if (!confirm('确定要删除这个员工吗？相关的排班记录也将被删除。')) return;
         
         try {
-            const response = await fetch('schedule_api.php?action=delete_employee', {
+            const response = await fetch('../api/schedule_api.php?action=delete_employee', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id })

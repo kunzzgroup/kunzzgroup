@@ -1059,8 +1059,8 @@ body.sidebar-transition {
                             </a>
                             <div class="sub-options" id="j1-options">
                                 <?php if (!empty($submenuVisibility['brand']['j1_schedule'])): ?>
-                                <a href="schedule_manager.php?restaurant=J1" class="sub-option">员工排班表</a>
-                                <a href="phone_manage.php?restaurant=J1" class="sub-option">员工手机记录</a>
+                                <a href="../modules/schedule_manager.php?restaurant=J1" class="sub-option">员工排班表</a>
+                                <a href="../cms/phone_manage.php?restaurant=J1" class="sub-option">员工手机记录</a>
                                 <?php endif; ?>
                             </div>
                             <?php endif; ?>
@@ -1072,8 +1072,8 @@ body.sidebar-transition {
                             </a>
                             <div class="sub-options" id="j2-options">
                                 <?php if (!empty($submenuVisibility['brand']['j2_schedule'])): ?>
-                                <a href="schedule_manager.php?restaurant=J2" class="sub-option">员工排班表</a>
-                                <a href="phone_manage.php?restaurant=J2" class="sub-option">员工手机记录</a>
+                                <a href="../modules/schedule_manager.php?restaurant=J2" class="sub-option">员工排班表</a>
+                                <a href="../cms/phone_manage.php?restaurant=J2" class="sub-option">员工手机记录</a>
                                 <?php endif; ?>
                             </div>
                             <?php endif; ?>
@@ -1101,8 +1101,8 @@ body.sidebar-transition {
                             </a>
                             <div class="sub-options" id="j3-options">
                                 <?php if (!empty($submenuVisibility['brand']['j3_schedule'])): ?>
-                                <a href="schedule_manager.php?restaurant=J3" class="sub-option">员工排班表</a>
-                                <a href="phone_manage.php?restaurant=J3" class="sub-option">员工手机记录</a>
+                                <a href="../modules/schedule_manager.php?restaurant=J3" class="sub-option">员工排班表</a>
+                                <a href="../cms/phone_manage.php?restaurant=J3" class="sub-option">员工手机记录</a>
                                 <?php endif; ?>
                             </div>
                             <?php endif; ?>
