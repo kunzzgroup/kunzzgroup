@@ -2131,6 +2131,9 @@ require_once 'session_check.php';
                 <div class="mobile-selector" id="mobile-selector-j1" style="display: none;">
                     <a id="mobile-link-button-j1" class="selector-button" href="../j1/j1stockeditmobile.php">手机版</a>
                 </div>
+                <div class="mobile-selector" id="mobile-selector-j2" style="display: none;">
+                    <a id="mobile-link-button-j2" class="selector-button" href="../j2/j2stockeditmobile.php">手机版</a>
+                </div>
                 <div class="view-selector">
                     <button class="selector-button" onclick="toggleViewSelector()">
                         <span id="current-view">进出货</span>
@@ -3397,6 +3400,10 @@ require_once 'session_check.php';
             if (mobileSelectorJ1) {
                 mobileSelectorJ1.style.display = currentStockType === 'j1' ? 'inline-flex' : 'none';
             }
+            const mobileSelectorJ2 = document.getElementById('mobile-selector-j2');
+            if (mobileSelectorJ2) {
+                mobileSelectorJ2.style.display = currentStockType === 'j2' ? 'inline-flex' : 'none';
+            }
 
             // 初始化：根据当前系统更新“新增记录”弹窗备注 placeholder
             updateNewRecordRemarkPlaceholder();
@@ -3477,6 +3484,10 @@ require_once 'session_check.php';
             const mobileSelectorJ1 = document.getElementById('mobile-selector-j1');
             if (mobileSelectorJ1) {
                 mobileSelectorJ1.style.display = stockType === 'j1' ? 'inline-flex' : 'none';
+            }
+            const mobileSelectorJ2 = document.getElementById('mobile-selector-j2');
+            if (mobileSelectorJ2) {
+                mobileSelectorJ2.style.display = stockType === 'j2' ? 'inline-flex' : 'none';
             }
 
             // 修改Type列的控制 - 不要隐藏，而是控制禁用状态
