@@ -7,8 +7,11 @@
 async function loadView() {
     try {
         console.log("Loading Corporate Blueprint view...");
-        const response = await fetch(BASE_URL + "pages/html/corporate_blueprint.html", {
-            credentials: "same-origin"
+        const response = await fetch(window.BASE_URL + "pages/html/" + window.PAGE_NAME + ".html", {
+            credentials: "same-origin",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
         });
         if (!response.ok) throw new Error("Failed to load view");
         const html = await response.text();

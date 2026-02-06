@@ -2,7 +2,7 @@
 // 检查是否已经启动了session
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
-}
+    }
 
 // 包含媒体配置
 if (!isset($mediaConfigIncluded)) {
