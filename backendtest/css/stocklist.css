@@ -1,0 +1,598 @@
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f1dfbc;
+            color: #111827;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 56px;
+            font-weight: bold;
+            color: #583e04;
+        }
+
+        .header .controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-button {
+            background-color: #583e04;
+            color: white;
+            font-weight: 500;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .back-button:hover {
+            background-color: #462d03;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(88, 62, 4, 0.2);
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .alert-info {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        /* 搜索和过滤区域 */
+        .filter-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px 40px;
+            margin-bottom: 24px;
+            border: 2px solid #583e04;
+            box-shadow: 0 2px 8px rgba(88, 62, 4, 0.1);
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 50px;
+            margin-bottom: 16px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filter-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #583e04;
+        }
+
+        .filter-input,
+        .filter-select {
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            color: #583e04;
+        }
+
+        .filter-input:focus,
+        .filter-select:focus {
+            outline: none;
+            border-color: #583e04;
+            box-shadow: 0 0 0 3px rgba(88, 62, 4, 0.1);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: #583e04;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #462d03;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #059669;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #4b5563;
+            transform: translateY(-1px);
+        }
+
+        .btn-warning {
+            background-color: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #d97706;
+            transform: translateY(-1px);
+        }
+
+
+        .summary-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            border: 2px solid #583e04;
+            box-shadow: 0 2px 8px rgba(88, 62, 4, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(88, 62, 4, 0.15);
+        }
+
+        .summary-card h3 {
+            color: #583e04;
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-card .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #583e04;
+        }
+
+        .summary-card.total-value .value {
+            color: #583e04;
+        }
+
+        /* 货币显示容器 */
+        .currency-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 20px;
+            height: 40px;
+            box-sizing: border-box;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .currency-display .currency-symbol {
+            color: #6b7280;
+            font-weight: 500;
+            text-align: left;
+            flex-shrink: 0;
+        }
+
+        .currency-display .currency-amount {
+            font-weight: 500;
+            color: #583e04;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .currency-symbol {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .stock-table {
+            table-layout: fixed;
+            width: 100%;
+            min-width: 1400px;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .stock-table th {
+            background: #583e04;
+            color: white;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: 600;
+            border: 1px solid #462d03;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+            min-width: 80px;
+        }
+
+        .stock-table td {
+            padding: 12px 8px;
+            border: 1px solid #d1d5db;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .stock-table tr:nth-child(even) {
+            background-color: white;
+        }
+
+        .stock-table tr:hover {
+            background-color: #e5ebf8ff;
+        }
+
+        /* 固定表格列宽 */
+        .stock-table th:nth-child(1),
+        .stock-table td:nth-child(1) {
+            width: 80px;
+        }
+
+        /* No. */
+        .stock-table th:nth-child(2),
+        .stock-table td:nth-child(2) {
+            width: 200px;
+        }
+
+        /* Product Name */
+        .stock-table th:nth-child(3),
+        .stock-table td:nth-child(3) {
+            width: 120px;
+        }
+
+        /* Code Number */
+        .stock-table th:nth-child(4),
+        .stock-table td:nth-child(4) {
+            width: 120px;
+        }
+
+        /* Total Stock */
+        .stock-table th:nth-child(5),
+        .stock-table td:nth-child(5) {
+            width: 100px;
+        }
+
+        /* Specification */
+        .stock-table th:nth-child(6),
+        .stock-table td:nth-child(6) {
+            width: 120px;
+        }
+
+        /* Unit Price */
+        .stock-table th:nth-child(7),
+        .stock-table td:nth-child(7) {
+            width: 120px;
+        }
+
+        /* Total Price */
+
+        .table-container {
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(88, 62, 4, 0.1);
+            border: 2px solid #583e04;
+            overflow: visible;
+        }
+
+        .table-scroll-container {
+            overflow-x: auto;
+            overflow-y: visible;
+        }
+
+        /* 操作按钮 */
+        .action-buttons {
+            padding: 24px;
+            background: #f8f5eb;
+            border-top: 2px solid #583e04;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* 统计信息 */
+        .stats-info {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            font-size: 14px;
+            color: #6b7280;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 150px;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #583e04;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .font-mono {
+            font-family: 'Courier New', monospace;
+        }
+
+        .positive-value {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .zero-value {
+            color: #6b7280;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .no-data i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #583e04;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .total-row {
+            background: #f8f5eb !important;
+            border-top: 2px solid #583e04;
+            font-weight: 600;
+            color: #583e04;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+
+            /* 移动端改为上下排列 */
+            .main-content-row {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .summary-section {
+                flex: none;
+                width: 100%;
+                min-width: auto;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .stats-info {
+                flex-direction: column;
+                gap: 8px;
+                align-items: flex-start;
+            }
+
+            .stat-item {
+                min-width: auto;
+                width: 100%;
+            }
+        }
+
+        /* 确保负数的货币显示也是红色 */
+        .positive-value .currency-symbol {
+            color: #6b7280 !important;
+            font-weight: 600;
+        }
+
+        .positive-value .currency-amount {
+            color: #583e04 !important;
+            font-weight: 600;
+        }
+
+        .zero-value .currency-symbol,
+        .zero-value .currency-amount {
+            color: #6b7280 !important;
+        }
+
+        .total-row .currency-symbol,
+        .total-row .currency-amount {
+            color: #583e04 !important;
+            font-weight: 600;
+        }
+
+        /* 价格单元格样式 */
+        .stock-table td.price-cell {
+            padding: 0;
+            text-align: left;
+        }
+
+        .stock-table td.stock-cell {
+            padding: 0;
+            text-align: center;
+        }
+
+        .stock-cell .currency-display {
+            justify-content: center;
+        }
+
+        /* 确保价格单元格内容填满 */
+        .price-cell .currency-display {
+            width: 100%;
+            margin: 0;
+        }
+
+        /* 总库存价值专用的货币显示样式 */
+        .summary-currency-display {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .summary-currency-display .currency-symbol {
+            font-size: 32px;
+            font-weight: bold;
+            color: #583e04;
+        }
+
+        .summary-currency-display .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #10b981;
+        }
+
+        /* 主要内容行布局 */
+        .main-content-row {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+            align-items: stretch;
+            /* 改为stretch让子元素高度一致 */
+        }
+
+        /* 左侧总库存区域 */
+        .summary-section {
+            flex: 0 0 400px;
+            /* 固定宽度400px */
+            min-width: 400px;
+            display: flex;
+            /* 添加flex布局 */
+            flex-direction: column;
+            /* 垂直排列 */
+        }
+
+        /* 右侧搜索过滤区域 */
+        .filter-section {
+            flex: 1;
+            /* 占据剩余空间 */
+            min-width: 0;
+            /* 允许缩小 */
+            display: flex;
+            /* 添加flex布局 */
+            flex-direction: column;
+            /* 垂直排列 */
+        }
+
+        /* 总库存卡片样式调整 */
+        .summary-section .summary-card {
+            width: 100%;
+            margin-bottom: 24px;
+            flex: 1;
+            /* 让卡片填满整个高度 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            /* 垂直居中内容 */
+        }

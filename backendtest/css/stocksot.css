@@ -1,0 +1,1339 @@
+﻿        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #faf7f2;
+            color: #111827;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: clamp(16px, 1.25vw, 24px) 24px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: clamp(18px, 1.67vw, 32px);
+        }
+        
+        .header h1 {
+            font-size: clamp(20px, 2.6vw, 50px);
+            font-weight: bold;
+            color: #000000ff;
+        }
+        
+        .header .controls {
+            display: flex;
+            align-items: center;
+            gap: 0px;
+        }
+
+        .selector-button {
+            background-color: #f99e00;
+            color: white;
+            font-weight: 500;
+            padding: clamp(6px, 0.52vw, 10px) clamp(16px, 1.04vw, 20px);
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: clamp(10px, 0.73vw, 14px);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            width: clamp(90px, 6.77vw, 130px);
+            justify-content: space-between;
+            position: relative;
+        }
+        
+        .selector-button:hover {
+            background-color: #f98500ff;
+            border-radius: 8px;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(88, 62, 4, 0.2);
+        }
+
+        .selector-dropdown {
+            position: absolute;
+            top: 110%;
+            right: 0;
+            background: white;
+            border: 2px solid #000000ff;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(88, 62, 4, 0.2);
+            width: 100%;
+            z-index: 10000;
+            display: none;
+        }
+
+        .selector-dropdown.show {
+            display: block;
+        }
+
+        .selector-dropdown .dropdown-item {
+            padding: clamp(6px, 0.42vw, 8px) clamp(10px, 0.83vw, 16px);
+            cursor: pointer;
+            border-bottom: 1px solid #e5e7eb;
+            transition: all 0.2s;
+            color: #000000ff;
+            font-size: clamp(8px, 0.74vw, 14px);
+            font-weight: 500;
+            text-decoration: none;
+            display: block;
+        }
+
+        .selector-dropdown .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .selector-dropdown .dropdown-item:hover {
+            background-color: #f8f5eb;
+            border-radius: 8px;
+        }
+
+        .selector-dropdown .dropdown-item.active {
+            background-color: #f99e00 !important;
+            border-radius: 4px !important;
+            color: white !important;
+        }
+
+        /* 视图选择器样式 */
+        .view-selector {
+            position: relative;
+            margin-right: 16px;
+        }
+
+        .view-selector .selector-button:hover {
+            background-color: #f99e00;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(88, 62, 4, 0.2);
+        }
+
+        .view-selector .selector-dropdown {
+            width: 100%;
+        }
+
+        /* Excel样式表格 */
+        .excel-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(88, 62, 4, 0.1);
+            border: 2px solid #000000ff;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 300px);
+            min-height: 100px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            table-layout: fixed;
+        }
+
+        .excel-table th {
+            background: #636363;
+            color: white;
+            padding: clamp(4px, 0.42vw, 8px) 0;
+            text-align: center;
+            font-size: clamp(8px, 0.74vw, 14px);
+            font-weight: 600;
+            border: 1px solid #d1d5db;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            white-space: nowrap;
+            min-width: 80px;
+        }
+
+        .excel-table td {
+            font-size: clamp(8px, 0.74vw, 14px);
+            padding: 0;
+            border: 1px solid #d1d5db;
+            text-align: center;
+            position: relative;
+        }
+
+        .excel-table tr:nth-child(even) {
+            background-color: white;
+        }
+
+        .excel-table tr:hover {
+            background-color: #e5ebf8ff;
+        }
+
+        /* 日期单元格样式 */
+        .date-cell {
+            background: #f8f5eb !important;
+            font-weight: 600;
+            color: #000000ff;
+            padding: 12px 8px;
+            min-width: 100px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        /* 输入框容器样式 */
+        .input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            height: 40px;
+        }
+
+        /* 输入框样式 */
+        .excel-input {
+            width: 100%;
+            height: 40px;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-size: 14px;
+            padding: 8px 4px;
+            transition: all 0.2s;
+            box-sizing: border-box;
+            vertical-align: middle;
+            line-height: 24px;
+        }
+
+        .excel-input.text-input {
+            text-align: left;
+            padding-left: 8px;
+        }
+
+        .excel-input.datetime-input {
+            padding: 8px 4px;
+            text-align: center;
+        }
+
+        .excel-input:focus {
+            background: white;
+            border: 2px solid #583e04;
+            outline: none;
+            z-index: 5;
+            position: relative;
+        }
+
+
+        /* 下拉选择框样式 */
+        .excel-select {
+            width: 100%;
+            height: 40px;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-size: 14px;
+            padding: 8px 4px;
+            transition: all 0.2s;
+            cursor: pointer;
+            box-sizing: border-box;
+            vertical-align: middle;
+            line-height: 24px;
+        }
+
+        .excel-select:focus {
+            background: white;
+            border: 2px solid #583e04;
+            outline: none;
+            z-index: 5;
+            position: relative;
+        }
+
+        .excel-select[disabled] {
+            background: #f9fafb !important;
+            cursor: not-allowed;
+        }
+
+        .excel-input[readonly] {
+            background-color: #f9fafb !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-weight: bold;
+            color: #000000ff;
+            cursor: not-allowed;
+        }
+
+        .excel-input[readonly]:focus {
+            background-color: #f9fafb !important;
+            border: 1px solid #d1d5db !important;
+        }
+        
+        /* 手动输入价格样式 */
+        .manual-price-input {
+            animation: slideDown 0.2s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 数字字体样式 */
+        .excel-input[type="number"] {
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: "tnum";
+        }
+
+        .table-scroll-container {
+            overflow-x: hidden;
+            overflow-y: auto;
+            flex: 1;
+            position: relative;
+        }
+
+        .excel-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #000000ff;
+        }
+
+        .excel-table thead tr {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .excel-table th {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .btn {
+            padding: clamp(4px, 0.42vw, 8px) clamp(6px, 0.63vw, 12px);
+            border-radius: clamp(4px, 0.42vw, 8px);
+            border: none;
+            cursor: pointer;
+            font-size: clamp(8px, 0.74vw, 14px);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background-color: #f99e00;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #f98500ff;
+            transform: translateY(-1px);
+        }
+        
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #059669;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #4b5563;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        #confirm-batch-delete-btn:disabled {
+            background: #6c757d;
+            border-color: #6c757d;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .batch-select-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        /* 统计信息 */
+        .stats-info {
+            display: flex;
+            gap: 0px;
+            align-items: center;
+            font-size: clamp(8px, 0.74vw, 14px);
+            color: #6b7280;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: clamp(90px, 7.82vw, 150px);
+        }
+
+        .stat-value {
+            font-size: clamp(12px, 0.94vw, 18px);
+            font-weight: bold;
+            color: #000000ff;
+        }
+
+        .action-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: clamp(4px, 0.32vw, 6px);
+            width: clamp(18px, 1.67vw, 32px);
+            height: clamp(18px, 1.67vw, 32px);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: clamp(6px, 0.63vw, 12px);
+            margin: 0;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .action-btn.edit-btn {
+            background: #f59e0b;
+        }
+
+        .action-btn.edit-btn:hover {
+            background: #d97706;
+        }
+
+        .edit-btn.save-mode {
+            background: #10b981;
+        }
+
+        .edit-btn.save-mode:hover {
+            background: #059669;
+        }
+
+        .action-btn.delete-btn {
+            background: #ef4444;
+        }
+
+        .action-btn.delete-btn:hover {
+            background: #dc2626;
+        }
+
+        .action-btn.approve-btn {
+            background: #10b981;
+        }
+
+        .action-btn.approve-btn:hover {
+            background: #059669;
+        }
+
+        .save-new-btn {
+            background: #10b981 !important;
+        }
+
+        .cancel-new-btn {
+            background: #6b7280 !important;
+        }
+
+        .action-cell {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 8px 4px;
+            width: 100%;
+            height: 40px;
+            box-sizing: border-box;
+        }
+
+        /* 确保操作列的span容器也正确显示 */
+        .excel-table td span.action-cell {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(0px, 0.21vw, 4px);
+            padding: 8px clamp(0px, 0.21vw, 4px);
+            width: 100%;
+            height: 40px;
+            box-sizing: border-box;
+        }
+
+        /* 编辑行高亮效果 */
+        .excel-table tr.editing-row {
+            background-color: #cde3ff !important;
+            transition: background-color 0.3s ease;
+        }
+
+        .excel-table tr.editing-row td {
+            background-color: #cde3ff !important;
+            transition: background-color 0.3s ease;
+        }
+
+        /* 编辑行样式 */
+        .editing-row {
+            background-color: #e0f2fe !important;  /* 与新增行相同的浅蓝色背景 */
+        }
+
+        .editing-row td {
+            background-color: #e0f2fe !important;
+        }
+
+        /* 确保输入框背景透明，显示行的背景色 */
+        .new-row .excel-input, 
+        .new-row .excel-select,
+        .new-row .combobox-input,
+        .editing-row .excel-input, 
+        .editing-row .excel-select,
+        .editing-row .combobox-input {
+            background: transparent !important;
+        }
+
+        /* 聚焦时的输入框样式 */
+        .new-row .excel-input:focus, 
+        .new-row .excel-select:focus,
+        .new-row .combobox-input:focus,
+        .editing-row .excel-input:focus, 
+        .editing-row .excel-select:focus,
+        .editing-row .combobox-input:focus {
+            background: white !important;
+        }
+
+        /* 序号列在编辑模式下保持灰色背景 */
+        .excel-table tr.editing-row .serial-number-cell {
+            background-color: #f9fafb !important;
+        }
+
+        /* 新行动画 */
+        .new-row {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .new-row.fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 新增行样式 */
+        .new-row {
+            background-color: #f0f9ff !important;  
+        }
+
+        .new-row .excel-input, .new-row .excel-select {
+            background: white;
+        }
+
+        /* 新增行样式 */
+        .new-row {
+            background-color: #e0f2fe !important;  /* 浅蓝色背景 */
+        }
+
+        .new-row td {
+            background-color: #e0f2fe !important;
+        }
+
+        /* 序号列样式 */
+        .serial-number-cell {
+            padding: 8px;
+            text-align: center;
+            font-weight: 600;
+            color: #6b7280;
+            background-color: #f9fafb;
+        }
+
+        /* Combobox 样式 */
+        .combobox-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .combobox-input {
+            width: 100%;
+            height: 40px;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-size: 14px;
+            padding: 8px 20px 8px 4px;
+            transition: all 0.2s;
+            box-sizing: border-box;
+            cursor: text;
+            ime-mode: disabled;
+            vertical-align: middle;
+            line-height: 24px;
+        }
+
+        .combobox-input:focus {
+            background: #fff;
+            border: 2px solid #583e04;
+            outline: none;
+            z-index: 15;
+            position: relative;
+        }
+
+        .combobox-arrow {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .combobox-dropdown {
+            position: fixed;
+            background: white;
+            border: 2px solid #583e04;
+            border-radius: 4px;
+            max-height: 250px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 9999;
+            display: none;
+            box-shadow: 0 4px 12px rgba(88, 62, 4, 0.2);
+            min-width: 200px;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            padding: 0;
+            margin: 0;
+        }
+
+        .combobox-dropdown.show {
+            display: block;
+        }
+
+        .combobox-option {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+            text-align: left;
+            line-height: 1.4;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .combobox-option:hover {
+            background-color: #f3f4f6;
+        }
+
+        .combobox-option:last-child {
+            border-bottom: none;
+        }
+
+        .combobox-option.highlighted {
+            background-color: #583e04;
+            color: white;
+        }
+
+        .combobox-input::-ms-clear {
+            display: none;
+        }
+
+        .combobox-input[readonly] {
+            background-color: transparent !important;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+
+        .combobox-input[readonly] + .combobox-arrow {
+            display: none;
+        }
+
+        .no-results {
+            padding: 10px 12px;
+            color: #6b7280;
+            font-style: italic;
+            text-align: center;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        /* 统一顶部行样式 */
+        .unified-header-row {
+            display: flex;
+            align-items: center;
+            gap: clamp(10px, 1.5vw, 30px);
+            padding: clamp(10px, 1.15vw, 22px) clamp(10px, 1.25vw, 24px);
+            background: white;
+            border-radius: 12px;
+            margin-bottom: clamp(14px, 1.25vw, 24px);
+            border: 2px solid #000000ff;
+            box-shadow: 0 2px 8px rgba(88, 62, 4, 0.1);
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .header-summary {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            flex-shrink: 0;
+            margin-right: 0px;
+        }
+
+        .summary-title {
+            font-size: clamp(14px, 1.5vw, 28px);
+            font-weight: 600;
+            color: #000000ff;
+            margin-bottom: 2px;
+            line-height: 1.2;
+        }
+
+        .summary-amount {
+            display: flex;
+            align-items: baseline;
+            gap: clamp(0px, 0.31vw, 6px);
+        }
+
+        .summary-amount .currency-symbol {
+            font-size: clamp(18px, 1.88vw, 36px);
+            font-weight: bold;
+            color: #000000ff;
+        }
+
+        .summary-amount .value {
+            font-size: clamp(18px, 1.88vw, 36px);
+            margin-left: 0px;
+            font-weight: 700;
+            color: #000000ff;
+        }
+
+        .header-right-group {
+            display: flex;
+            align-items: flex-end;
+            gap: clamp(2px, 0.32vw, 8px);
+            margin-left: auto;
+        }
+
+        .header-search {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: clamp(6px, 0.63vw, 12px);
+        }
+
+        .unified-search-input {
+            width: clamp(140px, 13.02vw, 250px);
+            padding: clamp(4px, 0.42vw, 8px) clamp(6px, 0.63vw, 12px);
+            border: 1px solid #d1d5db;
+            border-radius: clamp(4px, 0.42vw, 8px);
+            font-size: clamp(8px, 0.74vw, 14px);
+            background-color: #ffffff;
+            transition: all 0.2s ease;
+        }
+
+        .unified-search-input:focus {
+            outline: none;
+            border-color: #583e04;
+            box-shadow: 0 0 0 3px rgba(88, 62, 4, 0.1);
+        }
+
+        /* 调整按钮大小，使其更紧凑 */
+        .unified-header-row .btn {
+            padding: clamp(4px, 0.42vw, 8px) clamp(6px, 0.63vw, 12px);
+            font-size: clamp(8px, 0.74vw, 14px);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* 日期标签 */
+        .date-label {
+            display: block;
+            font-size: clamp(8px, 0.74vw, 14px);
+            font-weight: bold;
+            color: #000000ff;
+            white-space: nowrap;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .date-label-with-icon {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: clamp(8px, 0.74vw, 14px);
+            font-weight: 600;
+            color: #000000ff;
+            white-space: nowrap;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        /* 日期控制区域 */
+        .date-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: clamp(2px, 0.62vw, 12px);
+            align-items: flex-end;
+            flex: 1;
+        }
+
+        /* 日期范围选择器 */
+        .date-range-picker {
+            display: flex;
+            align-items: center;
+            gap: clamp(4px, 0.42vw, 8px);
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: clamp(4px, 0.42vw, 8px);
+            padding: clamp(4px, 0.42vw, 8px) clamp(8px, 0.83vw, 16px);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            min-width: clamp(180px, 15.63vw, 300px);
+            z-index: 1;
+        }
+
+        .date-range-picker:hover {
+            border-color: #f99e00;
+            box-shadow: 0 0 0 3px rgba(249, 158, 0, 0.1);
+        }
+
+        .date-range-picker i {
+            color: #f99e00;
+            font-size: clamp(8px, 0.74vw, 14px);
+            margin: 0 clamp(2px, 0.32vw, 6px);
+        }
+
+        .date-range-picker span {
+            color: #374151;
+            font-size: clamp(8px, 0.74vw, 14px);
+            font-weight: 500;
+        }
+
+        /* 日历弹窗 */
+        .calendar-popup {
+            position: fixed;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            z-index: 99999;
+            padding: clamp(8px, 0.83vw, 16px);
+            min-width: clamp(180px, 15.63vw, 300px);
+            max-height: 350px;
+            overflow: visible;
+        }
+
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .calendar-nav-btn {
+            background: transparent;
+            border: 0px solid #d1d5db;
+            border-radius: 4px;
+            width: clamp(20px, 1.25vw, 24px);
+            height: clamp(20px, 1.25vw, 24px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .calendar-nav-btn:hover {
+            background-color: #f3f4f6;
+            border-color: #f99e00;
+        }
+
+        .calendar-nav-btn i {
+            color: #374151;
+            font-size: clamp(7px, 0.57vw, 11px);
+        }
+
+        .calendar-month-year {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .calendar-month-year select {
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: clamp(2px, 0.21vw, 4px) clamp(4px, 0.31vw, 6px);
+            font-size: clamp(8px, 0.63vw, 12px);
+            font-weight: 600;
+            color: #000000ff;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .calendar-month-year select:hover {
+            border-color: #f99e00;
+        }
+
+        .calendar-month-year select:focus {
+            outline: none;
+            border-color: #f99e00;
+            box-shadow: 0 0 0 2px rgba(249, 158, 0, 0.1);
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 4px;
+        }
+
+        .calendar-weekday {
+            text-align: center;
+            font-size: clamp(8px, 0.63vw, 12px);
+            font-weight: 600;
+            color: #898989;
+            padding: clamp(2px, 0.21vw, 4px) 0;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: clamp(8px, 0.63vw, 12px);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #000000ff;
+            background: transparent;
+            border: 1px solid transparent;
+            position: relative;
+            padding: 4px;
+        }
+
+        .calendar-day:hover {
+            background-color: #f3f4f6;
+        }
+
+        .calendar-day.today {
+            border-color: #f99e00;
+            font-weight: 600;
+        }
+
+        .calendar-day.selected {
+            background-color: #f99e00;
+            color: white;
+            font-weight: 600;
+        }
+
+        .calendar-day.in-range {
+            background-color: rgba(249, 158, 0, 0.2);
+            color: #374151;
+            border-radius: 0px;
+        }
+
+        .calendar-day.start-date {
+            background-color: #f99e00;
+            color: white;
+            border-radius: 6px 0 0 6px;
+        }
+
+        .calendar-day.end-date {
+            background-color: #f99e00;
+            color: white;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .calendar-day.start-date.end-date {
+            border-radius: 6px;
+        }
+
+        .calendar-day.start-date.selecting {
+            border-radius: 6px;
+        }
+
+        .calendar-day.preview-range {
+            background-color: rgba(249, 158, 0, 0.15);
+            color: #374151;
+            border-radius: 0px;
+        }
+
+        .calendar-day.preview-end {
+            background-color: rgba(249, 158, 0, 0.4);
+            color: #374151;
+            font-weight: 600;
+            border: 1px dashed #f99e00;
+        }
+
+        .calendar-day.other-month {
+            color: #d1d5db;
+        }
+
+        .calendar-day.disabled {
+            color: #d1d5db;
+            cursor: not-allowed;
+        }
+
+        .calendar-day.disabled:hover {
+            background-color: transparent;
+        }
+
+        /* 下拉菜单 */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            font-size: clamp(8px, 0.74vw, 14px);
+            gap: 8px;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 2px solid #000000ff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(88, 62, 4, 0.15);
+            z-index: 1000;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: block;
+            width: 100%;
+            padding: clamp(6px, 0.52vw, 10px) clamp(10px, 1.04vw, 20px);
+            border: none;
+            background: transparent;
+            color: #000000ff;
+            cursor: pointer;
+            font-size: clamp(8px, 0.74vw, 14px);
+            font-weight: 600;
+            text-align: left;
+            transition: background-color 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(88, 62, 4, 0.1);
+        }
+
+        .dropdown-item:first-child {
+            border-radius: 6px 6px 0 0;
+        }
+
+        .dropdown-item:last-child {
+            border-radius: 0 0 6px 6px;
+        }
+
+        /* 批量操作按钮组 */
+        .batch-actions {
+            flex-shrink: 0;
+            display: flex;
+            gap: 8px;
+        }
+
+        /* 统计信息样式 */
+        .header-stats {
+            display: flex;
+                flex-direction: column;
+            gap: 4px;
+            font-size: clamp(6px, 0.63vw, 12px);
+            color: #6b7280;
+            flex-shrink: 0;
+            white-space: nowrap;
+            padding-bottom: clamp(4px, 0.42vw, 8px);
+        }
+
+        .header-stats .stat-value {
+            font-weight: bold;
+            color: #000000ff;
+        }
+
+        /* 加载状态 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #583e04;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 提示信息 */
+        .alert {
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .alert-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .alert-info {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        /* 通知容器 */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        /* 通知基础样式 */
+        .toast {
+            width: clamp(100px, 15.63vw, 300px);
+            padding: clamp(2px, 0.42vw, 8px) clamp(6px, 0.63vw, 12px);
+            border-radius: clamp(6px, 0.42vw, 8px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            font-size: clamp(8px, 0.74vw, 14px);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            pointer-events: auto;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast.hide {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        /* 通知类型样式 */
+        .toast-success {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9));
+            color: white;
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .toast-error {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(220, 38, 38, 0.9));
+            color: white;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .toast-info {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(37, 99, 235, 0.9));
+            color: white;
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .toast-warning {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.9), rgba(217, 119, 6, 0.9));
+            color: white;
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        /* 通知图标 */
+        .toast-icon {
+            font-size: clamp(14px, 0.94vw, 18px);
+            flex-shrink: 0;
+        }
+
+        /* 通知内容 */
+        .toast-content {
+            flex: 1;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        /* 关闭按钮 */
+        .toast-close {
+            background: none;
+            border: none;
+            color: inherit;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+        }
+
+        .toast-close:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* 进度条 */
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 0 0 8px 8px;
+            transform-origin: left;
+            animation: toastProgress 4s linear forwards;
+        }
+
+        /* 回到顶部按钮 */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: #f99e00;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 4px 12px rgba(88, 62, 4, 0.3);
+            transition: all 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            z-index: 1000;
+        }
+
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .back-to-top:hover {
+            background-color: #f98500ff;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(88, 62, 4, 0.4);
+        }
+
+        .back-to-top:active {
+            transform: translateY(-1px);
+        }
+
+        /* 响应式表格列宽 */
+        .excel-table th:nth-child(1), .excel-table td:nth-child(1) { width: 5%; }   /* 序号 */
+        .excel-table th:nth-child(2), .excel-table td:nth-child(2) { width: 10%; }  /* 日期 */
+        .excel-table th:nth-child(3), .excel-table td:nth-child(3) { width: 12%; }  /* 货品编号 */
+        .excel-table th:nth-child(4), .excel-table td:nth-child(4) { width: 20%; }  /* 货品 */
+        .excel-table th:nth-child(5), .excel-table td:nth-child(5) { width: 8%; }   /* 数量 */
+        .excel-table th:nth-child(6), .excel-table td:nth-child(6) { width: 10%; }  /* 规格 */
+        .excel-table th:nth-child(7), .excel-table td:nth-child(7) { width: 12%; }  /* 单价 */
+        .excel-table th:nth-child(8), .excel-table td:nth-child(8) { width: 10%; }  /* 总价 */
+        .excel-table th:nth-child(9), .excel-table td:nth-child(9) { width: 10%; }  /* 类型 */
+        .excel-table th:nth-child(10), .excel-table td:nth-child(10) { width: 90px; }  /* 操作 */
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+            
+            .header .controls {
+                flex-wrap: wrap;
+                justify-content: center;
+                width: 100%;
+            }
+            
+            .filter-bar {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .filter-bar .stats-info {
+                flex-direction: column;
+                gap: 8px;
+                align-items: center;
+            }
+            
+            .filter-bar .stats-info .stat-item {
+                min-width: auto;
+                width: 100%;
+                justify-content: center;
+            }
+        }

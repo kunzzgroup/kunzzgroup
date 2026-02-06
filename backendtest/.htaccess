@@ -1,0 +1,10 @@
+RewriteEngine On
+
+# Allow access to folders without .php
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.*)$ $1.php [L]
+
+# Redirect .php to extension-less
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/backend/([^.]+)\.php [NC]
+RewriteRule ^ /backend/%1 [R=301,L]
