@@ -251,6 +251,9 @@ function convertToOrgChartFormat($orgStructure) {
             background: transparent !important;
         }
     </style>
+    <script>
+        const BASE_URL = "/backendtest/";
+    </script>
 </head>
 <body>
     <?php if ($strategyData && !empty($strategyData['organizationStructure'])): ?>

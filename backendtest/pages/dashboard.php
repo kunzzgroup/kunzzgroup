@@ -94,6 +94,9 @@ if (isset($_SESSION['user_id'])) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <script>
+        const BASE_URL = "/backendtest/";
+    </script>
 </head>
 <body>
     <?php include '../core/sidebar.php'; ?>

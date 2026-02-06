@@ -912,6 +912,9 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
             }
         }
     </style>
+    <script>
+        const BASE_URL = "/backendtest/";
+    </script>
 </head>
 <body class="has-sidebar">
     <?php include '../core/sidebar.php'; ?>
