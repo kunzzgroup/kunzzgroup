@@ -4,11 +4,24 @@ ob_start();
 
 // 设置字符编码
 header('Content-Type: text/html; charset=UTF-8');
+
+// 加载JSON数据 - 文件在backend目录中
+$jsonFile = __DIR__ . '/corporate_strategy.json';
+$strategyData = null;
+
+if (file_exists($jsonFile)) {
+    $jsonContent = file_get_contents($jsonFile);
+    $strategyData = json_decode($jsonContent, true);
+    
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        $strategyData = null;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" type="image/png" href="../../images/images/logo.png">
+    <link rel="icon" type="image/png" href="../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>企业蓝图</title>
@@ -2937,7 +2950,7 @@ header('Content-Type: text/html; charset=UTF-8');
             transform: translate(-50%, -50%);
             width: clamp(600px, 62.5vw, 1000px);
             height: clamp(600px, 62.5vw, 1000px);
-            background: url('../../images/images/logo.png') no-repeat center;
+            background: url('../images/images/logo.png') no-repeat center;
             background-size: contain;
             opacity: 0.08;
             z-index: 0;
@@ -3083,7 +3096,7 @@ header('Content-Type: text/html; charset=UTF-8');
     <script src="https://cdn.jsdelivr.net/npm/orgchart@2.1.9/dist/js/jquery.orgchart.min.js"></script>
 </head>
 <body>
-    <?php include '../core/sidebar.php'; ?>
+    <?php include 'sidebar.php'; ?>
     
     <!-- 主内容区域 -->
     <div class="main-content">
@@ -3093,68 +3106,6 @@ header('Content-Type: text/html; charset=UTF-8');
                 <h1 class="header-title">企业蓝图</h1>
             </div>
 
-            <?php 
-            // 重新初始化数据确保在渲染前是正确的
-            $defaultData = [
-                'companyOverview' => [
-                    'companyName' => 'KUNZZ HOLDINGS SDN BHD',
-                    'planTitle' => 'Corporate Strategic Plan',
-                    'strategyStartYear' => 2025,
-                    'strategyEndYear' => 2029,
-                    'ultimateGoal' => '成为全球领先的综合性企业控股集团'
-                ],
-                'organizationStructure' => [
-                    'ceo' => ['name' => 'MR. KUN', 'title' => 'CEO / Founder'],
-                    'pa' => ['name' => 'MS. LEE', 'title' => 'Personal Assistant'],
-                    'cLevel' => [
-                        ['name' => 'MR. TAN', 'title' => 'Chief Technology Officer', 'subordinates' => [['name' => 'Ariel', 'title' => 'Tech Manager'], ['name' => 'Bella', 'title' => 'System Architect']]],
-                        ['name' => 'MR. WONG', 'title' => 'Chief Operations Officer', 'subordinates' => [['name' => 'Charlie', 'title' => 'Ops Manager']]],
-                        ['name' => 'MS. CHEN', 'title' => 'Chief Financial Officer']
-                    ]
-                ],
-                'internalOrganization' => [
-                    'departments' => [
-                        ['name' => 'Human Resources', 'positions' => [['title' => 'HR Manager', 'name' => 'MRS. CHAN'], ['title' => 'Recruiter', 'name' => 'Alice'], ['title' => 'Admin Specialist', 'name' => 'Bob']]],
-                        ['name' => 'Sales Department', 'positions' => [['title' => 'Sales Director', 'name' => 'MR. LIM'], ['title' => 'Key Account Manager', 'name' => 'David'], ['title' => 'Sales Representative', 'name' => 'Eva']]]
-                    ]
-                ],
-                'timeline' => [
-                    ['year' => 2025, 'goal' => '奠定基础：完善核心架构与标准'],
-                    ['year' => 2026, 'goal' => '扩张布局：建立主要区域中心'],
-                    ['year' => 2027, 'goal' => '技术突破：实现全面数字化转型'],
-                    ['year' => 2028, 'goal' => '品牌升华：成为行业公认的标杆'],
-                    ['year' => 2029, 'goal' => '终极愿景：在2029年实现全球化运营']
-                ],
-                'corporateCore' => [
-                    'mission' => "初心：通过创新和卓越的服务，为员工、客户和合伙人创造可持续的价值。\n感性目标：让每一个相信我们的人都能获得成功。",
-                    'vision' => "2029年愿景：构建一个全球性的业务生态系统，服务超过百万级用户，并实现年收入翻番。",
-                    'culture' => ['诚信', '协作', '创新', '专业'],
-                    'values' => ['客户第一', '质量为本', '拥抱变化', '激情卓越']
-                ],
-                'cultureExplanation' => [
-                    ['key' => '诚信', 'description' => '诚实正直，言出必行。对客户、员工和合伙人保持透明。', 'scoring' => [['point' => 1, 'description' => '基本遵守规则'], ['point' => 3, 'description' => '在关键时刻能坚持正直'], ['point' => 5, 'description' => '通过自己的正直行为影响他人并建立深厚信任']]],
-                    ['key' => '协作', 'description' => '打破部门壁垒，为了共同的目标齐心协力。', 'scoring' => [['point' => 1, 'description' => '能完成本职工作'], ['point' => 3, 'description' => '主动协助同事'], ['point' => 5, 'description' => '在团队中发挥核心凝聚作用，带领团队共同成功']]]
-                ],
-                'valuesExplanation' => [
-                    ['key' => '客户第一', 'description' => '客户的成功就是我们的成功。始终从客户的角度出发思考问题。', 'scoring' => [['point' => 1, 'description' => '能及时响应客户需求'], ['point' => 3, 'description' => '能预见客户需求并提供方案'], ['point' => 5, 'description' => '与客户建立伙伴关系，成为其业务中不可或缺的一部分']]]
-                ],
-                'strategicObjectives' => [
-                    '2025' => [['department' => 'HR', 'strategy' => '建立高效的人才管理体系']],
-                    '2026' => [['department' => 'Marketing', 'strategy' => '品牌重塑与市场渗透']]
-                ]
-            ];
-            
-            $jsonFile = __DIR__ . '/corporate_strategy.json';
-            $strategyData = $defaultData;
-            
-            if (file_exists($jsonFile)) {
-                $jsonContent = file_get_contents($jsonFile);
-                $decodedData = json_decode($jsonContent, true);
-                if (json_last_error() === JSON_ERROR_NONE && is_array($decodedData)) {
-                    $strategyData = array_replace_recursive($defaultData, $decodedData);
-                }
-            }
-            ?>
             <?php if ($strategyData): ?>
                 <!-- Header Section - 新设计 -->
                 <div class="section">
@@ -3170,7 +3121,7 @@ header('Content-Type: text/html; charset=UTF-8');
                         <div class="header-logo-container">
                             <div class="header-logo">
                                 <?php 
-                                $logoPath = '../../images/images/logo.png';
+                                $logoPath = '../images/images/logo.png';
                                 $logoFullPath = __DIR__ . '/../images/images/logo.png';
                                 if (file_exists($logoFullPath)): 
                                 ?>
