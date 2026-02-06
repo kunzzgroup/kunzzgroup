@@ -1200,7 +1200,7 @@ require_once '../core/session_check.php';
         // 加载供应商列表
         async function loadSupplies() {
             try {
-                const response = await fetch('supply_api.php?action=supplies');
+                const response = await fetch('../api/supply_api.php?action=supplies');
                 
                 // 检查响应状态
                 if (!response.ok) {
@@ -1252,7 +1252,7 @@ require_once '../core/session_check.php';
                 const search = document.getElementById('search-input')?.value || '';
                 const type = document.getElementById('type-filter')?.value || '';
                 
-                let url = 'supply_api.php?action=list';
+                let url = '../api/supply_api.php?action=list';
                 if (search) url += '&search=' + encodeURIComponent(search);
                 if (type) url += '&type=' + encodeURIComponent(type);
                 
@@ -1485,7 +1485,7 @@ require_once '../core/session_check.php';
             try {
                 // 为每个有价格的供应商创建记录
                 const promises = prices.map(priceData => {
-                    return fetch('supply_api.php?action=material', {
+                    return fetch('../api/supply_api.php?action=material', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -2220,7 +2220,7 @@ require_once '../core/session_check.php';
             }
             
             try {
-                const response = await fetch('supply_api.php?action=batch-save', {
+                const response = await fetch('../api/supply_api.php?action=batch-save', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -2290,8 +2290,8 @@ require_once '../core/session_check.php';
             try {
                 const isEdit = !!editingSupplyId;
                 const url = isEdit 
-                    ? `supply_api.php?action=supply&id=${editingSupplyId}`
-                    : 'supply_api.php?action=supply';
+                    ? `../api/supply_api.php?action=supply&id=${editingSupplyId}`
+                    : '../api/supply_api.php?action=supply';
                 const method = isEdit ? 'PUT' : 'POST';
                 
                 const response = await fetch(url, {
@@ -2333,7 +2333,7 @@ require_once '../core/session_check.php';
             }
             
             try {
-                const response = await fetch(`supply_api.php?action=supply&id=${id}`, {
+                const response = await fetch(`../api/supply_api.php?action=supply&id=${id}`, {
                     method: 'DELETE'
                 });
                 
@@ -2466,7 +2466,7 @@ require_once '../core/session_check.php';
             try {
                 // 如果存在旧记录，先删除
                 if (recordId) {
-                    const deleteResponse = await fetch(`supply_api.php?action=material&id=${recordId}`, {
+                    const deleteResponse = await fetch(`../api/supply_api.php?action=material&id=${recordId}`, {
                         method: 'DELETE'
                     });
                     const deleteResult = await deleteResponse.json();
@@ -2478,7 +2478,7 @@ require_once '../core/session_check.php';
                 }
                 
                 // 创建新记录（可能类型已改变）
-                const createResponse = await fetch('supply_api.php?action=material', {
+                const createResponse = await fetch('../api/supply_api.php?action=material', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -2602,7 +2602,7 @@ require_once '../core/session_check.php';
             }
             
             try {
-                const response = await fetch(`supply_api.php?action=material&id=${recordId}`, {
+                const response = await fetch(`../api/supply_api.php?action=material&id=${recordId}`, {
                     method: 'DELETE'
                 });
                 
@@ -2701,7 +2701,7 @@ require_once '../core/session_check.php';
             try {
                 // 批量删除
                 const promises = recordIds.map(id => 
-                    fetch(`supply_api.php?action=material&id=${id}`, {
+                    fetch(`../api/supply_api.php?action=material&id=${id}`, {
                         method: 'DELETE'
                     })
                 );

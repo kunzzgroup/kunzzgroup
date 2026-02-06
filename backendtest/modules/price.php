@@ -1190,7 +1190,7 @@ require_once '../core/session_check.php';
         // 加载餐厅列表
         async function loadRestaurants() {
             try {
-                const response = await fetch('price_api.php?action=restaurants');
+                const response = await fetch('../api/price_api.php?action=restaurants');
                 
                 // 检查响应状态
                 if (!response.ok) {
@@ -1242,7 +1242,7 @@ require_once '../core/session_check.php';
                 const search = document.getElementById('search-input')?.value || '';
                 const type = document.getElementById('type-filter')?.value || '';
                 
-                let url = 'price_api.php?action=list';
+                let url = '../api/price_api.php?action=list';
                 if (search) url += '&search=' + encodeURIComponent(search);
                 if (type) url += '&type=' + encodeURIComponent(type);
                 
@@ -1485,7 +1485,7 @@ require_once '../core/session_check.php';
             try {
                 // 为每个有价格的餐厅创建记录
                 const promises = prices.map(priceData => {
-                    return fetch('price_api.php?action=food', {
+                    return fetch('../api/price_api.php?action=food', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -2234,7 +2234,7 @@ require_once '../core/session_check.php';
             }
             
             try {
-                const response = await fetch('price_api.php?action=batch-save', {
+                const response = await fetch('../api/price_api.php?action=batch-save', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -2312,8 +2312,8 @@ require_once '../core/session_check.php';
             try {
                 const isEdit = !!editingRestaurantId;
                 const url = isEdit 
-                    ? `price_api.php?action=restaurant&id=${editingRestaurantId}`
-                    : 'price_api.php?action=restaurant';
+                    ? `../api/price_api.php?action=restaurant&id=${editingRestaurantId}`
+                    : '../api/price_api.php?action=restaurant';
                 const method = isEdit ? 'PUT' : 'POST';
                 
                 const response = await fetch(url, {
@@ -2356,7 +2356,7 @@ require_once '../core/session_check.php';
             }
             
             try {
-                const response = await fetch(`price_api.php?action=restaurant&id=${id}`, {
+                const response = await fetch(`../api/price_api.php?action=restaurant&id=${id}`, {
                     method: 'DELETE'
                 });
                 
@@ -2489,7 +2489,7 @@ require_once '../core/session_check.php';
             try {
                 // 如果存在旧记录，先删除
                 if (recordId) {
-                    const deleteResponse = await fetch(`price_api.php?action=food&id=${recordId}`, {
+                    const deleteResponse = await fetch(`../api/price_api.php?action=food&id=${recordId}`, {
                         method: 'DELETE'
                     });
                     const deleteResult = await deleteResponse.json();
@@ -2501,7 +2501,7 @@ require_once '../core/session_check.php';
                 }
                 
                 // 创建新记录（可能类型已改变）
-                const createResponse = await fetch('price_api.php?action=food', {
+                const createResponse = await fetch('../api/price_api.php?action=food', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -2625,7 +2625,7 @@ require_once '../core/session_check.php';
             }
             
             try {
-                const response = await fetch(`price_api.php?action=food&id=${recordId}`, {
+                const response = await fetch(`../api/price_api.php?action=food&id=${recordId}`, {
                     method: 'DELETE'
                 });
                 
@@ -2724,7 +2724,7 @@ require_once '../core/session_check.php';
             try {
                 // 批量删除
                 const promises = recordIds.map(id => 
-                    fetch(`price_api.php?action=food&id=${id}`, {
+                    fetch(`../api/price_api.php?action=food&id=${id}`, {
                         method: 'DELETE'
                     })
                 );
