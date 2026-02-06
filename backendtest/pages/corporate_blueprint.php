@@ -12,28 +12,107 @@ $defaultData = [
     'companyOverview' => [
         'companyName' => 'KUNZZ HOLDINGS SDN BHD',
         'planTitle' => 'Corporate Strategic Plan',
-        'strategyStartYear' => date('Y'),
-        'strategyEndYear' => date('Y') + 5,
-        'ultimateGoal' => ''
+        'strategyStartYear' => 2025,
+        'strategyEndYear' => 2029,
+        'ultimateGoal' => '成为全球领先的综合性企业控股集团'
     ],
     'organizationStructure' => [
-        'ceo' => ['name' => '', 'title' => 'CEO'],
-        'pa' => ['name' => '', 'title' => 'PA'],
-        'cLevel' => []
+        'ceo' => ['name' => 'MR. KUN', 'title' => 'CEO / Founder'],
+        'pa' => ['name' => 'MS. LEE', 'title' => 'Personal Assistant'],
+        'cLevel' => [
+            [
+                'name' => 'MR. TAN', 
+                'title' => 'Chief Technology Officer',
+                'subordinates' => [
+                    ['name' => 'Ariel', 'title' => 'Tech Manager'],
+                    ['name' => 'Bella', 'title' => 'System Architect']
+                ]
+            ],
+            [
+                'name' => 'MR. WONG', 
+                'title' => 'Chief Operations Officer',
+                'subordinates' => [
+                    ['name' => 'Charlie', 'title' => 'Ops Manager']
+                ]
+            ],
+            [
+                'name' => 'MS. CHEN', 
+                'title' => 'Chief Financial Officer'
+            ]
+        ]
     ],
     'internalOrganization' => [
-        'departments' => []
+        'departments' => [
+            [
+                'name' => 'Human Resources',
+                'positions' => [
+                    ['title' => 'HR Manager', 'name' => 'MRS. CHAN'],
+                    ['title' => 'Recruiter', 'name' => 'Alice'],
+                    ['title' => 'Admin Specialist', 'name' => 'Bob']
+                ]
+            ],
+            [
+                'name' => 'Sales Department',
+                'positions' => [
+                    ['title' => 'Sales Director', 'name' => 'MR. LIM'],
+                    ['title' => 'Key Account Manager', 'name' => 'David'],
+                    ['title' => 'Sales Representative', 'name' => 'Eva']
+                ]
+            ]
+        ]
     ],
-    'timeline' => [],
+    'timeline' => [
+        ['year' => 2025, 'goal' => '奠定基础：完善核心架构与标准'],
+        ['year' => 2026, 'goal' => '扩张布局：建立主要区域中心'],
+        ['year' => 2027, 'goal' => '技术突破：实现全面数字化转型'],
+        ['year' => 2028, 'goal' => '品牌升华：成为行业公认的标杆'],
+        ['year' => 2029, 'goal' => '终极愿景：在2029年实现全球化运营']
+    ],
     'corporateCore' => [
-        'mission' => '',
-        'vision' => '',
-        'culture' => [],
-        'values' => []
+        'mission' => "初心：通过创新和卓越的服务，为员工、客户和合伙人创造可持续的价值。\n感性目标：让每一个相信我们的人都能获得成功。",
+        'vision' => "2029年愿景：构建一个全球性的业务生态系统，服务超过百万级用户，并实现年收入翻番。",
+        'culture' => ['诚信', '协作', '创新', '专业'],
+        'values' => ['客户第一', '质量为本', '拥抱变化', '激情卓越']
     ],
-    'cultureExplanation' => [],
-    'valuesExplanation' => [],
-    'strategicObjectives' => []
+    'cultureExplanation' => [
+        [
+            'key' => '诚信',
+            'description' => '诚实正直，言出必行。对客户、员工和合伙人保持透明。',
+            'scoring' => [
+                ['point' => 1, 'description' => '基本遵守规则'],
+                ['point' => 3, 'description' => '在关键时刻能坚持正直'],
+                ['point' => 5, 'description' => '通过自己的正直行为影响他人并建立深厚信任']
+            ]
+        ],
+        [
+            'key' => '协作',
+            'description' => '打破部门壁垒，为了共同的目标齐心协力。',
+            'scoring' => [
+                ['point' => 1, 'description' => '能完成本职工作'],
+                ['point' => 3, 'description' => '主动协助同事'],
+                ['point' => 5, 'description' => '在团队中发挥核心凝聚作用，带领团队共同成功']
+            ]
+        ]
+    ],
+    'valuesExplanation' => [
+        [
+            'key' => '客户第一',
+            'description' => '客户的成功就是我们的成功。始终从客户的角度出发思考问题。',
+            'scoring' => [
+                ['point' => 1, 'description' => '能及时响应客户需求'],
+                ['point' => 3, 'description' => '能预见客户需求并提供方案'],
+                ['point' => 5, 'description' => '与客户建立伙伴关系，成为其业务中不可或缺的一部分']
+            ]
+        ]
+    ],
+    'strategicObjectives' => [
+        '2025' => [
+            ['department' => 'HR', 'strategy' => '建立高效的人才管理体系']
+        ],
+        '2026' => [
+            ['department' => 'Marketing', 'strategy' => '品牌重塑与市场渗透']
+        ]
+    ]
 ];
 
 // 加载JSON数据 - 文件在backend目录中
@@ -49,117 +128,6 @@ if (file_exists($jsonFile)) {
         $strategyData = array_replace_recursive($defaultData, $decodedData);
     }
 }
-
-// 转换组织架构数据为 OrgChart.js 所需的树形格式
-function convertToOrgChartFormat($orgStructure) {
-    // CEO节点（根节点）
-    if (empty($orgStructure['ceo'])) {
-        return null;
-    }
-    
-    $ceoTitle = $orgStructure['ceo']['title'] ?? $orgStructure['ceo']['fullTitle'] ?? 'CEO';
-    $ceoName = $orgStructure['ceo']['name'] ?? '';
-    
-    $ceoNode = [
-        'id' => 'ceo',
-        'name' => $ceoName ?: '—',
-        'title' => $ceoTitle,
-        'level' => 'ceo',
-        'children' => []
-    ];
-    
-    // C-Level节点作为CEO的子节点
-    if (!empty($orgStructure['cLevel']) && is_array($orgStructure['cLevel'])) {
-        foreach ($orgStructure['cLevel'] as $index => $member) {
-            $memberTitle = $member['title'] ?? $member['fullTitle'] ?? '';
-            $memberName = $member['name'] ?? '';
-            
-            $cLevelNode = [
-                'id' => 'clevel_' . $index,
-                'name' => $memberName ?: '—',
-                'title' => $memberTitle,
-                'level' => 'clevel',
-                'children' => []
-            ];
-            
-            // 处理下属
-            if (!empty($member['subordinates']) && is_array($member['subordinates'])) {
-                foreach ($member['subordinates'] as $subIndex => $sub) {
-                    $subTitle = $sub['title'] ?? $sub['fullTitle'] ?? '';
-                    $subName = $sub['name'] ?? '';
-                    
-                    $subNode = [
-                        'id' => 'sub_' . $index . '_' . $subIndex,
-                        'name' => $subName ?: '—',
-                        'title' => $subTitle,
-                        'level' => 'subordinate'
-                    ];
-                    $cLevelNode['children'][] = $subNode;
-                }
-            }
-            
-            $ceoNode['children'][] = $cLevelNode;
-        }
-    }
-    
-    // PA节点也作为CEO的子节点
-    if (!empty($orgStructure['pa'])) {
-        $paTitle = $orgStructure['pa']['title'] ?? $orgStructure['pa']['fullTitle'] ?? 'PA';
-        $paName = $orgStructure['pa']['name'] ?? '';
-        
-        $paNode = [
-            'id' => 'pa',
-            'name' => $paName ?: '—',
-            'title' => $paTitle,
-            'level' => 'pa'
-        ];
-        $ceoNode['children'][] = $paNode;
-    }
-    
-    return $ceoNode;
-}
-
-// 转换内部组织架构数据
-function convertToInternalOrgChartFormat($internalOrg) {
-    if (empty($internalOrg['departments']) || !is_array($internalOrg['departments'])) {
-        return [];
-    }
-
-    $charts = [];
-    foreach ($internalOrg['departments'] as $index => $dept) {
-        if (empty($dept['name'])) continue;
-
-        $root = [
-            'id' => 'dept_' . $index,
-            'title' => $dept['name'],
-            'name' => 'Department',
-            'level' => 'department',
-            'children' => []
-        ];
-        
-        if (!empty($dept['positions']) && is_array($dept['positions'])) {
-            foreach ($dept['positions'] as $posIndex => $pos) {
-                $posTitle = $pos['title'] ?? '';
-                $posName = $pos['name'] ?? '';
-                
-                if (empty($posTitle)) continue;
-
-                $root['children'][] = [
-                    'id' => 'dept_' . $index . '_pos_' . $posIndex,
-                    'title' => $posTitle,
-                    'name' => $posName ?: '—',
-                    'level' => 'position'
-                ];
-            }
-        }
-        $charts[] = $root;
-    }
-    return $charts;
-}
-
-// 生成图表数据
-$orgChartData = convertToOrgChartFormat($strategyData['organizationStructure']);
-$internalOrgChartData = convertToInternalOrgChartFormat($strategyData['internalOrganization']);
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
