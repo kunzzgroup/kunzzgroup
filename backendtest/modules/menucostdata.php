@@ -1051,7 +1051,7 @@
             }
 
             try {
-                const response = await fetch(`menucostdata_api.php?id=${id}`, {
+                const response = await fetch(`../api/menucostdata_api.php?id=${id}`, {
                     method: 'DELETE'
                 });
 

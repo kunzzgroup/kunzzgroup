@@ -445,7 +445,7 @@
         // 加载原材料列表
         async function loadIngredients() {
             try {
-                const response = await fetch('menucost_api.php?action=ingredients');
+                const response = await fetch('../api/menucost_api.php?action=ingredients');
                 const result = await response.json();
                 if (result.success) {
                     ingredients = result.data || [];
@@ -458,7 +458,7 @@
         // 加载数据
         async function loadData() {
             try {
-                const response = await fetch('menucost_api.php?action=list');
+                const response = await fetch('../api/menucost_api.php?action=list');
                 const result = await response.json();
                 
                 if (result.success) {
@@ -605,7 +605,7 @@
             }
 
             try {
-                const response = await fetch(`menucost_api.php?id=${menuItemId}`, {
+                const response = await fetch(`../api/menucost_api.php?id=${menuItemId}`, {
                     method: 'DELETE'
                 });
 
@@ -683,7 +683,7 @@
             }
 
             try {
-                const response = await fetch('menucost_api.php?action=ingredient', {
+                const response = await fetch('../api/menucost_api.php?action=ingredient', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -721,7 +721,7 @@
             }
 
             try {
-                const response = await fetch(`menucost_api.php?action=ingredient&id=${ingredientId}`, {
+                const response = await fetch(`../api/menucost_api.php?action=ingredient&id=${ingredientId}`, {
                     method: 'DELETE'
                 });
 

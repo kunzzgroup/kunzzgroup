@@ -1700,7 +1700,7 @@ require_once '../core/session_check.php';
         try {
             const workAreaFilter = document.getElementById('workAreaFilter');
             const workArea = workAreaFilter ? workAreaFilter.value : '';
-            let url = `schedule_api.php?action=get_employees&restaurant=${currentRestaurant}`;
+            let url = `../api/schedule_api.php?action=get_employees&restaurant=${currentRestaurant}`;
             if (workArea) {
                 url += '&work_area=' + workArea;
             }
@@ -1717,7 +1717,7 @@ require_once '../core/session_check.php';
 
     async function loadShifts() {
         try {
-            const response = await fetch(`schedule_api.php?action=get_shifts&restaurant=${currentRestaurant}`);
+            const response = await fetch(`../api/schedule_api.php?action=get_shifts&restaurant=${currentRestaurant}`);
             const result = await response.json();
             console.log('加载班次API响应:', result);
             
@@ -1748,7 +1748,7 @@ require_once '../core/session_check.php';
     
     async function loadLeaveTypes() {
         try {
-            const response = await fetch('schedule_api.php?action=get_leave_types');
+            const response = await fetch('../api/schedule_api.php?action=get_leave_types');
             const result = await response.json();
             if (result.success) {
                 leaveTypes = result.data;
@@ -1778,7 +1778,7 @@ require_once '../core/session_check.php';
             
             const workAreaFilter = document.getElementById('workAreaFilter');
             const workArea = workAreaFilter ? workAreaFilter.value : '';
-            let url = `schedule_api.php?action=get_schedules&year=${currentYear}&month=${currentMonth}&restaurant=${currentRestaurant}`;
+            let url = `../api/schedule_api.php?action=get_schedules&year=${currentYear}&month=${currentMonth}&restaurant=${currentRestaurant}`;
             if (workArea) {
                 url += '&work_area=' + workArea;
             }
@@ -2038,7 +2038,7 @@ require_once '../core/session_check.php';
                 }
             }
             
-            const response = await fetch('schedule_api.php?action=save_schedule', {
+            const response = await fetch('../api/schedule_api.php?action=save_schedule', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -2073,7 +2073,7 @@ require_once '../core/session_check.php';
         if (!confirm('确定要删除这条排班记录吗？')) return;
         
         try {
-            const response = await fetch('schedule_api.php?action=delete_schedule', {
+            const response = await fetch('../api/schedule_api.php?action=delete_schedule', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -2479,7 +2479,7 @@ require_once '../core/session_check.php';
                 ? { id, name, phone, position, work_area: workArea }
                 : { name, phone, position, work_area: workArea, restaurant: currentRestaurant };
             
-            const response = await fetch(`schedule_api.php?action=${action}`, {
+            const response = await fetch(`../api/schedule_api.php?action=${action}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestData)
@@ -2509,7 +2509,7 @@ require_once '../core/session_check.php';
         if (!confirm('确定要删除这个员工吗？相关的排班记录也将被删除。')) return;
         
         try {
-            const response = await fetch('schedule_api.php?action=delete_employee', {
+            const response = await fetch('../api/schedule_api.php?action=delete_employee', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id })
@@ -2572,7 +2572,7 @@ require_once '../core/session_check.php';
                 ? { id, start_time: startTime, end_time: endTime }
                 : { shift_code: code, restaurant: currentRestaurant, start_time: startTime, end_time: endTime };
             
-            const response = await fetch(`schedule_api.php?action=${action}`, {
+            const response = await fetch(`../api/schedule_api.php?action=${action}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestData)
@@ -2614,7 +2614,7 @@ require_once '../core/session_check.php';
         btn.disabled = true;
         
         try {
-            const response = await fetch('schedule_api.php?action=add_shift', {
+            const response = await fetch('../api/schedule_api.php?action=add_shift', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -2652,7 +2652,7 @@ require_once '../core/session_check.php';
         try {
             console.log('删除班次ID:', id);
             
-            const response = await fetch('schedule_api.php?action=delete_shift', {
+            const response = await fetch('../api/schedule_api.php?action=delete_shift', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id })
@@ -3376,7 +3376,7 @@ require_once '../core/session_check.php';
     }
     
     async function saveScheduleRequest(payload) {
-        const response = await fetch('schedule_api.php?action=save_schedule', {
+        const response = await fetch('../api/schedule_api.php?action=save_schedule', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -3389,7 +3389,7 @@ require_once '../core/session_check.php';
     }
     
     async function deleteScheduleRequest(employeeId, dateStr) {
-        const response = await fetch('schedule_api.php?action=delete_schedule', {
+        const response = await fetch('../api/schedule_api.php?action=delete_schedule', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -3569,7 +3569,7 @@ require_once '../core/session_check.php';
                 return;
             }
             
-            const response = await fetch('schedule_api.php?action=save_schedules_batch', {
+            const response = await fetch('../api/schedule_api.php?action=save_schedules_batch', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ schedules: scheduleData })
@@ -3636,7 +3636,7 @@ require_once '../core/session_check.php';
             }
             
             if (restoreSchedules.length > 0) {
-                await fetch('schedule_api.php?action=save_schedules_batch', {
+                await fetch('../api/schedule_api.php?action=save_schedules_batch', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ schedules: restoreSchedules })
@@ -3645,7 +3645,7 @@ require_once '../core/session_check.php';
             
             if (deleteTargets.length > 0) {
                 await Promise.all(deleteTargets.map(target => 
-                    fetch('schedule_api.php?action=delete_schedule', {
+                    fetch('../api/schedule_api.php?action=delete_schedule', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(target)
@@ -3743,7 +3743,7 @@ require_once '../core/session_check.php';
             }
             
             // 批量保存
-            const response = await fetch('schedule_api.php?action=save_schedules_batch', {
+            const response = await fetch('../api/schedule_api.php?action=save_schedules_batch', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ schedules: copiedSchedules })
@@ -4733,7 +4733,7 @@ require_once '../core/session_check.php';
                 
                 if (!value) {
                     // 删除记录
-                    await fetch('schedule_api.php?action=delete_schedule', {
+                    await fetch('../api/schedule_api.php?action=delete_schedule', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -4782,7 +4782,7 @@ require_once '../core/session_check.php';
             
             // 批量保存
             if (schedulesToSave.length > 0) {
-                const response = await fetch('schedule_api.php?action=save_schedules_batch', {
+                const response = await fetch('../api/schedule_api.php?action=save_schedules_batch', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ schedules: schedulesToSave })

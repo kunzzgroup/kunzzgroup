@@ -2254,7 +2254,7 @@ require_once '../core/session_check.php';
             // 每5分钟刷新一次会话
             sessionRefreshInterval = setInterval(async () => {
                 try {
-                    const response = await fetch('session_refresh_api.php');
+                    const response = await fetch('../api/session_refresh_api.php');
                     const result = await response.json();
                     
                     if (!result.success && result.code === 'SESSION_EXPIRED') {
@@ -2406,7 +2406,7 @@ require_once '../core/session_check.php';
             try {
                 // 添加时间戳防止缓存，确保每次获取最新数据
                 const timestamp = new Date().getTime();
-                const response = await fetch(`stockminimumapi.php?action=list&_t=${timestamp}`, {
+                const response = await fetch(`../api/stockminimumapi.php?action=list&_t=${timestamp}`, {
                     cache: 'no-cache',
                     headers: {
                         'Cache-Control': 'no-cache',
