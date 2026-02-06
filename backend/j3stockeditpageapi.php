@@ -259,11 +259,15 @@ function handleGet() {
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if ($result) {
+                $category = $result['category'] ?? '';
+                if ($category === 'Drinks') {
+                    $category = 'Service Line';
+                }
                 sendResponse(true, "产品名称获取成功", [
                     'product_name' => $result['product_name'],
                     'specification' => $result['specification'],
                     'supplier' => $result['supplier'],
-                    'category' => $result['category']
+                    'category' => $category
                 ]);
             } else {
                 sendResponse(false, "未找到对应的产品名称");
@@ -291,11 +295,15 @@ function handleGet() {
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if ($result) {
+                $category = $result['category'] ?? '';
+                if ($category === 'Drinks') {
+                    $category = 'Service Line';
+                }
                 sendResponse(true, "产品编号获取成功", [
                     'product_code' => $result['product_code'],
                     'specification' => $result['specification'],
                     'supplier' => $result['supplier'],
-                    'category' => $result['category']
+                    'category' => $category
                 ]);
             } else {
                 sendResponse(false, "未找到对应的产品编号");
