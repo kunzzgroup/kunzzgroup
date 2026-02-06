@@ -1318,7 +1318,7 @@ Implementation Timeline Adherence (%)"><?php echo htmlspecialchars(implode("\n",
                 <!-- 固定操作按钮 -->
                 <div class="fixed-actions">
                     <button type="submit" class="btn">保存更改</button>
-                    <a href="../modules/corporate_blueprint.php" class="btn btn-secondary">返回查看</a>
+                    <a href="corporate_blueprint.php" class="btn btn-secondary">返回查看</a>
                 </div>
             </form>
         </div>
