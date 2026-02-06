@@ -6,7 +6,7 @@ ob_start();
 header('Content-Type: text/html; charset=UTF-8');
 
 // 加载JSON数据 - 文件在backend目录中
-$jsonFile = __DIR__ . '/corporate_strategy.json';
+$jsonFile = __DIR__ . 'backend/corporate_strategy.json';
 $strategyData = null;
 
 if (file_exists($jsonFile)) {
@@ -3096,7 +3096,7 @@ if (file_exists($jsonFile)) {
     <script src="https://cdn.jsdelivr.net/npm/orgchart@2.1.9/dist/js/jquery.orgchart.min.js"></script>
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
+    <?php include '../core/sidebar.php'; ?>
     
     <!-- 主内容区域 -->
     <div class="main-content">
