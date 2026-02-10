@@ -1,4 +1,10 @@
 <?php
+if (!function_exists('getBgMusicHtml')) {
+    function getBgMusicHtml() {
+        return ''; // 临时禁用背景音乐
+    }
+}
+
 // 检查是否已经启动了session
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
@@ -6,7 +12,6 @@ if (session_status() == PHP_SESSION_NONE) {
 
 // 包含媒体配置
 if (!isset($mediaConfigIncluded)) {
-    include_once '../media_config.php';
     $mediaConfigIncluded = true;
 }
 
