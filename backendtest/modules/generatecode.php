@@ -1499,7 +1499,6 @@ require_once 'session_check.php';
     </style>
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
     <?php include CORE_PATH . '/sidebar.php'; ?>
     <div class="container">
         <!-- 页面标题 -->
