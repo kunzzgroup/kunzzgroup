@@ -956,7 +956,7 @@ require_once CORE_PATH . '/session_check.php';
     </style>
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
+    <?php include CORE_PATH . '/sidebar.php'; ?>
     <div class="container">
         <div class="header">
             <h1>餐厅价格对比</h1>
