@@ -1,6 +1,6 @@
 <?php
 session_start();
-include_once '../media_config.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/core/media_config.php';
 
 // 禁用页面缓存
 header("Cache-Control: no-cache, no-store, must-revalidate");
