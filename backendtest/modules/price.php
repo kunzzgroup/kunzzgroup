@@ -1244,7 +1244,7 @@ require_once CORE_PATH . '/session_check.php';
                 const search = document.getElementById('search-input')?.value || '';
                 const type = document.getElementById('type-filter')?.value || '';
                 
-                let url = 'price_api.php?action=list';
+                let url = '/backendtest/api/price_api.php?action=list';
                 if (search) url += '&search=' + encodeURIComponent(search);
                 if (type) url += '&type=' + encodeURIComponent(type);
                 
