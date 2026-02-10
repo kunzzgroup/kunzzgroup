@@ -1,5 +1,4 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT'].'/core/debug_bootstrap.php';
 // 禁用页面缓存
 header("Cache-Control: no-cache, no-store, must-revalidate");
 header("Pragma: no-cache");
