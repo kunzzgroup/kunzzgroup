@@ -3540,7 +3540,7 @@ require_once CORE_PATH . '/session_check.php';
 
     <script>
         // API 配置
-        const API_BASE_URL = 'dishware_api.php';
+        const API_BASE_URL = '/backendtest/api/dishware_api.php';
         
         // 应用状态
         let stockData = [];
