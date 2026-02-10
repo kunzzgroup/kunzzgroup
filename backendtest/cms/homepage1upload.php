@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . '/../core/bootstrap.php';
 
 // 检查是否已登录（根据你的登录系统调整）
 if (!isset($_SESSION['user_id'])) {
@@ -284,7 +284,7 @@ if (file_exists('media_config.json')) {
     </style>
 </head>
 <body>
-    <?php include__DIR__ . '/../core/sidebar.php'; ?>
+    <?php  ?>
     <div class="container">
         <div class="header">
             <h1>首页媒体管理</h1>
@@ -386,4 +386,5 @@ if (file_exists('media_config.json')) {
     </script>
 </body>
 </html>
+
 

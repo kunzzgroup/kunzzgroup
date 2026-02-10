@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../core/bootstrap.php';
+
 declare(strict_types=1);
 
 // 设置内存和执行时间，以防数据量大
@@ -153,4 +155,5 @@ if ($counter === 1) {
 
 echo "</table></body></html>";
 exit;
+
 

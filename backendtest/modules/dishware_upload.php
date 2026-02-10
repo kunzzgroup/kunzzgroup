@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+<?php
+require_once __DIR__ . '/../core/bootstrap.php';
+
+><!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <link rel="icon" type="image/png" href="images/images/logo.png">
@@ -612,3 +615,5 @@
     </script>
 </body>
 </html>
+
+

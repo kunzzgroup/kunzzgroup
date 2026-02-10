@@ -1,6 +1,8 @@
 <?php
+require_once __DIR__ . '/../core/bootstrap.php';
+
 // 包含会话验证
-require_once__DIR__ . '/../core/session_check.php';
+
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -1367,7 +1369,7 @@ require_once__DIR__ . '/../core/session_check.php';
     </style>
 </head>
 <body>
-    <?php include__DIR__ . '/../core/sidebar.php'; ?>
+    <?php  ?>
     <!-- 低库存预警弹窗 -->
     <div id="low-stock-modal" class="low-stock-modal">
         <div class="low-stock-modal-content">
@@ -3491,4 +3493,5 @@ require_once__DIR__ . '/../core/session_check.php';
     </script>
 </body>
 </html>
+
 

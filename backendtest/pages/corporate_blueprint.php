@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/../core/bootstrap.php';
+
 ob_start();
 
 // 设置字符编码
@@ -3096,7 +3097,7 @@ if (file_exists($jsonFile)) {
     <script src="https://cdn.jsdelivr.net/npm/orgchart@2.1.9/dist/js/jquery.orgchart.min.js"></script>
 </head>
 <body>
-    <?php include__DIR__ . '/../core/sidebar.php'; ?>
+    <?php  ?>
     
     <!-- 主内容区域 -->
     <div class="main-content">
@@ -4103,6 +4104,7 @@ if (file_exists($jsonFile)) {
 <?php
 ob_end_flush();
 ?>
+
 
 
 

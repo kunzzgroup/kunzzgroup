@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/../core/bootstrap.php';
+
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">

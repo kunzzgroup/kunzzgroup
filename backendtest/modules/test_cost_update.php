@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../core/bootstrap.php';
+
 // 测试成本表更新是否累加的脚本
 
 $host = 'localhost';
@@ -104,4 +106,5 @@ try {
     echo "<p style='color: red;'>错误: " . $e->getMessage() . "</p>";
 }
 ?>
+
 

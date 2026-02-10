@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../core/bootstrap.php';
+
 /**
  * 迁移脚本：将现有的 stock_sot 记录同步到 stockinout_data 表
  * 
@@ -89,4 +91,5 @@ try {
     exit(1);
 }
 ?>
+
 

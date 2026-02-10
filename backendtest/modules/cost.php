@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . '/../core/bootstrap.php';
 
 // 超时时间（秒）
 define('SESSION_TIMEOUT', 60);
@@ -1386,7 +1386,7 @@ $avatarLetter = strtoupper($username[0]);
     </style>
 </head>
 <body class="restaurant-j1">
-    <?php include__DIR__ . '/../core/sidebar.php'; ?>
+    <?php  ?>
         <div class="container">
             <div class="header">
                 <div>
@@ -3899,6 +3899,7 @@ $avatarLetter = strtoupper($username[0]);
     </script>
 </body>
 </html>
+
 
 
 

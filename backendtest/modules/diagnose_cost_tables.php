@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../core/bootstrap.php';
+
 // 诊断成本表问题的脚本
 
 $host = 'localhost';
@@ -58,4 +60,5 @@ try {
     echo "错误: " . $e->getMessage();
 }
 ?>
+
 

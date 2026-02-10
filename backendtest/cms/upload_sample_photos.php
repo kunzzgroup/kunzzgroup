@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../core/bootstrap.php';
+
 // 上传示例照片的脚本
 
 echo "<h2>上传示例照片</h2>";
@@ -80,3 +82,4 @@ if ($photos) {
 
 echo "<br><strong>示例照片上传完成！</strong>";
 ?>
+

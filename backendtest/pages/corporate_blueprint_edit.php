@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . '/../core/bootstrap.php';
 
 // 检查是否已登录
 if (!isset($_SESSION['user_id'])) {
@@ -914,7 +914,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
     </style>
 </head>
 <body class="has-sidebar">
-    <?php include__DIR__ . '/../core/sidebar.php'; ?>
+    <?php  ?>
     <div class="container">
         <div class="header">
             <h1>企业蓝图管理</h1>
@@ -1742,6 +1742,7 @@ Implementation Timeline Adherence (%)"></textarea>
     </script>
 </body>
 </html>
+
 
 
 

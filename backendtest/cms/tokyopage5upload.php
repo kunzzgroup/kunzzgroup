@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/../core/bootstrap.php';
+
 include_once 'media_config.php';
 
 // 检查是否已登录（根据你的登录系统调整）
@@ -412,7 +413,7 @@ $currentConfig = getTokyoLocationConfig();
     </style>
 </head>
 <body>
-    <?php include__DIR__ . '/../core/sidebar.php'; ?>
+    <?php  ?>
     <div class="container">
         <div class="header">
             <h1>Tokyo 位置信息管理</h1>
@@ -748,4 +749,5 @@ $currentConfig = getTokyoLocationConfig();
     </script>
 </body>
 </html>
+
 

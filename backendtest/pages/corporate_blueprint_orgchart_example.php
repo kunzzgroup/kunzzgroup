@@ -1,10 +1,11 @@
 <?php
+require_once __DIR__ . '/../core/bootstrap.php';
+
 /**
  * 方案2示例：使用 OrgChart.js 实现组织架构图
  * 这是一个示例文件，展示如何使用专业的图表库来实现树形组织架构图
  */
 
-session_start();
 ob_start();
 header('Content-Type: text/html; charset=UTF-8');
 
@@ -314,4 +315,5 @@ function convertToOrgChartFormat($orgStructure) {
 <?php
 ob_end_flush();
 ?>
+
 

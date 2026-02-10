@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../core/bootstrap.php';
+
 // 测试碗碟破损记录系统
 require_once__DIR__ . '/../api/dishware_api.php';
 
@@ -79,5 +81,6 @@ echo "<li>✓ 破损记录增删改查</li>";
 echo "<li>✓ 实时数据更新</li>";
 echo "</ul>";
 ?>
+
 
 

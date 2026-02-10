@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . '/../core/bootstrap.php';
 
 // 超时时间（秒）
 define('SESSION_TIMEOUT', 300); // 未勾选「记住我」时 5 分钟无活动则登出
@@ -96,7 +96,7 @@ if (isset($_SESSION['user_id'])) {
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <?php include __DIR__ . '/../core/sidebar.php'; ?>
+    <?php  ?>
   
 <script src="app.js"></script>
 <script>
@@ -459,5 +459,6 @@ function goToCulture() {
 <!-- sidebar scripts moved to ../sidebar.php ../sidebar.php -->
 </body>
 </html>
+
 
 

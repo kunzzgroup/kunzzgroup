@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../core/bootstrap.php';
+
 // 防止浏览器/代理缓存，确保修改能立刻生效
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Cache-Control: post-check=0, pre-check=0', false);
@@ -6,7 +8,7 @@ header('Pragma: no-cache');
 header('Expires: 0');
 
 // 在输出任何内容前完成 session 与认证检查，避免未勾选「记住我」时白屏
-session_start();
+
 define('SESSION_TIMEOUT_DISHWARE', 60);
 
 if (isset($_SESSION['user_id'])) {
@@ -2916,7 +2918,7 @@ if (isset($_SESSION['user_id'])) {
     </style>
 </head>
 <body>
-    <?php include__DIR__ . '/../core/sidebar.php'; ?>
+    <?php  ?>
     <div class="container">
         <div class="header">
             <div>
@@ -11916,5 +11918,6 @@ if (isset($_SESSION['user_id'])) {
     </script>
 </body>
 </html>
+
 
 

@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../../../../../../../../core/bootstrap.php';
 // 用于排查：浏览器当前访问的是否为本工作区部署出来的 PHP 文件（以及是否被 OPcache/代理缓存）
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
@@ -30,5 +31,6 @@ echo json_encode([
     'php_sapi' => PHP_SAPI,
     'opcache' => $opcache,
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
 
 

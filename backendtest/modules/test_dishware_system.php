@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../core/bootstrap.php';
+
 // 测试碗碟库存系统
 // 这个文件用于测试系统是否正常工作
 
@@ -96,3 +98,4 @@ echo "<p><a href='dishware_stock.php' style='color: blue;'>📊 库存管理</a>
 echo "<hr>";
 echo "<p><small>测试完成时间: " . date('Y-m-d H:i:s') . "</small></p>";
 ?>
+
