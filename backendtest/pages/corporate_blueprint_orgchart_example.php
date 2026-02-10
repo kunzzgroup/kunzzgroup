@@ -1,4 +1,5 @@
 <?php
+require_once dirname(__DIR__) . '/core/init.php';
 /**
  * 方案2示例：使用 OrgChart.js 实现组织架构图
  * 这是一个示例文件，展示如何使用专业的图表库来实现树形组织架构图

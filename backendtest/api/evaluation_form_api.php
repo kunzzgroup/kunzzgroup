@@ -1,4 +1,5 @@
 <?php
+require_once dirname(__DIR__) . '/core/init.php';
 ob_start();
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: *");

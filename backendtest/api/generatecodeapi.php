@@ -1,4 +1,5 @@
 <?php
+require_once dirname(__DIR__) . '/core/init.php';
 
 // 设置响应头
 header('Content-Type: application/json; charset=utf-8');

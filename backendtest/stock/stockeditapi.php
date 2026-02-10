@@ -1,4 +1,6 @@
 <?php
+require_once dirname(__DIR__) . '/core/init.php';
+require_once CORE_PATH . '/bootstrap.php';
 ob_start();
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");

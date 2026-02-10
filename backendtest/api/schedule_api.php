@@ -1,4 +1,5 @@
 <?php
+require_once dirname(__DIR__) . '/core/init.php';
 // 员工排班系统API
 session_start();
 header('Content-Type: application/json');
