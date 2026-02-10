@@ -5,10 +5,7 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
-// 启动 session（用于获取当前登录用户）
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+
 
 // 处理预检请求
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -20,25 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// 数据库配置
-$host = 'localhost';
-$dbname = 'u690174784_kunzz';
-$dbuser = 'u690174784_kunzz';
-$dbpass = 'Kunzz1688';
-
-// 获取请求方法和数据
-$method = $_SERVER['REQUEST_METHOD'];
-$data = json_decode(file_get_contents("php://input"), true);
-
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    ob_end_clean();
-    http_response_code(500);
-    echo json_encode(["success" => false, "message" => "数据库连接失败：" . $e->getMessage(), "error_details" => $e->getMessage()]);
-    exit;
-}
+// 引入核心初始化文件
+require_once dirname(__DIR__) . '/core/init.php';
 
 // 调试信息
 error_log("数据库连接成功");
@@ -392,7 +372,7 @@ function handleApprove() {
     
     // 检查用户权限
     if (session_status() === PHP_SESSION_NONE) {
-        session_start();
+
     }
     if (!isset($_SESSION['user_id'])) {
         sendResponse(false, "用户未登录");

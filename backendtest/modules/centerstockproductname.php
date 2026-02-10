@@ -1,25 +1,18 @@
 <?php
-session_start();
+require_once dirname(__DIR__) . '/core/init.php';
+// Use centralized session check if appropriate, or keep specific logic. 
+// For now, replacing logic with standard check might change behavior, so I will keep the check but use global $pdo.
 
-// 检查用户是否登录
-if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php'); // 重定向到登录页面
-    exit;
-}
+// 包含会话验证
+require_once CORE_PATH . '/session_check.php';
 
 // 获取用户权限 - 直接检查注册码
 $canApprove = false;
 if (isset($_SESSION['user_id'])) {
-    // 这里需要连接数据库检查用户的注册码
-    $host = 'localhost';
-    $dbname = 'u690174784_kunzz';
-    $dbuser = 'u690174784_kunzz';
-    $dbpass = 'Kunzz1688';
+    // Uses global $pdo from db.php
+    global $pdo;
     
     try {
-        $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
         $allowedCodes = ['SUPPORT88', 'IT4567', 'QX0EQP','IT7890'];
         $userId = $_SESSION['user_id'];
         
@@ -1009,7 +1002,7 @@ if (isset($_SESSION['user_id'])) {
     </style>
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
+    <?php include CORE_PATH . '/sidebar.php'; ?>
     <div class="container">
         <div class="header">
             <div>

@@ -1,6 +1,8 @@
 <?php
+// 包含初始化文件
+require_once dirname(__DIR__) . '/core/init.php';
 // 包含会话验证
-require_once 'session_check.php';
+require_once CORE_PATH . '/session_check.php';
 
 $reportPermissions = ['kpi', 'cost'];
 $restaurantPermissions = ['j1', 'j2', 'j3'];
@@ -14,9 +16,7 @@ $restaurantConfigPhp = [
     'j3' => ['name' => 'J3', 'number' => 3],
 ];
 
-if (!isset($_SESSION)) {
-    @session_start();
-}
+// session_check.php 已经开启了 session
 
 // 获取用户职位信息
 $userPosition = (!empty($_SESSION['position'])) ? strtoupper(trim($_SESSION['position'])) : '';
@@ -26,17 +26,8 @@ $isOperationManager = ($userPosition === 'OPERATION MANAGER');
 $hasNewPermissions = false;
 
 if (isset($_SESSION['user_id'])) {
-    $host = 'localhost';
-    $dbname = 'u690174784_kunzz';
-    $dbuser = 'u690174784_kunzz';
-    $dbpass = 'Kunzz1688';
-
+    // 使用全局 $pdo 对象
     try {
-        $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        ]);
-
         // 优先使用新的权限系统（page_permissions.kpi_upload）
         $stmt = $pdo->prepare("SELECT page_permissions_json, report_permissions_json, restaurant_permissions_json FROM user_sidebar_permissions WHERE user_id = ?");
         $stmt->execute([$_SESSION['user_id']]);
@@ -1124,7 +1115,7 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
     </style>
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
+    <?php include CORE_PATH . '/sidebar.php'; ?>
     <div class="container">
         <div class="header">
             <div>

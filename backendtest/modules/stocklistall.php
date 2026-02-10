@@ -1,6 +1,7 @@
 <?php
 // 包含会话验证
-require_once 'session_check.php';
+require_once dirname(__DIR__) . '/core/init.php';
+require_once CORE_PATH . '/session_check.php';
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -1367,7 +1368,7 @@ require_once 'session_check.php';
     </style>
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
+    <?php include CORE_PATH . '/sidebar.php'; ?>
     <!-- 低库存预警弹窗 -->
     <div id="low-stock-modal" class="low-stock-modal">
         <div class="low-stock-modal-content">

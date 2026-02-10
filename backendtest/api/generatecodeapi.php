@@ -11,18 +11,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit(0);
 }
 
-// 数据库配置
-$host = 'localhost';
-$dbname = 'u690174784_kunzz';
-$username = 'u690174784_kunzz';
-$password = 'Kunzz1688';
+// 引入核心初始化文件
+require_once dirname(__DIR__) . '/core/init.php';
 
 try {
-    // 创建PDO连接
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-
+    // init.php 已经创建了 $pdo 连接
     // 设置时区为马来西亚时间 (UTC+8)
     $pdo->exec("SET time_zone = '+08:00'");
 } catch(PDOException $e) {
@@ -1278,7 +1271,7 @@ function saveUserSidebarPermissions($pdo, $input) {
 
 // 单独的获取/保存页面权限接口（可供其他页面直接调用）
 function getUserPagePermissions($pdo, $input) {
-    if (!isset($_SESSION)) { @session_start(); }
+
     $userId = isset($input['user_id']) ? intval($input['user_id']) : (isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : 0);
     if ($userId <= 0) { echo json_encode(['success'=>false, 'message'=>'未登录']); return; }
     try {

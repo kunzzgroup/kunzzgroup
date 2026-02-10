@@ -1,6 +1,8 @@
 <?php
+// 包含初始化文件
+require_once dirname(__DIR__) . '/core/init.php';
 // 包含会话验证
-require_once 'session_check.php';
+require_once CORE_PATH . '/session_check.php';
 
 // 防止浏览器缓存旧版 JS/HTML，避免修复已上线但用户端仍加载旧代码导致持续报错
 // 注意：必须在任何输出之前设置 header
@@ -21,24 +23,16 @@ $restaurantConfigPhp = [
     'j3' => ['name' => 'J3', 'number' => 3],
 ];
 
-if (!isset($_SESSION)) {
-    @session_start();
-}
+// session_start() handled by init.php
 
 // 标记是否使用了新权限系统
 $hasNewPermissions = false;
 
 if (isset($_SESSION['user_id'])) {
-    $host = 'localhost';
-    $dbname = 'u690174784_kunzz';
-    $dbuser = 'u690174784_kunzz';
-    $dbpass = 'Kunzz1688';
+    global $pdo;
 
     try {
-        $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        ]);
+        // DB Connected via init.php -> db.php
 
         // 优先使用新的权限系统（page_permissions.kpi_upload）
         $stmt = $pdo->prepare("SELECT page_permissions_json, report_permissions_json, restaurant_permissions_json FROM user_sidebar_permissions WHERE user_id = ?");
@@ -1107,7 +1101,7 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
     </style>
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
+    <?php include CORE_PATH . '/sidebar.php'; ?>
     <div class="container">
         <div class="header">
             <div>

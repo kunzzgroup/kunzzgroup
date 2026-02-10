@@ -11,22 +11,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 // 数据库连接配置
-$host = 'localhost';
-$dbname = 'u690174784_kunzz';
-$username = 'u690174784_kunzz';
-$password = 'Kunzz1688';
-
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    echo json_encode([
-        'success' => false,
-        'message' => '数据库连接失败: ' . $e->getMessage()
-    ]);
-    exit();
-}
+// 引入核心初始化文件
+require_once dirname(__DIR__) . '/core/init.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 

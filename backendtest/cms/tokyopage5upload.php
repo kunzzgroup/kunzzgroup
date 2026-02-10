@@ -1,12 +1,7 @@
 <?php
-session_start();
+require_once dirname(__DIR__) . '/core/init.php';
+require_once CORE_PATH . '/session_check.php';
 include_once 'media_config.php';
-
-// 检查是否已登录（根据你的登录系统调整）
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.html");
-    exit();
-}
 
 // 处理删除店铺
 if (isset($_POST['action']) && $_POST['action'] === 'delete' && isset($_POST['store_key'])) {
@@ -412,7 +407,7 @@ $currentConfig = getTokyoLocationConfig();
     </style>
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
+    <?php include CORE_PATH . '/sidebar.php'; ?>
     <div class="container">
         <div class="header">
             <h1>Tokyo 位置信息管理</h1>

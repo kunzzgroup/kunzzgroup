@@ -1,11 +1,6 @@
 <?php
-session_start();
-
-// 检查是否已登录（根据你的登录系统调整）
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.html");
-    exit();
-}
+require_once dirname(__DIR__) . '/core/init.php';
+require_once CORE_PATH . '/session_check.php';
 
 // 处理文件上传
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
@@ -284,7 +279,7 @@ if (file_exists('media_config.json')) {
     </style>
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
+    <?php include CORE_PATH . '/sidebar.php'; ?>
     <div class="container">
         <div class="header">
             <h1>首页媒体管理</h1>

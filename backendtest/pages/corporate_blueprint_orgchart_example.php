@@ -4,6 +4,7 @@
  * 这是一个示例文件，展示如何使用专业的图表库来实现树形组织架构图
  */
 
+require_once dirname(__DIR__) . '/core/init.php';
 session_start();
 ob_start();
 header('Content-Type: text/html; charset=UTF-8');

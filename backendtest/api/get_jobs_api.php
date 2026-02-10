@@ -10,17 +10,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 }
 
 // 数据库配置
-$host = 'localhost';
-$dbname = 'u690174784_kunzz';
-$dbuser = 'u690174784_kunzz';
-$dbpass = 'Kunzz1688';
-
-// 获取语言参数，默认为中文
-$language = isset($_GET['lang']) ? $_GET['lang'] : 'zh';
+// 引入核心初始化文件
+require_once dirname(__DIR__) . '/core/init.php';
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // init.php 已经创建了 $pdo 连接
     
     // 根据语言获取职位
     $stmt = $pdo->prepare("SELECT * FROM job_positions WHERE language = ? ORDER BY publish_date DESC, id DESC");

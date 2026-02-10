@@ -1,6 +1,8 @@
 <?php
+// 包含初始化文件
+require_once dirname(__DIR__) . '/core/init.php';
 // 包含会话验证
-require_once 'session_check.php';
+require_once CORE_PATH . '/session_check.php';
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">

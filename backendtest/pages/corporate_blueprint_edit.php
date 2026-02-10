@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once dirname(__DIR__) . '/core/init.php';
+
 
 // 检查是否已登录
 if (!isset($_SESSION['user_id'])) {
@@ -914,7 +915,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
     </style>
 </head>
 <body class="has-sidebar">
-    <?php include 'sidebar.php'; ?>
+    <?php include CORE_PATH . '/sidebar.php'; ?>
     <div class="container">
         <div class="header">
             <h1>企业蓝图管理</h1>

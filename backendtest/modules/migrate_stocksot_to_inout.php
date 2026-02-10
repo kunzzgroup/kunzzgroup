@@ -8,16 +8,12 @@
  * 3. 如果不存在，创建对应的出货记录
  */
 
-// 数据库连接配置
-$host = 'localhost';
-$dbname = 'u690174784_kunzz';
-$username = 'u690174784_kunzz';
-$password = 'Kunzz1688';
+require_once dirname(__DIR__) . '/core/init.php';
+// Not including session_check.php as this might be a CLI/utility script, 
+// but using init.php for DB connection.
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    // $pdo is available from init.php
     
     echo "开始迁移 stock_sot 数据到 stockinout_data...\n\n";
     

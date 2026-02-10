@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+require_once dirname(__DIR__) . '/core/init.php';
+require_once CORE_PATH . '/session_check.php';
+
 // 设置内存和执行时间，以防数据量大
 ini_set('memory_limit', '512M');
 set_time_limit(120);
@@ -14,11 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
-
-$host = 'localhost';
-$dbname = 'u690174784_kunzz';
-$dbuser = 'u690174784_kunzz';
-$dbpass = 'Kunzz1688';
 
 $system = strtolower(trim($_GET['system'] ?? ''));
 $startDate = trim($_GET['start_date'] ?? '');
@@ -52,16 +50,7 @@ foreach (['startDate' => $startDate, 'endDate' => $endDate] as $label => $value)
     }
 }
 
-try {
-    $pdo = new PDO("mysql:host={$host};dbname={$dbname};charset=utf8mb4", $dbuser, $dbpass, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    ]);
-} catch (PDOException $e) {
-    http_response_code(500);
-    echo 'Database connection failed.';
-    exit;
-}
+// $pdo is available from init.php
 
 $table = $tableMap[$system];
 

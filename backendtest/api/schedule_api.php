@@ -1,21 +1,10 @@
 <?php
 // 员工排班系统API
-session_start();
+
 header('Content-Type: application/json');
 
-// 数据库配置
-$host = 'localhost';
-$dbname = 'u690174784_kunzz';
-$username = 'u690174784_kunzz';
-$password = 'Kunzz1688';
-
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    echo json_encode(['success' => false, 'error' => '数据库连接失败']);
-    exit;
-}
+// 引入核心初始化文件
+require_once dirname(__DIR__) . '/core/init.php';
 
 // 获取请求方法和操作类型
 $method = $_SERVER['REQUEST_METHOD'];

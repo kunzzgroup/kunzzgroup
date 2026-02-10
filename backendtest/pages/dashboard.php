@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once dirname(__DIR__) . '/core/init.php';
+
 
 // 超时时间（秒）
 define('SESSION_TIMEOUT', 300); // 未勾选「记住我」时 5 分钟无活动则登出
@@ -96,7 +97,7 @@ if (isset($_SESSION['user_id'])) {
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <?php include '../core/sidebar.php'; ?>
+    <?php include CORE_PATH . '/sidebar.php'; ?>
   
 <script src="app.js"></script>
 <script>
