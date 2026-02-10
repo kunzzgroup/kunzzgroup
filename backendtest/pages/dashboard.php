@@ -96,7 +96,7 @@ if (isset($_SESSION['user_id'])) {
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <?php include '../sidebar.php'; ?>
+    <?php include__DIR__ . '/../core/sidebar.php'; ?>
   
 <script src="app.js"></script>
 <script>
@@ -459,4 +459,5 @@ function goToCulture() {
 <!-- sidebar scripts moved to ../sidebar.php ../sidebar.php -->
 </body>
 </html>
+
 

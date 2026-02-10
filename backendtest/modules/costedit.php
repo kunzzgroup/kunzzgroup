@@ -1,6 +1,6 @@
 <?php
 // 包含会话验证
-require_once '../session_check.php ../session_check.php';
+require_once__DIR__ . '/../core/session_check.php';
 
 // 防止浏览器缓存旧版 JS/HTML，避免修复已上线但用户端仍加载旧代码导致持续报错
 // 注意：必须在任何输出之前设置 header
@@ -1107,7 +1107,7 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
     </style>
 </head>
 <body>
-    <?php include '../sidebar.php ../sidebar.php'; ?>
+    <?php include__DIR__ . '/../core/sidebar.php'; ?>
     <div class="container">
         <div class="header">
             <div>
@@ -2776,5 +2776,6 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
     </script>
 </body>
 </html>
+
 
 

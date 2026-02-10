@@ -288,7 +288,7 @@ if (file_exists('../media_config.json')) {
     </style>
 </head>
 <body>
-    <?php include '../sidebar.php ../sidebar.php'; ?>
+    <?php include__DIR__ . '/../core/sidebar.php'; ?>
     <div class="container">
         <div class="header">
             <h1>加入我们页面管理</h1>
@@ -400,3 +400,4 @@ if (file_exists('../media_config.json')) {
     </script>
 </body>
 </html>
+

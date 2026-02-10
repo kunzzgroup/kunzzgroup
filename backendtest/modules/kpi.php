@@ -1371,7 +1371,7 @@ $avatarLetter = strtoupper($username[0]);
     </style>
 </head>
 <body class="restaurant-j1">
-    <?php include '../sidebar.php ../sidebar.php'; ?>
+    <?php include__DIR__ . '/../core/sidebar.php'; ?>
         <div class="container">
             <div class="header">
                 <div>
@@ -4342,3 +4342,4 @@ $avatarLetter = strtoupper($username[0]);
     </script>           
 </body>
 </html>
+

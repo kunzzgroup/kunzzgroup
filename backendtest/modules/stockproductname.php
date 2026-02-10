@@ -1109,7 +1109,7 @@ if (isset($_SESSION['user_id'])) {
     </style>
 </head>
 <body>
-    <?php include '../sidebar.php ../sidebar.php'; ?>
+    <?php include__DIR__ . '/../core/sidebar.php'; ?>
     <div class="container">
         <div class="header">
             <div>
@@ -3073,3 +3073,4 @@ if (isset($_SESSION['user_id'])) {
 // 页面权限检查已在 applyPagePermissions 函数中处理，这里不需要重复代码
 </script>
 </html>
+

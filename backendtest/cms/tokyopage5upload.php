@@ -412,7 +412,7 @@ $currentConfig = getTokyoLocationConfig();
     </style>
 </head>
 <body>
-    <?php include '../sidebar.php ../sidebar.php'; ?>
+    <?php include__DIR__ . '/../core/sidebar.php'; ?>
     <div class="container">
         <div class="header">
             <h1>Tokyo 位置信息管理</h1>
@@ -748,3 +748,4 @@ $currentConfig = getTokyoLocationConfig();
     </script>
 </body>
 </html>
+

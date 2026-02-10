@@ -914,7 +914,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
     </style>
 </head>
 <body class="has-sidebar">
-    <?php include '../sidebar.php ../sidebar.php'; ?>
+    <?php include__DIR__ . '/../core/sidebar.php'; ?>
     <div class="container">
         <div class="header">
             <h1>企业蓝图管理</h1>
@@ -1742,5 +1742,6 @@ Implementation Timeline Adherence (%)"></textarea>
     </script>
 </body>
 </html>
+
 
 

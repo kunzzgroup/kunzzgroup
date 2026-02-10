@@ -1,6 +1,6 @@
 <?php
 // 测试碗碟破损记录系统
-require_once '../api/dishware_api.php ../api/dishware_api.php';
+require_once__DIR__ . '/../api/dishware_api.php';
 
 echo "<h2>碗碟破损记录系统测试</h2>";
 
@@ -79,4 +79,5 @@ echo "<li>✓ 破损记录增删改查</li>";
 echo "<li>✓ 实时数据更新</li>";
 echo "</ul>";
 ?>
+
 

@@ -1,6 +1,6 @@
 <?php
 // 包含会话验证
-require_once '../session_check.php ../session_check.php';
+require_once__DIR__ . '/../core/session_check.php';
 
 $reportPermissions = ['kpi', 'cost'];
 $restaurantPermissions = ['j1', 'j2', 'j3'];
@@ -1124,7 +1124,7 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
     </style>
 </head>
 <body>
-    <?php include '../sidebar.php ../sidebar.php'; ?>
+    <?php include__DIR__ . '/../core/sidebar.php'; ?>
     <div class="container">
         <div class="header">
             <div>
@@ -2738,3 +2738,4 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
 </body>
 </html>
 </html>
+

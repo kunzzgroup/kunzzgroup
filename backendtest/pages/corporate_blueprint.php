@@ -3096,7 +3096,7 @@ if (file_exists($jsonFile)) {
     <script src="https://cdn.jsdelivr.net/npm/orgchart@2.1.9/dist/js/jquery.orgchart.min.js"></script>
 </head>
 <body>
-    <?php include '../sidebar.php ../sidebar.php'; ?>
+    <?php include__DIR__ . '/../core/sidebar.php'; ?>
     
     <!-- 主内容区域 -->
     <div class="main-content">
@@ -4103,5 +4103,6 @@ if (file_exists($jsonFile)) {
 <?php
 ob_end_flush();
 ?>
+
 
 

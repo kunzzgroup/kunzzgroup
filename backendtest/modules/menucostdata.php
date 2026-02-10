@@ -533,7 +533,7 @@
     </style>
 </head>
 <body>
-    <?php include '../sidebar.php ../sidebar.php'; ?>
+    <?php include__DIR__ . '/../core/sidebar.php'; ?>
     <div class="container">
         <div class="header">
             <h1>菜单成本数据管理</h1>
@@ -1086,5 +1086,6 @@
     </script>
 </body>
 </html>
+
 
 

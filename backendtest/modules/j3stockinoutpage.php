@@ -1,6 +1,6 @@
 <?php
 // 包含会话验证
-require_once '../session_check.php ../session_check.php';
+require_once__DIR__ . '/../core/session_check.php';
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -2085,7 +2085,7 @@ require_once '../session_check.php ../session_check.php';
     </style>
 </head>
 <body>
-    <?php include '../sidebar.php ../sidebar.php'; ?>
+    <?php include__DIR__ . '/../core/sidebar.php'; ?>
     <div class="container">
         <div class="header">
             <div>
@@ -8254,3 +8254,4 @@ require_once '../session_check.php ../session_check.php';
     </div>
 </body>
 </html>
+

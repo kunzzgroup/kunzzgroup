@@ -1009,7 +1009,7 @@ if (isset($_SESSION['user_id'])) {
     </style>
 </head>
 <body>
-    <?php include '../sidebar.php ../sidebar.php'; ?>
+    <?php include__DIR__ . '/../core/sidebar.php'; ?>
     <div class="container">
         <div class="header">
             <div>
@@ -2321,4 +2321,5 @@ if (isset($_SESSION['user_id'])) {
 </script>
 </body>
 </html>
+
 

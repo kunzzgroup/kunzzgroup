@@ -888,7 +888,7 @@ if (file_exists($configFile) && is_readable($configFile)) {
     </style>
 </head>
 <body>
-    <?php include '../sidebar.php ../sidebar.php'; ?>
+    <?php include__DIR__ . '/../core/sidebar.php'; ?>
     <div class="container">
         <div class="header">
             <h1><?php echo $isEnglish ? 'Timeline Management' : '发展历史管理'; ?></h1>
@@ -1297,3 +1297,4 @@ if (file_exists($configFile) && is_readable($configFile)) {
     </script>
 </body>
 </html>
+
