@@ -5,11 +5,6 @@ require_once CORE_PATH . '/session_check.php';
 // session_check.php 已经处理了会话超时和"记住我"功能
 ?>
 
-$username = $_SESSION['username'];
-// 修改这行：检查position是否为空或null
-$position = (!empty($_SESSION['position'])) ? $_SESSION['position'] : 'User';
-$avatarLetter = strtoupper($username[0]);
-?>
 
 <!DOCTYPE html>
 <html lang="zh">
