@@ -1,4 +1,5 @@
 <?php
+require_once dirname(__DIR__) . '/core/init.php';
 require_once dirname(__DIR__) . '/core/bootstrap.php';
 // session_start(); // Handled by bootstrap
 
