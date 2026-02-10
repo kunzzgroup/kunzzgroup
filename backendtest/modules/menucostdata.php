@@ -647,7 +647,7 @@ require_once CORE_PATH . '/session_check.php';
         // 加载数据
         async function loadData() {
             try {
-                const response = await fetch('menucostdata_api.php');
+                const response = await fetch('/backendtest/api/menucostdata_api.php');
                 const result = await response.json();
                 
                 if (result.success) {
@@ -944,7 +944,7 @@ require_once CORE_PATH . '/session_check.php';
             }
 
             try {
-                const response = await fetch('menucostdata_api.php', {
+                const response = await fetch('/backendtest/api/menucostdata_api.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1018,7 +1018,7 @@ require_once CORE_PATH . '/session_check.php';
             }
 
             try {
-                const response = await fetch('menucostdata_api.php', {
+                const response = await fetch('/backendtest/api/menucostdata_api.php', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'

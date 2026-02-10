@@ -1393,7 +1393,7 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
             // 每5分钟刷新一次会话
             sessionRefreshInterval = setInterval(async () => {
                 try {
-                    const response = await fetch('session_refresh_api.php');
+                    const response = await fetch('/backendtest/api/session_refresh_api.php');
                     const result = await response.json();
                     
                     if (!result.success && result.code === 'SESSION_EXPIRED') {

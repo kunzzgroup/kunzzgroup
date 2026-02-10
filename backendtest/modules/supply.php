@@ -1201,7 +1201,7 @@ require_once CORE_PATH . '/session_check.php';
         // 加载供应商列表
         async function loadSupplies() {
             try {
-                const response = await fetch('supply_api.php?action=supplies');
+                const response = await fetch('/backendtest/api/supply_api.php?action=supplies');
                 
                 // 检查响应状态
                 if (!response.ok) {
@@ -1486,7 +1486,7 @@ require_once CORE_PATH . '/session_check.php';
             try {
                 // 为每个有价格的供应商创建记录
                 const promises = prices.map(priceData => {
-                    return fetch('supply_api.php?action=material', {
+                    return fetch('/backendtest/api/supply_api.php?action=material', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -2221,7 +2221,7 @@ require_once CORE_PATH . '/session_check.php';
             }
             
             try {
-                const response = await fetch('supply_api.php?action=batch-save', {
+                const response = await fetch('/backendtest/api/supply_api.php?action=batch-save', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -2479,7 +2479,7 @@ require_once CORE_PATH . '/session_check.php';
                 }
                 
                 // 创建新记录（可能类型已改变）
-                const createResponse = await fetch('supply_api.php?action=material', {
+                const createResponse = await fetch('/backendtest/api/supply_api.php?action=material', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

@@ -584,7 +584,7 @@ require_once CORE_PATH . '/session_check.php';
             
             try {
                 // 这里需要创建对应的API接口
-                const response = await fetch('stockminimumapi.php?action=list');
+                const response = await fetch('/backendtest/api/stockminimumapi.php?action=list');
                 const result = await response.json();
                 
                 if (result.success) {
@@ -704,7 +704,7 @@ require_once CORE_PATH . '/session_check.php';
             if (!product) return;
 
             try {
-                const response = await fetch('stockminimumapi.php', {
+                const response = await fetch('/backendtest/api/stockminimumapi.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -749,7 +749,7 @@ require_once CORE_PATH . '/session_check.php';
             });
 
             try {
-                const response = await fetch('stockminimumapi.php', {
+                const response = await fetch('/backendtest/api/stockminimumapi.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

@@ -1197,7 +1197,7 @@ require_once CORE_PATH . '/session_check.php';
                     }
                 });
 
-                const res = await fetch('evaluation_form_api.php', {
+                const res = await fetch('/backendtest/api/evaluation_form_api.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'save_standards', items })
@@ -1493,7 +1493,7 @@ require_once CORE_PATH . '/session_check.php';
             });
 
             try {
-                const response = await fetch('evaluation_form_api.php', {
+                const response = await fetch('/backendtest/api/evaluation_form_api.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

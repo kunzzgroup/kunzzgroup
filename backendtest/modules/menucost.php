@@ -645,7 +645,7 @@ require_once CORE_PATH . '/session_check.php';
             }
 
             try {
-                const response = await fetch('menucost_api.php', {
+                const response = await fetch('/backendtest/api/menucost_api.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

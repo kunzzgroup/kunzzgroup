@@ -2714,7 +2714,7 @@ require_once CORE_PATH . '/session_check.php';
             // 每5分钟刷新一次会话
             sessionRefreshInterval = setInterval(async () => {
                 try {
-                    const response = await fetch('session_refresh_api.php');
+                    const response = await fetch('/backendtest/api/session_refresh_api.php');
                     const result = await response.json();
                     
                     if (!result.success && result.code === 'SESSION_EXPIRED') {
@@ -3250,7 +3250,7 @@ require_once CORE_PATH . '/session_check.php';
             submitBtn.disabled = true;
             
             try {
-                const response = await fetch('generatecodeapi.php', {
+                const response = await fetch('/backendtest/api/generatecodeapi.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -3379,7 +3379,7 @@ require_once CORE_PATH . '/session_check.php';
         // 删除行数据
         async function deleteRow(id) {
             try {
-                const response = await fetch('generatecodeapi.php', {
+                const response = await fetch('/backendtest/api/generatecodeapi.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -3499,7 +3499,7 @@ require_once CORE_PATH . '/session_check.php';
             submitBtn.disabled = true;
             
             try {
-                const response = await fetch('generatecodeapi.php', {
+                const response = await fetch('/backendtest/api/generatecodeapi.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -3555,7 +3555,7 @@ require_once CORE_PATH . '/session_check.php';
             cancelBtn.disabled = true;
             
             try {
-                const response = await fetch('generatecodeapi.php', {
+                const response = await fetch('/backendtest/api/generatecodeapi.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -4332,7 +4332,7 @@ require_once CORE_PATH . '/session_check.php';
                 // 先设置默认全选（所有checkbox都是active且全选）
                 setDefaultAllPermissions();
                 
-                const res = await fetch('generatecodeapi.php', {
+                const res = await fetch('/backendtest/api/generatecodeapi.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'get_permissions', user_id: userId })
@@ -4463,7 +4463,7 @@ require_once CORE_PATH . '/session_check.php';
             btn.disabled = true;
             
             try {
-                const res = await fetch('generatecodeapi.php', {
+                const res = await fetch('/backendtest/api/generatecodeapi.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

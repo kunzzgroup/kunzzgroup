@@ -1122,7 +1122,7 @@ if (isset($_SESSION['user_id'])) {
         // 检查用户权限的函数
         async function checkUserPermissions() {
             try {
-                const response = await fetch('check_permissions.php');
+                const response = await fetch('/backendtest/api/check_permissions_api.php');
                 const result = await response.json();
                 return result.canApprove || false;
             } catch (error) {

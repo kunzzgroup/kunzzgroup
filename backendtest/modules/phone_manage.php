@@ -1070,7 +1070,7 @@ require_once CORE_PATH . '/session_check.php';
     async function saveAllData() {
         try {
             // TODO: 实现保存到API
-            // const response = await fetch('phone_api.php?action=save_records', {
+            // const response = await fetch('/backendtest/api/phone_api.php?action=save_records', {
             //     method: 'POST',
             //     headers: { 'Content-Type': 'application/json' },
             //     body: JSON.stringify({ 
@@ -1660,7 +1660,7 @@ require_once CORE_PATH . '/session_check.php';
         if (!confirm('确定要删除这个员工吗？相关的排班记录也将被删除。')) return;
         
         try {
-            const response = await fetch('schedule_api.php?action=delete_employee', {
+            const response = await fetch('/backendtest/api/schedule_api.php?action=delete_employee', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id })

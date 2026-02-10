@@ -626,7 +626,7 @@ require_once CORE_PATH . '/session_check.php';
         // 加载用户的问卷回答
         async function loadUserResponse() {
             try {
-                const res = await fetch('qnaapi.php', {
+                const res = await fetch('/backendtest/api/qnaapi.php', {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' }
                 });
@@ -691,7 +691,7 @@ require_once CORE_PATH . '/session_check.php';
                     data[`question${i}`] = formData.get(`question${i}`) || '';
                 }
 
-                const res = await fetch('qnaapi.php', {
+                const res = await fetch('/backendtest/api/qnaapi.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
