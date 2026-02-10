@@ -1487,7 +1487,7 @@ require_once CORE_PATH . '/session_check.php';
             try {
                 // 为每个有价格的餐厅创建记录
                 const promises = prices.map(priceData => {
-                    return fetch('/backendtest/api/price_api.php?action=food', {
+                    return fetch('/backendtest/api/price_api.php?action=food'), {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -2236,7 +2236,7 @@ require_once CORE_PATH . '/session_check.php';
             }
             
             try {
-                const response = await fetch('/backendtest/api/price_api.php?action=batch-save', {
+                const response = await fetch('/backendtest/api/price_api.php?action=batch-save'), {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -2358,7 +2358,7 @@ require_once CORE_PATH . '/session_check.php';
             }
             
             try {
-                const response = await fetch(`/backendtest/api/price_api.php?action=restaurant&id=${id}`, {
+                const response = await fetch(`/backendtest/api/price_api.php?action=restaurant&id=${id}`), {
                     method: 'DELETE'
                 });
                 
@@ -2491,7 +2491,7 @@ require_once CORE_PATH . '/session_check.php';
             try {
                 // 如果存在旧记录，先删除
                 if (recordId) {
-                    const deleteResponse = await fetch(`/backendtest/api/price_api.php?action=food&id=${recordId}`, {
+                    const deleteResponse = await fetch(`/backendtest/api/price_api.php?action=food&id=${recordId}`), {
                         method: 'DELETE'
                     });
                     const deleteResult = await deleteResponse.json();
@@ -2503,7 +2503,7 @@ require_once CORE_PATH . '/session_check.php';
                 }
                 
                 // 创建新记录（可能类型已改变）
-                const createResponse = await fetch('/backendtest/api/price_api.php?action=food', {
+                const createResponse = await fetch('/backendtest/api/price_api.php?action=food'), {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -2627,7 +2627,7 @@ require_once CORE_PATH . '/session_check.php';
             }
             
             try {
-                const response = await fetch(`/backendtest/api/price_api.php?action=food&id=${recordId}`, {
+                const response = await fetch(`/backendtest/api/price_api.php?action=food&id=${recordId}`), {
                     method: 'DELETE'
                 });
                 
@@ -2726,7 +2726,7 @@ require_once CORE_PATH . '/session_check.php';
             try {
                 // 批量删除
                 const promises = recordIds.map(id => 
-                    fetch(`/backendtest/api/price_api.php?action=food&id=${id}`, {
+                    fetch(`/backendtest/api/price_api.php?action=food&id=${id}`), {
                         method: 'DELETE'
                     })
                 );
