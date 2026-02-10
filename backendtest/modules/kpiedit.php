@@ -1282,7 +1282,7 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
 
     <script>
         // API 配置
-        const API_BASE_URL = 'kpiapi.php';
+        const API_BASE_URL = '/backendtest/api/kpiapi.php';
         
         const availableReportTypes = <?php echo json_encode($reportPermissions); ?>;
         const reportDropdownEnabled = <?php echo $showReportDropdown ? 'true' : 'false'; ?>;
@@ -1393,7 +1393,7 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
             // 每5分钟刷新一次会话
             sessionRefreshInterval = setInterval(async () => {
                 try {
-                    const response = await fetch('/backendtest/api/session_refresh_api.php');
+                    const response = await fetch('/backendtest/api/kpiapi.php');
                     const result = await response.json();
                     
                     if (!result.success && result.code === 'SESSION_EXPIRED') {
