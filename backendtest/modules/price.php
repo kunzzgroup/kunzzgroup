@@ -1192,7 +1192,7 @@ require_once CORE_PATH . '/session_check.php';
         // 加载餐厅列表
         async function loadRestaurants() {
             try {
-                const response = await fetch('/backendtest/api/price_api.php');
+                const response = await fetch('/kunzzgroup/backendtest/api/price_api.php');
                 
                 // 检查响应状态
                 if (!response.ok) {
@@ -1244,7 +1244,7 @@ require_once CORE_PATH . '/session_check.php';
                 const search = document.getElementById('search-input')?.value || '';
                 const type = document.getElementById('type-filter')?.value || '';
                 
-                let url = '/backendtest/api/price_api.php?action=list';
+                let url = '/kunzzgroup/backendtest/api/price_api.php?action=list';
                 if (search) url += '&search=' + encodeURIComponent(search);
                 if (type) url += '&type=' + encodeURIComponent(type);
                 
