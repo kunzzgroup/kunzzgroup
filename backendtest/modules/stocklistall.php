@@ -1854,11 +1854,11 @@ require_once CORE_PATH . '/session_check.php';
 
         // API配置
         const API_CONFIG = {
-            central: 'stocklistapi.php',
-            j1: 'j1stocklistapi.php',
-            j2: 'j2stocklistapi.php',
-            j3: 'j3stocklistapi.php',
-            remark: 'stockremarkapi.php'
+            central: '/backendtest/api/stocklistapi.php',
+            j1: '/backendtest/api/j1stocklistapi.php',
+            j2: '/backendtest/api/j2stocklistapi.php',
+            j3: '/backendtest/api/j3stocklistapi.php',
+            remark: '/backendtest/api/stockremarkapi.php'
         };
 
         const SYSTEM_NAMES = {
