@@ -1,4 +1,8 @@
 <?php
+require_once __DIR__ . '/../backend/core/api_guard.php';
+require_login();
+header('Content-Type: application/json');
+
 ob_start();
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: *");
@@ -12,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-session_start();
+// session_start(); replaced by api_guard
 
 // 检查用户是否登录
 if (!isset($_SESSION['user_id'])) {
@@ -156,4 +160,5 @@ function handlePost($pdo, $userId, $data) {
         }
     }
 }
+
 

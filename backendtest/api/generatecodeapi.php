@@ -1,4 +1,8 @@
 <?php
+require_once __DIR__ . '/../backend/core/api_guard.php';
+require_login();
+header('Content-Type: application/json');
+
 
 // 设置响应头
 header('Content-Type: application/json; charset=utf-8');
@@ -1278,7 +1282,7 @@ function saveUserSidebarPermissions($pdo, $input) {
 
 // 单独的获取/保存页面权限接口（可供其他页面直接调用）
 function getUserPagePermissions($pdo, $input) {
-    if (!isset($_SESSION)) { @session_start(); }
+    if (!isset($_SESSION)) { @// session_start(); replaced by api_guard }
     $userId = isset($input['user_id']) ? intval($input['user_id']) : (isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : 0);
     if ($userId <= 0) { echo json_encode(['success'=>false, 'message'=>'未登录']); return; }
     try {

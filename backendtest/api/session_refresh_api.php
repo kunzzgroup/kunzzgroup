@@ -1,5 +1,9 @@
 <?php
-session_start();
+require_once __DIR__ . '/../backend/core/api_guard.php';
+require_login();
+header('Content-Type: application/json');
+
+// session_start(); replaced by api_guard
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['id'])) {
@@ -8,3 +12,4 @@ if (!isset($_SESSION['id'])) {
     echo json_encode(['success' => true]);
 }
 ?>
+

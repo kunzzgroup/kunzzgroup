@@ -1,6 +1,10 @@
 <?php
+require_once __DIR__ . '/../backend/core/api_guard.php';
+require_login();
+header('Content-Type: application/json');
+
 // 员工排班系统API
-session_start();
+// session_start(); replaced by api_guard
 header('Content-Type: application/json');
 
 // 数据库配置
@@ -356,4 +360,5 @@ switch($action) {
         echo json_encode(['success' => false, 'error' => '无效的操作']);
 }
 ?>
+
 

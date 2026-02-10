@@ -1,4 +1,8 @@
 <?php
+require_once __DIR__ . '/../backend/core/api_guard.php';
+require_login();
+header('Content-Type: application/json');
+
 ob_start();
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: *");
@@ -508,3 +512,4 @@ function saveStandards($pdo) {
         sendResponse(false, "保存考核标准失败：" . $e->getMessage());
     }
 }
+

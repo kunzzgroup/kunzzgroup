@@ -1,0 +1,21 @@
+<!-- Dashboard View Content -->
+<div class="main-container">
+    <div style="display: flex; justify-content: center; align-items: center; height: 80vh; color: #6b7280;">
+        <div class="loader-spinner">加载中...</div>
+    </div>
+</div>
+<!-- 
+    NOTE: The original dashboard.php primarily acted as a wrapper for sidebar.php.
+    Authentication and layout are handled by the shell and sidebar.
+    This HTML file is loaded into #app.
+    Currently, the sidebar is loaded by PHP in the shell.
+    The #app container is where dynamic dashboard widgets would go.
+    For now, we preserve the "Loading" state or we can put the welcome message here.
+-->
+<script>
+    // Remove loader after view is loaded if needed, or replace content
+    // For this specific case where dashboard was just a sidebar wrapper,
+    // we might want to display a default welcome screen if sidebar doesn't cover it.
+    // However, sidebar.php seems to have position:fixed/absolute overlay behavior?
+    // We will leave this consistent with the "Loading" placeholder found in the previous shell.
+</script>

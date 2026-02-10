@@ -1,4 +1,8 @@
 <?php
+require_once __DIR__ . '/../backend/core/api_guard.php';
+require_login();
+header('Content-Type: application/json');
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
@@ -84,3 +88,4 @@ try {
     echo json_encode($response, JSON_UNESCAPED_UNICODE);
 }
 ?>
+

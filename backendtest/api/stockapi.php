@@ -1,4 +1,8 @@
 <?php
+require_once __DIR__ . '/../backend/core/api_guard.php';
+require_login();
+header('Content-Type: application/json');
+
 ob_start();
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
@@ -7,7 +11,7 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
 // 启动 session（用于获取当前登录用户）
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+    // session_start(); replaced by api_guard
 }
 
 // 处理预检请求
@@ -392,7 +396,7 @@ function handleApprove() {
     
     // 检查用户权限
     if (session_status() === PHP_SESSION_NONE) {
-        session_start();
+        // session_start(); replaced by api_guard
     }
     if (!isset($_SESSION['user_id'])) {
         sendResponse(false, "用户未登录");

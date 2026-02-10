@@ -1,6 +1,8 @@
 <?php
 ob_start();
-session_start();
+// session_start();
+// Using centralized session check
+require_once __DIR__ . '/backendtest/backend/core/session_check.php';
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 

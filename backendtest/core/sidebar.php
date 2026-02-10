@@ -7,9 +7,7 @@ $canViewAnalytics = isset($canViewAnalytics) ? $canViewAnalytics : true;
 ?>
 
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../backend/core/session_check.php';
 
 // 超时时间（秒）
 define('SESSION_TIMEOUT', 60);

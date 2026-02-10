@@ -1,4 +1,8 @@
 <?php
+require_once __DIR__ . '/../backend/core/api_guard.php';
+require_login();
+header('Content-Type: application/json');
+
 ob_start();
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
@@ -2762,3 +2766,4 @@ function updateDishwareSetRelation() {
     }
 }
 ?>
+
