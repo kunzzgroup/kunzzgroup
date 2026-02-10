@@ -4,6 +4,10 @@
  * Acts as a controller to serve the dashboard UI shell.
  */
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 require_once __DIR__ . '/../backend/core/session_check.php';
 require_login();
 
