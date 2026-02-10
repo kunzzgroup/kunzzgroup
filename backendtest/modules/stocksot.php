@@ -1543,9 +1543,9 @@ require_once CORE_PATH . '/session_check.php';
     </div>
 
     <script>
-        const API_BASE_URL = 'stocksotapi.php';
-        const PRODUCT_API_URL = 'stockapi.php';
-        const PRICE_API_URL = 'stockeditapi.php';  // 价格API使用stockeditapi
+        const API_BASE_URL = '/backendtest/api/stocksotapi.php';
+        const PRODUCT_API_URL = '/backendtest/api/stockapi.php';
+        const PRICE_API_URL = '/backendtest/api/stockeditapi.php';  // 价格API使用stockeditapi
         const STOCK_VIEW_OPTIONS = [
             { value: 'list', label: '总库存' },
             { value: 'records', label: '进出货' },
