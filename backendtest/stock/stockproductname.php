@@ -1225,7 +1225,7 @@ if (isset($_SESSION['user_id'])) {
         // 检查用户权限的函数
         async function checkUserPermissions() {
             try {
-                const response = await fetch('check_permissions.php');
+                const response = await fetch('/backendtest/api/check_permissions_api.php');
                 const result = await response.json();
                 return result.canApprove || false;
             } catch (error) {
@@ -1366,7 +1366,7 @@ if (isset($_SESSION['user_id'])) {
         // 应用页面权限，隐藏不允许的下拉选项，并自动切换到允许的系统
         async function applyPagePermissions() {
             try {
-                const res = await fetch('generatecodeapi.php', {
+                const res = await fetch('/backendtest/api/generatecodeapi.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'get_page_permissions' })

@@ -1951,7 +1951,7 @@ require_once 'session_check.php';
             if (urlSystem && ['central', 'j1', 'j2', 'j3'].includes(urlSystem)) {
                 // 再次检查权限，确保URL中的系统是被允许的
                 try {
-                    const res = await fetch('generatecodeapi.php', {
+                    const res = await fetch('/backendtest/api/generatecodeapi.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ action: 'get_page_permissions' })
@@ -2042,7 +2042,7 @@ require_once 'session_check.php';
                         return;
                     }
                 } else {
-                    const res = await fetch('generatecodeapi.php', {
+                    const res = await fetch('/backendtest/api/generatecodeapi.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ action: 'get_page_permissions' })
@@ -2109,7 +2109,7 @@ require_once 'session_check.php';
 
         async function applyPagePermissions() {
             try {
-                const res = await fetch('generatecodeapi.php', {
+                const res = await fetch('/backendtest/api/generatecodeapi.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'get_page_permissions' })
@@ -2254,7 +2254,7 @@ require_once 'session_check.php';
             // 每5分钟刷新一次会话
             sessionRefreshInterval = setInterval(async () => {
                 try {
-                    const response = await fetch('session_refresh_api.php');
+                    const response = await fetch('/backendtest/api/session_refresh_api.php');
                     const result = await response.json();
                     
                     if (!result.success && result.code === 'SESSION_EXPIRED') {
