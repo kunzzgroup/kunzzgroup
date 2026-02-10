@@ -2615,7 +2615,7 @@ $avatarLetter = strtoupper($username[0]);
         // API 调用函数
         async function apiCall(endpoint, options = {}) {
             try {
-                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                const response = await fetch('/backendtest/api/kpiapi.php'), {
                     headers: {
                         'Content-Type': 'application/json',
                         ...options.headers
