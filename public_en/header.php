@@ -6,7 +6,7 @@ if (session_status() == PHP_SESSION_NONE) {
 
 // 包含媒体配置
 if (!isset($mediaConfigIncluded)) {
-require_once $_SERVER['DOCUMENT_ROOT'] . '/core/media_config.php';
+    include_once '../media_config.php';
     $mediaConfigIncluded = true;
 }
 
