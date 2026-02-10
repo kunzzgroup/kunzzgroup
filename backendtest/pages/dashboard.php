@@ -29,7 +29,7 @@ $position = (!empty($_SESSION['position'])) ? $_SESSION['position'] : 'User';
     <!-- Base Configuration -->
     <script>
         window.BASE_URL = "/backendtest/"; // Adjusted to project root if needed, user said "/backendtest/"
-        window.API_BASE = "/backendtest/backend/api/";
+        window.API_BASE = "/backendtest/api/";
         window.PAGE_NAME = "dashboard";
     </script>
     
