@@ -3592,7 +3592,7 @@ require_once 'session_check.php';
         // 应用页面权限，隐藏不允许的下拉选项，并自动切换到允许的系统
         async function applyPagePermissions() {
             try {
-                const res = await fetch('/backendtest/api/generatecodeapi.php', {
+                const res = await fetch('generatecodeapi.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'get_page_permissions' })

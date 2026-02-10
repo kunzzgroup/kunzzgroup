@@ -2757,7 +2757,7 @@ require_once CORE_PATH . '/session_check.php';
             const tableBody = document.getElementById('tableBody');
             
             try {
-                const response = await fetch('/backendtest/api/generatecodeapi.php?action=list');
+                const response = await fetch('generatecodeapi.php?action=list');
                 const result = await response.json();
 
                 if (result.success) {

@@ -449,7 +449,7 @@ require_once CORE_PATH . '/session_check.php';
         // 加载原材料列表
         async function loadIngredients() {
             try {
-                const response = await fetch('/backendtest/api/menucost_api.php?action=ingredients');
+                const response = await fetch('menucost_api.php?action=ingredients');
                 const result = await response.json();
                 if (result.success) {
                     ingredients = result.data || [];
@@ -462,7 +462,7 @@ require_once CORE_PATH . '/session_check.php';
         // 加载数据
         async function loadData() {
             try {
-                const response = await fetch('/backendtest/api/menucost_api.php?action=list');
+                const response = await fetch('menucost_api.php?action=list');
                 const result = await response.json();
                 
                 if (result.success) {
@@ -687,7 +687,7 @@ require_once CORE_PATH . '/session_check.php';
             }
 
             try {
-                const response = await fetch('/backendtest/api/menucost_api.php?action=ingredient', {
+                const response = await fetch('menucost_api.php?action=ingredient', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
