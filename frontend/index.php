@@ -1,8 +1,6 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 session_start();
+include_once '../media_config.php';
 
 // 禁用页面缓存
 header("Cache-Control: no-cache, no-store, must-revalidate");
