@@ -1055,7 +1055,7 @@ require_once CORE_PATH . '/session_check.php';
             }
 
             try {
-                const response = await fetch(`menucostdata_api.php?id=${id}`, {
+                const response = await fetch(`/backendtest/api/menucostdata_api.php?id=${id}`, {
                     method: 'DELETE'
                 });
 

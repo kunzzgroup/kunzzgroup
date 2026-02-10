@@ -2407,7 +2407,7 @@ require_once CORE_PATH . '/session_check.php';
             try {
                 // 添加时间戳防止缓存，确保每次获取最新数据
                 const timestamp = new Date().getTime();
-                const response = await fetch(`stockminimumapi.php?action=list&_t=${timestamp}`, {
+                const response = await fetch(`/backendtest/api/stockminimumapi.php?action=list&_t=${timestamp}`, {
                     cache: 'no-cache',
                     headers: {
                         'Cache-Control': 'no-cache',

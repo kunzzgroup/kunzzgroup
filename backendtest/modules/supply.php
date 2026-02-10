@@ -2334,7 +2334,7 @@ require_once CORE_PATH . '/session_check.php';
             }
             
             try {
-                const response = await fetch(`supply_api.php?action=supply&id=${id}`, {
+                const response = await fetch(`/backendtest/api/supply_api.php?action=supply&id=${id}`, {
                     method: 'DELETE'
                 });
                 
@@ -2467,7 +2467,7 @@ require_once CORE_PATH . '/session_check.php';
             try {
                 // 如果存在旧记录，先删除
                 if (recordId) {
-                    const deleteResponse = await fetch(`supply_api.php?action=material&id=${recordId}`, {
+                    const deleteResponse = await fetch(`/backendtest/api/supply_api.php?action=material&id=${recordId}`, {
                         method: 'DELETE'
                     });
                     const deleteResult = await deleteResponse.json();
@@ -2603,7 +2603,7 @@ require_once CORE_PATH . '/session_check.php';
             }
             
             try {
-                const response = await fetch(`supply_api.php?action=material&id=${recordId}`, {
+                const response = await fetch(`/backendtest/api/supply_api.php?action=material&id=${recordId}`, {
                     method: 'DELETE'
                 });
                 
@@ -2702,7 +2702,7 @@ require_once CORE_PATH . '/session_check.php';
             try {
                 // 批量删除
                 const promises = recordIds.map(id => 
-                    fetch(`supply_api.php?action=material&id=${id}`, {
+                    fetch(`/backendtest/api/supply_api.php?action=material&id=${id}`, {
                         method: 'DELETE'
                     })
                 );

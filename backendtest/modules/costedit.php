@@ -1493,7 +1493,7 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                         start_date: startDate,
                         end_date: endDate
                     })}`),
-                    fetch(`kpiapi.php?${new URLSearchParams({
+                    fetch(`/backendtest/api/kpiapi.php?${new URLSearchParams({
                         action: 'list',
                         restaurant: currentRestaurant,
                         start_date: startDate,

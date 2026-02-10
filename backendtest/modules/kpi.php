@@ -2610,7 +2610,7 @@ require_once CORE_PATH . '/session_check.php';
         // API 调用函数
         async function apiCall(endpoint, options = {}) {
             try {
-                const response = await fetch('/backendtest/api/kpiapi.php'), {
+                const response = await fetch(`/backendtest/api/kpiapi.php${endpoint}`, {
                     headers: {
                         'Content-Type': 'application/json',
                         ...options.headers

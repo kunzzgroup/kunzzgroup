@@ -609,7 +609,7 @@ require_once CORE_PATH . '/session_check.php';
             }
 
             try {
-                const response = await fetch(`menucost_api.php?id=${menuItemId}`, {
+                const response = await fetch(`/backendtest/api/menucost_api.php?id=${menuItemId}`, {
                     method: 'DELETE'
                 });
 
@@ -725,7 +725,7 @@ require_once CORE_PATH . '/session_check.php';
             }
 
             try {
-                const response = await fetch(`menucost_api.php?action=ingredient&id=${ingredientId}`, {
+                const response = await fetch(`/backendtest/api/menucost_api.php?action=ingredient&id=${ingredientId}`, {
                     method: 'DELETE'
                 });
 

@@ -1718,7 +1718,7 @@ require_once CORE_PATH . '/session_check.php';
 
     async function loadShifts() {
         try {
-            const response = await fetch(`schedule_api.php?action=get_shifts&restaurant=${currentRestaurant}`);
+            const response = await fetch(`/backendtest/api/schedule_api.php?action=get_shifts&restaurant=${currentRestaurant}`);
             const result = await response.json();
             console.log('加载班次API响应:', result);
             
@@ -2480,7 +2480,7 @@ require_once CORE_PATH . '/session_check.php';
                 ? { id, name, phone, position, work_area: workArea }
                 : { name, phone, position, work_area: workArea, restaurant: currentRestaurant };
             
-            const response = await fetch(`schedule_api.php?action=${action}`, {
+            const response = await fetch(`/backendtest/api/schedule_api.php?action=${action}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestData)
@@ -2573,7 +2573,7 @@ require_once CORE_PATH . '/session_check.php';
                 ? { id, start_time: startTime, end_time: endTime }
                 : { shift_code: code, restaurant: currentRestaurant, start_time: startTime, end_time: endTime };
             
-            const response = await fetch(`schedule_api.php?action=${action}`, {
+            const response = await fetch(`/backendtest/api/schedule_api.php?action=${action}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestData)

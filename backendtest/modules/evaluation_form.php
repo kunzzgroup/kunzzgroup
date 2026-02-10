@@ -906,7 +906,7 @@ require_once CORE_PATH . '/session_check.php';
         async function loadEmployees(department) {
             try {
                 const restaurant = document.getElementById('restaurant').value;
-                const response = await fetch(`../backend/schedule_api.php?action=get_employees&work_area=${department}&restaurant=${restaurant}`);
+                const response = await fetch(`/backendtest/api/schedule_api.php?action=get_employees&work_area=${department}&restaurant=${restaurant}`);
                 const result = await response.json();
                 if (result.success) {
                     employees = result.data.filter(emp => emp.is_active === 1 || emp.is_active === '1');
@@ -920,7 +920,7 @@ require_once CORE_PATH . '/session_check.php';
         // 加载考核指标
         async function loadCriteria(department) {
             try {
-                const response = await fetch(`evaluation_form_api.php?action=get_criteria&department=${department}`);
+                const response = await fetch(`/backendtest/api/evaluation_form_api.php?action=get_criteria&department=${department}`);
                 const result = await response.json();
                 if (result.success) {
                     criteria = result.data;
@@ -1047,9 +1047,9 @@ require_once CORE_PATH . '/session_check.php';
                 showMessage('正在加载考核标准...', 'success');
 
                 const [c1, c2, c3] = await Promise.all([
-                    fetch(`evaluation_form_api.php?action=get_criteria&department=service_line`).then(r => r.json()),
-                    fetch(`evaluation_form_api.php?action=get_criteria&department=sushi_bar`).then(r => r.json()),
-                    fetch(`evaluation_form_api.php?action=get_criteria&department=kitchen`).then(r => r.json())
+                    fetch(`/backendtest/api/evaluation_form_api.php?action=get_criteria&department=service_line`).then(r => r.json()),
+                    fetch(`/backendtest/api/evaluation_form_api.php?action=get_criteria&department=sushi_bar`).then(r => r.json()),
+                    fetch(`/backendtest/api/evaluation_form_api.php?action=get_criteria&department=kitchen`).then(r => r.json())
                 ]);
 
                 const criteriaByDept = {
@@ -1058,7 +1058,7 @@ require_once CORE_PATH . '/session_check.php';
                     kitchen: c3.success ? c3.data : []
                 };
 
-                const sres = await fetch(`evaluation_form_api.php?action=get_standards`).then(r => r.json());
+                const sres = await fetch(`/backendtest/api/evaluation_form_api.php?action=get_standards`).then(r => r.json());
                 const rows = sres.success ? (sres.data || []) : [];
 
                 // 初始化结构
@@ -1232,7 +1232,7 @@ require_once CORE_PATH . '/session_check.php';
                 if (!pdfContainer) return;
 
                 // 获取当前部门的指标名称
-                const response = await fetch(`evaluation_form_api.php?action=get_criteria&department=${activeDept}`);
+                const response = await fetch(`/backendtest/api/evaluation_form_api.php?action=get_criteria&department=${activeDept}`);
                 const result = await response.json();
                 const criteriaList = result.success ? result.data : [];
 

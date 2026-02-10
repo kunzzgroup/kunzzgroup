@@ -863,7 +863,7 @@ require_once CORE_PATH . '/session_check.php';
     // 加载员工数据
     async function loadEmployees() {
         try {
-            const response = await fetch(`schedule_api.php?action=get_employees&restaurant=${currentRestaurant}`);
+            const response = await fetch(`/backendtest/api/schedule_api.php?action=get_employees&restaurant=${currentRestaurant}`);
             const result = await response.json();
             if (result.success) {
                 employees = result.data;
@@ -1630,7 +1630,7 @@ require_once CORE_PATH . '/session_check.php';
                 ? { id, name, phone, position, work_area: workArea }
                 : { name, phone, position, work_area: workArea, restaurant: currentRestaurant };
             
-            const response = await fetch(`schedule_api.php?action=${action}`, {
+            const response = await fetch(`/backendtest/api/schedule_api.php?action=${action}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestData)
