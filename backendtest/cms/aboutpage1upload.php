@@ -1,5 +1,6 @@
 <?php
-require_once dirname(__DIR__) . '/core/bootstrap.php';
+require_once dirname(__DIR__) . '/core/init.php';
+require_once CORE_PATH . '/bootstrap.php';
 // session_start(); // Handled by bootstrap
 
 // 检查是否已登录（根据你的登录系统调整）

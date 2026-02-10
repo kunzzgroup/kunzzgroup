@@ -1,5 +1,6 @@
 <?php
-require_once dirname(__DIR__) . '/core/bootstrap.php';
+require_once dirname(__DIR__) . '/core/init.php';
+require_once CORE_PATH . '/bootstrap.php';
 // require_once 'session_check.php'; // Handled by bootstrap
 ?>
 <!DOCTYPE html>
