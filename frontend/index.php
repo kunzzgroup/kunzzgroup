@@ -1,4 +1,5 @@
 <?php
+require_once $_SERVER['DOCUMENT_ROOT'].'/core/debug_bootstrap.php';
 session_start();
 include_once '../media_config.php';
 

@@ -1,4 +1,5 @@
 <?php
+require_once $_SERVER['DOCUMENT_ROOT'].'/core/debug_bootstrap.php';
 // 检查是否已经启动了session
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
