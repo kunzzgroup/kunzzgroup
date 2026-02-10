@@ -413,7 +413,7 @@ $currentConfig = getTokyoLocationConfig();
     </style>
 </head>
 <body>
-<!-- Sidebar included via bootstrap.php -->
+<?php load_sidebar(); ?>
     <div class="container">
         <div class="header">
             <h1>Tokyo 位置信息管理</h1>

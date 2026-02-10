@@ -806,7 +806,7 @@ require_once dirname(__DIR__) . '/core/bootstrap.php';
             page-break-after: auto;
         }
     </style>
-<!-- Sidebar included via bootstrap.php -->
+<?php load_sidebar(); ?>
 </head>
 <body>
     <div class="container">

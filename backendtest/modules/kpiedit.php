@@ -1125,7 +1125,7 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
     </style>
 </head>
 <body>
-<!-- Sidebar included via bootstrap.php -->
+<?php load_sidebar(); ?>
     <div class="container">
         <div class="header">
             <div>

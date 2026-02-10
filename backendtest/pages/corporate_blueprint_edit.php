@@ -915,7 +915,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
     </style>
 </head>
 <body class="has-sidebar">
-<!-- Sidebar included via bootstrap.php -->
+<?php load_sidebar(); ?>
     <div class="container">
         <div class="header">
             <h1>企业蓝图管理</h1>

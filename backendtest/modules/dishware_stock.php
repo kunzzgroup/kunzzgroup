@@ -2917,7 +2917,7 @@ if (isset($_SESSION['user_id'])) {
     </style>
 </head>
 <body>
-<!-- Sidebar included via bootstrap.php -->
+<?php load_sidebar(); ?>
     <div class="container">
         <div class="header">
             <div>

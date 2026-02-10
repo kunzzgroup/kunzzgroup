@@ -1368,7 +1368,7 @@ require_once dirname(__DIR__) . '/core/bootstrap.php';
     </style>
 </head>
 <body>
-<!-- Sidebar included via bootstrap.php -->
+<?php load_sidebar(); ?>
     <!-- 低库存预警弹窗 -->
     <div id="low-stock-modal" class="low-stock-modal">
         <div class="low-stock-modal-content">

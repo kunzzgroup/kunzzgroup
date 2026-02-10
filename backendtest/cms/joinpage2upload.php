@@ -364,7 +364,7 @@ if (file_exists('../media_config.json')) {
     </style>
 </head>
 <body>
-<!-- Sidebar included via bootstrap.php -->
+<?php load_sidebar(); ?>
     <div class="container">
         <div class="header">
             <h1>我们的足迹照片管理</h1>

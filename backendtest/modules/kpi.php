@@ -1372,7 +1372,7 @@ $avatarLetter = strtoupper($username[0]);
     </style>
 </head>
 <body class="restaurant-j1">
-<!-- Sidebar included via bootstrap.php -->
+<?php load_sidebar(); ?>
         <div class="container">
             <div class="header">
                 <div>

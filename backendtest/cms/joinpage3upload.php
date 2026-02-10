@@ -736,7 +736,7 @@ if (isset($_GET['success'])) {
     </script>
 </head>
 <body>
-<!-- Sidebar included via bootstrap.php -->
+<?php load_sidebar(); ?>
     <div class="container">
         <div class="header">
             <h1><?php echo $isEnglish ? 'Job Positions Management' : '招聘职位管理'; ?></h1>

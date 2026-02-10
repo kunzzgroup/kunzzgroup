@@ -3097,7 +3097,7 @@ if (file_exists($jsonFile)) {
     <script src="https://cdn.jsdelivr.net/npm/orgchart@2.1.9/dist/js/jquery.orgchart.min.js"></script>
 </head>
 <body>
-<!-- Sidebar included via bootstrap.php -->
+<?php load_sidebar(); ?>
     
     <!-- 主内容区域 -->
     <div class="main-content">

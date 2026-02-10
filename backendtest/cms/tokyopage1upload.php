@@ -286,7 +286,7 @@ if (file_exists('media_config.json')) {
     </style>
 </head>
 <body>
-<!-- Sidebar included via bootstrap.php -->
+<?php load_sidebar(); ?>
     <div class="container">
         <div class="header">
             <h1>Tokyo Japanese Cuisine 页面管理</h1>
