@@ -110,8 +110,8 @@ if (!isset($_SESSION['user_id'])) {
         let selectedProductCategory = '';
         let editingRowIds = new Set();
         
-        // API配置 - J2 数据库
-        const API_BASE_URL = '../../stockapi.php';
+        // API配置 - J2 数据库（指向backend目录下的stockapi.php）
+        const API_BASE_URL = '../../backend/stockapi.php';
         const SYSTEM_TYPE = 'J2';
         const STOCK_EDIT_API = '../../j2/j2stockeditmobile_api.php';
         
