@@ -1,6 +1,7 @@
 <?php
 // 包含会话验证
-require_once 'session_check.php';
+require_once dirname(__DIR__) . '/core/bootstrap.php';
+// require_once 'session_check.php'; // Handled by bootstrap
 
 // 防止浏览器缓存旧版 JS/HTML，避免修复已上线但用户端仍加载旧代码导致持续报错
 // 注意：必须在任何输出之前设置 header
@@ -22,7 +23,7 @@ $restaurantConfigPhp = [
 ];
 
 if (!isset($_SESSION)) {
-    @session_start();
+// @session_start(); // Handled by bootstrap
 }
 
 // 标记是否使用了新权限系统
@@ -1107,7 +1108,7 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
     </style>
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
+<!-- Sidebar included via bootstrap.php -->
     <div class="container">
         <div class="header">
             <div>

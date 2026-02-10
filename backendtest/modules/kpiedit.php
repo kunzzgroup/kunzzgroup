@@ -1,6 +1,7 @@
 <?php
 // 包含会话验证
-require_once 'session_check.php';
+require_once dirname(__DIR__) . '/core/bootstrap.php';
+// require_once 'session_check.php'; // Handled by bootstrap
 
 $reportPermissions = ['kpi', 'cost'];
 $restaurantPermissions = ['j1', 'j2', 'j3'];
@@ -15,7 +16,7 @@ $restaurantConfigPhp = [
 ];
 
 if (!isset($_SESSION)) {
-    @session_start();
+// @session_start(); // Handled by bootstrap
 }
 
 // 获取用户职位信息
@@ -1124,7 +1125,7 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
     </style>
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
+<!-- Sidebar included via bootstrap.php -->
     <div class="container">
         <div class="header">
             <div>

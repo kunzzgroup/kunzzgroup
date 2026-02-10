@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once dirname(__DIR__) . '/core/bootstrap.php';
+// session_start(); // Handled by bootstrap
 
 // 检查用户是否登录
 if (!isset($_SESSION['user_id'])) {
@@ -1009,7 +1010,7 @@ if (isset($_SESSION['user_id'])) {
     </style>
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
+<!-- Sidebar included via bootstrap.php -->
     <div class="container">
         <div class="header">
             <div>

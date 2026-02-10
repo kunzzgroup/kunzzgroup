@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once dirname(__DIR__) . '/core/bootstrap.php';
+// session_start(); // Handled by bootstrap
 
 // 检查是否已登录
 if (!isset($_SESSION['user_id'])) {
@@ -363,7 +364,7 @@ if (file_exists('../media_config.json')) {
     </style>
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
+<!-- Sidebar included via bootstrap.php -->
     <div class="container">
         <div class="header">
             <h1>我们的足迹照片管理</h1>

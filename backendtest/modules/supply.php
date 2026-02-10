@@ -1,6 +1,7 @@
 <?php
 // 包含会话验证
-require_once 'session_check.php';
+require_once dirname(__DIR__) . '/core/bootstrap.php';
+// require_once 'session_check.php'; // Handled by bootstrap
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -960,7 +961,7 @@ require_once 'session_check.php';
     </style>
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
+<!-- Sidebar included via bootstrap.php -->
     <div class="container">
         <div class="header">
             <h1>供应商价格对比</h1>

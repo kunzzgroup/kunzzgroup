@@ -1,3 +1,4 @@
+<?php require_once dirname(__DIR__) . '/core/bootstrap.php'; ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -533,7 +534,7 @@
     </style>
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
+<!-- Sidebar included via bootstrap.php -->
     <div class="container">
         <div class="header">
             <h1>菜单成本数据管理</h1>

@@ -1,6 +1,7 @@
 <?php
 // 包含会话验证
-require_once 'session_check.php';
+require_once dirname(__DIR__) . '/core/bootstrap.php';
+// require_once 'session_check.php'; // Handled by bootstrap
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -805,7 +806,7 @@ require_once 'session_check.php';
             page-break-after: auto;
         }
     </style>
-    <?php include 'sidebar.php'; ?>
+<!-- Sidebar included via bootstrap.php -->
 </head>
 <body>
     <div class="container">

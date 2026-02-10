@@ -6,7 +6,8 @@ header('Pragma: no-cache');
 header('Expires: 0');
 
 // 在输出任何内容前完成 session 与认证检查，避免未勾选「记住我」时白屏
-session_start();
+require_once dirname(__DIR__) . '/core/bootstrap.php';
+// session_start(); // Handled by bootstrap
 define('SESSION_TIMEOUT_DISHWARE', 60);
 
 if (isset($_SESSION['user_id'])) {
@@ -2916,7 +2917,7 @@ if (isset($_SESSION['user_id'])) {
     </style>
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
+<!-- Sidebar included via bootstrap.php -->
     <div class="container">
         <div class="header">
             <div>
