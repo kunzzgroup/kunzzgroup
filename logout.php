@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/backendtest/backend/core/session_check.php';
+require_once __DIR__ . '../backendtest/core/session_check.php';
 session_unset();
 session_destroy();
 

@@ -7,7 +7,7 @@ $canViewAnalytics = isset($canViewAnalytics) ? $canViewAnalytics : true;
 ?>
 
 <?php
-require_once __DIR__ . '/../backend/core/session_check.php';
+require_once __DIR__ . '../core/session_check.php';
 
 // 超时时间（秒）
 define('SESSION_TIMEOUT', 60);

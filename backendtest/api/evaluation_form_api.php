@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../backend/core/api_guard.php';
+require_once __DIR__ . '../core/api_guard.php';
 require_login();
 header('Content-Type: application/json');
 
@@ -512,4 +512,6 @@ function saveStandards($pdo) {
         sendResponse(false, "保存考核标准失败：" . $e->getMessage());
     }
 }
+
+
 
