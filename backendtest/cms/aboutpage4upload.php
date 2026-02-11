@@ -1043,8 +1043,15 @@ if (file_exists($configFile) && is_readable($configFile)) {
                                     
                                     if ($fullPath) {
                                         // 为显示生成正确的相对路径
+                                        // 当前文件在 cms/ 目录，图片在 images/images/ 目录
                                         if (strpos($originalPath, '/') !== 0 && strpos($originalPath, 'http') !== 0) {
-                                            $displayPath = '../' . $originalPath;
+                                            // 如果路径已经包含了 images/，说明是相对于根目录的路径
+                                            if (strpos($originalPath, 'images/') === 0) {
+                                                $displayPath = '../' . $originalPath;
+                                            } else {
+                                                // 否则直接使用原始路径
+                                                $displayPath = $originalPath;
+                                            }
                                         } else {
                                             $displayPath = $originalPath;
                                         }
