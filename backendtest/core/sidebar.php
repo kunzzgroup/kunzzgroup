@@ -1275,7 +1275,7 @@ body.sidebar-transition {
                     </div>
                 </div>
                 <div class="menu-item-wrapper">
-                    <a href="corporate_blueprint_edit.php" class="informationmenu-item">
+                    <a href="../cms/corporate_blueprint_edit.php" class="informationmenu-item">
                         企业蓝图管理
                     </a>
                 </div>
