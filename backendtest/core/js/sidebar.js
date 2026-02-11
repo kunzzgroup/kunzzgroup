@@ -232,7 +232,7 @@ console.log('点击Section + 悬停Submenu系统已加载完成');
 async function redirectToAllowedStockPage(event) {
     event.preventDefault();
     try {
-        const res = await fetch('generatecodeapi.php', {
+        const res = await fetch('/backendtest/api/generatecodeapi.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'get_page_permissions' })

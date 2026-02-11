@@ -330,5 +330,7 @@ if (!$canSeeBrand) {
     unset($flag);
 }
 ?>
+<?php
 // Include the sidebar template
-<?php require __DIR__ . '/templates/sidebar.php'; ?>
+require __DIR__ . '/templates/sidebar.php';
+?>
