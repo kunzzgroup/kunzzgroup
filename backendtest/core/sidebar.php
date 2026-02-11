@@ -331,7 +331,20 @@ if (!$canSeeBrand) {
 }
 ?>
 
-<?php require __DIR__ . '/templates/sidebar.php'; ?>
+
+<style>
+/*左边的选项bar*/
+.informationmenu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(255, 255, 255, 1);
+    z-index: 999;
+    /* 修改：默认显示遮罩层 */
+    opacity: 1;
+    visibility: visible;
     transition: all 0.3s ease;
     pointer-events: none; /* 添加这行，让遮罩层不阻止点击 */
 }
