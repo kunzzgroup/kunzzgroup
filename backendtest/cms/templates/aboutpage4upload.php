@@ -146,34 +146,32 @@
                                 <?php 
                                 $imagePath = '';
                                 $displayPath = '';
-                                if (isset($data['image'])) {
-                                    // 检查文件是否存在（使用原始路径）
+                                if (isset($data['image']) && !empty($data['image'])) {
                                     $originalPath = $data['image'];
-                                    $fullPath = '';
                                     
-                                    // 尝试多个可能的路径
+                                    // 为浏览器显示生成正确的相对路径
+                                    // 如果路径已经是绝对路径或http开头，直接使用
+                                    if (strpos($originalPath, '/') === 0 || strpos($originalPath, 'http') === 0) {
+                                        $displayPath = $originalPath;
+                                    } else {
+                                        // 相对路径，从cms目录访问根目录的images
+                                        $displayPath = '../' . $originalPath;
+                                    }
+                                    
+                                    // 验证文件是否存在（服务器端路径）
                                     $possiblePaths = [
+                                        __DIR__ . '/../../' . $originalPath,
+                                        __DIR__ . '/../' . $originalPath,
                                         $originalPath,
                                         '../' . $originalPath,
                                         '../../' . $originalPath,
-                                        $uploadDir . basename($originalPath)
                                     ];
                                     
                                     foreach ($possiblePaths as $testPath) {
                                         if (file_exists($testPath)) {
-                                            $fullPath = $testPath;
+                                            $imagePath = $testPath;
                                             break;
                                         }
-                                    }
-                                    
-                                    if ($fullPath) {
-                                        // 为显示生成正确的相对路径
-                                        if (strpos($originalPath, '/') !== 0 && strpos($originalPath, 'http') !== 0) {
-                                            $displayPath = '../' . $originalPath;
-                                        } else {
-                                            $displayPath = $originalPath;
-                                        }
-                                        $imagePath = $fullPath;
                                     }
                                 }
                                 if ($imagePath && $displayPath): 
