@@ -1,6 +1,6 @@
 <?php
-session_start();
-ob_start();
+require_once dirname(__DIR__) . '/core/init.php';
+require_once '../core/session_check.php';
 
 // 设置字符编码
 header('Content-Type: text/html; charset=UTF-8');
