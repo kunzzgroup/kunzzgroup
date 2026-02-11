@@ -180,6 +180,7 @@
                                 ?>
                                     <div class="current-file">
                                         <strong><?php echo $isEnglish ? 'Current Photo:' : '当前照片:'; ?></strong> <?php echo basename($data['image']); ?><br>
+                                        <small><?php echo $isEnglish ? 'Path:' : '路径:'; ?> <span style="color: #666;"><?php echo htmlspecialchars($data['image']); ?></span></small><br>
                                         <small><?php echo $isEnglish ? 'Updated:' : '更新时间:'; ?> <?php echo $data['updated'] ?? ($isEnglish ? 'Unknown' : '未知'); ?></small>
                                         
                                         <div class="preview-container">
@@ -243,10 +244,6 @@
         </div>
     </div>
     
-    <script>
-        // 设置页面语言变量供JS使用
-        window.PAGE_LANG = '<?php echo $isEnglish ? 'en' : 'zh'; ?>';
-    </script>
     <script src="js/aboutpage4upload.js"></script>
 </body>
 </html>
