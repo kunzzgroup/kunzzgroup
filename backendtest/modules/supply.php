@@ -1,7 +1,7 @@
 <?php
 // 包含会话验证
 require_once dirname(__DIR__) . '/core/init.php';
-require_once CORE_PATH . '/session_check.php';
+require_once '../core/session_check.php';
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -1201,7 +1201,7 @@ require_once CORE_PATH . '/session_check.php';
         // 加载供应商列表
         async function loadSupplies() {
             try {
-                const response = await fetch('/backendtest/api/supply_api.php?action=supplies');
+                const response = await fetch('../api/supply_api.php?action=supplies');
                 
                 // 检查响应状态
                 if (!response.ok) {
@@ -1253,7 +1253,7 @@ require_once CORE_PATH . '/session_check.php';
                 const search = document.getElementById('search-input')?.value || '';
                 const type = document.getElementById('type-filter')?.value || '';
                 
-                let url = 'supply_api.php?action=list';
+                let url = '../api/supply_api.php?action=list';
                 if (search) url += '&search=' + encodeURIComponent(search);
                 if (type) url += '&type=' + encodeURIComponent(type);
                 
@@ -1486,7 +1486,7 @@ require_once CORE_PATH . '/session_check.php';
             try {
                 // 为每个有价格的供应商创建记录
                 const promises = prices.map(priceData => {
-                    return fetch('/backendtest/api/supply_api.php?action=material', {
+                    return fetch('../api/supply_api.php?action=material', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
