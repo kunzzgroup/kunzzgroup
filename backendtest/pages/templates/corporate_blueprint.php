@@ -46,10 +46,10 @@
                                      onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                                 <?php else: ?>
                                 <!-- 如果图片不存在，显示占位符 -->
-                                <div class="logo-fallback" style="display: block;"></div>
+                                <div class="logo-fallback" style="display: flex;">KH</div>
                                 <?php endif; ?>
                                 <!-- 图片加载失败时的备用占位符 -->
-                                <div class="logo-fallback" style="display: none;"></div>
+                                <div class="logo-fallback" style="display: none;">KH</div>
                             </div>
                         </div>
 
