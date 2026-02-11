@@ -1124,7 +1124,7 @@ body.sidebar-transition {
             <div class="dropdown-menu-items" id="analytics-items">
                 <?php if (!empty($submenuVisibility['analytics']['kpi_report'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="/modules/kpi.php" class="informationmenu-item">
+                    <a href="../modules/kpi.php" class="informationmenu-item">
                         KPI报表
                     </a>
                 </div>
@@ -1149,17 +1149,17 @@ body.sidebar-transition {
             <div class="dropdown-menu-items" id="hr-items">               
                 <?php if (!empty($submenuVisibility['hr']['staff_management'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="/modules/generatecode.php" class="informationmenu-item">
+                    <a href="../modules/generatecode.php" class="informationmenu-item">
                         职员管理
                     </a>
                 </div>
                 <div class="menu-item-wrapper">
-                    <a href="/modules/qna.php" class="informationmenu-item">
+                    <a href="../modules/qna.php" class="informationmenu-item">
                         问卷回答
                     </a>
                 </div>
                 <div class="menu-item-wrapper">
-                    <a href="/modules/evaluation_form.php" class="informationmenu-item">
+                    <a href="../modules/evaluation_form.php" class="informationmenu-item">
                         考核表单
                     </a>
                 </div>
@@ -1178,7 +1178,7 @@ body.sidebar-transition {
             <div class="dropdown-menu-items" id="resource-items">               
                 <?php if (!empty($submenuVisibility['resource']['stock_inventory'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="/modules/stocklistall.php" class="informationmenu-item" id="stock-link" onclick="redirectToAllowedStockPage(event)">
+                    <a href="../modules/stocklistall.php" class="informationmenu-item" id="stock-link" onclick="redirectToAllowedStockPage(event)">
                         库存
                     </a>
                 </div>
@@ -1192,7 +1192,7 @@ body.sidebar-transition {
                 <?php endif; ?>
                 <?php if (!empty($submenuVisibility['resource']['price_comparison'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="/modules/price.php" class="informationmenu-item">
+                    <a href="../modules/price.php" class="informationmenu-item">
                         价格对比
                     </a>
                 </div>
@@ -1253,8 +1253,8 @@ body.sidebar-transition {
                             <div class="submenu-title">旗下品牌</div>
                         </div>
                         <div class="submenu-content">
-                            <a href="../cms/tokyo page1upload.php" class="submenu-item">第一页</a>
-                            <a href="../cms/tokyo page5upload.php" class="submenu-item">第五页</a>
+                            <a href="../cms/tokyopage1upload.php" class="submenu-item">第一页</a>
+                            <a href="../cms/tokyopage5upload.php" class="submenu-item">第五页</a>
                         </div>
                     </div>
                 </div>
