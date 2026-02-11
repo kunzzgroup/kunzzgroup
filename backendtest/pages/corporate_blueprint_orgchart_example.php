@@ -10,7 +10,7 @@ ob_start();
 header('Content-Type: text/html; charset=UTF-8');
 
 // 加载JSON数据
-$jsonFile = __DIR__ . '/corporate_strategy.json';
+$jsonFile = __DIR__ . '../corporate_strategy.json';
 $strategyData = null;
 
 if (file_exists($jsonFile)) {
