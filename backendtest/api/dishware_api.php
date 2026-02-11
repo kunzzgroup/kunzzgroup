@@ -723,27 +723,35 @@ function deleteDishware() {
 
 // 上传照片
 function uploadPhoto() {
+
     if (!isset($_FILES['photo']) || $_FILES['photo']['error'] !== UPLOAD_ERR_OK) {
         sendResponse(false, "照片上传失败");
     }
-    
-    $upload_dir = 'uploads/dishware/';
-    if (!is_dir($upload_dir)) {
-        mkdir($upload_dir, 0755, true);
+
+    // ===== 服务器磁盘路径 =====
+    $server_upload_dir = $_SERVER['DOCUMENT_ROOT'] . '/backendtest/uploads/dishware/';
+
+    // ===== 浏览器访问路径（数据库保存）=====
+    $web_upload_dir = 'uploads/dishware/';
+
+    if (!is_dir($server_upload_dir)) {
+        mkdir($server_upload_dir, 0755, true);
     }
-    
-    $file_extension = pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
+
+    $file_extension = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
     $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
-    
-    if (!in_array(strtolower($file_extension), $allowed_extensions)) {
+
+    if (!in_array($file_extension, $allowed_extensions)) {
         sendResponse(false, "不支持的文件格式");
     }
-    
-    $filename = uniqid() . '.' . $file_extension;
-    $file_path = $upload_dir . $filename;
-    
-    if (move_uploaded_file($_FILES['photo']['tmp_name'], $file_path)) {
-        sendResponse(true, "照片上传成功", ['photo_path' => $file_path]);
+
+    $filename = uniqid('dish_', true) . '.' . $file_extension;
+
+    $server_file = $server_upload_dir . $filename;
+    $web_file = $web_upload_dir . $filename;
+
+    if (move_uploaded_file($_FILES['photo']['tmp_name'], $server_file)) {
+        sendResponse(true, "照片上传成功", ['photo_path' => $web_file]);
     } else {
         sendResponse(false, "照片保存失败");
     }
