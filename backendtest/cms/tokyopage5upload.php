@@ -1,7 +1,7 @@
 <?php
 require_once dirname(__DIR__) . '/core/init.php';
 require_once CORE_PATH . '/session_check.php';
-include_once 'media_config.php';
+include_once '../media_config.php';
 
 // 处理删除店铺
 if (isset($_POST['action']) && $_POST['action'] === 'delete' && isset($_POST['store_key'])) {
