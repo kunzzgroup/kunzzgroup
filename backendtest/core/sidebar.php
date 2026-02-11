@@ -1018,10 +1018,7 @@ body.sidebar-transition {
         <?php if ($canSeeBrand): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="brand-items">
-                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-                </svg>
+                <img src="../images/images/网页照片上传.svg" alt="" class="section-icon">
                 集团架构
                 <span class="section-arrow">⮞</span>
             </div>
@@ -1120,11 +1117,7 @@ body.sidebar-transition {
         <?php if ($canSeeAnalytics): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="analytics-items">
-                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="20" x2="18" y2="10"></line>
-                    <line x1="12" y1="20" x2="12" y2="4"></line>
-                    <line x1="6" y1="20" x2="6" y2="14"></line>
-                </svg>
+                <img src="../images/images/运营分析与报表.svg" alt="" class="section-icon">
                 营收数据
                 <span class="section-arrow">⮞</span>
             </div>
@@ -1150,12 +1143,7 @@ body.sidebar-transition {
         <?php if ($canSeeHR): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="hr-items">
-                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                </svg>
+                <img src="../images/images/人事与资源管理.svg" alt="" class="section-icon">
                 人事管理
             </div>
             <div class="dropdown-menu-items" id="hr-items">               
@@ -1183,11 +1171,7 @@ body.sidebar-transition {
         <?php if ($canSeeResource): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="resource-items">
-                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="21 8 21 21 3 21 3 8"></polyline>
-                    <rect x="1" y="3" width="22" height="5"></rect>
-                    <line x1="10" y1="12" x2="14" y2="12"></line>
-                </svg>
+                <img src="../images/images/资源库管理.svg" alt="" class="section-icon">
                 资源总库
                 <span class="section-arrow">⮞</span>
             </div>
@@ -1220,11 +1204,7 @@ body.sidebar-transition {
         <?php if ($canSeeVisual): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="photoupload-items">
-                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                    <polyline points="21 15 16 10 5 21"></polyline>
-                </svg>
+                <img src="../images/images/网页照片上传.svg" alt="" class="section-icon">
                 视觉管理
                 <span class="section-arrow">⮞</span>
             </div>
