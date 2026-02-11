@@ -440,8 +440,6 @@ if (file_exists($configFile) && is_readable($configFile)) {
 // 移除自动添加默认数据的逻辑
 // if (empty($items)) {
 //     $items = $defaultTimeline;
-// }
-?>
 
 require __DIR__ . '/templates/aboutpage4upload.php';
-?>
+
