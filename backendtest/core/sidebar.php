@@ -1018,7 +1018,7 @@ body.sidebar-transition {
         <?php if ($canSeeBrand): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="brand-items">
-                <img src="../images/images/网页照片上传.svg" alt="" class="section-icon">
+                <img src="../../images/images/网页照片上传.svg" alt="" class="section-icon">
                 集团架构
                 <span class="section-arrow">⮞</span>
             </div>
@@ -1117,7 +1117,7 @@ body.sidebar-transition {
         <?php if ($canSeeAnalytics): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="analytics-items">
-                <img src="../images/images/运营分析与报表.svg" alt="" class="section-icon">
+                <img src="../../images/images/运营分析与报表.svg" alt="" class="section-icon">
                 营收数据
                 <span class="section-arrow">⮞</span>
             </div>
@@ -1143,7 +1143,7 @@ body.sidebar-transition {
         <?php if ($canSeeHR): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="hr-items">
-                <img src="../images/images/人事与资源管理.svg" alt="" class="section-icon">
+                <img src="../../images/images/人事与资源管理.svg" alt="" class="section-icon">
                 人事管理
             </div>
             <div class="dropdown-menu-items" id="hr-items">               
@@ -1171,7 +1171,7 @@ body.sidebar-transition {
         <?php if ($canSeeResource): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="resource-items">
-                <img src="../images/images/资源库管理.svg" alt="" class="section-icon">
+                <img src="../../images/images/资源库管理.svg" alt="" class="section-icon">
                 资源总库
                 <span class="section-arrow">⮞</span>
             </div>
@@ -1204,7 +1204,7 @@ body.sidebar-transition {
         <?php if ($canSeeVisual): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="photoupload-items">
-                <img src="../images/images/网页照片上传.svg" alt="" class="section-icon">
+                <img src="../../images/images/网页照片上传.svg" alt="" class="section-icon">
                 视觉管理
                 <span class="section-arrow">⮞</span>
             </div>
