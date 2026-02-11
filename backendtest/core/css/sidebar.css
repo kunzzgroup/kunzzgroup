@@ -693,7 +693,7 @@ body.sidebar-transition {
     display: inline-block;
 }
 
-/* 按用户要求，隐藏"分组标题"的箭头，保留子项箭头 */
+/* 按用户要求，隐藏“分组标题”的箭头，保留子项箭头 */
 .informationmenu .section-arrow {
     display: none !important;
 }
