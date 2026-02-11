@@ -1,14 +1,12 @@
 <?php
-require_once dirname(__DIR__) . '/core/init.php';
-require_once CORE_PATH . '/session_check.php';
+session_start();
 ob_start();
 
 // 设置字符编码
 header('Content-Type: text/html; charset=UTF-8');
 
 // 加载JSON数据 - 文件在backend目录中
-$jsonFile = __DIR__ . '/../backend/corporate_strategy.json';
-
+$jsonFile = __DIR__ . '/corporate_strategy.json';
 $strategyData = null;
 
 if (file_exists($jsonFile)) {
@@ -4105,3 +4103,4 @@ if (file_exists($jsonFile)) {
 <?php
 ob_end_flush();
 ?>
+

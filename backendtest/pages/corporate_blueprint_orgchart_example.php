@@ -4,13 +4,12 @@
  * 这是一个示例文件，展示如何使用专业的图表库来实现树形组织架构图
  */
 
-require_once dirname(__DIR__) . '/core/init.php';
 session_start();
 ob_start();
 header('Content-Type: text/html; charset=UTF-8');
 
 // 加载JSON数据
-$jsonFile = __DIR__ . '/../backendtest/pages/corporate_strategy.json';
+$jsonFile = __DIR__ . '/corporate_strategy.json';
 $strategyData = null;
 
 if (file_exists($jsonFile)) {

@@ -1,6 +1,5 @@
 <?php
-require_once dirname(__DIR__) . '/core/init.php';
-
+session_start();
 
 // 检查是否已登录
 if (!isset($_SESSION['user_id'])) {
@@ -11,7 +10,7 @@ if (!isset($_SESSION['user_id'])) {
 // 增加 max_input_vars 限制（如果表单字段太多）
 ini_set('max_input_vars', 5000);
 
-$jsonFile = __DIR__ . '/../backend/pages/corporate_strategy.json';
+$jsonFile = __DIR__ . '/corporate_strategy.json';
 $success = '';
 $error = '';
 
