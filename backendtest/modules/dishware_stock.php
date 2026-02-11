@@ -8,19 +8,6 @@ header('Expires: 0');
 require_once dirname(__DIR__) . '/core/init.php';
 require_once CORE_PATH . '/session_check.php';
 
-if (!defined('BASE_URL')) {
-    define('BASE_URL', '/backendtest/');
-}
-
-function img_path($path){
-    if (!$path) return '';
-    // If path is uploads/..., map it to api/uploads/...
-    if (strpos($path, 'uploads/') === 0) {
-        return '../api/' . $path; 
-    }
-    return $path;
-}
-
 // define('SESSION_TIMEOUT_DISHWARE', 60); // Not needed if session_check handles it
 
 ?>
@@ -7986,22 +7973,8 @@ function img_path($path){
             function photoHtmlFrom(path, altText, iconClass = 'fa-image') {
                 const tooltip = (altText || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 const label = tooltip || (path ? '照片' : '无照片');
-                
-                // JS equivalent of img_path helper
-                // The API returns paths like 'uploads/dishware/file.jpg'
-                // We are in 'backendtest/modules/', images are in 'backendtest/api/uploads/'
-                // So we need to prepend '../api/' to 'uploads/'
-                
-                let displayPath = path;
-                if (path && typeof path === 'string') {
-                     // Check if path is relative and starts with uploads/
-                     if (path.indexOf('uploads/') === 0) {
-                         displayPath = '../api/' + path;
-                     }
-                }
-                
                 const inner = path
-                    ? `<img src="${displayPath}" alt="${label}" class="product-photo">`
+                    ? `<img src="${path}" alt="${label}" class="product-photo">`
                     : `<div class="no-photo"><i class="fas ${iconClass}"></i></div>`;
                 return `<span class="photo-tooltip-wrap" data-tooltip="${label}">${inner}</span>`;
             }
@@ -8321,22 +8294,8 @@ function img_path($path){
             function photoHtmlFrom(path, altText, iconClass = 'fa-image') {
                 const tooltip = (altText || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 const label = tooltip || (path ? '照片' : '无照片');
-                
-                // JS equivalent of img_path helper
-                // The API returns paths like 'uploads/dishware/file.jpg'
-                // We are in 'backendtest/modules/', images are in 'backendtest/api/uploads/'
-                // So we need to prepend '../api/' to 'uploads/'
-                
-                let displayPath = path;
-                if (path && typeof path === 'string') {
-                     // Check if path is relative and starts with uploads/
-                     if (path.indexOf('uploads/') === 0) {
-                         displayPath = '../api/' + path;
-                     }
-                }
-                
                 const inner = path
-                    ? `<img src="${displayPath}" alt="${label}" class="product-photo">`
+                    ? `<img src="${path}" alt="${label}" class="product-photo">`
                     : `<div class="no-photo"><i class="fas ${iconClass}"></i></div>`;
                 return `<span class="photo-tooltip-wrap" data-tooltip="${label}">${inner}</span>`;
             }
