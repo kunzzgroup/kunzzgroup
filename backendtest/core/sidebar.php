@@ -994,34 +994,6 @@ body.sidebar-transition {
 
 /* 按用户要求，隐藏“分组标题”的箭头，保留子项箭头 */
 .informationmenu .section-arrow { display: none !important; }
-
-/* Custom CSS Icons */
-.icon-brand, .icon-analytics, .icon-hr, .icon-resource, .icon-visual {
-    display: inline-block;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-}
-
-.icon-brand {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='7' width='20' height='14' rx='2' ry='2'/%3E%3Cpath d='M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16'/%3E%3C/svg%3E");
-}
-
-.icon-analytics {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='20' x2='18' y2='10'/%3E%3Cline x1='12' y1='20' x2='12' y2='4'/%3E%3Cline x1='6' y1='20' x2='6' y2='14'/%3E%3C/svg%3E");
-}
-
-.icon-hr {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M23 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E");
-}
-
-.icon-resource {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='21 8 21 21 3 21 3 8'/%3E%3Crect x='1' y='3' width='22' height='5'/%3E%3Cline x1='10' y1='12' x2='14' y2='12'/%3E%3C/svg%3E");
-}
-
-.icon-visual {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'/%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'/%3E%3Cpolyline points='21 15 16 10 5 21'/%3E%3C/svg%3E");
-}
 </style>
 
 <!-- 侧边菜单 -->
@@ -1046,8 +1018,7 @@ body.sidebar-transition {
         <?php if ($canSeeBrand): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="brand-items">
-            <div class="informationmenu-section-title" data-target="brand-items">
-                <i class="section-icon icon-brand"></i>
+                <img src="../images/images/网页照片上传.svg" alt="" class="section-icon">
                 集团架构
                 <span class="section-arrow">⮞</span>
             </div>
@@ -1146,8 +1117,7 @@ body.sidebar-transition {
         <?php if ($canSeeAnalytics): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="analytics-items">
-            <div class="informationmenu-section-title" data-target="analytics-items">
-                <i class="section-icon icon-analytics"></i>
+                <img src="../images/images/运营分析与报表.svg" alt="" class="section-icon">
                 营收数据
                 <span class="section-arrow">⮞</span>
             </div>
@@ -1173,8 +1143,7 @@ body.sidebar-transition {
         <?php if ($canSeeHR): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="hr-items">
-            <div class="informationmenu-section-title" data-target="hr-items">
-                <i class="section-icon icon-hr"></i>
+                <img src="../images/images/人事与资源管理.svg" alt="" class="section-icon">
                 人事管理
             </div>
             <div class="dropdown-menu-items" id="hr-items">               
@@ -1202,8 +1171,7 @@ body.sidebar-transition {
         <?php if ($canSeeResource): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="resource-items">
-            <div class="informationmenu-section-title" data-target="resource-items">
-                <i class="section-icon icon-resource"></i>
+                <img src="../images/images/资源库管理.svg" alt="" class="section-icon">
                 资源总库
                 <span class="section-arrow">⮞</span>
             </div>
@@ -1236,8 +1204,7 @@ body.sidebar-transition {
         <?php if ($canSeeVisual): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="photoupload-items">
-            <div class="informationmenu-section-title" data-target="photoupload-items">
-                <i class="section-icon icon-visual"></i>
+                <img src="../images/images/网页照片上传.svg" alt="" class="section-icon">
                 视觉管理
                 <span class="section-arrow">⮞</span>
             </div>
