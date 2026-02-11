@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once dirname(__DIR__) . '/core/init.php';
+require_once CORE_PATH . '/session_check.php';
 
 // 检查是否已登录
 if (!isset($_SESSION['user_id'])) {

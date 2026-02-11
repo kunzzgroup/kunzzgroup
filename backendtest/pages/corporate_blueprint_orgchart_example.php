@@ -4,8 +4,8 @@
  * 这是一个示例文件，展示如何使用专业的图表库来实现树形组织架构图
  */
 
-session_start();
-ob_start();
+require_once dirname(__DIR__) . '/core/init.php';
+require_once CORE_PATH . '/session_check.php';
 header('Content-Type: text/html; charset=UTF-8');
 
 // 加载JSON数据
