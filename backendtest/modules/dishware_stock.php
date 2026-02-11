@@ -7973,8 +7973,24 @@ require_once CORE_PATH . '/session_check.php';
             function photoHtmlFrom(path, altText, iconClass = 'fa-image') {
                 const tooltip = (altText || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 const label = tooltip || (path ? '照片' : '无照片');
+                
+                // Fix path relative to modules directory
+                let imagePath = path;
+                if (imagePath && !imagePath.startsWith('http') && !imagePath.startsWith('../')) {
+                    if (imagePath.startsWith('uploads/')) {
+                         // API uploads are in ../api/uploads/
+                        imagePath = '../api/' + imagePath;
+                    } else if (imagePath.startsWith('images/')) {
+                        // Static images are in ../images/
+                         imagePath = '../' + imagePath;
+                    } else {
+                        // Default fallback
+                        imagePath = '../' + imagePath;
+                    }
+                }
+                
                 const inner = path
-                    ? `<img src="${path}" alt="${label}" class="product-photo">`
+                    ? `<img src="${imagePath}" alt="${label}" class="product-photo">`
                     : `<div class="no-photo"><i class="fas ${iconClass}"></i></div>`;
                 return `<span class="photo-tooltip-wrap" data-tooltip="${label}">${inner}</span>`;
             }
@@ -8294,8 +8310,24 @@ require_once CORE_PATH . '/session_check.php';
             function photoHtmlFrom(path, altText, iconClass = 'fa-image') {
                 const tooltip = (altText || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 const label = tooltip || (path ? '照片' : '无照片');
+                
+                // Fix path relative to modules directory
+                let imagePath = path;
+                if (imagePath && !imagePath.startsWith('http') && !imagePath.startsWith('../')) {
+                    if (imagePath.startsWith('uploads/')) {
+                         // API uploads are in ../api/uploads/
+                        imagePath = '../api/' + imagePath;
+                    } else if (imagePath.startsWith('images/')) {
+                        // Static images are in ../images/
+                         imagePath = '../' + imagePath;
+                    } else {
+                        // Default fallback
+                        imagePath = '../' + imagePath;
+                    }
+                }
+                
                 const inner = path
-                    ? `<img src="${path}" alt="${label}" class="product-photo">`
+                    ? `<img src="${imagePath}" alt="${label}" class="product-photo">`
                     : `<div class="no-photo"><i class="fas ${iconClass}"></i></div>`;
                 return `<span class="photo-tooltip-wrap" data-tooltip="${label}">${inner}</span>`;
             }
