@@ -23,7 +23,7 @@
         <?php if ($canSeeBrand): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="brand-items">
-                <img src="../../backendtest/images/images/网页照片上传.svg" alt="" class="section-icon">
+                <img src="../../images/images/网页照片上传.svg" alt="" class="section-icon">
                 集团架构
                 <span class="section-arrow">⮞</span>
             </div>
@@ -122,7 +122,7 @@
         <?php if ($canSeeAnalytics): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="analytics-items">
-                <img src="/backendtest/images/images/运营分析与报表.svg" alt="" class="section-icon">
+                <img src="../../images/images/运营分析与报表.svg" alt="" class="section-icon">
                 营收数据
                 <span class="section-arrow">⮞</span>
             </div>
@@ -148,7 +148,7 @@
         <?php if ($canSeeHR): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="hr-items">
-                <img src="/backendtest/images/images/人事与资源管理.svg" alt="" class="section-icon">
+                <img src="../../images/images/人事与资源管理.svg" alt="" class="section-icon">
                 人事管理
             </div>
             <div class="dropdown-menu-items" id="hr-items">               
@@ -176,28 +176,28 @@
         <?php if ($canSeeResource): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="resource-items">
-                <img src="/backendtest/images/images/资源库管理.svg" alt="" class="section-icon">
+                <img src="../../images/images/资源库管理.svg" alt="" class="section-icon">
                 资源总库
                 <span class="section-arrow">⮞</span>
             </div>
             <div class="dropdown-menu-items" id="resource-items">               
                 <?php if (!empty($submenuVisibility['resource']['stock_inventory'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="/backendtest/modules/stocklistall.php" class="informationmenu-item" id="stock-link" onclick="redirectToAllowedStockPage(event)">
+                    <a href="../../modules/stocklistall.php" class="informationmenu-item" id="stock-link" onclick="redirectToAllowedStockPage(event)">
                         库存
                     </a>
                 </div>
                 <?php endif; ?>
                 <?php if (!empty($submenuVisibility['resource']['dishware'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="/backendtest/core/templates/dishware_stock.php" class="informationmenu-item">
+                    <a href="../../core/templates/dishware_stock.php" class="informationmenu-item">
                         碗碟
                     </a>
                 </div>
                 <?php endif; ?>
                 <?php if (!empty($submenuVisibility['resource']['price_comparison'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="/backendtest/modules/price.php" class="informationmenu-item">
+                    <a href="../../modules/price.php" class="informationmenu-item">
                         价格对比
                     </a>
                 </div>
@@ -209,7 +209,7 @@
         <?php if ($canSeeVisual): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="photoupload-items">
-                <img src="/backendtest/images/images/网页照片上传.svg" alt="" class="section-icon">
+                <img src="../../images/images/网页照片上传.svg" alt="" class="section-icon">
                 视觉管理
                 <span class="section-arrow">⮞</span>
             </div>
