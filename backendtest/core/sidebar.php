@@ -1034,7 +1034,7 @@ body.sidebar-transition {
                             <div class="submenu-title">KUNZZ HOLDINGS SDN BHD</div>
                         </div>
                         <div class="submenu-content">
-                            <a href="corporate_blueprint.php" class="submenu-item">企业蓝图</a>
+                            <a href="../pages/corporate_blueprint.php" class="submenu-item">企业蓝图</a>
                         </div>
                     </div>
                 </div>
@@ -1059,8 +1059,8 @@ body.sidebar-transition {
                             </a>
                             <div class="sub-options" id="j1-options">
                                 <?php if (!empty($submenuVisibility['brand']['j1_schedule'])): ?>
-                                <a href="schedule_manager.php?restaurant=J1" class="sub-option">员工排班表</a>
-                                <a href="phone_manage.php?restaurant=J1" class="sub-option">员工手机记录</a>
+                                <a href="../modules/schedule_manager.php?restaurant=J1" class="sub-option">员工排班表</a>
+                                <a href="../modules/phone_manage.php?restaurant=J1" class="sub-option">员工手机记录</a>
                                 <?php endif; ?>
                             </div>
                             <?php endif; ?>
@@ -1072,8 +1072,8 @@ body.sidebar-transition {
                             </a>
                             <div class="sub-options" id="j2-options">
                                 <?php if (!empty($submenuVisibility['brand']['j2_schedule'])): ?>
-                                <a href="schedule_manager.php?restaurant=J2" class="sub-option">员工排班表</a>
-                                <a href="phone_manage.php?restaurant=J2" class="sub-option">员工手机记录</a>
+                                <a href="../modules/schedule_manager.php?restaurant=J2" class="sub-option">员工排班表</a>
+                                <a href="../modules/phone_manage.php?restaurant=J2" class="sub-option">员工手机记录</a>
                                 <?php endif; ?>
                             </div>
                             <?php endif; ?>
@@ -1101,8 +1101,8 @@ body.sidebar-transition {
                             </a>
                             <div class="sub-options" id="j3-options">
                                 <?php if (!empty($submenuVisibility['brand']['j3_schedule'])): ?>
-                                <a href="schedule_manager.php?restaurant=J3" class="sub-option">员工排班表</a>
-                                <a href="phone_manage.php?restaurant=J3" class="sub-option">员工手机记录</a>
+                                <a href="../modules/schedule_manager.php?restaurant=J3" class="sub-option">员工排班表</a>
+                                <a href="../modules/phone_manage.php?restaurant=J3" class="sub-option">员工手机记录</a>
                                 <?php endif; ?>
                             </div>
                             <?php endif; ?>
@@ -1124,7 +1124,7 @@ body.sidebar-transition {
             <div class="dropdown-menu-items" id="analytics-items">
                 <?php if (!empty($submenuVisibility['analytics']['kpi_report'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="kpi.php" class="informationmenu-item">
+                    <a href="/modules/kpi.php" class="informationmenu-item">
                         KPI报表
                     </a>
                 </div>
@@ -1149,17 +1149,17 @@ body.sidebar-transition {
             <div class="dropdown-menu-items" id="hr-items">               
                 <?php if (!empty($submenuVisibility['hr']['staff_management'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="generatecode.php" class="informationmenu-item">
+                    <a href="/modules/generatecode.php" class="informationmenu-item">
                         职员管理
                     </a>
                 </div>
                 <div class="menu-item-wrapper">
-                    <a href="qna.php" class="informationmenu-item">
+                    <a href="/modules/qna.php" class="informationmenu-item">
                         问卷回答
                     </a>
                 </div>
                 <div class="menu-item-wrapper">
-                    <a href="evaluation_form.php" class="informationmenu-item">
+                    <a href="/modules/evaluation_form.php" class="informationmenu-item">
                         考核表单
                     </a>
                 </div>
@@ -1178,7 +1178,7 @@ body.sidebar-transition {
             <div class="dropdown-menu-items" id="resource-items">               
                 <?php if (!empty($submenuVisibility['resource']['stock_inventory'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="stocklistall.php" class="informationmenu-item" id="stock-link" onclick="redirectToAllowedStockPage(event)">
+                    <a href="/modules/stocklistall.php" class="informationmenu-item" id="stock-link" onclick="redirectToAllowedStockPage(event)">
                         库存
                     </a>
                 </div>
@@ -1192,7 +1192,7 @@ body.sidebar-transition {
                 <?php endif; ?>
                 <?php if (!empty($submenuVisibility['resource']['price_comparison'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="price.php" class="informationmenu-item">
+                    <a href="/modules/price.php" class="informationmenu-item">
                         价格对比
                     </a>
                 </div>
@@ -1210,7 +1210,7 @@ body.sidebar-transition {
             </div>
             <div class="dropdown-menu-items" id="photoupload-items">
                 <div class="menu-item-wrapper">
-                    <a href="bgmusicupload.php" class="informationmenu-item">
+                    <a href="../cms/bgmusicupload.php" class="informationmenu-item">
                         背景音乐
                     </a>
                 </div>
@@ -1224,7 +1224,7 @@ body.sidebar-transition {
                             <div class="submenu-title">首页</div>
                         </div>
                         <div class="submenu-content">
-                            <a href="homepage1upload.php" class="submenu-item">第一页</a>
+                            <a href="../cms/homepage1upload.php" class="submenu-item">第一页</a>
                         </div>
                     </div>
                 </div>
@@ -1238,8 +1238,8 @@ body.sidebar-transition {
                             <div class="submenu-title">关于我们</div>
                         </div>
                         <div class="submenu-content">
-                            <a href="aboutpage1upload.php" class="submenu-item">第一页</a>
-                            <a href="aboutpage4upload.php" class="submenu-item">第四页</a>
+                            <a href="../cms/aboutpage1upload.php" class="submenu-item">第一页</a>
+                            <a href="../cms/aboutpage4upload.php" class="submenu-item">第四页</a>
                         </div>
                     </div>
                 </div>
@@ -1253,8 +1253,8 @@ body.sidebar-transition {
                             <div class="submenu-title">旗下品牌</div>
                         </div>
                         <div class="submenu-content">
-                            <a href="tokyopage1upload.php" class="submenu-item">第一页</a>
-                            <a href="tokyopage5upload.php" class="submenu-item">第五页</a>
+                            <a href="../cms/tokyo page1upload.php" class="submenu-item">第一页</a>
+                            <a href="../cms/tokyo page5upload.php" class="submenu-item">第五页</a>
                         </div>
                     </div>
                 </div>
