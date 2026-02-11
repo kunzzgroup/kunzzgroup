@@ -23,7 +23,7 @@
         <?php if ($canSeeBrand): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="brand-items">
-                <img src="/backendtest/images/images/网页照片上传.svg" alt="" class="section-icon">
+                <img src="../../backendtest/images/images/网页照片上传.svg" alt="" class="section-icon">
                 集团架构
                 <span class="section-arrow">⮞</span>
             </div>
