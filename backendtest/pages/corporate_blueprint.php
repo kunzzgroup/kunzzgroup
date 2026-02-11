@@ -1,5 +1,6 @@
 <?php
 require_once dirname(__DIR__) . '/core/init.php';
+require_once CORE_PATH . '/session_check.php';
 ob_start();
 
 // 设置字符编码
