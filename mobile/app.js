@@ -111,10 +111,10 @@ document.addEventListener("DOMContentLoaded", function () {
         const emailField = this.querySelector('input[name="username"]');
         const passwordField = this.querySelector('input[name="password"]');
 
-        // 验证邮箱格式（必须是 Gmail）
-        if (emailField && !emailField.value.match(/^.+@gmail\.com$/)) {
+        // 验证邮箱格式（支持任意合法邮箱，不限于 Gmail）
+        if (emailField && !emailField.value.match(/^[^@\s]+@[^@\s]+\.[^@\s]+$/)) {
           e.preventDefault();
-          alert('请输入有效的 Gmail 地址');
+          alert('请输入有效的邮箱地址');
           emailField.focus();
           return false;
         }
