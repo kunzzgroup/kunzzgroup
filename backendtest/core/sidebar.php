@@ -331,5 +331,4 @@ if (!$canSeeBrand) {
 }
 ?>
 // Include the sidebar template
-require __DIR__ . '/templates/sidebar.php';
-?>
+<?php require __DIR__ . '/templates/sidebar.php'; ?>
