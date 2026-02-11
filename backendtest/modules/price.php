@@ -1,7 +1,7 @@
 <?php
 // 包含会话验证
 require_once dirname(__DIR__) . '/core/init.php';
-require_once 'session_check.php';
+require_once '../core/session_check.php';
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
