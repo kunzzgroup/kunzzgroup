@@ -33,7 +33,7 @@ if (!$configFile) {
     error_log("信息：找到配置文件: $configFile");
 }
 
-$uploadDir = '../images/images/';
+$uploadDir = '../../images/images/';
 
 // 安全写入：规范化为扁平结构 + 文件锁 + 原子重命名
 function normalizeToFlatArray($raw) {
@@ -1043,8 +1043,9 @@ if (file_exists($configFile) && is_readable($configFile)) {
                                     
                                     if ($fullPath) {
                                         // 为显示生成正确的相对路径
+                                        // 当前文件在 cms/ 目录，图片在 images/images/ 目录，需要 ../../
                                         if (strpos($originalPath, '/') !== 0 && strpos($originalPath, 'http') !== 0) {
-                                            $displayPath = '../' . $originalPath;
+                                            $displayPath = '../../' . $originalPath;
                                         } else {
                                             $displayPath = $originalPath;
                                         }
