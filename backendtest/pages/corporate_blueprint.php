@@ -6,7 +6,7 @@ require_once CORE_PATH . '/session_check.php';
 header('Content-Type: text/html; charset=UTF-8');
 
 // 加载JSON数据 - 文件在backend目录中
-$jsonFile = __DIR__ . '/corporate_strategy.json';
+$jsonFile = dirname(dirname(__DIR__)) . '/backend/corporate_strategy.json';
 $strategyData = null;
 
 if (file_exists($jsonFile)) {
