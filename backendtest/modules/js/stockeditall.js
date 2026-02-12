@@ -394,19 +394,20 @@ function initEnhancedDatePickers() {
     const currentDay = today.getDate();
 
     // 初始化日历选择器默认值为今天
-    calendarStartDate = new Date(today);
+    // 初始化日历选择器默认值为今天
     calendarEndDate = new Date(today);
 
     // Default to last 30 days to ensure data is visible
     const thirtyDaysAgo = new Date(today);
     thirtyDaysAgo.setDate(today.getDate() - 30);
+    calendarStartDate = new Date(thirtyDaysAgo);
 
     dateRange = {
         startDate: `${thirtyDaysAgo.getFullYear()}-${String(thirtyDaysAgo.getMonth() + 1).padStart(2, '0')}-${String(thirtyDaysAgo.getDate()).padStart(2, '0')}`,
         endDate: `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`
     };
 
-    console.log('初始化日期选择器，设置日期范围为今天:', dateRange.startDate, '到', dateRange.endDate);
+    console.log('初始化日期选择器，设置日期范围为过去30天:', dateRange.startDate, '到', dateRange.endDate);
 
     // 更新日期范围显示
     updateDateRangeDisplay();
@@ -960,22 +961,22 @@ function switchStock(stockType, event = null) {
     // 更新API地址
     switch (stockType) {
         case 'central':
-            API_BASE_URL = 'stockeditapi.php';
+            API_BASE_URL = '../api/stockeditapi.php';
             document.getElementById('page-title').textContent = '进出货 - 中央';
             document.getElementById('current-stock-type').textContent = '中央';
             break;
         case 'j1':
-            API_BASE_URL = 'j1stockeditpageapi.php';
+            API_BASE_URL = '../api/j1stockeditpageapi.php';
             document.getElementById('page-title').textContent = '进出货 - J1';
             document.getElementById('current-stock-type').textContent = 'J1';
             break;
         case 'j2':
-            API_BASE_URL = 'j2stockeditpageapi.php';
+            API_BASE_URL = '../api/j2stockeditpageapi.php';
             document.getElementById('page-title').textContent = '进出货 - J2';
             document.getElementById('current-stock-type').textContent = 'J2';
             break;
         case 'j3':
-            API_BASE_URL = 'j3stockeditpageapi.php';
+            API_BASE_URL = '../api/j3stockeditpageapi.php';
             document.getElementById('page-title').textContent = '进出货 - J3';
             document.getElementById('current-stock-type').textContent = 'J3';
             break;
