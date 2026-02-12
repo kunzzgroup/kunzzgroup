@@ -110,9 +110,11 @@ function initCalendar() {
     const today = new Date();
     calendarCurrentDate = new Date(today.getFullYear(), today.getMonth(), 1);
 
-    // 设置默认日期范围为今天
+    // Set default date range to last 30 days
     if (!calendarStartDate) {
-        calendarStartDate = new Date(today);
+        const thirtyDaysAgo = new Date(today);
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+        calendarStartDate = new Date(thirtyDaysAgo);
         calendarStartDate.setHours(0, 0, 0, 0);
     }
     if (!calendarEndDate) {
@@ -395,9 +397,12 @@ function initEnhancedDatePickers() {
     calendarStartDate = new Date(today);
     calendarEndDate = new Date(today);
 
-    // 设置dateRange为今天
+    // Default to last 30 days to ensure data is visible
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+
     dateRange = {
-        startDate: `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`,
+        startDate: `${thirtyDaysAgo.getFullYear()}-${String(thirtyDaysAgo.getMonth() + 1).padStart(2, '0')}-${String(thirtyDaysAgo.getDate()).padStart(2, '0')}`,
         endDate: `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`
     };
 
