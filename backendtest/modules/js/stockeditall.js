@@ -7592,3 +7592,278 @@ function handleNewRowPriceSelectChange(selectElement, rowId) {
         updateNewRowTotal(priceInput);
     }
 }
+
+// --- Appended Helper Functions ---
+
+function generateTargetOptions(selectedValue = '') {
+    const options = ['j1', 'j2', 'j3'];
+    let html = '<option value="">Target</option>';
+    options.forEach(opt => {
+        const selected = opt === selectedValue ? 'selected' : '';
+        html += `<option value="${opt}" ${selected}>${opt.toUpperCase()}</option>`;
+    });
+    return html;
+}
+
+function saveNewRows() {
+    return Array.from(document.querySelectorAll('.new-row')).map(row => ({
+        element: row.cloneNode(true),
+        parent: row.parentNode
+    }));
+}
+
+function restoreNewRows(newRows) {
+    if (newRows && newRows.length > 0) {
+        setTimeout(() => {
+            const tbody = document.getElementById('stock-tbody');
+            newRows.forEach(({ element }, index) => {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(-10px)';
+                element.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                tbody.appendChild(element);
+                setTimeout(() => {
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                    setTimeout(() => {
+                        element.style.transition = '';
+                        element.style.transform = '';
+                    }, 300);
+                }, index * 30);
+            });
+            setTimeout(bindComboboxEvents, 0);
+            if (typeof updateBatchSaveButtonVisibility === 'function') {
+                updateBatchSaveButtonVisibility();
+            }
+        }, 50);
+    }
+}
+
+async function checkProductStock(productName, outQuantity, price = null) {
+    if (!productName || outQuantity <= 0) {
+        return { sufficient: true, availableStock: 0, currentStock: 0 };
+    }
+
+    try {
+        let apiUrl;
+        if (price !== null && price !== '') {
+            apiUrl = `?action=product_stock_by_price&product_name=${encodeURIComponent(productName)}&price=${encodeURIComponent(price)}`;
+        } else {
+            apiUrl = `?action=product_stock&product_name=${encodeURIComponent(productName)}`;
+        }
+
+        const result = await apiCall(apiUrl);
+
+        if (result.success && result.data) {
+            const availableStock = parseFloat(result.data.available_stock || 0);
+            const currentStock = parseFloat(result.data.current_stock || 0);
+
+            return {
+                sufficient: availableStock >= outQuantity,
+                availableStock: availableStock,
+                currentStock: currentStock,
+                requested: outQuantity
+            };
+        } else {
+            return { sufficient: true, availableStock: 0, currentStock: 0 };
+        }
+
+    } catch (error) {
+        console.error('检查库存失败:', error);
+        return { sufficient: true, availableStock: 0, currentStock: 0 };
+    }
+}
+
+function updateRemarkCheck(checkbox) {
+    const remarkNumberInput = document.getElementById('add-remark-number');
+    if (checkbox.checked) {
+        remarkNumberInput.disabled = false;
+        if (!remarkNumberInput.value) {
+            // Optional: Set default or focus
+        }
+        remarkNumberInput.focus();
+    } else {
+        remarkNumberInput.disabled = true;
+        remarkNumberInput.value = '';
+    }
+}
+
+function getFormRemarkNumber() {
+    const checkbox = document.getElementById('add-product-remark');
+    const input = document.getElementById('add-remark-number');
+    if (checkbox && checkbox.checked) {
+        return input ? input.value : '';
+    }
+    return '';
+}
+
+function toggleNewRowRemarkNumber(checkbox, rowId) {
+    const input = document.getElementById(`${rowId}-remark-number`);
+    if (input) {
+        input.disabled = !checkbox.checked;
+        if (!checkbox.checked) {
+            input.value = '';
+        } else {
+            input.focus();
+        }
+    }
+}
+
+function createRemarkNumberInput(rowId, remarkNumber = '') {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'table-input';
+    input.id = `${rowId}-remark-number`;
+    input.value = remarkNumber;
+    input.placeholder = 'No.';
+    input.style.width = '60px'; // Adjust width as needed
+    input.disabled = !remarkNumber; // Disable if empty initially, or handled by checkbox state
+    // Actually, should be disabled if checkbox is unchecked.
+    // The checkbox state determines this.
+    return input;
+}
+
+function createNewRowRemarkNumberInput(rowId) {
+    return `<input type="text" class="table-input" id="${rowId}-remark-number" placeholder="No." style="width: 50px;" disabled>`;
+}
+
+
+// Function to update remark number in existing rows (if needed)
+function updateRemarkNumber(id, value) {
+    updateField(id, 'remark_number', value);
+}
+
+function updateNewRowRemarkNumber(input, rowId) {
+    // Just updates the input value, which is pulled when saving
+}
+
+function extractRowData(row) {
+    const inputs = row.querySelectorAll('input, select');
+    const data = {};
+    inputs.forEach(input => {
+        if (input.id) {
+            if (input.type === 'checkbox') {
+                data[input.id] = input.checked;
+            } else {
+                data[input.id] = input.value;
+            }
+        }
+    });
+    return data;
+}
+
+function restoreRowData(row, data) {
+    const inputs = row.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        if (input.id && data[input.id] !== undefined) {
+            if (input.type === 'checkbox') {
+                input.checked = data[input.id];
+            } else {
+                input.value = data[input.id];
+            }
+        }
+    });
+}
+
+async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
+    const row = buttonElement.closest('tr');
+    const rowId = row.querySelector('[id$="-price"]').id.split('-')[0]; // Extract rowId prefix (e.g. new-123)
+
+    // Helper to get value
+    const getVal = (suffix) => {
+        const el = document.getElementById(`${rowId}-${suffix}`);
+        return el ? el.value : '';
+    };
+    const getChecked = (suffix) => {
+        const el = document.getElementById(`${rowId}-${suffix}`);
+        return el ? el.checked : false;
+    };
+
+    // Construct formData
+    const formData = {
+        date: getVal('date'),
+        time: getVal('time'),
+        product_name: getVal('product_name-input') || getVal('product_name'), // Handle combo input
+        in_quantity: parseFloat(getVal('in-qty')) || 0,
+        out_quantity: parseFloat(getVal('out-qty')) || 0,
+        specification: getVal('specification'),
+        price: getVal('price') || 0,
+        receiver: getVal('receiver'),
+        code_number: getVal('code_number-input') || getVal('code_number'),
+        remark: getVal('remark'),
+        product_remark_checked: getChecked('product-remark'),
+        remark_number: getVal('remark-number'),
+        target_system: getVal('target'),
+        type: getVal('type')
+    };
+
+    // Validation
+    const requiredFields = ['date', 'time', 'product_name', 'specification', 'receiver'];
+    for (let field of requiredFields) {
+        if (!formData[field]) {
+            showAlert(`Please fill in required fields`, 'error');
+            return;
+        }
+    }
+
+    if (formData.out_quantity > 0 && !formData.target_system) {
+        showAlert('Please select target system for outbound', 'error');
+        return;
+    }
+
+    // Stock check
+    if (formData.out_quantity > 0) {
+        const stockCheck = await checkProductStock(formData.product_name, formData.out_quantity, formData.price);
+        if (!stockCheck.sufficient) {
+            showAlert(`Insufficient Stock! Available: ${stockCheck.availableStock}`, 'error');
+            if (!skipTableRefresh) return;
+        }
+    }
+
+    try {
+        const result = await apiCall('', {
+            method: 'POST',
+            body: JSON.stringify(formData)
+        });
+
+        if (result.success) {
+            if (!skipTableRefresh) showAlert('Record Added Successfully', 'success');
+            row.remove();
+
+            // Add to stockData
+            const newRecord = {
+                id: result.data.id || Date.now(),
+                ...formData,
+                created_at: new Date().toISOString()
+            };
+            stockData.push(newRecord);
+
+            if (!skipTableRefresh) {
+                // Save other new rows
+                const otherNewRows = Array.from(document.querySelectorAll('.new-row'));
+                const savedRows = otherNewRows.map(r => ({
+                    element: r.cloneNode(true),
+                    data: extractRowData(r)
+                }));
+
+                renderStockTable();
+
+                // Restore
+                setTimeout(() => {
+                    const tbody = document.getElementById('stock-tbody');
+                    savedRows.forEach(({ element, data }) => {
+                        tbody.appendChild(element);
+                        restoreRowData(element, data);
+                    });
+                    setTimeout(bindComboboxEvents, 0);
+                    if (typeof updateBatchSaveButtonVisibility === 'function') updateBatchSaveButtonVisibility();
+                }, 100);
+                updateStats();
+            }
+        } else {
+            showAlert('Add Failed: ' + (result.message || 'Unknown Error'), 'error');
+        }
+    } catch (error) {
+        console.error(error);
+        showAlert('Error saving record', 'error');
+    }
+}
