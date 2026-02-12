@@ -178,6 +178,6 @@
             defaultRestaurant: '<?php echo $defaultRestaurant; ?>'
         };
     </script>
-    <script src="js/costedit.js"></script>
+    <script src="js/costedit.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

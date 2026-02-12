@@ -47,6 +47,10 @@ function initApp() {
     initYearSelect();
     initCurrentMonth();
     refreshRestaurantDisplay();
+
+    console.log('[initApp] Initialized with PAGE_CONFIG:', PAGE_CONFIG);
+    console.log('[initApp] Current Restaurant:', currentRestaurant);
+
     loadMonthData();
 }
 
@@ -159,7 +163,10 @@ function showSessionExpiredMessage() {
 // API 调用函数
 async function apiCall(endpoint, options = {}) {
     try {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        const url = `${API_BASE_URL}${endpoint}`;
+        console.log('[API Call] Requesting:', url, options);
+
+        const response = await fetch(url, {
             headers: {
                 'Content-Type': 'application/json',
                 ...options.headers
@@ -167,18 +174,30 @@ async function apiCall(endpoint, options = {}) {
             ...options
         });
 
+        console.log('[API Call] Response status:', response.status);
+
         if (!response.ok) {
             throw new Error(`HTTP错误: ${response.status}`);
         }
 
-        const data = await response.json();
+        // Clone response to log text if JSON parsing fails
+        const clone = response.clone();
+        try {
+            const data = await response.json();
+            console.log('[API Call] Response data:', data);
 
-        if (data.code === 'SESSION_EXPIRED') {
-            showSessionExpiredMessage();
-            return { success: false, code: 'SESSION_EXPIRED' };
+            if (data.code === 'SESSION_EXPIRED') {
+                showSessionExpiredMessage();
+                return { success: false, code: 'SESSION_EXPIRED' };
+            }
+
+            return data;
+        } catch (e) {
+            const text = await clone.text();
+            console.error('[API Call] JSON Parse Error:', e);
+            console.error('[API Call] Response Text:', text);
+            throw e;
         }
-
-        return data;
     } catch (error) {
         console.error('API调用失败:', error);
         throw error;
@@ -216,6 +235,8 @@ async function loadMonthData(preserveEditingState = false) {
     isLoading = true;
     currentYear = parseInt(document.getElementById('year-select').value);
     currentMonth = parseInt(document.getElementById('month-select').value);
+
+    console.log('[loadMonthData] Loading data for:', currentYear, currentMonth, 'Restaurant:', currentRestaurant);
 
     try {
         const startDate = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-01`;
