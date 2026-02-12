@@ -183,7 +183,7 @@
             <div class="dropdown-menu-items" id="resource-items">               
                 <?php if (!empty($submenuVisibility['resource']['stock_inventory'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="../../modules/stocklistall.php" class="informationmenu-item" id="stock-link" onclick="redirectToAllowedStockPage(event)">
+                    <a href="/backendtest/modules/stocklistall.php" class="informationmenu-item" id="stock-link" onclick="redirectToAllowedStockPage(event)">
                         库存
                     </a>
                 </div>
