@@ -3,32 +3,32 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: #f1dfbc;
             color: #111827;
         }
-        
+
         .container {
             max-width: 1800px;
             margin: 0 auto;
             padding: 24px;
         }
-        
+
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 32px;
         }
-        
+
         .header h1 {
             font-size: 56px;
             font-weight: bold;
             color: #583e04;
         }
-        
+
         .header .controls {
             display: flex;
             align-items: center;
@@ -50,7 +50,7 @@
             transition: all 0.2s;
             text-decoration: none;
         }
-        
+
         .back-button:hover {
             background-color: #462d03;
             transform: translateY(-1px);
@@ -67,13 +67,13 @@
             align-items: center;
             gap: 8px;
         }
-        
+
         .alert-success {
             background-color: #d1fae5;
             color: #065f46;
             border: 1px solid #a7f3d0;
         }
-        
+
         .alert-error {
             background-color: #fee2e2;
             color: #991b1b;
@@ -115,7 +115,8 @@
             color: #583e04;
         }
 
-        .filter-input, .filter-select {
+        .filter-input,
+        .filter-select {
             padding: 10px 12px;
             border: 1px solid #d1d5db;
             border-radius: 8px;
@@ -124,7 +125,8 @@
             color: #583e04;
         }
 
-        .filter-input:focus, .filter-select:focus {
+        .filter-input:focus,
+        .filter-select:focus {
             outline: none;
             border-color: #583e04;
             box-shadow: 0 0 0 3px rgba(88, 62, 4, 0.1);
@@ -149,22 +151,22 @@
             transition: all 0.2s;
             text-decoration: none;
         }
-        
+
         .btn-primary {
             background-color: #583e04;
             color: white;
         }
-        
+
         .btn-primary:hover {
             background-color: #462d03;
             transform: translateY(-1px);
         }
-        
+
         .btn-success {
             background-color: #10b981;
             color: white;
         }
-        
+
         .btn-success:hover {
             background-color: #059669;
             transform: translateY(-1px);
@@ -174,7 +176,7 @@
             background-color: #6b7280;
             color: white;
         }
-        
+
         .btn-secondary:hover {
             background-color: #4b5563;
             transform: translateY(-1px);
@@ -184,7 +186,7 @@
             background-color: #f59e0b;
             color: white;
         }
-        
+
         .btn-warning:hover {
             background-color: #d97706;
             transform: translateY(-1px);
@@ -194,7 +196,7 @@
             background-color: #ef4444;
             color: white;
         }
-        
+
         .btn-danger:hover {
             background-color: #dc2626;
             transform: translateY(-1px);
@@ -310,7 +312,8 @@
             transition: all 0.2s;
             box-sizing: border-box;
             vertical-align: middle;
-            line-height: 24px; /* 保持行高一致 */
+            line-height: 24px;
+            /* 保持行高一致 */
         }
 
         .table-input.currency-input {
@@ -339,7 +342,8 @@
             appearance: none;
             box-sizing: border-box;
             vertical-align: middle;
-            line-height: 24px; /* 保持行高一致 */
+            line-height: 24px;
+            /* 保持行高一致 */
         }
 
         .table-select:focus {
@@ -402,7 +406,8 @@
 
         /* 固定表格列宽，防止编辑时宽度变化 */
         .stock-table {
-            table-layout: fixed; /* 添加这行 */
+            table-layout: fixed;
+            /* 添加这行 */
             width: 100%;
             min-width: 1400px;
             border-collapse: collapse;
@@ -410,21 +415,82 @@
         }
 
         /* 为每列指定固定宽度 */
-        .stock-table th:nth-child(1), .stock-table td:nth-child(1) { width: 90px; } /* DATE */
-        .stock-table th:nth-child(2), .stock-table td:nth-child(2) { width: 100px; } /* Code Number */
-        .stock-table th:nth-child(3), .stock-table td:nth-child(3) { width: 180px; } /* PRODUCT */
-        .stock-table th:nth-child(4), .stock-table td:nth-child(4) { width: 70px; }  /* In */
-        .stock-table th:nth-child(5), .stock-table td:nth-child(5) { width: 70px; }  /* Out */
-        .stock-table th:nth-child(6), .stock-table td:nth-child(6) { width: 80px; } /* Target */
-        .stock-table th:nth-child(7), .stock-table td:nth-child(7) { width: 90px; } /* Specification */
-        .stock-table th:nth-child(8), .stock-table td:nth-child(8) { width: 100px; } /* Price */
-        .stock-table th:nth-child(9), .stock-table td:nth-child(9) { width: 100px; } /* Total */
-        .stock-table th:nth-child(10), .stock-table td:nth-child(10) { width: 150px; } /* Name */
-        .stock-table th:nth-child(11), .stock-table td:nth-child(11) { width: 100px; } /* Remark */
-        .stock-table th:nth-child(12), .stock-table td:nth-child(12) { width: 70px; } /* 操作 */
+        .stock-table th:nth-child(1),
+        .stock-table td:nth-child(1) {
+            width: 90px;
+        }
+
+        /* DATE */
+        .stock-table th:nth-child(2),
+        .stock-table td:nth-child(2) {
+            width: 100px;
+        }
+
+        /* Code Number */
+        .stock-table th:nth-child(3),
+        .stock-table td:nth-child(3) {
+            width: 180px;
+        }
+
+        /* PRODUCT */
+        .stock-table th:nth-child(4),
+        .stock-table td:nth-child(4) {
+            width: 70px;
+        }
+
+        /* In */
+        .stock-table th:nth-child(5),
+        .stock-table td:nth-child(5) {
+            width: 70px;
+        }
+
+        /* Out */
+        .stock-table th:nth-child(6),
+        .stock-table td:nth-child(6) {
+            width: 80px;
+        }
+
+        /* Target */
+        .stock-table th:nth-child(7),
+        .stock-table td:nth-child(7) {
+            width: 90px;
+        }
+
+        /* Specification */
+        .stock-table th:nth-child(8),
+        .stock-table td:nth-child(8) {
+            width: 100px;
+        }
+
+        /* Price */
+        .stock-table th:nth-child(9),
+        .stock-table td:nth-child(9) {
+            width: 100px;
+        }
+
+        /* Total */
+        .stock-table th:nth-child(10),
+        .stock-table td:nth-child(10) {
+            width: 150px;
+        }
+
+        /* Name */
+        .stock-table th:nth-child(11),
+        .stock-table td:nth-child(11) {
+            width: 100px;
+        }
+
+        /* Remark */
+        .stock-table th:nth-child(12),
+        .stock-table td:nth-child(12) {
+            width: 70px;
+        }
+
+        /* 操作 */
 
         /* 确保输入框和选择框填满单元格 */
-        .table-input, .table-select {
+        .table-input,
+        .table-select {
             width: 100%;
             height: 40px;
             border: none;
@@ -433,7 +499,8 @@
             font-size: 14px;
             padding: 8px 4px;
             transition: all 0.2s;
-            box-sizing: border-box; /* 添加这行 */
+            box-sizing: border-box;
+            /* 添加这行 */
         }
 
         /* 编辑状态下的价格输入框样式 */
@@ -623,7 +690,8 @@
             color: #583e04;
         }
 
-        .form-input, .form-select {
+        .form-input,
+        .form-select {
             padding: 10px 12px;
             border: 1px solid #d1d5db;
             border-radius: 8px;
@@ -632,7 +700,8 @@
             color: #583e04;
         }
 
-        .form-input:focus, .form-select:focus {
+        .form-input:focus,
+        .form-select:focus {
             outline: none;
             border-color: #583e04;
             box-shadow: 0 0 0 3px rgba(88, 62, 4, 0.1);
@@ -654,10 +723,15 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* 响应式设计 */
@@ -667,21 +741,21 @@
                 gap: 16px;
                 align-items: flex-start;
             }
-            
+
             .filter-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .filter-actions {
                 flex-direction: column;
                 width: 100%;
             }
-            
+
             .action-buttons {
                 flex-direction: column;
                 gap: 12px;
             }
-            
+
             .stats-info {
                 flex-direction: column;
                 gap: 8px;
@@ -752,16 +826,18 @@
 
         /* 新增行样式 */
         .new-row {
-            background-color: #f0f9ff !important;  
+            background-color: #f0f9ff !important;
         }
 
-        .new-row .table-input, .new-row .table-select {
+        .new-row .table-input,
+        .new-row .table-select {
             background: white;
         }
 
         /* 新增行样式 */
         .new-row {
-            background-color: #e0f2fe !important;  /* 浅蓝色背景 */
+            background-color: #e0f2fe !important;
+            /* 浅蓝色背景 */
         }
 
         .new-row td {
@@ -770,7 +846,8 @@
 
         /* 编辑行样式 */
         .editing-row {
-            background-color: #e0f2fe !important;  /* 与新增行相同的浅蓝色背景 */
+            background-color: #e0f2fe !important;
+            /* 与新增行相同的浅蓝色背景 */
         }
 
         .editing-row td {
@@ -778,20 +855,20 @@
         }
 
         /* 确保输入框背景透明，显示行的背景色 */
-        .new-row .table-input, 
+        .new-row .table-input,
         .new-row .table-select,
         .new-row .currency-input-edit,
-        .editing-row .table-input, 
+        .editing-row .table-input,
         .editing-row .table-select,
         .editing-row .currency-input-edit {
             background: transparent !important;
         }
 
         /* 聚焦时的输入框样式 */
-        .new-row .table-input:focus, 
+        .new-row .table-input:focus,
         .new-row .table-select:focus,
         .new-row .currency-input-edit:focus,
-        .editing-row .table-input:focus, 
+        .editing-row .table-input:focus,
         .editing-row .table-select:focus,
         .editing-row .currency-input-edit:focus {
             background: white !important;
@@ -822,9 +899,11 @@
             transition: all 0.2s;
             box-sizing: border-box;
             cursor: text;
-            ime-mode: disabled; /* 禁用输入法 */
+            ime-mode: disabled;
+            /* 禁用输入法 */
             vertical-align: middle;
-            line-height: 24px; /* 保持行高一致 */
+            line-height: 24px;
+            /* 保持行高一致 */
         }
 
         .combobox-input:focus {
@@ -846,16 +925,19 @@
         }
 
         .combobox-dropdown {
-            position: fixed; /* 改为 fixed 定位，避免被表格限制 */
+            position: fixed;
+            /* 改为 fixed 定位，避免被表格限制 */
             background: white;
             border: 2px solid #583e04;
             border-radius: 4px;
             max-height: 300px;
             overflow-y: auto;
-            z-index: 9999; /* 提高层级，确保显示在最前面 */
+            z-index: 9999;
+            /* 提高层级，确保显示在最前面 */
             display: none;
             box-shadow: 0 4px 12px rgba(88, 62, 4, 0.2);
-            min-width: 200px; /* 设置最小宽度 */
+            min-width: 200px;
+            /* 设置最小宽度 */
         }
 
         .combobox-dropdown.show {
@@ -895,7 +977,8 @@
             transition: all 0.2s;
             box-sizing: border-box;
             cursor: text;
-            ime-mode: disabled; /* 禁用输入法 */
+            ime-mode: disabled;
+            /* 禁用输入法 */
         }
 
         .combobox-input:focus {
@@ -924,11 +1007,13 @@
             border-radius: 4px;
             box-shadow: 0 4px 12px rgba(88, 62, 4, 0.1);
             border: 2px solid #583e04;
-            overflow: visible; /* 改为 visible，允许内容溢出 */
+            overflow: visible;
+            /* 改为 visible，允许内容溢出 */
         }
 
-        .table-container > div:first-child {
-            overflow-x: auto; /* 只对内部滚动容器设置 overflow */
+        .table-container>div:first-child {
+            overflow-x: auto;
+            /* 只对内部滚动容器设置 overflow */
         }
 
         /* 为了确保水平滚动正常，添加一个内部容器 */
@@ -1108,4 +1193,3 @@
         .close-export-modal:hover {
             color: #374151;
         }
-    </style>
