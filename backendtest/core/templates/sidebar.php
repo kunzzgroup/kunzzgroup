@@ -136,7 +136,7 @@
                 <?php endif; ?>
                 <?php if (!empty($submenuVisibility['analytics']['kpi_upload'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="/backendtest/modules/<?php echo $kpiUploadDefaultPage; ?>" class="informationmenu-item">
+                    <a href="/backendtest/modules/kpiedit.php"<?php echo $kpiUploadDefaultPage; ?>" class="informationmenu-item">
                         数据上传
                     </a>
                 </div>
@@ -190,14 +190,14 @@
                 <?php endif; ?>
                 <?php if (!empty($submenuVisibility['resource']['dishware'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="../../modules/dishware_stock.php" class="informationmenu-item">
+                    <a href="/backendtest/modules/dishware_stock.php" class="informationmenu-item">
                         碗碟
                     </a>
                 </div>
                 <?php endif; ?>
                 <?php if (!empty($submenuVisibility['resource']['price_comparison'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="../../modules/price.php" class="informationmenu-item">
+                    <a href="/backendtest/modules/price.php" class="informationmenu-item">
                         价格对比
                     </a>
                 </div>
