@@ -1,5 +1,4 @@
-﻿</head>
-<body class="restaurant-j1">
+﻿<body class="restaurant-j1">
     <?php include CORE_PATH . '/sidebar.php'; ?>
         <div class="container">
             <div class="header">
