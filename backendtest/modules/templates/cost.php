@@ -1,5 +1,5 @@
 <body class="restaurant-j1">
-    <?php include 'sidebar.php'; ?>
+   <?php include CORE_PATH . '/sidebar.php'; ?>
         <div class="container">
             <div class="header">
                 <div>

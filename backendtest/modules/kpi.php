@@ -18,7 +18,8 @@ require_once CORE_PATH . '/session_check.php';
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/kpi.css">
+    <link rel="stylesheet" href="../modules/css/kpi.css">
+
 
     <?php include __DIR__ . '/templates/kpi.php'; ?>
 <script src="js/kpi.js"></script>
