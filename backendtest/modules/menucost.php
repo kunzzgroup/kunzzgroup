@@ -13,6 +13,6 @@ require_once CORE_PATH . '/session_check.php';
     <link rel="stylesheet" href="../css/menucost.css">
     <script src="../js/menucost.js"></script>
 </head>
-
+<?php include __DIR__ . '/templates/menucost.php'; ?>
 </html>
 
