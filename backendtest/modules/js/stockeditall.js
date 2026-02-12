@@ -25,16 +25,16 @@ if (requestedStockType && validStockTypes.has(requestedStockType)) {
     currentStockType = requestedStockType;
     switch (currentStockType) {
         case 'central':
-            API_BASE_URL = '../api/stockeditapi.php';
+            API_BASE_URL = '/backendtest/api/stockeditapi.php';
             break;
         case 'j1':
-            API_BASE_URL = '../api/j1stockeditpageapi.php';
+            API_BASE_URL = '/backendtest/api/j1stockeditpageapi.php';
             break;
         case 'j2':
-            API_BASE_URL = '../api/j2stockeditpageapi.php';
+            API_BASE_URL = '/backendtest/api/j2stockeditpageapi.php';
             break;
         case 'j3':
-            API_BASE_URL = '../api/j3stockeditpageapi.php';
+            API_BASE_URL = '/backendtest/api/j3stockeditpageapi.php';
             break;
     }
 }
