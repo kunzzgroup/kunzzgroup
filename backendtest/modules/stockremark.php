@@ -11,10 +11,9 @@ require_once CORE_PATH . '/session_check.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>库存价格分析 - 库存管理系统</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../css/stockremark.css">
-    <link rel="stylesheet" href="../css/stockremark.css">
+    <link rel="stylesheet" href="/modules/css/stockremark.css">
     <?php include __DIR__ . '/templates/stockremark.php'; ?>
-    <script src="../modules/js/stockremark.js"></script>
+    <script src="/modules/js/stockremark.js"></script>
 
 </head>
 
