@@ -190,7 +190,7 @@
                 <?php endif; ?>
                 <?php if (!empty($submenuVisibility['resource']['dishware'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="../backendtest/modules/dishware_stock.php" class="informationmenu-item">
+                    <a href="../../modules/dishware_stock.php" class="informationmenu-item">
                         碗碟
                     </a>
                 </div>
