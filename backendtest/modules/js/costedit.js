@@ -1,5 +1,5 @@
 // API 配置
-const API_BASE_URL = '../api/costapi.php';
+const API_BASE_URL = '/backendtest/api/costapi.php';
 
 // ===== 页面版本标识（用于确认是否加载到最新代码，排查缓存/OPcache）=====
 const COSTEDIT_BUILD_ID = '2025-12-18_02';
