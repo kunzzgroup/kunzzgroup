@@ -727,7 +727,7 @@ function uploadPhoto() {
         sendResponse(false, "照片上传失败");
     }
     
-    $upload_dir = 'uploads/dishware/';
+    $upload_dir = '../uploads/dishware/';
     if (!is_dir($upload_dir)) {
         mkdir($upload_dir, 0755, true);
     }
