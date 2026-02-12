@@ -1,0 +1,30 @@
+RewriteEngine On
+
+# -----------------------------
+# 1. 不要改 API（最重要）
+# -----------------------------
+RewriteRule ^api/ - [L]
+RewriteRule ^backend/ - [L]
+
+# 单独的 API 文件
+RewriteRule ^(costapi|stockapi|kpiapi|check_permissions_api)\.php$ - [L]
+
+# -----------------------------
+# 2. 如果文件真实存在 → 直接访问
+# -----------------------------
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# -----------------------------
+# 3. 隐藏 .php（页面）
+# -----------------------------
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.+?)/?$ $1.php [L,QSA]
+
+# -----------------------------
+# 4. 首页
+# -----------------------------
+DirectoryIndex index.php index.html
