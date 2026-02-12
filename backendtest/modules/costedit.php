@@ -139,7 +139,7 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>餐厅成本管理后台 - Excel模式</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../costedit/style.css">
+    <link rel="stylesheet" href="../css/costedit.css">
 </head>
 <body>
     <?php include CORE_PATH . '/sidebar.php'; ?>
