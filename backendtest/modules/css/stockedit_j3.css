@@ -1785,11 +1785,10 @@
             gap: clamp(2px, 0.62vw, 12px);
             align-items: flex-end;
             flex: 1;
-        }
 
-        font-size: clamp(6px, 0.63vw, 12px);
-        color: #6b7280;
-        font-weight: 600;
+            font-size: clamp(6px, 0.63vw, 12px);
+            color: #6b7280;
+            font-weight: 600;
         }
 
         .date-info {
