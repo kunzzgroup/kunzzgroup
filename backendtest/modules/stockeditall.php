@@ -15,7 +15,7 @@ require_once CORE_PATH . '/session_check.php';
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="animation.css" />
     <link rel="stylesheet" href="../css/stockeditall.css" />
-    <?php include __DIR__ . '/templates/stockitall.php'; ?>
+    <?php include __DIR__ . '/templates/stockeditall.php'; ?>
     <script src="../modules/js/stockeditall.js"></script>
 </head>
 
