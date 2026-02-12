@@ -52,11 +52,11 @@ let cachedAllowedViews = new Set();
 
 // API配置
 const API_CONFIG = {
-    central: '/backendtest/api/stocklistapi.php',
-    j1: '/backendtest/api/j1stocklistapi.php',
-    j2: '/backendtest/api/j2stocklistapi.php',
-    j3: '/backendtest/api/j3stocklistapi.php',
-    remark: '/backendtest/api/stockremarkapi.php'
+    central: '../api/stocklistapi.php',
+    j1: '../api/j1stocklistapi.php',
+    j2: '../api/j2stocklistapi.php',
+    j3: '../api/j3stocklistapi.php',
+    remark: '../api/stockremarkapi.php'
 };
 
 const SYSTEM_NAMES = {
@@ -150,7 +150,7 @@ async function initApp() {
     if (urlSystem && ['central', 'j1', 'j2', 'j3'].includes(urlSystem)) {
         // 再次检查权限，确保URL中的系统是被允许的
         try {
-            const res = await fetch('/backendtest/api/generatecodeapi.php', {
+            const res = await fetch('../api/generatecodeapi.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'get_page_permissions' })
@@ -241,7 +241,7 @@ async function switchSystem(system, evt) {
                 return;
             }
         } else {
-            const res = await fetch('/backendtest/api/generatecodeapi.php', {
+            const res = await fetch('../api/generatecodeapi.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'get_page_permissions' })
@@ -308,7 +308,7 @@ function toggleViewSelector() {
 
 async function applyPagePermissions() {
     try {
-        const res = await fetch('/backendtest/api/generatecodeapi.php', {
+        const res = await fetch('../api/generatecodeapi.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'get_page_permissions' })
@@ -453,7 +453,7 @@ function startSessionRefresh() {
     // 每5分钟刷新一次会话
     sessionRefreshInterval = setInterval(async () => {
         try {
-            const response = await fetch('/backendtest/api/session_refresh_api.php');
+            const response = await fetch('../api/session_refresh_api.php');
             const result = await response.json();
 
             if (!result.success && result.code === 'SESSION_EXPIRED') {
@@ -605,7 +605,7 @@ async function loadLowStockSettings() {
     try {
         // 添加时间戳防止缓存，确保每次获取最新数据
         const timestamp = new Date().getTime();
-        const response = await fetch(`/backendtest/api/stockminimumapi.php?action=list&_t=${timestamp}`, {
+        const response = await fetch(`../api/stockminimumapi.php?action=list&_t=${timestamp}`, {
             cache: 'no-cache',
             headers: {
                 'Cache-Control': 'no-cache',

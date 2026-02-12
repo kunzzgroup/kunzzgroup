@@ -16,7 +16,7 @@ const STOCK_VIEW_OPTIONS = [
 let cachedStockAllowedSystems = new Set();
 let cachedStockAllowedViews = new Set();
 
-let API_BASE_URL = 'stockeditapi.php';
+let API_BASE_URL = '../api/stockeditapi.php';
 let currentStockType = 'central';
 const urlParams = new URLSearchParams(window.location.search);
 const requestedStockType = urlParams.get('system');
@@ -25,16 +25,16 @@ if (requestedStockType && validStockTypes.has(requestedStockType)) {
     currentStockType = requestedStockType;
     switch (currentStockType) {
         case 'central':
-            API_BASE_URL = 'stockeditapi.php';
+            API_BASE_URL = '../api/stockeditapi.php';
             break;
         case 'j1':
-            API_BASE_URL = 'j1stockeditpageapi.php';
+            API_BASE_URL = '../api/j1stockeditpageapi.php';
             break;
         case 'j2':
-            API_BASE_URL = 'j2stockeditpageapi.php';
+            API_BASE_URL = '../api/j2stockeditpageapi.php';
             break;
         case 'j3':
-            API_BASE_URL = 'j3stockeditpageapi.php';
+            API_BASE_URL = '../api/j3stockeditpageapi.php';
             break;
     }
 }
