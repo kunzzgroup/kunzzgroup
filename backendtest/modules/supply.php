@@ -12,6 +12,7 @@ require_once '../core/session_check.php';
     <title>供应商价格对比</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../animation.css" />
+    <link rel="stylesheet" href="../supply.css">
     <style>
         * {
             margin: 0;
