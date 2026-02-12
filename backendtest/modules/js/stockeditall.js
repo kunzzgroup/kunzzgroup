@@ -961,22 +961,22 @@ function switchStock(stockType, event = null) {
     // 更新API地址
     switch (stockType) {
         case 'central':
-            API_BASE_URL = '../api/stockeditapi.php';
+            API_BASE_URL = 'stockeditapi.php';
             document.getElementById('page-title').textContent = '进出货 - 中央';
             document.getElementById('current-stock-type').textContent = '中央';
             break;
         case 'j1':
-            API_BASE_URL = '../api/j1stockeditpageapi.php';
+            API_BASE_URL = 'j1stockeditpageapi.php';
             document.getElementById('page-title').textContent = '进出货 - J1';
             document.getElementById('current-stock-type').textContent = 'J1';
             break;
         case 'j2':
-            API_BASE_URL = '../api/j2stockeditpageapi.php';
+            API_BASE_URL = 'j2stockeditpageapi.php';
             document.getElementById('page-title').textContent = '进出货 - J2';
             document.getElementById('current-stock-type').textContent = 'J2';
             break;
         case 'j3':
-            API_BASE_URL = '../api/j3stockeditpageapi.php';
+            API_BASE_URL = 'j3stockeditpageapi.php';
             document.getElementById('page-title').textContent = '进出货 - J3';
             document.getElementById('current-stock-type').textContent = 'J3';
             break;
@@ -1326,7 +1326,7 @@ document.addEventListener('click', function (event) {
 // API 调用函数
 async function apiCall(endpoint, options = {}) {
     try {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        const response = await fetch('/backendtest/api/stocklistapi.php', {
             headers: {
                 'Content-Type': 'application/json',
                 ...options.headers
