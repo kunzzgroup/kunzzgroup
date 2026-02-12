@@ -391,6 +391,7 @@ tr[data-type="set"]:not(:first-child) {
 
 .quantity-input {
     -moz-appearance: textfield;
+    appearance: textfield;
     /* Firefox */
 }
 
@@ -1436,6 +1437,7 @@ tr[data-type="set"]:not(:first-child) {
 
 .quantity-input {
     -moz-appearance: textfield;
+    appearance: textfield;
     /* Firefox */
 }
 
@@ -3108,6 +3110,7 @@ tr[data-type="set"]:not(:first-child) {
 
 .break-record-table tr.new-row input[type="number"] {
     -moz-appearance: textfield;
+    appearance: textfield;
     /* Firefox */
 }
 
