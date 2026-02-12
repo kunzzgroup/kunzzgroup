@@ -22,6 +22,7 @@ require_once CORE_PATH . '/session_check.php';
     <link rel="stylesheet" href="/modules/css/dishware_stock.css">
 
     <?php include __DIR__ . '/templates/dishware_stock.php'; ?>
+    <script src="js/dishware_stock.js"></script>
 </head>
     
 </html>
