@@ -19,7 +19,7 @@ require_once CORE_PATH . '/session_check.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>碗碟库存管理 - 库存管理系统</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../css/dishware_stock.css">
+    <link rel="stylesheet" href="../modules/css/dishware_stock.css">
 </head>
 <body>
     <?php include CORE_PATH . '/sidebar.php'; ?>
