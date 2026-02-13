@@ -647,7 +647,7 @@ if (!isset($_SESSION['user_id'])) {
             }
         }
         
-        // 保存单个记录（按价格从高到低依次扣减）
+        // 保存单个记录（按价格从高到低依次扣除）
         async function saveRecord(id) {
             const record = stockData.find(r => r.id === id);
             if (!record) return;
@@ -678,13 +678,13 @@ if (!isset($_SESSION['user_id'])) {
                     return;
                 }
                 
-                // 获取该产品的价格和库存信息（按价格从高到低）
-                const priceStockUrl = `${STOCK_EDIT_API}?action=product_prices_with_stock&product_name=${encodeURIComponent(record.product_name)}${record.product_code ? '&code_number=' + encodeURIComponent(record.product_code) : ''}`;
-                const priceStockResp = await fetch(priceStockUrl);
-                const priceStockResult = await priceStockResp.json();
+                // 获取该产品的所有不同价格的库存记录（按价格从高到低）
+                const stockByPriceUrl = `${STOCK_EDIT_API}?action=product_stock_by_price&product_name=${encodeURIComponent(record.product_name)}${record.product_code ? '&code_number=' + encodeURIComponent(record.product_code) : ''}`;
+                const stockResp = await fetch(stockByPriceUrl);
+                const stockResult = await stockResp.json();
                 
-                if (!priceStockResult.success || !priceStockResult.data || priceStockResult.data.length === 0) {
-                    // 如果没有价格信息，使用原来的方式（单条记录）
+                if (!stockResult.success || !stockResult.data || stockResult.data.length === 0) {
+                    // 如果没有找到按价格分组的库存，使用原来的方式（向后兼容）
                     const workDate = getDefaultWorkDate();
                     const now = new Date();
                     const timeStr = now.toTimeString().slice(0, 8);
@@ -705,106 +705,121 @@ if (!isset($_SESSION['user_id'])) {
                     });
                     
                     const result = await response.json();
-                    if (!result.success) throw new Error(result.message || '保存失败');
-                } else {
-                    // 按价格从高到低依次扣减（每次保存后重新查询最新库存）
-                    let remainingQty = soldQty;
-                    const workDate = getDefaultWorkDate();
-                    let savedRecords = 0;
+                    if (result.success) {
+                        editingRowIds.delete(id);
+                        await reloadStockTotals(editingRowIds);
+                        const updatedRecord = stockData.find(r => r.id === id);
+                        if (updatedRecord) updatedRecord.qty = updatedRecord.original_qty;
+                        generateTable();
+                        alert(`记录已保存\n产品: ${record.product_name}\n出货量: ${soldQty.toFixed(3)}`);
+                    } else {
+                        throw new Error(result.message || '保存失败');
+                    }
+                    return;
+                }
+                
+                // 按价格从高到低依次扣除
+                const priceStocks = stockResult.data; // 已经是按价格从高到低排序
+                let remainingQty = soldQty;
+                const workDate = getDefaultWorkDate();
+                const now = new Date();
+                const baseTimeStr = now.toTimeString().slice(0, 8);
+                const outboundRecords = [];
+                
+                console.log('按价格分组的库存数据:', priceStocks);
+                console.log('需要扣除的总数量:', soldQty);
+                
+                for (let i = 0; i < priceStocks.length && remainingQty > 0.001; i++) {
+                    const priceStock = priceStocks[i];
+                    const availableStock = parseFloat(priceStock.available_stock) || 0;
                     
-                    while (remainingQty > 0) {
-                        // 重新查询当前的价格库存列表（获取最新数据）
-                        const priceStockUrl = `${STOCK_EDIT_API}?action=product_prices_with_stock&product_name=${encodeURIComponent(record.product_name)}${record.product_code ? '&code_number=' + encodeURIComponent(record.product_code) : ''}`;
-                        const priceStockResp = await fetch(priceStockUrl);
-                        const priceStockResult = await priceStockResp.json();
+                    console.log(`价格 RM ${priceStock.price}: 可用库存=${availableStock}, 还需扣除=${remainingQty.toFixed(3)}`);
+                    
+                    // 跳过库存为0或负数的价格（已经扣完了）
+                    if (availableStock <= 0) {
+                        console.log(`跳过价格 RM ${priceStock.price}（库存=${availableStock}）`);
+                        continue;
+                    }
+                    
+                    // 计算从这个价格扣除的数量（不能超过可用库存）
+                    const deductQty = Math.min(remainingQty, availableStock);
+                    
+                    if (deductQty > 0.001) {
+                        console.log(`从价格 RM ${priceStock.price} 扣除: ${deductQty.toFixed(3)}`);
                         
-                        if (!priceStockResult.success || !priceStockResult.data || priceStockResult.data.length === 0) {
-                            // 没有更多价格库存了
-                            break;
-                        }
-                        
-                        const priceStockList = priceStockResult.data;
-                        console.log(`第 ${savedRecords + 1} 次查询，获取到的价格库存列表:`, priceStockList);
-                        // 详细输出每个价格的库存信息
-                        priceStockList.forEach((item, idx) => {
-                            console.log(`  价格 ${idx + 1}: RM ${item.price}, 可用库存: ${item.available_stock}`);
-                        });
-                        
-                        // 找到最高价格的可用库存
-                        const highestPriceItem = priceStockList[0]; // 已经按价格从高到低排序
-                        const price = parseFloat(highestPriceItem.price) || 0;
-                        const availableStock = parseFloat(highestPriceItem.available_stock) || 0;
-                        
-                        console.log(`选择扣减: 价格=RM ${price}, 可用库存=${availableStock}, 剩余需扣=${remainingQty}`);
-                        
-                        if (availableStock <= 0) {
-                            // 最高价格的库存已经用完，继续下一个
-                            console.log(`价格 RM ${price} 的库存已用完，跳过`);
-                            break;
-                        }
-                        
-                        const deductQty = Math.min(remainingQty, availableStock);
-                        
-                        // 为每条记录生成不同的时间戳
-                        const now = new Date();
-                        const timeStr = now.toTimeString().slice(0, 8);
-                        
-                        const outboundData = {
+                        // 为每个价格创建出货记录（使用稍微不同的时间戳以避免冲突）
+                        const timeStr = i === 0 ? baseTimeStr : new Date(now.getTime() + i * 1000).toTimeString().slice(0, 8);
+                        outboundRecords.push({
                             date: workDate,
                             time: timeStr,
                             product_name: record.product_name,
                             code_number: record.product_code || null,
                             in_quantity: 0,
                             out_quantity: deductQty,
-                            price: price
-                        };
+                            price: priceStock.price // 保存价格信息用于显示
+                        });
                         
-                        console.log(`保存记录 ${savedRecords + 1}: 价格=${price}, 扣减=${deductQty}, 剩余需扣=${remainingQty - deductQty}, 时间=${timeStr}`);
-                        
+                        remainingQty -= deductQty;
+                    }
+                }
+                
+                console.log('扣除后的剩余数量:', remainingQty.toFixed(3));
+                console.log('创建的出货记录数:', outboundRecords.length);
+                
+                if (remainingQty > 0.001) {
+                    alert(`警告：库存不足！\n产品: ${record.product_name}\n需要扣除: ${soldQty.toFixed(3)}\n实际可扣除: ${(soldQty - remainingQty).toFixed(3)}\n不足: ${remainingQty.toFixed(3)}`);
+                    return;
+                }
+                
+                // 依次发送所有出货记录
+                let successCount = 0;
+                let errorMsg = '';
+                
+                for (const outboundData of outboundRecords) {
+                    try {
+                        console.log('发送出货记录:', JSON.stringify(outboundData, null, 2));
                         const response = await fetch(STOCK_EDIT_API, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(outboundData)
                         });
+                        
                         const result = await response.json();
-                        if (!result.success) {
-                            console.error('保存失败:', result);
-                            throw new Error(result.message || '保存失败');
+                        console.log('API 响应:', result);
+                        if (result.success) {
+                            successCount++;
+                        } else {
+                            const price = outboundData.price || 0;
+                            errorMsg += `价格 RM ${price.toFixed(2)} 扣除失败: ${result.message}\n`;
                         }
-                        console.log(`记录 ${savedRecords + 1} 保存成功:`, result.data);
-                        console.log(`保存的数据: price=${price}, out_quantity=${deductQty}, product_name=${record.product_name}`);
-                        
-                        remainingQty -= deductQty;
-                        savedRecords++;
-                        
-                        // 延迟2秒，确保数据库事务提交并同步完成，然后再查询最新库存
-                        if (remainingQty > 0) {
-                            console.log(`等待数据库同步...剩余需扣: ${remainingQty}`);
-                            await new Promise(resolve => setTimeout(resolve, 2000));
-                        }
+                    } catch (e) {
+                        console.error('发送失败:', e);
+                        errorMsg += `价格扣除失败: ${e.message}\n`;
                     }
-                    
-                    if (remainingQty > 0) {
-                        alert(`警告：库存不足！\n产品: ${record.product_name}\n需要出货: ${soldQty.toFixed(3)}\n实际可出货: ${(soldQty - remainingQty).toFixed(3)}\n不足: ${remainingQty.toFixed(3)}`);
-                    }
-                    
-                    console.log(`共保存 ${savedRecords} 条记录，总扣减量: ${soldQty.toFixed(3)}`);
                 }
                 
-                // 从编辑列表中移除当前保存的记录
-                editingRowIds.delete(id);
-                
-                // 重新加载库存总数以获取最新数据（排除其他正在编辑的记录）
-                await reloadStockTotals(editingRowIds);
-                
-                // 更新当前保存的记录：使用最新的库存总数
-                const updatedRecord = stockData.find(r => r.id === id);
-                if (updatedRecord) {
-                    updatedRecord.qty = updatedRecord.original_qty;
+                if (successCount === outboundRecords.length) {
+                    // 从编辑列表中移除当前保存的记录
+                    editingRowIds.delete(id);
+                    
+                    // 重新加载库存总数以获取最新数据（排除其他正在编辑的记录）
+                    await reloadStockTotals(editingRowIds);
+                    
+                    // 更新当前保存的记录：使用最新的库存总数
+                    const updatedRecord = stockData.find(r => r.id === id);
+                    if (updatedRecord) {
+                        updatedRecord.qty = updatedRecord.original_qty;
+                    }
+                    
+                    generateTable();
+                    const priceDetails = outboundRecords.map((r) => {
+                        const price = r.price || 0;
+                        return `RM ${price.toFixed(2)}: ${r.out_quantity.toFixed(3)}`;
+                    }).join(', ');
+                    alert(`记录已保存\n产品: ${record.product_name}\n总出货量: ${soldQty.toFixed(3)}\n按价格扣除: ${priceDetails}`);
+                } else {
+                    throw new Error(`部分记录保存失败:\n${errorMsg}`);
                 }
-                
-                generateTable();
-                alert(`记录已保存\n产品: ${record.product_name}\n出货量: ${soldQty.toFixed(3)}`);
                 
             } catch (error) {
                 console.error('保存失败:', error);

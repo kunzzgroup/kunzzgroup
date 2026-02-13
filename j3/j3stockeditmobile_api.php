@@ -313,8 +313,8 @@ function handleGet() {
             }
             break;
             
-        case 'product_prices_with_stock':
-            // 获取指定产品的价格列表和库存（从 j3stockedit_data 表，用于按价格从高到低扣减）
+        case 'product_stock_by_price':
+            // 获取指定产品的按价格分组的库存记录（用于按价格从高到低扣除）
             $productName = $_GET['product_name'] ?? null;
             $codeNumber = $_GET['code_number'] ?? null;
             
@@ -323,52 +323,48 @@ function handleGet() {
             }
             
             try {
-                // 从 j3stockedit_data 获取该产品所有不同价格的库存情况
-                // 使用 CAST 确保价格精度一致，避免 GROUP BY 时因精度问题导致分组失败
-                // 直接计算 SUM(in_quantity) - SUM(out_quantity)，不要只统计正数
+                // 从 j3stockedit_data 表获取该产品的所有不同价格的库存情况
+                // 注意：需要计算每个价格的净库存（in - out），包括负数的情况
+                // 只查询有价格记录的（price IS NOT NULL），并按价格分组
                 $sql = "SELECT 
-                            CAST(price AS DECIMAL(10,2)) as price,
+                            COALESCE(price, 0) as price,
                             SUM(in_quantity) as total_in,
                             SUM(out_quantity) as total_out,
                             (SUM(in_quantity) - SUM(out_quantity)) as available_stock
                         FROM j3stockedit_data 
-                        WHERE product_name = ?";
+                        WHERE product_name = ? AND price IS NOT NULL";
                 $params = [$productName];
+                
                 if (!empty($codeNumber)) {
                     $sql .= " AND code_number = ?";
                     $params[] = $codeNumber;
                 }
-                $sql .= "
-                        GROUP BY CAST(price AS DECIMAL(10,2))
-                        HAVING (SUM(in_quantity) - SUM(out_quantity)) > 0
-                        ORDER BY CAST(price AS DECIMAL(10,2)) DESC";
+                
+                $sql .= " GROUP BY price ORDER BY price DESC";
                 
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
                 $priceStockData = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 
-                // 记录查询结果用于调试
-                error_log("product_prices_with_stock查询 - 产品: $productName" . (!empty($codeNumber) ? ", 编号: $codeNumber" : "") . ", 返回记录数: " . count($priceStockData));
+                // 调试日志
+                error_log("product_stock_by_price - product: $productName, code: " . ($codeNumber ?? 'null') . ", found " . count($priceStockData) . " price groups");
                 
                 $result = [];
                 foreach ($priceStockData as $row) {
-                    // 保持价格原始值，不强制转换为 float，避免精度丢失
-                    $priceValue = $row['price'];
-                    // 如果是字符串，转换为数字；如果是数字，直接使用
-                    if (is_string($priceValue)) {
-                        $priceValue = floatval($priceValue);
-                    }
+                    $priceVal = floatval($row['price'] ?? 0);
                     $availableStock = floatval($row['available_stock'] ?? 0);
-                    error_log("  价格: $priceValue, 可用库存: $availableStock, 进货总计: " . ($row['total_in'] ?? 0) . ", 出货总计: " . ($row['total_out'] ?? 0));
                     $result[] = [
-                        'price' => $priceValue,
-                        'available_stock' => $availableStock
+                        'price' => $priceVal,
+                        'available_stock' => $availableStock,
+                        'total_in' => floatval($row['total_in'] ?? 0),
+                        'total_out' => floatval($row['total_out'] ?? 0)
                     ];
+                    error_log("  - Price: $priceVal, Available: $availableStock");
                 }
                 
-                sendResponse(true, "产品价格库存信息获取成功", $result);
+                sendResponse(true, "产品按价格分组的库存获取成功", $result);
             } catch (PDOException $e) {
-                sendResponse(false, "查询价格库存信息失败：" . $e->getMessage());
+                sendResponse(false, "查询失败：" . $e->getMessage());
             }
             break;
             
@@ -387,6 +383,9 @@ function handlePost() {
     if (empty($data['date']) || empty($data['time']) || empty($data['product_name'])) {
         sendResponse(false, "日期、时间和产品名称是必填字段");
     }
+    
+    // 调试日志：记录接收到的数据
+    error_log("handlePost - Received data: " . json_encode($data));
     
     try {
         // 开始事务
@@ -413,6 +412,7 @@ function handlePost() {
         updateStocklistTotal($data['product_name'], $data['code_number'] ?? null, floatval($data['in_quantity'] ?? 0), floatval($data['out_quantity'] ?? 0), true);
         
         // 同步到 j3stockedit_data 表（与 J1/J2 一致，backend stocklistall 可显示扣除）
+        // 确保价格字段被传递
         syncToJ3StockEditData($pdo, $data, 'insert');
         
         $pdo->commit();
@@ -584,19 +584,23 @@ function syncToJ3StockEditData($pdo, $data, $operation = 'insert') {
         }
         
         $specification = $productInfo['specification'] ?? null;
-        // 如果传入的数据中有 price，优先使用（用于按价格从高到低扣减）
-        // 保持价格原始精度，避免精度丢失导致查询时无法匹配
-        if (isset($data['price']) && $data['price'] !== null && $data['price'] !== '') {
-            $price = is_numeric($data['price']) ? floatval($data['price']) : 0;
+        // 优先使用前端传递的价格（用于按价格扣除），否则从 stock_data 获取
+        // 检查前端是否传递了价格字段（可能是字符串或数字）
+        $price = 0;
+        if (isset($data['price'])) {
+            $priceVal = is_numeric($data['price']) ? floatval($data['price']) : 0;
+            if ($priceVal > 0) {
+                $price = $priceVal;
+            } else {
+                $price = floatval($productInfo['price'] ?? 0);
+            }
         } else {
-            $price = isset($productInfo['price']) && $productInfo['price'] !== null ? floatval($productInfo['price']) : 0;
+            $price = floatval($productInfo['price'] ?? 0);
         }
         $type = $productInfo['category'] ?? null;
         
-        // 将 Drinks 转换为 Service Line
-        if ($type === 'Drinks' || strtolower($type) === 'drinks') {
-            $type = 'Service Line';
-        }
+        // 调试日志（生产环境可移除）
+        error_log("syncToJ3StockEditData - product: {$data['product_name']}, frontend_price: " . ($data['price'] ?? 'not set') . ", final_price: $price");
         
         if ($operation === 'insert') {
             $sql = "INSERT INTO j3stockedit_data 
