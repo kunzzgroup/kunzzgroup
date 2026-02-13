@@ -65,7 +65,7 @@ $avatarLetter = strtoupper($username[0]);
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/kpi.css">
+    <link rel="stylesheet" href="/backend/css/kpi.css">
     <title>餐厅KPI管理系统</title> 
 </head>
 <body class="restaurant-j1">
