@@ -2008,10 +2008,6 @@ require_once '../backend/session_check.php';
             <div>
                 <h1 id="page-title"> 手机出货记录 - J2</h1>
             </div>
-            <a class="back-button" href="../backend/stockeditall.php?system=j2">
-                <i class="fas fa-arrow-left"></i>
-                返回上一页
-            </a>
         </div>
         
         <!-- Alert Messages -->

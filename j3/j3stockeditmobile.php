@@ -1990,10 +1990,6 @@ require_once '../backend/session_check.php';
             <div>
                 <h1 id="page-title">进出货 - J3 - 手机版</h1>
             </div>
-            <a class="back-button" href="../backend/stockeditall.php?system=j3">
-                <i class="fas fa-arrow-left"></i>
-                返回上一页
-            </a>
         </div>
         
         <!-- Alert Messages -->
