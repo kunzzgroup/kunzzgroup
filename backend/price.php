@@ -11,6 +11,7 @@ require_once 'session_check.php';
     <title>餐厅价格对比</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../animation.css" />
+    <link rel="stylesheet" href="css/price.css">
     
 </head>
 <body>
