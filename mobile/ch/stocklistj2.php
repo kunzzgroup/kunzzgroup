@@ -22,9 +22,12 @@ if (!isset($_SESSION['user_id'])) {
                 <img src="../images/icons/logout.svg" alt="" aria-hidden="true">
             </a>
             <h1>库存列表 (J2)</h1>
-            <button class="calendar-button" type="button" aria-label="日历">
-                <img src="../images/icons/calendar.svg" alt="" aria-hidden="true">
-            </button>
+            <div class="calendar-header-right">
+                <span id="calendar-selected-date-display" class="calendar-date-display" aria-live="polite"></span>
+                <button class="calendar-button" type="button" aria-label="日历">
+                    <img src="../images/icons/calendar.svg" alt="" aria-hidden="true">
+                </button>
+            </div>
         </header>
 
         <main class="page-content">
@@ -123,6 +126,7 @@ if (!isset($_SESSION['user_id'])) {
         let selectedFreezerCategory = '';
         let selectedProductCategory = '';
         let editingRowIds = new Set();
+        let currentWorkDate = null; // 本页本次选择的日期（不刷新时保留，刷新后清空为今天）
         
         // API配置 - J2 数据库（指向backend目录下的stockapi.php）
         const API_BASE_URL = '../../backend/stockapi.php';
@@ -156,11 +160,13 @@ if (!isset($_SESSION['user_id'])) {
             document.getElementById('calendar-modal-confirm').addEventListener('click', function() {
                 const date = document.getElementById('calendar-date-picker').value;
                 if (date) {
-                    try { localStorage.setItem('j2_stock_edit_date', date); } catch (e) {}
+                    setDefaultWorkDate(date);
+                    updateCalendarDateDisplay();
                 }
                 closeCalendarModal();
             });
             
+            updateCalendarDateDisplay();
             // 加载产品列表
             loadProductList();
         });
@@ -168,10 +174,23 @@ if (!isset($_SESSION['user_id'])) {
         function openCalendarModal() {
             const overlay = document.getElementById('calendar-modal-overlay');
             const picker = document.getElementById('calendar-date-picker');
-            picker.value = getTodayDateString();
+            picker.value = getDefaultWorkDate();
             overlay.classList.add('is-open');
             overlay.setAttribute('aria-hidden', 'false');
             picker.focus();
+        }
+        
+        function formatWorkDateDisplay(dateStr) {
+            if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return '';
+            const p = dateStr.split('-');
+            return p[1].replace(/^0/, '') + '月' + p[2].replace(/^0/, '') + '日';
+        }
+        
+        function updateCalendarDateDisplay() {
+            const el = document.getElementById('calendar-selected-date-display');
+            if (!el) return;
+            const dateStr = getDefaultWorkDate();
+            el.textContent = dateStr ? formatWorkDateDisplay(dateStr) : '';
         }
         
         function closeCalendarModal() {
@@ -184,6 +203,22 @@ if (!isset($_SESSION['user_id'])) {
         function getTodayDateString() {
             const today = new Date();
             return today.toISOString().split('T')[0];
+        }
+        
+        // 出货记录使用的日期：本次会话内选的日期（不刷新则保留），刷新页面则默认今天
+        function getDefaultWorkDate() {
+            if (currentWorkDate && /^\d{4}-\d{2}-\d{2}$/.test(currentWorkDate)) return currentWorkDate;
+            return getTodayDateString();
+        }
+        // 选择日期确定时：记入内存并写入 storage，供编辑页记录使用
+        function setDefaultWorkDate(dateStr) {
+            if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return;
+            currentWorkDate = dateStr;
+            const key = 'j2_stock_edit_date';
+            try {
+                localStorage.setItem(key, dateStr);
+                sessionStorage.setItem(key, dateStr);
+            } catch (e) {}
         }
         
         // 从API获取产品列表
@@ -643,13 +678,13 @@ if (!isset($_SESSION['user_id'])) {
                     return;
                 }
                 
-                // 使用今天的日期
-                const todayDate = getTodayDateString();
+                // 使用日历选择的日期或今天
+                const workDate = getDefaultWorkDate();
                 const now = new Date();
                 const timeStr = now.toTimeString().slice(0, 8);
                 
                 const outboundData = {
-                    date: todayDate,
+                    date: workDate,
                     time: timeStr,
                     product_name: record.product_name,
                     code_number: record.product_code || null,
