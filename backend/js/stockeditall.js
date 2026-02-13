@@ -1248,16 +1248,16 @@ function toggleViewSelector() {
 function switchView(viewType) {
     if (viewType === 'list') {
         // 直接跳转到库存清单页面，不带参数
-        window.location.href = 'stocklistall.php';
+        window.location.href = 'stocklistall';
     } else if (viewType === 'remark') {
         // 跳转到备注页面
-        window.location.href = 'stockremark.php';
+        window.location.href = 'stockremark';
     } else if (viewType === 'product') {
         // 跳转到货品种类页面
-        window.location.href = 'stockproductname.php';
+        window.location.href = 'stockproductname';
     } else if (viewType === 'sot') {
         // 跳转到货品异常页面
-        window.location.href = 'stocksot.php';
+        window.location.href = 'stocksot';
     } else {
         // 保持在当前页面（库存记录）
         hideViewDropdown();
