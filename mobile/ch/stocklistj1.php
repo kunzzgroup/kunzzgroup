@@ -155,7 +155,9 @@ if (!isset($_SESSION['user_id'])) {
             document.getElementById('calendar-modal-cancel').addEventListener('click', closeCalendarModal);
             document.getElementById('calendar-modal-confirm').addEventListener('click', function() {
                 const date = document.getElementById('calendar-date-picker').value;
-                if (date) console.log('已选择日期:', date);
+                if (date) {
+                    try { localStorage.setItem('j1_stock_edit_date', date); } catch (e) {}
+                }
                 closeCalendarModal();
             });
             
