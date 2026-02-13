@@ -576,6 +576,11 @@ function syncToJ3StockEditData($pdo, $data, $operation = 'insert') {
         $price = isset($data['price']) ? floatval($data['price']) : floatval($productInfo['price'] ?? 0);
         $type = $productInfo['category'] ?? null;
         
+        // 将 Drinks 转换为 Service Line
+        if ($type === 'Drinks' || strtolower($type) === 'drinks') {
+            $type = 'Service Line';
+        }
+        
         if ($operation === 'insert') {
             $sql = "INSERT INTO j3stockedit_data 
                     (date, time, code_number, product_name, in_quantity, out_quantity, specification, price, receiver, remark, target_system, type) 
