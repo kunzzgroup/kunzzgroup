@@ -159,7 +159,7 @@ if (!isset($_SESSION['user_id'])) {
             document.getElementById('calendar-modal-confirm').addEventListener('click', function() {
                 const date = document.getElementById('calendar-date-picker').value;
                 if (date) {
-                    try { localStorage.setItem('j3_stock_edit_date', date); } catch (e) {}
+                    setDefaultWorkDate(date);
                     updateCalendarDateDisplay();
                 }
                 closeCalendarModal();
@@ -204,13 +204,25 @@ if (!isset($_SESSION['user_id'])) {
             return today.toISOString().split('T')[0];
         }
         
-        // 出货记录使用的日期：优先使用日历选择的日期，否则今天
+        // 出货记录使用的日期：优先使用日历选择的日期（localStorage + sessionStorage 双写，刷新后仍保留），否则今天
         function getDefaultWorkDate() {
+            const key = 'j3_stock_edit_date';
+            const valid = function (s) { return s && /^\d{4}-\d{2}-\d{2}$/.test(s); };
             try {
-                const saved = localStorage.getItem('j3_stock_edit_date');
-                if (saved && /^\d{4}-\d{2}-\d{2}$/.test(saved)) return saved;
+                const fromLocal = localStorage.getItem(key);
+                if (valid(fromLocal)) return fromLocal;
+                const fromSession = sessionStorage.getItem(key);
+                if (valid(fromSession)) return fromSession;
             } catch (e) {}
             return getTodayDateString();
+        }
+        function setDefaultWorkDate(dateStr) {
+            if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return;
+            const key = 'j3_stock_edit_date';
+            try {
+                localStorage.setItem(key, dateStr);
+                sessionStorage.setItem(key, dateStr);
+            } catch (e) {}
         }
         
         // 从API获取产品列表
