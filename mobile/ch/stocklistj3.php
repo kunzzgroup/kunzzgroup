@@ -711,18 +711,22 @@ if (!isset($_SESSION['user_id'])) {
                     const priceStockList = priceStockResult.data;
                     let remainingQty = soldQty;
                     const workDate = getDefaultWorkDate();
-                    const now = new Date();
-                    const timeStr = now.toTimeString().slice(0, 8);
+                    const baseTime = new Date();
                     const recordsToSave = [];
                     
-                    for (const item of priceStockList) {
+                    for (let i = 0; i < priceStockList.length; i++) {
                         if (remainingQty <= 0) break;
                         
+                        const item = priceStockList[i];
                         const price = parseFloat(item.price) || 0;
                         const availableStock = parseFloat(item.available_stock) || 0;
                         const deductQty = Math.min(remainingQty, availableStock);
                         
                         if (deductQty > 0) {
+                            // 为每条记录生成不同的时间（避免同步冲突）
+                            const recordTime = new Date(baseTime.getTime() + i * 1000); // 每条记录间隔1秒
+                            const timeStr = recordTime.toTimeString().slice(0, 8); // HH:MM:SS
+                            
                             recordsToSave.push({
                                 date: workDate,
                                 time: timeStr,
