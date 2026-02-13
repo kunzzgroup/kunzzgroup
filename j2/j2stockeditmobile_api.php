@@ -325,8 +325,9 @@ function handleGet() {
             
             try {
                 // 从 j2stockedit_data 获取该产品所有不同价格的库存情况
+                // 使用 CAST 确保价格精度一致，避免 GROUP BY 时因精度问题导致分组失败
                 $sql = "SELECT 
-                            price,
+                            CAST(price AS DECIMAL(10,2)) as price,
                             SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
                             SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
                             (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
@@ -339,9 +340,9 @@ function handleGet() {
                     $params[] = $codeNumber;
                 }
                 $sql .= "
-                        GROUP BY price
+                        GROUP BY CAST(price AS DECIMAL(10,2))
                         HAVING available_stock > 0
-                        ORDER BY price DESC";
+                        ORDER BY CAST(price AS DECIMAL(10,2)) DESC";
                 
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
@@ -349,8 +350,14 @@ function handleGet() {
                 
                 $result = [];
                 foreach ($priceStockData as $row) {
+                    // 保持价格原始值，不强制转换为 float，避免精度丢失
+                    $priceValue = $row['price'];
+                    // 如果是字符串，转换为数字；如果是数字，直接使用
+                    if (is_string($priceValue)) {
+                        $priceValue = floatval($priceValue);
+                    }
                     $result[] = [
-                        'price' => floatval($row['price'] ?? 0),
+                        'price' => $priceValue,
                         'available_stock' => floatval($row['available_stock'] ?? 0)
                     ];
                 }
@@ -575,7 +582,12 @@ function syncToJ2StockEditData($pdo, $data, $operation = 'insert') {
         
         $specification = $productInfo['specification'] ?? null;
         // 如果传入的数据中有 price，优先使用（用于按价格从高到低扣减）
-        $price = isset($data['price']) ? floatval($data['price']) : floatval($productInfo['price'] ?? 0);
+        // 保持价格原始精度，避免精度丢失导致查询时无法匹配
+        if (isset($data['price']) && $data['price'] !== null && $data['price'] !== '') {
+            $price = is_numeric($data['price']) ? floatval($data['price']) : 0;
+        } else {
+            $price = isset($productInfo['price']) && $productInfo['price'] !== null ? floatval($productInfo['price']) : 0;
+        }
         $type = $productInfo['category'] ?? null;
         
         // 将 Drinks 转换为 Service Line
