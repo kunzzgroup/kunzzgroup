@@ -727,8 +727,7 @@ if (isset($_SESSION['user_id'])) {
                         code_number: record.product_code || null,
                         in_quantity: 0,
                         out_quantity: soldQty,
-                        receiver: CURRENT_USERNAME || '',
-                        remark: 'MOBILE'
+                        receiver: CURRENT_USERNAME || ''
                     };
                     
                     const response = await fetch(STOCK_EDIT_API, {
@@ -790,8 +789,7 @@ if (isset($_SESSION['user_id'])) {
                             in_quantity: 0,
                             out_quantity: deductQty,
                             price: priceStock.price, // 保存价格信息用于显示
-                            receiver: CURRENT_USERNAME || '',
-                            remark: 'MOBILE'
+                            receiver: CURRENT_USERNAME || ''
                         });
                         
                         remainingQty -= deductQty;

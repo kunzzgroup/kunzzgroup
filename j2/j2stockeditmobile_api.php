@@ -71,16 +71,6 @@ function ensureTables(PDO $pdo) {
             throw $e;
         }
     }
-    
-    // 如果表已存在但缺少remark字段，则添加该字段
-    try {
-        $pdo->exec("ALTER TABLE `j2stockeditmobile_data` ADD COLUMN `remark` varchar(255) DEFAULT NULL AFTER `receiver`");
-    } catch (PDOException $e) {
-        // 字段已存在，忽略错误
-        if (strpos($e->getMessage(), 'Duplicate column name') === false) {
-            throw $e;
-        }
-    }
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS `j2stocklist_total` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -409,8 +399,8 @@ function handlePost() {
         $pdo->beginTransaction();
         
         $sql = "INSERT INTO j2stockeditmobile_data 
-                (date, time, product_name, code_number, in_quantity, out_quantity, receiver, remark) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                (date, time, product_name, code_number, in_quantity, out_quantity, receiver) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $pdo->prepare($sql);
 
@@ -421,8 +411,7 @@ function handlePost() {
             $data['code_number'] ?? null,
             floatval($data['in_quantity'] ?? 0),
             floatval($data['out_quantity'] ?? 0),
-            $data['receiver'] ?? null,
-            $data['remark'] ?? 'MOBILE'
+            $data['receiver'] ?? null
         ]);
         
         $newId = $pdo->lastInsertId();
@@ -471,7 +460,7 @@ function handlePut() {
         
         $sql = "UPDATE j2stockeditmobile_data 
                 SET date = ?, time = ?, product_name = ?, code_number = ?, 
-                    in_quantity = ?, out_quantity = ?, receiver = ?, remark = ?
+                    in_quantity = ?, out_quantity = ?, receiver = ?
                 WHERE id = ?";
 
         $stmt = $pdo->prepare($sql);
@@ -484,7 +473,6 @@ function handlePut() {
             floatval($data['in_quantity'] ?? $oldRecord['in_quantity']),
             floatval($data['out_quantity'] ?? $oldRecord['out_quantity']),
             $data['receiver'] ?? $oldRecord['receiver'] ?? null,
-            $data['remark'] ?? $oldRecord['remark'] ?? 'MOBILE',
             $data['id']
         ]);
         
@@ -634,7 +622,7 @@ function syncToJ2StockEditData($pdo, $data, $operation = 'insert') {
                 $specification,
                 $price,
                 'Mobile', // 标记为移动端操作
-                $data['remark'] ?? 'MOBILE', // remark
+                null, // remark
                 'j2',
                 $type
             ]);
