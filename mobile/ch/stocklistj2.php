@@ -126,6 +126,7 @@ if (!isset($_SESSION['user_id'])) {
         let selectedFreezerCategory = '';
         let selectedProductCategory = '';
         let editingRowIds = new Set();
+        let currentWorkDate = null; // 本页本次选择的日期（不刷新时保留，刷新后清空为今天）
         
         // API配置 - J2 数据库（指向backend目录下的stockapi.php）
         const API_BASE_URL = '../../backend/stockapi.php';
@@ -204,20 +205,15 @@ if (!isset($_SESSION['user_id'])) {
             return today.toISOString().split('T')[0];
         }
         
-        // 出货记录使用的日期：优先使用日历选择的日期（localStorage + sessionStorage 双写，刷新后仍保留），否则今天
+        // 出货记录使用的日期：本次会话内选的日期（不刷新则保留），刷新页面则默认今天
         function getDefaultWorkDate() {
-            const key = 'j2_stock_edit_date';
-            const valid = function (s) { return s && /^\d{4}-\d{2}-\d{2}$/.test(s); };
-            try {
-                const fromLocal = localStorage.getItem(key);
-                if (valid(fromLocal)) return fromLocal;
-                const fromSession = sessionStorage.getItem(key);
-                if (valid(fromSession)) return fromSession;
-            } catch (e) {}
+            if (currentWorkDate && /^\d{4}-\d{2}-\d{2}$/.test(currentWorkDate)) return currentWorkDate;
             return getTodayDateString();
         }
+        // 选择日期确定时：记入内存并写入 storage，供编辑页记录使用
         function setDefaultWorkDate(dateStr) {
             if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return;
+            currentWorkDate = dateStr;
             const key = 'j2_stock_edit_date';
             try {
                 localStorage.setItem(key, dateStr);
