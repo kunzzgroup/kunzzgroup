@@ -410,12 +410,12 @@ function handleGet() {
     
     switch ($action) {
         case 'list':
-            // 获取所有进出库数据（包括移动端数据）
+            // 获取所有进出库数据
             $startDate = $_GET['start_date'] ?? null;
             $endDate = $_GET['end_date'] ?? null;
             $searchDate = $_GET['search_date'] ?? null;
             $receiver = $_GET['receiver'] ?? null;
-            $productCode = $_GET['product_code'] ?? null;
+            $productCode = $_GET['product_code'] ?? null;  // 这行已存在，保持不变
             $productName = $_GET['product_name'] ?? null;
 
             // 如果没有提供日期范围，默认显示一年内的数据
@@ -424,153 +424,37 @@ function handleGet() {
                 $endDate = date('Y-m-d'); // 今天
             }
 
-            // 构建日期条件
-            $dateCondition = '';
+            $sql = "SELECT * FROM stockinout_data WHERE 1=1";
             $params = [];
             
+            // 排除货品异常（SOT）的记录，因为它们在 stocksot.php 中管理
+            $sql .= " AND (target_system IS NULL OR target_system != 'SOT')";
+            
             if ($searchDate) {
-                $dateCondition = " AND date = ?";
+                $sql .= " AND date = ?";
                 $params[] = $searchDate;
             } elseif ($startDate && $endDate) {
-                $dateCondition = " AND date BETWEEN ? AND ?";
+                $sql .= " AND date BETWEEN ? AND ?";
                 $params[] = $startDate;
                 $params[] = $endDate;
             }
             
-            // 构建其他过滤条件
-            $receiverCondition = '';
             if ($receiver) {
-                $receiverCondition = " AND receiver LIKE ?";
+                $sql .= " AND receiver LIKE ?";
                 $params[] = "%$receiver%";
             }
 
-            $productCodeCondition = '';
             if ($productCode) {
-                $productCodeCondition = " AND code_number LIKE ?";
+                $sql .= " AND code_number LIKE ?";  // 修改这里：从product_code改为code_number
                 $params[] = "%$productCode%";
             }
 
-            $productNameCondition = '';
             if ($productName) {
-                $productNameCondition = " AND product_name LIKE ?";
+                $sql .= " AND product_name LIKE ?";
                 $params[] = "%$productName%";
             }
-
-            // 合并 stockinout_data 和移动端表的数据
-            // 使用 UNION ALL 合并所有表的数据，并统一字段结构
-            $sql = "
-                SELECT 
-                    id,
-                    date,
-                    time,
-                    product_name,
-                    code_number,
-                    in_quantity,
-                    out_quantity,
-                    specification,
-                    price,
-                    receiver,
-                    remark,
-                    target_system,
-                    product_remark_checked,
-                    remark_number,
-                    created_at,
-                    updated_at,
-                    'stockinout' as source_table
-                FROM stockinout_data 
-                WHERE 1=1 
-                AND (target_system IS NULL OR target_system != 'SOT')
-                $dateCondition
-                $receiverCondition
-                $productCodeCondition
-                $productNameCondition
-                
-                UNION ALL
-                
-                SELECT 
-                    id,
-                    date,
-                    time,
-                    product_name,
-                    code_number,
-                    in_quantity,
-                    out_quantity,
-                    NULL as specification,
-                    NULL as price,
-                    receiver,
-                    NULL as remark,
-                    'j1' as target_system,
-                    0 as product_remark_checked,
-                    '' as remark_number,
-                    created_at,
-                    updated_at,
-                    'j1mobile' as source_table
-                FROM j1stockeditmobile_data
-                WHERE 1=1
-                AND out_quantity > 0
-                $dateCondition
-                $receiverCondition
-                $productCodeCondition
-                $productNameCondition
-                
-                UNION ALL
-                
-                SELECT 
-                    id,
-                    date,
-                    time,
-                    product_name,
-                    code_number,
-                    in_quantity,
-                    out_quantity,
-                    NULL as specification,
-                    NULL as price,
-                    receiver,
-                    NULL as remark,
-                    'j2' as target_system,
-                    0 as product_remark_checked,
-                    '' as remark_number,
-                    created_at,
-                    updated_at,
-                    'j2mobile' as source_table
-                FROM j2stockeditmobile_data
-                WHERE 1=1
-                AND out_quantity > 0
-                $dateCondition
-                $receiverCondition
-                $productCodeCondition
-                $productNameCondition
-                
-                UNION ALL
-                
-                SELECT 
-                    id,
-                    date,
-                    time,
-                    product_name,
-                    code_number,
-                    in_quantity,
-                    out_quantity,
-                    NULL as specification,
-                    NULL as price,
-                    receiver,
-                    NULL as remark,
-                    'j3' as target_system,
-                    0 as product_remark_checked,
-                    '' as remark_number,
-                    created_at,
-                    updated_at,
-                    'j3mobile' as source_table
-                FROM j3stockeditmobile_data
-                WHERE 1=1
-                AND out_quantity > 0
-                $dateCondition
-                $receiverCondition
-                $productCodeCondition
-                $productNameCondition
-                
-                ORDER BY date ASC, time ASC
-            ";
+            
+            $sql .= " ORDER BY date ASC, time ASC";
             
             // 从请求参数中获取limit，如果没有则默认使用10000
             $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10000;
@@ -581,41 +465,8 @@ function handleGet() {
                 $stmt->execute($params);
                 $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 
-                // 为移动端记录补充缺失的字段（从 stock_data 表获取）
-                $productInfoCache = [];
+                // 为每条记录添加计算字段
                 foreach ($records as &$record) {
-                    // 如果是移动端数据且缺少 specification 或 price，尝试从 stock_data 获取
-                    if (in_array($record['source_table'], ['j1mobile', 'j2mobile', 'j3mobile'])) {
-                        $productName = $record['product_name'];
-                        $codeNumber = $record['code_number'];
-                        
-                        // 使用缓存避免重复查询
-                        $cacheKey = $productName . '|' . ($codeNumber ?? '');
-                        if (!isset($productInfoCache[$cacheKey])) {
-                            $infoStmt = $pdo->prepare("SELECT specification, price, category FROM stock_data WHERE product_name = ? " . ($codeNumber ? "AND product_code = ?" : "LIMIT 1"));
-                            if ($codeNumber) {
-                                $infoStmt->execute([$productName, $codeNumber]);
-                            } else {
-                                $infoStmt->execute([$productName]);
-                            }
-                            $productInfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
-                            $productInfoCache[$cacheKey] = $productInfo ?: null;
-                        }
-                        
-                        $productInfo = $productInfoCache[$cacheKey];
-                        if ($productInfo) {
-                            if (empty($record['specification'])) {
-                                $record['specification'] = $productInfo['specification'] ?? null;
-                            }
-                            if (empty($record['price']) || $record['price'] === null) {
-                                $record['price'] = $productInfo['price'] ?? 0;
-                            }
-                            if (empty($record['type'])) {
-                                $record['type'] = $productInfo['category'] ?? null;
-                            }
-                        }
-                    }
-                    
                     // 计算库存余额
                     $inQty = floatval($record['in_quantity'] ?? 0);
                     $outQty = floatval($record['out_quantity'] ?? 0);
@@ -636,6 +487,14 @@ function handleGet() {
                     $record['out_value'] = $record['out_value'];
                     $record['balance_value'] = $record['balance_value'];
                 }
+
+                $record['in_quantity'] = $inQty;
+                    $record['out_quantity'] = $outQty;
+                    $record['balance_quantity'] = $record['balance_quantity'];
+                    $record['price'] = $price;
+                    $record['in_value'] = $record['in_value'];
+                    $record['out_value'] = $record['out_value'];
+                    $record['balance_value'] = $record['balance_value'];
                 
                 sendResponse(true, "进出库数据获取成功，共找到 " . count($records) . " 条记录", $records);
             } catch (PDOException $e) {
