@@ -578,12 +578,17 @@ function syncToJ3StockEditData($pdo, $data, $operation = 'insert') {
         }
         
         $specification = $productInfo['specification'] ?? null;
-        // 优先使用前端传递的价格（用于按价格扣除），否则从 stock_data 获取
-        $price = isset($data['price']) && $data['price'] > 0 ? floatval($data['price']) : floatval($productInfo['price'] ?? 0);
+        // 优先使用前端传递的价格（用于按价格扣除），即使为0也要使用前端的价格
+        // 只有当前端完全没有传递price字段时，才从stock_data获取
+        if (isset($data['price']) && ($data['price'] !== null && $data['price'] !== '')) {
+            $price = floatval($data['price']);
+        } else {
+            $price = floatval($productInfo['price'] ?? 0);
+        }
         $type = $productInfo['category'] ?? null;
         
         // 调试日志：记录使用的价格
-        error_log("syncToJ3StockEditData: product_name={$data['product_name']}, frontend_price=" . ($data['price'] ?? 'null') . ", final_price={$price}, out_quantity=" . ($data['out_quantity'] ?? 0));
+        error_log("syncToJ3StockEditData: product_name={$data['product_name']}, frontend_price=" . ($data['price'] ?? 'null') . ", stock_data_price=" . ($productInfo['price'] ?? 'null') . ", final_price={$price}, out_quantity=" . ($data['out_quantity'] ?? 0));
         
         if ($operation === 'insert') {
             $sql = "INSERT INTO j3stockedit_data 
