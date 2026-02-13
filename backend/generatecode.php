@@ -929,7 +929,7 @@ require_once 'session_check.php';
     <div class="toast-container" id="toast-container">
         <!-- 动态通知内容 -->
     </div>
-    <script src="/js/generatecode.js"></script>
+    <script src="js/generatecode.js"></script>
     
 </body>
 </html>
