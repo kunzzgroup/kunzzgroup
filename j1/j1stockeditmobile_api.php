@@ -314,6 +314,53 @@ function handleGet() {
             }
             break;
             
+        case 'product_prices_with_stock':
+            // 获取指定产品的价格列表和库存（从 j1stockedit_data 表，用于按价格从高到低扣减）
+            $productName = $_GET['product_name'] ?? null;
+            $codeNumber = $_GET['code_number'] ?? null;
+            
+            if (!$productName) {
+                sendResponse(false, "缺少产品名称参数");
+            }
+            
+            try {
+                // 从 j1stockedit_data 获取该产品所有不同价格的库存情况
+                $sql = "SELECT 
+                            price,
+                            SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
+                            SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
+                            (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
+                            SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as available_stock
+                        FROM j1stockedit_data 
+                        WHERE product_name = ?";
+                $params = [$productName];
+                if (!empty($codeNumber)) {
+                    $sql .= " AND code_number = ?";
+                    $params[] = $codeNumber;
+                }
+                $sql .= "
+                        GROUP BY price
+                        HAVING available_stock > 0
+                        ORDER BY price DESC";
+                
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute($params);
+                $priceStockData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                
+                $result = [];
+                foreach ($priceStockData as $row) {
+                    $result[] = [
+                        'price' => floatval($row['price'] ?? 0),
+                        'available_stock' => floatval($row['available_stock'] ?? 0)
+                    ];
+                }
+                
+                sendResponse(true, "产品价格库存信息获取成功", $result);
+            } catch (PDOException $e) {
+                sendResponse(false, "查询价格库存信息失败：" . $e->getMessage());
+            }
+            break;
+            
         default:
             sendResponse(false, "未知的action参数");
     }
