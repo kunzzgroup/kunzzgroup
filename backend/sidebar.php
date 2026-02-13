@@ -70,7 +70,7 @@ $canSeeHR = true;
 $canSeeResource = true;
 $canSeeVisual = true;
 $canSeeBrand = true;
-$kpiUploadDefaultPage = 'kpiedit.php'; // 默认跳转到kpiedit.php
+$kpiUploadDefaultPage = 'kpiedit'; // 默认跳转到kpiedit.php
 $submenuVisibility = [
     'analytics' => [
         'kpi_report' => true,
@@ -147,7 +147,7 @@ if (isset($_SESSION['user_id'])) {
                     $uploadTypes = array_values(array_intersect($pagePerms['kpi_upload']['type'] ?? [], ['kpi', 'cost']));
                     // 如果只有cost权限，默认跳转到costedit.php
                     if (count($uploadTypes) === 1 && $uploadTypes[0] === 'cost') {
-                        $kpiUploadDefaultPage = 'costedit.php';
+                        $kpiUploadDefaultPage = 'costedit';
                     }
                     // 如果只有kpi权限，或者两者都有，默认跳转到kpiedit.php（已经是默认值）
                 }
