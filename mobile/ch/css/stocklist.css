@@ -74,8 +74,24 @@ body {
     transform: scale(0.95);
 }
 
-.calendar-button {
+.calendar-header-right {
     margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.calendar-date-display {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.calendar-date-display:empty {
+    display: none;
+}
+
+.calendar-button {
     width: 42px;
     height: 42px;
     border: none;

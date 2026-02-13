@@ -22,9 +22,12 @@ if (!isset($_SESSION['user_id'])) {
                 <img src="../images/icons/logout.svg" alt="" aria-hidden="true">
             </a>
             <h1>库存列表 (J2)</h1>
-            <button class="calendar-button" type="button" aria-label="日历">
-                <img src="../images/icons/calendar.svg" alt="" aria-hidden="true">
-            </button>
+            <div class="calendar-header-right">
+                <span id="calendar-selected-date-display" class="calendar-date-display" aria-live="polite"></span>
+                <button class="calendar-button" type="button" aria-label="日历">
+                    <img src="../images/icons/calendar.svg" alt="" aria-hidden="true">
+                </button>
+            </div>
         </header>
 
         <main class="page-content">
@@ -157,10 +160,12 @@ if (!isset($_SESSION['user_id'])) {
                 const date = document.getElementById('calendar-date-picker').value;
                 if (date) {
                     try { localStorage.setItem('j2_stock_edit_date', date); } catch (e) {}
+                    updateCalendarDateDisplay();
                 }
                 closeCalendarModal();
             });
             
+            updateCalendarDateDisplay();
             // 加载产品列表
             loadProductList();
         });
@@ -168,10 +173,23 @@ if (!isset($_SESSION['user_id'])) {
         function openCalendarModal() {
             const overlay = document.getElementById('calendar-modal-overlay');
             const picker = document.getElementById('calendar-date-picker');
-            picker.value = getTodayDateString();
+            picker.value = getDefaultWorkDate();
             overlay.classList.add('is-open');
             overlay.setAttribute('aria-hidden', 'false');
             picker.focus();
+        }
+        
+        function formatWorkDateDisplay(dateStr) {
+            if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return '';
+            const p = dateStr.split('-');
+            return p[1].replace(/^0/, '') + '月' + p[2].replace(/^0/, '') + '日';
+        }
+        
+        function updateCalendarDateDisplay() {
+            const el = document.getElementById('calendar-selected-date-display');
+            if (!el) return;
+            const dateStr = getDefaultWorkDate();
+            el.textContent = dateStr ? formatWorkDateDisplay(dateStr) : '';
         }
         
         function closeCalendarModal() {
