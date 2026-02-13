@@ -326,10 +326,12 @@ function handleGet() {
             }
             
             try {
+                // 强制刷新连接，确保看到最新数据
                 // 从 j2stockedit_data 获取该产品所有不同价格的库存情况
                 // 使用 CAST 确保价格精度一致，避免 GROUP BY 时因精度问题导致分组失败
                 // 直接计算 SUM(in_quantity) - SUM(out_quantity)，不要只统计正数
                 // 使用 SQL_NO_CACHE 确保查询最新数据，不使用查询缓存
+                // 注意：这里查询的是所有库存（包括0和负数），然后在PHP中过滤
                 $sql = "SELECT SQL_NO_CACHE
                             CAST(price AS DECIMAL(10,2)) as price,
                             SUM(in_quantity) as total_in,
@@ -344,12 +346,18 @@ function handleGet() {
                 }
                 $sql .= "
                         GROUP BY CAST(price AS DECIMAL(10,2))
-                        HAVING (SUM(in_quantity) - SUM(out_quantity)) > 0
                         ORDER BY CAST(price AS DECIMAL(10,2)) DESC";
                 
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
                 $priceStockData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                
+                // 在PHP中过滤掉库存<=0的价格，而不是在SQL中使用HAVING
+                // 这样可以确保查询到所有价格，然后根据实际库存过滤
+                $priceStockData = array_filter($priceStockData, function($row) {
+                    $availableStock = floatval($row['available_stock'] ?? 0);
+                    return $availableStock > 0;
+                });
                 
                 // 记录查询结果用于调试
                 error_log("product_prices_with_stock查询 - 产品: $productName" . (!empty($codeNumber) ? ", 编号: $codeNumber" : "") . ", 返回记录数: " . count($priceStockData));

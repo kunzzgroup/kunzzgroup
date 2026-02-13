@@ -325,10 +325,12 @@ function handleGet() {
             }
             
             try {
+                // 强制刷新连接，确保看到最新数据
                 // 从 j3stockedit_data 获取该产品所有不同价格的库存情况
                 // 使用 CAST 确保价格精度一致，避免 GROUP BY 时因精度问题导致分组失败
                 // 直接计算 SUM(in_quantity) - SUM(out_quantity)，不要只统计正数
                 // 使用 SQL_NO_CACHE 确保查询最新数据，不使用查询缓存
+                // 注意：这里查询的是所有库存（包括0和负数），然后在PHP中过滤
                 $sql = "SELECT SQL_NO_CACHE
                             CAST(price AS DECIMAL(10,2)) as price,
                             SUM(in_quantity) as total_in,
@@ -343,12 +345,18 @@ function handleGet() {
                 }
                 $sql .= "
                         GROUP BY CAST(price AS DECIMAL(10,2))
-                        HAVING (SUM(in_quantity) - SUM(out_quantity)) > 0
                         ORDER BY CAST(price AS DECIMAL(10,2)) DESC";
                 
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
                 $priceStockData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                
+                // 在PHP中过滤掉库存<=0的价格，而不是在SQL中使用HAVING
+                // 这样可以确保查询到所有价格，然后根据实际库存过滤
+                $priceStockData = array_filter($priceStockData, function($row) {
+                    $availableStock = floatval($row['available_stock'] ?? 0);
+                    return $availableStock > 0;
+                });
                 
                 // 记录查询结果用于调试
                 error_log("product_prices_with_stock查询 - 产品: $productName" . (!empty($codeNumber) ? ", 编号: $codeNumber" : "") . ", 返回记录数: " . count($priceStockData));
@@ -418,7 +426,11 @@ function handlePost() {
         // 同步到 j3stockedit_data 表（与 J1/J2 一致，backend stocklistall 可显示扣除）
         syncToJ3StockEditData($pdo, $data, 'insert');
         
+        // 提交事务，确保数据已保存
         $pdo->commit();
+        
+        // 记录保存的数据用于调试
+        error_log("POST保存完成 - 产品: {$data['product_name']}, 价格: " . ($data['price'] ?? 'N/A') . ", 出货: " . floatval($data['out_quantity'] ?? 0));
         
         // 获取新创建的记录
         $stmt = $pdo->prepare("SELECT * FROM j3stockeditmobile_data WHERE id = ?");
@@ -620,7 +632,10 @@ function syncToJ3StockEditData($pdo, $data, $operation = 'insert') {
                 'j3',
                 $type
             ]);
-            return $pdo->lastInsertId();
+            $insertId = $pdo->lastInsertId();
+            // 记录保存的数据用于调试
+            error_log("syncToJ3StockEditData保存 - 产品: {$data['product_name']}, 价格: $price, 进货: " . floatval($data['in_quantity'] ?? 0) . ", 出货: " . floatval($data['out_quantity'] ?? 0) . ", ID: $insertId");
+            return $insertId;
         } elseif ($operation === 'update') {
             $oldDate = $data['old_date'] ?? $data['date'];
             $oldTime = $data['old_time'] ?? $data['time'];
