@@ -723,9 +723,9 @@ if (!isset($_SESSION['user_id'])) {
                         const deductQty = Math.min(remainingQty, availableStock);
                         
                         if (deductQty > 0) {
-                            // 为每条记录生成不同的时间（避免同步冲突）
-                            const recordTime = new Date(baseTime.getTime() + i * 1000); // 每条记录间隔1秒
-                            const timeStr = recordTime.toTimeString().slice(0, 8); // HH:MM:SS
+                            // 为每条记录生成稍微不同的时间（每毫秒递增），确保能正确匹配到对应的 price
+                            const recordTime = new Date(baseTime.getTime() + i);
+                            const timeStr = recordTime.toTimeString().slice(0, 8);
                             
                             recordsToSave.push({
                                 date: workDate,

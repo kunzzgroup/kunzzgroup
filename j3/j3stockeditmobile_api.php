@@ -572,9 +572,8 @@ function syncToJ3StockEditData($pdo, $data, $operation = 'insert') {
         }
         
         $specification = $productInfo['specification'] ?? null;
-        // 如果传入的数据中有 price 字段（即使是0），优先使用（用于按价格从高到低扣减）
-        // 因为出货记录需要对应特定的进货价格
-        $price = array_key_exists('price', $data) ? floatval($data['price']) : floatval($productInfo['price'] ?? 0);
+        // 如果传入的数据中有 price，优先使用（用于按价格从高到低扣减）
+        $price = isset($data['price']) ? floatval($data['price']) : floatval($productInfo['price'] ?? 0);
         $type = $productInfo['category'] ?? null;
         
         if ($operation === 'insert') {
