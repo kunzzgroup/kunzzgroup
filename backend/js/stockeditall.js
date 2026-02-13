@@ -2276,6 +2276,13 @@ function restoreEditingRowsInputValues(editingValues) {
                     if (!input && field === 'product_remark_checked') {
                         input = row.querySelector('[onchange*="updateRemarkCheck"]');
                     }
+                    // type字段的特殊处理：通过ID查找
+                    if (!input && field === 'type') {
+                        const rowIdMatch = row.querySelector('input')?.id?.match(/^([^-]+-[^-]+)/);
+                        if (rowIdMatch) {
+                            input = document.getElementById(`${rowIdMatch[1]}-type`);
+                        }
+                    }
                 }
 
                 if (input) {
@@ -3131,9 +3138,9 @@ function extractRowData(row) {
         receiver: receiverValue,
         remark: document.getElementById(`${rowId}-remark`) ? document.getElementById(`${rowId}-remark`).value : '',
         target: document.getElementById(`${rowId}-target`) ? document.getElementById(`${rowId}-target`).value : '',
-        type: document.getElementById(`${rowId}-type`) ? document.getElementById(`${rowId}-type`).value : '',
         productRemarkChecked: document.getElementById(`${rowId}-product-remark`) ? document.getElementById(`${rowId}-product-remark`).checked : false,
-        remarkNumber: document.getElementById(`${rowId}-remark-number`) ? document.getElementById(`${rowId}-remark-number`).value : ''
+        remarkNumber: document.getElementById(`${rowId}-remark-number`) ? document.getElementById(`${rowId}-remark-number`).value : '',
+        type: document.getElementById(`${rowId}-type`) ? document.getElementById(`${rowId}-type`).value : ''
     };
 }
 
@@ -3177,20 +3184,6 @@ function restoreRowData(element, data) {
         targetSelect.value = data.target;
     }
 
-    // 恢复type下拉框的选中状态
-    const typeSelect = document.getElementById(`${rowId}-type`);
-    if (typeSelect && data.type !== undefined) {
-        typeSelect.value = data.type;
-        // 如果值不在选项中，添加并选中
-        if (data.type && !Array.from(typeSelect.options).some(opt => opt.value === data.type)) {
-            const option = document.createElement('option');
-            option.value = data.type;
-            option.textContent = data.type;
-            typeSelect.appendChild(option);
-        }
-        typeSelect.value = data.type;
-    }
-
     // 恢复货品备注复选框
     const productRemarkCheckbox = document.getElementById(`${rowId}-product-remark`);
     if (productRemarkCheckbox && data.productRemarkChecked !== undefined) {
@@ -3201,6 +3194,19 @@ function restoreRowData(element, data) {
     const remarkNumberInput = document.getElementById(`${rowId}-remark-number`);
     if (remarkNumberInput && data.remarkNumber) {
         remarkNumberInput.value = data.remarkNumber;
+    }
+
+    // 恢复类型下拉框的选中状态
+    const typeSelect = document.getElementById(`${rowId}-type`);
+    if (typeSelect && data.type !== undefined) {
+        // 如果值不在选项中，添加并选中
+        if (data.type && !Array.from(typeSelect.options).some(opt => opt.value === data.type)) {
+            const option = document.createElement('option');
+            option.value = data.type;
+            option.textContent = data.type;
+            typeSelect.appendChild(option);
+        }
+        typeSelect.value = data.type || '';
     }
 }
 
