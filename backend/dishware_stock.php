@@ -704,6 +704,6 @@ if (isset($_SESSION['user_id'])) {
             </form>
         </div>
     </div>
-    <script src="/backend/js/dishware_stock.js"></script>
+    <script src="js/dishware_stock.js"></script>
 </body>
 </html>
