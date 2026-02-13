@@ -22,6 +22,9 @@ if (!isset($_SESSION['user_id'])) {
                 <img src="../images/icons/logout.svg" alt="" aria-hidden="true">
             </a>
             <h1>库存列表 (J1)</h1>
+            <button class="calendar-button" type="button" aria-label="日历">
+                <img src="../images/icons/calendar.svg" alt="" aria-hidden="true">
+            </button>
         </header>
 
         <main class="page-content">
@@ -100,6 +103,17 @@ if (!isset($_SESSION['user_id'])) {
         </main>
     </div>
 
+    <div class="calendar-modal-overlay" id="calendar-modal-overlay" aria-hidden="true">
+        <div class="calendar-modal" role="dialog" aria-labelledby="calendar-modal-title" aria-modal="true">
+            <h3 id="calendar-modal-title">选择日期</h3>
+            <input type="date" id="calendar-date-picker" class="date-input-bar" aria-label="选择日期">
+            <div class="calendar-modal-actions">
+                <button type="button" class="btn-cancel" id="calendar-modal-cancel">取消</button>
+                <button type="button" class="btn-confirm" id="calendar-modal-confirm">确定</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
     <script>
         // 全局变量
@@ -133,9 +147,36 @@ if (!isset($_SESSION['user_id'])) {
                 }
             });
             
+            // 日历按钮：打开日期选择弹窗
+            document.querySelector('.calendar-button').addEventListener('click', openCalendarModal);
+            document.getElementById('calendar-modal-overlay').addEventListener('click', function(e) {
+                if (e.target === this) closeCalendarModal();
+            });
+            document.getElementById('calendar-modal-cancel').addEventListener('click', closeCalendarModal);
+            document.getElementById('calendar-modal-confirm').addEventListener('click', function() {
+                const date = document.getElementById('calendar-date-picker').value;
+                if (date) console.log('已选择日期:', date);
+                closeCalendarModal();
+            });
+            
             // 加载产品列表
             loadProductList();
         });
+        
+        function openCalendarModal() {
+            const overlay = document.getElementById('calendar-modal-overlay');
+            const picker = document.getElementById('calendar-date-picker');
+            picker.value = getTodayDateString();
+            overlay.classList.add('is-open');
+            overlay.setAttribute('aria-hidden', 'false');
+            picker.focus();
+        }
+        
+        function closeCalendarModal() {
+            const overlay = document.getElementById('calendar-modal-overlay');
+            overlay.classList.remove('is-open');
+            overlay.setAttribute('aria-hidden', 'true');
+        }
         
         // 获取今天的日期字符串 (YYYY-MM-DD)
         function getTodayDateString() {
