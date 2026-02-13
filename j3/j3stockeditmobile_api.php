@@ -385,6 +385,7 @@ function handleGet() {
 // 处理 POST 请求 - 创建新记录
 function handlePost() {
     global $pdo;
+    
     global $data;
     
     // 验证必填字段
@@ -415,19 +416,10 @@ function handlePost() {
         $newId = $pdo->lastInsertId();
         
         // 更新库存总数表
-        updateStocklistTotal(
-            $data['product_name'],
-            $data['code_number'] ?? null,
-            floatval($data['in_quantity'] ?? 0),
-            floatval($data['out_quantity'] ?? 0),
-            true
-        );
+        updateStocklistTotal($data['product_name'], $data['code_number'] ?? null, floatval($data['in_quantity'] ?? 0), floatval($data['out_quantity'] ?? 0), true);
         
         // 同步到 j3stockedit_data 表（与 J1/J2 一致，backend stocklistall 可显示扣除）
         syncToJ3StockEditData($pdo, $data, 'insert');
-        
-        // 再同步一份到总进出货表 stockinout_data，供 stockeditall.php 使用
-        syncToMainStockinoutFromJ3Mobile($pdo, $data);
         
         $pdo->commit();
         

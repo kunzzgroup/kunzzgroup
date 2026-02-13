@@ -386,6 +386,7 @@ function handleGet() {
 // 处理 POST 请求 - 创建新记录
 function handlePost() {
     global $pdo;
+    
     global $data;
     
     // 验证必填字段
@@ -416,19 +417,10 @@ function handlePost() {
         $newId = $pdo->lastInsertId();
         
         // 更新库存总数表
-        updateStocklistTotal(
-            $data['product_name'],
-            $data['code_number'] ?? null,
-            floatval($data['in_quantity'] ?? 0),
-            floatval($data['out_quantity'] ?? 0),
-            true
-        );
+        updateStocklistTotal($data['product_name'], $data['code_number'] ?? null, floatval($data['in_quantity'] ?? 0), floatval($data['out_quantity'] ?? 0), true);
         
-        // 同步到 j2stockedit_data 表（店内明细）
+        // 同步到 j2stockedit_data 表
         syncToJ2StockEditData($pdo, $data, 'insert');
-        
-        // 同步一条对应记录到总进出货表 stockinout_data，供 stockeditall.php 使用
-        syncToMainStockinoutFromJ2Mobile($pdo, $data);
         
         $pdo->commit();
         
@@ -713,60 +705,6 @@ function syncToJ2StockEditData($pdo, $data, $operation = 'insert') {
         error_log("同步到j2stockedit_data失败: " . $e->getMessage());
         // 不抛出异常，避免影响主流程
         return false;
-    }
-}
-
-/**
- * 将 J2 手机出货记录同步一份到总进出货表 stockinout_data，
- * 这样 backend/stockeditall.php 就能看到这些记录。
- */
-function syncToMainStockinoutFromJ2Mobile(PDO $pdo, array $data): void {
-    // 仅在有实际出库数量时同步
-    $outQty = floatval($data['out_quantity'] ?? 0);
-    if ($outQty <= 0) {
-        return;
-    }
-    
-    try {
-        // 从 stock_data 获取规格和单价
-        $productInfo = null;
-        if (!empty($data['product_name'])) {
-            $stmt = $pdo->prepare("SELECT specification, price FROM stock_data WHERE product_name = ? LIMIT 1");
-            $stmt->execute([$data['product_name']]);
-            $productInfo = $stmt->fetch(PDO::FETCH_ASSOC);
-        } elseif (!empty($data['code_number'])) {
-            $stmt = $pdo->prepare("SELECT specification, price FROM stock_data WHERE product_code = ? LIMIT 1");
-            $stmt->execute([$data['code_number']]);
-            $productInfo = $stmt->fetch(PDO::FETCH_ASSOC);
-        }
-        
-        $specification = $productInfo['specification'] ?? null;
-        $price = isset($productInfo['price']) ? floatval($productInfo['price']) : 0.0;
-        
-        $sql = "INSERT INTO stockinout_data 
-                (date, time, product_name, receiver, in_quantity, out_quantity, 
-                 specification, price, code_number, remark, target_system, 
-                 product_remark_checked, remark_number)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            $data['date'],
-            $data['time'],
-            $data['product_name'],
-            $data['receiver'] ?? '',
-            0,
-            $outQty,
-            $specification,
-            $price,
-            $data['code_number'] ?? null,
-            $data['remark'] ?? null,
-            'j2',
-            0,
-            ''
-        ]);
-    } catch (PDOException $e) {
-        error_log("syncToMainStockinoutFromJ2Mobile 失败: " . $e->getMessage());
     }
 }
 
