@@ -3131,7 +3131,6 @@ function extractRowData(row) {
         receiver: receiverValue,
         remark: document.getElementById(`${rowId}-remark`) ? document.getElementById(`${rowId}-remark`).value : '',
         target: document.getElementById(`${rowId}-target`) ? document.getElementById(`${rowId}-target`).value : '',
-        type: document.getElementById(`${rowId}-type`) ? document.getElementById(`${rowId}-type`).value : '',
         productRemarkChecked: document.getElementById(`${rowId}-product-remark`) ? document.getElementById(`${rowId}-product-remark`).checked : false,
         remarkNumber: document.getElementById(`${rowId}-remark-number`) ? document.getElementById(`${rowId}-remark-number`).value : ''
     };
@@ -3175,20 +3174,6 @@ function restoreRowData(element, data) {
     const targetSelect = document.getElementById(`${rowId}-target`);
     if (targetSelect && data.target) {
         targetSelect.value = data.target;
-    }
-
-    // 恢复type下拉框的选中状态
-    const typeSelect = document.getElementById(`${rowId}-type`);
-    if (typeSelect && data.type !== undefined) {
-        typeSelect.value = data.type;
-        // 如果值不在选项中，添加并选中
-        if (data.type && !Array.from(typeSelect.options).some(opt => opt.value === data.type)) {
-            const option = document.createElement('option');
-            option.value = data.type;
-            option.textContent = data.type;
-            typeSelect.appendChild(option);
-        }
-        typeSelect.value = data.type;
     }
 
     // 恢复货品备注复选框
