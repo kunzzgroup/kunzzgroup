@@ -325,13 +325,14 @@ function handleGet() {
             try {
                 // 从 j3stockedit_data 表获取该产品的所有不同价格的库存情况
                 // 注意：需要计算每个价格的净库存（in - out），包括负数的情况
+                // 过滤掉 price 为 NULL 的记录，并按价格从高到低排序
                 $sql = "SELECT 
-                            price,
+                            COALESCE(price, 0) as price,
                             SUM(in_quantity) as total_in,
                             SUM(out_quantity) as total_out,
                             (SUM(in_quantity) - SUM(out_quantity)) as available_stock
                         FROM j3stockedit_data 
-                        WHERE product_name = ?";
+                        WHERE product_name = ? AND price IS NOT NULL";
                 $params = [$productName];
                 
                 if (!empty($codeNumber)) {
@@ -347,9 +348,13 @@ function handleGet() {
                 
                 $result = [];
                 foreach ($priceStockData as $row) {
+                    $price = floatval($row['price'] ?? 0);
+                    $availableStock = floatval($row['available_stock'] ?? 0);
+                    
+                    // 只返回有库存的价格（包括负数，因为负数表示已经超扣了）
                     $result[] = [
-                        'price' => floatval($row['price'] ?? 0),
-                        'available_stock' => floatval($row['available_stock'] ?? 0),
+                        'price' => $price,
+                        'available_stock' => $availableStock,
                         'total_in' => floatval($row['total_in'] ?? 0),
                         'total_out' => floatval($row['total_out'] ?? 0)
                     ];
@@ -576,6 +581,9 @@ function syncToJ3StockEditData($pdo, $data, $operation = 'insert') {
         // 优先使用前端传递的价格（用于按价格扣除），否则从 stock_data 获取
         $price = isset($data['price']) && $data['price'] > 0 ? floatval($data['price']) : floatval($productInfo['price'] ?? 0);
         $type = $productInfo['category'] ?? null;
+        
+        // 调试日志：记录使用的价格
+        error_log("syncToJ3StockEditData: product_name={$data['product_name']}, frontend_price=" . ($data['price'] ?? 'null') . ", final_price={$price}, out_quantity=" . ($data['out_quantity'] ?? 0));
         
         if ($operation === 'insert') {
             $sql = "INSERT INTO j3stockedit_data 

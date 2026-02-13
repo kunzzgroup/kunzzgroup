@@ -777,6 +777,7 @@ if (!isset($_SESSION['user_id'])) {
                 
                 for (const outboundData of outboundRecords) {
                     try {
+                        console.log('发送出货记录:', JSON.stringify(outboundData, null, 2));
                         const response = await fetch(STOCK_EDIT_API, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
