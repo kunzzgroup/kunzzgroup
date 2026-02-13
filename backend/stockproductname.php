@@ -169,5 +169,7 @@ if (isset($_SESSION['user_id'])) {
         const PAGE_CONFIG = {
             currentUserApplicant: <?php echo json_encode($currentApplicant, JSON_UNESCAPED_UNICODE); ?>,
         };
-    <script src="/backend/js/stockproductname.js"></script>
+
+     /script>   
+    <script src="js/stockproductname.js"></script>
 </html>
