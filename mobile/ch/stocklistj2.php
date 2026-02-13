@@ -707,41 +707,37 @@ if (!isset($_SESSION['user_id'])) {
                     const result = await response.json();
                     if (!result.success) throw new Error(result.message || '保存失败');
                 } else {
-                    // 按价格从高到低依次扣减
-                    const priceStockList = priceStockResult.data;
-                    console.log('获取到的价格库存列表:', priceStockList);
+                    // 按价格从高到低依次扣减（每次保存后重新查询最新库存）
                     let remainingQty = soldQty;
                     const workDate = getDefaultWorkDate();
-                    const recordsToSave = [];
+                    let savedRecords = 0;
                     
-                    for (let i = 0; i < priceStockList.length; i++) {
-                        if (remainingQty <= 0) break;
+                    while (remainingQty > 0) {
+                        // 重新查询当前的价格库存列表（获取最新数据）
+                        const priceStockUrl = `${STOCK_EDIT_API}?action=product_prices_with_stock&product_name=${encodeURIComponent(record.product_name)}${record.product_code ? '&code_number=' + encodeURIComponent(record.product_code) : ''}`;
+                        const priceStockResp = await fetch(priceStockUrl);
+                        const priceStockResult = await priceStockResp.json();
                         
-                        const item = priceStockList[i];
-                        const price = parseFloat(item.price) || 0;
-                        const availableStock = parseFloat(item.available_stock) || 0;
+                        if (!priceStockResult.success || !priceStockResult.data || priceStockResult.data.length === 0) {
+                            // 没有更多价格库存了
+                            break;
+                        }
+                        
+                        const priceStockList = priceStockResult.data;
+                        console.log(`第 ${savedRecords + 1} 次查询，获取到的价格库存列表:`, priceStockList);
+                        
+                        // 找到最高价格的可用库存
+                        const highestPriceItem = priceStockList[0]; // 已经按价格从高到低排序
+                        const price = parseFloat(highestPriceItem.price) || 0;
+                        const availableStock = parseFloat(highestPriceItem.available_stock) || 0;
+                        
+                        if (availableStock <= 0) {
+                            // 最高价格的库存已经用完，继续下一个
+                            break;
+                        }
+                        
                         const deductQty = Math.min(remainingQty, availableStock);
                         
-                        if (deductQty > 0) {
-                            recordsToSave.push({
-                                price: price,
-                                deductQty: deductQty,
-                                index: i
-                            });
-                            console.log(`准备保存记录: 价格=${price}, 扣减=${deductQty}`);
-                            remainingQty -= deductQty;
-                        }
-                    }
-                    
-                    if (remainingQty > 0) {
-                        alert(`警告：库存不足！\n产品: ${record.product_name}\n需要出货: ${soldQty.toFixed(3)}\n实际可出货: ${(soldQty - remainingQty).toFixed(3)}\n不足: ${remainingQty.toFixed(3)}`);
-                    }
-                    
-                    console.log(`准备保存 ${recordsToSave.length} 条记录，总扣减量: ${soldQty}`);
-                    
-                    // 依次保存每条记录（每条记录之间延迟1秒，确保时间戳不同）
-                    for (let idx = 0; idx < recordsToSave.length; idx++) {
-                        const recordInfo = recordsToSave[idx];
                         // 为每条记录生成不同的时间戳
                         const now = new Date();
                         const timeStr = now.toTimeString().slice(0, 8);
@@ -752,11 +748,11 @@ if (!isset($_SESSION['user_id'])) {
                             product_name: record.product_name,
                             code_number: record.product_code || null,
                             in_quantity: 0,
-                            out_quantity: recordInfo.deductQty,
-                            price: recordInfo.price
+                            out_quantity: deductQty,
+                            price: price
                         };
                         
-                        console.log(`保存第 ${idx + 1}/${recordsToSave.length} 条记录: 价格=${recordInfo.price}, 扣减=${recordInfo.deductQty}, 时间=${timeStr}`);
+                        console.log(`保存记录 ${savedRecords + 1}: 价格=${price}, 扣减=${deductQty}, 剩余需扣=${remainingQty - deductQty}, 时间=${timeStr}`);
                         
                         const response = await fetch(STOCK_EDIT_API, {
                             method: 'POST',
@@ -768,13 +764,22 @@ if (!isset($_SESSION['user_id'])) {
                             console.error('保存失败:', result);
                             throw new Error(result.message || '保存失败');
                         }
-                        console.log(`第 ${idx + 1} 条记录保存成功:`, result.data);
+                        console.log(`记录 ${savedRecords + 1} 保存成功:`, result.data);
                         
-                        // 每条记录之间延迟1秒，确保时间戳不同（MySQL TIME 类型只到秒）
-                        if (idx < recordsToSave.length - 1) {
+                        remainingQty -= deductQty;
+                        savedRecords++;
+                        
+                        // 延迟1秒，确保时间戳不同，并让数据库有时间同步
+                        if (remainingQty > 0) {
                             await new Promise(resolve => setTimeout(resolve, 1000));
                         }
                     }
+                    
+                    if (remainingQty > 0) {
+                        alert(`警告：库存不足！\n产品: ${record.product_name}\n需要出货: ${soldQty.toFixed(3)}\n实际可出货: ${(soldQty - remainingQty).toFixed(3)}\n不足: ${remainingQty.toFixed(3)}`);
+                    }
+                    
+                    console.log(`共保存 ${savedRecords} 条记录，总扣减量: ${soldQty.toFixed(3)}`);
                 }
                 
                 // 从编辑列表中移除当前保存的记录
