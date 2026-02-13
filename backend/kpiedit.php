@@ -105,7 +105,7 @@ if (!$hasNewPermissions) {
 
 if (!in_array('kpi', $reportPermissions, true)) {
     if (in_array('cost', $reportPermissions, true)) {
-        header('Location: costedit.php');
+        header('Location: costedit');
         exit();
     }
     $reportPermissions[] = 'kpi';

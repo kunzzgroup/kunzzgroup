@@ -372,7 +372,7 @@ if (!$canSeeBrand) {
                             <div class="submenu-title">KUNZZ HOLDINGS SDN BHD</div>
                         </div>
                         <div class="submenu-content">
-                            <a href="corporate_blueprint.php" class="submenu-item">企业蓝图</a>
+                            <a href="corporate_blueprint" class="submenu-item">企业蓝图</a>
                         </div>
                     </div>
                 </div>
@@ -397,8 +397,8 @@ if (!$canSeeBrand) {
                             </a>
                             <div class="sub-options" id="j1-options">
                                 <?php if (!empty($submenuVisibility['brand']['j1_schedule'])): ?>
-                                <a href="schedule_manager.php?restaurant=J1" class="sub-option">员工排班表</a>
-                                <a href="phone_manage.php?restaurant=J1" class="sub-option">员工手机记录</a>
+                                <a href="schedule_manager?restaurant=J1" class="sub-option">员工排班表</a>
+                                <a href="phone_manage?restaurant=J1" class="sub-option">员工手机记录</a>
                                 <?php endif; ?>
                             </div>
                             <?php endif; ?>
@@ -410,8 +410,8 @@ if (!$canSeeBrand) {
                             </a>
                             <div class="sub-options" id="j2-options">
                                 <?php if (!empty($submenuVisibility['brand']['j2_schedule'])): ?>
-                                <a href="schedule_manager.php?restaurant=J2" class="sub-option">员工排班表</a>
-                                <a href="phone_manage.php?restaurant=J2" class="sub-option">员工手机记录</a>
+                                <a href="schedule_manager?restaurant=J2" class="sub-option">员工排班表</a>
+                                <a href="phone_manage?restaurant=J2" class="sub-option">员工手机记录</a>
                                 <?php endif; ?>
                             </div>
                             <?php endif; ?>
@@ -439,8 +439,8 @@ if (!$canSeeBrand) {
                             </a>
                             <div class="sub-options" id="j3-options">
                                 <?php if (!empty($submenuVisibility['brand']['j3_schedule'])): ?>
-                                <a href="schedule_manager.php?restaurant=J3" class="sub-option">员工排班表</a>
-                                <a href="phone_manage.php?restaurant=J3" class="sub-option">员工手机记录</a>
+                                <a href="schedule_manager?restaurant=J3" class="sub-option">员工排班表</a>
+                                <a href="phone_manage?restaurant=J3" class="sub-option">员工手机记录</a>
                                 <?php endif; ?>
                             </div>
                             <?php endif; ?>
@@ -462,7 +462,7 @@ if (!$canSeeBrand) {
             <div class="dropdown-menu-items" id="analytics-items">
                 <?php if (!empty($submenuVisibility['analytics']['kpi_report'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="kpi.php" class="informationmenu-item">
+                    <a href="kpi" class="informationmenu-item">
                         KPI报表
                     </a>
                 </div>
@@ -487,17 +487,17 @@ if (!$canSeeBrand) {
             <div class="dropdown-menu-items" id="hr-items">               
                 <?php if (!empty($submenuVisibility['hr']['staff_management'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="generatecode.php" class="informationmenu-item">
+                    <a href="generatecode" class="informationmenu-item">
                         职员管理
                     </a>
                 </div>
                 <div class="menu-item-wrapper">
-                    <a href="qna.php" class="informationmenu-item">
+                    <a href="qna" class="informationmenu-item">
                         问卷回答
                     </a>
                 </div>
                 <div class="menu-item-wrapper">
-                    <a href="evaluation_form.php" class="informationmenu-item">
+                    <a href="evaluation_form" class="informationmenu-item">
                         考核表单
                     </a>
                 </div>
@@ -516,21 +516,21 @@ if (!$canSeeBrand) {
             <div class="dropdown-menu-items" id="resource-items">               
                 <?php if (!empty($submenuVisibility['resource']['stock_inventory'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="stocklistall.php" class="informationmenu-item" id="stock-link" onclick="redirectToAllowedStockPage(event)">
+                    <a href="stocklistall" class="informationmenu-item" id="stock-link" onclick="redirectToAllowedStockPage(event)">
                         库存
                     </a>
                 </div>
                 <?php endif; ?>
                 <?php if (!empty($submenuVisibility['resource']['dishware'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="dishware_stock.php" class="informationmenu-item">
+                    <a href="dishware_stock" class="informationmenu-item">
                         碗碟
                     </a>
                 </div>
                 <?php endif; ?>
                 <?php if (!empty($submenuVisibility['resource']['price_comparison'])): ?>
                 <div class="menu-item-wrapper">
-                    <a href="price.php" class="informationmenu-item">
+                    <a href="price" class="informationmenu-item">
                         价格对比
                     </a>
                 </div>
@@ -548,7 +548,7 @@ if (!$canSeeBrand) {
             </div>
             <div class="dropdown-menu-items" id="photoupload-items">
                 <div class="menu-item-wrapper">
-                    <a href="bgmusicupload.php" class="informationmenu-item">
+                    <a href="bgmusicupload" class="informationmenu-item">
                         背景音乐
                     </a>
                 </div>
@@ -562,7 +562,7 @@ if (!$canSeeBrand) {
                             <div class="submenu-title">首页</div>
                         </div>
                         <div class="submenu-content">
-                            <a href="homepage1upload.php" class="submenu-item">第一页</a>
+                            <a href="homepage1upload" class="submenu-item">第一页</a>
                         </div>
                     </div>
                 </div>
@@ -576,8 +576,8 @@ if (!$canSeeBrand) {
                             <div class="submenu-title">关于我们</div>
                         </div>
                         <div class="submenu-content">
-                            <a href="aboutpage1upload.php" class="submenu-item">第一页</a>
-                            <a href="aboutpage4upload.php" class="submenu-item">第四页</a>
+                            <a href="aboutpage1upload" class="submenu-item">第一页</a>
+                            <a href="aboutpage4upload" class="submenu-item">第四页</a>
                         </div>
                     </div>
                 </div>
@@ -591,8 +591,8 @@ if (!$canSeeBrand) {
                             <div class="submenu-title">旗下品牌</div>
                         </div>
                         <div class="submenu-content">
-                            <a href="tokyopage1upload.php" class="submenu-item">第一页</a>
-                            <a href="tokyopage5upload.php" class="submenu-item">第五页</a>
+                            <a href="tokyopage1upload" class="submenu-item">第一页</a>
+                            <a href="tokyopage5upload" class="submenu-item">第五页</a>
                         </div>
                     </div>
                 </div>
@@ -606,14 +606,14 @@ if (!$canSeeBrand) {
                             <div class="submenu-title">加入我们</div>
                         </div>
                         <div class="submenu-content">
-                            <a href="joinpage1upload.php" class="submenu-item">第一页</a>
-                            <a href="joinpage2upload.php" class="submenu-item">第二页</a>
-                            <a href="joinpage3upload.php" class="submenu-item">第三页</a>
+                            <a href="joinpage1upload" class="submenu-item">第一页</a>
+                            <a href="joinpage2upload" class="submenu-item">第二页</a>
+                            <a href="joinpage3upload" class="submenu-item">第三页</a>
                         </div>
                     </div>
                 </div>
                 <div class="menu-item-wrapper">
-                    <a href="corporate_blueprint_edit.php" class="informationmenu-item">
+                    <a href="corporate_blueprint_edit" class="informationmenu-item">
                         企业蓝图管理
                     </a>
                 </div>
@@ -622,7 +622,7 @@ if (!$canSeeBrand) {
         <?php endif; ?>
 
         <div class="informationmenu-footer">
-            <button class="logout-btn" onclick="location.href='logout.php'">
+            <button class="logout-btn" onclick="location.href='logout'">
                 登出
             </button>
         </div>

@@ -154,10 +154,10 @@ $avatarLetter = strtoupper($username[0]);
                                 <i class="fas fa-chevron-down"></i>
                             </button>
                             <div class="report-dropdown-menu" id="report-type-dropdown">
-                                <a href="kpi.php" class="report-dropdown-item">
+                                <a href="kpi" class="report-dropdown-item">
                                     <i class="fas fa-chart-line"></i> KPI 报表
                                 </a>
-                                <a href="cost.php" class="report-dropdown-item">
+                                <a href="cost" class="report-dropdown-item">
                                     <i class="fas fa-chart-pie"></i> 成本报表
                                 </a>
                             </div>
