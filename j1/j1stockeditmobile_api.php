@@ -574,7 +574,8 @@ function syncToJ1StockEditData($pdo, $data, $operation = 'insert') {
         }
         
         $specification = $productInfo['specification'] ?? null;
-        $price = floatval($productInfo['price'] ?? 0);
+        // 如果传入的数据中有 price，优先使用（用于按价格从高到低扣减）
+        $price = isset($data['price']) ? floatval($data['price']) : floatval($productInfo['price'] ?? 0);
         $type = $productInfo['category'] ?? null;
         
         if ($operation === 'insert') {
