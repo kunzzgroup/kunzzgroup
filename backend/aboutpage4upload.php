@@ -692,6 +692,6 @@ if (file_exists($configFile) && is_readable($configFile)) {
             </div>
         </div>
     </div>
-    
+    <script src="/backend/js/aboutpage4upload.js"></script>
 </body>
 </html>
