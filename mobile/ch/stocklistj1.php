@@ -186,6 +186,15 @@ if (!isset($_SESSION['user_id'])) {
             return today.toISOString().split('T')[0];
         }
         
+        // 出货记录使用的日期：优先使用日历选择的日期，否则今天
+        function getDefaultWorkDate() {
+            try {
+                const saved = localStorage.getItem('j1_stock_edit_date');
+                if (saved && /^\d{4}-\d{2}-\d{2}$/.test(saved)) return saved;
+            } catch (e) {}
+            return getTodayDateString();
+        }
+        
         // 从API获取产品列表
         async function loadProductList() {
             try {
@@ -643,13 +652,13 @@ if (!isset($_SESSION['user_id'])) {
                     return;
                 }
                 
-                // 使用今天的日期
-                const todayDate = getTodayDateString();
+                // 使用日历选择的日期或今天
+                const workDate = getDefaultWorkDate();
                 const now = new Date();
                 const timeStr = now.toTimeString().slice(0, 8);
                 
                 const outboundData = {
-                    date: todayDate,
+                    date: workDate,
                     time: timeStr,
                     product_name: record.product_name,
                     code_number: record.product_code || null,
