@@ -74,6 +74,30 @@ body {
     transform: scale(0.95);
 }
 
+.calendar-button {
+    margin-left: auto;
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 12px;
+    background: #f7931e;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+.calendar-button img {
+    width: 20px;
+    height: 20px;
+    display: block;
+}
+
+.calendar-button:active {
+    transform: scale(0.95);
+}
+
 .sr-only {
     position: absolute;
     width: 1px;

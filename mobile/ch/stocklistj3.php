@@ -22,6 +22,9 @@ if (!isset($_SESSION['user_id'])) {
                 <img src="../images/icons/logout.svg" alt="" aria-hidden="true">
             </a>
             <h1>库存列表 (J3)</h1>
+            <button class="calendar-button" type="button" aria-label="日历">
+                <img src="../images/icons/calendar.svg" alt="" aria-hidden="true">
+            </button>
         </header>
 
         <main class="page-content">
