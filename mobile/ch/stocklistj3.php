@@ -765,13 +765,15 @@ if (!isset($_SESSION['user_id'])) {
                             throw new Error(result.message || '保存失败');
                         }
                         console.log(`记录 ${savedRecords + 1} 保存成功:`, result.data);
+                        console.log(`保存的数据: price=${price}, out_quantity=${deductQty}, product_name=${record.product_name}`);
                         
                         remainingQty -= deductQty;
                         savedRecords++;
                         
-                        // 延迟1秒，确保时间戳不同，并让数据库有时间同步
+                        // 延迟2秒，确保数据库事务提交并同步完成，然后再查询最新库存
                         if (remainingQty > 0) {
-                            await new Promise(resolve => setTimeout(resolve, 1000));
+                            console.log(`等待数据库同步...剩余需扣: ${remainingQty}`);
+                            await new Promise(resolve => setTimeout(resolve, 2000));
                         }
                     }
                     
