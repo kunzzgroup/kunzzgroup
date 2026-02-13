@@ -67,22 +67,25 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
                         UNION ALL
                         SELECT 
                             m.product_name,
-                            COALESCE(je.specification, sd.specification, NULL) as specification,
-                            COALESCE(je.price, sd.price, 0) as price,
+                            COALESCE(sd.specification, je.specification, NULL) as specification,
+                            COALESCE(je.price, 0) as price,
                             m.code_number,
-                            COALESCE(je.type, sd.category, NULL) as type,
+                            COALESCE(sd.category, je.type, NULL) as type,
                             m.in_quantity,
                             m.out_quantity
                         FROM j2stockeditmobile_data m
-                        LEFT JOIN j2stockedit_data je ON (
-                            je.product_name = m.product_name 
-                            AND je.date = m.date 
-                            AND je.time = m.time
-                            AND (je.code_number = m.code_number OR (je.code_number IS NULL AND m.code_number IS NULL))
-                            AND je.receiver = 'Mobile'
-                            AND je.target_system = 'j2'
-                        )
                         LEFT JOIN stock_data sd ON (sd.product_name = m.product_name OR sd.product_code = m.code_number)
+                        LEFT JOIN (
+                            SELECT je1.product_name, je1.code_number, je1.price, je1.specification, je1.type
+                            FROM j2stockedit_data je1
+                            INNER JOIN (
+                                SELECT product_name, code_number, MAX(id) as max_id
+                                FROM j2stockedit_data
+                                WHERE price > 0
+                                GROUP BY product_name, code_number
+                            ) je2 ON je1.id = je2.max_id
+                        ) je ON je.product_name = m.product_name 
+                            AND (je.code_number = m.code_number OR (je.code_number IS NULL AND m.code_number IS NULL))
                         WHERE m.product_name IS NOT NULL AND m.product_name != ''
                         AND m.date <= ?
                     ) AS combined_data
@@ -110,22 +113,25 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
                         UNION ALL
                         SELECT 
                             m.product_name,
-                            COALESCE(je.specification, sd.specification, NULL) as specification,
-                            COALESCE(je.price, sd.price, 0) as price,
+                            COALESCE(sd.specification, je.specification, NULL) as specification,
+                            COALESCE(je.price, 0) as price,
                             m.code_number,
-                            COALESCE(je.type, sd.category, NULL) as type,
+                            COALESCE(sd.category, je.type, NULL) as type,
                             m.in_quantity,
                             m.out_quantity
                         FROM j2stockeditmobile_data m
-                        LEFT JOIN j2stockedit_data je ON (
-                            je.product_name = m.product_name 
-                            AND je.date = m.date 
-                            AND je.time = m.time
-                            AND (je.code_number = m.code_number OR (je.code_number IS NULL AND m.code_number IS NULL))
-                            AND je.receiver = 'Mobile'
-                            AND je.target_system = 'j2'
-                        )
                         LEFT JOIN stock_data sd ON (sd.product_name = m.product_name OR sd.product_code = m.code_number)
+                        LEFT JOIN (
+                            SELECT je1.product_name, je1.code_number, je1.price, je1.specification, je1.type
+                            FROM j2stockedit_data je1
+                            INNER JOIN (
+                                SELECT product_name, code_number, MAX(id) as max_id
+                                FROM j2stockedit_data
+                                WHERE price > 0
+                                GROUP BY product_name, code_number
+                            ) je2 ON je1.id = je2.max_id
+                        ) je ON je.product_name = m.product_name 
+                            AND (je.code_number = m.code_number OR (je.code_number IS NULL AND m.code_number IS NULL))
                         WHERE m.product_name IS NOT NULL AND m.product_name != ''
                     ) AS combined_data
                     GROUP BY product_name, specification, price, code_number, type
