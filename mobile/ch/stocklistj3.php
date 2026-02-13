@@ -725,14 +725,21 @@ if (!isset($_SESSION['user_id'])) {
                         
                         const priceStockList = priceStockResult.data;
                         console.log(`第 ${savedRecords + 1} 次查询，获取到的价格库存列表:`, priceStockList);
+                        // 详细输出每个价格的库存信息
+                        priceStockList.forEach((item, idx) => {
+                            console.log(`  价格 ${idx + 1}: RM ${item.price}, 可用库存: ${item.available_stock}`);
+                        });
                         
                         // 找到最高价格的可用库存
                         const highestPriceItem = priceStockList[0]; // 已经按价格从高到低排序
                         const price = parseFloat(highestPriceItem.price) || 0;
                         const availableStock = parseFloat(highestPriceItem.available_stock) || 0;
                         
+                        console.log(`选择扣减: 价格=RM ${price}, 可用库存=${availableStock}, 剩余需扣=${remainingQty}`);
+                        
                         if (availableStock <= 0) {
                             // 最高价格的库存已经用完，继续下一个
+                            console.log(`价格 RM ${price} 的库存已用完，跳过`);
                             break;
                         }
                         

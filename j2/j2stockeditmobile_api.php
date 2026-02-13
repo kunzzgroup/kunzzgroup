@@ -326,12 +326,12 @@ function handleGet() {
             try {
                 // 从 j2stockedit_data 获取该产品所有不同价格的库存情况
                 // 使用 CAST 确保价格精度一致，避免 GROUP BY 时因精度问题导致分组失败
+                // 直接计算 SUM(in_quantity) - SUM(out_quantity)，不要只统计正数
                 $sql = "SELECT 
                             CAST(price AS DECIMAL(10,2)) as price,
-                            SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
-                            SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
-                            (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
-                            SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as available_stock
+                            SUM(in_quantity) as total_in,
+                            SUM(out_quantity) as total_out,
+                            (SUM(in_quantity) - SUM(out_quantity)) as available_stock
                         FROM j2stockedit_data 
                         WHERE product_name = ?";
                 $params = [$productName];
@@ -341,12 +341,15 @@ function handleGet() {
                 }
                 $sql .= "
                         GROUP BY CAST(price AS DECIMAL(10,2))
-                        HAVING available_stock > 0
+                        HAVING (SUM(in_quantity) - SUM(out_quantity)) > 0
                         ORDER BY CAST(price AS DECIMAL(10,2)) DESC";
                 
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
                 $priceStockData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                
+                // 记录查询结果用于调试
+                error_log("product_prices_with_stock查询 - 产品: $productName" . (!empty($codeNumber) ? ", 编号: $codeNumber" : "") . ", 返回记录数: " . count($priceStockData));
                 
                 $result = [];
                 foreach ($priceStockData as $row) {
@@ -356,9 +359,11 @@ function handleGet() {
                     if (is_string($priceValue)) {
                         $priceValue = floatval($priceValue);
                     }
+                    $availableStock = floatval($row['available_stock'] ?? 0);
+                    error_log("  价格: $priceValue, 可用库存: $availableStock, 进货总计: " . ($row['total_in'] ?? 0) . ", 出货总计: " . ($row['total_out'] ?? 0));
                     $result[] = [
                         'price' => $priceValue,
-                        'available_stock' => floatval($row['available_stock'] ?? 0)
+                        'available_stock' => $availableStock
                     ];
                 }
                 
