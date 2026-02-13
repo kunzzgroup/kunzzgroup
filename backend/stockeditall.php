@@ -13,7 +13,7 @@ require_once 'session_check.php';
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="animation.css" />
-    <link rel="stylesheet" href="../css/stockeditall.css" />
+    <link rel="stylesheet" href="/backend/css/stockeditall.css" />
     
 </head>
 <body>
