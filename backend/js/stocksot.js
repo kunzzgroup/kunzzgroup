@@ -570,13 +570,13 @@ function toggleViewSelector() {
 
 function switchView(viewType) {
     if (viewType === 'list') {
-        window.location.href = 'stocklistall.php';
+        window.location.href = 'stocklistall';
     } else if (viewType === 'records') {
-        window.location.href = 'stockeditall.php';
+        window.location.href = 'stockeditall';
     } else if (viewType === 'remark') {
-        window.location.href = 'stockremark.php';
+        window.location.href = 'stockremark';
     } else if (viewType === 'product') {
-        window.location.href = 'stockproductname.php';
+        window.location.href = 'stockproductname';
     } else {
         hideViewDropdown();
     }

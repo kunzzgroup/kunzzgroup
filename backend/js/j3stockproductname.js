@@ -89,13 +89,13 @@ function toggleViewSelector() {
 function switchView(viewType) {
     if (viewType === 'list') {
         // 跳转到总库存页面
-        window.location.href = 'stocklistall.php';
+        window.location.href = 'stocklistall';
     } else if (viewType === 'records') {
         // 跳转到进出货页面
-        window.location.href = 'stockeditall.php';
+        window.location.href = 'stockeditall';
     } else if (viewType === 'remark') {
         // 跳转到货品备注页面
-        window.location.href = 'stockremark.php';
+        window.location.href = 'stockremark';
     } else {
         // 保持在当前页面（货品种类）
         hideViewDropdown();

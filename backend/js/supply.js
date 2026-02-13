@@ -1631,7 +1631,7 @@ function switchComparisonMode(mode) {
 
     // 如果选择餐厅对比，直接跳转到 price.php
     if (mode === 'restaurant') {
-        window.location.href = 'price.php';
+        window.location.href = 'price';
         return;
     }
 }

@@ -324,7 +324,7 @@ function showSessionExpiredMessage() {
                         <div style="background: #ffebee; border: 1px solid #f44336; border-radius: 8px; padding: 20px; margin: 10px;">
                             <h3 style="color: #C62828; margin: 0 0 10px 0;">🔒 会话已过期</h3>
                             <p style="margin: 0 0 15px 0;">您的登录会话已过期，请重新登录以继续使用。</p>
-                            <button onclick="window.location.href='../frontend/login.php'" 
+                            <button onclick="window.location.href='../frontend/login'" 
                                     style="background: #C62828; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
                                 重新登录
                             </button>
@@ -429,7 +429,7 @@ function generateRandomCode() {
 
 // 返回仪表盘
 function goBack() {
-    window.location.href = 'dashboard.php';
+    window.location.href = 'dashboard';
 }
 
 // 显示数据

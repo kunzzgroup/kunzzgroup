@@ -280,7 +280,7 @@ function goBack() {
         }
     }
 
-    window.location.href = 'stocklistall.php';
+    window.location.href = 'stocklistall';
 }
 
 // 完全替换现有的 showAlert 函数

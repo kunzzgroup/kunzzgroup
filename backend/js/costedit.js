@@ -148,7 +148,7 @@ function showSessionExpiredMessage() {
                     <div style="text-align: center; padding: 50px; background: #ffebee; border: 1px solid #f44336; border-radius: 8px; margin: 20px;">
                         <h2 style="color: #C62828; margin: 0 0 15px 0;">🔒 会话已过期</h2>
                         <p style="margin: 0 0 20px 0; color: #666;">您的登录会话已过期，请重新登录以继续使用。</p>
-                        <button onclick="window.location.href='../frontend/login.php'" 
+                        <button onclick="window.location.href='../frontend/login'" 
                                 style="background: #C62828; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; font-size: 16px;">
                             重新登录
                         </button>

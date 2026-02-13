@@ -1298,7 +1298,7 @@ function generateTargetOptions(selectedValue = '') {
 
 // 返回仪表盘
 function goBack() {
-    window.location.href = 'dashboard.php';
+    window.location.href = 'dashboard';
 }
 
 // 点击其他地方关闭下拉菜单

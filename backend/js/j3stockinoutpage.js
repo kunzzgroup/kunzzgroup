@@ -867,16 +867,16 @@ function toggleViewSelector() {
 function switchView(viewType) {
     if (viewType === 'list') {
         // 直接跳转到库存清单页面，不带参数
-        window.location.href = 'j3stocklist.php';
+        window.location.href = 'j3stocklist';
     } else if (viewType === 'remark') {
         // 跳转到备注页面
-        window.location.href = 'stockremark.php';
+        window.location.href = 'stockremark';
     } else if (viewType === 'product') {
         // 跳转到货品种类页面
-        window.location.href = 'stockproductname.php';
+        window.location.href = 'stockproductname';
     } else if (viewType === 'sot') {
         // 跳转到货品异常页面
-        window.location.href = 'stocksot.php';
+        window.location.href = 'stocksot';
     } else {
         // 保持在当前页面（库存记录）
         hideViewDropdown();
@@ -900,7 +900,7 @@ function generateTargetOptions(selectedValue = '') {
 
 // 返回仪表盘
 function goBack() {
-    window.location.href = 'dashboard.php';
+    window.location.href = 'dashboard';
 }
 
 // 点击其他地方关闭下拉菜单

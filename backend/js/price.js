@@ -1656,7 +1656,7 @@ function switchComparisonMode(mode) {
 
     // 如果选择批发商对比，直接跳转到 supplier.php
     if (mode === 'supplier') {
-        window.location.href = 'supply.php';
+        window.location.href = 'supply';
         return;
     }
 }

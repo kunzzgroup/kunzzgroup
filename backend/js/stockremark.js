@@ -122,15 +122,15 @@ function toggleViewSelector() {
 
 function switchView(viewType) {
     if (viewType === 'list') {
-        window.location.href = 'stocklistall.php';
+        window.location.href = 'stocklistall';
     } else if (viewType === 'records') {
-        window.location.href = 'stockeditall.php';
+        window.location.href = 'stockeditall';
     } else if (viewType === 'product') {
         // 跳转到货品种类页面
-        window.location.href = 'stockproductname.php';
+        window.location.href = 'stockproductname';
     } else if (viewType === 'sot') {
         // 跳转到货品异常页面
-        window.location.href = 'stocksot.php';
+        window.location.href = 'stocksot';
     } else {
         // 保持在当前页面（库存价格分析）
         hideViewDropdown();
@@ -147,7 +147,7 @@ function hideViewDropdown() {
 
 // 返回仪表盘
 function goBack() {
-    window.location.href = 'dashboard.php';
+    window.location.href = 'dashboard';
 }
 
 // API 调用函数
