@@ -80,8 +80,7 @@ body {
     height: 42px;
     border: none;
     border-radius: 12px;
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
+    background: #f7931e;
     display: inline-flex;
     justify-content: center;
     align-items: center;
