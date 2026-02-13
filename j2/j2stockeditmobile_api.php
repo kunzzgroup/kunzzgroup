@@ -24,6 +24,8 @@ $dbpass = 'Kunzz1688';
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // 设置事务隔离级别为 READ COMMITTED，确保查询能看到已提交的数据
+    $pdo->exec("SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED");
     // 确保所需数据表存在（静默失败以避免无权限导致500）
     try { ensureTables($pdo); } catch (Throwable $ignore) {}
 } catch (PDOException $e) {
@@ -327,7 +329,8 @@ function handleGet() {
                 // 从 j2stockedit_data 获取该产品所有不同价格的库存情况
                 // 使用 CAST 确保价格精度一致，避免 GROUP BY 时因精度问题导致分组失败
                 // 直接计算 SUM(in_quantity) - SUM(out_quantity)，不要只统计正数
-                $sql = "SELECT 
+                // 使用 SQL_NO_CACHE 确保查询最新数据，不使用查询缓存
+                $sql = "SELECT SQL_NO_CACHE
                             CAST(price AS DECIMAL(10,2)) as price,
                             SUM(in_quantity) as total_in,
                             SUM(out_quantity) as total_out,

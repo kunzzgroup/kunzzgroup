@@ -714,8 +714,16 @@ if (!isset($_SESSION['user_id'])) {
                     
                     while (remainingQty > 0) {
                         // 重新查询当前的价格库存列表（获取最新数据）
-                        const priceStockUrl = `${STOCK_EDIT_API}?action=product_prices_with_stock&product_name=${encodeURIComponent(record.product_name)}${record.product_code ? '&code_number=' + encodeURIComponent(record.product_code) : ''}`;
-                        const priceStockResp = await fetch(priceStockUrl);
+                        // 添加时间戳参数避免浏览器缓存，确保获取最新数据
+                        const timestamp = Date.now();
+                        const priceStockUrl = `${STOCK_EDIT_API}?action=product_prices_with_stock&product_name=${encodeURIComponent(record.product_name)}${record.product_code ? '&code_number=' + encodeURIComponent(record.product_code) : ''}&_t=${timestamp}`;
+                        const priceStockResp = await fetch(priceStockUrl, {
+                            cache: 'no-store',
+                            headers: {
+                                'Cache-Control': 'no-cache',
+                                'Pragma': 'no-cache'
+                            }
+                        });
                         const priceStockResult = await priceStockResp.json();
                         
                         if (!priceStockResult.success || !priceStockResult.data || priceStockResult.data.length === 0) {
