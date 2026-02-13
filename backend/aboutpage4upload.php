@@ -455,7 +455,7 @@ if (file_exists($configFile) && is_readable($configFile)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $isEnglish ? 'Timeline Management' : '发展历史管理'; ?> - KUNZZ HOLDINGS</title>
-    <link rel="stylesheet" href=" backend/css/aboutpage4upload.css">
+    <link rel="stylesheet" href="/backend/css/aboutpage4upload.css">
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
