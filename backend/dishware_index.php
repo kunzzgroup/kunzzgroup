@@ -25,7 +25,7 @@
                 <i class="fas fa-upload card-icon"></i>
                 <h3>碗碟信息上传</h3>
                 <p>上传碗碟照片、设置尺寸价格、选择分类，支持单个上传和批量CSV导入</p>
-                <a href="dishware_upload.php" class="card-btn">
+                <a href="dishware_upload" class="card-btn">
                     <i class="fas fa-plus"></i>
                     开始上传
                 </a>
@@ -35,7 +35,7 @@
                 <i class="fas fa-warehouse card-icon"></i>
                 <h3>库存管理</h3>
                 <p>查看所有碗碟信息，管理各地点库存数量，实时计算总库存价值</p>
-                <a href="dishware_stock.php" class="card-btn">
+                <a href="dishware_stock" class="card-btn">
                     <i class="fas fa-chart-bar"></i>
                     管理库存
                 </a>

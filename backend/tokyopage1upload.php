@@ -86,8 +86,8 @@ if (file_exists('media_config.json')) {
         </div>
         
         <div class="breadcrumb">
-            <a href="dashboard.php">仪表板</a> > 
-            <a href="media_manager.php">媒体管理</a> > 
+            <a href="dashboard">仪表板</a> > 
+            <a href="media_manager">媒体管理</a> > 
             <span>Tokyo Japanese Cuisine 页面</span>
         </div>
         

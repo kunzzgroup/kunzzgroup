@@ -24,11 +24,11 @@ require_once 'session_check.php';
                     切换页面
                     <i class="fas fa-chevron-down"></i>
                     <div class="dropdown-menu" id="page-dropdown">
-                        <a href="j1stockedit.php" class="dropdown-item">
+                        <a href="j1stockedit" class="dropdown-item">
                             <i class="fas fa-file-alt"></i>
                             J1 stock
                         </a>
-                        <a href="j2stockedit.php" class="dropdown-item">
+                        <a href="j2stockedit" class="dropdown-item">
                             <i class="fas fa-file-alt"></i>
                             J2 stock
                         </a>
