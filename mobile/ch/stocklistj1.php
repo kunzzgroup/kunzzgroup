@@ -6,6 +6,34 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: login.html');
     exit;
 }
+
+// 获取当前登录用户的用户名（优先昵称，其次中文名，最后英文名）
+$currentUsername = '';
+if (isset($_SESSION['user_id'])) {
+    $host = 'localhost';
+    $dbname = 'u690174784_kunzz';
+    $dbuser = 'u690174784_kunzz';
+    $dbpass = 'Kunzz1688';
+    
+    try {
+        $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        $userId = $_SESSION['user_id'];
+        $stmt = $pdo->prepare("SELECT nickname, username_cn, username FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        $userRow = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($userRow) {
+            $nickname = trim((string)($userRow['nickname'] ?? ''));
+            $usernameCn = trim((string)($userRow['username_cn'] ?? ''));
+            $username = trim((string)($userRow['username'] ?? ''));
+            $currentUsername = $nickname !== '' ? $nickname : ($usernameCn !== '' ? $usernameCn : $username);
+        }
+    } catch (PDOException $e) {
+        $currentUsername = '';
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="zh">
@@ -127,6 +155,9 @@ if (!isset($_SESSION['user_id'])) {
         let selectedProductCategory = '';
         let editingRowIds = new Set();
         let currentWorkDate = null; // 本页本次选择的日期（不刷新时保留，刷新后清空为今天）
+        
+        // 当前登录用户名（从PHP传递）
+        const CURRENT_USERNAME = <?php echo json_encode($currentUsername, JSON_UNESCAPED_UNICODE); ?>;
         
         // API配置（指向backend目录下的stockapi.php）
         const API_BASE_URL = '../../backend/stockapi.php';
@@ -695,7 +726,8 @@ if (!isset($_SESSION['user_id'])) {
                         product_name: record.product_name,
                         code_number: record.product_code || null,
                         in_quantity: 0,
-                        out_quantity: soldQty
+                        out_quantity: soldQty,
+                        receiver: CURRENT_USERNAME || ''
                     };
                     
                     const response = await fetch(STOCK_EDIT_API, {
@@ -756,7 +788,8 @@ if (!isset($_SESSION['user_id'])) {
                             code_number: record.product_code || null,
                             in_quantity: 0,
                             out_quantity: deductQty,
-                            price: priceStock.price // 保存价格信息用于显示
+                            price: priceStock.price, // 保存价格信息用于显示
+                            receiver: CURRENT_USERNAME || ''
                         });
                         
                         remainingQty -= deductQty;
