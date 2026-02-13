@@ -145,7 +145,7 @@ function formatFileSize($bytes) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>背景音乐管理 - KUNZZ HOLDINGS</title>
-   <link rel="stylesheet" href="/backend/css/bgmusicupload.css">
+    <link rel="stylesheet" href="/backend/css/bgmusicupload.css">
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
