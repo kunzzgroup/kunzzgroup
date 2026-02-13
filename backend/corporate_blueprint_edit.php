@@ -350,7 +350,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
     <link rel="stylesheet" href="css/corporate_blueprint_edit.css">
 </head>
 <body class="has-sidebar">
-    <?php include CORE_PATH . '/sidebar.php'; ?>
+    <?php include 'sidebar.php'; ?>
     <div class="container">
         <div class="header">
             <h1>企业蓝图管理</h1>
