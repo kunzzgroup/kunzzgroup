@@ -12,14 +12,15 @@ const COSTEDIT_BUILD_ID = '2025-12-18_02';
     } catch (e) { }
 })();
 
-const availableReportTypes = ($reportPermissions);
-const reportDropdownEnabled = $showReportDropdown ? 'true' : 'false';
-const availableRestaurants = ($restaurantPermissions);
-const restaurantDropdownEnabled = $showRestaurantDropdown ? 'true' : 'false';
-const restaurantConfig = ($restaurantConfigAllowed);
+// Load configuration from PAGE_CONFIG defined in the template
+const availableReportTypes = PAGE_CONFIG.availableReportTypes;
+const reportDropdownEnabled = PAGE_CONFIG.reportDropdownEnabled;
+const availableRestaurants = PAGE_CONFIG.availableRestaurants;
+const restaurantDropdownEnabled = PAGE_CONFIG.restaurantDropdownEnabled;
+const restaurantConfig = PAGE_CONFIG.restaurantConfig;
 
 // 应用状态
-let currentRestaurant = ($defaultRestaurant);
+let currentRestaurant = '<?php echo $defaultRestaurant; ?>';
 let currentYear = new Date().getFullYear();
 let currentMonth = new Date().getMonth() + 1;
 let monthData = {};
@@ -1327,7 +1328,6 @@ document.addEventListener('paste', function (e) {
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', initApp);
-
 // 切换数字下拉菜单
 function toggleNumberDropdown() {
     if (!restaurantDropdownEnabled) return;
