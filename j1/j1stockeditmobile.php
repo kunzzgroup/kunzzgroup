@@ -2329,6 +2329,15 @@ require_once '../backend/session_check.php';
             endDate: null
         };
 
+        // 从库存列表日历选择的日期（localStorage），用于出货记录的默认日期
+        function getDefaultWorkDate() {
+            try {
+                const saved = localStorage.getItem('j1_stock_edit_date');
+                if (saved && /^\d{4}-\d{2}-\d{2}$/.test(saved)) return saved;
+            } catch (e) {}
+            return new Date().toISOString().split('T')[0];
+        }
+
         // 新的日历选择器变量
         let calendarCurrentDate = new Date();
         let calendarStartDate = null;
@@ -2635,29 +2644,31 @@ require_once '../backend/session_check.php';
 
         // 增强的日期选择器功能
         function initEnhancedDatePickers() {
-            // 获取当前日期
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const currentYear = today.getFullYear();
-            const currentMonth = today.getMonth() + 1;
-            const currentDay = today.getDate();
+            // 使用库存列表选择的日期或今天
+            const defaultDateStr = getDefaultWorkDate();
+            const parts = defaultDateStr.split('-');
+            const currentYear = parseInt(parts[0], 10);
+            const currentMonth = parseInt(parts[1], 10);
+            const currentDay = parseInt(parts[2], 10);
+            const defaultDate = new Date(currentYear, currentMonth - 1, currentDay);
+            defaultDate.setHours(0, 0, 0, 0);
 
-            // 初始化日历选择器默认值为今天
-            calendarStartDate = new Date(today);
-            calendarEndDate = new Date(today);
+            // 初始化日历选择器默认值为选定日期
+            calendarStartDate = new Date(defaultDate);
+            calendarEndDate = new Date(defaultDate);
 
-            // 设置dateRange为今天
+            // 设置dateRange
             dateRange = {
-                startDate: `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`,
-                endDate: `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`
+                startDate: defaultDateStr,
+                endDate: defaultDateStr
             };
             
-            console.log('初始化日期选择器，设置日期范围为今天:', dateRange.startDate, '到', dateRange.endDate);
+            console.log('初始化日期选择器，设置日期范围:', dateRange.startDate, '到', dateRange.endDate);
     
             // 更新日期范围显示
             updateDateRangeDisplay();
 
-            // 设置开始和结束日期初始值为今天（用于旧的选择器，如果还在使用）
+            // 设置开始和结束日期初始值（用于旧的选择器，如果还在使用）
             startDateValue = {
                 year: currentYear,
                 month: currentMonth,
@@ -3031,9 +3042,8 @@ require_once '../backend/session_check.php';
 
         // 初始化应用
         function initApp() {
-            // 设置默认日期为今天
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('add-date').value = today;
+            // 设置默认日期为库存列表选择的日期或今天
+            document.getElementById('add-date').value = getDefaultWorkDate();
             document.getElementById('add-time').value = new Date().toTimeString().slice(0, 5);
             
             // 初始化增强型日期选择器
@@ -4050,9 +4060,8 @@ require_once '../backend/session_check.php';
             const modal = document.getElementById('date-rows-modal');
             const dateInput = document.getElementById('selected-date');
             
-            // 设置默认日期为今天
-            const today = new Date().toISOString().split('T')[0];
-            dateInput.value = today;
+            // 设置默认日期为库存列表选择的日期或今天
+            dateInput.value = getDefaultWorkDate();
             
             // 显示弹窗
             modal.classList.add('show');
@@ -4165,10 +4174,9 @@ require_once '../backend/session_check.php';
             }, 100);
         }
 
-        // 添加新行到表格（使用今天的日期）
+        // 添加新行到表格（使用默认工作日期：库存列表选择的日期或今天）
         function addNewRow() {
-            const today = new Date().toISOString().split('T')[0];
-            addNewRowWithDate(today);
+            addNewRowWithDate(getDefaultWorkDate());
         }
 
         // 自动填充supplier到receiver字段（只在有进货数量时）
