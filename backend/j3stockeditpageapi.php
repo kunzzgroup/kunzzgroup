@@ -96,38 +96,58 @@ function handleGet() {
                 $endDate = date('Y-m-t');
             }
 
-            $sql = "SELECT * FROM j3stockedit_data WHERE 1=1";
-            $params = [];
-            
+            // 构建日期条件
+            $dateCondition = "";
+            $dateParams = [];
             if ($searchDate) {
-                $sql .= " AND date = ?";
-                $params[] = $searchDate;
+                $dateCondition = " AND date = ?";
+                $dateParams[] = $searchDate;
             } elseif ($startDate && $endDate) {
-                $sql .= " AND date BETWEEN ? AND ?";
-                $params[] = $startDate;
-                $params[] = $endDate;
+                $dateCondition = " AND date BETWEEN ? AND ?";
+                $dateParams[] = $startDate;
+                $dateParams[] = $endDate;
             }
             
+            // 构建其他过滤条件
+            $filterCondition = "";
+            $filterParams = [];
             if ($receiver) {
-                $sql .= " AND receiver LIKE ?";
-                $params[] = "%$receiver%";
+                $filterCondition .= " AND receiver LIKE ?";
+                $filterParams[] = "%$receiver%";
             }
-
             if ($productCode) {
-                $sql .= " AND code_number LIKE ?";  // 修改这里：从product_code改为code_number
-                $params[] = "%$productCode%";
+                $filterCondition .= " AND code_number LIKE ?";
+                $filterParams[] = "%$productCode%";
             }
-
             if ($productName) {
-                $sql .= " AND product_name LIKE ?";
-                $params[] = "%$productName%";
+                $filterCondition .= " AND product_name LIKE ?";
+                $filterParams[] = "%$productName%";
             }
             
-            $sql .= " ORDER BY date ASC, time ASC";
+            // 合并两个表的数据：j3stockedit_data 和 j3stockeditmobile_data
+            $sql = "SELECT 
+                        id, date, time, product_name, code_number, 
+                        in_quantity, out_quantity, specification, price, 
+                        receiver, remark, target_system, type,
+                        created_at, updated_at
+                    FROM j3stockedit_data 
+                    WHERE 1=1" . $dateCondition . $filterCondition . "
+                    UNION ALL
+                    SELECT 
+                        id + 3000000000 as id, date, time, product_name, code_number,
+                        in_quantity, out_quantity, NULL as specification, NULL as price,
+                        receiver, NULL as remark, NULL as target_system, NULL as type,
+                        created_at, updated_at
+                    FROM j3stockeditmobile_data 
+                    WHERE 1=1" . $dateCondition . $filterCondition . "
+                    ORDER BY date ASC, time ASC";
             
             // 从请求参数中获取limit，如果没有则默认使用10000
             $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10000;
             $sql .= " LIMIT " . $limit;
+            
+            // 合并参数数组
+            $params = array_merge($dateParams, $filterParams, $dateParams, $filterParams);
             
             $stmt = $pdo->prepare($sql);
             try {
