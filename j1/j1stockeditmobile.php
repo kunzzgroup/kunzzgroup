@@ -2638,44 +2638,23 @@ require_once '../backend/session_check.php';
             }
         });
 
-        // 增强的日期选择器功能
+        // 增强的日期选择器功能（页面进入时显示默认今天，记录保存时仍用 getDefaultWorkDate）
         function initEnhancedDatePickers() {
-            // 使用库存列表选择的日期或今天
-            const defaultDateStr = getDefaultWorkDate();
-            const parts = defaultDateStr.split('-');
-            const currentYear = parseInt(parts[0], 10);
-            const currentMonth = parseInt(parts[1], 10);
-            const currentDay = parseInt(parts[2], 10);
-            const defaultDate = new Date(currentYear, currentMonth - 1, currentDay);
-            defaultDate.setHours(0, 0, 0, 0);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth() + 1;
+            const currentDay = today.getDate();
+            const todayStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`;
 
-            // 初始化日历选择器默认值为选定日期
-            calendarStartDate = new Date(defaultDate);
-            calendarEndDate = new Date(defaultDate);
-
-            // 设置dateRange
-            dateRange = {
-                startDate: defaultDateStr,
-                endDate: defaultDateStr
-            };
-            
-            console.log('初始化日期选择器，设置日期范围:', dateRange.startDate, '到', dateRange.endDate);
-    
-            // 更新日期范围显示
+            calendarStartDate = new Date(today);
+            calendarEndDate = new Date(today);
+            dateRange = { startDate: todayStr, endDate: todayStr };
+            console.log('初始化日期选择器，设置日期范围为今天:', dateRange.startDate, '到', dateRange.endDate);
             updateDateRangeDisplay();
 
-            // 设置开始和结束日期初始值（用于旧的选择器，如果还在使用）
-            startDateValue = {
-                year: currentYear,
-                month: currentMonth,
-                day: currentDay
-            };
-
-            endDateValue = {
-                year: currentYear,
-                month: currentMonth,
-                day: currentDay
-            };
+            startDateValue = { year: currentYear, month: currentMonth, day: currentDay };
+            endDateValue = { year: currentYear, month: currentMonth, day: currentDay };
         }
 
         function updateDateDisplay(prefix) {
@@ -3038,8 +3017,8 @@ require_once '../backend/session_check.php';
 
         // 初始化应用
         function initApp() {
-            // 设置默认日期为库存列表选择的日期或今天
-            document.getElementById('add-date').value = getDefaultWorkDate();
+            // 进入页面时日期显示默认今天（记录保存时仍用 getDefaultWorkDate）
+            document.getElementById('add-date').value = new Date().toISOString().split('T')[0];
             document.getElementById('add-time').value = new Date().toTimeString().slice(0, 5);
             
             // 初始化增强型日期选择器
@@ -4056,8 +4035,8 @@ require_once '../backend/session_check.php';
             const modal = document.getElementById('date-rows-modal');
             const dateInput = document.getElementById('selected-date');
             
-            // 设置默认日期为库存列表选择的日期或今天
-            dateInput.value = getDefaultWorkDate();
+            // 弹窗打开时默认显示今天
+            dateInput.value = new Date().toISOString().split('T')[0];
             
             // 显示弹窗
             modal.classList.add('show');
