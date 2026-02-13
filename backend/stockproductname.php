@@ -50,7 +50,7 @@ if (isset($_SESSION['user_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>库存货品管理后台 - Excel模式</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../css/stockproductname.css">
+    <link rel="stylesheet" href="/backend/css/stockproductname.css">
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
