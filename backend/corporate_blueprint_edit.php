@@ -350,7 +350,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
     <link rel="stylesheet" href="css/corporate_blueprint_edit.css">
 </head>
 <body class="has-sidebar">
-    <?php include 'sidebar.php'; ?>
+    <?php include CORE_PATH . '/sidebar.php'; ?>
     <div class="container">
         <div class="header">
             <h1>企业蓝图管理</h1>
@@ -759,7 +759,18 @@ Implementation Timeline Adherence (%)"><?php echo htmlspecialchars(implode("\n",
             </form>
         </div>
     </div>
-    <script src="../js/corporate_blueprint_edit.js"></script>
+    
+    <script>
+        // Pass PHP variables to JS
+        let clevelIndex = <?php echo count($orgStructure['cLevel'] ?? []); ?>;
+        let deptIndex = <?php echo count($internalOrg['departments'] ?? []); ?>;
+        let timelineIndex = <?php echo count($timeline); ?>;
+        let cultureIndex = <?php echo count($corporateCore['culture'] ?? []); ?>;
+        let valuesIndex = <?php echo count($corporateCore['values'] ?? []); ?>;
+        let cultureExplanationIndex = <?php echo count($cultureExplanation); ?>;
+        let valuesExplanationIndex = <?php echo count($valuesExplanation); ?>;
+    </script>
+    <script src="js/corporate_blueprint_edit.js"></script>
 </body>
 </html>
 
