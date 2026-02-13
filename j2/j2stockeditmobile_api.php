@@ -325,12 +325,12 @@ function handleGet() {
             
             try {
                 // 从 j2stockedit_data 表获取该产品的所有不同价格的库存情况
+                // 注意：需要计算每个价格的净库存（in - out），包括负数的情况
                 $sql = "SELECT 
                             price,
-                            SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
-                            SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
-                            (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
-                            SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as available_stock
+                            SUM(in_quantity) as total_in,
+                            SUM(out_quantity) as total_out,
+                            (SUM(in_quantity) - SUM(out_quantity)) as available_stock
                         FROM j2stockedit_data 
                         WHERE product_name = ?";
                 $params = [$productName];
@@ -340,7 +340,7 @@ function handleGet() {
                     $params[] = $codeNumber;
                 }
                 
-                $sql .= " GROUP BY price HAVING available_stock > 0 ORDER BY price DESC";
+                $sql .= " GROUP BY price ORDER BY price DESC";
                 
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
@@ -575,7 +575,8 @@ function syncToJ2StockEditData($pdo, $data, $operation = 'insert') {
         }
         
         $specification = $productInfo['specification'] ?? null;
-        $price = floatval($productInfo['price'] ?? 0);
+        // 优先使用前端传递的价格（用于按价格扣除），否则从 stock_data 获取
+        $price = isset($data['price']) && $data['price'] > 0 ? floatval($data['price']) : floatval($productInfo['price'] ?? 0);
         $type = $productInfo['category'] ?? null;
         
         if ($operation === 'insert') {

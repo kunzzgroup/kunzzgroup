@@ -726,16 +726,27 @@ if (!isset($_SESSION['user_id'])) {
                 const baseTimeStr = now.toTimeString().slice(0, 8);
                 const outboundRecords = [];
                 
-                for (let i = 0; i < priceStocks.length && remainingQty > 0; i++) {
+                console.log('按价格分组的库存数据:', priceStocks);
+                console.log('需要扣除的总数量:', soldQty);
+                
+                for (let i = 0; i < priceStocks.length && remainingQty > 0.001; i++) {
                     const priceStock = priceStocks[i];
                     const availableStock = parseFloat(priceStock.available_stock) || 0;
                     
-                    if (availableStock <= 0) continue;
+                    console.log(`价格 RM ${priceStock.price}: 可用库存=${availableStock}, 还需扣除=${remainingQty.toFixed(3)}`);
                     
-                    // 计算从这个价格扣除的数量
+                    // 跳过库存为0或负数的价格（已经扣完了）
+                    if (availableStock <= 0) {
+                        console.log(`跳过价格 RM ${priceStock.price}（库存=${availableStock}）`);
+                        continue;
+                    }
+                    
+                    // 计算从这个价格扣除的数量（不能超过可用库存）
                     const deductQty = Math.min(remainingQty, availableStock);
                     
-                    if (deductQty > 0) {
+                    if (deductQty > 0.001) {
+                        console.log(`从价格 RM ${priceStock.price} 扣除: ${deductQty.toFixed(3)}`);
+                        
                         // 为每个价格创建出货记录（使用稍微不同的时间戳以避免冲突）
                         const timeStr = i === 0 ? baseTimeStr : new Date(now.getTime() + i * 1000).toTimeString().slice(0, 8);
                         outboundRecords.push({
@@ -751,6 +762,9 @@ if (!isset($_SESSION['user_id'])) {
                         remainingQty -= deductQty;
                     }
                 }
+                
+                console.log('扣除后的剩余数量:', remainingQty.toFixed(3));
+                console.log('创建的出货记录数:', outboundRecords.length);
                 
                 if (remainingQty > 0.001) {
                     alert(`警告：库存不足！\n产品: ${record.product_name}\n需要扣除: ${soldQty.toFixed(3)}\n实际可扣除: ${(soldQty - remainingQty).toFixed(3)}\n不足: ${remainingQty.toFixed(3)}`);
