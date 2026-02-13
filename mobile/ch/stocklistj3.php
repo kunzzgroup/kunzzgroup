@@ -777,6 +777,7 @@ if (!isset($_SESSION['user_id'])) {
                 
                 for (const outboundData of outboundRecords) {
                     try {
+                        console.log('发送出货记录:', JSON.stringify(outboundData, null, 2));
                         const response = await fetch(STOCK_EDIT_API, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -784,6 +785,7 @@ if (!isset($_SESSION['user_id'])) {
                         });
                         
                         const result = await response.json();
+                        console.log('API 响应:', result);
                         if (result.success) {
                             successCount++;
                         } else {
@@ -791,6 +793,7 @@ if (!isset($_SESSION['user_id'])) {
                             errorMsg += `价格 RM ${price.toFixed(2)} 扣除失败: ${result.message}\n`;
                         }
                     } catch (e) {
+                        console.error('发送失败:', e);
                         errorMsg += `价格扣除失败: ${e.message}\n`;
                     }
                 }

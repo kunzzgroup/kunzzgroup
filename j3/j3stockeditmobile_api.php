@@ -325,13 +325,14 @@ function handleGet() {
             try {
                 // 从 j3stockedit_data 表获取该产品的所有不同价格的库存情况
                 // 注意：需要计算每个价格的净库存（in - out），包括负数的情况
+                // 只查询有价格记录的（price IS NOT NULL），并按价格分组
                 $sql = "SELECT 
-                            price,
+                            COALESCE(price, 0) as price,
                             SUM(in_quantity) as total_in,
                             SUM(out_quantity) as total_out,
                             (SUM(in_quantity) - SUM(out_quantity)) as available_stock
                         FROM j3stockedit_data 
-                        WHERE product_name = ?";
+                        WHERE product_name = ? AND price IS NOT NULL";
                 $params = [$productName];
                 
                 if (!empty($codeNumber)) {
@@ -345,14 +346,20 @@ function handleGet() {
                 $stmt->execute($params);
                 $priceStockData = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 
+                // 调试日志
+                error_log("product_stock_by_price - product: $productName, code: " . ($codeNumber ?? 'null') . ", found " . count($priceStockData) . " price groups");
+                
                 $result = [];
                 foreach ($priceStockData as $row) {
+                    $priceVal = floatval($row['price'] ?? 0);
+                    $availableStock = floatval($row['available_stock'] ?? 0);
                     $result[] = [
-                        'price' => floatval($row['price'] ?? 0),
-                        'available_stock' => floatval($row['available_stock'] ?? 0),
+                        'price' => $priceVal,
+                        'available_stock' => $availableStock,
                         'total_in' => floatval($row['total_in'] ?? 0),
                         'total_out' => floatval($row['total_out'] ?? 0)
                     ];
+                    error_log("  - Price: $priceVal, Available: $availableStock");
                 }
                 
                 sendResponse(true, "产品按价格分组的库存获取成功", $result);
@@ -376,6 +383,9 @@ function handlePost() {
     if (empty($data['date']) || empty($data['time']) || empty($data['product_name'])) {
         sendResponse(false, "日期、时间和产品名称是必填字段");
     }
+    
+    // 调试日志：记录接收到的数据
+    error_log("handlePost - Received data: " . json_encode($data));
     
     try {
         // 开始事务
@@ -402,6 +412,7 @@ function handlePost() {
         updateStocklistTotal($data['product_name'], $data['code_number'] ?? null, floatval($data['in_quantity'] ?? 0), floatval($data['out_quantity'] ?? 0), true);
         
         // 同步到 j3stockedit_data 表（与 J1/J2 一致，backend stocklistall 可显示扣除）
+        // 确保价格字段被传递
         syncToJ3StockEditData($pdo, $data, 'insert');
         
         $pdo->commit();
@@ -574,8 +585,22 @@ function syncToJ3StockEditData($pdo, $data, $operation = 'insert') {
         
         $specification = $productInfo['specification'] ?? null;
         // 优先使用前端传递的价格（用于按价格扣除），否则从 stock_data 获取
-        $price = isset($data['price']) && $data['price'] > 0 ? floatval($data['price']) : floatval($productInfo['price'] ?? 0);
+        // 检查前端是否传递了价格字段（可能是字符串或数字）
+        $price = 0;
+        if (isset($data['price'])) {
+            $priceVal = is_numeric($data['price']) ? floatval($data['price']) : 0;
+            if ($priceVal > 0) {
+                $price = $priceVal;
+            } else {
+                $price = floatval($productInfo['price'] ?? 0);
+            }
+        } else {
+            $price = floatval($productInfo['price'] ?? 0);
+        }
         $type = $productInfo['category'] ?? null;
+        
+        // 调试日志（生产环境可移除）
+        error_log("syncToJ3StockEditData - product: {$data['product_name']}, frontend_price: " . ($data['price'] ?? 'not set') . ", final_price: $price");
         
         if ($operation === 'insert') {
             $sql = "INSERT INTO j3stockedit_data 
