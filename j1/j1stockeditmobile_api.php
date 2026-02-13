@@ -53,6 +53,7 @@ function ensureTables(PDO $pdo) {
       `code_number` varchar(100) DEFAULT NULL,
       `in_quantity` decimal(10,3) DEFAULT 0.000,
       `out_quantity` decimal(10,3) DEFAULT 0.000,
+      `receiver` varchar(100) DEFAULT NULL,
       `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
       `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       PRIMARY KEY (`id`),
@@ -60,6 +61,16 @@ function ensureTables(PDO $pdo) {
       KEY `idx_product_name` (`product_name`),
       KEY `idx_code_number` (`code_number`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+    
+    // 如果表已存在但缺少receiver字段，则添加该字段
+    try {
+        $pdo->exec("ALTER TABLE `j1stockeditmobile_data` ADD COLUMN `receiver` varchar(100) DEFAULT NULL AFTER `out_quantity`");
+    } catch (PDOException $e) {
+        // 字段已存在，忽略错误
+        if (strpos($e->getMessage(), 'Duplicate column name') === false) {
+            throw $e;
+        }
+    }
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS `j1stocklist_total` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -388,8 +399,8 @@ function handlePost() {
         $pdo->beginTransaction();
         
         $sql = "INSERT INTO j1stockeditmobile_data 
-                (date, time, product_name, code_number, in_quantity, out_quantity) 
-                VALUES (?, ?, ?, ?, ?, ?)";
+                (date, time, product_name, code_number, in_quantity, out_quantity, receiver) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $pdo->prepare($sql);
 
@@ -399,7 +410,8 @@ function handlePost() {
             $data['product_name'],
             $data['code_number'] ?? null,
             floatval($data['in_quantity'] ?? 0),
-            floatval($data['out_quantity'] ?? 0)
+            floatval($data['out_quantity'] ?? 0),
+            $data['receiver'] ?? null
         ]);
         
         $newId = $pdo->lastInsertId();
@@ -448,7 +460,7 @@ function handlePut() {
         
         $sql = "UPDATE j1stockeditmobile_data 
                 SET date = ?, time = ?, product_name = ?, code_number = ?, 
-                    in_quantity = ?, out_quantity = ?
+                    in_quantity = ?, out_quantity = ?, receiver = ?
                 WHERE id = ?";
 
         $stmt = $pdo->prepare($sql);
@@ -460,6 +472,7 @@ function handlePut() {
             $data['code_number'] ?? $oldRecord['code_number'],
             floatval($data['in_quantity'] ?? $oldRecord['in_quantity']),
             floatval($data['out_quantity'] ?? $oldRecord['out_quantity']),
+            $data['receiver'] ?? $oldRecord['receiver'] ?? null,
             $data['id']
         ]);
         

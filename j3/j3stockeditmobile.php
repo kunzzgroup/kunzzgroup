@@ -2215,6 +2215,7 @@ require_once '../backend/session_check.php';
                         <th class="product-name-col">货品</th>
                         <th style="min-width: 80px;">进货</th>
                         <th style="min-width: 80px;">出货</th>
+                        <th style="min-width: 100px;">出货人</th>
                         <th style="min-width: 80px;" id="action-header">操作</th>
                     </tr>
                 </thead>
@@ -3919,6 +3920,12 @@ require_once '../backend/session_check.php';
                         ${isEditing ? 
                             `<input type="number" class="table-input" value="${record.out_quantity || ''}" min="0" step="0.001" onchange="handleEditOutQuantityChange(${record.id}, this.value)">` :
                             `<span class="${outQty > 0 ? 'negative-value' : ''}">${formatNumber(record.out_quantity)}</span>`
+                        }
+                    </td>
+                    <td>
+                        ${isEditing ? 
+                            createCombobox('receiver', record.receiver || '', record.id) :
+                            `<span>${record.receiver || '-'}</span>`
                         }
                     </td>
                     <td>
