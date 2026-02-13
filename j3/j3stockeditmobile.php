@@ -73,6 +73,13 @@ require_once '../backend/session_check.php';
             box-shadow: 0 4px 8px rgba(107, 114, 128, 0.2);
         }
 
+        /* 在500px以下隐藏返回按钮 */
+        @media (max-width: 500px) {
+            .back-button {
+                display: none !important;
+            }
+        }
+
         /* Alert Messages */
         .alert {
             padding: 12px 16px;
@@ -1990,6 +1997,10 @@ require_once '../backend/session_check.php';
             <div>
                 <h1 id="page-title">进出货 - J3 - 手机版</h1>
             </div>
+            <a class="back-button" href="../backend/stockeditall.php?system=j3">
+                <i class="fas fa-arrow-left"></i>
+                返回上一页
+            </a>
         </div>
         
         <!-- Alert Messages -->
