@@ -528,6 +528,12 @@ function handlePost() {
         // 开始事务
         $pdo->beginTransaction();
         
+        // 将 Drinks 转换为 Service Line
+        $type = $data['type'] ?? null;
+        if ($type === 'Drinks' || strtolower($type) === 'drinks') {
+            $type = 'Service Line';
+        }
+
         $sql = "INSERT INTO j1stockedit_data 
                 (date, time, product_name, 
                 in_quantity, out_quantity, specification, price, code_number, remark, receiver, target_system, type) 
@@ -547,7 +553,7 @@ function handlePost() {
             $data['remark'] ?? null,
             $data['receiver'] ?? null,
             $data['target_system'] ?? null,
-            $data['type'] ?? null
+            $type
         ]);
         
         $newId = $pdo->lastInsertId();
@@ -727,6 +733,12 @@ function handlePut() {
     }
     
     try {
+        // 将 Drinks 转换为 Service Line
+        $type = $data['type'] ?? null;
+        if ($type === 'Drinks' || strtolower($type) === 'drinks') {
+            $type = 'Service Line';
+        }
+
         $sql = "UPDATE j1stockedit_data 
                 SET date = ?, time = ?, product_name = ?, 
                     in_quantity = ?, out_quantity = ?, 
@@ -747,7 +759,7 @@ function handlePut() {
             $data['remark'] ?? null,
             $data['receiver'] ?? null,
             $data['target_system'] ?? null,
-            $data['type'] ?? null,
+            $type,
             $data['id']
         ]);
         

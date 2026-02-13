@@ -309,6 +309,12 @@ function handlePost() {
         $price = floatval($data['price'] ?? 0);
         $totalValue = ($inQty + $outQty) * $price;
 
+        // 将 Drinks 转换为 Service Line
+        $type = $data['type'] ?? null;
+        if ($type === 'Drinks' || strtolower($type) === 'drinks') {
+            $type = 'Service Line';
+        }
+
         $sql = "INSERT INTO j1stockinout_data 
                 (date, time, code_number, product_name, 
                 in_quantity, out_quantity, specification, price, total_value, type, receiver, remark, target_system) 
@@ -326,7 +332,7 @@ function handlePost() {
             $data['specification'] ?? null,
             $price,
             $totalValue,
-            $data['type'] ?? null,
+            $type,
             $data['receiver'] ?? null,
             $data['remark'] ?? null,
             $data['target_system'] ?? null
@@ -394,6 +400,12 @@ function handlePut() {
         $price = floatval($data['price'] ?? 0);
         $totalValue = ($inQty + $outQty) * $price;
 
+        // 将 Drinks 转换为 Service Line
+        $type = $data['type'] ?? null;
+        if ($type === 'Drinks' || strtolower($type) === 'drinks') {
+            $type = 'Service Line';
+        }
+
         $sql = "UPDATE j1stockinout_data 
                 SET date = ?, time = ?, code_number = ?, product_name = ?, 
                     in_quantity = ?, out_quantity = ?, specification = ?, price = ?, total_value = ?,
@@ -412,7 +424,7 @@ function handlePut() {
             $data['specification'] ?? null,
             $price,
             $totalValue,
-            $data['type'] ?? null,
+            $type,
             $data['receiver'] ?? null,
             $data['remark'] ?? null,
             $data['target_system'] ?? null,
