@@ -125,6 +125,7 @@ function handleGet() {
             }
             
             // 合并两个表的数据：j3stockedit_data 和 j3stockeditmobile_data
+            // 对于 mobile 表的记录，需要从 stock_data 获取 specification 和 price
             $sql = "SELECT 
                         id, date, time, product_name, code_number, 
                         in_quantity, out_quantity, specification, price, 
@@ -134,11 +135,18 @@ function handleGet() {
                     WHERE 1=1" . $dateCondition . $filterCondition . "
                     UNION ALL
                     SELECT 
-                        id + 3000000000 as id, date, time, product_name, code_number,
-                        in_quantity, out_quantity, NULL as specification, NULL as price,
-                        receiver, NULL as remark, NULL as target_system, NULL as type,
-                        created_at, updated_at
-                    FROM j3stockeditmobile_data 
+                        m.id + 3000000000 as id, m.date, m.time, m.product_name, m.code_number,
+                        m.in_quantity, m.out_quantity, 
+                        COALESCE(s.specification, NULL) as specification, 
+                        COALESCE(s.price, NULL) as price,
+                        m.receiver, 
+                        COALESCE(m.remark, 'MOBILE') as remark, 
+                        NULL as target_system, 
+                        COALESCE(s.category, NULL) as type,
+                        m.created_at, m.updated_at
+                    FROM j3stockeditmobile_data m
+                    LEFT JOIN stock_data s ON m.product_name = s.product_name 
+                        AND (m.code_number IS NULL OR m.code_number = '' OR m.code_number = s.product_code)
                     WHERE 1=1" . $dateCondition . $filterCondition . "
                     ORDER BY date ASC, time ASC";
             
