@@ -10,6 +10,13 @@ RewriteRule ^backend/ - [L]
 RewriteRule ^(costapi|stockapi|kpiapi|check_permissions)\.php$ - [L]
 
 # -----------------------------
+# 1.5. Force remove .php extension from URL bar
+# If user manually visits /frontend/page.php, 301 redirect to /frontend/page
+# -----------------------------
+RewriteCond %{THE_REQUEST} \s/+(.+?)\.php[\s?] [NC]
+RewriteRule ^ /%1 [R=301,L,NE]
+
+# -----------------------------
 # 2. Serve Existing Files/Directories
 # -----------------------------
 RewriteCond %{REQUEST_FILENAME} -f

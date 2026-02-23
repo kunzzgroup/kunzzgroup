@@ -1,4 +1,5 @@
 <?php
-// Silently include the frontend homepage to keep the URL clean
-require 'frontend/index.php';
+// 重定向到 frontend/index (without .php)
+header("Location: frontend/index");
+exit;
 ?>
