@@ -84,8 +84,8 @@ function getLanguageSwitchUrl($targetLang) {
 
         <!-- 中间导航（默认显示，大屏） -->
         <nav class="header-nav-links" id="navMenu">
-        <div class="header-nav-item"><a href="index">首页</a></div>
-        <div class="header-nav-item"><a href="about">关于我们</a></div>
+            <div class="header-nav-item"><a href="index.php">首页</a></div>
+            <div class="header-nav-item"><a href="about.php">关于我们</a></div>
             <div class="header-nav-item header-nav-dropdown">
                 <span class="header-nav-dropdown-trigger">旗下品牌</span>
                 <div class="header-nav-dropdown-menu" id="brandsNavDropdownMenu">
@@ -93,7 +93,7 @@ function getLanguageSwitchUrl($targetLang) {
                     <a href="https://izakaya.kunzzgroup.com" class="header-nav-dropdown-item">Tokyo Izakaya Cuisine</a>
                 </div>
             </div>
-        <div class="header-nav-item"><a href="joinus">加入我们</a></div>
+            <div class="header-nav-item"><a href="joinus.php">加入我们</a></div>
         </nav>
 
         <!-- 右侧区域 -->
