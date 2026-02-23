@@ -243,11 +243,11 @@ async function redirectToAllowedStockPage(event) {
         let targetView = 'list';
         const viewOrder = ['list', 'records', 'remark', 'product', 'sot'];
         const viewRedirectMap = {
-            list: 'stocklistall.php',
-            records: 'stockeditall.php',
-            remark: 'stockremark.php',
-            product: 'stockproductname.php',
-            sot: 'stocksot.php'
+            list: 'stocklistall',
+            records: 'stockeditall',
+            remark: 'stockremark',
+            product: 'stockproductname',
+            sot: 'stocksot'
         };
 
         if (data.success && data.page_permissions && data.page_permissions.stock_inventory) {
@@ -270,7 +270,7 @@ async function redirectToAllowedStockPage(event) {
         window.location.href = `${redirectBase}?system=${targetSystem}`;
     } catch (e) {
         // 出错时默认跳转到中央
-        window.location.href = 'stocklistall.php?system=central';
+        window.location.href = 'stocklistall?system=central';
     }
 }
 
