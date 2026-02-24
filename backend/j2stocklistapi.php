@@ -84,7 +84,6 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
                 'code_number' => $v['code_number'],
                 'desktop_stock' => $v['stock'],
                 'specification' => '',
-                    HAVING current_stock != 0
                 'price' => 0,
                 'type' => ''
             ];
@@ -127,7 +126,6 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
                 'specification' => '',
                 'price' => 0,
                 'type' => ''
-                    HAVING current_stock != 0
             ];
         }
     }
@@ -164,8 +162,6 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
         ];
     }
 
-        
-        // 初始化类型统计
     return [
         'summary' => $summaryData,
         'total_value' => $totalValue,

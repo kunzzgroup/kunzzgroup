@@ -88,7 +88,6 @@ function getJ1StockSummary($startDate = null, $endDate = null) {
         $price = floatval($row['price'] ?? 0);
         $type = $row['type'] ?? '';
         if ($type === 'Drinks') $type = 'Service Line';
-                    HAVING current_stock != 0
         $totalPrice = $currentStock * $price;
         $totalValue += $totalPrice;
         if (!empty($type) && isset($typeStats[$type])) {
@@ -106,60 +105,6 @@ function getJ1StockSummary($startDate = null, $endDate = null) {
             'formatted_stock' => number_format($currentStock, 2),
             'formatted_price' => number_format($price, 2),
             'formatted_total_price' => number_format($totalPrice, 2)
-        
-        foreach ($stockData as $row) {
-            $currentStock = floatval($row['current_stock']);
-            $price = floatval($row['price']);
-            $totalPrice = $currentStock * $price;
-            $type = $row['type'] ?? '';
-            // Drinks 与 Service Line 合并统计
-            if ($type === 'Drinks') $type = 'Service Line';
-            
-            // 使用原始数值累加，不进行四舍五入
-            $totalValue += $totalPrice;
-            
-            // 按类型累计库存价值
-            if (!empty($type) && isset($typeStats[$type])) {
-                $typeStats[$type] += $totalPrice;
-            }
-            
-            $summaryData[] = [
-                'no' => $counter++,
-                'product_name' => $row['product_name'],
-                'code_number' => $row['code_number'] ?? '',
-                'total_stock' => $currentStock,
-                'specification' => $row['specification'] ?? '',
-                'price' => $price,
-                'total_price' => $totalPrice, // 使用原始计算值
-                'type' => $type,
-                'formatted_stock' => number_format($currentStock, 2),
-                'formatted_price' => number_format($price, 2),
-                'formatted_total_price' => number_format($totalPrice, 2) // 显示时格式化为两位小数
-            ];
-        }
-        
-        return [
-            'summary' => $summaryData,
-            'total_value' => $totalValue,
-                    HAVING current_stock != 0
-            'formatted_total_value' => number_format($totalValue, 2),
-            'total_products' => count($summaryData),
-            'type_stats' => [
-                'kitchen' => $typeStats['Kitchen'],
-                'sushi_bar' => $typeStats['Sushi Bar'],
-                'service_line' => $typeStats['Service Line'],
-                'sake' => $typeStats['Sake'],
-                'formatted_kitchen' => number_format($typeStats['Kitchen'], 2),
-                'formatted_sushi_bar' => number_format($typeStats['Sushi Bar'], 2),
-                'formatted_service_line' => number_format($typeStats['Service Line'], 2),
-                'formatted_sake' => number_format($typeStats['Sake'], 2)
-            ]
-            $key = ($row['product_name'] ?? '') . '|' . ($row['code_number'] ?? '') . '|' . ($row['specification'] ?? '');
-            $currentStock = floatval($row['current_stock']);
-        ];
-        
-    } catch (PDOException $e) {
-        throw new Exception("查询J1库存数据失败：" . $e->getMessage());
         ];
     }
 
@@ -177,10 +122,11 @@ function getJ1StockSummary($startDate = null, $endDate = null) {
             'formatted_sushi_bar' => number_format($typeStats['Sushi Bar'], 2),
             'formatted_service_line' => number_format($typeStats['Service Line'], 2),
             'formatted_sake' => number_format($typeStats['Sake'], 2)
-        
-        // 初始化类型统计
         ]
     ];
+    } catch (PDOException $e) {
+        throw new Exception("查询J1库存数据失败：" . $e->getMessage());
+    }
 }
 
 // 主要路由处理
