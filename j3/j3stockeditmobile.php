@@ -6317,28 +6317,34 @@ require_once '../backend/session_check.php';
         // 加载新增表单的价格选项
     </script>
     <script>
-        // 检查货品库存是否足够（按货品名称和价格分别计算）
-        async function checkProductStock(productName, outQuantity, price = null) {
+        // 检查货品库存是否足够（与总库存口径一致：合并两表；先减高价格以此类推）
+        async function checkProductStock(productName, outQuantity, price = null, codeNumber = null) {
             if (!productName || outQuantity <= 0) {
                 return { sufficient: true, availableStock: 0, currentStock: 0 };
             }
             
             try {
                 let apiUrl;
-                if (price !== null && price !== '') {
-                    // 按货品名称和价格检查库存
+                if (price != null && price !== '' && parseFloat(price) > 0) {
                     apiUrl = `?action=product_stock_by_price&product_name=${encodeURIComponent(productName)}&price=${encodeURIComponent(price)}`;
+                    if (codeNumber != null && codeNumber !== '') apiUrl += `&code_number=${encodeURIComponent(codeNumber)}`;
                 } else {
-                    // 按货品名称检查总库存
                     apiUrl = `?action=product_stock&product_name=${encodeURIComponent(productName)}`;
+                    if (codeNumber != null && codeNumber !== '') apiUrl += `&code_number=${encodeURIComponent(codeNumber)}`;
                 }
                 
                 const result = await apiCall(apiUrl);
                 
                 if (result.success && result.data) {
-                    const availableStock = parseFloat(result.data.available_stock || 0);
-                    const currentStock = parseFloat(result.data.current_stock || 0);
-                    
+                    let availableStock = 0;
+                    let currentStock = 0;
+                    if (Array.isArray(result.data)) {
+                        availableStock = result.data.reduce((sum, item) => sum + parseFloat(item.available_stock || 0), 0);
+                        currentStock = availableStock;
+                    } else {
+                        availableStock = parseFloat(result.data.available_stock || 0);
+                        currentStock = parseFloat(result.data.current_stock || 0);
+                    }
                     return {
                         sufficient: availableStock >= outQuantity,
                         availableStock: availableStock,
@@ -6346,13 +6352,11 @@ require_once '../backend/session_check.php';
                         requested: outQuantity
                     };
                 } else {
-                    // 如果无法获取库存信息，默认允许（可能是新货品）
                     return { sufficient: true, availableStock: 0, currentStock: 0 };
                 }
                 
             } catch (error) {
                 console.error('检查库存失败:', error);
-                // 网络错误时默认允许保存
                 return { sufficient: true, availableStock: 0, currentStock: 0 };
             }
         }

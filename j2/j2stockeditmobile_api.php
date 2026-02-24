@@ -324,6 +324,46 @@ function handleGet() {
                 }
             }
             break;
+
+        case 'product_stock':
+            // 按货品总可用库存（与总库存一致：合并 j2stockeditmobile_data + j2stockedit_data）
+            $productName = $_GET['product_name'] ?? null;
+            $codeNumber = $_GET['code_number'] ?? null;
+            if (!$productName) {
+                sendResponse(false, "缺少产品名称参数");
+            }
+            try {
+                $sql = "SELECT SUM(in_quantity) - SUM(out_quantity) as available_stock
+                        FROM (
+                            SELECT in_quantity, out_quantity FROM j2stockeditmobile_data
+                            WHERE product_name = ? AND product_name IS NOT NULL AND product_name != ''";
+                $params = [$productName];
+                if ($codeNumber !== null && $codeNumber !== '') {
+                    $sql .= " AND code_number = ?";
+                    $params[] = $codeNumber;
+                }
+                $sql .= " UNION ALL
+                            SELECT in_quantity, out_quantity FROM j2stockedit_data
+                            WHERE product_name = ? AND product_name IS NOT NULL AND product_name != ''";
+                $params[] = $productName;
+                if ($codeNumber !== null && $codeNumber !== '') {
+                    $sql .= " AND (code_number = ? OR (code_number IS NULL AND ? = ''))";
+                    $params[] = $codeNumber;
+                    $params[] = $codeNumber;
+                }
+                $sql .= ") AS combined";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute($params);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                $available = floatval($row['available_stock'] ?? 0);
+                sendResponse(true, "货品总可用库存获取成功", [
+                    'available_stock' => $available,
+                    'current_stock' => $available
+                ]);
+            } catch (PDOException $e) {
+                sendResponse(false, "查询失败：" . $e->getMessage());
+            }
+            break;
             
         case 'product_stock_by_price':
             // 获取指定产品的按价格分组的库存记录（用于按价格从高到低扣除）
