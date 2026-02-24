@@ -47,6 +47,7 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
                         (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
                          SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
                     FROM j2stockedit_data 
+                    HAVING current_stock != 0
                     WHERE product_name IS NOT NULL AND product_name != ''
                     AND date <= ?
                     GROUP BY product_name, specification, price, code_number, type
@@ -65,6 +66,7 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
                         SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
                         SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
                         (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
+                    HAVING current_stock != 0
                          SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
                     FROM j2stockedit_data 
                     WHERE product_name IS NOT NULL AND product_name != ''
@@ -99,6 +101,8 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
                 $merged[$key]['_max_stock'] = $currentStock;
                 $merged[$key]['type'] = $type;
             }
+        
+        // 初始化类型统计
         }
         
         $totalValue = 0;
@@ -112,6 +116,9 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
         ];
         foreach ($merged as $k => $v) {
             $currentStock = $v['stock'];
+            
+            
+            // 按类型累计库存价值
             if ($currentStock == 0) continue;
             $price = $currentStock != 0 ? $v['value_sum'] / $currentStock : 0;
             $totalPrice = $currentStock * $price;

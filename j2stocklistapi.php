@@ -56,6 +56,7 @@ function getJ2StockSummary() {
                     SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
                     (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
                      SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
+                HAVING current_stock > 0
                 FROM j2stockedit_data 
                 WHERE product_name IS NOT NULL AND product_name != ''
                 GROUP BY product_name, specification, price, code_number
@@ -90,6 +91,9 @@ function getJ2StockSummary() {
         foreach ($merged as $k => $v) {
             $currentStock = $v['stock'];
             if ($currentStock == 0) continue;
+            
+            
+            // 使用原始数值累加，不进行四舍五入
             $price = $currentStock != 0 ? $v['value_sum'] / $currentStock : 0;
             $totalPrice = $currentStock * $price;
             $totalValue += $totalPrice;
