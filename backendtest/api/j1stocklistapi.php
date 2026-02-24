@@ -75,6 +75,7 @@ function getJ1StockSummary($startDate = null, $endDate = null) {
                         ) je ON je.product_name = m.product_name 
                             AND (je.code_number = m.code_number OR (je.code_number IS NULL AND m.code_number IS NULL))
                         WHERE m.product_name IS NOT NULL AND m.product_name != ''
+                    HAVING current_stock != 0
                         AND m.date <= ?
                     ) AS combined_data
                     GROUP BY product_name, specification, price, code_number, type
@@ -120,6 +121,7 @@ function getJ1StockSummary($startDate = null, $endDate = null) {
                                 GROUP BY product_name, code_number
                             ) je2 ON je1.id = je2.max_id
                         ) je ON je.product_name = m.product_name 
+                    HAVING current_stock != 0
                             AND (je.code_number = m.code_number OR (je.code_number IS NULL AND m.code_number IS NULL))
                         WHERE m.product_name IS NOT NULL AND m.product_name != ''
                     ) AS combined_data
@@ -154,6 +156,8 @@ function getJ1StockSummary($startDate = null, $endDate = null) {
                 $merged[$key]['_max_stock'] = $currentStock;
                 $merged[$key]['type'] = $type;
             }
+        
+        // 初始化类型统计
         }
         
         $totalValue = 0;
@@ -167,6 +171,9 @@ function getJ1StockSummary($startDate = null, $endDate = null) {
         ];
         foreach ($merged as $k => $v) {
             $currentStock = $v['stock'];
+            
+            
+            // 按类型累计库存价值
             if ($currentStock == 0) continue;
             $price = $currentStock != 0 ? $v['value_sum'] / $currentStock : 0;
             $totalPrice = $currentStock * $price;

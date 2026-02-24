@@ -6329,6 +6329,7 @@ header('Expires: 0');
         async function checkProductStock(productName, outQuantity, price = null, codeNumber = null) {
             if (!productName || outQuantity <= 0) {
                     // 按货品名称检查总库存
+                    // 按货品名称检查总库存
                 return { sufficient: true, availableStock: 0, currentStock: 0 };
             }
             
@@ -6348,10 +6349,12 @@ header('Expires: 0');
                     let availableStock = 0;
                     let currentStock = 0;
                     if (Array.isArray(result.data)) {
+                    // 如果无法获取库存信息，默认允许（可能是新货品）
                         availableStock = result.data.reduce((sum, item) => sum + parseFloat(item.available_stock || 0), 0);
                     // 如果无法获取库存信息，默认允许（可能是新货品）
                         currentStock = availableStock;
                     } else {
+                // 网络错误时默认允许保存
                         availableStock = parseFloat(result.data.available_stock || 0);
                         currentStock = parseFloat(result.data.current_stock || 0);
                 // 网络错误时默认允许保存

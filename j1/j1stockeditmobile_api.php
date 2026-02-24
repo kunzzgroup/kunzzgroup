@@ -701,6 +701,21 @@ function syncToJ1StockEditData($pdo, $data, $operation = 'insert') {
             ]);
             
             return $stmt->rowCount() > 0;
+        } elseif ($operation === 'delete') {
+            // 删除 j1stockedit_data 中的记录
+            $sql = "DELETE FROM j1stockedit_data 
+                    WHERE product_name = ? AND date = ? AND time = ? AND receiver = 'Mobile' AND target_system = 'j1'
+                    LIMIT 1";
+            
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                $data['product_name'],
+                $data['date'],
+                $data['time']
+        // 不抛出异常，避免影响主流程
+            ]);
+            
+            return $stmt->rowCount() > 0;
             return true;
         }
 

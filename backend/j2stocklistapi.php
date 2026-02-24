@@ -42,62 +42,119 @@ function sendResponse($success, $message = "", $data = null) {
 }
 
 // 获取J2库存汇总数据
-// 真实货物数量 = 手机版现有数量，即 j2stocklist_total.total_qty（手机端进出时更新）
+// 真实货物数量 = 有手机记录时用 j2stocklist_total.total_qty（现有），否则用桌面该货品库存合计
+// 货品全集 = 桌面 j2stockedit_data 所有货品 + j2stocklist_total 所有货品，保证「其余资料」都显示
 function getJ2StockSummary($startDate = null, $endDate = null) {
     global $pdo;
 
+    // 1) 桌面按货品汇总：每货品一行，库存合计 + 最新单价/规格/类型
+    $sqlDesktop = "SELECT d.product_name, d.code_number,
+            SUM(CASE WHEN d.in_quantity > 0 THEN d.in_quantity ELSE 0 END) - SUM(CASE WHEN d.out_quantity > 0 THEN d.out_quantity ELSE 0 END) as desktop_stock
+            FROM j2stockedit_data d
+            WHERE d.product_name IS NOT NULL AND d.product_name != ''
+            GROUP BY d.product_name, d.code_number";
+    $stmt = $pdo->prepare($sqlDesktop);
+    $stmt->execute();
+    $desktopStock = [];
+    while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $k = ($r['product_name'] ?? '') . '|' . ($r['code_number'] ?? '');
+        $desktopStock[$k] = ['stock' => floatval($r['desktop_stock'] ?? 0), 'product_name' => $r['product_name'] ?? '', 'code_number' => $r['code_number'] ?? ''];
+    }
+    $sqlLatest = "SELECT je1.product_name, je1.code_number, je1.specification, je1.price, je1.type
+            FROM j2stockedit_data je1
+            INNER JOIN (SELECT product_name, code_number, MAX(id) as max_id FROM j2stockedit_data WHERE price > 0 GROUP BY product_name, code_number) je2 ON je1.id = je2.max_id
+            ORDER BY je1.product_name, je1.price";
+    $stmt2 = $pdo->query($sqlLatest);
+    $desktopByProduct = [];
+    while ($r = $stmt2->fetch(PDO::FETCH_ASSOC)) {
+        $k = ($r['product_name'] ?? '') . '|' . ($r['code_number'] ?? '');
+        $desktopByProduct[$k] = [
+            'product_name' => $r['product_name'],
+            'code_number' => $r['code_number'] ?? '',
+            'desktop_stock' => isset($desktopStock[$k]) ? $desktopStock[$k]['stock'] : 0,
+            'specification' => $r['specification'] ?? '',
+            'price' => floatval($r['price'] ?? 0),
+            'type' => $r['type'] ?? ''
+        ];
+    }
+    foreach ($desktopStock as $k => $v) {
+        if (!isset($desktopByProduct[$k])) {
+            $desktopByProduct[$k] = [
+                'product_name' => $v['product_name'],
+                'code_number' => $v['code_number'],
+                'desktop_stock' => $v['stock'],
+                'specification' => '',
+                    HAVING current_stock != 0
+                'price' => 0,
+                'type' => ''
+            ];
+        }
+    }
+
+    // 2) 手机现有数量（有则优先用）
+    $mobileMap = [];
     try {
-        $sql = "SELECT t.product_name, t.code_number, t.total_qty,
-                je.specification, je.price, je.type
-                FROM j2stocklist_total t
-                LEFT JOIN (
-                    SELECT je1.product_name, je1.code_number, je1.specification, je1.price, je1.type
-                    FROM j2stockedit_data je1
-                    INNER JOIN (
-                        SELECT product_name, code_number, MAX(id) as max_id
-                        FROM j2stockedit_data WHERE price > 0
-                        GROUP BY product_name, code_number
-                    ) je2 ON je1.id = je2.max_id
-                ) je ON je.product_name = t.product_name
-                    AND (je.code_number = t.code_number OR (je.code_number IS NULL AND t.code_number IS NULL))
-                WHERE t.total_qty > 0
-                ORDER BY t.product_name ASC, COALESCE(je.price, 0) ASC";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute();
-        $stockData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmtM = $pdo->query("SELECT product_name, code_number, total_qty FROM j2stocklist_total");
+        while ($r = $stmtM->fetch(PDO::FETCH_ASSOC)) {
+            $k = ($r['product_name'] ?? '') . '|' . ($r['code_number'] ?? '');
+            $mobileMap[$k] = ['qty' => floatval($r['total_qty'] ?? 0), 'product_name' => $r['product_name'] ?? '', 'code_number' => $r['code_number'] ?? ''];
+        }
     } catch (PDOException $e) {
-        if ($e->getCode() === '42S02' || strpos($e->getMessage(), '1146') !== false) {
-            $stockData = [];
-        } else {
+        if ($e->getCode() !== '42S02' && strpos($e->getMessage(), '1146') === false) {
             throw new Exception("查询J2库存数据失败：" . $e->getMessage());
         }
     }
 
+    // 3) 合并：所有桌面货品 + 仅在手机出现的货品；数量 = 有手机用 total_qty，否则用桌面合计
+    $rows = [];
+    foreach ($desktopByProduct as $k => $v) {
+        $qty = isset($mobileMap[$k]) ? $mobileMap[$k]['qty'] : $v['desktop_stock'];
+        $rows[] = [
+            'product_name' => $v['product_name'],
+            'code_number' => $v['code_number'],
+            'total_qty' => $qty,
+            'specification' => $v['specification'],
+            'price' => $v['price'],
+            'type' => $v['type']
+        ];
+    }
+    foreach ($mobileMap as $k => $m) {
+        if (!isset($desktopByProduct[$k]) && $m['qty'] > 0) {
+            $rows[] = [
+                'product_name' => $m['product_name'],
+                'code_number' => $m['code_number'],
+                'total_qty' => $m['qty'],
+                'specification' => '',
+                'price' => 0,
+                'type' => ''
+                    HAVING current_stock != 0
+            ];
+        }
+    }
+    usort($rows, function ($a, $b) {
+        $c = strcmp($a['product_name'], $b['product_name']);
+        return $c !== 0 ? $c : ($a['price'] <=> $b['price']);
+    });
+
     $totalValue = 0;
     $summaryData = [];
     $counter = 1;
-    $typeStats = [
-        'Kitchen' => 0,
-        'Sushi Bar' => 0,
-        'Service Line' => 0,
-        'Sake' => 0
-    ];
-    foreach ($stockData as $row) {
+    $typeStats = ['Kitchen' => 0, 'Sushi Bar' => 0, 'Service Line' => 0, 'Sake' => 0];
+    foreach ($rows as $row) {
         $currentStock = floatval($row['total_qty'] ?? 0);
+        if ($currentStock <= 0) continue;
         $price = floatval($row['price'] ?? 0);
         $type = $row['type'] ?? '';
         if ($type === 'Drinks') $type = 'Service Line';
         $totalPrice = $currentStock * $price;
         $totalValue += $totalPrice;
-        if (!empty($type) && isset($typeStats[$type])) {
-            $typeStats[$type] += $totalPrice;
-        }
+        if (!empty($type) && isset($typeStats[$type])) $typeStats[$type] += $totalPrice;
         $summaryData[] = [
             'no' => $counter++,
             'product_name' => $row['product_name'],
-            'code_number' => $row['code_number'] ?? '',
+            'code_number' => $row['code_number'],
             'total_stock' => $currentStock,
-            'specification' => $row['specification'] ?? '',
+            'specification' => $row['specification'],
             'price' => $price,
             'total_price' => $totalPrice,
             'type' => $type,
@@ -107,6 +164,8 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
         ];
     }
 
+        
+        // 初始化类型统计
     return [
         'summary' => $summaryData,
         'total_value' => $totalValue,
