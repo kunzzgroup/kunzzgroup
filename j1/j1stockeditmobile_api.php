@@ -687,6 +687,20 @@ function syncToJ1StockEditData($pdo, $data, $operation = 'insert') {
                     $remaining, $specification, $price, $type
                 ]);
             }
+        } elseif ($operation === 'delete') {
+            // 删除 j1stockedit_data 中的记录
+            $sql = "DELETE FROM j1stockedit_data 
+                    WHERE product_name = ? AND date = ? AND time = ? AND receiver = 'Mobile' AND target_system = 'j1'
+                    LIMIT 1";
+            
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                $data['product_name'],
+                $data['date'],
+                $data['time']
+            ]);
+            
+            return $stmt->rowCount() > 0;
             return true;
         }
 
@@ -698,6 +712,7 @@ function syncToJ1StockEditData($pdo, $data, $operation = 'insert') {
         } elseif (!empty($codeNumber)) {
             $infoStmt = $pdo->prepare("SELECT specification, price, category FROM stock_data WHERE product_code = ? LIMIT 1");
             $infoStmt->execute([$codeNumber]);
+        // 不抛出异常，避免影响主流程
             $productInfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
         }
         $specification = $productInfo['specification'] ?? null;

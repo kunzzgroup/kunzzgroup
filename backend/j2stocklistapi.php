@@ -84,6 +84,7 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
                                 WHERE price > 0
                                 GROUP BY product_name, code_number
                             ) je2 ON je1.id = je2.max_id
+                    HAVING current_stock != 0
                         ) je ON je.product_name = m.product_name 
                             AND (je.code_number = m.code_number OR (je.code_number IS NULL AND m.code_number IS NULL))
                         WHERE m.product_name IS NOT NULL AND m.product_name != ''
@@ -126,6 +127,7 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
                             INNER JOIN (
                                 SELECT product_name, code_number, MAX(id) as max_id
                                 FROM j2stockedit_data
+                    HAVING current_stock != 0
                                 WHERE price > 0
                                 GROUP BY product_name, code_number
                             ) je2 ON je1.id = je2.max_id
@@ -162,6 +164,8 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
             $merged[$key]['stock'] += $currentStock;
             $merged[$key]['value_sum'] += $price * $currentStock;
             if ($currentStock > ($merged[$key]['_max_stock'] ?? 0)) {
+        
+        // 初始化类型统计
                 $merged[$key]['_max_stock'] = $currentStock;
                 $merged[$key]['type'] = $type;
             }

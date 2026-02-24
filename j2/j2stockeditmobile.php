@@ -6324,6 +6324,7 @@ header('Expires: 0');
         // 检查货品库存是否足够（与总库存口径一致：合并两表；先减高价格以此类推）
         async function checkProductStock(productName, outQuantity, price = null, codeNumber = null) {
             if (!productName || outQuantity <= 0) {
+                    // 按货品名称检查总库存
                 return { sufficient: true, availableStock: 0, currentStock: 0 };
             }
             
@@ -6344,10 +6345,12 @@ header('Expires: 0');
                     let currentStock = 0;
                     if (Array.isArray(result.data)) {
                         availableStock = result.data.reduce((sum, item) => sum + parseFloat(item.available_stock || 0), 0);
+                    // 如果无法获取库存信息，默认允许（可能是新货品）
                         currentStock = availableStock;
                     } else {
                         availableStock = parseFloat(result.data.available_stock || 0);
                         currentStock = parseFloat(result.data.current_stock || 0);
+                // 网络错误时默认允许保存
                     }
                     return {
                         sufficient: availableStock >= outQuantity,

@@ -686,6 +686,17 @@ function syncToJ3StockEditData($pdo, $data, $operation = 'insert') {
                     $remaining, $specification, $price, $type
                 ]);
             }
+        } elseif ($operation === 'delete') {
+            $sql = "DELETE FROM j3stockedit_data 
+                    WHERE product_name = ? AND date = ? AND time = ? AND receiver = 'Mobile' AND target_system = 'j3'
+                    LIMIT 1";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                $data['product_name'],
+                $data['date'],
+                $data['time']
+            ]);
+            return $stmt->rowCount() > 0;
             return true;
         }
 
