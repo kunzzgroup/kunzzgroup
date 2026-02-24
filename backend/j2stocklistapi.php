@@ -90,7 +90,6 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
                         AND m.date <= ?
                     ) AS combined_data
                     GROUP BY product_name, specification, price, code_number, type
-                    HAVING current_stock != 0
                     ORDER BY product_name ASC, price ASC";
             
             $stmt = $pdo->prepare($sql);
@@ -135,7 +134,6 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
                         WHERE m.product_name IS NOT NULL AND m.product_name != ''
                     ) AS combined_data
                     GROUP BY product_name, specification, price, code_number, type
-                    HAVING current_stock != 0
                     ORDER BY product_name ASC, price ASC";
             
             $stmt = $pdo->prepare($sql);
@@ -143,47 +141,63 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
         }
         $stockData = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // 计算总价值和按类型统计 - 使用原始数值计算，只在显示时格式化
+        // 同一货品（名称+编号+规格）合并为一行：库存先相减，单价用加权平均，type 取库存量最大的一档
+        $merged = [];
+        foreach ($stockData as $row) {
+            $key = ($row['product_name'] ?? '') . '|' . ($row['code_number'] ?? '') . '|' . ($row['specification'] ?? '');
+            $currentStock = floatval($row['current_stock']);
+            $price = floatval($row['price']);
+            $type = $row['type'] ?? '';
+            if ($type === 'Drinks') $type = 'Service Line';
+            if (!isset($merged[$key])) {
+                $merged[$key] = [
+                    'product_name' => $row['product_name'],
+                    'code_number' => $row['code_number'] ?? '',
+                    'specification' => $row['specification'] ?? '',
+                    'stock' => 0,
+                    'value_sum' => 0,
+                    'type' => $type
+                ];
+            }
+            $merged[$key]['stock'] += $currentStock;
+            $merged[$key]['value_sum'] += $price * $currentStock;
+            if ($currentStock > ($merged[$key]['_max_stock'] ?? 0)) {
+                $merged[$key]['_max_stock'] = $currentStock;
+                $merged[$key]['type'] = $type;
+            }
+        }
+        
         $totalValue = 0;
         $summaryData = [];
         $counter = 1;
-        
-        // 初始化类型统计
         $typeStats = [
             'Kitchen' => 0,
             'Sushi Bar' => 0,
             'Service Line' => 0,
             'Sake' => 0
         ];
-        
-        foreach ($stockData as $row) {
-            $currentStock = floatval($row['current_stock']);
-            $price = floatval($row['price']);
+        foreach ($merged as $k => $v) {
+            $currentStock = $v['stock'];
+            if ($currentStock == 0) continue;
+            $price = $currentStock != 0 ? $v['value_sum'] / $currentStock : 0;
             $totalPrice = $currentStock * $price;
-            $type = $row['type'] ?? '';
-            // Drinks 与 Service Line 合并统计
-            if ($type === 'Drinks') $type = 'Service Line';
-            
-            // 使用原始数值累加，不进行四舍五入
+            $type = $v['type'] ?? '';
             $totalValue += $totalPrice;
-            
-            // 按类型累计库存价值
             if (!empty($type) && isset($typeStats[$type])) {
                 $typeStats[$type] += $totalPrice;
             }
-            
             $summaryData[] = [
                 'no' => $counter++,
-                'product_name' => $row['product_name'],
-                'code_number' => $row['code_number'] ?? '',
+                'product_name' => $v['product_name'],
+                'code_number' => $v['code_number'],
                 'total_stock' => $currentStock,
-                'specification' => $row['specification'] ?? '',
+                'specification' => $v['specification'],
                 'price' => $price,
-                'total_price' => $totalPrice, // 使用原始计算值
+                'total_price' => $totalPrice,
                 'type' => $type,
                 'formatted_stock' => number_format($currentStock, 2),
                 'formatted_price' => number_format($price, 2),
-                'formatted_total_price' => number_format($totalPrice, 2) // 显示时格式化为两位小数
+                'formatted_total_price' => number_format($totalPrice, 2)
             ];
         }
         
