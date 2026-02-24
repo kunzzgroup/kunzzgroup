@@ -42,151 +42,87 @@ function sendResponse($success, $message = "", $data = null) {
 }
 
 // 获取J2库存汇总数据
+// 真实货物数量 = 手机版现有数量，即 j2stocklist_total.total_qty（手机端进出时更新）
 function getJ2StockSummary($startDate = null, $endDate = null) {
     global $pdo;
 
     try {
-        // 1) 桌面端库存：按 (名称, 编号, 规格, 单价) 分组
-        $sqlDesktop = "SELECT product_name, specification, price, code_number, type,
-            SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
-            SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
-            (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) -
-             SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
-            FROM j2stockedit_data
-            WHERE product_name IS NOT NULL AND product_name != ''";
-        $params = [];
-        if ($endDate) {
-            $sqlDesktop .= " AND date <= ?";
-            $params[] = $endDate;
-        }
-        $sqlDesktop .= " GROUP BY product_name, specification, price, code_number, type ORDER BY product_name ASC, price ASC";
-        $stmt = $pdo->prepare($sqlDesktop);
-        $stmt->execute($params);
-        $desktopRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // 2) 手机端出货合计：按 (名称, 编号) 汇总，不区分单价
-        $sqlMobile = "SELECT product_name, code_number, SUM(out_quantity) as mobile_out
-            FROM j2stockeditmobile_data
-            WHERE product_name IS NOT NULL AND product_name != ''";
-        $paramsM = [];
-        if ($endDate) {
-            $sqlMobile .= " AND date <= ?";
-            $paramsM[] = $endDate;
-        }
-        $sqlMobile .= " GROUP BY product_name, code_number";
-        $stmtM = $pdo->prepare($sqlMobile);
-        $stmtM->execute($paramsM);
-        $mobileOutList = $stmtM->fetchAll(PDO::FETCH_ASSOC);
-        $mobileOutMap = [];
-        $normKey = function ($name, $code) {
-            return preg_replace('/\s+/', '', trim($name ?? '')) . '|' . preg_replace('/\s+/', '', trim($code ?? ''));
-        };
-        foreach ($mobileOutList as $r) {
-            $mobileOutMap[$normKey($r['product_name'], $r['code_number'])] = floatval($r['mobile_out']);
-        }
-
-        // 3) 按 (product_name, code_number) 分组桌面行，手机出货按「先扣高价」从各单价档扣减
-        $byProduct = [];
-        foreach ($desktopRows as $row) {
-            $name = $row['product_name'] ?? '';
-            $code = $row['code_number'] ?? '';
-            $key = $normKey($name, $code);
-            if (!isset($byProduct[$key])) {
-                $byProduct[$key] = [];
-            }
-            $stock = floatval($row['current_stock']);
-            $price = floatval($row['price']);
-            $type = $row['type'] ?? '';
-            if ($type === 'Drinks') $type = 'Service Line';
-            $byProduct[$key][] = [
-                'product_name' => $name,
-                'code_number' => $code,
-                'specification' => $row['specification'] ?? '',
-                'price' => $price,
-                'type' => $type,
-                'stock' => $stock
-            ];
-        }
-        foreach ($mobileOutMap as $pkey => $mobileOut) {
-            if ($mobileOut <= 0 || !isset($byProduct[$pkey])) continue;
-            $rows = &$byProduct[$pkey];
-            usort($rows, function ($a, $b) { return $b['price'] <=> $a['price']; });
-            $remain = $mobileOut;
-            foreach ($rows as &$r) {
-                if ($remain <= 0) break;
-                $deduct = min($r['stock'], $remain);
-                $r['stock'] -= $deduct;
-                $remain -= $deduct;
-            }
-            unset($r);
-        }
-
-        // 4) 展平为 stock > 0 的行，按名称、单价排序
-        $merged = [];
-        foreach ($byProduct as $rows) {
-            foreach ($rows as $r) {
-                if ($r['stock'] <= 0) continue;
-                $merged[] = $r;
-            }
-        }
-        usort($merged, function ($a, $b) {
-            $c = strcmp($a['product_name'], $b['product_name']);
-            return $c !== 0 ? $c : ($a['price'] <=> $b['price']);
-        });
-
-        $totalValue = 0;
-        $summaryData = [];
-        $counter = 1;
-        $typeStats = [
-            'Kitchen' => 0,
-            'Sushi Bar' => 0,
-            'Service Line' => 0,
-            'Sake' => 0
-        ];
-        foreach ($merged as $v) {
-            $currentStock = $v['stock'];
-            $price = $v['price'];
-            $totalPrice = $currentStock * $price;
-            $type = $v['type'] ?? '';
-            $totalValue += $totalPrice;
-            if (!empty($type) && isset($typeStats[$type])) {
-                $typeStats[$type] += $totalPrice;
-            }
-            $summaryData[] = [
-                'no' => $counter++,
-                'product_name' => $v['product_name'],
-                'code_number' => $v['code_number'],
-                'total_stock' => $currentStock,
-                'specification' => $v['specification'],
-                'price' => $price,
-                'total_price' => $totalPrice,
-                'type' => $type,
-                'formatted_stock' => number_format($currentStock, 2),
-                'formatted_price' => number_format($price, 2),
-                'formatted_total_price' => number_format($totalPrice, 2)
-            ];
-        }
-        
-        return [
-            'summary' => $summaryData,
-            'total_value' => $totalValue,
-            'formatted_total_value' => number_format($totalValue, 2),
-            'total_products' => count($summaryData),
-            'type_stats' => [
-                'kitchen' => $typeStats['Kitchen'],
-                'sushi_bar' => $typeStats['Sushi Bar'],
-                'service_line' => $typeStats['Service Line'],
-                'sake' => $typeStats['Sake'],
-                'formatted_kitchen' => number_format($typeStats['Kitchen'], 2),
-                'formatted_sushi_bar' => number_format($typeStats['Sushi Bar'], 2),
-                'formatted_service_line' => number_format($typeStats['Service Line'], 2),
-                'formatted_sake' => number_format($typeStats['Sake'], 2)
-            ]
-        ];
-        
+        $sql = "SELECT t.product_name, t.code_number, t.total_qty,
+                je.specification, je.price, je.type
+                FROM j2stocklist_total t
+                LEFT JOIN (
+                    SELECT je1.product_name, je1.code_number, je1.specification, je1.price, je1.type
+                    FROM j2stockedit_data je1
+                    INNER JOIN (
+                        SELECT product_name, code_number, MAX(id) as max_id
+                        FROM j2stockedit_data WHERE price > 0
+                        GROUP BY product_name, code_number
+                    ) je2 ON je1.id = je2.max_id
+                ) je ON je.product_name = t.product_name
+                    AND (je.code_number = t.code_number OR (je.code_number IS NULL AND t.code_number IS NULL))
+                WHERE t.total_qty > 0
+                ORDER BY t.product_name ASC, COALESCE(je.price, 0) ASC";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        $stockData = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
-        throw new Exception("查询J2库存数据失败：" . $e->getMessage());
+        if ($e->getCode() === '42S02' || strpos($e->getMessage(), '1146') !== false) {
+            $stockData = [];
+        } else {
+            throw new Exception("查询J2库存数据失败：" . $e->getMessage());
+        }
     }
+
+    $totalValue = 0;
+    $summaryData = [];
+    $counter = 1;
+    $typeStats = [
+        'Kitchen' => 0,
+        'Sushi Bar' => 0,
+        'Service Line' => 0,
+        'Sake' => 0
+    ];
+    foreach ($stockData as $row) {
+        $currentStock = floatval($row['total_qty'] ?? 0);
+        $price = floatval($row['price'] ?? 0);
+        $type = $row['type'] ?? '';
+        if ($type === 'Drinks') $type = 'Service Line';
+        $totalPrice = $currentStock * $price;
+        $totalValue += $totalPrice;
+        if (!empty($type) && isset($typeStats[$type])) {
+            $typeStats[$type] += $totalPrice;
+        }
+        $summaryData[] = [
+            'no' => $counter++,
+            'product_name' => $row['product_name'],
+            'code_number' => $row['code_number'] ?? '',
+            'total_stock' => $currentStock,
+            'specification' => $row['specification'] ?? '',
+            'price' => $price,
+            'total_price' => $totalPrice,
+            'type' => $type,
+            'formatted_stock' => number_format($currentStock, 2),
+            'formatted_price' => number_format($price, 2),
+            'formatted_total_price' => number_format($totalPrice, 2)
+        ];
+    }
+
+    return [
+        'summary' => $summaryData,
+        'total_value' => $totalValue,
+        'formatted_total_value' => number_format($totalValue, 2),
+        'total_products' => count($summaryData),
+        'type_stats' => [
+            'kitchen' => $typeStats['Kitchen'],
+            'sushi_bar' => $typeStats['Sushi Bar'],
+            'service_line' => $typeStats['Service Line'],
+            'sake' => $typeStats['Sake'],
+            'formatted_kitchen' => number_format($typeStats['Kitchen'], 2),
+            'formatted_sushi_bar' => number_format($typeStats['Sushi Bar'], 2),
+            'formatted_service_line' => number_format($typeStats['Service Line'], 2),
+            'formatted_sake' => number_format($typeStats['Sake'], 2)
+        ]
+    ];
 }
 
 // 主要路由处理
