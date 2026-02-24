@@ -144,12 +144,12 @@ function getJ1StockSummary($startDate = null, $endDate = null) {
         }
         $stockData = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // 同一货品（名称+编号+规格）合并为一行：库存先相减，单价用加权平均，type 取库存量最大的一档；先减高价格以此类推
+        // 同一货品（名称+编号+规格+单价）合并为一行；同品名不同单价不合并，各占一行
         $merged = [];
         foreach ($stockData as $row) {
-            $key = ($row['product_name'] ?? '') . '|' . ($row['code_number'] ?? '') . '|' . ($row['specification'] ?? '');
-            $currentStock = floatval($row['current_stock']);
             $price = floatval($row['price']);
+            $key = ($row['product_name'] ?? '') . '|' . ($row['code_number'] ?? '') . '|' . ($row['specification'] ?? '') . '|' . round($price, 4);
+            $currentStock = floatval($row['current_stock']);
             $type = $row['type'] ?? '';
             if ($type === 'Drinks') $type = 'Service Line';
             if (!isset($merged[$key])) {
