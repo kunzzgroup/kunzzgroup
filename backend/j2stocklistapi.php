@@ -44,131 +44,94 @@ function sendResponse($success, $message = "", $data = null) {
 // 获取J2库存汇总数据
 function getJ2StockSummary($startDate = null, $endDate = null) {
     global $pdo;
-    
+
     try {
-        // 如果提供了结束日期，计算到该日期为止的所有库存（包括历史累计）
-        // 合并 j2stockedit_data 和 j2stockeditmobile_data（与 J1 一致，mobile 端扣货在 backend 显示）
+        // 1) 桌面端库存：按 (名称, 编号, 规格, 单价) 分组
+        $sqlDesktop = "SELECT product_name, specification, price, code_number, type,
+            SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
+            SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
+            (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) -
+             SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
+            FROM j2stockedit_data
+            WHERE product_name IS NOT NULL AND product_name != ''";
+        $params = [];
         if ($endDate) {
-            $sql = "SELECT 
-                        product_name,
-                        specification,
-                        price,
-                        code_number,
-                        type,
-                        SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
-                        SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
-                        (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
-                         SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
-                    FROM (
-                        SELECT product_name, specification, price, code_number, type, in_quantity, out_quantity
-                        FROM j2stockedit_data 
-                        WHERE product_name IS NOT NULL AND product_name != ''
-                        AND date <= ?
-                        UNION ALL
-                        SELECT 
-                            m.product_name,
-                            COALESCE(sd.specification, je.specification, NULL) as specification,
-                            COALESCE(je.price, 0) as price,
-                            m.code_number,
-                            COALESCE(sd.category, je.type, NULL) as type,
-                            m.in_quantity,
-                            m.out_quantity
-                        FROM j2stockeditmobile_data m
-                        LEFT JOIN stock_data sd ON (sd.product_name = m.product_name OR sd.product_code = m.code_number)
-                        LEFT JOIN (
-                            SELECT je1.product_name, je1.code_number, je1.price, je1.specification, je1.type
-                            FROM j2stockedit_data je1
-                            INNER JOIN (
-                                SELECT product_name, code_number, MAX(id) as max_id
-                                FROM j2stockedit_data
-                                WHERE price > 0
-                                GROUP BY product_name, code_number
-                            ) je2 ON je1.id = je2.max_id
-                        ) je ON je.product_name = m.product_name 
-                            AND (je.code_number = m.code_number OR (je.code_number IS NULL AND m.code_number IS NULL))
-                        WHERE m.product_name IS NOT NULL AND m.product_name != ''
-                        AND m.date <= ?
-                    ) AS combined_data
-                    GROUP BY product_name, specification, price, code_number, type
-                    ORDER BY product_name ASC, price ASC";
-            
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$endDate, $endDate]);
-        } else {
-            $sql = "SELECT 
-                        product_name,
-                        specification,
-                        price,
-                        code_number,
-                        type,
-                        SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
-                        SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
-                        (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
-                         SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
-                    FROM (
-                        SELECT product_name, specification, price, code_number, type, in_quantity, out_quantity
-                        FROM j2stockedit_data 
-                        WHERE product_name IS NOT NULL AND product_name != ''
-                        UNION ALL
-                        SELECT 
-                            m.product_name,
-                            COALESCE(sd.specification, je.specification, NULL) as specification,
-                            COALESCE(je.price, 0) as price,
-                            m.code_number,
-                            COALESCE(sd.category, je.type, NULL) as type,
-                            m.in_quantity,
-                            m.out_quantity
-                        FROM j2stockeditmobile_data m
-                        LEFT JOIN stock_data sd ON (sd.product_name = m.product_name OR sd.product_code = m.code_number)
-                        LEFT JOIN (
-                            SELECT je1.product_name, je1.code_number, je1.price, je1.specification, je1.type
-                            FROM j2stockedit_data je1
-                            INNER JOIN (
-                                SELECT product_name, code_number, MAX(id) as max_id
-                                FROM j2stockedit_data
-                                WHERE price > 0
-                                GROUP BY product_name, code_number
-                            ) je2 ON je1.id = je2.max_id
-                        ) je ON je.product_name = m.product_name 
-                            AND (je.code_number = m.code_number OR (je.code_number IS NULL AND m.code_number IS NULL))
-                        WHERE m.product_name IS NOT NULL AND m.product_name != ''
-                    ) AS combined_data
-                    GROUP BY product_name, specification, price, code_number, type
-                    ORDER BY product_name ASC, price ASC";
-            
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute();
+            $sqlDesktop .= " AND date <= ?";
+            $params[] = $endDate;
         }
-        $stockData = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        // 同一货品（名称+编号+规格+单价）合并为一行；同品名不同单价不合并，各占一行
-        $merged = [];
-        foreach ($stockData as $row) {
+        $sqlDesktop .= " GROUP BY product_name, specification, price, code_number, type ORDER BY product_name ASC, price ASC";
+        $stmt = $pdo->prepare($sqlDesktop);
+        $stmt->execute($params);
+        $desktopRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // 2) 手机端出货合计：按 (名称, 编号) 汇总，不区分单价
+        $sqlMobile = "SELECT product_name, code_number, SUM(out_quantity) as mobile_out
+            FROM j2stockeditmobile_data
+            WHERE product_name IS NOT NULL AND product_name != ''";
+        $paramsM = [];
+        if ($endDate) {
+            $sqlMobile .= " AND date <= ?";
+            $paramsM[] = $endDate;
+        }
+        $sqlMobile .= " GROUP BY product_name, code_number";
+        $stmtM = $pdo->prepare($sqlMobile);
+        $stmtM->execute($paramsM);
+        $mobileOutList = $stmtM->fetchAll(PDO::FETCH_ASSOC);
+        $mobileOutMap = [];
+        foreach ($mobileOutList as $r) {
+            $k = ($r['product_name'] ?? '') . '|' . ($r['code_number'] ?? '');
+            $mobileOutMap[$k] = floatval($r['mobile_out']);
+        }
+
+        // 3) 按 (product_name, code_number) 分组桌面行，手机出货按「先扣高价」从各单价档扣减
+        $byProduct = [];
+        foreach ($desktopRows as $row) {
+            $name = $row['product_name'] ?? '';
+            $code = $row['code_number'] ?? '';
+            $key = $name . '|' . $code;
+            if (!isset($byProduct[$key])) {
+                $byProduct[$key] = [];
+            }
+            $stock = floatval($row['current_stock']);
             $price = floatval($row['price']);
-            $key = ($row['product_name'] ?? '') . '|' . ($row['code_number'] ?? '') . '|' . ($row['specification'] ?? '') . '|' . round($price, 4);
-            $currentStock = floatval($row['current_stock']);
             $type = $row['type'] ?? '';
             if ($type === 'Drinks') $type = 'Service Line';
-            if (!isset($merged[$key])) {
-                $merged[$key] = [
-                    'product_name' => $row['product_name'],
-                    'code_number' => $row['code_number'] ?? '',
-                    'specification' => $row['specification'] ?? '',
-                    'stock' => 0,
-                    'value_sum' => 0,
-                    'type' => $type
-                ];
+            $byProduct[$key][] = [
+                'product_name' => $name,
+                'code_number' => $code,
+                'specification' => $row['specification'] ?? '',
+                'price' => $price,
+                'type' => $type,
+                'stock' => $stock
+            ];
+        }
+        foreach ($mobileOutMap as $pkey => $mobileOut) {
+            if ($mobileOut <= 0 || !isset($byProduct[$pkey])) continue;
+            $rows = &$byProduct[$pkey];
+            usort($rows, function ($a, $b) { return $b['price'] <=> $a['price']; });
+            $remain = $mobileOut;
+            foreach ($rows as &$r) {
+                if ($remain <= 0) break;
+                $deduct = min($r['stock'], $remain);
+                $r['stock'] -= $deduct;
+                $remain -= $deduct;
             }
-            $merged[$key]['stock'] += $currentStock;
-            $merged[$key]['value_sum'] += $price * $currentStock;
-            if ($currentStock > ($merged[$key]['_max_stock'] ?? 0)) {
-        
-        // 初始化类型统计
-                $merged[$key]['_max_stock'] = $currentStock;
-                $merged[$key]['type'] = $type;
+            unset($r);
+        }
+
+        // 4) 展平为 stock > 0 的行，按名称、单价排序
+        $merged = [];
+        foreach ($byProduct as $rows) {
+            foreach ($rows as $r) {
+                if ($r['stock'] <= 0) continue;
+                $merged[] = $r;
             }
         }
-        
+        usort($merged, function ($a, $b) {
+            $c = strcmp($a['product_name'], $b['product_name']);
+            return $c !== 0 ? $c : ($a['price'] <=> $b['price']);
+        });
+
         $totalValue = 0;
         $summaryData = [];
         $counter = 1;
@@ -178,13 +141,9 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
             'Service Line' => 0,
             'Sake' => 0
         ];
-        foreach ($merged as $k => $v) {
+        foreach ($merged as $v) {
             $currentStock = $v['stock'];
-            
-            
-            // 按类型累计库存价值
-            if ($currentStock == 0) continue;
-            $price = $currentStock != 0 ? $v['value_sum'] / $currentStock : 0;
+            $price = $v['price'];
             $totalPrice = $currentStock * $price;
             $type = $v['type'] ?? '';
             $totalValue += $totalPrice;
