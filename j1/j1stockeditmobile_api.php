@@ -617,133 +617,103 @@ function handleDelete() {
     }
 }
 
-// 同步数据到 j1stockedit_data 表
+// 同步数据到 j1stockedit_data 表（出库时按价格从高到低分配：先扣高单价，再扣下一档）
 function syncToJ1StockEditData($pdo, $data, $operation = 'insert') {
     try {
-        // 从 stock_data 获取产品的详细信息
-        $productInfo = null;
-        if (!empty($data['product_name'])) {
-            $infoStmt = $pdo->prepare("SELECT specification, price, category FROM stock_data WHERE product_name = ? LIMIT 1");
-            $infoStmt->execute([$data['product_name']]);
-            $productInfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
-        } elseif (!empty($data['code_number'])) {
-            $infoStmt = $pdo->prepare("SELECT specification, price, category FROM stock_data WHERE product_code = ? LIMIT 1");
-            $infoStmt->execute([$data['code_number']]);
-            $productInfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
-        }
-        
-        $specification = $productInfo['specification'] ?? null;
-        // 优先使用前端传递的价格（用于按价格扣除），即使为0也要使用前端的价格
-        // 只有当前端完全没有传递price字段时，才从stock_data获取
-        if (isset($data['price']) && ($data['price'] !== null && $data['price'] !== '')) {
-            $price = floatval($data['price']);
-        } else {
-            $price = floatval($productInfo['price'] ?? 0);
-        }
-        $type = $productInfo['category'] ?? null;
-        
-        // 调试日志：记录使用的价格
-        error_log("syncToJ1StockEditData: product_name={$data['product_name']}, frontend_price=" . ($data['price'] ?? 'null') . ", stock_data_price=" . ($productInfo['price'] ?? 'null') . ", final_price={$price}, out_quantity=" . ($data['out_quantity'] ?? 0));
-        
-        if ($operation === 'insert') {
-            // 插入新记录到 j1stockedit_data
-            $sql = "INSERT INTO j1stockedit_data 
-                    (date, time, code_number, product_name, in_quantity, out_quantity, specification, price, receiver, remark, target_system, type) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            
+        $outQty = floatval($data['out_quantity'] ?? 0);
+        $inQty = floatval($data['in_quantity'] ?? 0);
+        $productName = $data['product_name'] ?? '';
+        $codeNumber = $data['code_number'] ?? null;
+
+        if ($operation === 'delete') {
+            $sql = "DELETE FROM j1stockedit_data 
+                    WHERE product_name = ? AND date = ? AND time = ? AND receiver = 'Mobile' AND target_system = 'j1'";
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([
-                $data['date'],
-                $data['time'],
-                $data['code_number'] ?? null,
-                $data['product_name'],
-                floatval($data['in_quantity'] ?? 0),
-                floatval($data['out_quantity'] ?? 0),
-                $specification,
-                $price,
-                'Mobile', // 标记为移动端操作
-                null, // remark
-                'j1',
-                $type
-            ]);
-            
-            return $pdo->lastInsertId();
-        } elseif ($operation === 'update') {
-            // 更新 j1stockedit_data 中的记录
-            // 需要先查找旧记录（使用旧的date和time），如果找不到则插入新记录
-            // 注意：这里假设传入的data包含旧的date和time用于查找
+            $stmt->execute([$data['product_name'], $data['date'], $data['time']]);
+            return true;
+        }
+
+        if ($operation === 'update') {
             $oldDate = $data['old_date'] ?? $data['date'];
             $oldTime = $data['old_time'] ?? $data['time'];
-            
-            // 先尝试更新
-            $sql = "UPDATE j1stockedit_data 
-                    SET date = ?, time = ?, code_number = ?, product_name = ?, 
-                        in_quantity = ?, out_quantity = ?, specification = ?, price = ?, type = ?
-                    WHERE product_name = ? AND date = ? AND time = ? AND receiver = 'Mobile' AND target_system = 'j1'
-                    LIMIT 1";
-            
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([
-                $data['date'],
-                $data['time'],
-                $data['code_number'] ?? null,
-                $data['product_name'],
-                floatval($data['in_quantity'] ?? 0),
-                floatval($data['out_quantity'] ?? 0),
-                $specification,
-                $price,
-                $type,
-                $data['product_name'], // WHERE条件
-                $oldDate, // WHERE条件 - 使用旧的date
-                $oldTime // WHERE条件 - 使用旧的time
-            ]);
-            
-            // 如果更新失败（找不到记录），则插入新记录
-            if ($stmt->rowCount() === 0) {
-                $insertSql = "INSERT INTO j1stockedit_data 
-                        (date, time, code_number, product_name, in_quantity, out_quantity, specification, price, receiver, remark, target_system, type) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                
-                $insertStmt = $pdo->prepare($insertSql);
-                $insertStmt->execute([
-                    $data['date'],
-                    $data['time'],
-                    $data['code_number'] ?? null,
-                    $data['product_name'],
-                    floatval($data['in_quantity'] ?? 0),
-                    floatval($data['out_quantity'] ?? 0),
-                    $specification,
-                    $price,
-                    'Mobile',
-                    null,
-                    'j1',
-                    $type
-                ]);
-                
-                return $pdo->lastInsertId();
-            }
-            
-            return true;
-        } elseif ($operation === 'delete') {
-            // 删除 j1stockedit_data 中的记录
             $sql = "DELETE FROM j1stockedit_data 
-                    WHERE product_name = ? AND date = ? AND time = ? AND receiver = 'Mobile' AND target_system = 'j1'
-                    LIMIT 1";
-            
+                    WHERE product_name = ? AND date = ? AND time = ? AND receiver = 'Mobile' AND target_system = 'j1'";
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([
-                $data['product_name'],
-                $data['date'],
-                $data['time']
-            ]);
-            
-            return $stmt->rowCount() > 0;
+            $stmt->execute([$productName, $oldDate, $oldTime]);
         }
-        
-        return false;
+
+        if ($outQty <= 0 && $inQty <= 0) return true;
+
+        if ($outQty > 0 && $inQty <= 0) {
+            $sql = "SELECT price, specification, type,
+                        (SUM(in_quantity) - SUM(out_quantity)) as available
+                    FROM j1stockedit_data
+                    WHERE product_name = ? AND price IS NOT NULL AND price > 0";
+            $params = [$productName];
+            if ($codeNumber !== null && $codeNumber !== '') {
+                $sql .= " AND (code_number = ? OR (code_number IS NULL AND ? = ''))";
+                $params[] = $codeNumber;
+                $params[] = $codeNumber;
+            }
+            $sql .= " GROUP BY price, specification, type HAVING available > 0 ORDER BY price DESC";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            $tiers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $remaining = $outQty;
+            $insertSql = "INSERT INTO j1stockedit_data 
+                    (date, time, code_number, product_name, in_quantity, out_quantity, specification, price, receiver, remark, target_system, type) 
+                    VALUES (?, ?, ?, ?, 0, ?, ?, ?, 'Mobile', NULL, 'j1', ?)";
+            $insertStmt = $pdo->prepare($insertSql);
+            foreach ($tiers as $tier) {
+                if ($remaining <= 0) break;
+                $avail = floatval($tier['available']);
+                $deduct = min($avail, $remaining);
+                if ($deduct <= 0) continue;
+                $insertStmt->execute([
+                    $data['date'], $data['time'], $codeNumber, $productName,
+                    $deduct, $tier['specification'] ?? null, floatval($tier['price']), $tier['type'] ?? null
+                ]);
+                $remaining -= $deduct;
+            }
+            if ($remaining > 0) {
+                $infoStmt = $pdo->prepare("SELECT specification, price, category FROM stock_data WHERE product_name = ? LIMIT 1");
+                $infoStmt->execute([$productName]);
+                $productInfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
+                $price = floatval($productInfo['price'] ?? 0);
+                $specification = $productInfo['specification'] ?? null;
+                $type = $productInfo['category'] ?? null;
+                $insertStmt->execute([
+                    $data['date'], $data['time'], $codeNumber, $productName,
+                    $remaining, $specification, $price, $type
+                ]);
+            }
+            return true;
+        }
+
+        $productInfo = null;
+        if (!empty($productName)) {
+            $infoStmt = $pdo->prepare("SELECT specification, price, category FROM stock_data WHERE product_name = ? LIMIT 1");
+            $infoStmt->execute([$productName]);
+            $productInfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
+        } elseif (!empty($codeNumber)) {
+            $infoStmt = $pdo->prepare("SELECT specification, price, category FROM stock_data WHERE product_code = ? LIMIT 1");
+            $infoStmt->execute([$codeNumber]);
+            $productInfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
+        }
+        $specification = $productInfo['specification'] ?? null;
+        $price = isset($data['price']) && $data['price'] !== null && $data['price'] !== '' ? floatval($data['price']) : floatval($productInfo['price'] ?? 0);
+        $type = $productInfo['category'] ?? null;
+        $sql = "INSERT INTO j1stockedit_data 
+                (date, time, code_number, product_name, in_quantity, out_quantity, specification, price, receiver, remark, target_system, type) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Mobile', NULL, 'j1', ?)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            $data['date'], $data['time'], $codeNumber, $productName,
+            $inQty, $outQty, $specification, $price, $type
+        ]);
+        return $pdo->lastInsertId();
     } catch (PDOException $e) {
         error_log("同步到j1stockedit_data失败: " . $e->getMessage());
-        // 不抛出异常，避免影响主流程
         return false;
     }
 }
