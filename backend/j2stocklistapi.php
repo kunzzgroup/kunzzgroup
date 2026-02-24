@@ -78,9 +78,11 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
         $stmtM->execute($paramsM);
         $mobileOutList = $stmtM->fetchAll(PDO::FETCH_ASSOC);
         $mobileOutMap = [];
+        $normKey = function ($name, $code) {
+            return preg_replace('/\s+/', '', trim($name ?? '')) . '|' . preg_replace('/\s+/', '', trim($code ?? ''));
+        };
         foreach ($mobileOutList as $r) {
-            $k = ($r['product_name'] ?? '') . '|' . ($r['code_number'] ?? '');
-            $mobileOutMap[$k] = floatval($r['mobile_out']);
+            $mobileOutMap[$normKey($r['product_name'], $r['code_number'])] = floatval($r['mobile_out']);
         }
 
         // 3) 按 (product_name, code_number) 分组桌面行，手机出货按「先扣高价」从各单价档扣减
@@ -88,7 +90,7 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
         foreach ($desktopRows as $row) {
             $name = $row['product_name'] ?? '';
             $code = $row['code_number'] ?? '';
-            $key = $name . '|' . $code;
+            $key = $normKey($name, $code);
             if (!isset($byProduct[$key])) {
                 $byProduct[$key] = [];
             }
