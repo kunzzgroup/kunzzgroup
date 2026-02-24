@@ -4552,9 +4552,9 @@ header('Expires: 0');
                 }
             }
 
-            // 检查库存是否足够
+            // 检查库存是否足够（与总库存口径一致：合并两表）
             if (formData.out_quantity > 0) {
-                const stockCheck = await checkProductStock(formData.product_name, formData.out_quantity, 0);
+                const stockCheck = await checkProductStock(formData.product_name, formData.out_quantity, 0, formData.code_number);
                 if (!stockCheck.sufficient) {
                     const errorMsg = `库存不足！当前可用库存: ${stockCheck.availableStock}，请求出库: ${stockCheck.requested}`;
                     if (!skipTableRefresh) {
@@ -4708,8 +4708,8 @@ header('Expires: 0');
                 }
                 formData.target_system = targetSystem;
                 
-                // 现有库存检查代码（价格参数已删除）
-                const stockCheck = await checkProductStock(formData.product_name, formData.out_quantity, 0);
+                // 库存检查与总库存口径一致（合并两表）
+                const stockCheck = await checkProductStock(formData.product_name, formData.out_quantity, 0, formData.code_number);
                 if (!stockCheck.sufficient) {
                     showAlert(`库存不足！当前可用库存: ${stockCheck.availableStock}，请求出库: ${formData.out_quantity}`, 'error');
                     return;
@@ -6322,25 +6322,27 @@ header('Expires: 0');
     </script>
     <script>
         // 检查货品库存是否足够（按货品名称和价格分别计算）
-        async function checkProductStock(productName, outQuantity, price = null) {
+        async function checkProductStock(productName, outQuantity, price = null, codeNumber = null) {
             if (!productName || outQuantity <= 0) {
                 return { sufficient: true, availableStock: 0, currentStock: 0 };
             }
             
             try {
                 let apiUrl;
-                if (price !== null && price !== '') {
-                    // 按货品名称和价格检查库存
+                if (price != null && price !== '' && parseFloat(price) > 0) {
+                    // 按货品名称和具体价格档检查库存（用于价格下拉等）
                     apiUrl = `?action=product_stock_by_price&product_name=${encodeURIComponent(productName)}&price=${encodeURIComponent(price)}`;
+                    if (codeNumber != null && codeNumber !== '') apiUrl += `&code_number=${encodeURIComponent(codeNumber)}`;
                 } else {
-                    // 按货品名称检查总库存
+                    // 按货品名称检查总可用库存（与总库存一致：合并两表）
                     apiUrl = `?action=product_stock&product_name=${encodeURIComponent(productName)}`;
+                    if (codeNumber != null && codeNumber !== '') apiUrl += `&code_number=${encodeURIComponent(codeNumber)}`;
                 }
                 
                 const result = await apiCall(apiUrl);
                 
                 if (result.success && result.data) {
-                    // product_stock_by_price 返回按价格分组的数组，需汇总各价格档的可用库存
+                    // product_stock 返回单对象；product_stock_by_price 返回数组，需汇总
                     let availableStock = 0;
                     let currentStock = 0;
                     if (Array.isArray(result.data)) {
