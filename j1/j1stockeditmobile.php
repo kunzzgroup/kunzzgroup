@@ -6332,9 +6332,16 @@ require_once '../backend/session_check.php';
                 const result = await apiCall(apiUrl);
                 
                 if (result.success && result.data) {
-                    const availableStock = parseFloat(result.data.available_stock || 0);
-                    const currentStock = parseFloat(result.data.current_stock || 0);
-                    
+                    // product_stock_by_price 返回按价格分组的数组，需汇总各价格档的可用库存
+                    let availableStock = 0;
+                    let currentStock = 0;
+                    if (Array.isArray(result.data)) {
+                        availableStock = result.data.reduce((sum, item) => sum + parseFloat(item.available_stock || 0), 0);
+                        currentStock = availableStock;
+                    } else {
+                        availableStock = parseFloat(result.data.available_stock || 0);
+                        currentStock = parseFloat(result.data.current_stock || 0);
+                    }
                     return {
                         sufficient: availableStock >= outQuantity,
                         availableStock: availableStock,
