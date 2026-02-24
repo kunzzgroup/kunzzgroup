@@ -27,17 +27,9 @@ try {
 } catch (PDOException $e) {
     ob_end_clean();
     http_response_code(500);
-    echo json_encode(["success" => false, "message" => "数据库连接失败：" . $e->getMessage(), "error_details" => $e->getMessage()]);
+    echo json_encode(["success" => false, "message" => "数据库连接失败：" . $e->getMessage()]);
     exit;
 }
-
-// 调试信息
-error_log("数据库连接成功 - j2stockeditapi");
-error_log("请求方法: " . $_SERVER['REQUEST_METHOD']);
-
-// 获取请求方法和数据
-$method = $_SERVER['REQUEST_METHOD'];
-$data = json_decode(file_get_contents("php://input"), true);
 
 function sendResponse($success, $message = "", $data = null) {
     ob_end_clean();
@@ -49,431 +41,267 @@ function sendResponse($success, $message = "", $data = null) {
     exit;
 }
 
-// 路由处理
-switch ($method) {
-    case 'GET':
-        handleGet();
-        break;
-    case 'POST':
-        handlePost();
-        break;
-    case 'PUT':
-        handlePut();
-        break;
-    case 'DELETE':
-        handleDelete();
-        break;
-    default:
-        sendResponse(false, "不支持的请求方法");
+// 获取J2库存汇总数据
+function getJ2StockSummary($startDate = null, $endDate = null) {
+    global $pdo;
+    
+    try {
+        // 如果提供了结束日期，计算到该日期为止的所有库存（包括历史累计）
+        // 合并 j2stockedit_data 和 j2stockeditmobile_data（与 J1 一致，mobile 端扣货在 backend 显示）
+        if ($endDate) {
+            $sql = "SELECT 
+                        product_name,
+                        specification,
+                        price,
+                        code_number,
+                        type,
+                        SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
+                        SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
+                        (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
+                         SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
+                    FROM (
+                        SELECT product_name, specification, price, code_number, type, in_quantity, out_quantity
+                        FROM j2stockedit_data 
+                        WHERE product_name IS NOT NULL AND product_name != ''
+                        AND date <= ?
+                        UNION ALL
+                        SELECT 
+                            m.product_name,
+                            COALESCE(sd.specification, je.specification, NULL) as specification,
+                            COALESCE(je.price, 0) as price,
+                            m.code_number,
+                            COALESCE(sd.category, je.type, NULL) as type,
+                            m.in_quantity,
+                            m.out_quantity
+                        FROM j2stockeditmobile_data m
+                        LEFT JOIN stock_data sd ON (sd.product_name = m.product_name OR sd.product_code = m.code_number)
+                        LEFT JOIN (
+                            SELECT je1.product_name, je1.code_number, je1.price, je1.specification, je1.type
+                            FROM j2stockedit_data je1
+                            INNER JOIN (
+                                SELECT product_name, code_number, MAX(id) as max_id
+                                FROM j2stockedit_data
+                                WHERE price > 0
+                                GROUP BY product_name, code_number
+                            ) je2 ON je1.id = je2.max_id
+                        ) je ON je.product_name = m.product_name 
+                            AND (je.code_number = m.code_number OR (je.code_number IS NULL AND m.code_number IS NULL))
+                        WHERE m.product_name IS NOT NULL AND m.product_name != ''
+                        AND m.date <= ?
+                    ) AS combined_data
+                    GROUP BY product_name, specification, price, code_number, type
+                    HAVING current_stock != 0
+                    ORDER BY product_name ASC, price ASC";
+            
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$endDate, $endDate]);
+        } else {
+            $sql = "SELECT 
+                        product_name,
+                        specification,
+                        price,
+                        code_number,
+                        type,
+                        SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
+                        SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
+                        (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
+                         SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
+                    FROM (
+                        SELECT product_name, specification, price, code_number, type, in_quantity, out_quantity
+                        FROM j2stockedit_data 
+                        WHERE product_name IS NOT NULL AND product_name != ''
+                        UNION ALL
+                        SELECT 
+                            m.product_name,
+                            COALESCE(sd.specification, je.specification, NULL) as specification,
+                            COALESCE(je.price, 0) as price,
+                            m.code_number,
+                            COALESCE(sd.category, je.type, NULL) as type,
+                            m.in_quantity,
+                            m.out_quantity
+                        FROM j2stockeditmobile_data m
+                        LEFT JOIN stock_data sd ON (sd.product_name = m.product_name OR sd.product_code = m.code_number)
+                        LEFT JOIN (
+                            SELECT je1.product_name, je1.code_number, je1.price, je1.specification, je1.type
+                            FROM j2stockedit_data je1
+                            INNER JOIN (
+                                SELECT product_name, code_number, MAX(id) as max_id
+                                FROM j2stockedit_data
+                                WHERE price > 0
+                                GROUP BY product_name, code_number
+                            ) je2 ON je1.id = je2.max_id
+                        ) je ON je.product_name = m.product_name 
+                            AND (je.code_number = m.code_number OR (je.code_number IS NULL AND m.code_number IS NULL))
+                        WHERE m.product_name IS NOT NULL AND m.product_name != ''
+                    ) AS combined_data
+                    GROUP BY product_name, specification, price, code_number, type
+                    HAVING current_stock != 0
+                    ORDER BY product_name ASC, price ASC";
+            
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute();
+        }
+        $stockData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // 计算总价值和按类型统计 - 使用原始数值计算，只在显示时格式化
+        $totalValue = 0;
+        $summaryData = [];
+        $counter = 1;
+        
+        // 初始化类型统计
+        $typeStats = [
+            'Kitchen' => 0,
+            'Sushi Bar' => 0,
+            'Service Line' => 0,
+            'Sake' => 0
+        ];
+        
+        foreach ($stockData as $row) {
+            $currentStock = floatval($row['current_stock']);
+            $price = floatval($row['price']);
+            $totalPrice = $currentStock * $price;
+            $type = $row['type'] ?? '';
+            // Drinks 与 Service Line 合并统计
+            if ($type === 'Drinks') $type = 'Service Line';
+            
+            // 使用原始数值累加，不进行四舍五入
+            $totalValue += $totalPrice;
+            
+            // 按类型累计库存价值
+            if (!empty($type) && isset($typeStats[$type])) {
+                $typeStats[$type] += $totalPrice;
+            }
+            
+            $summaryData[] = [
+                'no' => $counter++,
+                'product_name' => $row['product_name'],
+                'code_number' => $row['code_number'] ?? '',
+                'total_stock' => $currentStock,
+                'specification' => $row['specification'] ?? '',
+                'price' => $price,
+                'total_price' => $totalPrice, // 使用原始计算值
+                'type' => $type,
+                'formatted_stock' => number_format($currentStock, 2),
+                'formatted_price' => number_format($price, 2),
+                'formatted_total_price' => number_format($totalPrice, 2) // 显示时格式化为两位小数
+            ];
+        }
+        
+        return [
+            'summary' => $summaryData,
+            'total_value' => $totalValue,
+            'formatted_total_value' => number_format($totalValue, 2),
+            'total_products' => count($summaryData),
+            'type_stats' => [
+                'kitchen' => $typeStats['Kitchen'],
+                'sushi_bar' => $typeStats['Sushi Bar'],
+                'service_line' => $typeStats['Service Line'],
+                'sake' => $typeStats['Sake'],
+                'formatted_kitchen' => number_format($typeStats['Kitchen'], 2),
+                'formatted_sushi_bar' => number_format($typeStats['Sushi Bar'], 2),
+                'formatted_service_line' => number_format($typeStats['Service Line'], 2),
+                'formatted_sake' => number_format($typeStats['Sake'], 2)
+            ]
+        ];
+        
+    } catch (PDOException $e) {
+        throw new Exception("查询J2库存数据失败：" . $e->getMessage());
+    }
 }
 
-// 处理 GET 请求 - 获取数据
-function handleGet() {
-    global $pdo;
+// 主要路由处理
+$method = $_SERVER['REQUEST_METHOD'];
 
-    $action = $_GET['action'] ?? 'list';
-
+if ($method === 'GET') {
+    $action = $_GET['action'] ?? 'summary';
+    
     switch ($action) {
-        case 'list':
-            // 获取所有J2出库数据
-            $startDate = $_GET['start_date'] ?? null;
-            $endDate = $_GET['end_date'] ?? null;
-            $searchDate = $_GET['search_date'] ?? null;
-            $receiver = $_GET['receiver'] ?? null;
-            $productCode = $_GET['product_code'] ?? null;
-            $productName = $_GET['product_name'] ?? null;
-            $type = $_GET['type'] ?? null;
-
-            // 如果没有提供日期范围，默认使用当月
-            if (!$startDate && !$endDate && !$searchDate) {
-                $currentYear = date('Y');
-                $currentMonth = date('m');
-                $startDate = "$currentYear-$currentMonth-01";
-                $endDate = date('Y-m-t');
-            }
-
-            $sql = "SELECT * FROM j2stockinout_data WHERE 1=1";
-            $params = [];
-
-            if ($searchDate) {
-                $sql .= " AND date = ?";
-                $params[] = $searchDate;
-            } elseif ($startDate && $endDate) {
-                $sql .= " AND date BETWEEN ? AND ?";
-                $params[] = $startDate;
-                $params[] = $endDate;
-            }
-
-            if ($receiver) {
-                $sql .= " AND receiver LIKE ?";
-                $params[] = "%$receiver%";
-            }
-
-            if ($productCode) {
-                $sql .= " AND code_number LIKE ?";
-                $params[] = "%$productCode%";
-            }
-
-            if ($productName) {
-                $sql .= " AND product_name LIKE ?";
-                $params[] = "%$productName%";
-            }
-
-            if ($type) {
-                $sql .= " AND type LIKE ?";
-                $params[] = "%$type%";
-            }
-
-            $sql .= " ORDER BY date ASC, time ASC";
-
-            $stmt = $pdo->prepare($sql);
+        case 'summary':
             try {
-                $stmt->execute($params);
-                $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                // 为每条记录格式化数字和计算总价值
-                foreach ($records as &$record) {
-                    $inQty = floatval($record['in_quantity'] ?? 0);
-                    $outQty = floatval($record['out_quantity'] ?? 0);
-                    $price = floatval($record['price'] ?? 0);
-                    
-                    // 计算库存余额和价值
-                    $record['balance_quantity'] = $inQty - $outQty;
-                    $record['in_value'] = $inQty * $price;
-                    $record['out_value'] = $outQty * $price;
-                    $record['balance_value'] = $record['balance_quantity'] * $price;
-                    $record['total_value'] = $outQty * $price; // 保持原有逻辑
-                    
-                    // 格式化数字
-                    $record['in_quantity'] = number_format($inQty, 2);
-                    $record['out_quantity'] = number_format($outQty, 2);
-                    $record['balance_quantity'] = number_format($record['balance_quantity'], 2);
-                    $record['price'] = number_format($price, 2);
-                    $record['in_value'] = number_format($record['in_value'], 2);
-                    $record['out_value'] = number_format($record['out_value'], 2);
-                    $record['balance_value'] = number_format($record['balance_value'], 2);
-                    $record['total_value'] = number_format($record['total_value'], 2);
-                }
-
-                sendResponse(true, "J2出库数据获取成功，共找到 " . count($records) . " 条记录", $records);
-            } catch (PDOException $e) {
-                sendResponse(false, "查询数据失败：" . $e->getMessage());
+                $endDate = $_GET['end_date'] ?? null;
+                $result = getJ2StockSummary(null, $endDate);
+                sendResponse(true, "J2库存汇总数据获取成功", $result);
+            } catch (Exception $e) {
+                sendResponse(false, $e->getMessage());
             }
             break;
-
-        case 'codenumbers':
-            // 获取所有唯一的code_number和对应的product_name列表
-            $stmt = $pdo->prepare("SELECT DISTINCT product_code as code_number, product_name FROM stock_data WHERE product_code IS NOT NULL AND product_code != '' ORDER BY product_code");
-            $stmt->execute();
-            $codeNumbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            sendResponse(true, "编号列表获取成功", $codeNumbers);
-            break;
-
-        case 'product_by_code':
-            // 根据code_number获取对应的product_name
-            $codeNumber = $_GET['code_number'] ?? null;
-            if (!$codeNumber) {
-                sendResponse(false, "缺少编号参数");
-            }
-
-            $stmt = $pdo->prepare("SELECT DISTINCT product_name FROM stock_data WHERE product_code = ? LIMIT 1");
-            $stmt->execute([$codeNumber]);
-            $productName = $stmt->fetchColumn();
-
-            if ($productName) {
-                sendResponse(true, "产品名称获取成功", ['product_name' => $productName]);
-            } else {
-                sendResponse(false, "未找到对应的产品名称");
-            }
-            break;
-
-        case 'products_list':
-            // 获取所有唯一的产品名称和对应的product_code列表
-            $stmt = $pdo->prepare("SELECT DISTINCT product_name, product_code FROM stock_data WHERE product_name IS NOT NULL AND product_name != '' ORDER BY product_name");
-            $stmt->execute();
-            $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            sendResponse(true, "产品列表获取成功", $products);
-            break;
-
-        case 'code_by_product':
-            // 根据product_name获取对应的product_code
-            $productName = $_GET['product_name'] ?? null;
-            if (!$productName) {
-                sendResponse(false, "缺少产品名称参数");
-            }
-
-            $stmt = $pdo->prepare("SELECT DISTINCT product_code FROM stock_data WHERE product_name = ? LIMIT 1");
-            $stmt->execute([$productName]);
-            $productCode = $stmt->fetchColumn();
-
-            if ($productCode) {
-                sendResponse(true, "产品编号获取成功", ['product_code' => $productCode]);
-            } else {
-                sendResponse(false, "未找到对应的产品编号");
-            }
-            break;
-
-        case 'types':
-            // 获取所有唯一的类型列表
-            $stmt = $pdo->prepare("SELECT DISTINCT type FROM j2stockinout_data WHERE type IS NOT NULL AND type != '' ORDER BY type");
-            $stmt->execute();
-            $types = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-            sendResponse(true, "类型列表获取成功", $types);
-            break;
-
-        case 'migrate_history':
-            // 一次性迁移所有历史出库数据
+            
+        case 'supply_total':
+            // 获取J2入库总值（从j2stockinout_data表，仅当前月份）
             try {
-                // 查找所有有出库数量的历史记录，且不在J2表中的
-                $sql = "INSERT INTO j2stockinout_data 
-                        (date, time, code_number, product_name, out_quantity, specification, price, total_value, type, receiver, remark)
-                        SELECT 
-                            s.date, s.time, s.code_number, s.product_name, s.out_quantity, s.specification, s.price, 
-                            (s.out_quantity * s.price) as total_value,
-                            'MIGRATED_OUTBOUND' as type,
-                            s.receiver, s.remark
-                        FROM stockinout_data s
-                        WHERE s.out_quantity > 0 
-                        AND NOT EXISTS (
-                            SELECT 1 FROM j2stockinout_data j2 
-                            WHERE j2.product_name = s.product_name 
-                            AND j2.date = s.date 
-                            AND j2.time = s.time 
-                            AND j2.out_quantity = s.out_quantity
-                        )";
+                // 获取当前月份的第一天和最后一天
+                $firstDayOfMonth = date('Y-m-01');
+                $lastDayOfMonth = date('Y-m-t');
+                
+                $sql = "SELECT SUM(in_quantity * price) as total_supply_value 
+                        FROM j2stockinout_data 
+                        WHERE in_quantity > 0 
+                        AND date >= ? AND date <= ?";
                 
                 $stmt = $pdo->prepare($sql);
-                $stmt->execute();
-                $migratedCount = $stmt->rowCount();
+                $stmt->execute([$firstDayOfMonth, $lastDayOfMonth]);
+                $result = $stmt->fetch(PDO::FETCH_ASSOC);
                 
-                sendResponse(true, "历史数据迁移完成，共迁移 $migratedCount 条出库记录", ['migrated_count' => $migratedCount]);
+                $totalSupplyValue = floatval($result['total_supply_value'] ?? 0);
                 
-            } catch (PDOException $e) {
-                sendResponse(false, "数据迁移失败：" . $e->getMessage());
+                sendResponse(true, "J2供应总值获取成功", [
+                    'total_supply_value' => $totalSupplyValue,
+                    'formatted_total_value' => number_format($totalSupplyValue, 2),
+                    'month' => date('Y-m')
+                ]);
+            } catch (Exception $e) {
+                sendResponse(false, $e->getMessage());
             }
             break;
-
+            
+        case 'export':
+            // 导出功能（可选实现）
+            try {
+                $result = getJ2StockSummary();
+                
+                // 设置CSV头信息
+                header('Content-Type: text/csv; charset=utf-8');
+                header('Content-Disposition: attachment; filename="j2_stock_summary_' . date('Y-m-d') . '.csv"');
+                
+                ob_end_clean();
+                
+                // 创建CSV输出
+                $output = fopen('php://output', 'w');
+                
+                // 写入BOM以支持中文
+                fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+                
+                // 写入表头
+                fputcsv($output, ['No', 'Product Name', 'Code Number', 'Total Stock', 'Specification', 'Unit Price (RM)', 'Total Price (RM)']);
+                
+                // 写入数据
+                foreach ($result['summary'] as $row) {
+                    fputcsv($output, [
+                        $row['no'],
+                        $row['product_name'],
+                        $row['code_number'],
+                        $row['formatted_stock'],
+                        $row['specification'],
+                        $row['formatted_price'],
+                        $row['formatted_total_price']
+                    ]);
+                }
+                
+                // 写入总计
+                fputcsv($output, ['', '', '', '', '', 'Total Value:', $result['formatted_total_value']]);
+                
+                fclose($output);
+                exit;
+                
+            } catch (Exception $e) {
+                sendResponse(false, "导出失败：" . $e->getMessage());
+            }
+            break;
+            
         default:
             sendResponse(false, "无效的操作");
     }
-}
-
-// 处理 POST 请求 - 添加新记录
-function handlePost() {
-    global $pdo, $data;
-
-    if (!$data) {
-        sendResponse(false, "无效的数据格式");
-    }
-
-    // 验证必填字段
-    $required_fields = ['date', 'time', 'product_name'];
-    foreach ($required_fields as $field) {
-        if (empty($data[$field])) {
-            sendResponse(false, "缺少必填字段：$field");
-        }
-    }
-
-    // 验证至少有入库或出库数量
-    $inQty = floatval($data['in_quantity'] ?? 0);
-    $outQty = floatval($data['out_quantity'] ?? 0);
-    if ($inQty <= 0 && $outQty <= 0) {
-        sendResponse(false, "入库数量或出库数量至少填写一项且大于0");
-    }
-
-    // 验证产品名称是否存在于数据库中
-    if (!empty($data['product_name'])) {
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM stock_data WHERE product_name = ?");
-        $stmt->execute([$data['product_name']]);
-        if ($stmt->fetchColumn() == 0) {
-            sendResponse(false, "产品名称不存在，请选择有效的产品");
-        }
-    }
-
-    // 验证产品编号是否存在于数据库中
-    if (!empty($data['code_number'])) {
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM stock_data WHERE product_code = ?");
-        $stmt->execute([$data['code_number']]);
-        if ($stmt->fetchColumn() == 0) {
-            sendResponse(false, "产品编号不存在，请选择有效的编号");
-        }
-    }
-
-    try {
-        // 计算总价值
-        $inQty = floatval($data['in_quantity'] ?? 0);
-        $outQty = floatval($data['out_quantity'] ?? 0);
-        $price = floatval($data['price'] ?? 0);
-        $totalValue = ($inQty + $outQty) * $price;
-
-        // 将 Drinks 转换为 Service Line
-        $type = $data['type'] ?? null;
-        if ($type === 'Drinks' || strtolower($type) === 'drinks') {
-            $type = 'Service Line';
-        }
-
-        $sql = "INSERT INTO j1stockinout_data 
-                (date, time, code_number, product_name, 
-                in_quantity, out_quantity, specification, price, total_value, type, receiver, remark, target_system) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-        $stmt = $pdo->prepare($sql);
-
-        $stmt->execute([
-            $data['date'],
-            $data['time'],
-            $data['code_number'] ?? null,
-            $data['product_name'],
-            $inQty,
-            $outQty,
-            $data['specification'] ?? null,
-            $price,
-            $totalValue,
-            $type,
-            $data['receiver'] ?? null,
-            $data['remark'] ?? null,
-            $data['target_system'] ?? null
-        ]);
-
-        $newId = $pdo->lastInsertId();
-
-        // 获取新插入的记录
-        $stmt = $pdo->prepare("SELECT * FROM j2stockinout_data WHERE id = ?");
-        $stmt->execute([$newId]);
-        $newRecord = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        sendResponse(true, "J2出库记录添加成功", $newRecord);
-
-    } catch (PDOException $e) {
-        sendResponse(false, "添加记录失败：" . $e->getMessage());
-    }
-}
-
-// 处理 PUT 请求 - 更新记录
-function handlePut() {
-    global $pdo, $data;
-
-    if (!$data || !isset($data['id'])) {
-        sendResponse(false, "缺少记录ID");
-    }
-
-    // 验证必填字段
-    $required_fields = ['date', 'time', 'product_name'];
-    foreach ($required_fields as $field) {
-        if (empty($data[$field])) {
-            sendResponse(false, "缺少必填字段：$field");
-        }
-    }
-
-    // 验证至少有入库或出库数量
-    $inQty = floatval($data['in_quantity'] ?? 0);
-    $outQty = floatval($data['out_quantity'] ?? 0);
-    if ($inQty <= 0 && $outQty <= 0) {
-        sendResponse(false, "入库数量或出库数量至少填写一项且大于0");
-    }
-
-    // 验证产品名称是否存在于数据库中
-    if (!empty($data['product_name'])) {
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM stock_data WHERE product_name = ?");
-        $stmt->execute([$data['product_name']]);
-        if ($stmt->fetchColumn() == 0) {
-            sendResponse(false, "产品名称不存在，请选择有效的产品");
-        }
-    }
-
-    // 验证产品编号是否存在于数据库中
-    if (!empty($data['code_number'])) {
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM stock_data WHERE product_code = ?");
-        $stmt->execute([$data['code_number']]);
-        if ($stmt->fetchColumn() == 0) {
-            sendResponse(false, "产品编号不存在，请选择有效的编号");
-        }
-    }
-
-    try {
-        // 计算总价值
-        $inQty = floatval($data['in_quantity'] ?? 0);
-        $outQty = floatval($data['out_quantity'] ?? 0);
-        $price = floatval($data['price'] ?? 0);
-        $totalValue = ($inQty + $outQty) * $price;
-
-        // 将 Drinks 转换为 Service Line
-        $type = $data['type'] ?? null;
-        if ($type === 'Drinks' || strtolower($type) === 'drinks') {
-            $type = 'Service Line';
-        }
-
-        $sql = "UPDATE j1stockinout_data 
-                SET date = ?, time = ?, code_number = ?, product_name = ?, 
-                    in_quantity = ?, out_quantity = ?, specification = ?, price = ?, total_value = ?,
-                    type = ?, receiver = ?, remark = ?, target_system = ?
-                WHERE id = ?";
-
-        $stmt = $pdo->prepare($sql);
-
-        $result = $stmt->execute([
-            $data['date'],
-            $data['time'],
-            $data['code_number'] ?? null,
-            $data['product_name'],
-            $inQty,
-            $outQty,
-            $data['specification'] ?? null,
-            $price,
-            $totalValue,
-            $type,
-            $data['receiver'] ?? null,
-            $data['remark'] ?? null,
-            $data['target_system'] ?? null,
-            $data['id']
-        ]);
-
-        // 检查记录是否存在
-        $checkStmt = $pdo->prepare("SELECT * FROM j2stockinout_data WHERE id = ?");
-        $checkStmt->execute([$data['id']]);
-        $existingRecord = $checkStmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($existingRecord) {
-            // 记录存在，获取更新后的记录
-            $stmt = $pdo->prepare("SELECT * FROM j2stockinout_data WHERE id = ?");
-            $stmt->execute([$data['id']]);
-            $updatedRecord = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            sendResponse(true, "J2出库记录更新成功", $updatedRecord);
-        } else {
-            sendResponse(false, "记录不存在");
-        }
-
-    } catch (PDOException $e) {
-        sendResponse(false, "更新记录失败：" . $e->getMessage());
-    }
-}
-
-// 处理 DELETE 请求 - 删除记录
-function handleDelete() {
-    global $pdo;
-
-    $id = $_GET['id'] ?? null;
-
-    if (!$id) {
-        sendResponse(false, "缺少记录ID");
-    }
-
-    try {
-        $stmt = $pdo->prepare("DELETE FROM j2stockinout_data WHERE id = ?");
-        $result = $stmt->execute([$id]);
-
-        if ($stmt->rowCount() > 0) {
-            sendResponse(true, "J2出库记录删除成功");
-        } else {
-            sendResponse(false, "记录不存在");
-        }
-
-    } catch (PDOException $e) {
-        sendResponse(false, "删除记录失败：" . $e->getMessage());
-    }
+} else {
+    sendResponse(false, "不支持的请求方法");
 }
 ?>
