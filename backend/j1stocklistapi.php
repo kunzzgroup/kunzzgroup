@@ -48,8 +48,8 @@ function getJ1StockSummary($startDate = null, $endDate = null) {
     try {
         // 如果提供了结束日期，计算到该日期为止的所有库存（包括历史累计）
         if ($endDate) {
-            // 计算到结束日期为止的所有库存
-            // 合并 j1stockedit_data 和 j1stockeditmobile_data 两个表的数据
+            // j1stockedit_data 包含桌面端及手机端 sync 记录（receiver='Mobile'）
+            // 统一从此表查询，mobile 出货会按 specification/price/type 正确合并到同一行
             $sql = "SELECT 
                         product_name,
                         specification,
@@ -60,46 +60,17 @@ function getJ1StockSummary($startDate = null, $endDate = null) {
                         SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
                         (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
                          SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
-                    FROM (
-                        SELECT product_name, specification, price, code_number, type, in_quantity, out_quantity
-                        FROM j1stockedit_data 
-                        WHERE product_name IS NOT NULL AND product_name != ''
-                        AND (receiver IS NULL OR receiver NOT IN ('Mobile', 'mobile'))
-                        AND date <= ?
-                        UNION ALL
-                        SELECT 
-                            m.product_name,
-                            COALESCE(sd.specification, je.specification, NULL) as specification,
-                            COALESCE(je.price, 0) as price,
-                            m.code_number,
-                            COALESCE(sd.category, je.type, NULL) as type,
-                            m.in_quantity,
-                            m.out_quantity
-                        FROM j1stockeditmobile_data m
-                        LEFT JOIN stock_data sd ON (sd.product_name = m.product_name OR sd.product_code = m.code_number)
-                        LEFT JOIN (
-                            SELECT je1.product_name, je1.code_number, je1.price, je1.specification, je1.type
-                            FROM j1stockedit_data je1
-                            INNER JOIN (
-                                SELECT product_name, code_number, MAX(id) as max_id
-                                FROM j1stockedit_data
-                                WHERE price > 0
-                                GROUP BY product_name, code_number
-                            ) je2 ON je1.id = je2.max_id
-                        ) je ON je.product_name = m.product_name 
-                            AND (je.code_number = m.code_number OR (je.code_number IS NULL AND m.code_number IS NULL))
-                        WHERE m.product_name IS NOT NULL AND m.product_name != ''
-                        AND m.date <= ?
-                    ) AS combined_data
+                    FROM j1stockedit_data
+                    WHERE product_name IS NOT NULL AND product_name != ''
+                    AND date <= ?
                     GROUP BY product_name, specification, price, code_number, type
                     HAVING current_stock != 0
                     ORDER BY product_name ASC, price ASC";
             
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([$endDate, $endDate]);
+            $stmt->execute([$endDate]);
         } else {
-            // 没有日期范围，返回所有库存
-            // 合并 j1stockedit_data 和 j1stockeditmobile_data 两个表的数据
+            // 没有日期过滤，返回所有库存
             $sql = "SELECT 
                         product_name,
                         specification,
@@ -110,35 +81,8 @@ function getJ1StockSummary($startDate = null, $endDate = null) {
                         SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
                         (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
                          SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
-                    FROM (
-                        SELECT product_name, specification, price, code_number, type, in_quantity, out_quantity
-                        FROM j1stockedit_data 
-                        WHERE product_name IS NOT NULL AND product_name != ''
-                        AND (receiver IS NULL OR receiver NOT IN ('Mobile', 'mobile'))
-                        UNION ALL
-                        SELECT 
-                            m.product_name,
-                            COALESCE(sd.specification, je.specification, NULL) as specification,
-                            COALESCE(je.price, 0) as price,
-                            m.code_number,
-                            COALESCE(sd.category, je.type, NULL) as type,
-                            m.in_quantity,
-                            m.out_quantity
-                        FROM j1stockeditmobile_data m
-                        LEFT JOIN stock_data sd ON (sd.product_name = m.product_name OR sd.product_code = m.code_number)
-                        LEFT JOIN (
-                            SELECT je1.product_name, je1.code_number, je1.price, je1.specification, je1.type
-                            FROM j1stockedit_data je1
-                            INNER JOIN (
-                                SELECT product_name, code_number, MAX(id) as max_id
-                                FROM j1stockedit_data
-                                WHERE price > 0
-                                GROUP BY product_name, code_number
-                            ) je2 ON je1.id = je2.max_id
-                        ) je ON je.product_name = m.product_name 
-                            AND (je.code_number = m.code_number OR (je.code_number IS NULL AND m.code_number IS NULL))
-                        WHERE m.product_name IS NOT NULL AND m.product_name != ''
-                    ) AS combined_data
+                    FROM j1stockedit_data
+                    WHERE product_name IS NOT NULL AND product_name != ''
                     GROUP BY product_name, specification, price, code_number, type
                     HAVING current_stock != 0
                     ORDER BY product_name ASC, price ASC";
