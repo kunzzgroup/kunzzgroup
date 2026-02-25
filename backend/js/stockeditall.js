@@ -37,18 +37,6 @@ if (requestedStockType && validStockTypes.has(requestedStockType)) {
             API_BASE_URL = 'j3stockeditpageapi.php';
             break;
     }
-} else {
-    // 没有 URL 参数时，从 localStorage 恢复上次的系统选择
-    const savedSystem = localStorage.getItem('lastStockSystem');
-    if (savedSystem && validStockTypes.has(savedSystem)) {
-        currentStockType = savedSystem;
-        switch (currentStockType) {
-            case 'central': API_BASE_URL = 'stockeditapi.php'; break;
-            case 'j1': API_BASE_URL = 'j1stockeditpageapi.php'; break;
-            case 'j2': API_BASE_URL = 'j2stockeditpageapi.php'; break;
-            case 'j3': API_BASE_URL = 'j3stockeditpageapi.php'; break;
-        }
-    }
 }
 
 // 新增记录弹窗：备注 placeholder（中央保持原样，J1/J2/J3改为“输入备注（发票号码/损耗）”）
@@ -965,8 +953,6 @@ function switchStock(stockType, event = null) {
         }
     }
     currentStockType = stockType;
-    // 保存当前系统选择，下次直接进入该页也会自动恒复
-    localStorage.setItem('lastStockSystem', stockType);
     updateNewRecordRemarkPlaceholder();
 
     // 更新API地址
@@ -1260,19 +1246,18 @@ function toggleViewSelector() {
 }
 
 function switchView(viewType) {
-    const systemParam = (currentStockType && currentStockType !== 'central') ? `?system=${currentStockType}` : '';
     if (viewType === 'list') {
-        // 跳转到库存清单页面（保留当前系统选择）
-        window.location.href = `stocklistall${systemParam}`;
+        // 直接跳转到库存清单页面，不带参数
+        window.location.href = 'stocklistall';
     } else if (viewType === 'remark') {
-        // 跳转到备注页面（保留当前系统选择）
-        window.location.href = `stockremark${systemParam}`;
+        // 跳转到备注页面
+        window.location.href = 'stockremark';
     } else if (viewType === 'product') {
-        // 跳转到货品种类页面（保留当前系统选择）
-        window.location.href = `stockproductname${systemParam}`;
+        // 跳转到货品种类页面
+        window.location.href = 'stockproductname';
     } else if (viewType === 'sot') {
-        // 跳转到货品异常页面（保留当前系统选择）
-        window.location.href = `stocksot${systemParam}`;
+        // 跳转到货品异常页面
+        window.location.href = 'stocksot';
     } else {
         // 保持在当前页面（库存记录）
         hideViewDropdown();
