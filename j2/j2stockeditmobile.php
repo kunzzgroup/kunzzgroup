@@ -3944,29 +3944,23 @@ require_once '../backend/session_check.php';
                     <td>
                         <span class="action-cell">
                             ${isBatchDeleteMode ? 
-                                (record.is_from_mobile !== 0 ? 
-                                    `<input type="checkbox" class="batch-select-checkbox" 
-                                            data-record-id="${record.id}" 
-                                            onchange="toggleRecordSelection(${record.id}, this.checked)"
-                                            ${selectedRecords.has(record.id) ? 'checked' : ''}>`  :
-                                    `<span style="color:#9ca3af;font-size:11px;">电脑版</span>`
-                                ) :
-                                (record.is_from_mobile === 0 ?
-                                    `<span style="color:#9ca3af;font-size:11px;" title="电脑版记录，请在电脑版修改">💻</span>` :
-                                    (isEditing ? 
-                                        `<button class="action-btn edit-btn save-mode" onclick="saveRecord(${record.id})" title="保存">
-                                            <i class="fas fa-save"></i>
-                                        </button>
-                                        <button class="action-btn" onclick="cancelEdit(${record.id})" title="取消" style="background: #6b7280;">
-                                            <i class="fas fa-times"></i>
-                                        </button>` :
-                                        `<button class="action-btn edit-btn" onclick="editRecord(${record.id})" title="编辑">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="action-btn delete-btn" onclick="deleteRecord(${record.id})" title="删除">
-                                            <i class="fas fa-trash"></i>
-                                        </button>`
-                                    )
+                                `<input type="checkbox" class="batch-select-checkbox" 
+                                        data-record-id="${record.id}" 
+                                        onchange="toggleRecordSelection(${record.id}, this.checked)"
+                                        ${selectedRecords.has(record.id) ? 'checked' : ''}>` :
+                                (isEditing ? 
+                                    `<button class="action-btn edit-btn save-mode" onclick="saveRecord(${record.id})" title="保存">
+                                        <i class="fas fa-save"></i>
+                                    </button>
+                                    <button class="action-btn" onclick="cancelEdit(${record.id})" title="取消" style="background: #6b7280;">
+                                        <i class="fas fa-times"></i>
+                                    </button>` :
+                                    `<button class="action-btn edit-btn" onclick="editRecord(${record.id})" title="编辑">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn delete-btn" onclick="deleteRecord(${record.id})" title="删除">
+                                        <i class="fas fa-trash"></i>
+                                    </button>`
                                 )
                             }
                         </span>
