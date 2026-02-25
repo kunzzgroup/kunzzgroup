@@ -1,66 +1,72 @@
 <?php
-header("Content-Type: application/json");
 session_start();
 
-// 1. 数据库连接配置
+// GET request: serve the reset password HTML page
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    include 'reset_password.html';
+    exit;
+}
+
+// POST request: handle password reset API
+header("Content-Type: application/json");
+
+// 1. Database connection
 $host = 'localhost';
 $dbname = 'u690174784_kunzz';
 $dbuser = 'u690174784_kunzz';
 $dbpass = 'Kunzz1688';
 
-// 2. 建立数据库连接
+// 2. Connect
 $conn = new mysqli($host, $dbuser, $dbpass, $dbname);
 
-// 检查连接是否成功
 if ($conn->connect_error) {
-    echo json_encode(["success" => false, "message" => "数据库连接失败: " . $conn->connect_error]);
+    echo json_encode(["success" => false, "message" => "Database connection failed: " . $conn->connect_error]);
     exit;
 }
 
-// 获取 JSON 数据
+// Get JSON input
 $data = json_decode(file_get_contents("php://input"), true);
 $email = $data["email"] ?? "";
 $newPassword = $data["new_password"] ?? "";
 
-// 检查字段
+// Validate fields
 if (!$email || !$newPassword) {
-    echo json_encode(["success" => false, "message" => "邮箱或新密码缺失"]);
+    echo json_encode(["success" => false, "message" => "Email or new password is missing"]);
     exit;
 }
 
-// 验证 session 中验证码
+// Validate session verification code
 if (
     !isset($_SESSION["verification_code"]) ||
     !isset($_SESSION["verification_email"]) ||
     !isset($_SESSION["code_expire_time"]) ||
     $_SESSION["verification_email"] !== $email
 ) {
-    echo json_encode(["success" => false, "message" => "请先完成验证码验证"]);
+    echo json_encode(["success" => false, "message" => "Please complete verification first"]);
     exit;
 }
 
-// 检查验证码是否过期
+// Check if code has expired
 if (time() > $_SESSION["code_expire_time"]) {
-    echo json_encode(["success" => false, "message" => "验证码已过期"]);
+    echo json_encode(["success" => false, "message" => "Verification code has expired"]);
     exit;
 }
 
-// 加密密码
+// Hash and update password
 $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
 
-// 更新数据库 - 同时更新密码和首次登录状态
 $stmt = $conn->prepare("UPDATE users SET password = ?, is_first_login = 0 WHERE email = ?");
 $stmt->bind_param("ss", $hashedPassword, $email);
 
 if ($stmt->execute()) {
-    echo json_encode(["success" => true, "message" => "密码更新成功"]);
+    echo json_encode(["success" => true, "message" => "Password updated successfully"]);
 
-    // 可选：清除验证码 session
+    // Clear verification session
     unset($_SESSION["verification_code"]);
     unset($_SESSION["verification_email"]);
     unset($_SESSION["code_expire_time"]);
 } else {
-    echo json_encode(["success" => false, "message" => "密码更新失败"]);
+    echo json_encode(["success" => false, "message" => "Password update failed"]);
 }
 
 $stmt->close();
