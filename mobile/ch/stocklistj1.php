@@ -282,6 +282,13 @@ if (isset($_SESSION['user_id'])) {
                 if (result.success) {
                     // 保存完整的原始产品列表（用于提取所有类型选项）
                     allProductList = result.data || [];
+                    // 统一将 Drinks 显示为 Service Line（与后台一致）
+                    allProductList = allProductList.map(item => {
+                        if (item.category === 'Drinks' || item.category === 'drinks') {
+                            item.category = 'Service Line';
+                        }
+                        return item;
+                    });
                     productList = [...allProductList]; // 复制完整列表
                     console.log('接收到产品数据数量:', productList.length);
                     
