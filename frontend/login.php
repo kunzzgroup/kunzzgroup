@@ -62,7 +62,7 @@ if ($result->num_rows === 1) {
             setcookie('remember_token', '', time() - 3600, "/");
         }
 
-        header("Location: /backend/dashboard.php");
+        header("Location: ../backend/dashboard");
         exit();
 
     } else {
