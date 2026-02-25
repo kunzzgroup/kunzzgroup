@@ -546,6 +546,9 @@ if (isset($_SESSION['user_id'])) {
             const selectedCategory = productCategorySelect ? productCategorySelect.value : '';
             
             const filteredData = stockData.filter(item => {
+                // 零库存过滤：排除数量为 0 或负数的行
+                if (parseFloat(item.qty) <= 0) return false;
+
                 // 搜索过滤
                 if (searchTerm) {
                     const code = (item.product_code || '').toLowerCase();
