@@ -63,6 +63,7 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
                         SELECT product_name, specification, price, code_number, type, in_quantity, out_quantity
                         FROM j2stockedit_data 
                         WHERE product_name IS NOT NULL AND product_name != ''
+                        AND (receiver IS NULL OR receiver NOT IN ('Mobile', 'mobile'))
                         AND date <= ?
                         UNION ALL
                         SELECT 
@@ -110,6 +111,7 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
                         SELECT product_name, specification, price, code_number, type, in_quantity, out_quantity
                         FROM j2stockedit_data 
                         WHERE product_name IS NOT NULL AND product_name != ''
+                        AND (receiver IS NULL OR receiver NOT IN ('Mobile', 'mobile'))
                         UNION ALL
                         SELECT 
                             m.product_name,
