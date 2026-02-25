@@ -82,6 +82,14 @@ function ensureTables(PDO $pdo) {
       UNIQUE KEY `unique_product` (`product_name`, `code_number`),
       KEY `idx_product_name` (`product_name`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+    // 添加 mobile_ref_id 列
+    try {
+        $pdo->exec("ALTER TABLE `j2stockedit_data` ADD COLUMN `mobile_ref_id` int(11) DEFAULT NULL");
+        $pdo->exec("ALTER TABLE `j2stockedit_data` ADD INDEX `idx_mobile_ref_id` (`mobile_ref_id`)");
+    } catch (PDOException $e) {
+        // 列已存在则忽略
+    }
 }
 
 // 获取请求方法和数据
@@ -419,7 +427,8 @@ function handlePost() {
         // 更新库存总数表
         updateStocklistTotal($data['product_name'], $data['code_number'] ?? null, floatval($data['in_quantity'] ?? 0), floatval($data['out_quantity'] ?? 0), true);
         
-        // 同步到 j2stockedit_data 表
+        // 同步到 j2stockedit_data 表（传入 mobile_ref_id）
+        $data['mobile_ref_id'] = $newId;
         syncToJ2StockEditData($pdo, $data, 'insert');
         
         $pdo->commit();
@@ -493,18 +502,22 @@ function handlePut() {
             true
         );
         
-        // 同步更新到 j2stockedit_data 表
+        // 同步更新到 j2stockedit_data：先删除旧扣货行，再重新智能分层扣货
+        $mobileId = $data['id'];
+        $delStmt = $pdo->prepare("DELETE FROM j2stockedit_data WHERE mobile_ref_id = ? AND receiver = 'Mobile' AND target_system = 'j2'");
+        $delStmt->execute([$mobileId]);
+
         $updateData = [
-            'date' => $data['date'] ?? $oldRecord['date'],
-            'time' => $data['time'] ?? $oldRecord['time'],
-            'product_name' => $data['product_name'] ?? $oldRecord['product_name'],
-            'code_number' => $data['code_number'] ?? $oldRecord['code_number'],
-            'in_quantity' => floatval($data['in_quantity'] ?? $oldRecord['in_quantity']),
-            'out_quantity' => floatval($data['out_quantity'] ?? $oldRecord['out_quantity']),
-            'old_date' => $oldRecord['date'], // 用于查找旧记录
-            'old_time' => $oldRecord['time']  // 用于查找旧记录
+            'date'          => $data['date'] ?? $oldRecord['date'],
+            'time'          => $data['time'] ?? $oldRecord['time'],
+            'product_name'  => $data['product_name'] ?? $oldRecord['product_name'],
+            'code_number'   => $data['code_number'] ?? $oldRecord['code_number'],
+            'in_quantity'   => floatval($data['in_quantity'] ?? $oldRecord['in_quantity']),
+            'out_quantity'  => floatval($data['out_quantity'] ?? $oldRecord['out_quantity']),
+            'price'         => $data['price'] ?? null,
+            'mobile_ref_id' => $mobileId,
         ];
-        syncToJ2StockEditData($pdo, $updateData, 'update');
+        syncToJ2StockEditData($pdo, $updateData, 'insert');
         
         $pdo->commit();
         
@@ -564,7 +577,7 @@ function handleDelete() {
             );
             
             // 同步删除 j2stockedit_data 表中的记录
-            syncToJ2StockEditData($pdo, $record, 'delete');
+            syncToJ2StockEditData($pdo, ['mobile_ref_id' => $id], 'delete');
         }
         
         $pdo->commit();
@@ -577,136 +590,117 @@ function handleDelete() {
     }
 }
 
-// 同步数据到 j2stockedit_data 表
+// 同步数据到 j2stockedit_data 表（智能按价格从高到低分层扣货）
 function syncToJ2StockEditData($pdo, $data, $operation = 'insert') {
     try {
-        // 直接从 j2stockedit_data 查找该产品最近的 specification/price/type
-        $matchInfo = null;
-        if (!empty($data['product_name'])) {
-            $q = "SELECT specification, price, type FROM j2stockedit_data
-                  WHERE product_name = ?
-                  AND receiver NOT IN ('Mobile','mobile')
-                  AND price IS NOT NULL AND price > 0
-                  ORDER BY id DESC LIMIT 1";
-            $qStmt = $pdo->prepare($q);
-            $qStmt->execute([$data['product_name']]);
-            $matchInfo = $qStmt->fetch(PDO::FETCH_ASSOC);
-        }
-        if (!$matchInfo && !empty($data['product_name'])) {
-            $infoStmt = $pdo->prepare("SELECT specification, price, category as type FROM stock_data WHERE product_name = ? LIMIT 1");
-            $infoStmt->execute([$data['product_name']]);
-            $matchInfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
-        }
-        
-        $specification = $matchInfo['specification'] ?? null;
-        if (isset($data['price']) && ($data['price'] !== null && $data['price'] !== '')) {
-            $price = floatval($data['price']);
-        } else {
-            $price = floatval($matchInfo['price'] ?? 0);
-        }
-        $type = $matchInfo['type'] ?? null;
-        
-        error_log("syncToJ2StockEditData: product={$data['product_name']}, spec={$specification}, price={$price}, type={$type}, op={$operation}");
-        
-        if ($operation === 'insert') {
-            // 插入新记录到 j2stockedit_data
-            $sql = "INSERT INTO j2stockedit_data 
-                    (date, time, code_number, product_name, in_quantity, out_quantity, specification, price, receiver, remark, target_system, type) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([
-                $data['date'],
-                $data['time'],
-                $data['code_number'] ?? null,
-                $data['product_name'],
-                floatval($data['in_quantity'] ?? 0),
-                floatval($data['out_quantity'] ?? 0),
-                $specification,
-                $price,
-                'Mobile', // 标记为移动端操作
-                null, // remark
-                'j2',
-                $type
-            ]);
-            
-            return $pdo->lastInsertId();
-        } elseif ($operation === 'update') {
-            // 更新 j2stockedit_data 中的记录
-            // 需要先查找旧记录（使用旧的date和time），如果找不到则插入新记录
-            // 注意：这里假设传入的data包含旧的date和time用于查找
-            $oldDate = $data['old_date'] ?? $data['date'];
-            $oldTime = $data['old_time'] ?? $data['time'];
-            
-            // 先尝试更新
-            $sql = "UPDATE j2stockedit_data 
-                    SET date = ?, time = ?, code_number = ?, product_name = ?, 
-                        in_quantity = ?, out_quantity = ?, specification = ?, price = ?, type = ?
-                    WHERE product_name = ? AND date = ? AND time = ? AND receiver = 'Mobile' AND target_system = 'j2'
-                    LIMIT 1";
-            
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([
-                $data['date'],
-                $data['time'],
-                $data['code_number'] ?? null,
-                $data['product_name'],
-                floatval($data['in_quantity'] ?? 0),
-                floatval($data['out_quantity'] ?? 0),
-                $specification,
-                $price,
-                $type,
-                $data['product_name'], // WHERE条件
-                $oldDate, // WHERE条件 - 使用旧的date
-                $oldTime // WHERE条件 - 使用旧的time
-            ]);
-            
-            // 如果更新失败（找不到记录），则插入新记录
-            if ($stmt->rowCount() === 0) {
-                $insertSql = "INSERT INTO j2stockedit_data 
-                        (date, time, code_number, product_name, in_quantity, out_quantity, specification, price, receiver, remark, target_system, type) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                
-                $insertStmt = $pdo->prepare($insertSql);
-                $insertStmt->execute([
-                    $data['date'],
-                    $data['time'],
-                    $data['code_number'] ?? null,
-                    $data['product_name'],
-                    floatval($data['in_quantity'] ?? 0),
-                    floatval($data['out_quantity'] ?? 0),
-                    $specification,
-                    $price,
-                    'Mobile',
-                    null,
-                    'j2',
-                    $type
-                ]);
-                
-                return $pdo->lastInsertId();
+        if ($operation === 'delete') {
+            $mobileRefId = $data['mobile_ref_id'] ?? null;
+            if ($mobileRefId) {
+                $stmt = $pdo->prepare("DELETE FROM j2stockedit_data WHERE mobile_ref_id = ? AND receiver = 'Mobile' AND target_system = 'j2'");
+                $stmt->execute([$mobileRefId]);
+                return $stmt->rowCount() > 0;
             }
-            
-            return true;
-        } elseif ($operation === 'delete') {
-            // 删除 j2stockedit_data 中的记录
-            $sql = "DELETE FROM j2stockedit_data 
-                    WHERE product_name = ? AND date = ? AND time = ? AND receiver = 'Mobile' AND target_system = 'j2'
-                    LIMIT 1";
-            
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([
-                $data['product_name'],
-                $data['date'],
-                $data['time']
-            ]);
-            
-            return $stmt->rowCount() > 0;
+            return false;
         }
-        
-        return false;
+
+        if ($operation !== 'insert') return false;
+
+        $outQty      = floatval($data['out_quantity'] ?? 0);
+        $inQty       = floatval($data['in_quantity'] ?? 0);
+        $mobileRefId = $data['mobile_ref_id'] ?? null;
+        $codeNumber  = $data['code_number'] ?? null;
+        $productName = $data['product_name'] ?? '';
+
+        // 入库或无出货：单行插入
+        if ($outQty <= 0) {
+            $matchInfo = null;
+            $qStmt = $pdo->prepare("SELECT specification, price, type FROM j2stockedit_data
+                WHERE product_name = ? AND (receiver IS NULL OR receiver NOT IN ('Mobile','mobile'))
+                AND price IS NOT NULL AND price > 0 ORDER BY id DESC LIMIT 1");
+            $qStmt->execute([$productName]);
+            $matchInfo = $qStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$matchInfo) {
+                $infoStmt = $pdo->prepare("SELECT specification, price, category as type FROM stock_data WHERE product_name = ? LIMIT 1");
+                $infoStmt->execute([$productName]);
+                $matchInfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
+            }
+
+            $price = isset($data['price']) && $data['price'] !== null && $data['price'] !== ''
+                ? floatval($data['price']) : floatval($matchInfo['price'] ?? 0);
+
+            $stmt = $pdo->prepare(
+                "INSERT INTO j2stockedit_data
+                 (date, time, code_number, product_name, in_quantity, out_quantity,
+                  specification, price, receiver, remark, target_system, type, mobile_ref_id)
+                 VALUES (?,?,?,?,?,?,?,?,'Mobile',NULL,'j2',?,?)"
+            );
+            $stmt->execute([
+                $data['date'], $data['time'], $codeNumber, $productName,
+                $inQty, 0,
+                $matchInfo['specification'] ?? null, $price,
+                $matchInfo['type'] ?? null, $mobileRefId,
+            ]);
+            return $pdo->lastInsertId();
+        }
+
+        // 出库：智能分层扣货
+        $tierParams = [$productName];
+        $codeFilter = '';
+        if ($codeNumber !== null && $codeNumber !== '') {
+            $codeFilter = ' AND code_number = ?';
+            $tierParams[] = $codeNumber;
+        }
+
+        $tierStmt = $pdo->prepare(
+            "SELECT specification, price, type,
+                    (SUM(in_quantity) - SUM(out_quantity)) AS available
+             FROM j2stockedit_data
+             WHERE product_name = ? {$codeFilter}
+             AND price IS NOT NULL AND price > 0
+             GROUP BY specification, price, type
+             HAVING available > 0
+             ORDER BY price DESC
+             FOR UPDATE"
+        );
+        $tierStmt->execute($tierParams);
+        $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $remaining   = $outQty;
+        $insertStmt  = $pdo->prepare(
+            "INSERT INTO j2stockedit_data
+             (date, time, code_number, product_name, in_quantity, out_quantity,
+              specification, price, receiver, remark, target_system, type, mobile_ref_id)
+             VALUES (?,?,?,?,0,?,?,?,'Mobile',NULL,'j2',?,?)"
+        );
+
+        foreach ($tiers as $tier) {
+            if ($remaining <= 0) break;
+            $deduct = min(floatval($tier['available']), $remaining);
+            $insertStmt->execute([
+                $data['date'], $data['time'], $codeNumber, $productName,
+                $deduct, $tier['specification'], floatval($tier['price']),
+                $tier['type'], $mobileRefId,
+            ]);
+            $remaining -= $deduct;
+        }
+
+        if ($remaining > 0.0001) {
+            $lastTier = !empty($tiers) ? end($tiers) : [
+                'specification' => null, 'price' => floatval($data['price'] ?? 0), 'type' => null
+            ];
+            $insertStmt->execute([
+                $data['date'], $data['time'], $codeNumber, $productName,
+                $remaining, $lastTier['specification'], floatval($lastTier['price']),
+                $lastTier['type'], $mobileRefId,
+            ]);
+        }
+
+        error_log("syncToJ2StockEditData: product={$productName}, out={$outQty}, tiers=" . count($tiers));
+        return true;
+
     } catch (PDOException $e) {
         error_log("同步到j2stockedit_data失败: " . $e->getMessage());
-        // 不抛出异常，避免影响主流程
         return false;
     }
 }
