@@ -25,6 +25,39 @@ RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+frontend/(.*)\s [NC]
 RewriteRule ^frontend/(.*)$ /$1 [R=301,L]
 
 # -----------------------------------------------------
+# 2.5. Hide /frontend_en/ and route /en/ to frontend_en
+# -----------------------------------------------------
+
+# If browser visits /frontend_en/index or /frontend_en/index.php -> redirect to /en/
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+frontend_en/index(\.php)?\s [NC]
+RewriteRule ^frontend_en/index(\.php)?$ /en/ [R=301,L]
+
+# If browser visits /frontend_en/page.php -> redirect to /en/page
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+frontend_en/([^\.\s]+)\.php\s [NC]
+RewriteRule ^frontend_en/([^/]+)\.php$ /en/$1 [R=301,L]
+
+# If browser visits /frontend_en/anything -> redirect to /en/anything
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+frontend_en/(.*)\s [NC]
+RewriteRule ^frontend_en/(.*)$ /en/$1 [R=301,L]
+
+# Route /en/ to frontend_en/index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^en/?$ frontend_en/index.php [L]
+
+# Route /en/pagename to frontend_en/pagename.php (if exists)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}/frontend_en/$1.php -f
+RewriteRule ^en/(.+)$ frontend_en/$1.php [L]
+
+# Route /en/pagename to frontend_en/pagename.html (if exists)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}/frontend_en/$1.html -f
+RewriteRule ^en/(.+)$ frontend_en/$1.html [L]
+
+# -----------------------------------------------------
 # 3. Pretty URLs for j1/j2/j3 directories
 # -----------------------------------------------------
 RewriteCond %{REQUEST_FILENAME} !-f

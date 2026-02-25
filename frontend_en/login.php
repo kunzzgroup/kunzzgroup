@@ -42,7 +42,7 @@ if ($result->num_rows === 1) {
         // 检查是否为首次登录
         if ($user['is_first_login'] == 1) {
             // 首次登录，跳转到密码重置页面
-            header("Location: reset_password.html");
+            header("Location: /en/reset_password");
             exit();
         }
 
@@ -67,12 +67,12 @@ if ($result->num_rows === 1) {
         exit();
 
     } else {
-        echo "<script>alert('密码错误'); window.location.href='login.html';</script>";
+        echo "<script>alert('密码错误'); window.location.href='/en/login';</script>";
         exit();
     }
 
 } else {
-    echo "<script>alert('该账号不存在'); window.location.href='login.html';</script>";
+    echo "<script>alert('该账号不存在'); window.location.href='/en/login';</script>";
     exit();
 }
 

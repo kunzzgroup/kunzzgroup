@@ -28,7 +28,3 @@ RewriteRule ^(.+?)/?$ $1.php [L,QSA]
 # 4. Directory Index
 # -----------------------------
 DirectoryIndex index.php index.html
-
-# 4. Directory Index
-# -----------------------------
-DirectoryIndex index.php index.html
