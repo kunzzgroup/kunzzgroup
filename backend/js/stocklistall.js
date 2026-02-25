@@ -402,29 +402,28 @@ async function applyPagePermissions() {
 function switchView(view) {
     if (view === currentView) return;
 
+    const systemParam = (currentSystem && currentSystem !== 'central') ? `?system=${currentSystem}` : '';
+
     if (view === 'records') {
-        // 跳转到库存记录页面
-        window.location.href = 'stockeditall';
+        window.location.href = `stockeditall${systemParam}`;
         return;
     }
 
     if (view === 'remark') {
-        // 跳转到Remark页面
-        window.location.href = 'stockremark';
+        window.location.href = `stockremark${systemParam}`;
         return;
     }
 
     if (view === 'product') {
-        // 跳转到货品种类页面
-        window.location.href = 'stockproductname';
+        window.location.href = `stockproductname${systemParam}`;
         return;
     }
 
     if (view === 'sot') {
-        // 跳转到货品异常页面
-        window.location.href = 'stocksot';
+        window.location.href = `stocksot${systemParam}`;
         return;
     }
+
 
     currentView = view;
 
