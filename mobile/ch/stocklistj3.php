@@ -65,7 +65,7 @@ if (isset($_SESSION['user_id'])) {
                         <label for="product-category" class="sr-only">货品类型</label>
                         <div class="select-wrapper">
                             <select id="product-category" name="product-category">
-                                <option value="" disabled>部门</option>
+                                <option value="" disabled selected>部门</option>
                                 <option value="">全部</option>
                             </select>
                             <span class="select-icon" aria-hidden="true"></span>
@@ -421,7 +421,7 @@ if (isset($_SESSION['user_id'])) {
             const currentValue = categorySelect.value;
             
             // 清空选项（保留"全部"选项）
-            categorySelect.innerHTML = '<option value="" disabled>部门</option><option value="">全部</option>';
+            categorySelect.innerHTML = '<option value="" disabled selected>部门</option><option value="">全部</option>';
             
             // 添加所有货品类型选项
             categories.forEach(category => {
@@ -478,7 +478,7 @@ if (isset($_SESSION['user_id'])) {
             
             // 如果没有选择货品类型，显示所有冰箱分类
             if (!selectedProductCategory || selectedProductCategory === '') {
-                freezerCategorySelect.innerHTML = '<option value="" disabled>区域</option><option value="">全部</option>';
+                freezerCategorySelect.innerHTML = '<option value="" disabled selected>区域</option><option value="">全部</option>';
                 allFreezerCategories.forEach(cat => {
                     const option = document.createElement('option');
                     option.value = cat.value;
@@ -499,7 +499,7 @@ if (isset($_SESSION['user_id'])) {
                 });
                 
                 // 清空选项（保留"全部"选项）
-                freezerCategorySelect.innerHTML = '<option value="" disabled>区域</option><option value="">全部</option>';
+                freezerCategorySelect.innerHTML = '<option value="" disabled selected>区域</option><option value="">全部</option>';
                 
                 // 只添加有效的冰箱分类选项
                 allFreezerCategories.forEach(cat => {
