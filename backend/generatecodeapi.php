@@ -246,16 +246,17 @@ function sendWelcomeEmail($email, $username, $password, $accountType) {
     $headers = array(
         'MIME-Version' => '1.0',
         'Content-type' => 'text/html; charset=utf-8',
-        'From' => 'noreply@kunzzgroup.com',
+        'From' => 'no-reply@kunzzgroup.com',
         'Reply-To' => 'support@kunzzgroup.com',
         'X-Mailer' => 'PHP/' . phpversion()
     );
     
     // 将数组转换为字符串格式
-    $headerString = '';
+    $headerParts = [];
     foreach ($headers as $key => $value) {
-        $headerString .= $key . ': ' . $value . "\r\n";
+        $headerParts[] = $key . ': ' . $value;
     }
+    $headerString = implode("\r\n", $headerParts);
     
     // 发送邮件
     return mail($to, $subject, $message, $headerString);
