@@ -1,16 +1,17 @@
 RewriteEngine On
 
 # -----------------------------------------------------
-# 1. Protect actual logic & APIs from rewriting
+# 1. Protect actual logic & APIs
 # -----------------------------------------------------
 RewriteRule ^api/ - [L]
 RewriteRule ^backend/ - [L]
 RewriteRule ^(costapi|stockapi|kpiapi|check_permissions)\.php$ - [L]
 
+# ✅ 已经被内部重写到 frontend/ 的请求，直接放行，不再处理
+RewriteRule ^frontend/ - [L]
+
 # -----------------------------------------------------
-# 2. Aggressively Hide /frontend/index.php and /frontend/
-# If a user's browser actually visits the ugly URL, redirect it
-# to the root equivalent. This physically changes the URL bar.
+# 2. Hide /frontend/ URLs → redirect to clean URLs
 # -----------------------------------------------------
 RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+frontend/index\.php\s [NC]
 RewriteRule ^frontend/index\.php$ / [R=301,L]
@@ -25,7 +26,7 @@ RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+frontend/(.*)\s [NC]
 RewriteRule ^frontend/(.*)$ /$1 [R=301,L]
 
 # -----------------------------------------------------
-# 3. Pretty URLs for j1/j2/j3 directories
+# 3. Pretty URLs for j1/j2/j3
 # -----------------------------------------------------
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
@@ -35,7 +36,6 @@ RewriteRule ^(.+?)/?$ $1.php [L,QSA]
 
 # -----------------------------------------------------
 # 4. Transparently Serve From /frontend
-# If none of the above matches, map to frontend (without changing URL)
 # -----------------------------------------------------
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
