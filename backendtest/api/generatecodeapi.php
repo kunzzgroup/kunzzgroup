@@ -241,18 +241,20 @@ function sendWelcomeEmail($email, $username, $password, $accountType) {
         'Content-type' => 'text/html; charset=utf-8',
         'From' => 'no-reply@kunzzgroup.com',
         'Reply-To' => 'support@kunzzgroup.com',
+        'Return-Path' => 'no-reply@kunzzgroup.com',
+        'Message-ID' => '<' . uniqid() . '-' . time() . '@kunzzgroup.com>',
+        'Date' => date('r'),
         'X-Mailer' => 'PHP/' . phpversion()
     );
     
     // 将数组转换为字符串格式
-    $headerParts = [];
+    $headerString = '';
     foreach ($headers as $key => $value) {
-        $headerParts[] = $key . ': ' . $value;
+        $headerString .= $key . ': ' . $value . "\r\n";
     }
-    $headerString = implode("\r\n", $headerParts);
     
-    // 发送邮件
-    return mail($to, $subject, $message, $headerString);
+    // 发送邮件 (添加第五个参数 -f 强制指定信封发送者，这对于绕过多数服务器反垃圾过滤至关重要)
+    return mail($to, $subject, $message, $headerString, '-fno-reply@kunzzgroup.com');
 }
 
 /**
