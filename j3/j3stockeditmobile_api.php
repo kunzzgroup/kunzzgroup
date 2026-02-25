@@ -579,29 +579,33 @@ function handleDelete() {
 // 同步数据到 j3stockedit_data 表（与 J1/J2 一致，使 backend stocklistall 能显示 mobile 端扣除）
 function syncToJ3StockEditData($pdo, $data, $operation = 'insert') {
     try {
-        $productInfo = null;
+        // 直接从 j3stockedit_data 查找该产品最近的 specification/price/type
+        $matchInfo = null;
         if (!empty($data['product_name'])) {
-            $infoStmt = $pdo->prepare("SELECT specification, price, category FROM stock_data WHERE product_name = ? LIMIT 1");
+            $q = "SELECT specification, price, type FROM j3stockedit_data
+                  WHERE product_name = ?
+                  AND receiver NOT IN ('Mobile','mobile')
+                  AND price IS NOT NULL AND price > 0
+                  ORDER BY id DESC LIMIT 1";
+            $qStmt = $pdo->prepare($q);
+            $qStmt->execute([$data['product_name']]);
+            $matchInfo = $qStmt->fetch(PDO::FETCH_ASSOC);
+        }
+        if (!$matchInfo && !empty($data['product_name'])) {
+            $infoStmt = $pdo->prepare("SELECT specification, price, category as type FROM stock_data WHERE product_name = ? LIMIT 1");
             $infoStmt->execute([$data['product_name']]);
-            $productInfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
-        } elseif (!empty($data['code_number'])) {
-            $infoStmt = $pdo->prepare("SELECT specification, price, category FROM stock_data WHERE product_code = ? LIMIT 1");
-            $infoStmt->execute([$data['code_number']]);
-            $productInfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
+            $matchInfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
         }
         
-        $specification = $productInfo['specification'] ?? null;
-        // 优先使用前端传递的价格（用于按价格扣除），即使为0也要使用前端的价格
-        // 只有当前端完全没有传递price字段时，才从stock_data获取
+        $specification = $matchInfo['specification'] ?? null;
         if (isset($data['price']) && ($data['price'] !== null && $data['price'] !== '')) {
             $price = floatval($data['price']);
         } else {
-            $price = floatval($productInfo['price'] ?? 0);
+            $price = floatval($matchInfo['price'] ?? 0);
         }
-        $type = $productInfo['category'] ?? null;
+        $type = $matchInfo['type'] ?? null;
         
-        // 调试日志：记录使用的价格
-        error_log("syncToJ3StockEditData: product_name={$data['product_name']}, frontend_price=" . ($data['price'] ?? 'null') . ", stock_data_price=" . ($productInfo['price'] ?? 'null') . ", final_price={$price}, out_quantity=" . ($data['out_quantity'] ?? 0));
+        error_log("syncToJ3StockEditData: product={$data['product_name']}, spec={$specification}, price={$price}, type={$type}, op={$operation}");
         
         if ($operation === 'insert') {
             $sql = "INSERT INTO j3stockedit_data 
