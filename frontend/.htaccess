@@ -1,13 +1,10 @@
 RewriteEngine On
 
-# 1. 真实文件或目录直接访问
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# 2. 隐藏 .php 扩展名
 RewriteCond %{REQUEST_FILENAME}.php -f
 RewriteRule ^(.+?)/?$ $1.php [L,QSA]
 
-# 3. 默认首页
 DirectoryIndex index.php index.html

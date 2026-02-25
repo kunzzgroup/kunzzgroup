@@ -12,7 +12,7 @@ if (
     isset($_SESSION['user_id']) || 
     (isset($_COOKIE['user_id']) && isset($_COOKIE['username']) && isset($_COOKIE['remember_token']) && $_COOKIE['remember_token'] === '1')
 ) {
-    header("Location: ../backend/dashboard.php");
+    header("Location: /backend/dashboard.php");
     exit();
 }
 
