@@ -129,7 +129,7 @@ function handleGet() {
     
     switch ($action) {
         case 'list':
-            // 获取所有进出库数据
+            // 获取所有进出库数据（手机端 + 电脑端）
             $startDate = $_GET['start_date'] ?? null;
             $endDate = $_GET['end_date'] ?? null;
             $searchDate = $_GET['search_date'] ?? null;
@@ -137,49 +137,67 @@ function handleGet() {
             $productName = $_GET['product_name'] ?? null;
             $limit = $_GET['limit'] ?? 5000;
 
-            // 不设置默认日期范围：未提供日期参数时返回全部记录
-
-            $sql = "SELECT * FROM j2stockeditmobile_data WHERE 1=1";
+            $dateCond = "1=1";
             $params = [];
-            
+            $params2 = [];
             if ($searchDate) {
-                $sql .= " AND date = ?";
+                $dateCond = "date = ?";
                 $params[] = $searchDate;
+                $params2[] = $searchDate;
             } elseif ($startDate && $endDate) {
-                $sql .= " AND date BETWEEN ? AND ?";
+                $dateCond = "date BETWEEN ? AND ?";
                 $params[] = $startDate;
                 $params[] = $endDate;
-            }
-            
-            if ($productCode) {
-                $sql .= " AND code_number LIKE ?";
-                $params[] = "%$productCode%";
+                $params2[] = $startDate;
+                $params2[] = $endDate;
             }
 
-            if ($productName) {
-                $sql .= " AND product_name LIKE ?";
-                $params[] = "%$productName%";
+            $codeCond = "";
+            $nameCond = "";
+            if ($productCode) {
+                $codeCond = " AND code_number LIKE ?";
+                $params[] = "%$productCode%";
+                $params2[] = "%$productCode%";
             }
-            
-            // 按顺序显示：日期升序 → 时间升序 → 进货在前（in_quantity>0）→ 最后按id
-            $sql .= " ORDER BY date ASC, time ASC, CASE WHEN in_quantity>0 THEN 0 ELSE 1 END ASC, id ASC";
-            $sql .= " LIMIT " . intval($limit);
-            
+            if ($productName) {
+                $nameCond = " AND product_name LIKE ?";
+                $params[] = "%$productName%";
+                $params2[] = "%$productName%";
+            }
+
+            $sql = "SELECT id, date, time, product_name, code_number,
+                           in_quantity, out_quantity, receiver, created_at, updated_at,
+                           1 AS is_from_mobile
+                    FROM j2stockeditmobile_data
+                    WHERE $dateCond $codeCond $nameCond
+                    UNION ALL
+                    SELECT id, date, time, product_name, code_number,
+                           in_quantity, out_quantity,
+                           CASE WHEN receiver IS NULL OR receiver = '' THEN applicant ELSE receiver END AS receiver,
+                           created_at, updated_at,
+                           0 AS is_from_mobile
+                    FROM j2stockedit_data
+                    WHERE $dateCond $codeCond $nameCond
+                    AND (receiver IS NULL OR receiver NOT IN ('Mobile', 'mobile'))
+                    ORDER BY date ASC, time ASC, is_from_mobile DESC, id ASC
+                    LIMIT " . intval($limit);
+
+            $allParams = array_merge($params, $params2);
+
             try {
                 $stmt = $pdo->prepare($sql);
-                $stmt->execute($params);
+                $stmt->execute($allParams);
                 $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                
-                // 为每条记录添加计算字段
+
                 foreach ($records as &$record) {
                     $inQty = floatval($record['in_quantity'] ?? 0);
                     $outQty = floatval($record['out_quantity'] ?? 0);
                     $record['balance_quantity'] = $inQty - $outQty;
+                    $record['is_from_mobile'] = (int)$record['is_from_mobile'];
                 }
-                
+
                 sendResponse(true, "数据获取成功，共找到 " . count($records) . " 条记录", $records);
             } catch (PDOException $e) {
-                // 表不存在：创建表并返回空数组，避免500
                 if ($e->getCode() === '42S02' || strpos($e->getMessage(), '1146') !== false) {
                     try { ensureTables($pdo); } catch (Throwable $ignore) {}
                     sendResponse(true, "首次初始化，表已创建", []);
