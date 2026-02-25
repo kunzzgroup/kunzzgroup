@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 
 // 检查用户是否登录
@@ -65,7 +65,7 @@ if (isset($_SESSION['user_id'])) {
                         <label for="product-category" class="sr-only">货品类型</label>
                         <div class="select-wrapper">
                             <select id="product-category" name="product-category">
-                                <option value="" disabled selected>部门</option>
+                                <option value="" disabled>部门</option>
                                 <option value="">全部</option>
                             </select>
                             <span class="select-icon" aria-hidden="true"></span>
@@ -76,7 +76,7 @@ if (isset($_SESSION['user_id'])) {
                         <label for="freezer-category" class="sr-only">冰箱分类</label>
                         <div class="select-wrapper">
                             <select id="freezer-category" name="freezer-category">
-                                <option value="" disabled selected>区域</option>
+                                <option value="" disabled>区域</option>
                                 <option value="">全部</option>
                                 <option value="K1-1">K1-1</option>
                                 <option value="K1-2">K1-2</option>
