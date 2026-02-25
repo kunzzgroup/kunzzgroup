@@ -46,7 +46,7 @@ function getJ2StockSummary() {
     global $pdo;
     
     try {
-        // 查询j2stockedit_data表的汇总数据：按产品名称、规格、价格分组计算库存
+        // 按产品名称、规格、价格分组，再在 PHP 中按同一货品（名称+编号+规格）合并，先相减后显示一行
         $sql = "SELECT 
                     product_name,
                     specification,
@@ -56,40 +56,58 @@ function getJ2StockSummary() {
                     SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
                     (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
                      SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
+                HAVING current_stock > 0
                 FROM j2stockedit_data 
                 WHERE product_name IS NOT NULL AND product_name != ''
                 GROUP BY product_name, specification, price, code_number
-                HAVING current_stock > 0
                 ORDER BY product_name ASC, price ASC";
         
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
         $stockData = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // 计算总价值 - 使用原始数值计算，只在显示时格式化
+        // 同一货品（名称+编号+规格）合并为一行：库存相加减，单价用加权平均
+        $merged = [];
+        foreach ($stockData as $row) {
+            $key = ($row['product_name'] ?? '') . '|' . ($row['code_number'] ?? '') . '|' . ($row['specification'] ?? '');
+            $currentStock = floatval($row['current_stock']);
+            $price = floatval($row['price']);
+            if (!isset($merged[$key])) {
+                $merged[$key] = [
+                    'product_name' => $row['product_name'],
+                    'code_number' => $row['code_number'] ?? '',
+                    'specification' => $row['specification'] ?? '',
+                    'stock' => 0,
+                    'value_sum' => 0
+                ];
+            }
+            $merged[$key]['stock'] += $currentStock;
+            $merged[$key]['value_sum'] += $price * $currentStock;
+        }
+        
         $totalValue = 0;
         $summaryData = [];
         $counter = 1;
-        
-        foreach ($stockData as $row) {
-            $currentStock = floatval($row['current_stock']);
-            $price = floatval($row['price']);
-            $totalPrice = $currentStock * $price;
+        foreach ($merged as $k => $v) {
+            $currentStock = $v['stock'];
+            if ($currentStock == 0) continue;
+            
             
             // 使用原始数值累加，不进行四舍五入
+            $price = $currentStock != 0 ? $v['value_sum'] / $currentStock : 0;
+            $totalPrice = $currentStock * $price;
             $totalValue += $totalPrice;
-            
             $summaryData[] = [
                 'no' => $counter++,
-                'product_name' => $row['product_name'],
-                'code_number' => $row['code_number'] ?? '',
+                'product_name' => $v['product_name'],
+                'code_number' => $v['code_number'],
                 'total_stock' => $currentStock,
-                'specification' => $row['specification'] ?? '',
+                'specification' => $v['specification'],
                 'price' => $price,
-                'total_price' => $totalPrice, // 使用原始计算值
+                'total_price' => $totalPrice,
                 'formatted_stock' => number_format($currentStock, 2),
                 'formatted_price' => number_format($price, 2),
-                'formatted_total_price' => number_format($totalPrice, 2) // 显示时格式化为两位小数
+                'formatted_total_price' => number_format($totalPrice, 2)
             ];
         }
         

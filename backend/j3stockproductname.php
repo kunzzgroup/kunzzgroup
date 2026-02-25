@@ -164,4 +164,3 @@ if (isset($_SESSION['user_id'])) {
     <script src="../js/j3stockproductname.js"></script>
 </body>
 </html>
-
