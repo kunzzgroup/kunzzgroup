@@ -6,11 +6,11 @@ RewriteEngine On
 RewriteRule ^api/ - [L]
 RewriteRule ^backend/ - [L]
 
-# Specific API Files
+# Specific API Files (Fixed check_permissions filename)
 RewriteRule ^(costapi|stockapi|kpiapi|check_permissions)\.php$ - [L]
 
 # -----------------------------
-# 2. Serve Existing Files/Directories Directly
+# 2. Serve Existing Files/Directories
 # -----------------------------
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^ - [L]
@@ -19,6 +19,12 @@ RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
 # -----------------------------
-# 3. Directory Index
+# 3. Pretty URLs (Hide .php)
+# -----------------------------
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.+?)/?$ $1.php [L,QSA]
+
+# -----------------------------
+# 4. Directory Index
 # -----------------------------
 DirectoryIndex index.php index.html

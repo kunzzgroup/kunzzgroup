@@ -37,15 +37,8 @@ RewriteRule ^(.+?)/?$ $1.php [L,QSA]
 # 4. Transparently Serve From /frontend
 # If none of the above matches, map to frontend (without changing URL)
 # -----------------------------------------------------
-
-# Try frontend/path.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_URI} !^/(backend|api|frontend_en)/
-RewriteRule ^(.+)$ frontend/$1.php [L]
-
-# Fallback: just map to frontend/path (let frontend/.htaccess handle the rest)
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_URI} !^/(backend|api|frontend_en)/
+RewriteCond %{REQUEST_URI} !^/backend/
+RewriteCond %{REQUEST_URI} !^/api/
 RewriteRule ^(.*)$ frontend/$1 [L]
