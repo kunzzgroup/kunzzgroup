@@ -1,16 +1,14 @@
 RewriteEngine On
 
 # -----------------------------
-# 1. Protect Logic & APIs (Most Important)
+# 1. Protect Logic & APIs
 # -----------------------------
 RewriteRule ^api/ - [L]
 RewriteRule ^backend/ - [L]
-
-# Specific API Files (Fixed check_permissions filename)
 RewriteRule ^(costapi|stockapi|kpiapi|check_permissions)\.php$ - [L]
 
 # -----------------------------
-# 2. Serve Existing Files/Directories
+# 2. Serve Existing Files/Directories Directly
 # -----------------------------
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^ - [L]
@@ -19,12 +17,6 @@ RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
 # -----------------------------
-# 3. Pretty URLs (Hide .php)
-# -----------------------------
-RewriteCond %{REQUEST_FILENAME}.php -f
-RewriteRule ^(.+?)/?$ $1.php [L,QSA]
-
-# -----------------------------
-# 4. Directory Index
+# 3. Directory Index
 # -----------------------------
 DirectoryIndex index.php index.html

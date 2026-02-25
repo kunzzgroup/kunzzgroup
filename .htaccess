@@ -8,37 +8,10 @@ RewriteRule ^backend/ - [L]
 RewriteRule ^(costapi|stockapi|kpiapi|check_permissions)\.php$ - [L]
 
 # -----------------------------------------------------
-# 2. Aggressively Hide /frontend/index.php and /frontend/
-# If a user's browser actually visits the ugly URL, redirect it
-# to the root equivalent. This physically changes the URL bar.
-# -----------------------------------------------------
-RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+frontend/index\.php\s [NC]
-RewriteRule ^frontend/index\.php$ / [R=301,L]
-
-RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+frontend/index\s [NC]
-RewriteRule ^frontend/index$ / [R=301,L]
-
-RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+frontend/([^\.\s]+)\.php\s [NC]
-RewriteRule ^frontend/([^/]+)\.php$ /$1 [R=301,L]
-
-RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/+frontend/(.*)\s [NC]
-RewriteRule ^frontend/(.*)$ /$1 [R=301,L]
-
-# -----------------------------------------------------
-# 3. Pretty URLs for j1/j2/j3 directories
+# 2. Pretty URLs for j1/j2/j3 directories
 # -----------------------------------------------------
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} ^/(j1|j2|j3)/
 RewriteCond %{REQUEST_FILENAME}.php -f
 RewriteRule ^(.+?)/?$ $1.php [L,QSA]
-
-# -----------------------------------------------------
-# 4. Transparently Serve From /frontend
-# If none of the above matches, map to frontend (without changing URL)
-# -----------------------------------------------------
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_URI} !^/backend/
-RewriteCond %{REQUEST_URI} !^/api/
-RewriteRule ^(.*)$ frontend/$1 [L]
