@@ -37,6 +37,18 @@ if (requestedStockType && validStockTypes.has(requestedStockType)) {
             API_BASE_URL = 'j3stockeditpageapi.php';
             break;
     }
+} else {
+    // 没有 URL 参数时，从 localStorage 恢复上次的系统选择
+    const savedSystem = localStorage.getItem('lastStockSystem');
+    if (savedSystem && validStockTypes.has(savedSystem)) {
+        currentStockType = savedSystem;
+        switch (currentStockType) {
+            case 'central': API_BASE_URL = 'stockeditapi.php'; break;
+            case 'j1': API_BASE_URL = 'j1stockeditpageapi.php'; break;
+            case 'j2': API_BASE_URL = 'j2stockeditpageapi.php'; break;
+            case 'j3': API_BASE_URL = 'j3stockeditpageapi.php'; break;
+        }
+    }
 }
 
 // 新增记录弹窗：备注 placeholder（中央保持原样，J1/J2/J3改为“输入备注（发票号码/损耗）”）
@@ -953,6 +965,8 @@ function switchStock(stockType, event = null) {
         }
     }
     currentStockType = stockType;
+    // 保存当前系统选择，下次直接进入该页也会自动恒复
+    localStorage.setItem('lastStockSystem', stockType);
     updateNewRecordRemarkPlaceholder();
 
     // 更新API地址
