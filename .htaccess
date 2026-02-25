@@ -38,25 +38,14 @@ RewriteRule ^(.+?)/?$ $1.php [L,QSA]
 # If none of the above matches, map to frontend (without changing URL)
 # -----------------------------------------------------
 
-# First, check if it maps to a .php file
+# Try frontend/path.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_URI} !^/backend/
-RewriteCond %{REQUEST_URI} !^/api/
-RewriteCond %{DOCUMENT_ROOT}/frontend/$1.php -f
-RewriteRule ^(.*)$ frontend/$1.php [L]
+RewriteCond %{REQUEST_URI} !^/(backend|api|frontend_en)/
+RewriteRule ^(.+)$ frontend/$1.php [L]
 
-# Then, check if it maps to an .html file
+# Fallback: just map to frontend/path (let frontend/.htaccess handle the rest)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_URI} !^/backend/
-RewriteCond %{REQUEST_URI} !^/api/
-RewriteCond %{DOCUMENT_ROOT}/frontend/$1.html -f
-RewriteRule ^(.*)$ frontend/$1.html [L]
-
-# Finally, fallback
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_URI} !^/backend/
-RewriteCond %{REQUEST_URI} !^/api/
+RewriteCond %{REQUEST_URI} !^/(backend|api|frontend_en)/
 RewriteRule ^(.*)$ frontend/$1 [L]
