@@ -1,6 +1,11 @@
 <?php
 // 包含会话验证
 require_once '../backend/session_check.php';
+// 读取店面会话，限制为本页支持的类型
+$_sessionStore = strtolower($_SESSION['store'] ?? 'j3');
+if (!in_array($_sessionStore, ['j1', 'j2', 'j3', 'central'])) {
+    $_sessionStore = 'j3';
+}
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -2297,8 +2302,8 @@ require_once '../backend/session_check.php';
 
     <script>
         // API 配置
-        let API_BASE_URL = 'j3stockeditmobile_api.php';
-        let currentStockType = 'j3';
+        let API_BASE_URL = '<?php echo $_sessionStore; ?>stockeditmobile_api.php';
+        let currentStockType = '<?php echo $_sessionStore; ?>';
         
         // 应用状态
         let stockData = [];

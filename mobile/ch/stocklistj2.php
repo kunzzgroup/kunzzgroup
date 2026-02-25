@@ -1,5 +1,6 @@
 ﻿<?php
 session_start();
+$_SESSION['store'] = 'J2'; // 记录当前选择的店面
 
 // 检查用户是否登录
 if (!isset($_SESSION['user_id'])) {
