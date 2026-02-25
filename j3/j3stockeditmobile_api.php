@@ -275,7 +275,7 @@ function handleGet() {
             break;
             
         case 'stocklist_total':
-            // 合并 j3stockeditmobile_data 和 j3stockedit_data 两个表的数据来计算库存总数（与 J1/J2 一致）
+            // 手机记录已经通过 sync 写入 j3stockedit_data，直接查该表即可，避免双重计算
             try {
                 $sql = "SELECT 
                             product_name,
@@ -283,15 +283,8 @@ function handleGet() {
                             SUM(in_quantity) as total_in,
                             SUM(out_quantity) as total_out,
                             SUM(in_quantity) - SUM(out_quantity) as total_qty
-                        FROM (
-                            SELECT product_name, code_number, in_quantity, out_quantity
-                            FROM j3stockeditmobile_data
-                            WHERE product_name IS NOT NULL AND product_name != ''
-                            UNION ALL
-                            SELECT product_name, code_number, in_quantity, out_quantity
-                            FROM j3stockedit_data
-                            WHERE product_name IS NOT NULL AND product_name != ''
-                        ) AS combined_data
+                        FROM j3stockedit_data
+                        WHERE product_name IS NOT NULL AND product_name != ''
                         GROUP BY product_name, code_number
                         ORDER BY product_name";
                 
