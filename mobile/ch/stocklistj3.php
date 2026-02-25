@@ -65,7 +65,7 @@ if (isset($_SESSION['user_id'])) {
                         <label for="product-category" class="sr-only">货品类型</label>
                         <div class="select-wrapper">
                             <select id="product-category" name="product-category">
-                                <option value="">部门/区域</option>
+                                <option value="">全部</option>
                             </select>
                             <span class="select-icon" aria-hidden="true"></span>
                         </div>
@@ -75,7 +75,7 @@ if (isset($_SESSION['user_id'])) {
                         <label for="freezer-category" class="sr-only">冰箱分类</label>
                         <div class="select-wrapper">
                             <select id="freezer-category" name="freezer-category">
-                                <option value="">存放/位置</option>
+                                <option value="">全部</option>
                                 <option value="K1-1">K1-1</option>
                                 <option value="K1-2">K1-2</option>
                                 <option value="K1-3">K1-3</option>
@@ -420,7 +420,7 @@ if (isset($_SESSION['user_id'])) {
             const currentValue = categorySelect.value;
             
             // 清空选项（保留"全部"选项）
-            categorySelect.innerHTML = '<option value="">部门/区域</option>';
+            categorySelect.innerHTML = '<option value="">全部</option>';
             
             // 添加所有货品类型选项
             categories.forEach(category => {
@@ -477,7 +477,7 @@ if (isset($_SESSION['user_id'])) {
             
             // 如果没有选择货品类型，显示所有冰箱分类
             if (!selectedProductCategory || selectedProductCategory === '') {
-                freezerCategorySelect.innerHTML = '<option value="">存放/位置</option>';
+                freezerCategorySelect.innerHTML = '<option value="">全部</option>';
                 allFreezerCategories.forEach(cat => {
                     const option = document.createElement('option');
                     option.value = cat.value;
@@ -498,7 +498,7 @@ if (isset($_SESSION['user_id'])) {
                 });
                 
                 // 清空选项（保留"全部"选项）
-                freezerCategorySelect.innerHTML = '<option value="">存放/位置</option>';
+                freezerCategorySelect.innerHTML = '<option value="">全部</option>';
                 
                 // 只添加有效的冰箱分类选项
                 allFreezerCategories.forEach(cat => {
