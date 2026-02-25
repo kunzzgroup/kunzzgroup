@@ -2180,10 +2180,7 @@ require_once '../backend/session_check.php';
                         placeholder="输入关键字搜索...">
                 </div>
                 
-                <button class="btn btn-success" onclick="showDateRowsModal()">
-                    <i class="fas fa-plus"></i>
-                    新增记录
-                </button>
+
                 
                 <button class="btn btn-warning" onclick="exportData()">
                     <i class="fas fa-download"></i>
