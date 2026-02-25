@@ -37,35 +37,8 @@ RewriteRule ^(.+?)/?$ $1.php [L,QSA]
 # 4. Transparently Serve From /frontend
 # If none of the above matches, map to frontend (without changing URL)
 # -----------------------------------------------------
-
-# Prevent infinite loops internally: ifURI already starts with frontend/ stop.
-RewriteCond %{REQUEST_URI} ^/frontend/ [NC]
-RewriteRule ^ - [L]
-
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^reset_password/?$ frontend/reset_password.html [L]
-
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^login/?$ frontend/login.php [L]
-
-# General fallback: check if a .php file exists in frontend
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_URI} !^/(backend|api)/ [NC]
-RewriteCond %{DOCUMENT_ROOT}/frontend/$1.php -f
-RewriteRule ^(.*)$ frontend/$1.php [L]
-
-# General fallback: check if a .html file exists in frontend
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_URI} !^/(backend|api)/ [NC]
-RewriteCond %{DOCUMENT_ROOT}/frontend/$1.html -f
-RewriteRule ^(.*)$ frontend/$1.html [L]
-
-# Final fallback
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_URI} !^/(backend|api)/ [NC]
+RewriteCond %{REQUEST_URI} !^/backend/
+RewriteCond %{REQUEST_URI} !^/api/
 RewriteRule ^(.*)$ frontend/$1 [L]
