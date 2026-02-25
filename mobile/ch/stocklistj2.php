@@ -420,7 +420,7 @@ if (isset($_SESSION['user_id'])) {
             const currentValue = categorySelect.value;
             
             // 清空选项（保留"全部"选项）
-            categorySelect.innerHTML = '<option value="">全部</option>';
+            categorySelect.innerHTML = '<option value="" disabled>部门</option><option value="">全部</option>';
             
             // 添加所有货品类型选项
             categories.forEach(category => {
@@ -498,7 +498,7 @@ if (isset($_SESSION['user_id'])) {
                 });
                 
                 // 清空选项（保留"全部"选项）
-                freezerCategorySelect.innerHTML = '<option value="">全部</option>';
+                freezerCategorySelect.innerHTML = '<option value="" disabled>区域</option><option value="">全部</option>';
                 
                 // 只添加有效的冰箱分类选项
                 allFreezerCategories.forEach(cat => {
