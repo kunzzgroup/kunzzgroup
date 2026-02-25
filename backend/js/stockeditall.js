@@ -1246,18 +1246,19 @@ function toggleViewSelector() {
 }
 
 function switchView(viewType) {
+    const systemParam = (currentStockType && currentStockType !== 'central') ? `?system=${currentStockType}` : '';
     if (viewType === 'list') {
-        // 直接跳转到库存清单页面，不带参数
-        window.location.href = 'stocklistall';
+        // 跳转到库存清单页面（保留当前系统选择）
+        window.location.href = `stocklistall${systemParam}`;
     } else if (viewType === 'remark') {
-        // 跳转到备注页面
-        window.location.href = 'stockremark';
+        // 跳转到备注页面（保留当前系统选择）
+        window.location.href = `stockremark${systemParam}`;
     } else if (viewType === 'product') {
-        // 跳转到货品种类页面
-        window.location.href = 'stockproductname';
+        // 跳转到货品种类页面（保留当前系统选择）
+        window.location.href = `stockproductname${systemParam}`;
     } else if (viewType === 'sot') {
-        // 跳转到货品异常页面
-        window.location.href = 'stocksot';
+        // 跳转到货品异常页面（保留当前系统选择）
+        window.location.href = `stocksot${systemParam}`;
     } else {
         // 保持在当前页面（库存记录）
         hideViewDropdown();
