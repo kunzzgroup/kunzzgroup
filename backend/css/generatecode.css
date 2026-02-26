@@ -930,7 +930,7 @@ tr:hover {
     margin: 0;
     color: white;
     font-size: 15px;
-    white-space: nowrap;
+    width: 100%;
 }
 
 .perm-level-1-item label span:not(.perm-arrow) {
