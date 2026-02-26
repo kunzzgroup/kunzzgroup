@@ -10,47 +10,6 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-// ✅ 健壮性检查：仅在 status 字段存在时进行安全校验
-// 防止用户由于未运行 SQL 迁移而导致脚本报错（点不到验证码）
-$host = 'localhost';
-$dbname = 'u690174784_kunzz';
-$dbuser = 'u690174784_kunzz';
-$dbpass = 'Kunzz1688';
-
-$conn = new mysqli($host, $dbuser, $dbpass, $dbname);
-if ($conn->connect_error) {
-    echo json_encode(["success" => false, "message" => "数据库连接失败"]);
-    exit;
-}
-
-// 检查 users 表是否已有 status 字段
-$hasStatus = false;
-$res = $conn->query("SHOW COLUMNS FROM users LIKE 'status'");
-if ($res && $res->num_rows > 0) {
-    $hasStatus = true;
-}
-
-$query = $hasStatus 
-    ? "SELECT id FROM users WHERE email = ? AND status = 'active' LIMIT 1"
-    : "SELECT id FROM users WHERE email = ? LIMIT 1";
-
-$checkStmt = $conn->prepare($query);
-if ($checkStmt) {
-    $checkStmt->bind_param("s", $email);
-    $checkStmt->execute();
-    $checkResult = $checkStmt->get_result();
-
-    if ($checkResult->num_rows === 0) {
-        // 用户非 active 或不存在 — 返回错误提示（用户要求明确提示）
-        $checkStmt->close();
-        $conn->close();
-        echo json_encode(["success" => false, "message" => "该用户邮件并不在数据库，无法发送验证码"]);
-        exit;
-    }
-    $checkStmt->close();
-}
-$conn->close();
-
 // 生成6位验证码
 $code = rand(100000, 999999);
 

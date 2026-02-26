@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
 
     // 更新数据库 - 同时更新密码和首次登录状态
-    $stmt = $conn->prepare("UPDATE users SET password = ?, is_first_login = 0 WHERE email = ? AND status = 'active'");
+    $stmt = $conn->prepare("UPDATE users SET password = ?, is_first_login = 0 WHERE email = ?");
     $stmt->bind_param("ss", $hashedPassword, $email);
 
     if ($stmt->execute()) {
