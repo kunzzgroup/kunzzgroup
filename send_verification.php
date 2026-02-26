@@ -22,30 +22,11 @@ $_SESSION["code_expire_time"] = time() + 300;  // 5分钟
 $to = $email;
 $subject = "KUNZZ HOLDINGS - 邮箱验证码";
 $message = "您的验证码是：$code\n\n有效时间为5分钟。";
+$headers = "From: no-reply@kunzzgroup.com\r\nContent-Type: text/plain; charset=UTF-8";
 
-$headers = array(
-    'MIME-Version' => '1.0',
-    'Content-type' => 'text/plain; charset=utf-8',
-    'From' => 'no-reply@kunzzgroup.com',
-    'Reply-To' => 'support@kunzzgroup.com',
-    'Return-Path' => 'no-reply@kunzzgroup.com'
-);
-
-$headerString = '';
-foreach ($headers as $key => $value) {
-    if ($key !== 'Content-type') {
-        $headerString .= $key . ': ' . $value . "\r\n";
-    } else {
-        $headerString .= $key . ': ' . $value . "\r\n";
-    }
-}
-
-// 尝试发送邮件。如果失败（通常是因为本地环境没配置SMTP），为了不卡住流程，直接返回成功并把验证码放在提示里（方便测试）
-if (mail($to, $subject, $message, $headerString, '-fno-reply@kunzzgroup.com')) {
+if (mail($to, $subject, $message, $headers)) {
     echo json_encode(["success" => true, "message" => "验证码已发送"]);
 } else {
-    // 【由于你卡在这里，我暂时加上测试回退方案】
-    // 将验证码也打印出来，方便你就算发不出邮件也能继续测试 reset 流程
-    echo json_encode(["success" => true, "message" => "邮件发送失败 (本地测试模式)，您的验证码是: " . $code]);
+    echo json_encode(["success" => false, "message" => "邮件发送失败，请稍后重试"]);
 }
 ?>
