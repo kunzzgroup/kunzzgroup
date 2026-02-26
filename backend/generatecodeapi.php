@@ -376,6 +376,7 @@ function getCodesAndUsers($pdo) {
                 u.account_type,
                 u.created_at
             FROM users u
+            WHERE u.status != 'deleted'
             ORDER BY u.created_at DESC, u.id DESC
         ";
         
@@ -689,12 +690,14 @@ function deleteCode($pdo, $input) {
         $username = $result['username'];
         $registration_code = $result['registration_code'];
 
-        // 直接删除用户
-        $deleteSql = "DELETE FROM users WHERE id = :id";
-        $deleteStmt = $pdo->prepare($deleteSql);
-        $deleteStmt->bindParam(':id', $id);
+        // ✅ 软删除：标记状态为 deleted，混淆邮箱以防止未来冲突
+        $obfuscatedEmail = 'deleted_' . $id . '_' . time() . '@invalid.local';
+        $softDeleteSql = "UPDATE users SET status = 'deleted', email = :email WHERE id = :id";
+        $softDeleteStmt = $pdo->prepare($softDeleteSql);
+        $softDeleteStmt->bindParam(':email', $obfuscatedEmail);
+        $softDeleteStmt->bindParam(':id', $id);
         
-        if (!$deleteStmt->execute()) {
+        if (!$softDeleteStmt->execute()) {
             $pdo->rollBack();
             echo json_encode([
                 'success' => false,
@@ -770,8 +773,8 @@ function addNewUser($pdo, $input) {
         // 开始事务
         $pdo->beginTransaction();
 
-        // 检查邮箱是否已存在
-        $checkEmailSql = "SELECT id FROM users WHERE email = ?";
+        // 检查邮箱是否已存在（仅检查活跃或禁用用户，忽略软删除用户）
+        $checkEmailSql = "SELECT id FROM users WHERE email = ? AND status != 'deleted'";
         $checkEmailStmt = $pdo->prepare($checkEmailSql);
         $checkEmailStmt->execute([$input['email']]);
 
