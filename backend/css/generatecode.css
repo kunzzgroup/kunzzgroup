@@ -1141,7 +1141,7 @@ tr:hover {
     visibility: hidden;
 }
 
-.perm-detail-content {
+#perm-detail-content {
     opacity: 0;
     transform: translateY(10px);
     height: 100%;
@@ -1156,7 +1156,7 @@ tr:hover {
     z-index: 1;
 }
 
-.perm-detail-content.active {
+#perm-detail-content.active {
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;

@@ -784,28 +784,6 @@ function openEditModal(id) {
             addInputFormatting(input, field);
         }
     });
-
-    // 初始化权限树
-    initPermissionTreeEvents('editUserModal');
-
-    // 获取当用户的现有权限并设置复选框状态
-    // userData.permissions 应该是一个包含权限ID的数组
-    if (userData.permissions) {
-        setPermCheckboxes('editUserModal', userData.permissions);
-    } else {
-        // 如果没有权限数据，确保所有复选框都未选中
-        setPermCheckboxes('editUserModal', []);
-    }
-
-    // 添加权限复选框的change事件监听器，用于更新验证状态
-    const editModal = document.getElementById('editUserModal');
-    if (editModal) {
-        editModal.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-            checkbox.addEventListener('change', () => {
-                updatePermissionValidationState('editUserModal');
-            });
-        });
-    }
 }
 
 // 关闭编辑模态框
@@ -846,16 +824,6 @@ async function handleEditUserSubmit(e) {
             return;
         }
     }
-
-    // 获取并验证权限数据
-    const permData = extractPermissionsData('editUserModal');
-    if (!permData || permData.permissions.length === 0) {
-        showMessage('请至少选择一项用户权限', 'error');
-        return;
-    }
-
-    // 合并权限数据
-    Object.assign(userData, permData);
 
     // 显示加载状态
     const submitBtn = document.querySelector('#editUserForm .btn-save');
@@ -1250,11 +1218,6 @@ function initPermissionTreeEvents(containerId) {
     if (!containerEl) return;
     if (containerEl.dataset.treeBound === 'true') return;
     containerEl.dataset.treeBound = 'true';
-
-    // 绑定所有的 checkbox 变化以更新验证状态
-    containerEl.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        cb.addEventListener('change', () => updatePermissionValidationState(containerId));
-    });
     // 如果已经绑定过，直接返回
 
 
