@@ -925,12 +925,12 @@ tr:hover {
 .perm-level-1-item label {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     cursor: pointer;
-    /* 一级分类label保持pointer以提示可点击展开 */
     margin: 0;
     color: white;
-    font-size: 16px;
+    font-size: 15px;
+    white-space: nowrap;
 }
 
 .perm-level-1-item label span:not(.perm-arrow) {
