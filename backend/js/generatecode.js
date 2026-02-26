@@ -733,14 +733,6 @@ function openEditModal(id) {
     const row = document.getElementById(`row-${id}`);
     const userData = JSON.parse(row.getAttribute('data-user').replace(/&apos;/g, "'"));
 
-    // 先展示模态框以便获取尺寸
-    const modal = document.getElementById('editUserModal');
-    modal.style.display = 'block';
-
-    // 重置并初始化权限树及验证系统
-    resetPermissionTree(modal);
-    initPermissionTreeEvents(modal);
-
     // 填充表单数据
     document.getElementById('edit_user_id').value = userData.id;
     document.getElementById('edit_username').value = userData.username || '';
@@ -775,6 +767,9 @@ function openEditModal(id) {
     accountTypeSelect.addEventListener('change', function () {
         updatePositionOptions(this.value, 'edit_position');
     });
+
+    // 显示模态框
+    document.getElementById('editUserModal').style.display = 'block';
 
     // 添加输入格式化
     const fieldsToFormat = [
@@ -815,7 +810,7 @@ async function handleEditUserSubmit(e) {
         return;
     }
 
-    // 验证所有字段格式
+    // 验证字段格式
     const fieldsToValidate = ['username', 'username_cn', 'email'];
 
     for (let field of fieldsToValidate) {
@@ -829,22 +824,6 @@ async function handleEditUserSubmit(e) {
             return;
         }
     }
-
-    // 提取权限数据
-    const modal = document.getElementById('editUserModal');
-    const checkedBoxes = Array.from(modal.querySelectorAll('.perm-l1-check, .perm-l2-check, .perm-stock-system, .perm-stock-view, .perm-upload-system, .perm-upload-type, .perm-page-schedule, .perm-page-blueprint'))
-        .filter(cb => cb.checked && !cb.disabled);
-
-    if (checkedBoxes.length === 0) {
-        const warningDiv = modal.querySelector('.perm-warning');
-        if (warningDiv) {
-            warningDiv.style.display = 'block';
-        }
-        showMessage('请至少选择一项用户权限', 'error');
-        return;
-    }
-
-    const { perms, submenuPermissions, pagePermissions, brandPermissions, reportPermissions, restaurantPermissions } = extractPermissionsData(modal);
 
     // 显示加载状态
     const submitBtn = document.querySelector('#editUserForm .btn-save');
@@ -861,12 +840,6 @@ async function handleEditUserSubmit(e) {
             body: JSON.stringify({
                 action: 'update',
                 id: userData.user_id,
-                permissions: perms,
-                page_permissions: pagePermissions,
-                submenu_permissions: submenuPermissions,
-                report_permissions: reportPermissions,
-                restaurant_permissions: restaurantPermissions,
-                brand_permissions: brandPermissions,
                 ...userData
             })
         });
@@ -1031,15 +1004,10 @@ function getAccountTypeKey(displayName) {
 
 // 打开添加职员模态框
 function openAddUserModal() {
-    const modal = document.getElementById('addUserModal');
-    modal.style.display = 'block';
+    document.getElementById('addUserModal').style.display = 'block';
 
     // 重置表单
     document.getElementById('addUserForm').reset();
-
-    // 重置并初始化权限树及验证系统
-    resetPermissionTree(modal);
-    initPermissionTreeEvents(modal);
 
     // 重置职位选择框
     const positionSelect = document.getElementById('add_position');
@@ -1106,22 +1074,6 @@ async function addNewUser() {
         }
     }
 
-    // 提取权限数据
-    const modal = document.getElementById('addUserModal');
-    const checkedBoxes = Array.from(modal.querySelectorAll('.perm-l1-check, .perm-l2-check, .perm-stock-system, .perm-stock-view, .perm-upload-system, .perm-upload-type, .perm-page-schedule, .perm-page-blueprint'))
-        .filter(cb => cb.checked && !cb.disabled);
-
-    if (checkedBoxes.length === 0) {
-        const warningDiv = modal.querySelector('.perm-warning');
-        if (warningDiv) {
-            warningDiv.style.display = 'block';
-        }
-        showMessage('请至少选择一项用户权限', 'error');
-        return;
-    }
-
-    const { perms, submenuPermissions, pagePermissions, brandPermissions, reportPermissions, restaurantPermissions } = extractPermissionsData(modal);
-
     // 显示加载状态
     const submitBtn = document.querySelector('#addUserForm .btn-save');
     const originalText = submitBtn.innerHTML;
@@ -1136,12 +1088,6 @@ async function addNewUser() {
             },
             body: JSON.stringify({
                 action: 'add_user',
-                permissions: perms,
-                page_permissions: pagePermissions,
-                submenu_permissions: submenuPermissions,
-                report_permissions: reportPermissions,
-                restaurant_permissions: restaurantPermissions,
-                brand_permissions: brandPermissions,
                 ...userData
             })
         });
@@ -1266,120 +1212,560 @@ const restaurantOptions = ['j1', 'j2', 'j3'];
 // 全局标记，避免重复绑定
 let permissionTreeEventsBound = false;
 
-// 初始化权限树事件监听器 - CLEAN NATIVE VERSION
-function initPermissionTreeEvents(container) {
-    if (!container) return;
+// 初始化权限树事件监听器
+function initPermissionTreeEvents() {
+    // 如果已经绑定过，直接返回
+    if (permissionTreeEventsBound) return;
+    permissionTreeEventsBound = true;
 
-    // 所有需要监听变化的复选框
-    const allCheckboxes = container.querySelectorAll('.clean-perm-tree input[type="checkbox"]');
+    // 阻止label的默认行为，防止点击label时触发checkbox
+    document.querySelectorAll('#permissionsModal .perm-checkbox-label').forEach(label => {
+        label.addEventListener('click', function (e) {
+            // 如果点击的是checkbox，允许默认行为
+            if (e.target.tagName === 'INPUT') {
+                return;
+            }
+            // 点击其他部分（文字、箭头等），只阻止默认行为，不阻止冒泡
+            e.preventDefault();
+        });
+    });
 
-    // 绑定所有的 checkbox 的 change 事件来触发验证
-    allCheckboxes.forEach(cb => {
-        cb.addEventListener('change', () => {
-            updatePermissionValidationState(container);
+    // 额外权限区域的label也需要阻止
+    document.querySelectorAll('.extra-perm-section label').forEach(label => {
+        label.addEventListener('click', function (e) {
+            if (e.target.tagName !== 'INPUT') {
+                e.preventDefault();
+            }
+        });
+    });
 
-            // 下发：如果勾选父级，它下面的所有子级也跟着变
-            const parentDetails = cb.closest('details');
-            if (parentDetails && (cb.classList.contains('perm-parent') || cb.classList.contains('perm-child'))) {
-                const childCheckboxes = parentDetails.querySelectorAll('.perm-children input[type="checkbox"], .perm-grandchildren input[type="checkbox"]');
-                // 只有当这是当前层级的 checkbox，它才能控制下面
-                if (cb === parentDetails.querySelector('summary input[type="checkbox"]')) {
-                    childCheckboxes.forEach(childCb => {
-                        childCb.checked = cb.checked;
-                    });
-                }
+    // 三级面板的label也需要阻止
+    document.querySelectorAll('#perm-detail-content label').forEach(label => {
+        label.addEventListener('click', function (e) {
+            if (e.target.tagName !== 'INPUT') {
+                e.preventDefault();
+            }
+        });
+    });
+
+    // 四级分类点击展开/折叠
+    document.querySelectorAll('.perm-level-4-item').forEach(item => {
+        item.addEventListener('click', function (e) {
+            // 如果点击的是复选框，不处理展开
+            if (e.target.tagName === 'INPUT') {
+                e.stopPropagation();
+                return;
             }
 
-            // 上报：如果取消勾选子级，且它是该父级下最后一个勾选的，则取消勾选父级
-            // 如果勾选子级，则自动勾选对应父级
-            if (cb.classList.contains('perm-grandchild') || cb.classList.contains('perm-child')) {
-                let current = cb;
-                while (current) {
-                    const parentDetails = current.closest('.perm-children')?.closest('details');
-                    if (!parentDetails) break;
+            const container = item.querySelector('.perm-level-4-container');
+            if (!container) return;
 
-                    const parentSummaryCb = parentDetails.querySelector('summary input[type="checkbox"]');
-                    if (parentSummaryCb) {
-                        if (cb.checked) {
-                            // 如果子级勾选了，父级一定得勾上
-                            parentSummaryCb.checked = true;
-                        } else {
-                            // 如果子级取消勾选了，检查同级是否还有勾选的
-                            const siblingCheckboxes = parentDetails.querySelectorAll('.perm-children input[type="checkbox"]:checked, .perm-grandchildren input[type="checkbox"]:checked');
-                            if (siblingCheckboxes.length === 0) {
-                                parentSummaryCb.checked = false;
-                            }
+            const isCurrentlyExpanded = item.classList.contains('expanded');
+
+            // 如果当前项未展开，先关闭所有其他四级分类
+            if (!isCurrentlyExpanded) {
+                document.querySelectorAll('.perm-level-4-item.expanded').forEach(otherItem => {
+                    if (otherItem !== item) {
+                        otherItem.classList.remove('expanded');
+                        const otherContainer = otherItem.querySelector('.perm-level-4-container');
+                        if (otherContainer) {
+                            otherContainer.classList.remove('expanded');
                         }
                     }
-                    current = parentSummaryCb; // 继续往上层找
+                });
+            }
+
+            // 切换当前项的展开状态
+            item.classList.toggle('expanded');
+            container.classList.toggle('expanded');
+        });
+    });
+
+    // 一级分类点击展开/折叠
+    document.querySelectorAll('.perm-level-1-item').forEach(item => {
+        item.addEventListener('click', function (e) {
+            // 如果点击的是复选框，不处理展开
+            if (e.target.tagName === 'INPUT') {
+                e.stopPropagation();
+                return;
+            }
+
+            const parent = item.getAttribute('data-perm');
+            const container = document.querySelector(`.perm-level-2-container[data-parent="${parent}"]`);
+            const isCurrentlyExpanded = item.classList.contains('expanded');
+            const detailContent = document.getElementById('perm-detail-content');
+            const placeholder = document.querySelector('.perm-detail-placeholder');
+            const hasLevel3 = item.classList.contains('has-level-3');
+            const sub = item.getAttribute('data-sub');
+
+            // 如果是一级分类有三级配置（如视觉管理）
+            if (hasLevel3 && sub) {
+                const panel = document.querySelector(`#perm-detail-content .perm-level-3-panel[data-for="${sub}"]`);
+
+                // 如果当前项未展开，先关闭所有其他一级分类和三级面板
+                if (!isCurrentlyExpanded) {
+                    document.querySelectorAll('.perm-level-1-item.expanded').forEach(otherItem => {
+                        if (otherItem !== item) {
+                            otherItem.classList.remove('expanded');
+                            const otherParent = otherItem.getAttribute('data-perm');
+                            const otherContainer = document.querySelector(`.perm-level-2-container[data-parent="${otherParent}"]`);
+                            if (otherContainer) {
+                                otherContainer.classList.remove('expanded');
+                            }
+                        }
+                    });
+
+                    // 关闭所有有三级配置的二级项和右侧详细配置卡片
+                    document.querySelectorAll('.perm-level-2-item.has-level-3.expanded').forEach(level2Item => {
+                        level2Item.classList.remove('expanded');
+                    });
+                    document.querySelectorAll('.perm-level-1-item.has-level-3.expanded').forEach(level1Item => {
+                        if (level1Item !== item) {
+                            level1Item.classList.remove('expanded');
+                        }
+                    });
+                    document.querySelectorAll('.perm-level-3-panel').forEach(p => {
+                        if (p !== panel) p.classList.remove('show');
+                    });
+                }
+
+                // 切换当前项的展开状态
+                item.classList.toggle('expanded');
+
+                // 切换三级面板显示
+                if (panel) {
+                    const isPanelShowing = panel.classList.contains('show');
+                    if (!isPanelShowing) {
+                        // 显示面板
+                        document.querySelectorAll('.perm-level-3-panel').forEach(p => p.classList.remove('show'));
+                        panel.classList.add('show');
+                        if (detailContent) detailContent.classList.add('active');
+                        if (placeholder) placeholder.classList.add('hidden');
+                    } else {
+                        // 隐藏面板
+                        panel.classList.remove('show');
+                        if (detailContent) detailContent.classList.remove('active');
+                        if (placeholder) placeholder.classList.remove('hidden');
+                    }
+                }
+                return;
+            }
+
+            // 普通一级分类（有二级容器）
+            if (!container) return;
+
+            // 如果当前项未展开，先关闭所有其他一级分类
+            if (!isCurrentlyExpanded) {
+                document.querySelectorAll('.perm-level-1-item.expanded').forEach(otherItem => {
+                    if (otherItem !== item) {
+                        otherItem.classList.remove('expanded');
+                        const otherParent = otherItem.getAttribute('data-perm');
+                        const otherContainer = document.querySelector(`.perm-level-2-container[data-parent="${otherParent}"]`);
+                        if (otherContainer) {
+                            otherContainer.classList.remove('expanded');
+                        }
+                    }
+                });
+
+                // 关闭所有有三级配置的二级项和右侧详细配置卡片
+                document.querySelectorAll('.perm-level-2-item.has-level-3.expanded').forEach(level2Item => {
+                    level2Item.classList.remove('expanded');
+                });
+                document.querySelectorAll('.perm-level-1-item.has-level-3.expanded').forEach(level1Item => {
+                    level1Item.classList.remove('expanded');
+                });
+                document.querySelectorAll('.perm-level-3-panel').forEach(panel => {
+                    panel.classList.remove('show');
+                });
+                if (detailContent) detailContent.classList.remove('active');
+                if (placeholder) placeholder.classList.remove('hidden');
+            }
+
+            // 切换当前项的展开状态
+            item.classList.toggle('expanded');
+            container.classList.toggle('expanded');
+        });
+    });
+
+    // 一级复选框变化 - 同步二级权限状态
+    document.querySelectorAll('.perm-l1-check').forEach(checkbox => {
+        if (!checkbox.dataset.fromChild) {
+            checkbox.dataset.fromChild = 'false';
+        }
+
+        checkbox.addEventListener('change', function () {
+            const parentValue = this.value;
+            const isChecked = this.checked;
+            const isFromChild = this.dataset.fromChild === 'true';
+
+            // 重置标记
+            this.dataset.fromChild = 'false';
+
+            if (!isFromChild) {
+                syncLevel2Permissions(parentValue, isChecked);
+            }
+        });
+    });
+
+    // 二级复选框变化 - 检查父级状态并同步三级权限
+    document.querySelectorAll('.perm-l2-check').forEach(checkbox => {
+        checkbox.dataset.fromChild = checkbox.dataset.fromChild || 'false';
+
+        checkbox.addEventListener('change', function () {
+            const level2Value = this.value;
+            const isChecked = this.checked;
+            const parent = this.dataset.parent;
+            const isFromChild = this.dataset.fromChild === 'true';
+
+            // 重置标记
+            this.dataset.fromChild = 'false';
+
+            // 检查父级状态
+            const parentCheckbox = document.querySelector(`.perm-l1-check[value="${parent}"]`);
+            if (parentCheckbox && !parentCheckbox.checked) {
+                parentCheckbox.dataset.fromChild = 'true';
+                parentCheckbox.checked = true;
+                parentCheckbox.dispatchEvent(new Event('change'));
+                this.checked = true;
+            }
+
+            // 同步三级权限（仅在不是从子级触发时，才向下联动）
+            if (!isFromChild) {
+                syncLevel3Permissions(level2Value, isChecked);
+            }
+
+            // 取消勾选时，若无其他同级，则向上取消父级
+            if (!isChecked) {
+                const otherChildren = document.querySelectorAll(`.perm-l2-check[data-parent="${parent}"]:checked`);
+                if (otherChildren.length === 0 && parentCheckbox) {
+                    parentCheckbox.dataset.fromChild = 'true';
+                    parentCheckbox.checked = false;
+                    parentCheckbox.dispatchEvent(new Event('change'));
                 }
             }
         });
     });
 
-    // 初始验证状态
-    updatePermissionValidationState(container);
+    // 二级有三级的项目 - 在右侧卡片显示三级面板
+    document.querySelectorAll('.perm-level-2-item.has-level-3').forEach(item => {
+        item.addEventListener('click', function (e) {
+            // 如果点击的是复选框，不处理展开
+            if (e.target.tagName === 'INPUT') {
+                e.stopPropagation();
+                return;
+            }
 
-    // 阻止 summary 中 checkbox 点击时触发 summary 折叠
-    container.querySelectorAll('.clean-perm-tree summary input[type="checkbox"]').forEach(cb => {
-        cb.addEventListener('click', function (e) {
-            e.stopPropagation();
+            const sub = item.getAttribute('data-sub');
+            const panel = document.querySelector(`#perm-detail-content .perm-level-3-panel[data-for="${sub}"]`);
+            const detailContent = document.getElementById('perm-detail-content');
+            const placeholder = document.querySelector('.perm-detail-placeholder');
+            const isCurrentlyExpanded = item.classList.contains('expanded');
+
+            // 如果当前项未展开，先关闭所有其他有三级配置的二级项
+            if (!isCurrentlyExpanded) {
+                document.querySelectorAll('.perm-level-2-item.has-level-3.expanded').forEach(otherItem => {
+                    if (otherItem !== item) {
+                        otherItem.classList.remove('expanded');
+                        const otherSub = otherItem.getAttribute('data-sub');
+                        const otherPanel = document.querySelector(`#perm-detail-content .perm-level-3-panel[data-for="${otherSub}"]`);
+                        if (otherPanel) {
+                            otherPanel.classList.remove('show');
+                        }
+                    }
+                });
+            }
+
+            // 关闭所有三级面板（除了当前要显示的）
+            document.querySelectorAll('.perm-level-3-panel').forEach(p => {
+                if (p !== panel) p.classList.remove('show');
+            });
+
+            // 切换当前面板
+            item.classList.toggle('expanded');
+
+            if (!isCurrentlyExpanded) {
+                // 展开：显示右侧卡片内容，隐藏占位符
+                detailContent.classList.add('active');
+                placeholder.classList.add('hidden');
+                panel.classList.add('show');
+            } else {
+                // 折叠：关闭面板，显示占位符
+                panel.classList.remove('show');
+                detailContent.classList.remove('active');
+                placeholder.classList.remove('hidden');
+            }
         });
     });
+
+    // 店面项展开/收缩功能
+    document.querySelectorAll('.perm-store-item').forEach(item => {
+        const label = item.querySelector('.perm-checkbox-label');
+        if (label) {
+            label.addEventListener('click', function (e) {
+                // 如果点击的是checkbox，不处理展开
+                if (e.target.tagName === 'INPUT') {
+                    return;
+                }
+                e.preventDefault();
+                e.stopPropagation();
+                item.classList.toggle('expanded');
+            });
+        }
+    });
+
+    // 三级页面权限和库存/上传权限的向上联动
+    document.querySelectorAll('.perm-stock-system, .perm-stock-view, .perm-upload-system, .perm-upload-type, .perm-page-schedule, .perm-page-blueprint').forEach(checkbox => {
+        checkbox.addEventListener('change', function () {
+            let level2Value = '';
+            if (this.classList.contains('perm-stock-system') || this.classList.contains('perm-stock-view')) {
+                level2Value = 'stock_inventory';
+            } else if (this.classList.contains('perm-upload-system') || this.classList.contains('perm-upload-type')) {
+                level2Value = 'kpi_upload';
+            } else if (this.classList.contains('perm-page-schedule')) {
+                level2Value = this.dataset.brand || '';
+            } else if (this.classList.contains('perm-page-blueprint')) {
+                level2Value = this.dataset.brand || '';
+            }
+
+            if (!level2Value) return;
+
+            const level2Checkbox = document.querySelector(`.perm-l2-check[value="${level2Value}"]`);
+            if (!level2Checkbox) return;
+
+            if (this.checked) {
+                if (!level2Checkbox.checked) {
+                    level2Checkbox.dataset.fromChild = 'true';
+                    level2Checkbox.checked = true;
+                    level2Checkbox.dispatchEvent(new Event('change'));
+                }
+            } else {
+                let otherChecked = 0;
+                if (level2Value === 'stock_inventory') {
+                    otherChecked = document.querySelectorAll('.perm-stock-system:checked, .perm-stock-view:checked').length;
+                } else if (level2Value === 'kpi_upload') {
+                    otherChecked = document.querySelectorAll('.perm-upload-system:checked, .perm-upload-type:checked').length;
+                } else if (level2Value === 'kunzz_holdings') {
+                    otherChecked = document.querySelectorAll(`.perm-page-blueprint[data-brand="${level2Value}"]:checked`).length;
+                } else {
+                    otherChecked = document.querySelectorAll(`.perm-page-schedule[data-brand="${level2Value}"]:checked`).length;
+                }
+
+                if (otherChecked === 0) {
+                    level2Checkbox.dataset.fromChild = 'true';
+                    level2Checkbox.checked = false;
+                    level2Checkbox.dispatchEvent(new Event('change'));
+                }
+            }
+        });
+    });
+
+    // 二级复选框变化 - 不自动勾选三级
+    // 移除自动勾选逻辑，用户需要手动勾选三级选项
+
 }
 
 // 设置默认全选所有权限
 function setDefaultAllPermissions() {
     // 先确保所有checkbox都是active的（不设置disabled）
-    document.querySelectorAll('#permissionsModal .clean-perm-tree input[type="checkbox"]').forEach(cb => {
+    document.querySelectorAll('#permissionsModal input[type="checkbox"]').forEach(cb => {
         cb.disabled = false;
-        cb.checked = true; // 全选
+    });
+
+    // 全选所有一级权限
+    document.querySelectorAll('.perm-l1-check').forEach(cb => {
+        cb.checked = true;
+    });
+
+    // 全选所有二级权限
+    document.querySelectorAll('.perm-l2-check').forEach(cb => {
+        cb.checked = true;
+        cb.disabled = false;
+    });
+
+    // 全选所有三级权限（库存、数据上传、集团架构页面权限）
+    document.querySelectorAll('.perm-stock-system, .perm-stock-view, .perm-upload-system, .perm-upload-type, .perm-page-schedule, .perm-page-blueprint').forEach(cb => {
+        cb.checked = true;
+        cb.disabled = false;
+    });
+
+    // 确保所有checkbox都是active的（不设置disabled）
+    document.querySelectorAll('#permissionsModal input[type="checkbox"]').forEach(cb => {
+        cb.disabled = false;
     });
 }
 
-// 权限校验系统
-function updatePermissionValidationState(container) {
-    if (!container) return;
-
-    const submitBtn = container.querySelector('button[type="submit"]');
-    const warningDiv = container.querySelector('.perm-warning');
-
-    const checkedBoxes = Array.from(container.querySelectorAll('.clean-perm-tree input[type="checkbox"]'))
-        .filter(cb => cb.checked && !cb.disabled);
-
-    const hasSelection = checkedBoxes.length > 0;
-
-    if (container.id === 'addUserModal' || container.id === 'editUserModal') {
-        if (warningDiv) {
-            warningDiv.style.display = hasSelection ? 'none' : 'block';
+// 同步二级权限状态
+function syncLevel2Permissions(parentValue, parentChecked) {
+    // 获取该父级下的所有二级权限
+    document.querySelectorAll(`.perm-l2-check[data-parent="${parentValue}"]`).forEach(cb => {
+        if (parentChecked) {
+            if (!cb.checked) {
+                cb.checked = true;
+            }
+            syncLevel3Permissions(cb.value, true);
+        } else {
+            cb.checked = false;
+            syncLevel3Permissions(cb.value, false);
         }
-        if (submitBtn) {
-            submitBtn.disabled = !hasSelection;
-            submitBtn.style.opacity = hasSelection ? '1' : '0.5';
-            submitBtn.style.cursor = hasSelection ? 'pointer' : 'not-allowed';
-        }
+    });
+}
+
+// 同步三级权限状态
+function syncLevel3Permissions(level2Value, level2Checked) {
+    // 库存权限
+    if (level2Value === 'stock_inventory') {
+        document.querySelectorAll('.perm-stock-system, .perm-stock-view').forEach(cb => {
+            cb.checked = level2Checked ? true : false;
+        });
+    }
+
+    // 数据上传权限
+    if (level2Value === 'kpi_upload') {
+        document.querySelectorAll('.perm-upload-system, .perm-upload-type').forEach(cb => {
+            cb.checked = level2Checked ? true : false;
+        });
+    }
+
+    // 集团架构权限 - KUNZZ HOLDINGS
+    if (level2Value === 'kunzz_holdings') {
+        document.querySelectorAll('.perm-page-blueprint[data-brand="kunzz_holdings"]').forEach(cb => {
+            cb.checked = level2Checked ? true : false;
+        });
+    }
+
+    // 集团架构权限 - TOKYO CUISINE
+    if (level2Value === 'tokyo_cuisine') {
+        document.querySelectorAll('.perm-page-schedule[data-store="j1"], .perm-page-schedule[data-store="j2"]').forEach(cb => {
+            cb.checked = level2Checked ? true : false;
+        });
+    }
+
+    // 集团架构权限 - TOKYO IZAKAYA
+    if (level2Value === 'tokyo_izakaya') {
+        document.querySelectorAll('.perm-page-schedule[data-store="j3"]').forEach(cb => {
+            cb.checked = level2Checked ? true : false;
+        });
     }
 }
 
-// 清空并折叠权限树
-function resetPermissionTree(container) {
-    if (!container) return;
-
-    // 取消所有 checkbox 勾选
-    container.querySelectorAll('.clean-perm-tree input[type="checkbox"]').forEach(cb => {
-        cb.checked = false;
+// 关闭详细配置面板
+function closeDetailPanel() {
+    document.querySelectorAll('.perm-level-3-panel').forEach(p => p.classList.remove('show'));
+    document.querySelectorAll('.perm-level-2-item.has-level-3').forEach(i => i.classList.remove('expanded'));
+    document.querySelectorAll('.perm-level-1-item.has-level-3').forEach(i => i.classList.remove('expanded'));
+    document.querySelectorAll('.perm-level-4-item.expanded').forEach(item => {
+        item.classList.remove('expanded');
+        const container = item.querySelector('.perm-level-4-container');
+        if (container) container.classList.remove('expanded');
     });
+    document.getElementById('perm-detail-content').classList.remove('active');
+    document.querySelector('.perm-detail-placeholder').classList.remove('hidden');
+}
 
-    // 折叠所有面板 (HTML5 Native Details)
-    container.querySelectorAll('.clean-perm-tree details').forEach(details => {
-        // Only keep the root open
-        if (!details.classList.contains('perm-group')) {
-            details.removeAttribute('open');
+// 更新库存权限（三级）
+function updateStockInventoryPerms(checked) {
+    document.querySelectorAll('.perm-stock-system').forEach(cb => cb.checked = checked);
+    document.querySelectorAll('.perm-stock-view').forEach(cb => cb.checked = checked);
+}
+
+// 更新数据上传权限（三级）
+function updateKpiUploadPerms(checked) {
+    document.querySelectorAll('.perm-upload-type').forEach(cb => cb.checked = checked);
+}
+
+function hasCustomPermissions(data) {
+    if (!data) return false;
+    const { permissions, submenu_permissions, page_permissions, report_permissions, restaurant_permissions, brand_permissions, upload_permissions } = data;
+    if (Array.isArray(permissions) && permissions.length) return true;
+    if (Array.isArray(report_permissions) && report_permissions.length) return true;
+    if (Array.isArray(restaurant_permissions) && restaurant_permissions.length) return true;
+    if (Array.isArray(upload_permissions) && upload_permissions.length) return true;
+
+    if (submenu_permissions && typeof submenu_permissions === 'object') {
+        if (Object.values(submenu_permissions).some(arr => Array.isArray(arr) && arr.length)) {
+            return true;
         }
+    }
+
+    if (page_permissions && typeof page_permissions === 'object') {
+        const stock = page_permissions.stock_inventory || {};
+        if ((Array.isArray(stock.system) && stock.system.length) ||
+            (Array.isArray(stock.view) && stock.view.length)) {
+            return true;
+        }
+    }
+
+    if (brand_permissions && typeof brand_permissions === 'object') {
+        if (Object.values(brand_permissions).some(arr => Array.isArray(arr) && arr.length)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function openPermissionsModal(userId) {
+    if (!userId) {
+        showMessage('无效的用户ID', 'error');
+        return;
+    }
+
+    const modal = document.getElementById('permissionsModal');
+
+    // 保存当前用户ID
+    document.getElementById('perm_current_user_id').value = userId;
+
+    // 查找用户信息并更新标题
+    const user = originalTableData.find(u => u.id == userId);
+    if (user) {
+        document.getElementById('perm_modal_title').textContent = `用户权限设定 - ${user.username || '未命名用户'}`;
+    } else {
+        document.getElementById('perm_modal_title').textContent = '用户权限设定';
+    }
+
+    // 加载该用户的权限
+    loadUserPermissions(userId);
+
+    // 初始化权限树事件
+    initPermissionTreeEvents();
+
+    modal.style.display = 'block';
+}
+
+function closePermissionsModal() {
+    // 关闭所有展开的项
+    document.querySelectorAll('.perm-level-1-item.expanded').forEach(item => {
+        item.classList.remove('expanded');
+    });
+    document.querySelectorAll('.perm-level-2-container.expanded').forEach(container => {
+        container.classList.remove('expanded');
+    });
+    document.querySelectorAll('.perm-level-3-panel.show').forEach(panel => {
+        panel.classList.remove('show');
+    });
+    document.querySelectorAll('.perm-level-2-item.has-level-3.expanded').forEach(item => {
+        item.classList.remove('expanded');
+    });
+    document.querySelectorAll('.perm-level-1-item.has-level-3.expanded').forEach(item => {
+        item.classList.remove('expanded');
+    });
+    document.querySelectorAll('.perm-level-4-item.expanded').forEach(item => {
+        item.classList.remove('expanded');
+        const container = item.querySelector('.perm-level-4-container');
+        if (container) container.classList.remove('expanded');
     });
 
-    // 重置验证状态
-    updatePermissionValidationState(container);
+    // 重置右侧详细配置卡片
+    const detailContent = document.getElementById('perm-detail-content');
+    const placeholder = document.querySelector('.perm-detail-placeholder');
+    if (detailContent) detailContent.classList.remove('active');
+    if (placeholder) placeholder.classList.remove('hidden');
+
+    // 重置标题和用户ID
+    document.getElementById('perm_modal_title').textContent = '用户权限设定';
+    document.getElementById('perm_current_user_id').value = '';
+
+    document.getElementById('permissionsModal').style.display = 'none';
 }
 
 // 设置权限复选框状态 - 重构版
@@ -1387,27 +1773,19 @@ function setPermCheckboxes(perms, pagePerms, submenuPerms, reportPerms, restaura
     const mainList = Array.isArray(perms) ? perms : [];
     const values = new Set(mainList);
 
-    // 设置一级分类 (Perm Parents)
-    document.querySelectorAll('.clean-perm-tree .perm-parent').forEach(cb => {
+    // 设置一级分类
+    document.querySelectorAll('.perm-l1-check').forEach(cb => {
         cb.checked = values.has(cb.value);
     });
 
-    // 设置二级分类 (Perm Childs)
+    // 设置二级分类
     const submenuData = (submenuPerms && typeof submenuPerms === 'object') ? submenuPerms : {};
-    document.querySelectorAll('.clean-perm-tree .perm-child').forEach(cb => {
+    document.querySelectorAll('.perm-l2-check').forEach(cb => {
         const parent = cb.dataset.parent;
         const parentEnabled = values.has(parent);
-
-        let allowed = [];
-        if (parent === 'analytics') allowed = ['kpi_report', 'kpi_upload'];
-        if (parent === 'hr') allowed = ['staff_management'];
-        if (parent === 'resource') allowed = ['stock_inventory', 'dishware', 'price_comparison'];
-        if (parent === 'brand') allowed = ['kunzz_holdings', 'tokyo_cuisine', 'tokyo_izakaya'];
-
         const hasCustom = Object.prototype.hasOwnProperty.call(submenuData, parent);
         const source = hasCustom ? submenuData[parent] : undefined;
-        allowed = Array.isArray(source) ? source : allowed;
-
+        const allowed = Array.isArray(source) ? source : (sidebarSubOptions[parent] || []);
         cb.checked = parentEnabled && allowed.includes(cb.value);
     });
 
@@ -1418,10 +1796,13 @@ function setPermCheckboxes(perms, pagePerms, submenuPerms, reportPerms, restaura
     const systemSet = new Set(stockSystems);
     const viewSet = new Set(stockViews);
 
-    document.querySelectorAll('.clean-perm-tree .perm-stock-system').forEach(cb => {
+    // 检查stock_inventory二级权限是否选中
+    const stockInventoryChecked = document.querySelector('.perm-l2-check[value="stock_inventory"]')?.checked || false;
+
+    document.querySelectorAll('.perm-stock-system').forEach(cb => {
         cb.checked = systemSet.has(cb.value);
     });
-    document.querySelectorAll('.clean-perm-tree .perm-stock-view').forEach(cb => {
+    document.querySelectorAll('.perm-stock-view').forEach(cb => {
         cb.checked = viewSet.has(cb.value);
     });
 
@@ -1432,52 +1813,77 @@ function setPermCheckboxes(perms, pagePerms, submenuPerms, reportPerms, restaura
     const uploadSystemSet = new Set(uploadSystems);
     const uploadTypeSet = new Set(uploadTypes);
 
-    document.querySelectorAll('.clean-perm-tree .perm-upload-system').forEach(cb => {
+    document.querySelectorAll('.perm-upload-system').forEach(cb => {
         cb.checked = uploadSystemSet.has(cb.value);
     });
-    document.querySelectorAll('.clean-perm-tree .perm-upload-type').forEach(cb => {
+    document.querySelectorAll('.perm-upload-type').forEach(cb => {
         cb.checked = uploadTypeSet.has(cb.value);
     });
 
     // 设置集团架构三级和四级权限
     const brandData = (brandPerms && typeof brandPerms === 'object') ? brandPerms : {};
 
+    // 兼容旧格式（数组）和新格式（对象）
+    let cuisineStores = [];
+    let izakayaStores = [];
     let cuisineStorePerms = {};
     let izakayaStorePerms = {};
 
-    if (brandData.tokyo_cuisine && typeof brandData.tokyo_cuisine === 'object' && !Array.isArray(brandData.tokyo_cuisine)) {
+    if (Array.isArray(brandData.tokyo_cuisine)) {
+        // 旧格式：数组
+        cuisineStores = brandData.tokyo_cuisine;
+    } else if (brandData.tokyo_cuisine && typeof brandData.tokyo_cuisine === 'object') {
+        // 新格式：对象，包含第四级权限
         cuisineStorePerms = brandData.tokyo_cuisine;
+        cuisineStores = Object.keys(cuisineStorePerms);
     }
-    if (brandData.tokyo_izakaya && typeof brandData.tokyo_izakaya === 'object' && !Array.isArray(brandData.tokyo_izakaya)) {
+
+    if (Array.isArray(brandData.tokyo_izakaya)) {
+        // 旧格式：数组
+        izakayaStores = brandData.tokyo_izakaya;
+    } else if (brandData.tokyo_izakaya && typeof brandData.tokyo_izakaya === 'object') {
+        // 新格式：对象，包含第四级权限
         izakayaStorePerms = brandData.tokyo_izakaya;
+        izakayaStores = Object.keys(izakayaStorePerms);
     }
+
+    // 检查相关二级权限是否选中
+    const kunzzHoldingsChecked = document.querySelector('.perm-l2-check[value="kunzz_holdings"]')?.checked || false;
+    const tokyoCuisineChecked = document.querySelector('.perm-l2-check[value="tokyo_cuisine"]')?.checked || false;
+    const tokyoIzakayaChecked = document.querySelector('.perm-l2-check[value="tokyo_izakaya"]')?.checked || false;
 
     // 设置KUNZZ HOLDINGS的页面权限（企业蓝图）
     if (brandData.kunzz_holdings && typeof brandData.kunzz_holdings === 'object') {
+        // 如果是对象格式，检查是否有blueprint权限
         const kunzzPerms = brandData.kunzz_holdings.blueprint;
         if (Array.isArray(kunzzPerms) && kunzzPerms.includes('blueprint')) {
-            document.querySelectorAll('.clean-perm-tree .perm-page-blueprint[data-brand="kunzz_holdings"]').forEach(cb => {
+            document.querySelectorAll('.perm-page-blueprint[data-brand="kunzz_holdings"]').forEach(cb => {
                 cb.checked = true;
             });
         }
     }
 
     // 设置三级页面权限（员工排班表）- 每个店面独立设置
+    // 设置J1的页面权限
     if (cuisineStorePerms && typeof cuisineStorePerms === 'object') {
         const j1Perms = Array.isArray(cuisineStorePerms['j1']) ? cuisineStorePerms['j1'] : [];
-        document.querySelectorAll('.clean-perm-tree .perm-page-schedule[data-store="j1"]').forEach(cb => {
+        document.querySelectorAll('.perm-page-schedule[data-store="j1"]').forEach(cb => {
             cb.checked = j1Perms.includes('schedule');
         });
+    }
 
+    // 设置J2的页面权限
+    if (cuisineStorePerms && typeof cuisineStorePerms === 'object') {
         const j2Perms = Array.isArray(cuisineStorePerms['j2']) ? cuisineStorePerms['j2'] : [];
-        document.querySelectorAll('.clean-perm-tree .perm-page-schedule[data-store="j2"]').forEach(cb => {
+        document.querySelectorAll('.perm-page-schedule[data-store="j2"]').forEach(cb => {
             cb.checked = j2Perms.includes('schedule');
         });
     }
 
+    // 设置J3的页面权限
     if (izakayaStorePerms && typeof izakayaStorePerms === 'object') {
         const j3Perms = Array.isArray(izakayaStorePerms['j3']) ? izakayaStorePerms['j3'] : [];
-        document.querySelectorAll('.clean-perm-tree .perm-page-schedule[data-store="j3"]').forEach(cb => {
+        document.querySelectorAll('.perm-page-schedule[data-store="j3"]').forEach(cb => {
             cb.checked = j3Perms.includes('schedule');
         });
     }
@@ -1485,48 +1891,21 @@ function setPermCheckboxes(perms, pagePerms, submenuPerms, reportPerms, restaura
     // 设置额外权限
     const reportSetSource = Array.isArray(reportPerms) && reportPerms.length ? reportPerms : [];
     const reportSet = new Set(reportSetSource);
-    document.querySelectorAll('.clean-perm-tree .perm-report').forEach(cb => {
+    document.querySelectorAll('.perm-report').forEach(cb => {
         cb.checked = reportSet.has(cb.value);
     });
 
     const restaurantSetSource = Array.isArray(restaurantPerms) && restaurantPerms.length ? restaurantPerms : [];
     const restaurantSet = new Set(restaurantSetSource);
-    document.querySelectorAll('.clean-perm-tree .perm-restaurant').forEach(cb => {
+    document.querySelectorAll('.perm-restaurant').forEach(cb => {
         cb.checked = restaurantSet.has(cb.value);
     });
 
-    // 确保所有checkbox都是active的
-    document.querySelectorAll('.clean-perm-tree input[type="checkbox"]').forEach(cb => {
+    // 确保所有checkbox都是active的（不设置disabled）
+    // 因为用户要求所有checkbox都应该是active的，不管父级是否选中
+    document.querySelectorAll('#permissionsModal input[type="checkbox"]').forEach(cb => {
         cb.disabled = false;
     });
-}
-
-// 设置J3的页面权限
-if (izakayaStorePerms && typeof izakayaStorePerms === 'object') {
-    const j3Perms = Array.isArray(izakayaStorePerms['j3']) ? izakayaStorePerms['j3'] : [];
-    document.querySelectorAll('.perm-page-schedule[data-store="j3"]').forEach(cb => {
-        cb.checked = j3Perms.includes('schedule');
-    });
-}
-
-// 设置额外权限
-const reportSetSource = Array.isArray(reportPerms) && reportPerms.length ? reportPerms : [];
-const reportSet = new Set(reportSetSource);
-document.querySelectorAll('.perm-report').forEach(cb => {
-    cb.checked = reportSet.has(cb.value);
-});
-
-const restaurantSetSource = Array.isArray(restaurantPerms) && restaurantPerms.length ? restaurantPerms : [];
-const restaurantSet = new Set(restaurantSetSource);
-document.querySelectorAll('.perm-restaurant').forEach(cb => {
-    cb.checked = restaurantSet.has(cb.value);
-});
-
-// 确保所有checkbox都是active的（不设置disabled）
-// 因为用户要求所有checkbox都应该是active的，不管父级是否选中
-document.querySelectorAll('#permissionsModal input[type="checkbox"]').forEach(cb => {
-    cb.disabled = false;
-});
 }
 
 async function loadUserPermissions(userId) {
@@ -1587,9 +1966,77 @@ async function loadUserPermissions(userId) {
 
 async function savePermissions() {
     const userId = document.getElementById('perm_current_user_id').value;
-    const modal = document.getElementById('permissionsModal');
 
-    const { perms, submenuPermissions, pagePermissions, brandPermissions, reportPermissions, restaurantPermissions } = extractPermissionsData(modal);
+    // 获取一级权限
+    const perms = Array.from(document.querySelectorAll('.perm-l1-check:checked')).map(cb => cb.value);
+
+    // 获取二级权限（按父级分组）
+    const submenuPermissions = {};
+    Object.keys(sidebarSubOptions).forEach(parent => {
+        const mainCheckbox = document.querySelector(`.perm-l1-check[value="${parent}"]`);
+        const selectedSubs = Array.from(document.querySelectorAll(`.perm-l2-check[data-parent="${parent}"]:checked`)).map(cb => cb.value);
+        if (mainCheckbox && mainCheckbox.checked) {
+            submenuPermissions[parent] = selectedSubs;
+        } else {
+            submenuPermissions[parent] = [];
+        }
+    });
+
+    // 获取库存三级权限
+    const selectedStockSystems = Array.from(document.querySelectorAll('.perm-stock-system:checked')).map(cb => cb.value);
+    const selectedStockViews = Array.from(document.querySelectorAll('.perm-stock-view:checked')).map(cb => cb.value);
+
+    // 获取数据上传三级权限
+    const selectedUploadSystems = Array.from(document.querySelectorAll('.perm-upload-system:checked')).map(cb => cb.value);
+    const selectedUploadTypes = Array.from(document.querySelectorAll('.perm-upload-type:checked')).map(cb => cb.value);
+
+    const pagePermissions = {
+        stock_inventory: {
+            system: selectedStockSystems,
+            view: selectedStockViews
+        },
+        kpi_upload: {
+            system: selectedUploadSystems,
+            type: selectedUploadTypes
+        }
+    };
+
+    // 获取集团架构三级页面权限，每个店面独立保存
+    // 获取KUNZZ HOLDINGS的页面权限（企业蓝图）
+    const kunzzHoldingsPermissions = {};
+    const blueprintChecked = document.querySelector('.perm-page-blueprint[data-brand="kunzz_holdings"]')?.checked || false;
+    if (blueprintChecked) {
+        kunzzHoldingsPermissions['blueprint'] = ['blueprint'];
+    }
+
+    const cuisineStorePermissions = {};
+    // 获取J1的页面权限
+    const j1ScheduleChecked = document.querySelector('.perm-page-schedule[data-store="j1"]')?.checked || false;
+    if (j1ScheduleChecked) {
+        cuisineStorePermissions['j1'] = ['schedule'];
+    }
+    // 获取J2的页面权限
+    const j2ScheduleChecked = document.querySelector('.perm-page-schedule[data-store="j2"]')?.checked || false;
+    if (j2ScheduleChecked) {
+        cuisineStorePermissions['j2'] = ['schedule'];
+    }
+
+    const izakayaStorePermissions = {};
+    // 获取J3的页面权限
+    const j3ScheduleChecked = document.querySelector('.perm-page-schedule[data-store="j3"]')?.checked || false;
+    if (j3ScheduleChecked) {
+        izakayaStorePermissions['j3'] = ['schedule'];
+    }
+
+    const brandPermissions = {
+        kunzz_holdings: kunzzHoldingsPermissions,
+        tokyo_cuisine: cuisineStorePermissions,
+        tokyo_izakaya: izakayaStorePermissions
+    };
+
+    // 获取额外权限
+    const reportPermissions = Array.from(document.querySelectorAll('.perm-report:checked')).map(cb => cb.value);
+    const restaurantPermissions = Array.from(document.querySelectorAll('.perm-restaurant:checked')).map(cb => cb.value);
 
     const btn = document.querySelector('#permissionsModal .btn-save');
     const old = btn.innerHTML;
@@ -1624,86 +2071,6 @@ async function savePermissions() {
         btn.innerHTML = old;
         btn.disabled = false;
     }
-}
-
-// 提取权限数据
-function extractPermissionsData(container) {
-    if (!container) return {};
-
-    // 获取一级权限
-    const perms = Array.from(container.querySelectorAll('.perm-parent:checked')).map(cb => cb.value);
-
-    // 获取二级权限（按父级分组）
-    const submenuPermissions = {};
-    const sidebarParents = ['analytics', 'hr', 'resource', 'brand'];
-
-    sidebarParents.forEach(parent => {
-        const mainCheckbox = container.querySelector(`.perm-parent[value="${parent}"]`);
-        const selectedSubs = Array.from(container.querySelectorAll(`.perm-child[data-parent="${parent}"]:checked`)).map(cb => cb.value);
-        if (mainCheckbox && mainCheckbox.checked) {
-            submenuPermissions[parent] = selectedSubs;
-        } else {
-            submenuPermissions[parent] = [];
-        }
-    });
-
-    // 获取库存三级权限
-    const selectedStockSystems = Array.from(container.querySelectorAll('.perm-stock-system:checked')).map(cb => cb.value);
-    const selectedStockViews = Array.from(container.querySelectorAll('.perm-stock-view:checked')).map(cb => cb.value);
-
-    // 获取数据上传三级权限
-    const selectedUploadSystems = Array.from(container.querySelectorAll('.perm-upload-system:checked')).map(cb => cb.value);
-    const selectedUploadTypes = Array.from(container.querySelectorAll('.perm-upload-type:checked')).map(cb => cb.value);
-
-    const pagePermissions = {
-        stock_inventory: {
-            system: selectedStockSystems,
-            view: selectedStockViews
-        },
-        kpi_upload: {
-            system: selectedUploadSystems,
-            type: selectedUploadTypes
-        }
-    };
-
-    // 获取集团架构三级页面权限，每个店面独立保存
-    // 获取KUNZZ HOLDINGS的页面权限（企业蓝图）
-    const kunzzHoldingsPermissions = {};
-    const blueprintChecked = container.querySelector('.perm-page-blueprint[data-brand="kunzz_holdings"]')?.checked || false;
-    if (blueprintChecked) {
-        kunzzHoldingsPermissions['blueprint'] = ['blueprint'];
-    }
-
-    const cuisineStorePermissions = {};
-    // 获取J1的页面权限
-    const j1ScheduleChecked = container.querySelector('.perm-page-schedule[data-store="j1"]')?.checked || false;
-    if (j1ScheduleChecked) {
-        cuisineStorePermissions['j1'] = ['schedule'];
-    }
-    // 获取J2的页面权限
-    const j2ScheduleChecked = container.querySelector('.perm-page-schedule[data-store="j2"]')?.checked || false;
-    if (j2ScheduleChecked) {
-        cuisineStorePermissions['j2'] = ['schedule'];
-    }
-
-    const izakayaStorePermissions = {};
-    // 获取J3的页面权限
-    const j3ScheduleChecked = container.querySelector('.perm-page-schedule[data-store="j3"]')?.checked || false;
-    if (j3ScheduleChecked) {
-        izakayaStorePermissions['j3'] = ['schedule'];
-    }
-
-    const brandPermissions = {
-        kunzz_holdings: kunzzHoldingsPermissions,
-        tokyo_cuisine: cuisineStorePermissions,
-        tokyo_izakaya: izakayaStorePermissions
-    };
-
-    // 获取额外权限 (若有)
-    const reportPermissions = Array.from(container.querySelectorAll('.perm-report:checked')).map(cb => cb.value);
-    const restaurantPermissions = Array.from(container.querySelectorAll('.perm-restaurant:checked')).map(cb => cb.value);
-
-    return { perms, submenuPermissions, pagePermissions, brandPermissions, reportPermissions, restaurantPermissions };
 }
 
 // 下载申请表相关函数
