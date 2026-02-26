@@ -886,13 +886,12 @@ require_once 'session_check.php';
                                     </div>
                                 </div>
                             </div>
-                            <!-- 权限未选择警告 -->
-                            <p class="perm-warning" style="color:red; display:none; margin-top: 12px;">⚠️ 请至少选择一项用户权限</p>
+
                         </div>
                     </div>
 
                     <div class="modal-buttons">
-                        <button type="submit" class="btn-action btn-save" disabled style="background-color: #9ca3af; cursor: not-allowed; opacity: 0.7;">
+                        <button type="submit" class="btn-action btn-save">
                             添加职员
                         </button>
                         <button type="button" class="btn-action btn-cancel" onclick="closeAddUserModal()">
