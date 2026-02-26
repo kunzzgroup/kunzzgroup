@@ -1,14 +1,6 @@
 <?php
-session_start();
-
-// GET 请求：展示重置密码网页
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    include 'reset_password.html';
-    exit;
-}
-
-// POST 请求：处理密码重置 API
 header("Content-Type: application/json");
+session_start();
 
 // 1. 数据库连接配置
 $host = 'localhost';
@@ -63,7 +55,7 @@ $stmt->bind_param("ss", $hashedPassword, $email);
 if ($stmt->execute()) {
     echo json_encode(["success" => true, "message" => "密码更新成功"]);
 
-    // 清除验证码 session
+    // 可选：清除验证码 session
     unset($_SESSION["verification_code"]);
     unset($_SESSION["verification_email"]);
     unset($_SESSION["code_expire_time"]);
