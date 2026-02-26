@@ -1127,67 +1127,28 @@ function saveUserSidebarPermissions($pdo, $input) {
         return;
     }
     $userId = intval($input['user_id']);
-    $perms = $input['permissions'];
-    if (!is_array($perms)) { $perms = []; }
-    // 仅允许这些键
-    $allowedKeys = ['analytics','hr','resource','visual','brand'];
-    $perms = array_values(array_intersect($perms, $allowedKeys));
-    // 页面权限（可选）
-    $pagePerms = isset($input['page_permissions']) && is_array($input['page_permissions']) ? $input['page_permissions'] : [];
-    // 规范化：仅允许已知键
-    $normalize = function($arr, $allow) {
-        return array_values(array_intersect(is_array($arr) ? $arr : [], $allow));
-    };
-    $stockSystemsAllowed = ['central','j1','j2','j3'];
-    $stockViewsAllowed = ['list','records','remark','product','sot'];
-    $uploadSystemsAllowed = ['j1','j2','j3'];
-    $uploadTypesAllowed = ['kpi','cost'];
-    $pagePermsNorm = [
-        'stock_inventory' => [
-            'system' => $normalize($pagePerms['stock_inventory']['system'] ?? [], $stockSystemsAllowed),
-            'view'   => $normalize($pagePerms['stock_inventory']['view'] ?? [], $stockViewsAllowed)
-        ],
-        'kpi_upload' => [
-            'system' => $normalize($pagePerms['kpi_upload']['system'] ?? [], $uploadSystemsAllowed),
-            'type'   => $normalize($pagePerms['kpi_upload']['type'] ?? [], $uploadTypesAllowed)
-        ]
-    ];
-    $submenuInput = isset($input['submenu_permissions']) && is_array($input['submenu_permissions']) ? $input['submenu_permissions'] : [];
-    $submenuAllowed = [
-        'analytics' => ['kpi_report', 'kpi_upload'],
-        'hr' => ['staff_management', 'schedule'],
-        'resource' => ['stock_inventory', 'dishware', 'price_comparison'],
-        'visual' => ['bgmusic', 'homepage1', 'about1', 'about4', 'tokyo1', 'tokyo5', 'join1', 'join2', 'join3'],
-        'brand' => ['kunzz_holdings', 'tokyo_cuisine', 'tokyo_izakaya']
-    ];
-    $submenuPermsNorm = [];
-    foreach ($submenuAllowed as $parent => $allowedList) {
-        $requested = isset($submenuInput[$parent]) && is_array($submenuInput[$parent]) ? $submenuInput[$parent] : [];
-        $submenuPermsNorm[$parent] = array_values(array_intersect($requested, $allowedList));
-    }
-    foreach ($submenuPermsNorm as $parent => $list) {
-        if (!in_array($parent, $perms, true)) {
-            $submenuPermsNorm[$parent] = [];
-        }
-    }
-    $reportAllowed = ['kpi','cost'];
-    $restaurantAllowed = ['j1','j2','j3'];
-    $reportPerms = isset($input['report_permissions']) && is_array($input['report_permissions'])
-        ? array_values(array_intersect($input['report_permissions'], $reportAllowed))
-        : $reportAllowed;
-    if (empty($reportPerms)) {
-        $reportPerms = $reportAllowed;
-    }
-    $restaurantPerms = isset($input['restaurant_permissions']) && is_array($input['restaurant_permissions'])
-        ? array_values(array_intersect($input['restaurant_permissions'], $restaurantAllowed))
-        : $restaurantAllowed;
-    if (empty($restaurantPerms)) {
-        $restaurantPerms = $restaurantAllowed;
-    }
-    // 品牌权限（三级和四级）
+    
+    // 获取基础权限 (Level 1)
+    $perms = is_array($input['permissions']) ? $input['permissions'] : [];
+    
+    // 获取页面权限 (Level 3 Inventory & Upload)
+    $pagePermsNorm = isset($input['page_permissions']) && is_array($input['page_permissions']) ? $input['page_permissions'] : [];
+    
+    // 获取子菜单权限 (Level 2)
+    $submenuPermsNorm = isset($input['submenu_permissions']) && is_array($input['submenu_permissions']) ? $input['submenu_permissions'] : [];
+    
+    // 获取品牌和三级页面权限
     $brandPerms = isset($input['brand_permissions']) && is_array($input['brand_permissions']) ? $input['brand_permissions'] : [];
-    // 上传权限
+    
+    // 获取报告权限
+    $reportPerms = isset($input['report_permissions']) && is_array($input['report_permissions']) ? $input['report_permissions'] : [];
+    
+    // 获取分店权限
+    $restaurantPerms = isset($input['restaurant_permissions']) && is_array($input['restaurant_permissions']) ? $input['restaurant_permissions'] : [];
+    
+    // 上传权限 (Reserved)
     $uploadPerms = isset($input['upload_permissions']) && is_array($input['upload_permissions']) ? $input['upload_permissions'] : [];
+
     try {
         // 检查是否使用 user_page_permissions 表（新表结构）
         $tableExists = false;
