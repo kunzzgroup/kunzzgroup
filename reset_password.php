@@ -52,7 +52,7 @@ $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
 $stmt = $conn->prepare("UPDATE users SET password = ?, is_first_login = 0 WHERE email = ?");
 $stmt->bind_param("ss", $hashedPassword, $email);
 
-if ($stmt->execute()) {
+if ($stmt->execute() && $stmt->affected_rows > 0) {
     echo json_encode(["success" => true, "message" => "密码更新成功"]);
 
     // 可选：清除验证码 session
@@ -60,7 +60,8 @@ if ($stmt->execute()) {
     unset($_SESSION["verification_email"]);
     unset($_SESSION["code_expire_time"]);
 } else {
-    echo json_encode(["success" => false, "message" => "密码更新失败"]);
+    // 如果没有行受影响，可能是用户已经被删除
+    echo json_encode(["success" => false, "message" => "密码更新失败，用户可能不存在"]);
 }
 
 $stmt->close();

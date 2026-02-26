@@ -689,7 +689,20 @@ function deleteCode($pdo, $input) {
         $username = $result['username'];
         $registration_code = $result['registration_code'];
 
-        // 直接删除用户
+        // 1. 删除权限记录
+        $deleteSidebarPermsSql = "DELETE FROM user_sidebar_permissions WHERE user_id = :id";
+        $pdo->prepare($deleteSidebarPermsSql)->execute([':id' => $id]);
+
+        $deletePagePermsSql = "DELETE FROM user_page_permissions WHERE user_id = :id";
+        $pdo->prepare($deletePagePermsSql)->execute([':id' => $id]);
+
+        // 2. 如果存在注册码，将其从 application_codes 中删除（物理删除版本，不留痕迹）
+        if (!empty($registration_code)) {
+            $deleteAppCodeSql = "DELETE FROM application_codes WHERE code = :code";
+            $pdo->prepare($deleteAppCodeSql)->execute([':code' => $registration_code]);
+        }
+
+        // 3. 最后删除主用户表记录
         $deleteSql = "DELETE FROM users WHERE id = :id";
         $deleteStmt = $pdo->prepare($deleteSql);
         $deleteStmt->bindParam(':id', $id);

@@ -10,6 +10,33 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
+// 数据库连接配置
+$host = 'localhost';
+$dbname = 'u690174784_kunzz';
+$dbuser = 'u690174784_kunzz';
+$dbpass = 'Kunzz1688';
+
+$conn = new mysqli($host, $dbuser, $dbpass, $dbname);
+if ($conn->connect_error) {
+    echo json_encode(["success" => false, "message" => "数据库连接失败"]);
+    exit;
+}
+
+// 检查邮箱是否存在
+$stmt = $conn->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
+$stmt->bind_param("s", $email);
+$stmt->execute();
+$result = $stmt->get_result();
+$userExists = $result->num_rows > 0;
+$stmt->close();
+$conn->close();
+
+// 安全性：如果用户不存在，仍然返回成功，但不发送验证码
+if (!$userExists) {
+    echo json_encode(["success" => true, "message" => "验证码已发送"]);
+    exit;
+}
+
 // 生成6位验证码
 $code = rand(100000, 999999);
 
