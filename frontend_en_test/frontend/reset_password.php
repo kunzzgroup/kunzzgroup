@@ -1,14 +1,6 @@
 <?php
 session_start();
 
-// GET 请求：展示重置密码网页
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    include 'reset_password.html';
-    exit;
-}
-
-// POST 请求：处理密码重置 API
-header("Content-Type: application/json");
 // Handle API Request (POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header("Content-Type: application/json");
