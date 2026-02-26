@@ -43,10 +43,22 @@ if (isset($_SESSION['user_id'])) {
     $_SESSION['username'] = $_COOKIE['username'];
     $_SESSION['position'] = isset($_COOKIE['position']) ? $_COOKIE['position'] : null;
     $_SESSION['account_type'] = isset($_COOKIE['account_type']) ? $_COOKIE['account_type'] : null;
+    $_SESSION['is_first_login'] = isset($_COOKIE['is_first_login']) ? (int)$_COOKIE['is_first_login'] : 0;
     $_SESSION['last_activity'] = time();
 } else {
     // 没有 session，也没有有效 cookie
-    header("Location: ../frontend/login.html");
+    header("Location: /kunzzgroup/login.html");
+    exit();
+}
+
+// 强制首次登录修改密码
+if (
+    isset($_SESSION['is_first_login']) && 
+    $_SESSION['is_first_login'] == 1 && 
+    strpos($_SERVER['PHP_SELF'], 'change_password.php') === false &&
+    strpos($_SERVER['PHP_SELF'], 'logout.php') === false
+) {
+    header("Location: /kunzzgroup/change_password.php");
     exit();
 }
 
@@ -54,5 +66,5 @@ if (isset($_SESSION['user_id'])) {
 $username = $_SESSION['username'];
 $position = (!empty($_SESSION['position'])) ? $_SESSION['position'] : 'User';
 $account_type = (!empty($_SESSION['account_type'])) ? $_SESSION['account_type'] : 'user';
-$avatarLetter = strtoupper($username[0]);
+$avatarLetter = !empty($username) ? strtoupper($username[0]) : '?';
 ?>

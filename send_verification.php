@@ -22,8 +22,8 @@ if ($conn->connect_error) {
     exit;
 }
 
-// 检查邮箱是否存在
-$stmt = $conn->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
+// 检查邮箱是否存在，且账户已激活（不是首次登录状态）
+$stmt = $conn->prepare("SELECT id FROM users WHERE email = ? AND is_first_login = 0 LIMIT 1");
 $stmt->bind_param("s", $email);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -31,9 +31,9 @@ $userExists = $result->num_rows > 0;
 $stmt->close();
 $conn->close();
 
-// 安全性：如果用户不存在，仍然返回成功，但不发送验证码
+// 安全性：无论用户是否存在，都返回统一消息，防止扫描邮箱
 if (!$userExists) {
-    echo json_encode(["success" => true, "message" => "验证码已发送"]);
+    echo json_encode(["success" => true, "message" => "如账户存在，验证邮件将发送至您的邮箱"]);
     exit;
 }
 

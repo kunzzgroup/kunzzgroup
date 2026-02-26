@@ -105,28 +105,14 @@ try {
 /**
  * 生成随机密码
  */
-function generateRandomPassword($length = 10) {
-    $uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    $lowercase = 'abcdefghijklmnopqrstuvwxyz';
-    $numbers = '0123456789';
-    $symbols = '!@#$%&*';
-    
-    $password = '';
-    
-    // 确保密码包含每种类型的字符
-    $password .= $uppercase[rand(0, strlen($uppercase) - 1)];
-    $password .= $lowercase[rand(0, strlen($lowercase) - 1)];
-    $password .= $numbers[rand(0, strlen($numbers) - 1)];
-    $password .= $symbols[rand(0, strlen($symbols) - 1)];
-    
-    // 填充剩余长度
-    $allChars = $uppercase . $lowercase . $numbers . $symbols;
-    for ($i = 4; $i < $length; $i++) {
-        $password .= $allChars[rand(0, strlen($allChars) - 1)];
+function generateRandomPassword($length = 8) {
+    try {
+        return bin2hex(random_bytes($length / 2));
+    } catch (Exception $e) {
+        // 回退到简单方法（如果不满足字节数需求）
+        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        return substr(str_shuffle($chars), 0, $length);
     }
-    
-    // 打乱密码字符顺序
-    return str_shuffle($password);
 }
 
 /**
@@ -224,11 +210,11 @@ function sendWelcomeEmail($email, $username, $password, $accountType) {
                 <div class='password'>{$password}</div>
             </div>
             
-            <p><strong style='color: #ff5c00;'>重要提醒：</strong></p>
+            <p><strong style='color: #ff5c00;'>重要安全性提醒：</strong></p>
             <ul>
-                <li>请妥善保管您的登录信息</li>
-                <li>建议您首次登录后立即修改密码</li>
-                <li>如有任何问题，请联系管理员</li>
+                <li>请妥善保管您的登录信息，不要泄露给他人。</li>
+                <li style='color: #d93025; font-weight: bold;'>根据公司安全策略，您首次登录后必须立即修改初始密码。</li>
+                <li>在完成密码修改前，您将无法访问系统的其他管理功能。</li>
             </ul>
             
             <p>感谢您成为我们团队的一员！</p>
@@ -688,6 +674,7 @@ function deleteCode($pdo, $input) {
 
         $username = $result['username'];
         $registration_code = $result['registration_code'];
+        $email = $result['email'] ?? '';
 
         // 1. 删除权限记录
         $deleteSidebarPermsSql = "DELETE FROM user_sidebar_permissions WHERE user_id = :id";
@@ -696,7 +683,16 @@ function deleteCode($pdo, $input) {
         $deletePagePermsSql = "DELETE FROM user_page_permissions WHERE user_id = :id";
         $pdo->prepare($deletePagePermsSql)->execute([':id' => $id]);
 
-        // 2. 如果存在注册码，将其从 application_codes 中删除（物理删除版本，不留痕迹）
+        // 2. 删除重置记录和日志（根据邮箱）
+        if (!empty($email)) {
+            $deleteResetsSql = "DELETE FROM password_resets WHERE email = :email";
+            $pdo->prepare($deleteResetsSql)->execute([':email' => $email]);
+            
+            $deleteResetLogsSql = "DELETE FROM password_reset_logs WHERE email = :email";
+            $pdo->prepare($deleteResetLogsSql)->execute([':email' => $email]);
+        }
+
+        // 3. 如果存在注册码，将其从 application_codes 中删除
         if (!empty($registration_code)) {
             $deleteAppCodeSql = "DELETE FROM application_codes WHERE code = :code";
             $pdo->prepare($deleteAppCodeSql)->execute([':code' => $registration_code]);
