@@ -59,16 +59,22 @@ $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
 // 更新数据库 - 同时更新密码和首次登录状态
 $stmt = $conn->prepare("UPDATE users SET password = ?, is_first_login = 0 WHERE email = ?");
 $stmt->bind_param("ss", $hashedPassword, $email);
+$stmt->execute();
 
-if ($stmt->execute()) {
-    echo json_encode(["success" => true, "message" => "密码更新成功"]);
+if ($stmt->affected_rows === 1) {
+    echo json_encode([
+        "success" => true,
+        "message" => "密码更新成功"
+    ]);
 
-    // 清除验证码 session
     unset($_SESSION["verification_code"]);
     unset($_SESSION["verification_email"]);
     unset($_SESSION["code_expire_time"]);
 } else {
-    echo json_encode(["success" => false, "message" => "密码更新失败"]);
+    echo json_encode([
+        "success" => false,
+        "message" => "账户不存在或已被删除"
+    ]);
 }
 
 $stmt->close();
