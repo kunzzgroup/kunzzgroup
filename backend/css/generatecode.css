@@ -1483,9 +1483,14 @@ tr:hover {
         flex-direction: column;
     }
 
+    .perm-tree-container {
+        max-height: none;
+    }
+
     .perm-detail-card {
-        flex: 1;
-        max-height: 40vh;
+        flex: none;
+        max-height: none;
+        min-height: 250px;
     }
 
     #permissionsModal .modal-content {

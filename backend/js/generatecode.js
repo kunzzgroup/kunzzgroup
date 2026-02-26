@@ -1270,10 +1270,6 @@ let permissionTreeEventsBound = false;
 function initPermissionTreeEvents(container) {
     if (!container) return;
 
-    // 如果已经绑定过，直接返回
-    if (container.dataset.permValidationInit === 'true') return;
-    container.dataset.permValidationInit = 'true';
-
     // 绑定所有的 checkbox 的 change 事件来触发验证
     const allCheckboxes = container.querySelectorAll('.perm-l1-check, .perm-l2-check, .perm-stock-system, .perm-stock-view, .perm-upload-system, .perm-upload-type, .perm-page-schedule, .perm-page-blueprint');
     allCheckboxes.forEach(cb => {
@@ -1351,6 +1347,7 @@ function initPermissionTreeEvents(container) {
     // 一级分类点击展开/折叠
     container.querySelectorAll('.perm-level-1-item').forEach(item => {
         item.addEventListener('click', function (e) {
+            console.log("perm-level-1-item clicked:", item, "target:", e.target);
             // 如果点击的是复选框，不处理展开
             if (e.target.tagName === 'INPUT') {
                 e.stopPropagation();
