@@ -246,11 +246,8 @@ function sendWelcomeEmail($email, $username, $password, $accountType) {
     $headers = array(
         'MIME-Version' => '1.0',
         'Content-type' => 'text/html; charset=utf-8',
-        'From' => 'no-reply@kunzzgroup.com',
+        'From' => 'noreply@kunzzgroup.com',
         'Reply-To' => 'support@kunzzgroup.com',
-        'Return-Path' => 'no-reply@kunzzgroup.com',
-        'Message-ID' => '<' . uniqid() . '-' . time() . '@kunzzgroup.com>',
-        'Date' => date('r'),
         'X-Mailer' => 'PHP/' . phpversion()
     );
     
@@ -260,8 +257,8 @@ function sendWelcomeEmail($email, $username, $password, $accountType) {
         $headerString .= $key . ': ' . $value . "\r\n";
     }
     
-    // 发送邮件 (添加第五个参数 -f 强制指定信封发送者，这对于绕过多数服务器反垃圾过滤至关重要)
-    return mail($to, $subject, $message, $headerString, '-fno-reply@kunzzgroup.com');
+    // 发送邮件
+    return mail($to, $subject, $message, $headerString);
 }
 
 /**

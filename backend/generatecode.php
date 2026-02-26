@@ -930,6 +930,5 @@ require_once 'session_check.php';
         <!-- 动态通知内容 -->
     </div>
     <script src="js/generatecode.js"></script>
-    
 </body>
 </html>
