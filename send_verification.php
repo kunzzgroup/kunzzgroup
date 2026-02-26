@@ -41,10 +41,10 @@ if ($checkStmt) {
     $checkResult = $checkStmt->get_result();
 
     if ($checkResult->num_rows === 0) {
-        // 用户非 active 或不存在 — 静默返回成功，防止邮箱探测
+        // 用户非 active 或不存在 — 返回错误提示（用户要求明确提示）
         $checkStmt->close();
         $conn->close();
-        echo json_encode(["success" => true, "message" => "验证码已发送"]);
+        echo json_encode(["success" => false, "message" => "该用户邮件并不在数据库，无法发送验证码"]);
         exit;
     }
     $checkStmt->close();
