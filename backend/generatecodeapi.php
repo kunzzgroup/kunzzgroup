@@ -629,9 +629,15 @@ function updateCodeAndUser($pdo, $input) {
             $pdo->rollBack();
             echo json_encode([
                 'success' => false,
-                'message' => '更新用户信息失败'
+                'message' => '用户更新失败'
             ]);
             return;
+        }
+
+        // 更新权限数据
+        if (isset($input['permissions'])) {
+            $input['user_id'] = $id;
+            saveUserSidebarPermissions($pdo, $input, true);
         }
 
         // 提交事务
@@ -856,9 +862,17 @@ function addNewUser($pdo, $input) {
             $pdo->rollBack();
             echo json_encode([
                 'success' => false,
-                'message' => '用户创建失败，请检查数据格式'
+                'message' => '添加职员失败'
             ]);
             return;
+        }
+        
+        $userId = $pdo->lastInsertId();
+        
+        // 保存权限数据
+        if (isset($input['permissions'])) {
+            $input['user_id'] = $userId;
+            saveUserSidebarPermissions($pdo, $input, true);
         }
 
         // 提交事务
@@ -1121,8 +1135,9 @@ function getUserSidebarPermissions($pdo, $input) {
 /**
  * 保存用户的侧边栏权限
  */
-function saveUserSidebarPermissions($pdo, $input) {
+function saveUserSidebarPermissions($pdo, $input, $internal = false) {
     if (empty($input['user_id']) || !isset($input['permissions'])) {
+        if ($internal) return false;
         echo json_encode(['success' => false, 'message' => '参数不完整']);
         return;
     }
@@ -1273,8 +1288,10 @@ function saveUserSidebarPermissions($pdo, $input) {
             }
         }
         
+        if ($internal) return true;
         echo json_encode(['success' => true]);
     } catch (PDOException $e) {
+        if ($internal) throw $e;
         echo json_encode(['success' => false, 'message' => '保存失败: '.$e->getMessage()]);
     }
 }
