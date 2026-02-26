@@ -10,6 +10,12 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
+// 只允许 Gmail
+if (!preg_match('/@gmail\.com$/', $email)) {
+    echo json_encode(["success" => false, "message" => "目前仅支持 Gmail"]);
+    exit;
+}
+
 // 生成6位验证码
 $code = rand(100000, 999999);
 
