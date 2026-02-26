@@ -1348,20 +1348,6 @@ function initPermissionTreeEvents(container) {
         });
     });
 
-    // 容器范围内的关闭按钮（addUserModal 使用 add-perm-close-btn 类）
-    container.querySelectorAll('.add-perm-close-btn').forEach(btn => {
-        btn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            const detailContent = container.querySelector('.perm-detail-content');
-            const placeholder = container.querySelector('.perm-detail-placeholder');
-            container.querySelectorAll('.perm-level-3-panel').forEach(p => p.classList.remove('show'));
-            container.querySelectorAll('.perm-level-2-item.has-level-3').forEach(i => i.classList.remove('expanded'));
-            container.querySelectorAll('.perm-level-1-item.has-level-3').forEach(i => i.classList.remove('expanded'));
-            if (detailContent) detailContent.classList.remove('active');
-            if (placeholder) placeholder.classList.remove('hidden');
-        });
-    });
-
     // 一级分类点击展开/折叠
     container.querySelectorAll('.perm-level-1-item').forEach(item => {
         item.addEventListener('click', function (e) {

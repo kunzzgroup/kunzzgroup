@@ -864,28 +864,6 @@ function addNewUser($pdo, $input) {
         // 提交事务
         $pdo->commit();
 
-        // 获取新用户 ID
-        $newUserId = $pdo->lastInsertId();
-
-        // 保存权限数据（若有传入权限）
-        if (!empty($input['permissions']) && is_array($input['permissions'])) {
-            $permInput = [
-                'user_id'                 => $newUserId,
-                'permissions'             => $input['permissions'],
-                'page_permissions'        => $input['page_permissions'] ?? [],
-                'submenu_permissions'     => $input['submenu_permissions'] ?? [],
-                'report_permissions'      => $input['report_permissions'] ?? [],
-                'restaurant_permissions'  => $input['restaurant_permissions'] ?? [],
-                'brand_permissions'       => $input['brand_permissions'] ?? []
-            ];
-            try {
-                savePermissionsForUser($pdo, $permInput);
-            } catch (Throwable $pe) {
-                // 权限保存失败不影响主流程
-                error_log("添加璞员权限保存失败: " . $pe->getMessage());
-            }
-        }
-
         // 发送欢迎邮件
         $emailSent = sendWelcomeEmail($input['email'], $input['username'], $defaultPassword, $input['account_type']);
 
@@ -924,80 +902,6 @@ function addNewUser($pdo, $input) {
     }
 }
 
-/**
- * 为指定用户单独保存权限（赋予/编辑共用）
- */
-function savePermissionsForUser($pdo, $input) {
-    $userId = intval($input['user_id']);
-    if (!$userId) return;
-
-    $allowedKeys = ['analytics','hr','resource','visual','brand'];
-    $perms = is_array($input['permissions']) ? array_values(array_intersect($input['permissions'], $allowedKeys)) : [];
-
-    $normalize = function($arr, $allow) {
-        return array_values(array_intersect(is_array($arr) ? $arr : [], $allow));
-    };
-    $pagePermsInput = is_array($input['page_permissions']) ? $input['page_permissions'] : [];
-    $pagePermsNorm = [
-        'stock_inventory' => [
-            'system' => $normalize($pagePermsInput['stock_inventory']['system'] ?? [], ['central','j1','j2','j3']),
-            'view'   => $normalize($pagePermsInput['stock_inventory']['view'] ?? [], ['list','records','remark','product','sot'])
-        ],
-        'kpi_upload' => [
-            'system' => $normalize($pagePermsInput['kpi_upload']['system'] ?? [], ['j1','j2','j3']),
-            'type'   => $normalize($pagePermsInput['kpi_upload']['type'] ?? [], ['kpi','cost'])
-        ]
-    ];
-    $submenuAllowed = [
-        'analytics' => ['kpi_report','kpi_upload'],
-        'hr'        => ['staff_management','schedule'],
-        'resource'  => ['stock_inventory','dishware','price_comparison'],
-        'visual'    => ['bgmusic','homepage1','about1','about4','tokyo1','tokyo5','join1','join2','join3'],
-        'brand'     => ['kunzz_holdings','tokyo_cuisine','tokyo_izakaya']
-    ];
-    $submenuInput = is_array($input['submenu_permissions']) ? $input['submenu_permissions'] : [];
-    $submenuPermsNorm = [];
-    foreach ($submenuAllowed as $parent => $allowedList) {
-        $requested = isset($submenuInput[$parent]) && is_array($submenuInput[$parent]) ? $submenuInput[$parent] : [];
-        $submenuPermsNorm[$parent] = in_array($parent, $perms, true)
-            ? array_values(array_intersect($requested, $allowedList))
-            : [];
-    }
-    $reportAllowed    = ['kpi','cost'];
-    $restaurantAllowed = ['j1','j2','j3'];
-    $reportPerms = isset($input['report_permissions']) && is_array($input['report_permissions'])
-        ? array_values(array_intersect($input['report_permissions'], $reportAllowed)) : $reportAllowed;
-    if (empty($reportPerms)) $reportPerms = $reportAllowed;
-    $restaurantPerms = isset($input['restaurant_permissions']) && is_array($input['restaurant_permissions'])
-        ? array_values(array_intersect($input['restaurant_permissions'], $restaurantAllowed)) : $restaurantAllowed;
-    if (empty($restaurantPerms)) $restaurantPerms = $restaurantAllowed;
-    $brandPerms = isset($input['brand_permissions']) && is_array($input['brand_permissions']) ? $input['brand_permissions'] : [];
-
-    ensurePermissionsTable($pdo);
-    $stmt = $pdo->prepare("
-        INSERT INTO user_sidebar_permissions
-            (user_id, permissions_json, page_permissions_json, submenu_permissions_json,
-             report_permissions_json, restaurant_permissions_json, brand_permissions_json, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
-        ON DUPLICATE KEY UPDATE
-            permissions_json         = VALUES(permissions_json),
-            page_permissions_json    = VALUES(page_permissions_json),
-            submenu_permissions_json = VALUES(submenu_permissions_json),
-            report_permissions_json  = VALUES(report_permissions_json),
-            restaurant_permissions_json = VALUES(restaurant_permissions_json),
-            brand_permissions_json   = VALUES(brand_permissions_json),
-            updated_at               = NOW()
-    ");
-    $stmt->execute([
-        $userId,
-        json_encode($perms),
-        json_encode($pagePermsNorm),
-        json_encode($submenuPermsNorm),
-        json_encode($reportPerms),
-        json_encode($restaurantPerms),
-        json_encode($brandPerms)
-    ]);
-}
 /**
  * 确保权限表存在
  */
