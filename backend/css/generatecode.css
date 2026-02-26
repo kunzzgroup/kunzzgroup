@@ -938,21 +938,8 @@ tr:hover {
     /* 文字也显示可点击 */
 }
 
-/* 一级分类有三级配置的样式 */
 .perm-level-1-item.has-level-3 {
     position: relative;
-}
-
-.perm-level-1-item.has-level-3::after {
-    content: '详细配置 ▶';
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.9);
-    font-weight: 600;
-    opacity: 0.8;
 }
 
 .perm-level-1-item.has-level-3.expanded {
@@ -1085,7 +1072,7 @@ tr:hover {
 }
 
 .perm-level-2-item.has-level-3::after {
-    content: '详细配置 ▶';
+    content: '▶';
     position: absolute;
     right: 10px;
     top: 50%;
@@ -1093,7 +1080,7 @@ tr:hover {
     font-size: 11px;
     color: #ff8019;
     font-weight: 600;
-    opacity: 0.7;
+    opacity: 0.5;
 }
 
 /* 右侧详细配置卡片 */
@@ -1268,38 +1255,30 @@ tr:hover {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 12px;
-    cursor: pointer;
+    padding: 8px 12px;
+    cursor: default;
     user-select: none;
     font-size: 13px;
-    color: #4b5563;
-    font-weight: 500;
+    color: #374151;
+    font-weight: 600;
+    background: #f3f4f6;
+    border-radius: 4px 4px 0 0;
 }
 
 .perm-store-item .perm-checkbox-label:hover {
-    background-color: #f9fafb;
+    background-color: #f3f4f6;
 }
 
 .perm-store-item .perm-arrow-store {
-    display: inline-block;
-    transition: transform 0.2s;
-    color: #6b7280;
-    font-size: 12px;
-}
-
-.perm-store-item.expanded .perm-arrow-store {
-    transform: rotate(90deg);
-}
-
-.perm-store-content {
     display: none;
-    padding: 10px 12px 10px 30px;
+}
+
+/* store-content 默认展开（无需点击箭头） */
+.perm-store-content {
+    display: block;
+    padding: 8px 12px 8px 16px;
     border-top: 1px solid #e5e7eb;
     background-color: #f9fafb;
-}
-
-.perm-store-item.expanded .perm-store-content {
-    display: block;
 }
 
 .perm-store-content .perm-section-title {
