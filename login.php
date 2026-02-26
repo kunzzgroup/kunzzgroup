@@ -43,10 +43,9 @@ if ($result->num_rows === 1) {
         $_SESSION['last_activity'] = time(); // ➤ 当前登录时间（用于 1 分钟自动登出）
 
         // 检查是否为首次登录
-        $_SESSION['is_first_login'] = $user['is_first_login'];
         if ($user['is_first_login'] == 1) {
-            // 首次登录，跳转到强制改密页面
-            header("Location: change_password.php");
+            // 首次登录，跳转到密码重置页面
+            header("Location: reset_password.html");
             exit();
         }
 
