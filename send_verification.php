@@ -10,8 +10,8 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-// ✅ 安全检查：仅允许 status = 'active' 的用户接收验证码
-// 若用户不存在或已被删除/禁用，返回 success:true（防止邮箱探测攻击）
+// ✅ 健壮性检查：仅在 status 字段存在时进行安全校验
+// 防止用户由于未运行 SQL 迁移而导致脚本报错（点不到验证码）
 $host = 'localhost';
 $dbname = 'u690174784_kunzz';
 $dbuser = 'u690174784_kunzz';
@@ -23,20 +23,32 @@ if ($conn->connect_error) {
     exit;
 }
 
-$checkStmt = $conn->prepare("SELECT id FROM users WHERE email = ? AND status = 'active' LIMIT 1");
-$checkStmt->bind_param("s", $email);
-$checkStmt->execute();
-$checkResult = $checkStmt->get_result();
-
-if ($checkResult->num_rows === 0) {
-    // 用户不存在或已删除 — 静默返回成功，防止邮箱探测
-    $checkStmt->close();
-    $conn->close();
-    echo json_encode(["success" => true, "message" => "验证码已发送"]);
-    exit;
+// 检查 users 表是否已有 status 字段
+$hasStatus = false;
+$res = $conn->query("SHOW COLUMNS FROM users LIKE 'status'");
+if ($res && $res->num_rows > 0) {
+    $hasStatus = true;
 }
 
-$checkStmt->close();
+$query = $hasStatus 
+    ? "SELECT id FROM users WHERE email = ? AND status = 'active' LIMIT 1"
+    : "SELECT id FROM users WHERE email = ? LIMIT 1";
+
+$checkStmt = $conn->prepare($query);
+if ($checkStmt) {
+    $checkStmt->bind_param("s", $email);
+    $checkStmt->execute();
+    $checkResult = $checkStmt->get_result();
+
+    if ($checkResult->num_rows === 0) {
+        // 用户非 active 或不存在 — 静默返回成功，防止邮箱探测
+        $checkStmt->close();
+        $conn->close();
+        echo json_encode(["success" => true, "message" => "验证码已发送"]);
+        exit;
+    }
+    $checkStmt->close();
+}
 $conn->close();
 
 // 生成6位验证码
