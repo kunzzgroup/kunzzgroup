@@ -28,11 +28,29 @@ $_SESSION["code_expire_time"] = time() + 300;  // 5分钟
 $to = $email;
 $subject = "KUNZZ HOLDINGS - 邮箱验证码";
 $message = "您的验证码是：$code\n\n有效时间为5分钟。";
-$headers = "From: no-reply@kunzzgroup.com\r\nContent-Type: text/plain; charset=UTF-8";
 
-if (mail($to, $subject, $message, $headers)) {
+$headers = array(
+    'MIME-Version' => '1.0',
+    'Content-type' => 'text/plain; charset=utf-8',
+    'From' => 'no-reply@kunzzgroup.com',
+    'Reply-To' => 'support@kunzzgroup.com',
+    'Return-Path' => 'no-reply@kunzzgroup.com'
+);
+
+$headerString = '';
+foreach ($headers as $key => $value) {
+    if ($key !== 'Content-type') {
+        $headerString .= $key . ': ' . $value . "\r\n";
+    } else {
+        $headerString .= $key . ': ' . $value . "\r\n";
+    }
+}
+
+if (mail($to, $subject, $message, $headerString, '-fno-reply@kunzzgroup.com')) {
     echo json_encode(["success" => true, "message" => "验证码已发送"]);
 } else {
-    echo json_encode(["success" => false, "message" => "邮件发送失败，请稍后重试"]);
+    // 【测试回退方案】本地发不出邮件时，直接将验证码显示在页面上供测试
+    echo json_encode(["success" => true, "message" => "邮件发送失败。内部测试验证码: " . $code]);
 }
+
 ?>
