@@ -88,7 +88,7 @@ require_once 'session_check.php';
 
     <!-- 用户权限模态框 -->
     <div id="permissionsModal" class="modal">
-        <div class="modal-content" style="max-width: 1200px !important; width: 85vw !important;">
+        <div class="modal-content" style="max-width: 950px !important; width: 70vw !important;">
             <div class="modal-header" style="color: #ff5c00; font-size: 24px; margin-bottom: 20px; font-weight: 600;">
                 <i class="fas fa-user-shield"></i> <span id="perm_modal_title">用户权限设定</span>
             </div>
@@ -641,9 +641,7 @@ require_once 'session_check.php';
                     
                     <!-- 用户权限设定区块 -->
                     <div class="form-section">
-                        <div class="form-section-header" style="color: #ff5c00;">
-                            <i class="fas fa-user-shield"></i> 用户权限设定
-                        </div>
+                        <div class="form-section-header">用户权限设定</div>
                         <div class="form-section-content" style="padding: 0;">
                             <!-- 权限配置布局 -->
                             <div class="perm-layout-container" style="border: none; margin-top: 0; box-shadow: none;">
@@ -1178,9 +1176,7 @@ require_once 'session_check.php';
                     
                     <!-- 用户权限设定区块 -->
                     <div class="form-section">
-                        <div class="form-section-header" style="color: #ff5c00;">
-                            <i class="fas fa-user-shield"></i> 用户权限设定
-                        </div>
+                        <div class="form-section-header">用户权限设定</div>
                         <div class="form-section-content" style="padding: 0;">
                             <!-- 权限配置布局 -->
                             <div class="perm-layout-container" style="border: none; margin-top: 0; box-shadow: none;">

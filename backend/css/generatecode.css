@@ -714,7 +714,7 @@ tr:hover {
     margin: 3% auto;
     padding: clamp(18px, 1.3vw, 25px);
     border-radius: 10px;
-    width: clamp(750px, 62.5vw, 1200px);
+    width: clamp(650px, 50vw, 1000px);
     text-align: center;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     animation: slideIn 0.3s ease;
