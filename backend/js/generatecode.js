@@ -1354,8 +1354,7 @@ function initPermissionTreeEvents(container) {
                 return;
             }
 
-            const parent = item.getAttribute('data-perm');
-            const subContainer = container.querySelector(`.perm-level-2-container[data-parent="${parent}"]`);
+            const subContainer = item.parentElement.querySelector('.perm-level-2-container');
             const isCurrentlyExpanded = item.classList.contains('expanded');
             const detailContent = container.querySelector('.perm-detail-content');
             const placeholder = container.querySelector('.perm-detail-placeholder');
