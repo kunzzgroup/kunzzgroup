@@ -1182,6 +1182,93 @@ require_once 'session_check.php';
         <!-- 动态通知内容 -->
     </div>
     <script src="js/generatecode.js"></script>
+    <script>
+    // =========================================================
+    // addUserModal 权限展开/折叠 — 直接绑定（防止 initPermissionTreeEvents guard 问题）
+    // =========================================================
+    document.addEventListener('DOMContentLoaded', function () {
+        const addModal = document.getElementById('addUserModal');
+        if (!addModal) return;
+
+        // 事件委托：监听 addUserModal 内所有点击
+        addModal.addEventListener('click', function (e) {
+            // 如果点击的是 checkbox，不处理展开
+            if (e.target.tagName === 'INPUT') return;
+
+            // ---- 一级项展开（点击 perm-level-1-item 或其子元素）----
+            const lvl1Item = e.target.closest('.perm-level-1-item');
+            if (lvl1Item && lvl1Item.closest('#addUserModal')) {
+                e.stopPropagation();
+                const parent = lvl1Item.getAttribute('data-perm');
+                if (!parent) return;
+
+                const subContainer = addModal.querySelector(`.perm-level-2-container[data-parent="${parent}"]`);
+                if (!subContainer) return;
+
+                // 关闭其他已展开的一级项
+                addModal.querySelectorAll('.perm-level-1-item.expanded').forEach(other => {
+                    if (other !== lvl1Item) {
+                        other.classList.remove('expanded');
+                        const op = other.getAttribute('data-perm');
+                        const oc = addModal.querySelector(`.perm-level-2-container[data-parent="${op}"]`);
+                        if (oc) oc.classList.remove('expanded');
+                    }
+                });
+
+                lvl1Item.classList.toggle('expanded');
+                subContainer.classList.toggle('expanded');
+                return;
+            }
+
+            // ---- 二级有三级项展开（点击 perm-level-2-item.has-level-3 或其子元素）----
+            const lvl2Item = e.target.closest('.perm-level-2-item.has-level-3');
+            if (lvl2Item && lvl2Item.closest('#addUserModal')) {
+                e.stopPropagation();
+                const sub = lvl2Item.getAttribute('data-sub');
+                if (!sub) return;
+
+                const detailContent = addModal.querySelector('.perm-detail-content');
+                const placeholder  = addModal.querySelector('.perm-detail-placeholder');
+                const panel = detailContent ? detailContent.querySelector(`.perm-level-3-panel[data-for="${sub}"]`) : null;
+                const isExpanded = lvl2Item.classList.contains('expanded');
+
+                // 关闭其他已展开的二级项
+                addModal.querySelectorAll('.perm-level-2-item.has-level-3.expanded').forEach(other => {
+                    if (other !== lvl2Item) {
+                        other.classList.remove('expanded');
+                        const os = other.getAttribute('data-sub');
+                        const op2 = detailContent ? detailContent.querySelector(`.perm-level-3-panel[data-for="${os}"]`) : null;
+                        if (op2) op2.classList.remove('show');
+                    }
+                });
+
+                lvl2Item.classList.toggle('expanded');
+
+                if (!isExpanded) {
+                    if (panel) panel.classList.add('show');
+                    if (detailContent) detailContent.classList.add('active');
+                    if (placeholder) placeholder.classList.add('hidden');
+                } else {
+                    if (panel) panel.classList.remove('show');
+                    if (detailContent) detailContent.classList.remove('active');
+                    if (placeholder) placeholder.classList.remove('hidden');
+                }
+                return;
+            }
+
+            // ---- 店面展开（store-item label）----
+            const storeLabel = e.target.closest('.perm-store-item .perm-checkbox-label');
+            if (storeLabel && storeLabel.closest('#addUserModal')) {
+                const storeItem = storeLabel.closest('.perm-store-item');
+                if (storeItem) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    storeItem.classList.toggle('expanded');
+                }
+            }
+        });
+    });
+    </script>
     
 </body>
 </html>
