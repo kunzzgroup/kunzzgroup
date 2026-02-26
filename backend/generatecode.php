@@ -229,8 +229,8 @@ require_once 'session_check.php';
                     <!-- 右侧：三级详细配置卡片 -->
                     <div class="perm-detail-card">
                         <div class="perm-detail-placeholder">
-                            <i class="fas fa-hand-pointer" style="font-size: 48px; color: #d1d5db; margin-bottom: 15px;"></i>
-                            <p style="color: #9ca3af; font-size: 14px;">点击左侧带有箭头的选项<br>查看详细配置</p>
+                            <i class="fas fa-hand-pointer" style="font-size: 32px; color: #d1d5db; margin-bottom: 10px;"></i>
+                            <p style="color: #9ca3af; font-size: 12px;">点击左侧带有箭头的选项<br>查看详细配置</p>
                         </div>
                         
                         <!-- 所有三级面板移到这里 -->
@@ -779,8 +779,8 @@ require_once 'session_check.php';
                                 <!-- 右侧：三级详细配置卡片 -->
                                 <div class="perm-detail-card">
                                     <div class="perm-detail-placeholder">
-                                        <i class="fas fa-hand-pointer" style="font-size: 48px; color: #d1d5db; margin-bottom: 15px;"></i>
-                                        <p style="color: #9ca3af; font-size: 14px;">点击左侧带有箭头的选项<br>查看详细配置</p>
+                                        <i class="fas fa-hand-pointer" style="font-size: 32px; color: #d1d5db; margin-bottom: 10px;"></i>
+                                        <p style="color: #9ca3af; font-size: 12px;">点击左侧带有箭头的选项<br>查看详细配置</p>
                                     </div>
                                     
                                     <!-- 所有三级面板移到这里 -->
@@ -1316,8 +1316,8 @@ require_once 'session_check.php';
                                 <!-- 右侧：三级详细配置卡片 -->
                                 <div class="perm-detail-card">
                                     <div class="perm-detail-placeholder">
-                                        <i class="fas fa-hand-pointer" style="font-size: 48px; color: #d1d5db; margin-bottom: 15px;"></i>
-                                        <p style="color: #9ca3af; font-size: 14px;">点击左侧带有箭头的选项<br>查看详细配置</p>
+                                        <i class="fas fa-hand-pointer" style="font-size: 32px; color: #d1d5db; margin-bottom: 10px;"></i>
+                                        <p style="color: #9ca3af; font-size: 12px;">点击左侧带有箭头的选项<br>查看详细配置</p>
                                     </div>
                                     
                                     <!-- 所有三级面板移到这里 -->
