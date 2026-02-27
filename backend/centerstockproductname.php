@@ -48,7 +48,7 @@ if (isset($_SESSION['user_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>库存产品管理后台 - 中央</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../css/centerstockproductname.css?v=2026">
+    <link rel="stylesheet" href="../css/centerstockproductname.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
@@ -168,6 +168,6 @@ if (isset($_SESSION['user_id'])) {
         <i class="fas fa-chevron-up"></i>
     </button>
 
-    <script src="../js/centerstockproductname.js?v=2026"></script>
+    <script src="../js/centerstockproductname.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

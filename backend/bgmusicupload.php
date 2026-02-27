@@ -152,7 +152,7 @@ function formatFileSize($bytes) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>背景音乐管理 - KUNZZ HOLDINGS</title>
-    <link rel="stylesheet" href="/backend/css/bgmusicupload.css?v=2026">
+    <link rel="stylesheet" href="/backend/css/bgmusicupload.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
@@ -258,6 +258,6 @@ function formatFileSize($bytes) {
             </div>
         </div>
     </div>
-    <script src="/backend/js/bgmusicupload.js?v=2026"></script>
+    <script src="/backend/js/bgmusicupload.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

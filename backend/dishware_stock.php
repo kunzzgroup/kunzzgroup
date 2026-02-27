@@ -49,7 +49,7 @@ if (isset($_SESSION['user_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>碗碟库存管理 - 库存管理系统</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/backend/css/dishware_stock.css?v=2026">
+    <link rel="stylesheet" href="/backend/css/dishware_stock.css?v=<?php echo time(); ?>">
    
 </head>
 <body>
@@ -704,6 +704,6 @@ if (isset($_SESSION['user_id'])) {
             </form>
         </div>
     </div>
-    <script src="js/dishware_stock.js?v=2026"></script>
+    <script src="js/dishware_stock.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

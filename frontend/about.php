@@ -97,22 +97,22 @@ $timelineItems = getTimelineItems('zh');
       
         <div class="values-bottom animate-on-scroll card-tilt-in-left">
             <div class="values-card">
-                <img src="../images/images/目标导向.png?v=2026" alt="icon" class="values-icon">
+                <img src="../images/images/目标导向.png?v=<?php echo time(); ?>" alt="icon" class="values-icon">
                 <h3>目标导向</h3>
                 <p>以结果为导向，聚焦关键任务，明确每一步的方向与意义。</p>
             </div>
             <div class="values-card">
-                <img src="../images/images/理念一致.png?v=2026" alt="icon" class="values-icon">
+                <img src="../images/images/理念一致.png?v=<?php echo time(); ?>" alt="icon" class="values-icon">
                 <h3>理念一致</h3>
                 <p>保持高度共识，思想同频，目标一致，减少内耗。</p>
             </div>
             <div class="values-card">
-                <img src="../images/images/追求卓越.png?v=2026" alt="icon" class="values-icon">
+                <img src="../images/images/追求卓越.png?v=<?php echo time(); ?>" alt="icon" class="values-icon">
                 <h3>追求卓越</h3>
                 <p>不满足于完成任务，要追求干得更好，更高标准地完成目标，持续优化每项工作。</p>
             </div>
             <div class="values-card">
-                <img src="../images/images/创新精神.png?v=2026" alt="icon" class="values-icon">
+                <img src="../images/images/创新精神.png?v=<?php echo time(); ?>" alt="icon" class="values-icon">
                 <h3>创新精神</h3>
                 <p>拥抱变化、敢于尝试，突破既有框架，不断探索新方法、新工具与新角度，推动企业成长。</p>
             </div>
@@ -187,10 +187,10 @@ $timelineItems = getTimelineItems('zh');
 <?php include '../public/social.php'; ?>
   
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="../app.js?v=2026"></script>
-<script src="../public/header.js?v=2026"></script>
-<script src="../public/footer.js?v=2026"></script>
-<script src="../public/social.js?v=2026"></script>
+<script src="../app.js?v=<?php echo time(); ?>"></script>
+<script src="../public/header.js?v=<?php echo time(); ?>"></script>
+<script src="../public/footer.js?v=<?php echo time(); ?>"></script>
+<script src="../public/social.js?v=<?php echo time(); ?>"></script>
 <script>
         // 通用的 animate-on-scroll observer（保持原有逻辑）
         const observer = new IntersectionObserver((entries) => {

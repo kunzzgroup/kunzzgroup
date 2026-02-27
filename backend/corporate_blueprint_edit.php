@@ -354,7 +354,7 @@ $strategicObjectives = $currentData['strategicObjectives'] ?? [];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>企业蓝图管理 - KUNZZ HOLDINGS</title>
     <link rel="icon" type="image/png" href="../images/images/logo.png">
-    <link rel="stylesheet" href="css/corporate_blueprint_edit.css?v=2026">
+    <link rel="stylesheet" href="css/corporate_blueprint_edit.css?v=<?php echo time(); ?>">
 </head>
 <body class="has-sidebar">
     <?php include 'sidebar.php'; ?>
@@ -777,7 +777,7 @@ Implementation Timeline Adherence (%)"><?php echo htmlspecialchars(implode("\n",
         let cultureExplanationIndex = <?php echo count($cultureExplanation); ?>;
         let valuesExplanationIndex = <?php echo count($valuesExplanation); ?>;
     </script>
-    <script src="js/corporate_blueprint_edit.js?v=2026"></script>
+    <script src="js/corporate_blueprint_edit.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>
 

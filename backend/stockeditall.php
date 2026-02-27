@@ -18,9 +18,9 @@ require_once 'session_check.php';
     <title>库存管理系统</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=2026" />
-    <link rel="stylesheet" href="animation.css?v=2026" />
-    <link rel="stylesheet" href="/backend/css/stockeditall.css?v=2026" />
+    <link rel="stylesheet" href="style.css?v=<?php echo time(); ?>" />
+    <link rel="stylesheet" href="animation.css?v=<?php echo time(); ?>" />
+    <link rel="stylesheet" href="/backend/css/stockeditall.css?v=<?php echo time(); ?>" />
     
 </head>
 <body>
@@ -438,7 +438,7 @@ require_once 'session_check.php';
         </div>
     </div>
 
-    <script src="js/stockeditall.js?v=2026"></script>
+    <script src="js/stockeditall.js?v=<?php echo time(); ?>"></script>
 </body>
 <script>
 // 页面权限检查已在 applyPagePermissions 函数中处理，这里不需要重复代码

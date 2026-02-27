@@ -100,7 +100,7 @@ $currentConfig = getTokyoLocationConfig();
     <link rel="icon" type="image/png" href="../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/tokyopage5upload.css?v=2026">
+    <link rel="stylesheet" href="css/tokyopage5upload.css?v=<?php echo time(); ?>">
     <title>Tokyo 位置信息管理 - KUNZZ HOLDINGS</title>
     
 </head>
@@ -265,6 +265,6 @@ window.TOKYO_UPLOAD = {
 };
 </script>
 
-<script src="js/tokyopage5upload.js?v=2026"></script>
+<script src="js/tokyopage5upload.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

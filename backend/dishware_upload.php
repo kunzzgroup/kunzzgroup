@@ -13,7 +13,7 @@ if (!headers_sent()) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>碗碟信息上传 - 库存管理系统</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/dishware_upload.css?v=2026">
+    <link rel="stylesheet" href="css/dishware_upload.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <div class="container">
@@ -111,6 +111,6 @@ if (!headers_sent()) {
             </form>
         </div>
     </div>
-    <script src="js/dishware_upload.js?v=2026"></script>
+    <script src="js/dishware_upload.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

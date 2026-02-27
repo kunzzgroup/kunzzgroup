@@ -16,7 +16,7 @@ session_start();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>最低库存设置 - 库存管理系统</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="/backend/css/stockminimum.css?v=2026">
+    <link rel="stylesheet" href="/backend/css/stockminimum.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <div class="container">
@@ -105,6 +105,6 @@ session_start();
     <!-- 动态通知内容 -->
     </div>
 
-    <script src="js/stockminimum.js?v=2026"></script>
+    <script src="js/stockminimum.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

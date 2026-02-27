@@ -74,7 +74,7 @@ if (file_exists('media_config.json')) {
     <link rel="icon" type="image/png" href="../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/homepage1upload.css?v=2026">
+    <link rel="stylesheet" href="css/homepage1upload.css?v=<?php echo time(); ?>">
     <title>首页媒体管理 - KUNZZ HOLDINGS</title>
     
 </head>
@@ -138,6 +138,6 @@ if (file_exists('media_config.json')) {
             </div>
         </div>
     </div>
-    <script src="js/homepage1upload.js?v=2026"></script>
+    <script src="js/homepage1upload.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

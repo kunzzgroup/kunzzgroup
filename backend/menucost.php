@@ -13,7 +13,7 @@ if (!headers_sent()) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>菜单成本管理</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/menucost.css?v=2026">
+    <link rel="stylesheet" href="css/menucost.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
@@ -79,7 +79,7 @@ if (!headers_sent()) {
         </div>
     </div>
 
-    <script src="js/menucost.js?v=2026"></script>
+    <script src="js/menucost.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>
 

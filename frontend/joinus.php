@@ -37,27 +37,27 @@ include '../public/header.php';
       <h2>公司福利</h2>
       <div class="benefits-grid">
         <div class="benefit-item">
-          <img src="../../images/images/带薪假期.png?v=2026" alt="带薪假期">
+          <img src="../../images/images/带薪假期.png?v=<?php echo time(); ?>" alt="带薪假期">
           <p>带薪假期</p>
         </div>
         <div class="benefit-item">
-          <img src="../../images/images/旅游奖励.png?v=2026" alt="旅游奖励">
+          <img src="../../images/images/旅游奖励.png?v=<?php echo time(); ?>" alt="旅游奖励">
           <p>旅游奖励</p>
         </div>
         <div class="benefit-item">
-          <img src="../../images/images/汽车奖励.png?v=2026" alt="汽车奖励">
+          <img src="../../images/images/汽车奖励.png?v=<?php echo time(); ?>" alt="汽车奖励">
           <p>汽车奖励</p>
         </div>
         <div class="benefit-item">
-          <img src="../../images/images/房子奖励.png?v=2026" alt="房子奖励">
+          <img src="../../images/images/房子奖励.png?v=<?php echo time(); ?>" alt="房子奖励">
           <p>房子奖励</p>
         </div>
         <div class="benefit-item">
-          <img src="../../images/images/年度绩效奖励.png?v=2026" alt="年度绩效奖励">
+          <img src="../../images/images/年度绩效奖励.png?v=<?php echo time(); ?>" alt="年度绩效奖励">
           <p>年度绩效奖励</p>
         </div>
         <div class="benefit-item">
-          <img src="../../images/images/专业培训与学习机会.png?v=2026" alt="专业培训与学习机会">
+          <img src="../../images/images/专业培训与学习机会.png?v=<?php echo time(); ?>" alt="专业培训与学习机会">
           <p>专业培训与学习机会</p>
         </div>
       </div>
@@ -295,10 +295,10 @@ include '../public/header.php';
 <?php include '../public/social.php'; ?>
     
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="app.js?v=2026"></script>
-<script src="../public/header.js?v=2026"></script>
-<script src="../public/footer.js?v=2026"></script>
-<script src="../public/social.js?v=2026"></script>
+<script src="app.js?v=<?php echo time(); ?>"></script>
+<script src="../public/header.js?v=<?php echo time(); ?>"></script>
+<script src="../public/footer.js?v=<?php echo time(); ?>"></script>
+<script src="../public/social.js?v=<?php echo time(); ?>"></script>
 <script>
         // 通用的 animate-on-scroll observer（保持原有逻辑）
 const observer = new IntersectionObserver((entries) => {

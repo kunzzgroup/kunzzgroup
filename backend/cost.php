@@ -73,7 +73,7 @@ $avatarLetter = strtoupper($username[0]);
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/backend/css/cost.css?v=2026">
+    <link rel="stylesheet" href="/backend/css/cost.css?v=<?php echo time(); ?>">
 </head>
 <body class="restaurant-j1">
     <?php include 'sidebar.php'; ?>
@@ -414,7 +414,7 @@ $avatarLetter = strtoupper($username[0]);
             <!-- 动态生成日期 -->
         </div>
     </div>
-    <script src="js/cost.js?v=2026"></script>
+    <script src="js/cost.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>
 

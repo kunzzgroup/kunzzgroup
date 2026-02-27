@@ -74,7 +74,7 @@ if (file_exists('../media_config.json')) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>媒体管理 - KUNZZ HOLDINGS</title>
-    <link rel="stylesheet" href="css/media_manager.css?v=2026">
+    <link rel="stylesheet" href="css/media_manager.css?v=<?php echo time(); ?>">
     
 </head>
 <body>
@@ -180,6 +180,6 @@ if (file_exists('../media_config.json')) {
             </div>
         </div>
     </div>
-    <script src="js/media_manager.js?v=2026"></script>
+    <script src="js/media_manager.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

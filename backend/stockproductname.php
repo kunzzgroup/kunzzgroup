@@ -57,7 +57,7 @@ if (isset($_SESSION['user_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>库存货品管理后台 - Excel模式</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/backend/css/stockproductname.css?v=2026">
+    <link rel="stylesheet" href="/backend/css/stockproductname.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
@@ -177,5 +177,5 @@ if (isset($_SESSION['user_id'])) {
             currentUserApplicant: <?php echo json_encode($currentApplicant, JSON_UNESCAPED_UNICODE); ?>,
         };
     </script>   
-    <script src="js/stockproductname.js?v=2026"></script>
+    <script src="js/stockproductname.js?v=<?php echo time(); ?>"></script>
 </html>

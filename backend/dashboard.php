@@ -93,8 +93,8 @@ if (isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KUNZZ HOLDINGS</title>
-    <link rel="stylesheet" href="style.css?v=2026" />
-    <link rel="stylesheet" href="animation.css?v=2026" />
+    <link rel="stylesheet" href="style.css?v=<?php echo time(); ?>" />
+    <link rel="stylesheet" href="animation.css?v=<?php echo time(); ?>" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -105,7 +105,7 @@ if (isset($_SESSION['user_id'])) {
 <body>
     <?php include 'sidebar.php'; ?>
   
-<script src="app.js?v=2026"></script>
+<script src="app.js?v=<?php echo time(); ?>"></script>
 <script>
         const hamburger = document.getElementById('hamburger');
         const navMenu = document.getElementById('navMenu');

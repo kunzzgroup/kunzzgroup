@@ -462,7 +462,7 @@ if (file_exists($configFile) && is_readable($configFile)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $isEnglish ? 'Timeline Management' : '发展历史管理'; ?> - KUNZZ HOLDINGS</title>
-    <link rel="stylesheet" href="/backend/css/aboutpage4upload.css?v=2026">
+    <link rel="stylesheet" href="/backend/css/aboutpage4upload.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
@@ -699,6 +699,6 @@ if (file_exists($configFile) && is_readable($configFile)) {
             </div>
         </div>
     </div>
-    <script src="/backend/js/aboutpage4upload.js?v=2026"></script>
+    <script src="/backend/js/aboutpage4upload.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

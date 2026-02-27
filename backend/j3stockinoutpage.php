@@ -18,9 +18,9 @@ require_once 'session_check.php';
     <title>库存管理系统</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=2026" />
-    <link rel="stylesheet" href="animation.css?v=2026" />
-    <link rel="stylesheet" href="../css/j3stockinoutpage.css?v=2026" />
+    <link rel="stylesheet" href="style.css?v=<?php echo time(); ?>" />
+    <link rel="stylesheet" href="animation.css?v=<?php echo time(); ?>" />
+    <link rel="stylesheet" href="../css/j3stockinoutpage.css?v=<?php echo time(); ?>" />
     
 </head>
 <body>
@@ -399,6 +399,6 @@ require_once 'session_check.php';
             <!-- 动态生成日期 -->
         </div>
     </div>
-    <script src="js/j3stockinoutpage.js?v=2026"></script>
+    <script src="js/j3stockinoutpage.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

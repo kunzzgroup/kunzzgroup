@@ -13,7 +13,7 @@ if (!headers_sent()) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>碗碟库存管理系统</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/backend/css/dishware_index.css?v=2026">
+    <link rel="stylesheet" href="/backend/css/dishware_index.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <a href="/" class="back-button">
@@ -118,6 +118,6 @@ if (!headers_sent()) {
             </div>
         </div>
     </div>
-    <script src="/backend/js/dishware_index.js?v=2026"></script>
+    <script src="/backend/js/dishware_index.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

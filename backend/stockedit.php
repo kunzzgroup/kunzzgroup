@@ -17,7 +17,7 @@ require_once 'session_check.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>库存管理系统 - 进出货管理</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../css/stockedit.css?v=2026">
+    <link rel="stylesheet" href="../css/stockedit.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <div class="container">
@@ -270,6 +270,6 @@ require_once 'session_check.php';
 </div>
     </div>
 
-    <script src="js/stockedit.js?v=2026"></script>
+    <script src="js/stockedit.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

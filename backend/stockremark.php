@@ -17,7 +17,7 @@ require_once 'session_check.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>库存价格分析 - 库存管理系统</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/stockremark.css?v=2026">
+    <link rel="stylesheet" href="css/stockremark.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
@@ -73,6 +73,6 @@ require_once 'session_check.php';
     <button class="back-to-top" id="back-to-top-btn" onclick="scrollToTop()" title="回到顶部">
         <i class="fas fa-chevron-up"></i>
     </button>
-    <script src="js/stockremark.js?v=2026"></script>
+    <script src="js/stockremark.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>
