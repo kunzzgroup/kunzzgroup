@@ -7,6 +7,10 @@ RewriteRule ^(costapi|stockapi|kpiapi|check_permissions)\.php$ - [L]
 # 防止循环关键行：已经被内部重写到 frontend/ 的请求，直接放行
 RewriteRule ^frontend/ - [L]
 
+# 检查是否存在同名的 .php 文件，如果是，则重写为 .php (支持无后缀访问 j1/j1stockeditmobile)
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.+?)/?$ $1.php [L,QSA]
+
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
