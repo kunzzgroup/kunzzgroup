@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once dirname(__DIR__) . '/core/init.php';
 require_once CORE_PATH . '/session_check.php';
 
