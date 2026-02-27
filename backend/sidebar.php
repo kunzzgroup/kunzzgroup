@@ -557,6 +557,10 @@ if (!$canSeeBrand) {
                         首页
                         <span class="informationmenu-arrow">›</span>
                     </a>
+                                        <a href="#" class="informationmenu-item">
+                        首页
+                        <span class="informationmenu-arrow">›</span>
+                    </a>
                     <div class="submenu">
                         <div class="submenu-header">
                             <div class="submenu-title">首页</div>
