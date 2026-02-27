@@ -1,6 +1,21 @@
 RewriteEngine On
 
 # -----------------------------
+# 终极浏览器缓存杀手 (Ultimate Cache Buster)
+# -----------------------------
+FileETag None
+<IfModule mod_headers.c>
+    Header unset ETag
+    Header always set Cache-Control "max-age=0, no-cache, no-store, must-revalidate, proxy-revalidate"
+    Header always set Pragma "no-cache"
+    Header always set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+</IfModule>
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 0 seconds"
+</IfModule>
+
+# -----------------------------
 # 1. Protect Logic & APIs (Most Important)
 # -----------------------------
 RewriteRule ^api/ - [L]

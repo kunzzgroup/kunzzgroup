@@ -1,10 +1,17 @@
 RewriteEngine On
 
-# ===== 禁止浏览器缓存 =====
+# ===== 终极浏览器缓存杀手 (Ultimate Cache Buster) =====
+FileETag None
 <IfModule mod_headers.c>
-Header always set Cache-Control "no-cache, no-store, must-revalidate"
-Header always set Pragma "no-cache"
-Header always set Expires "0"
+    Header unset ETag
+    Header always set Cache-Control "max-age=0, no-cache, no-store, must-revalidate, proxy-revalidate"
+    Header always set Pragma "no-cache"
+    Header always set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+</IfModule>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 0 seconds"
 </IfModule>
 
 # ===== API & Backend 不 rewrite =====
