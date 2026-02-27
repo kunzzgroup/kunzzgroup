@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 session_start();
 
 // 检查用户是否登录
