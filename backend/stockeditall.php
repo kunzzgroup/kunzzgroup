@@ -32,13 +32,13 @@ require_once 'session_check.php';
             </div>
             <div class="controls">
                 <div class="mobile-selector" id="mobile-selector" style="display: none;">
-                    <a id="mobile-link-button" class="selector-button" href="../j3/j3stockeditmobile">手机版</a>
+                    <a id="mobile-link-button" class="selector-button" href="../j3/j3stockeditmobile.php">手机版</a>
                 </div>
                 <div class="mobile-selector" id="mobile-selector-j1" style="display: none;">
-                    <a id="mobile-link-button-j1" class="selector-button" href="../j1/j1stockeditmobile">手机版</a>
+                    <a id="mobile-link-button-j1" class="selector-button" href="../j1/j1stockeditmobile.php">手机版</a>
                 </div>
                 <div class="mobile-selector" id="mobile-selector-j2" style="display: none;">
-                    <a id="mobile-link-button-j2" class="selector-button" href="../j2/j2stockeditmobile">手机版</a>
+                    <a id="mobile-link-button-j2" class="selector-button" href="../j2/j2stockeditmobile.php">手机版</a>
                 </div>
                 <div class="view-selector">
                     <button class="selector-button" onclick="toggleViewSelector()">
