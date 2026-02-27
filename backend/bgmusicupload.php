@@ -1,4 +1,11 @@
 <?php
+if (!headers_sent()) {
+    header("Cache-Control: no-cache, no-store, must-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+}
+?>
+<?php
 session_start();
 
 // 检查是否已登录（根据你的登录系统调整）
@@ -145,7 +152,7 @@ function formatFileSize($bytes) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>背景音乐管理 - KUNZZ HOLDINGS</title>
-    <link rel="stylesheet" href="/backend/css/bgmusicupload.css">
+    <link rel="stylesheet" href="/backend/css/bgmusicupload.css?v=2026">
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
@@ -251,6 +258,6 @@ function formatFileSize($bytes) {
             </div>
         </div>
     </div>
-    <script src="/backend/js/bgmusicupload.js"></script>
+    <script src="/backend/js/bgmusicupload.js?v=2026"></script>
 </body>
 </html>

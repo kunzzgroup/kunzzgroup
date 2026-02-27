@@ -1,3 +1,10 @@
+<?php
+if (!headers_sent()) {
+    header("Cache-Control: no-cache, no-store, must-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+}
+?>
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -6,7 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>碗碟库存管理系统</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/backend/css/dishware_index.css">
+    <link rel="stylesheet" href="/backend/css/dishware_index.css?v=2026">
 </head>
 <body>
     <a href="/" class="back-button">
@@ -111,6 +118,6 @@
             </div>
         </div>
     </div>
-    <script src="/backend/js/dishware_index.js"></script>
+    <script src="/backend/js/dishware_index.js?v=2026"></script>
 </body>
 </html>

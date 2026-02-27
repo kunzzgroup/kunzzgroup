@@ -1,4 +1,11 @@
 <?php
+if (!headers_sent()) {
+    header("Cache-Control: no-cache, no-store, must-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+}
+?>
+<?php
 declare(strict_types=1);
 
 // 设置内存和执行时间，以防数据量大

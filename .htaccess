@@ -1,3 +1,9 @@
+<IfModule mod_headers.c>
+Header set Cache-Control "no-cache, no-store, must-revalidate"
+Header set Pragma "no-cache"
+Header set Expires "0"
+</IfModule>
+
 RewriteEngine On
 
 RewriteRule ^api/ - [L]
@@ -11,7 +17,9 @@ RewriteRule ^frontend/ - [L]
 RewriteCond %{REQUEST_FILENAME}.php -f
 RewriteRule ^(.+?)/?$ $1.php [L,QSA]
 
-RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 

@@ -1,4 +1,11 @@
 <?php
+if (!headers_sent()) {
+    header("Cache-Control: no-cache, no-store, must-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+}
+?>
+<?php
 require_once 'session_check.php';
 ?>
 <!DOCTYPE html>
@@ -11,7 +18,7 @@ require_once 'session_check.php';
     <title>问卷回答 - KUNZZ HOLDINGS</title>
     <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
     <script src="get_fontkit.php"></script>
-    <link rel="stylesheet" href="css/qna.css">
+    <link rel="stylesheet" href="css/qna.css?v=2026">
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
@@ -256,7 +263,7 @@ require_once 'session_check.php';
     </div>
 
     
-    <script src="js/qna.js"></script>
+    <script src="js/qna.js?v=2026"></script>
 </body>
 </html>
 

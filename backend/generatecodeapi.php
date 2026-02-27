@@ -1,4 +1,11 @@
 <?php
+if (!headers_sent()) {
+    header("Cache-Control: no-cache, no-store, must-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+}
+?>
+<?php
 
 // 设置响应头
 header('Content-Type: application/json; charset=utf-8');

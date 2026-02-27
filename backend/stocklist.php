@@ -1,4 +1,11 @@
 <?php
+if (!headers_sent()) {
+    header("Cache-Control: no-cache, no-store, must-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+}
+?>
+<?php
 // 包含会话验证
 require_once 'session_check.php';
 ?>
@@ -10,8 +17,8 @@ require_once 'session_check.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>库存汇总 - 库存管理系统</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="animation.css" />
-    <link rel="stylesheet" href="../css/stocklist.css" />   
+    <link rel="stylesheet" href="animation.css?v=2026" />
+    <link rel="stylesheet" href="../css/stocklist.css?v=2026" />   
 </head>
 <body>
     <div class="container">
@@ -119,6 +126,6 @@ require_once 'session_check.php';
         </div>
     </div>
 
-    <script src="js/stocklist.js"></script>
+    <script src="js/stocklist.js?v=2026"></script>
 </body>
 </html>

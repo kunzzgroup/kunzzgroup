@@ -1,3 +1,10 @@
+<?php
+if (!headers_sent()) {
+    header("Cache-Control: no-cache, no-store, must-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+}
+?>
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -6,7 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>菜单成本管理</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/menucost.css">
+    <link rel="stylesheet" href="css/menucost.css?v=2026">
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
@@ -72,7 +79,7 @@
         </div>
     </div>
 
-    <script src="js/menucost.js"></script>
+    <script src="js/menucost.js?v=2026"></script>
 </body>
 </html>
 

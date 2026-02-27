@@ -1,4 +1,11 @@
 <?php
+if (!headers_sent()) {
+    header("Cache-Control: no-cache, no-store, must-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+}
+?>
+<?php
 // Ensure variables exist when included from different pages
 $username = isset($username) ? $username : (isset($_SESSION['username']) ? $_SESSION['username'] : 'User');
 $position = isset($position) ? $position : ((isset($_SESSION['position']) && !empty($_SESSION['position'])) ? $_SESSION['position'] : 'User');
@@ -332,7 +339,7 @@ if (!$canSeeBrand) {
 ?>
 
 
-<link rel="stylesheet" href="css/sidebar.css">
+<link rel="stylesheet" href="css/sidebar.css?v=2026">
 
 <!-- 侧边菜单 -->
 <div class="informationmenu">
@@ -356,7 +363,7 @@ if (!$canSeeBrand) {
         <?php if ($canSeeBrand): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="brand-items">
-                <img src="../images/images/网页照片上传.svg" alt="" class="section-icon">
+                <img src="../images/images/网页照片上传.svg?v=2026" alt="" class="section-icon">
                 集团架构
                 <span class="section-arrow">⮞</span>
             </div>
@@ -455,7 +462,7 @@ if (!$canSeeBrand) {
         <?php if ($canSeeAnalytics): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="analytics-items">
-                <img src="../images/images/运营分析与报表.svg" alt="" class="section-icon">
+                <img src="../images/images/运营分析与报表.svg?v=2026" alt="" class="section-icon">
                 营收数据
                 <span class="section-arrow">⮞</span>
             </div>
@@ -481,7 +488,7 @@ if (!$canSeeBrand) {
         <?php if ($canSeeHR): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="hr-items">
-                <img src="../images/images/人事与资源管理.svg" alt="" class="section-icon">
+                <img src="../images/images/人事与资源管理.svg?v=2026" alt="" class="section-icon">
                 人事管理
             </div>
             <div class="dropdown-menu-items" id="hr-items">               
@@ -509,7 +516,7 @@ if (!$canSeeBrand) {
         <?php if ($canSeeResource): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="resource-items">
-                <img src="../images/images/资源库管理.svg" alt="" class="section-icon">
+                <img src="../images/images/资源库管理.svg?v=2026" alt="" class="section-icon">
                 资源总库
                 <span class="section-arrow">⮞</span>
             </div>
@@ -542,7 +549,7 @@ if (!$canSeeBrand) {
         <?php if ($canSeeVisual): ?>
         <div class="informationmenu-section">
             <div class="informationmenu-section-title" data-target="photoupload-items">
-                <img src="../images/images/网页照片上传.svg" alt="" class="section-icon">
+                <img src="../images/images/网页照片上传.svg?v=2026" alt="" class="section-icon">
                 视觉管理
                 <span class="section-arrow">⮞</span>
             </div>
@@ -631,5 +638,5 @@ if (!$canSeeBrand) {
     </div>
 </div>
 
-    <script src="js/sidebar.js"></script>
+    <script src="js/sidebar.js?v=2026"></script>
 </script>

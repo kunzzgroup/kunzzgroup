@@ -1,4 +1,11 @@
 <?php
+if (!headers_sent()) {
+    header("Cache-Control: no-cache, no-store, must-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+}
+?>
+<?php
 session_start();
 
 // 检查是否已登录（根据你的登录系统调整）
@@ -78,7 +85,7 @@ if (file_exists('../media_config.json')) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>加入我们页面管理 - KUNZZ HOLDINGS</title>
-    <link rel="stylesheet" href="css/joinpage1upload.css">
+    <link rel="stylesheet" href="css/joinpage1upload.css?v=2026">
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
@@ -151,6 +158,6 @@ if (file_exists('../media_config.json')) {
         </div>
     </div>
     
-    <script src="js/joinpage1upload.js"></script>
+    <script src="js/joinpage1upload.js?v=2026"></script>
 </body>
 </html>

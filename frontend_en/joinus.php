@@ -37,27 +37,27 @@ include '../public_en/header.php';
       <h2>Benefits</h2>
       <div class="benefits-grid">
         <div class="benefit-item">
-          <img src="../../images/images/带薪假期.png" alt="带薪假期">
+          <img src="../../images/images/带薪假期.png?v=2026" alt="带薪假期">
           <p>Annual Leave</p>
         </div>
         <div class="benefit-item">
-          <img src="../../images/images/旅游奖励.png" alt="旅游奖励">
+          <img src="../../images/images/旅游奖励.png?v=2026" alt="旅游奖励">
           <p>Travel Incentive</p>
         </div>
         <div class="benefit-item">
-          <img src="../../images/images/汽车奖励.png" alt="汽车奖励">
+          <img src="../../images/images/汽车奖励.png?v=2026" alt="汽车奖励">
           <p>Car Allowance</p>
         </div>
         <div class="benefit-item">
-          <img src="../../images/images/房子奖励.png" alt="房子奖励">
+          <img src="../../images/images/房子奖励.png?v=2026" alt="房子奖励">
           <p>Housing Allowance</p>
         </div>
         <div class="benefit-item">
-          <img src="../../images/images/年度绩效奖励.png" alt="年度绩效奖励">
+          <img src="../../images/images/年度绩效奖励.png?v=2026" alt="年度绩效奖励">
           <p>Annual Bonus</p>
         </div>
         <div class="benefit-item">
-          <img src="../../images/images/专业培训与学习机会.png" alt="专业培训与学习机会">
+          <img src="../../images/images/专业培训与学习机会.png?v=2026" alt="专业培训与学习机会">
           <p>Training & Learning</p>
         </div>
       </div>
@@ -295,10 +295,10 @@ include '../public_en/header.php';
 <?php include '../public_en/social.php'; ?>
     
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="app.js"></script>
-<script src="../public_en/header.js"></script>
-<script src="../public_en/footer.js"></script>
-<script src="../public_en/social.js"></script>
+<script src="app.js?v=2026"></script>
+<script src="../public_en/header.js?v=2026"></script>
+<script src="../public_en/footer.js?v=2026"></script>
+<script src="../public_en/social.js?v=2026"></script>
 <script>
         // 通用的 animate-on-scroll observer（保持原有逻辑）
 const observer = new IntersectionObserver((entries) => {

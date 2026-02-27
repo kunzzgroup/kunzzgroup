@@ -1,4 +1,11 @@
 <?php
+if (!headers_sent()) {
+    header("Cache-Control: no-cache, no-store, must-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+}
+?>
+<?php
 session_start();
 ob_start();
 
@@ -29,7 +36,7 @@ if (file_exists($jsonFile)) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/orgchart@2.1.9/dist/css/jquery.orgchart.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/orgchart@2.1.9/dist/js/jquery.orgchart.min.js"></script>
-    <link rel="stylesheet" href="/backend/css/corporate_blueprint.css">
+    <link rel="stylesheet" href="/backend/css/corporate_blueprint.css?v=2026">
 </head>
 <body>
     <?php include 'sidebar.php'; ?>

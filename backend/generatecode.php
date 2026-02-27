@@ -1,4 +1,11 @@
 <?php
+if (!headers_sent()) {
+    header("Cache-Control: no-cache, no-store, must-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+}
+?>
+<?php
 // 包含会话验证
 require_once 'session_check.php';
 ?>
@@ -9,7 +16,7 @@ require_once 'session_check.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/generatecode.css">
+    <link rel="stylesheet" href="css/generatecode.css?v=2026">
     <title>职员管理系统</title>
     
 </head>
@@ -929,6 +936,6 @@ require_once 'session_check.php';
     <div class="toast-container" id="toast-container">
         <!-- 动态通知内容 -->
     </div>
-    <script src="js/generatecode.js"></script>
+    <script src="js/generatecode.js?v=2026"></script>
 </body>
 </html>

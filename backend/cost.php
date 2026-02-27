@@ -1,4 +1,11 @@
 <?php
+if (!headers_sent()) {
+    header("Cache-Control: no-cache, no-store, must-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+}
+?>
+<?php
 session_start();
 
 // 超时时间（秒）
@@ -66,7 +73,7 @@ $avatarLetter = strtoupper($username[0]);
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/backend/css/cost.css">
+    <link rel="stylesheet" href="/backend/css/cost.css?v=2026">
 </head>
 <body class="restaurant-j1">
     <?php include 'sidebar.php'; ?>
@@ -407,7 +414,7 @@ $avatarLetter = strtoupper($username[0]);
             <!-- 动态生成日期 -->
         </div>
     </div>
-    <script src="js/cost.js"></script>
+    <script src="js/cost.js?v=2026"></script>
 </body>
 </html>
 

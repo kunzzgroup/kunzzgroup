@@ -1,4 +1,11 @@
 <?php
+if (!headers_sent()) {
+    header("Cache-Control: no-cache, no-store, must-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+}
+?>
+<?php
 // 提供 fontkit.umd.js 文件
 // 如果本地有文件，直接提供；否则尝试从 CDN 下载并缓存
 

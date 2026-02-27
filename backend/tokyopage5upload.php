@@ -1,4 +1,11 @@
 <?php
+if (!headers_sent()) {
+    header("Cache-Control: no-cache, no-store, must-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+}
+?>
+<?php
 session_start();
 include_once '../media_config.php';
 
@@ -93,7 +100,7 @@ $currentConfig = getTokyoLocationConfig();
     <link rel="icon" type="image/png" href="../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/tokyopage5upload.css">
+    <link rel="stylesheet" href="css/tokyopage5upload.css?v=2026">
     <title>Tokyo 位置信息管理 - KUNZZ HOLDINGS</title>
     
 </head>
@@ -258,6 +265,6 @@ window.TOKYO_UPLOAD = {
 };
 </script>
 
-<script src="js/tokyopage5upload.js"></script>
+<script src="js/tokyopage5upload.js?v=2026"></script>
 </body>
 </html>

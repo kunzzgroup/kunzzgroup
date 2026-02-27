@@ -96,22 +96,22 @@ $timelineItems = getTimelineItems('en');
       
         <div class="values-bottom animate-on-scroll card-tilt-in-left">
             <div class="values-card">
-                <img src="../images/images/目标导向.png" alt="icon" class="values-icon">
+                <img src="../images/images/目标导向.png?v=2026" alt="icon" class="values-icon">
                 <h3>Goal-Oriented</h3>
                 <p>Result-oriented, focused on key tasks, with clear direction and purpose at every step.</p>
             </div>
             <div class="values-card">
-                <img src="../images/images/理念一致.png" alt="icon" class="values-icon">
+                <img src="../images/images/理念一致.png?v=2026" alt="icon" class="values-icon">
                 <h3>Aligned Thinking</h3>
                 <p>Maintain strong consensus, stay mentally in sync, align on goals, and reduce internal friction.</p>
             </div>
             <div class="values-card">
-                <img src="../images/images/追求卓越.png" alt="icon" class="values-icon">
+                <img src="../images/images/追求卓越.png?v=2026" alt="icon" class="values-icon">
                 <h3>Seek Excellence</h3>
                 <p>Not just completing tasks — but doing them better, aiming higher, and improving continuously.</p>
             </div>
             <div class="values-card">
-                <img src="../images/images/创新精神.png" alt="icon" class="values-icon">
+                <img src="../images/images/创新精神.png?v=2026" alt="icon" class="values-icon">
                 <h3>Creativity</h3>
                 <p>Embrace change, dare to try, break limits, and keep exploring new ways to grow.</p>
             </div>
@@ -186,10 +186,10 @@ $timelineItems = getTimelineItems('en');
 <?php include '../public_en/social.php'; ?>
   
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="../app.js"></script>
-<script src="../public_en/header.js"></script>
-<script src="../public_en/footer.js"></script>
-<script src="../public_en/social.js"></script>
+<script src="../app.js?v=2026"></script>
+<script src="../public_en/header.js?v=2026"></script>
+<script src="../public_en/footer.js?v=2026"></script>
+<script src="../public_en/social.js?v=2026"></script>
 <script>
         const hamburger = document.getElementById('hamburger');
         const navMenu = document.getElementById('navMenu');

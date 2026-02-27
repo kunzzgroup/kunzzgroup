@@ -1,4 +1,11 @@
 <?php
+if (!headers_sent()) {
+    header("Cache-Control: no-cache, no-store, must-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+}
+?>
+<?php
 session_start();
 
 // 超时时间（秒）
@@ -65,7 +72,7 @@ $avatarLetter = strtoupper($username[0]);
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/backend/css/kpi.css">
+    <link rel="stylesheet" href="/backend/css/kpi.css?v=2026">
     <title>餐厅KPI管理系统</title> 
 </head>
 <body class="restaurant-j1">
@@ -224,7 +231,7 @@ $avatarLetter = strtoupper($username[0]);
                         <div class="card-body">
                             <div class="kpi-card-vertical">
                                 <div class="icon dynamic-color">
-                                    <img src="../images/images/table.svg" alt="桌子图标" style="width: clamp(30px, 2.1vw, 40px); height: clamp(28px, 1.98vw, 38px); filter: brightness(0);">
+                                    <img src="../images/images/table.svg?v=2026" alt="桌子图标" style="width: clamp(30px, 2.1vw, 40px); height: clamp(28px, 1.98vw, 38px); filter: brightness(0);">
                                 </div>
                                 <div>
                                     <p class="kpi-label">桌子总数</p>
@@ -389,6 +396,6 @@ $avatarLetter = strtoupper($username[0]);
     </div>
 
     
-    <script src="js/kpi.js"></script>
+    <script src="js/kpi.js?v=2026"></script>
 </body>
 </html>

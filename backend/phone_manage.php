@@ -1,4 +1,11 @@
 <?php
+if (!headers_sent()) {
+    header("Cache-Control: no-cache, no-store, must-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+}
+?>
+<?php
 // 包含会话验证
 require_once 'session_check.php';
 ?>
@@ -11,7 +18,7 @@ require_once 'session_check.php';
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <link rel="stylesheet" href="css/phone_manage.css">
+    <link rel="stylesheet" href="css/phone_manage.css?v=2026">
     <title>手机管理系统</title>
     
 </head>
@@ -142,7 +149,7 @@ require_once 'session_check.php';
     </div>
 
     
-    <script src="js/phone_manage.js"></script>
+    <script src="js/phone_manage.js?v=2026"></script>
 </body>
 </html>
 

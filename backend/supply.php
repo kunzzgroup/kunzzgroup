@@ -1,4 +1,11 @@
 <?php
+if (!headers_sent()) {
+    header("Cache-Control: no-cache, no-store, must-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+}
+?>
+<?php
 // 包含会话验证
 require_once 'session_check.php';
 ?>
@@ -10,8 +17,8 @@ require_once 'session_check.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>供应商价格对比</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../animation.css" />
-    <link rel="stylesheet" href="css/supply.css" />
+    <link rel="stylesheet" href="../animation.css?v=2026" />
+    <link rel="stylesheet" href="css/supply.css?v=2026" />
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
@@ -217,7 +224,7 @@ require_once 'session_check.php';
         </div>
     </div>
 
-    <script src="js/supply.js"></script>
+    <script src="js/supply.js?v=2026"></script>
 </body>
 </html>
 

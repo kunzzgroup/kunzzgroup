@@ -55,7 +55,7 @@ include '../public_en/header.php';
     </div>
     <div class="comprofile-image animate-on-scroll rotate-3d-full">
       <!-- 你可以换成自己的图片 -->
-      <img src="../images/images/logo.png" alt="公司介绍图" />
+      <img src="../images/images/logo.png?v=2026" alt="公司介绍图" />
     </div>
   </div>
 
@@ -82,22 +82,22 @@ include '../public_en/header.php';
   <section id="culture" class="culture-section">
     <div class="culture-left animate-on-scroll card-tilt-in-left">
       <div class="culture-card">
-        <img src="../images/images/积极向上 (1).png" alt="icon" class="culture-icon">
+        <img src="../images/images/积极向上 (1).png?v=2026" alt="icon" class="culture-icon">
         <h3>Positive</h3>
         <p>Stay Positive in Challenges<br>Embrace Change to Grow</p>
       </div>
       <div class="culture-card">
-        <img src="../images/images/高效执行 (1).png" alt="icon" class="culture-icon">
+        <img src="../images/images/高效执行 (1).png?v=2026" alt="icon" class="culture-icon">
         <h3>Efficient</h3>
         <p>Say it, do it. Respond fast.<br>Result-Driven & Action-Oriented</p>
       </div>
       <div class="culture-card">
-        <img src="../images/images/灵活应变 (1).png" alt="icon" class="culture-icon">
+        <img src="../images/images/灵活应变 (1).png?v=2026" alt="icon" class="culture-icon">
         <h3>Flexible</h3>
         <p>Face Change and Challenges<br>Stay Open and Adjust Fast</p>
       </div>
       <div class="culture-card">
-        <img src="../images/images/诚信待人 (1).png" alt="icon" class="culture-icon">
+        <img src="../images/images/诚信待人 (1).png?v=2026" alt="icon" class="culture-icon">
         <h3>Honesty</h3>
         <p>Build Trust with Sincerity<br>is Our Core Principle</p>
       </div>
@@ -120,10 +120,10 @@ include '../public_en/header.php';
 </div> <!-- 关闭 swiper -->
 <?php include '../public_en/social.php'; ?>
   
-<script src="../app.js" defer></script>
-<script src="../public_en/header.js" defer></script>
-<script src="../public_en/footer.js" defer></script>
-<script src="../public_en/social.js" defer></script>
+<script src="../app.js?v=2026" defer></script>
+<script src="../public_en/header.js?v=2026" defer></script>
+<script src="../public_en/footer.js?v=2026" defer></script>
+<script src="../public_en/social.js?v=2026" defer></script>
 <script>
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {

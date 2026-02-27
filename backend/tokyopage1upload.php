@@ -1,4 +1,11 @@
 <?php
+if (!headers_sent()) {
+    header("Cache-Control: no-cache, no-store, must-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+}
+?>
+<?php
 session_start();
 
 // 检查是否已登录（根据你的登录系统调整）
@@ -74,7 +81,7 @@ if (file_exists('media_config.json')) {
     <link rel="icon" type="image/png" href="../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/tokyopage1upload.css">
+    <link rel="stylesheet" href="css/tokyopage1upload.css?v=2026">
     <title>Tokyo Japanese Cuisine页面管理 - KUNZZ HOLDINGS</title>
     
 </head>
@@ -150,6 +157,6 @@ if (file_exists('media_config.json')) {
     </div>
     
 
-    <script src="js/tokyopage1upload.js"></script>
+    <script src="js/tokyopage1upload.js?v=2026"></script>
 </body>
 </html>

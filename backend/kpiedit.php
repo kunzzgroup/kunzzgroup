@@ -1,4 +1,11 @@
 <?php
+if (!headers_sent()) {
+    header("Cache-Control: no-cache, no-store, must-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+}
+?>
+<?php
 // 包含会话验证
 require_once 'session_check.php';
 
@@ -142,7 +149,7 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>餐厅数据管理后台 - Excel模式</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/kpiedit.css">
+    <link rel="stylesheet" href="css/kpiedit.css?v=2026">
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
@@ -321,7 +328,7 @@ window.KPI_CONFIG = {
 };
 </script>
     
-    <script src="js/kpiedit.js"></script>
+    <script src="js/kpiedit.js?v=2026"></script>
 </body>
 </html>
 </html>
