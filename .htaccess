@@ -1,14 +1,21 @@
-<IfModule mod_headers.c>
-Header set Cache-Control "no-cache, no-store, must-revalidate"
-Header set Pragma "no-cache"
-Header set Expires "0"
-</IfModule>
-
 RewriteEngine On
 
+# ===== 禁止浏览器缓存 =====
+<IfModule mod_headers.c>
+Header always set Cache-Control "no-cache, no-store, must-revalidate"
+Header always set Pragma "no-cache"
+Header always set Expires "0"
+</IfModule>
+
+# ===== API & Backend 不 rewrite =====
 RewriteRule ^api/ - [L]
 RewriteRule ^backend/ - [L]
 RewriteRule ^(costapi|stockapi|kpiapi|check_permissions)\.php$ - [L]
+
+# ===== 手机版 rewrite =====
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(j1|j2|j3)$ $1.php [L]
 
 # 防止循环关键行：已经被内部重写到 frontend/ 的请求，直接放行
 RewriteRule ^frontend/ - [L]
@@ -17,11 +24,12 @@ RewriteRule ^frontend/ - [L]
 RewriteCond %{REQUEST_FILENAME}.php -f
 RewriteRule ^(.+?)/?$ $1.php [L,QSA]
 
+# ===== 不影响真实文件/目录 =====
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^ - [L]
 
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
+# ===== 转发到 frontend =====
 RewriteRule ^(.*)$ frontend/$1 [L]
-RewriteRule ^(.*)$ frontend_en/$1 [L]
