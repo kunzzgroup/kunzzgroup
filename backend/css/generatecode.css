@@ -872,42 +872,69 @@ tr:hover {
 
 /* 权限布局容器 */
 .perm-layout-container {
-    display: flex;
-    gap: 20px;
+    display: block;
+    /* 改为块级，单列布局 */
     margin-bottom: 20px;
-    min-height: 400px;
-    /* 确保有足够高度 */
     transform: translateZ(0);
+    /* 启用GPU加速 */
     -webkit-font-smoothing: antialiased;
 }
 
-.compact-perm-layout {
-    gap: 15px;
+/* 隐藏旧的详情卡片相关样式 */
+.perm-detail-card,
+.perm-detail-placeholder,
+.perm-close-btn {
+    display: none !important;
 }
 
-.compact-perm-layout .perm-tree-container {
-    flex: 1;
-    min-width: 300px;
-    /* 防止树被压缩得太小 */
+/* 内联三级面板样式 */
+.perm-level-3-panel-inline {
+    display: none;
+    /* 默认隐藏 */
+    margin: 10px 0 10px 30px;
+    padding: 15px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    animation: slideDown 0.3s ease-out;
 }
 
-.compact-perm-layout .perm-detail-card {
-    flex: 0 0 clamp(300px, 30vw, 400px);
+.perm-level-3-panel-inline.show {
+    display: block;
+}
+
+.perm-level-2-item.expanded .perm-arrow-sub {
+    transform: rotate(90deg);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* 权限树形结构样式 */
 .perm-tree-container {
-    flex: 1;
-    max-height: 60vh;
-    overflow-y: auto;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 15px;
-    background: #f9fafb;
-    transform: translateZ(0);
-    /* 启用GPU加速 */
-    -webkit-overflow-scrolling: touch;
-    /* iOS平滑滚动 */
+    width: 100%;
+    /* 全宽 */
+}
+
+max-height: 60vh;
+overflow-y: auto;
+border: 2px solid #e5e7eb;
+border-radius: 8px;
+padding: 15px;
+background: #f9fafb;
+transform: translateZ(0);
+/* 启用GPU加速 */
+-webkit-overflow-scrolling: touch;
+/* iOS平滑滚动 */
 }
 
 /* 一级分类 */
