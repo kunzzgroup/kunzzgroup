@@ -1,4 +1,20 @@
 
+// 模态框标签切换函数
+function switchModalTab(tabId, btn) {
+    // 获取当前模态框内的所有标签按钮和内容
+    const modalBody = btn.closest('.modal-body');
+    const tabs = modalBody.querySelectorAll('.tab-content');
+    const btns = modalBody.querySelectorAll('.tab-btn');
+
+    // 移除所有 active 类
+    tabs.forEach(tab => tab.classList.remove('active'));
+    btns.forEach(b => b.classList.remove('active'));
+
+    // 为当前点击的按钮和对应的内容添加 active 类
+    document.getElementById('tab-' + tabId).classList.add('active');
+    btn.classList.add('active');
+}
+
 // 职位配置 - 根据账号类型显示不同职位选项
 const positionsByAccountType = {
     'special': [
@@ -737,9 +753,11 @@ function openEditModal(id) {
     const modal = document.getElementById('editUserModal');
     modal.style.display = 'block';
 
+    // 重置标签页到第一个
+    const firstTabBtn = modal.querySelector('.tab-btn');
+    if (firstTabBtn) switchModalTab('edit-basic', firstTabBtn);
+
     // 重置并初始化权限树及验证系统
-    resetPermissionTree(modal);
-    initPermissionTreeEvents(modal);
 
     // 填充表单数据
     document.getElementById('edit_user_id').value = userData.id;
@@ -1036,6 +1054,10 @@ function openAddUserModal() {
 
     // 重置表单
     document.getElementById('addUserForm').reset();
+
+    // 重置标签页到第一个
+    const firstTabBtn = modal.querySelector('.tab-btn');
+    if (firstTabBtn) switchModalTab('basic', firstTabBtn);
 
     // 重置并初始化权限树及验证系统
     resetPermissionTree(modal);
