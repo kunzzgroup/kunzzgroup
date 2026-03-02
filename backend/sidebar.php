@@ -586,7 +586,6 @@ if (!$canSeeBrand) {
                         <div class="submenu-content">
                             <a href="aboutpage1upload" class="submenu-item">第一页</a>
                             <a href="aboutpage4upload" class="submenu-item">第四页</a>
-                            <a href="aboutpage4upload" class="submenu-item">第四页</a>
                         </div>
                     </div>
                 </div>
