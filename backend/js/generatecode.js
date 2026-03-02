@@ -1371,7 +1371,13 @@ function initPermissionTreeEvents(container) {
 
             // 如果是一级分类有三级配置（如视觉管理）
             if (hasLevel3 && sub) {
-                const panel = container.querySelector(`.perm-detail-content .perm-level-3-panel[data-for="${sub}"]`);
+                // 先尝试寻找当前项内部的内联面板 (Add Staff 常用)
+                let panel = item.querySelector('.perm-level-3-panel-inline');
+
+                // 如果没找到内联面板，则去外部详细卡片找 (Edit Staff 常用)
+                if (!panel) {
+                    panel = container.querySelector(`.perm-detail-content .perm-level-3-panel[data-for="${sub}"]`);
+                }
 
                 // 如果当前项未展开，先关闭所有其他一级分类和三级面板
                 if (!isCurrentlyExpanded) {
@@ -1395,7 +1401,9 @@ function initPermissionTreeEvents(container) {
                             level1Item.classList.remove('expanded');
                         }
                     });
-                    container.querySelectorAll('.perm-level-3-panel').forEach(p => {
+
+                    // 统一处理面板隐藏
+                    container.querySelectorAll('.perm-level-3-panel, .perm-level-3-panel-inline').forEach(p => {
                         if (p !== panel) p.classList.remove('show');
                     });
                 }
@@ -1408,7 +1416,7 @@ function initPermissionTreeEvents(container) {
                     const isPanelShowing = panel.classList.contains('show');
                     if (!isPanelShowing) {
                         // 显示面板
-                        container.querySelectorAll('.perm-level-3-panel').forEach(p => p.classList.remove('show'));
+                        container.querySelectorAll('.perm-level-3-panel, .perm-level-3-panel-inline').forEach(p => p.classList.remove('show'));
                         panel.classList.add('show');
                         if (detailContent) detailContent.classList.add('active');
                         if (placeholder) placeholder.classList.add('hidden');
@@ -1527,27 +1535,34 @@ function initPermissionTreeEvents(container) {
             }
 
             const sub = item.getAttribute('data-sub');
-            const panel = container.querySelector(`.perm-detail-content .perm-level-3-panel[data-for="${sub}"]`);
             const detailContent = container.querySelector('.perm-detail-content');
             const placeholder = container.querySelector('.perm-detail-placeholder');
             const isCurrentlyExpanded = item.classList.contains('expanded');
+
+            // 先尝试寻找当前项内部的内联面板 (Add Staff 常用)
+            let panel = item.querySelector('.perm-level-3-panel-inline');
+
+            // 如果没找到内联面板，则去外部详细卡片找 (Edit Staff 常用)
+            if (!panel) {
+                panel = container.querySelector(`.perm-detail-content .perm-level-3-panel[data-for="${sub}"]`);
+            }
 
             // 如果当前项未展开，先关闭所有其他有三级配置的二级项
             if (!isCurrentlyExpanded) {
                 container.querySelectorAll('.perm-level-2-item.has-level-3.expanded').forEach(otherItem => {
                     if (otherItem !== item) {
                         otherItem.classList.remove('expanded');
+                        // 统一关闭三级面板
                         const otherSub = otherItem.getAttribute('data-sub');
-                        const otherPanel = container.querySelector(`.perm-detail-content .perm-level-3-panel[data-for="${otherSub}"]`);
-                        if (otherPanel) {
-                            otherPanel.classList.remove('show');
-                        }
+                        container.querySelectorAll('.perm-level-3-panel, .perm-level-3-panel-inline').forEach(p => {
+                            p.classList.remove('show');
+                        });
                     }
                 });
             }
 
             // 关闭所有三级面板（除了当前要显示的）
-            container.querySelectorAll('.perm-level-3-panel').forEach(p => {
+            container.querySelectorAll('.perm-level-3-panel, .perm-level-3-panel-inline').forEach(p => {
                 if (p !== panel) p.classList.remove('show');
             });
 
@@ -1555,15 +1570,15 @@ function initPermissionTreeEvents(container) {
             item.classList.toggle('expanded');
 
             if (!isCurrentlyExpanded) {
-                // 展开：显示右侧卡片内容，隐藏占位符
-                detailContent.classList.add('active');
-                placeholder.classList.add('hidden');
-                panel.classList.add('show');
+                // 展开：显示内容
+                if (panel) panel.classList.add('show');
+                if (detailContent) detailContent.classList.add('active');
+                if (placeholder) placeholder.classList.add('hidden');
             } else {
-                // 折叠：关闭面板，显示占位符
-                panel.classList.remove('show');
-                detailContent.classList.remove('active');
-                placeholder.classList.remove('hidden');
+                // 折叠：关闭面板
+                if (panel) panel.classList.remove('show');
+                if (detailContent) detailContent.classList.remove('active');
+                if (placeholder) placeholder.classList.remove('hidden');
             }
         });
     });

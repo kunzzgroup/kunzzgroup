@@ -646,13 +646,13 @@ require_once 'session_check.php';
                         </div>
                     </div>
                     
-                    <div class="form-section" style="margin-top: 20px;">
+                    <div class="form-section addUserPermLayout" style="margin-top: 20px;">
                         <div class="form-section-header">权限设置</div>
                         <div class="form-section-content">
                             <!-- 权限配置布局 -->
-                            <div class="perm-layout-container compact-perm-layout">
-                                <!-- 左侧：权限树形结构 -->
-                                <div class="perm-tree-container">
+                            <div class="perm-layout-container">
+                                <!-- 权限树形结构 (单列设计) -->
+                                <div class="perm-tree-container" style="max-height: none;">
                                     <!-- 一级：集团架构 -->
                                     <div class="perm-level-1">
                                         <div class="perm-level-1-item" data-perm="brand">
@@ -670,6 +670,13 @@ require_once 'session_check.php';
                                                     <span class="perm-arrow-sub">▶</span>
                                                     <span>KUNZZ HOLDINGS SDN BHD</span>
                                                 </label>
+                                                <!-- 内联三级面板 -->
+                                                <div class="perm-level-3-panel-inline" data-for="kunzz_holdings">
+                                                    <div class="perm-level-3-section">
+                                                        <div class="perm-section-title">页面权限</div>
+                                                        <label><input type="checkbox" class="perm-page-blueprint" data-brand="kunzz_holdings" value="blueprint"> 企业蓝图</label>
+                                                    </div>
+                                                </div>
                                             </div>
                                             
                                             <!-- TOKYO JAPANESE CUISINE SDN BHD -->
@@ -679,6 +686,32 @@ require_once 'session_check.php';
                                                     <span class="perm-arrow-sub">▶</span>
                                                     <span>TOKYO JAPANESE CUISINE SDN BHD</span>
                                                 </label>
+                                                <!-- 内联三级面板 -->
+                                                <div class="perm-level-3-panel-inline" data-for="tokyo_cuisine">
+                                                    <div class="perm-level-3-section">
+                                                        <div class="perm-section-title">店面</div>
+                                                        <div class="perm-store-item" data-store="j1">
+                                                            <label class="perm-checkbox-label">
+                                                                <span class="perm-arrow-store">▶</span>
+                                                                <span>J1 (Midvalley Southkey)</span>
+                                                            </label>
+                                                            <div class="perm-store-content">
+                                                                <div class="perm-section-title">页面权限</div>
+                                                                <label><input type="checkbox" class="perm-page-schedule" data-store="j1" data-brand="tokyo_cuisine" value="schedule"> 员工排班表</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="perm-store-item" data-store="j2">
+                                                            <label class="perm-checkbox-label">
+                                                                <span class="perm-arrow-store">▶</span>
+                                                                <span>J2 (Paradigm Mall)</span>
+                                                            </label>
+                                                            <div class="perm-store-content">
+                                                                <div class="perm-section-title">页面权限</div>
+                                                                <label><input type="checkbox" class="perm-page-schedule" data-store="j2" data-brand="tokyo_cuisine" value="schedule"> 员工排班表</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                             
                                             <!-- TOKYO IZAKAYA SDN BHD -->
@@ -688,10 +721,26 @@ require_once 'session_check.php';
                                                     <span class="perm-arrow-sub">▶</span>
                                                     <span>TOKYO IZAKAYA SDN BHD</span>
                                                 </label>
+                                                <!-- 内联三级面板 -->
+                                                <div class="perm-level-3-panel-inline" data-for="tokyo_izakaya">
+                                                    <div class="perm-level-3-section">
+                                                        <div class="perm-section-title">店面</div>
+                                                        <div class="perm-store-item" data-store="j3">
+                                                            <label class="perm-checkbox-label">
+                                                                <span class="perm-arrow-store">▶</span>
+                                                                <span>J3 (Desa Tebrau)</span>
+                                                            </label>
+                                                            <div class="perm-store-content">
+                                                                <div class="perm-section-title">页面权限</div>
+                                                                <label><input type="checkbox" class="perm-page-schedule" data-store="j3" data-brand="tokyo_izakaya" value="schedule"> 员工排班表</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-
+                                    
                                     <!-- 一级：营收数据 -->
                                     <div class="perm-level-1">
                                         <div class="perm-level-1-item" data-perm="analytics">
@@ -714,6 +763,20 @@ require_once 'session_check.php';
                                                     <span class="perm-arrow-sub">▶</span>
                                                     <span>数据上传</span>
                                                 </label>
+                                                <!-- 内联三级面板 -->
+                                                <div class="perm-level-3-panel-inline" data-for="kpi_upload">
+                                                    <div class="perm-level-3-section">
+                                                        <div class="perm-section-title">系统选项</div>
+                                                        <label><input type="checkbox" class="perm-upload-system" value="j1"> J1</label>
+                                                        <label><input type="checkbox" class="perm-upload-system" value="j2"> J2</label>
+                                                        <label><input type="checkbox" class="perm-upload-system" value="j3"> J3</label>
+                                                    </div>
+                                                    <div class="perm-level-3-section">
+                                                        <div class="perm-section-title">上传类型</div>
+                                                        <label><input type="checkbox" class="perm-upload-type" value="kpi"> KPI</label>
+                                                        <label><input type="checkbox" class="perm-upload-type" value="cost"> 成本</label>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -753,6 +816,24 @@ require_once 'session_check.php';
                                                     <span class="perm-arrow-sub">▶</span>
                                                     <span>库存</span>
                                                 </label>
+                                                <!-- 内联三级面板 -->
+                                                <div class="perm-level-3-panel-inline" data-for="stock_inventory">
+                                                    <div class="perm-level-3-section">
+                                                        <div class="perm-section-title">系统选项</div>
+                                                        <label><input type="checkbox" class="perm-stock-system" value="central"> 中央</label>
+                                                        <label><input type="checkbox" class="perm-stock-system" value="j1"> J1</label>
+                                                        <label><input type="checkbox" class="perm-stock-system" value="j2"> J2</label>
+                                                        <label><input type="checkbox" class="perm-stock-system" value="j3"> J3</label>
+                                                    </div>
+                                                    <div class="perm-level-3-section">
+                                                        <div class="perm-section-title">视图选项</div>
+                                                        <label><input type="checkbox" class="perm-stock-view" value="list"> 总库存</label>
+                                                        <label><input type="checkbox" class="perm-stock-view" value="records"> 进出货</label>
+                                                        <label><input type="checkbox" class="perm-stock-view" value="remark"> 货品备注</label>
+                                                        <label><input type="checkbox" class="perm-stock-view" value="product"> 货品种类</label>
+                                                        <label><input type="checkbox" class="perm-stock-view" value="sot"> 货品异常</label>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div class="perm-level-2-item">
                                                 <label class="perm-checkbox-label">
@@ -777,127 +858,6 @@ require_once 'session_check.php';
                                                 <strong>视觉管理</strong>
                                             </label>
                                         </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- 右侧：三级详细配置卡片 -->
-                                <div class="perm-detail-card">
-                                    <div class="perm-detail-placeholder">
-                                        <i class="fas fa-hand-pointer" style="font-size: 48px; color: #d1d5db; margin-bottom: 15px;"></i>
-                                        <p style="color: #9ca3af; font-size: 14px;">点击左侧带有箭头的选项<br>查看详细配置</p>
-                                    </div>
-                                    
-                                    <!-- 所有三级面板移到这里 -->
-                                    <div class="perm-detail-content" style="height: auto;">
-                                        <!-- 集团架构 - KUNZZ HOLDINGS -->
-                                        <div class="perm-level-3-panel" data-for="kunzz_holdings">
-                                            <div class="perm-detail-header">
-                                                <strong>KUNZZ HOLDINGS SDN BHD</strong>
-                                                <button type="button" class="perm-close-btn" onclick="closeDetailPanel()">×</button>
-                                            </div>
-                                            <div class="perm-level-3-section">
-                                                <div class="perm-section-title">页面权限</div>
-                                                <label><input type="checkbox" class="perm-page-blueprint" data-brand="kunzz_holdings" value="blueprint"> 企业蓝图</label>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- 集团架构 - TOKYO CUISINE -->
-                                        <div class="perm-level-3-panel" data-for="tokyo_cuisine">
-                                            <div class="perm-detail-header">
-                                                <strong>TOKYO JAPANESE CUISINE SDN BHD</strong>
-                                                <button type="button" class="perm-close-btn" onclick="closeDetailPanel()">×</button>
-                                            </div>
-                                            <div class="perm-level-3-section">
-                                                <div class="perm-section-title">店面</div>
-                                                <!-- J1 店面 - 可展开/收缩 -->
-                                                <div class="perm-store-item" data-store="j1">
-                                                    <label class="perm-checkbox-label">
-                                                        <span class="perm-arrow-store">▶</span>
-                                                        <span>J1 (Midvalley Southkey)</span>
-                                                    </label>
-                                                    <div class="perm-store-content">
-                                                        <div class="perm-section-title">页面权限</div>
-                                                        <label><input type="checkbox" class="perm-page-schedule" data-store="j1" data-brand="tokyo_cuisine" value="schedule"> 员工排班表</label>
-                                                    </div>
-                                                </div>
-                                                <!-- J2 店面 - 可展开/收缩 -->
-                                                <div class="perm-store-item" data-store="j2">
-                                                    <label class="perm-checkbox-label">
-                                                        <span class="perm-arrow-store">▶</span>
-                                                        <span>J2 (Paradigm Mall)</span>
-                                                    </label>
-                                                    <div class="perm-store-content">
-                                                        <div class="perm-section-title">页面权限</div>
-                                                        <label><input type="checkbox" class="perm-page-schedule" data-store="j2" data-brand="tokyo_cuisine" value="schedule"> 员工排班表</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- 集团架构 - TOKYO IZAKAYA -->
-                                        <div class="perm-level-3-panel" data-for="tokyo_izakaya">
-                                            <div class="perm-detail-header">
-                                                <strong>TOKYO IZAKAYA SDN BHD</strong>
-                                                <button type="button" class="perm-close-btn" onclick="closeDetailPanel()">×</button>
-                                            </div>
-                                            <div class="perm-level-3-section">
-                                                <div class="perm-section-title">店面</div>
-                                                <!-- J3 店面 - 可展开/收缩 -->
-                                                <div class="perm-store-item" data-store="j3">
-                                                    <label class="perm-checkbox-label">
-                                                        <span class="perm-arrow-store">▶</span>
-                                                        <span>J3 (Desa Tebrau)</span>
-                                                    </label>
-                                                    <div class="perm-store-content">
-                                                        <div class="perm-section-title">页面权限</div>
-                                                        <label><input type="checkbox" class="perm-page-schedule" data-store="j3" data-brand="tokyo_izakaya" value="schedule"> 员工排班表</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- 营收数据 - 数据上传 -->
-                                        <div class="perm-level-3-panel" data-for="kpi_upload">
-                                            <div class="perm-detail-header">
-                                                <strong>数据上传</strong>
-                                                <button type="button" class="perm-close-btn" onclick="closeDetailPanel()">×</button>
-                                            </div>
-                                            <div class="perm-level-3-section">
-                                                <div class="perm-section-title">系统选项</div>
-                                                <label><input type="checkbox" class="perm-upload-system" value="j1"> J1</label>
-                                                <label><input type="checkbox" class="perm-upload-system" value="j2"> J2</label>
-                                                <label><input type="checkbox" class="perm-upload-system" value="j3"> J3</label>
-                                            </div>
-                                            <div class="perm-level-3-section">
-                                                <div class="perm-section-title">上传类型</div>
-                                                <label><input type="checkbox" class="perm-upload-type" value="kpi"> KPI</label>
-                                                <label><input type="checkbox" class="perm-upload-type" value="cost"> 成本</label>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- 资源总库 - 库存 -->
-                                        <div class="perm-level-3-panel" data-for="stock_inventory">
-                                            <div class="perm-detail-header">
-                                                <strong>库存</strong>
-                                                <button type="button" class="perm-close-btn" onclick="closeDetailPanel()">×</button>
-                                            </div>
-                                            <div class="perm-level-3-section">
-                                                <div class="perm-section-title">系统选项</div>
-                                                <label><input type="checkbox" class="perm-stock-system" value="central"> 中央</label>
-                                                <label><input type="checkbox" class="perm-stock-system" value="j1"> J1</label>
-                                                <label><input type="checkbox" class="perm-stock-system" value="j2"> J2</label>
-                                                <label><input type="checkbox" class="perm-stock-system" value="j3"> J3</label>
-                                            </div>
-                                            <div class="perm-level-3-section">
-                                                <div class="perm-section-title">视图选项</div>
-                                                <label><input type="checkbox" class="perm-stock-view" value="list"> 总库存</label>
-                                                <label><input type="checkbox" class="perm-stock-view" value="records"> 进出货</label>
-                                                <label><input type="checkbox" class="perm-stock-view" value="remark"> 货品备注</label>
-                                                <label><input type="checkbox" class="perm-stock-view" value="product"> 货品种类</label>
-                                                <label><input type="checkbox" class="perm-stock-view" value="sot"> 货品异常</label>
-                                            </div>
-                                        </div>
-                                        
                                     </div>
                                 </div>
                             </div>
@@ -1168,12 +1128,263 @@ require_once 'session_check.php';
                                     </select>
                                 </div>
                                 
-                                <div class="form-group">
+                        <div class="form-group">
                                     <label for="edit_position">职位</label>
                                     <select id="edit_position" name="position">
                                         <option value="">请先选择账号类型</option>
                                     </select>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 编辑职员专用权限布局 -->
+                    <div class="form-section editUserPermLayout" style="margin-top: 20px;">
+                        <div class="form-section-header">权限设置</div>
+                        <div class="form-section-content">
+                            <!-- 权限配置布局 (维持双列) -->
+                            <div class="perm-layout-container">
+                                <!-- 左侧：权限树形结构 -->
+                                <div class="perm-tree-container">
+                                    <!-- 一级：集团架构 -->
+                                    <div class="perm-level-1">
+                                        <div class="perm-level-1-item" data-perm="brand">
+                                            <label class="perm-checkbox-label">
+                                                <input type="checkbox" class="perm-l1-check" value="brand">
+                                                <span class="perm-arrow">▶</span>
+                                                <strong>集团架构</strong>
+                                            </label>
+                                        </div>
+                                        <div class="perm-level-2-container" data-parent="brand">
+                                            <div class="perm-level-2-item has-level-3" data-sub="kunzz_holdings">
+                                                <label class="perm-checkbox-label">
+                                                    <input type="checkbox" class="perm-l2-check" data-parent="brand" value="kunzz_holdings">
+                                                    <span class="perm-arrow-sub">▶</span>
+                                                    <span>KUNZZ HOLDINGS SDN BHD</span>
+                                                </label>
+                                            </div>
+                                            <div class="perm-level-2-item has-level-3" data-sub="tokyo_cuisine">
+                                                <label class="perm-checkbox-label">
+                                                    <input type="checkbox" class="perm-l2-check" data-parent="brand" value="tokyo_cuisine">
+                                                    <span class="perm-arrow-sub">▶</span>
+                                                    <span>TOKYO JAPANESE CUISINE SDN BHD</span>
+                                                </label>
+                                            </div>
+                                            <div class="perm-level-2-item has-level-3" data-sub="tokyo_izakaya">
+                                                <label class="perm-checkbox-label">
+                                                    <input type="checkbox" class="perm-l2-check" data-parent="brand" value="tokyo_izakaya">
+                                                    <span class="perm-arrow-sub">▶</span>
+                                                    <span>TOKYO IZAKAYA SDN BHD</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 一级：营收数据 -->
+                                    <div class="perm-level-1">
+                                        <div class="perm-level-1-item" data-perm="analytics">
+                                            <label class="perm-checkbox-label">
+                                                <input type="checkbox" class="perm-l1-check" value="analytics">
+                                                <span class="perm-arrow">▶</span>
+                                                <strong>营收数据</strong>
+                                            </label>
+                                        </div>
+                                        <div class="perm-level-2-container" data-parent="analytics">
+                                            <div class="perm-level-2-item">
+                                                <label class="perm-checkbox-label">
+                                                    <input type="checkbox" class="perm-l2-check" data-parent="analytics" value="kpi_report">
+                                                    <span>KPI报表</span>
+                                                </label>
+                                            </div>
+                                            <div class="perm-level-2-item has-level-3" data-sub="kpi_upload">
+                                                <label class="perm-checkbox-label">
+                                                    <input type="checkbox" class="perm-l2-check" data-parent="analytics" value="kpi_upload">
+                                                    <span class="perm-arrow-sub">▶</span>
+                                                    <span>数据上传</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 一级：人事管理 -->
+                                    <div class="perm-level-1">
+                                        <div class="perm-level-1-item" data-perm="hr">
+                                            <label class="perm-checkbox-label">
+                                                <input type="checkbox" class="perm-l1-check" value="hr">
+                                                <span class="perm-arrow">▶</span>
+                                                <strong>人事管理</strong>
+                                            </label>
+                                        </div>
+                                        <div class="perm-level-2-container" data-parent="hr">
+                                            <div class="perm-level-2-item">
+                                                <label class="perm-checkbox-label">
+                                                    <input type="checkbox" class="perm-l2-check" data-parent="hr" value="staff_management">
+                                                    <span>职员管理</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 一级：资源总库 -->
+                                    <div class="perm-level-1">
+                                        <div class="perm-level-1-item" data-perm="resource">
+                                            <label class="perm-checkbox-label">
+                                                <input type="checkbox" class="perm-l1-check" value="resource">
+                                                <span class="perm-arrow">▶</span>
+                                                <strong>资源总库</strong>
+                                            </label>
+                                        </div>
+                                        <div class="perm-level-2-container" data-parent="resource">
+                                            <div class="perm-level-2-item has-level-3" data-sub="stock_inventory">
+                                                <label class="perm-checkbox-label">
+                                                    <input type="checkbox" class="perm-l2-check" data-parent="resource" value="stock_inventory">
+                                                    <span class="perm-arrow-sub">▶</span>
+                                                    <span>库存</span>
+                                                </label>
+                                            </div>
+                                            <div class="perm-level-2-item">
+                                                <label class="perm-checkbox-label">
+                                                    <input type="checkbox" class="perm-l2-check" data-parent="resource" value="dishware">
+                                                    <span>碗碟</span>
+                                                </label>
+                                            </div>
+                                            <div class="perm-level-2-item">
+                                                <label class="perm-checkbox-label">
+                                                    <input type="checkbox" class="perm-l2-check" data-parent="resource" value="price_comparison">
+                                                    <span>价格对比</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 一级：视觉管理 -->
+                                    <div class="perm-level-1">
+                                        <div class="perm-level-1-item" data-perm="visual">
+                                            <label class="perm-checkbox-label">
+                                                <input type="checkbox" class="perm-l1-check" value="visual">
+                                                <strong>视觉管理</strong>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 右侧：三级详细配置卡片 -->
+                                <div class="perm-detail-card">
+                                    <div class="perm-detail-placeholder">
+                                        <i class="fas fa-hand-pointer" style="font-size: 48px; color: #d1d5db; margin-bottom: 15px;"></i>
+                                        <p style="color: #9ca3af; font-size: 14px;">点击左侧带有箭头的选项<br>查看详细配置</p>
+                                    </div>
+                                    <div class="perm-detail-content">
+                                        <!-- 面板内容由JS根据 context 动态查找或初始化时存在 -->
+                                        <!-- 为保证逻辑统一，这里也放入三级面板，但样式会由 .editUserPermLayout 控制 -->
+                                        <!-- 集团架构 - KUNZZ HOLDINGS -->
+                                        <div class="perm-level-3-panel" data-for="kunzz_holdings">
+                                            <div class="perm-detail-header">
+                                                <strong>KUNZZ HOLDINGS SDN BHD</strong>
+                                                <button type="button" class="perm-close-btn" onclick="closeDetailPanel()">×</button>
+                                            </div>
+                                            <div class="perm-level-3-section">
+                                                <div class="perm-section-title">页面权限</div>
+                                                <label><input type="checkbox" class="perm-page-blueprint" data-brand="kunzz_holdings" value="blueprint"> 企业蓝图</label>
+                                            </div>
+                                        </div>
+                                        <!-- TOKYO CUISINE -->
+                                        <div class="perm-level-3-panel" data-for="tokyo_cuisine">
+                                            <div class="perm-detail-header">
+                                                <strong>TOKYO JAPANESE CUISINE SDN BHD</strong>
+                                                <button type="button" class="perm-close-btn" onclick="closeDetailPanel()">×</button>
+                                            </div>
+                                            <div class="perm-level-3-section">
+                                                <div class="perm-section-title">店面</div>
+                                                <div class="perm-store-item" data-store="j1">
+                                                    <label class="perm-checkbox-label">
+                                                        <span class="perm-arrow-store">▶</span>
+                                                        <span>J1 (Midvalley Southkey)</span>
+                                                    </label>
+                                                    <div class="perm-store-content">
+                                                        <div class="perm-section-title">页面权限</div>
+                                                        <label><input type="checkbox" class="perm-page-schedule" data-store="j1" data-brand="tokyo_cuisine" value="schedule"> 员工排班表</label>
+                                                    </div>
+                                                </div>
+                                                <div class="perm-store-item" data-store="j2">
+                                                    <label class="perm-checkbox-label">
+                                                        <span class="perm-arrow-store">▶</span>
+                                                        <span>J2 (Paradigm Mall)</span>
+                                                    </label>
+                                                    <div class="perm-store-content">
+                                                        <div class="perm-section-title">页面权限</div>
+                                                        <label><input type="checkbox" class="perm-page-schedule" data-store="j2" data-brand="tokyo_cuisine" value="schedule"> 员工排班表</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- TOKYO IZAKAYA -->
+                                        <div class="perm-level-3-panel" data-for="tokyo_izakaya">
+                                            <div class="perm-detail-header">
+                                                <strong>TOKYO IZAKAYA SDN BHD</strong>
+                                                <button type="button" class="perm-close-btn" onclick="closeDetailPanel()">×</button>
+                                            </div>
+                                            <div class="perm-level-3-section">
+                                                <div class="perm-section-title">店面</div>
+                                                <div class="perm-store-item" data-store="j3">
+                                                    <label class="perm-checkbox-label">
+                                                        <span class="perm-arrow-store">▶</span>
+                                                        <span>J3 (Desa Tebrau)</span>
+                                                    </label>
+                                                    <div class="perm-store-content">
+                                                        <div class="perm-section-title">页面权限</div>
+                                                        <label><input type="checkbox" class="perm-page-schedule" data-store="j3" data-brand="tokyo_izakaya" value="schedule"> 员工排班表</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- KPI UPLOAD -->
+                                        <div class="perm-level-3-panel" data-for="kpi_upload">
+                                            <div class="perm-detail-header">
+                                                <strong>数据上传</strong>
+                                                <button type="button" class="perm-close-btn" onclick="closeDetailPanel()">×</button>
+                                            </div>
+                                            <div class="perm-level-3-section">
+                                                <div class="perm-section-title">系统选项</div>
+                                                <label><input type="checkbox" class="perm-upload-system" value="j1"> J1</label>
+                                                <label><input type="checkbox" class="perm-upload-system" value="j2"> J2</label>
+                                                <label><input type="checkbox" class="perm-upload-system" value="j3"> J3</label>
+                                            </div>
+                                            <div class="perm-level-3-section">
+                                                <div class="perm-section-title">上传类型</div>
+                                                <label><input type="checkbox" class="perm-upload-type" value="kpi"> KPI</label>
+                                                <label><input type="checkbox" class="perm-upload-type" value="cost"> 成本</label>
+                                            </div>
+                                        </div>
+                                        <!-- STOCK INVENTORY -->
+                                        <div class="perm-level-3-panel" data-for="stock_inventory">
+                                            <div class="perm-detail-header">
+                                                <strong>库存</strong>
+                                                <button type="button" class="perm-close-btn" onclick="closeDetailPanel()">×</button>
+                                            </div>
+                                            <div class="perm-level-3-section">
+                                                <div class="perm-section-title">系统选项</div>
+                                                <label><input type="checkbox" class="perm-stock-system" value="central"> 中央</label>
+                                                <label><input type="checkbox" class="perm-stock-system" value="j1"> J1</label>
+                                                <label><input type="checkbox" class="perm-stock-system" value="j2"> J2</label>
+                                                <label><input type="checkbox" class="perm-stock-system" value="j3"> J3</label>
+                                            </div>
+                                            <div class="perm-level-3-section">
+                                                <div class="perm-section-title">视图选项</div>
+                                                <label><input type="checkbox" class="perm-stock-view" value="list"> 总库存</label>
+                                                <label><input type="checkbox" class="perm-stock-view" value="records"> 进出货</label>
+                                                <label><input type="checkbox" class="perm-stock-view" value="remark"> 货品备注</label>
+                                                <label><input type="checkbox" class="perm-stock-view" value="product"> 货品种类</label>
+                                                <label><input type="checkbox" class="perm-stock-view" value="sot"> 货品异常</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 权限验证和展示警告 -->
+                            <div class="perm-warning" style="display: none; color: #dc2626; font-size: 13px; font-weight: bold; margin-top: 10px; text-align: center;">
+                                <i class="fas fa-exclamation-triangle"></i> 请至少选择一项权限
                             </div>
                         </div>
                     </div>
