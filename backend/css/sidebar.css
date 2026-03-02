@@ -424,11 +424,16 @@
     width: clamp(12px, 1.04vw, 20px);
     height: clamp(12px, 1.04vw, 20px);
     margin-right: clamp(18px, 1.3vw, 25px);
-    vertical-align: middle;
     flex-shrink: 0;
     object-fit: contain;
-    transition: filter 0.3s ease;
-    /* 给icon加动画 */
+    transition: filter 0.3s ease, stroke 0.3s ease;
+    display: block;
+}
+
+/* inline SVG specific */
+svg.section-icon {
+    overflow: visible;
+    color: inherit;
 }
 
 .informationmenu-section-title.active .section-icon {
