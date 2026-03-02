@@ -82,16 +82,7 @@ require_once 'session_check.php';
                         </div>
                     </div>
                 </div>
-                              <div class="form-section">
-                    <div class="form-section-header">问题 4.1</div>
-                    <div class="form-section-content">
-                        <div class="question-item">
-                            <div class="question-text">在实现的目标过程中,你目前遇到最大的困难或挑战是什么?</div>
-                            <div class="question-example">(可以是工作上的,也可以是个人层面的)</div>
-                            <textarea class="question-input" name="question4.1" id="question4.1" required></textarea>
-                        </div>
-                    </div>
-                </div>
+                              
 
                 <div class="form-section">
                     <div class="form-section-header">问题 5</div>
