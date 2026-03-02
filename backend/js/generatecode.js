@@ -1725,7 +1725,7 @@ function resetPermissionTree(container) {
     container.querySelectorAll('.perm-level-1-item.expanded').forEach(item => item.classList.remove('expanded'));
     container.querySelectorAll('.perm-level-2-container.expanded').forEach(item => item.classList.remove('expanded'));
     container.querySelectorAll('.perm-level-2-item.has-level-3.expanded').forEach(item => item.classList.remove('expanded'));
-    container.querySelectorAll('.perm-level-3-panel.show').forEach(item => item.classList.remove('show'));
+    container.querySelectorAll('.perm-level-3-panel.show, .perm-level-3-panel-inline.show').forEach(item => item.classList.remove('show'));
     container.querySelectorAll('.perm-store-item.expanded').forEach(item => item.classList.remove('expanded'));
 
     // 重置右侧卡片显示
@@ -1886,7 +1886,7 @@ function closePermissionsModal() {
     document.querySelectorAll('.perm-level-2-container.expanded').forEach(container => {
         container.classList.remove('expanded');
     });
-    document.querySelectorAll('.perm-level-3-panel.show').forEach(panel => {
+    document.querySelectorAll('.perm-level-3-panel.show, .perm-level-3-panel-inline.show').forEach(panel => {
         panel.classList.remove('show');
     });
     document.querySelectorAll('.perm-level-2-item.has-level-3.expanded').forEach(item => {
