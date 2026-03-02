@@ -16,8 +16,8 @@ if (!isset($_SESSION['user_id'])) {
 
 // 处理文件上传
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
-    $uploadDir = 'video/video/';
-    $configFile = 'media_config.json';
+    $uploadDir = '../video/video/';
+    $configFile = '../media_config.json';
     
     // 确保上传目录存在
     if (!file_exists($uploadDir)) {
@@ -63,8 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
 
 // 读取当前配置
 $config = [];
-if (file_exists('media_config.json')) {
-    $config = json_decode(file_get_contents('media_config.json'), true) ?: [];
+if (file_exists('../media_config.json')) {
+    $config = json_decode(file_get_contents('../media_config.json'), true) ?: [];
 }
 ?>
 
