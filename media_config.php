@@ -155,16 +155,10 @@ function getMediaConfig($mediaType) {
 function getMediaHtml($mediaType, $attributes = []) {
     $media = getMediaConfig($mediaType);
     
-    // 处理文件路径
+    // 处理文件路径：如果不是以 / 或 http 开头，添加 ../
     $filePath = $media['file'];
-    if (strpos($filePath, 'http') === 0 || strpos($filePath, '/') === 0) {
-        // 绝对URL或绝对路径：直接使用
-    } elseif (strpos($filePath, '../') === 0) {
-        // 已经包含 ../（从 backend/ 目录存储时使用的相对路径，相对于网站根目录）
-        // 从 frontend/ 访问时：../images/images/x.jpg 相对于 frontend/ 已经正确指向根目录
-        // 无需额外添加 ../
-    } else {
-        // 普通相对路径（如 video/video/x.mp4）：从 frontend/ 访问时需添加 ../
+    if (strpos($filePath, '/') !== 0 && strpos($filePath, 'http') !== 0) {
+        // 从 frontend 目录访问，需要添加 ../
         $filePath = '../' . $filePath;
     }
     
