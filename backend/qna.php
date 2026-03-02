@@ -61,6 +61,17 @@ require_once 'session_check.php';
                     </div>
                 </div>
 
+                                <div class="form-section">
+                    <div class="form-section-header">问题 2.1</div>
+                    <div class="form-section-content">
+                        <div class="question-item">
+                            <div class="question-text">你目前最重要的个人目标或梦想是什么?</div>
+                            <div class="question-example">(例如:事业发展,专业技能,经济目标,生活稳定,家庭等)</div>
+                            <textarea class="question-input" name="question2.1" id="question2.1" required></textarea>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-section">
                     <div class="form-section-header">问题 3</div>
                     <div class="form-section-content">
