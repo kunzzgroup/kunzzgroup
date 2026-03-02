@@ -875,9 +875,24 @@ tr:hover {
     display: flex;
     gap: 20px;
     margin-bottom: 20px;
+    min-height: 400px;
+    /* 确保有足够高度 */
     transform: translateZ(0);
-    /* 启用GPU加速 */
     -webkit-font-smoothing: antialiased;
+}
+
+.compact-perm-layout {
+    gap: 15px;
+}
+
+.compact-perm-layout .perm-tree-container {
+    flex: 1;
+    min-width: 300px;
+    /* 防止树被压缩得太小 */
+}
+
+.compact-perm-layout .perm-detail-card {
+    flex: 0 0 clamp(300px, 30vw, 400px);
 }
 
 /* 权限树形结构样式 */
