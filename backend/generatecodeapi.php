@@ -865,6 +865,63 @@ function addNewUser($pdo, $input) {
             return;
         }
 
+        $newUserId = $pdo->lastInsertId();
+
+        // ======= 保存初始权限数据 =======
+        ensurePermissionsTable($pdo); // 确保权限表存在
+        
+        $perms = isset($input['permissions']) && is_array($input['permissions']) ? $input['permissions'] : [];
+        $pagePerms = isset($input['page_permissions']) && is_array($input['page_permissions']) ? $input['page_permissions'] : [];
+        $submenuPerms = isset($input['submenu_permissions']) && is_array($input['submenu_permissions']) ? $input['submenu_permissions'] : [];
+        $reportPerms = isset($input['report_permissions']) && is_array($input['report_permissions']) ? $input['report_permissions'] : [];
+        $restaurantPerms = isset($input['restaurant_permissions']) && is_array($input['restaurant_permissions']) ? $input['restaurant_permissions'] : [];
+        $brandPerms = isset($input['brand_permissions']) && is_array($input['brand_permissions']) ? $input['brand_permissions'] : [];
+
+        // 将权限数据直接插入 user_sidebar_permissions 表
+        $insertPermsSql = "INSERT INTO user_sidebar_permissions (
+            user_id, 
+            permissions_json, 
+            page_permissions_json, 
+            submenu_permissions_json, 
+            report_permissions_json, 
+            restaurant_permissions_json, 
+            brand_permissions_json,
+            upload_permissions_json,
+            updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NOW())";
+        
+        $insertPermsStmt = $pdo->prepare($insertPermsSql);
+        $insertPermsStmt->execute([
+            $newUserId,
+            empty($perms) ? NULL : json_encode($perms, JSON_UNESCAPED_UNICODE),
+            empty($pagePerms) ? NULL : json_encode($pagePerms, JSON_UNESCAPED_UNICODE),
+            empty($submenuPerms) ? NULL : json_encode($submenuPerms, JSON_UNESCAPED_UNICODE),
+            empty($reportPerms) ? NULL : json_encode($reportPerms, JSON_UNESCAPED_UNICODE),
+            empty($restaurantPerms) ? NULL : json_encode($restaurantPerms, JSON_UNESCAPED_UNICODE),
+            empty($brandPerms) ? NULL : json_encode($brandPerms, JSON_UNESCAPED_UNICODE)
+        ]);
+        
+        // 尝试写入 user_page_permissions（如果使用了新表结构）
+        try {
+            $checkStmt = $pdo->query("SHOW TABLES LIKE 'user_page_permissions'");
+            if ($checkStmt->rowCount() > 0) {
+                // 如果用户有传 page_permissions，遍历并写入
+                if (!empty($pagePerms)) {
+                    $insertPagePermsStmt = $pdo->prepare("INSERT INTO user_page_permissions (user_id, page_key, permissions_json, updated_at) VALUES (?, ?, ?, NOW())");
+                    foreach ($pagePerms as $pageKey => $pagePermData) {
+                        $insertPagePermsStmt->execute([
+                            $newUserId,
+                            $pageKey,
+                            json_encode($pagePermData, JSON_UNESCAPED_UNICODE)
+                        ]);
+                    }
+                }
+            }
+        } catch (Throwable $e) {
+            // 忽略表不存在等错误
+        }
+        // ================================
+
         // 提交事务
         $pdo->commit();
 

@@ -1041,6 +1041,10 @@ function openAddUserModal() {
     resetPermissionTree(modal);
     initPermissionTreeEvents(modal);
 
+    // 强制赋予所有权限并触发表单校验状态
+    setDefaultAllPermissions(modal);
+    updatePermissionValidationState(modal);
+
     // 重置职位选择框
     const positionSelect = document.getElementById('add_position');
     positionSelect.innerHTML = '<option value="">请先选择账号类型</option>';
@@ -1632,31 +1636,33 @@ function initPermissionTreeEvents(container) {
 }
 
 // 设置默认全选所有权限
-function setDefaultAllPermissions() {
+function setDefaultAllPermissions(container) {
+    if (!container) return;
+
     // 先确保所有checkbox都是active的（不设置disabled）
-    document.querySelectorAll('#permissionsModal input[type="checkbox"]').forEach(cb => {
+    container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
         cb.disabled = false;
     });
 
     // 全选所有一级权限
-    document.querySelectorAll('.perm-l1-check').forEach(cb => {
+    container.querySelectorAll('.perm-l1-check').forEach(cb => {
         cb.checked = true;
     });
 
     // 全选所有二级权限
-    document.querySelectorAll('.perm-l2-check').forEach(cb => {
+    container.querySelectorAll('.perm-l2-check').forEach(cb => {
         cb.checked = true;
         cb.disabled = false;
     });
 
     // 全选所有三级权限（库存、数据上传、集团架构页面权限）
-    document.querySelectorAll('.perm-stock-system, .perm-stock-view, .perm-upload-system, .perm-upload-type, .perm-page-schedule, .perm-page-blueprint').forEach(cb => {
+    container.querySelectorAll('.perm-stock-system, .perm-stock-view, .perm-upload-system, .perm-upload-type, .perm-page-schedule, .perm-page-blueprint').forEach(cb => {
         cb.checked = true;
         cb.disabled = false;
     });
 
     // 确保所有checkbox都是active的（不设置disabled）
-    document.querySelectorAll('#permissionsModal input[type="checkbox"]').forEach(cb => {
+    container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
         cb.disabled = false;
     });
 }
@@ -1687,6 +1693,7 @@ function updatePermissionValidationState(container) {
         }
     }
 }
+
 
 // 清空并折叠权限树
 function resetPermissionTree(container) {
@@ -1770,18 +1777,20 @@ function syncLevel3Permissions(container, level2Value, level2Checked) {
     }
 }
 
-// 关闭详细配置面板
+// 隐藏所有右侧面板
 function closeDetailPanel() {
-    document.querySelectorAll('.perm-level-3-panel').forEach(p => p.classList.remove('show'));
-    document.querySelectorAll('.perm-level-2-item.has-level-3').forEach(i => i.classList.remove('expanded'));
-    document.querySelectorAll('.perm-level-1-item.has-level-3').forEach(i => i.classList.remove('expanded'));
-    document.querySelectorAll('.perm-level-4-item.expanded').forEach(item => {
-        item.classList.remove('expanded');
-        const container = item.querySelector('.perm-level-4-container');
-        if (container) container.classList.remove('expanded');
+    // Use proper selector across multiple modales or the focused one
+    document.querySelectorAll('.perm-level-3-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.perm-level-2-item').forEach(i => i.classList.remove('active'));
+
+    // Replace hardcoded ID search with class-based logic
+    document.querySelectorAll('.perm-detail-content').forEach(content => {
+        content.classList.remove('active');
+        const placeholder = content.previousElementSibling;
+        if (placeholder && placeholder.classList.contains('perm-detail-placeholder')) {
+            placeholder.classList.remove('hidden');
+        }
     });
-    document.getElementById('perm-detail-content').classList.remove('active');
-    document.querySelector('.perm-detail-placeholder').classList.remove('hidden');
 }
 
 // 更新库存权限（三级）
@@ -1848,7 +1857,7 @@ function openPermissionsModal(userId) {
     // 加载该用户的权限
     loadUserPermissions(userId);
 
-    // 初始化权限树事件
+    // 重置并初始化权限树及验证系统
     initPermissionTreeEvents(modal);
 
     modal.style.display = 'block';

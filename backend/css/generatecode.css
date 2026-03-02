@@ -1407,6 +1407,33 @@ tr:hover {
     cursor: pointer;
 }
 
+/* 紧凑权限布局 (Add New Staff 特用) */
+.compact-perm-layout {
+    flex-direction: column;
+    max-height: 400px;
+}
+
+.compact-perm-layout .perm-tree-container {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+    margin-right: 0;
+    padding-right: 0;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    height: auto;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.compact-perm-layout .perm-detail-card {
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    height: auto;
+    overflow-y: visible;
+}
+
 /* 额外权限区域 */
 .extra-perms-container {
     display: grid;
