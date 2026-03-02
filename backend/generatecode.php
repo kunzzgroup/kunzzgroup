@@ -44,9 +44,6 @@ require_once 'session_check.php';
                             <button type="button" class="btn-generate" onclick="openDownloadModal()">
                                 <i class="fas fa-download"></i> 下载面试表
                             </button>
-                            <button type="button" class="btn-generate" onclick="window.location.href = window.location.pathname + '?t=' + new Date().getTime();" style="background-color: #ff5722; color: white; border: none;">
-                                <i class="fas fa-sync-alt"></i> 强制刷新
-                            </button>
                         </div>
                         
                         <div class="form-group" style="flex: 0 0 auto; position: relative; display: flex; align-items: center; gap: 10px;">
