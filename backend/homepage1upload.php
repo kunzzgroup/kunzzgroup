@@ -16,8 +16,12 @@ if (!isset($_SESSION['user_id'])) {
 
 // 处理文件上传
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
-    $uploadDir = 'video/video/';
-    $configFile = 'media_config.json';
+    // 根据文件类型决定上传目录
+    $allowedVideo = ['mp4', 'webm', 'mov', 'avi'];
+    $allowedImage = ['jpg', 'jpeg', 'png', 'webp'];
+    $isVideo = in_array($fileExtension, $allowedVideo);
+    $uploadDir = $isVideo ? '../video/video/' : '../images/images/';
+    $configFile = '../media_config.json';  // 根目录 media_config.json（前端读取的）
     
     // 确保上传目录存在
     if (!file_exists($uploadDir)) {
@@ -28,9 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
     $mediaType = $_POST['media_type'];
     $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
     
-    // 允许的文件类型
-    $allowedVideo = ['mp4', 'webm', 'mov', 'avi'];
-    $allowedImage = ['jpg', 'jpeg', 'png', 'webp'];
     $allowedTypes = array_merge($allowedVideo, $allowedImage);
     
     if (in_array($fileExtension, $allowedTypes)) {
@@ -45,9 +46,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
                 $config = json_decode(file_get_contents($configFile), true) ?: [];
             }
             
+            $webPath = $uploadDir . $newFileName;
+            
             $config[$mediaType] = [
-                'file' => $targetPath,
-                'type' => in_array($fileExtension, $allowedVideo) ? 'video' : 'image',
+                'file' => $webPath,
+                'type' => $isVideo ? 'video' : 'image',
                 'updated' => date('Y-m-d H:i:s')
             ];
             
@@ -63,8 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
 
 // 读取当前配置
 $config = [];
-if (file_exists('media_config.json')) {
-    $config = json_decode(file_get_contents('media_config.json'), true) ?: [];
+if (file_exists('../media_config.json')) {
+    $config = json_decode(file_get_contents('../media_config.json'), true) ?: [];
 }
 ?>
 
