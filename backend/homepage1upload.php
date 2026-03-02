@@ -16,13 +16,7 @@ if (!isset($_SESSION['user_id'])) {
 
 // 处理文件上传
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
-    $uploadDir = 'video/video/';
-    $configFile = 'media_config.json';
-    
-    // 确保上传目录存在
-    if (!file_exists($uploadDir)) {
-        mkdir($uploadDir, 0777, true);
-    }
+    $configFile = '../media_config.json';
     
     $file = $_FILES['media_file'];
     $mediaType = $_POST['media_type'];
@@ -32,6 +26,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
     $allowedVideo = ['mp4', 'webm', 'mov', 'avi'];
     $allowedImage = ['jpg', 'jpeg', 'png', 'webp'];
     $allowedTypes = array_merge($allowedVideo, $allowedImage);
+    
+    // 根据文件类型决定上传目录（与 aboutpage1upload.php 相同的路径规则）
+    $isVideo = in_array($fileExtension, $allowedVideo);
+    $uploadDir = $isVideo ? '../video/video/' : '../images/images/';
+    
+    // 确保上传目录存在
+    if (!file_exists($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
+    }
     
     if (in_array($fileExtension, $allowedTypes)) {
         // 生成新文件名
@@ -45,9 +48,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
                 $config = json_decode(file_get_contents($configFile), true) ?: [];
             }
             
+            // 使用相对路径（与 aboutpage1upload.php 相同的格式）
+            $webPath = $uploadDir . $newFileName;
+            
             $config[$mediaType] = [
-                'file' => $targetPath,
-                'type' => in_array($fileExtension, $allowedVideo) ? 'video' : 'image',
+                'file' => $webPath,
+                'type' => $isVideo ? 'video' : 'image',
                 'updated' => date('Y-m-d H:i:s')
             ];
             
@@ -63,9 +69,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
 
 // 读取当前配置
 $config = [];
-if (file_exists('media_config.json')) {
-    $config = json_decode(file_get_contents('media_config.json'), true) ?: [];
+if (file_exists('../media_config.json')) {
+    $config = json_decode(file_get_contents('../media_config.json'), true) ?: [];
 }
+
 ?>
 
 <!DOCTYPE html>
