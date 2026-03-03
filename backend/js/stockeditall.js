@@ -3270,15 +3270,6 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
         throw new Error(errorMsg);
     }
 
-    // 单价不能为空且大于0
-    if (!formData.price || parseFloat(formData.price) <= 0) {
-        const errorMsg = '单价不能为空且必须大于0';
-        if (!skipTableRefresh) {
-            showAlert(errorMsg, 'error');
-        }
-        throw new Error(errorMsg);
-    }
-
     // 添加target验证
     if (formData.out_quantity > 0) {
         const targetInput = document.getElementById(`${rowId}-target`);
