@@ -3270,6 +3270,15 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
         throw new Error(errorMsg);
     }
 
+    // 单价不能为空且大于0
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+        const errorMsg = '单价不能为空且必须大于0';
+        if (!skipTableRefresh) {
+            showAlert(errorMsg, 'error');
+        }
+        throw new Error(errorMsg);
+    }
+
     // 添加target验证
     if (formData.out_quantity > 0) {
         const targetInput = document.getElementById(`${rowId}-target`);
@@ -3461,6 +3470,11 @@ async function saveNewRecord() {
             showAlert(`请填写${getFieldLabel(field)}`, 'error');
             return;
         }
+    }
+
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+        showAlert('单价不能为空且必须大于0', 'error');
+        return;
     }
 
     if (formData.product_remark_checked && !formData.remark_number) {
@@ -3865,6 +3879,11 @@ async function saveRecord(id) {
 
     if (record.product_remark_checked && !remarkNumberValue) {
         showAlert('货品备注已勾选时，请填写备注编号', 'error');
+        return;
+    }
+
+    if (!record.price || parseFloat(record.price) <= 0) {
+        showAlert('单价不能为空且必须大于0', 'error');
         return;
     }
 
