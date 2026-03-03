@@ -3331,7 +3331,10 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
     if (formData.out_quantity > 0) {
         const stockCheck = await checkProductStock(formData.product_name, formData.out_quantity, formData.price);
         if (!stockCheck.sufficient) {
-            const errorMsg = `库存不足！当前可用库存: ${stockCheck.availableStock}，请求出库: ${stockCheck.requested}`;
+            let errorMsg = `库存不足！当前可用库存: ${stockCheck.availableStock}，请求出库: ${stockCheck.requested}`;
+            if (['j1', 'j2', 'j3'].includes(currentStockType)) {
+                errorMsg = '库存显示不足';
+            }
             if (!skipTableRefresh) {
                 showAlert(errorMsg, 'error');
             }
@@ -3496,7 +3499,11 @@ async function saveNewRecord() {
         // 现有库存检查代码
         const stockCheck = await checkProductStock(formData.product_name, formData.out_quantity, formData.price);
         if (!stockCheck.sufficient) {
-            showAlert(`库存不足！当前可用库存: ${stockCheck.availableStock}，请求出库: ${formData.out_quantity}`, 'error');
+            let errorMsg = `库存不足！当前可用库存: ${stockCheck.availableStock}，请求出库: ${formData.out_quantity}`;
+            if (['j1', 'j2', 'j3'].includes(currentStockType)) {
+                errorMsg = '库存显示不足';
+            }
+            showAlert(errorMsg, 'error');
             return;
         }
     }
@@ -3875,6 +3882,32 @@ async function saveRecord(id) {
         const validCodes = window.codeNumberOptions.map(c => c.code_number);
         if (!validCodes.includes(record.code_number)) {
             showAlert('货品编号不存在，请从下拉列表中选择有效的编号', 'error');
+            return;
+        }
+    }
+
+    // 检查库存是否足够
+    if (parseFloat(record.out_quantity) > 0) {
+        const stockCheck = await checkProductStock(record.product_name, record.out_quantity, record.price);
+
+        // 尝试从原始编辑数据中恢复原有出库数量
+        let oldOutQty = 0;
+        if (originalEditData && originalEditData.has(id)) {
+            const oldData = originalEditData.get(id);
+            // 只有当编辑前后货品名称和价格没变时，原有出库数量才能归还可用库存中
+            if (oldData.product_name === record.product_name && parseFloat(oldData.price || 0) === parseFloat(record.price || 0)) {
+                oldOutQty = parseFloat(oldData.out_quantity) || 0;
+            }
+        }
+
+        // 实际可用库存等同于现有库存加上原本该记录出库的数量
+        const actualAvailable = stockCheck.availableStock + oldOutQty;
+        if (parseFloat(record.out_quantity) > actualAvailable) {
+            let errorMsg = `库存不足！当前可用库存 (修改前): ${actualAvailable}，请求修改为出库: ${record.out_quantity}`;
+            if (['j1', 'j2', 'j3'].includes(currentStockType)) {
+                errorMsg = '库存显示不足';
+            }
+            showAlert(errorMsg, 'error');
             return;
         }
     }
