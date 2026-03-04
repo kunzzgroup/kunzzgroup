@@ -66,7 +66,7 @@ require_once 'session_check.php';
             text-decoration: none;
             transition: all 0.2s;
         }
-        .back-btn:hover { background: #f3f4f6; color: #1f2937; }
+        .back-btn:hover { background: #f9731633; color: #f97316ff; }
 
         /* Wizard Progress Bar */
         .wizard-progress {
