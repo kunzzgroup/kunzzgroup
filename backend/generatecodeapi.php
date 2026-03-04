@@ -949,13 +949,17 @@ function addNewUser($pdo, $input) {
         ]);
 
     } catch (PDOException $e) {
-        $pdo->rollBack();
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
         echo json_encode([
             'success' => false,
             'message' => '数据库操作失败: ' . $e->getMessage()
         ]);
     } catch (Exception $e) {
-        $pdo->rollBack();
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
         echo json_encode([
             'success' => false,
             'message' => '操作失败: ' . $e->getMessage()
