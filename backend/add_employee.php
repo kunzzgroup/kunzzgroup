@@ -19,12 +19,11 @@ require_once 'session_check.php';
     <link rel="stylesheet" href="css/generatecode.css?v=<?php echo time(); ?>">
     <title>添加职员 - 职员管理系统</title>
     <style>
-        /* ── 书本双页布局 ── */
+        /* ── Modern User Wizard Layout ── */
         body {
-            background: #e8e0d8;
+            background: #f3f4f6; /* Softer background */
         }
 
-        /* 主包裹：紧贴 sidebar 下方，填满剩余高度 */
         .add-employee-page {
             display: flex;
             flex-direction: column;
@@ -39,213 +38,301 @@ require_once 'session_check.php';
             display: flex;
             align-items: center;
             gap: 14px;
-            padding: 12px 28px;
+            padding: 16px 32px;
             background: #fff;
             border-bottom: 1px solid #e5e7eb;
             flex-shrink: 0;
-            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+            box-shadow: 0 1px 3px rgba(0,0,0,.04);
             z-index: 10;
         }
         .page-header-bar h1 {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
-            color: #1f2937;
+            color: #111827;
             margin: 0;
         }
-        .page-header-bar .back-btn {
+        .back-btn {
             display: inline-flex;
             align-items: center;
-            gap: 7px;
-            padding: 7px 14px;
-            background: #f3f4f6;
-            color: #374151;
-            border: none;
-            border-radius: 7px;
-            font-size: 13px;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #f9fafb;
+            color: #4b5563;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
             text-decoration: none;
-            transition: background .18s;
+            transition: all 0.2s;
         }
-        .page-header-bar .back-btn:hover { background: #e5e7eb; }
+        .back-btn:hover { background: #f3f4f6; color: #1f2937; }
 
-        /* 消息区域 */
-        #messageArea {
-            padding: 0 28px;
-            flex-shrink: 0;
-        }
-
-        /* ── 书本容器 ── */
-        .book-wrapper {
-            flex: 1;
+        /* Wizard Progress Bar */
+        .wizard-progress {
             display: flex;
-            min-height: 0;           /* 让 flex 子项可收缩 */
-            padding: 16px 20px;
-            gap: 0;
-        }
-
-        /* 书页公共样式 */
-        .book-page {
-            flex: 1;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 24px 32px;
             background: #fff;
-            overflow-y: auto;
-            padding: 22px 24px 24px;
-            /* 独立滚动 */
-            scrollbar-width: thin;
-            scrollbar-color: #f97316 #fde8d8;
-        }
-        .book-page::-webkit-scrollbar { width: 5px; }
-        .book-page::-webkit-scrollbar-track { background: #fde8d8; }
-        .book-page::-webkit-scrollbar-thumb { background: #f97316; border-radius: 4px; }
-
-        /* 左页：圆角左侧，阴影朝右 */
-        .book-page-left {
-            border-radius: 4px 0 0 4px;
-            box-shadow: -3px 0 10px rgba(0,0,0,.08), 6px 0 18px rgba(0,0,0,.10);
-        }
-
-        /* 书脊分割线 */
-        .book-spine {
-            width: 6px;
-            background: linear-gradient(to right, #d97706, #f97316, #d97706);
-            flex-shrink: 0;
-            box-shadow: 0 0 8px rgba(0,0,0,.25);
-        }
-
-        /* 右页：圆角右侧 */
-        .book-page-right {
-            border-radius: 0 4px 4px 0;
-            box-shadow: 6px 0 10px rgba(0,0,0,.08), -3px 0 18px rgba(0,0,0,.10);
-        }
-
-        /* 页码标签 */
-        .page-label {
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: .08em;
-            text-transform: uppercase;
-            color: #9ca3af;
-            margin-bottom: 14px;
-            padding-bottom: 8px;
             border-bottom: 1px solid #f3f4f6;
+            flex-shrink: 0;
+        }
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #9ca3af;
+            font-weight: 600;
+            font-size: 14px;
+            position: relative;
+        }
+        .step-indicator.active {
+            color: #f97316;
+        }
+        .step-indicator.completed {
+            color: #10b981;
+        }
+        .step-circle {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 13px;
+        }
+        .step-indicator.active .step-circle {
+            background: #f97316;
+            color: #fff;
+        }
+        .step-indicator.completed .step-circle {
+            background: #10b981;
+            color: #fff;
+        }
+        .step-connector {
+            flex-grow: 1;
+            max-width: 80px;
+            height: 2px;
+            background: #e5e7eb;
+        }
+        .step-connector.completed {
+            background: #10b981;
         }
 
+        /* ── Main Form Area ── */
+        .wizard-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
         #addUserForm {
+            width: 100%;
+            max-width: 900px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,.05), 0 2px 4px -1px rgba(0,0,0,.03);
             display: flex;
             flex-direction: column;
-            flex: 1;
-            min-height: 0;
+            overflow: hidden;
             margin: 0;
         }
 
-        /* ── 底部动作栏 ── */
+        .wizard-step {
+            display: none;
+            padding: 32px;
+        }
+        .wizard-step.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        /* Cards and Sections inside steps */
+        .form-section {
+            margin-bottom: 24px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+        .form-section-header {
+            background: #f9fafb;
+            padding: 16px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .form-section-content {
+            padding: 24px;
+        }
+
+        /* Responsive Grid & Spacing */
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px 24px;
+        }
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px 24px;
+        }
+        .form-grid-1 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+        @media (max-width: 768px) {
+            .form-grid-2, .form-grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #111827;
+            background: #fff;
+            transition: all 0.2s;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #f97316;
+            box-shadow: 0 0 0 3px rgba(249,115,22,0.15);
+        }
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="tel"],
+        .form-group input[type="date"],
+        .form-group select {
+            height: 40px !important;
+        }
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        /* Validation Styles */
+        .form-group.has-error input,
+        .form-group.has-error select {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+        }
+        .error-msg {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+        .has-error .error-msg {
+            display: block;
+        }
+
+        /* Permission Section Specifics */
+        .editUserPermLayout {
+            margin: 0 !important;
+            border: none !important;
+        }
+        .editUserPermLayout .form-section-header {
+            display: none; /* Hide duplicate headers since we wrap it in a card */
+        }
+        .editUserPermLayout .form-section-content {
+            padding: 0;
+        }
+        .editUserPermLayout .perm-tree-container {
+            max-height: 400px !important;
+            overflow-y: auto;
+        }
+        .editUserPermLayout .perm-detail-card {
+            max-height: 400px !important;
+            overflow-y: auto;
+        }
+
+        /* ── Action Bar (Sticky) ── */
         .page-action-bar {
             display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-            padding: 10px 28px;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 32px;
             background: #fff;
             border-top: 1px solid #e5e7eb;
-            flex-shrink: 0;
-            box-shadow: 0 -2px 8px rgba(0,0,0,.05);
+            position: sticky;
+            bottom: 0;
+            z-index: 20;
+            box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.02);
+            margin-top: auto; /* Push to bottom if content is short */
         }
-        .page-action-bar .btn-action {
-            padding: 10px 28px;
+        .action-left {
+            display: flex;
+            gap: 12px;
+        }
+        .action-right {
+            display: flex;
+            gap: 12px;
+        }
+        .btn-wizard {
+            padding: 10px 24px;
             border-radius: 8px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            border: none;
-            transition: all .18s;
-            text-decoration: none;
+            border: 1px solid transparent;
+            transition: all 0.2s;
             display: inline-flex;
             align-items: center;
-            gap: 7px;
+            justify-content: center;
+            gap: 8px;
         }
-        .page-action-bar .btn-save {
-            background: #f97316;
-            color: #fff;
-            box-shadow: 0 3px 10px rgba(249,115,22,.30);
-        }
-        .page-action-bar .btn-save:hover { background: #ea6b0a; transform: translateY(-1px); }
-        .page-action-bar .btn-cancel {
-            background: #f3f4f6;
+        .btn-prev {
+            background: #fff;
+            border-color: #d1d5db;
             color: #374151;
         }
-        .page-action-bar .btn-cancel:hover { background: #e5e7eb; }
-
-        /* ── form-section 小调整，让两页内间距更紧凑 ── */
-        .book-page .form-section {
-            margin-bottom: 16px;
+        .btn-prev:hover { background: #f3f4f6; }
+        
+        .btn-next {
+            background: #f97316;
+            color: #fff;
+            box-shadow: 0 2px 4px rgba(249,115,22,0.2);
         }
-        .book-page .form-section-header {
-            font-size: 12px;
-            padding: 6px 12px;
-        }
-        .book-page .form-section-content {
-            padding: 12px 14px;
-        }
-        .book-page .form-group label {
-            font-size: 12px;
-        }
-        .book-page .form-group input,
-        .book-page .form-group select,
-        .book-page .form-group textarea {
-            padding: 7px 10px;
-            font-size: 13px;
-        }
-
-        /* 权限树在右页铺满 */
-        .book-page-right .perm-tree-container {
-            max-height: none !important;
-        }
-
-        /* ── 表单字段样式覆盖（页面级，替代原 #addUserModal 选择器） ── */
-        .book-page .form-group {
-            margin-bottom: 0;
-            display: flex;
-            flex-direction: column;
-        }
-        .book-page .form-group label {
-            display: block;
-            margin-bottom: 4px;
-            color: #1f2937;
-            font-weight: 600;
-            font-size: 12px;
-        }
-        .book-page .form-group input,
-        .book-page .form-group select,
-        .book-page .form-group textarea {
-            width: 100%;
-            padding: 6px 10px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 13px;
-            font-family: inherit;
+        .btn-next:hover { background: #ea6b0a; transform: translateY(-1px); }
+        
+        .btn-cancel {
             background: #fff;
-            color: #111827;
-            transition: border-color .18s;
-            box-sizing: border-box;
-            height: auto;
+            color: #6b7280;
         }
-        .book-page .form-group input:focus,
-        .book-page .form-group select:focus,
-        .book-page .form-group textarea:focus {
-            outline: none;
-            border-color: #f97316;
-            box-shadow: 0 0 0 3px rgba(249,115,22,.15);
-        }
-        .book-page .form-group textarea {
-            min-height: 54px;
-            resize: vertical;
-        }
-        /* Override the aggressive height !important from generatecode.css */
-        .book-page .form-group input[type="text"],
-        .book-page .form-group input[type="email"],
-        .book-page .form-group input[type="tel"],
-        .book-page .form-group input[type="date"],
-        .book-page .form-group select {
-            height: 34px !important;
-            padding: 0 10px !important;
+        .btn-cancel:hover { color: #111827; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -262,51 +349,107 @@ require_once 'session_check.php';
                 <h1><i class="fas fa-user-plus"></i> 添加新职员</h1>
             </div>
 
-            <!-- 消息提示区 -->
-            <div id="messageArea"></div>
+            <!-- Wizard Progress Indicator -->
+            <div class="wizard-progress">
+                <div class="step-indicator active" id="indicator-step-1">
+                    <div class="step-circle">1</div>
+                    <span>基本信息</span>
+                </div>
+                <div class="step-connector" id="connector-step-1"></div>
+                <div class="step-indicator" id="indicator-step-2">
+                    <div class="step-circle">2</div>
+                    <span>个人资料</span>
+                </div>
+                <div class="step-connector" id="connector-step-2"></div>
+                <div class="step-indicator" id="indicator-step-3">
+                    <div class="step-circle">3</div>
+                    <span>权限设置</span>
+                </div>
+            </div>
 
-            <!-- 书本双页布局 -->
+            <!-- Message Notification Area -->
+            <div id="messageArea" style="padding: 16px 32px 0;"></div>
+
+            <!-- Wizard Content Area -->
+            <div class="wizard-container">
             <form id="addUserForm">
-            <div class="book-wrapper">
 
-                <!-- ── 左页：员工信息 ── -->
-                <div class="book-page book-page-left">
-                    <div class="page-label">📋 员工信息</div>
-                <!-- 基本信息区块 -->
-                <div class="form-section">
-                    <div class="form-section-header">基本信息</div>
-                    <div class="form-section-content">
-                        <div class="form-row-2col">
-                            <div class="form-group">
-                                <label for="add_username">英文姓名 *</label>
-                                <input type="text" id="add_username" name="username" required maxlength="50">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="add_username_cn">中文姓名</label>
-                                <input type="text" id="add_username_cn" name="username_cn" maxlength="100">
+                <!-- ========== STEP 1: Basic Information & Account Settings ========== -->
+                <div class="wizard-step active" id="step-1">
+                    <div class="form-section">
+                        <div class="form-section-header">基本信息 Basic Information</div>
+                        <div class="form-section-content">
+                            <div class="form-grid-2">
+                                <div class="form-group" id="group-add-username">
+                                    <label for="add_username">英文姓名 English Name *</label>
+                                    <input type="text" id="add_username" name="username" required maxlength="50" placeholder="e.g. John Doe">
+                                    <div class="error-msg">请填写英文姓名，至少包含两个单词</div>
+                                </div>
+                                
+                                <div class="form-group" id="group-add-username-cn">
+                                    <label for="add_username_cn">中文姓名 Chinese Name</label>
+                                    <input type="text" id="add_username_cn" name="username_cn" maxlength="100" placeholder="e.g. 刘德华">
+                                    <div class="error-msg">中文姓名至少需要两个汉字</div>
+                                </div>
+                                
+                                <div class="form-group" id="group-add-nickname">
+                                    <label for="add_nickname">昵称 Nickname</label>
+                                    <input type="text" id="add_nickname" name="nickname" maxlength="50">
+                                </div>
+                                
+                                <div class="form-group" id="group-add-email">
+                                    <label for="add_email">邮箱 Email *</label>
+                                    <input type="email" id="add_email" name="email" required maxlength="100" placeholder="e.g. user@example.com">
+                                    <div class="error-msg">请填写有效的邮箱地址</div>
+                                </div>
                             </div>
                         </div>
-                        
-                        <div class="form-row-2col">
-                            <div class="form-group">
-                                <label for="add_nickname">昵称</label>
-                                <input type="text" id="add_nickname" name="nickname" maxlength="50">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="add_email">邮箱 *</label>
-                                <input type="email" id="add_email" name="email" required maxlength="100">
+                    </div>
+
+                    <!-- Moved Account Settings to Step 1 -->
+                    <div class="form-section">
+                        <div class="form-section-header">账号设置 Account Settings</div>
+                        <div class="form-section-content">
+                            <div class="form-grid-2">
+                                <div class="form-group" id="group-add-account-type">
+                                    <label for="add_account_type">账号类型 Account Type *</label>
+                                    <select id="add_account_type" name="account_type" required>
+                                        <option value="">请选择账号类型</option>
+                                        <option value="special">特殊 (Special)</option>
+                                        <option value="hr">人事部 (HR)</option>
+                                        <option value="account">会计部 (Accountant)</option>
+                                        <option value="media">媒体制作部 (Media Production)</option>
+                                        <option value="marketing">推广部 (Marketing)</option>
+                                        <option value="support">支援部 (Support)</option>
+                                        <option value="production">生产部 (Production)</option>
+                                        <option value="r&d">研发部 (R&D)</option>
+                                        <option value="technical">科技部 (Technical)</option>
+                                        <option value="design">设计部 (Design)</option>
+                                        <option value="operation">Operation</option>
+                                        <option value="service">前台 (Service)</option>
+                                        <option value="sushi">Sushi Bar</option>
+                                        <option value="kitchen">厨房 (Kitchen)</option>
+                                    </select>
+                                    <div class="error-msg">请选择账号类型</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="add_position">职位 Position</label>
+                                    <select id="add_position" name="position">
+                                        <option value="">请先选择账号类型</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 个人资料区块 -->
-                <div class="form-section">
-                    <div class="form-section-header">个人资料</div>
-                    <div class="form-section-content">
-                        <div class="form-row-3col">
+                <!-- ========== STEP 2: Personal Details ========== -->
+                <div class="wizard-step" id="step-2">
+                    <div class="form-section">
+                        <div class="form-section-header">个人资料 Personal Details</div>
+                        <div class="form-section-content">
+                        <div class="form-grid-3">
                             <div class="form-group">
                                 <label for="add_ic_number">身份证号码</label>
                                 <input type="text" id="add_ic_number" name="ic_number" maxlength="20">
@@ -323,7 +466,7 @@ require_once 'session_check.php';
                             </div>
                         </div>
                         
-                        <div class="form-row-3col">
+                        <div class="form-grid-3">
                             <div class="form-group">
                                 <label for="add_gender">性别</label>
                                 <select id="add_gender" name="gender">
@@ -412,7 +555,7 @@ require_once 'session_check.php';
                             </div>
                         </div>
                         
-                        <div class="form-row-1col">
+                        <div class="form-grid-1">
                             <div class="form-group">
                                 <label for="add_home_address">住址</label>
                                 <textarea id="add_home_address" name="home_address" rows="2" maxlength="255"></textarea>
@@ -423,7 +566,7 @@ require_once 'session_check.php';
 
                 <!-- 银行信息区块 -->
                 <div class="form-section">
-                    <div class="form-section-header">银行信息</div>
+                    <div class="form-section-header">银行信息 Bank Information</div>
                     <div class="form-section-content">
                         <div class="form-row-2col">
                             <div class="form-group">
@@ -481,49 +624,11 @@ require_once 'session_check.php';
                         </div>
                     </div>
                 </div>
-                </div><!-- /book-page-left -->
+                </div> <!-- End of Step 2 -->
 
-                <!-- ── 书脊 ── -->
-                <div class="book-spine"></div>
-
-                <!-- ── 右页：账号 & 权限 ── -->
-                <div class="book-page book-page-right">
-                <!-- 账号设置区块 -->
-                <div class="form-section">
-                    <div class="form-section-header">账号设置</div>
-                    <div class="form-section-content">
-                        <div class="form-row-2col">
-                            <div class="form-group">
-                                <label for="add_account_type">账号类型 *</label>
-                                <select id="add_account_type" name="account_type" required>
-                                    <option value="">请选择账号类型</option>
-                                    <option value="special">特殊 (Special)</option>
-                                    <option value="hr">人事部 (HR)</option>
-                                    <option value="account">会计部 (Accountant)</option>
-                                    <option value="media">媒体制作部 (Media Production)</option>
-                                    <option value="marketing">推广部 (Marketing)</option>
-                                    <option value="support">支援部 (Support)</option>
-                                    <option value="production">生产部 (Production)</option>
-                                    <option value="r&d">研发部 (R&D)</option>
-                                    <option value="technical">科技部 (Technical)</option>
-                                    <option value="design">设计部 (Design)</option>
-                                    <option value="operation">Operation</option>
-                                    <option value="service">前台 (Service)</option>
-                                    <option value="sushi">Sushi Bar</option>
-                                    <option value="kitchen">厨房 (Kitchen)</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="add_position">职位</label>
-                                <select id="add_position" name="position">
-                                    <option value="">请先选择账号类型</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
+                <!-- ========== STEP 3: Bank, Emergency Contacts, & Permissions ========== -->
+                <div class="wizard-step" id="step-3">
+                    <!-- 权限设置区块 -->
                 <!-- 编辑职员专用权限布局 (复用至添加页面) -->
                 <div class="form-section editUserPermLayout" style="margin-top: 20px;">
                     <div class="form-section-header">权限设置</div>
@@ -774,19 +879,26 @@ require_once 'session_check.php';
                         </div>
                     </div>
                 </div>
-                </div><!-- /book-page-right -->
-
-            </div><!-- /book-wrapper -->
+                </div><!-- End of Step 3 -->
             </form>
+            </div><!-- /wizard-container -->
 
-            <!-- 底部操作按钮 -->
+            <!-- 底部操作按钮 Sticky ActionBar -->
             <div class="page-action-bar">
-                <button type="submit" form="addUserForm" class="btn-action btn-save">
-                    <i class="fas fa-user-plus"></i> 添加职员
-                </button>
-                <a href="generatecode.php" class="btn-action btn-cancel">
-                    取消
-                </a>
+                <div class="action-left">
+                    <a href="generatecode.php" class="btn-wizard btn-cancel">取消 Cancel</a>
+                </div>
+                <div class="action-right">
+                    <button type="button" class="btn-wizard btn-prev" id="btn-prev" style="display: none;">
+                        <i class="fas fa-arrow-left"></i> 上一步
+                    </button>
+                    <button type="button" class="btn-wizard btn-next" id="btn-next">
+                        下一步 <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button type="submit" form="addUserForm" class="btn-wizard btn-next" id="btn-save" style="display: none;">
+                        <i class="fas fa-check"></i> 保存职员
+                    </button>
+                </div>
             </div>
 
         </div><!-- /add-employee-page -->
@@ -794,30 +906,66 @@ require_once 'session_check.php';
 
     <script src="js/generatecode.js?v=<?php echo time(); ?>"></script>
     <script>
-        // 页面专用初始化：add_employee 页面无需加载表格数据
+        // ── Wizard Logic & Form Validation ──
+        let currentStep = 1;
+        const totalSteps = 3;
+
         document.addEventListener('DOMContentLoaded', function () {
             startSessionRefresh();
 
-            // 初始化账号类型 → 职位联动
+            // Initialize position dropdown
             const accountTypeSelect = document.getElementById('add_account_type');
             if (accountTypeSelect) {
                 accountTypeSelect.addEventListener('change', function () {
                     updatePositionOptions(this.value, 'add_position');
+                    // Remove error state on change
+                    this.closest('.form-group').classList.remove('has-error');
                 });
             }
 
-            // 初始化权限树
+            // Remove error state on input
+            const inputs = document.querySelectorAll('#addUserForm input, #addUserForm select');
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    this.closest('.form-group').classList.remove('has-error');
+                });
+            });
+
+            // Initialize Permission Tree
             const permContainer = document.querySelector('.editUserPermLayout');
             if (permContainer) {
                 initPermissionTreeEvents(permContainer);
             }
 
-            // 表单提交
+            // Wizard Navigation Buttons
+            const btnNext = document.getElementById('btn-next');
+            const btnPrev = document.getElementById('btn-prev');
+            const btnSave = document.getElementById('btn-save');
+
+            btnNext.addEventListener('click', function() {
+                if (validateStep(currentStep)) {
+                    if (currentStep < totalSteps) {
+                        currentStep++;
+                        updateWizardUI();
+                    }
+                }
+            });
+
+            btnPrev.addEventListener('click', function() {
+                if (currentStep > 1) {
+                    currentStep--;
+                    updateWizardUI();
+                }
+            });
+
+            // Form Submit Event
             const form = document.getElementById('addUserForm');
             if (form) {
                 form.addEventListener('submit', function (e) {
                     e.preventDefault();
-                    addNewUserAndRedirect();
+                    if (validateStep(currentStep)) {
+                        addNewUserAndRedirect();
+                    }
                 });
             }
         });
@@ -826,7 +974,102 @@ require_once 'session_check.php';
             stopSessionRefresh();
         });
 
-        // 覆盖 addNewUser 使其在成功后跳转回 generatecode.php
+        function updateWizardUI() {
+            // Update Steps Display
+            document.querySelectorAll('.wizard-step').forEach(step => step.classList.remove('active'));
+            document.getElementById(`step-${currentStep}`).classList.add('active');
+
+            // Update Progress Indicator
+            for (let i = 1; i <= totalSteps; i++) {
+                const indicator = document.getElementById(`indicator-step-${i}`);
+                const connector = document.getElementById(`connector-step-${i}`);
+                
+                // Get inner text (removing step circle if present) dynamically
+                let titleText = indicator.querySelector('span').innerText;
+
+                if (i < currentStep) {
+                    indicator.classList.remove('active');
+                    indicator.classList.add('completed');
+                    indicator.innerHTML = `<div class="step-circle"><i class="fas fa-check"></i></div><span>${titleText}</span>`;
+                    if (connector) connector.classList.add('completed');
+                } else if (i === currentStep) {
+                    indicator.classList.add('active');
+                    indicator.classList.remove('completed');
+                    indicator.innerHTML = `<div class="step-circle">${i}</div><span>${titleText}</span>`;
+                    if (connector) connector.classList.remove('completed');
+                } else {
+                    indicator.classList.remove('active', 'completed');
+                    indicator.innerHTML = `<div class="step-circle">${i}</div><span>${titleText}</span>`;
+                    if (connector) connector.classList.remove('completed');
+                }
+            }
+
+            // Update Action Buttons
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+            const btnSave = document.getElementById('btn-save');
+
+            if (currentStep === 1) {
+                btnPrev.style.display = 'none';
+                btnNext.style.display = 'inline-flex';
+                btnSave.style.display = 'none';
+            } else if (currentStep === totalSteps) {
+                btnPrev.style.display = 'inline-flex';
+                btnNext.style.display = 'none';
+                btnSave.style.display = 'inline-flex';
+            } else {
+                btnPrev.style.display = 'inline-flex';
+                btnNext.style.display = 'inline-flex';
+                btnSave.style.display = 'none';
+            }
+            
+            // Scroll to top of wizard container
+            const wizardContainer = document.querySelector('.wizard-container');
+            if (wizardContainer) wizardContainer.scrollTop = 0;
+        }
+
+        function validateStep(step) {
+            let isValid = true;
+            
+            if (step === 1) {
+                const username = document.getElementById('add_username');
+                const usernameCn = document.getElementById('add_username_cn');
+                const email = document.getElementById('add_email');
+                const accountType = document.getElementById('add_account_type');
+
+                // Validate Username (English)
+                if (!username.value.trim() || !validateField('username', username.value.trim())) {
+                    username.closest('.form-group').classList.add('has-error');
+                    isValid = false;
+                }
+                
+                // Validate Username (Chinese) if provided
+                if (usernameCn.value.trim() && !validateField('username_cn', usernameCn.value.trim())) {
+                    usernameCn.closest('.form-group').classList.add('has-error');
+                    isValid = false;
+                }
+
+                // Validate Email
+                if (!email.value.trim() || !validateField('email', email.value.trim())) {
+                    email.closest('.form-group').classList.add('has-error');
+                    isValid = false;
+                }
+                
+                // Validate Account Type
+                if (!accountType.value) {
+                    accountType.closest('.form-group').classList.add('has-error');
+                    isValid = false;
+                }
+            }
+            
+            if (!isValid) {
+                showMessage('请修正表单中的错误。', 'error');
+            }
+            
+            return isValid;
+        }
+
+        // Add New User API call logic
         async function addNewUserAndRedirect() {
             const formData = new FormData(document.getElementById('addUserForm'));
             const userData = {};
@@ -835,28 +1078,7 @@ require_once 'session_check.php';
                 userData[key] = value.trim();
             }
 
-            // 验证必填字段
-            if (!userData.username || !userData.email || !userData.account_type) {
-                showMessage('请填写所有必填字段（英文姓名、邮箱、账号类型）！', 'error');
-                return;
-            }
-
-            // 验证字段格式
-            const fieldsToValidate = ['username', 'username_cn', 'email'];
-            for (let field of fieldsToValidate) {
-                if (userData[field] && !validateField(field, userData[field])) {
-                    const fieldNames = {
-                        'username': '英文姓名需要至少两个单词',
-                        'username_cn': '中文姓名需要至少两个字',
-                        'email': '邮箱格式不正确'
-                    };
-                    showMessage(fieldNames[field], 'error');
-                    return;
-                }
-            }
-
-            // 提取权限数据
-            const modal = document.getElementById('addUserForm').closest('.add-employee-page') || document.body;
+            // Extract Permissions
             const checkedBoxes = Array.from(document.querySelectorAll('.editUserPermLayout .perm-l1-check, .editUserPermLayout .perm-l2-check, .editUserPermLayout .perm-stock-system, .editUserPermLayout .perm-stock-view, .editUserPermLayout .perm-upload-system, .editUserPermLayout .perm-upload-type, .editUserPermLayout .perm-page-schedule, .editUserPermLayout .perm-page-blueprint'))
                 .filter(cb => cb.checked && !cb.disabled);
 
@@ -870,10 +1092,10 @@ require_once 'session_check.php';
             const permContainer = document.querySelector('.editUserPermLayout');
             const { perms, submenuPermissions, pagePermissions, brandPermissions, reportPermissions, restaurantPermissions } = extractPermissionsData(permContainer);
 
-            // 显示加载状态
-            const submitBtn = document.querySelector('#addUserForm .btn-save');
+            // loading state
+            const submitBtn = document.getElementById('btn-save');
             const originalHTML = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<div class="loading"></div>添加中...';
+            submitBtn.innerHTML = '<div class="loading"></div>保存中...';
             submitBtn.disabled = true;
 
             try {
@@ -897,8 +1119,10 @@ require_once 'session_check.php';
                 const result = await response.json();
 
                 if (result.success) {
-                    // 成功后跳转回职员列表
-                    window.location.href = 'generatecode.php';
+                    showMessage('员工添加成功！正在返回列表...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'generatecode.php';
+                    }, 1000);
                 } else {
                     showMessage(result.message || '添加失败，请重试！', 'error');
                     submitBtn.innerHTML = originalHTML;
