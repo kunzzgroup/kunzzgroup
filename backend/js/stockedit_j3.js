@@ -2119,7 +2119,7 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
                 <td>
                     ${createNewRowRemarkNumberInput(rowId)}
                 </td>
-                <td>${createCombobox('receiver', '', null, rowId)}</td>
+                <td>${createCombobox('receiver', (currentStockType && currentStockType !== 'central' ? currentStockType.toUpperCase() : ''), null, rowId)}</td>
                 <td><input type="text" class="table-input" placeholder="输入备注..." id="${rowId}-remark" value="${remarkValue}"></td>
                 <td>
                     <span class="action-cell">
@@ -3068,6 +3068,16 @@ function toggleAddForm() {
             document.getElementById('add-product-remark').checked = false;
             document.getElementById('add-remark-number').value = '';
             document.getElementById('add-remark-number').disabled = true;
+
+            // 自动填充收货单位（除了 central 之外）
+            const receiverInput = document.getElementById('add-receiver-input');
+            if (receiverInput) {
+                if (currentStockType && currentStockType !== 'central') {
+                    receiverInput.value = currentStockType.toUpperCase();
+                } else {
+                    receiverInput.value = '';
+                }
+            }
         }, 100);
     }
 }
