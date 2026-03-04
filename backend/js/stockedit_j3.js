@@ -1,4 +1,4 @@
-
+﻿
 // API 配置
 let API_BASE_URL = 'stockeditapi.php';
 let currentStockType = 'j3';
@@ -4468,7 +4468,7 @@ async function checkProductStock(productName, outQuantity, price = null) {
 
     try {
         let apiUrl;
-        if (price !== null && price !== '') {
+        if (price !== null && price !== '' && price !== undefined) {
             // 按货品名称和价格检查库存
             apiUrl = `?action=product_stock_by_price&product_name=${encodeURIComponent(productName)}&price=${encodeURIComponent(price)}`;
         } else {
