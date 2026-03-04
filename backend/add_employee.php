@@ -51,19 +51,298 @@ require_once 'session_check.php';
             color: #111827;
             margin: 0;
         }
-        /* ── Hover Overrides ── */
-        .back-btn:hover,
-        .btn-wizard:hover {
-            background: #f9731633 !important;
-            color: #f97316 !important;
-            border-color: #f97316 !important;
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #f97316;
+            color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .back-btn:hover { 
+            background: #f9731633;
+            color: #f97316;
+            border-color: #9ca3af;
+        }
+
+        /* Wizard Progress Bar */
+        .wizard-progress {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 24px 32px;
+            background: #fff;
+            border-bottom: 1px solid #f3f4f6;
+            flex-shrink: 0;
+        }
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #9ca3af;
+            font-weight: 600;
+            font-size: 14px;
+            position: relative;
+        }
+        .step-indicator.active {
+            color: #f97316;
+        }
+        .step-indicator.completed {
+            color: #10b981;
+        }
+        .step-circle {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 13px;
+        }
+        .step-indicator.active .step-circle {
+            background: #f97316;
+            color: #fff;
+        }
+        .step-indicator.completed .step-circle {
+            background: #10b981;
+            color: #fff;
+        }
+        .step-connector {
+            flex-grow: 1;
+            max-width: 80px;
+            height: 2px;
+            background: #e5e7eb;
+        }
+        .step-connector.completed {
+            background: #10b981;
+        }
+
+        /* ── Main Form Area ── */
+        .wizard-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        #addUserForm {
+            width: 100%;
+            max-width: 900px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,.05), 0 2px 4px -1px rgba(0,0,0,.03);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            margin: 0;
+        }
+
+        .wizard-step {
+            display: none;
+            padding: 32px;
+        }
+        .wizard-step.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        /* Cards and Sections inside steps */
+        .form-section {
+            margin-bottom: 24px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+        .form-section-header {
+            background: #f97316;
+            padding: 16px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .form-section-content {
+            padding: 24px;
+        }
+
+        /* Responsive Grid & Spacing */
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px 24px;
+        }
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px 24px;
+        }
+        .form-grid-1 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+        @media (max-width: 768px) {
+            .form-grid-2, .form-grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #111827;
+            background: #fff;
+            transition: all 0.2s;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #f97316;
+            box-shadow: 0 0 0 3px rgba(249,115,22,0.15);
+        }
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="tel"],
+        .form-group input[type="date"],
+        .form-group select {
+            height: 40px !important;
+        }
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        /* Validation Styles */
+        .form-group.has-error input,
+        .form-group.has-error select {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+        }
+        .error-msg {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+        .has-error .error-msg {
+            display: block;
+        }
+
+        /* Permission Section Specifics */
+        .editUserPermLayout {
+            margin: 0 !important;
+            border: none !important;
+        }
+        .editUserPermLayout .form-section-header {
+            display: none; /* Hide duplicate headers since we wrap it in a card */
+        }
+        .editUserPermLayout .form-section-content {
+            padding: 0;
+        }
+        .editUserPermLayout .perm-tree-container {
+            max-height: 400px !important;
+            overflow-y: auto;
+        }
+        .editUserPermLayout .perm-detail-card {
+            max-height: 400px !important;
+            overflow-y: auto;
+        }
+
+        /* ── Action Bar (Sticky) ── */
+        .page-action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 32px;
+            background: #fff;
+            border-top: 1px solid #e5e7eb;
+            position: sticky;
+            bottom: 0;
+            z-index: 20;
+            box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.02);
+            margin-top: auto; /* Push to bottom if content is short */
+        }
+        .action-left {
+            display: flex;
+            gap: 12px;
+        }
+        .action-right {
+            display: flex;
+            gap: 12px;
+        }
+        .btn-wizard {
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-prev {
+            background: #fff;
+            border-color: #d1d5db;
+            color: #374151;
+        }
+        .btn-prev:hover { background: #f3f4f6; }
+        
+        .btn-next {
+            background: #f97316;
+            color: #fff;
+            box-shadow: 0 2px 4px rgba(249,115,22,0.2);
+        }
+        .btn-next:hover { background: #ea6b0a; transform: translateY(-1px); }
+        
+        .btn-cancel {
+            background: #f97316;
+            color: #ffffff;
+            border-color: #d1d5db;
+        }
+        .btn-cancel:hover { 
+            background: #f9731633;
+            color: #f97316;
+            border-color: #9ca3af;
         }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-    </style>
     </style>
 </head>
 <body>

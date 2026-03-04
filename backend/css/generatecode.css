@@ -158,12 +158,12 @@ body {
 
 .form-section-header {
     padding: clamp(6px, 0.52vw, 10px) clamp(10px, 0.73vw, 14px);
-    border-bottom: 1px solid #e5e7eb;
-    font-size: 16px;
-    font-weight: 600;
+    border-bottom: 1px solid #ffddaa;
+    font-size: clamp(8px, 0.74vw, 14px);
+    font-weight: 700;
     text-align: left;
-    color: #ffffff;
-    background: #f97316;
+    color: white;
+    background: #f99e00;
     border-radius: 8px 8px 0 0;
 }
 
@@ -637,55 +637,19 @@ tr:hover {
     transform: translateY(-1px);
 }
 
-/* ── Unified Button Styles ── */
-.back-btn,
-.btn-wizard {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px 24px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.2s;
-    border: 1px solid transparent;
-}
-
-/* Primary Buttons (Orange) */
-.back-btn,
-.btn-next,
-.btn-save,
 .btn-cancel {
-    background: #f97316;
-    color: #ffffff;
-    box-shadow: 0 2px 4px rgba(249, 115, 22, 0.2);
+    background: #6b7280;
+    color: white;
 }
 
-/* Secondary Buttons (White) */
-.btn-prev {
-    background: #ffffff;
-    color: #374151;
-    border-color: #d1d5db;
-}
-
-/* Hover States */
-.back-btn:hover,
-.btn-next:hover,
-.btn-save:hover,
-.btn-cancel:hover,
-.btn-prev:hover {
-    background: #f9731633;
-    color: #f97316;
-    border-color: #f97316;
+.btn-cancel:hover {
+    background: #6b7280;
     transform: translateY(-1px);
-    box-shadow: 0 4px 6px rgba(249, 115, 22, 0.1);
 }
 
-.back-btn {
-    padding: 8px 16px;
+.btn-delete {
+    background: #ef4444;
+    color: white;
 }
 
 .btn-delete:hover {
@@ -1704,120 +1668,4 @@ tr:hover {
 .editUserPermLayout .perm-level-3-panel-inline {
     display: none !important;
     /* Ensure inline panels don't show in side-panel mode */
-}
-
-/* ── Wizard & Form Structure ── */
-.wizard-progress {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    padding: 24px 32px;
-    background: #fff;
-    border-bottom: 1px solid #f3f4f6;
-    flex-shrink: 0;
-}
-
-.step-indicator {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #9ca3af;
-    font-weight: 600;
-    font-size: 14px;
-    position: relative;
-}
-
-.step-indicator.active {
-    color: #f97316;
-}
-
-.step-indicator.completed {
-    color: #10b981;
-}
-
-.step-circle {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: #f3f4f6;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 13px;
-}
-
-.step-indicator.active .step-circle {
-    background: #f97316;
-    color: #fff;
-}
-
-.step-indicator.completed .step-circle {
-    background: #10b981;
-    color: #fff;
-}
-
-.connector-line {
-    flex: 1;
-    height: 2px;
-    background: #e5e7eb;
-    max-width: 80px;
-}
-
-.connector-line.completed {
-    background: #10b981;
-}
-
-.wizard-container {
-    flex: 1;
-    overflow-y: auto;
-    padding: 32px;
-    display: flex;
-    justify-content: center;
-}
-
-#addUserForm {
-    width: 100%;
-    max-width: 900px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, .05);
-}
-
-.wizard-step {
-    display: none;
-    padding: 32px;
-}
-
-.wizard-step.active {
-    display: block;
-    animation: fadeIn 0.3s ease;
-}
-
-.form-grid-1 {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
-}
-
-.form-grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px 24px;
-}
-
-.form-grid-3 {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 16px 24px;
-}
-
-.page-action-bar {
-    display: flex;
-    justify-content: space-between;
-    padding: 20px 32px;
-    background: #fff;
-    border-top: 1px solid #e5e7eb;
-    position: sticky;
-    bottom: 0;
 }
