@@ -1275,6 +1275,9 @@ function hideViewDropdown() {
 // 根据当前库存类型生成target选项
 function generateTargetOptions(selectedValue = '') {
     let options = '';
+    if (!selectedValue && typeof currentStockType !== 'undefined' && currentStockType && currentStockType !== 'central') {
+        selectedValue = currentStockType;
+    }
 
     if (currentStockType === 'central') {
         // Central页面显示所有选项
@@ -1491,7 +1494,11 @@ function clearOutboundFields(container) {
     // 清空Target下拉框
     const targetSelect = container.querySelector('select[id*="-target"], select[data-field="target_system"]');
     if (targetSelect) {
-        targetSelect.value = '';
+        if (typeof currentStockType !== 'undefined' && currentStockType && currentStockType !== 'central') {
+            targetSelect.value = currentStockType;
+        } else {
+            targetSelect.value = '';
+        }
         targetSelect.disabled = true;
         targetSelect.required = false;
     }
@@ -1658,7 +1665,11 @@ function handleEditOutQuantityChange(recordId, value) {
                 targetSelect.required = true;
             } else {
                 targetSelect.disabled = true;
-                targetSelect.value = '';
+                if (typeof currentStockType !== 'undefined' && currentStockType && currentStockType !== 'central') {
+                    targetSelect.value = currentStockType;
+                } else {
+                    targetSelect.value = '';
+                }
                 targetSelect.required = false;
             }
         }
@@ -1684,7 +1695,11 @@ function handleNewRowOutQuantityChange(rowId, value) {
                 targetSelect.required = true;
             } else {
                 targetSelect.disabled = true;
-                targetSelect.value = '';
+                if (typeof currentStockType !== 'undefined' && currentStockType && currentStockType !== 'central') {
+                    targetSelect.value = currentStockType;
+                } else {
+                    targetSelect.value = '';
+                }
                 targetSelect.required = false;
             }
         }
@@ -1784,7 +1799,11 @@ async function handleProductChange(selectElement, codeNumberElement) {
 
         const targetSelect = container.querySelector('select[id*="-target"], select[data-field="target_system"]');
         if (targetSelect) {
-            targetSelect.value = '';
+            if (typeof currentStockType !== 'undefined' && currentStockType && currentStockType !== 'central') {
+                targetSelect.value = currentStockType;
+            } else {
+                targetSelect.value = '';
+            }
             targetSelect.disabled = true;
             targetSelect.required = false;
         }
@@ -1959,7 +1978,11 @@ async function handleCodeNumberChange(selectElement, productNameElement) {
 
         const targetSelect = container.querySelector('select[id*="-target"], select[data-field="target_system"]');
         if (targetSelect) {
-            targetSelect.value = '';
+            if (typeof currentStockType !== 'undefined' && currentStockType && currentStockType !== 'central') {
+                targetSelect.value = currentStockType;
+            } else {
+                targetSelect.value = '';
+            }
             targetSelect.disabled = true;
             targetSelect.required = false;
         }
@@ -2952,7 +2975,11 @@ function updateNewRowTotal(element) {
             targetSelect.required = true;
         } else {
             targetSelect.disabled = true;
-            targetSelect.value = '';
+            if (typeof currentStockType !== 'undefined' && currentStockType && currentStockType !== 'central') {
+                targetSelect.value = currentStockType;
+            } else {
+                targetSelect.value = '';
+            }
             targetSelect.required = false;
         }
     }
@@ -3753,8 +3780,13 @@ function updateField(id, field, value) {
                     targetSelect.required = true;
                 } else {
                     targetSelect.disabled = true;
-                    targetSelect.value = '';
-                    record.target_system = '';
+                    if (typeof currentStockType !== 'undefined' && currentStockType && currentStockType !== 'central') {
+                        targetSelect.value = currentStockType;
+                        record.target_system = currentStockType;
+                    } else {
+                        targetSelect.value = '';
+                        record.target_system = '';
+                    }
                 }
             }
         }
@@ -4742,7 +4774,11 @@ async function selectComboboxOption(optionElement, input) {
 
             const targetSelect = container.querySelector('select[id*="-target"], select[data-field="target_system"]');
             if (targetSelect) {
-                targetSelect.value = '';
+                if (typeof currentStockType !== 'undefined' && currentStockType && currentStockType !== 'central') {
+                    targetSelect.value = currentStockType;
+                } else {
+                    targetSelect.value = '';
+                }
                 targetSelect.disabled = true;
                 targetSelect.required = false;
             }
@@ -5781,7 +5817,11 @@ window.handleAddFormOutQuantityChange = function () {
         targetSelect.required = true;
     } else {
         targetSelect.disabled = true;
-        targetSelect.value = '';
+        if (typeof currentStockType !== 'undefined' && currentStockType && currentStockType !== 'central') {
+            targetSelect.value = currentStockType;
+        } else {
+            targetSelect.value = '';
+        }
         targetSelect.required = false;
     }
 
