@@ -326,9 +326,13 @@ require_once 'session_check.php';
         
         .btn-cancel {
             background: #fff;
-            color: #6b7280;
+            color: #ef4444; /* Red hue for cancel */
+            border-color: #fecaca;
         }
-        .btn-cancel:hover { color: #111827; }
+        .btn-cancel:hover { 
+            background: #fef2f2;
+            color: #b91c1c; 
+        }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -895,7 +899,7 @@ require_once 'session_check.php';
                     <button type="button" class="btn-wizard btn-next" id="btn-next">
                         下一步 <i class="fas fa-arrow-right"></i>
                     </button>
-                    <button type="submit" form="addUserForm" class="btn-wizard btn-next" id="btn-save" style="display: none;">
+                    <button type="button" class="btn-wizard btn-next" id="btn-save" style="display: none;">
                         <i class="fas fa-check"></i> 保存职员
                     </button>
                 </div>
@@ -958,16 +962,13 @@ require_once 'session_check.php';
                 }
             });
 
-            // Form Submit Event
-            const form = document.getElementById('addUserForm');
-            if (form) {
-                form.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    if (validateStep(currentStep)) {
-                        addNewUserAndRedirect();
-                    }
-                });
-            }
+            // Save Button Event
+            btnSave.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (validateStep(currentStep)) {
+                    addNewUserAndRedirect();
+                }
+            });
         });
 
         window.addEventListener('beforeunload', function () {
