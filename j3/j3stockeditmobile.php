@@ -466,9 +466,9 @@ require_once '../backend/session_check.php';
         /* 响应式表格列宽 */
         .stock-table th:nth-child(1), .stock-table td:nth-child(1) { width: 5%; } /* 日期 */
         .stock-table th:nth-child(2), .stock-table td:nth-child(2) { width: 7%; } /* 货品编号 */
-        .stock-table th:nth-child(3), .stock-table td:nth-child(3) { width: 16%; } /* 货品 */
-        .stock-table th:nth-child(4), .stock-table td:nth-child(4) { width: 5%; }  /* 进货 */
-        .stock-table th:nth-child(5), .stock-table td:nth-child(5) { width: 5%; }  /* 出货 */
+        .stock-table th:nth-child(3), .stock-table td:nth-child(3) { width: 25%; } /* 货品 */
+        .stock-table th:nth-child(4), .stock-table td:nth-child(4) { width: 10%; }  /* 出货 */
+        .stock-table th:nth-child(5), .stock-table td:nth-child(5) { width: 8%; } /* 操作 */
         .stock-table th:nth-child(6), .stock-table td:nth-child(6) { width: 6%; } /* 收货单位 */
         .stock-table th:nth-child(7), .stock-table td:nth-child(7) { width: 5%; } /* 规格 */
         .stock-table th:nth-child(10), .stock-table td:nth-child(10) { width: 6%; } /* 类型 */
@@ -2055,10 +2055,7 @@ require_once '../backend/session_check.php';
                         <option value="">请选择货品名称</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="add-in-qty">入库数量</label>
-                    <input type="number" id="add-in-qty" class="form-input" min="0" step="0.001" placeholder="0.000" oninput="handleAddFormOutQuantityChange()">
-                </div>
+
                 <div class="form-group">
                     <label for="add-out-qty">出库数量</label>
                     <input type="number" id="add-out-qty" class="form-input" min="0" step="0.001" placeholder="0.000" oninput="handleAddFormOutQuantityChange()" onchange="handleAddFormOutQuantityChange()">
@@ -2218,8 +2215,7 @@ require_once '../backend/session_check.php';
                     <tr>
                         <th style="min-width: 100px;">日期</th>
                         <th style="min-width: 100px;">货品编号</th>
-                        <th class="product-name-col">货品</th>
-                        <th style="min-width: 80px;">进货</th>
+                        <th class="product-name-col" style="min-width: 200px;">货品</th>
                         <th style="min-width: 80px;">出货</th>
                         <th style="min-width: 100px;">出货人</th>
                         <th style="min-width: 80px;" id="action-header">操作</th>
@@ -3661,7 +3657,6 @@ require_once '../backend/session_check.php';
                             return (
                                 (record.code_number && record.code_number.toLowerCase().includes(unifiedSearch)) ||
                                 (record.product_name && record.product_name.toLowerCase().includes(unifiedSearch)) ||
-                                (record.in_quantity && record.in_quantity.toString().includes(unifiedSearch)) ||
                                 (record.out_quantity && record.out_quantity.toString().includes(unifiedSearch)) ||
                                 (record.receiver && record.receiver.toLowerCase().includes(unifiedSearch)) ||
                                 (record.specification && record.specification.toLowerCase().includes(unifiedSearch)) ||
@@ -3883,7 +3878,7 @@ require_once '../backend/session_check.php';
             tbody.innerHTML = '';
             
             if (stockData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="padding: 20px; color: #6b7280;">暂无数据</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="padding: 20px; color: #6b7280; text-align: center; width: 100%;">暂无数据</td></tr>';
                 return;
             }
             
@@ -3916,12 +3911,7 @@ require_once '../backend/session_check.php';
                             `<span>${record.product_name}</span>`
                         }
                     </td>
-                    <td>
-                        ${isEditing ? 
-                            `<input type="number" class="table-input" value="${record.in_quantity || ''}" min="0" step="0.001" onchange="updateField(${record.id}, 'in_quantity', this.value)">` :
-                            `<span>${formatNumber(record.in_quantity)}</span>`
-                        }
-                    </td>
+
                     <td>
                         ${isEditing ? 
                             `<input type="number" class="table-input" value="${record.out_quantity || ''}" min="0" step="0.001" onchange="handleEditOutQuantityChange(${record.id}, this.value)">` :
@@ -4123,7 +4113,7 @@ require_once '../backend/session_check.php';
                 <td><input type="date" class="table-input" value="${selectedDate}" id="${rowId}-date"></td>
                 <td>${createCombobox('code', '', null, rowId)}</td>
                 <td>${createCombobox('product', '', null, rowId)}</td>
-                <td><input type="number" class="table-input" min="0" step="0.001" placeholder="0.000" id="${rowId}-in-qty" oninput="updateNewRowTotal(this)"></td>
+
                 <td><input type="number" class="table-input" min="0" step="0.001" placeholder="0.000" id="${rowId}-out-qty" oninput="updateNewRowTotal(this)"></td>
                 <td>
                     <span class="action-cell">
@@ -4166,38 +4156,9 @@ require_once '../backend/session_check.php';
             addNewRowWithDate(getDefaultWorkDate());
         }
 
-        // 自动填充supplier到receiver字段（只在有进货数量时）
+        // 进货数量已删除，该函数保留为空存根（避免其他调用报错）
         function updateSupplierIfNeeded(row, recordId) {
-            if (!row) return;
-            
-            // 获取进货数量
-            let inQty = 0;
-            const inQtyInput = row.querySelector('input[id$="-in-qty"]');
-            if (inQtyInput) {
-                inQty = parseFloat(inQtyInput.value) || 0;
-            }
-            
-            // 查找receiver输入框
-            const receiverInput = row.querySelector('.combobox-input[data-type="receiver"]');
-            if (!receiverInput) return;
-            
-            // 只在有进货数量时才自动填充supplier，否则清空
-            if (inQty > 0 && row.dataset.supplier) {
-                receiverInput.value = row.dataset.supplier;
-                
-                // 如果有recordId，更新数据库
-                if (recordId) {
-                    updateField(parseInt(recordId), 'receiver', row.dataset.supplier);
-                }
-            } else {
-                // 进货数量为0或空时，清空supplier
-                receiverInput.value = '';
-                
-                // 如果有recordId，更新数据库
-                if (recordId) {
-                    updateField(parseInt(recordId), 'receiver', '');
-                }
-            }
+            // 进货数量已删除，无需自动填充supplier
         }
         
         // 更新新行的总价计算
@@ -4205,14 +4166,9 @@ require_once '../backend/session_check.php';
             const row = element.closest('tr');
             const rowId = element.id.split('-')[0] + '-' + element.id.split('-')[1]; // 获取行的唯一ID
             
-            const inQty = parseFloat(document.getElementById(`${rowId}-in-qty`).value) || 0;
+            const inQty = 0; // 进货数量已删除，始终为0
             const outQty = parseFloat(document.getElementById(`${rowId}-out-qty`).value) || 0;
             // 价格相关代码已删除
-
-            // 新增：当进货数量变化时，检查是否需要自动填充supplier
-            if (element.id.includes('-in-qty') && row && row.dataset.supplier) {
-                updateSupplierIfNeeded(row, null);
-            }
 
             // 新增：控制Target下拉框的启用/禁用状态
             const targetSelect = document.getElementById(`${rowId}-target`);
@@ -4416,7 +4372,7 @@ require_once '../backend/session_check.php';
                 date: document.getElementById(`${rowId}-date`) ? document.getElementById(`${rowId}-date`).value : '',
                 codeValue: document.getElementById(`${rowId}-code_number-input`) ? document.getElementById(`${rowId}-code_number-input`).value : '',
                 productValue: document.getElementById(`${rowId}-product_name-input`) ? document.getElementById(`${rowId}-product_name-input`).value : '',
-                inQty: document.getElementById(`${rowId}-in-qty`) ? document.getElementById(`${rowId}-in-qty`).value : '',
+                inQty: 0, // 进货数量已删除，始终为0
                 outQty: document.getElementById(`${rowId}-out-qty`) ? document.getElementById(`${rowId}-out-qty`).value : '',
                 specification: document.getElementById(`${rowId}-specification`) ? document.getElementById(`${rowId}-specification`).value : '',
                 // price字段已删除
@@ -4435,7 +4391,7 @@ require_once '../backend/session_check.php';
             if (document.getElementById(`${rowId}-date`)) document.getElementById(`${rowId}-date`).value = data.date;
             if (document.getElementById(`${rowId}-code_number-input`)) document.getElementById(`${rowId}-code_number-input`).value = data.codeValue;
             if (document.getElementById(`${rowId}-product_name-input`)) document.getElementById(`${rowId}-product_name-input`).value = data.productValue;
-            if (document.getElementById(`${rowId}-in-qty`)) document.getElementById(`${rowId}-in-qty`).value = data.inQty;
+            // 进货数量字段已删除
             if (document.getElementById(`${rowId}-out-qty`)) document.getElementById(`${rowId}-out-qty`).value = data.outQty;
             
             // 恢复规格下拉框的选中状态
@@ -4505,7 +4461,7 @@ require_once '../backend/session_check.php';
                 date: document.getElementById(`${rowId}-date`) ? document.getElementById(`${rowId}-date`).value : '',
                 time: new Date().toTimeString().slice(0, 8),
                 product_name: productInput ? productInput.value : '',
-                in_quantity: parseFloat(document.getElementById(`${rowId}-in-qty`) ? document.getElementById(`${rowId}-in-qty`).value : 0) || 0,
+                in_quantity: 0, // 进货数量已删除，始终为0
                 out_quantity: parseFloat(document.getElementById(`${rowId}-out-qty`) ? document.getElementById(`${rowId}-out-qty`).value : 0) || 0,
                 code_number: codeInput ? codeInput.value : ''
             };
@@ -4583,7 +4539,7 @@ require_once '../backend/session_check.php';
                     time: formData.time,
                     code_number: formData.code_number,
                     product_name: formData.product_name,
-                    in_quantity: formData.in_quantity,
+                    in_quantity: 0, // 进货数量已删除
                     out_quantity: formData.out_quantity,
                     created_at: new Date().toISOString()
                 };
@@ -4649,7 +4605,7 @@ require_once '../backend/session_check.php';
                 date: document.getElementById('add-date').value,
                 time: document.getElementById('add-time').value,
                 product_name: document.getElementById('add-product-name').value,
-                in_quantity: parseFloat(document.getElementById('add-in-qty').value) || 0,
+                in_quantity: 0, // 进货数量已删除，始终为0
                 out_quantity: parseFloat(document.getElementById('add-out-qty').value) || 0,
                 specification: document.getElementById('add-specification').value,
                 // price字段已删除
@@ -4724,7 +4680,7 @@ require_once '../backend/session_check.php';
                     time: formData.time,
                     code_number: formData.code_number,
                     product_name: formData.product_name,
-                    in_quantity: formData.in_quantity,
+                    in_quantity: 0, // 进货数量已删除
                     out_quantity: formData.out_quantity,
                     target_system: formData.target_system,
                     specification: formData.specification,
@@ -6274,22 +6230,22 @@ require_once '../backend/session_check.php';
         // 处理新增表单出库数量变化
         function handleAddFormOutQuantityChange() {
             const outQty = parseFloat(document.getElementById('add-out-qty').value) || 0;
-            const inQty = parseFloat(document.getElementById('add-in-qty').value) || 0;
+            const inQty = 0; // 进货数量已删除，始终为0
             const productName = document.getElementById('add-product-name').value;
             const priceSelect = document.getElementById('add-price-select');
             const priceInput = document.getElementById('add-price');
             
-            if (outQty > 0 && inQty === 0 && productName) {
-                // 纯出库且有货品名称，显示价格下拉选项（带库存检查）
+            if (outQty > 0 && productName) {
+                // 出库且有货品名称，显示价格下拉选项（带库存检查）
                 priceSelect.style.display = 'block';
                 priceInput.style.display = 'none';
                 priceInput.value = '';
                 loadAddFormProductPricesWithStock(productName, outQty);
             } else {
-                // 入库或出库为0，显示普通输入框
+                // 出库为0，显示普通输入框
                 priceSelect.style.display = 'none';
                 priceInput.style.display = 'block';
-                if (outQty === 0 && inQty === 0) {
+                if (outQty === 0) {
                     priceInput.value = '';
                 }
             }
