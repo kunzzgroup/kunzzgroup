@@ -56,7 +56,7 @@ require_once 'session_check.php';
             align-items: center;
             gap: 8px;
             padding: 8px 16px;
-            background: #f97316;
+            background: #f97316ff;
             color: #ffffffff;
             border: 1px solid #e5e7eb;
             border-radius: 6px;
@@ -164,7 +164,7 @@ require_once 'session_check.php';
             margin-bottom: 0;
         }
         .form-section-header {
-            background: #f97316;
+            background: #f97316ff;
             padding: 16px 20px;
             font-size: 16px;
             font-weight: 600;
@@ -331,7 +331,7 @@ require_once 'session_check.php';
         }
         .btn-cancel:hover { 
             background: #f9731633;
-            color: #f97316;
+            color: #f97316ff;
             border-color: #9ca3af;
         }
 
