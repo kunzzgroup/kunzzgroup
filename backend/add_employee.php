@@ -164,11 +164,11 @@ require_once 'session_check.php';
             margin-bottom: 0;
         }
         .form-section-header {
-            background: #f9fafb;
+            background: #f97316;
             padding: 16px 20px;
             font-size: 16px;
             font-weight: 600;
-            color: #1f2937;
+            color: #ffffffff;
             border-bottom: 1px solid #e5e7eb;
         }
         .form-section-content {
@@ -325,13 +325,13 @@ require_once 'session_check.php';
         .btn-next:hover { background: #ea6b0a; transform: translateY(-1px); }
         
         .btn-cancel {
-            background: #ffffff;
-            color: #6b7280;
+            background: #f97316;
+            color: #ffffffff;
             border-color: #d1d5db;
         }
         .btn-cancel:hover { 
-            background: #f3f4f6;
-            color: #111827; 
+            background: #f9731633;
+            color: #f97316;
             border-color: #9ca3af;
         }
 
