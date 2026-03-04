@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!headers_sent()) {
     header("Cache-Control: max-age=0, no-cache, no-store, must-revalidate, proxy-revalidate");
     header("Pragma: no-cache");
@@ -382,7 +382,7 @@ function handleGet() {
                 sendResponse(false, "缺少产品名称参数");
             }
             
-            if ($price === null || $price === '') {
+            if ($price === null || $price === "") {
                 sendResponse(false, "缺少价格参数");
             }
             

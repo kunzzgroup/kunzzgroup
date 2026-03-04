@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 ob_start();
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
@@ -713,7 +713,7 @@ function handleGet() {
                 sendResponse(false, "缺少产品名称参数");
             }
             
-            if ($price === null || $price === '') {
+            if ($price === null || $price === "") {
                 sendResponse(false, "缺少价格参数");
             }
             
