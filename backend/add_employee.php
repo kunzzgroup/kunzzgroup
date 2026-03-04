@@ -19,73 +19,228 @@ require_once 'session_check.php';
     <link rel="stylesheet" href="css/generatecode.css?v=<?php echo time(); ?>">
     <title>添加职员 - 职员管理系统</title>
     <style>
-        /* 页面级覆盖：将模态框样式转换为全页面表单 */
-        .add-employee-page {
-            max-width: 900px;
-            margin: 30px auto;
-            padding: 0 20px 60px;
+        /* ── 书本双页布局 ── */
+        body {
+            background: #e8e0d8;
         }
+
+        /* 主包裹：紧贴 sidebar 下方，填满剩余高度 */
+        .add-employee-page {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 0px);
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* 顶部标题栏 */
         .page-header-bar {
             display: flex;
             align-items: center;
-            gap: 16px;
-            margin-bottom: 28px;
+            gap: 14px;
+            padding: 12px 28px;
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            flex-shrink: 0;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+            z-index: 10;
         }
         .page-header-bar h1 {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 700;
-            color: #111827;
+            color: #1f2937;
             margin: 0;
         }
         .page-header-bar .back-btn {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
+            gap: 7px;
+            padding: 7px 14px;
             background: #f3f4f6;
             color: #374151;
             border: none;
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: 7px;
+            font-size: 13px;
             cursor: pointer;
             text-decoration: none;
-            transition: background 0.2s;
+            transition: background .18s;
         }
-        .page-header-bar .back-btn:hover {
-            background: #e5e7eb;
-        }
+        .page-header-bar .back-btn:hover { background: #e5e7eb; }
+
+        /* 消息区域 */
         #messageArea {
-            margin-bottom: 20px;
+            padding: 0 28px;
+            flex-shrink: 0;
         }
-        /* 底部按钮行 */
+
+        /* ── 书本容器 ── */
+        .book-wrapper {
+            flex: 1;
+            display: flex;
+            min-height: 0;           /* 让 flex 子项可收缩 */
+            padding: 16px 20px;
+            gap: 0;
+        }
+
+        /* 书页公共样式 */
+        .book-page {
+            flex: 1;
+            background: #fff;
+            overflow-y: auto;
+            padding: 22px 24px 24px;
+            /* 独立滚动 */
+            scrollbar-width: thin;
+            scrollbar-color: #f97316 #fde8d8;
+        }
+        .book-page::-webkit-scrollbar { width: 5px; }
+        .book-page::-webkit-scrollbar-track { background: #fde8d8; }
+        .book-page::-webkit-scrollbar-thumb { background: #f97316; border-radius: 4px; }
+
+        /* 左页：圆角左侧，阴影朝右 */
+        .book-page-left {
+            border-radius: 4px 0 0 4px;
+            box-shadow: -3px 0 10px rgba(0,0,0,.08), 6px 0 18px rgba(0,0,0,.10);
+        }
+
+        /* 书脊分割线 */
+        .book-spine {
+            width: 6px;
+            background: linear-gradient(to right, #d97706, #f97316, #d97706);
+            flex-shrink: 0;
+            box-shadow: 0 0 8px rgba(0,0,0,.25);
+        }
+
+        /* 右页：圆角右侧 */
+        .book-page-right {
+            border-radius: 0 4px 4px 0;
+            box-shadow: 6px 0 10px rgba(0,0,0,.08), -3px 0 18px rgba(0,0,0,.10);
+        }
+
+        /* 页码标签 */
+        .page-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: #9ca3af;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        /* ── 底部动作栏 ── */
         .page-action-bar {
             display: flex;
             gap: 12px;
-            margin-top: 30px;
             justify-content: flex-end;
+            padding: 10px 28px;
+            background: #fff;
+            border-top: 1px solid #e5e7eb;
+            flex-shrink: 0;
+            box-shadow: 0 -2px 8px rgba(0,0,0,.05);
         }
         .page-action-bar .btn-action {
-            padding: 12px 32px;
+            padding: 10px 28px;
             border-radius: 8px;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             border: none;
-            transition: all 0.2s;
+            transition: all .18s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
         }
         .page-action-bar .btn-save {
-            background: #ff5c00;
-            color: white;
+            background: #f97316;
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(249,115,22,.30);
         }
-        .page-action-bar .btn-save:hover {
-            background: #e04e00;
-        }
+        .page-action-bar .btn-save:hover { background: #ea6b0a; transform: translateY(-1px); }
         .page-action-bar .btn-cancel {
             background: #f3f4f6;
             color: #374151;
         }
-        .page-action-bar .btn-cancel:hover {
-            background: #e5e7eb;
+        .page-action-bar .btn-cancel:hover { background: #e5e7eb; }
+
+        /* ── form-section 小调整，让两页内间距更紧凑 ── */
+        .book-page .form-section {
+            margin-bottom: 16px;
+        }
+        .book-page .form-section-header {
+            font-size: 12px;
+            padding: 6px 12px;
+        }
+        .book-page .form-section-content {
+            padding: 12px 14px;
+        }
+        .book-page .form-group label {
+            font-size: 12px;
+        }
+        .book-page .form-group input,
+        .book-page .form-group select,
+        .book-page .form-group textarea {
+            padding: 7px 10px;
+            font-size: 13px;
+        }
+
+        /* 权限树在右页铺满 */
+        .book-page-right .perm-tree-container {
+            max-height: none !important;
+        }
+        .book-page-right .perm-layout-container {
+            display: block;
+        }
+
+        /* ── 表单字段样式覆盖（页面级，替代原 #addUserModal 选择器） ── */
+        .book-page .form-group {
+            margin-bottom: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .book-page .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            color: #1f2937;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        .book-page .form-group input,
+        .book-page .form-group select,
+        .book-page .form-group textarea {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+            background: #fff;
+            color: #111827;
+            transition: border-color .18s;
+            box-sizing: border-box;
+            height: auto;
+        }
+        .book-page .form-group input:focus,
+        .book-page .form-group select:focus,
+        .book-page .form-group textarea:focus {
+            outline: none;
+            border-color: #f97316;
+            box-shadow: 0 0 0 3px rgba(249,115,22,.15);
+        }
+        .book-page .form-group textarea {
+            min-height: 54px;
+            resize: vertical;
+        }
+        /* Override the aggressive height !important from generatecode.css */
+        .book-page .form-group input[type="text"],
+        .book-page .form-group input[type="email"],
+        .book-page .form-group input[type="tel"],
+        .book-page .form-group input[type="date"],
+        .book-page .form-group select {
+            height: 34px !important;
+            padding: 0 10px !important;
         }
     </style>
 </head>
@@ -94,7 +249,7 @@ require_once 'session_check.php';
     <div class="container">
         <div class="add-employee-page">
 
-            <!-- 页面标题栏 -->
+            <!-- 顶部标题栏 -->
             <div class="page-header-bar">
                 <a href="generatecode.php" class="back-btn">
                     <i class="fas fa-arrow-left"></i> 返回职员列表
@@ -105,8 +260,13 @@ require_once 'session_check.php';
             <!-- 消息提示区 -->
             <div id="messageArea"></div>
 
-            <!-- 添加职员表单 -->
+            <!-- 书本双页布局 -->
             <form id="addUserForm">
+            <div class="book-wrapper">
+
+                <!-- ── 左页：员工信息 ── -->
+                <div class="book-page book-page-left">
+                    <div class="page-label">📋 员工信息</div>
                 <!-- 基本信息区块 -->
                 <div class="form-section">
                     <div class="form-section-header">基本信息</div>
@@ -316,7 +476,14 @@ require_once 'session_check.php';
                         </div>
                     </div>
                 </div>
+                </div><!-- /book-page-left -->
 
+                <!-- ── 书脊 ── -->
+                <div class="book-spine"></div>
+
+                <!-- ── 右页：账号 & 权限 ── -->
+                <div class="book-page book-page-right">
+                    <div class="page-label">⚙️ 账号 & 权限</div>
                 <!-- 账号设置区块 -->
                 <div class="form-section">
                     <div class="form-section-header">账号设置</div>
@@ -576,20 +743,23 @@ require_once 'session_check.php';
                         </div>
                     </div>
                 </div>
+                </div><!-- /book-page-right -->
 
-                <!-- 底部操作按钮 -->
-                <div class="page-action-bar">
-                    <button type="submit" class="btn-action btn-save">
-                        <i class="fas fa-user-plus"></i> 添加职员
-                    </button>
-                    <a href="generatecode.php" class="btn-action btn-cancel">
-                        取消
-                    </a>
-                </div>
+            </div><!-- /book-wrapper -->
             </form>
 
-        </div>
-    </div>
+            <!-- 底部操作按钮 -->
+            <div class="page-action-bar">
+                <button type="submit" form="addUserForm" class="btn-action btn-save">
+                    <i class="fas fa-user-plus"></i> 添加职员
+                </button>
+                <a href="generatecode.php" class="btn-action btn-cancel">
+                    取消
+                </a>
+            </div>
+
+        </div><!-- /add-employee-page -->
+    </div><!-- /container -->
 
     <script src="js/generatecode.js?v=<?php echo time(); ?>"></script>
     <script>
