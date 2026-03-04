@@ -964,10 +964,15 @@ require_once 'session_check.php';
             });
 
             // Save Button Event
-            btnSave.addEventListener('click', function(e) {
+            btnSave.addEventListener('click', async function(e) {
                 e.preventDefault();
-                if (validateStep(currentStep)) {
-                    addNewUserAndRedirect();
+                try {
+                    if (validateStep(currentStep)) {
+                        await addNewUserAndRedirect();
+                    }
+                } catch (err) {
+                    showInlineMessage('内部执行错误: ' + err.message, 'error');
+                    console.error("Save Button Error:", err);
                 }
             });
         });
@@ -1030,8 +1035,35 @@ require_once 'session_check.php';
             if (wizardContainer) wizardContainer.scrollTop = 0;
         }
 
+        function showInlineMessage(msg, type = 'error') {
+            const area = document.getElementById('messageArea');
+            if (!area) return;
+            
+            const color = type === 'success' ? '#059669' : '#dc2626';
+            const bg = type === 'success' ? '#d1fae5' : '#fee2e2';
+            const border = type === 'success' ? '#a7f3d0' : '#fecaca';
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            
+            area.innerHTML = `
+                <div style="background: ${bg}; color: ${color}; border: 1px solid ${border}; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; font-weight: 500; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas ${icon}"></i> ${msg}
+                </div>
+            `;
+            
+            // Auto hide success messages after a few seconds
+            if (type === 'success') {
+                setTimeout(() => { area.innerHTML = ''; }, 3000);
+            }
+            
+            // Scroll to the message area
+            area.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
         function validateStep(step) {
             let isValid = true;
+            
+            // Clear previous errors on validation
+            document.getElementById('messageArea').innerHTML = '';
             
             if (step === 1) {
                 const username = document.getElementById('add_username');
@@ -1065,7 +1097,7 @@ require_once 'session_check.php';
             }
             
             if (!isValid) {
-                alert('请修正表单中的错误。');
+                showInlineMessage('请修正表单中的错误。', 'error');
             }
             
             return isValid;
@@ -1087,7 +1119,7 @@ require_once 'session_check.php';
             if (checkedBoxes.length === 0) {
                 const warningDiv = document.querySelector('.perm-warning');
                 if (warningDiv) warningDiv.style.display = 'block';
-                alert('请至少选择一项用户权限');
+                showInlineMessage('请至少选择一项用户权限', 'error');
                 return;
             }
 
@@ -1121,19 +1153,24 @@ require_once 'session_check.php';
                 const result = await response.json();
 
                 if (result.success) {
-                    alert('员工添加成功！正在返回列表...');
+                    showInlineMessage('员工添加成功！正在返回列表...', 'success');
                     setTimeout(() => {
                         window.location.href = 'generatecode.php';
-                    }, 500);
+                    }, 1000);
                 } else {
-                    alert(result.message || '添加失败，请重试！');
+                    showInlineMessage(result.message || '添加失败，请重试！', 'error');
+                    if (submitBtn) {
+                        submitBtn.innerHTML = originalHTML;
+                        submitBtn.disabled = false;
+                    }
+                }
+            } catch (error) {
+                showInlineMessage(`添加失败，网络错误 或 API异常：${error.message}`, 'error');
+                console.error("Fetch Error: ", error);
+                if (submitBtn) {
                     submitBtn.innerHTML = originalHTML;
                     submitBtn.disabled = false;
                 }
-            } catch (error) {
-                alert(`网络错误：${error.message}`);
-                submitBtn.innerHTML = originalHTML;
-                submitBtn.disabled = false;
             }
         }
     </script>
