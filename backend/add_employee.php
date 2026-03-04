@@ -129,6 +129,14 @@ require_once 'session_check.php';
             border-bottom: 1px solid #f3f4f6;
         }
 
+        #addUserForm {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            margin: 0;
+        }
+
         /* ── 底部动作栏 ── */
         .page-action-bar {
             display: flex;

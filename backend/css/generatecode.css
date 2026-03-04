@@ -1099,6 +1099,7 @@ tr:hover {
 /* 右侧详细配置卡片 */
 .perm-detail-card {
     flex: 0 0 400px;
+    min-height: 400px;
     max-height: 60vh;
     border: 2px solid #ff8019;
     border-radius: 8px;
@@ -1141,7 +1142,7 @@ tr:hover {
     visibility: hidden;
 }
 
-#perm-detail-content {
+.perm-detail-content {
     opacity: 0;
     transform: translateY(10px);
     height: 100%;
@@ -1156,7 +1157,7 @@ tr:hover {
     z-index: 1;
 }
 
-#perm-detail-content.active {
+.perm-detail-content.active {
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
