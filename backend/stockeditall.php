@@ -130,11 +130,11 @@ require_once 'session_check.php';
                 </div>
                 <div class="form-group">
                     <label for="add-in-qty">入库数量</label>
-                    <input type="number" id="add-in-qty" class="form-input" min="0" step="0.001" placeholder="0.000" oninput="window.handleAddFormOutQuantityChange()">
+                    <input type="number" id="add-in-qty" class="form-input" min="0" step="0.001" placeholder="0" oninput="window.handleAddFormOutQuantityChange()">
                 </div>
                 <div class="form-group">
                     <label for="add-out-qty">出库数量</label>
-                    <input type="number" id="add-out-qty" class="form-input" min="0" step="0.001" placeholder="0.000" oninput="window.handleAddFormOutQuantityChange()" onchange="window.handleAddFormOutQuantityChange()">
+                    <input type="number" id="add-out-qty" class="form-input" min="0" step="0.001" placeholder="0" oninput="window.handleAddFormOutQuantityChange()" onchange="window.handleAddFormOutQuantityChange()">
                 </div>
                 <div class="form-group" id="target-form-group">
                     <label for="add-target">目标系统</label>

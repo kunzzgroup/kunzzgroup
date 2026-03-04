@@ -2385,13 +2385,13 @@ function renderStockTable() {
                     </td>
                     <td>
                         ${isEditing ?
-                `<input type="number" class="table-input" id="edit-in-${record.id}" value="${(parseFloat(record.in_quantity) || 0) === 0 ? '' : (record.in_quantity || '')}" min="0" step="0.001" placeholder="0.00" onchange="updateField(${record.id}, 'in_quantity', this.value)" oninput="enforceQuantityMutex(this, document.getElementById('edit-out-${record.id}'))" ${(parseFloat(record.out_quantity) || 0) > 0 ? 'disabled' : ''}>` :
+                `<input type="number" class="table-input" id="edit-in-${record.id}" value="${(parseFloat(record.in_quantity) || 0) === 0 ? '' : (record.in_quantity || '')}" min="0" step="0.001" placeholder="0" onchange="updateField(${record.id}, 'in_quantity', this.value)" oninput="enforceQuantityMutex(this, document.getElementById('edit-out-${record.id}'))" ${(parseFloat(record.out_quantity) || 0) > 0 ? 'disabled' : ''}>` :
                 `<span>${formatNumber(record.in_quantity)}</span>`
             }
                     </td>
                     <td>
                         ${isEditing ?
-                `<input type="number" class="table-input" id="edit-out-${record.id}" value="${(parseFloat(record.out_quantity) || 0) === 0 ? '' : (record.out_quantity || '')}" min="0" step="0.001" placeholder="0.00" onchange="handleEditOutQuantityChange(${record.id}, this.value)" oninput="enforceQuantityMutex(document.getElementById('edit-in-${record.id}'), this)" ${(parseFloat(record.in_quantity) || 0) > 0 ? 'disabled' : ''}>` :
+                `<input type="number" class="table-input" id="edit-out-${record.id}" value="${(parseFloat(record.out_quantity) || 0) === 0 ? '' : (record.out_quantity || '')}" min="0" step="0.001" placeholder="0" onchange="handleEditOutQuantityChange(${record.id}, this.value)" oninput="enforceQuantityMutex(document.getElementById('edit-in-${record.id}'), this)" ${(parseFloat(record.in_quantity) || 0) > 0 ? 'disabled' : ''}>` :
                 `<span class="${outQty > 0 ? 'negative-value' : ''}">${formatNumber(record.out_quantity)}</span>`
             }
                     </td>
@@ -2729,8 +2729,8 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
                 <td><input type="date" class="table-input" value="${selectedDate}" id="${rowId}-date"></td>
                 <td>${createCombobox('code', '', null, rowId)}</td>
                 <td>${createCombobox('product', '', null, rowId)}</td>
-                <td><input type="number" class="table-input" min="0" step="0.001" placeholder="0.000" id="${rowId}-in-qty" oninput="updateNewRowTotal(this)"></td>
-                <td><input type="number" class="table-input" min="0" step="0.001" placeholder="0.000" id="${rowId}-out-qty" oninput="updateNewRowTotal(this)" onchange="handleNewRowOutQuantityChange('${rowId}', this.value)"></td>
+                <td><input type="number" class="table-input" min="0" step="0.001" placeholder="0" id="${rowId}-in-qty" oninput="updateNewRowTotal(this)"></td>
+                <td><input type="number" class="table-input" min="0" step="0.001" placeholder="0" id="${rowId}-out-qty" oninput="updateNewRowTotal(this)" onchange="handleNewRowOutQuantityChange('${rowId}', this.value)"></td>
                 <td>
                     <select class="table-select" id="${rowId}-target" disabled>
                         <option value="">请选择</option>
@@ -2746,7 +2746,7 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
                 <td>
                     <div class="currency-display">
                         <span class="currency-symbol">RM</span>
-                        <input type="number" class="currency-input-edit" min="0" step="0.00001" placeholder="0.00000" id="${rowId}-price" oninput="updateNewRowTotal(this)">
+                        <input type="number" class="currency-input-edit" min="0" step="0.00001" placeholder="0.00" id="${rowId}-price" oninput="updateNewRowTotal(this)">
                     </div>
                 </td>
                 <td class="calculated-cell">
