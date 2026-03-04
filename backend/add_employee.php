@@ -325,13 +325,14 @@ require_once 'session_check.php';
         .btn-next:hover { background: #ea6b0a; transform: translateY(-1px); }
         
         .btn-cancel {
-            background: #fff;
-            color: #ef4444; /* Red hue for cancel */
-            border-color: #fecaca;
+            background: #ffffff;
+            color: #6b7280;
+            border-color: #d1d5db;
         }
         .btn-cancel:hover { 
-            background: #fef2f2;
-            color: #b91c1c; 
+            background: #f3f4f6;
+            color: #111827; 
+            border-color: #9ca3af;
         }
 
         @keyframes fadeIn {
@@ -1064,7 +1065,7 @@ require_once 'session_check.php';
             }
             
             if (!isValid) {
-                showMessage('请修正表单中的错误。', 'error');
+                alert('请修正表单中的错误。');
             }
             
             return isValid;
@@ -1086,7 +1087,7 @@ require_once 'session_check.php';
             if (checkedBoxes.length === 0) {
                 const warningDiv = document.querySelector('.perm-warning');
                 if (warningDiv) warningDiv.style.display = 'block';
-                showMessage('请至少选择一项用户权限', 'error');
+                alert('请至少选择一项用户权限');
                 return;
             }
 
@@ -1120,17 +1121,17 @@ require_once 'session_check.php';
                 const result = await response.json();
 
                 if (result.success) {
-                    showMessage('员工添加成功！正在返回列表...', 'success');
+                    alert('员工添加成功！正在返回列表...');
                     setTimeout(() => {
                         window.location.href = 'generatecode.php';
-                    }, 1000);
+                    }, 500);
                 } else {
-                    showMessage(result.message || '添加失败，请重试！', 'error');
+                    alert(result.message || '添加失败，请重试！');
                     submitBtn.innerHTML = originalHTML;
                     submitBtn.disabled = false;
                 }
             } catch (error) {
-                showMessage(`网络错误：${error.message}`, 'error');
+                alert(`网络错误：${error.message}`);
                 submitBtn.innerHTML = originalHTML;
                 submitBtn.disabled = false;
             }
