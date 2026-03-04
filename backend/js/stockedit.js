@@ -341,13 +341,13 @@ function renderStockTable() {
                     </td>
                     <td>
                         ${isEditing ?
-                `<input type="number" class="table-input" value="${record.in_quantity || ''}" min="0" step="0.01" onchange="updateField(${record.id}, 'in_quantity', this.value)">` :
+                `<input type="number" class="table-input" value="${record.in_quantity || ''}" min="0" step="0.01" onchange="updateField(${record.id}, 'in_quantity', this.value)" oninput="enforceQuantityMutex(this, this.closest('tr').querySelector('input[onchange*=\\'out_quantity\\']'))" ${(parseFloat(record.out_quantity) || 0) > 0 ? 'disabled' : ''}>` :
                 `<span>${formatNumber(record.in_quantity)}</span>`
             }
                     </td>
                     <td>
                         ${isEditing ?
-                `<input type="number" class="table-input" value="${record.out_quantity || ''}" min="0" step="0.01" onchange="updateField(${record.id}, 'out_quantity', this.value)">` :
+                `<input type="number" class="table-input" value="${record.out_quantity || ''}" min="0" step="0.01" onchange="updateField(${record.id}, 'out_quantity', this.value)" oninput="enforceQuantityMutex(this.closest('tr').querySelector('input[onchange*=\\'in_quantity\\']'), this)" ${(parseFloat(record.in_quantity) || 0) > 0 ? 'disabled' : ''}>` :
                 `<span class="${outQty > 0 ? 'negative-value' : ''}">${formatNumber(record.out_quantity)}</span>`
             }
                     </td>
