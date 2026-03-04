@@ -1621,6 +1621,24 @@ function handleOutQuantityChange(container, outQty) {
     // 这个函数保留用于其他可能的逻辑扩展
 }
 
+// 进/出货互斥控制
+function enforceQuantityMutex(inInput, outInput) {
+    if (!inInput || !outInput) return;
+    const inVal = parseFloat(inInput.value) || 0;
+    const outVal = parseFloat(outInput.value) || 0;
+
+    if (inVal > 0) {
+        outInput.value = '';
+        outInput.disabled = true;
+    } else if (outVal > 0) {
+        inInput.value = '';
+        inInput.disabled = true;
+    } else {
+        inInput.disabled = false;
+        outInput.disabled = false;
+    }
+}
+
 // 处理编辑模式下出货数量变化
 function handleEditOutQuantityChange(recordId, value) {
     const outQty = parseFloat(value) || 0;
@@ -2869,9 +2887,14 @@ function updateNewRowTotal(element) {
     const row = element.closest('tr');
     const rowId = element.id.split('-')[0] + '-' + element.id.split('-')[1]; // 获取行的唯一ID
 
-    const inQty = parseFloat(document.getElementById(`${rowId}-in-qty`).value) || 0;
-    const outQty = parseFloat(document.getElementById(`${rowId}-out-qty`).value) || 0;
+    const inQtyInput = document.getElementById(`${rowId}-in-qty`);
+    const outQtyInput = document.getElementById(`${rowId}-out-qty`);
+    const inQty = parseFloat(inQtyInput.value) || 0;
+    const outQty = parseFloat(outQtyInput.value) || 0;
     const price = parseFloat(document.getElementById(`${rowId}-price`).value) || 0;
+
+    // 互斥判断
+    enforceQuantityMutex(inQtyInput, outQtyInput);
 
     // 新增：当进货数量变化时，检查是否需要自动填充supplier
     if (element.id.includes('-in-qty') && row && row.dataset.supplier) {
@@ -3689,6 +3712,17 @@ function updateField(id, field, value) {
     const record = stockData.find(r => r.id === id);
     if (record) {
         record[field] = value;
+
+        // 进出货互斥检查
+        if (field === 'in_quantity' || field === 'out_quantity') {
+            const row = document.querySelector(`tr[data-record-id="${id}"]`);
+            if (row) {
+                // Find inputs using data-field
+                const inInput = row.querySelector(`input[onchange*="updateField(${id}, 'in_quantity'"]`);
+                const outInput = row.querySelector(`input[onchange*="handleEditOutQuantityChange(${id}"]`);
+                enforceQuantityMutex(inInput, outInput);
+            }
+        }
 
         // 特殊处理出库数量变化
         if (field === 'out_quantity') {
@@ -5659,11 +5693,16 @@ function handleAddFormPriceChange() {
 // 处理新增表单出库数量变化
 window.handleAddFormOutQuantityChange = function () {
     console.log('=== handleAddFormOutQuantityChange 被调用 ===');
-    const outQty = parseFloat(document.getElementById('add-out-qty').value) || 0;
-    const inQty = parseFloat(document.getElementById('add-in-qty').value) || 0;
+    const inInput = document.getElementById('add-in-qty');
+    const outInput = document.getElementById('add-out-qty');
+    const outQty = parseFloat(outInput.value) || 0;
+    const inQty = parseFloat(inInput.value) || 0;
     const productName = document.getElementById('add-product-name').value;
     const priceSelect = document.getElementById('add-price-select');
     const priceInput = document.getElementById('add-price');
+
+    // 互斥控制
+    enforceQuantityMutex(inInput, outInput);
 
     console.log('出库数量:', outQty, '入库数量:', inQty, '货品名称:', productName);
 

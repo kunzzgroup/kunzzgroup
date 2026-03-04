@@ -935,6 +935,13 @@ function handlePost() {
         }
     }
 
+    // 验证进出货互斥
+    $in_qty = isset($data['in_quantity']) ? floatval($data['in_quantity']) : 0;
+    $out_qty = isset($data['out_quantity']) ? floatval($data['out_quantity']) : 0;
+    if ($in_qty > 0 && $out_qty > 0) {
+        sendResponse(false, "进货和出货数量不能同时大于0");
+    }
+
     // 验证产品名称是否存在于数据库中
     if (!empty($data['product_name'])) {
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM stock_data WHERE product_name = ?");
@@ -1178,6 +1185,13 @@ function handlePut() {
         if (empty($data[$field])) {
             sendResponse(false, "缺少必填字段：$field");
         }
+    }
+
+    // 验证进出货互斥
+    $in_qty = isset($data['in_quantity']) ? floatval($data['in_quantity']) : 0;
+    $out_qty = isset($data['out_quantity']) ? floatval($data['out_quantity']) : 0;
+    if ($in_qty > 0 && $out_qty > 0) {
+        sendResponse(false, "进货和出货数量不能同时大于0");
     }
 
     // 验证产品名称是否存在于数据库中

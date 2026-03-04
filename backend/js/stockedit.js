@@ -958,6 +958,16 @@ function updateField(id, field, value) {
     if (record) {
         record[field] = value;
 
+        // 互斥处理
+        if (field === 'in_quantity' || field === 'out_quantity') {
+            const row = document.querySelector(`tr[data-record-id="${id}"]`);
+            if (row) {
+                const inInput = row.querySelector(`input[onchange*="updateField(${id}, 'in_quantity'"]`);
+                const outInput = row.querySelector(`input[onchange*="updateField(${id}, 'out_quantity'"]`);
+                enforceQuantityMutex(inInput, outInput);
+            }
+        }
+
         // 特殊处理出库数量变化
         if (field === 'out_quantity') {
             const outQty = parseFloat(value) || 0;
@@ -2017,11 +2027,16 @@ function handleAddFormPriceChange() {
 
 // 处理新增表单出库数量变化
 function handleAddFormOutQuantityChange() {
-    const outQty = parseFloat(document.getElementById('add-out-qty').value) || 0;
-    const inQty = parseFloat(document.getElementById('add-in-qty').value) || 0;
+    const inInput = document.getElementById('add-in-qty');
+    const outInput = document.getElementById('add-out-qty');
+    const outQty = parseFloat(outInput.value) || 0;
+    const inQty = parseFloat(inInput.value) || 0;
     const productName = document.getElementById('add-product-name').value;
     const priceSelect = document.getElementById('add-price-select');
     const priceInput = document.getElementById('add-price');
+
+    // 互斥处理
+    enforceQuantityMutex(inInput, outInput);
 
     if (outQty > 0 && inQty === 0 && productName) {
         // 纯出库且有产品名称，显示价格下拉选项（带库存检查）
