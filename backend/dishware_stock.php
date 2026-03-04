@@ -365,7 +365,7 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                     <div class="form-group">
                         <label>单价 (RM)</label>
-                        <input type="number" id="add-unit-price" name="unit_price" step="0.01" min="0">
+                        <input type="number" id="add-unit-price" name="unit_price" step="0.01" min="0" placeholder="0.00">
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>照片上传</label>
@@ -441,7 +441,7 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                     <div class="form-group">
                         <label class="required">单价 (RM)</label>
-                        <input type="number" id="edit-unit-price" name="unit_price" step="0.01" min="0" required>
+                        <input type="number" id="edit-unit-price" name="unit_price" step="0.01" min="0" required placeholder="0.00">
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>库存数量</label>
@@ -536,11 +536,11 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                     <div class="form-group">
                         <label>单价 (RM)</label>
-                        <input type="number" id="damage-unit-price" name="unit_price" step="0.01" min="0" readonly style="background: #f3f4f6;">
+                        <input type="number" id="damage-unit-price" name="unit_price" step="0.01" min="0" readonly style="background: #f3f4f6;" placeholder="0.00">
                     </div>
                     <div class="form-group">
                         <label>总价 (RM)</label>
-                        <input type="number" id="damage-total-price" name="total_price" step="0.01" readonly style="background: #f3f4f6;">
+                        <input type="number" id="damage-total-price" name="total_price" step="0.01" readonly style="background: #f3f4f6;" placeholder="0.00">
                     </div>
                 </div>
                 <div class="modal-actions">

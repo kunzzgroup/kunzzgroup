@@ -2385,13 +2385,13 @@ function renderStockTable() {
                     </td>
                     <td>
                         ${isEditing ?
-                `<input type="number" class="table-input" id="edit-in-${record.id}" value="${record.in_quantity || ''}" min="0" step="0.001" onchange="updateField(${record.id}, 'in_quantity', this.value)" oninput="enforceQuantityMutex(this, document.getElementById('edit-out-${record.id}'))" ${(parseFloat(record.out_quantity) || 0) > 0 ? 'disabled' : ''}>` :
+                `<input type="number" class="table-input" id="edit-in-${record.id}" value="${(parseFloat(record.in_quantity) || 0) === 0 ? '' : (record.in_quantity || '')}" min="0" step="0.001" placeholder="0.00" onchange="updateField(${record.id}, 'in_quantity', this.value)" oninput="enforceQuantityMutex(this, document.getElementById('edit-out-${record.id}'))" ${(parseFloat(record.out_quantity) || 0) > 0 ? 'disabled' : ''}>` :
                 `<span>${formatNumber(record.in_quantity)}</span>`
             }
                     </td>
                     <td>
                         ${isEditing ?
-                `<input type="number" class="table-input" id="edit-out-${record.id}" value="${record.out_quantity || ''}" min="0" step="0.001" onchange="handleEditOutQuantityChange(${record.id}, this.value)" oninput="enforceQuantityMutex(document.getElementById('edit-in-${record.id}'), this)" ${(parseFloat(record.in_quantity) || 0) > 0 ? 'disabled' : ''}>` :
+                `<input type="number" class="table-input" id="edit-out-${record.id}" value="${(parseFloat(record.out_quantity) || 0) === 0 ? '' : (record.out_quantity || '')}" min="0" step="0.001" placeholder="0.00" onchange="handleEditOutQuantityChange(${record.id}, this.value)" oninput="enforceQuantityMutex(document.getElementById('edit-in-${record.id}'), this)" ${(parseFloat(record.in_quantity) || 0) > 0 ? 'disabled' : ''}>` :
                 `<span class="${outQty > 0 ? 'negative-value' : ''}">${formatNumber(record.out_quantity)}</span>`
             }
                     </td>
@@ -2429,7 +2429,7 @@ function renderStockTable() {
                     `<div class="currency-display">
                                     <span class="currency-symbol">RM</span>
                                     <input type="number" class="currency-input-edit" 
-                                        value="${formatCurrencyEdit(record.price_raw ?? record.price)}" min="0" step="0.00001" 
+                                        value="${parseFloat(record.price_raw ?? (record.price || 0)) === 0 ? '' : formatCurrencyEdit(record.price_raw ?? record.price)}" min="0" step="0.00001" placeholder="0.00" 
                                         onchange="updateField(${record.id}, 'price', this.value)">
                                 </div>`
                 ) :
@@ -3709,6 +3709,9 @@ function cancelEdit(id = null) {
 
 // 更新字段
 function updateField(id, field, value) {
+    if ((field === 'in_quantity' || field === 'out_quantity' || field === 'price') && value === '') {
+        value = '0.00';
+    }
     const record = stockData.find(r => r.id === id);
     if (record) {
         record[field] = value;

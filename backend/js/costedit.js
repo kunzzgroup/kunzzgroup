@@ -339,7 +339,7 @@ async function loadMonthStock() {
 function formatCurrencyDisplay(value) {
     if (!value || value === '') return '';
     const num = parseFloat(value);
-    if (isNaN(num)) return '';
+    if (isNaN(num) || num === 0) return '';
     return num.toFixed(2);
 }
 

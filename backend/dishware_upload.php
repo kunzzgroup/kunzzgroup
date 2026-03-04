@@ -81,7 +81,7 @@ if (!headers_sent()) {
                     
                     <div class="form-group">
                         <label for="unit_price" class="required">单价 (RM)</label>
-                        <input type="number" id="unit_price" name="unit_price" class="form-input" step="0.01" min="0" required>
+                        <input type="number" id="unit_price" name="unit_price" class="form-input" step="0.01" min="0" required placeholder="0.00">
                     </div>
                     
                     <div class="form-group full-width">

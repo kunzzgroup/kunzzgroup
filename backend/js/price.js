@@ -1044,7 +1044,8 @@ async function batchSaveNewRows() {
             foodNameInput.value = foodName;
         }
         const foodType = row.querySelector('.new-type-select')?.value.trim() || null;
-        const priceValue = parseFloat(row.querySelector('.new-price')?.value);
+        const priceInputVal = row.querySelector('.new-price')?.value;
+        const priceValue = priceInputVal === '' ? 0 : parseFloat(priceInputVal);
 
         if (!foodName) {
             showToast(`第 ${index + 1} 行：请输入货品名称`, 'error');
@@ -1281,7 +1282,7 @@ function enterEditMode(row, item, recordId) {
     const priceCell = cells[3];
     const priceData_item = item.prices && item.prices[currentRestaurant] ? item.prices[currentRestaurant] : null;
     const price = priceData_item && priceData_item.price ? priceData_item.price : '';
-    priceCell.innerHTML = `<input type="number" class="table-input edit-price" value="${price}" min="0" step="0.01" placeholder="0.00" style="text-align: right;">`;
+    priceCell.innerHTML = `<input type="number" class="table-input edit-price" value="${(parseFloat(price) || 0) === 0 ? '' : price}" min="0" step="0.01" placeholder="0.00" style="text-align: right;">`;
 
     // 操作按钮
     const actionCell = cells[4];
@@ -1307,7 +1308,8 @@ async function saveEditRow(row, recordId, originalItem) {
         foodNameInput.value = foodName;
     }
     const foodType = row.querySelector('.edit-type-select')?.value.trim() || null;
-    const priceValue = parseFloat(row.querySelector('.edit-price')?.value);
+    const priceInputVal = row.querySelector('.edit-price')?.value;
+    const priceValue = priceInputVal === '' ? 0 : parseFloat(priceInputVal);
 
     if (!foodName) {
         showToast('请输入货品名称', 'error');

@@ -126,7 +126,7 @@ function renderTable() {
                         </td>
                         <td class="text-right">
                             ${isEditing ?
-                `<input type="number" class="table-input" id="edit-price-${item.id}" value="${item.price}" step="0.01" min="0">` :
+                `<input type="number" class="table-input" id="edit-price-${item.id}" value="${(parseFloat(item.price) || 0) === 0 ? '' : item.price}" step="0.01" min="0" placeholder="0.00">` :
                 `<span>${parseFloat(item.price).toFixed(2)}</span>`
             }
                         </td>
