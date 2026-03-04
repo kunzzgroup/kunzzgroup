@@ -1466,14 +1466,10 @@ function clearOutboundFields(container) {
         totalInput.value = '';
     }
 
-    // 清空收货单位
+    // 清空供应商/出货人（用户必须手动选择，不自动填入 system）
     const receiverInput = container.querySelector('input[id*="-receiver"], input[data-field="receiver"]');
     if (receiverInput) {
-        if (currentStockType && currentStockType !== 'central') {
-            receiverInput.value = currentStockType.toUpperCase();
-        } else {
-            receiverInput.value = '';
-        }
+        receiverInput.value = '';
         // 保持收货人字段始终可输入，不设置disabled
     }
 
@@ -1770,11 +1766,8 @@ async function handleProductChange(selectElement, codeNumberElement) {
 
         const receiverInput = container.querySelector('input[id*="-receiver"], input[data-field="receiver"]');
         if (receiverInput) {
-            if (currentStockType && currentStockType !== 'central') {
-                receiverInput.value = currentStockType.toUpperCase();
-            } else {
-                receiverInput.value = '';
-            }
+            // 供应商/出货人由用户手动选择，不自动填入 system
+            receiverInput.value = '';
         }
 
         // 仅 central 模式有 target select
@@ -1948,11 +1941,8 @@ async function handleCodeNumberChange(selectElement, productNameElement) {
 
         const receiverInput = container.querySelector('input[id*="-receiver"], input[data-field="receiver"]');
         if (receiverInput) {
-            if (currentStockType && currentStockType !== 'central') {
-                receiverInput.value = currentStockType.toUpperCase();
-            } else {
-                receiverInput.value = '';
-            }
+            // 供应商/出货人由用户手动选择，不自动填入 system
+            receiverInput.value = '';
         }
 
         // 仅 central 模式有 target select
@@ -2793,7 +2783,7 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
                 <td>
                     ${createNewRowRemarkNumberInput(rowId)}
                 </td>
-                <td>${createCombobox('receiver', (currentStockType && currentStockType !== 'central' ? currentStockType.toUpperCase() : ''), null, rowId)}</td>
+                <td>${createCombobox('receiver', '', null, rowId)}</td>
                 <td><input type="text" class="table-input" placeholder="输入备注..." id="${rowId}-remark" value="${remarkValue}"></td>
                 <td>
                     <span class="action-cell">
@@ -2887,12 +2877,8 @@ function updateSupplierIfNeeded(row, recordId) {
             updateField(parseInt(recordId), 'receiver', row.dataset.supplier);
         }
     } else {
-        // 进货数量为0或空时，清空supplier，并恢复默认的收货人（如果适用）
-        if (currentStockType && currentStockType !== 'central') {
-            receiverInput.value = currentStockType.toUpperCase();
-        } else {
-            receiverInput.value = '';
-        }
+        // 供应商/出货人由用户手动选择，不自动填入 system
+        receiverInput.value = '';
 
         // 解锁收货人字段（非进货时）
         receiverInput.disabled = false;
