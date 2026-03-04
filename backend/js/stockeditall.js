@@ -1578,18 +1578,36 @@ async function refreshEditPriceSelect(recordId, productName) {
     const outQty = record ? parseFloat(record.out_quantity || 0) : 0;
     const codeNumber = record && record.code_number ? String(record.code_number).trim() : '';
 
-    await loadProductPricesWithStock(productName, selectId, '', outQty, codeNumber);
+    let currentPrice = '';
+    let oldQty = 0;
 
-    priceSelect.value = '';
+    // 获取编辑模式下原始数据的价格和数量，以将其还原至可用库存中供本次计算
+    if (originalEditData && originalEditData.has(recordId)) {
+        const oldData = originalEditData.get(recordId);
+        // 如果货品名称未改变，则可以使用原来的价格
+        if (oldData.product_name === productName) {
+            currentPrice = oldData.price_raw || oldData.price || '';
+            oldQty = parseFloat(oldData.out_quantity) || 0;
+        }
+    }
+
+    // 将原始价格和还原数量传递给下拉加载方法
+    await loadProductPricesWithStock(productName, selectId, currentPrice, outQty, codeNumber, oldQty);
+
+    priceSelect.value = currentPrice;
     priceSelect.dataset.productName = productName;
-    priceSelect.dataset.currentPrice = '';
+    priceSelect.dataset.currentPrice = currentPrice;
     priceSelect.setAttribute('data-product-name', productName);
-    priceSelect.setAttribute('data-current-price', '');
+    priceSelect.setAttribute('data-current-price', currentPrice);
 
     if (record) {
-        record.price_raw = '';
+        if (!record.price && currentPrice) {
+            record.price_raw = currentPrice;
+        } else {
+            record.price_raw = currentPrice; // 保留原单价
+        }
     }
-    updateField(recordId, 'price', '');
+    updateField(recordId, 'price', currentPrice);
 }
 
 // 收货人选项列表
@@ -5449,7 +5467,7 @@ window.loadAddFormProductPricesWithStock = async function (productName, required
     }
 }
 
-async function loadProductPricesWithStock(productName, selectElementId, currentPrice = '', requiredQty = 0, codeNumber = '') {
+async function loadProductPricesWithStock(productName, selectElementId, currentPrice = '', requiredQty = 0, codeNumber = '', oldQtyForCurrentPrice = 0) {
     try {
         let code = codeNumber;
         if (!code && selectElementId) {
@@ -5471,7 +5489,13 @@ async function loadProductPricesWithStock(productName, selectElementId, currentP
 
             result.data.forEach(item => {
                 const price = item.price;
-                const availableStock = item.available_stock;
+                let availableStock = item.available_stock;
+
+                // 给当前正在编辑的价格加上原来的出库数量，相当于暂不扣减（仅当价格匹配时）
+                if (price == currentPrice) {
+                    availableStock = parseFloat(availableStock) + parseFloat(oldQtyForCurrentPrice);
+                }
+
                 const selected = price == currentPrice ? 'selected' : '';
 
                 // 只显示库存足够的价格选项，但当前价格即使库存不足也要显示（已选中的选项）
