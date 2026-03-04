@@ -342,7 +342,7 @@ function handlePost() {
             $type,
             $data['receiver'] ?? null,
             $data['remark'] ?? null,
-            $data['target_system'] ?? null
+            'j2'  // 强制使用 j2，防止前端笺改
         ]);
 
         $newId = $pdo->lastInsertId();
@@ -434,7 +434,7 @@ function handlePut() {
             $type,
             $data['receiver'] ?? null,
             $data['remark'] ?? null,
-            $data['target_system'] ?? null,
+            'j2',  // 强制使用 j2，防止前端笺改
             $data['id']
         ]);
 

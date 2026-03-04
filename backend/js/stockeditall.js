@@ -1272,30 +1272,16 @@ function hideViewDropdown() {
     }
 }
 
-// 根据当前库存类型生成target选项
+// 根据当前库存类型生成target选项（仅在 central 模式下使用）
 function generateTargetOptions(selectedValue = '') {
     let options = '';
-    if (!selectedValue && typeof currentStockType !== 'undefined' && currentStockType && currentStockType !== 'central') {
-        selectedValue = currentStockType;
-    }
-
+    // 仅 central 页面需要 select，其他页面直接只读显示
     if (currentStockType === 'central') {
-        // Central页面显示所有选项
         options += `<option value="j1" ${selectedValue === 'j1' ? 'selected' : ''}>J1</option>`;
         options += `<option value="j2" ${selectedValue === 'j2' ? 'selected' : ''}>J2</option>`;
         options += `<option value="j3" ${selectedValue === 'j3' ? 'selected' : ''}>J3</option>`;
         options += `<option value="central" ${selectedValue === 'central' ? 'selected' : ''}>中央</option>`;
-    } else if (currentStockType === 'j1') {
-        // J1页面只显示J1选项
-        options += `<option value="j1" ${selectedValue === 'j1' ? 'selected' : ''}>J1</option>`;
-    } else if (currentStockType === 'j2') {
-        // J2页面只显示J2选项
-        options += `<option value="j2" ${selectedValue === 'j2' ? 'selected' : ''}>J2</option>`;
-    } else if (currentStockType === 'j3') {
-        // J3页面只显示J3选项
-        options += `<option value="j3" ${selectedValue === 'j3' ? 'selected' : ''}>J3</option>`;
     }
-
     return options;
 }
 
@@ -1491,16 +1477,14 @@ function clearOutboundFields(container) {
         // 保持收货人字段始终可输入，不设置disabled
     }
 
-    // 清空Target下拉框
-    const targetSelect = container.querySelector('select[id*="-target"], select[data-field="target_system"]');
-    if (targetSelect) {
-        if (typeof currentStockType !== 'undefined' && currentStockType && currentStockType !== 'central') {
-            targetSelect.value = currentStockType;
-        } else {
+    // 清空Target下拉框（仅 central 模式有 select）
+    if (currentStockType === 'central') {
+        const targetSelect = container.querySelector('select[id*="-target"], select[data-field="target_system"]');
+        if (targetSelect) {
             targetSelect.value = '';
+            targetSelect.disabled = true;
+            targetSelect.required = false;
         }
-        targetSelect.disabled = true;
-        targetSelect.required = false;
     }
 
     // 清空规格字段
@@ -1657,20 +1641,18 @@ function handleEditOutQuantityChange(recordId, value) {
         document.querySelector(`input[data-record-id="${recordId}"]`)?.closest('tr');
 
     if (row) {
-        // 控制Target下拉框状态
-        const targetSelect = document.getElementById(`target-select-${recordId}`);
-        if (targetSelect) {
-            if (outQty > 0) {
-                targetSelect.disabled = false;
-                targetSelect.required = true;
-            } else {
-                targetSelect.disabled = true;
-                if (typeof currentStockType !== 'undefined' && currentStockType && currentStockType !== 'central') {
-                    targetSelect.value = currentStockType;
+        // 非central模式下无target select，无需控制
+        if (currentStockType === 'central') {
+            const targetSelect = document.getElementById(`target-select-${recordId}`);
+            if (targetSelect) {
+                if (outQty > 0) {
+                    targetSelect.disabled = false;
+                    targetSelect.required = true;
                 } else {
+                    targetSelect.disabled = true;
                     targetSelect.value = '';
+                    targetSelect.required = false;
                 }
-                targetSelect.required = false;
             }
         }
 
@@ -1687,20 +1669,18 @@ function handleNewRowOutQuantityChange(rowId, value) {
     const row = document.getElementById(`${rowId}-out-qty`)?.closest('tr');
 
     if (row) {
-        // 控制Target下拉框状态
-        const targetSelect = document.getElementById(`${rowId}-target`);
-        if (targetSelect) {
-            if (outQty > 0) {
-                targetSelect.disabled = false;
-                targetSelect.required = true;
-            } else {
-                targetSelect.disabled = true;
-                if (typeof currentStockType !== 'undefined' && currentStockType && currentStockType !== 'central') {
-                    targetSelect.value = currentStockType;
+        // 非central模式下无target select，无需控制
+        if (currentStockType === 'central') {
+            const targetSelect = document.getElementById(`${rowId}-target`);
+            if (targetSelect) {
+                if (outQty > 0) {
+                    targetSelect.disabled = false;
+                    targetSelect.required = true;
                 } else {
+                    targetSelect.disabled = true;
                     targetSelect.value = '';
+                    targetSelect.required = false;
                 }
-                targetSelect.required = false;
             }
         }
 
@@ -1797,15 +1777,14 @@ async function handleProductChange(selectElement, codeNumberElement) {
             }
         }
 
-        const targetSelect = container.querySelector('select[id*="-target"], select[data-field="target_system"]');
-        if (targetSelect) {
-            if (typeof currentStockType !== 'undefined' && currentStockType && currentStockType !== 'central') {
-                targetSelect.value = currentStockType;
-            } else {
+        // 仅 central 模式有 target select
+        if (currentStockType === 'central') {
+            const targetSelect = container.querySelector('select[id*="-target"], select[data-field="target_system"]');
+            if (targetSelect) {
                 targetSelect.value = '';
+                targetSelect.disabled = true;
+                targetSelect.required = false;
             }
-            targetSelect.disabled = true;
-            targetSelect.required = false;
         }
 
         // 更新单价选项
@@ -1976,15 +1955,14 @@ async function handleCodeNumberChange(selectElement, productNameElement) {
             }
         }
 
-        const targetSelect = container.querySelector('select[id*="-target"], select[data-field="target_system"]');
-        if (targetSelect) {
-            if (typeof currentStockType !== 'undefined' && currentStockType && currentStockType !== 'central') {
-                targetSelect.value = currentStockType;
-            } else {
+        // 仅 central 模式有 target select
+        if (currentStockType === 'central') {
+            const targetSelect = container.querySelector('select[id*="-target"], select[data-field="target_system"]');
+            if (targetSelect) {
                 targetSelect.value = '';
+                targetSelect.disabled = true;
+                targetSelect.required = false;
             }
-            targetSelect.disabled = true;
-            targetSelect.required = false;
         }
 
         updatePriceOptions(container, '');
@@ -2431,12 +2409,16 @@ function renderStockTable() {
             }
                     </td>
                     <td>
-                        ${isEditing ?
-                `<select class="table-select" id="target-select-${record.id}" onchange="updateField(${record.id}, 'target_system', this.value)" ${(parseFloat(record.out_quantity || 0) === 0) ? 'disabled' : ''}>
-                                <option value="">请选择</option>
-                                ${generateTargetOptions(record.target_system)}
-                            </select>` :
-                `<span>${record.target_system ? record.target_system.toUpperCase() : '-'}</span>`
+                        ${currentStockType !== 'central' ?
+                // 非central：始终只读显示当前系统，不显示 select
+                `<span>${currentStockType.toUpperCase()}</span>` :
+                // central：编辑時显示 select，否則显示值
+                (isEditing ?
+                    `<select class="table-select" id="target-select-${record.id}" onchange="updateField(${record.id}, 'target_system', this.value)" ${(parseFloat(record.out_quantity || 0) === 0) ? 'disabled' : ''}>
+                            <option value="">请选择</option>
+                            ${generateTargetOptions(record.target_system)}
+                        </select>` :
+                    `<span>${record.target_system ? record.target_system.toUpperCase() : '-'}</span>`)
             }
                     </td>
                     <td>
@@ -2767,10 +2749,16 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
                 <td><input type="number" class="table-input" min="0" step="0.001" placeholder="0" id="${rowId}-in-qty" oninput="updateNewRowTotal(this)"></td>
                 <td><input type="number" class="table-input" min="0" step="0.001" placeholder="0" id="${rowId}-out-qty" oninput="updateNewRowTotal(this)" onchange="handleNewRowOutQuantityChange('${rowId}', this.value)"></td>
                 <td>
-                    <select class="table-select" id="${rowId}-target" disabled>
-                        <option value="">请选择</option>
-                        ${generateTargetOptions()}
-                    </select>
+                    ${currentStockType !== 'central' ?
+            // 非central：只读显示 + 隐藏 input 保存值
+            `<span>${currentStockType.toUpperCase()}</span>
+                        <input type="hidden" id="${rowId}-target" value="${currentStockType}">` :
+            // central：保留 select
+            `<select class="table-select" id="${rowId}-target" disabled>
+                            <option value="">请选择</option>
+                            ${generateTargetOptions()}
+                        </select>`
+        }
                 </td>
                 <td>
                     <select class="table-select" id="${rowId}-specification">
@@ -2967,20 +2955,18 @@ function updateNewRowTotal(element) {
         }
     }
 
-    // 新增：控制Target下拉框的启用/禁用状态
-    const targetSelect = document.getElementById(`${rowId}-target`);
-    if (targetSelect) {
-        if (outQty > 0) {
-            targetSelect.disabled = false;
-            targetSelect.required = true;
-        } else {
-            targetSelect.disabled = true;
-            if (typeof currentStockType !== 'undefined' && currentStockType && currentStockType !== 'central') {
-                targetSelect.value = currentStockType;
+    // 控制Target下拉框（仅 central 模式有 select）
+    if (currentStockType === 'central') {
+        const targetSelect = document.getElementById(`${rowId}-target`);
+        if (targetSelect && targetSelect.tagName === 'SELECT') {
+            if (outQty > 0) {
+                targetSelect.disabled = false;
+                targetSelect.required = true;
             } else {
+                targetSelect.disabled = true;
                 targetSelect.value = '';
+                targetSelect.required = false;
             }
-            targetSelect.required = false;
         }
     }
 
@@ -3354,8 +3340,12 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
         throw new Error(errorMsg);
     }
 
-    // 添加target验证
-    if (formData.out_quantity > 0) {
+    // 添加target处理
+    if (currentStockType !== 'central') {
+        // 非central页面：强制使用当前系统，不需要验证 select
+        formData.target_system = currentStockType;
+    } else if (formData.out_quantity > 0) {
+        // central页面：需要验证 select
         const targetInput = document.getElementById(`${rowId}-target`);
         if (!targetInput || !targetInput.value) {
             const errorMsg = '当有出库数量时，请选择目标系统（J1、J2或J3）';

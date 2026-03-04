@@ -559,14 +559,14 @@ function handlePost() {
             $data['code_number'] ?? null,
             $data['remark'] ?? null,
             $data['receiver'] ?? null,
-            $data['target_system'] ?? null,
+            'j1',  // 强制使用 j1，防止前端笺改
             $type
         ]);
         
         $newId = $pdo->lastInsertId();
         
-        // 检查target_system，如果是Central则同时保存到stockinout_data表
-        $targetSystem = $data['target_system'] ?? 'j1'; // 默认j1
+        // 当前 system=j1页面，收货单位始终是 j1
+        $targetSystem = 'j1'; // 强制锁定为 j1
 
         if (strtolower($targetSystem) === 'central') {
             // 如果选择Central，同时保存到stockinout_data表
@@ -765,7 +765,7 @@ function handlePut() {
             $data['code_number'] ?? null,
             $data['remark'] ?? null,
             $data['receiver'] ?? null,
-            $data['target_system'] ?? null,
+            'j1',  // 强制使用 j1，防止前端笺改
             $type,
             $data['id']
         ]);
@@ -781,8 +781,8 @@ function handlePut() {
             $stmt->execute([$data['id']]);
             $updatedRecord = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // 检查target_system，如果是Central则同步更新stockinout_data表
-            $targetSystem = $data['target_system'] ?? 'j1'; // 默认j1
+            // 当前 system=j1页面，收货单位始终是 j1
+            $targetSystem = 'j1'; // 强制锁定
 
             if (strtolower($targetSystem) === 'central') {
                 // 更新对应的stockinout_data记录 - 通过匹配字段找到对应记录
