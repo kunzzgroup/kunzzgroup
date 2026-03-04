@@ -1057,7 +1057,11 @@ function clearOutboundFields(container) {
     // 清空收货单位
     const receiverInput = container.querySelector('input[id*="-receiver"], input[data-field="receiver"]');
     if (receiverInput) {
-        receiverInput.value = '';
+        if (currentStockType && currentStockType !== 'central') {
+            receiverInput.value = currentStockType.toUpperCase();
+        } else {
+            receiverInput.value = '';
+        }
         // 保持收货人字段始终可输入，不设置disabled
     }
 
@@ -1217,7 +1221,11 @@ async function handleProductChange(selectElement, codeNumberElement) {
 
         const receiverInput = container.querySelector('input[id*="-receiver"], input[data-field="receiver"]');
         if (receiverInput) {
-            receiverInput.value = '';
+            if (currentStockType && currentStockType !== 'central') {
+                receiverInput.value = currentStockType.toUpperCase();
+            } else {
+                receiverInput.value = '';
+            }
         }
 
         const targetSelect = container.querySelector('select[id*="-target"], select[data-field="target_system"]');
@@ -1382,7 +1390,11 @@ async function handleCodeNumberChange(selectElement, productNameElement) {
 
         const receiverInput = container.querySelector('input[id*="-receiver"], input[data-field="receiver"]');
         if (receiverInput) {
-            receiverInput.value = '';
+            if (currentStockType && currentStockType !== 'central') {
+                receiverInput.value = currentStockType.toUpperCase();
+            } else {
+                receiverInput.value = '';
+            }
         }
 
         const targetSelect = container.querySelector('select[id*="-target"], select[data-field="target_system"]');
@@ -2187,8 +2199,12 @@ function updateSupplierIfNeeded(row, recordId) {
             updateField(parseInt(recordId), 'receiver', row.dataset.supplier);
         }
     } else {
-        // 进货数量为0或空时，清空supplier
-        receiverInput.value = '';
+        // 进货数量为0或空时，清空supplier，并恢复默认的收货人（如果适用）
+        if (currentStockType && currentStockType !== 'central') {
+            receiverInput.value = currentStockType.toUpperCase();
+        } else {
+            receiverInput.value = '';
+        }
 
         // 如果有recordId，更新数据库
         if (recordId) {
@@ -3684,7 +3700,11 @@ async function selectComboboxOption(optionElement, input) {
 
             const receiverInput = container.querySelector('input[id*="-receiver"], input[data-field="receiver"]');
             if (receiverInput) {
-                receiverInput.value = '';
+                if (currentStockType && currentStockType !== 'central') {
+                    receiverInput.value = currentStockType.toUpperCase();
+                } else {
+                    receiverInput.value = '';
+                }
             }
 
             const targetSelect = container.querySelector('select[id*="-target"], select[data-field="target_system"]');
