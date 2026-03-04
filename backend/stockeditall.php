@@ -136,10 +136,16 @@ require_once 'session_check.php';
                     <label for="add-out-qty">出库数量</label>
                     <input type="number" id="add-out-qty" class="form-input" min="0" step="0.001" placeholder="0.000" oninput="window.handleAddFormOutQuantityChange()" onchange="window.handleAddFormOutQuantityChange()">
                 </div>
-                <select id="add-target" class="form-select" disabled>
-                    <option value="">请选择</option>
-                    ${generateTargetOptions()}
-                </select>
+                <div class="form-group" id="target-form-group">
+                    <label for="add-target">目标系统</label>
+                    <select id="add-target" class="form-select" disabled>
+                        <option value="">请选择</option>
+                        <option value="j1">J1</option>
+                        <option value="j2">J2</option>
+                        <option value="j3">J3</option>
+                        <option value="central">中央</option>
+                    </select>
+                </div>
                 <div class="form-group">
                     <label for="add-specification">规格单位 *</label>
                     <select id="add-specification" class="form-select" required>
@@ -170,7 +176,21 @@ require_once 'session_check.php';
                 </div>
                 <div class="form-group">
                     <label for="add-receiver">收货人 *</label>
-                    ${createCombobox('receiver', '', null, 'add')}
+                    <div class="combobox-container" id="add-receiver">
+                        <input 
+                            type="text" 
+                            class="combobox-input" 
+                            id="add-receiver-input"
+                            value="" 
+                            placeholder="输入或选择收货人..."
+                            autocomplete="off"
+                            data-field="receiver"
+                            data-type="receiver"
+                        />
+                        <i class="fas fa-chevron-down combobox-arrow"></i>
+                        <div class="combobox-dropdown" id="add-receiver-dropdown">
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="add-applicant">申请人 *</label>
