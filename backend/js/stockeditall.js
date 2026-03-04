@@ -3330,9 +3330,9 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
         throw new Error(errorMsg);
     }
 
-    // 验证单价：不能为空且必须大于0
-    if (!formData.price || parseFloat(formData.price) <= 0) {
-        const errorMsg = '单价不能为空且必须大于0';
+    // 验证单价：不能为空且不能小于0
+    if (formData.price === '' || formData.price === null || formData.price === undefined || parseFloat(formData.price) < 0) {
+        const errorMsg = '单价不能为空且不能小于0';
         if (!skipTableRefresh) showAlert(errorMsg, 'error');
         throw new Error(errorMsg);
     }
@@ -3524,7 +3524,7 @@ async function saveNewRecord() {
         in_quantity: parseFloat(document.getElementById('add-in-qty').value) || 0,
         out_quantity: parseFloat(document.getElementById('add-out-qty').value) || 0,
         specification: document.getElementById('add-specification').value,
-        price: document.getElementById('add-price').value || 0,
+        price: document.getElementById('add-price').value,
         receiver: document.getElementById('add-receiver').value,
         applicant: document.getElementById('add-applicant').value,
         code_number: document.getElementById('add-code-number').value,
@@ -3554,9 +3554,9 @@ async function saveNewRecord() {
         return;
     }
 
-    // 验证单价：不能为空且必须大于0
-    if (!formData.price || parseFloat(formData.price) <= 0) {
-        showAlert('单价不能为空且必须大于0', 'error');
+    // 验证单价：不能为空且不能小于0
+    if (formData.price === '' || formData.price === null || formData.price === undefined || parseFloat(formData.price) < 0) {
+        showAlert('单价不能为空且不能小于0', 'error');
         return;
     }
 
@@ -4007,9 +4007,9 @@ async function saveRecord(id) {
         return;
     }
 
-    // 验证单价：不能为空且必须大于0
-    if (!record.price || parseFloat(record.price) <= 0) {
-        showAlert('单价不能为空且必须大于0', 'error');
+    // 验证单价：不能为空且不能小于0
+    if (record.price === '' || record.price === null || record.price === undefined || parseFloat(record.price) < 0) {
+        showAlert('单价不能为空且不能小于0', 'error');
         return;
     }
 
