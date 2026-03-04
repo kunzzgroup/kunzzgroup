@@ -1225,18 +1225,24 @@ async function deleteRowAndClose(id) {
 }
 
 // 点击模态框外部关闭（为添加职员模态框）
-document.getElementById('addUserModal').onclick = function (event) {
-    if (event.target === this) {
-        closeAddUserModal();
-    }
-};
+const addUserModalEl = document.getElementById('addUserModal');
+if (addUserModalEl) {
+    addUserModalEl.onclick = function (event) {
+        if (event.target === this) {
+            closeAddUserModal();
+        }
+    };
+}
 
 // 点击模态框外部关闭（用户权限）
-document.getElementById('permissionsModal').onclick = function (event) {
-    if (event.target === this) {
-        closePermissionsModal();
-    }
-};
+const permissionsModalEl = document.getElementById('permissionsModal');
+if (permissionsModalEl) {
+    permissionsModalEl.onclick = function (event) {
+        if (event.target === this) {
+            closePermissionsModal();
+        }
+    };
+}
 
 // 监听滚动事件，控制回到顶部按钮显示
 let scrollTimeout;
