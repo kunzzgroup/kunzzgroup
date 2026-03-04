@@ -530,6 +530,17 @@ function handlePost() {
     if (!empty($data['target_system']) && !in_array($data['target_system'], ['j3', 'Central', 'central'])) {
         sendResponse(false, "target_system 只能选择 j3 或 Central");
     }
+
+    // 验证数量：不能为负数
+    $inQty = floatval($data['in_quantity'] ?? 0);
+    $outQty = floatval($data['out_quantity'] ?? 0);
+    if ($inQty < 0 || $outQty < 0) {
+        sendResponse(false, "数量不能为负数");
+    }
+    // 验证数量：进货和出货不能同时为 0
+    if ($inQty <= 0 && $outQty <= 0) {
+        sendResponse(false, "进货或出货数量必须大于 0");
+    }
     
     try {
         // 开始事务
@@ -737,6 +748,17 @@ function handlePut() {
         if ($stmt->fetchColumn() == 0) {
             sendResponse(false, "产品编号不存在，请选择有效的编号");
         }
+    }
+
+    // 验证数量：不能为负数
+    $inQty = floatval($data['in_quantity'] ?? 0);
+    $outQty = floatval($data['out_quantity'] ?? 0);
+    if ($inQty < 0 || $outQty < 0) {
+        sendResponse(false, "数量不能为负数");
+    }
+    // 验证数量：进货和出货不能同时为 0
+    if ($inQty <= 0 && $outQty <= 0) {
+        sendResponse(false, "进货或出货数量必须大于 0");
     }
     
     try {

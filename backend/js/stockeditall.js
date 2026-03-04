@@ -3317,6 +3317,19 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
         throw new Error(errorMsg);
     }
 
+    // 验证数量：不能为负数
+    if (formData.in_quantity < 0 || formData.out_quantity < 0) {
+        const errorMsg = '数量不能为负数';
+        if (!skipTableRefresh) showAlert(errorMsg, 'error');
+        throw new Error(errorMsg);
+    }
+    // 验证数量：进货和出货不能同时为 0
+    if (formData.in_quantity <= 0 && formData.out_quantity <= 0) {
+        const errorMsg = '进货或出货数量必须大于 0';
+        if (!skipTableRefresh) showAlert(errorMsg, 'error');
+        throw new Error(errorMsg);
+    }
+
     // 当勾选货品备注时，必须填写备注编号
     if (formData.product_remark_checked && !formData.remark_number) {
         const errorMsg = '货品备注已勾选时，请填写备注编号';
@@ -3521,6 +3534,17 @@ async function saveNewRecord() {
             showAlert(`请填写${getFieldLabel(field)}`, 'error');
             return;
         }
+    }
+
+    // 验证数量：不能为负数
+    if (formData.in_quantity < 0 || formData.out_quantity < 0) {
+        showAlert('数量不能为负数', 'error');
+        return;
+    }
+    // 验证数量：进货和出货不能同时为 0
+    if (formData.in_quantity <= 0 && formData.out_quantity <= 0) {
+        showAlert('进货或出货数量必须大于 0', 'error');
+        return;
     }
 
     if (!formData.price || parseFloat(formData.price) <= 0) {
