@@ -771,6 +771,9 @@ function addNewUser($pdo, $input) {
     }
 
     try {
+        // ======= 确保权限表存在 (必须放在事务开始前，否则DDL会隐式提交事务) =======
+        ensurePermissionsTable($pdo);
+
         // 开始事务
         $pdo->beginTransaction();
 
@@ -868,7 +871,6 @@ function addNewUser($pdo, $input) {
         $newUserId = $pdo->lastInsertId();
 
         // ======= 保存初始权限数据 =======
-        ensurePermissionsTable($pdo); // 确保权限表存在
         
         $perms = isset($input['permissions']) && is_array($input['permissions']) ? $input['permissions'] : [];
         $pagePerms = isset($input['page_permissions']) && is_array($input['page_permissions']) ? $input['page_permissions'] : [];

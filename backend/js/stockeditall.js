@@ -3325,7 +3325,14 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
     }
     // 验证数量：进货和出货不能同时为 0
     if (formData.in_quantity <= 0 && formData.out_quantity <= 0) {
-        const errorMsg = '进货或出货数量必须大于 0';
+        const errorMsg = '进货或出货数量必须至少填入一项大于 0';
+        if (!skipTableRefresh) showAlert(errorMsg, 'error');
+        throw new Error(errorMsg);
+    }
+
+    // 验证单价：不能为空且必须大于0
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+        const errorMsg = '单价不能为空且必须大于0';
         if (!skipTableRefresh) showAlert(errorMsg, 'error');
         throw new Error(errorMsg);
     }
@@ -3543,7 +3550,13 @@ async function saveNewRecord() {
     }
     // 验证数量：进货和出货不能同时为 0
     if (formData.in_quantity <= 0 && formData.out_quantity <= 0) {
-        showAlert('进货或出货数量必须大于 0', 'error');
+        showAlert('进货或出货数量必须至少填入一项大于 0', 'error');
+        return;
+    }
+
+    // 验证单价：不能为空且必须大于0
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+        showAlert('单价不能为空且必须大于0', 'error');
         return;
     }
 
@@ -3986,6 +3999,15 @@ async function saveRecord(id) {
         return;
     }
 
+    // 验证数量：进货和出货不能同时为 0
+    const inQty = parseFloat(record.in_quantity) || 0;
+    const outQty = parseFloat(record.out_quantity) || 0;
+    if (inQty <= 0 && outQty <= 0) {
+        showAlert('进货或出货数量必须至少填入一项大于 0', 'error');
+        return;
+    }
+
+    // 验证单价：不能为空且必须大于0
     if (!record.price || parseFloat(record.price) <= 0) {
         showAlert('单价不能为空且必须大于0', 'error');
         return;
