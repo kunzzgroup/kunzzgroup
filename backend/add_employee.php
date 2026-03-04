@@ -56,8 +56,8 @@ require_once 'session_check.php';
             align-items: center;
             gap: 8px;
             padding: 8px 16px;
-            background: #f97316ff;
-            color: #ffffffff;
+            background: #f97316;
+            color: #ffffff;
             border: 1px solid #e5e7eb;
             border-radius: 6px;
             font-size: 14px;
@@ -66,7 +66,11 @@ require_once 'session_check.php';
             text-decoration: none;
             transition: all 0.2s;
         }
-        .back-btn:hover { background: #f9731633; color: #f97316ff; }
+        .back-btn:hover { 
+            background: #f9731633;
+            color: #f97316;
+            border-color: #9ca3af;
+        }
 
         /* Wizard Progress Bar */
         .wizard-progress {
@@ -164,11 +168,11 @@ require_once 'session_check.php';
             margin-bottom: 0;
         }
         .form-section-header {
-            background: #f97316ff;
+            background: #f97316;
             padding: 16px 20px;
             font-size: 16px;
             font-weight: 600;
-            color: #ffffffff;
+            color: #ffffff;
             border-bottom: 1px solid #e5e7eb;
         }
         .form-section-content {
@@ -326,12 +330,12 @@ require_once 'session_check.php';
         
         .btn-cancel {
             background: #f97316;
-            color: #ffffffff;
+            color: #ffffff;
             border-color: #d1d5db;
         }
         .btn-cancel:hover { 
             background: #f9731633;
-            color: #f97316ff;
+            color: #f97316;
             border-color: #9ca3af;
         }
 
