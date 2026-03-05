@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!headers_sent()) {
     header("Cache-Control: max-age=0, no-cache, no-store, must-revalidate, proxy-revalidate");
     header("Pragma: no-cache");
@@ -19,17 +19,12 @@ require_once 'session_check.php';
     <link rel="stylesheet" href="css/generatecode.css?v=<?php echo time(); ?>">
     <title>添加职员 - 职员管理系统</title>
     <style>
-        /* ── Modern User Wizard Layout ── */
-        body {
-            background: #f3f4f6; /* Softer background */
-        }
+        body { background: #f3f4f6; }
 
         .add-employee-page {
             display: flex;
             flex-direction: column;
-            height: calc(100vh - 0px);
-            padding: 0;
-            margin: 0;
+            height: 100vh;
             overflow: hidden;
         }
 
@@ -73,155 +68,60 @@ require_once 'session_check.php';
             transform: translateY(-1px);
         }
 
-        /* Wizard Progress Bar */
-        .wizard-progress {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            padding: 24px 32px;
-            background: #fff;
-            border-bottom: 1px solid #f3f4f6;
-            flex-shrink: 0;
-        }
-        .step-indicator {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #9ca3af;
-            font-weight: 600;
-            font-size: 14px;
-            position: relative;
-        }
-        .step-indicator.active {
-            color: #f97316;
-        }
-        .step-indicator.completed {
-            color: #10b981;
-        }
-        .step-circle {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: #f3f4f6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 13px;
-        }
-        .step-indicator.active .step-circle {
-            background: #f97316;
-            color: #fff;
-        }
-        .step-indicator.completed .step-circle {
-            background: #10b981;
-            color: #fff;
-        }
-        .step-connector {
-            flex-grow: 1;
-            max-width: 80px;
-            height: 2px;
-            background: #e5e7eb;
-        }
-        .step-connector.completed {
-            background: #10b981;
-        }
-
-        /* ── Main Form Area ── */
-        .wizard-container {
+        /* ── Scrollable form area ── */
+        .form-scroll-area {
             flex: 1;
             overflow-y: auto;
-            padding: 32px;
+            padding: 24px 32px;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
         }
         #addUserForm {
             width: 100%;
             max-width: 1050px;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,.05), 0 2px 4px -1px rgba(0,0,0,.03);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            margin: 0;
+            gap: 20px;
+            padding-bottom: 16px;
         }
 
-        .wizard-step {
-            display: none;
-            padding: 32px;
-        }
-        .wizard-step.active {
-            display: block;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
-        /* Cards and Sections inside steps */
+        /* Cards */
         .form-section {
-            margin-bottom: 24px;
             background: #fff;
             border: 1px solid #e5e7eb;
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: hidden;
-        }
-        .form-section:last-child {
-            margin-bottom: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,.04);
         }
         .form-section-header {
             background: #f97316;
-            padding: 16px 20px;
-            font-size: 16px;
+            padding: 13px 20px;
+            font-size: 15px;
             font-weight: 600;
-            color: #ffffff;
-            border-bottom: 1px solid #e5e7eb;
+            color: #fff;
         }
-        .form-section-content {
-            padding: 24px;
-        }
+        .form-section-content { padding: 20px 24px; }
 
-        /* Responsive Grid & Spacing */
-        .form-grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px 24px;
-        }
-        .form-grid-3 {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 16px 24px;
-        }
-        .form-grid-1 {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px;
-        }
-        @media (max-width: 768px) {
-            .form-grid-2, .form-grid-3 {
-                grid-template-columns: 1fr;
-            }
-        }
+        /* Grids */
+        .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 22px; }
+        .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px 22px; }
+        .form-grid-1 { display: grid; grid-template-columns: 1fr; gap: 14px; }
+        .form-row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 22px; }
+        .form-row-1col { display: grid; grid-template-columns: 1fr; gap: 14px; }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-        .form-group label {
-            font-size: 13px;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 6px;
-        }
+        /* Form fields */
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
         .form-group input,
         .form-group select,
         .form-group textarea {
-            padding: 10px 12px;
+            padding: 9px 12px;
             border: 1px solid #d1d5db;
             border-radius: 6px;
             font-size: 14px;
             color: #111827;
             background: #fff;
-            transition: all 0.2s;
+            transition: border-color .2s, box-shadow .2s;
             width: 100%;
             box-sizing: border-box;
         }
@@ -230,119 +130,76 @@ require_once 'session_check.php';
         .form-group textarea:focus {
             outline: none;
             border-color: #f97316;
-            box-shadow: 0 0 0 3px rgba(249,115,22,0.15);
+            box-shadow: 0 0 0 3px rgba(249,115,22,.12);
         }
         .form-group input[type="text"],
         .form-group input[type="email"],
         .form-group input[type="tel"],
         .form-group input[type="date"],
-        .form-group select {
-            height: 40px !important;
-        }
-        .form-group textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
+        .form-group select { height: 40px !important; }
+        .form-group textarea { min-height: 80px; resize: vertical; }
 
-        /* Validation Styles */
+        /* Validation */
         .form-group.has-error input,
-        .form-group.has-error select {
-            border-color: #ef4444;
-            background-color: #fef2f2;
-        }
-        .error-msg {
-            color: #ef4444;
-            font-size: 12px;
-            margin-top: 4px;
-            display: none;
-        }
-        .has-error .error-msg {
-            display: block;
-        }
+        .form-group.has-error select { border-color: #ef4444; background: #fef2f2; }
+        .error-msg { color: #ef4444; font-size: 12px; margin-top: 4px; display: none; }
+        .has-error .error-msg { display: block; }
 
-        /* Permission Section Specifics */
-        .editUserPermLayout {
-            margin: 0 !important;
-            border: none !important;
-        }
-        .editUserPermLayout .form-section-header {
-            display: none; /* Hide duplicate headers since we wrap it in a card */
-        }
-        .editUserPermLayout .form-section-content {
-            padding: 0;
-        }
-        .editUserPermLayout .perm-tree-container {
-            max-height: 400px !important;
-            overflow-y: auto;
-        }
-        .editUserPermLayout .perm-detail-card {
-            max-height: 400px !important;
-            overflow-y: auto;
-        }
+        /* Permission section */
+        .editUserPermLayout { margin: 0 !important; border: none !important; }
+        .editUserPermLayout .form-section-header { display: none; }
+        .editUserPermLayout .form-section-content { padding: 0; }
+        .editUserPermLayout .perm-tree-container { max-height: 420px !important; overflow-y: auto; }
+        .editUserPermLayout .perm-detail-card { max-height: 420px !important; overflow-y: auto; }
 
-        /* ── Action Bar (Sticky) ── */
+        /* ── Sticky action bar at bottom ── */
         .page-action-bar {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: center;
-            padding: 20px 32px;
+            gap: 12px;
+            padding: 14px 32px;
             background: #fff;
             border-top: 1px solid #e5e7eb;
-            position: sticky;
-            bottom: 0;
-            z-index: 20;
-            box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.02);
-            margin-top: auto; /* Push to bottom if content is short */
+            flex-shrink: 0;
+            box-shadow: 0 -2px 6px rgba(0,0,0,.04);
         }
-        .action-left {
-            display: flex;
-            gap: 12px;
-        }
-        .action-right {
-            display: flex;
-            gap: 12px;
-        }
-        .btn-wizard {
-            padding: 10px 24px;
+        .btn-save {
+            padding: 10px 28px;
+            background: #f97316;
+            color: #fff;
+            border: none;
             border-radius: 8px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            border: 1px solid transparent;
-            transition: all 0.2s;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
             gap: 8px;
+            box-shadow: 0 2px 6px rgba(249,115,22,.3);
+            transition: all .2s;
         }
-        .btn-prev {
+        .btn-save:hover { background: #ea6b0a; transform: translateY(-1px); }
+        .btn-back-action {
+            padding: 10px 22px;
             background: #fff;
-            border-color: #d1d5db;
             color: #374151;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background .2s;
         }
-        .btn-prev:hover { background: #f3f4f6; }
-        
-        .btn-next {
-            background: #f97316;
-            color: #fff;
-            box-shadow: 0 2px 4px rgba(249,115,22,0.2);
-        }
-        .btn-next:hover { background: #ea6b0a; transform: translateY(-1px); }
-        
-        .btn-cancel {
-            background: #f97316;
-            color: #fff;
-            box-shadow: 0 2px 4px rgba(249,115,22,0.2);
-        }
-        .btn-cancel:hover { 
-            background: #ea6b0a;
-            color: #fff;
-            transform: translateY(-1px);
-        }
+        .btn-back-action:hover { background: #f3f4f6; }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -354,38 +211,19 @@ require_once 'session_check.php';
             <!-- 顶部标题栏 -->
             <div class="page-header-bar">
                 <a href="generatecode" class="back-btn">
-                    <i class="fas fa-arrow-left"></i> 返回职员列表
+                    <i class="fas fa-arrow-left"></i> 返回
                 </a>
                 <h1><i class="fas fa-user-plus"></i> 添加新职员</h1>
             </div>
 
-            <!-- Wizard Progress Indicator -->
-            <div class="wizard-progress">
-                <div class="step-indicator active" id="indicator-step-1">
-                    <div class="step-circle">1</div>
-                    <span>基本信息</span>
-                </div>
-                <div class="step-connector" id="connector-step-1"></div>
-                <div class="step-indicator" id="indicator-step-2">
-                    <div class="step-circle">2</div>
-                    <span>个人资料</span>
-                </div>
-                <div class="step-connector" id="connector-step-2"></div>
-                <div class="step-indicator" id="indicator-step-3">
-                    <div class="step-circle">3</div>
-                    <span>权限设置</span>
-                </div>
-            </div>
+            <!-- Message -->
+            <div id="messageArea" style="padding: 12px 32px 0;"></div>
 
-            <!-- Message Notification Area -->
-            <div id="messageArea" style="padding: 16px 32px 0;"></div>
+            <!-- Single-page scroll area -->
+            <div class="form-scroll-area">
+            <form id="addUserForm" style="animation: fadeIn .3s ease;">
 
-            <!-- Wizard Content Area -->
-            <div class="wizard-container">
-            <form id="addUserForm">
-
-                <!-- ========== STEP 1: Basic Information & Account Settings ========== -->
-                <div class="wizard-step active" id="step-1">
+                <!-- ── Basic Information ── -->
                     <div class="form-section">
                         <div class="form-section-header">基本信息 Basic Information</div>
                         <div class="form-section-content">
@@ -634,10 +472,9 @@ require_once 'session_check.php';
                         </div>
                     </div>
                 </div>
-                </div> <!-- End of Step 2 -->
 
-                <!-- ========== STEP 3: Bank, Emergency Contacts, & Permissions ========== -->
-                <div class="wizard-step" id="step-3">
+                <!-- ── Permissions ── -->
+
                     <!-- 权限设置区块 -->
                 <!-- 编辑职员专用权限布局 (复用至添加页面) -->
                 <div class="form-section editUserPermLayout" style="margin-top: 20px;">
@@ -889,26 +726,18 @@ require_once 'session_check.php';
                         </div>
                     </div>
                 </div>
-                </div><!-- End of Step 3 -->
-            </form>
-            </div><!-- /wizard-container -->
 
-            <!-- 底部操作按钮 Sticky ActionBar -->
+            </form>
+            </div><!-- /form-scroll-area -->
+
+            <!-- Sticky action bar -->
             <div class="page-action-bar">
-                <div class="action-left">
-                    <a href="generatecode" class="btn-wizard btn-cancel">取消 Cancel</a>
-                </div>
-                <div class="action-right">
-                    <button type="button" class="btn-wizard btn-prev" id="btn-prev" style="display: none;">
-                        <i class="fas fa-arrow-left"></i> 上一步
-                    </button>
-                    <button type="button" class="btn-wizard btn-next" id="btn-next">
-                        下一步 <i class="fas fa-arrow-right"></i>
-                    </button>
-                    <button type="button" class="btn-wizard btn-next" id="btn-save" style="display: none;">
-                        <i class="fas fa-check"></i> 保存职员
-                    </button>
-                </div>
+                <a href="generatecode" class="btn-back-action">
+                    <i class="fas fa-times"></i> 取消
+                </a>
+                <button type="button" id="btn-save" onclick="addNewUserAndRedirect()" class="btn-save">
+                    <i class="fas fa-save"></i> 保存职员
+                </button>
             </div>
 
         </div><!-- /add-employee-page -->
@@ -916,225 +745,82 @@ require_once 'session_check.php';
 
     <script src="js/generatecode.js?v=<?php echo time(); ?>"></script>
     <script>
-        // ── Wizard Logic & Form Validation ──
-        let currentStep = 1;
-        const totalSteps = 3;
-
         document.addEventListener('DOMContentLoaded', function () {
             startSessionRefresh();
 
-            // Initialize position dropdown
+            // Position dropdown
             const accountTypeSelect = document.getElementById('add_account_type');
             if (accountTypeSelect) {
                 accountTypeSelect.addEventListener('change', function () {
                     updatePositionOptions(this.value, 'add_position');
-                    // Remove error state on change
                     this.closest('.form-group').classList.remove('has-error');
                 });
             }
 
-            // Remove error state on input
-            const inputs = document.querySelectorAll('#addUserForm input, #addUserForm select');
-            inputs.forEach(input => {
+            // Remove error on input
+            document.querySelectorAll('#addUserForm input, #addUserForm select').forEach(input => {
                 input.addEventListener('input', function() {
-                    this.closest('.form-group').classList.remove('has-error');
+                    this.closest('.form-group')?.classList.remove('has-error');
                 });
             });
 
-            // Initialize Permission Tree
+            // Init permission tree
             const permContainer = document.querySelector('.editUserPermLayout');
-            if (permContainer) {
-                initPermissionTreeEvents(permContainer);
-            }
-
-            // Wizard Navigation Buttons
-            const btnNext = document.getElementById('btn-next');
-            const btnPrev = document.getElementById('btn-prev');
-            const btnSave = document.getElementById('btn-save');
-
-            btnNext.addEventListener('click', function() {
-                if (validateStep(currentStep)) {
-                    if (currentStep < totalSteps) {
-                        currentStep++;
-                        updateWizardUI();
-                    }
-                }
-            });
-
-            btnPrev.addEventListener('click', function() {
-                if (currentStep > 1) {
-                    currentStep--;
-                    updateWizardUI();
-                }
-            });
-
-            // Save Button Event
-            btnSave.addEventListener('click', async function(e) {
-                e.preventDefault();
-                try {
-                    if (validateStep(currentStep)) {
-                        await addNewUserAndRedirect();
-                    }
-                } catch (err) {
-                    showInlineMessage('内部执行错误: ' + err.message, 'error');
-                    console.error("Save Button Error:", err);
-                }
-            });
+            if (permContainer) initPermissionTreeEvents(permContainer);
         });
 
-        window.addEventListener('beforeunload', function () {
-            stopSessionRefresh();
-        });
-
-        function updateWizardUI() {
-            // Update Steps Display
-            document.querySelectorAll('.wizard-step').forEach(step => step.classList.remove('active'));
-            document.getElementById(`step-${currentStep}`).classList.add('active');
-
-            // Update Progress Indicator
-            for (let i = 1; i <= totalSteps; i++) {
-                const indicator = document.getElementById(`indicator-step-${i}`);
-                const connector = document.getElementById(`connector-step-${i}`);
-                
-                // Get inner text (removing step circle if present) dynamically
-                let titleText = indicator.querySelector('span').innerText;
-
-                if (i < currentStep) {
-                    indicator.classList.remove('active');
-                    indicator.classList.add('completed');
-                    indicator.innerHTML = `<div class="step-circle"><i class="fas fa-check"></i></div><span>${titleText}</span>`;
-                    if (connector) connector.classList.add('completed');
-                } else if (i === currentStep) {
-                    indicator.classList.add('active');
-                    indicator.classList.remove('completed');
-                    indicator.innerHTML = `<div class="step-circle">${i}</div><span>${titleText}</span>`;
-                    if (connector) connector.classList.remove('completed');
-                } else {
-                    indicator.classList.remove('active', 'completed');
-                    indicator.innerHTML = `<div class="step-circle">${i}</div><span>${titleText}</span>`;
-                    if (connector) connector.classList.remove('completed');
-                }
-            }
-
-            // Update Action Buttons
-            const btnPrev = document.getElementById('btn-prev');
-            const btnNext = document.getElementById('btn-next');
-            const btnSave = document.getElementById('btn-save');
-
-            if (currentStep === 1) {
-                btnPrev.style.display = 'none';
-                btnNext.style.display = 'inline-flex';
-                btnSave.style.display = 'none';
-            } else if (currentStep === totalSteps) {
-                btnPrev.style.display = 'inline-flex';
-                btnNext.style.display = 'none';
-                btnSave.style.display = 'inline-flex';
-            } else {
-                btnPrev.style.display = 'inline-flex';
-                btnNext.style.display = 'inline-flex';
-                btnSave.style.display = 'none';
-            }
-            
-            // Scroll to top of wizard container
-            const wizardContainer = document.querySelector('.wizard-container');
-            if (wizardContainer) wizardContainer.scrollTop = 0;
-        }
+        window.addEventListener('beforeunload', stopSessionRefresh);
 
         function showInlineMessage(msg, type = 'error') {
             const area = document.getElementById('messageArea');
-            if (!area) return;
-            
-            const color = type === 'success' ? '#059669' : '#dc2626';
-            const bg = type === 'success' ? '#d1fae5' : '#fee2e2';
-            const border = type === 'success' ? '#a7f3d0' : '#fecaca';
-            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-            
-            area.innerHTML = `
-                <div style="background: ${bg}; color: ${color}; border: 1px solid ${border}; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; font-weight: 500; display: flex; align-items: center; gap: 8px;">
-                    <i class="fas ${icon}"></i> ${msg}
-                </div>
-            `;
-            
-            // Auto hide success messages after a few seconds
-            if (type === 'success') {
-                setTimeout(() => { area.innerHTML = ''; }, 3000);
-            }
-            
-            // Scroll to the message area
-            area.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const color = type === 'success' ? '#065f46' : '#991b1b';
+            const bg    = type === 'success' ? '#d1fae5' : '#fee2e2';
+            const icon  = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            area.innerHTML = `<div style="background:${bg};color:${color};padding:12px 16px;border-radius:8px;font-size:14px;display:flex;align-items:center;gap:8px;">
+                <i class="fas ${icon}"></i> ${msg}</div>`;
+            if (type !== 'success') setTimeout(() => area.innerHTML = '', 5000);
+            area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
-        function validateStep(step) {
-            let isValid = true;
-            
-            // Clear previous errors on validation
-            document.getElementById('messageArea').innerHTML = '';
-            
-            if (step === 1) {
-                const username = document.getElementById('add_username');
-                const usernameCn = document.getElementById('add_username_cn');
-                const email = document.getElementById('add_email');
-                const accountType = document.getElementById('add_account_type');
-
-                // Validate Username (English)
-                if (!username.value.trim() || !validateField('username', username.value.trim())) {
-                    username.closest('.form-group').classList.add('has-error');
-                    isValid = false;
-                }
-                
-                // Validate Username (Chinese) if provided
-                if (usernameCn.value.trim() && !validateField('username_cn', usernameCn.value.trim())) {
-                    usernameCn.closest('.form-group').classList.add('has-error');
-                    isValid = false;
-                }
-
-                // Validate Email
-                if (!email.value.trim() || !validateField('email', email.value.trim())) {
-                    email.closest('.form-group').classList.add('has-error');
-                    isValid = false;
-                }
-                
-                // Validate Account Type
-                if (!accountType.value) {
-                    accountType.closest('.form-group').classList.add('has-error');
-                    isValid = false;
-                }
-            }
-            
-            if (!isValid) {
-                showInlineMessage('请修正表单中的错误。', 'error');
-            }
-            
-            return isValid;
-        }
-
-        // Add New User API call logic
         async function addNewUserAndRedirect() {
             const formData = new FormData(document.getElementById('addUserForm'));
             const userData = {};
+            for (let [key, value] of formData.entries()) userData[key] = value.trim();
 
-            for (let [key, value] of formData.entries()) {
-                userData[key] = value.trim();
+            // Validate required fields
+            let hasError = false;
+            if (!userData.username || userData.username.split(/\s+/).filter(w=>w).length < 2) {
+                document.getElementById('add_username').closest('.form-group').classList.add('has-error');
+                hasError = true;
             }
-
-            // Extract Permissions
-            const checkedBoxes = Array.from(document.querySelectorAll('.editUserPermLayout .perm-l1-check, .editUserPermLayout .perm-l2-check, .editUserPermLayout .perm-stock-system, .editUserPermLayout .perm-stock-view, .editUserPermLayout .perm-upload-system, .editUserPermLayout .perm-upload-type, .editUserPermLayout .perm-page-schedule, .editUserPermLayout .perm-page-blueprint'))
-                .filter(cb => cb.checked && !cb.disabled);
-
-            if (checkedBoxes.length === 0) {
-                const warningDiv = document.querySelector('.perm-warning');
-                if (warningDiv) warningDiv.style.display = 'block';
-                showInlineMessage('请至少选择一项用户权限', 'error');
+            if (!userData.email) {
+                document.getElementById('add_email').closest('.form-group').classList.add('has-error');
+                hasError = true;
+            }
+            if (!userData.account_type) {
+                document.getElementById('add_account_type').closest('.form-group').classList.add('has-error');
+                hasError = true;
+            }
+            if (hasError) {
+                showInlineMessage('请填写所有必填项（*）', 'error');
                 return;
             }
 
+            // Check permissions
             const permContainer = document.querySelector('.editUserPermLayout');
             const { perms, submenuPermissions, pagePermissions, brandPermissions, reportPermissions, restaurantPermissions } = extractPermissionsData(permContainer);
+            const checkedAny = document.querySelectorAll('.editUserPermLayout .perm-l1-check:checked, .editUserPermLayout .perm-l2-check:checked').length;
+            if (checkedAny === 0) {
+                const warn = document.querySelector('.perm-warning');
+                if (warn) warn.style.display = 'block';
+                showInlineMessage('请至少选择一项权限', 'error');
+                warn?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
 
-            // loading state
             const submitBtn = document.getElementById('btn-save');
             const originalHTML = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<div class="loading"></div>保存中...';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
             submitBtn.disabled = true;
 
             try {
@@ -1153,31 +839,30 @@ require_once 'session_check.php';
                     })
                 });
 
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const result = await response.json();
 
                 if (result.success) {
-                    showInlineMessage('员工添加成功！正在返回列表...', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'generatecode';
-                    }, 1000);
+                    let msg = `职员 "${result.data?.username || userData.username}" 添加成功！`;
+                    if (result.data?.email_sent) {
+                        msg += ` 登录信息已发送至 ${result.data.email}`;
+                    } else {
+                        msg += ` 临时密码：${result.data?.default_password || ''}`;
+                    }
+                    showInlineMessage(msg, 'success');
+                    setTimeout(() => { window.location.href = 'generatecode'; }, 1500);
                 } else {
                     showInlineMessage(result.message || '添加失败，请重试！', 'error');
-                    if (submitBtn) {
-                        submitBtn.innerHTML = originalHTML;
-                        submitBtn.disabled = false;
-                    }
-                }
-            } catch (error) {
-                showInlineMessage(`添加失败，网络错误 或 API异常：${error.message}`, 'error');
-                console.error("Fetch Error: ", error);
-                if (submitBtn) {
                     submitBtn.innerHTML = originalHTML;
                     submitBtn.disabled = false;
                 }
+            } catch (error) {
+                showInlineMessage(`网络错误：${error.message}`, 'error');
+                submitBtn.innerHTML = originalHTML;
+                submitBtn.disabled = false;
             }
         }
     </script>
 </body>
 </html>
+
