@@ -382,11 +382,7 @@ require_once 'session_check.php';
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- 银行信息区块 -->
-                <div class="form-section">
-                    <div class="form-section-header" style="text-transform: uppercase;">银行信息 BANK INFORMATION</div>
+                     <div class="form-section-header" style="text-transform: uppercase;">银行信息 BANK INFORMATION</div>
                     <div class="form-section-content">
                         <div class="form-grid-3">
                             <div class="form-group">
@@ -424,6 +420,8 @@ require_once 'session_check.php';
                         </div>
                     </div>
                 </div>
+
+                
                 </div> <!-- /Left Column -->
 
                 <div class="form-col">
