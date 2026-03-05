@@ -58,18 +58,19 @@ require_once 'session_check.php';
             padding: 8px 16px;
             background: #f97316;
             color: #ffffff;
-            border: 1px solid #e5e7eb;
+            border: 1px solid transparent;
             border-radius: 6px;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
             text-decoration: none;
             transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(249,115,22,0.2);
         }
         .back-btn:hover { 
-            background: #f9731633;
-            color: #f97316;
-            border-color: #9ca3af;
+            background: #ea6b0a;
+            color: #fff;
+            transform: translateY(-1px);
         }
 
         /* Wizard Progress Bar */
@@ -330,13 +331,13 @@ require_once 'session_check.php';
         
         .btn-cancel {
             background: #f97316;
-            color: #ffffff;
-            border-color: #d1d5db;
+            color: #fff;
+            box-shadow: 0 2px 4px rgba(249,115,22,0.2);
         }
         .btn-cancel:hover { 
-            background: #f9731633;
-            color: #f97316;
-            border-color: #9ca3af;
+            background: #ea6b0a;
+            color: #fff;
+            transform: translateY(-1px);
         }
 
         @keyframes fadeIn {
