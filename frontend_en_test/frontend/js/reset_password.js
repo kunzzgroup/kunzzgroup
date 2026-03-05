@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         // Check formats
-        const isValidEmail = /^[^@\s]+@gmail\.com$/.test(email);
+        const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         const isValidPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(password);
         const passwordsMatch = password === confirmPassword && confirmPassword !== "";
 
