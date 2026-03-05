@@ -71,11 +71,11 @@ require_once 'session_check.php';
         /* ── Scrollable form area ── */
         .form-scroll-area {
             flex: 1;
-            overflow-y: auto;
+            overflow: hidden; /* 不在外层滚动，内层各自滚动 */
             padding: 10px 14px;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
+            align-items: stretch;
         }
         #addUserForm {
             width: 100%;
@@ -83,20 +83,22 @@ require_once 'session_check.php';
             display: grid;
             grid-template-columns: 35fr 55fr;
             gap: 10px;
-            padding-bottom: 16px;
-            align-items: start;
+            height: 100%; /* 填满整个form-scroll-area */
         }
         @media (max-width: 1200px) {
             #addUserForm {
                 grid-template-columns: 1fr;
                 max-width: 1050px;
+                height: auto;
             }
         }
         .form-col {
             display: flex;
             flex-direction: column;
             gap: 0px;
-            align-self: start; /* 防止列高度因内容变化而拉伸影响另一列 */
+            overflow-y: auto; /* 每列内部独立滚动 */
+            padding-bottom: 16px;
+            min-height: 0;
         }
 
         /* Cards */
