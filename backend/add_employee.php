@@ -86,13 +86,6 @@ require_once 'session_check.php';
             align-items: stretch; /* 两列等高 */
             height: 100%;
         }
-        @media (max-width: 1200px) {
-            #addUserForm {
-                grid-template-columns: 1fr;
-                max-width: 1050px;
-                height: auto;
-            }
-        }
         .form-col {
             display: flex;
             flex-direction: column;
@@ -108,6 +101,76 @@ require_once 'session_check.php';
             flex: 1;
             min-height: 0;
             overflow: hidden;
+        }
+
+        /* ── 平板视图 (<1200px) ── */
+        @media (max-width: 1200px) {
+            .form-scroll-area {
+                overflow-y: auto; /* 恢复基于页面的滚动 */
+                align-items: flex-start;
+            }
+            #addUserForm {
+                grid-template-columns: 1fr; /* 堆叠成上下布局 */
+                max-width: 100%;
+                height: auto;
+            }
+            .form-col {
+                height: auto;
+                overflow: visible; /* 关闭内部滚动 */
+                padding-bottom: 0px;
+            }
+            .form-col > .form-section:last-child,
+            .form-col > .editUserPermLayout:last-child {
+                flex: none;
+                overflow: visible;
+            }
+        }
+
+        /* ── 手机视图 (<768px) ── */
+        @media (max-width: 768px) {
+            .page-header-bar {
+                padding: 12px 14px;
+            }
+            .page-header-bar h1 {
+                font-size: 16px;
+            }
+            .back-btn {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+            .form-scroll-area {
+                padding: 10px;
+            }
+            .form-grid-3, .form-grid-2, .form-row-2col {
+                grid-template-columns: 1fr; /* 手机端全部退化为单列 */
+                gap: 12px;
+            }
+            .form-section-content {
+                padding: 14px 14px;
+            }
+            .form-section-header, .form-section-header-bank {
+                padding: 10px 14px;
+                font-size: 13px;
+            }
+            .page-action-bar {
+                padding: 12px 16px;
+                flex-direction: column-reverse; /* 上下堆叠，保存按钮在上面 */
+                gap: 8px;
+            }
+            .btn-save, .btn-back-action {
+                width: 100%;
+                justify-content: center;
+                padding: 12px;
+                font-size: 15px;
+            }
+            #toast-container {
+                bottom: 110px;
+                left: 50%;
+                right: auto;
+                transform: translateX(-50%);
+                align-items: center;
+                width: 90vw;
+            }
         }
 
         /* Cards */
