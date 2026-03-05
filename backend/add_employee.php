@@ -206,8 +206,9 @@ require_once 'session_check.php';
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
-    <div class="container">
+    <div class="container" style="padding:0; height:100vh; max-width:100%;">
         <div class="add-employee-page">
+
 
             <!-- 顶部标题栏 -->
             <div class="page-header-bar">
