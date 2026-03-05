@@ -159,9 +159,6 @@ require_once 'session_check.php';
         .has-error .error-msg { display: block; }
 
         /* Permission section */
-        .editUserPermLayout { margin: 0 !important; border: none !important; }
-        .editUserPermLayout .form-section-header { display: none; }
-        .editUserPermLayout .form-section-content { padding: 0; }
         .editUserPermLayout .perm-tree-container { max-height: 420px !important; overflow-y: auto; }
         .editUserPermLayout .perm-detail-card { max-height: 420px !important; overflow-y: auto; }
 
