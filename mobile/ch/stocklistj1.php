@@ -7,6 +7,9 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// 记录用户当前访问的页面，以便下次登录时自动跳转
+setcookie('last_page', basename($_SERVER['PHP_SELF']), time() + 86400 * 30, "/");
+
 // 获取当前登录用户的用户名（优先昵称，其次中文名，最后英文名）
 $currentUsername = '';
 if (isset($_SESSION['user_id'])) {

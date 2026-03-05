@@ -11,6 +11,16 @@ session_start();
 // 超时时间（秒）
 define('SESSION_TIMEOUT', 60);
 
+// 获取当前 URL 路径判断重定向
+$current_uri = $_SERVER['REQUEST_URI'] ?? '';
+$redirect_path = '../frontend/login.html'; // Default (backend or j1)
+
+if (strpos($current_uri, '/j2/') !== false) {
+    $redirect_path = '../../j2/frontend/login.html';
+} elseif (strpos($current_uri, '/j3/') !== false) {
+    $redirect_path = '../../j3/frontend/login.html';
+}
+
 // 如果 session 存在，检查是否过期
 if (isset($_SESSION['user_id'])) {
 
@@ -32,7 +42,7 @@ if (isset($_SESSION['user_id'])) {
         setcookie('remember_token', '', time() - 60, "/");
 
         // 跳转登录页
-        header("Location: ../frontend/login.html");
+        header("Location: " . $redirect_path);
         exit();
     }
 
@@ -53,7 +63,7 @@ if (isset($_SESSION['user_id'])) {
     $_SESSION['last_activity'] = time();
 } else {
     // 没有 session，也没有有效 cookie
-    header("Location: ../frontend/login.html");
+    header("Location: " . $redirect_path);
     exit();
 }
 

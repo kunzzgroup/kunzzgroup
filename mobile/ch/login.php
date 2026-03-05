@@ -63,7 +63,20 @@ if ($result->num_rows === 1) {
             setcookie('remember_token', '', time() - 3600, "/");
         }
 
-        header("Location: stocklistj1.php");
+        // 检查用户所属系统/权限作为回退方案
+        $default_page = '../backend/dashboard.php'; // 初始回退 (全局面板)
+
+        // 尝试根据账户类型或用户所属系统设置更合理的默认页
+        if (isset($user['target_system']) && $user['target_system'] === 'j1') {
+            $default_page = 'stocklistj1.php';
+        } elseif (isset($user['target_system']) && $user['target_system'] === 'j2') {
+            $default_page = 'stocklistj2.php';
+        } elseif (isset($user['target_system']) && $user['target_system'] === 'j3') {
+            $default_page = 'stocklistj3.php';
+        }
+
+        $last_page = $_COOKIE['last_page'] ?? $default_page;
+        header("Location: " . $last_page);
         exit();
 
     } else {
