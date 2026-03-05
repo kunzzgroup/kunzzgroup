@@ -155,6 +155,12 @@ require_once 'session_check.php';
         /* Permission section */
         .editUserPermLayout .perm-tree-container { max-height: 420px !important; overflow-y: auto; }
         .editUserPermLayout .perm-detail-card { max-height: 420px !important; overflow-y: auto; }
+        
+        /* Validation */
+        .form-group.has-error input,
+        .form-group.has-error select { border-color: #ef4444; background: #fef2f2; }
+        .error-msg { color: #ef4444; font-size: 12px; margin-top: 4px; display: none; }
+        .has-error .error-msg { display: block; }
 
         /* ── Sticky action bar at bottom ── */
         .page-action-bar {
