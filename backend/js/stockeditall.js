@@ -2530,7 +2530,7 @@ function renderStockTable() {
                 // 只有纯出库时才加载价格选项（带库存检查）
                 if (outQty > 0 && inQty === 0) {
                     const codeNum = record.code_number ? String(record.code_number).trim() : '';
-                    loadProductPricesWithStock(record.product_name, `price-select-${record.id}`, (record.price_raw ?? record.price), outQty, codeNum);
+                    loadProductPricesWithStock(record.product_name, `price-select-${record.id}`, (record.price_raw ?? record.price), outQty, codeNum, outQty);
                 }
             }
         });
