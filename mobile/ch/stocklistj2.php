@@ -7,9 +7,6 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// 记录用户当前访问的页面，以便下次登录时自动跳转
-setcookie('last_page', basename($_SERVER['PHP_SELF']), time() + 86400 * 30, "/");
-
 // 获取当前登录用户的用户名（优先昵称，其次中文名，最后英文名）
 $currentUsername = '';
 if (isset($_SESSION['user_id'])) {
@@ -49,7 +46,7 @@ if (isset($_SESSION['user_id'])) {
 <body>
     <div class="stocklist-page">
         <header class="page-header">
-            <a class="logout-button" href="../../j2/frontend/login.html" aria-label="退出登录">
+            <a class="logout-button" href="login.html" aria-label="退出登录">
                 <img src="../images/icons/logout.svg" alt="" aria-hidden="true">
             </a>
             <h1>库存列表 (J2)</h1>
