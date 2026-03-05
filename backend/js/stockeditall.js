@@ -3407,8 +3407,8 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
         }
     }
 
-    // 检查库存是否足够
-    if (formData.out_quantity > 0) {
+    // 检查库存是否足够（RM0单价货品直接允许出货）
+    if (formData.out_quantity > 0 && parseFloat(formData.price) > 0) {
         const stockCheck = await checkProductStock(formData.product_name, formData.out_quantity, formData.price);
         if (!stockCheck.sufficient) {
             let errorMsg = `库存不足！当前可用库存: ${stockCheck.availableStock}，请求出库: ${stockCheck.requested}`;
@@ -3554,14 +3554,9 @@ async function saveNewRecord() {
         return;
     }
 
-    // 验证单价：不能为空且不能小于0
+    // 验证单价：不能为空且不能小于0（允许RM0）
     if (formData.price === '' || formData.price === null || formData.price === undefined || parseFloat(formData.price) < 0) {
         showAlert('单价不能为空且不能小于0', 'error');
-        return;
-    }
-
-    if (!formData.price || parseFloat(formData.price) <= 0) {
-        showAlert('单价不能为空且必须大于0', 'error');
         return;
     }
 
@@ -3588,7 +3583,7 @@ async function saveNewRecord() {
         }
     }
 
-    // 检查库存是否足够
+    // 检查库存是否足够（RM0单价货品直接允许出货）
     if (formData.out_quantity > 0) {
         // 添加target验证
         const targetSystem = document.getElementById('add-target').value;
@@ -3598,8 +3593,8 @@ async function saveNewRecord() {
         }
         formData.target_system = targetSystem;
 
-        // 现有库存检查代码
-        const stockCheck = await checkProductStock(formData.product_name, formData.out_quantity, formData.price);
+        // 现有库存检查代码（RM0直接跳过库存检查）
+        const stockCheck = parseFloat(formData.price) > 0 ? await checkProductStock(formData.product_name, formData.out_quantity, formData.price) : { sufficient: true, availableStock: 0, currentStock: 0 };
         if (!stockCheck.sufficient) {
             let errorMsg = `库存不足！当前可用库存: ${stockCheck.availableStock}，请求出库: ${formData.out_quantity}`;
             if (['j1', 'j2', 'j3'].includes(currentStockType)) {
@@ -4031,8 +4026,8 @@ async function saveRecord(id) {
         }
     }
 
-    // 检查库存是否足够
-    if (parseFloat(record.out_quantity) > 0) {
+    // 检查库存是否足够（RM0单价货品直接允许出货）
+    if (parseFloat(record.out_quantity) > 0 && parseFloat(record.price) > 0) {
         const stockCheck = await checkProductStock(record.product_name, record.out_quantity, record.price);
 
         // 尝试从原始编辑数据中恢复原有出库数量
