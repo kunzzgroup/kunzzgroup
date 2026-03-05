@@ -152,12 +152,6 @@ require_once 'session_check.php';
         .form-group select { height: 36px !important; }
         .form-group textarea { min-height: 35px; resize: vertical; }
 
-        /* Validation */
-        .form-group.has-error input,
-        .form-group.has-error select { border-color: #ef4444; background: #fef2f2; }
-        .error-msg { color: #ef4444; font-size: 12px; margin-top: 4px; display: none; }
-        .has-error .error-msg { display: block; }
-
         /* Permission section */
         .editUserPermLayout .perm-tree-container { max-height: 420px !important; overflow-y: auto; }
         .editUserPermLayout .perm-detail-card { max-height: 420px !important; overflow-y: auto; }
@@ -474,7 +468,7 @@ require_once 'session_check.php';
 
                     <!-- 权限设置区块 -->
                 <!-- 编辑职员专用权限布局 (复用至添加页面) -->
-                <div class="form-section">
+                <div class="form-section editUserPermLayout" style="margin-top: 20px;">
                     <div class="form-section-header" style="text-transform: uppercase;">权限管理 PERMISSION MANAGEMENT</div>
                     <div class="form-section-content">
                         <!-- 权限配置布局 (维持双列) -->
