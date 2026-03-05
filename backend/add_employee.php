@@ -72,7 +72,7 @@ require_once 'session_check.php';
         .form-scroll-area {
             flex: 1;
             overflow-y: auto;
-            padding: 20px 24px;
+            padding: 10px 14px;
             display: flex;
             justify-content: center;
             align-items: flex-start;
@@ -81,8 +81,8 @@ require_once 'session_check.php';
             width: 100%;
             max-width: 1600px;
             display: grid;
-            grid-template-columns: 65fr 35fr;
-            gap: 24px;
+            grid-template-columns: 40fr 55fr;
+            gap: 10px;
             padding-bottom: 16px;
             align-items: start;
         }
