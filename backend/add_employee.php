@@ -347,13 +347,13 @@ require_once 'session_check.php';
     </style>
 </head>
 <body>
-    <?php include 'sidebar.php'; ?>
+    <?php include 'sidebar'; ?>
     <div class="container">
         <div class="add-employee-page">
 
             <!-- 顶部标题栏 -->
             <div class="page-header-bar">
-                <a href="generatecode.php" class="back-btn">
+                <a href="generatecode" class="back-btn">
                     <i class="fas fa-arrow-left"></i> 返回职员列表
                 </a>
                 <h1><i class="fas fa-user-plus"></i> 添加新职员</h1>
@@ -896,7 +896,7 @@ require_once 'session_check.php';
             <!-- 底部操作按钮 Sticky ActionBar -->
             <div class="page-action-bar">
                 <div class="action-left">
-                    <a href="generatecode.php" class="btn-wizard btn-cancel">取消 Cancel</a>
+                    <a href="generatecode" class="btn-wizard btn-cancel">取消 Cancel</a>
                 </div>
                 <div class="action-right">
                     <button type="button" class="btn-wizard btn-prev" id="btn-prev" style="display: none;">
@@ -1160,7 +1160,7 @@ require_once 'session_check.php';
                 if (result.success) {
                     showInlineMessage('员工添加成功！正在返回列表...', 'success');
                     setTimeout(() => {
-                        window.location.href = 'generatecode.php';
+                        window.location.href = 'generatecode';
                     }, 1000);
                 } else {
                     showInlineMessage(result.message || '添加失败，请重试！', 'error');
