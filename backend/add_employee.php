@@ -883,6 +883,10 @@ require_once 'session_check.php';
         function showInlineMessage(msg, type = 'error') {
             const container = document.getElementById('toast-container');
             if (!container) return;
+            
+            // 清除之前的 toast，限制最多只显示一个
+            container.innerHTML = '';
+            
             const icon = type === 'success' ? 'fa-check-circle'
                        : type === 'warning' ? 'fa-exclamation-triangle'
                        : 'fa-times-circle';
@@ -890,10 +894,15 @@ require_once 'session_check.php';
             toast.className = `toast toast-${type}`;
             toast.innerHTML = `<i class="fas ${icon}"></i><span>${msg}</span>`;
             container.appendChild(toast);
+            
             const delay = type === 'success' ? 3000 : 4500;
             setTimeout(() => {
-                toast.classList.add('toast-out');
-                setTimeout(() => toast.remove(), 320);
+                if (toast.parentNode === container) {
+                    toast.classList.add('toast-out');
+                    setTimeout(() => {
+                        if (toast.parentNode === container) toast.remove();
+                    }, 320);
+                }
             }, delay);
         }
 
