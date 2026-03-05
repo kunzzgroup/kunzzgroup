@@ -268,42 +268,7 @@ require_once 'session_check.php';
                         </div>
                     </div>
 
-                    <!-- Moved Account Settings to Step 1 -->
-                    <div class="form-section">
-                        <div class="form-section-header">账号设置 Account Settings</div>
-                        <div class="form-section-content">
-                            <div class="form-grid-2">
-                                <div class="form-group" id="group-add-account-type">
-                                    <label for="add_account_type">账号类型 Account Type *</label>
-                                    <select id="add_account_type" name="account_type" required>
-                                        <option value="">请选择账号类型</option>
-                                        <option value="special">特殊 (Special)</option>
-                                        <option value="hr">人事部 (HR)</option>
-                                        <option value="account">会计部 (Accountant)</option>
-                                        <option value="media">媒体制作部 (Media Production)</option>
-                                        <option value="marketing">推广部 (Marketing)</option>
-                                        <option value="support">支援部 (Support)</option>
-                                        <option value="production">生产部 (Production)</option>
-                                        <option value="r&d">研发部 (R&D)</option>
-                                        <option value="technical">科技部 (Technical)</option>
-                                        <option value="design">设计部 (Design)</option>
-                                        <option value="operation">Operation</option>
-                                        <option value="service">前台 (Service)</option>
-                                        <option value="sushi">Sushi Bar</option>
-                                        <option value="kitchen">厨房 (Kitchen)</option>
-                                    </select>
-                                    <div class="error-msg">请选择账号类型</div>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="add_position">职位 Position</label>
-                                    <select id="add_position" name="position">
-                                        <option value="">请先选择账号类型</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
 
                 <!-- ========== STEP 2: Personal Details ========== -->
                     <div class="form-section">
@@ -423,9 +388,7 @@ require_once 'session_check.php';
                         </div>
                     </div>
                 </div>
-                </div> <!-- /Left Column -->
 
-                <div class="form-col">
                 <!-- 银行信息区块 -->
                 <div class="form-section">
                     <div class="form-section-header">银行信息 Bank Information</div>
@@ -486,6 +449,45 @@ require_once 'session_check.php';
                         </div>
                     </div>
                 </div>
+                </div> <!-- /Left Column -->
+
+                <div class="form-col">
+                    <!-- Moved Account Settings to Step 1 -->
+                    <div class="form-section">
+                        <div class="form-section-header">账号设置 Account Settings</div>
+                        <div class="form-section-content">
+                            <div class="form-grid-2">
+                                <div class="form-group" id="group-add-account-type">
+                                    <label for="add_account_type">账号类型 Account Type *</label>
+                                    <select id="add_account_type" name="account_type" required>
+                                        <option value="">请选择账号类型</option>
+                                        <option value="special">特殊 (Special)</option>
+                                        <option value="hr">人事部 (HR)</option>
+                                        <option value="account">会计部 (Accountant)</option>
+                                        <option value="media">媒体制作部 (Media Production)</option>
+                                        <option value="marketing">推广部 (Marketing)</option>
+                                        <option value="support">支援部 (Support)</option>
+                                        <option value="production">生产部 (Production)</option>
+                                        <option value="r&d">研发部 (R&D)</option>
+                                        <option value="technical">科技部 (Technical)</option>
+                                        <option value="design">设计部 (Design)</option>
+                                        <option value="operation">Operation</option>
+                                        <option value="service">前台 (Service)</option>
+                                        <option value="sushi">Sushi Bar</option>
+                                        <option value="kitchen">厨房 (Kitchen)</option>
+                                    </select>
+                                    <div class="error-msg">请选择账号类型</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="add_position">职位 Position</label>
+                                    <select id="add_position" name="position">
+                                        <option value="">请先选择账号类型</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                 <!-- ── Permissions ── -->
 
