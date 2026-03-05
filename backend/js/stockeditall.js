@@ -4031,78 +4031,80 @@ async function saveRecord(id) {
         }
     }
 
-    // 检查库存是否足够
-    if (parseFloat(record.out_quantity) > 0) {
-        const stockCheck = await checkProductStock(record.product_name, record.out_quantity, record.price);
+    // 检查库存是否足够（RM0库存允许直接出货）
+    if (parseFloat(record.out_quantity) > 0 && parseFloat(record.price) > 0) {
 
-        // 尝试从原始编辑数据中恢复原有出库数量
-        let oldOutQty = 0;
-        if (originalEditData && originalEditData.has(id)) {
-            const oldData = originalEditData.get(id);
-            // 只有当编辑前后货品名称和价格没变时，原有出库数量才能归还可用库存中
-            if (oldData.product_name === record.product_name && parseFloat(oldData.price || 0) === parseFloat(record.price || 0)) {
-                oldOutQty = parseFloat(oldData.out_quantity) || 0;
-            }
-        }
+        const stockCheck = await checkProductStock(
+            record.product_name,
+            record.out_quantity,
+            record.price
+        );
 
-        // 实际可用库存等同于现有库存加上原本该记录出库的数量
-        const actualAvailable = stockCheck.availableStock + oldOutQty;
-        if (parseFloat(record.out_quantity) > actualAvailable) {
-            let errorMsg = `库存不足！当前可用库存 (修改前): ${actualAvailable}，请求修改为出库: ${record.out_quantity}`;
-            if (['j1', 'j2', 'j3'].includes(currentStockType)) {
-                errorMsg = '库存显示不足';
-            }
-            showAlert(errorMsg, 'error');
+        if (!stockCheck) {
+            showAlert('库存不足，无法出货', 'error');
             return;
         }
+
     }
 
-    try {
-        const result = await apiCall('', {
-            method: 'PUT',
-            body: JSON.stringify(record)
-        });
-
-        if (result.success) {
-            showAlert('记录更新成功', 'success');
-
-            // 保存其他正在编辑的行的输入值，并排除当前保存的行
-            const editingValues = saveEditingRowsInputValues();
-            editingValues.delete(id);
-
-            // 从编辑状态集合及原始数据缓存中移除当前行
-            editingRowIds.delete(id);
-            if (originalEditData) {
-                originalEditData.delete(id);
-            }
-
-            // 使用后端返回的数据更新本地缓存，若无返回则保留现有数据
-            const recordIndex = stockData.findIndex(r => r.id === id);
-            if (recordIndex !== -1) {
-                const currentRecord = stockData[recordIndex] || {};
-                const serverRecord = (result.data && typeof result.data === 'object') ? result.data : {};
-                stockData[recordIndex] = {
-                    ...currentRecord,
-                    ...serverRecord
-                };
-            }
-
-            // 保存所有新创建的行
-            const newRows = saveNewRows();
-
-            // 重新渲染表格并保持统计信息最新
-            renderStockTable();
-            updateStats();
-
-            // 恢复新增行和其他正在编辑的输入值
-            restoreNewRows(newRows);
-            restoreEditingRowsInputValues(editingValues);
-        } else {
-            showAlert('更新失败: ' + (result.message || '未知错误'), 'error');
+    // 实际可用库存等同于现有库存加上原本该记录出库的数量
+    const actualAvailable = stockCheck.availableStock + oldOutQty;
+    if (parseFloat(record.out_quantity) > actualAvailable) {
+        let errorMsg = `库存不足！当前可用库存 (修改前): ${actualAvailable}，请求修改为出库: ${record.out_quantity}`;
+        if (['j1', 'j2', 'j3'].includes(currentStockType)) {
+            errorMsg = '库存显示不足';
         }
-    } catch (error) {
-        showAlert('保存时发生错误', 'error');
+        showAlert(errorMsg, 'error');
+        return;
     }
+}
+
+try {
+    const result = await apiCall('', {
+        method: 'PUT',
+        body: JSON.stringify(record)
+    });
+
+    if (result.success) {
+        showAlert('记录更新成功', 'success');
+
+        // 保存其他正在编辑的行的输入值，并排除当前保存的行
+        const editingValues = saveEditingRowsInputValues();
+        editingValues.delete(id);
+
+        // 从编辑状态集合及原始数据缓存中移除当前行
+        editingRowIds.delete(id);
+        if (originalEditData) {
+            originalEditData.delete(id);
+        }
+
+        // 使用后端返回的数据更新本地缓存，若无返回则保留现有数据
+        const recordIndex = stockData.findIndex(r => r.id === id);
+        if (recordIndex !== -1) {
+            const currentRecord = stockData[recordIndex] || {};
+            const serverRecord = (result.data && typeof result.data === 'object') ? result.data : {};
+            stockData[recordIndex] = {
+                ...currentRecord,
+                ...serverRecord
+            };
+        }
+
+        // 保存所有新创建的行
+        const newRows = saveNewRows();
+
+        // 重新渲染表格并保持统计信息最新
+        renderStockTable();
+        updateStats();
+
+        // 恢复新增行和其他正在编辑的输入值
+        restoreNewRows(newRows);
+        restoreEditingRowsInputValues(editingValues);
+    } else {
+        showAlert('更新失败: ' + (result.message || '未知错误'), 'error');
+    }
+} catch (error) {
+    showAlert('保存时发生错误', 'error');
+}
 }
 
 // 批准记录
