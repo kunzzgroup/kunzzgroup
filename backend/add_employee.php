@@ -83,7 +83,8 @@ require_once 'session_check.php';
             display: grid;
             grid-template-columns: 35fr 55fr;
             gap: 10px;
-            height: 100%; /* 填满整个form-scroll-area */
+            align-items: stretch; /* 两列等高 */
+            height: 100%;
         }
         @media (max-width: 1200px) {
             #addUserForm {
@@ -96,9 +97,17 @@ require_once 'session_check.php';
             display: flex;
             flex-direction: column;
             gap: 0px;
-            overflow-y: auto; /* 每列内部独立滚动 */
+            height: 100%; /* 撑满格子高度，使底部对齐 */
+            overflow-y: auto;
             padding-bottom: 16px;
             min-height: 0;
+        }
+        /* 最后一个section自动填充剩余高度 */
+        .form-col > .form-section:last-child,
+        .form-col > .editUserPermLayout:last-child {
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
         }
 
         /* Cards */
