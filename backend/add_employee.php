@@ -224,6 +224,41 @@ require_once 'session_check.php';
             to   { opacity: 1; transform: translateY(0); }
         }
 
+        /* ── Toast 通知 ── */
+        #toast-container {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            pointer-events: none;
+            width: max-content;
+            max-width: 90vw;
+        }
+        .toast {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 22px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 8px 28px rgba(0,0,0,.18);
+            pointer-events: all;
+            animation: toastIn .3s cubic-bezier(.21,1.02,.73,1) forwards;
+            min-width: 240px;
+        }
+        .toast.toast-error   { background:#fff1f2; color:#9f1239; border:1.5px solid #fca5a5; }
+        .toast.toast-success { background:#f0fdf4; color:#166534; border:1.5px solid #86efac; }
+        .toast.toast-warning { background:#fffbeb; color:#92400e; border:1.5px solid #fcd34d; }
+        .toast.toast-out     { animation: toastOut .3s ease forwards; }
+        @keyframes toastIn  { from{opacity:0;transform:translateY(-18px) scale(.95)} to{opacity:1;transform:translateY(0) scale(1)} }
+        @keyframes toastOut { from{opacity:1;transform:translateY(0) scale(1)}       to{opacity:0;transform:translateY(-12px) scale(.95)} }
+
         /*.bank-form section*/
     .form-section-header-bank {
     padding: clamp(6px, 0.52vw, 10px) clamp(10px, 0.73vw, 14px);
@@ -250,8 +285,8 @@ require_once 'session_check.php';
                 <h1><i class="fas fa-user-plus"></i> 添加新职员</h1>
             </div>
 
-            <!-- Message -->
-            <div id="messageArea" style="padding: 12px 32px 0;"></div>
+            <!-- Message area hidden, toast used instead -->
+            <div id="messageArea" style="display:none;"></div>
 
             <!-- Single-page scroll area -->
             <div class="form-scroll-area">
@@ -753,6 +788,9 @@ require_once 'session_check.php';
         </div><!-- /add-employee-page -->
     </div><!-- /container -->
 
+    <!-- Toast container: position:fixed, 完全脱离文档流 -->
+    <div id="toast-container"></div>
+
     <script src="js/generatecode.js?v=<?php echo time(); ?>"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -782,14 +820,20 @@ require_once 'session_check.php';
         window.addEventListener('beforeunload', stopSessionRefresh);
 
         function showInlineMessage(msg, type = 'error') {
-            const area = document.getElementById('messageArea');
-            const color = type === 'success' ? '#065f46' : '#991b1b';
-            const bg    = type === 'success' ? '#d1fae5' : '#fee2e2';
-            const icon  = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-            area.innerHTML = `<div style="background:${bg};color:${color};padding:12px 16px;border-radius:8px;font-size:14px;display:flex;align-items:center;gap:8px;">
-                <i class="fas ${icon}"></i> ${msg}</div>`;
-            if (type !== 'success') setTimeout(() => area.innerHTML = '', 5000);
-            area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const icon = type === 'success' ? 'fa-check-circle'
+                       : type === 'warning' ? 'fa-exclamation-triangle'
+                       : 'fa-times-circle';
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `<i class="fas ${icon}"></i><span>${msg}</span>`;
+            container.appendChild(toast);
+            const delay = type === 'success' ? 3000 : 4500;
+            setTimeout(() => {
+                toast.classList.add('toast-out');
+                setTimeout(() => toast.remove(), 320);
+            }, delay);
         }
 
         async function addNewUserAndRedirect() {
