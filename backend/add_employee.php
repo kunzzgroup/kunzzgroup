@@ -347,7 +347,7 @@ require_once 'session_check.php';
     </style>
 </head>
 <body>
-    <?php include 'sidebar'; ?>
+    <?php include 'sidebar.php'; ?>
     <div class="container">
         <div class="add-employee-page">
 
