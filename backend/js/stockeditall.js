@@ -3293,7 +3293,14 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
         in_quantity: parseFloat(document.getElementById(`${rowId}-in-qty`) ? document.getElementById(`${rowId}-in-qty`).value : 0) || 0,
         out_quantity: parseFloat(document.getElementById(`${rowId}-out-qty`) ? document.getElementById(`${rowId}-out-qty`).value : 0) || 0,
         specification: document.getElementById(`${rowId}-specification`) ? document.getElementById(`${rowId}-specification`).value : '',
-        price: document.getElementById(`${rowId}-price`) ? document.getElementById(`${rowId}-price`).value : 0,
+        price: (() => {
+            const hiddenInput = document.getElementById(`${rowId}-price`);
+            const priceSelect = document.getElementById(`${rowId}-price-select`);
+            // 当价格下拉列表激活时，hidden input 是空的，需要读 select 的值
+            if (hiddenInput && hiddenInput.value !== '') return hiddenInput.value;
+            if (priceSelect && priceSelect.value !== '' && priceSelect.value !== 'manual') return priceSelect.value;
+            return hiddenInput ? hiddenInput.value : 0;
+        })(),
         receiver: receiverInput ? receiverInput.value : '',
         code_number: codeInput ? codeInput.value : '',
         remark: document.getElementById(`${rowId}-remark`) ? document.getElementById(`${rowId}-remark`).value : '',
