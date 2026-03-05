@@ -314,7 +314,7 @@ require_once 'session_check.php';
                                 
                                 <div class="form-group" id="group-add-email">
                                     <label for="add_email">邮箱 Email *</label>
-                                    <input type="email" id="add_email" name="email" required maxlength="100" placeholder="E.G. USER@EXAMPLE.COM" style="text-transform: uppercase;">
+                                    <input type="email" id="add_email" name="email" required maxlength="100" placeholder="e.g. user@example.com">
                                     <div class="error-msg">请填写有效的邮箱地址</div>
                                 </div>
                                 
