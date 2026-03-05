@@ -138,7 +138,7 @@ require_once 'session_check.php';
         }
         #addUserForm {
             width: 100%;
-            max-width: 900px;
+            max-width: 1050px;
             background: #fff;
             border-radius: 12px;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,.05), 0 2px 4px -1px rgba(0,0,0,.03);
