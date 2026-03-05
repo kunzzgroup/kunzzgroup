@@ -224,40 +224,38 @@ require_once 'session_check.php';
             to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* ── Toast 通知 ── */
+        /* ── Toast 通知 ── 从右下角保存按钮上方弹出 */
         #toast-container {
             position: fixed;
-            top: 24px;
-            left: 50%;
-            transform: translateX(-50%);
+            bottom: 80px;   /* 比 page-action-bar 高一点 */
+            right: 32px;
             z-index: 99999;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
+            flex-direction: column-reverse; /* 新 toast 叠在上方 */
+            align-items: flex-end;
+            gap: 8px;
             pointer-events: none;
-            width: max-content;
-            max-width: 90vw;
+            max-width: 340px;
         }
         .toast {
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            padding: 12px 22px;
+            padding: 12px 20px;
             border-radius: 10px;
-            font-size: 14px;
+            font-size: 13.5px;
             font-weight: 600;
-            box-shadow: 0 8px 28px rgba(0,0,0,.18);
+            box-shadow: 0 6px 24px rgba(0,0,0,.16);
             pointer-events: all;
             animation: toastIn .3s cubic-bezier(.21,1.02,.73,1) forwards;
-            min-width: 240px;
+            width: 100%;
         }
         .toast.toast-error   { background:#fff1f2; color:#9f1239; border:1.5px solid #fca5a5; }
         .toast.toast-success { background:#f0fdf4; color:#166534; border:1.5px solid #86efac; }
         .toast.toast-warning { background:#fffbeb; color:#92400e; border:1.5px solid #fcd34d; }
-        .toast.toast-out     { animation: toastOut .3s ease forwards; }
-        @keyframes toastIn  { from{opacity:0;transform:translateY(-18px) scale(.95)} to{opacity:1;transform:translateY(0) scale(1)} }
-        @keyframes toastOut { from{opacity:1;transform:translateY(0) scale(1)}       to{opacity:0;transform:translateY(-12px) scale(.95)} }
+        .toast.toast-out     { animation: toastOut .25s ease forwards; }
+        @keyframes toastIn  { from{opacity:0;transform:translateY(16px) scale(.96)} to{opacity:1;transform:translateY(0) scale(1)} }
+        @keyframes toastOut { from{opacity:1;transform:translateY(0) scale(1)}      to{opacity:0;transform:translateY(10px) scale(.96)} }
 
         /*.bank-form section*/
     .form-section-header-bank {
@@ -421,7 +419,7 @@ require_once 'session_check.php';
                         <div class="form-grid-1" style="margin-top: 14px;">
                             <div class="form-group">
                                 <label for="add_home_address">地址</label>
-                                <textarea id="add_home_address" name="home_address" rows="2" maxlength="255"></textarea>
+                                <textarea id="add_home_address" name="home_address" rows="2" maxlength="255" style="resize: none;"></textarea>
                             </div>
                         </div>
 
