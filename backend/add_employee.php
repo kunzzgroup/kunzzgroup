@@ -95,7 +95,7 @@ require_once 'session_check.php';
         .form-col {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 0px;
         }
 
         /* Cards */
