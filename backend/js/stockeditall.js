@@ -3560,10 +3560,6 @@ async function saveNewRecord() {
         return;
     }
 
-    if (!formData.price || parseFloat(formData.price) <= 0) {
-        showAlert('单价不能为空且必须大于0', 'error');
-        return;
-    }
 
     if (formData.product_remark_checked && !formData.remark_number) {
         showAlert('货品备注已勾选时，请填写备注编号', 'error');
@@ -5457,6 +5453,20 @@ async function loadNewRowProductPricesWithStock(productName, selectElementId, cu
             selectElement.innerHTML = '<option value="">暂无足够库存的价格</option><option value="manual">手动输入价格</option>';
         }
 
+        // 自动同步初始下拉选单值到隐藏的单价输入框（修复初始选择未更改时验证为空的问题）
+        if (selectElement.value !== 'manual' && selectElement.value !== '') {
+            const rowIdMatch = selectElement.id.match(/^(.+)-price-select$/);
+            if (rowIdMatch) {
+                const priceInput = document.getElementById(`${rowIdMatch[1]}-price`);
+                if (priceInput) {
+                    priceInput.value = selectElement.value;
+                    if (typeof updateNewRowTotal === 'function') {
+                        updateNewRowTotal(priceInput);
+                    }
+                }
+            }
+        }
+
     } catch (error) {
         console.error('加载货品价格失败:', error);
         const selectElement = document.getElementById(selectElementId);
@@ -5566,6 +5576,11 @@ window.loadAddFormProductPricesWithStock = async function (productName, required
                 priceInput.disabled = false;
                 priceInput.style.color = '';
                 priceInput.style.backgroundColor = '';
+
+                // 自动同步初始下拉选单值到单价输入框
+                if (selectElement.value !== 'manual' && selectElement.value !== '') {
+                    priceInput.value = selectElement.value;
+                }
             }
         } else {
             // 没有价格数据，显示库存不足
