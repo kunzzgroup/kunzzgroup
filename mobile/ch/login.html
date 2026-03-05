@@ -20,13 +20,7 @@
       <h2>登入</h2>
       <form action="login.php" method="POST">
         <label for="username" class="input-label">账号</label>
-        <input
-          type="email"
-          name="username"
-          placeholder="请输入邮箱地址"
-          pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$"
-          required
-        >
+        <input type="email" name="username" placeholder="请输入邮箱地址" pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$" required>
         <label for="password" class="input-label">密码</label>
         <div class="password-container">
           <input type="password" id="password" name="password" placeholder="密码"
@@ -56,6 +50,13 @@
   <script src="../app.js?v=2"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
+      // 捕获 URL 中的 redirect 参数并加到 form action 中
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirect = urlParams.get('redirect');
+      if (redirect) {
+        document.querySelector('form').action = 'login.php?redirect=' + encodeURIComponent(redirect);
+      }
+
       const toggle = document.getElementById("toggle-password");
       const password = document.getElementById("password");
       const emailInput = document.querySelector('input[name="username"]');

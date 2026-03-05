@@ -63,7 +63,8 @@ if ($result->num_rows === 1) {
             setcookie('remember_token', '', time() - 3600, "/");
         }
 
-        header("Location: stocklistj1.php");
+        $redirect_page = $_GET['redirect'] ?? 'stocklistj1.php'; // 优先使用 URL 参数
+        header("Location: " . $redirect_page);
         exit();
 
     } else {

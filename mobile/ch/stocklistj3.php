@@ -46,7 +46,7 @@ if (isset($_SESSION['user_id'])) {
 <body>
     <div class="stocklist-page">
         <header class="page-header">
-            <a class="logout-button" href="login.html" aria-label="退出登录">
+            <a class="logout-button" href="login.html?redirect=stocklistj3.php" aria-label="退出登录">
                 <img src="../images/icons/logout.svg" alt="" aria-hidden="true">
             </a>
             <h1>库存列表 (J3)</h1>
