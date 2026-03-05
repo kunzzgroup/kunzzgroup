@@ -214,6 +214,17 @@ require_once 'session_check.php';
             from { opacity: 0; transform: translateY(8px); }
             to   { opacity: 1; transform: translateY(0); }
         }
+
+        /*.bank-form section*/
+    .form-section-header-bank {
+    padding: clamp(6px, 0.52vw, 10px) clamp(10px, 0.73vw, 14px);
+    border-bottom: 1px solid #ffddaa;
+    font-size: clamp(8px, 0.74vw, 14px);
+    font-weight: 700;
+    text-align: left;
+    color: white;
+    background: #f99e00;
+}
     </style>
 </head>
 <body>
@@ -382,7 +393,7 @@ require_once 'session_check.php';
                             </div>
                         </div>
                     </div>
-                     <div class="form-section-header" style="text-transform: uppercase;">银行信息 BANK INFORMATION</div>
+                     <div class="form-section-header-bank" style="text-transform: uppercase;">银行信息 BANK INFORMATION</div>
                     <div class="form-section-content">
                         <div class="form-grid-3">
                             <div class="form-group">
