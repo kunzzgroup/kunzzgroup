@@ -81,7 +81,7 @@ require_once 'session_check.php';
             width: 100%;
             max-width: 1600px;
             display: grid;
-            grid-template-columns: 40fr 55fr;
+            grid-template-columns: 35fr 55fr;
             gap: 10px;
             padding-bottom: 16px;
             align-items: start;
@@ -96,6 +96,7 @@ require_once 'session_check.php';
             display: flex;
             flex-direction: column;
             gap: 0px;
+            align-self: start; /* 防止列高度因内容变化而拉伸影响另一列 */
         }
 
         /* Cards */
