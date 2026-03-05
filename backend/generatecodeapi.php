@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!headers_sent()) {
     header("Cache-Control: max-age=0, no-cache, no-store, must-revalidate, proxy-revalidate");
     header("Pragma: no-cache");
@@ -6,6 +6,11 @@ if (!headers_sent()) {
 }
 ?>
 <?php
+require_once __DIR__ . '/mailer_config.php';
+require_once VENDOR_AUTOLOAD;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
 
 // 设置响应头
 header('Content-Type: application/json; charset=utf-8');
@@ -137,109 +142,76 @@ function generateRandomPassword($length = 10) {
 }
 
 /**
- * 发送欢迎邮件
+ * 发送欢迎邮件（PHPMailer SMTP 版）
  */
 function sendWelcomeEmail($email, $username, $password, $accountType) {
-    $to = $email;
-    $subject = "欢迎加入 Kunzz Group - 您的登录信息";
-    
+
     // 格式化账户类型
     $typeNames = [
-        'special' => '特殊',
-        'hr' => '人事部',
-        'account' => '会计部',
-        'media' => '媒体制作部',
-        'marketing' => '推广部',
-        'support' => '支援部',
+        'special'    => '特殊',
+        'hr'         => '人事部',
+        'account'    => '会计部',
+        'media'      => '媒体制作部',
+        'marketing'  => '推广部',
+        'support'    => '支援部',
         'production' => '生产部',
-        'r&d' => '研发部',
-        'technical' => '科技部',
-        'design' => '设计部',
-        'operation' => 'Operation',
-        'service' => '前台',
-        'sushi' => 'Sushi Bar',
-        'kitchen' => '厨房'
+        'r&d'        => '研发部',
+        'technical'  => '科技部',
+        'design'     => '设计部',
+        'operation'  => 'Operation',
+        'service'    => '前台',
+        'sushi'      => 'Sushi Bar',
+        'kitchen'    => '厨房'
     ];
-    
     $accountTypeName = $typeNames[$accountType] ?? $accountType;
-    
-    $message = "
+
+    // 登录地址（根据实际服务器地址修改）
+    $loginUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
+        . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
+
+    $htmlBody = "
     <html>
     <head>
+        <meta charset='utf-8'>
         <title>欢迎加入 Kunzz Group</title>
         <style>
-            body { 
-                font-family: Arial, sans-serif; 
-                line-height: 1.6; 
-                color: #333; 
-                max-width: 600px; 
-                margin: 0 auto; 
-                padding: 20px; 
-            }
-            .header { 
-                background: #ff5c00; 
-                color: white; 
-                padding: 20px; 
-                text-align: center; 
-                border-radius: 8px 8px 0 0; 
-            }
-            .content { 
-                background: #f9f9f9; 
-                padding: 30px; 
-                border-radius: 0 0 8px 8px; 
-                border: 1px solid #ddd; 
-            }
-            .credentials { 
-                background: white; 
-                padding: 20px; 
-                margin: 20px 0; 
-                border-radius: 5px; 
-                border-left: 4px solid #ff5c00; 
-            }
-            .password { 
-                font-family: monospace; 
-                font-size: 18px; 
-                font-weight: bold; 
-                color: #ff5c00; 
-                background: #f0f0f0; 
-                padding: 10px; 
-                border-radius: 4px; 
-                letter-spacing: 1px; 
-            }
-            .footer { 
-                margin-top: 30px; 
-                padding-top: 20px; 
-                border-top: 1px solid #ddd; 
-                font-size: 12px; 
-                color: #666; 
-            }
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background: #f4f4f4; }
+            .wrapper { max-width: 600px; margin: 30px auto; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+            .header { background: #f97316; color: white; padding: 28px 32px; text-align: center; }
+            .header h1 { margin: 0; font-size: 22px; }
+            .content { padding: 32px; }
+            .credentials { background: #fff8f0; padding: 20px; margin: 20px 0; border-radius: 8px; border-left: 4px solid #f97316; }
+            .credentials p { margin: 8px 0; }
+            .password { font-family: monospace; font-size: 20px; font-weight: bold; color: #f97316; background: #fdebd0; padding: 10px 16px; border-radius: 6px; letter-spacing: 2px; display: inline-block; margin-top: 6px; }
+            .login-btn { display: inline-block; margin-top: 20px; padding: 12px 28px; background: #f97316; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; }
+            .footer { background: #f9f9f9; padding: 20px 32px; font-size: 12px; color: #999; border-top: 1px solid #eee; text-align: center; }
         </style>
     </head>
     <body>
-        <div class='header'>
-            <h1>欢迎加入 Kunzz Group!</h1>
-        </div>
-        <div class='content'>
-            <h2>亲爱的 {$username}，</h2>
-            <p>欢迎您加入我们的团队！您的账户已成功创建。</p>
-            
-            <div class='credentials'>
-                <h3>您的登录信息：</h3>
-                <p><strong>邮箱：</strong> {$email}</p>
-                <p><strong>账户类型：</strong> {$accountTypeName}</p>
-                <p><strong>临时密码：</strong></p>
-                <div class='password'>{$password}</div>
+        <div class='wrapper'>
+            <div class='header'>
+                <h1>🎉 欢迎加入 Kunzz Group!</h1>
             </div>
-            
-            <p><strong style='color: #ff5c00;'>重要提醒：</strong></p>
-            <ul>
-                <li>请妥善保管您的登录信息</li>
-                <li>建议您首次登录后立即修改密码</li>
-                <li>如有任何问题，请联系管理员</li>
-            </ul>
-            
-            <p>感谢您成为我们团队的一员！</p>
-            
+            <div class='content'>
+                <h2>亲爱的 {$username}，</h2>
+                <p>您的账户已成功创建。以下是您的登录信息：</p>
+
+                <div class='credentials'>
+                    <p><strong>📧 邮箱：</strong> {$email}</p>
+                    <p><strong>🏷️ 账户类型：</strong> {$accountTypeName}</p>
+                    <p><strong>🔒 临时密码：</strong></p>
+                    <div class='password'>{$password}</div>
+                </div>
+
+                <a href='{$loginUrl}' class='login-btn'>前往登录系统</a>
+
+                <p style='margin-top:24px;'><strong style='color:#f97316;'>重要提醒：</strong></p>
+                <ul>
+                    <li>请妥善保管您的登录信息，切勿转发此邮件</li>
+                    <li>建议您首次登录后立即修改密码</li>
+                    <li>如有任何问题，请联系管理员</li>
+                </ul>
+            </div>
             <div class='footer'>
                 <p>此邮件由系统自动发送，请勿回复。</p>
                 <p>&copy; " . date('Y') . " Kunzz Group. All rights reserved.</p>
@@ -248,25 +220,41 @@ function sendWelcomeEmail($email, $username, $password, $accountType) {
     </body>
     </html>
     ";
-    
-    // 设置邮件头
-    $headers = array(
-        'MIME-Version' => '1.0',
-        'Content-type' => 'text/html; charset=utf-8',
-        'From' => 'noreply@kunzzgroup.com',
-        'Reply-To' => 'support@kunzzgroup.com',
-        'X-Mailer' => 'PHP/' . phpversion()
-    );
-    
-    // 将数组转换为字符串格式
-    $headerString = '';
-    foreach ($headers as $key => $value) {
-        $headerString .= $key . ': ' . $value . "\r\n";
+
+    try {
+        $mail = new PHPMailer(true);
+
+        // SMTP 设置
+        $mail->isSMTP();
+        $mail->Host       = SMTP_HOST;
+        $mail->SMTPAuth   = true;
+        $mail->Username   = SMTP_USER;
+        $mail->Password   = SMTP_PASS;
+        $mail->SMTPSecure = SMTP_SECURE;
+        $mail->Port       = SMTP_PORT;
+        $mail->CharSet    = 'UTF-8';
+
+        // 发件人 & 收件人
+        $mail->setFrom(SMTP_FROM, SMTP_FROM_NAME);
+        $mail->addAddress($email, $username);
+        $mail->addReplyTo(SMTP_FROM, SMTP_FROM_NAME);
+
+        // 内容
+        $mail->isHTML(true);
+        $mail->Subject = '欢迎加入 Kunzz Group - 您的登录信息';
+        $mail->Body    = $htmlBody;
+        $mail->AltBody = "亲爱的 {$username}，\n\n您的账户已创建。\n邮箱：{$email}\n账户类型：{$accountTypeName}\n临时密码：{$password}\n\n请登录：{$loginUrl}\n\n请勿回复此邮件。";
+
+        $mail->send();
+        return true;
+
+    } catch (Exception $e) {
+        // 记录错误到日志（不暴露给前端）
+        error_log('[sendWelcomeEmail] SMTP Error: ' . $e->getMessage());
+        return false;
     }
-    
-    // 发送邮件
-    return mail($to, $subject, $message, $headerString);
 }
+
 
 /**
  * 生成新的应用代码
