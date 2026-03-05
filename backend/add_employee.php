@@ -227,7 +227,7 @@ require_once 'session_check.php';
             <!-- 顶部标题栏 -->
             <div class="page-header-bar">
                 <a href="generatecode" class="back-btn">
-                    <i class="fas fa-arrow-left"></i> 返回
+                    <i class="fas fa-arrow-left"></i> 返回列表
                 </a>
                 <h1><i class="fas fa-user-plus"></i> 添加新职员</h1>
             </div>
