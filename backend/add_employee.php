@@ -33,7 +33,7 @@ require_once 'session_check.php';
             display: flex;
             align-items: center;
             gap: 14px;
-            padding: 16px 32px;
+            padding: 14px 24px;
             background: #fff;
             border-bottom: 1px solid #e5e7eb;
             flex-shrink: 0;
@@ -72,9 +72,10 @@ require_once 'session_check.php';
         .form-scroll-area {
             flex: 1;
             overflow-y: auto;
-            padding: 24px 32px;
+            padding: 20px 24px;
             display: flex;
             justify-content: center;
+            align-items: flex-start;
         }
         #addUserForm {
             width: 100%;
