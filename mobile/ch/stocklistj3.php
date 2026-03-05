@@ -3,7 +3,8 @@ session_start();
 
 // 检查用户是否登录
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.html');
+    $current_page = basename($_SERVER['PHP_SELF']);
+    header('Location: login.html?redirect=' . urlencode($current_page));
     exit;
 }
 
