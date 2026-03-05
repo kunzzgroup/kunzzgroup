@@ -131,7 +131,7 @@ require_once 'session_check.php';
             padding: 9px 12px;
             border: 1px solid #d1d5db;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 14px;
             color: #111827;
             background: #fff;
             transition: border-color .2s, box-shadow .2s;
@@ -150,7 +150,7 @@ require_once 'session_check.php';
         .form-group input[type="tel"],
         .form-group input[type="date"],
         .form-group select { height: 36px !important; }
-        .form-group textarea { min-height: 40px; resize: vertical; }
+        .form-group textarea { min-height: 35px; resize: vertical; }
 
         /* Validation */
         .form-group.has-error input,
