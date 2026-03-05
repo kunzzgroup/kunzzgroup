@@ -159,9 +159,6 @@ require_once 'session_check.php';
         .has-error .error-msg { display: block; }
 
         /* Permission section */
-        .editUserPermLayout { margin: 0 !important; border: none !important; }
-        .editUserPermLayout .form-section-header { display: none; }
-        .editUserPermLayout .form-section-content { padding: 0; }
         .editUserPermLayout .perm-tree-container { max-height: 420px !important; overflow-y: auto; }
         .editUserPermLayout .perm-detail-card { max-height: 420px !important; overflow-y: auto; }
 
@@ -477,7 +474,7 @@ require_once 'session_check.php';
 
                     <!-- 权限设置区块 -->
                 <!-- 编辑职员专用权限布局 (复用至添加页面) -->
-                <div class="form-section>
+                <div class="form-section">
                     <div class="form-section-header" style="text-transform: uppercase;">权限管理 PERMISSION MANAGEMENT</div>
                     <div class="form-section-content">
                         <!-- 权限配置布局 (维持双列) -->
