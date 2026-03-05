@@ -4009,9 +4009,20 @@ async function saveRecord(id) {
         return;
     }
 
-    // 验证单价：不能为空且不能小于0
-    if (record.price === '' || record.price === null || record.price === undefined || parseFloat(record.price) < 0) {
-        showAlert('单价不能为空且不能小于0', 'error');
+    // 验证单价：不能小于0（允许RM0）
+    // 如果 record.price 为空/null/undefined，尝试从 DOM 价格下拉列表读取（当下拉激活时 record 可能没被更新）
+    if (record.price === '' || record.price === null || record.price === undefined) {
+        const priceSelect = document.getElementById(`price-select-${id}`);
+        if (priceSelect && priceSelect.value !== '' && priceSelect.value !== 'manual') {
+            // 从下拉列表读取并更新 record
+            record.price = priceSelect.value;
+        } else {
+            // 没有下拉值，默认当作 0 处理（RM0 允许出货）
+            record.price = 0;
+        }
+    }
+    if (parseFloat(record.price) < 0) {
+        showAlert('单价不能小于0', 'error');
         return;
     }
 
