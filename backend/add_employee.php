@@ -129,7 +129,7 @@ require_once 'session_check.php';
 
         /* Grids */
         .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 22px; }
-        .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px 22px; }
+        .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px 22px; }
         .form-grid-1 { display: grid; grid-template-columns: 1fr; gap: 14px; }
         .form-row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 22px; }
         .form-row-1col { display: grid; grid-template-columns: 1fr; gap: 14px; }
@@ -171,7 +171,7 @@ require_once 'session_check.php';
         /* Validation */
         .form-group.has-error input,
         .form-group.has-error select { border-color: #ef4444; background: #fef2f2; }
-        .error-msg { color: #ef4444; font-size: 12px; margin-top: 4px; display: none; }
+        .error-msg { color: #ef4444; font-size: 10px; margin-top: 4px; display: none; }
         .has-error .error-msg { display: block; }
 
         /* ── Sticky action bar at bottom ── */
