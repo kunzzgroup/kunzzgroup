@@ -737,10 +737,6 @@ function openEditModal(id) {
     const modal = document.getElementById('editUserModal');
     modal.style.display = 'block';
 
-    // 重置并初始化权限树及验证系统
-    resetPermissionTree(modal);
-    initPermissionTreeEvents(modal);
-
     // 填充表单数据
     document.getElementById('edit_user_id').value = userData.id;
     document.getElementById('edit_username').value = userData.username || '';
@@ -830,22 +826,6 @@ async function handleEditUserSubmit(e) {
         }
     }
 
-    // 提取权限数据
-    const modal = document.getElementById('editUserModal');
-    const checkedBoxes = Array.from(modal.querySelectorAll('.perm-l1-check, .perm-l2-check, .perm-stock-system, .perm-stock-view, .perm-upload-system, .perm-upload-type, .perm-page-schedule, .perm-page-blueprint'))
-        .filter(cb => cb.checked && !cb.disabled);
-
-    if (checkedBoxes.length === 0) {
-        const warningDiv = modal.querySelector('.perm-warning');
-        if (warningDiv) {
-            warningDiv.style.display = 'block';
-        }
-        showMessage('请至少选择一项用户权限', 'error');
-        return;
-    }
-
-    const { perms, submenuPermissions, pagePermissions, brandPermissions, reportPermissions, restaurantPermissions } = extractPermissionsData(modal);
-
     // 显示加载状态
     const submitBtn = document.querySelector('#editUserForm .btn-save');
     const originalText = submitBtn.innerHTML;
@@ -861,12 +841,6 @@ async function handleEditUserSubmit(e) {
             body: JSON.stringify({
                 action: 'update',
                 id: userData.user_id,
-                permissions: perms,
-                page_permissions: pagePermissions,
-                submenu_permissions: submenuPermissions,
-                report_permissions: reportPermissions,
-                restaurant_permissions: restaurantPermissions,
-                brand_permissions: brandPermissions,
                 ...userData
             })
         });
