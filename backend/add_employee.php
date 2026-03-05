@@ -81,7 +81,7 @@ require_once 'session_check.php';
             width: 100%;
             max-width: 1600px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 65fr 35fr;
             gap: 24px;
             padding-bottom: 16px;
             align-items: start;
@@ -237,64 +237,47 @@ require_once 'session_check.php';
             <div class="form-scroll-area">
             <form id="addUserForm" style="animation: fadeIn .3s ease;">
                 <div class="form-col">
-                <!-- ── Basic Information ── -->
+                <!-- ── 个人资料 PERSONAL DETAILS ── -->
                     <div class="form-section">
-                        <div class="form-section-header">基本信息 Basic Information</div>
+                        <div class="form-section-header" style="text-transform: uppercase;">个人资料 PERSONAL DETAILS</div>
                         <div class="form-section-content">
-                            <div class="form-grid-2">
+                            <div class="form-grid-3">
                                 <div class="form-group" id="group-add-username">
-                                    <label for="add_username">英文姓名 English Name *</label>
-                                    <input type="text" id="add_username" name="username" required maxlength="50" placeholder="e.g. JOHN DOE" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()">
+                                    <label for="add_username">英语姓名 English Name *</label>
+                                    <input type="text" id="add_username" name="username" required maxlength="50" placeholder="E.G. JOHN DOE" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()">
                                     <div class="error-msg">请填写英文姓名，至少包含两个单词</div>
                                 </div>
                                 
                                 <div class="form-group" id="group-add-username-cn">
                                     <label for="add_username_cn">中文姓名 Chinese Name</label>
-                                    <input type="text" id="add_username_cn" name="username_cn" maxlength="100" placeholder="e.g. 刘德华">
+                                    <input type="text" id="add_username_cn" name="username_cn" maxlength="100" placeholder="E.G. 某某某">
                                     <div class="error-msg">中文姓名至少需要两个汉字</div>
                                 </div>
                                 
                                 <div class="form-group" id="group-add-nickname">
                                     <label for="add_nickname">昵称 Nickname</label>
-                                    <input type="text" id="add_nickname" name="nickname" maxlength="50">
+                                    <input type="text" id="add_nickname" name="nickname" maxlength="50" placeholder="E.G. JACKIE">
                                 </div>
                                 
                                 <div class="form-group" id="group-add-email">
                                     <label for="add_email">邮箱 Email *</label>
-                                    <input type="email" id="add_email" name="email" required maxlength="100" placeholder="e.g. user@example.com">
+                                    <input type="email" id="add_email" name="email" required maxlength="100" placeholder="E.G. USER@EXAMPLE.COM" style="text-transform: uppercase;">
                                     <div class="error-msg">请填写有效的邮箱地址</div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-
-                <!-- ========== STEP 2: Personal Details ========== -->
-                    <div class="form-section">
-                        <div class="form-section-header">个人资料 Personal Details</div>
-                        <div class="form-section-content">
-                        <div class="form-grid-3">
-                            <div class="form-group">
-                                <label for="add_ic_number">身份证号码</label>
-                                <input type="text" id="add_ic_number" name="ic_number" maxlength="20">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="add_phone_number">联络号码</label>
-                                <input type="tel" id="add_phone_number" name="phone_number" maxlength="20">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="add_date_of_birth">出生日期</label>
-                                <input type="date" id="add_date_of_birth" name="date_of_birth">
-                            </div>
-                        </div>
-                        
-                        <div class="form-grid-3">
-                            <div class="form-group">
-                                <label for="add_gender">性别</label>
-                                <select id="add_gender" name="gender">
+                                
+                                <div class="form-group">
+                                    <label for="add_ic_number">身份证号码</label>
+                                    <input type="text" id="add_ic_number" name="ic_number" maxlength="20">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="add_phone_number">联络号码</label>
+                                    <input type="tel" id="add_phone_number" name="phone_number" maxlength="20">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="add_gender">性别</label>
+                                    <select id="add_gender" name="gender">
                                     <option value="">请选择</option>
                                     <option value="male">男</option>
                                     <option value="female">女</option>
@@ -380,10 +363,22 @@ require_once 'session_check.php';
                             </div>
                         </div>
                         
-                        <div class="form-grid-1">
+                        <div class="form-grid-1" style="margin-top: 14px;">
                             <div class="form-group">
-                                <label for="add_home_address">住址</label>
+                                <label for="add_home_address">地址</label>
                                 <textarea id="add_home_address" name="home_address" rows="2" maxlength="255"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-row-2col" style="margin-top: 14px;">
+                            <div class="form-group">
+                                <label for="add_emergency_contact_name">紧急联系人</label>
+                                <input type="text" id="add_emergency_contact_name" name="emergency_contact_name" maxlength="100">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="add_emergency_phone_number">紧急联系人号码</label>
+                                <input type="tel" id="add_emergency_phone_number" name="emergency_phone_number" maxlength="20">
                             </div>
                         </div>
                     </div>
@@ -391,9 +386,9 @@ require_once 'session_check.php';
 
                 <!-- 银行信息区块 -->
                 <div class="form-section">
-                    <div class="form-section-header">银行信息 Bank Information</div>
+                    <div class="form-section-header" style="text-transform: uppercase;">银行信息 BANK INFORMATION</div>
                     <div class="form-section-content">
-                        <div class="form-row-2col">
+                        <div class="form-grid-3">
                             <div class="form-group">
                                 <label for="add_bank_account_holder_en">银行账户持有人</label>
                                 <input type="text" id="add_bank_account_holder_en" name="bank_account_holder_en" maxlength="50">
@@ -403,9 +398,7 @@ require_once 'session_check.php';
                                 <label for="add_bank_account">银行账号</label>
                                 <input type="text" id="add_bank_account" name="bank_account" maxlength="30">
                             </div>
-                        </div>
-                        
-                        <div class="form-row-1col">
+                            
                             <div class="form-group">
                                 <label for="add_bank_name">银行名称</label>
                                 <select id="add_bank_name" name="bank_name">
@@ -431,30 +424,12 @@ require_once 'session_check.php';
                         </div>
                     </div>
                 </div>
-
-                <!-- 紧急联络人区块 -->
-                <div class="form-section">
-                    <div class="form-section-header">紧急联络人</div>
-                    <div class="form-section-content">
-                        <div class="form-row-2col">
-                            <div class="form-group">
-                                <label for="add_emergency_contact_name">紧急联系人</label>
-                                <input type="text" id="add_emergency_contact_name" name="emergency_contact_name" maxlength="100">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="add_emergency_phone_number">紧急联系人电话</label>
-                                <input type="tel" id="add_emergency_phone_number" name="emergency_phone_number" maxlength="20">
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 </div> <!-- /Left Column -->
 
                 <div class="form-col">
                     <!-- Moved Account Settings to Step 1 -->
                     <div class="form-section">
-                        <div class="form-section-header">账号设置 Account Settings</div>
+                        <div class="form-section-header" style="text-transform: uppercase;">账号设置 ACCOUNT SETTINGS</div>
                         <div class="form-section-content">
                             <div class="form-grid-2">
                                 <div class="form-group" id="group-add-account-type">
@@ -494,7 +469,7 @@ require_once 'session_check.php';
                     <!-- 权限设置区块 -->
                 <!-- 编辑职员专用权限布局 (复用至添加页面) -->
                 <div class="form-section editUserPermLayout" style="margin-top: 20px;">
-                    <div class="form-section-header">权限设置</div>
+                    <div class="form-section-header" style="text-transform: uppercase;">权限管理 PERMISSION MANAGEMENT</div>
                     <div class="form-section-content">
                         <!-- 权限配置布局 (维持双列) -->
                         <div class="perm-layout-container">
