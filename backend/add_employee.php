@@ -474,7 +474,7 @@ require_once 'session_check.php';
 
                     <!-- 权限设置区块 -->
                 <!-- 编辑职员专用权限布局 (复用至添加页面) -->
-                <div class="form-section editUserPermLayout" style="margin-top: 20px;">
+                <div class="form-section editUserPermLayout">
                     <div class="form-section-header" style="text-transform: uppercase;">权限管理 PERMISSION MANAGEMENT</div>
                     <div class="form-section-content">
                         <!-- 权限配置布局 (维持双列) -->
