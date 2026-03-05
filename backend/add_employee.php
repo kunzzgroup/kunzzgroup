@@ -261,7 +261,7 @@ require_once 'session_check.php';
                                 
                                 <div class="form-group" id="group-add-username-cn">
                                     <label for="add_username_cn">中文姓名 Chinese Name</label>
-                                    <input type="text" id="add_username_cn" name="username_cn" maxlength="100" placeholder="E.G. 某某某">
+                                    <input type="text" id="add_username_cn" name="username_cn" maxlength="100" placeholder="E.G. 刘德华">
                                     <div class="error-msg">中文姓名至少需要两个汉字</div>
                                 </div>
                                 
