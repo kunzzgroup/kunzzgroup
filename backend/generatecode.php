@@ -648,12 +648,6 @@ require_once 'session_check.php';
                             </div>
                         </div>
                     </div>
-
-
-
-
-
-                    </div>
                     
                     <div class="modal-buttons">
                         <button type="submit" class="btn-action btn-save">
