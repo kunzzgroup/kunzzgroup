@@ -392,7 +392,7 @@ require_once 'session_check.php';
                             <div class="form-grid-2">
                                 <div class="form-group" id="group-add-username">
                                     <label for="add_username">英文姓名 English Name *</label>
-                                    <input type="text" id="add_username" name="username" required maxlength="50" placeholder="e.g. John Doe">
+                                    <input type="text" id="add_username" name="username" required maxlength="50" placeholder="e.g. JOHN DOE" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()">
                                     <div class="error-msg">请填写英文姓名，至少包含两个单词</div>
                                 </div>
                                 
