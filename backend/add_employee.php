@@ -102,13 +102,7 @@ require_once 'session_check.php';
             padding-bottom: 16px;
             min-height: 0;
         }
-        /* 最后一个section自动填充剩余高度 */
-        .form-col > .form-section:last-child,
-        .form-col > .editUserPermLayout:last-child {
-            flex: 1;
-            min-height: 0;
-            overflow: hidden;
-        }
+
 
         /* Cards */
         .form-section {
@@ -224,6 +218,39 @@ require_once 'session_check.php';
             to   { opacity: 1; transform: translateY(0); }
         }
 
+        /* ── Toast Notification ── */
+        #toast-container {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .toast {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 13px 22px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 6px 24px rgba(0,0,0,.18);
+            pointer-events: all;
+            animation: toastIn .3s cubic-bezier(.21,1.02,.73,1) forwards;
+            min-width: 220px;
+            max-width: 480px;
+        }
+        .toast.toast-error   { background: #fff1f2; color: #9f1239; border: 1.5px solid #fca5a5; }
+        .toast.toast-success { background: #f0fdf4; color: #166534; border: 1.5px solid #86efac; }
+        .toast.toast-out     { animation: toastOut .3s ease forwards; }
+        @keyframes toastIn  { from { opacity:0; transform:translateY(-16px) scale(.96); } to { opacity:1; transform:translateY(0) scale(1); } }
+        @keyframes toastOut { from { opacity:1; transform:translateY(0) scale(1); }         to { opacity:0; transform:translateY(-10px) scale(.96); } }
+
         /*.bank-form section*/
     .form-section-header-bank {
     padding: clamp(6px, 0.52vw, 10px) clamp(10px, 0.73vw, 14px);
@@ -251,7 +278,8 @@ require_once 'session_check.php';
             </div>
 
             <!-- Message -->
-            <div id="messageArea" style="padding: 12px 32px 0;"></div>
+            <div id="messageArea" style="display:none;"></div>
+    <div id="toast-container"></div>
 
             <!-- Single-page scroll area -->
             <div class="form-scroll-area">
@@ -782,14 +810,17 @@ require_once 'session_check.php';
         window.addEventListener('beforeunload', stopSessionRefresh);
 
         function showInlineMessage(msg, type = 'error') {
-            const area = document.getElementById('messageArea');
-            const color = type === 'success' ? '#065f46' : '#991b1b';
-            const bg    = type === 'success' ? '#d1fae5' : '#fee2e2';
-            const icon  = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-            area.innerHTML = `<div style="background:${bg};color:${color};padding:12px 16px;border-radius:8px;font-size:14px;display:flex;align-items:center;gap:8px;">
-                <i class="fas ${icon}"></i> ${msg}</div>`;
-            if (type !== 'success') setTimeout(() => area.innerHTML = '', 5000);
-            area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            const container = document.getElementById('toast-container');
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `<i class="fas ${icon}"></i><span>${msg}</span>`;
+            container.appendChild(toast);
+            const delay = type === 'success' ? 3000 : 4000;
+            setTimeout(() => {
+                toast.classList.add('toast-out');
+                setTimeout(() => toast.remove(), 300);
+            }, delay);
         }
 
         async function addNewUserAndRedirect() {
