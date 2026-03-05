@@ -162,7 +162,7 @@ require_once 'session_check.php';
         .form-group input[type="tel"],
         .form-group input[type="date"],
         .form-group select { height: 36px !important; }
-        .form-group textarea { min-height: 35px; resize: vertical; }
+        .form-group textarea { min-height: 35px; resize: none !important; overflow-y: auto; }
 
         /* Permission section */
         .editUserPermLayout .perm-tree-container { max-height: 420px !important; overflow-y: auto; }
