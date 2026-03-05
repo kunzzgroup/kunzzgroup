@@ -2530,7 +2530,7 @@ function renderStockTable() {
                 // 只有纯出库时才加载价格选项（带库存检查）
                 if (outQty > 0 && inQty === 0) {
                     const codeNum = record.code_number ? String(record.code_number).trim() : '';
-                    loadProductPricesWithStock(record.product_name, `price-select-${record.id}`, (record.price_raw ?? record.price), outQty, codeNum, outQty);
+                    loadProductPricesWithStock(record.product_name, `price-select-${record.id}`, (record.price_raw ?? record.price), outQty, codeNum);
                 }
             }
         });
@@ -5625,6 +5625,8 @@ async function loadProductPricesWithStock(productName, selectElementId, currentP
             let options = '<option value="">请选择价格</option>';
             options += '<option value="manual">手动输入价格</option>';
 
+            let currentPriceIncluded = false;
+
             result.data.forEach(item => {
                 const price = item.price;
                 let availableStock = item.available_stock;
@@ -5640,12 +5642,23 @@ async function loadProductPricesWithStock(productName, selectElementId, currentP
                 if (availableStock >= requiredQty || price == currentPrice) {
                     const stockInfo = availableStock >= requiredQty ? `(库存: ${availableStock})` : `(库存不足: ${availableStock})`;
                     options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
+                    if (price == currentPrice) currentPriceIncluded = true;
                 }
             });
 
+            // 若当前价格未在 API 结果中（库存为0被过滤），仍补上显示（库存: 0）供编辑保存
+            if (currentPrice !== '' && currentPrice !== null && currentPrice !== undefined && !currentPriceIncluded && parseFloat(currentPrice) > 0) {
+                options += `<option value="${currentPrice}" selected>${parseFloat(currentPrice).toFixed(5)} (库存: 0)</option>`;
+            }
+
             selectElement.innerHTML = options;
         } else {
-            selectElement.innerHTML = '<option value="">暂无足够库存的价格</option><option value="manual">手动输入价格</option>';
+            // 无数据时若有当前价格（编辑模式），仍显示该选项供保存
+            let fallbackOption = '';
+            if (currentPrice !== '' && currentPrice !== null && currentPrice !== undefined && parseFloat(currentPrice) > 0) {
+                fallbackOption = `<option value="${currentPrice}" selected>${parseFloat(currentPrice).toFixed(5)} (库存: 0)</option>`;
+            }
+            selectElement.innerHTML = `<option value="">暂无足够库存的价格</option><option value="manual">手动输入价格</option>${fallbackOption}`;
         }
 
         // 绑定变化事件
