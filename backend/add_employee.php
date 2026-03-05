@@ -79,11 +79,23 @@ require_once 'session_check.php';
         }
         #addUserForm {
             width: 100%;
-            max-width: 1050px;
+            max-width: 1600px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            padding-bottom: 16px;
+            align-items: start;
+        }
+        @media (max-width: 1200px) {
+            #addUserForm {
+                grid-template-columns: 1fr;
+                max-width: 1050px;
+            }
+        }
+        .form-col {
             display: flex;
             flex-direction: column;
             gap: 20px;
-            padding-bottom: 16px;
         }
 
         /* Cards */
@@ -224,7 +236,7 @@ require_once 'session_check.php';
             <!-- Single-page scroll area -->
             <div class="form-scroll-area">
             <form id="addUserForm" style="animation: fadeIn .3s ease;">
-
+                <div class="form-col">
                 <!-- ── Basic Information ── -->
                     <div class="form-section">
                         <div class="form-section-header">基本信息 Basic Information</div>
@@ -292,10 +304,8 @@ require_once 'session_check.php';
                             </div>
                         </div>
                     </div>
-                </div>
 
                 <!-- ========== STEP 2: Personal Details ========== -->
-                <div class="wizard-step" id="step-2">
                     <div class="form-section">
                         <div class="form-section-header">个人资料 Personal Details</div>
                         <div class="form-section-content">
@@ -413,7 +423,9 @@ require_once 'session_check.php';
                         </div>
                     </div>
                 </div>
+                </div> <!-- /Left Column -->
 
+                <div class="form-col">
                 <!-- 银行信息区块 -->
                 <div class="form-section">
                     <div class="form-section-header">银行信息 Bank Information</div>
@@ -728,6 +740,7 @@ require_once 'session_check.php';
                         </div>
                     </div>
                 </div>
+                </div> <!-- /Right Column -->
 
             </form>
             </div><!-- /form-scroll-area -->
