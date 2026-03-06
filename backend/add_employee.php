@@ -100,11 +100,12 @@ body { background: #f3f4f6; }
 }
 
 /* 左侧主卡片 — 关键滚动容器 */
-.left-card {
+.form-col > .left-card {
     display: block;
-    flex: 1;           /* 撑满 form-col 剩余高度 */
-    min-height: 0;     /* flex 子元素必须有 min-height: 0 才能触发滚动 */
-    overflow-y: auto;
+    flex: 1 1 0;           /* 强制占用剩余空间 */
+    min-height: 0;         /* 关键：允许子元素溢出触发滚动 */
+    max-height: 100%;      /* 关键：限制高度上限 */
+    overflow-y: auto !important;
     overflow-x: hidden;
     padding-right: 4px;
     padding-bottom: 16px;
@@ -253,7 +254,7 @@ body { background: #f3f4f6; }
     background: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
-    overflow: visible;
+    overflow: hidden;
     box-shadow: 0 1px 3px rgba(0,0,0,.04);
 }
 .form-section-header {
