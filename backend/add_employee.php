@@ -101,6 +101,8 @@ require_once 'session_check.php';
             height: 100%;
             min-height: 0;
             overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 4px; /* Give scrollbar room to breathe */
         }
         
         /* Webkit scrollbar specific styling for inner containers */
@@ -240,9 +242,9 @@ require_once 'session_check.php';
 
         /* Grids */
         .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 22px; }
-        .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px 22px; }
+        .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px 16px; }
         .form-grid-1 { display: grid; grid-template-columns: 1fr; gap: 14px; }
-        .form-row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 22px; }
+        .form-row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
         .form-row-1col { display: grid; grid-template-columns: 1fr; gap: 14px; }
 
         /* Form fields */
