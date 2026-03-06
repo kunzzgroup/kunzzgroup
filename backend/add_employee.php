@@ -76,13 +76,12 @@ require_once 'session_check.php';
             display: flex;
             justify-content: center;
             align-items: stretch;
-            min-height: 0; /* Ensures the flex child doesn't grow past 100vh */
         }
         #addUserForm {
             width: 100%;
             max-width: 1600px;
             display: grid;
-            grid-template-columns: 35fr 55fr;
+            grid-template-columns: minmax(0, 35fr) minmax(0, 55fr);
             gap: 10px;
             align-items: stretch; /* 两列等高 */
             height: 100%;
@@ -90,22 +89,22 @@ require_once 'session_check.php';
         .form-col {
             display: flex;
             flex-direction: column;
-            gap: 14px; /* Added gap between sections */
+            gap: 0px;
             height: 100%; /* 撑满格子高度，使底部对齐 */
             min-height: 0;
         }
         
-        /* 左侧主卡片 */
+        /* 左侧主卡片支持内部滚动 */
         .left-card {
-            display: block; /* Removing flex allows children to overflow instead of shrinking */
+            display: flex;
+            flex-direction: column;
             height: 100%;
-            min-height: 0;
             overflow-y: auto;
             overflow-x: hidden;
-            padding-right: 4px; /* Give scrollbar room to breathe */
+            min-height: 0;
         }
-        
-        /* Webkit scrollbar specific styling for inner containers */
+
+        /* 滚动条美化 */
         .left-card::-webkit-scrollbar,
         .editUserPermLayout .perm-tree-container::-webkit-scrollbar,
         .editUserPermLayout .perm-detail-card::-webkit-scrollbar {
@@ -128,30 +127,12 @@ require_once 'session_check.php';
         .editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb:hover {
             background: #94a3b8; 
         }
-
         /* 最后一个section自动填充剩余高度 */
-        .form-col > .form-section:last-child {
-            flex: 1;
-            min-height: 0;
-        }
-        
+        .form-col > .form-section:last-child,
         .form-col > .editUserPermLayout:last-child {
-            display: flex;
-            flex-direction: column;
             flex: 1;
             min-height: 0;
-        }
-        
-        .editUserPermLayout .form-section-content {
-            flex: 1;
-            min-height: 0;
-            display: flex; /* For internal layouts */
-            flex-direction: column;
-        }
-        
-        /* 表头不缩小 */
-        .form-section-header, .form-section-header-bank {
-            flex-shrink: 0;
+            overflow: hidden;
         }
 
         /* ── 平板视图 (<1200px) ── */
@@ -167,12 +148,12 @@ require_once 'session_check.php';
             }
             .form-col {
                 height: auto;
-                overflow-y: visible; /* 允许在手机上自然撑开由外层滚动 */
+                overflow: visible; /* 关闭内部滚动 */
                 padding-bottom: 0px;
             }
             .left-card {
                 height: auto;
-                overflow-y: visible;
+                overflow: visible;
             }
             .form-col > .form-section:last-child,
             .form-col > .editUserPermLayout:last-child {
@@ -245,12 +226,12 @@ require_once 'session_check.php';
         }
         .form-section-content { padding: 20px 24px; }
 
-        /* Grids */
-        .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 22px; }
-        .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px 16px; }
-        .form-grid-1 { display: grid; grid-template-columns: 1fr; gap: 14px; }
-        .form-row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
-        .form-row-1col { display: grid; grid-template-columns: 1fr; gap: 14px; }
+        /* Grids - 使用 minmax 防止溢出 */
+        .form-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 22px; }
+        .form-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px 22px; }
+        .form-grid-1 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+        .form-row-2col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 22px; }
+        .form-row-1col { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
 
         /* Form fields */
         .form-group { display: flex; flex-direction: column; }
@@ -408,7 +389,7 @@ require_once 'session_check.php';
             <div class="form-scroll-area">
             <form id="addUserForm" style="animation: fadeIn .3s ease;">
                 <div class="form-col">
-                <!-- ── 个人资料 PERSONAL DETAILS ── -->
+                <!-- ── 个人资料 + 银行信息 (统一滚动容器) ── -->
                     <div class="form-section left-card">
                         <div class="form-section-header" style="text-transform: uppercase;">个人资料 PERSONAL DETAILS</div>
                         <div class="form-section-content">
@@ -552,47 +533,46 @@ require_once 'session_check.php';
                                 <input type="tel" id="add_emergency_phone_number" name="emergency_phone_number" maxlength="20">
                             </div>
                         </div>
-                    </div>
-                     <div class="form-section-header-bank" style="text-transform: uppercase;">银行信息 BANK INFORMATION</div>
-                    <div class="form-section-content" style="flex-shrink: 0; padding-top: 15px;">
-                        <div class="form-grid-3">
-                            <div class="form-group">
-                                <label for="add_bank_account_holder_en">银行账户持有人</label>
-                                <input type="text" id="add_bank_account_holder_en" name="bank_account_holder_en" maxlength="50">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="add_bank_account">银行账号</label>
-                                <input type="text" id="add_bank_account" name="bank_account" maxlength="30">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="add_bank_name">银行名称</label>
-                                <select id="add_bank_name" name="bank_name">
-                                    <option value="">请选择银行</option>
-                                    <option value="Maybank (Malayan Banking Berhad)">Maybank (Malayan Banking Berhad)</option>
-                                    <option value="CIMB Bank">CIMB Bank</option>
-                                    <option value="Public Bank">Public Bank</option>
-                                    <option value="RHB Bank">RHB Bank</option>
-                                    <option value="Hong Leong Bank">Hong Leong Bank</option>
-                                    <option value="AmBank">AmBank</option>
-                                    <option value="Alliance Bank">Alliance Bank</option>
-                                    <option value="Affin Bank">Affin Bank</option>
-                                    <option value="Bank Islam Malaysia">Bank Islam Malaysia</option>
-                                    <option value="Agrobank">Agrobank</option>
-                                    <option value="Bank Simpanan Nasional (BSN)">Bank Simpanan Nasional (BSN)</option>
-                                    <option value="HSBC Bank Malaysia">HSBC Bank Malaysia</option>
-                                    <option value="OCBC Bank (Malaysia)">OCBC Bank (Malaysia)</option>
-                                    <option value="Standard Chartered Bank Malaysia">Standard Chartered Bank Malaysia</option>
-                                    <option value="United Overseas Bank (UOB Malaysia)">United Overseas Bank (UOB Malaysia)</option>
-                                    <option value="Bank of China (Malaysia)">Bank of China (Malaysia)</option>
-                                </select>
+
+                        <!-- 银行信息移到这里，共用同一个 left-card 卡片容器 -->
+                        <div class="form-section-header-bank" style="text-transform: uppercase;">银行信息 BANK INFORMATION</div>
+                        <div class="form-section-content">
+                            <div class="form-grid-3">
+                                <div class="form-group">
+                                    <label for="add_bank_account_holder_en">银行账户持有人</label>
+                                    <input type="text" id="add_bank_account_holder_en" name="bank_account_holder_en" maxlength="50">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="add_bank_account">银行账号</label>
+                                    <input type="text" id="add_bank_account" name="bank_account" maxlength="30">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="add_bank_name">银行名称</label>
+                                    <select id="add_bank_name" name="bank_name">
+                                        <option value="">请选择银行</option>
+                                        <option value="Maybank (Malayan Banking Berhad)">Maybank (Malayan Banking Berhad)</option>
+                                        <option value="CIMB Bank">CIMB Bank</option>
+                                        <option value="Public Bank">Public Bank</option>
+                                        <option value="RHB Bank">RHB Bank</option>
+                                        <option value="Hong Leong Bank">Hong Leong Bank</option>
+                                        <option value="AmBank">AmBank</option>
+                                        <option value="Alliance Bank">Alliance Bank</option>
+                                        <option value="Affin Bank">Affin Bank</option>
+                                        <option value="Bank Islam Malaysia">Bank Islam Malaysia</option>
+                                        <option value="Agrobank">Agrobank</option>
+                                        <option value="Bank Simpanan Nasional (BSN)">Bank Simpanan Nasional (BSN)</option>
+                                        <option value="HSBC Bank Malaysia">HSBC Bank Malaysia</option>
+                                        <option value="OCBC Bank (Malaysia)">OCBC Bank (Malaysia)</option>
+                                        <option value="Standard Chartered Bank Malaysia">Standard Chartered Bank Malaysia</option>
+                                        <option value="United Overseas Bank (UOB Malaysia)">United Overseas Bank (UOB Malaysia)</option>
+                                        <option value="Bank of China (Malaysia)">Bank of China (Malaysia)</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                
+                    </div> <!-- /left-card -->
                 </div> <!-- /Left Column -->
 
                 <div class="form-col">
