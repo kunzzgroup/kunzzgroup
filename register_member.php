@@ -48,7 +48,7 @@ if ($stmt->num_rows > 0) {
 $stmt->close();
 
 // 密码加密
-$hashed_password = password_hash($password, PASSWORD_DEFAULT);
+$hashed_password = secure_hash_password($password);
 
 // 插入用户数据
 $stmt = $conn->prepare("INSERT INTO users_member (username, email, phone_number, password, created_at)

@@ -47,7 +47,7 @@ if (time() > $_SESSION["code_expire_time"]) {
 }
 
 // 加密密码
-$hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+$hashedPassword = secure_hash_password($newPassword);
 
 // 更新数据库 - 同时更新密码和首次登录状态
 $stmt = $conn->prepare("UPDATE users SET password = ?, is_first_login = 0 WHERE email = ?");

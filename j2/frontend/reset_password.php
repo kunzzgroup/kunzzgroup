@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../backend/xss_protect.php';
 header("Content-Type: application/json");
 session_start();
 
@@ -18,7 +19,7 @@ if ($conn->connect_error) {
 }
 
 // 获取 JSON 数据
-$data = json_decode(file_get_contents("php://input"), true);
+$data = get_safe_json_input();
 $email = $data["email"] ?? "";
 $newPassword = $data["new_password"] ?? "";
 
@@ -46,7 +47,7 @@ if (time() > $_SESSION["code_expire_time"]) {
 }
 
 // 加密密码
-$hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+$hashedPassword = secure_hash_password($newPassword);
 
 // 更新数据库 - 同时更新密码和首次登录状态
 $stmt = $conn->prepare("UPDATE users SET password = ?, is_first_login = 0 WHERE email = ?");

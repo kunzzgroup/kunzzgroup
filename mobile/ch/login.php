@@ -32,7 +32,7 @@ $result = $stmt->get_result();
 if ($result->num_rows === 1) {
     $user = $result->fetch_assoc();
 
-    if (password_verify($password, $user['password'])) {
+    if (verify_secure_password($password, $user['password'])) {
         // ✅ 登录成功，设置 Session
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];

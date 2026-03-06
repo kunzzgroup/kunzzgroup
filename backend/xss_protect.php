@@ -121,4 +121,37 @@ $_POST = sanitize_sql_injection(sanitize_input_recursive($_POST));
 $_COOKIE = sanitize_sql_injection(sanitize_input_recursive($_COOKIE));
 $_REQUEST = sanitize_sql_injection(sanitize_input_recursive($_REQUEST));
 
+// 7. 密码安全处理 (防彩虹表和暴力破解)
+if (!function_exists('secure_hash_password')) {
+    /**
+     * 将明文密码进行安全哈希处理
+     * 优先使用目前公认最安全的 Argon2id 算法，如果服务器不支持则回退到高强度的 Bcrypt(cost=12)
+     * password_hash 本身会为每次加密自动生成独一无二的随机盐值(Salt)，无惧彩虹表攻击。
+     */
+    function secure_hash_password($password) {
+        $options = [
+            'memory_cost' => 65536, // Argon2 memory cost: 64MB
+            'time_cost'   => 4,     // Argon2 time cost: 4 iterations
+            'threads'     => 1,     // Argon2 threads
+            'cost'        => 12     // Bcrypt cost (工作因子升级到12)
+        ];
+        
+        if (defined('PASSWORD_ARGON2ID')) {
+            return password_hash($password, PASSWORD_ARGON2ID, $options);
+        } else {
+            return password_hash($password, PASSWORD_BCRYPT, $options);
+        }
+    }
+}
+
+if (!function_exists('verify_secure_password')) {
+    /**
+     * 安全地验证哈希密码
+     * 自动从密文中提取盐值并与自带的安全体系进行校验匹配
+     */
+    function verify_secure_password($password, $hashed_password) {
+        return password_verify($password, $hashed_password);
+    }
+}
+
 ?>

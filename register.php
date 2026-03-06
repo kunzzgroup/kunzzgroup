@@ -83,7 +83,7 @@ $account_type = $codeData['account_type'];
 $codeId = $codeData['id'];
 
 // 加密密码
-$hashed_password = password_hash($password, PASSWORD_DEFAULT);
+$hashed_password = secure_hash_password($password);
 
 // 插入用户
 $stmt = $conn->prepare("

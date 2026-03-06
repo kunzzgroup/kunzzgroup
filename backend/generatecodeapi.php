@@ -800,7 +800,7 @@ function addNewUser($pdo, $input) {
 
         // 生成随机密码
         $defaultPassword = generateRandomPassword();
-        $hashedPassword = password_hash($defaultPassword, PASSWORD_DEFAULT);
+        $hashedPassword = secure_hash_password($defaultPassword);
 
         // 处理日期格式
         $dateOfBirth = !empty($input['date_of_birth']) ? $input['date_of_birth'] : null;

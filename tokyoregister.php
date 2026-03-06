@@ -52,7 +52,7 @@ if ($stmt->num_rows > 0) {
 $stmt->close();
 
 // 8. 加密密码
-$hashed_password = password_hash($password, PASSWORD_DEFAULT);
+$hashed_password = secure_hash_password($password);
 
 // 9. 插入用户信息
 $stmt = $conn->prepare("INSERT INTO tokyo_users (username, email, password) VALUES (?, ?, ?)");

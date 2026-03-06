@@ -61,7 +61,7 @@ if (time() > $_SESSION["code_expire_time"]) {
 }
 
 // Hash and update password
-$hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+$hashedPassword = secure_hash_password($newPassword);
 
 $stmt = $conn->prepare("UPDATE users SET password = ?, is_first_login = 0 WHERE email = ?");
 $stmt->bind_param("ss", $hashedPassword, $email);

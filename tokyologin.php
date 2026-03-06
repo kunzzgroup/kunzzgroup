@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     // 4. 验证用户和密码
-    if ($user && password_verify($password, $user['password'])) {
+    if ($user && verify_secure_password($password, $user['password'])) {
         // 登录成功，保存登录状态
         $_SESSION['user_email'] = $user['email'];
         header("Location: tokyo-japanese-cuisine.html"); // 登录成功后跳转页面
