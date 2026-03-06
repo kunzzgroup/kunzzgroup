@@ -19,365 +19,385 @@ require_once 'session_check.php';
     <link rel="stylesheet" href="css/generatecode.css?v=<?php echo time(); ?>">
     <title>添加职员 - 职员管理系统</title>
     <style>
-        body { background: #f3f4f6; }
+       body { background: #f3f4f6; }
 
-        .add-employee-page {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* 顶部标题栏 */
-        .page-header-bar {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 14px 24px;
-            background: #fff;
-            border-bottom: 1px solid #e5e7eb;
-            flex-shrink: 0;
-            box-shadow: 0 1px 3px rgba(0,0,0,.04);
-            z-index: 10;
-        }
-        .page-header-bar h1 {
-            font-size: 20px;
-            font-weight: 700;
-            color: #111827;
-            margin: 0;
-        }
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: #f97316;
-            color: #ffffff;
-            border: 1px solid transparent;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.2s;
-            box-shadow: 0 2px 4px rgba(249,115,22,0.2);
-        }
-        .back-btn:hover { 
-            background: #ea6b0a;
-            color: #fff;
-            transform: translateY(-1px);
-        }
-
-        /* ── Scrollable form area ── */
-        .form-scroll-area {
-            flex: 1;
-            overflow: hidden; /* 不在外层滚动，内层各自滚动 */
-            padding: 10px 14px;
-            display: flex;
-            justify-content: center;
-            align-items: stretch;
-        }
-        #addUserForm {
-            width: 100%;
-            max-width: 1600px;
-            display: grid;
-            grid-template-columns: 35fr 55fr;
-            gap: 10px;
-            align-items: stretch; /* 两列等高 */
-            height: 100%;
-        }
-        .form-col {
-            display: flex;
-            flex-direction: column;
-            gap: 14px; /* Added gap between sections */
-            height: 100%; /* 撑满格子高度，使底部对齐 */
-            min-height: 0;
-        }
-        
-        /* 左侧主卡片 */
-        .left-card {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            min-height: 0;
-            overflow-y: auto;
-        }
-        
-        /* Webkit scrollbar specific styling for inner containers */
-        .left-card::-webkit-scrollbar,
-        .editUserPermLayout .perm-tree-container::-webkit-scrollbar,
-        .editUserPermLayout .perm-detail-card::-webkit-scrollbar {
-            width: 6px;
-        }
-        .left-card::-webkit-scrollbar-track,
-        .editUserPermLayout .perm-tree-container::-webkit-scrollbar-track,
-        .editUserPermLayout .perm-detail-card::-webkit-scrollbar-track {
-            background: #f1f1f1; 
-            border-radius: 4px;
-        }
-        .left-card::-webkit-scrollbar-thumb,
-        .editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb,
-        .editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 4px;
-        }
-        .left-card::-webkit-scrollbar-thumb:hover,
-        .editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb:hover,
-        .editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
-        }
-
-        /* 最后一个section自动填充剩余高度 */
-        .form-col > .form-section:last-child,
-        .form-col > .editUserPermLayout:last-child {
-            flex: 1;
-            min-height: 0;
-            display: flex;
-            flex-direction: column;
-        }
-        .editUserPermLayout .form-section-content {
-            flex: 1;
-            min-height: 0;
-            display: flex; /* For internal layouts */
-            flex-direction: column;
-        }
-        
-        /* 表头不缩小 */
-        .form-section-header, .form-section-header-bank {
-            flex-shrink: 0;
-        }
-
-        /* ── 平板视图 (<1200px) ── */
-        @media (max-width: 1200px) {
-            .form-scroll-area {
-                overflow-y: auto; /* 恢复基于页面的滚动 */
-                align-items: flex-start;
-            }
-            #addUserForm {
-                grid-template-columns: 1fr; /* 堆叠成上下布局 */
-                max-width: 100%;
-                height: auto;
-            }
-            .form-col {
-                height: auto;
-                overflow-y: visible; /* 允许在手机上自然撑开由外层滚动 */
-                padding-bottom: 0px;
-            }
-            .left-card {
-                height: auto;
-                overflow-y: visible;
-            }
-            .form-col > .form-section:last-child,
-            .form-col > .editUserPermLayout:last-child {
-                flex: none;
-                overflow: visible;
-            }
-        }
-
-        /* ── 手机视图 (<768px) ── */
-        @media (max-width: 768px) {
-            .page-header-bar {
-                padding: 12px 14px;
-            }
-            .page-header-bar h1 {
-                font-size: 16px;
-            }
-            .back-btn {
-                padding: 6px 12px;
-                font-size: 13px;
-            }
-            .form-scroll-area {
-                padding: 10px;
-            }
-            .form-grid-3, .form-grid-2, .form-row-2col {
-                grid-template-columns: 1fr; /* 手机端全部退化为单列 */
-                gap: 12px;
-            }
-            .form-section-content {
-                padding: 14px 14px;
-            }
-            .form-section-header, .form-section-header-bank {
-                padding: 10px 14px;
-                font-size: 13px;
-            }
-            .page-action-bar {
-                padding: 12px 16px;
-                flex-direction: column-reverse; /* 上下堆叠，保存按钮在上面 */
-                gap: 8px;
-            }
-            .btn-save, .btn-back-action {
-                width: 100%;
-                justify-content: center;
-                padding: 12px;
-                font-size: 15px;
-            }
-            #toast-container {
-                bottom: 110px;
-                left: 50%;
-                right: auto;
-                transform: translateX(-50%);
-                align-items: center;
-                width: 90vw;
-            }
-        }
-
-        /* Cards */
-        .form-section {
-            background: #fff;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,.04);
-        }
-        .form-section-header {
-            background: #f97316;
-            padding: 13px 20px;
-            font-size: 15px;
-            font-weight: 600;
-            color: #fff;
-        }
-        .form-section-content { padding: 20px 24px; }
-
-        /* Grids */
-        .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 22px; }
-        .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px 22px; }
-        .form-grid-1 { display: grid; grid-template-columns: 1fr; gap: 14px; }
-        .form-row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 22px; }
-        .form-row-1col { display: grid; grid-template-columns: 1fr; gap: 14px; }
-
-        /* Form fields */
-        .form-group { display: flex; flex-direction: column; }
-        .form-group label { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            padding: 9px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 14px;
-            color: #111827;
-            background: #fff;
-            transition: border-color .2s, box-shadow .2s;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #f97316;
-            box-shadow: 0 0 0 3px rgba(249,115,22,.12);
-        }
-        .form-group input[type="text"],
-        .form-group input[type="email"],
-        .form-group input[type="tel"],
-        .form-group input[type="date"],
-        .form-group select { height: 36px !important; }
-        .form-group textarea { min-height: 35px; resize: none !important; overflow-y: auto; }
-
-        /* Permission section */
-        .editUserPermLayout .perm-tree-container { max-height: 420px !important; overflow-y: auto; }
-        .editUserPermLayout .perm-detail-card { max-height: 420px !important; overflow-y: auto; }
-        
-        /* Validation */
-        .form-group.has-error input,
-        .form-group.has-error select { border-color: #ef4444; background: #fef2f2; }
-        .error-msg { color: #ef4444; font-size: 10px; margin-top: 4px; display: none; }
-        .has-error .error-msg { display: block; }
-
-        /* ── Sticky action bar at bottom ── */
-        .page-action-bar {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 32px;
-            background: #fff;
-            border-top: 1px solid #e5e7eb;
-            flex-shrink: 0;
-            box-shadow: 0 -2px 6px rgba(0,0,0,.04);
-        }
-        .btn-save {
-            padding: 10px 28px;
-            background: #f97316;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 2px 6px rgba(249,115,22,.3);
-            transition: all .2s;
-        }
-        .btn-save:hover { background: #ea6b0a; transform: translateY(-1px); }
-        .btn-back-action {
-            padding: 10px 22px;
-            background: #fff;
-            color: #374151;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: background .2s;
-        }
-        .btn-back-action:hover { background: #f3f4f6; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ── Toast 通知 ── 从右下角保存按钮上方弹出 */
-        #toast-container {
-            position: fixed;
-            bottom: 80px;   /* 比 page-action-bar 高一点 */
-            right: 32px;
-            z-index: 99999;
-            display: flex;
-            flex-direction: column-reverse; /* 新 toast 叠在上方 */
-            align-items: flex-end;
-            gap: 8px;
-            pointer-events: none;
-            max-width: 340px;
-        }
-        .toast {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 20px;
-            border-radius: 10px;
-            font-size: 13.5px;
-            font-weight: 600;
-            box-shadow: 0 6px 24px rgba(0,0,0,.16);
-            pointer-events: all;
-            animation: toastIn .3s cubic-bezier(.21,1.02,.73,1) forwards;
-            width: 100%;
-        }
-        .toast.toast-error   { background:#fff1f2; color:#9f1239; border:1.5px solid #fca5a5; }
-        .toast.toast-success { background:#f0fdf4; color:#166534; border:1.5px solid #86efac; }
-        .toast.toast-warning { background:#fffbeb; color:#92400e; border:1.5px solid #fcd34d; }
-        .toast.toast-out     { animation: toastOut .25s ease forwards; }
-        @keyframes toastIn  { from{opacity:0;transform:translateY(16px) scale(.96)} to{opacity:1;transform:translateY(0) scale(1)} }
-        @keyframes toastOut { from{opacity:1;transform:translateY(0) scale(1)}      to{opacity:0;transform:translateY(10px) scale(.96)} }
-
-        /*.bank-form section*/
-    .form-section-header-bank {
-    padding: clamp(6px, 0.52vw, 10px) clamp(10px, 0.73vw, 14px);
-    border-bottom: 1px solid #ffddaa;
-    font-size: clamp(8px, 0.74vw, 14px);
-    font-weight: 700;
-    text-align: left;
-    color: white;
-    background: #f99e00;
+.add-employee-page {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
 }
+
+/* 顶部标题栏 */
+.page-header-bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 24px;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    z-index: 10;
+}
+.page-header-bar h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #f97316;
+    color: #ffffff;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(249,115,22,0.2);
+}
+.back-btn:hover { 
+    background: #ea6b0a;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+/* ── Scrollable form area ── */
+.form-scroll-area {
+    flex: 1;
+    overflow: hidden;
+    padding: 10px 14px;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    min-height: 0;
+}
+
+#addUserForm {
+    width: 100%;
+    max-width: 1600px;
+    display: grid;
+    grid-template-columns: 35fr 55fr;
+    gap: 10px;
+    align-items: stretch;
+    height: 100%;
+    min-height: 0;
+}
+
+.form-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden; /* 防止 col 本身溢出 */
+}
+
+/* 左侧主卡片 — 关键滚动容器 */
+.left-card {
+    display: block;
+    flex: 1;           /* 撑满 form-col 剩余高度 */
+    min-height: 0;     /* flex 子元素必须有 min-height: 0 才能触发滚动 */
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+    padding-bottom: 16px;
+    box-sizing: border-box;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+}
+
+/* Scrollbar styling */
+.left-card::-webkit-scrollbar {
+    width: 6px;
+}
+.left-card::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+.left-card::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+.left-card::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* 右侧 col 最后一个 section 填满剩余高度 */
+.form-col > .form-section:last-child {
+    flex: 1;
+    min-height: 0;
+}
+
+.form-col > .editUserPermLayout:last-child {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+.editUserPermLayout .form-section-content {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 表头不缩小 */
+.form-section-header,
+.form-section-header-bank {
+    flex-shrink: 0;
+}
+
+/* Permission section */
+.editUserPermLayout .perm-tree-container { max-height: 420px !important; overflow-y: auto; }
+.editUserPermLayout .perm-detail-card    { max-height: 420px !important; overflow-y: auto; }
+
+.editUserPermLayout .perm-tree-container::-webkit-scrollbar,
+.editUserPermLayout .perm-detail-card::-webkit-scrollbar { width: 6px; }
+.editUserPermLayout .perm-tree-container::-webkit-scrollbar-track,
+.editUserPermLayout .perm-detail-card::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+.editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb,
+.editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+.editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb:hover,
+.editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ── 平板视图 (<1200px) ── */
+@media (max-width: 1200px) {
+    .form-scroll-area {
+        overflow-y: auto;
+        align-items: flex-start;
+    }
+    #addUserForm {
+        grid-template-columns: 1fr;
+        max-width: 100%;
+        height: auto;
+    }
+    .form-col {
+        height: auto;
+        overflow-y: visible;
+        overflow: visible;
+    }
+    .left-card {
+        flex: none;
+        height: auto;
+        min-height: unset;
+        overflow-y: visible;
+        padding-bottom: 16px;
+    }
+    .form-col > .form-section:last-child,
+    .form-col > .editUserPermLayout:last-child {
+        flex: none;
+        overflow: visible;
+    }
+}
+
+/* ── 手机视图 (<768px) ── */
+@media (max-width: 768px) {
+    .page-header-bar {
+        padding: 12px 14px;
+    }
+    .page-header-bar h1 {
+        font-size: 16px;
+    }
+    .back-btn {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+    .form-scroll-area {
+        padding: 10px;
+    }
+    .form-grid-3, .form-grid-2, .form-row-2col {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .form-section-content {
+        padding: 14px 14px;
+    }
+    .form-section-header,
+    .form-section-header-bank {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+    .page-action-bar {
+        padding: 12px 16px;
+        flex-direction: column-reverse;
+        gap: 8px;
+    }
+    .btn-save, .btn-back-action {
+        width: 100%;
+        justify-content: center;
+        padding: 12px;
+        font-size: 15px;
+    }
+    #toast-container {
+        bottom: 110px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        align-items: center;
+        width: 90vw;
+    }
+}
+
+/* Cards */
+.form-section {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+}
+.form-section-header {
+    background: #f97316;
+    padding: 13px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+}
+.form-section-header-bank {
+    background: #f97316;
+    padding: 13px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    margin-top: 10px; /* 与个人资料区块分隔 */
+}
+.form-section-content { padding: 20px 24px; }
+
+/* Grids */
+.form-grid-2   { display: grid; grid-template-columns: 1fr 1fr;       gap: 14px 22px; }
+.form-grid-3   { display: grid; grid-template-columns: 1fr 1fr 1fr;   gap: 14px 16px; }
+.form-grid-1   { display: grid; grid-template-columns: 1fr;           gap: 14px; }
+.form-row-2col { display: grid; grid-template-columns: 1fr 1fr;       gap: 14px 16px; }
+.form-row-1col { display: grid; grid-template-columns: 1fr;           gap: 14px; }
+
+/* Form fields */
+.form-group { display: flex; flex-direction: column; }
+.form-group label { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 9px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #111827;
+    background: #fff;
+    transition: border-color .2s, box-shadow .2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #f97316;
+    box-shadow: 0 0 0 3px rgba(249,115,22,.12);
+}
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="tel"],
+.form-group input[type="date"],
+.form-group select { height: 36px !important; }
+.form-group textarea { min-height: 35px; resize: none !important; overflow-y: auto; }
+
+/* Validation */
+.form-group.has-error input,
+.form-group.has-error select { border-color: #ef4444; background: #fef2f2; }
+.error-msg { color: #ef4444; font-size: 10px; margin-top: 4px; display: none; }
+.has-error .error-msg { display: block; }
+
+/* ── Sticky action bar at bottom ── */
+.page-action-bar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 32px;
+    background: #fff;
+    border-top: 1px solid #e5e7eb;
+    flex-shrink: 0;
+    box-shadow: 0 -2px 6px rgba(0,0,0,.04);
+}
+.btn-save {
+    padding: 10px 28px;
+    background: #f97316;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 6px rgba(249,115,22,.3);
+    transition: all .2s;
+}
+.btn-save:hover { background: #ea6b0a; transform: translateY(-1px); }
+.btn-back-action {
+    padding: 10px 22px;
+    background: #fff;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background .2s;
+}
+.btn-back-action:hover { background: #f3f4f6; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Toast 通知 ── */
+#toast-container {
+    position: fixed;
+    bottom: 80px;
+    right: 32px;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    gap: 8px;
+    pointer-events: none;
+    max-width: 340px;
+}
+.toast {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 600;
+    box-shadow: 0 6px 24px rgba(0,0,0,.16);
+    pointer-events: all;
+    animation: toastIn .3s cubic-bezier(.21,1.02,.73,1) forwards;
+    width: 100%;
+}
+.toast.toast-error   { background:#fff1f2; color:#9f1239; border:1.5px solid #fca5a5; }
+.toast.toast-success { background:#f0fdf4; color:#166534; border:1.5px solid #86efac; }
+.toast.toast-warning { background:#fffbeb; color:#92400e; border:1.5px solid #fcd34d; }
+.toast.toast-out     { animation: toastOut .25s ease forwards; }
+@keyframes toastIn  { from{opacity:0;transform:translateY(16px) scale(.96)} to{opacity:1;transform:translateY(0) scale(1)} }
+@keyframes toastOut { from{opacity:1;transform:translateY(0) scale(1)}      to{opacity:0;transform:translateY(10px) scale(.96)} }
     </style>
 </head>
 <body>
