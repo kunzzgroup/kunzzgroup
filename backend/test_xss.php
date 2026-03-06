@@ -46,4 +46,36 @@ if (isset($_GET['test'])) {
     echo "<p style='color:gray;'>当前 URL 没有 ?test=... 参数</p>";
 }
 
+// 3. 测试 SQL 注入过滤
+echo "<hr>";
+echo "<h3>3. 测试 SQL 注入 (SQLi) 拦截</h3>";
+$malicious_sql_json = '{
+    "username": "admin\' UNION SELECT password FROM users --",
+    "details": {
+        "action": "DROP TABLE users;",
+        "safe_text": "hello world"
+    }
+}';
+$decoded_sql_array = json_decode($malicious_sql_json, true);
+$sanitized_sql_array = sanitize_sql_injection(sanitize_input_recursive($decoded_sql_array));
+
+echo "<strong>原始恶意 SQL 注入数据：</strong><br>";
+echo "<pre style='background:#fee; padding:10px;'>" . htmlspecialchars($malicious_sql_json) . "</pre>";
+
+echo "<strong>经过 xss_protect.php 双重过滤 (XSS + SQLi) 后的安全数据：</strong><br>";
+echo "<p style='color:green;'>注意：危险的 SQL 关键字 (如 UNION SELECT, DROP TABLE) 已被替换为 [SQL_BLOCKED]！</p>";
+echo "<pre style='background:#efe; padding:10px;'>";
+print_r($sanitized_sql_array);
+echo "</pre>";
+
+echo "<h3>3.1 URL 参数 SQL 注入测试</h3>";
+echo "<p>尝试在 URL 后面加上： <code>?id=1 UNION SELECT * FROM admin</code></p>";
+
+if (isset($_GET['id'])) {
+    echo "<strong>接收到的 \$_GET['id'] 内容：</strong><br>";
+    echo "<pre style='background:#efe; padding:10px;'>" . $_GET['id'] . "</pre>";
+} else {
+    echo "<p style='color:gray;'>当前 URL 没有 ?id=... 参数</p>";
+}
+
 ?>
