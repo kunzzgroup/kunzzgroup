@@ -69,20 +69,56 @@ if (!function_exists('get_safe_json_input')) {
         
         $decodedInput = json_decode($rawInput, true);
         if (json_last_error() === JSON_ERROR_NONE && is_array($decodedInput)) {
-            // 返回深度清理的输入
-            return sanitize_input_recursive($decodedInput);
+            // 返回深度清理的输入 (同时经过 XSS 和 SQLi 过滤)
+            return sanitize_sql_injection(sanitize_input_recursive($decodedInput));
         }
         return [];
     }
 }
 
-// 5. [全局激活] 自动拦截 $_GET、$_POST、$_COOKIE 和 $_REQUEST 
+// 5. 简易 SQL 注入 (SQLi) 关键字过滤器 / WAF
+if (!function_exists('sanitize_sql_injection')) {
+    /**
+     * 检测并拦截常见的 SQL 注入关键字
+     * 注意：最佳的防 SQL 注入方式始终是使用 PDO 预处理语句 (Prepared Statements)。
+     * 此函数作为额外的防线，防止在未按规范使用预处理的遗留代码中发生注入。
+     */
+    function sanitize_sql_injection($data) {
+        if (is_array($data)) {
+            $sanitized = [];
+            foreach ($data as $key => $value) {
+                // 不对键名做SQL拦截，仅过滤值
+                $sanitized[$key] = sanitize_sql_injection($value);
+            }
+            return $sanitized;
+        } else if (is_string($data)) {
+            // 常见的 SQL 注入恶意关键字特征正则 (忽略大小写)
+            $sql_pattern = '/\b(UNION\s+SELECT|DROP\s+TABLE|ALTER\s+TABLE|INSERT\s+INTO|DELETE\s+FROM|UPDATE\s+.*?\s+SET|EXEC(\s|\+)+(s|x)p_)\b/i';
+            
+            // 如果检测到高度危险的SQL语法，直接清空或阻断（这里选择替换为空或可疑标记，视业务需求也可直接 die()）
+            if (preg_match($sql_pattern, $data)) {
+                // 记录日志 (可选): error_log("Possible SQL Injection detected: " . $data);
+                // 将危险关键字替换为 [SQL_BLOCKED]
+                return preg_replace($sql_pattern, '[SQL_BLOCKED]', $data);
+            }
+            
+            // 如果项目中没有全部使用 PDO，也可以在这里进行 addslashes 转义:
+            // return addslashes($data); 
+            // 但如果使用了 PDO，增加 addslashes 会导致数据库里存入多余的反斜杠，因此这里仅用正则过滤恶意拼接。
+            return $data;
+        } else {
+            return $data;
+        }
+    }
+}
+
+// 6. [全局激活] 自动拦截 $_GET、$_POST、$_COOKIE 和 $_REQUEST 
 //    将其自动转换为安全格式（防患于未然全局防护）。
 // 注意: 此操作会使得保存到数据库的字符实体化(如 < 变成 &lt;)。
 // 要获取原始未经转义的数据，请在使用前小心设计。
-$_GET = sanitize_input_recursive($_GET);
-$_POST = sanitize_input_recursive($_POST);
-$_COOKIE = sanitize_input_recursive($_COOKIE);
-$_REQUEST = sanitize_input_recursive($_REQUEST);
+$_GET = sanitize_sql_injection(sanitize_input_recursive($_GET));
+$_POST = sanitize_sql_injection(sanitize_input_recursive($_POST));
+$_COOKIE = sanitize_sql_injection(sanitize_input_recursive($_COOKIE));
+$_REQUEST = sanitize_sql_injection(sanitize_input_recursive($_REQUEST));
 
 ?>
