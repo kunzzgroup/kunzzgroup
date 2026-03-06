@@ -89,26 +89,41 @@ require_once 'session_check.php';
         .form-col {
             display: flex;
             flex-direction: column;
+            gap: 14px; /* Added gap between sections */
             height: 100%; /* 撑满格子高度，使底部对齐 */
-            overflow-y: auto;
-            padding-bottom: 16px;
-            padding-right: 6px; /* Add slight padding for scrollbar */
             min-height: 0;
         }
         
-        /* Webkit scrollbar specific styling for inner columns */
-        .form-col::-webkit-scrollbar {
+        /* 左侧主卡片 */
+        .left-card {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 0;
+            overflow-y: auto;
+        }
+        
+        /* Webkit scrollbar specific styling for inner containers */
+        .left-card::-webkit-scrollbar,
+        .editUserPermLayout .perm-tree-container::-webkit-scrollbar,
+        .editUserPermLayout .perm-detail-card::-webkit-scrollbar {
             width: 6px;
         }
-        .form-col::-webkit-scrollbar-track {
+        .left-card::-webkit-scrollbar-track,
+        .editUserPermLayout .perm-tree-container::-webkit-scrollbar-track,
+        .editUserPermLayout .perm-detail-card::-webkit-scrollbar-track {
             background: #f1f1f1; 
             border-radius: 4px;
         }
-        .form-col::-webkit-scrollbar-thumb {
+        .left-card::-webkit-scrollbar-thumb,
+        .editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb,
+        .editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb {
             background: #cbd5e1; 
             border-radius: 4px;
         }
-        .form-col::-webkit-scrollbar-thumb:hover {
+        .left-card::-webkit-scrollbar-thumb:hover,
+        .editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb:hover,
+        .editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb:hover {
             background: #94a3b8; 
         }
 
@@ -117,7 +132,19 @@ require_once 'session_check.php';
         .form-col > .editUserPermLayout:last-child {
             flex: 1;
             min-height: 0;
-            overflow: visible; /* changed from hidden so bottom content isn't clipped */
+            display: flex;
+            flex-direction: column;
+        }
+        .editUserPermLayout .form-section-content {
+            flex: 1;
+            min-height: 0;
+            display: flex; /* For internal layouts */
+            flex-direction: column;
+        }
+        
+        /* 表头不缩小 */
+        .form-section-header, .form-section-header-bank {
+            flex-shrink: 0;
         }
 
         /* ── 平板视图 (<1200px) ── */
@@ -135,6 +162,10 @@ require_once 'session_check.php';
                 height: auto;
                 overflow-y: visible; /* 允许在手机上自然撑开由外层滚动 */
                 padding-bottom: 0px;
+            }
+            .left-card {
+                height: auto;
+                overflow-y: visible;
             }
             .form-col > .form-section:last-child,
             .form-col > .editUserPermLayout:last-child {
@@ -371,7 +402,7 @@ require_once 'session_check.php';
             <form id="addUserForm" style="animation: fadeIn .3s ease;">
                 <div class="form-col">
                 <!-- ── 个人资料 PERSONAL DETAILS ── -->
-                    <div class="form-section">
+                    <div class="form-section left-card">
                         <div class="form-section-header" style="text-transform: uppercase;">个人资料 PERSONAL DETAILS</div>
                         <div class="form-section-content">
                             <div class="form-grid-3">
@@ -516,7 +547,7 @@ require_once 'session_check.php';
                         </div>
                     </div>
                      <div class="form-section-header-bank" style="text-transform: uppercase;">银行信息 BANK INFORMATION</div>
-                    <div class="form-section-content">
+                    <div class="form-section-content" style="flex-shrink: 0; padding-top: 15px;">
                         <div class="form-grid-3">
                             <div class="form-group">
                                 <label for="add_bank_account_holder_en">银行账户持有人</label>
