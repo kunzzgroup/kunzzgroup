@@ -19,7 +19,7 @@ require_once 'session_check.php';
     <link rel="stylesheet" href="css/generatecode.css?v=<?php echo time(); ?>">
     <title>添加职员 - 职员管理系统</title>
     <style>
-       body { background: #f3f4f6; }
+body { background: #f3f4f6; }
 
 .add-employee-page {
     display: flex;
@@ -253,7 +253,7 @@ require_once 'session_check.php';
     background: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
-    overflow: hidden;
+    overflow: visible;
     box-shadow: 0 1px 3px rgba(0,0,0,.04);
 }
 .form-section-header {
