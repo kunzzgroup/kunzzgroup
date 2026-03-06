@@ -6,6 +6,7 @@ if (!headers_sent()) {
 }
 ?>
 <?php
+require_once __DIR__ . '/xss_protect.php';
 ob_start();
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
@@ -55,7 +56,7 @@ $restaurantConfig = [
 
 // 获取请求方法和数据
 $method = $_SERVER['REQUEST_METHOD'];
-$data = json_decode(file_get_contents("php://input"), true);
+$data = get_safe_json_input();
 
 function sendResponse($success, $message = "", $data = null) {
     ob_end_clean();

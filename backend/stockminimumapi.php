@@ -6,6 +6,7 @@ if (!headers_sent()) {
 }
 ?>
 <?php
+require_once __DIR__ . '/xss_protect.php';
 ob_start();
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
@@ -197,7 +198,7 @@ if ($method === 'GET') {
     }
     
 } elseif ($method === 'POST') {
-    $input = json_decode(file_get_contents('php://input'), true);
+    $input = get_safe_json_input();
     
     if (!$input) {
         sendResponse(false, "无效的JSON数据");

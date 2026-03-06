@@ -6,6 +6,7 @@ if (!headers_sent()) {
 }
 ?>
 <?php
+require_once __DIR__ . '/xss_protect.php';
 ob_start();
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: *");
@@ -69,7 +70,7 @@ $action = '';
 if ($method === 'GET') {
     $action = $_GET['action'] ?? '';
 } else if ($method === 'POST') {
-    $input = json_decode(file_get_contents('php://input'), true);
+    $input = get_safe_json_input();
     $action = $input['action'] ?? '';
 }
 
@@ -233,7 +234,7 @@ function getForm($pdo) {
  * 创建新表单
  */
 function createForm($pdo) {
-    $input = json_decode(file_get_contents('php://input'), true);
+    $input = get_safe_json_input();
     
     $formName = $input['form_name'] ?? '';
     $department = $input['department'] ?? '';
@@ -300,7 +301,7 @@ function createForm($pdo) {
  * 更新表单
  */
 function updateForm($pdo) {
-    $input = json_decode(file_get_contents('php://input'), true);
+    $input = get_safe_json_input();
     
     $formId = $input['form_id'] ?? '';
     $formName = $input['form_name'] ?? '';
@@ -373,7 +374,7 @@ function updateForm($pdo) {
  * 删除表单
  */
 function deleteForm($pdo) {
-    $input = json_decode(file_get_contents('php://input'), true);
+    $input = get_safe_json_input();
     $formId = $input['form_id'] ?? '';
     
     if (!$formId) {
@@ -451,7 +452,7 @@ function getStandards($pdo) {
  */
 function saveStandards($pdo) {
     try {
-        $input = json_decode(file_get_contents('php://input'), true);
+        $input = get_safe_json_input();
         $items = $input['items'] ?? [];
         if (!is_array($items) || count($items) === 0) {
             sendResponse(false, "没有要保存的内容");

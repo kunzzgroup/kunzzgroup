@@ -6,6 +6,7 @@ if (!headers_sent()) {
 }
 ?>
 <?php
+require_once __DIR__ . '/xss_protect.php';
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
@@ -109,7 +110,7 @@ function handleGet($pdo) {
 
 // 处理 POST 请求 - 创建新的货品异常记录
 function handlePost($pdo) {
-    $input = json_decode(file_get_contents('php://input'), true);
+    $input = get_safe_json_input();
     
     // 验证必填字段
     if (empty($input['date']) || empty($input['product_name'])) {
@@ -198,7 +199,7 @@ function handlePost($pdo) {
 
 // 处理 PUT 请求 - 更新货品异常记录
 function handlePut($pdo) {
-    $input = json_decode(file_get_contents('php://input'), true);
+    $input = get_safe_json_input();
     
     if (empty($input['id'])) {
         throw new Exception('记录ID为必填项');

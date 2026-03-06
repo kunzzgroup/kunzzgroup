@@ -6,6 +6,8 @@ if (!headers_sent()) {
 }
 ?>
 <?php
+// 引入全局防护脚本
+require_once __DIR__ . '/xss_protect.php';
 require_once __DIR__ . '/mailer_config.php';
 require_once VENDOR_AUTOLOAD;
 use PHPMailer\PHPMailer\PHPMailer;
@@ -53,7 +55,8 @@ $action = '';
 if ($method === 'GET') {
     $action = $_GET['action'] ?? '';
 } else if ($method === 'POST') {
-    $input = json_decode(file_get_contents('php://input'), true);
+    // 使用 xss_protect.php 中定义的安全获取 JSON 输入函数
+    $input = get_safe_json_input();
     $action = $input['action'] ?? '';
 }
 

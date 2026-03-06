@@ -6,6 +6,7 @@ if (!headers_sent()) {
 }
 ?>
 <?php
+require_once __DIR__ . '/xss_protect.php';
 ob_start();
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
@@ -40,7 +41,7 @@ try {
 
 // 获取请求方法和数据
 $method = $_SERVER['REQUEST_METHOD'];
-$data = json_decode(file_get_contents("php://input"), true);
+$data = get_safe_json_input();
 
 function sendResponse($success, $message = "", $data = null) {
     ob_end_clean();
@@ -582,13 +583,7 @@ function updateStock() {
     // 支持从POST和PUT请求中获取数据
     // 如果$data为空（可能是JSON解析失败），尝试从php://input重新解析
     if (empty($data) || !is_array($data)) {
-        $raw_input = file_get_contents("php://input");
-        if (!empty($raw_input)) {
-            $decoded = json_decode($raw_input, true);
-            if (is_array($decoded)) {
-                $data = $decoded;
-            }
-        }
+        $data = get_safe_json_input();
     }
     
     $dishware_id = $data['dishware_id'] ?? $_POST['dishware_id'] ?? '';

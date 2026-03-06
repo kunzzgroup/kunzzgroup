@@ -6,6 +6,7 @@ if (!headers_sent()) {
 }
 ?>
 <?php
+require_once __DIR__ . '/xss_protect.php';
 // 员工排班系统API
 session_start();
 header('Content-Type: application/json');
@@ -59,7 +60,7 @@ switch($action) {
     // 添加员工
     case 'add_employee':
         if ($method === 'POST') {
-            $data = json_decode(file_get_contents('php://input'), true);
+            $data = get_safe_json_input();
             $sql = "INSERT INTO schedule_employees (name, phone, position, work_area, restaurant) 
                     VALUES (:name, :phone, :position, :work_area, :restaurant)";
             $stmt = $pdo->prepare($sql);
@@ -77,7 +78,7 @@ switch($action) {
     // 更新员工
     case 'update_employee':
         if ($method === 'POST') {
-            $data = json_decode(file_get_contents('php://input'), true);
+            $data = get_safe_json_input();
             $sql = "UPDATE schedule_employees 
                     SET name = :name, phone = :phone, position = :position, work_area = :work_area 
                     WHERE id = :id";
@@ -98,7 +99,7 @@ switch($action) {
     case 'delete_employee':
         if ($method === 'POST') {
             try {
-                $data = json_decode(file_get_contents('php://input'), true);
+                $data = get_safe_json_input();
                 
                 // 先删除该员工的所有排班记录
                 $sql1 = "DELETE FROM schedule_records WHERE employee_id = :id";
@@ -142,7 +143,7 @@ switch($action) {
     case 'add_shift':
         if ($method === 'POST') {
             try {
-                $data = json_decode(file_get_contents('php://input'), true);
+                $data = get_safe_json_input();
                 $sql = "INSERT INTO schedule_shifts (shift_code, restaurant, start_time, end_time) 
                         VALUES (:shift_code, :restaurant, :start_time, :end_time)";
                 $stmt = $pdo->prepare($sql);
@@ -163,7 +164,7 @@ switch($action) {
     case 'update_shift':
         if ($method === 'POST') {
             try {
-                $data = json_decode(file_get_contents('php://input'), true);
+                $data = get_safe_json_input();
                 $sql = "UPDATE schedule_shifts 
                         SET start_time = :start_time, end_time = :end_time 
                         WHERE id = :id";
@@ -184,7 +185,7 @@ switch($action) {
     case 'delete_shift':
         if ($method === 'POST') {
             try {
-                $data = json_decode(file_get_contents('php://input'), true);
+                $data = get_safe_json_input();
                 $sql = "DELETE FROM schedule_shifts WHERE id = :id";
                 $stmt = $pdo->prepare($sql);
                 $result = $stmt->execute([':id' => $data['id']]);
@@ -253,7 +254,7 @@ switch($action) {
     // 保存/更新排班记录
     case 'save_schedule':
         if ($method === 'POST') {
-            $data = json_decode(file_get_contents('php://input'), true);
+            $data = get_safe_json_input();
             
             // 如果是班次，可能需要保留公共假期背景
             if ($data['value_type'] === 'shift') {
@@ -316,7 +317,7 @@ switch($action) {
     // 批量保存排班记录
     case 'save_schedules_batch':
         if ($method === 'POST') {
-            $data = json_decode(file_get_contents('php://input'), true);
+            $data = get_safe_json_input();
             
             $pdo->beginTransaction();
             try {
@@ -347,7 +348,7 @@ switch($action) {
     // 删除排班记录
     case 'delete_schedule':
         if ($method === 'POST') {
-            $data = json_decode(file_get_contents('php://input'), true);
+            $data = get_safe_json_input();
             $sql = "DELETE FROM schedule_records 
                     WHERE employee_id = :employee_id AND schedule_date = :schedule_date";
             $stmt = $pdo->prepare($sql);

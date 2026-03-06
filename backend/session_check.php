@@ -6,6 +6,9 @@ if (!headers_sent()) {
 }
 ?>
 <?php
+// 包含全局防 XSS 脚本 (包括安全响应头设置与输入过滤)
+require_once __DIR__ . '/xss_protect.php';
+
 session_start();
 
 // 超时时间（秒）

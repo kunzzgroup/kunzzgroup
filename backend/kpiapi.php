@@ -6,6 +6,7 @@ if (!headers_sent()) {
 }
 ?>
 <?php
+require_once __DIR__ . '/xss_protect.php';
 ob_start();
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
@@ -58,7 +59,7 @@ $restaurantConfig = [
 
 // 获取请求方法和数据
 $method = $_SERVER['REQUEST_METHOD'];
-$data = json_decode(file_get_contents("php://input"), true);
+$data = get_safe_json_input();
 
 function sendResponse($success, $message = "", $data = null) {
     ob_end_clean();
@@ -367,7 +368,7 @@ function handleClearTestData() {
 
 // 根据请求方法处理
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $input = json_decode(file_get_contents('php://input'), true);
+    $input = get_safe_json_input();
     $action = $input['action'] ?? '';
     
     switch ($action) {
