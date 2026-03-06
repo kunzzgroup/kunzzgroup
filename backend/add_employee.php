@@ -76,6 +76,7 @@ require_once 'session_check.php';
             display: flex;
             justify-content: center;
             align-items: stretch;
+            min-height: 0; /* Ensures the flex child doesn't grow past 100vh */
         }
         #addUserForm {
             width: 100%;
@@ -96,8 +97,7 @@ require_once 'session_check.php';
         
         /* 左侧主卡片 */
         .left-card {
-            display: flex;
-            flex-direction: column;
+            display: block; /* Removing flex allows children to overflow instead of shrinking */
             height: 100%;
             min-height: 0;
             overflow-y: auto;
@@ -130,13 +130,18 @@ require_once 'session_check.php';
         }
 
         /* 最后一个section自动填充剩余高度 */
-        .form-col > .form-section:last-child,
-        .form-col > .editUserPermLayout:last-child {
+        .form-col > .form-section:last-child {
             flex: 1;
             min-height: 0;
+        }
+        
+        .form-col > .editUserPermLayout:last-child {
             display: flex;
             flex-direction: column;
+            flex: 1;
+            min-height: 0;
         }
+        
         .editUserPermLayout .form-section-content {
             flex: 1;
             min-height: 0;
