@@ -89,18 +89,35 @@ require_once 'session_check.php';
         .form-col {
             display: flex;
             flex-direction: column;
-            gap: 0px;
             height: 100%; /* 撑满格子高度，使底部对齐 */
             overflow-y: auto;
             padding-bottom: 16px;
+            padding-right: 6px; /* Add slight padding for scrollbar */
             min-height: 0;
         }
+        
+        /* Webkit scrollbar specific styling for inner columns */
+        .form-col::-webkit-scrollbar {
+            width: 6px;
+        }
+        .form-col::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        .form-col::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        .form-col::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
         /* 最后一个section自动填充剩余高度 */
         .form-col > .form-section:last-child,
         .form-col > .editUserPermLayout:last-child {
             flex: 1;
             min-height: 0;
-            overflow: hidden;
+            overflow: visible; /* changed from hidden so bottom content isn't clipped */
         }
 
         /* ── 平板视图 (<1200px) ── */
@@ -116,7 +133,7 @@ require_once 'session_check.php';
             }
             .form-col {
                 height: auto;
-                overflow: visible; /* 关闭内部滚动 */
+                overflow-y: visible; /* 允许在手机上自然撑开由外层滚动 */
                 padding-bottom: 0px;
             }
             .form-col > .form-section:last-child,
