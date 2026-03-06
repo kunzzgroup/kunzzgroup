@@ -402,7 +402,7 @@ body { background: #f3f4f6; }
 
 .required-mark {
     color: #ef4444;
-    font-size: 14px;
+    font-size: 15px;
     margin-left: 2px;
     vertical-align: super;
 }
