@@ -6,6 +6,7 @@ if (!headers_sent()) {
 }
 ?>
 <?php
+require_once __DIR__ . '/../backend/xss_protect.php';
 session_start();
 
 // GET request: serve the reset password HTML page
@@ -32,7 +33,7 @@ if ($conn->connect_error) {
 }
 
 // Get JSON input
-$data = json_decode(file_get_contents("php://input"), true);
+$data = get_safe_json_input();
 $email = $data["email"] ?? "";
 $newPassword = $data["new_password"] ?? "";
 

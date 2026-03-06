@@ -6,6 +6,7 @@ if (!headers_sent()) {
 }
 ?>
 <?php
+require_once __DIR__ . '/../backend/xss_protect.php';
 session_start();
 
 // GET 请求：展示重置密码网页
@@ -34,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // 获取 JSON 数据
-    $data = json_decode(file_get_contents("php://input"), true);
+    $data = get_safe_json_input();
     $email = $data["email"] ?? "";
     $newPassword = $data["new_password"] ?? "";
 

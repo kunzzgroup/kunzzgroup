@@ -1,14 +1,15 @@
 <?php
-header("Content-Type: application/json");
+require_once __DIR__ . '/backend/xss_protect.php';
 session_start();
+header("Content-Type: application/json");
 
 require_once __DIR__ . '/backend/mailer_config.php';
 require_once VENDOR_AUTOLOAD;
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-
-$data = json_decode(file_get_contents("php://input"), true);
+// 2. 获取请求数据
+$data = get_safe_json_input();
 $email = trim($data["email"] ?? "");
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {

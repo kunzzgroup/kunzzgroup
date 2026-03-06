@@ -6,6 +6,7 @@ if (!headers_sent()) {
 }
 ?>
 <?php
+require_once __DIR__ . '/../backend/xss_protect.php';
 ob_start();
 session_start();
 ini_set('display_errors', 1);

@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/backend/xss_protect.php';
 session_start();
 
 // 1. 数据库连接配置

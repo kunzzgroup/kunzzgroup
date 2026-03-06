@@ -1,8 +1,10 @@
 <?php
-header("Content-Type: application/json");
+require_once __DIR__ . '/backend/xss_protect.php';
 session_start();
+header("Content-Type: application/json");
 
-$data = json_decode(file_get_contents("php://input"), true);
+// 1. 获取请求数据
+$data = get_safe_json_input();
 $email = $data["email"] ?? "";
 $code = $data["code"] ?? "";
 

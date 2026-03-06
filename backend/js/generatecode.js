@@ -140,6 +140,17 @@ const positionsByAccountType = {
     ]
 };
 
+// 避免 DOM 型 XSS：安全地转义 HTML 特殊字符
+function escapeHTML(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
 // 更新职位下拉选项
 function updatePositionOptions(accountType, positionSelectId) {
     const positionSelect = document.getElementById(positionSelectId);
@@ -523,12 +534,12 @@ function displayData(data) {
     });
 
     const rows = sortedData.map((item, index) => `
-                <tr id="row-${item.id}" data-id="${item.id}" data-user='${JSON.stringify(item).replace(/'/g, "&apos;")}'>
+                <tr id="row-${item.id}" data-id="${item.id}" data-user='${escapeHTML(JSON.stringify(item))}'>
                     <td style="text-align: center; font-weight: bold; color: black;">${index + 1}</td>
-                    <td>${item.position || '<em style="color: #999;">-</em>'}</td>
-                    <td>${item.username || '<em style="color: #999;">-</em>'}</td>
-                    <td>${item.email || '<em style="color: #999;">-</em>'}</td>
-                    <td>${item.phone_number || '<em style="color: #999;">-</em>'}</td>
+                    <td>${item.position ? escapeHTML(item.position) : '<em style="color: #999;">-</em>'}</td>
+                    <td>${item.username ? escapeHTML(item.username) : '<em style="color: #999;">-</em>'}</td>
+                    <td>${item.email ? escapeHTML(item.email) : '<em style="color: #999;">-</em>'}</td>
+                    <td>${item.phone_number ? escapeHTML(item.phone_number) : '<em style="color: #999;">-</em>'}</td>
                     <td>
                         <div class="action-buttons">
                             <button class="btn-action btn-edit" onclick="openEditModal(${item.id})" title="编辑">

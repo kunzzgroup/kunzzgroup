@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/backend/xss_protect.php';
 ob_start();
 header("Content-Type: application/json");
 ini_set('display_errors', 0);
@@ -19,7 +20,7 @@ if ($conn->connect_error) {
 }
 
 // 获取 JSON 数据
-$data = json_decode(file_get_contents("php://input"), true);
+$data = get_safe_json_input();
 
 // 获取字段
 $name = trim($data['name'] ?? '');

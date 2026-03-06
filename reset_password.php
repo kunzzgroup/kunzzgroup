@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/backend/xss_protect.php';
 header("Content-Type: application/json");
 session_start();
 
@@ -18,7 +19,7 @@ if ($conn->connect_error) {
 }
 
 // 获取 JSON 数据
-$data = json_decode(file_get_contents("php://input"), true);
+$data = get_safe_json_input();
 $email = $data["email"] ?? "";
 $newPassword = $data["new_password"] ?? "";
 

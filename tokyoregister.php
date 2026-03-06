@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/backend/xss_protect.php';
 // 设置响应为 JSON
 header("Content-Type: application/json");
 
@@ -18,7 +19,7 @@ if ($conn->connect_error) {
 }
 
 // 4. 解析 JSON 请求数据
-$data = json_decode(file_get_contents("php://input"), true);
+$data = get_safe_json_input();
 $username = $data['username'] ?? '';
 $email = $data['email'] ?? '';
 $password = $data['password'] ?? '';

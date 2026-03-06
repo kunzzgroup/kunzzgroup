@@ -854,6 +854,17 @@ require_once 'session_check.php';
 
     <script src="js/generatecode.js?v=<?php echo time(); ?>"></script>
     <script>
+        // 避免 DOM 型 XSS：安全地转义 HTML 特殊字符
+        function escapeHTML(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             startSessionRefresh();
 
@@ -892,7 +903,7 @@ require_once 'session_check.php';
                        : 'fa-times-circle';
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
-            toast.innerHTML = `<i class="fas ${icon}"></i><span>${msg}</span>`;
+            toast.innerHTML = `<i class="fas ${icon}"></i><span>${escapeHTML(msg)}</span>`;
             container.appendChild(toast);
             
             const delay = type === 'success' ? 3000 : 4500;
