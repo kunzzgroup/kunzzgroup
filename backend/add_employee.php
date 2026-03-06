@@ -399,6 +399,13 @@ body { background: #f3f4f6; }
 .toast.toast-out     { animation: toastOut .25s ease forwards; }
 @keyframes toastIn  { from{opacity:0;transform:translateY(16px) scale(.96)} to{opacity:1;transform:translateY(0) scale(1)} }
 @keyframes toastOut { from{opacity:1;transform:translateY(0) scale(1)}      to{opacity:0;transform:translateY(10px) scale(.96)} }
+
+.required-mark {
+    color: #ef4444;
+    font-size: 1.2em;
+    margin-left: 2px;
+    vertical-align: middle;
+}
     </style>
 </head>
 <body>
@@ -428,7 +435,7 @@ body { background: #f3f4f6; }
     <div class="form-section-content">
         <div class="form-grid-3">
             <div class="form-group" id="group-add-username">
-                <label for="add_username">英语姓名 English Name *</label>
+                <label for="add_username">英语姓名 English Name <span class="required-mark">*</span></label>
                 <input type="text" id="add_username" name="username" required maxlength="50" placeholder="E.G. JOHN DOE" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()">
                 <div class="error-msg">请填写英文姓名，至少包含两个单词</div>
             </div>
@@ -445,7 +452,7 @@ body { background: #f3f4f6; }
             </div>
             
             <div class="form-group" id="group-add-email">
-                <label for="add_email">邮箱 Email *</label>
+                <label for="add_email">邮箱 Email <span class="required-mark">*</span></label>
                 <input type="email" id="add_email" name="email" required maxlength="100" placeholder="e.g. user@example.com">
                 <div class="error-msg">请填写有效的邮箱地址</div>
             </div>
@@ -619,7 +626,7 @@ body { background: #f3f4f6; }
                         <div class="form-section-content">
                             <div class="form-grid-2">
                                 <div class="form-group" id="group-add-account-type">
-                                    <label for="add_account_type">账号类型 Account Type *</label>
+                                    <label for="add_account_type">账号类型 Account Type <span class="required-mark">*</span></label>
                                     <select id="add_account_type" name="account_type" required>
                                         <option value="">请选择账号类型</option>
                                         <option value="special">特殊 (Special)</option>
