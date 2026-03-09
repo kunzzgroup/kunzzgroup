@@ -557,3 +557,7 @@ function escHtml(str) {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
 }
+
+function toggleAddCard() {
+    document.getElementById('add-card').classList.toggle('collapsed');
+}

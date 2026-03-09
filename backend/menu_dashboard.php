@@ -74,13 +74,17 @@ if (!isset($_SESSION['user_id'])) {
             <div class="right-panel">
                 
                 <!-- Add New Item Card -->
-                <div class="card" id="add-card">
+                <div class="card collapsed" id="add-card">
                     <div class="card-deco-corner corner-tl"></div><div class="card-deco-corner corner-tr"></div><div class="card-deco-corner corner-bl"></div><div class="card-deco-corner corner-br"></div>
-                    <div class="card-header">
-                        <h3>➕ 新增菜单项目</h3>
+                    <div class="card-header" onclick="toggleAddCard()" style="cursor:pointer">
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <span class="toggle-icon">▼</span>
+                            <h3>➕ 新增菜单项目</h3>
+                        </div>
                         <div style="font-size:12px;color:var(--muted)">当前位置：<span id="cur-cat-label" style="color:var(--gold);font-weight:700">加载中...</span></div>
                     </div>
-                    <div class="card-body">
+                    <div class="card-collapsible">
+                        <div class="card-body">
                         <div class="form-row">
                             <div class="fg">
                                 <label>菜单编号</label>
@@ -132,6 +136,7 @@ if (!isset($_SESSION['user_id'])) {
                         </div>
                     </div>
                 </div>
+            </div>
                 
                 <!-- Items List Table -->
                 <div class="card">
