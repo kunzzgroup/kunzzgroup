@@ -3376,11 +3376,47 @@ document.addEventListener('click', function (e) {
 
 // 键盘快捷键支持
 document.addEventListener('keydown', function (e) {
-    // Ctrl+S 保存所有编辑
-    if (e.ctrlKey && e.key === 's') {
+    // Ctrl+Shift+S 批量保存
+    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 's') {
         e.preventDefault();
+        const batchSaveBtn = document.getElementById('batch-save-btn');
+        if (batchSaveBtn && batchSaveBtn.style.display !== 'none') {
+            batchSaveNewRows();
+        }
+        return;
+    }
+
+    // Ctrl+S 保存
+    if (e.ctrlKey && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+
+        // 1. 优先保存当前获焦的行
+        const activeElement = document.activeElement;
+        const focusedRow = activeElement ? activeElement.closest('tr') : null;
+
+        if (focusedRow) {
+            // 如果是新行
+            if (focusedRow.classList.contains('new-row')) {
+                const saveBtn = focusedRow.querySelector('.save-new-btn');
+                if (saveBtn) {
+                    saveNewRowRecord(saveBtn);
+                    return;
+                }
+            }
+            // 如果是正在编辑的行
+            if (focusedRow.classList.contains('editing-row')) {
+                // 从行中找到记录ID
+                const saveBtn = focusedRow.querySelector('.save-mode');
+                if (saveBtn) {
+                    // 按钮的onclick通常包含 saveRecord(id)
+                    saveBtn.click();
+                    return;
+                }
+            }
+        }
+
+        // 2. 如果没有获焦的特定行，或者该行不可保存，则回退到原逻辑：保存所有正在编辑的记录
         if (editingRowIds.size > 0) {
-            // 保存所有正在编辑的记录
             editingRowIds.forEach(id => {
                 saveRecord(id);
             });
