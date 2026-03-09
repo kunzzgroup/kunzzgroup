@@ -232,6 +232,12 @@ async function loadItems(search = '') {
     if (search) params.search = search;
 
     const res = await apiGet(params);
+
+    // Smooth transition effect
+    tbody.classList.remove('fade-in');
+    void tbody.offsetWidth; // Trigger reflow
+    tbody.classList.add('fade-in');
+
     if (!res.success) {
         showToast('⚠️ 加载失败：' + res.message);
         tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px">加载出错</td></tr>`;
