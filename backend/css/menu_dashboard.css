@@ -402,49 +402,6 @@ body.has-sidebar {
     transform: rotate(-90deg);
 }
 
-.card-deco-corner {
-    position: absolute;
-    width: 24px;
-    height: 24px;
-    border: 3px solid var(--gold);
-    opacity: 0.25;
-    pointer-events: none;
-    transition: all 0.3s ease;
-}
-
-.card:hover .card-deco-corner {
-    opacity: 0.8;
-    width: 30px;
-    height: 30px;
-}
-
-.corner-tl {
-    top: 15px;
-    left: 15px;
-    border-right: none;
-    border-bottom: none;
-}
-
-.corner-tr {
-    top: 15px;
-    right: 15px;
-    border-left: none;
-    border-bottom: none;
-}
-
-.corner-bl {
-    bottom: 15px;
-    left: 15px;
-    border-right: none;
-    border-top: none;
-}
-
-.corner-br {
-    bottom: 15px;
-    right: 15px;
-    border-left: none;
-    border-top: none;
-}
 
 .card:hover {
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
@@ -466,14 +423,6 @@ body.has-sidebar {
     display: flex;
     align-items: center;
     gap: 10px;
-}
-
-.card-header h3::before {
-    content: '';
-    width: 4px;
-    height: 20px;
-    background: var(--gold);
-    border-radius: 2px;
 }
 
 .card-body {
