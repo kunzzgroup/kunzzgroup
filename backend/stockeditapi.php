@@ -628,8 +628,8 @@ function handleGet() {
                 sendResponse(false, "缺少产品名称参数");
             }
             
-            $stmt = $pdo->prepare("SELECT DISTINCT product_code, specification, supplier, category FROM stock_data WHERE product_name = ? LIMIT 1");
-            $stmt->execute([$productName]);
+            $stmt = $pdo->prepare("SELECT DISTINCT product_code, specification, supplier, category FROM stock_data WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) LIMIT 1");
+            $stmt->execute([$productName, $productName]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if ($result) {
@@ -658,11 +658,11 @@ function handleGet() {
             
             $sql = "SELECT DISTINCT price 
                     FROM stockinout_data 
-                    WHERE product_name = ? AND in_quantity > 0
+                    WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND in_quantity > 0
                     ORDER BY price DESC";
             
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([$productName]);
+            $stmt->execute([$productName, $productName]);
             $prices = $stmt->fetchAll(PDO::FETCH_COLUMN);
             
             sendResponse(true, "产品价格列表获取成功", $prices);
@@ -681,10 +681,10 @@ function handleGet() {
                         (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
                         SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as available_stock
                     FROM stockinout_data 
-                    WHERE product_name = ?";
+                    WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&'))";
             
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([$productName]);
+            $stmt->execute([$productName, $productName]);
             $stockData = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if ($stockData) {
@@ -724,10 +724,10 @@ function handleGet() {
                         (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
                         SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as available_stock
                     FROM stockinout_data 
-                    WHERE product_name = ? AND price = ?";
+                    WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND price = ?";
             
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([$productName, $price]);
+            $stmt->execute([$productName, $productName, $price]);
             $stockData = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if ($stockData) {
@@ -759,8 +759,8 @@ function handleGet() {
                 sendResponse(false, "缺少产品名称参数");
             }
             
-            if ($requiredQty <= 0) {
-                sendResponse(false, "出库数量必须大于0");
+            if ($requiredQty < 0) {
+                sendResponse(false, "出库数量不能为负数");
             }
             
             try {
@@ -772,8 +772,8 @@ function handleGet() {
                             (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
                             SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as available_stock
                         FROM stockinout_data 
-                        WHERE product_name = ?";
-                $params = [$productName];
+                        WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&'))";
+                $params = [$productName, $productName];
                 if (!empty($codeNumber)) {
                     $sql .= " AND code_number = ?";
                     $params[] = $codeNumber;
