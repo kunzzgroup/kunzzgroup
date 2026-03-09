@@ -557,4 +557,3 @@ function escHtml(str) {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
 }
-}
