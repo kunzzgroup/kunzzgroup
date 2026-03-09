@@ -59,7 +59,7 @@ if (isset($_SESSION['user_id'])) {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/backend/css/stockproductname.css?v=<?php echo time(); ?>">
 </head>
-<body>
+<body data-user="<?php echo htmlspecialchars($currentApplicant, ENT_QUOTES, 'UTF-8'); ?>">
     <?php include 'sidebar.php'; ?>
     <div class="container">
         <div class="header">
@@ -172,10 +172,6 @@ if (isset($_SESSION['user_id'])) {
     </button>
 
 
-    <script>
-        const PAGE_CONFIG = {
-            currentUserApplicant: <?php echo json_encode($currentApplicant, JSON_UNESCAPED_UNICODE); ?>,
-        };
-    </script>   
     <script src="js/stockproductname.js?v=<?php echo time(); ?>"></script>
+</body>
 </html>

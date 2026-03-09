@@ -1,4 +1,10 @@
 
+const CURRENT_USER_APPLICANT = document.body?.dataset?.user || null;
+
+if (!CURRENT_USER_APPLICANT) {
+    console.warn("User applicant not found on body data-user attribute.");
+}
+
 
 // 检查用户权限的函数
 async function checkUserPermissions() {
@@ -21,7 +27,7 @@ async function initPermissions() {
 }
 
 const API_BASE_URL = 'stockapi.php';  // 如果在同一目录
-const availableReportTypes = PAGE_CONFIG.$currentApplicant;
+const availableReportTypes = CURRENT_USER_APPLICANT;
 
 
 // 应用状态
