@@ -685,23 +685,6 @@ async function saveNewRowRecord(buttonElement) {
         formData.target_system = targetInput.value;
     }
 
-    // 验证产品名称是否存在于数据库中
-    if (formData.product_name && window.productOptions) {
-        const validProducts = window.productOptions.map(p => p.product_name);
-        if (!validProducts.includes(formData.product_name)) {
-            showAlert('产品名称不存在，请从下拉列表中选择有效的产品', 'error');
-            return;
-        }
-    }
-
-    // 验证编号是否存在于数据库中
-    if (formData.code_number && window.codeNumberOptions) {
-        const validCodes = window.codeNumberOptions.map(c => c.code_number);
-        if (!validCodes.includes(formData.code_number)) {
-            showAlert('产品编号不存在，请从下拉列表中选择有效的编号', 'error');
-            return;
-        }
-    }
 
     // 检查库存是否足够
     if (formData.out_quantity > 0) {
@@ -811,23 +794,6 @@ async function saveNewRecord() {
         }
     }
 
-    // 验证产品名称是否存在于数据库中
-    if (formData.product_name && window.productOptions) {
-        const validProducts = window.productOptions.map(p => p.product_name);
-        if (!validProducts.includes(formData.product_name)) {
-            showAlert('产品名称不存在，请从下拉列表中选择有效的产品', 'error');
-            return;
-        }
-    }
-
-    // 验证编号是否存在于数据库中
-    if (formData.code_number && window.codeNumberOptions) {
-        const validCodes = window.codeNumberOptions.map(c => c.code_number);
-        if (!validCodes.includes(formData.code_number)) {
-            showAlert('产品编号不存在，请从下拉列表中选择有效的编号', 'error');
-            return;
-        }
-    }
 
     // 检查库存是否足够
     if (formData.out_quantity > 0) {
@@ -1094,23 +1060,6 @@ async function saveRecord(id) {
     const record = stockData.find(r => r.id === id);
     if (!record) return;
 
-    // 验证产品名称是否存在于数据库中
-    if (record.product_name && window.productOptions) {
-        const validProducts = window.productOptions.map(p => p.product_name);
-        if (!validProducts.includes(record.product_name)) {
-            showAlert('产品名称不存在，请从下拉列表中选择有效的产品', 'error');
-            return;
-        }
-    }
-
-    // 验证编号是否存在于数据库中
-    if (record.code_number && window.codeNumberOptions) {
-        const validCodes = window.codeNumberOptions.map(c => c.code_number);
-        if (!validCodes.includes(record.code_number)) {
-            showAlert('产品编号不存在，请从下拉列表中选择有效的编号', 'error');
-            return;
-        }
-    }
 
     // 检查库存是否足够
     if (parseFloat(record.out_quantity) > 0) {
