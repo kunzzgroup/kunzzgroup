@@ -146,7 +146,24 @@ async function loadCategories(type) {
     const counterEl = document.getElementById(`tab-${type}-count`);
     if (counterEl) counterEl.textContent = `${total} 项记录`;
 
-    if (type === currentType) renderCatList(type);
+    if (type === currentType) {
+        renderCatList(type);
+        updateCategoryDropdowns(type);
+    }
+}
+
+function updateCategoryDropdowns(type) {
+    const cats = allCats[type] || [];
+    const addSelect = document.getElementById('inp-category');
+    const editSelect = document.getElementById('edit-category');
+
+    const html = cats.map(c => `<option value="${c.id}">${escHtml(c.category_name)}</option>`).join('');
+
+    if (addSelect) {
+        addSelect.innerHTML = html;
+        if (currentCatId) addSelect.value = currentCatId;
+    }
+    if (editSelect) editSelect.innerHTML = html;
 }
 
 function renderCatList(type) {
@@ -169,7 +186,7 @@ function renderCatList(type) {
                 <span style="font-size:10px;opacity:0.4;font-weight:400" title="排序权重">#${c.sort_order || 0}</span>
             </div>
             <div class="cat-item-actions">
-                <button class="btn-edit-cat" onclick="event.stopPropagation();openEditCatModal(${JSON.stringify(c).replace(/'/g, "&#39;")})" title="编辑分类">✎</button>
+                <button class="btn-edit-cat" onclick="event.stopPropagation();openEditCatModal(${c.id})" title="编辑分类">✎</button>
                 <button class="btn-del-cat" onclick="event.stopPropagation();confirmDelCat(${c.id},'${escHtml(c.category_name)}')" title="删除分类">✕</button>
             </div>
         </div>
@@ -213,7 +230,9 @@ function selectCat(catId, catName, count) {
     const targetCat = document.querySelector(`.cat-item[data-id="${catId}"]`);
     if (targetCat) targetCat.classList.add('active');
 
-    document.getElementById('cur-cat-label').textContent = catName;
+    const addSelect = document.getElementById('inp-category');
+    if (addSelect) addSelect.value = catId;
+
     document.getElementById('table-title').textContent = catName;
     document.getElementById('item-count').textContent = `${count} 项`;
     document.getElementById('search-input').value = '';
@@ -323,7 +342,7 @@ async function handleAdd() {
     const fd = new FormData();
     fd.append('action', 'add');
     fd.append('type', currentType);
-    fd.append('category_id', currentCatId);
+    fd.append('category_id', document.getElementById('inp-category').value);
     fd.append('item_code', document.getElementById('inp-code').value.trim());
     fd.append('item_name', name);
     fd.append('item_name_cn', document.getElementById('inp-cn').value.trim());
@@ -404,6 +423,7 @@ async function doDelete() {
 
 function openEditModal(item) {
     document.getElementById('edit-id').value = item.id;
+    document.getElementById('edit-category').value = item.category_id;
     document.getElementById('edit-code').value = item.item_code || '';
     document.getElementById('edit-name').value = item.item_name || '';
     document.getElementById('edit-cn').value = item.item_name_cn || '';
@@ -509,7 +529,11 @@ async function doDeleteCat() {
     }
 }
 
-function openEditCatModal(cat) {
+function openEditCatModal(id) {
+    // Look up category in local state
+    const cat = allCats[currentType].find(c => c.id == id);
+    if (!cat) return;
+
     document.getElementById('edit-cat-id').value = cat.id;
     document.getElementById('edit-cat-name').value = cat.category_name;
     document.getElementById('edit-cat-order').value = cat.sort_order || 0;

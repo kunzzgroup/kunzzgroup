@@ -78,7 +78,12 @@ if (!isset($_SESSION['user_id'])) {
                     <div class="card-deco-corner corner-tl"></div><div class="card-deco-corner corner-tr"></div><div class="card-deco-corner corner-bl"></div><div class="card-deco-corner corner-br"></div>
                     <div class="card-header">
                         <h3>➕ 新增菜单项目</h3>
-                        <div style="font-size:12px;color:var(--muted)">当前位置：<span id="cur-cat-label" style="color:var(--gold);font-weight:700">加载中...</span></div>
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <span style="font-size:12px;color:var(--muted)">选择分类：</span>
+                            <select id="inp-category" style="padding:4px 10px;border-radius:8px;border:1.5px solid var(--gold);font-size:12px;color:var(--brown);font-weight:700;outline:none;background:var(--white)">
+                                <option value="">正在加载...</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="form-row">
@@ -244,22 +249,22 @@ if (!isset($_SESSION['user_id'])) {
             <div id="edit-thumb-wrap" style="text-align:center;margin-bottom:20px"></div>
             <div class="form-row">
                 <div class="fg">
-                    <label>菜单编号</label>
-                    <input type="text" id="edit-code">
+                    <label>所属分类 *</label>
+                    <select id="edit-category"></select>
                 </div>
                 <div class="fg">
-                    <label>英文名称 *</label>
-                    <input type="text" id="edit-name">
+                    <label>菜单编号</label>
+                    <input type="text" id="edit-code">
                 </div>
             </div>
             <div class="form-row">
                 <div class="fg">
-                    <label>中文名称</label>
-                    <input type="text" id="edit-cn">
+                    <label>英文名称 *</label>
+                    <input type="text" id="edit-name">
                 </div>
                 <div class="fg">
-                    <label>食材描述</label>
-                    <input type="text" id="edit-desc">
+                    <label>中文名称</label>
+                    <input type="text" id="edit-cn">
                 </div>
             </div>
             <div class="form-row">
