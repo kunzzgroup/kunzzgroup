@@ -16,274 +16,174 @@ if (!isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menu Management – TOKYO JAPANESE</title>
+    <title>菜单管理 · Tokyo Japanese</title>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/menu_dashboard.css?v=<?php echo time(); ?>">
     <link rel="icon" type="image/png" href="../images/logo.png">
 </head>
 <body class="has-sidebar">
-    
+
     <!-- Sidebar Integration -->
     <?php include 'sidebar.php'; ?>
 
-    <div class="container">
-        <!-- Header Section -->
-        <div class="header">
-            <h1>🍽️ 菜单管理</h1>
-            <p>管理 Grand Menu 及 Sushi Menu 的分类与菜品信息</p>
-            <div class="breadcrumb">视觉管理 › 菜单管理 › <span id="bc-tab">Grand Menu</span></div>
-        </div>
-
-        <!-- Dashboard Tabs -->
-        <div class="menu-tabs">
-            <button class="menu-tab active" id="tab-grand" onclick="switchTab(this,'grand')">
-                <div class="tab-icon">🍽️</div>
-                <div class="tab-label">
-                    <div class="t1">Grand Menu</div>
-                    <div class="t2" id="tab-grand-count">正在统计...</div>
+    <div class="workspace">
+        
+        <!-- 1. TOPBAR -->
+        <header class="topbar">
+            <div class="tb-left">
+                <span style="font-size:18px">🍽️</span>
+                <span class="tb-title">菜单管理系统</span>
+                <span style="opacity:0.2;margin:0 4px">|</span>
+                <div class="tb-crumb">
+                    视觉管理 › <span id="bc-tab">Grand Menu</span> › <b id="bc-cat">—</b>
                 </div>
-            </button>
-            <button class="menu-tab" id="tab-sushi" onclick="switchTab(this,'sushi')">
-                <div class="tab-icon">🍣</div>
-                <div class="tab-label">
-                    <div class="t1">Sushi Menu</div>
-                    <div class="t2" id="tab-sushi-count">正在统计...</div>
-                </div>
-            </button>
-        </div>
+            </div>
+            <div class="tb-right">
+                <span class="tb-badge" id="tb-stats">0 项目</span>
+                <div style="width:32px;height:32px;border-radius:50%;background:var(--gold-bg);display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700;font-size:12px">T</div>
+            </div>
+        </header>
 
-        <!-- Content Grid -->
-        <div class="content-grid">
+        <!-- 2. BODY LAYOUT -->
+        <main class="body-layout">
             
-            <!-- Category Sidebar -->
-            <div class="cat-panel">
-                <div class="cat-panel-header">
-                    <span>📂 分类管理</span>
-                    <button class="btn-add-cat" onclick="openAddCatModal()" title="新增分类">+</button>
+            <!-- LEFT: Category Navigation -->
+            <aside class="cat-col">
+                <div class="cat-head">
+                    <span class="cat-head-label">分类目录</span>
+                    <button class="btn-new-cat" onclick="toggleCatAdd()" title="新增分类">＋</button>
                 </div>
-                <div class="cat-list" id="cat-list">
-                    <!-- Categories will be rendered here by JS -->
-                    <div class="skeleton" style="height:40px;margin:10px;border-radius:8px"></div>
-                    <div class="skeleton" style="height:40px;margin:10px;border-radius:8px"></div>
-                </div>
-            </div>
-
-            <!-- Main Management Area -->
-            <div class="right-panel">
                 
-                <!-- Add New Item Card -->
-                <div class="card collapsed" id="add-card">
-                    <div class="card-header" onclick="toggleAddCard()" style="cursor:pointer">
-                        <div style="display:flex;align-items:center;gap:12px">
-                            <span class="toggle-icon">▼</span>
-                            <h3>➕ 新增菜单项目</h3>
-                        </div>
-                        <div style="font-size:12px;color:var(--muted)">当前位置：<span id="cur-cat-label" style="color:var(--gold);font-weight:700">加载中...</span></div>
+                <!-- Inline Add Row -->
+                <div class="cat-add-row" id="cat-add-row">
+                    <input type="text" id="new-cat-inp" placeholder="分类名称..." onkeyup="if(event.key==='Enter')doAddCat()">
+                    <button class="btn-ok" onclick="doAddCat()">OK</button>
+                </div>
+
+                <div class="type-tabs">
+                    <button class="type-tab active" id="tab-grand" onclick="switchType('grand')">GRAND</button>
+                    <button class="type-tab"        id="tab-sushi" onclick="switchType('sushi')">SUSHI</button>
+                </div>
+
+                <div class="cat-scroll" id="cat-scroll">
+                    <!-- Loaded by JS -->
+                </div>
+            </aside>
+
+            <!-- MIDDLE: Item List -->
+            <section class="list-col">
+                <div class="list-toolbar">
+                    <div class="search-box">
+                        <span class="si">🔍</span>
+                        <input type="text" id="search-inp" placeholder="搜索名称或编号..." oninput="onSearch(this.value)">
                     </div>
-                    <div class="card-collapsible">
-                        <div class="card-body">
-                        <div class="form-row">
-                            <div class="fg">
-                                <label>菜单编号</label>
-                                <input type="text" id="inp-code" placeholder="例如: H01">
-                            </div>
-                            <div class="fg">
-                                <label>英文名称 *</label>
-                                <input type="text" id="inp-name" placeholder="例如: ATSUYAKI TAMAGO">
-                            </div>
-                            <div class="fg">
-                                <label>中文名称</label>
-                                <input type="text" id="inp-cn" placeholder="例如: 厚玉子烧">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="fg">
-                                <label>食材/描述</label>
-                                <input type="text" id="inp-desc" placeholder="例如: Japanese Omelette">
-                            </div>
-                            <div class="fg">
-                                <label>价格 (RM)</label>
-                                <input type="text" id="inp-price" placeholder="13.90">
-                            </div>
-                            <div class="fg">
-                                <label>展示状态</label>
-                                <select id="inp-status">
-                                    <option value="published">✅ 已发布</option>
-                                    <option value="draft">📝 草稿</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Image Upload Area -->
-                        <div class="upload-zone" id="drop-zone">
-                            <input type="file" id="file-input" accept="image/*">
-                            <span class="uz-icon">🖼️</span>
-                            <p>将菜品图片拖拽至此，或 <strong>点击选择文件</strong></p>
-                            <span class="hint">建议尺寸 800x600 · 支持 JPG, PNG, WEBP · 最大 5MB</span>
-                        </div>
-
-                        <!-- Preview -->
-                        <div id="preview-wrap" style="display:none">
-                            <img id="preview-img" src="">
-                            <div id="preview-name" style="font-size:12px;color:var(--gold);margin-top:10px"></div>
-                        </div>
-                        <div style="display:flex;gap:12px;margin-top:20px">
-                            <button class="btn btn-primary" id="btn-submit" onclick="handleAdd()">📤 上传并保存</button>
-                            <button class="btn btn-secondary" onclick="resetForm()">↩️ 重置表单</button>
-                        </div>
+                    <div class="toolbar-info">
+                        <div class="info-chip"><span class="dot-green"></span> <span id="info-pub">0 已发布</span></div>
+                        <div class="info-chip"><span class="dot-gray"></span>  <span id="info-dft">0 草稿</span></div>
                     </div>
                 </div>
-            </div>
+
+                <div class="list-head">
+                    <div style="padding-left:14px">缩略图</div>
+                    <div>菜品详情</div>
+                    <div style="padding-left:8px">价格</div>
+                    <div style="padding-left:8px">状态</div>
+                    <div style="text-align:right;padding-right:14px">操作</div>
+                </div>
+
+                <div class="list-scroll" id="list-scroll">
+                    <!-- Items loaded by JS -->
+                </div>
+            </section>
+
+            <!-- RIGHT: Add Panel -->
+            <aside class="add-panel">
+                <div class="add-panel-head">
+                    <h3>＋ 新增菜单项目</h3>
+                    <p id="add-panel-sub">请先选择分类</p>
+                </div>
                 
-                <!-- Items List Table -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3>📋 <span id="table-title">记录列表</span> <span class="badge" id="item-count" style="margin-left:10px;font-size:12px;padding:2px 10px;background:var(--cream);border-radius:20px">0 项</span></h3>
-                        <div class="search-box">
-                            <input type="text" id="search-input" placeholder="🔍 搜索项目名称..." oninput="handleSearch(this.value)" style="padding:8px 15px;border-radius:10px;border:1px solid var(--border);font-size:13px;width:220px">
+                <div class="add-scroll">
+                    <div class="field">
+                        <label>菜品编号</label>
+                        <input type="text" id="f-code" placeholder="例: H01, S05">
+                    </div>
+                    <div class="field">
+                        <label>英文名称 *</label>
+                        <input type="text" id="f-name" placeholder="例: SALMON NIGIRI">
+                    </div>
+                    <div class="field">
+                        <label>中文名称</label>
+                        <input type="text" id="f-cn" placeholder="例: 三文鱼握寿司">
+                    </div>
+                    <div class="field">
+                        <label>食材/描述</label>
+                        <input type="text" id="f-desc" placeholder="简短描述...">
+                    </div>
+                    
+                    <div class="field-row">
+                        <div class="field">
+                            <label>价格 (RM)</label>
+                            <input type="text" id="f-price" placeholder="12.90">
+                        </div>
+                        <div class="field">
+                            <label>展示状态</label>
+                            <select id="f-status">
+                                <option value="published">✓ 已发布</option>
+                                <option value="draft">◷ 草稿</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th width="45%">项目详情</th>
-                                    <th width="12%">价格</th>
-                                    <th width="12%">资源状态</th>
-                                    <th width="12%">发布状态</th>
-                                    <th width="10%">日期</th>
-                                    <th width="9%">操作</th>
-                                </tr>
-                            </thead>
-                            <tbody id="menu-tbody">
-                                <!-- Items will be rendered here by JS -->
-                                <tr>
-                                    <td colspan="6" style="text-align:center;padding:60px;color:var(--muted)">正在初始化系统...</td>
-                                </tr>
-                            </tbody>
-                        </table>
+
+                    <div class="divider"></div>
+                    
+                    <div class="field">
+                        <label>展示图片</label>
+                        <div class="img-zone" id="img-zone" 
+                             ondragover="event.preventDefault();this.classList.add('dragover')" 
+                             ondragleave="this.classList.remove('dragover')"
+                             ondrop="onImgDrop(event)">
+                            <input type="file" id="f-img" accept="image/*" onchange="onImgPick(this)">
+                            
+                            <div class="img-zone-inner" id="img-zone-inner">
+                                <span class="iz-icon">📸</span>
+                                <span class="iz-text">拖拽图片或 <b>点击上传</b></span>
+                                <span class="iz-hint">建议 800x600, < 2MB</span>
+                            </div>
+
+                            <div class="img-preview-wrap" id="img-preview-wrap">
+                                <img id="img-preview" src="">
+                                <div class="img-preview-info">
+                                    <div class="img-preview-name" id="img-preview-name">file.jpg</div>
+                                    <div class="img-preview-size" id="img-preview-size">0 KB</div>
+                                </div>
+                                <button class="img-clear" onclick="clearImg(event)">✕</button>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-            </div>
-        </div>
+                    <button class="btn-submit" id="btn-submit" onclick="doAdd()">
+                        <span id="btn-submit-text">＋ 添加到菜单</span>
+                    </button>
+                    <button class="btn-reset" onclick="resetForm()">重置表单</button>
+                </div>
+            </aside>
+        </main>
     </div>
 
-    <!-- Modals & Toasts -->
-    <div class="toast" id="toast">
-        <span id="toast-msg"></span>
-    </div>
+    <!-- 3. TOAST & MODALS -->
+    <div class="toast" id="toast">操作成功</div>
 
-    <!-- Delete Item Modal -->
-    <div class="modal-overlay" id="del-modal">
-        <div class="modal">
-            <h3>🗑️ 确认删除</h3>
-            <p>确定要永久移除 <strong id="del-item-name"></strong> 吗？<br>此操作将不可撤销。</p>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('del-modal')">取消</button>
-                <button class="btn btn-danger" id="btn-confirm-del" onclick="doDelete()">立即删除</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Delete Category Modal -->
-    <div class="modal-overlay" id="del-cat-modal">
-        <div class="modal">
-            <h3>🗑️ 删除分类</h3>
-            <p>确认删除分类 <strong id="del-cat-name"></strong> 吗？<br>该分类下的所有菜品信息都将被同步清除。</p>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('del-cat-modal')">取消</button>
-                <button class="btn btn-danger" onclick="doDeleteCat()">确认删除</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="add-cat-modal">
-        <div class="modal">
-            <h3>📂 新增分类</h3>
-            <div class="fg">
-                <label>分类名称 *</label>
-                <input type="text" id="new-cat-name" placeholder="例如: House Special">
-            </div>
-            <div class="fg" style="margin-top:15px">
-                <label>排序权重</label>
-                <input type="number" id="new-cat-order" value="0">
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('add-cat-modal')">关闭</button>
-                <button class="btn btn-primary" onclick="doAddCat()">确认创建</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Category Modal -->
-    <div class="modal-overlay" id="edit-cat-modal">
-        <div class="modal">
-            <h3>📂 编辑分类</h3>
-            <input type="hidden" id="edit-cat-id">
-            <div class="fg">
-                <label>分类名称 *</label>
-                <input type="text" id="edit-cat-name">
-            </div>
-            <div class="fg" style="margin-top:15px">
-                <label>排序权重 (越小越靠前)</label>
-                <input type="number" id="edit-cat-order">
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('edit-cat-modal')">取消</button>
-                <button class="btn btn-primary" onclick="doEditCat()">保存更改</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Item Modal -->
-    <div class="modal-overlay" id="edit-modal">
-        <div class="modal" style="max-width:600px">
-            <h3>✏️ 编辑项目信息</h3>
-            <input type="hidden" id="edit-id">
-            <div id="edit-thumb-wrap" style="text-align:center;margin-bottom:20px"></div>
-            <div class="form-row">
-                <div class="fg">
-                    <label>菜单编号</label>
-                    <input type="text" id="edit-code">
-                </div>
-                <div class="fg">
-                    <label>英文名称 *</label>
-                    <input type="text" id="edit-name">
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="fg">
-                    <label>中文名称</label>
-                    <input type="text" id="edit-cn">
-                </div>
-                <div class="fg">
-                    <label>食材描述</label>
-                    <input type="text" id="edit-desc">
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="fg">
-                    <label>价格 (RM)</label>
-                    <input type="text" id="edit-price">
-                </div>
-                <div class="fg">
-                    <label>状态</label>
-                    <select id="edit-status">
-                        <option value="published">✅ 已发布</option>
-                        <option value="draft">📝 草稿</option>
-                    </select>
-                </div>
-            </div>
-            <div class="fg">
-                <label>更新图片 (留空则保留原图)</label>
-                <input type="file" id="edit-image" accept="image/*" style="border:1.5px solid var(--border);padding:8px;width:100%;border-radius:10px;font-size:12px">
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('edit-modal')">取消</button>
-                <button class="btn btn-primary" id="btn-edit-save" onclick="doEdit()">💾 保存更改</button>
+    <!-- Confirm Dialog -->
+    <div class="confirm-bg" id="confirm-bg">
+        <div class="confirm-box">
+            <h4 id="confirm-title">确认操作</h4>
+            <p id="confirm-body">确定要执行此操作吗？</p>
+            <div class="confirm-btns">
+                <button class="cbtn cbtn-no"  onclick="closeConfirm()">取消</button>
+                <button class="cbtn cbtn-yes" id="confirm-yes">确定执行</button>
             </div>
         </div>
     </div>
@@ -292,3 +192,4 @@ if (!isset($_SESSION['user_id'])) {
     <script src="js/menu_dashboard.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>
+

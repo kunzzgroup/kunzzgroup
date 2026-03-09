@@ -1,559 +1,574 @@
 /**
- * TOKYO JAPANESE CUISINE — Menu Management Dashboard JS
- * Extracted from menu_dashboard.php for cleaner architecture.
+ * TOKYO JAPANESE — Menu Dashboard Optimized JS
  */
 
+// ── CONFIG ──
 const API = 'menu_api.php';
 
-// LOCAL STATE
-let currentType = 'grand';
-let currentCatId = null;
-let currentCatName = '';
-let deleteItemId = null;
-let deleteCatId = null;
-let searchTimer = null;
-let allCats = { grand: [], sushi: [] };
+// ── STATE ──
+let menuType = 'grand';
+let catId = null;
+let catName = '';
+let cats = { grand: [], sushi: [] };
+let items = [];
+let editOpen = null;  // item id currently being edited
+let searchTmr = null;
+let imgFile = null;
 
+// ── BOOT ──
 document.addEventListener('DOMContentLoaded', () => {
-    // Initial Loads
-    loadCategories('grand');
-    loadCategories('sushi');
+    loadCats('grand');
+    loadCats('sushi');
 
-    // Image preview for add form
-    const fileInput = document.getElementById('file-input');
-    if (fileInput) {
-        fileInput.addEventListener('change', function () {
-            previewFile(this.files[0], 'preview-img', 'preview-name', 'preview-wrap');
-        });
-    }
-
-    // Drag & drop for add form
-    const dz = document.getElementById('drop-zone');
-    if (dz) {
-        dz.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dz.style.borderColor = 'var(--gold)';
-            dz.style.background = '#fffbf5';
-        });
-        dz.addEventListener('dragleave', () => {
-            dz.style.borderColor = 'var(--border)';
-            dz.style.background = '#fdfdfd';
-        });
-        dz.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dz.style.borderColor = 'var(--border)';
-            dz.style.background = '#fdfdfd';
-            const f = e.dataTransfer.files[0];
-            if (f) {
-                document.getElementById('file-input').files = e.dataTransfer.files;
-                previewFile(f, 'preview-img', 'preview-name', 'preview-wrap');
-            }
-        });
-    }
-
-    // Close modals on backdrop click
-    document.querySelectorAll('.modal-overlay').forEach(o => {
-        o.addEventListener('click', e => { if (e.target === o) o.classList.remove('show'); });
-    });
-
-    // Edit image preview handler
-    const editImage = document.getElementById('edit-image');
-    if (editImage) {
-        editImage.addEventListener('change', function () {
-            const f = this.files[0]; if (!f) return;
-            const r = new FileReader();
-            r.onload = e => {
-                document.getElementById('edit-thumb-wrap').innerHTML = `<img src="${e.target.result}" style="max-height:100px;border-radius:12px;border:3px solid var(--gold);margin-top:10px">`;
-            };
-            r.readAsDataURL(f);
+    // Close confirm modal on backdrop click
+    const confirmBg = document.getElementById('confirm-bg');
+    if (confirmBg) {
+        confirmBg.addEventListener('click', e => {
+            if (e.target === e.currentTarget) closeConfirm();
         });
     }
 });
 
-// CORE API HELPERS
-async function api(params) {
+// ── UTILS ──
+const esc = s => s ? String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;') : '';
+const fmtDate = s => s ? s.slice(0, 10) : '—';
+const fmtBytes = b => b < 1024 * 1024 ? (b / 1024).toFixed(0) + 'KB' : (b / 1024 / 1024).toFixed(1) + 'MB';
+
+async function apiGet(p) {
+    const qs = new URLSearchParams(p).toString();
+    return fetch(`${API}?${qs}`).then(r => r.json());
+}
+
+async function apiPost(p, files = {}) {
     const fd = new FormData();
-    for (const [k, v] of Object.entries(params)) fd.append(k, v);
-    try {
-        const r = await fetch(API, { method: 'POST', body: fd });
-        return await r.json();
-    } catch (e) {
-        console.error('API Error:', e);
-        return { success: false, message: 'Network or server error.' };
-    }
+    Object.entries(p).forEach(([k, v]) => fd.append(k, v));
+    Object.entries(files).forEach(([k, v]) => { if (v) fd.append(k, v); });
+    return fetch(API, { method: 'POST', body: fd }).then(r => r.json());
 }
 
-async function apiGet(params) {
-    const qs = new URLSearchParams(params).toString();
-    try {
-        const r = await fetch(`${API}?${qs}`);
-        return await r.json();
-    } catch (e) {
-        console.error('API GET Error:', e);
-        return { success: false, message: 'Network or server error.' };
-    }
-}
-
-// UI HELPERS
-function showToast(msg, duration = 3000) {
+function toast(msg, ms = 2800) {
     const t = document.getElementById('toast');
-    const m = document.getElementById('toast-msg');
-    if (!t || !m) return;
-    m.textContent = msg;
+    if (!t) return;
+    t.textContent = msg;
     t.classList.add('show');
-    clearTimeout(t._timer);
-    t._timer = setTimeout(() => t.classList.remove('show'), duration);
+    clearTimeout(t._t);
+    t._t = setTimeout(() => t.classList.remove('show'), ms);
 }
 
-function closeModal(id) {
-    const m = document.getElementById(id);
-    if (m) m.classList.remove('show');
+// ── TYPE SWITCH ──
+function switchType(t) {
+    menuType = t;
+    catId = null;
+    catName = '';
+
+    document.getElementById('tab-grand').classList.toggle('active', t === 'grand');
+    document.getElementById('tab-sushi').classList.toggle('active', t === 'sushi');
+
+    const bcTab = document.getElementById('bc-tab');
+    if (bcTab) bcTab.textContent = t === 'grand' ? 'Grand Menu' : 'Sushi Menu';
+
+    const bcCat = document.getElementById('bc-cat');
+    if (bcCat) bcCat.textContent = '—';
+
+    const stats = document.getElementById('tb-stats');
+    if (stats) stats.textContent = '0 项目';
+
+    renderCats(t);
+    clearList();
 }
 
-function openModal(id) {
-    const m = document.getElementById(id);
-    if (m) m.classList.add('show');
+// ── CATEGORIES ──
+async function loadCats(t) {
+    const res = await apiGet({ action: 'get_categories', type: t });
+    if (!res.success) return;
+    cats[t] = res.data.categories;
+    if (t === menuType) {
+        renderCats(t);
+        if (!catId && cats[t].length) {
+            selectCat(cats[t][0].id, cats[t][0].category_name);
+        }
+    }
 }
 
-function previewFile(file, imgId, nameId, wrapId) {
-    if (!file) return;
-    const r = new FileReader();
-    r.onload = e => {
-        const img = document.getElementById(imgId);
-        const name = document.getElementById(nameId);
-        const wrap = document.getElementById(wrapId);
-        if (img) img.src = e.target.result;
-        if (name) name.textContent = '✅ ' + file.name;
-        if (wrap) wrap.style.display = 'block';
-    };
-    r.readAsDataURL(file);
-}
-
-function fmtDate(str) {
-    if (!str) return '—';
-    return str.slice(0, 10);
-}
-
-// CATEGORY LOGIC
-async function loadCategories(type) {
-    const res = await apiGet({ action: 'get_categories', type });
-    if (!res.success) { showToast('⚠️ 无法加载分类'); return; }
-
-    allCats[type] = res.data.categories;
-
-    // Update the tab subtitle counter
-    const total = res.data.categories.reduce((s, c) => s + parseInt(c.item_count || 0), 0);
-    const counterEl = document.getElementById(`tab-${type}-count`);
-    if (counterEl) counterEl.textContent = `${total} 项记录`;
-
-    if (type === currentType) renderCatList(type);
-}
-
-function renderCatList(type) {
-    const cats = allCats[type] || [];
-    const list = document.getElementById('cat-list');
-    if (!list) return;
-
-    if (cats.length === 0) {
-        list.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">暂无分类<br><small>点击右上角 + 开始</small></div>`;
+function renderCats(t) {
+    const el = document.getElementById('cat-scroll');
+    if (!el) return;
+    const data = cats[t] || [];
+    if (!data.length) {
+        el.innerHTML = `<div style="text-align:center;padding:20px 10px;font-size:12px;color:var(--text-4)">暂无分类<br>点击 + 新增</div>`;
         return;
     }
-
-    list.innerHTML = cats.map(c => `
-        <div class="cat-item ${c.id == currentCatId ? 'active' : ''}" 
-             onclick="selectCat(${c.id}, '${escHtml(c.category_name)}', ${c.item_count})" 
-             data-id="${c.id}">
-            <div style="display:flex;align-items:center;gap:8px;flex:1;overflow:hidden">
-                <span class="cat-count" title="项目数量">${c.item_count}</span>
-                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(c.category_name)}</span>
-                <span style="font-size:10px;opacity:0.4;font-weight:400" title="排序权重">#${c.sort_order || 0}</span>
-            </div>
-            <div class="cat-item-actions">
-                <button class="btn-edit-cat" onclick="event.stopPropagation();openEditCatModal(${c.id})" title="编辑分类">✎</button>
-                <button class="btn-del-cat" onclick="event.stopPropagation();confirmDelCat(${c.id},'${escHtml(c.category_name)}')" title="删除分类">✕</button>
-            </div>
-        </div>
-    `).join('');
-
-    // If no category selected yet, pick first
-    if (!currentCatId && cats.length > 0) {
-        selectCat(cats[0].id, cats[0].category_name, cats[0].item_count);
-    }
+    el.innerHTML = data.map(c => `
+    <div class="cat-item ${c.id == catId ? 'active' : ''}" data-id="${c.id}"
+         draggable="true" onclick="selectCat(${c.id},'${esc(c.category_name)}')">
+      <span class="cat-drag" title="拖拽排序">⠿</span>
+      <span class="cat-label">${esc(c.category_name)}</span>
+      <span class="cat-n">${c.item_count}</span>
+      <button class="cat-rm" onclick="event.stopPropagation();confirmDelCat(${c.id},'${esc(c.category_name)}')" title="删除">✕</button>
+    </div>
+  `).join('');
+    initCatDrag();
 }
 
-// TAB SWITCHING
-function switchTab(el, type) {
-    currentType = type;
-    currentCatId = null;
-
-    // UI Updates
-    document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
-    if (el) el.classList.add('active');
-    else {
-        const target = document.getElementById('tab-' + type);
-        if (target) target.classList.add('active');
-    }
-
-    const bc = document.getElementById('bc-tab');
-    if (bc) bc.textContent = type === 'grand' ? 'Grand Menu' : 'Sushi Menu';
-
-    document.getElementById('table-title').textContent = '—';
-    document.getElementById('item-count').textContent = '0 项';
-    document.getElementById('menu-tbody').innerHTML = `<tr><td colspan="6" style="text-align:center;padding:60px;color:var(--muted);font-size:14px">请先在左侧选择一个分类</td></tr>`;
-    document.getElementById('cur-cat-label').textContent = '请选择分类';
-
-    renderCatList(type);
-}
-
-function selectCat(catId, catName, count) {
-    currentCatId = catId;
-    currentCatName = catName;
-
-    document.querySelectorAll('.cat-item').forEach(i => i.classList.remove('active'));
-    const targetCat = document.querySelector(`.cat-item[data-id="${catId}"]`);
-    if (targetCat) targetCat.classList.add('active');
-
-    document.getElementById('cur-cat-label').textContent = catName;
-    document.getElementById('table-title').textContent = catName;
-    document.getElementById('item-count').textContent = `${count} 项`;
-    document.getElementById('search-input').value = '';
-
-    loadItems();
-}
-
-// ITEM LOGIC
-async function loadItems(search = '') {
-    const tbody = document.getElementById('menu-tbody');
-    if (!tbody) return;
-
-    tbody.innerHTML = `<tr><td colspan="6">
-        <div class="skeleton" style="height:35px;margin:15px;border-radius:10px"></div>
-        <div class="skeleton" style="height:35px;margin:15px;border-radius:10px"></div>
-        <div class="skeleton" style="height:35px;margin:15px;border-radius:10px"></div>
-    </td></tr>`;
-
-    const params = { action: 'get', type: currentType, category_id: currentCatId };
-    if (search) params.search = search;
-
-    const res = await apiGet(params);
-
-    // Smooth transition effect
-    tbody.classList.remove('fade-in');
-    void tbody.offsetWidth; // Trigger reflow
-    tbody.classList.add('fade-in');
-
-    if (!res.success) {
-        showToast('⚠️ 加载失败：' + res.message);
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px">加载出错</td></tr>`;
-        return;
-    }
-
-    const items = res.data.items;
-    document.getElementById('item-count').textContent = `${items.length} 项`;
-
-    if (items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:80px;color:var(--muted)">
-            <div style="font-size:40px;margin-bottom:15px">🍽️</div>
-            <p>该分类下暂无项目</p>
-        </td></tr>`;
-        return;
-    }
-
-    tbody.innerHTML = items.map(item => `
-        <tr>
-            <td>
-                <div style="display:flex;align-items:center;gap:15px">
-                    ${item.image_url
-            ? `<img class="item-thumb" src="${escHtml(item.image_url)}" onerror="this.src='../images/placeholder.png'">`
-            : `<div class="item-thumb" style="background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:18px">🍱</div>`
-        }
-                    <div>
-                        <div style="display:flex;align-items:center">
-                            ${item.item_code ? `<span class="item-code">${escHtml(item.item_code)}</span>` : ''}
-                            <span class="item-name">${escHtml(item.item_name)}</span>
-                        </div>
-                        <div style="font-size:12px;color:var(--muted);margin-top:4px">
-                            ${item.item_name_cn ? escHtml(item.item_name_cn) : ''} 
-                            ${item.item_desc ? `<span style="opacity:0.5;margin:0 4px">|</span>` + escHtml(item.item_desc) : ''}
-                        </div>
-                    </div>
-                </div>
-            </td>
-            <td><strong style="color:var(--brown)">${item.price_formatted || '—'}</strong></td>
-            <td>
-                ${item.image_url
-            ? `<span style="color:var(--green);font-size:12px">● 已同步</span>`
-            : `<span style="color:var(--muted);font-size:12px;opacity:0.5">无图片</span>`
-        }
-            </td>
-            <td>
-                <div class="status-badge ${item.status === 'published' ? 's-pub' : 's-draft'}" 
-                     onclick="toggleStatus(${item.id})" style="cursor:pointer">
-                    <span class="s-dot"></span>
-                    ${item.status === 'published' ? '已发布' : '草稿'}
-                </div>
-            </td>
-            <td style="color:var(--muted);font-size:12px">${fmtDate(item.created_at)}</td>
-            <td>
-                <div style="display:flex;gap:8px">
-                    <button class="btn btn-secondary btn-small" style="padding:4px 10px;border-radius:8px" onclick='openEditModal(${JSON.stringify(item)})'>编辑</button>
-                    <button class="btn btn-danger btn-small" style="padding:4px 10px;border-radius:8px" onclick="confirmDelete(${item.id}, '${escHtml(item.item_name)}')">删除</button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
-}
-
-// ACTIONS
-function handleSearch(val) {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => loadItems(val), 400);
-}
-
-async function handleAdd() {
-    const name = document.getElementById('inp-name').value.trim();
-    if (!name) { showToast('⚠️ 请填写菜品名称'); return; }
-    if (!currentCatId) { showToast('⚠️ 请先选择分类'); return; }
-
-    const btn = document.getElementById('btn-submit');
-    const originalText = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '保存中...';
-
-    const fd = new FormData();
-    fd.append('action', 'add');
-    fd.append('type', currentType);
-    fd.append('category_id', currentCatId);
-    fd.append('item_code', document.getElementById('inp-code').value.trim());
-    fd.append('item_name', name);
-    fd.append('item_name_cn', document.getElementById('inp-cn').value.trim());
-    fd.append('item_desc', document.getElementById('inp-desc').value.trim());
-    fd.append('price', document.getElementById('inp-price').value.trim());
-    fd.append('status', document.getElementById('inp-status').value);
-
-    const imgFile = document.getElementById('file-input').files[0];
-    if (imgFile) fd.append('image', imgFile);
-
-    try {
-        const resp = await fetch(API, { method: 'POST', body: fd });
-        const result = await resp.json();
-        if (result.success) {
-            showToast('✅ 项目已成功添加');
-            resetForm();
-            await loadCategories(currentType);
-            await loadItems();
-        } else {
-            showToast('❌ 错误：' + result.message);
-        }
-    } catch (e) {
-        showToast('❌ 网络提交失败');
-    }
-
-    btn.disabled = false;
-    btn.innerHTML = originalText;
-}
-
-function resetForm() {
-    ['inp-code', 'inp-name', 'inp-cn', 'inp-desc', 'inp-price'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-    });
-    const s = document.getElementById('inp-status');
-    if (s) s.value = 'published';
-    const pw = document.getElementById('preview-wrap');
-    if (pw) pw.style.display = 'none';
-    const fi = document.getElementById('file-input');
-    if (fi) fi.value = '';
-}
-
-async function toggleStatus(id) {
-    const res = await api({ action: 'toggle_status', id });
-    if (res.success) {
-        showToast(`🔄 状态已更新为「${res.data.status === 'published' ? '已发布' : '草稿'}」`);
-        loadItems(document.getElementById('search-input').value);
-    } else {
-        showToast('❌ 切换失败');
-    }
-}
-
-// MODAL CONTROLS
-function confirmDelete(id, name) {
-    deleteItemId = id;
-    document.getElementById('del-item-name').textContent = name;
-    openModal('del-modal');
-}
-
-async function doDelete() {
-    const btn = document.getElementById('btn-confirm-del');
-    btn.textContent = '提交中...';
-    btn.disabled = true;
-
-    const res = await api({ action: 'delete', id: deleteItemId });
-    closeModal('del-modal');
-    btn.textContent = '确认删除';
-    btn.disabled = false;
-
-    if (res.success) {
-        showToast('🗑️ 项目已移除');
-        await loadCategories(currentType);
-        await loadItems();
-    } else {
-        showToast('❌ 删除失败');
-    }
-}
-
-function openEditModal(item) {
-    document.getElementById('edit-id').value = item.id;
-    document.getElementById('edit-code').value = item.item_code || '';
-    document.getElementById('edit-name').value = item.item_name || '';
-    document.getElementById('edit-cn').value = item.item_name_cn || '';
-    document.getElementById('edit-desc').value = item.item_desc || '';
-    document.getElementById('edit-price').value = item.price || '';
-    document.getElementById('edit-status').value = item.status;
-    document.getElementById('edit-image').value = '';
-
-    const thumbWrap = document.getElementById('edit-thumb-wrap');
-    thumbWrap.innerHTML = item.image_url
-        ? `<img src="${escHtml(item.image_url)}" style="max-height:100px;border-radius:12px;border:3px solid var(--gold);margin-top:10px">`
-        : '';
-
-    openModal('edit-modal');
-}
-
-async function doEdit() {
-    const name = document.getElementById('edit-name').value.trim();
-    if (!name) { showToast('⚠️ 名称不能为空'); return; }
-
-    const btn = document.getElementById('btn-edit-save');
-    btn.disabled = true;
-    btn.innerHTML = '正在保存...';
-
-    const fd = new FormData();
-    fd.append('action', 'edit');
-    fd.append('id', document.getElementById('edit-id').value);
-    fd.append('item_code', document.getElementById('edit-code').value.trim());
-    fd.append('item_name', name);
-    fd.append('item_name_cn', document.getElementById('edit-cn').value.trim());
-    fd.append('item_desc', document.getElementById('edit-desc').value.trim());
-    fd.append('price', document.getElementById('edit-price').value.trim());
-    fd.append('status', document.getElementById('edit-status').value);
-
-    const imgFile = document.getElementById('edit-image').files[0];
-    if (imgFile) fd.append('image', imgFile);
-
-    try {
-        const r = await fetch(API, { method: 'POST', body: fd });
-        const res = await r.json();
-        if (res.success) {
-            closeModal('edit-modal');
-            showToast('✅ 修改已生效');
-            loadItems(document.getElementById('search-input').value);
-        } else {
-            showToast('❌ 错误：' + res.message);
-        }
-    } catch (e) {
-        showToast('❌ 提交过程中出现问题');
-    }
-
-    btn.disabled = false;
-    btn.innerHTML = '💾 保存修改';
-}
-
-function openAddCatModal() {
-    document.getElementById('new-cat-name').value = '';
-    document.getElementById('new-cat-order').value = '0';
-    openModal('add-cat-modal');
+function toggleCatAdd() {
+    const row = document.getElementById('cat-add-row');
+    if (!row) return;
+    row.classList.toggle('open');
+    if (row.classList.contains('open')) document.getElementById('new-cat-inp').focus();
+    else document.getElementById('new-cat-inp').value = '';
 }
 
 async function doAddCat() {
-    const name = document.getElementById('new-cat-name').value.trim();
-    if (!name) { showToast('⚠️ 分类名不能为空'); return; }
-
-    const res = await api({
-        action: 'add_category',
-        type: currentType,
-        category_name: name,
-        sort_order: document.getElementById('new-cat-order').value || 0,
-    });
-
-    closeModal('add-cat-modal');
-
+    const inp = document.getElementById('new-cat-inp');
+    const name = inp.value.trim();
+    if (!name) { toast('⚠ 请输入分类名称'); return; }
+    const res = await apiPost({ action: 'add_category', type: menuType, category_name: name });
     if (res.success) {
-        showToast('✅ 已成功创建分类');
-        await loadCategories(currentType);
-        const newCat = allCats[currentType].find(c => c.id == res.data.id);
-        if (newCat) selectCat(newCat.id, newCat.category_name, 0);
-    } else {
-        showToast('❌ 失败：' + res.message);
-    }
+        toast(`✓ 分类「${name}」已新增`);
+        inp.value = '';
+        document.getElementById('cat-add-row').classList.remove('open');
+        await loadCats(menuType);
+        const c = cats[menuType].find(x => x.id == res.data.id);
+        if (c) selectCat(c.id, c.category_name);
+    } else { toast('✕ ' + res.message); }
 }
 
 function confirmDelCat(id, name) {
-    deleteCatId = id;
-    document.getElementById('del-cat-name').textContent = name;
-    openModal('del-cat-modal');
-}
-
-async function doDeleteCat() {
-    const res = await api({ action: 'delete_category', id: deleteCatId });
-    closeModal('del-cat-modal');
-
-    if (res.success) {
-        showToast('🗑️ 分类及关联项目已删除');
-        currentCatId = null;
-        await loadCategories(currentType);
-        document.getElementById('table-title').textContent = '—';
-        document.getElementById('menu-tbody').innerHTML = `<tr><td colspan="6" style="text-align:center;padding:60px;color:var(--muted)">请在左侧选择分类</td></tr>`;
-    } else {
-        showToast('❌ 加载失败');
-    }
-}
-
-function openEditCatModal(id) {
-    // Look up category in local state
-    const cat = allCats[currentType].find(c => c.id == id);
-    if (!cat) return;
-
-    document.getElementById('edit-cat-id').value = cat.id;
-    document.getElementById('edit-cat-name').value = cat.category_name;
-    document.getElementById('edit-cat-order').value = cat.sort_order || 0;
-    openModal('edit-cat-modal');
-}
-
-async function doEditCat() {
-    const id = document.getElementById('edit-cat-id').value;
-    const name = document.getElementById('edit-cat-name').value.trim();
-    const order = document.getElementById('edit-cat-order').value;
-
-    if (!name) { showToast('⚠️ 分类名称不能为空'); return; }
-
-    const res = await api({
-        action: 'edit_category',
-        id,
-        category_name: name,
-        sort_order: order
+    showConfirm(`删除分类「${name}」`, `该分类下所有菜单项目及图片将被一并删除，无法恢复。`, async () => {
+        const res = await apiPost({ action: 'delete_category', id });
+        if (res.success) {
+            toast('✓ 分类已删除');
+            if (catId == id) { catId = null; clearList(); }
+            await loadCats(menuType);
+        } else { toast('✕ ' + res.message); }
     });
+}
 
-    closeModal('edit-cat-modal');
+// Category drag-to-reorder
+function initCatDrag() {
+    let drag = null;
+    document.querySelectorAll('.cat-item').forEach(el => {
+        el.addEventListener('dragstart', e => { drag = el; setTimeout(() => el.classList.add('dragging'), 0); e.dataTransfer.effectAllowed = 'move'; });
+        el.addEventListener('dragend', () => { el.classList.remove('dragging'); document.querySelectorAll('.cat-item').forEach(i => i.classList.remove('over')); });
+        el.addEventListener('dragover', e => { e.preventDefault(); if (el !== drag) { document.querySelectorAll('.cat-item').forEach(i => i.classList.remove('over')); el.classList.add('over'); } });
+        el.addEventListener('drop', e => {
+            e.preventDefault();
+            if (drag && el !== drag) {
+                const p = drag.parentNode, ns = [...p.children], di = ns.indexOf(drag), ti = ns.indexOf(el);
+                di < ti ? p.insertBefore(drag, el.nextSibling) : p.insertBefore(drag, el);
+                // Sync cats array order
+                const ids = [...p.querySelectorAll('.cat-item')].map(x => parseInt(x.dataset.id));
+                cats[menuType] = ids.map(id => cats[menuType].find(c => c.id == id)).filter(Boolean);
+                toast('✓ 分类顺序已更新');
+            }
+        });
+    });
+}
+
+// ── SELECT CATEGORY ──
+function selectCat(id, name) {
+    catId = id;
+    catName = name;
+
+    const bcCat = document.getElementById('bc-cat');
+    if (bcCat) bcCat.textContent = name;
+
+    const addSub = document.getElementById('add-panel-sub');
+    if (addSub) addSub.textContent = `当前：${name}`;
+
+    document.querySelectorAll('.cat-item').forEach(el => el.classList.toggle('active', el.dataset.id == id));
+    loadItems();
+}
+
+function clearList() {
+    const scroll = document.getElementById('list-scroll');
+    if (scroll) scroll.innerHTML = `<div class="empty-state"><div class="ei">🍽️</div><p>请选择左侧分类</p></div>`;
+
+    const pub = document.getElementById('info-pub');
+    if (pub) pub.textContent = '0 已发布';
+
+    const dft = document.getElementById('info-dft');
+    if (dft) dft.textContent = '0 草稿';
+
+    const stats = document.getElementById('tb-stats');
+    if (stats) stats.textContent = '0 项目';
+}
+
+// ── LOAD ITEMS ──
+async function loadItems(search = '') {
+    if (!catId) return;
+    const scroll = document.getElementById('list-scroll');
+    if (!scroll) return;
+    scroll.innerHTML = [1, 2, 3, 4].map(() => `<div class="skel" style="height:56px"></div>`).join('');
+
+    const p = { action: 'get', type: menuType, category_id: catId };
+    if (search) p.search = search;
+    const res = await apiGet(p);
+    if (!res.success) { toast('✕ 加载失败'); return; }
+
+    items = res.data.items;
+    const pubCount = items.filter(i => i.status === 'published').length;
+    const dftCount = items.length - pubCount;
+
+    const pubEl = document.getElementById('info-pub');
+    if (pubEl) pubEl.textContent = `${pubCount} 已发布`;
+
+    const dftEl = document.getElementById('info-dft');
+    if (dftEl) dftEl.textContent = `${dftCount} 草稿`;
+
+    const statsEl = document.getElementById('tb-stats');
+    if (statsEl) statsEl.textContent = `${items.length} 项目`;
+
+    // Update cat count in sidebar
+    const catEl = document.querySelector(`.cat-item[data-id="${catId}"] .cat-n`);
+    if (catEl) catEl.textContent = items.length;
+
+    if (!items.length) {
+        scroll.innerHTML = `<div class="empty-state"><div class="ei">🍽️</div><p>暂无项目<br><small style="opacity:0.6">在右侧面板新增</small></p></div>`;
+        return;
+    }
+
+    scroll.innerHTML = items.map(item => buildItemHTML(item)).join('');
+    initItemDrag();
+}
+
+function buildItemHTML(item) {
+    return `
+  <div class="item-wrap" data-id="${item.id}">
+    <div class="item-row ${editOpen == item.id ? 'editing' : ''}" id="row-${item.id}" draggable="true" data-id="${item.id}">
+
+      <!-- Thumb — click to quick-upload image -->
+      <div class="thumb-cell">
+        ${item.image_url
+            ? `<img class="item-thumb" src="${esc(item.image_url)}" onerror="this.parentNode.innerHTML=thumbPh(${item.id})">`
+            : thumbPh(item.id)}
+      </div>
+
+      <!-- Info -->
+      <div class="info-cell">
+        <div class="item-en">
+          ${item.item_code ? `<span class="item-tag">${esc(item.item_code)}</span>` : ''}
+          ${esc(item.item_name)}
+        </div>
+        <div class="item-sub">
+          ${item.item_name_cn ? esc(item.item_name_cn) : ''}
+          ${item.item_name_cn && item.item_desc ? ' · ' : ''}
+          ${item.item_desc ? esc(item.item_desc) : ''}
+        </div>
+      </div>
+
+      <!-- Price -->
+      <div class="price-cell">${item.price_formatted || '—'}</div>
+
+      <!-- Status toggle -->
+      <div class="status-cell">
+        <button class="status-btn ${item.status === 'published' ? 's-pub' : 's-draft'}" onclick="toggleStatus(${item.id})">
+          <span class="sdot"></span>
+          ${item.status === 'published' ? '已发布' : '草稿'}
+        </button>
+      </div>
+
+      <!-- Actions -->
+      <div class="act-cell">
+        <button class="abtn edit" onclick="toggleEdit(${item.id})">编辑</button>
+        <button class="abtn del"  onclick="confirmDelItem(${item.id},'${esc(item.item_name)}')">删除</button>
+      </div>
+    </div>
+
+    <!-- Inline edit panel -->
+    <div class="edit-panel ${editOpen == item.id ? 'open' : ''}" id="ep-${item.id}">
+      <div class="ep-grid">
+        <div><div class="ep-label">编号</div><input class="ep-input" id="ep-code-${item.id}"  value="${esc(item.item_code || '')}"></div>
+        <div><div class="ep-label">英文名称</div><input class="ep-input" id="ep-name-${item.id}"  value="${esc(item.item_name || '')}"></div>
+        <div><div class="ep-label">中文名称</div><input class="ep-input" id="ep-cn-${item.id}"    value="${esc(item.item_name_cn || '')}"></div>
+        <div><div class="ep-label">描述</div><input class="ep-input" id="ep-desc-${item.id}" value="${esc(item.item_desc || '')}"></div>
+        <div><div class="ep-label">价格</div><input class="ep-input" id="ep-price-${item.id}" value="${esc(item.price || '')}"></div>
+      </div>
+      <div class="ep-grid2">
+        <div>
+          <div class="ep-label">图片</div>
+          <label class="ep-img-zone" id="ep-iz-${item.id}">
+            <input type="file" accept="image/*" onchange="onEpImg(${item.id},this)">
+            <img class="ep-img-preview" id="ep-prev-${item.id}" ${item.image_url ? `src="${esc(item.image_url)}" style="display:block"` : ''}>
+            <span class="ep-img-text" id="ep-it-${item.id}">${item.image_url ? '点击换图' : '点击上传'}</span>
+          </label>
+        </div>
+        <div>
+          <div class="ep-label">状态</div>
+          <select class="ep-input ep-select" id="ep-status-${item.id}">
+            <option value="published" ${item.status === 'published' ? 'selected' : ''}>✓ 已发布</option>
+            <option value="draft"     ${item.status === 'draft' ? 'selected' : ''}>◷ 草稿</option>
+          </select>
+        </div>
+      </div>
+      <div class="ep-actions">
+        <button class="btn-save" id="ep-save-${item.id}" onclick="doEdit(${item.id})">保存修改</button>
+        <button class="btn-discard" onclick="toggleEdit(${item.id})">取消</button>
+        <span style="font-size:11px;color:var(--text-4);margin-left:auto">${fmtDate(item.updated_at)}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+function thumbPh(id) {
+    return `<label class="thumb-ph" title="点击上传图片">
+    <input type="file" accept="image/*" onchange="quickUploadImg(${id},this)">
+    <span>🍽</span>
+    <span class="upload-hint">上传</span>
+  </label>`;
+}
+
+// ── SEARCH ──
+function onSearch(v) {
+    clearTimeout(searchTmr);
+    searchTmr = setTimeout(() => loadItems(v), 350);
+}
+
+// ── TOGGLE EDIT ──
+function toggleEdit(id) {
+    if (editOpen === id) {
+        document.getElementById(`ep-${id}`)?.classList.remove('open');
+        document.getElementById(`row-${id}`)?.classList.remove('editing');
+        editOpen = null;
+        return;
+    }
+    // Close previous
+    if (editOpen) {
+        document.getElementById(`ep-${editOpen}`)?.classList.remove('open');
+        document.getElementById(`row-${editOpen}`)?.classList.remove('editing');
+    }
+    editOpen = id;
+    const ep = document.getElementById(`ep-${id}`);
+    const row = document.getElementById(`row-${id}`);
+    if (ep) ep.classList.add('open');
+    if (row) row.classList.add('editing');
+
+    const nameInp = document.getElementById(`ep-name-${id}`);
+    if (nameInp) nameInp.focus();
+
+    // Scroll into view
+    setTimeout(() => ep?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+}
+
+// ── EDIT IMG PREVIEW ──
+function onEpImg(id, inp) {
+    const f = inp.files[0]; if (!f) return;
+    const prev = document.getElementById(`ep-prev-${id}`);
+    const text = document.getElementById(`ep-it-${id}`);
+    const zone = document.getElementById(`ep-iz-${id}`);
+    const r = new FileReader();
+    r.onload = e => {
+        if (prev) { prev.src = e.target.result; prev.style.display = 'block'; }
+        if (text) text.textContent = '✓ ' + f.name.slice(0, 16);
+        if (zone) zone.classList.add('has-file');
+    };
+    r.readAsDataURL(f);
+}
+
+// ── SAVE EDIT ──
+async function doEdit(id) {
+    const nameInp = document.getElementById(`ep-name-${id}`);
+    const name = nameInp ? nameInp.value.trim() : '';
+    if (!name) { toast('⚠ 英文名称不能为空'); return; }
+
+    const btn = document.getElementById(`ep-save-${id}`);
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin"></span>'; }
+
+    const p = {
+        action: 'edit', id,
+        item_code: document.getElementById(`ep-code-${id}`).value.trim(),
+        item_name: name,
+        item_name_cn: document.getElementById(`ep-cn-${id}`).value.trim(),
+        item_desc: document.getElementById(`ep-desc-${id}`).value.trim(),
+        price: document.getElementById(`ep-price-${id}`).value.trim(),
+        status: document.getElementById(`ep-status-${id}`).value,
+    };
+
+    const imgInp = document.querySelector(`#ep-${id} input[type=file]`);
+    const res = await apiPost(p, (imgInp && imgInp.files[0]) ? { image: imgInp.files[0] } : {});
+
+    if (btn) { btn.disabled = false; btn.innerHTML = '保存修改'; }
 
     if (res.success) {
-        showToast('✅ 分类已更新');
-        await loadCategories(currentType);
-    } else {
-        showToast('❌ 更新失败：' + res.message);
+        toast('✓ 修改已保存');
+        editOpen = null;
+        const searchInp = document.getElementById('search-inp');
+        loadItems(searchInp ? searchInp.value : '');
+    } else { toast('✕ ' + res.message); }
+}
+
+// ── TOGGLE STATUS ──
+async function toggleStatus(id) {
+    const res = await apiPost({ action: 'toggle_status', id });
+    if (res.success) {
+        const lbl = res.data.status === 'published' ? '✓ 已发布' : '◷ 草稿';
+        toast(lbl);
+        const searchInp = document.getElementById('search-inp');
+        loadItems(searchInp ? searchInp.value : '');
+    } else { toast('✕ ' + res.message); }
+}
+
+// ── QUICK UPLOAD (click thumb) ──
+async function quickUploadImg(id, inp) {
+    const f = inp.files[0]; if (!f) return;
+    toast('⟳ 上传中…');
+    const res = await apiPost({ action: 'edit', id }, { image: f });
+    if (res.success) {
+        toast('✓ 图片已更新');
+        const searchInp = document.getElementById('search-inp');
+        loadItems(searchInp ? searchInp.value : '');
+    } else { toast('✕ ' + res.message); }
+}
+
+// ── DELETE ITEM ──
+function confirmDelItem(id, name) {
+    showConfirm(`删除「${name}」`, '此操作无法恢复，图片也会一并删除。', async () => {
+        const res = await apiPost({ action: 'delete', id });
+        if (res.success) {
+            toast('✓ 已删除');
+            await loadCats(menuType);
+            const searchInp = document.getElementById('search-inp');
+            await loadItems(searchInp ? searchInp.value : '');
+        } else { toast('✕ ' + res.message); }
+    });
+}
+
+// ── ITEM DRAG-REORDER ──
+function initItemDrag() {
+    const scroll = document.getElementById('list-scroll');
+    if (!scroll) return;
+    let drag = null;
+    scroll.querySelectorAll('.item-row').forEach(el => {
+        el.addEventListener('dragstart', e => { drag = el; setTimeout(() => el.classList.add('dragging'), 0); e.dataTransfer.effectAllowed = 'move'; });
+        el.addEventListener('dragend', () => { el.classList.remove('dragging'); scroll.querySelectorAll('.item-row').forEach(i => i.classList.remove('over')); });
+        el.addEventListener('dragover', e => { e.preventDefault(); if (el !== drag) { scroll.querySelectorAll('.item-row').forEach(i => i.classList.remove('over')); el.classList.add('over'); } });
+        el.addEventListener('drop', e => {
+            e.preventDefault();
+            if (!drag || el === drag) return;
+            const dWrap = drag.closest('.item-wrap');
+            const tWrap = el.closest('.item-wrap');
+            if (!dWrap || !tWrap) return;
+            const p = dWrap.parentNode;
+            const ns = [...p.children];
+            if (ns.indexOf(dWrap) < ns.indexOf(tWrap)) p.insertBefore(dWrap, tWrap.nextSibling);
+            else p.insertBefore(dWrap, tWrap);
+            toast('✓ 顺序已调整');
+        });
+    });
+}
+
+// ── ADD FORM ──
+function onImgPick(inp) {
+    const f = inp.files[0]; if (!f) return;
+    imgFile = f;
+    showImgPreview(f);
+}
+
+function onImgDrop(e) {
+    e.preventDefault();
+    const zone = document.getElementById('img-zone');
+    if (zone) zone.classList.remove('dragover');
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('image/')) {
+        imgFile = f;
+        showImgPreview(f);
     }
 }
 
-function toggleAddCard() {
-    document.getElementById('add-card').classList.toggle('collapsed');
+function showImgPreview(f) {
+    const r = new FileReader();
+    r.onload = e => {
+        const inner = document.getElementById('img-zone-inner');
+        if (inner) inner.style.display = 'none';
+
+        const wrap = document.getElementById('img-preview-wrap');
+        if (wrap) wrap.classList.add('show');
+
+        const prev = document.getElementById('img-preview');
+        if (prev) prev.src = e.target.result;
+
+        const name = document.getElementById('img-preview-name');
+        if (name) name.textContent = '✓ ' + f.name;
+
+        const size = document.getElementById('img-preview-size');
+        if (size) size.textContent = fmtBytes(f.size);
+    };
+    r.readAsDataURL(f);
 }
 
-function escHtml(str) {
-    if (!str) return '';
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+function clearImg(e) {
+    if (e && e.stopPropagation) e.stopPropagation();
+    imgFile = null;
+    const inp = document.getElementById('f-img');
+    if (inp) inp.value = '';
+
+    const wrap = document.getElementById('img-preview-wrap');
+    if (wrap) wrap.classList.remove('show');
+
+    const inner = document.getElementById('img-zone-inner');
+    if (inner) inner.style.display = '';
+}
+
+async function doAdd() {
+    const nameInp = document.getElementById('f-name');
+    const name = nameInp ? nameInp.value.trim() : '';
+    if (!name) { toast('⚠ 请填写英文名称'); nameInp?.focus(); return; }
+    if (!catId) { toast('⚠ 请先选择左侧分类'); return; }
+
+    const btn = document.getElementById('btn-submit');
+    const txt = document.getElementById('btn-submit-text');
+    if (btn) btn.disabled = true;
+    if (txt) txt.innerHTML = '<span class="spin"></span> 保存中…';
+
+    const p = {
+        action: 'add', type: menuType, category_id: catId,
+        item_code: document.getElementById('f-code').value.trim(),
+        item_name: name,
+        item_name_cn: document.getElementById('f-cn').value.trim(),
+        item_desc: document.getElementById('f-desc').value.trim(),
+        price: document.getElementById('f-price').value.trim(),
+        status: document.getElementById('f-status').value,
+    };
+
+    const res = await apiPost(p, imgFile ? { image: imgFile } : {});
+
+    if (btn) btn.disabled = false;
+    if (txt) txt.textContent = '＋ 添加到菜单';
+
+    if (res.success) {
+        toast(`✓ 「${name}」已添加`);
+        resetForm();
+        await loadCats(menuType);
+        const searchInp = document.getElementById('search-inp');
+        loadItems(searchInp ? searchInp.value : '');
+    } else { toast('✕ ' + res.message); }
+}
+
+function resetForm() {
+    ['f-code', 'f-name', 'f-cn', 'f-desc', 'f-price'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    const status = document.getElementById('f-status');
+    if (status) status.value = 'published';
+    clearImg();
+    imgFile = null;
+}
+
+// ── CONFIRM ──
+function showConfirm(title, body, cb) {
+    const t = document.getElementById('confirm-title');
+    const b = document.getElementById('confirm-body');
+    const bg = document.getElementById('confirm-bg');
+    const yes = document.getElementById('confirm-yes');
+
+    if (t) t.textContent = title;
+    if (b) b.textContent = body;
+    if (bg) bg.classList.add('show');
+    if (yes) yes.onclick = () => { closeConfirm(); cb(); };
+}
+
+function closeConfirm() {
+    const bg = document.getElementById('confirm-bg');
+    if (bg) bg.classList.remove('show');
 }
