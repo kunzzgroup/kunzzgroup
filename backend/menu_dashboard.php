@@ -74,18 +74,22 @@ if (!isset($_SESSION['user_id'])) {
             <div class="right-panel">
                 
                 <!-- Add New Item Card -->
-                <div class="card">
+                <div class="card collapsed" id="add-card">
                     <div class="card-deco-corner corner-tl"></div><div class="card-deco-corner corner-tr"></div><div class="card-deco-corner corner-bl"></div><div class="card-deco-corner corner-br"></div>
-                    <div class="card-header">
-                        <h3>➕ 新增菜单项目</h3>
-                        <div style="display:flex;align-items:center;gap:10px">
+                    <div class="card-header" onclick="toggleAddCard()" style="cursor:pointer">
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <span class="toggle-icon">▼</span>
+                            <h3>➕ 新增菜单项目</h3>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:10px" onclick="event.stopPropagation()">
                             <span style="font-size:12px;color:var(--muted)">选择分类：</span>
                             <select id="inp-category" style="padding:4px 10px;border-radius:8px;border:1.5px solid var(--gold);font-size:12px;color:var(--brown);font-weight:700;outline:none;background:var(--white)">
                                 <option value="">正在加载...</option>
                             </select>
                         </div>
                     </div>
-                    <div class="card-body">
+                    <div class="card-collapsible">
+                        <div class="card-body">
                         <div class="form-row">
                             <div class="fg">
                                 <label>菜单编号</label>
@@ -131,14 +135,12 @@ if (!isset($_SESSION['user_id'])) {
                             <img id="preview-img" src="">
                             <div id="preview-name" style="font-size:12px;color:var(--gold);margin-top:10px"></div>
                         </div>
-
-                        <div style="display:flex;gap:12px;margin-top:20px">
-                            <button class="btn btn-primary" id="btn-submit" onclick="handleAdd()">📤 上传并保存</button>
-                            <button class="btn btn-secondary" onclick="resetForm()">↩️ 重置表单</button>
+                        <div class="modal-footer" style="padding:0">
+                            <button class="btn btn-primary" style="width:100%;height:50px;font-size:16px;letter-spacing:1px" onclick="handleAdd()">确认发布菜单项目</button>
                         </div>
                     </div>
                 </div>
-
+                
                 <!-- Items List Table -->
                 <div class="card">
                     <div class="card-deco-corner corner-tl"></div><div class="card-deco-corner corner-tr"></div><div class="card-deco-corner corner-bl"></div><div class="card-deco-corner corner-br"></div>

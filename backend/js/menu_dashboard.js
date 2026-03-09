@@ -331,7 +331,7 @@ function handleSearch(val) {
 
 async function handleAdd() {
     const name = document.getElementById('inp-name').value.trim();
-    if (!name) { showToast('⚠️ 菜单名称不能为空'); return; }
+    if (!name) { showToast('⚠️ 请填写菜品名称'); return; }
     if (!currentCatId) { showToast('⚠️ 请先选择分类'); return; }
 
     const btn = document.getElementById('btn-submit');
@@ -562,6 +562,10 @@ async function doEditCat() {
     } else {
         showToast('❌ 更新失败：' + res.message);
     }
+}
+
+function toggleAddCard() {
+    document.getElementById('add-card').classList.toggle('collapsed');
 }
 
 function escHtml(str) {
