@@ -198,7 +198,6 @@ if (!isset($_SESSION['user_id'])) {
         </div>
     </div>
 
-    <!-- Add Category Modal -->
     <div class="modal-overlay" id="add-cat-modal">
         <div class="modal">
             <h3>📂 新增分类</h3>
@@ -213,6 +212,26 @@ if (!isset($_SESSION['user_id'])) {
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('add-cat-modal')">关闭</button>
                 <button class="btn btn-primary" onclick="doAddCat()">确认创建</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Category Modal -->
+    <div class="modal-overlay" id="edit-cat-modal">
+        <div class="modal">
+            <h3>📂 编辑分类</h3>
+            <input type="hidden" id="edit-cat-id">
+            <div class="fg">
+                <label>分类名称 *</label>
+                <input type="text" id="edit-cat-name">
+            </div>
+            <div class="fg" style="margin-top:15px">
+                <label>排序权重 (越小越靠前)</label>
+                <input type="number" id="edit-cat-order">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('edit-cat-modal')">取消</button>
+                <button class="btn btn-primary" onclick="doEditCat()">保存更改</button>
             </div>
         </div>
     </div>

@@ -110,6 +110,7 @@ match ($action) {
     // ── Categories ──────────────────────────────────────────
     'get_categories'    => actionGetCategories(),
     'add_category'      => actionAddCategory(),
+    'edit_category'     => actionEditCategory(),
     'delete_category'   => actionDeleteCategory(),
 
     // ── Menu Items ──────────────────────────────────────────
@@ -184,6 +185,36 @@ function actionDeleteCategory(): void {
 
     if ($stmt->rowCount() === 0) respond(false, '分类不存在', null, 404);
     respond(true, '分类已删除（该分类下的菜单项也已一并删除）');
+}
+
+// ============================================================
+//  ACTION: EDIT CATEGORY
+//  POST menu_api.php?action=edit_category
+//  Body: id, category_name, sort_order
+// ============================================================
+function actionEditCategory(): void {
+    $id    = (int)($_POST['id'] ?? 0);
+    $name  = trim($_POST['category_name'] ?? '');
+    $order = isset($_POST['sort_order']) ? (int)$_POST['sort_order'] : null;
+
+    if ($id <= 0) respond(false, 'id 无效', null, 422);
+
+    $pdo = getDB();
+    $sql = "UPDATE menu_categories SET category_name = ?";
+    $params = [$name];
+
+    if ($order !== null) {
+        $sql .= ", sort_order = ?";
+        $params[] = $order;
+    }
+
+    $sql .= " WHERE id = ?";
+    $params[] = $id;
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    respond(true, '分类更新成功');
 }
 
 // ============================================================

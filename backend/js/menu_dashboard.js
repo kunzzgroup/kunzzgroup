@@ -163,11 +163,15 @@ function renderCatList(type) {
         <div class="cat-item ${c.id == currentCatId ? 'active' : ''}" 
              onclick="selectCat(${c.id}, '${escHtml(c.category_name)}', ${c.item_count})" 
              data-id="${c.id}">
-            <div style="display:flex;align-items:center;gap:8px">
-                <span class="cat-count">${c.item_count}</span>
-                <span>${escHtml(c.category_name)}</span>
+            <div style="display:flex;align-items:center;gap:8px;flex:1;overflow:hidden">
+                <span class="cat-count" title="项目数量">${c.item_count}</span>
+                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(c.category_name)}</span>
+                <span style="font-size:10px;opacity:0.4;font-weight:400" title="排序权重">#${c.sort_order || 0}</span>
             </div>
-            <button class="btn-del-cat" onclick="event.stopPropagation();confirmDelCat(${c.id},'${escHtml(c.category_name)}')" title="删除分类">✕</button>
+            <div class="cat-item-actions">
+                <button class="btn-edit-cat" onclick="event.stopPropagation();openEditCatModal(${JSON.stringify(c).replace(/'/g, "&#39;")})" title="编辑分类">✎</button>
+                <button class="btn-del-cat" onclick="event.stopPropagation();confirmDelCat(${c.id},'${escHtml(c.category_name)}')" title="删除分类">✕</button>
+            </div>
         </div>
     `).join('');
 
@@ -502,6 +506,37 @@ async function doDeleteCat() {
         document.getElementById('menu-tbody').innerHTML = `<tr><td colspan="6" style="text-align:center;padding:60px;color:var(--muted)">请在左侧选择分类</td></tr>`;
     } else {
         showToast('❌ 加载失败');
+    }
+}
+
+function openEditCatModal(cat) {
+    document.getElementById('edit-cat-id').value = cat.id;
+    document.getElementById('edit-cat-name').value = cat.category_name;
+    document.getElementById('edit-cat-order').value = cat.sort_order || 0;
+    openModal('edit-cat-modal');
+}
+
+async function doEditCat() {
+    const id = document.getElementById('edit-cat-id').value;
+    const name = document.getElementById('edit-cat-name').value.trim();
+    const order = document.getElementById('edit-cat-order').value;
+
+    if (!name) { showToast('⚠️ 分类名称不能为空'); return; }
+
+    const res = await api({
+        action: 'edit_category',
+        id,
+        category_name: name,
+        sort_order: order
+    });
+
+    closeModal('edit-cat-modal');
+
+    if (res.success) {
+        showToast('✅ 分类已更新');
+        await loadCategories(currentType);
+    } else {
+        showToast('❌ 更新失败：' + res.message);
     }
 }
 

@@ -14,9 +14,8 @@
     --green: #27ae60;
     --shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
     --shadow-hover: 0 12px 40px rgba(107, 76, 42, 0.12);
-    --header-gradient: linear-gradient(135deg, #4a3621 0%, #2a1b0d 100%);
-    --seigaiha: radial-gradient(circle at 100% 50%, transparent 20%, rgba(201, 168, 76, 0.05) 21%, rgba(201, 168, 76, 0.05) 34%, transparent 35%, transparent),
-        radial-gradient(circle at 0% 50%, transparent 20%, rgba(201, 168, 76, 0.05) 21%, rgba(201, 168, 76, 0.05) 34%, transparent 35%, transparent) 0 -50px;
+    --header-gradient: linear-gradient(135deg, #3d2b18 0%, #1a1209 100%);
+    --dot-pattern: radial-gradient(rgba(201, 168, 76, 0.2) 2px, transparent 0);
 }
 
 * {
@@ -66,9 +65,9 @@ body.has-sidebar {
     content: '';
     position: absolute;
     inset: 0;
-    background-image: var(--seigaiha);
-    background-size: 100px 100px;
-    opacity: 0.4;
+    background-image: var(--dot-pattern);
+    background-size: 24px 24px;
+    opacity: 0.8;
 }
 
 .header::after {
@@ -320,24 +319,45 @@ body.has-sidebar {
     background: rgba(0, 0, 0, 0.1);
 }
 
-.btn-del-cat {
+.cat-item-actions {
+    display: flex;
+    gap: 8px;
+    opacity: 0.2;
+    transition: opacity 0.2s;
+}
+
+.cat-item:hover .cat-item-actions {
+    opacity: 1;
+}
+
+.cat-item.active .cat-item-actions {
+    opacity: 0.6;
+}
+
+.btn-del-cat,
+.btn-edit-cat {
     background: none;
     border: none;
     cursor: pointer;
-    color: rgba(0, 0, 0, 0.2);
-    font-size: 12px;
+    font-size: 14px;
     transition: all 0.2s;
-    display: none;
 }
 
-.cat-item:hover .btn-del-cat {
-    display: block;
+.btn-del-cat {
     color: var(--red);
 }
 
-.cat-item.active .btn-del-cat {
-    display: block;
-    color: rgba(0, 0, 0, 0.3);
+.btn-edit-cat {
+    color: var(--brown);
+}
+
+.cat-item:hover .btn-del-cat:hover {
+    transform: scale(1.2);
+}
+
+.cat-item:hover .btn-edit-cat:hover {
+    color: var(--gold);
+    transform: scale(1.2);
 }
 
 /* Main Panels */
@@ -359,18 +379,18 @@ body.has-sidebar {
 
 .card-deco-corner {
     position: absolute;
-    width: 20px;
-    height: 20px;
-    border: 2px solid var(--gold);
-    opacity: 0.3;
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--gold);
+    opacity: 0.25;
     pointer-events: none;
     transition: all 0.3s ease;
 }
 
 .card:hover .card-deco-corner {
-    opacity: 1;
-    width: 25px;
-    height: 25px;
+    opacity: 0.8;
+    width: 30px;
+    height: 30px;
 }
 
 .corner-tl {
@@ -485,13 +505,23 @@ body.has-sidebar {
 .upload-zone {
     border: 2px dashed var(--border);
     border-radius: 15px;
-    padding: 40px;
+    padding: 30px;
     text-align: center;
     cursor: pointer;
     background: #fdfdfd;
     transition: all 0.3s;
     position: relative;
     margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.upload-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
 }
 
 .upload-zone:hover {
@@ -610,10 +640,11 @@ tbody tr:hover td {
 }
 
 .s-dot {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: currentColor;
+    flex-shrink: 0;
 }
 
 /* Buttons */
