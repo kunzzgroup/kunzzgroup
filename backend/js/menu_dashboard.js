@@ -146,24 +146,7 @@ async function loadCategories(type) {
     const counterEl = document.getElementById(`tab-${type}-count`);
     if (counterEl) counterEl.textContent = `${total} 项记录`;
 
-    if (type === currentType) {
-        renderCatList(type);
-        updateCategoryDropdowns(type);
-    }
-}
-
-function updateCategoryDropdowns(type) {
-    const cats = allCats[type] || [];
-    const addSelect = document.getElementById('inp-category');
-    const editSelect = document.getElementById('edit-category');
-
-    const html = cats.map(c => `<option value="${c.id}">${escHtml(c.category_name)}</option>`).join('');
-
-    if (addSelect) {
-        addSelect.innerHTML = html;
-        if (currentCatId) addSelect.value = currentCatId;
-    }
-    if (editSelect) editSelect.innerHTML = html;
+    if (type === currentType) renderCatList(type);
 }
 
 function renderCatList(type) {
@@ -230,9 +213,7 @@ function selectCat(catId, catName, count) {
     const targetCat = document.querySelector(`.cat-item[data-id="${catId}"]`);
     if (targetCat) targetCat.classList.add('active');
 
-    const addSelect = document.getElementById('inp-category');
-    if (addSelect) addSelect.value = catId;
-
+    document.getElementById('cur-cat-label').textContent = catName;
     document.getElementById('table-title').textContent = catName;
     document.getElementById('item-count').textContent = `${count} 项`;
     document.getElementById('search-input').value = '';
@@ -342,7 +323,7 @@ async function handleAdd() {
     const fd = new FormData();
     fd.append('action', 'add');
     fd.append('type', currentType);
-    fd.append('category_id', document.getElementById('inp-category').value);
+    fd.append('category_id', currentCatId);
     fd.append('item_code', document.getElementById('inp-code').value.trim());
     fd.append('item_name', name);
     fd.append('item_name_cn', document.getElementById('inp-cn').value.trim());
@@ -423,7 +404,6 @@ async function doDelete() {
 
 function openEditModal(item) {
     document.getElementById('edit-id').value = item.id;
-    document.getElementById('edit-category').value = item.category_id;
     document.getElementById('edit-code').value = item.item_code || '';
     document.getElementById('edit-name').value = item.item_name || '';
     document.getElementById('edit-cn').value = item.item_name_cn || '';
