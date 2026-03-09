@@ -1,4 +1,13 @@
 
+// HTML 反转义函数
+function decodeHtml(html) {
+    if (!html) return '';
+    if (typeof html !== 'string') return html;
+    const txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+}
+
 // 检查用户权限的函数
 async function checkUserPermissions() {
     try {
@@ -242,7 +251,15 @@ async function loadStockData() {
         console.log('解析后的数据:', result);
 
         if (result.success) {
-            stockData = result.data || [];
+            stockData = (result.data || []).map(record => {
+                const decodedRecord = { ...record };
+                ['product_code', 'product_name', 'specification', 'category', 'supplier', 'applicant', 'approver', 'system_assign'].forEach(field => {
+                    if (decodedRecord[field]) {
+                        decodedRecord[field] = decodeHtml(decodedRecord[field]);
+                    }
+                });
+                return decodedRecord;
+            });
             generateStockTable();
             updateStats();
             showAlert(`库存数据加载成功，共找到 ${stockData.length} 条记录`, 'success');
@@ -389,8 +406,14 @@ function createStockRow(data = {}, index = -1) {
                 </td>
                 <td style="padding: 8px;">
                     ${data.approver ?
-            '<span style="color: #065f46; font-weight: 600;">已批准</span>' :
-            '<span style="color: #92400e; font-weight: 600;">待批准</span>'
+            `<span style="color: #065f46; font-weight: 600;">已批准</span>` :
+            (userCanApprove && !isNewRow ?
+                `<button class="approve-btn" onclick="approveRecord('${rowId}')">
+                                <i class="fas fa-check"></i>
+                                批准
+                            </button>` :
+                `<span style="color: #92400e; font-weight: 600;">待批准</span>`
+            )
         }
                 </td>
                 <td class="action-cell">

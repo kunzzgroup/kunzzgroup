@@ -1,4 +1,13 @@
 
+// HTML 反转义函数
+function decodeHtml(html) {
+    if (!html) return '';
+    if (typeof html !== 'string') return html;
+    const txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+}
+
 // API 配置
 const STOCK_SYSTEM_OPTIONS = [
     { value: 'central', label: '中央' },
@@ -1356,7 +1365,15 @@ async function loadStockData() {
         const result = await apiCall(apiUrl);
 
         if (result.success) {
-            stockData = result.data || [];
+            stockData = (result.data || []).map(record => {
+                const decodedRecord = { ...record };
+                ['product_name', 'code_number', 'receiver', 'remark', 'category', 'specification', 'applicant', 'approver', 'type'].forEach(field => {
+                    if (decodedRecord[field]) {
+                        decodedRecord[field] = decodeHtml(decodedRecord[field]);
+                    }
+                });
+                return decodedRecord;
+            });
         } else {
             stockData = [];
             showAlert('获取数据失败: ' + (result.message || '未知错误'), 'error');
@@ -1380,7 +1397,11 @@ async function loadCodeNumbers() {
     try {
         const result = await apiCall('?action=codenumbers');
         if (result.success && result.data) {
-            window.codeNumberOptions = result.data;
+            window.codeNumberOptions = result.data.map(opt => {
+                if (typeof opt === 'string') return decodeHtml(opt);
+                if (opt.code_number) opt.code_number = decodeHtml(opt.code_number);
+                return opt;
+            });
         } else {
             window.codeNumberOptions = [];
         }
@@ -1395,7 +1416,11 @@ async function loadProducts() {
     try {
         const result = await apiCall('?action=products_list');
         if (result.success && result.data) {
-            window.productOptions = result.data;
+            window.productOptions = result.data.map(opt => {
+                if (typeof opt === 'string') return decodeHtml(opt);
+                if (opt.product_name) opt.product_name = decodeHtml(opt.product_name);
+                return opt;
+            });
         } else {
             window.productOptions = [];
         }
