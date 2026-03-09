@@ -58,7 +58,7 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
         if ($endDate) {
             // j2stockedit_data 包含桌面端及手机端 sync 记录（receiver='Mobile'）
             $sql = "SELECT 
-                        product_name,
+                        REPLACE(product_name, '&amp;', '&') as product_name,
                         specification,
                         price,
                         code_number,
@@ -70,7 +70,7 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
                     FROM j2stockedit_data
                     WHERE product_name IS NOT NULL AND product_name != ''
                     AND date <= ?
-                    GROUP BY product_name, specification, price, code_number, type
+                    GROUP BY REPLACE(product_name, '&amp;', '&'), specification, price, code_number, type
                     HAVING current_stock != 0
                     ORDER BY product_name ASC, price ASC";
             
@@ -79,7 +79,7 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
         } else {
             // 没有日期过滤，返回所有库存
             $sql = "SELECT 
-                        product_name,
+                        REPLACE(product_name, '&amp;', '&') as product_name,
                         specification,
                         price,
                         code_number,
@@ -90,7 +90,7 @@ function getJ2StockSummary($startDate = null, $endDate = null) {
                          SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
                     FROM j2stockedit_data
                     WHERE product_name IS NOT NULL AND product_name != ''
-                    GROUP BY product_name, specification, price, code_number, type
+                    GROUP BY REPLACE(product_name, '&amp;', '&'), specification, price, code_number, type
                     HAVING current_stock != 0
                     ORDER BY product_name ASC, price ASC";
             
