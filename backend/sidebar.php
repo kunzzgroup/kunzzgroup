@@ -102,6 +102,7 @@ $submenuVisibility = [
         'join1' => true,
         'join2' => true,
         'join3' => true,
+        'menu_management' => true,
     ],
     'brand' => [
         'kunzz_holdings' => true,
@@ -625,6 +626,23 @@ if (!$canSeeBrand) {
                         企业蓝图管理
                     </a>
                 </div>
+                <?php if (!empty($submenuVisibility['visual']['menu_management'])): ?>
+                <div class="menu-item-wrapper">
+                    <a class="informationmenu-item" href="#">
+                        菜单管理
+                        <span class="informationmenu-arrow">›</span>
+                    </a>
+                    <div class="submenu">
+                        <div class="submenu-header">
+                            <div class="submenu-title">菜单管理</div>
+                        </div>
+                        <div class="submenu-content">
+                            <a href="grand_menu" class="submenu-item">Grand Menu</a>
+                            <a href="sushi_menu" class="submenu-item">Sushi Menu</a>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
         <?php endif; ?>
