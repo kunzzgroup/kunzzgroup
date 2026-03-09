@@ -3376,57 +3376,8 @@ document.addEventListener('click', function (e) {
 
 // 键盘快捷键支持
 document.addEventListener('keydown', function (e) {
-<<<<<<< HEAD
     // Ctrl+Shift+S 批量保存
     if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 's') {
-=======
-    // Ctrl + A + Enter 批量保存
-    if (e.ctrlKey && e.key === 'Enter' && window._isAHeld) {
-        e.preventDefault();
-        const batchSaveBtn = document.getElementById('batch-save-btn');
-        if (batchSaveBtn && batchSaveBtn.style.display !== 'none' && !batchSaveBtn.disabled) {
-            batchSaveNewRows();
-        }
-        return;
-    }
-
-    // Ctrl+Enter 保存当前编辑行或新增行
-    if (e.ctrlKey && e.key === 'Enter') {
-        e.preventDefault();
-
-        // 1. 检查是否在新增表单中
-        const addForm = document.getElementById('add-form');
-        if (addForm && addForm.classList.contains('show') && addForm.contains(document.activeElement)) {
-            saveNewRecord();
-            return;
-        }
-
-        // 2. 检查是否在表格的某一行中
-        const activeElement = document.activeElement;
-        const row = activeElement.closest('tr');
-        if (row) {
-            if (row.classList.contains('new-row')) {
-                // 新增行
-                const saveBtn = row.querySelector('.save-new-btn');
-                if (saveBtn) saveBtn.click();
-            } else if (row.classList.contains('editing-row')) {
-                // 编辑行
-                const saveBtn = row.querySelector('.save-mode');
-                if (saveBtn) saveBtn.click();
-            }
-            return;
-        }
-
-        // 3. 后备方案：如果有正在编辑的行，保存第一行
-        if (editingRowIds.size > 0) {
-            const firstId = Array.from(editingRowIds)[0];
-            saveRecord(firstId);
-        }
-    }
-
-    // Ctrl+S 保存所有编辑
-    if (e.ctrlKey && e.key === 's') {
->>>>>>> ae730b67dc689c1f06dff8608c51323df3f2bb55
         e.preventDefault();
         const batchSaveBtn = document.getElementById('batch-save-btn');
         if (batchSaveBtn && batchSaveBtn.style.display !== 'none') {
@@ -3454,10 +3405,9 @@ document.addEventListener('keydown', function (e) {
             }
             // 如果是正在编辑的行
             if (focusedRow.classList.contains('editing-row')) {
-                // 从行中找到记录ID
+                // 从行中找到保存按钮并触发点击
                 const saveBtn = focusedRow.querySelector('.save-mode');
                 if (saveBtn) {
-                    // 按钮的onclick通常包含 saveRecord(id)
                     saveBtn.click();
                     return;
                 }
@@ -3484,15 +3434,6 @@ document.addEventListener('keydown', function (e) {
         e.preventDefault();
         scrollToTop();
     }
-});
-
-// 监听 A 键状态用于 Ctrl+A+Enter
-window._isAHeld = false;
-document.addEventListener('keydown', function (e) {
-    if (e.key.toLowerCase() === 'a') window._isAHeld = true;
-});
-document.addEventListener('keyup', function (e) {
-    if (e.key.toLowerCase() === 'a') window._isAHeld = false;
 });
 // 创建 Combobox 组件
 function createCombobox(type, value = '', recordId = null, isNewRow = false) {
