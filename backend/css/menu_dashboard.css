@@ -377,6 +377,31 @@ body.has-sidebar {
     position: relative;
 }
 
+/* Collapsible Card */
+.card-collapsible {
+    max-height: 2000px;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 1;
+}
+
+.card.collapsed .card-collapsible {
+    max-height: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+.toggle-icon {
+    font-size: 10px;
+    color: var(--gold);
+    transition: transform 0.3s ease;
+    display: inline-block;
+}
+
+.card.collapsed .toggle-icon {
+    transform: rotate(-90deg);
+}
+
 .card-deco-corner {
     position: absolute;
     width: 24px;
