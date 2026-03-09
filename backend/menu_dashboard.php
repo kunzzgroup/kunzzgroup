@@ -75,7 +75,7 @@ if (!isset($_SESSION['user_id'])) {
                 
                 <!-- Add New Item Card -->
                 <div class="card collapsed" id="add-card">
-                    <div class="card-deco-corner corner-tl"></div><div class="card-deco-corner corner-tr"></div><div class="card-deco-corner corner-bl"></div><div class="card-deco-corner corner-br"></div>
+                    <div class="card-deco-corner corner-tl"></div><div class="card-deco-corner corner-tr"></div><div class="card-deco-corner corner-bl"></div>
                     <div class="card-header" onclick="toggleAddCard()" style="cursor:pointer">
                         <div style="display:flex;align-items:center;gap:12px">
                             <span class="toggle-icon">▼</span>
@@ -140,7 +140,7 @@ if (!isset($_SESSION['user_id'])) {
                 
                 <!-- Items List Table -->
                 <div class="card">
-                    <div class="card-deco-corner corner-tl"></div><div class="card-deco-corner corner-tr"></div><div class="card-deco-corner corner-bl"></div><div class="card-deco-corner corner-br"></div>
+                    <div class="card-deco-corner corner-tl"></div><div class="card-deco-corner corner-tr"></div><div class="card-deco-corner corner-bl"></div>
                     <div class="card-header">
                         <h3>📋 <span id="table-title">记录列表</span> <span class="badge" id="item-count" style="margin-left:10px;font-size:12px;padding:2px 10px;background:var(--cream);border-radius:20px">0 项</span></h3>
                         <div class="search-box">
