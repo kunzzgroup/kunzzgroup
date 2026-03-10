@@ -5,7 +5,7 @@
 
 // ── 1. CONFIG & STATE ──
 const API = 'menu_api.php';
-let menuType = 'grand', catId = null, catName = '', items = [], imgFile = null, editId = null, searchTmr = null;
+let menuType = 'grand', catId = null, catName = '', items = [], cats = { grand: [], sushi: [] }, imgFile = null, editId = null, searchTmr = null;
 
 // ── 2. INITIALIZATION ──
 document.addEventListener('DOMContentLoaded', () => {
@@ -110,8 +110,31 @@ function initDrag(sel, pid, type) {
 function onSearch(v) { clearTimeout(searchTmr); searchTmr = setTimeout(() => loadItems(v), 300); }
 async function toggleStatus(id) { if ((await apiPost({ action: 'toggle_status', id })).success) loadItems(); }
 async function updateInline(id, f, v) { if ((await apiPost({ action: 'edit', id, [f]: v })).success) toast('✓ 已保存'); }
-function confirmDelCat(id, name) { if (confirm(`确认删除分类 "${name}"？`)) apiPost({ action: 'delete_category', id }).then(r => r.success && loadCats(menuType)); }
-function confirmDelItem(id, name) { if (confirm(`确认移除 "${name}"？`)) apiPost({ action: 'delete', id }).then(r => r.success && loadItems()); }
+function openConfirm(title, body, onYes) {
+    document.getElementById('confirm-title').textContent = title;
+    document.getElementById('confirm-body').textContent = body;
+    const btn = document.getElementById('confirm-yes');
+    btn.onclick = () => { onYes(); closeConfirm(); };
+    document.getElementById('confirm-bg').classList.add('show');
+}
+function closeConfirm() { document.getElementById('confirm-bg').classList.remove('show'); }
+
+function confirmDelCat(id, name) {
+    openConfirm('确认删除分类？', `确定要删除 "${name}" 吗？该分类下的菜单项也将被永久移除。`, async () => {
+        if ((await apiPost({ action: 'delete_category', id })).success) {
+            toast('✓ 分类已删除');
+            loadCats(menuType);
+        }
+    });
+}
+function confirmDelItem(id, name) {
+    openConfirm('确认移除菜品？', `确定要移除 "${name}" 吗？`, async () => {
+        if ((await apiPost({ action: 'delete', id })).success) {
+            toast('✓ 菜品已移除');
+            loadItems();
+        }
+    });
+}
 
 function onImgPick(inp) { const f = inp.files[0]; if (!f) return; imgFile = f; const r = new FileReader(); r.onload = e => { document.getElementById('img-zone-inner').style.display = 'none'; const w = document.getElementById('img-preview-wrap'); w.style.display = 'flex'; w.querySelector('img').src = e.target.result; }; r.readAsDataURL(f); }
 function clearImg() { imgFile = null; document.getElementById('f-img').value = ''; document.getElementById('img-preview-wrap').style.display = 'none'; document.getElementById('img-zone-inner').style.display = 'flex'; }
