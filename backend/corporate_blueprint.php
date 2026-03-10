@@ -676,7 +676,7 @@ if (file_exists($jsonFile)) {
                 const orgData = <?php echo !empty($orgChartData) ? json_encode($orgChartData, JSON_UNESCAPED_UNICODE) : 'null'; ?>;
                 const internalOrgData = <?php echo !empty($internalOrgChartData) ? json_encode($internalOrgChartData, JSON_UNESCAPED_UNICODE) : 'null'; ?>;
                 </script>
-
+                <script src="/backend/js/corporate_blueprint.js?v=<?php echo time(); ?>"></script>
 
             <?php else: ?>
                 <!-- 如果没有JSON数据，显示错误信息 -->
