@@ -307,7 +307,7 @@ body {
     gap: 6px;
 }
 
-.cat-item:hover:not(.active) .cat-actions {
+.cat-item:hover .cat-actions {
     display: flex;
 }
 

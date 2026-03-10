@@ -129,6 +129,15 @@ function openConfirm(title, body, onYes) {
 }
 function closeConfirm() { document.getElementById('confirm-bg').classList.remove('show'); }
 
+async function renameCat(id, currentName) {
+    const newName = prompt('修改分类名称：', currentName);
+    if (!newName || newName.trim() === currentName) return;
+    if ((await apiPost({ action: 'edit_category', id, category_name: newName.trim() })).success) {
+        toast('✓ 分类名称已更新');
+        loadCats(menuType);
+    }
+}
+
 function confirmDelCat(id, name) {
     openConfirm('确认删除分类？', `确定要删除 "${name}" 吗？该分类下的菜单项也将被永久移除。`, async () => {
         if ((await apiPost({ action: 'delete_category', id })).success) {

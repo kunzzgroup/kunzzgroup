@@ -116,7 +116,13 @@ function renderCategoryHTML(array $c, bool $isActive): string {
     return "
         <div class=\"cat-item $activeCls\" data-id=\"$id\" draggable=\"true\" onclick=\"selectCat($id,'$name')\">
           <div class=\"cat-item-left\"><span class=\"cat-drag-handle\">⠿</span><span class=\"cat-name-box\">$name</span></div>
-          <div class=\"cat-item-right\"><span class=\"cat-badge\">$count</span><button class=\"btn-cat-act\" onclick=\"event.stopPropagation();confirmDelCat($id,'$name')\">✕</button></div>
+          <div class=\"cat-item-right\">
+            <span class=\"cat-badge\">$count</span>
+            <div class=\"cat-actions\">
+              <button class=\"btn-cat-act\" onclick=\"event.stopPropagation();renameCat($id,'$name')\">✎</button>
+              <button class=\"btn-cat-act\" onclick=\"event.stopPropagation();confirmDelCat($id,'$name')\">✕</button>
+            </div>
+          </div>
         </div>";
 }
 
@@ -168,6 +174,7 @@ if ($action) {
         'toggle_status'       => actionToggleStatus(),
         'reorder_items'       => actionReorderItems(),
         'reorder_cats'        => actionReorderCats(),
+        'edit_category'       => actionEditCategory(),
         'get_item'            => actionGetItem(),
         'get_categories_html' => actionGetCategoriesHTML(),
         'get_items_html'      => actionGetItemsHTML(),
