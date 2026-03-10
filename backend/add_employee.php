@@ -283,7 +283,15 @@ body { background: #f3f4f6; }
 
 /* Form fields */
 .form-group { display: flex; flex-direction: column; }
-.form-group label { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+.form-group label { 
+    font-size: 13px; 
+    font-weight: 600; 
+    color: #374151; 
+    margin-bottom: 6px; 
+    min-height: 20px; /* Standardize height to ensure consistent box alignment */
+    display: flex;
+    align-items: center;
+}
 .form-group input,
 .form-group select,
 .form-group textarea {
@@ -402,9 +410,9 @@ body { background: #f3f4f6; }
 
 .required-mark {
     color: #ef4444;
-    font-size: 15px;
+    font-size: 14px;
     margin-left: 2px;
-
+    line-height: 1;
 }
     </style>
 </head>
