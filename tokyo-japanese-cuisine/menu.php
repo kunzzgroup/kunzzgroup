@@ -31,6 +31,16 @@ $sushiCategories = fetchMenuData('sushi');
 function panelId(string $type, int $catId): string { return 'panel-' . $type . '-' . $catId; }
 function imgUrl(?string $path): string { if (!$path) return ''; if (str_starts_with($path, 'http')) return $path; return IMG_URL_PREFIX . ltrim($path, '/'); }
 function e(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
+
+// Debug Info (Temporary)
+if (isset($_GET['debug'])) {
+    echo "<div style='background:red;color:white;padding:20px;position:fixed;top:0;left:0;z-index:9999;'>";
+    echo "Grand Categories: " . count($grandCategories) . "<br>";
+    foreach($grandCategories as $c) echo "- " . $c['category_name'] . ": " . count($c['items']) . " items<br>";
+    echo "Sushi Categories: " . count($sushiCategories) . "<br>";
+    foreach($sushiCategories as $c) echo "- " . $c['category_name'] . ": " . count($c['items']) . " items<br>";
+    echo "</div>";
+}
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN" class="menu-html">

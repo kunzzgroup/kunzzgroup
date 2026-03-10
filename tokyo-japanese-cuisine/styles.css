@@ -3487,6 +3487,15 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
   }
 }
 
+.haidilao-panel {
+  display: none;
+  width: 100%;
+}
+
+.haidilao-panel.active {
+  display: block;
+}
+
 /* --- Zoom Modal --- */
 .zoom-modal {
   display: flex;
