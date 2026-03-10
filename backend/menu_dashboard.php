@@ -32,18 +32,17 @@ if (!isset($_SESSION['user_id'])) {
         
         <!-- 1. TOPBAR -->
         <header class="topbar">
-            <div class="tb-left">
-                <span style="font-size:18px">🍽️</span>
-                <span class="tb-title">菜单管理系统</span>
-                <span style="opacity:0.2;margin:0 4px">|</span>
-                <div class="tb-crumb">
-                    视觉管理 › <span id="bc-tab">Grand Menu</span> › <b id="bc-cat">—</b>
+                <div class="tb-left">
+                    <div class="tb-logo">T</div>
+                    <span class="tb-title">菜单管理系统</span>
+                    <span style="opacity:0.2;margin:0 4px">|</span>
+                    <div class="tb-crumb">
+                        视觉管理 › <span id="bc-tab">Grand Menu</span> › <b id="bc-cat">—</b>
+                    </div>
                 </div>
-            </div>
-            <div class="tb-right">
-                <span class="tb-badge" id="tb-stats">0 项目</span>
-                <div style="width:32px;height:32px;border-radius:50%;background:var(--gold-bg);display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700;font-size:12px">T</div>
-            </div>
+                <div class="tb-right">
+                    <span class="tb-badge" id="tb-stats">0 项目</span>
+                </div>
         </header>
 
         <!-- 2. BODY LAYOUT -->
