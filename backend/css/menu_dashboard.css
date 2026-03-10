@@ -750,6 +750,7 @@ body {
     align-items: center;
     gap: 8px;
     text-align: center;
+    pointer-events: none;
 }
 
 .iz-icon {
@@ -772,6 +773,7 @@ body {
     padding: 10px;
     gap: 12px;
     z-index: 10;
+    pointer-events: none;
 }
 
 .img-preview-wrap img {

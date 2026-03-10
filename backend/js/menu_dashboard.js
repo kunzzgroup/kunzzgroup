@@ -146,7 +146,35 @@ function confirmDelItem(id, name) {
     });
 }
 
-function openImgPick(inp) { const f = inp.files[0]; if (!f) return; imgFile = f; const r = new FileReader(); r.onload = e => { document.getElementById('img-zone-inner').style.display = 'none'; const w = document.getElementById('img-preview-wrap'); w.style.display = 'flex'; w.querySelector('img').src = e.target.result; }; r.readAsDataURL(f); }
+function onImgPick(inp) {
+    const f = inp.files[0];
+    if (!f) return;
+    handleImgFile(f);
+}
+
+function onImgDrop(e) {
+    e.preventDefault();
+    document.getElementById('img-zone').classList.remove('dragover');
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('image/')) {
+        handleImgFile(f);
+    }
+}
+
+function handleImgFile(f) {
+    imgFile = f;
+    imgDeleted = false;
+    const r = new FileReader();
+    r.onload = e => {
+        document.getElementById('img-zone-inner').style.display = 'none';
+        const w = document.getElementById('img-preview-wrap');
+        w.style.display = 'flex';
+        w.querySelector('img').src = e.target.result;
+        document.getElementById('img-preview-name').textContent = f.name;
+        document.getElementById('img-preview-size').textContent = (f.size / 1024).toFixed(1) + ' KB';
+    };
+    r.readAsDataURL(f);
+}
 function clearImg() {
     imgFile = null;
     imgDeleted = true;
