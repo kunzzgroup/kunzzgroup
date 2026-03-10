@@ -444,7 +444,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 parentCategory.querySelectorAll('.haidilao-sidebar-tab').forEach(t => t.classList.remove('active'));
                 this.classList.add('active');
 
-                const targetPanelId = 'panel-' + this.getAttribute('data-target');
+                const targetPanelId = this.getAttribute('data-target');
 
                 // Show corresponding panel
                 haidilaoContentPanels.forEach(panel => {
