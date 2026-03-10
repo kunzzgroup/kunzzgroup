@@ -38,5 +38,16 @@ RewriteRule ^ - [L]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
+# ===== URL 优化 (URL Optimization) =====
+# 1. 移除 .php 后缀 (Remove .php extension)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^([^\.]+)$ $1.php [NC,L]
+
+# 2. 菜单路径优化 (Menu path optimization)
+# 允许访问 /menu/grand 或 /menu/sushi
+RewriteRule ^menu/(grand|sushi)/?$ tokyo-japanese-cuisine/menu.php#$1 [NE,L,R]
+RewriteRule ^menu/?$ tokyo-japanese-cuisine/menu.php [L]
+
 # ===== 转发到 frontend =====
 RewriteRule ^(.*)$ frontend/$1 [L]

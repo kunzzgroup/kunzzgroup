@@ -1,6 +1,6 @@
 <?php
 define('MENU_API_PATH', __DIR__ . '/../backend/menu_api.php');
-define('IMG_URL_PREFIX', '/uploads/');
+define('IMG_URL_PREFIX', '/backend/uploads/');
 
 if (file_exists(MENU_API_PATH)) {
     require_once MENU_API_PATH;
@@ -16,9 +16,11 @@ function fetchMenuData(string $type): array {
 
     $result = [];
     foreach ($categories as $cat) {
-        $stmt = $pdo->prepare("SELECT item_name, item_name_cn, item_desc, price, image_path FROM menus WHERE category_id = ? AND status = 'published' ORDER BY sort_order ASC, id ASC");
+        $stmt = $pdo->prepare("SELECT item_name, item_name_cn, item_desc, price, image_path FROM menus WHERE category_id = ? ORDER BY sort_order ASC, id ASC");
         $stmt->execute([$cat['id']]);
-        $result[] = ['id' => $cat['id'], 'category_name' => $cat['category_name'], 'items' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
+        $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Debug: if (count($items) > 0) echo "<!-- Panel {$cat['id']} has " . count($items) . " items -->";
+        $result[] = ['id' => $cat['id'], 'category_name' => $cat['category_name'], 'items' => $items];
     }
     return $result;
 }
@@ -158,7 +160,7 @@ function e(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8')
             ?>
                 <div class="haidilao-panel <?= $isActive ? 'active' : '' ?>"
                     id="<?= e($pid) ?>"
-                    <?= $isActive ? '' : 'hidden' ?>>
+                    style="<?= $isActive ? '' : 'display: none;' ?>">
 
                     <?php if (empty($cat['items'])) : ?>
                         <div style="padding:48px;text-align:center;opacity:.4;">
@@ -205,7 +207,7 @@ function e(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8')
             <?php foreach ($sushiCategories as $idx => $cat) :
                 $pid = panelId('sushi', $cat['id']);
             ?>
-                <div class="haidilao-panel" id="<?= e($pid) ?>" hidden>
+                <div class="haidilao-panel" id="<?= e($pid) ?>" style="display: none;">
 
                     <?php if (empty($cat['items'])) : ?>
                         <div style="padding:48px;text-align:center;opacity:.4;">
