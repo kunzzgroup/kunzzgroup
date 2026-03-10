@@ -1,23 +1,23 @@
 :root {
-    /* Color Palette - Tokyo Japanese Cuisine (Synced with Inventory Backend) */
-    --bg: #f1dfbc;
+    /* Color Palette - Tokyo Japanese Cuisine (Synced with Backend Screenshot) */
+    --bg: #f9f5f0;
     --surface: #ffffff;
-    --surface2: #f8f5eb;
-    --border: #dcbfa1;
-    --border2: #583e04;
-    --brown: #583e04;
-    --brown-md: #462d03;
-    --brown-lt: #8c6a0b;
-    --brown-dk: #23190f;
-    --gold: #583e04;
-    --gold-lt: #8c6a0b;
-    --gold-bg: #fdf6e3;
-    --gold-glow: rgba(88, 62, 4, 0.15);
-    --text: #111827;
-    --text-2: #374151;
-    --text-3: #583e04;
-    --green: #10b981;
-    --red: #ef4444;
+    --surface2: #ffffff;
+    --border: #e0e0e0;
+    --border2: #333333;
+    --brown: #333333;
+    --brown-md: #444444;
+    --brown-lt: #666666;
+    --brown-dk: #1a1a1a;
+    --gold: #ffa500;
+    --gold-lt: #ffb733;
+    --gold-bg: #ffffff;
+    --gold-glow: rgba(255, 165, 0, 0.1);
+    --text: #1a1a1a;
+    --text-2: #4a4a4a;
+    --text-3: #757575;
+    --green: #2e7d32;
+    --red: #d32f2f;
 
     /* Dimensions */
     --sidebar-w: clamp(140px, 13.02vw, 250px);
