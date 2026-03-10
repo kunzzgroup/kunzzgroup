@@ -1,265 +1,278 @@
 <?php
-define('MENU_API_PATH', __DIR__ . '/../backend/menu_api.php');
-define('IMG_URL_PREFIX', '/backend/uploads/');
+define('API_BASE', 'menu_api.php');
 
-if (file_exists(MENU_API_PATH)) {
-    require_once MENU_API_PATH;
-} else {
-    die('找不到 menu_api.php，请检查路径配置。');
+function fetchCategories(string $type): array {
+    $host = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
+          . '://' . $_SERVER['HTTP_HOST']
+          . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') . '/' . API_BASE;
+    $raw  = @file_get_contents($host . '?action=get_categories&type=' . $type,
+                false, stream_context_create(['http' => ['timeout' => 8]]));
+    if (!$raw) return [];
+    $json = json_decode($raw, true);
+    return ($json['success'] ?? false) ? ($json['data']['categories'] ?? []) : [];
 }
 
-function fetchMenuData(string $type): array {
-    $pdo = getDB();
-    $stmt = $pdo->prepare("SELECT id, category_name FROM menu_categories WHERE menu_type = ? ORDER BY sort_order ASC, id ASC");
-    $stmt->execute([$type]);
-    $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    $result = [];
-    foreach ($categories as $cat) {
-        $stmt = $pdo->prepare("SELECT item_name, item_name_cn, item_desc, price, image_path FROM menus WHERE category_id = ? AND status = 'published' ORDER BY sort_order ASC, id ASC");
-        $stmt->execute([$cat['id']]);
-        $result[] = ['id' => $cat['id'], 'category_name' => $cat['category_name'], 'items' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
-    }
-    return $result;
-}
-
-$grandCategories = fetchMenuData('grand');
-$sushiCategories = fetchMenuData('sushi');
-
-function panelId(string $type, int $catId): string { return 'panel-' . $type . '-' . $catId; }
-function imgUrl(?string $path): string { if (!$path) return ''; if (str_starts_with($path, 'http')) return $path; return IMG_URL_PREFIX . ltrim($path, '/'); }
-function e(?string $s): string { return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
-
-?>
-<!DOCTYPE html>
+$grandCats = fetchCategories('grand');
+$sushiCats = fetchCategories('sushi');
+?><!DOCTYPE html>
 <html lang="zh-CN" class="menu-html">
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" href="logo/tokyologo.png">
+    <link rel="icon" type="image/png" href="logo/tokyologo.png" />
     <title>Menu | TOKYO JAPANESE CUISINE</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Noto+Sans+SC:wght@300;400;500;600&display=swap"
-        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="menu.css" />
+    <style>
+        .nav-btn--dark    { color: #33322f; border-color: #33322f; }
+        .sidebar-link--accent { color: #a68a64; }
+        .sidebar-empty    { padding: 12px 16px; font-size: 13px; color: #9b8f7e; }
+
+        .item-info        { display: flex; flex-direction: column; gap: 2px; }
+        .title-cn         { font-size: 13px; color: #9b8f7e; }
+        .item-price       { font-size: 13px; font-weight: 600; color: #a68a64; margin-left: auto; white-space: nowrap; }
+
+        .img-placeholder  { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #f0ece6; color: #c4b89e; font-size: 2rem; }
+
+        .state-loading,
+        .state-empty      { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 0; gap: 12px; color: #9b8f7e; font-size: 0.88rem; letter-spacing: 0.04em; }
+        .state-loading::before { content: ''; width: 22px; height: 22px; border: 2px solid #e8e0d4; border-top-color: #a68a64; border-radius: 50%; animation: spin 0.75s linear infinite; }
+        .state-empty-icon { font-size: 2rem; }
+        @keyframes spin   { to { transform: rotate(360deg); } }
+    </style>
 </head>
 
-<body class="haidilao-menu-body">
+<body class="luxury-menu-body haidilao-menu-body">
 
-    <!-- Navigation -->
-    <nav id="nav" class="haidilao-nav">
-        <div class="nav-container">
-            <a href="tokyo.html" class="nav-logo-link">
-                <div class="haidilao-logo-bg">
-                    <img src="logo/tokyologo.png" alt="Tokyo" class="nav-logo">
-                </div>
-                <div class="nav-text-group">
-                    <span class="nav-text primary">TOKYO JAPANESE</span>
-                    <span class="nav-text secondary">CUISINE</span>
-                </div>
-            </a>
-            <div class="nav-links">
-                <a href="tokyo.html#about">关于我们</a>
-                <a href="tokyo.html#culture">使命愿景</a>
-                <a href="tokyo.html#featured">特色推荐</a>
-                <a href="tokyo.html#location">我们在这</a>
+<nav id="nav">
+    <div class="nav-container">
+        <a href="tokyo.html" class="nav-logo-link">
+            <div class="haidilao-logo-bg">
+                <img src="logo/tokyologo.png" alt="Tokyo" class="nav-logo" />
             </div>
-            <div class="nav-actions">
-                <a href="tokyo.html#reserve" class="btn-primary nav-btn"
-                    style="background-color: #a68a64; border-color: #a68a64; box-shadow: 0 4px 10px rgba(166, 138, 100, 0.3);">预订餐桌</a>
-                <a href="tokyo.html" class="btn-secondary nav-btn"
-                    style="color: #33322f; border-color: #33322f;">返回首页</a>
-                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">
-                    <span></span><span></span><span></span>
-                </button>
+            <div class="nav-text-group">
+                <span class="nav-text primary">TOKYO JAPANESE</span>
+                <span class="nav-text secondary">CUISINE</span>
             </div>
+        </a>
+        <div class="nav-links">
+            <a href="tokyo.html#about-culture">关于我们</a>
+            <a href="tokyo.html#mission-vision">使命愿景</a>
+            <a href="tokyo.html#featured">特色推荐</a>
+            <a href="tokyo.html#location">我们在这</a>
         </div>
-    </nav>
+        <div class="nav-actions">
+            <a href="tokyo.html#location" class="btn-primary nav-btn">联系我们</a>
+            <a href="tokyo.html" class="btn-secondary nav-btn nav-btn--dark">返回首页</a>
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </div>
+</nav>
 
-    <!-- Mobile Sidebar -->
-    <div class="mobile-sidebar-overlay" id="mobile-sidebar-overlay"></div>
-    <aside class="mobile-sidebar" id="mobile-sidebar">
-        <button class="mobile-sidebar-close" id="mobile-sidebar-close" aria-label="Close menu">×</button>
-        <div class="mobile-sidebar-content">
-            <a href="tokyo.html#about" class="sidebar-link">关于我们</a>
-            <a href="tokyo.html#culture" class="sidebar-link">使命愿景</a>
-            <a href="tokyo.html#featured" class="sidebar-link">特色推荐</a>
-            <a href="tokyo.html#location" class="sidebar-link">我们在这</a>
-            <a href="tokyo.html#reserve" class="sidebar-link" style="color:#a68a64;font-weight:600;">预订餐桌</a>
-            <a href="tokyo.html" class="sidebar-link" style="color:#a68a64;">返回首页</a>
+<div class="mobile-sidebar-overlay" id="mobile-sidebar-overlay"></div>
+<aside class="mobile-sidebar" id="mobile-sidebar">
+    <button class="mobile-sidebar-close" id="mobile-sidebar-close" aria-label="Close">×</button>
+    <div class="mobile-sidebar-content">
+        <a href="tokyo.html#about-culture" class="sidebar-link">关于我们</a>
+        <a href="tokyo.html#mission-vision" class="sidebar-link">使命愿景</a>
+        <a href="tokyo.html#featured" class="sidebar-link">特色推荐</a>
+        <a href="tokyo.html#location" class="sidebar-link">我们在这</a>
+        <a href="tokyo.html" class="sidebar-link sidebar-link--accent">返回首页</a>
+    </div>
+</aside>
+
+<div class="haidilao-top-nav-container">
+    <div class="haidilao-top-nav">
+        <button class="haidilao-top-tab active" data-menu="grand">
+            <div class="top-tab-icon">
+                <img src="grandmenu/menu2.png" alt="Grand Menu" />
+            </div>
+            <span>Grand Menu</span>
+        </button>
+        <button class="haidilao-top-tab" data-menu="sushi">
+            <div class="top-tab-icon">
+                <img src="sushimenu/menu1.png" alt="Sushi Menu" />
+            </div>
+            <span>Sushi Menu</span>
+        </button>
+    </div>
+</div>
+
+<div class="haidilao-layout">
+    <aside class="haidilao-sidebar">
+        <div class="sidebar-category" id="sidebar-grand">
+            <?php foreach ($grandCats as $i => $cat): ?>
+                <button class="haidilao-sidebar-tab<?= $i === 0 ? ' active' : '' ?>"
+                        data-cat-id="<?= (int)$cat['id'] ?>">
+                    <?= htmlspecialchars($cat['category_name']) ?>
+                </button>
+            <?php endforeach; ?>
+            <?php if (empty($grandCats)): ?>
+                <p class="sidebar-empty">暂无分类</p>
+            <?php endif; ?>
+        </div>
+
+        <div class="sidebar-category" id="sidebar-sushi" hidden>
+            <?php foreach ($sushiCats as $i => $cat): ?>
+                <button class="haidilao-sidebar-tab<?= $i === 0 ? ' active' : '' ?>"
+                        data-cat-id="<?= (int)$cat['id'] ?>">
+                    <?= htmlspecialchars($cat['category_name']) ?>
+                </button>
+            <?php endforeach; ?>
+            <?php if (empty($sushiCats)): ?>
+                <p class="sidebar-empty">暂无分类</p>
+            <?php endif; ?>
         </div>
     </aside>
 
-    <!-- Top Category Navigation (Grand Menu / Sushi Menu) -->
-    <div class="haidilao-top-nav-container">
-        <div class="haidilao-top-nav">
-            <button class="haidilao-top-tab active" data-menu="grand" id="tab-grand">
-                <div class="top-tab-icon">
-                    <img src="grandmenu/menu2.png" alt="Grand Menu" />
-                </div>
-                <span>Grand Menu</span>
-            </button>
-            <button class="haidilao-top-tab" data-menu="sushi" id="tab-sushi">
-                <div class="top-tab-icon">
-                    <img src="sushimenu/menu1.png" alt="Sushi Menu" />
-                </div>
-                <span>Sushi Menu</span>
-            </button>
-        </div>
+    <main class="haidilao-content" id="menu-content">
+        <div class="state-loading"></div>
+    </main>
+</div>
+
+<div id="zoom-modal" class="zoom-modal hidden">
+    <div class="zoom-modal-content">
+        <button class="zoom-modal-close" aria-label="Close">&times;</button>
+        <img id="zoom-modal-image" src="" alt="" class="zoom-modal-image" />
     </div>
+</div>
 
-    <!-- Main Layout -->
-    <div class="haidilao-layout">
+<script>
+(() => {
+    const API       = '<?= API_BASE ?>';
+    const content   = document.getElementById('menu-content');
+    const zoomModal = document.getElementById('zoom-modal');
+    const zoomImg   = document.getElementById('zoom-modal-image');
+    const topTabs   = document.querySelectorAll('.haidilao-top-tab');
+    const sidebars  = {
+        grand: document.getElementById('sidebar-grand'),
+        sushi: document.getElementById('sidebar-sushi'),
+    };
 
-        <!-- Sidebar（动态生成分类按钮）-->
-        <aside class="haidilao-sidebar">
+    let activeType  = 'grand';
+    let activeCatId = null;
 
-            <!-- Grand Menu Sidebar -->
-            <div class="sidebar-category" id="sidebar-grand">
-                <?php foreach ($grandCategories as $idx => $cat) :
-                    $pid = panelId('grand', $cat['id']);
-                    $activeCls = $idx === 0 ? 'active' : '';
-                ?>
-                    <button class="haidilao-sidebar-tab <?= $activeCls ?>"
-                        data-target="<?= e($pid) ?>">
-                        <?= e($cat['category_name']) ?>
-                    </button>
-                <?php endforeach; ?>
-                <?php if (empty($grandCategories)) : ?>
-                    <p style="padding:16px;opacity:.5;font-size:13px;">暂无分类</p>
-                <?php endif; ?>
-            </div>
+    // Zoom modal
+    const openZoom  = src => { zoomImg.src = src; zoomModal.classList.remove('hidden'); document.body.style.overflow = 'hidden'; };
+    const closeZoom = ()  => { zoomModal.classList.add('hidden'); document.body.style.overflow = ''; };
 
-            <!-- Sushi Menu Sidebar (hidden by default) -->
-            <div class="sidebar-category" id="sidebar-sushi" style="display:none;">
-                <?php foreach ($sushiCategories as $idx => $cat) :
-                    $pid = panelId('sushi', $cat['id']);
-                    $activeCls = $idx === 0 ? 'active' : '';
-                ?>
-                    <button class="haidilao-sidebar-tab <?= $activeCls ?>"
-                        data-target="<?= e($pid) ?>">
-                        <?= e($cat['category_name']) ?>
-                    </button>
-                <?php endforeach; ?>
-                <?php if (empty($sushiCategories)) : ?>
-                    <p style="padding:16px;opacity:.5;font-size:13px;">暂无分类</p>
-                <?php endif; ?>
-            </div>
+    document.querySelector('.zoom-modal-close').onclick = closeZoom;
+    zoomModal.onclick = e => { if (e.target === zoomModal) closeZoom(); };
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeZoom(); });
 
-        </aside>
+    // HTML escaping
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-        <!-- Content Panels（动态生成菜品卡片）-->
-        <main class="haidilao-content">
+    // Render card grid
+    function renderGrid(items) {
+        const published = items.filter(i => i.status === 'published');
 
-            <!-- ── Grand Menu Panels ── -->
-            <?php foreach ($grandCategories as $idx => $cat) :
-                $pid = panelId('grand', $cat['id']);
-                $isActive = $idx === 0;
-            ?>
-                <div class="haidilao-panel <?= $isActive ? 'active' : '' ?>"
-                    id="<?= e($pid) ?>"
-                    style="<?= $isActive ? '' : 'display: none;' ?>">
+        if (!published.length) {
+            return `<div class="state-empty"><span class="state-empty-icon">🍱</span><span>该分类下暂无菜品</span></div>`;
+        }
 
-                    <?php if (empty($cat['items'])) : ?>
-                        <div style="padding:48px;text-align:center;opacity:.4;">
-                            <div style="font-size:40px;">🍱</div>
-                            <p>此分类暂无已发布菜品</p>
-                        </div>
-                    <?php else : ?>
-                        <div class="haidilao-grid">
-                            <?php foreach ($cat['items'] as $item) :
-                                $img = imgUrl($item['image_path']);
-                                $name = e($item['item_name']);
-                                $nameCn = e($item['item_name_cn'] ?? '');
-                                $desc = e($item['item_desc'] ?? '');
-                                $price = $item['price'] !== null ? 'RM ' . number_format((float)$item['price'], 2) : '';
-                            ?>
-                                <div class="haidilao-card">
-                                    <div class="img-wrap">
-                                        <?php if ($img) : ?>
-                                            <img src="<?= e($img) ?>" alt="<?= $name ?>" loading="lazy" />
-                                        <?php else : ?>
-                                            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#f5f0e8;color:#bbb;font-size:32px;">🍽️</div>
-                                        <?php endif; ?>
-                                    </div>
-                                    <div class="info-wrap">
-                                        <span class="title"><?= $name ?></span>
-                                        <?php if ($nameCn) : ?>
-                                            <span class="subtitle"><?= $nameCn ?></span>
-                                        <?php endif; ?>
-                                        <?php if ($desc) : ?>
-                                            <p class="desc"><?= $desc ?></p>
-                                        <?php endif; ?>
-                                        <?php if ($price) : ?>
-                                            <span class="price"><?= e($price) ?></span>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
+        const cards = published.map(i => `
+            <div class="haidilao-card">
+                <div class="img-wrap">
+                    ${i.image_url
+                        ? `<img src="${esc(i.image_url)}" alt="${esc(i.item_name)}" loading="lazy" />`
+                        : `<div class="img-placeholder">🍱</div>`}
                 </div>
-            <?php endforeach; ?>
-
-            <!-- ── Sushi Menu Panels ── -->
-            <?php foreach ($sushiCategories as $idx => $cat) :
-                $pid = panelId('sushi', $cat['id']);
-            ?>
-                <div class="haidilao-panel" id="<?= e($pid) ?>" style="display: none;">
-
-                    <?php if (empty($cat['items'])) : ?>
-                        <div style="padding:48px;text-align:center;opacity:.4;">
-                            <div style="font-size:40px;">🍣</div>
-                            <p>此分类暂无已发布菜品</p>
-                        </div>
-                    <?php else : ?>
-                        <div class="haidilao-grid">
-                            <?php foreach ($cat['items'] as $item) :
-                                $img = imgUrl($item['image_path']);
-                                $name = e($item['item_name']);
-                                $nameCn = e($item['item_name_cn'] ?? '');
-                                $desc = e($item['item_desc'] ?? '');
-                                $price = $item['price'] !== null ? 'RM ' . number_format((float)$item['price'], 2) : '';
-                            ?>
-                                <div class="haidilao-card">
-                                    <div class="img-wrap">
-                                        <?php if ($img) : ?>
-                                            <img src="<?= e($img) ?>" alt="<?= $name ?>" loading="lazy" />
-                                        <?php else : ?>
-                                            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#f5f0e8;color:#bbb;font-size:32px;">🍽️</div>
-                                        <?php endif; ?>
-                                    </div>
-                                    <div class="info-wrap">
-                                        <span class="title"><?= $name ?></span>
-                                        <?php if ($nameCn) : ?>
-                                            <span class="subtitle"><?= $nameCn ?></span>
-                                        <?php endif; ?>
-                                        <?php if ($desc) : ?>
-                                            <p class="desc"><?= $desc ?></p>
-                                        <?php endif; ?>
-                                        <?php if ($price) : ?>
-                                            <span class="price"><?= e($price) ?></span>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
+                <div class="info-wrap">
+                    <div class="item-info">
+                        <span class="title">${esc(i.item_name)}</span>
+                        ${i.item_name_cn ? `<span class="title-cn">${esc(i.item_name_cn)}</span>` : ''}
+                    </div>
+                    ${i.price_formatted ? `<span class="item-price">${esc(i.price_formatted)}</span>` : ''}
                 </div>
-            <?php endforeach; ?>
+            </div>`).join('');
 
-        </main>
-    </div>
+        return `<div class="haidilao-grid">${cards}</div>`;
+    }
 
-    <!-- Zoom Modal -->
-    <div id="zoom-modal" class="zoom-modal hidden">
-        <div class="zoom-modal-content">
-            <button class="zoom-modal-close" aria-label="Close">&times;</button>
-            <img id="zoom-modal-image" src="" alt="Zoomed image" class="zoom-modal-image" />
-        </div>
-    </div>
+    // Fetch and render a category
+    function loadCategory(catId) {
+        if (activeCatId === catId) return;
+        activeCatId = catId;
+        content.innerHTML = '<div class="state-loading"></div>';
 
-    <script src="script.js"></script>
+        fetch(`${API}?action=get&type=${activeType}&category_id=${catId}&status=published`)
+            .then(r => r.json())
+            .then(json => {
+                if (!json.success) throw new Error(json.message);
+                content.innerHTML = renderGrid(json.data?.items ?? []);
+                content.querySelectorAll('.img-wrap img').forEach(img => {
+                    img.style.cursor = 'pointer';
+                    img.onclick = () => openZoom(img.src);
+                });
+            })
+            .catch(err => {
+                content.innerHTML = `<div class="state-empty"><span class="state-empty-icon">⚠️</span><span>${err.message}</span></div>`;
+            });
+    }
+
+    // Bind sidebar tab clicks
+    function bindSidebar(sidebar) {
+        sidebar?.querySelectorAll('.haidilao-sidebar-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                sidebar.querySelectorAll('.haidilao-sidebar-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                loadCategory(parseInt(tab.dataset.catId));
+            });
+        });
+    }
+
+    Object.values(sidebars).forEach(bindSidebar);
+
+    // Switch between Grand / Sushi
+    function switchMenu(type) {
+        activeType  = type;
+        activeCatId = null;
+
+        Object.entries(sidebars).forEach(([k, s]) => { if (s) s.hidden = k !== type; });
+
+        const sidebar  = sidebars[type];
+        const firstTab = sidebar?.querySelector('.haidilao-sidebar-tab');
+
+        if (firstTab) {
+            sidebar.querySelectorAll('.haidilao-sidebar-tab').forEach(t => t.classList.remove('active'));
+            firstTab.classList.add('active');
+            loadCategory(parseInt(firstTab.dataset.catId));
+        } else {
+            content.innerHTML = '<div class="state-empty"><span class="state-empty-icon">📁</span><span>暂无分类</span></div>';
+        }
+    }
+
+    topTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            topTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            switchMenu(tab.dataset.menu);
+        });
+    });
+
+    // Hash routing: menu.php#sushi or menu.php#grand
+    const hash    = location.hash.replace('#', '');
+    const initTab = (hash === 'sushi' || hash === 'grand')
+        ? document.querySelector(`.haidilao-top-tab[data-menu="${hash}"]`)
+        : document.querySelector('.haidilao-top-tab.active');
+    setTimeout(() => initTab?.click(), 50);
+
+    // Mobile sidebar
+    const mobileMenu    = document.getElementById('mobile-sidebar');
+    const mobileOverlay = document.getElementById('mobile-sidebar-overlay');
+    const openMobile    = () => { mobileMenu?.classList.add('active'); mobileOverlay?.classList.add('active'); document.body.style.overflow = 'hidden'; };
+    const closeMobile   = () => { mobileMenu?.classList.remove('active'); mobileOverlay?.classList.remove('active'); document.body.style.overflow = ''; };
+
+    document.getElementById('mobile-menu-btn')?.addEventListener('click', openMobile);
+    document.getElementById('mobile-sidebar-close')?.addEventListener('click', closeMobile);
+    mobileOverlay?.addEventListener('click', closeMobile);
+    document.querySelectorAll('.sidebar-link').forEach(l => l.addEventListener('click', closeMobile));
+})();
+</script>
+
 </body>
 </html>
