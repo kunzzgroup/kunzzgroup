@@ -37,7 +37,7 @@ async function loadCats(t) {
 async function loadItems(search = '') {
     if (!catId) return;
     const scroll = document.getElementById('list-scroll');
-    scroll.innerHTML = `<div class="skeleton" style="height:200px;margin:24;border-radius:12"></div>`;
+    scroll.innerHTML = `<div class="skeleton" style="height:160px; margin:20px; border-radius:12px"></div>`;
     scroll.innerHTML = await fetch(`${API}?action=get_items_html&category_id=${catId}&search=${search}`).then(r => r.text());
     const res = await apiGet({ action: 'get', type: menuType, category_id: catId, search });
     if (res.success) { items = res.data.items; syncStats(); }
