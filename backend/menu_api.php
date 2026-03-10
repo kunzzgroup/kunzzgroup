@@ -240,11 +240,26 @@ function actionDeleteCategory(): void {
     if ($id <= 0) respond(false, 'id 无效', null, 422);
 
     $pdo  = getDB();
+
+    // 1. 获取该分类下所有项目的图片路径
+    $stmt = $pdo->prepare("SELECT image_path FROM menus WHERE category_id = ?");
+    $stmt->execute([$id]);
+    $items = $stmt->fetchAll();
+
+    // 2. 删除服务器上的图片文件
+    foreach ($items as $item) {
+        if (!empty($item['image_path'])) {
+            $file = UPLOAD_BASE . $item['image_path'];
+            if (file_exists($file)) @unlink($file);
+        }
+    }
+
+    // 3. 执行删除操作 (级联删除分类及项目)
     $stmt = $pdo->prepare("DELETE FROM menu_categories WHERE id = ?");
     $stmt->execute([$id]);
 
     if ($stmt->rowCount() === 0) respond(false, '分类不存在', null, 404);
-    respond(true, '分类已删除（该分类下的菜单项也已一并删除）');
+    respond(true, '分类及其关联项目的图片已全部删除');
 }
 
 // ============================================================
@@ -504,22 +519,22 @@ function actionDelete(): void {
 
     $pdo  = getDB();
 
-    // Get image path before deleting
+    // 1. 查询图片路径
     $stmt = $pdo->prepare("SELECT image_path FROM menus WHERE id = ?");
     $stmt->execute([$id]);
     $row  = $stmt->fetch();
     if (!$row) respond(false, '菜单项目不存在', null, 404);
 
-    // Delete DB record
-    $pdo->prepare("DELETE FROM menus WHERE id = ?")->execute([$id]);
-
-    // Delete image file
+    // 2. unlink 删除服务器图片
     if ($row['image_path']) {
         $file = UPLOAD_BASE . $row['image_path'];
         if (file_exists($file)) @unlink($file);
     }
 
-    respond(true, '菜单项目已删除');
+    // 3. DELETE database (执行数据库删除)
+    $pdo->prepare("DELETE FROM menus WHERE id = ?")->execute([$id]);
+
+    respond(true, '菜单项目及图片已删除');
 }
 
 // ============================================================
