@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
 
-        // Initialize based on URL hash (e.g., menu.html#sushi or menu.html#grand)
+        // Initialize based on URL hash (e.g., menu.php#sushi or menu.php#grand)
         const hash = window.location.hash.replace('#', '');
         let targetTab;
 

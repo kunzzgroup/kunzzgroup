@@ -16,11 +16,9 @@ function fetchMenuData(string $type): array {
 
     $result = [];
     foreach ($categories as $cat) {
-        $stmt = $pdo->prepare("SELECT item_name, item_name_cn, item_desc, price, image_path FROM menus WHERE category_id = ? ORDER BY sort_order ASC, id ASC");
+        $stmt = $pdo->prepare("SELECT item_name, item_name_cn, item_desc, price, image_path FROM menus WHERE category_id = ? AND status = 'published' ORDER BY sort_order ASC, id ASC");
         $stmt->execute([$cat['id']]);
-        $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        // Debug: if (count($items) > 0) echo "<!-- Panel {$cat['id']} has " . count($items) . " items -->";
-        $result[] = ['id' => $cat['id'], 'category_name' => $cat['category_name'], 'items' => $items];
+        $result[] = ['id' => $cat['id'], 'category_name' => $cat['category_name'], 'items' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
     }
     return $result;
 }
@@ -32,15 +30,6 @@ function panelId(string $type, int $catId): string { return 'panel-' . $type . '
 function imgUrl(?string $path): string { if (!$path) return ''; if (str_starts_with($path, 'http')) return $path; return IMG_URL_PREFIX . ltrim($path, '/'); }
 function e(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 
-// Debug Info (Temporary)
-if (isset($_GET['debug'])) {
-    echo "<div style='background:red;color:white;padding:20px;position:fixed;top:0;left:0;z-index:9999;'>";
-    echo "Grand Categories: " . count($grandCategories) . "<br>";
-    foreach($grandCategories as $c) echo "- " . $c['category_name'] . ": " . count($c['items']) . " items<br>";
-    echo "Sushi Categories: " . count($sushiCategories) . "<br>";
-    foreach($sushiCategories as $c) echo "- " . $c['category_name'] . ": " . count($c['items']) . " items<br>";
-    echo "</div>";
-}
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN" class="menu-html">
