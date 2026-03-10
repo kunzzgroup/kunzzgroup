@@ -600,7 +600,14 @@ function actionGetCategoriesHTML(): void {
     $stmt = $pdo->prepare("SELECT id, category_name, (SELECT COUNT(*) FROM menus WHERE category_id = mc.id) AS item_count FROM menu_categories mc WHERE menu_type = ? ORDER BY sort_order ASC, id ASC");
     $stmt->execute([$type]);
     $cats = $stmt->fetchAll();
-    if (empty($cats)) { echo "<div class='empty-cat'>暂无分类</div>"; exit; }
+    if (empty($cats)) { 
+        echo "
+        <div class='empty-state mini'>
+            <div class='empty-icon'>📁</div>
+            <div class='empty-text'>暂无分类</div>
+        </div>"; 
+        exit; 
+    }
     foreach ($cats as $c) echo renderCategoryHTML($c, $c['id'] == $activeId);
     exit;
 }
@@ -618,7 +625,15 @@ function actionGetItemsHTML(): void {
     $sql .= " ORDER BY sort_order ASC, id ASC";
     $stmt = $pdo->prepare($sql); $stmt->execute($params);
     $items = $stmt->fetchAll();
-    if (empty($items)) { echo "<div class='empty-state'>暂无项目</div>"; exit; }
+    if (empty($items)) { 
+        echo "
+        <div class='empty-state'>
+            <div class='empty-icon'>🍱</div>
+            <div class='empty-text'>该分类下暂无项目</div>
+            <div class='empty-hint'>点击右侧“新增”按钮开始添加</div>
+        </div>"; 
+        exit; 
+    }
     foreach ($items as $i) echo renderItemHTML($i);
     exit;
 }
