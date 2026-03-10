@@ -103,7 +103,16 @@ const syncStats = () => {
 const toast = (m, d = 2800) => { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), d); };
 const resetForm = () => { ['f-code', 'f-name', 'f-cn', 'f-desc', 'f-price'].forEach(id => document.getElementById(id).value = ''); clearImg(); };
 function selectCat(id, name) { catId = id; catName = name; document.getElementById('bc-cat').textContent = name; document.getElementById('add-panel-sub').textContent = `当前分类：${name}`; document.querySelectorAll('.cat-item').forEach(el => el.classList.toggle('active', el.dataset.id == id)); loadItems(); }
-function switchType(t) { menuType = t; catId = null;['tab-grand', 'tab-sushi'].forEach(id => document.getElementById(id).classList.toggle('active', id.includes(t))); loadCats(t); }
+function switchType(t) {
+    menuType = t;
+    catId = null;
+    catName = '';
+    ['tab-grand', 'tab-sushi'].forEach(id => document.getElementById(id).classList.toggle('active', id.includes(t)));
+    document.getElementById('bc-tab').textContent = t === 'grand' ? 'Grand Menu' : 'Sushi Menu';
+    document.getElementById('bc-cat').textContent = '—';
+    document.getElementById('add-panel-sub').textContent = '请先选择分类';
+    loadCats(t);
+}
 
 // (Dragging & Files - Simplified)
 function initDrag(sel, pid, type) {

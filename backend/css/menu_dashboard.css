@@ -1,13 +1,14 @@
 :root {
     /* Color Palette - Tokyo Japanese Cuisine (Synced with Backend Screenshot) */
-    --bg: #f9f5f0;
+    /* Updated for "Tacit" Agreement: Silent Warm Gray BG + Dark Header */
+    --bg: #f8f1e7;
     --surface: #ffffff;
-    --surface2: #ffffff;
+    --surface2: #333333;
     --border: #e0e0e0;
     --border2: #333333;
     --brown: #333333;
     --brown-md: #444444;
-    --brown-lt: #666666;
+    --brown-lt: #888888;
     --brown-dk: #1a1a1a;
     --gold: #ffa500;
     --gold-lt: #ffb733;
@@ -16,6 +17,7 @@
     --text: #1a1a1a;
     --text-2: #4a4a4a;
     --text-3: #757575;
+    --text-head: #ffffff;
     --green: #2e7d32;
     --red: #d32f2f;
 
@@ -412,9 +414,9 @@ body {
     border-bottom: 1px solid var(--border);
     font-size: 11px;
     font-weight: 700;
-    color: var(--text-3);
+    color: var(--text-head);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.1em;
 }
 
 .list-head>div:not(:nth-child(2)) {
