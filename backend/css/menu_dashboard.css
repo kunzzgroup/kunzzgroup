@@ -417,6 +417,15 @@ body {
     letter-spacing: 0.05em;
 }
 
+.list-head>div:nth-child(3),
+.list-head>div:nth-child(4) {
+    text-align: center;
+}
+
+.list-head>div:nth-child(5) {
+    text-align: right;
+}
+
 .list-scroll {
     flex: 1;
     overflow-y: auto;
@@ -430,6 +439,7 @@ body {
     border-bottom: 1px solid var(--border);
     transition: 0.2s;
     background: white;
+    align-items: center;
 }
 
 .item-row:hover {
@@ -550,6 +560,16 @@ body {
 .status-toggle:hover {
     filter: brightness(0.95);
     transform: translateY(-1px);
+}
+
+.item-price {
+    text-align: center;
+}
+
+.item-status {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .item-actions {

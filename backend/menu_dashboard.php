@@ -88,7 +88,7 @@ if (!isset($_SESSION['user_id'])) {
                     <div>菜品详情</div>
                     <div>价格</div>
                     <div>状态</div>
-                    <div style="text-align:right">操作</div>
+                    <div>操作</div>
                 </div>
 
                 <div class="list-scroll" id="list-scroll">
