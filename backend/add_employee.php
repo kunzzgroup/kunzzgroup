@@ -404,7 +404,7 @@ body { background: #f3f4f6; }
     color: #ef4444;
     font-size: 15px;
     margin-left: 2px;
-    vertical-align: text-top;
+
 }
     </style>
 </head>
