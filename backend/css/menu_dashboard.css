@@ -81,21 +81,6 @@ body {
     z-index: 100;
 }
 
-.tb-logo {
-    width: 32px;
-    height: 32px;
-    background: var(--gold-bg);
-    color: var(--gold);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 15px;
-    border: 1px solid var(--border);
-    flex-shrink: 0;
-}
-
 .tb-left {
     display: flex;
     align-items: center;

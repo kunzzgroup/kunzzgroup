@@ -33,7 +33,6 @@ if (!isset($_SESSION['user_id'])) {
         <!-- 1. TOPBAR -->
         <header class="topbar">
                 <div class="tb-left">
-                    <div class="tb-logo">T</div>
                     <span class="tb-title">菜单管理系统</span>
                     <span style="opacity:0.2;margin:0 4px">|</span>
                     <div class="tb-crumb">
