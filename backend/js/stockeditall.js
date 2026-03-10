@@ -95,23 +95,14 @@ let isSelectingRange = false;
 
 // 全局键盘快捷键 (CTRL+S 保存) - 使用 Capture 模式确保最高优先级
 window.addEventListener('keydown', function (e) {
-    // 检查是否按下 Ctrl+S 或 Cmd+S (KeyS 是物理 S 键，不区分大小写/输入法)
+    // 检查是否按下 Ctrl+S 或 Cmd+S
     if ((e.ctrlKey || e.metaKey) && (e.code === 'KeyS' || e.key === 's' || e.key === 'S')) {
-        e.preventDefault(); // 立即阻止浏览器默认保存行为
+        e.preventDefault(); // 阻止浏览器默认保存行为
         e.stopPropagation(); // 阻止事件进一步传播
-        console.log('StockEdit Shortcut: CTRL+S triggered');
 
         const activeElement = document.activeElement;
 
-        // 1. 检查是否在新增弹窗中
-        const addForm = document.getElementById('add-form');
-        if (addForm && addForm.classList.contains('show')) {
-            console.log('Shortcut: Saving via add-form');
-            saveNewRecord();
-            return;
-        }
-
-        // 2. 检查是否在表格中的新行或编辑行
+        // 1. 尝试保存当前聚焦的行
         if (activeElement) {
             const row = activeElement.closest('tr');
             if (row) {
@@ -119,24 +110,21 @@ window.addEventListener('keydown', function (e) {
                 if (row.classList.contains('new-row')) {
                     const saveBtn = row.querySelector('.save-new-btn');
                     if (saveBtn) {
-                        console.log('Shortcut: Saving new row');
                         saveNewRowRecord(saveBtn);
                         return;
                     }
                 }
 
-                // 如果是正在编辑的行 (通过 data-record-id)
+                // 如果是正在编辑的行
                 let recordId = activeElement.getAttribute('data-record-id');
                 if (!recordId) {
-                    // 尝试在行内找第一个带 data-record-id 的 input
                     const inputWithId = row.querySelector('input[data-record-id]');
                     if (inputWithId) recordId = inputWithId.getAttribute('data-record-id');
                 }
 
                 if (recordId) {
                     const rid = parseInt(recordId);
-                    if (editingRowIds.has(rid)) {
-                        console.log('Shortcut: Saving editing row', rid);
+                    if (typeof editingRowIds !== 'undefined' && editingRowIds.has(rid)) {
                         saveRecord(rid);
                         return;
                     }
@@ -144,29 +132,30 @@ window.addEventListener('keydown', function (e) {
             }
         }
 
-        // 3. 兜底方案：如果是唯一编辑/新增项
+        // 2. 检查是否在新增弹窗中
+        const addForm = document.getElementById('add-form');
+        if (addForm && addForm.classList.contains('show')) {
+            saveNewRecord();
+            return;
+        }
+
+        // 3. 兜底方案：如果表格中只有一个新增行或一个编辑行，即使没有聚焦也保存它
         const newRows = document.querySelectorAll('.new-row');
         if (newRows.length === 1) {
             const saveBtn = newRows[0].querySelector('.save-new-btn');
             if (saveBtn) {
-                console.log('Shortcut: Saving single new row (fallback)');
                 saveNewRowRecord(saveBtn);
                 return;
             }
-        } else if (newRows.length > 1) {
-            console.log('Shortcut: Batch saving new rows');
-            batchSaveNewRows();
-            return;
         }
 
-        if (editingRowIds && editingRowIds.size === 1) {
+        if (typeof editingRowIds !== 'undefined' && editingRowIds.size === 1) {
             const rid = Array.from(editingRowIds)[0];
-            console.log('Shortcut: Saving single editing row (fallback)', rid);
             saveRecord(rid);
             return;
         }
     }
-}, true); // 设置为 true 使用 Capture 阶段，优先于大多数插件和默认行为
+}, true);
 
 
 // 切换日历显示
