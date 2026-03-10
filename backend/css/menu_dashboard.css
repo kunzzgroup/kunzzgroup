@@ -630,6 +630,28 @@ body {
     color: var(--text-3);
 }
 
+.btn-close-panel {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: white;
+    color: var(--text-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 12px;
+}
+
+.btn-close-panel:hover {
+    background: #fee2e2;
+    color: #ef4444;
+    border-color: #fca5a5;
+    transform: rotate(90deg);
+}
+
 .add-scroll {
     flex: 1;
     overflow-y: auto;

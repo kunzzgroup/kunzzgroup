@@ -61,7 +61,10 @@ async function doAdd() {
 function openEditPanel(id) {
     const item = items.find(i => i.id == id); if (!item) return;
     editId = id;
+    document.getElementById('add-panel-mode').style.display = 'block';
+    document.getElementById('add-panel-title').textContent = '编辑菜单项目';
     document.getElementById('add-panel-sub').textContent = `正在编辑：${item.item_name}`;
+    document.getElementById('btn-close-panel').style.display = 'flex';
     document.getElementById('btn-submit-text').textContent = '✓ 保存修改';
     ['code', 'name', 'cn', 'desc', 'price', 'status'].forEach(k => {
         const el = document.getElementById('f-' + k); if (el) el.value = item['item_' + k] || item[k] || '';
@@ -75,8 +78,11 @@ function openEditPanel(id) {
 
 function cancelEdit() {
     editId = null; resetForm();
+    document.getElementById('add-panel-mode').style.display = 'none';
+    document.getElementById('add-panel-title').textContent = '＋ 新增菜单项目';
     document.getElementById('btn-submit-text').textContent = '＋ 添加到菜单';
     document.getElementById('add-panel-sub').textContent = `当前分类：${catName}`;
+    document.getElementById('btn-close-panel').style.display = 'none';
 }
 
 // ── 5. HELPER FUNCTIONS ──
