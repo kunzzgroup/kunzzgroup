@@ -1,21 +1,21 @@
 :root {
-    /* Color Palette - Tokyo Japanese Cuisine (Updated to Vibrant Orange) */
+    /* Color Palette - Tokyo Japanese Cuisine (Synced with Inventory Backend) */
     --bg: #f1dfbc;
     --surface: #ffffff;
     --surface2: #f8f5eb;
     --border: #dcbfa1;
-    --border2: #ff5c00;
-    --brown: #ff5c00;
-    --brown-md: #e65300;
-    --brown-lt: #ff7d33;
-    --brown-dk: #b34100;
-    --gold: #ff5c00;
-    --gold-lt: #ff8533;
-    --gold-bg: #ffffff;
-    --gold-glow: rgba(255, 92, 0, 0.15);
+    --border2: #583e04;
+    --brown: #583e04;
+    --brown-md: #462d03;
+    --brown-lt: #8c6a0b;
+    --brown-dk: #23190f;
+    --gold: #583e04;
+    --gold-lt: #8c6a0b;
+    --gold-bg: #fdf6e3;
+    --gold-glow: rgba(88, 62, 4, 0.15);
     --text: #111827;
     --text-2: #374151;
-    --text-3: #ff5c00;
+    --text-3: #583e04;
     --green: #10b981;
     --red: #ef4444;
 
