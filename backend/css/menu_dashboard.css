@@ -934,7 +934,7 @@ body {
 }
 
 .btn-reset:hover {
-    background: var(--surface2);
+    background: #ffffff;
     border-color: var(--gold-lt);
     color: var(--gold);
     transform: translateY(-1px);
