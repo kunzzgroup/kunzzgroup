@@ -1,6 +1,6 @@
 <?php
-define('MENU_API_PATH', __DIR__ . '/../后台-menu/menu_api.php');
-define('IMG_URL_PREFIX', '/后台-menu/uploads/');
+define('MENU_API_PATH', __DIR__ . '/menu_api.php');
+define('IMG_URL_PREFIX', '/backend/uploads/');
 
 if (file_exists(MENU_API_PATH)) {
     require_once MENU_API_PATH;
