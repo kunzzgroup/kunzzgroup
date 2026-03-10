@@ -1,9 +1,9 @@
 :root {
     /* Color Palette - Tokyo Japanese Cuisine (Synced with Backend Screenshot) */
     /* Updated for "Tacit" Agreement: Silent Warm Gray BG + Dark Header */
-    --bg: #f8f1e7;
+    --bg: #faf7f2;
     --surface: #ffffff;
-    --surface2: #333333;
+    --surface2: #636363;
     --border: #e0e0e0;
     --border2: #333333;
     --brown: #333333;
@@ -16,7 +16,7 @@
     --gold-glow: rgba(255, 165, 0, 0.1);
     --text: #1a1a1a;
     --text-2: #4a4a4a;
-    --text-3: #757575;
+    --text-3: #636363;
     --text-head: #ffffff;
     --green: #2e7d32;
     --red: #d32f2f;
