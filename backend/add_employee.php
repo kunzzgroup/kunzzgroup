@@ -283,7 +283,15 @@ body { background: #f3f4f6; }
 
 /* Form fields */
 .form-group { display: flex; flex-direction: column; }
-.form-group label { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+.form-group label { 
+    font-size: 13px; 
+    font-weight: 600; 
+    color: #374151; 
+    margin-bottom: 6px; 
+    min-height: 32px; /* Ensure labels with varying line counts don't misalign inputs */
+    display: flex;
+    align-items: flex-end;
+}
 .form-group input,
 .form-group select,
 .form-group textarea {
@@ -402,9 +410,9 @@ body { background: #f3f4f6; }
 
 .required-mark {
     color: #ef4444;
-    font-size: 15px;
+    font-size: 14px;
     margin-left: 2px;
-    vertical-align: super;
+    line-height: 1;
 }
     </style>
 </head>
@@ -458,17 +466,17 @@ body { background: #f3f4f6; }
             </div>
             
             <div class="form-group">
-                <label for="add_ic_number">身份证号码</label>
+                <label for="add_ic_number">身份证号码 IC Number</label>
                 <input type="text" id="add_ic_number" name="ic_number" maxlength="20">
             </div>
             
             <div class="form-group">
-                <label for="add_phone_number">联络号码</label>
+                <label for="add_phone_number">联络号码 Contact Number</label>
                 <input type="tel" id="add_phone_number" name="phone_number" maxlength="20">
             </div>
             
             <div class="form-group">
-                <label for="add_gender">性别</label>
+                <label for="add_gender">性别 Gender</label>
                 <select id="add_gender" name="gender">
                     <option value="">请选择</option>
                     <option value="male">男</option>
@@ -478,7 +486,7 @@ body { background: #f3f4f6; }
             </div>
             
             <div class="form-group">
-                <label for="add_nationality">国籍</label>
+                <label for="add_nationality">国籍 Nationality</label>
                 <select id="add_nationality" name="nationality">
                     <option value="">请选择国籍</option>
                     <option value="Afghanistan">Afghanistan</option>
@@ -534,7 +542,7 @@ body { background: #f3f4f6; }
             </div>
             
             <div class="form-group">
-                <label for="add_race">种族</label>
+                <label for="add_race">种族 Race</label>
                 <select id="add_race" name="race">
                     <option value="">请选择种族</option>
                     <option value="Malay">Malay</option>
@@ -557,19 +565,19 @@ body { background: #f3f4f6; }
         
         <div class="form-grid-1" style="margin-top: 14px;">
             <div class="form-group">
-                <label for="add_home_address">地址</label>
+                <label for="add_home_address">地址 Address</label>
                 <textarea id="add_home_address" name="home_address" rows="2" maxlength="255" style="resize: none;"></textarea>
             </div>
         </div>
 
         <div class="form-row-2col" style="margin-top: 14px;">
             <div class="form-group">
-                <label for="add_emergency_contact_name">紧急联系人</label>
+                <label for="add_emergency_contact_name">紧急联系人 Emergency Contact</label>
                 <input type="text" id="add_emergency_contact_name" name="emergency_contact_name" maxlength="100">
             </div>
             
             <div class="form-group">
-                <label for="add_emergency_phone_number">紧急联系人号码</label>
+                <label for="add_emergency_phone_number">紧急联系人号码 Emergency Phone</label>
                 <input type="tel" id="add_emergency_phone_number" name="emergency_phone_number" maxlength="20">
             </div>
         </div>
@@ -580,17 +588,17 @@ body { background: #f3f4f6; }
     <div class="form-section-content" style="flex-shrink: 0; padding-top: 15px;">
         <div class="form-grid-3">
             <div class="form-group">
-                <label for="add_bank_account_holder_en">银行账户持有人</label>
+                <label for="add_bank_account_holder_en">银行账户持有人 Bank Holder</label>
                 <input type="text" id="add_bank_account_holder_en" name="bank_account_holder_en" maxlength="50">
             </div>
             
             <div class="form-group">
-                <label for="add_bank_account">银行账号</label>
+                <label for="add_bank_account">银行账号 Bank Account</label>
                 <input type="text" id="add_bank_account" name="bank_account" maxlength="30">
             </div>
             
             <div class="form-group">
-                <label for="add_bank_name">银行名称</label>
+                <label for="add_bank_name">银行名称 Bank Name</label>
                 <select id="add_bank_name" name="bank_name">
                     <option value="">请选择银行</option>
                     <option value="Maybank (Malayan Banking Berhad)">Maybank (Malayan Banking Berhad)</option>
