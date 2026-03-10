@@ -102,7 +102,7 @@ window.addEventListener('keydown', function (e) {
 
         const activeElement = document.activeElement;
 
-        // 1. 尝试保存当前聚焦的行
+        // 1. 优先保存当前聚焦的行
         if (activeElement) {
             const row = activeElement.closest('tr');
             if (row) {
@@ -139,9 +139,9 @@ window.addEventListener('keydown', function (e) {
             return;
         }
 
-        // 3. 兜底方案：如果表格中只有一个新增行或一个编辑行，即使没有聚焦也保存它
+        // 3. 兜底方案：保存第一个发现的新行或编辑行（实现“一个一个保存”）
         const newRows = document.querySelectorAll('.new-row');
-        if (newRows.length === 1) {
+        if (newRows.length > 0) {
             const saveBtn = newRows[0].querySelector('.save-new-btn');
             if (saveBtn) {
                 saveNewRowRecord(saveBtn);
@@ -149,7 +149,7 @@ window.addEventListener('keydown', function (e) {
             }
         }
 
-        if (typeof editingRowIds !== 'undefined' && editingRowIds.size === 1) {
+        if (typeof editingRowIds !== 'undefined' && editingRowIds.size > 0) {
             const rid = Array.from(editingRowIds)[0];
             saveRecord(rid);
             return;
