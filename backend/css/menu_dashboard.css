@@ -134,7 +134,7 @@ body {
 /* LEFT: Category Column */
 .cat-col {
     width: var(--cat-w);
-    background: var(--surface2);
+    background: var(--bg);
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
@@ -410,7 +410,7 @@ body {
     display: grid;
     grid-template-columns: 100px 1fr 100px 100px 120px;
     padding: 12px 24px;
-    background: var(--surface2);
+    background: #636363;
     border-bottom: 1px solid var(--border);
     font-size: 11px;
     font-weight: 700;
@@ -691,7 +691,7 @@ body {
 /* RIGHT: Add Panel Column */
 .add-panel {
     width: var(--add-w);
-    background: var(--surface2);
+    background: var(--bg);
     border-left: 1px solid var(--border);
     display: flex;
     flex-direction: column;
