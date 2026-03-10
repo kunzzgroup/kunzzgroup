@@ -33,7 +33,6 @@ if (!isset($_SESSION['user_id'])) {
         <!-- 1. TOPBAR -->
         <header class="topbar">
                 <div class="tb-left">
-                    <span style="font-size:18px">🍽️</span>
                     <span class="tb-title">菜单管理</span>
                     <span style="opacity:0.2;margin:0 4px">|</span>
                     <div class="tb-crumb">
@@ -42,7 +41,6 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
                 <div class="tb-right">
                     <span class="tb-badge" id="tb-stats">0 项目</span>
-                    <div class="tb-user">T</div>
                 </div>
         </header>
 
@@ -68,11 +66,7 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
 
                 <div class="cat-scroll" id="cat-scroll">
-                    <?php
-                    require_once 'menu_api.php';
-                    $init = getInitialDashboardData('grand');
-                    echo $init['cats_html'];
-                    ?>
+                    <!-- Loaded by JS -->
                 </div>
             </aside>
 
@@ -98,19 +92,15 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
 
                 <div class="list-scroll" id="list-scroll">
-                    <?php echo $init['items_html']; ?>
+                    <!-- Items loaded by JS -->
                 </div>
             </section>
 
             <!-- RIGHT: Add Panel -->
             <aside class="add-panel">
                 <div class="add-panel-head">
-                    <div class="add-panel-mode-row">
-                        <span class="add-panel-mode-label" id="add-panel-mode">新增模式</span>
-                        <button class="btn-panel-close" id="btn-panel-close" onclick="cancelEdit()" title="取消编辑">✕</button>
-                    </div>
-                    <h3 id="add-panel-title">新增菜单项目</h3>
-                    <p id="add-panel-sub"><?php echo $init['first_cat_id'] ? "当前分类：".$init['first_cat_name'] : "请先选择分类"; ?></p>
+                    <h3>＋ 新增菜单项目</h3>
+                    <p id="add-panel-sub">请先选择分类</p>
                 </div>
                 
                 <div class="add-scroll">
@@ -197,11 +187,6 @@ if (!isset($_SESSION['user_id'])) {
     </div>
 
     <!-- Custom JS -->
-    <script>
-        // Pass initial state to JS
-        const INITIAL_CAT_ID = <?php echo json_encode($init['first_cat_id']); ?>;
-        const INITIAL_CAT_NAME = <?php echo json_encode($init['first_cat_name']); ?>;
-    </script>
     <script src="js/menu_dashboard.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

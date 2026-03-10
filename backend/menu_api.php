@@ -1,22 +1,11 @@
 <?php
 // ============================================================
 //  TOKYO JAPANESE CUISINE — Menu API
-//  Single-file REST API for menu management
 // ============================================================
 /**
- * 🛠️ MAINTENANCE GUIDE (如何修改系统)
- * 
- * 1. 增加数据库字段 (Add DB Field):
- *    - 在 MySQL `menus` 表增加字段。
- *    - 修改 `actionAdd()` 和 `actionEdit()` 中的字段列表。
- *    - 修改 `renderItemHTML()` (下方的 HTML 模板) 以显示新字段。
- * 
- * 2. 修改界面 HTML (Edit UI):
- *    - 所有列表 HTML 都在 `renderCategoryHTML()` 和 `renderItemHTML()` 函数中。
- *    - JS 只是负责搬运这些 HTML，不包含结构逻辑。
- * 
- * 3. 切换菜单类型 (Menu Types):
- *    - 系统支持 'grand' 和 'sushi'，通过 `menu_type` 字段区分。
+ * 🛠️ 修改建议 (Maintenance Guide):
+ * 1. 修改样式: 找到下方的 renderItemHTML() 和 renderCategoryHTML()。
+ * 2. 增加字段: 在 renderItemHTML() 中增加 <div> 或 <input>，并在 actionAdd/Edit 中添加该字段。
  */
 
 header('Content-Type: application/json; charset=utf-8');
@@ -116,8 +105,7 @@ function uploadImage(array $file, string $menu_type, string $item_code): string 
 }
 
 // ============================================================
-//  ── HTML RENDERERS (Centralized UI Structure) ──
-//  Edit these functions to change how items/categories look.
+//  ── HTML RENDERERS (UI 结构锁在这里) ──
 // ============================================================
 
 function renderCategoryHTML(array $c, bool $isActive): string {
@@ -125,38 +113,20 @@ function renderCategoryHTML(array $c, bool $isActive): string {
     $name = htmlspecialchars($c['category_name'] ?? '');
     $count = (int)($c['item_count'] ?? 0);
     $activeCls = $isActive ? 'active' : '';
-
     return "
-        <div class=\"cat-item $activeCls\" data-id=\"$id\"
-             draggable=\"true\" onclick=\"selectCat($id,'$name')\">
-          <div class=\"cat-item-left\">
-            <span class=\"cat-drag-handle\">⠿</span>
-            <span class=\"cat-name-box\">$name</span>
-          </div>
-          <div class=\"cat-item-right\">
-            <span class=\"cat-badge\">$count</span>
-            <div class=\"cat-actions\">
-               <button class=\"btn-cat-act\" onclick=\"event.stopPropagation();confirmDelCat($id,'$name')\" title=\"删除\">✕</button>
-            </div>
-          </div>
+        <div class=\"cat-item $activeCls\" data-id=\"$id\" draggable=\"true\" onclick=\"selectCat($id,'$name')\">
+          <div class=\"cat-item-left\"><span class=\"cat-drag-handle\">⠿</span><span class=\"cat-name-box\">$name</span></div>
+          <div class=\"cat-item-right\"><span class=\"cat-badge\">$count</span><button class=\"btn-cat-act\" onclick=\"event.stopPropagation();confirmDelCat($id,'$name')\">✕</button></div>
         </div>";
 }
 
 function renderItemHTML(array $i): string {
-    $id = (int)$i['id'];
-    $code = htmlspecialchars($i['item_code'] ?? 'N/A');
-    $nameEn = htmlspecialchars($i['item_name'] ?? '');
-    $nameCn = htmlspecialchars($i['item_name_cn'] ?? '');
-    $desc = htmlspecialchars($i['item_desc'] ?? '');
-    $price = htmlspecialchars($i['price'] ?? '0.00');
-    $status = $i['status'] === 'published' ? 'published' : 'draft';
-    $statusText = $status === 'published' ? '已发布' : '草稿';
-    $dotCls = $status === 'published' ? 'green' : 'gray';
-    
+    $id = (int)$i['id']; $code = htmlspecialchars($i['item_code'] ?? 'N/A');
+    $nameEn = htmlspecialchars($i['item_name'] ?? ''); $nameCn = htmlspecialchars($i['item_name_cn'] ?? '');
+    $desc = htmlspecialchars($i['item_desc'] ?? ''); $price = htmlspecialchars($i['price'] ?? '0.00');
+    $isPub = $i['status'] === 'published';
     $imgUrl = buildImageUrl($i['image_path']);
     $imgHtml = $imgUrl ? "<img src=\"$imgUrl\">" : "<span class=\"item-thumb-none\">📸</span>";
-
-    // Item Actions SVGs (Edit & Delete)
     $editSvg = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
     $delSvg = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
 
@@ -169,57 +139,33 @@ function renderItemHTML(array $i): string {
             <input class=\"inline-input item-name-cn\" value=\"$nameCn\" onblur=\"updateInline($id,'item_name_cn',this.value)\">
             <input class=\"inline-input item-desc-row\" value=\"$desc\" onblur=\"updateInline($id,'item_desc',this.value)\">
         </div>
-        <div class=\"item-price\">
-            <div style=\"font-size:10px;opacity:0.5;font-weight:700\">PRICE</div>
-            <input class=\"inline-input item-price-val\" value=\"$price\" onblur=\"updateInline($id,'price',this.value)\">
-        </div>
-        <div class=\"item-status\">
-            <div class=\"status-toggle $status\" onclick=\"toggleStatus($id)\">
-                <span class=\"dot-$dotCls\"></span>
-                $statusText
-            </div>
-        </div>
-        <div class=\"item-actions\">
-            <button class=\"btn-act\" onclick=\"openEditPanel($id)\" title=\"编辑\">$editSvg</button>
-            <button class=\"btn-act btn-del\" onclick=\"confirmDelItem($id,'$nameEn')\" title=\"删除\">$delSvg</button>
-        </div>
+        <div class=\"item-price\"><div style=\"font-size:10px;opacity:0.5\">PRICE</div><input class=\"inline-input item-price-val\" value=\"$price\" onblur=\"updateInline($id,'price',this.value)\"></div>
+        <div class=\"item-status\"><div class=\"status-toggle ".($isPub?'published':'draft')."\" onclick=\"toggleStatus($id)\"><span class=\"dot-".($isPub?'green':'gray')."\"></span>".($isPub?'已发布':'草稿')."</div></div>
+        <div class=\"item-actions\"><button class=\"btn-act\" onclick=\"openEditPanel($id)\">$editSvg</button><button class=\"btn-act btn-del\" onclick=\"confirmDelItem($id,'$nameEn')\">$delSvg</button></div>
     </div>";
 }
 
 // ============================================================
-//  ROUTER (Only runs if action is provided)
+//  ROUTER (只在有 action 参数时运行，防止 include 出错)
 // ============================================================
 $action = $_REQUEST['action'] ?? '';
 
 if ($action) {
     match ($action) {
-        // ── Categories ──────────────────────────────────────────
-        'get_categories'    => actionGetCategories(),
-        'add_category'      => actionAddCategory(),
-        'edit_category'     => actionEditCategory(),
-        'delete_category'   => actionDeleteCategory(),
-
-        // ── Menu Items ──────────────────────────────────────────
-        'get'               => actionGet(),
-        'add'               => actionAdd(),
-        'edit'              => actionEdit(),
-        'delete'            => actionDelete(),
-
-        // ── Toggle Status ────────────────────────────────────────
-        'toggle_status'     => actionToggleStatus(),
-
-        // ── Sorting ─────────────────────────────────────────────
-        'reorder_items'     => actionReorderItems(),
-        'reorder_cats'      => actionReorderCats(),
-
-        // ── Single Item ─────────────────────────────────────────
-        'get_item'          => actionGetItem(),
-
-        // ── HTML FRAGMENTS (Separation) ─────────────────────────
+        'get_categories'      => actionGetCategories(),
+        'add_category'        => actionAddCategory(),
+        'delete_category'     => actionDeleteCategory(),
+        'get'                 => actionGet(),
+        'add'                 => actionAdd(),
+        'edit'                => actionEdit(),
+        'delete'              => actionDelete(),
+        'toggle_status'       => actionToggleStatus(),
+        'reorder_items'       => actionReorderItems(),
+        'reorder_cats'        => actionReorderCats(),
+        'get_item'            => actionGetItem(),
         'get_categories_html' => actionGetCategoriesHTML(),
         'get_items_html'      => actionGetItemsHTML(),
-
-        default             => respond(false, "Unknown action: '$action'. Valid: get_categories, add_category, delete_category, get, add, edit, delete, toggle_status, reorder_items, reorder_cats, get_item, get_categories_html, get_items_html", null, 400),
+        default               => respond(false, "Unknown action: $action", null, 400),
     };
 }
 
@@ -628,71 +574,4 @@ function actionGetItem(): void {
     if (!$item) respond(false, '未找到该项目', null, 404);
     $item['image_url'] = buildImageUrl($item['image_path']);
     respond(true, 'OK', $item);
-}
-
-// ── ACTIONS: HTML FRAGMENTS ─────────────────────────────────
-
-function actionGetCategoriesHTML(): void {
-    $type = $_GET['type'] ?? 'grand';
-    $activeId = (int)($_GET['active_id'] ?? 0);
-
-    $pdo  = getDB();
-    $stmt = $pdo->prepare("
-        SELECT id, category_name, sort_order,
-               (SELECT COUNT(*) FROM menus WHERE category_id = mc.id) AS item_count
-        FROM menu_categories mc
-        WHERE menu_type = ?
-        ORDER BY sort_order ASC, id ASC
-    ");
-    $stmt->execute([$type]);
-    $cats = $stmt->fetchAll();
-
-    if (empty($cats)) {
-        echo "<div style=\"text-align:center;padding:24px 10px;font-size:12px;color:var(--text-4)\">暂无分类</div>";
-        exit;
-    }
-
-    $html = "";
-    foreach ($cats as $c) {
-        $html .= renderCategoryHTML($c, $c['id'] == $activeId);
-    }
-    echo $html;
-    exit;
-}
-
-function actionGetItemsHTML(): void {
-    $catId = (int)($_GET['category_id'] ?? 0);
-    $search = trim($_GET['search'] ?? '');
-    
-    if ($catId <= 0) {
-         echo "<div style=\"text-align:center;padding:100px 0;opacity:0.3;font-size:14px\">请选择分类</div>";
-         exit;
-    }
-
-    $pdo = getDB();
-    $sql = "SELECT * FROM menus WHERE category_id = ?";
-    $params = [$catId];
-
-    if ($search !== '') {
-        $sql .= " AND (item_name LIKE ? OR item_name_cn LIKE ? OR item_code LIKE ?)";
-        $like = "%$search%";
-        $params[] = $like; $params[] = $like; $params[] = $like;
-    }
-
-    $sql .= " ORDER BY sort_order ASC, id ASC";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-    $items = $stmt->fetchAll();
-
-    if (empty($items)) {
-        echo "<div style=\"text-align:center;padding:100px 0;opacity:0.4;font-size:14px\">暂无项目</div>";
-        exit;
-    }
-
-    $html = "";
-    foreach ($items as $i) {
-        $html .= renderItemHTML($i);
-    }
-    echo $html;
-    exit;
 }
