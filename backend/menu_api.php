@@ -187,39 +187,41 @@ function renderItemHTML(array $i): string {
 }
 
 // ============================================================
-//  ROUTER
+//  ROUTER (Only runs if action is provided)
 // ============================================================
 $action = $_REQUEST['action'] ?? '';
 
-match ($action) {
-    // ── Categories ──────────────────────────────────────────
-    'get_categories'    => actionGetCategories(),
-    'add_category'      => actionAddCategory(),
-    'edit_category'     => actionEditCategory(),
-    'delete_category'   => actionDeleteCategory(),
+if ($action) {
+    match ($action) {
+        // ── Categories ──────────────────────────────────────────
+        'get_categories'    => actionGetCategories(),
+        'add_category'      => actionAddCategory(),
+        'edit_category'     => actionEditCategory(),
+        'delete_category'   => actionDeleteCategory(),
 
-    // ── Menu Items ──────────────────────────────────────────
-    'get'               => actionGet(),
-    'add'               => actionAdd(),
-    'edit'              => actionEdit(),
-    'delete'            => actionDelete(),
+        // ── Menu Items ──────────────────────────────────────────
+        'get'               => actionGet(),
+        'add'               => actionAdd(),
+        'edit'              => actionEdit(),
+        'delete'            => actionDelete(),
 
-    // ── Toggle Status ────────────────────────────────────────
-    'toggle_status'     => actionToggleStatus(),
+        // ── Toggle Status ────────────────────────────────────────
+        'toggle_status'     => actionToggleStatus(),
 
-    // ── Sorting ─────────────────────────────────────────────
-    'reorder_items'     => actionReorderItems(),
-    'reorder_cats'      => actionReorderCats(),
+        // ── Sorting ─────────────────────────────────────────────
+        'reorder_items'     => actionReorderItems(),
+        'reorder_cats'      => actionReorderCats(),
 
-    // ── Single Item ─────────────────────────────────────────
-    'get_item'          => actionGetItem(),
+        // ── Single Item ─────────────────────────────────────────
+        'get_item'          => actionGetItem(),
 
-    // ── HTML FRAGMENTS (Separation) ─────────────────────────
-    'get_categories_html' => actionGetCategoriesHTML(),
-    'get_items_html'      => actionGetItemsHTML(),
+        // ── HTML FRAGMENTS (Separation) ─────────────────────────
+        'get_categories_html' => actionGetCategoriesHTML(),
+        'get_items_html'      => actionGetItemsHTML(),
 
-    default             => respond(false, "Unknown action: '$action'. Valid: get_categories, add_category, delete_category, get, add, edit, delete, toggle_status, reorder_items, reorder_cats, get_item, get_categories_html, get_items_html", null, 400),
-};
+        default             => respond(false, "Unknown action: '$action'. Valid: get_categories, add_category, delete_category, get, add, edit, delete, toggle_status, reorder_items, reorder_cats, get_item, get_categories_html, get_items_html", null, 400),
+    };
+}
 
 // ============================================================
 //  ACTION: GET CATEGORIES
