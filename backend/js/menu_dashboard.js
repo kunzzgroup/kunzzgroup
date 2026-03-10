@@ -142,7 +142,22 @@ function confirmDelItem(id, name) {
     });
 }
 
-function onImgPick(inp) { const f = inp.files[0]; if (!f) return; imgFile = f; const r = new FileReader(); r.onload = e => { document.getElementById('img-zone-inner').style.display = 'none'; const w = document.getElementById('img-preview-wrap'); w.style.display = 'flex'; w.querySelector('img').src = e.target.result; }; r.readAsDataURL(f); }
+function openImgPick(inp) { const f = inp.files[0]; if (!f) return; imgFile = f; const r = new FileReader(); r.onload = e => { document.getElementById('img-zone-inner').style.display = 'none'; const w = document.getElementById('img-preview-wrap'); w.style.display = 'flex'; w.querySelector('img').src = e.target.result; }; r.readAsDataURL(f); }
 function clearImg() { imgFile = null; document.getElementById('f-img').value = ''; document.getElementById('img-preview-wrap').style.display = 'none'; document.getElementById('img-zone-inner').style.display = 'flex'; }
 function toggleCatAdd() { const r = document.getElementById('cat-add-row'); r.classList.toggle('active'); if (r.classList.contains('active')) document.getElementById('new-cat-inp').focus(); }
 async function doAddCat() { const i = document.getElementById('new-cat-inp'); if (!i.value) return; if ((await apiPost({ action: 'add_category', type: menuType, category_name: i.value })).success) { i.value = ''; loadCats(menuType); } }
+
+// ── 6. PHOTO VIEWER ──
+function openPhoto(url) {
+    if (!url) return;
+    const v = document.getElementById('photo-viewer');
+    const img = document.getElementById('pv-img');
+    img.src = url;
+    v.style.display = 'flex';
+    setTimeout(() => v.classList.add('show'), 10);
+}
+function closePhoto() {
+    const v = document.getElementById('photo-viewer');
+    v.classList.remove('show');
+    setTimeout(() => v.style.display = 'none', 300);
+}

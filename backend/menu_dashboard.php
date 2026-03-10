@@ -192,6 +192,12 @@ if (!isset($_SESSION['user_id'])) {
         </div>
     </div>
 
+    <!-- 4. PHOTO VIEWER -->
+    <div class="photo-viewer" id="photo-viewer" onclick="closePhoto()">
+        <button class="pv-close">✕</button>
+        <img src="" id="pv-img" onclick="event.stopPropagation()">
+    </div>
+
     <!-- Custom JS -->
     <script src="js/menu_dashboard.js?v=<?php echo time(); ?>"></script>
 </body>
