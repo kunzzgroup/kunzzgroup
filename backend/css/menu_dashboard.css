@@ -1,23 +1,23 @@
 :root {
-    /* Color Palette - Tokyo Japanese Cuisine */
-    --bg: #fcfaf7;
+    /* Color Palette - Tokyo Japanese Cuisine (Synced with Backend) */
+    --bg: #f1dfbc;
     --surface: #ffffff;
-    --surface2: #faf6ef;
-    --border: #e8dfd0;
-    --border2: #d4c8b4;
-    --brown: #3d2b1a;
-    --brown-md: #6b4c2a;
-    --brown-lt: #9a7558;
+    --surface2: #f8f5eb;
+    --border: #dcbfa1;
+    --border2: #583e04;
+    --brown: #583e04;
+    --brown-md: #462d03;
+    --brown-lt: #8c6a0b;
     --brown-dk: #23190f;
-    --gold: #b8952a;
-    --gold-lt: #d4ae4a;
-    --gold-bg: #fdf6e3;
-    --gold-glow: rgba(184, 149, 42, 0.1);
-    --text: #2a1f14;
-    --text-2: #6b5240;
-    --text-3: #a08060;
-    --green: #2d7a52;
-    --red: #c0392b;
+    --gold: #583e04;
+    --gold-lt: #8c6a0b;
+    --gold-bg: #ffffff;
+    --gold-glow: rgba(88, 62, 4, 0.1);
+    --text: #111827;
+    --text-2: #374151;
+    --text-3: #583e04;
+    --green: #10b981;
+    --red: #ef4444;
 
     /* Dimensions */
     --sidebar-w: clamp(140px, 13.02vw, 250px);
