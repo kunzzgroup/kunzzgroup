@@ -417,13 +417,8 @@ body {
     letter-spacing: 0.05em;
 }
 
-.list-head>div:nth-child(3),
-.list-head>div:nth-child(4) {
+.list-head>div:not(:nth-child(2)) {
     text-align: center;
-}
-
-.list-head>div:nth-child(5) {
-    text-align: right;
 }
 
 .list-scroll {
@@ -447,6 +442,11 @@ body {
     z-index: 10;
     transform: scale(1.002);
     box-shadow: var(--shadow);
+}
+
+.item-thumb-box-wrap {
+    display: flex;
+    justify-content: center;
 }
 
 .item-thumb-box {
@@ -526,6 +526,14 @@ body {
     box-shadow: var(--shadow);
 }
 
+.item-price {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+
 .item-price-val {
     font-size: 14px;
     font-weight: 700;
@@ -563,7 +571,11 @@ body {
 }
 
 .item-price {
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
 }
 
 .item-status {
@@ -575,7 +587,7 @@ body {
 .item-actions {
     display: flex;
     gap: 8px;
-    justify-content: flex-end;
+    justify-content: center;
     align-items: center;
 }
 
