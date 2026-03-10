@@ -575,3 +575,35 @@ function actionGetItem(): void {
     $item['image_url'] = buildImageUrl($item['image_path']);
     respond(true, 'OK', $item);
 }
+
+// ── ACTIONS: HTML FRAGMENTS (JS 调用) ─────────────────────
+
+function actionGetCategoriesHTML(): void {
+    $type = $_GET['type'] ?? 'grand';
+    $activeId = (int)($_GET['active_id'] ?? 0);
+    $pdo = getDB();
+    $stmt = $pdo->prepare("SELECT id, category_name, (SELECT COUNT(*) FROM menus WHERE category_id = mc.id) AS item_count FROM menu_categories mc WHERE menu_type = ? ORDER BY sort_order ASC, id ASC");
+    $stmt->execute([$type]);
+    $cats = $stmt->fetchAll();
+    if (empty($cats)) { echo "<div class='empty-cat'>暂无分类</div>"; exit; }
+    foreach ($cats as $c) echo renderCategoryHTML($c, $c['id'] == $activeId);
+    exit;
+}
+
+function actionGetItemsHTML(): void {
+    $catId = (int)($_GET['category_id'] ?? 0);
+    $search = trim($_GET['search'] ?? '');
+    if ($catId <= 0) { echo "<div class='empty-state'>请选择分类</div>"; exit; }
+    $pdo = getDB();
+    $sql = "SELECT * FROM menus WHERE category_id = ?"; $params = [$catId];
+    if ($search !== '') {
+        $sql .= " AND (item_name LIKE ? OR item_name_cn LIKE ? OR item_code LIKE ?)";
+        $like = "%$search%"; $params[] = $like; $params[] = $like; $params[] = $like;
+    }
+    $sql .= " ORDER BY sort_order ASC, id ASC";
+    $stmt = $pdo->prepare($sql); $stmt->execute($params);
+    $items = $stmt->fetchAll();
+    if (empty($items)) { echo "<div class='empty-state'>暂无项目</div>"; exit; }
+    foreach ($items as $i) echo renderItemHTML($i);
+    exit;
+}
