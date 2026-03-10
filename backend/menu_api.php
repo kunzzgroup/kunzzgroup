@@ -122,7 +122,14 @@ match ($action) {
     // ── Toggle Status ────────────────────────────────────────
     'toggle_status'     => actionToggleStatus(),
 
-    default             => respond(false, "Unknown action: '$action'. Valid: get_categories, add_category, delete_category, get, add, edit, delete, toggle_status", null, 400),
+    // ── Sorting ─────────────────────────────────────────────
+    'reorder_items'     => actionReorderItems(),
+    'reorder_cats'      => actionReorderCats(),
+
+    // ── Single Item ─────────────────────────────────────────
+    'get_item'          => actionGetItem(),
+
+    default             => respond(false, "Unknown action: '$action'. Valid: get_categories, add_category, delete_category, get, add, edit, delete, toggle_status, reorder_items, reorder_cats, get_item", null, 400),
 };
 
 // ============================================================
@@ -471,4 +478,63 @@ function actionToggleStatus(): void {
     $pdo->prepare("UPDATE menus SET status = ? WHERE id = ?")->execute([$newStatus, $id]);
 
     respond(true, "状态已切换为 $newStatus", ['id' => $id, 'status' => $newStatus]);
+}
+
+// ============================================================
+//  ACTION: REORDER ITEMS
+// ============================================================
+function actionReorderItems(): void {
+    $idsRaw = $_POST['ids'] ?? '';
+    if (empty($idsRaw)) respond(false, 'ids 不能为空', null, 422);
+    $idsArr = explode(',', $idsRaw);
+    $pdo    = getDB();
+    try {
+        $pdo->beginTransaction();
+        $stmt = $pdo->prepare("UPDATE menus SET sort_order = ? WHERE id = ?");
+        foreach ($idsArr as $index => $id) {
+            $stmt->execute([(int)$index + 1, (int)$id]);
+        }
+        $pdo->commit();
+        respond(true, '项目顺序已更新');
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        respond(false, '更新失败: ' . $e->getMessage(), null, 500);
+    }
+}
+
+// ============================================================
+//  ACTION: REORDER CATEGORIES
+// ============================================================
+function actionReorderCats(): void {
+    $idsRaw = $_POST['ids'] ?? '';
+    if (empty($idsRaw)) respond(false, 'ids 不能为空', null, 422);
+    $idsArr = explode(',', $idsRaw);
+    $pdo    = getDB();
+    try {
+        $pdo->beginTransaction();
+        $stmt = $pdo->prepare("UPDATE menu_categories SET sort_order = ? WHERE id = ?");
+        foreach ($idsArr as $index => $id) {
+            $stmt->execute([(int)$index + 1, (int)$id]);
+        }
+        $pdo->commit();
+        respond(true, '分类顺序已更新');
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        respond(false, '更新失败: ' . $e->getMessage(), null, 500);
+    }
+}
+
+// ============================================================
+//  ACTION: GET SINGLE ITEM
+// ============================================================
+function actionGetItem(): void {
+    $id = (int)($_GET['id'] ?? 0);
+    if ($id <= 0) respond(false, 'id 无效', null, 422);
+    $pdo  = getDB();
+    $stmt = $pdo->prepare("SELECT m.*, mc.category_name FROM menus m LEFT JOIN menu_categories mc ON mc.id = m.category_id WHERE m.id = ?");
+    $stmt->execute([$id]);
+    $item = $stmt->fetch();
+    if (!$item) respond(false, '未找到该项目', null, 404);
+    $item['image_url'] = buildImageUrl($item['image_path']);
+    respond(true, 'OK', $item);
 }

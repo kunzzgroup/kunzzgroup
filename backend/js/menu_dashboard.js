@@ -222,11 +222,16 @@ function initDrag(selector, parentId, type) {
         el.addEventListener('dragstart', () => { drag = el; setTimeout(() => el.classList.add('sortable-ghost'), 0); });
         el.addEventListener('dragend', () => el.classList.remove('sortable-ghost'));
         el.addEventListener('dragover', e => e.preventDefault());
-        el.addEventListener('drop', () => {
+        el.addEventListener('drop', async () => {
             if (drag && el !== drag) {
                 const ns = [...p.querySelectorAll(selector)];
                 ns.indexOf(drag) < ns.indexOf(el) ? p.insertBefore(drag, el.nextSibling) : p.insertBefore(drag, el);
-                toast('✓ 顺序已更新');
+
+                // Persist to backend
+                const newIds = [...p.querySelectorAll(selector)].map(x => x.dataset.id);
+                const action = type === 'cat' ? 'reorder_cats' : 'reorder_items';
+                const res = await apiPost({ action, ids: newIds.join(',') });
+                if (res.success) toast('✓ 顺序已更新');
             }
         });
     });
@@ -292,6 +297,28 @@ function onImgDrop(e) {
         const dt = new DataTransfer(); dt.items.add(e.dataTransfer.files[0]);
         inp.files = dt.files; onImgPick(inp);
     }
+}
+
+// ── DELETION ──
+function confirmDelCat(id, name) {
+    showConfirm('删除分类', `确定要删除分类 "${name}" 吗？这将会同时删除该分类下的所有菜品，且无法恢复！`, async () => {
+        const res = await apiPost({ action: 'delete_category', id });
+        if (res.success) {
+            toast('分类及其项目已删除');
+            loadCats(menuType);
+            if (catId == id) { catId = null; clearList(); }
+        }
+    });
+}
+
+function confirmDelItem(id, name) {
+    showConfirm('删除菜品', `确定要从菜单中移除 "${name}" 吗？`, async () => {
+        const res = await apiPost({ action: 'delete', id });
+        if (res.success) {
+            toast('菜品已删除');
+            loadItems();
+        }
+    });
 }
 
 // ── CONFIRM ──

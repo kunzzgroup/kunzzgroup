@@ -47,9 +47,7 @@ body {
 }
 
 /* Sidebar Integration */
-body.has-sidebar {
-    padding-left: var(--sidebar-w);
-}
+/* Redundant padding-left removed to avoid double-shifting */
 
 /* Main Workspace */
 .workspace {
