@@ -408,12 +408,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Show corresponding sidebar category
                 haidilaoSidebarCategories.forEach(sidebar => {
-                    sidebar.style.display = 'none';
                     if (sidebar.id === 'sidebar-' + mainCategory) {
                         sidebar.style.display = 'flex';
-                        // Auto-click first tab in this sidebar
-                        const firstTab = sidebar.querySelector('.haidilao-sidebar-tab');
-                        if (firstTab) firstTab.click();
+                        // Auto-click first tab in this sidebar if none is active
+                        const activeTab = sidebar.querySelector('.haidilao-sidebar-tab.active');
+                        if (!activeTab) {
+                            const firstTab = sidebar.querySelector('.haidilao-sidebar-tab');
+                            if (firstTab) firstTab.click();
+                        } else {
+                            // Re-trigger click to ensure panel is shown
+                            activeTab.click();
+                        }
+                    } else {
+                        sidebar.style.display = 'none';
                     }
                 });
             });

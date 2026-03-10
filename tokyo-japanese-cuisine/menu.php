@@ -28,7 +28,7 @@ $sushiCategories = fetchMenuData('sushi');
 
 function panelId(string $type, int $catId): string { return 'panel-' . $type . '-' . $catId; }
 function imgUrl(?string $path): string { if (!$path) return ''; if (str_starts_with($path, 'http')) return $path; return IMG_URL_PREFIX . ltrim($path, '/'); }
-function e(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
+function e(?string $s): string { return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
 
 ?>
 <!DOCTYPE html>
