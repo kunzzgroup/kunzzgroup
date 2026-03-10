@@ -331,16 +331,17 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: var(--bg);
+    background: var(--surface);
     overflow: hidden;
-    padding: 24px;
 }
 
 .list-toolbar {
-    padding-bottom: 20px;
+    height: 72px;
+    padding: 0 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    border-bottom: 1px solid var(--border);
 }
 
 .search-box {
@@ -362,8 +363,8 @@ body {
     height: 42px;
     padding: 0 14px 0 42px;
     border: 1.5px solid var(--border);
-    border-radius: 8px;
-    background: white;
+    border-radius: 10px;
+    background: var(--bg);
     outline: none;
     transition: 0.2s;
     font-size: 14px;
@@ -408,71 +409,41 @@ body {
 .list-head {
     display: grid;
     grid-template-columns: 100px 1fr 100px 100px 120px;
+    padding: 12px 24px;
     background: #636363;
-    border: 1.5px solid #a38b6d;
-    border-bottom: 2px solid #583e04;
+    border-bottom: 1px solid var(--border);
     font-size: 11px;
     font-weight: 700;
     color: var(--text-head);
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    overflow-y: scroll;
-    /* Match scrollbar spacing of the list */
-    scrollbar-width: none;
-    /* Hide scrollbar in header */
 }
 
-.list-head::-webkit-scrollbar {
-    display: none;
-}
-
-.list-head>div {
-    padding: 14px 16px;
-    border-right: 1px solid rgba(255, 255, 255, 0.15);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.list-head>div:nth-child(2) {
-    justify-content: flex-start;
-}
-
-.list-head>div:last-child {
-    border-right: none;
+.list-head>div:not(:nth-child(2)) {
+    text-align: center;
 }
 
 .list-scroll {
     flex: 1;
-    overflow-y: scroll;
+    overflow-y: auto;
     padding-bottom: 40px;
-    background: white;
-    border: 1.5px solid #a38b6d;
-    border-top: none;
 }
 
 .item-row {
     display: grid;
     grid-template-columns: 100px 1fr 100px 100px 120px;
+    padding: 16px 24px;
     border-bottom: 1px solid var(--border);
     transition: 0.2s;
     background: white;
-    align-items: stretch;
-}
-
-.item-row>div {
-    padding: 12px;
-    border-right: 1px solid var(--border);
-    display: flex;
     align-items: center;
 }
 
-.item-row>div:last-child {
-    border-right: none;
-}
-
 .item-row:hover {
-    background: #fafafa;
+    background: var(--bg);
+    z-index: 10;
+    transform: scale(1.002);
+    box-shadow: var(--shadow);
 }
 
 .item-thumb-box-wrap {
@@ -506,9 +477,8 @@ body {
 .item-details {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    flex: 1;
-    min-width: 0;
+    gap: 4px;
+    padding-right: 20px;
 }
 
 .item-code-tag {
