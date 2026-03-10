@@ -100,6 +100,16 @@ window.addEventListener('keydown', function (e) {
         e.preventDefault(); // 阻止浏览器默认保存行为
         e.stopPropagation(); // 阻止事件进一步传播
 
+        // A. 检查是否按下 SHIFT (CTRL+SHIFT+S) -> 触发批量保存
+        if (e.shiftKey) {
+            console.log('StockEdit Shortcut: CTRL+SHIFT+S triggered (Batch Save)');
+            if (typeof batchSaveNewRows === 'function') {
+                batchSaveNewRows();
+            }
+            return;
+        }
+
+        // B. 正常的 CTRL+S -> 保存单个项
         const activeElement = document.activeElement;
 
         // 1. 优先保存当前聚焦的行
