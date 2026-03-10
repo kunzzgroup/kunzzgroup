@@ -30,7 +30,7 @@ define('DB_PASS', 'Kunzz1688');
 
 // Image upload directory (relative to this file)
 define('UPLOAD_BASE', __DIR__ . '/uploads/');
-define('UPLOAD_URL_BASE', 'uploads/'); // Web-accessible relative path
+define('UPLOAD_URL_BASE', '/backend/uploads/'); // Web-accessible relative path
 
 // ============================================================
 //  DB CONNECTION

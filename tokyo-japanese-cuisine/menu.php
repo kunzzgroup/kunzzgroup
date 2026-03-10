@@ -1,5 +1,5 @@
 <?php
-define('API_BASE', 'menu_api.php');
+define('API_BASE', '../backend/menu_api.php');
 
 function fetchCategories(string $type): array {
     $host = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
