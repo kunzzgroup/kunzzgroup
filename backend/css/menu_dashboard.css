@@ -588,6 +588,13 @@ body {
     cursor: pointer;
 }
 
+.static-field {
+    padding: 2px 6px;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+}
+
 .skeleton {
     background: var(--surface2);
     animation: shimmer 1.5s infinite;
@@ -813,6 +820,9 @@ body {
     font-size: 12px;
     cursor: pointer;
     transition: 0.2s;
+    pointer-events: auto;
+    position: relative;
+    z-index: 20;
 }
 
 .btn-submit {

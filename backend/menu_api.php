@@ -139,10 +139,13 @@ function renderItemHTML(array $i): string {
         <div class=\"item-details\">
             <span class=\"item-code-tag\">$code</span>
             <input class=\"inline-input item-name-en\" value=\"$nameEn\" onblur=\"updateInline($id,'item_name',this.value)\">
-            <input class=\"inline-input item-name-cn\" value=\"$nameCn\" onblur=\"updateInline($id,'item_name_cn',this.value)\">
-            <input class=\"inline-input item-desc-row\" value=\"$desc\" onblur=\"updateInline($id,'item_desc',this.value)\">
+            <div class=\"item-name-cn static-field\">$nameCn</div>
+            <div class=\"item-desc-row static-field\">$desc</div>
         </div>
-        <div class=\"item-price\"><div style=\"font-size:10px;opacity:0.5\">PRICE</div><input class=\"inline-input item-price-val\" value=\"$price\" onblur=\"updateInline($id,'price',this.value)\"></div>
+        <div class=\"item-price\">
+            <div style=\"font-size:10px;opacity:0.5\">PRICE</div>
+            <div class=\"item-price-val static-field\">$price</div>
+        </div>
         <div class=\"item-status\"><div class=\"status-toggle ".($isPub?'published':'draft')."\" onclick=\"toggleStatus($id)\"><span class=\"dot-".($isPub?'green':'gray')."\"></span>".($isPub?'已发布':'草稿')."</div></div>
         <div class=\"item-actions\"><button class=\"btn-act\" onclick=\"openEditPanel($id)\">$editSvg</button><button class=\"btn-act btn-del\" onclick=\"confirmDelItem($id,'$nameEn')\">$delSvg</button></div>
     </div>";

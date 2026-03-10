@@ -175,7 +175,8 @@ function handleImgFile(f) {
     };
     r.readAsDataURL(f);
 }
-function clearImg() {
+function clearImg(e) {
+    if (e) e.stopPropagation();
     imgFile = null;
     imgDeleted = true;
     document.getElementById('f-img').value = '';
