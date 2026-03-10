@@ -3339,32 +3339,32 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
 
 .haidilao-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
 }
 
 /* Cards — premium stage */
 .haidilao-card {
   background: #fff;
-  border-radius: 22px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(51, 50, 47, 0.07);
-  transition: transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.38s ease;
+  box-shadow: 0 4px 15px rgba(51, 50, 47, 0.05);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  border: 1px solid rgba(93, 90, 84, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.03);
 }
 
 .haidilao-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 50px rgba(51, 50, 47, 0.13);
+  transform: translateY(-6px);
+  box-shadow: 0 15px 35px rgba(51, 50, 47, 0.1);
 }
 
 .img-wrap {
   width: 100%;
-  aspect-ratio: 1 / 1;
-  background-color: #ede8e0;
+  aspect-ratio: 4 / 3;
+  background-color: #f8f5f0;
   overflow: hidden;
   position: relative;
   flex-shrink: 0;
@@ -3374,32 +3374,56 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
-  transition: transform 0.4s ease;
-  cursor: pointer;
+  transition: transform 0.6s ease;
   display: block;
 }
 
 .haidilao-card:hover .img-wrap img {
-  transform: scale(1.08);
+  transform: scale(1.05);
 }
 
 .info-wrap {
-  padding: 22px 26px 26px 26px;
+  padding: 16px 20px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   background: #fff;
   flex-grow: 1;
-  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  border-top: 1px solid rgba(0, 0, 0, 0.03);
 }
 
 .title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #2c1810;
-  line-height: 1.35;
-  flex: 1;
-  letter-spacing: 0em;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #8b7353;
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+
+.desc {
+  font-size: 12px;
+  color: #777;
+  line-height: 1.5;
+  margin: 0 0 12px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 36px;
+}
+
+.price {
+  font-size: 17px;
+  font-weight: 700;
+  color: #a68a64;
+  margin-top: auto;
 }
 
 .add-btn {
