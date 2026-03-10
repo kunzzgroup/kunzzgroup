@@ -331,17 +331,16 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: var(--surface);
+    background: var(--bg);
     overflow: hidden;
+    padding: 24px;
 }
 
 .list-toolbar {
-    height: 72px;
-    padding: 0 24px;
+    padding-bottom: 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid var(--border);
 }
 
 .search-box {
@@ -363,8 +362,8 @@ body {
     height: 42px;
     padding: 0 14px 0 42px;
     border: 1.5px solid var(--border);
-    border-radius: 10px;
-    background: var(--bg);
+    border-radius: 8px;
+    background: white;
     outline: none;
     transition: 0.2s;
     font-size: 14px;
@@ -409,9 +408,9 @@ body {
 .list-head {
     display: grid;
     grid-template-columns: 100px 1fr 100px 100px 120px;
-    padding: 12px 24px;
     background: #636363;
-    border-bottom: 1px solid var(--border);
+    border: 1.5px solid #333;
+    border-bottom: 2px solid #333;
     font-size: 11px;
     font-weight: 700;
     color: var(--text-head);
@@ -419,31 +418,54 @@ body {
     letter-spacing: 0.1em;
 }
 
-.list-head>div:not(:nth-child(2)) {
-    text-align: center;
+.list-head>div {
+    padding: 12px 16px;
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.list-head>div:nth-child(2) {
+    justify-content: flex-start;
+}
+
+.list-head>div:last-child {
+    border-right: none;
 }
 
 .list-scroll {
     flex: 1;
     overflow-y: auto;
     padding-bottom: 40px;
+    background: white;
+    border: 1.5px solid #333;
+    border-top: none;
 }
 
 .item-row {
     display: grid;
     grid-template-columns: 100px 1fr 100px 100px 120px;
-    padding: 16px 24px;
     border-bottom: 1px solid var(--border);
     transition: 0.2s;
     background: white;
+    align-items: stretch;
+}
+
+.item-row>div {
+    padding: 12px;
+    border-right: 1px solid var(--border);
+    display: flex;
     align-items: center;
 }
 
+.item-row>div:last-child {
+    border-right: none;
+}
+
 .item-row:hover {
-    background: var(--bg);
+    background: #fffcf5;
     z-index: 10;
-    transform: scale(1.002);
-    box-shadow: var(--shadow);
 }
 
 .item-thumb-box-wrap {
