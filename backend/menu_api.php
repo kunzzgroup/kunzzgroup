@@ -452,6 +452,15 @@ function actionEdit(): void {
 
         $fields[] = "image_path = ?";
         $params[] = $image_path;
+    } 
+    // Handle manual image deletion
+    else if (!empty($_POST['delete_image'])) {
+        if ($existing['image_path']) {
+            $oldFile = UPLOAD_BASE . $existing['image_path'];
+            if (file_exists($oldFile)) @unlink($oldFile);
+        }
+        $fields[] = "image_path = ?";
+        $params[] = null;
     }
 
     if (empty($fields)) respond(false, '没有提供任何需要更新的字段', null, 422);

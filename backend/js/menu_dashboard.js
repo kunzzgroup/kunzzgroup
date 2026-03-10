@@ -45,6 +45,8 @@ async function loadItems(search = '') {
 }
 
 // ── 4. UI LOGIC (Add / Edit / Delete) ──
+let imgDeleted = false;
+
 async function doAdd() {
     const name = document.getElementById('f-name').value.trim();
     if (!name || !catId) return;
@@ -54,13 +56,15 @@ async function doAdd() {
         item_name_cn: document.getElementById('f-cn').value, item_desc: document.getElementById('f-desc').value,
         price: document.getElementById('f-price').value, status: document.getElementById('f-status').value
     };
+    if (editId && imgDeleted && !imgFile) p.delete_image = 1;
+
     const res = await apiPost(p, imgFile ? { image: imgFile } : {});
     if (res.success) { cancelEdit(); loadItems(); toast(editId ? '✓ 已保存修改' : '✓ 已添加'); }
 }
 
 function openEditPanel(id) {
     const item = items.find(i => i.id == id); if (!item) return;
-    editId = id;
+    editId = id; imgDeleted = false;
     document.getElementById('add-panel-mode').style.display = 'block';
     document.getElementById('add-panel-title').textContent = '编辑菜单项目';
     document.getElementById('add-panel-sub').textContent = `正在编辑：${item.item_name}`;
@@ -143,7 +147,13 @@ function confirmDelItem(id, name) {
 }
 
 function openImgPick(inp) { const f = inp.files[0]; if (!f) return; imgFile = f; const r = new FileReader(); r.onload = e => { document.getElementById('img-zone-inner').style.display = 'none'; const w = document.getElementById('img-preview-wrap'); w.style.display = 'flex'; w.querySelector('img').src = e.target.result; }; r.readAsDataURL(f); }
-function clearImg() { imgFile = null; document.getElementById('f-img').value = ''; document.getElementById('img-preview-wrap').style.display = 'none'; document.getElementById('img-zone-inner').style.display = 'flex'; }
+function clearImg() {
+    imgFile = null;
+    imgDeleted = true;
+    document.getElementById('f-img').value = '';
+    document.getElementById('img-preview-wrap').style.display = 'none';
+    document.getElementById('img-zone-inner').style.display = 'flex';
+}
 function toggleCatAdd() { const r = document.getElementById('cat-add-row'); r.classList.toggle('active'); if (r.classList.contains('active')) document.getElementById('new-cat-inp').focus(); }
 async function doAddCat() { const i = document.getElementById('new-cat-inp'); if (!i.value) return; if ((await apiPost({ action: 'add_category', type: menuType, category_name: i.value })).success) { i.value = ''; loadCats(menuType); } }
 
