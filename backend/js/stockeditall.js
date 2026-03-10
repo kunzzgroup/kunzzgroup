@@ -7704,3 +7704,75 @@ async function batchSaveNewRows() {
         batchSaveBtn.disabled = false;
     }
 }
+
+// 全局键盘快捷键
+document.addEventListener('keydown', function (e) {
+    // 检查是否按下 Ctrl+S 或 Cmd+S
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault(); // 阻止浏览器默认保存行为
+
+        const activeElement = document.activeElement;
+
+        // 1. 检查是否在新增弹窗中
+        const addForm = document.getElementById('add-form');
+        if (addForm && addForm.classList.contains('show')) {
+            saveNewRecord();
+            return;
+        }
+
+        // 2. 检查是否在表格中的新行或编辑行
+        if (activeElement) {
+            const row = activeElement.closest('tr');
+            if (row) {
+                // 如果是新创建的行
+                if (row.classList.contains('new-row')) {
+                    const saveBtn = row.querySelector('.save-new-btn');
+                    if (saveBtn) {
+                        saveNewRowRecord(saveBtn);
+                        return;
+                    }
+                }
+
+                // 如果是正在编辑的行
+                const recordIdAttr = activeElement.getAttribute('data-record-id');
+                if (recordIdAttr) {
+                    const recordId = parseInt(recordIdAttr);
+                    if (editingRowIds.has(recordId)) {
+                        saveRecord(recordId);
+                        return;
+                    }
+                }
+
+                // 另一种通过行查找 recordId 的方式
+                const firstInput = row.querySelector('input[data-record-id]');
+                if (firstInput) {
+                    const recordId = parseInt(firstInput.getAttribute('data-record-id'));
+                    if (editingRowIds.has(recordId)) {
+                        saveRecord(recordId);
+                        return;
+                    }
+                }
+            }
+        }
+
+        // 3. 兜底方案：如果有且仅有一个新行，保存它；如果有多个新行，触发批量保存
+        const newRows = document.querySelectorAll('.new-row');
+        if (newRows.length === 1) {
+            const saveBtn = newRows[0].querySelector('.save-new-btn');
+            if (saveBtn) {
+                saveNewRowRecord(saveBtn);
+                return;
+            }
+        } else if (newRows.length > 1) {
+            batchSaveNewRows();
+            return;
+        }
+
+        // 4. 如果只有一个正在编辑的行，保存它
+        if (editingRowIds.size === 1) {
+            const recordId = Array.from(editingRowIds)[0];
+            saveRecord(recordId);
+            return;
+        }
+    }
+});
