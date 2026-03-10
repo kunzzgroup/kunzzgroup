@@ -103,7 +103,7 @@ window.addEventListener('keydown', function (e) {
         const activeElement = document.activeElement;
 
         // 1. 优先保存当前聚焦的行
-        if (activeElement) {
+        if (activeElement && activeElement !== document.body) {
             const row = activeElement.closest('tr');
             if (row) {
                 // 如果是新创建的行
@@ -139,9 +139,11 @@ window.addEventListener('keydown', function (e) {
             return;
         }
 
-        // 3. 兜底方案：保存第一个发现的新行或编辑行（实现“一个一个保存”）
+        // 3. 兜底方案：保存当前可见的第一个未保存项（支持无光标下的“一个一个保存”）
+        // 优先保存表格中的“新行”
         const newRows = document.querySelectorAll('.new-row');
         if (newRows.length > 0) {
+            // 通常新行在底部，但我们从第一个开始保存
             const saveBtn = newRows[0].querySelector('.save-new-btn');
             if (saveBtn) {
                 saveNewRowRecord(saveBtn);
@@ -149,6 +151,7 @@ window.addEventListener('keydown', function (e) {
             }
         }
 
+        // 其次尝试保存“正在编辑”的旧行
         if (typeof editingRowIds !== 'undefined' && editingRowIds.size > 0) {
             const rid = Array.from(editingRowIds)[0];
             saveRecord(rid);
