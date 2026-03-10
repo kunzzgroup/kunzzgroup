@@ -148,16 +148,21 @@ function toggleCatAdd() { const r = document.getElementById('cat-add-row'); r.cl
 async function doAddCat() { const i = document.getElementById('new-cat-inp'); if (!i.value) return; if ((await apiPost({ action: 'add_category', type: menuType, category_name: i.value })).success) { i.value = ''; loadCats(menuType); } }
 
 // ── 6. PHOTO VIEWER ──
+let pvTmr = null;
 function openPhoto(url) {
     if (!url) return;
     const v = document.getElementById('photo-viewer');
     const img = document.getElementById('pv-img');
+    if (!v || !img) return;
+    clearTimeout(pvTmr);
     img.src = url;
     v.style.display = 'flex';
-    setTimeout(() => v.classList.add('show'), 10);
+    pvTmr = setTimeout(() => v.classList.add('show'), 10);
 }
 function closePhoto() {
     const v = document.getElementById('photo-viewer');
+    if (!v) return;
+    clearTimeout(pvTmr);
     v.classList.remove('show');
-    setTimeout(() => v.style.display = 'none', 300);
+    pvTmr = setTimeout(() => v.style.display = 'none', 300);
 }
