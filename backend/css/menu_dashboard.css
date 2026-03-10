@@ -592,6 +592,10 @@ body {
     cursor: pointer;
 }
 
+.clickable {
+    cursor: pointer;
+}
+
 .skeleton {
     background: var(--surface2);
     animation: shimmer 1.5s infinite;
