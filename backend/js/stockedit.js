@@ -1207,27 +1207,6 @@ function showAlert(message, type = 'success') {
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', initApp);
 
-// 键盘快捷键支持
-document.addEventListener('keydown', function (e) {
-    // Ctrl+S 保存所有编辑
-    if (e.ctrlKey && e.key === 's') {
-        e.preventDefault();
-        if (editingRowIds.size > 0) {
-            // 保存所有正在编辑的记录
-            editingRowIds.forEach(id => {
-                saveRecord(id);
-            });
-        }
-    }
-
-    // Escape键取消新增行
-    if (e.key === 'Escape') {
-        if (document.querySelector('.new-row')) {
-            cancelNewRow();
-        }
-        // 移除自动取消所有编辑的功能，让用户手动取消
-    }
-});
 
 // 创建 Combobox 组件
 function createCombobox(type, value = '', recordId = null, isNewRow = false) {

@@ -3358,67 +3358,7 @@ document.addEventListener('click', function (e) {
     }
 });
 
-// 键盘快捷键支持
-document.addEventListener('keydown', function (e) {
-    // Ctrl+Shift+S 批量保存
-    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 's') {
-        e.preventDefault();
-        const batchSaveBtn = document.getElementById('batch-save-btn');
-        if (batchSaveBtn && batchSaveBtn.style.display !== 'none') {
-            batchSaveNewRows();
-        }
-        return;
-    }
 
-    // Ctrl+S 保存
-    if (e.ctrlKey && e.key.toLowerCase() === 's') {
-        e.preventDefault();
-
-        // 1. 优先保存当前获焦的行
-        const activeElement = document.activeElement;
-        const focusedRow = activeElement ? activeElement.closest('tr') : null;
-
-        if (focusedRow) {
-            // 如果是新行
-            if (focusedRow.classList.contains('new-row')) {
-                const saveBtn = focusedRow.querySelector('.save-new-btn');
-                if (saveBtn) {
-                    saveNewRowRecord(saveBtn);
-                    return;
-                }
-            }
-            // 如果是正在编辑的行
-            if (focusedRow.classList.contains('editing-row')) {
-                // 从行中找到保存按钮并触发点击
-                const saveBtn = focusedRow.querySelector('.save-mode');
-                if (saveBtn) {
-                    saveBtn.click();
-                    return;
-                }
-            }
-        }
-
-        // 2. 如果没有获焦的特定行，或者该行不可保存，则回退到原逻辑：保存所有正在编辑的记录
-        if (editingRowIds.size > 0) {
-            editingRowIds.forEach(id => {
-                saveRecord(id);
-            });
-        }
-    }
-
-    // Escape键取消新增行
-    if (e.key === 'Escape') {
-        if (document.querySelector('.new-row')) {
-            cancelNewRow();
-        }
-    }
-
-    // Home键回到顶部
-    if (e.key === 'Home' && e.ctrlKey) {
-        e.preventDefault();
-        scrollToTop();
-    }
-});
 
 // 创建 Combobox 组件
 function createCombobox(type, value = '', recordId = null, isNewRow = false) {
