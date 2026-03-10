@@ -98,14 +98,18 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
             </section>
 
-            <!-- RIGHT: Add Panel -->
-            <aside class="add-panel">
+            <!-- RIGHT: Detail Panel (Add/Edit) -->
+            <aside class="add-panel" id="detail-panel">
                 <div class="add-panel-head">
-                    <h3>＋ 新增菜单项目</h3>
+                    <div class="panel-badge" id="panel-mode-badge">新增模式</div>
+                    <h3 id="panel-title">新增菜单项目</h3>
                     <p id="add-panel-sub">请先选择分类</p>
+                    <button class="btn-close-panel" onclick="closePanel()">✕</button>
                 </div>
                 
                 <div class="add-scroll">
+                    <input type="hidden" id="f-id" value="">
+
                     <div class="field">
                         <label>菜品编号</label>
                         <input type="text" id="f-code" placeholder="例: H01, S05">
@@ -164,10 +168,16 @@ if (!isset($_SESSION['user_id'])) {
                         </div>
                     </div>
 
-                    <button class="btn-submit" id="btn-submit" onclick="doAdd()">
-                        <span id="btn-submit-text">＋ 添加到菜单</span>
+                    <div class="panel-actions">
+                        <button class="btn-submit" id="btn-submit" onclick="doSave()">
+                            <span id="btn-submit-text">＋ 添加到菜单</span>
+                        </button>
+                        <button class="btn-reset" id="btn-reset" onclick="resetForm()">重置</button>
+                    </div>
+                    
+                    <button class="btn-delete-item" id="btn-delete-item" style="display:none" onclick="confirmDelCurrent()">
+                        ⚠️ 删除此菜品
                     </button>
-                    <button class="btn-reset" onclick="resetForm()">重置表单</button>
                 </div>
             </aside>
         </main>

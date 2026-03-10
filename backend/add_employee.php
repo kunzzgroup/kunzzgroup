@@ -107,7 +107,7 @@ body { background: #f3f4f6; }
     max-height: 100%;      /* 关键：限制高度上限 */
     overflow-y: auto !important;
     overflow-x: hidden;
-    padding-right: 4px;
+    padding-right: 0px;
     padding-bottom: 16px;
     box-sizing: border-box;
     border-radius: 10px;
