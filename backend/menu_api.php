@@ -347,7 +347,8 @@ function actionAdd(): void {
 
     if (!validMenuType($type))  respond(false, 'type 必须是 grand 或 sushi', null, 422);
     if ($category_id <= 0)      respond(false, 'category_id 无效', null, 422);
-    if (empty($item_name))      respond(false, 'item_name 不能为空', null, 422);
+    if (empty($item_name))      respond(false, '英文名称不能为空', null, 422);
+    if (empty(trim($_POST['item_code'] ?? ''))) respond(false, '编码不能为空', null, 422);
 
     $item_code   = trim($_POST['item_code'] ?? '');
     $item_name_cn= trim($_POST['item_name_cn'] ?? '');

@@ -48,11 +48,15 @@ async function loadItems(search = '') {
 let imgDeleted = false;
 
 async function doAdd() {
+    const code = document.getElementById('f-code').value.trim();
     const name = document.getElementById('f-name').value.trim();
-    if (!name || !catId) return;
+    if (!catId) { toast('⚠ 请先选择分类'); return; }
+    if (!code) { toast('⚠ 请输入编码'); return; }
+    if (!name) { toast('⚠ 请输入英文名称'); return; }
+
     const p = {
         action: editId ? 'edit' : 'add', id: editId, type: menuType, category_id: catId,
-        item_code: document.getElementById('f-code').value, item_name: name,
+        item_code: code, item_name: name,
         item_name_cn: document.getElementById('f-cn').value, item_desc: document.getElementById('f-desc').value,
         price: document.getElementById('f-price').value, status: document.getElementById('f-status').value
     };
