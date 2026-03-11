@@ -1018,7 +1018,7 @@ function getUserSidebarPermissions($pdo, $input) {
                     $stockViews = [];
                     if (isset($decoded2['stock_inventory'])) {
                         $stockSystems = array_values(array_intersect($decoded2['stock_inventory']['system'] ?? [], ['central','j1','j2','j3']));
-                        $stockViews = array_values(array_intersect($decoded2['stock_inventory']['view'] ?? [], ['list','records','remark','product','sot']));
+                        $stockViews = array_values(array_intersect($decoded2['stock_inventory']['view'] ?? [], ['list','records','remark','product','sot','approve']));
                     } else {
                         $legacyKeys = ['stocklistall','stockeditall','stockproductname','stockremark','stocksot'];
                         foreach ($legacyKeys as $legacyKey) {
@@ -1026,7 +1026,7 @@ function getUserSidebarPermissions($pdo, $input) {
                                 $stockSystems = array_merge($stockSystems, array_values(array_intersect($decoded2[$legacyKey]['system'], ['central','j1','j2','j3'])));
                             }
                             if (!empty($decoded2[$legacyKey]['view']) && is_array($decoded2[$legacyKey]['view'])) {
-                                $stockViews = array_merge($stockViews, array_values(array_intersect($decoded2[$legacyKey]['view'], ['list','records','remark','product','sot'])));
+                                $stockViews = array_merge($stockViews, array_values(array_intersect($decoded2[$legacyKey]['view'], ['list','records','remark','product','sot','approve'])));
                             }
                         }
                         $stockSystems = array_values(array_unique($stockSystems));
