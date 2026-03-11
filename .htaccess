@@ -46,11 +46,11 @@ RewriteRule ^([^\.]+)$ $1.php [NC,L]
 
 # 2. 菜单路径优化 (Menu path optimization)
 # 允许访问 /menu/grand 或 /menu/sushi
-RewriteRule ^menu/(grand|sushi)/?$ tokyo-japanese-cuisine/menu.php#$1 [NE,L,R]
-RewriteRule ^menu/?$ tokyo-japanese-cuisine/menu.php [L]
+RewriteRule ^menu/(grand|sushi)/?$ tokyo.kunzzgroup.com/menu.php#$1 [NE,L,R]
+RewriteRule ^menu/?$ tokyo.kunzzgroup.com/menu.php [L]
 
 # 3. 首页路径优化 (Tokyo landing page optimization)
-RewriteRule ^tokyo/?$ tokyo-japanese-cuisine/tokyo.html [L]
+RewriteRule ^tokyo/?$ tokyo.kunzzgroup.com/tokyo.html [L]
 
 # ===== 转发到 frontend =====
 RewriteRule ^(.*)$ frontend/$1 [L]
