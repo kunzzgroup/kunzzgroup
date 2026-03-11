@@ -130,10 +130,10 @@
                 <div class="footer-links">
                     <h4>快速导航</h4>
                     <ul>
-                        <li><a href="tokyo.html#about-culture">文化 &amp; 服务</a></li>
-                        <li><a href="tokyo.html#mission-vision">使命愿景</a></li>
-                        <li><a href="menu.php">特色推荐</a></li>
-                        <li><a href="tokyo.html#location">我们在这</a></li>
+                        <li><a href="tokyo#about-culture">文化 &amp; 服务</a></li>
+                        <li><a href="tokyo#mission-vision">使命愿景</a></li>
+                        <li><a href="menu">特色推荐</a></li>
+                        <li><a href="tokyo#location">我们在这</a></li>
                     </ul>
                 </div>
                 <!-- Contact -->
