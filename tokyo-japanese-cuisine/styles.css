@@ -1,4 +1,4 @@
-﻿/* Typography and Color Variables - Tokyo Theme */
+/* Typography and Color Variables - Tokyo Theme */
 :root {
   --font-serif: 'DM Serif Display', serif;
   --font-sans: 'Noto Sans SC', sans-serif;
@@ -2534,8 +2534,6 @@ a {
   width: 90%;
   margin: 0 auto;
   text-align: center;
-  margin-top: 100px;
-
 }
 
 #featured h2 {
@@ -4238,42 +4236,14 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
 
 /* =========================================
    USER CUSTOM SCROLL SNAP AND ANIMATION
+   (Removed global overflow:hidden — Swiper manages scroll internally)
    ========================================= */
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overflow: hidden;
-}
 
 /* Allow normal scroll on menu page */
 html.menu-html,
 html.menu-html body {
   overflow: auto !important;
   height: auto !important;
-}
-
-.ag-scroll-wrapper {
-  height: 100vh;
-  overflow-y: auto;
-  scroll-snap-type: y mandatory;
-  scroll-behavior: smooth;
-}
-
-.ag-section {
-  height: 100vh;
-  scroll-snap-align: start;
-  position: relative;
-  opacity: 0;
-  transform: translateY(60px);
-  transition: all 0.9s cubic-bezier(.22, 1, .36, 1);
-}
-
-.ag-section.ag-active {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 /* ═══════════════════════════════
@@ -4470,41 +4440,13 @@ html.menu-html body {
 }
 
 /* =========================================
-   MOBILE OPTIMIZATIONS (NORMAL SCROLL & NORMAL SIDEBAR)
+   MOBILE OPTIMIZATIONS
    ========================================= */
 @media (max-width: 768px) {
 
-  /* Hide computer-specific UI */
+  /* Hide bamboo pagination on mobile (Swiper breakpoints handle disabling) */
   .swiper-pagination {
     display: none !important;
-  }
-
-  /* Reset Swiper structures to allow normal native scrolling */
-  html,
-  body {
-    overflow: auto !important;
-    height: auto !important;
-    position: static !important;
-  }
-
-  .swiper {
-    height: auto !important;
-    overflow: visible !important;
-  }
-
-  .swiper-wrapper {
-    height: auto !important;
-    display: block !important;
-    transform: none !important;
-    flex-direction: column !important;
-  }
-
-  .swiper-slide {
-    height: auto !important;
-    min-height: 100vh;
-    display: block !important;
-    /* Remove flex constraints */
-    position: relative !important;
   }
 }
 
