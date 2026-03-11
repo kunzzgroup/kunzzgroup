@@ -1,8 +1,8 @@
 <?php
-// TOKYO JAPANESE CUISINE - Premium Menu Page
+// TOKYO JAPANESE CUISINE - Dynamic Haidilao-style Menu Page
 ?>
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="menu-html">
 
 <head>
     <meta charset="UTF-8" />
@@ -10,106 +10,122 @@
     <link rel="icon" type="image/png" href="logo/tokyologo.png">
     <title>Menu | TOKYO JAPANESE CUISINE</title>
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet" />
     
     <!-- CSS Dependencies -->
     <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="menu.css" />
     
     <style>
-        /* Fallback CSS Variables just in case styles.css misses them */
-        :root {
-            --color-bg: #f9f8f4;
-            --color-bg-alt: #f0ede6;
-            --color-text: #33322f;
-            --color-text-light: #7c776b;
-            --color-primary: #a68a64;
-            --color-primary-dark: #8b7353;
-        }
-
-        /* Adjust footer margin since we don't use swiper here */
-        .footer-section {
-            margin-top: 60px;
-            background-color: var(--color-bg-alt, #f0ede6);
-        }
+        /* Fallback adjustments if needed */
+        .footer-section { margin-top: 60px; background-color: #f0ede6; }
+        .loading-text { padding: 40px; text-align: center; color: #7c776b; font-size: 1.1rem; }
     </style>
 </head>
 
-<body class="luxury-menu-body">
+<body class="haidilao-menu-body">
 
-    <!-- Luxury Header -->
-    <header class="luxury-header">
-        <div class="luxury-header-inner">
-            <a href="tokyo.html" class="lux-logo-link">
-                <img src="logo/tokyologo.png" alt="Tokyo Logo" class="lux-nav-logo">
-                <div class="lux-logo-text">
-                    <span class="lux-logo-primary">TOKYO JAPANESE</span>
-                    <span class="lux-logo-secondary">CUISINE</span>
+    <!-- Navigation -->
+    <nav id="nav" class="haidilao-nav">
+        <div class="nav-container">
+            <a href="tokyo.html" class="nav-logo-link">
+                <div class="haidilao-logo-bg">
+                    <img src="logo/tokyologo.png" alt="Tokyo" class="nav-logo">
+                </div>
+                <div class="nav-text-group">
+                    <span class="nav-text primary">TOKYO JAPANESE</span>
+                    <span class="nav-text secondary">CUISINE</span>
                 </div>
             </a>
-            <div class="lux-nav-links">
+            <div class="nav-links">
                 <a href="tokyo.html#about-culture">关于我们</a>
                 <a href="tokyo.html#mission-vision">文化+服务</a>
-                <a href="menu.php" style="color: var(--color-primary); font-weight: 500;">精选菜单</a>
+                <a href="tokyo.html#featured" style="color: #a68a64; font-weight: 500;">特色推荐</a>
                 <a href="tokyo.html#location">我们在这</a>
             </div>
-            <div class="lux-nav-actions">
-                <a href="tokyo.html#location" class="btn-lux-primary">联系我们</a>
+            <div class="nav-actions">
+                <a href="tokyo.html#location" class="btn-primary nav-btn"
+                    style="background-color: #a68a64; border-color: #a68a64; box-shadow: 0 4px 10px rgba(166, 138, 100, 0.3);">联系我们</a>
+                <a href="tokyo.html" class="btn-secondary nav-btn"
+                    style="color: #33322f; border-color: #33322f;">返回首页</a>
+                <!-- Mobile-only hamburger button -->
+                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
             </div>
         </div>
-    </header>
+    </nav>
 
-    <!-- Page Hero -->
-    <div class="lux-page-hero">
-        <div class="lux-page-label">FINE DINING MENU</div>
-        <h1 class="lux-page-title">匠心料理 · 品越菜单</h1>
-        <p class="lux-page-subtext">Authentic Japanese Culinary Experience</p>
-        
-        <div class="lux-menu-switcher">
-            <button class="lux-switcher-btn active" data-type="grand">Grand Menu (热食菜单)</button>
-            <span class="lux-switcher-divider">|</span>
-            <button class="lux-switcher-btn" data-type="sushi">Sushi & Sashimi (寿司·刺身)</button>
+    <!-- Minimalist Right Sidebar Mobile Menu -->
+    <div class="mobile-sidebar-overlay" id="mobile-sidebar-overlay"></div>
+    <aside class="mobile-sidebar" id="mobile-sidebar">
+        <button class="mobile-sidebar-close" id="mobile-sidebar-close" aria-label="Close menu">×</button>
+        <div class="mobile-sidebar-content">
+            <a href="tokyo.html#about-culture" class="sidebar-link">关于我们</a>
+            <a href="tokyo.html#mission-vision" class="sidebar-link">文化+服务</a>
+            <a href="tokyo.html#featured" class="sidebar-link" style="color: #a68a64; font-weight: 600;">特色推荐</a>
+            <a href="tokyo.html#location" class="sidebar-link">我们在这</a>
+            <a href="tokyo.html" class="sidebar-link">返回首页</a>
+        </div>
+    </aside>
+
+    <!-- Top Category Navigation (Fixed Types) -->
+    <div class="haidilao-top-nav-container">
+        <div class="haidilao-top-nav">
+            <button class="haidilao-top-tab active" data-menu="grand" id="tab-grand">
+                <div class="top-tab-icon">
+                    <img src="grandmenu/menu2.png" alt="Grand Menu" />
+                </div>
+                <span>Grand Menu</span>
+            </button>
+            <button class="haidilao-top-tab" data-menu="sushi" id="tab-sushi">
+                <div class="top-tab-icon">
+                    <img src="sushimenu/menu1.png" alt="Sushi Menu" />
+                </div>
+                <span>Sushi Menu</span>
+            </button>
         </div>
     </div>
 
-    <!-- Category Bar -->
-    <div class="lux-category-bar" id="category-bar">
-        <!-- Categories injected via JS -->
-    </div>
+    <!-- Main Dynamic Layout -->
+    <div class="haidilao-layout">
+        <!-- Dynamic Sidebar for Categories -->
+        <aside class="haidilao-sidebar">
+            <div class="sidebar-category" id="dynamic-sidebar" style="display:flex;">
+                <!-- Buttons injected via JS -->
+            </div>
+        </aside>
 
-    <!-- Main Container -->
-    <div class="lux-container" id="menu-container">
-        <div class="lux-section-header">
-            <h2 class="lux-section-title" id="current-category-title">All Items 全部</h2>
-        </div>
-        <div class="lux-food-grid" id="food-grid">
-            <!-- Food cards injected via JS -->
-        </div>
+        <!-- Dynamic Content Panels for Food Items -->
+        <main class="haidilao-content">
+            <div class="haidilao-panel active" id="dynamic-panel">
+                <div class="haidilao-grid" id="dynamic-grid">
+                    <div class="loading-text">载入中 Loading...</div>
+                    <!-- Cards injected via JS -->
+                </div>
+            </div>
+        </main>
     </div>
 
     <!-- Zoom Modal -->
     <div id="zoom-modal" class="zoom-modal hidden">
-        <button class="zoom-modal-close" aria-label="Close" style="position:absolute; top:30px; right:30px; background:none; border:none; color:white; font-size:40px; cursor:pointer;">&times;</button>
-        <img id="zoom-modal-image" src="" alt="Zoomed Menu Item" style="max-width:90%; max-height:90%; border-radius:12px; object-fit:contain; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+        <div class="zoom-modal-content">
+            <button class="zoom-modal-close" aria-label="Close" style="font-size:30px;">&times;</button>
+            <img id="zoom-modal-image" src="" alt="Zoomed image" class="zoom-modal-image" style="max-height:90vh; border-radius:12px;"/>
+        </div>
     </div>
 
     <!-- Footer Section -->
     <section id="footer" class="footer-section">
         <div class="footer-container">
             <div class="footer-content">
-
                 <!-- Logo & Brand -->
                 <div class="footer-brand">
                     <div class="footer-logo">
                         <img src="logo/tokyologo.png" alt="Tokyo Japanese Cuisine" style="height:40px; border-radius:50%; border:2px solid #c9a96e;">
-                        <div>
-                            <div class="footer-logo-name">TOKYO JAPANESE</div>
-                            <div class="footer-logo-sub">CUISINE</div>
-                        </div>
+                        <div><div class="footer-logo-name">TOKYO JAPANESE</div><div class="footer-logo-sub">CUISINE</div></div>
                     </div>
                     <p class="footer-tagline">正宗日式料理，匠心传递每一道风味</p>
                 </div>
-
                 <!-- Quick Links -->
                 <div class="footer-links">
                     <h4>快速导航</h4>
@@ -120,7 +136,6 @@
                         <li><a href="tokyo.html#location">我们在这</a></li>
                     </ul>
                 </div>
-
                 <!-- Contact -->
                 <div class="footer-contact">
                     <h4>联系我们</h4>
@@ -129,7 +144,6 @@
                     <p>📍 分店：Paradigm Mall, JB</p>
                     <p>📞 <a href="tel:+60187738090">+60 18-773 8090</a></p>
                 </div>
-
                 <!-- Hours -->
                 <div class="footer-hours">
                     <h4>营业时间</h4>
@@ -137,38 +151,30 @@
                     <p>周六 – 周日：10:00 – 22:30</p>
                     <p>节假日照常营业</p>
                 </div>
-
             </div>
-
-            <div class="footer-bottom">
-                <p>🌸 © 2026 Tokyo Japanese Cuisine. All Rights Reserved.</p>
-            </div>
+            <div class="footer-bottom"><p>🌸 © 2026 Tokyo Japanese Cuisine. All Rights Reserved.</p></div>
         </div>
     </section>
 
-    <!-- Initialization Scripts -->
+    <!-- Dynamic Fetch Logic Script -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Note: Update API_URL if backend folder is located elsewhere
             const API_URL = '../backend/menu_api.php';
-            let currentType = 'grand';
-            let currentCategoryId = null; // null means 'All'
+            let currentType = 'grand'; // 'grand' or 'sushi'
             let categoriesData = [];
             let itemsData = [];
-
-            const typeSwitchers = document.querySelectorAll('.lux-switcher-btn');
-            const categoryBar = document.getElementById('category-bar');
-            const foodGrid = document.getElementById('food-grid');
-            const categoryTitle = document.getElementById('current-category-title');
             
-            // Zoom Modal logic
-            const zoomModal = document.getElementById('zoom-modal');
-            const zoomModalImage = document.getElementById('zoom-modal-image');
-            const zoomModalClose = document.querySelector('.zoom-modal-close');
+            const dynamicSidebar = document.getElementById('dynamic-sidebar');
+            const dynamicGrid = document.getElementById('dynamic-grid');
+            const topTabs = document.querySelectorAll('.haidilao-top-tab');
 
             // --- Window and Zoom Modal Logic ---
+            const zoomModal = document.getElementById('zoom-modal');
+            const zoomModalImage = document.getElementById('zoom-modal-image');
+            const closeBtn = document.querySelector('.zoom-modal-close');
+
             window.openZoomModal = function(src) {
-                if (!src || src.includes('📸')) return; // ignore invalid images
+                if (!src || src.includes('📸')) return; // ignore missing pics
                 zoomModalImage.src = src;
                 zoomModal.classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
@@ -180,174 +186,157 @@
                 document.body.style.overflow = '';
             };
 
-            zoomModalClose.addEventListener('click', closeZoomModal);
-            zoomModal.addEventListener('click', (e) => {
-                if (e.target === zoomModal) closeZoomModal();
-            });
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && !zoomModal.classList.contains('hidden')) {
-                    closeZoomModal();
-                }
-            });
+            if (closeBtn) closeBtn.onclick = closeZoomModal;
+            if (zoomModal) zoomModal.onclick = (e) => { if (e.target === zoomModal) closeZoomModal(); }
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !zoomModal.classList.contains('hidden')) closeZoomModal(); });
 
-            // --- Type Switcher Click Event (Grand vs Sushi) ---
-            typeSwitchers.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    typeSwitchers.forEach(b => b.classList.remove('active'));
-                    e.currentTarget.classList.add('active');
-                    currentType = e.currentTarget.getAttribute('data-type');
-                    // Update URL Hash automatically without redirect
+            // --- Top Tab Switcher Logic ---
+            topTabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    topTabs.forEach(t => t.classList.remove('active'));
+                    const clickedTab = e.currentTarget;
+                    clickedTab.classList.add('active');
+                    
+                    currentType = clickedTab.getAttribute('data-menu');
                     history.replaceState(null, null, '#' + currentType);
-                    currentCategoryId = null;
-                    loadMenuData();
+                    
+                    loadMenuData(); // Fetch completely fresh category and item data based on type
                 });
             });
 
-            // --- Read URL Hash Check (#grand or #sushi) ---
-            function parseHashOnInit() {
+            // Read URL Hash Check (#grand or #sushi)
+            function initHash() {
                 const hash = window.location.hash.replace('#', '');
                 if (hash === 'sushi' || hash === 'grand') {
-                    const btn = document.querySelector(`.lux-switcher-btn[data-type="${hash}"]`);
+                    const btn = document.querySelector(`.haidilao-top-tab[data-menu="${hash}"]`);
                     if (btn && !btn.classList.contains('active')) {
-                        typeSwitchers.forEach(b => b.classList.remove('active'));
+                        topTabs.forEach(t => t.classList.remove('active'));
                         btn.classList.add('active');
                         currentType = hash;
                     }
                 }
             }
 
-            // --- Fetch Data ---
+            // --- Fetch Both Category and Item Data ---
             async function loadMenuData() {
-                foodGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #9b8f7e; font-size: 1.1rem; padding: 60px 0; letter-spacing: 0.05em;">载入中 Loading...</div>';
-                
+                dynamicSidebar.innerHTML = '';
+                dynamicGrid.innerHTML = '<div class="loading-text">载入中 Loading...</div>';
+
                 try {
                     // Fetch categories
                     const catParams = new URLSearchParams({ action: 'get_categories', type: currentType });
                     const catRes = await fetch(`${API_URL}?${catParams.toString()}`);
                     const catJson = await catRes.json();
-                    if (catJson.success) {
-                        categoriesData = catJson.data.categories;
-                    } else {
-                        categoriesData = [];
-                    }
+                    categoriesData = catJson.success ? catJson.data.categories : [];
 
-                    // Fetch items 
+                    // Fetch items
                     const itemParams = new URLSearchParams({ action: 'get', type: currentType, status: 'published' });
                     const itemRes = await fetch(`${API_URL}?${itemParams.toString()}`);
                     const itemJson = await itemRes.json();
-                    if (itemJson.success) {
-                        itemsData = itemJson.data.items;
-                    } else {
-                        itemsData = [];
-                    }
+                    itemsData = itemJson.success ? itemJson.data.items : [];
 
-                    renderCategoryTabs();
-                    renderFoodGrid();
-
+                    renderSidebar();
                 } catch (error) {
                     console.error('Error fetching menu data:', error);
-                    foodGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #9b8f7e; font-size: 1.1rem; padding: 60px 0;">暂时无法加载菜单数据，请检查网络或刷新页面以重试。<br><br>Failed to fetch menu data.</div>';
+                    dynamicGrid.innerHTML = '<div class="loading-text">无法加载菜单数据，请检查网络<br><br>Failed to fetch menu data.</div>';
                 }
             }
 
-            // --- Render Categories (Tabs) ---
-            function renderCategoryTabs() {
-                categoryBar.innerHTML = '';
-                
-                // Add "All" Category Tab
-                const btnAll = document.createElement('button');
-                btnAll.className = `lux-cat-item ${currentCategoryId === null ? 'active' : ''}`;
-                btnAll.textContent = 'All 全部';
-                btnAll.addEventListener('click', () => {
-                    currentCategoryId = null;
-                    updateCategorySelection();
-                    renderFoodGrid();
-                });
-                categoryBar.appendChild(btnAll);
+            // --- Render Left Sidebar Dynamically ---
+            function renderSidebar() {
+                dynamicSidebar.innerHTML = '';
 
-                // Add Category Tabs from API
-                categoriesData.forEach(cat => {
-                    const btn = document.createElement('button');
-                    btn.className = `lux-cat-item ${currentCategoryId == cat.id ? 'active' : ''}`;
-                    btn.textContent = cat.category_name;
-                    btn.addEventListener('click', () => {
-                        currentCategoryId = cat.id;
-                        updateCategorySelection();
-                        renderFoodGrid();
-                    });
-                    categoryBar.appendChild(btn);
-                });
-            }
-
-            // --- Update UI Tab Selection ---
-            function updateCategorySelection() {
-                const btns = categoryBar.querySelectorAll('.lux-cat-item');
-                btns.forEach((btn, idx) => {
-                    if (currentCategoryId === null && idx === 0) {
-                        btn.classList.add('active');
-                    } else if (currentCategoryId !== null && idx > 0 && categoriesData[idx-1].id == currentCategoryId) {
-                        btn.classList.add('active');
-                    } else {
-                        btn.classList.remove('active');
-                    }
-                });
-            }
-
-            // --- Render Food Grid ---
-            function renderFoodGrid() {
-                // Determine Category Title
-                if (currentCategoryId === null) {
-                    categoryTitle.textContent = 'All Items 全部';
-                } else {
-                    const activeCat = categoriesData.find(c => c.id == currentCategoryId);
-                    categoryTitle.textContent = activeCat ? activeCat.category_name : 'Menu Items';
-                }
-
-                // Apply Filters
-                const filteredItems = currentCategoryId === null 
-                    ? itemsData 
-                    : itemsData.filter(item => item.category_id == currentCategoryId);
-
-                foodGrid.innerHTML = '';
-
-                if (filteredItems.length === 0) {
-                    foodGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #9b8f7e; font-size: 1.1rem; padding: 60px 0;">该分类下暂无发布的内容。<br><br>No items in this category yet.</div>';
+                if (categoriesData.length === 0) {
+                    dynamicSidebar.innerHTML = '<div style="padding:20px; color:#999; text-align:center;">暂无分类<br>No Categories</div>';
+                    dynamicGrid.innerHTML = '<div class="loading-text">该菜单目前没有上架的商品</div>';
                     return;
                 }
 
-                // Render Item Cards
-                filteredItems.forEach((item, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'lux-food-card';
-                    card.style.animationDelay = `${index * 0.05}s`;
+                categoriesData.forEach((cat, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = `haidilao-sidebar-tab ${index === 0 ? 'active' : ''}`; // auto-select first
+                    btn.textContent = cat.category_name;
+                    btn.setAttribute('data-id', cat.id);
+                    
+                    btn.addEventListener('click', () => {
+                        // Update active state in sidebar
+                        const allSidebarBtns = dynamicSidebar.querySelectorAll('.haidilao-sidebar-tab');
+                        allSidebarBtns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        
+                        // Render filtered grid
+                        renderFoodGrid(cat.id);
+                    });
 
-                    // Handle missing fields gracefully
-                    const imageUrl = item.image_url ? item.image_url : 'image/sushi-dish-asian-restaurant.jpg'; // fallback
+                    dynamicSidebar.appendChild(btn);
+                });
+
+                // Render the first category's items by default
+                if (categoriesData.length > 0) {
+                    renderFoodGrid(categoriesData[0].id);
+                }
+            }
+
+            // --- Render Food Grid Iteration ---
+            function renderFoodGrid(categoryId) {
+                dynamicGrid.innerHTML = '';
+
+                // Filter items by category
+                const filteredItems = itemsData.filter(item => item.category_id == categoryId);
+
+                if (filteredItems.length === 0) {
+                    dynamicGrid.innerHTML = '<div class="loading-text">该分类下暂无发布的内容<br><br>No items in this category.</div>';
+                    return;
+                }
+
+                filteredItems.forEach((item) => {
+                    const card = document.createElement('div');
+                    card.className = 'haidilao-card';
                     
-                    const pForm = item.price_formatted ? item.price_formatted : '';
-                    const priceHtml = pForm ? `<div style="color:var(--color-primary); font-family: 'Playfair Display', serif; font-size:1.15rem; margin-top:12px; letter-spacing:0.04em;">${pForm}</div>` : '';
-                    
+                    const imageUrl = item.image_url ? item.image_url : 'image/sushi-dish-asian-restaurant.jpg';
                     const nameEn = item.item_name || 'N/A';
-                    const nameCn = item.item_name_cn ? `<div style="font-size:0.85rem; color:#9b8f7e; margin-top:6px; letter-spacing:0.04em;">${item.item_name_cn}</div>` : '';
-                    const desc   = item.item_desc ? `<div style="font-size:0.82rem; color:#888; margin-top:10px; line-height:1.6; letter-spacing:0.02em;">${item.item_desc}</div>` : '';
+                    const nameCn = item.item_name_cn ? `<div style="font-size:0.8rem; color:#777; margin-top:2px;">${item.item_name_cn}</div>` : '';
+                    const priceForm = item.price_formatted ? `<div style="color:#a68a64; font-weight: 500; font-family: 'DM Serif Display', serif; margin-top:6px; font-size: 1.1rem;">${item.price_formatted}</div>` : '';
 
                     card.innerHTML = `
-                        <div class="lux-card-img" onclick="openZoomModal('${imageUrl}')">
+                        <div class="img-wrap" onclick="openZoomModal('${imageUrl}')">
                             <img src="${imageUrl}" alt="${nameEn}" loading="lazy" onerror="this.src='image/sushi-dish-asian-restaurant.jpg'">
                         </div>
-                        <div class="lux-card-info">
-                            <h3 class="lux-food-title">${nameEn}</h3>
+                        <div class="info-wrap" style="flex-direction: column; align-items: flex-start; padding-bottom: 15px;">
+                            <span class="title" style="margin-bottom:0;">${nameEn}</span>
                             ${nameCn}
-                            ${desc}
-                            ${priceHtml}
+                            ${priceForm}
                         </div>
                     `;
-                    foodGrid.appendChild(card);
+                    dynamicGrid.appendChild(card);
                 });
             }
 
-            // Init call
-            parseHashOnInit();
+            // --- Minimalist Mobile Sidebar Navigation Logic ---
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileSidebarNav = document.getElementById('mobile-sidebar');
+            const mobileSidebarOverlay = document.getElementById('mobile-sidebar-overlay');
+            const mobileSidebarClose = document.getElementById('mobile-sidebar-close');
+
+            if (mobileMenuBtn && mobileSidebarNav) {
+                mobileMenuBtn.addEventListener('click', () => {
+                    mobileSidebarNav.classList.add('active');
+                    mobileSidebarOverlay.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+
+                const closeMobileNav = () => {
+                    mobileSidebarNav.classList.remove('active');
+                    mobileSidebarOverlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                };
+
+                mobileSidebarClose.addEventListener('click', closeMobileNav);
+                mobileSidebarOverlay.addEventListener('click', closeMobileNav);
+            }
+
+            // Init Process
+            initHash();
             loadMenuData();
         });
     </script>
