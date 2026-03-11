@@ -42,8 +42,7 @@ body {
 }
 
 .swiper-slide {
-  height: auto;
-  min-height: 100vh;
+  height: 100vh;
   box-sizing: border-box;
   display: flex !important;
   flex-direction: column;
