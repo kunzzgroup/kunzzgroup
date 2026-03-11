@@ -38,9 +38,10 @@
     });
 })();
 
+// --- Swiper Global Declaration (Fix TDZ) ---
+let swiper = null;
+
 document.addEventListener('DOMContentLoaded', function () {
-
-
     // --- Sushi Menu Tabs Logic ---
     const sushiTabs = document.querySelectorAll('.sushi-menu-tab[data-sushi-category]');
     if (sushiTabs.length > 0) {
@@ -512,7 +513,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const slides = Array.from(document.querySelectorAll('.swiper-slide'));
                 const targetIndex = slides.indexOf(target);
                 if (targetIndex !== -1) {
-                    if (typeof swiper !== 'undefined' && swiper.enabled) {
+                    if (swiper && swiper.enabled) {
                         swiper.slideTo(targetIndex);
                     } else {
                         target.scrollIntoView({ behavior: 'smooth' });
@@ -527,7 +528,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // =========================================
     // SWIPER INIT (Frontend Reference style)
     // =========================================
-    const swiper = new Swiper('.swiper', {
+    swiper = new Swiper('.swiper', {
         direction: 'vertical',
         mousewheel: {
             enabled: true,
@@ -535,7 +536,7 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         speed: 800,
         simulateTouch: false,
-        slidesPerView: 'auto', // Allows footer to be its natural height
+        slidesPerView: 1, // Changed from auto to 1 to fix vertical sizing issue
         spaceBetween: 0,
         keyboard: {
             enabled: true,
