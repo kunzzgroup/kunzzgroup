@@ -27,7 +27,7 @@
     <!-- Navigation -->
     <nav id="nav" class="haidilao-nav">
         <div class="nav-container">
-            <a href="tokyo.html" class="nav-logo-link">
+            <a href="tokyo" class="nav-logo-link">
                 <div class="haidilao-logo-bg">
                     <img src="image/tokyologo.png" alt="Tokyo" class="nav-logo">
                 </div>
@@ -37,15 +37,15 @@
                 </div>
             </a>
             <div class="nav-links">
-                <a href="tokyo.html#about-culture">关于我们</a>
-                <a href="tokyo.html#mission-vision">文化+服务</a>
-                <a href="tokyo.html#featured" style="color: #a68a64; font-weight: 500;">特色推荐</a>
-                <a href="tokyo.html#location">我们在这</a>
+                <a href="tokyo#about-culture">关于我们</a>
+                <a href="tokyo#mission-vision">文化+服务</a>
+                <a href="tokyo#featured" style="color: #a68a64; font-weight: 500;">特色推荐</a>
+                <a href="tokyo#location">我们在这</a>
             </div>
             <div class="nav-actions">
-                <a href="tokyo.html#location" class="btn-primary nav-btn"
+                <a href="tokyo#location" class="btn-primary nav-btn"
                     style="background-color: #a68a64; border-color: #a68a64; box-shadow: 0 4px 10px rgba(166, 138, 100, 0.3);">联系我们</a>
-                <a href="tokyo.html" class="btn-secondary nav-btn"
+                <a href="tokyo" class="btn-secondary nav-btn"
                     style="color: #33322f; border-color: #33322f;">返回首页</a>
                 <!-- Mobile-only hamburger button -->
                 <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">
@@ -60,11 +60,11 @@
     <aside class="mobile-sidebar" id="mobile-sidebar">
         <button class="mobile-sidebar-close" id="mobile-sidebar-close" aria-label="Close menu">×</button>
         <div class="mobile-sidebar-content">
-            <a href="tokyo.html#about-culture" class="sidebar-link">关于我们</a>
-            <a href="tokyo.html#mission-vision" class="sidebar-link">文化+服务</a>
-            <a href="tokyo.html#featured" class="sidebar-link" style="color: #a68a64; font-weight: 600;">特色推荐</a>
-            <a href="tokyo.html#location" class="sidebar-link">我们在这</a>
-            <a href="tokyo.html" class="sidebar-link">返回首页</a>
+            <a href="tokyo#about-culture" class="sidebar-link">关于我们</a>
+            <a href="tokyo#mission-vision" class="sidebar-link">文化+服务</a>
+            <a href="tokyo#featured" class="sidebar-link" style="color: #a68a64; font-weight: 600;">特色推荐</a>
+            <a href="tokyo#location" class="sidebar-link">我们在这</a>
+            <a href="tokyo" class="sidebar-link">返回首页</a>
         </div>
     </aside>
 
