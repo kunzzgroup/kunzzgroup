@@ -159,8 +159,8 @@
     <!-- Dynamic Fetch Logic Script -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Updated API URL to match production environment
-            const API_URL = '/backend/menu_api.php';
+            // Absolute API URL for Cross-Domain Data Fetching
+            const API_URL = 'https://kunzzgroup.com/backend/menu_api.php';
             let currentType = 'grand'; // 'grand' or 'sushi'
             let categoriesData = [];
             let itemsData = [];

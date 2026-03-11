@@ -8,12 +8,10 @@
  * 2. 增加字段: 在 renderItemHTML() 中增加 <div> 或 <input>，并在 actionAdd/Edit 中添加该字段。
  */
 
-if (isset($_REQUEST['action'])) {
-    header('Content-Type: application/json; charset=utf-8');
-    header('Access-Control-Allow-Origin: *');
-    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type');
-}
+header("Access-Control-Allow-Origin: *"); // Allowed for all cross-domain frontend requests (e.g. tokyo.kunzzgroup.com)
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Content-Type: application/json; charset=utf-8");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -30,7 +28,7 @@ define('DB_PASS', 'Kunzz1688');
 
 // Image upload directory (relative to this file)
 define('UPLOAD_BASE', __DIR__ . '/uploads/');
-define('UPLOAD_URL_BASE', '/backend/uploads/'); // Web-accessible relative path
+define('UPLOAD_URL_BASE', 'https://kunzzgroup.com/backend/uploads/'); // Web-accessible absolute path for cross-domain
 
 // ============================================================
 //  DB CONNECTION
