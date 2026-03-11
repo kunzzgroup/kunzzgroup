@@ -38,10 +38,9 @@
     });
 })();
 
-// --- Swiper Global Declaration (Fix TDZ) ---
-let swiper = null;
-
 document.addEventListener('DOMContentLoaded', function () {
+
+
     // --- Sushi Menu Tabs Logic ---
     const sushiTabs = document.querySelectorAll('.sushi-menu-tab[data-sushi-category]');
     if (sushiTabs.length > 0) {
@@ -409,25 +408,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Show corresponding sidebar category
                 haidilaoSidebarCategories.forEach(sidebar => {
+                    sidebar.style.display = 'none';
                     if (sidebar.id === 'sidebar-' + mainCategory) {
                         sidebar.style.display = 'flex';
-                        // Auto-click first tab in this sidebar if none is active
-                        const activeTab = sidebar.querySelector('.haidilao-sidebar-tab.active');
-                        if (!activeTab) {
-                            const firstTab = sidebar.querySelector('.haidilao-sidebar-tab');
-                            if (firstTab) firstTab.click();
-                        } else {
-                            // Re-trigger click to ensure panel is shown
-                            activeTab.click();
-                        }
-                    } else {
-                        sidebar.style.display = 'none';
+                        // Auto-click first tab in this sidebar
+                        const firstTab = sidebar.querySelector('.haidilao-sidebar-tab');
+                        if (firstTab) firstTab.click();
                     }
                 });
             });
         });
 
-        // Initialize based on URL hash (e.g., menu.php#sushi or menu.php#grand)
+        // Initialize based on URL hash (e.g., menu.html#sushi or menu.html#grand)
         const hash = window.location.hash.replace('#', '');
         let targetTab;
 
@@ -452,7 +444,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 parentCategory.querySelectorAll('.haidilao-sidebar-tab').forEach(t => t.classList.remove('active'));
                 this.classList.add('active');
 
-                const targetPanelId = this.getAttribute('data-target');
+                const targetPanelId = 'panel-' + this.getAttribute('data-target');
 
                 // Show corresponding panel
                 haidilaoContentPanels.forEach(panel => {
@@ -513,7 +505,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const slides = Array.from(document.querySelectorAll('.swiper-slide'));
                 const targetIndex = slides.indexOf(target);
                 if (targetIndex !== -1) {
-                    if (swiper && swiper.enabled) {
+                    if (typeof swiper !== 'undefined' && swiper.enabled) {
                         swiper.slideTo(targetIndex);
                     } else {
                         target.scrollIntoView({ behavior: 'smooth' });
@@ -528,7 +520,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // =========================================
     // SWIPER INIT (Frontend Reference style)
     // =========================================
-    swiper = new Swiper('.swiper', {
+    const swiper = new Swiper('.swiper', {
         direction: 'vertical',
         mousewheel: {
             enabled: true,
@@ -536,7 +528,7 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         speed: 800,
         simulateTouch: false,
-        slidesPerView: 1, // Changed from auto to 1 to fix vertical sizing issue
+        slidesPerView: 'auto', // Allows footer to be its natural height
         spaceBetween: 0,
         keyboard: {
             enabled: true,

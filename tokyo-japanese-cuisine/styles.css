@@ -1,4 +1,4 @@
-/* Typography and Color Variables - Tokyo Theme */
+﻿/* Typography and Color Variables - Tokyo Theme */
 :root {
   --font-serif: 'DM Serif Display', serif;
   --font-sans: 'Noto Sans SC', sans-serif;
@@ -2523,9 +2523,7 @@ a {
 
 #featured {
   background-color: var(--color-bg-alt);
-  min-height: 100vh;
-  height: auto;
-  padding: 80px 0;
+  height: 100vh;
   display: flex !important;
   align-items: center;
   justify-content: center;
@@ -2698,7 +2696,7 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
 
 /* ── Zen About Layout ── */
 .zen-about {
-  padding: 80px 8%;
+  padding: 120px 8%;
   background: linear-gradient(to right, #f6f4f1, #eae7e3);
   display: flex;
   align-items: center;
@@ -2715,7 +2713,7 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
   gap: 80px;
   width: 100%;
   /* background: #ffffff; */
-  padding: 60px 40px;
+  padding: 120px 80px;
   border-radius: 24px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
   transform: translateY(0);
