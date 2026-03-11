@@ -49,5 +49,8 @@ RewriteRule ^([^\.]+)$ $1.php [NC,L]
 RewriteRule ^menu/(grand|sushi)/?$ tokyo-japanese-cuisine/menu.php#$1 [NE,L,R]
 RewriteRule ^menu/?$ tokyo-japanese-cuisine/menu.php [L]
 
+# 3. 首页路径优化 (Tokyo landing page optimization)
+RewriteRule ^tokyo/?$ tokyo-japanese-cuisine/tokyo.html [L]
+
 # ===== 转发到 frontend =====
 RewriteRule ^(.*)$ frontend/$1 [L]

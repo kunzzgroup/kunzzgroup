@@ -14,10 +14,10 @@
     
     <!-- CSS Dependencies -->
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="menu.css" />
     
     <style>
         /* Fallback adjustments if needed */
-        .footer-section { margin-top: 60px; background-color: #f0ede6; }
         .loading-text { padding: 40px; text-align: center; color: #7c776b; font-size: 1.1rem; }
     </style>
 </head>
