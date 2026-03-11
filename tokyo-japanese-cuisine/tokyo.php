@@ -1,17 +1,24 @@
-﻿<!DOCTYPE html>
+<?php
+if (!headers_sent()) {
+    header("Cache-Control: max-age=0, no-cache, no-store, must-revalidate, proxy-revalidate");
+    header("Pragma: no-cache");
+    header("Expires: Wed, 11 Jan 1984 05:00:00 GMT");
+}
+?>
+<!DOCTYPE html>
 <html lang="zh-CN">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="logo/tokyologo.png">
+  <link rel="icon" type="image/png" href="image/tokyologo.png">
   <title>TOKYO JAPANESE CUISINE | 东京日式料理</title>
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Noto+Sans+SC:wght@300;400;500;600&display=swap"
     rel="stylesheet" />
   <!-- Swiper CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=<?php echo time(); ?>" />
 </head>
 
 <body>
@@ -22,7 +29,7 @@
     <div class="nav-container">
       <a href="#hero" class="nav-logo-link">
         <div class="haidilao-logo-bg">
-          <img src="logo/tokyologo.png" alt="Tokyo" class="nav-logo">
+          <img src="image/tokyologo.png" alt="Tokyo" class="nav-logo">
         </div>
         <div class="nav-text-group">
           <span class="nav-text primary">TOKYO JAPANESE</span>
@@ -36,8 +43,8 @@
           <a href="#featured" class="nav-dropdown-trigger">特色推荐 <span class="nav-dropdown-arrow">▾</span></a>
           <div class="nav-dropdown-menu">
             <div class="nav-dropdown-card">
-              <a href="menu.html#sushi" class="nav-dropdown-item">Sushi Menu</a>
-              <a href="menu.html#grand" class="nav-dropdown-item">Grand Menu</a>
+              <a href="menu#sushi" class="nav-dropdown-item">Sushi Menu</a>
+              <a href="menu#grand" class="nav-dropdown-item">Grand Menu</a>
             </div>
           </div>
         </div>
@@ -64,7 +71,7 @@
     <div class="mobile-sidebar-content">
       <a href="#about-culture" class="sidebar-link">关于我们</a>
       <a href="#mission-vision" class="sidebar-link">文化+服务</a>
-      <a href="menu.html" class="sidebar-link">查看菜单</a>
+      <a href="menu" class="sidebar-link">查看菜单</a>
       <a href="#location" class="sidebar-link">我们在这</a>
       <a href="#contact" class="sidebar-link">联系我们</a>
       <a href="#member" class="sidebar-link">会员</a>
@@ -82,9 +89,9 @@
         </div>
         <div class="hero-slider" id="hero-slider">
           <div class="hero-slider-track" id="hero-slider-track">
-            <div class="hero-slide active" style="background-image: url('logo/tokyorestaurant.png');"></div>
+            <div class="hero-slide active" style="background-image: url('image/tokyorestaurant.png');"></div>
             <div class="hero-slide" style="background-image: url('image/sushi-dish-asian-restaurant.jpg');"></div>
-            <div class="hero-slide" style="background-image: url('grandmenu/zensai/zensai1.jpg');"></div>
+            <div class="hero-slide" style="background-image: url('image/zensai1.jpg');"></div>
           </div>
           <!-- Add dot indicators -->
           <div class="hero-slider-dots" id="hero-slider-dots">
@@ -97,7 +104,7 @@
         <div class="shoji-lattice"></div>
 
         <div class="hero-content">
-          <img src="logo/tokyologo.png" alt="Tokyo Japanese Cuisine" class="hero-logo floating-logo pulse-glow" />
+          <img src="image/tokyologo.png" alt="Tokyo Japanese Cuisine" class="hero-logo floating-logo pulse-glow" />
           <h1 class="hero-title">
             <span style="white-space: nowrap;">
               <span class="letter-reveal" style="--d:0.05s">T</span><span class="letter-reveal"
@@ -173,7 +180,7 @@
           </div>
 
           <div class="zen-images">
-            <img src="logo/chef.png" class="zen-img zen-img-top"
+            <img src="image/chef.png" class="zen-img zen-img-top"
               style="height: 500px; object-fit: cover; border-radius: 16px;">
             <img src="image/sushi-dish-asian-restaurant.jpg" class="zen-img zen-img-bottom">
           </div>
@@ -252,9 +259,9 @@
           <h2>特色推荐</h2>
           <div class="featured-cards-wrapper">
             <span class="featured-corner-br"></span>
-            <a href="menu.html#sushi" class="featured-card reveal scale-up delay-100">
+            <a href="menu#sushi" class="featured-card reveal scale-up delay-100">
               <div class="featured-card-image-wrapper">
-                <img src="sushimenu/menu1.png" alt="Sushi Menu" class="featured-card-img">
+                <img src="image/menu1.png" alt="Sushi Menu" class="featured-card-img">
                 <div class="featured-card-overlay">
                   <span class="featured-card-btn">View Sushi & Sashimi Menu</span>
                 </div>
@@ -264,9 +271,9 @@
                 <p>Fresh catch from Tokyo Bay</p>
               </div>
             </a>
-            <a href="menu.html#grand" class="featured-card reveal scale-up delay-200">
+            <a href="menu#grand" class="featured-card reveal scale-up delay-200">
               <div class="featured-card-image-wrapper">
-                <img src="grandmenu/menu2.png" alt="Grand Menu" class="featured-card-img">
+                <img src="image/menu2.png" alt="Grand Menu" class="featured-card-img">
                 <div class="featured-card-overlay">
                   <span class="featured-card-btn">View Grand Menu</span>
                 </div>
@@ -340,7 +347,7 @@
             <!-- Logo & Brand -->
             <div class="footer-brand">
               <div class="footer-logo">
-                <img src="logo/tokyologo.png" alt="Tokyo Japanese Cuisine"
+                <img src="image/tokyologo.png" alt="Tokyo Japanese Cuisine"
                   style="height:40px; border-radius:50%; border:2px solid #c9a96e;">
                 <div>
                   <div class="footer-logo-name">TOKYO JAPANESE</div>
@@ -394,7 +401,7 @@
 
   <!-- Swiper JS -->
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-  <script src="script.js"></script>
+  <script src="script.js?v=<?php echo time(); ?>"></script>
 
 </body>
 
