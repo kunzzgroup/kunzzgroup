@@ -36,7 +36,8 @@ if (isset($_SESSION['user_id'])) {
 
         if ($permData) {
             $decoded = json_decode($permData, true);
-            if (isset($decoded['view']) && is_array($decoded['view']) && in_array('approve', $decoded['view'])) {
+            // $decoded 包含的是 {"systems": [...], "views": [...]}
+            if (isset($decoded['views']) && is_array($decoded['views']) && in_array('approve', $decoded['views'])) {
                 $canApprove = true;
             }
         }
