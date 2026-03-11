@@ -159,7 +159,8 @@
     <!-- Dynamic Fetch Logic Script -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const API_URL = '../backend/menu_api.php';
+            // Updated API URL to match production environment
+            const API_URL = '/backend/menu_api.php';
             let currentType = 'grand'; // 'grand' or 'sushi'
             let categoriesData = [];
             let itemsData = [];
