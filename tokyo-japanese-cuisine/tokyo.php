@@ -18,7 +18,7 @@ if (!headers_sent()) {
     rel="stylesheet" />
   <!-- Swiper CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-  <link rel="stylesheet" href="styles.css?v=<?php echo time(); ?>" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
