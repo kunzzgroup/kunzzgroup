@@ -42,8 +42,7 @@ body {
 }
 
 .swiper-slide {
-  height: auto;
-  min-height: 100vh;
+  height: 100vh;
   box-sizing: border-box;
   display: flex !important;
   flex-direction: column;
@@ -136,7 +135,7 @@ a {
   width: 95%;
   max-width: 1300px;
   z-index: 1000;
-  background-color: #ffffffcc;
+  background-color: var(--color-bg-alt);
   border-radius: 9999px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
@@ -1652,10 +1651,8 @@ a {
 #location {
   background-color: var(--color-bg);
   position: relative;
-  overflow: visible;
-  height: auto;
-  min-height: 100vh;
-  padding: 100px 0;
+  overflow: hidden;
+  height: 100vh;
   display: flex !important;
   align-items: center;
   justify-content: center;
@@ -2526,9 +2523,7 @@ a {
 
 #featured {
   background-color: var(--color-bg-alt);
-  height: auto;
-  min-height: 100vh;
-  padding: 100px 0;
+  height: 100vh;
   display: flex !important;
   align-items: center;
   justify-content: center;
@@ -2663,9 +2658,8 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
 /* ── Section: About Culture (Full-screen Split Layout) ────────────────────── */
 #about-culture {
   background-color: var(--color-bg);
-  height: auto;
-  min-height: 100vh;
-  padding: 100px 0;
+  /* #f5f2ed */
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2719,7 +2713,7 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
   gap: 80px;
   width: 100%;
   /* background: #ffffff; */
-  padding: 60px 80px 120px 80px;
+  padding: 120px 80px;
   border-radius: 24px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
   transform: translateY(0);
@@ -4251,6 +4245,7 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
+  overflow: hidden;
 }
 
 /* Allow normal scroll on menu page */
@@ -4560,8 +4555,8 @@ html.menu-html body {
 #featured,
 #location {
   position: relative;
-  overflow: visible;
-  /* Prevent decorations from creating horizontal scroll initially, but visible needed for overlaps */
+  overflow: hidden;
+  /* Prevent decorations from creating horizontal scroll */
 }
 
 /* ══════════════════════════════════════
