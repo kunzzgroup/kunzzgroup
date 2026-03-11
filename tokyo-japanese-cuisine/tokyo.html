@@ -4904,8 +4904,8 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
           <a href="#featured" class="nav-dropdown-trigger">特色推荐 <span class="nav-dropdown-arrow">▾</span></a>
           <div class="nav-dropdown-menu">
             <div class="nav-dropdown-card">
-              <a href="menu.html#sushi" class="nav-dropdown-item">Sushi Menu</a>
-              <a href="menu.html#grand" class="nav-dropdown-item">Grand Menu</a>
+              <a href="menu#sushi" class="nav-dropdown-item">Sushi Menu</a>
+              <a href="menu#grand" class="nav-dropdown-item">Grand Menu</a>
             </div>
           </div>
         </div>
@@ -4932,7 +4932,7 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
     <div class="mobile-sidebar-content">
       <a href="#about-culture" class="sidebar-link">关于我们</a>
       <a href="#mission-vision" class="sidebar-link">文化+服务</a>
-      <a href="menu.html" class="sidebar-link">查看菜单</a>
+      <a href="menu" class="sidebar-link">查看菜单</a>
       <a href="#location" class="sidebar-link">我们在这</a>
       <a href="#contact" class="sidebar-link">联系我们</a>
       <a href="#member" class="sidebar-link">会员</a>
@@ -5120,7 +5120,7 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
           <h2>特色推荐</h2>
           <div class="featured-cards-wrapper">
             <span class="featured-corner-br"></span>
-            <a href="menu.html#sushi" class="featured-card reveal scale-up delay-100">
+            <a href="menu#sushi" class="featured-card reveal scale-up delay-100">
               <div class="featured-card-image-wrapper">
                 <img src="image/menu1.png" alt="Sushi Menu" class="featured-card-img">
                 <div class="featured-card-overlay">
@@ -5132,7 +5132,7 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
                 <p>Fresh catch from Tokyo Bay</p>
               </div>
             </a>
-            <a href="menu.html#grand" class="featured-card reveal scale-up delay-200">
+            <a href="menu#grand" class="featured-card reveal scale-up delay-200">
               <div class="featured-card-image-wrapper">
                 <img src="image/menu2.png" alt="Grand Menu" class="featured-card-img">
                 <div class="featured-card-overlay">
@@ -5683,7 +5683,7 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
           });
         });
 
-        // Initialize based on URL hash (e.g., menu.html#sushi or menu.html#grand)
+        // Initialize based on URL hash (e.g., menu#sushi or menu#grand)
         const hash = window.location.hash.replace('#', '');
         let targetTab;
 
