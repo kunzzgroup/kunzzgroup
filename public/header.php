@@ -89,7 +89,7 @@ function getLanguageSwitchUrl($targetLang) {
             <div class="header-nav-item header-nav-dropdown">
                 <span class="header-nav-dropdown-trigger">旗下品牌</span>
                 <div class="header-nav-dropdown-menu" id="brandsNavDropdownMenu">
-                    <a href="https://tokyo.kunzzgroup.com" class="header-nav-dropdown-item">Tokyo Japanese Cuisine</a>
+                    <a href="https://tokyo.kunzzgroup.com/tokyo" class="header-nav-dropdown-item">Tokyo Japanese Cuisine</a>
                     <a href="https://izakaya.kunzzgroup.com" class="header-nav-dropdown-item">Tokyo Izakaya Cuisine</a>
                 </div>
             </div>
