@@ -410,16 +410,39 @@ function handleApprove() {
         sendResponse(false, "用户未登录");
     }
     
-    // 检查用户是否使用了允许的注册码
-    $allowedCodes = ['SUPPORT88', 'IT4567', 'QX0EQP', 'HR2025','AZGQOY','IT7890'];
     $userId = $_SESSION['user_id'];
+    $hasPermission = false;
 
-    $stmt = $pdo->prepare("SELECT registration_code FROM users WHERE id = ?");
-    $stmt->execute([$userId]);
-    $userCode = $stmt->fetchColumn();
+    try {
+        // 第一层验证：检查 user_page_permissions 表里的动态权限
+        $permStmt = $pdo->prepare("SELECT permissions_json FROM user_page_permissions WHERE user_id = ? AND page_key = 'stock_inventory'");
+        $permStmt->execute([$userId]);
+        $permData = $permStmt->fetchColumn();
 
-    if (!$userCode || !in_array($userCode, $allowedCodes)) {
-        sendResponse(false, "您没有权限执行此操作");
+        if ($permData) {
+            $decoded = json_decode($permData, true);
+            if (isset($decoded['view']) && is_array($decoded['view']) && in_array('approve', $decoded['view'])) {
+                $hasPermission = true;
+            }
+        }
+
+        // 第二层验证（Fallback兼容）：针对系统原有管理员代码
+        if (!$hasPermission) {
+            $allowedCodes = ['SUPPORT88', 'IT4567', 'QX0EQP', 'HR2025','AZGQOY','IT7890'];
+            $codeStmt = $pdo->prepare("SELECT registration_code FROM users WHERE id = ?");
+            $codeStmt->execute([$userId]);
+            $userCode = $codeStmt->fetchColumn();
+            
+            if ($userCode && in_array($userCode, $allowedCodes)) {
+                $hasPermission = true;
+            }
+        }
+    } catch (PDOException $e) {
+        error_log("获取用户权限失败：" . $e->getMessage());
+    }
+
+    if (!$hasPermission) {
+        sendResponse(false, "您没有权限执行此操作 (缺少[货品批准]权限)");
     }
     
     if (!$data || !isset($data['id'])) {
@@ -544,6 +567,49 @@ function handleDelete() {
 // 批量批准功能（可选）
 function handleBatchApprove() {
     global $pdo, $data;
+    
+    // 检查用户权限
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    if (!isset($_SESSION['user_id'])) {
+        sendResponse(false, "用户未登录");
+    }
+    
+    $userId = $_SESSION['user_id'];
+    $hasPermission = false;
+
+    try {
+        // 第一层验证：检查 user_page_permissions 表里的动态权限
+        $permStmt = $pdo->prepare("SELECT permissions_json FROM user_page_permissions WHERE user_id = ? AND page_key = 'stock_inventory'");
+        $permStmt->execute([$userId]);
+        $permData = $permStmt->fetchColumn();
+
+        if ($permData) {
+            $decoded = json_decode($permData, true);
+            if (isset($decoded['view']) && is_array($decoded['view']) && in_array('approve', $decoded['view'])) {
+                $hasPermission = true;
+            }
+        }
+
+        // 第二层验证（Fallback兼容）：针对系统原有管理员代码
+        if (!$hasPermission) {
+            $allowedCodes = ['SUPPORT88', 'IT4567', 'QX0EQP', 'HR2025','AZGQOY','IT7890'];
+            $codeStmt = $pdo->prepare("SELECT registration_code FROM users WHERE id = ?");
+            $codeStmt->execute([$userId]);
+            $userCode = $codeStmt->fetchColumn();
+            
+            if ($userCode && in_array($userCode, $allowedCodes)) {
+                $hasPermission = true;
+            }
+        }
+    } catch (PDOException $e) {
+        error_log("获取用户权限失败：" . $e->getMessage());
+    }
+
+    if (!$hasPermission) {
+        sendResponse(false, "您没有权限执行此操作 (缺少[货品批准]权限)");
+    }
     
     if (!$data || !isset($data['ids']) || !isset($data['approver'])) {
         sendResponse(false, "缺少必要参数");

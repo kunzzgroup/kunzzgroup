@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 if (!headers_sent()) {
     header("Cache-Control: max-age=0, no-cache, no-store, must-revalidate, proxy-revalidate");
     header("Pragma: no-cache");
@@ -347,6 +347,7 @@ require_once 'session_check.php';
                                     <label><input type="checkbox" class="perm-stock-view" value="records"> 进出货</label>
                                     <label><input type="checkbox" class="perm-stock-view" value="remark"> 货品备注</label>
                                     <label><input type="checkbox" class="perm-stock-view" value="product"> 货品种类</label>
+                                    <label><input type="checkbox" class="perm-stock-view" value="approve"> 货品批准</label>
                                     <label><input type="checkbox" class="perm-stock-view" value="sot"> 货品异常</label>
                                 </div>
                             </div>
