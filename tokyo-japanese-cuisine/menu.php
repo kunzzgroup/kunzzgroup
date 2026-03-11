@@ -18,11 +18,118 @@ if (!headers_sent()) {
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet" />
     
     <!-- CSS Dependencies -->
-    <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="menu.css" />
-    
+
     <style>
-        /* Fallback adjustments if needed */
+        /* ── CSS Variables (previously in styles.css) ── */
+        :root {
+            --font-serif: 'DM Serif Display', serif;
+            --font-sans: 'Noto Sans SC', sans-serif;
+            --color-primary: #a68a64;
+            --color-primary-dark: #8b7353;
+            --color-text: #33322f;
+            --color-text-light: #5d5a54;
+            --color-bg: #f5f2ed;
+            --color-bg-alt: #ebe7e0;
+            --color-border: #E5E5E5;
+            --color-line: rgba(255, 255, 255, 0.5);
+            --color-brown: #2c1810;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0; padding: 0;
+            overflow-y: auto;
+            height: auto;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            -webkit-font-smoothing: antialiased;
+            color: var(--color-text);
+            background-color: var(--color-bg);
+            line-height: 1.6;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        /* ── Navigation ── */
+        #nav {
+            position: fixed;
+            top: 24px; left: 50%;
+            transform: translateX(-50%);
+            width: 95%; max-width: 1300px;
+            z-index: 1000;
+            background-color: var(--color-bg-alt);
+            border-radius: 9999px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            height: 72px;
+            display: flex; align-items: center;
+            padding: 0 16px;
+        }
+        .nav-container {
+            width: 100%; padding: 0 8px;
+            display: flex; align-items: center;
+            justify-content: space-between;
+        }
+        .nav-logo-link { display: flex; align-items: center; gap: 8px; }
+        .haidilao-logo-bg {
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; border: 2px solid var(--color-primary); padding: 2px;
+        }
+        .nav-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .nav-text-group { display: flex; flex-direction: column; justify-content: center; }
+        .nav-text-group .primary { color: var(--color-text-light); font-size: 18px; font-weight: 800; line-height: 1.1; }
+        .nav-text-group .secondary { color: var(--color-text-light); font-size: 12px; font-weight: 500; }
+        .nav-links { display: none; align-items: center; gap: 40px; }
+        @media (min-width: 992px) { .nav-links { display: flex; } }
+        .nav-links a { color: var(--color-text); font-size: 15px; font-weight: 600; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--color-primary); }
+        .nav-actions { display: flex; align-items: center; gap: 24px; }
+        .nav-hamburger {
+            width: 45px; height: 45px; border-radius: 50%;
+            background-color: var(--color-primary); border: none;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; gap: 4px; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(166,138,100,0.3);
+        }
+        .nav-hamburger span { width: 18px; height: 2px; background-color: var(--color-line); border-radius: 2px; }
+
+        /* ── Buttons ── */
+        .btn-primary {
+            padding: 8px 20px; border-radius: 9999px;
+            background-color: var(--color-primary); color: white;
+            font-weight: 600; border: 2px solid var(--color-primary);
+            display: inline-block; transition: all 0.3s ease; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(166,138,100,0.3); font-size: 14px;
+        }
+        .btn-primary:hover { background-color: var(--color-primary-dark); transform: translateY(-2px); }
+        .btn-secondary {
+            padding: 8px 20px; border-radius: 9999px;
+            border: 2px solid var(--color-border); color: var(--color-text);
+            font-weight: 600; display: inline-block; background-color: transparent;
+            cursor: pointer; transition: all 0.3s ease; font-size: 14px;
+        }
+        .btn-secondary:hover { border-color: var(--color-primary); color: var(--color-primary); transform: translateY(-2px); }
+
+        /* ── Mobile Sidebar ── */
+        .mobile-menu-btn, .mobile-sidebar-overlay, .mobile-sidebar { display: none !important; }
+        @media (max-width: 640px) {
+            .mobile-menu-btn { display: flex !important; flex-direction: column; justify-content: center; align-items: center; gap: 6px; width: 40px; height: 40px; background: transparent; border: none; cursor: pointer; padding: 0; }
+            .mobile-sidebar-overlay { display: block !important; }
+            .mobile-sidebar { display: flex !important; }
+        }
+        .mobile-menu-btn span { display: block; width: 24px; height: 2px; background: #a68a64; border-radius: 2px; }
+        .mobile-sidebar-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); opacity: 0; visibility: hidden; transition: all 0.4s ease; z-index: 10000; }
+        .mobile-sidebar-overlay.active { opacity: 1; visibility: visible; }
+        .mobile-sidebar { position: fixed; top: 0; right: -300px; width: 280px; height: 100vh; background-color: var(--color-bg); box-shadow: -5px 0 20px rgba(0,0,0,0.1); transition: right 0.4s cubic-bezier(0.25,0.8,0.25,1); z-index: 10002; flex-direction: column; padding: 40px 30px; }
+        .mobile-sidebar.active { right: 0; }
+        .mobile-sidebar-close { position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 2.5rem; color: var(--color-text); cursor: pointer; }
+        .mobile-sidebar-content { display: flex; flex-direction: column; gap: 20px; margin-top: 50px; }
+        .sidebar-link { font-size: 1.4rem; font-weight: 500; color: var(--color-text); display: block; padding: 8px 0; border-bottom: 1px solid rgba(166,138,100,0.15); }
+
+        /* ── Loading text ── */
         .loading-text { padding: 40px; text-align: center; color: #7c776b; font-size: 1.1rem; }
     </style>
 </head>
