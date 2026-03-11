@@ -28,7 +28,11 @@ define('DB_PASS', 'Kunzz1688');
 
 // Image upload directory (relative to this file)
 define('UPLOAD_BASE', __DIR__ . '/uploads/');
-define('UPLOAD_URL_BASE', 'https://kunzzgroup.com/backend/uploads/'); // Web-accessible absolute path for cross-domain
+// Web-accessible absolute path for cross-domain
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+$host = $_SERVER['HTTP_HOST'];
+$base_dir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+define('UPLOAD_URL_BASE', $protocol . $host . $base_dir . '/uploads/');
 
 // ============================================================
 //  DB CONNECTION

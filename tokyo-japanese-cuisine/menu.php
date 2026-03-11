@@ -7,7 +7,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" href="logo/tokyologo.png">
+    <link rel="icon" type="image/png" href="image/tokyologo.png">
     <title>Menu | TOKYO JAPANESE CUISINE</title>
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -29,7 +29,7 @@
         <div class="nav-container">
             <a href="tokyo.html" class="nav-logo-link">
                 <div class="haidilao-logo-bg">
-                    <img src="logo/tokyologo.png" alt="Tokyo" class="nav-logo">
+                    <img src="image/tokyologo.png" alt="Tokyo" class="nav-logo">
                 </div>
                 <div class="nav-text-group">
                     <span class="nav-text primary">TOKYO JAPANESE</span>
@@ -73,13 +73,13 @@
         <div class="haidilao-top-nav">
             <button class="haidilao-top-tab active" data-menu="grand" id="tab-grand">
                 <div class="top-tab-icon">
-                    <img src="grandmenu/menu2.png" alt="Grand Menu" />
+                    <img src="image/menu2.png" alt="Grand Menu" />
                 </div>
                 <span>Grand Menu</span>
             </button>
             <button class="haidilao-top-tab" data-menu="sushi" id="tab-sushi">
                 <div class="top-tab-icon">
-                    <img src="sushimenu/menu1.png" alt="Sushi Menu" />
+                    <img src="image/menu1.png" alt="Sushi Menu" />
                 </div>
                 <span>Sushi Menu</span>
             </button>
@@ -121,7 +121,7 @@
                 <!-- Logo & Brand -->
                 <div class="footer-brand">
                     <div class="footer-logo">
-                        <img src="logo/tokyologo.png" alt="Tokyo Japanese Cuisine" style="height:40px; border-radius:50%; border:2px solid #c9a96e;">
+                        <img src="image/tokyologo.png" alt="Tokyo Japanese Cuisine" style="height:40px; border-radius:50%; border:2px solid #c9a96e;">
                         <div><div class="footer-logo-name">TOKYO JAPANESE</div><div class="footer-logo-sub">CUISINE</div></div>
                     </div>
                     <p class="footer-tagline">正宗日式料理，匠心传递每一道风味</p>
@@ -159,8 +159,11 @@
     <!-- Dynamic Fetch Logic Script -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Absolute API URL for Cross-Domain Data Fetching
-            const API_URL = 'https://kunzzgroup.com/backend/menu_api.php';
+            // Dynamic API URL for Local Testing & Production
+            const isLocalhost = window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0.1');
+            const API_URL = isLocalhost 
+                ? 'http://localhost/kunzzgroup/backend/menu_api.php'
+                : 'https://kunzzgroup.com/backend/menu_api.php';
             let currentType = 'grand'; // 'grand' or 'sushi'
             let categoriesData = [];
             let itemsData = [];
