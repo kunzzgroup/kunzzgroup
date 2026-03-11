@@ -14,3 +14,9 @@ RewriteRule ^([^\.]+)$ $1.php [NC,L]
 
 # 3. 明确确保 /tokyo 访问能指向 tokyo.html
 RewriteRule ^tokyo/?$ tokyo.html [L]
+
+# 4. 菜单路径优化 (Menu path optimization)
+# 允许访问 /menu/grand 或 /menu/sushi
+RewriteRule ^menu/(grand|sushi)/?$ menu.php#$1 [NE,L,R]
+RewriteRule ^menu/?$ menu.php [L]
+
