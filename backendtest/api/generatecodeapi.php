@@ -972,7 +972,7 @@ function getUserSidebarPermissions($pdo, $input) {
                 $types = $permData['types'] ?? $permData['type'] ?? [];
                 if ($pageKey === 'stock_inventory') {
                     $stockSystems = is_array($systems) ? array_values(array_intersect($systems, ['central','j1','j2','j3'])) : [];
-                    $stockViews = is_array($views) ? array_values(array_intersect($views, ['list','records','remark','product','sot'])) : [];
+                    $stockViews = is_array($views) ? array_values(array_intersect($views, ['list','records','remark','product','sot','approve'])) : [];
                 } elseif ($pageKey === 'kpi_upload') {
                     $uploadSystems = is_array($systems) ? array_values(array_intersect($systems, ['j1','j2','j3'])) : [];
                     $uploadTypes = is_array($types) ? array_values(array_intersect($types, ['kpi','cost'])) : [];
@@ -981,7 +981,7 @@ function getUserSidebarPermissions($pdo, $input) {
                         $stockSystems = array_merge($stockSystems, array_values(array_intersect($systems, ['central','j1','j2','j3'])));
                     }
                     if (is_array($views)) {
-                        $stockViews = array_merge($stockViews, array_values(array_intersect($views, ['list','records','remark','product','sot'])));
+                        $stockViews = array_merge($stockViews, array_values(array_intersect($views, ['list','records','remark','product','sot','approve'])));
                     }
                 }
             }
@@ -1132,7 +1132,7 @@ function saveUserSidebarPermissions($pdo, $input) {
         return array_values(array_intersect(is_array($arr) ? $arr : [], $allow));
     };
     $stockSystemsAllowed = ['central','j1','j2','j3'];
-    $stockViewsAllowed = ['list','records','remark','product','sot'];
+    $stockViewsAllowed = ['list','records','remark','product','sot','approve'];
     $uploadSystemsAllowed = ['j1','j2','j3'];
     $uploadTypesAllowed = ['kpi','cost'];
     $pagePermsNorm = [
@@ -1319,7 +1319,7 @@ function getUserPagePermissions($pdo, $input) {
                 if ($pageKey === 'stock_inventory') {
                     $hasUnifiedStockEntry = true;
                     $stockSystems = is_array($systems) ? array_values(array_intersect($systems, ['central','j1','j2','j3'])) : [];
-                    $stockViews = is_array($views) ? array_values(array_intersect($views, ['list','records','remark','product','sot'])) : [];
+                    $stockViews = is_array($views) ? array_values(array_intersect($views, ['list','records','remark','product','sot','approve'])) : [];
                 } elseif ($pageKey === 'kpi_upload') {
                     $uploadSystems = is_array($systems) ? array_values(array_intersect($systems, ['j1','j2','j3'])) : [];
                     $uploadTypes = is_array($types) ? array_values(array_intersect($types, ['kpi','cost'])) : [];
@@ -1328,7 +1328,7 @@ function getUserPagePermissions($pdo, $input) {
                         $stockSystems = array_merge($stockSystems, array_values(array_intersect($systems, ['central','j1','j2','j3'])));
                     }
                     if (is_array($views)) {
-                        $stockViews = array_merge($stockViews, array_values(array_intersect($views, ['list','records','remark','product','sot'])));
+                        $stockViews = array_merge($stockViews, array_values(array_intersect($views, ['list','records','remark','product','sot','approve'])));
                     }
                 }
             }
@@ -1383,7 +1383,7 @@ function getUserPagePermissions($pdo, $input) {
                 if (is_array($tmp)) {
                     if (isset($tmp['stock_inventory'])) {
                         $stockSystems = array_values(array_intersect($tmp['stock_inventory']['system'] ?? [], ['central','j1','j2','j3']));
-                        $stockViews = array_values(array_intersect($tmp['stock_inventory']['view'] ?? [], ['list','records','remark','product','sot']));
+                        $stockViews = array_values(array_intersect($tmp['stock_inventory']['view'] ?? [], ['list','records','remark','product','sot','approve']));
                     } else {
                         $legacyKeys = ['stocklistall','stockeditall','stockproductname','stockremark','stocksot'];
                         foreach ($legacyKeys as $legacyKey) {
@@ -1391,7 +1391,7 @@ function getUserPagePermissions($pdo, $input) {
                                 $stockSystems = array_merge($stockSystems, array_values(array_intersect($tmp[$legacyKey]['system'], ['central','j1','j2','j3'])));
                             }
                             if (!empty($tmp[$legacyKey]['view']) && is_array($tmp[$legacyKey]['view'])) {
-                                $stockViews = array_merge($stockViews, array_values(array_intersect($tmp[$legacyKey]['view'], ['list','records','remark','product','sot'])));
+                                $stockViews = array_merge($stockViews, array_values(array_intersect($tmp[$legacyKey]['view'], ['list','records','remark','product','sot','approve'])));
                             }
                         }
                         $stockSystems = array_values(array_unique($stockSystems));
@@ -1459,7 +1459,7 @@ function saveUserPagePermissions($pdo, $input) {
     $pagePerms = is_array($input['page_permissions']) ? $input['page_permissions'] : [];
     $normalize = function($arr, $allow) { return array_values(array_intersect(is_array($arr)?$arr:[], $allow)); };
     $stockSystemsAllowed = ['central','j1','j2','j3'];
-    $stockViewsAllowed = ['list','records','remark','product','sot'];
+    $stockViewsAllowed = ['list','records','remark','product','sot','approve'];
     $pagePermsNorm = [
         'stock_inventory' => [
             'system' => $normalize($pagePerms['stock_inventory']['system'] ?? [], $stockSystemsAllowed),

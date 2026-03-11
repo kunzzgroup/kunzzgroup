@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 if (!headers_sent()) {
     header("Cache-Control: max-age=0, no-cache, no-store, must-revalidate, proxy-revalidate");
     header("Pragma: no-cache");
@@ -1197,7 +1197,7 @@ function saveUserSidebarPermissions($pdo, $input) {
         return array_values(array_intersect(is_array($arr) ? $arr : [], $allow));
     };
     $stockSystemsAllowed = ['central','j1','j2','j3'];
-    $stockViewsAllowed = ['list','records','remark','product','sot'];
+    $stockViewsAllowed = ['list','records','remark','product','sot','approve'];
     $uploadSystemsAllowed = ['j1','j2','j3'];
     $uploadTypesAllowed = ['kpi','cost'];
     $pagePermsNorm = [
@@ -1384,7 +1384,7 @@ function getUserPagePermissions($pdo, $input) {
                 if ($pageKey === 'stock_inventory') {
                     $hasUnifiedStockEntry = true;
                     $stockSystems = is_array($systems) ? array_values(array_intersect($systems, ['central','j1','j2','j3'])) : [];
-                    $stockViews = is_array($views) ? array_values(array_intersect($views, ['list','records','remark','product','sot'])) : [];
+                    $stockViews = is_array($views) ? array_values(array_intersect($views, ['list','records','remark','product','sot','approve'])) : [];
                 } elseif ($pageKey === 'kpi_upload') {
                     $uploadSystems = is_array($systems) ? array_values(array_intersect($systems, ['j1','j2','j3'])) : [];
                     $uploadTypes = is_array($types) ? array_values(array_intersect($types, ['kpi','cost'])) : [];
@@ -1393,7 +1393,7 @@ function getUserPagePermissions($pdo, $input) {
                         $stockSystems = array_merge($stockSystems, array_values(array_intersect($systems, ['central','j1','j2','j3'])));
                     }
                     if (is_array($views)) {
-                        $stockViews = array_merge($stockViews, array_values(array_intersect($views, ['list','records','remark','product','sot'])));
+                        $stockViews = array_merge($stockViews, array_values(array_intersect($views, ['list','records','remark','product','sot','approve'])));
                     }
                 }
             }
