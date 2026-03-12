@@ -3,19 +3,31 @@ async function checkUserPermissions() {
     try {
         const response = await fetch('/backendtest/api/check_permissions_api.php');
         const result = await response.json();
-        return result.canApprove || false;
+        return {
+            canApprove: result.canApprove || false,
+            canApply: result.canApply || false
+        };
     } catch (error) {
         console.error('检查权限失败:', error);
-        return false;
+        return { canApprove: false, canApply: false };
     }
 }
 
 // 全局变量存储用户权限
 let userCanApprove = false;
+let userCanApply = false;
 
 // 初始化权限检查
 async function initPermissions() {
-    userCanApprove = await checkUserPermissions();
+    const perms = await checkUserPermissions();
+    userCanApprove = perms.canApprove;
+    userCanApply = perms.canApply;
+
+    // 根据权限控制全局按钮显示
+    const addBtn = document.querySelector('.add-row-btn');
+    const saveAllBtn = document.querySelector('.save-all-btn');
+    if (addBtn) addBtn.style.display = userCanApply ? 'inline-block' : 'none';
+    if (saveAllBtn) saveAllBtn.style.display = userCanApply ? 'inline-block' : 'none';
 }
 
 const API_BASE_URL = 'stockapi.php';  // 如果在同一目录
@@ -393,12 +405,14 @@ function createStockRow(data = {}, index = -1) {
         }
                 </td>
                 <td class="action-cell">
+                    ${userCanApply ? `
                     <button class="edit-btn ${isNewRow ? 'save-mode' : ''}" id="edit-btn-${rowId}" onclick="toggleEdit('${rowId}')" title="${isNewRow ? '保存记录' : '编辑记录'}">
                         <i class="fas ${isNewRow ? 'fa-save' : 'fa-edit'}"></i>
                     </button>
                     <button class="delete-row-btn" onclick="deleteRow('${rowId}')" title="删除此行">
                         <i class="fas fa-trash-alt"></i>
                     </button>
+                    ` : ''}
                 </td>
             `;
 
@@ -407,6 +421,10 @@ function createStockRow(data = {}, index = -1) {
 
 // 添加新行
 function addNewRow() {
+    if (!userCanApply) {
+        showAlert('您没有权限添加记录 (缺少[申请权限])', 'error');
+        return;
+    }
     const tbody = document.getElementById('excel-tbody');
 
     const newData = {

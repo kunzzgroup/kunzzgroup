@@ -844,12 +844,14 @@ function createStockRow(data = {}, index = -1) {
             }
                     </td>
                     <td class="action-cell">
+                        ${userCanApply ? `
                         <button class="edit-btn ${isNewRow ? 'save-mode' : ''}" id="edit-btn-${rowId}" onclick="toggleEdit('${rowId}')" title="${isNewRow ? '保存记录' : '编辑记录'}">
                             <i class="fas ${isNewRow ? 'fa-save' : 'fa-edit'}"></i>
                         </button>
                         <button class="delete-row-btn" onclick="deleteRow('${rowId}')" title="删除此行">
                             <i class="fas fa-trash-alt"></i>
                         </button>
+                        ` : ''}
                     </td>
                 `;
     } else {
@@ -936,12 +938,14 @@ function createStockRow(data = {}, index = -1) {
             }
                     </td>
                     <td class="action-cell">
+                        ${userCanApply ? `
                         <button class="edit-btn ${isNewRow ? 'save-mode' : ''}" id="edit-btn-${rowId}" onclick="toggleEdit('${rowId}')" title="${isNewRow ? '保存记录' : '编辑记录'}">
                             <i class="fas ${isNewRow ? 'fa-save' : 'fa-edit'}"></i>
                         </button>
                         <button class="delete-row-btn" onclick="deleteRow('${rowId}')" title="删除此行">
                             <i class="fas fa-trash-alt"></i>
                         </button>
+                        ` : ''}
                     </td>
                 `;
     }
@@ -951,6 +955,10 @@ function createStockRow(data = {}, index = -1) {
 
 // 添加新行
 function addNewRow() {
+    if (!userCanApply) {
+        showAlert('您没有权限添加记录 (缺少[申请权限])', 'error');
+        return;
+    }
     const tbody = document.getElementById('excel-tbody');
 
     // 根据当前系统类型设置系统分配的默认值
