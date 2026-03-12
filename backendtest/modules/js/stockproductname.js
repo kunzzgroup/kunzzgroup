@@ -1017,8 +1017,14 @@ async function deleteFromDatabase(id) {
 // 保存所有数据
 async function saveAllData() {
     if (isLoading) return;
+    if (!userCanApply) {
+        showAlert('您没有权限保存 (缺少[申请权限])', 'error');
+        return;
+    }
 
-    const saveBtn = event.target;
+    const saveBtn = (typeof event !== 'undefined' && event && event.target) ? event.target : document.querySelector('.save-all-btn');
+    if (!saveBtn) return;
+
     const originalText = saveBtn.innerHTML;
     saveBtn.innerHTML = '<div class="loading"></div> 保存中...';
     saveBtn.disabled = true;

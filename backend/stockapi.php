@@ -102,7 +102,7 @@ function checkUserPermission(PDO $pdo, $userId, $permission): bool {
         }
 
         // 第二层验证（Fallback兼容）：针对系统原有管理员代码
-        if (!$hasPermission) {
+        if (!$hasPermission && !$permData) {
             $allowedCodes = ['SUPPORT88', 'IT4567', 'QX0EQP', 'HR2025', 'AZGQOY', 'IT7890'];
             $codeStmt = $pdo->prepare("SELECT registration_code FROM users WHERE id = ?");
             $codeStmt->execute([$userId]);

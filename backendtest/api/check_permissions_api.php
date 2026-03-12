@@ -32,7 +32,7 @@ if (isset($_SESSION['user_id'])) {
     }
 
     // 第二层验证（Fallback兼容）
-    if (!$canApprove || !$canApply) {
+    if (!$permData) {
         $allowedCodes = ['SUPPORT88', 'IT4567', 'QX0EQP', 'HR2025','AZGQOY','IT7890'];
         $stmt = $pdo->prepare("SELECT registration_code FROM users WHERE id = ?");
         $stmt->execute([$userId]);
