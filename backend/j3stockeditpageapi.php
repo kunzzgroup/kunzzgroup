@@ -491,6 +491,12 @@ function handlePost() {
     if (!$data) {
         sendResponse(false, "无效的数据格式");
     }
+
+    // 优先处理批量保存
+    if (($data['action'] ?? '') === 'batch_save') {
+        handleBatchSave();
+        return;
+    }
     
     // 验证必填字段
     $required_fields = ['date', 'time', 'product_name', 'receiver'];
@@ -519,10 +525,6 @@ function handlePost() {
     }
     
     try {
-        if (($data['action'] ?? '') === 'batch_save') {
-             handleBatchSave();
-             return;
-        }
 
         // 开始事务
         $pdo->beginTransaction();
