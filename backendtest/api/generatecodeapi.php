@@ -1132,13 +1132,16 @@ function saveUserSidebarPermissions($pdo, $input) {
         return array_values(array_intersect(is_array($arr) ? $arr : [], $allow));
     };
     $stockSystemsAllowed = ['central','j1','j2','j3'];
-    $stockViewsAllowed = ['list','records','remark','product','sot','approve'];
+    $stockViewsAllowed = ['list','records','remark','product','sot','approve','apply'];
     $uploadSystemsAllowed = ['j1','j2','j3'];
     $uploadTypesAllowed = ['kpi','cost'];
+    
+    $stockViewsRequested = $pagePerms['stock_inventory']['views'] ?? ($pagePerms['stock_inventory']['view'] ?? []);
+    
     $pagePermsNorm = [
         'stock_inventory' => [
             'system' => $normalize($pagePerms['stock_inventory']['system'] ?? [], $stockSystemsAllowed),
-            'view'   => $normalize($pagePerms['stock_inventory']['view'] ?? [], $stockViewsAllowed)
+            'views'  => $normalize($stockViewsRequested, $stockViewsAllowed)
         ],
         'kpi_upload' => [
             'system' => $normalize($pagePerms['kpi_upload']['system'] ?? [], $uploadSystemsAllowed),
@@ -1206,10 +1209,10 @@ function saveUserSidebarPermissions($pdo, $input) {
             $del->execute([':uid' => $userId]);
             
             // 保存统一库存权限
-            $stockPermData = $pagePermsNorm['stock_inventory'] ?? ['system'=>[], 'view'=>[]];
+            $stockPermData = $pagePermsNorm['stock_inventory'] ?? ['system'=>[], 'views'=>[]];
             $permJson = json_encode([
                 'systems' => $stockPermData['system'] ?? [],
-                'views' => $stockPermData['view'] ?? []
+                'views' => $stockPermData['views'] ?? []
             ], JSON_UNESCAPED_UNICODE);
             
             $up = $pdo->prepare("INSERT INTO user_page_permissions (user_id, page_key, permissions_json, updated_at)
@@ -1319,7 +1322,7 @@ function getUserPagePermissions($pdo, $input) {
                 if ($pageKey === 'stock_inventory') {
                     $hasUnifiedStockEntry = true;
                     $stockSystems = is_array($systems) ? array_values(array_intersect($systems, ['central','j1','j2','j3'])) : [];
-                    $stockViews = is_array($views) ? array_values(array_intersect($views, ['list','records','remark','product','sot','approve'])) : [];
+                    $stockViews = is_array($views) ? array_values(array_intersect($views, ['list','records','remark','product','sot','approve','apply'])) : [];
                 } elseif ($pageKey === 'kpi_upload') {
                     $uploadSystems = is_array($systems) ? array_values(array_intersect($systems, ['j1','j2','j3'])) : [];
                     $uploadTypes = is_array($types) ? array_values(array_intersect($types, ['kpi','cost'])) : [];
@@ -1328,15 +1331,15 @@ function getUserPagePermissions($pdo, $input) {
                         $stockSystems = array_merge($stockSystems, array_values(array_intersect($systems, ['central','j1','j2','j3'])));
                     }
                     if (is_array($views)) {
-                        $stockViews = array_merge($stockViews, array_values(array_intersect($views, ['list','records','remark','product','sot','approve'])));
+                        $stockViews = array_merge($stockViews, array_values(array_intersect($views, ['list','records','remark','product','sot','approve','apply'])));
                     }
                 }
             }
             $stockSystems = array_values(array_unique($stockSystems));
             $stockViews = array_values(array_unique($stockViews));
             $pagePerms['stock_inventory'] = [
-                'system' => $stockSystems,
-                'view' => $stockViews
+                'systems' => $stockSystems,
+                'views' => $stockViews
             ];
             $pagePerms['kpi_upload'] = [
                 'system' => $uploadSystems,
@@ -1382,8 +1385,8 @@ function getUserPagePermissions($pdo, $input) {
                 $tmp = json_decode($row['page_permissions_json'], true);
                 if (is_array($tmp)) {
                     if (isset($tmp['stock_inventory'])) {
-                        $stockSystems = array_values(array_intersect($tmp['stock_inventory']['system'] ?? [], ['central','j1','j2','j3']));
-                        $stockViews = array_values(array_intersect($tmp['stock_inventory']['view'] ?? [], ['list','records','remark','product','sot','approve']));
+                        $stockSystems = array_values(array_intersect($tmp['stock_inventory']['system'] ?? ($tmp['stock_inventory']['systems'] ?? []), ['central','j1','j2','j3']));
+                        $stockViews = array_values(array_intersect($tmp['stock_inventory']['view'] ?? ($tmp['stock_inventory']['views'] ?? []), ['list','records','remark','product','sot','approve','apply']));
                     } else {
                         $legacyKeys = ['stocklistall','stockeditall','stockproductname','stockremark','stocksot'];
                         foreach ($legacyKeys as $legacyKey) {
@@ -1391,18 +1394,18 @@ function getUserPagePermissions($pdo, $input) {
                                 $stockSystems = array_merge($stockSystems, array_values(array_intersect($tmp[$legacyKey]['system'], ['central','j1','j2','j3'])));
                             }
                             if (!empty($tmp[$legacyKey]['view']) && is_array($tmp[$legacyKey]['view'])) {
-                                $stockViews = array_merge($stockViews, array_values(array_intersect($tmp[$legacyKey]['view'], ['list','records','remark','product','sot','approve'])));
+                                $stockViews = array_merge($stockViews, array_values(array_intersect($tmp[$legacyKey]['view'], ['list','records','remark','product','sot','approve','apply'])));
                             }
                         }
-                        $stockSystems = array_values(array_unique($stockSystems));
-                        $stockViews = array_values(array_unique($stockViews));
-                    }
+                    $stockSystems = array_values(array_unique($stockSystems));
+                    $stockViews = array_values(array_unique($stockViews));
                 }
             }
-            $pagePerms['stock_inventory'] = [
-                'system' => $stockSystems,
-                'view' => $stockViews
-            ];
+        }
+        $pagePerms['stock_inventory'] = [
+            'systems' => $stockSystems,
+            'views' => $stockViews
+        ];
             
             // 读取 kpi_upload 权限
             $uploadSystems = [];

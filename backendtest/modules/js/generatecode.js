@@ -1791,7 +1791,8 @@ function setPermCheckboxes(perms, pagePerms, submenuPerms, reportPerms, restaura
     // 设置库存三级权限
     const stockPagePerms = (pagePerms && typeof pagePerms === 'object') ? (pagePerms.stock_inventory || {}) : {};
     const stockSystems = Array.isArray(stockPagePerms.system) ? stockPagePerms.system : [];
-    const stockViews = Array.isArray(stockPagePerms.view) ? stockPagePerms.view : [];
+    // 注意：后端现在统一使用 'views' (复数)
+    const stockViews = Array.isArray(stockPagePerms.views) ? stockPagePerms.views : (Array.isArray(stockPagePerms.view) ? stockPagePerms.view : []);
     const systemSet = new Set(stockSystems);
     const viewSet = new Set(stockViews);
 
@@ -1992,7 +1993,7 @@ async function savePermissions() {
     const pagePermissions = {
         stock_inventory: {
             system: selectedStockSystems,
-            view: selectedStockViews
+            views: selectedStockViews
         },
         kpi_upload: {
             system: selectedUploadSystems,

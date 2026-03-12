@@ -20,19 +20,31 @@ async function checkUserPermissions() {
     try {
         const response = await fetch('check_permissions.php');
         const result = await response.json();
-        return result.canApprove || false;
+        return {
+            canApprove: result.canApprove || false,
+            canApply: result.canApply || false
+        };
     } catch (error) {
         console.error('检查权限失败:', error);
-        return false;
+        return { canApprove: false, canApply: false };
     }
 }
 
 // 全局变量存储用户权限
 let userCanApprove = false;
+let userCanApply = false;
 
 // 初始化权限检查
 async function initPermissions() {
-    userCanApprove = await checkUserPermissions();
+    const perms = await checkUserPermissions();
+    userCanApprove = perms.canApprove;
+    userCanApply = perms.canApply;
+
+    // 根据权限控制全局按钮显示
+    const addBtn = document.querySelector('.add-row-btn');
+    const saveAllBtn = document.querySelector('.save-all-btn');
+    if (addBtn) addBtn.style.display = userCanApply ? 'inline-block' : 'none';
+    if (saveAllBtn) saveAllBtn.style.display = userCanApply ? 'inline-block' : 'none';
 }
 
 const API_BASE_URL = 'stockapi.php';  // 如果在同一目录
