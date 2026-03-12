@@ -49,6 +49,48 @@ function getCurrentApplicantName(PDO $pdo): string {
     return trim((string)($row['username'] ?? ''));
 }
 
+/**
+ * 检查用户是否拥有特定权限
+ * @param PDO $pdo 数据库连接
+ * @param int|string $userId 用户ID
+ * @param string $permission 权限名称 ('apply' 或 'approve')
+ * @return bool
+ */
+function checkUserPermission(PDO $pdo, $userId, $permission): bool {
+    $hasPermission = false;
+    
+    try {
+        // 第一层验证：检查 user_page_permissions 表里的动态权限
+        $permStmt = $pdo->prepare("SELECT permissions_json FROM user_page_permissions WHERE user_id = ? AND page_key = 'stock_inventory'");
+        $permStmt->execute([$userId]);
+        $permData = $permStmt->fetchColumn();
+
+        if ($permData) {
+            $decoded = json_decode($permData, true);
+            // 注意：数据库中存储的键是 'views'
+            if (isset($decoded['views']) && is_array($decoded['views']) && in_array($permission, $decoded['views'])) {
+                $hasPermission = true;
+            }
+        }
+
+        // 第二层验证（Fallback兼容）：针对系统原有管理员代码
+        if (!$hasPermission) {
+            $allowedCodes = ['SUPPORT88', 'IT4567', 'QX0EQP', 'HR2025', 'AZGQOY', 'IT7890'];
+            $codeStmt = $pdo->prepare("SELECT registration_code FROM users WHERE id = ?");
+            $codeStmt->execute([$userId]);
+            $userCode = $codeStmt->fetchColumn();
+            
+            if ($userCode && in_array($userCode, $allowedCodes)) {
+                $hasPermission = true;
+            }
+        }
+    } catch (PDOException $e) {
+        error_log("检查用户权限失败：" . $e->getMessage());
+    }
+    
+    return $hasPermission;
+}
+
 // 路由处理
 switch ($method) {
     case 'GET':
@@ -311,6 +353,11 @@ function handlePost() {
     if (!isset($_SESSION['user_id'])) {
         sendResponse(false, "用户未登录");
     }
+
+    // 权限检查：必须要有 apply 权限才能添加记录
+    if (!checkUserPermission($pdo, $_SESSION['user_id'], 'apply')) {
+        sendResponse(false, "您没有权限执行此操作 (缺少[申请权限])");
+    }
     
     // 验证必填字段
     // applicant 由系统根据登录账号自动写入（不信任前端传值）
@@ -378,16 +425,9 @@ function handleApprove() {
         sendResponse(false, "用户未登录");
     }
     
-    // 检查用户是否使用了允许的注册码
-    $allowedCodes = ['SUPPORT88', 'IT4567', 'QX0EQP', 'HR2025','AZGQOY','IT7890'];
     $userId = $_SESSION['user_id'];
-
-    $stmt = $pdo->prepare("SELECT registration_code FROM users WHERE id = ?");
-    $stmt->execute([$userId]);
-    $userCode = $stmt->fetchColumn();
-
-    if (!$userCode || !in_array($userCode, $allowedCodes)) {
-        sendResponse(false, "您没有权限执行此操作");
+    if (!checkUserPermission($pdo, $userId, 'approve')) {
+        sendResponse(false, "您没有权限执行此操作 (缺少[货品批准]权限)");
     }
     
     if (!$data || !isset($data['id'])) {
@@ -425,6 +465,11 @@ function handlePut() {
     
     if (!$data || !isset($data['id'])) {
         sendResponse(false, "缺少记录ID");
+    }
+
+    // 权限检查：必须要有 apply 权限才能更新记录
+    if (!checkUserPermission($pdo, $_SESSION['user_id'], 'apply')) {
+        sendResponse(false, "您没有权限执行此操作 (缺少[申请权限])");
     }
     
     // 验证必填字段
@@ -493,6 +538,11 @@ function handleDelete() {
     if (!$id) {
         sendResponse(false, "缺少记录ID");
     }
+
+    // 权限检查：必须要有 apply 权限才能删除记录
+    if (!checkUserPermission($pdo, $_SESSION['user_id'], 'apply')) {
+        sendResponse(false, "您没有权限执行此操作 (缺少[申请权限])");
+    }
     
     try {
         $stmt = $pdo->prepare("DELETE FROM stock_data WHERE id = ?");
@@ -512,6 +562,19 @@ function handleDelete() {
 // 批量批准功能（可选）
 function handleBatchApprove() {
     global $pdo, $data;
+    
+    // 检查用户权限
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    if (!isset($_SESSION['user_id'])) {
+        sendResponse(false, "用户未登录");
+    }
+    
+    $userId = $_SESSION['user_id'];
+    if (!checkUserPermission($pdo, $userId, 'approve')) {
+        sendResponse(false, "您没有权限执行此操作 (缺少[货品批准]权限)");
+    }
     
     if (!$data || !isset($data['ids']) || !isset($data['approver'])) {
         sendResponse(false, "缺少必要参数");

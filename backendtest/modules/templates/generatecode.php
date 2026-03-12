@@ -325,7 +325,10 @@
                                     <label><input type="checkbox" class="perm-stock-view" value="records"> 进出货</label>
                                     <label><input type="checkbox" class="perm-stock-view" value="remark"> 货品备注</label>
                                     <label><input type="checkbox" class="perm-stock-view" value="product"> 货品种类</label>
-                                    <label><input type="checkbox" class="perm-stock-view" value="approve"> 货品批准</label>
+                                    <div style="margin-left: 20px; margin-top: 5px; display: flex; flex-direction: column; gap: 5px; border-left: 2px solid #eee; padding-left: 10px;">
+                                        <label style="font-size: 0.9em;"><input type="checkbox" class="perm-stock-view" value="apply"> 申请权限 (Applicant)</label>
+                                        <label style="font-size: 0.9em;"><input type="checkbox" class="perm-stock-view" value="approve"> 批准权限 (Approver)</label>
+                                    </div>
                                     <label><input type="checkbox" class="perm-stock-view" value="sot"> 货品异常</label>
                                 </div>
                             </div>
