@@ -674,6 +674,7 @@ function handleApprove() {
 // 处理 PUT 请求 - 更新记录
 function handlePut() {
     global $pdo, $data;
+    $centralResult = false;
     
     if (!$data || !isset($data['id'])) {
         sendResponse(false, "缺少记录ID");
@@ -754,7 +755,7 @@ function handlePut() {
                                     ORDER BY id DESC LIMIT 1";
                 
                 $centralStmt = $pdo->prepare($centralUpdateSql);
-                $centralStmt->execute([
+                $centralResult = $centralStmt->execute([
                     $data['date'],
                     $data['time'], 
                     $data['product_name'],

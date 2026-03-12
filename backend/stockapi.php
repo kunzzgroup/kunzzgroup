@@ -298,7 +298,6 @@ function handleGet() {
             }
             
             sendResponse(true, "汇总数据获取成功", $summary);
-            break;
             
         case 'single':
             // 获取单条记录
@@ -317,7 +316,6 @@ function handleGet() {
             } else {
                 sendResponse(false, "记录不存在");
             }
-            break;
             
         case 'suppliers':
             // 获取所有供应商列表
@@ -326,7 +324,6 @@ function handleGet() {
             $suppliers = $stmt->fetchAll(PDO::FETCH_COLUMN);
             
             sendResponse(true, "供应商列表获取成功", $suppliers);
-            break;
             
         case 'products':
             // 获取所有产品列表
@@ -335,7 +332,6 @@ function handleGet() {
             $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
             sendResponse(true, "产品列表获取成功", $products);
-            break;
             
         default:
             sendResponse(false, "无效的操作");

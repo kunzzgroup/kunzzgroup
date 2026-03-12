@@ -754,7 +754,7 @@ function handlePut() {
                                     ORDER BY id DESC LIMIT 1";
                 
                 $centralStmt = $pdo->prepare($centralUpdateSql);
-                $centralStmt->execute([
+                $centralResult = $centralStmt->execute([
                     $data['date'],
                     $data['time'], 
                     $data['product_name'],

@@ -83,8 +83,4 @@ if ($result->num_rows === 1) {
     echo "<script>alert('该账号不存在'); window.location.href='login.html';</script>";
     exit();
 }
-
-$stmt->close();
-$conn->close();
-ob_end_flush();
 ?>

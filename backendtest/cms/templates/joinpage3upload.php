@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<?php $language = $isEnglish ? 'en' : 'zh'; ?>
 <html lang="zh">
 <head>
     <link rel="icon" type="image/png" href="../images/images/logo.png">

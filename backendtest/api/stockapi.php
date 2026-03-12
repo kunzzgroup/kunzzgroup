@@ -233,37 +233,6 @@ function handleGet() {
             }
             break;
             
-        case 'summary':
-            // 获取汇总数据
-            $startDate = $_GET['start_date'] ?? null;
-            $endDate = $_GET['end_date'] ?? null;
-            
-            $sql = "SELECT 
-                        COUNT(*) as total_records,
-                        COUNT(DISTINCT product_code) as total_products,
-                        COUNT(DISTINCT supplier) as total_suppliers,
-                        COUNT(CASE WHEN approver IS NOT NULL AND approver != '' THEN 1 END) as approved_count,
-                        COUNT(CASE WHEN approver IS NULL OR approver = '' THEN 1 END) as pending_count
-                    FROM stock_data WHERE 1=1";
-            $params = [];
-            
-            if ($startDate && $endDate) {
-                $sql .= " AND date BETWEEN ? AND ?";
-                $params[] = $startDate;
-                $params[] = $endDate;
-            }
-            
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute($params);
-            $summary = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            // 格式化数据
-            $summary['total_value'] = floatval($summary['total_value']);
-            $summary['avg_price'] = floatval($summary['avg_price']);
-            
-            sendResponse(true, "汇总数据获取成功", $summary);
-            break;
-            
         case 'single':
             // 获取单条记录
             $id = $_GET['id'] ?? null;
@@ -281,7 +250,6 @@ function handleGet() {
             } else {
                 sendResponse(false, "记录不存在");
             }
-            break;
             
         case 'suppliers':
             // 获取所有供应商列表
@@ -290,7 +258,6 @@ function handleGet() {
             $suppliers = $stmt->fetchAll(PDO::FETCH_COLUMN);
             
             sendResponse(true, "供应商列表获取成功", $suppliers);
-            break;
             
         case 'products':
             // 获取所有产品列表
@@ -299,7 +266,6 @@ function handleGet() {
             $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
             sendResponse(true, "产品列表获取成功", $products);
-            break;
 
         case 'summary':
             // 获取汇总数据
@@ -334,7 +300,6 @@ function handleGet() {
             }
             
             sendResponse(true, "汇总数据获取成功", $summary);
-            break;
             
         default:
             sendResponse(false, "无效的操作");

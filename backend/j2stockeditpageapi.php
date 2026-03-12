@@ -78,6 +78,8 @@ switch ($method) {
 // 处理 GET 请求 - 获取数据
 function handleGet() {
     global $pdo;
+    $productName = '';
+    $price = 0;
     
     $action = $_GET['action'] ?? 'list';
 
@@ -172,7 +174,6 @@ function handleGet() {
             } catch (PDOException $e) {
                 sendResponse(false, "查询数据失败：" . $e->getMessage());
             }
-            break;
             
         case 'summary':
             // 获取汇总数据
@@ -208,7 +209,6 @@ function handleGet() {
             }
             
             sendResponse(true, "汇总数据获取成功", $summary);
-            break;
             
         case 'single':
             // 获取单条记录
@@ -216,7 +216,6 @@ function handleGet() {
             if (!$id) {
                 sendResponse(false, "缺少记录ID");
             }
-            
             $stmt = $pdo->prepare("SELECT * FROM j2stockedit_data WHERE id = ?");
             $stmt->execute([$id]);
             $record = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -226,7 +225,6 @@ function handleGet() {
             } else {
                 sendResponse(false, "记录不存在");
             }
-            break;
             
         case 'suppliers':
             // 获取所有供应商列表
@@ -235,7 +233,6 @@ function handleGet() {
             $suppliers = $stmt->fetchAll(PDO::FETCH_COLUMN);
             
             sendResponse(true, "供应商列表获取成功", $suppliers);
-            break;
             
         case 'products':
             // 获取所有产品列表
@@ -253,7 +250,6 @@ function handleGet() {
             $codeNumbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
             sendResponse(true, "编号列表获取成功", $codeNumbers);
-            break;
 
         case 'product_by_code':
             // 根据code_number获取对应的product_name、specification、supplier和category
@@ -702,6 +698,7 @@ function handleApprove() {
 // 处理 PUT 请求 - 更新记录
 function handlePut() {
     global $pdo, $data;
+    $centralResult = false;
     
     if (!$data || !isset($data['id'])) {
         sendResponse(false, "缺少记录ID");

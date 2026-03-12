@@ -702,6 +702,7 @@ function handleApprove() {
 // 处理 PUT 请求 - 更新记录
 function handlePut() {
     global $pdo, $data;
+    $centralResult = false;
     
     if (!$data || !isset($data['id'])) {
         sendResponse(false, "缺少记录ID");

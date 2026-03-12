@@ -79,9 +79,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: login.php?error=account_not_found");
         exit();
     }
-
-    $stmt->close();
-    $conn->close();
 }
 // Render Page (GET)
 ?>

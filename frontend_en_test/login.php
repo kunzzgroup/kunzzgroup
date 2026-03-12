@@ -77,9 +77,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo "<script>alert('Account does not exist'); window.location.href='login.php';</script>";
         exit();
     }
-
-    $stmt->close();
-    $conn->close();
 }
 ?>
 
