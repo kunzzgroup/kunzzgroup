@@ -84,7 +84,7 @@ try {
     $mail->send();
     echo json_encode(["success" => true, "message" => "验证码已发送到邮箱，请查收"]);
 
-} catch (Exception $e) {
+} catch (\Exception $e) {
     error_log('[tokyosend_verification] SMTP Error: ' . $e->getMessage());
     echo json_encode(["success" => false, "message" => "邮件发送失败，请稍后重试"]);
 }

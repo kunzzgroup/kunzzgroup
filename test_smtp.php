@@ -36,7 +36,7 @@ try {
     $mail->send();
     echo "</pre><br><b style='color:green'>✅ 发送成功！请检查收件箱和垃圾邮件。</b>";
 
-} catch (Exception $e) {
+} catch (\Exception $e) {
     echo "</pre><br><b style='color:red'>❌ 错误：" . htmlspecialchars($mail->ErrorInfo) . "</b>";
 }
 ?>

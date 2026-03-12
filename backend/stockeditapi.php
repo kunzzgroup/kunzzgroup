@@ -904,8 +904,7 @@ function handleGet() {
             
             fclose($output);
             exit; // 重要：退出脚本，避免额外输出
-            break;
-
+        
         case 'remark_numbers':
             // 获取所有唯一的备注编号
             $stmt = $pdo->prepare("SELECT DISTINCT remark_number FROM stockinout_data WHERE remark_number IS NOT NULL AND remark_number != '' ORDER BY remark_number");

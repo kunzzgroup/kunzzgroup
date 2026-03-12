@@ -194,7 +194,7 @@ echo "UPDATE schedule_employees SET restaurant = 'J3' WHERE id IN (4, 5, 6);";
 echo "</pre>";
 echo "</li>";
 echo "<li><strong>方案2：为J2、J3重新添加员工</strong><br>";
-echo "在页面上选择J2餐厅，然后通过"员工管理"添加新员工，这些员工会自动属于J2。";
+echo "在页面上选择J2餐厅，然后通过'员工管理'添加新员工，这些员工会自动属于J2。";
 echo "</li>";
 echo "</ol>";
 echo "</div>";

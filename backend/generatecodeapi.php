@@ -110,7 +110,7 @@ try {
             ]);
             break;
     }
-} catch (Exception $e) {
+} catch (\Exception $e) {
     echo json_encode([
         'success' => false,
         'message' => '服务器错误: ' . $e->getMessage()

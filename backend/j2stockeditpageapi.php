@@ -137,7 +137,7 @@ function handleGet() {
             $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10000;
             $sql .= " LIMIT " . $limit;
             
-            error_log("J2 DEBUG stock by price: [productName=$productName] [price=$price]"); $stmt = $pdo->prepare($sql);
+            $stmt = $pdo->prepare($sql);
             try {
                 $stmt->execute($params);
                 $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -198,7 +198,7 @@ function handleGet() {
                 $params[] = $endDate;
             }
             
-            error_log("J2 DEBUG stock by price: [productName=$productName] [price=$price]"); $stmt = $pdo->prepare($sql);
+            $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
             $summary = $stmt->fetch(PDO::FETCH_ASSOC);
             
@@ -330,7 +330,7 @@ function handleGet() {
                 WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND in_quantity > 0
                 ORDER BY price DESC";
             
-            error_log("J2 DEBUG stock by price: [productName=$productName] [price=$price]"); $stmt = $pdo->prepare($sql);
+            $stmt = $pdo->prepare($sql);
             $stmt->execute([$productName, $productName]);
             $prices = $stmt->fetchAll(PDO::FETCH_COLUMN);
             
@@ -352,7 +352,7 @@ function handleGet() {
                     FROM j2stockedit_data
                     WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&'))";
             
-            error_log("J2 DEBUG stock by price: [productName=$productName] [price=$price]"); $stmt = $pdo->prepare($sql);
+            $stmt = $pdo->prepare($sql);
             $stmt->execute([$productName, $productName]);
             $stockData = $stmt->fetch(PDO::FETCH_ASSOC);
             
@@ -395,7 +395,7 @@ function handleGet() {
                     FROM j2stockedit_data
                     WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND price = ?";
             
-            error_log("J2 DEBUG stock by price: [productName=$productName] [price=$price]"); $stmt = $pdo->prepare($sql);
+            error_log("J2 DEBUG stock by price: [productName=" . ($productName ?? 'null') . "] [price=" . ($price ?? 'null') . "]"); $stmt = $pdo->prepare($sql);
             $stmt->execute([$productName, $productName, $price]);
             $stockData = $stmt->fetch(PDO::FETCH_ASSOC);
             
@@ -452,7 +452,7 @@ function handleGet() {
                         HAVING available_stock > 0
                         ORDER BY price DESC";
                 
-                error_log("J2 DEBUG stock by price: [productName=$productName] [price=$price]"); $stmt = $pdo->prepare($sql);
+                $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
                 $priceStockData = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 
@@ -783,7 +783,7 @@ function handlePut() {
                                     ORDER BY id DESC LIMIT 1";
                 
                 $centralStmt = $pdo->prepare($centralUpdateSql);
-                $centralStmt->execute([
+                $centralResult = $centralStmt->execute([
                     $data['date'],
                     $data['time'], 
                     $data['product_name'],

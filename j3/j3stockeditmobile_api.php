@@ -121,7 +121,7 @@ switch ($method) {
 
 // 处理 GET 请求
 function handleGet() {
-    global $pdo;
+    global $pdo, $dbname, $dbuser;
     
     $action = $_GET['action'] ?? 'list';
 
