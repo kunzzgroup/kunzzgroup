@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 if (!headers_sent()) {
     header("Cache-Control: max-age=0, no-cache, no-store, must-revalidate, proxy-revalidate");
     header("Pragma: no-cache");
@@ -519,6 +519,11 @@ function handlePost() {
     }
     
     try {
+        if (($data['action'] ?? '') === 'batch_save') {
+             handleBatchSave();
+             return;
+        }
+
         // 开始事务
         $pdo->beginTransaction();
         
@@ -863,6 +868,103 @@ function handleDelete() {
         
     } catch (PDOException $e) {
         sendResponse(false, "删除记录失败：" . $e->getMessage());
+    }
+}
+
+/**
+ * 处理批量保存请求 (J1)
+ * 预期负载结构: { "action": "batch_save", "document_date": "YYYY-MM-DD", "rows": [...] }
+ */
+function handleBatchSave() {
+    global $pdo, $data;
+    
+    $documentDate = $data['document_date'] ?? null;
+    $rows = $data['rows'] ?? [];
+    
+    if (!$documentDate) {
+        sendResponse(false, "缺少文件日期 (document_date)");
+    }
+    
+    if (empty($rows)) {
+        sendResponse(false, "没有需要保存的数据行");
+    }
+    
+    try {
+        $pdo->beginTransaction();
+        
+        $sql = "INSERT INTO j1stockedit_data 
+                (date, time, product_name, in_quantity, out_quantity, specification, price, code_number, remark, receiver, target_system, type) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $pdo->prepare($sql);
+        
+        $centralSql = "INSERT INTO stockinout_data 
+                      (date, time, product_name, in_quantity, out_quantity, specification, price, code_number, remark, receiver, target_system) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $centralStmt = $pdo->prepare($centralSql);
+
+        $successCount = 0;
+        foreach ($rows as $index => $row) {
+            // 验证每行的必填字段
+            $required = ['time', 'product_name', 'receiver'];
+            foreach ($required as $field) {
+                if (empty($row[$field])) {
+                    $rowNum = $index + 1;
+                    throw new Exception("第 {$rowNum} 行缺少必填字段：{$field}");
+                }
+            }
+
+            // 处理类型转换
+            $type = $row['type'] ?? null;
+            if ($type === 'Drinks' || strtolower($type) === 'drinks') {
+                $type = 'Service Line';
+            }
+            
+            // 写入 J1 数据库表
+            $stmt->execute([
+                $documentDate,
+                $row['time'],
+                $row['product_name'],
+                $row['in_quantity'] ?? 0,
+                $row['out_quantity'] ?? 0,
+                $row['specification'] ?? null,
+                $row['price'] ?? 0,
+                $row['code_number'] ?? null,
+                $row['remark'] ?? null,
+                $row['receiver'] ?? null,
+                'j1',
+                $type
+            ]);
+            
+            $newId = $pdo->lastInsertId();
+            $successCount++;
+
+            // 如果 target_system 是 Central，则同步保存
+            $targetSystem = $row['target_system'] ?? 'j1';
+            if (strtolower($targetSystem) === 'central') {
+                $centralStmt->execute([
+                    $documentDate,
+                    $row['time'],
+                    $row['product_name'],
+                    floatval($row['out_quantity'] ?? 0),
+                    0,
+                    $row['specification'] ?? null,
+                    floatval($row['price'] ?? 0),
+                    $row['code_number'] ?? null,
+                    $row['remark'] ?? null,
+                    $row['receiver'] ?? null,
+                    'central'
+                ]);
+            }
+        }
+        
+        $pdo->commit();
+        sendResponse(true, "J1 批量保存成功，共保存 {$successCount} 条记录");
+        
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        sendResponse(false, "J1 批量保存失败：" . $e->getMessage());
     }
 }
 ?>

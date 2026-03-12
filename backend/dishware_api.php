@@ -897,7 +897,10 @@ function addBreakRecord() {
         $chargeable = isset($postData['chargeable_quantity']) ? (int) $postData['chargeable_quantity'] : null;
         $chargeable = $chargeable !== null ? $chargeable : (int) $postData['break_quantity'];
         $total_price = $unit_price * $chargeable;
-        $break_date = $postData['break_date'] ?? date('Y-m-d');
+        $break_date = $postData['break_date'] ?? null;
+        if (empty($break_date)) {
+            throw new Exception("缺少破损日期 (break_date)");
+        }
         
         $sql = "INSERT INTO dishware_break_records (dishware_id, shop_type, break_quantity, chargeable_quantity, unit_price, total_price, break_date, recorded_by) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -1727,7 +1730,10 @@ function addSetBreakRecord() {
         // 插入破损记录
         $unit_price = $postData['unit_price'] ?? $set['set_price'];
         $total_price = $unit_price * $postData['break_quantity'];
-        $break_date = $postData['break_date'] ?? date('Y-m-d');
+        $break_date = $postData['break_date'] ?? null;
+        if (empty($break_date)) {
+            throw new Exception("缺少日期参数 (break_date)");
+        }
         
         $sql = "INSERT INTO dishware_set_break_records (set_id, shop_type, break_quantity, unit_price, total_price, break_date, recorded_by) 
                 VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -2222,7 +2228,10 @@ function addTransferRecord() {
     $to_shop_type = $postData['to_shop_type'] ?? '';
     $quantity = $postData['quantity'] ?? 0;
     $unit_price = $postData['unit_price'] ?? 0;
-    $transfer_date = $postData['transfer_date'] ?? date('Y-m-d');
+    $transfer_date = $postData['transfer_date'] ?? null;
+    if (empty($transfer_date)) {
+        sendResponse(false, "缺少转移日期 (transfer_date)");
+    }
     
     if (empty($dishware_id) || empty($from_shop_type) || empty($to_shop_type) || $quantity <= 0) {
         sendResponse(false, "缺少必要参数");

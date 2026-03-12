@@ -7680,103 +7680,103 @@ async function batchSaveNewRows() {
         return;
     }
 
+    // 提取所有行数据并寻找统一的 document_date
+    const rowsData = [];
+    let commonDate = null;
+    
+    try {
+        for (const row of newRows) {
+            const rowId = row.querySelector('input').id.split('-')[0] + '-' + row.querySelector('input').id.split('-')[1];
+            
+            // 获取各行的基本数据
+            const codeInput = document.getElementById(`${rowId}-code_number-input`);
+            const productInput = document.getElementById(`${rowId}-product_name-input`);
+            const receiverInput = document.getElementById(`${rowId}-receiver-input`);
+            
+            const rowDate = document.getElementById(`${rowId}-date`) ? document.getElementById(`${rowId}-date`).value : '';
+            if (!commonDate && rowDate) commonDate = rowDate; // 使用第一行日期作为基准
+
+            const data = {
+                time: new Date().toTimeString().slice(0, 5),
+                product_name: productInput ? productInput.value : '',
+                in_quantity: parseFloat(document.getElementById(`${rowId}-in-qty`) ? document.getElementById(`${rowId}-in-qty`).value : 0) || 0,
+                out_quantity: parseFloat(document.getElementById(`${rowId}-out-qty`) ? document.getElementById(`${rowId}-out-qty`).value : 0) || 0,
+                specification: document.getElementById(`${rowId}-specification`) ? document.getElementById(`${rowId}-specification`).value : '',
+                price: (() => {
+                    const hiddenInput = document.getElementById(`${rowId}-price`);
+                    const priceSelect = document.getElementById(`${rowId}-price-select`);
+                    if (hiddenInput && hiddenInput.value !== '') return hiddenInput.value;
+                    if (priceSelect && priceSelect.value !== '' && priceSelect.value !== 'manual') return priceSelect.value;
+                    return hiddenInput ? hiddenInput.value : 0;
+                })(),
+                receiver: receiverInput ? receiverInput.value : '',
+                code_number: codeInput ? codeInput.value : '',
+                remark: document.getElementById(`${rowId}-remark`) ? document.getElementById(`${rowId}-remark`).value : '',
+                product_remark_checked: document.getElementById(`${rowId}-product-remark`) ? document.getElementById(`${rowId}-product-remark`).checked : false,
+                remark_number: document.getElementById(`${rowId}-remark-number`) ? document.getElementById(`${rowId}-remark-number`).value.trim().toUpperCase() : '',
+                target_system: document.getElementById(`${rowId}-target`) ? document.getElementById(`${rowId}-target`).value : ''
+            };
+
+            // 基本验证
+            if (!data.product_name || !data.specification || !data.receiver) {
+                throw new Error('请确保所有行都填写了货品名称、规格单位和收货人');
+            }
+            if (data.in_quantity < 0 || data.out_quantity < 0) {
+                throw new Error('行记录中存在负数数量');
+            }
+            if (data.in_quantity <= 0 && data.out_quantity <= 0) {
+                throw new Error('每行记录必须至少填入一项进货或出货数量');
+            }
+
+            rowsData.push(data);
+        }
+    } catch (error) {
+        showAlert(error.message, 'error');
+        return;
+    }
+
+    if (!commonDate) {
+        showAlert('无法确定文件日期', 'error');
+        return;
+    }
+
     const batchSaveBtn = document.getElementById('batch-save-btn');
     const originalText = batchSaveBtn.innerHTML;
     batchSaveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
     batchSaveBtn.disabled = true;
 
-    let successCount = 0;
-    let failCount = 0;
-    const failedRows = []; // 记录失败的行
-    const errorMessages = []; // 记录错误信息
-
     try {
-        // 将新行转换为数组以避免 NodeList 引用问题
-        const rowsArray = Array.from(newRows);
+        const payload = {
+            action: 'batch_save',
+            document_date: commonDate,
+            rows: rowsData
+        };
 
-        // 遍历所有新行并保存（传入 skipTableRefresh=true）
-        for (let i = 0; i < rowsArray.length; i++) {
-            const row = rowsArray[i];
-            try {
-                const saveBtn = row.querySelector('.save-new-btn');
-                if (saveBtn) {
-                    // 调用保存函数，跳过表格刷新
-                    await saveNewRowRecord(saveBtn, true);
-                    successCount++;
-                    // 等待一小段时间，避免请求过快
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
-            } catch (error) {
-                console.error('保存行时出错:', error);
-                failCount++;
+        const response = await fetch(API_BASE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
 
-                // 克隆失败的行并保存数据
-                const clonedRow = row.cloneNode(true);
-                const rowData = extractRowData(row);
-                failedRows.push({
-                    element: clonedRow,
-                    data: rowData
-                });
+        const result = await response.json();
 
-                // 获取行的货品名称用于错误提示
-                const rowId = row.querySelector('input').id.split('-')[0] + '-' + row.querySelector('input').id.split('-')[1];
-                const productInput = document.getElementById(`${rowId}-product_name-input`);
-                const productName = productInput ? productInput.value || `第 ${i + 1} 行` : `第 ${i + 1} 行`;
-
-                errorMessages.push(`${productName}: ${error.message}`);
-            }
-        }
-
-        // 批量保存完成后，一次性重新渲染表格
-        renderStockTable();
-        updateStats();
-
-        // 恢复失败的行
-        if (failedRows.length > 0) {
-            setTimeout(() => {
-                const tbody = document.getElementById('stock-tbody');
-                failedRows.forEach(({ element, data }) => {
-                    // 标记失败的行（添加视觉提示）
-                    element.style.backgroundColor = '#fee';
-                    element.classList.add('validation-failed');
-                    tbody.appendChild(element);
-
-                    // 恢复行数据
-                    if (data) {
-                        restoreRowData(element, data);
-                    }
-
-                    // 添加事件监听，当用户修改内容时清除失败标记
-                    const inputs = element.querySelectorAll('input, select');
-                    inputs.forEach(input => {
-                        input.addEventListener('input', function () {
-                            element.style.backgroundColor = '';
-                            element.classList.remove('validation-failed');
-                        }, { once: true });
-                    });
-                });
-                bindComboboxEvents();
-                updateBatchSaveButtonVisibility();
-            }, 100);
-        }
-
-        // 显示结果
-        if (failCount === 0) {
-            showAlert(`成功保存 ${successCount} 条记录`, 'success');
-        } else if (successCount === 0) {
-            showAlert(`保存失败，所有记录都有问题：\n${errorMessages.join('\n')}`, 'error');
-        } else {
-            showAlert(`保存完成：成功 ${successCount} 条，失败 ${failCount} 条\n失败原因：\n${errorMessages.slice(0, 3).join('\n')}${errorMessages.length > 3 ? '\n...' : ''}`, 'warning');
-        }
-
-        // 更新按钮可见性
-        if (failCount === 0) {
+        if (result.success) {
+            showAlert(result.message || `成功保存 ${rowsData.length} 条记录`, 'success');
+            
+            // 成功后清空所有新行并重新加载
+            const tbody = document.getElementById('stock-tbody');
+            newRows.forEach(row => row.remove());
+            
+            await searchData(); // 刷新表格数据
+            updateStats();
             updateBatchSaveButtonVisibility();
+        } else {
+            showAlert(`保存失败：${result.message}`, 'error');
         }
 
     } catch (error) {
-        showAlert('批量保存时发生错误', 'error');
         console.error('批量保存错误:', error);
+        showAlert('批量保存时发生网络连接或解析错误', 'error');
     } finally {
         batchSaveBtn.innerHTML = originalText;
         batchSaveBtn.disabled = false;

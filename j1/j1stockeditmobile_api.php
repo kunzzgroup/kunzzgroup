@@ -103,6 +103,10 @@ switch ($method) {
         handleGet();
         break;
     case 'POST':
+        if (($data['action'] ?? '') === 'batch_save') {
+             handleBatchSave();
+             return;
+        }
         handlePost();
         break;
     case 'PUT':
@@ -771,4 +775,70 @@ function updateStocklistTotal($productName, $codeNumber, $inQty, $outQty, $isAdd
     }
 }
 
+/**
+ * 处理移动端批量保存请求 (J1)
+ * 预期负载结构: { "action": "batch_save", "document_date": "YYYY-MM-DD", "rows": [...] }
+ */
+function handleBatchSave() {
+    global $pdo, $data;
+    
+    $documentDate = $data['document_date'] ?? null;
+    $rows = $data['rows'] ?? [];
+    
+    if (!$documentDate) {
+        sendResponse(false, "缺少文件日期 (document_date)");
+    }
+    
+    if (empty($rows)) {
+        sendResponse(false, "没有需要保存的数据行");
+    }
+    
+    try {
+        $pdo->beginTransaction();
+        
+        $successCount = 0;
+        foreach ($rows as $index => $row) {
+            if (empty($row['time']) || empty($row['product_name'])) {
+                throw new Exception("第 " . ($index + 1) . " 行缺少必填字段");
+            }
+
+            // 1. 插入到移动端流水表
+            $sql = "INSERT INTO j1stockeditmobile_data 
+                    (date, time, product_name, code_number, in_quantity, out_quantity, receiver) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                $documentDate,
+                $row['time'],
+                $row['product_name'],
+                $row['code_number'] ?? null,
+                floatval($row['in_quantity'] ?? 0),
+                floatval($row['out_quantity'] ?? 0),
+                $row['receiver'] ?? 'Mobile'
+            ]);
+            
+            $newMobileId = $pdo->lastInsertId();
+            
+            // 2. 更新库存总数
+            updateStocklistTotal($row['product_name'], $row['code_number'] ?? null, floatval($row['in_quantity'] ?? 0), floatval($row['out_quantity'] ?? 0), true);
+            
+            // 3. 同步到桌面端主表
+            $syncData = $row;
+            $syncData['date'] = $documentDate;
+            $syncData['mobile_ref_id'] = $newMobileId;
+            syncToJ1StockEditData($pdo, $syncData, 'insert');
+            
+            $successCount++;
+        }
+        
+        $pdo->commit();
+        sendResponse(true, "J1 移动端批量保存成功，共保存 {$successCount} 条记录");
+        
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        sendResponse(false, "J1 移动端批量保存失败：" . $e->getMessage());
+    }
+}
 ?>

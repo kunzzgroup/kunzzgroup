@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/xss_protect.php';
 ob_start();
 header("Content-Type: application/json");
@@ -966,6 +966,11 @@ function handlePost() {
     }
     
     try {
+        if (($data['action'] ?? '') === 'batch_save') {
+            handleBatchSave();
+            return;
+        }
+
         // 开始事务
         $pdo->beginTransaction();
         
@@ -1092,6 +1097,92 @@ function handlePost() {
         $pdo->rollBack();
         error_log("一般错误: " . $e->getMessage());
         sendResponse(false, "添加记录失败：" . $e->getMessage());
+    }
+}
+
+/**
+ * 处理批量保存请求
+ * 预期负载结构: { "action": "batch_save", "document_date": "YYYY-MM-DD", "rows": [...] }
+ */
+function handleBatchSave() {
+    global $pdo, $data;
+    
+    $documentDate = $data['document_date'] ?? null;
+    $rows = $data['rows'] ?? [];
+    
+    if (!$documentDate) {
+        sendResponse(false, "缺少文件日期 (document_date)");
+    }
+    
+    if (empty($rows)) {
+        sendResponse(false, "没有需要保存的数据行");
+    }
+    
+    try {
+        $pdo->beginTransaction();
+        
+        $sql = "INSERT INTO stockinout_data 
+                (date, time, product_name, receiver, in_quantity, out_quantity, 
+                specification, price, code_number, remark, target_system, product_remark_checked, remark_number) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $pdo->prepare($sql);
+        
+        $successCount = 0;
+        foreach ($rows as $index => $row) {
+            // 验证每行的必填字段 (除了日期，统一使用 documentDate)
+            $required = ['time', 'product_name', 'receiver'];
+            foreach ($required as $field) {
+                if (empty($row[$field])) {
+                    $rowNum = $index + 1;
+                    throw new Exception("第 {$rowNum} 行缺少必填字段：{$field}");
+                }
+            }
+            
+            $stmt->execute([
+                $documentDate, // 强制使用联合日期
+                $row['time'],
+                $row['product_name'],
+                $row['receiver'],
+                $row['in_quantity'] ?? 0,
+                $row['out_quantity'] ?? 0,
+                $row['specification'] ?? null,
+                $row['price'] ?? 0,
+                $row['code_number'] ?? null,
+                $row['remark'] ?? null,
+                $row['target_system'] ?? null,
+                $row['product_remark_checked'] ?? 0,
+                $row['remark_number'] ?? ''
+            ]);
+            
+            $newId = $pdo->lastInsertId();
+            $successCount++;
+            
+            // 处理出库记录同步到子系统逻辑
+            $outQty = floatval($row['out_quantity'] ?? 0);
+            if ($outQty > 0) {
+                $targetSystem = $row['target_system'] ?? 'j1';
+                // 构造子系统同步所需的完整数据（包含日期）
+                $syncData = array_merge($row, ['date' => $documentDate]);
+                
+                if ($targetSystem === 'j1') {
+                    saveToJ1Table($pdo, $syncData, $newId);
+                    saveToJ1EditTable($pdo, $syncData, $newId);
+                } elseif ($targetSystem === 'j2') {
+                    saveToJ2Table($pdo, $syncData, $newId);
+                    saveToJ2EditTable($pdo, $syncData, $newId);
+                } elseif ($targetSystem === 'j3') {
+                    saveToJ3Table($pdo, $syncData, $newId);
+                    saveToJ3EditTable($pdo, $syncData, $newId);
+                }
+            }
+        }
+        
+        $pdo->commit();
+        sendResponse(true, "批量保存成功，共保存 {$successCount} 条记录");
+        
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        sendResponse(false, "批量保存失败：" . $e->getMessage());
     }
 }
 
