@@ -633,7 +633,7 @@ if (isset($_SESSION['user_id'])) {
                             step="0.01"
                             data-id="${item.id}"
                             data-original="${item.original_qty}"
-                            onchange="updateQty(${item.id}, this.value)"
+                            onchange="updateQty('${item.id}', this.value)"
                             onfocus="this.select()"
                             ${isEditing ? '' : 'readonly'}
                             style="border: none; background: transparent; font-size: 13px; padding: 2px 4px; width: 100%; max-width: 42px; text-align: right; pointer-events: ${isEditing ? 'auto' : 'none'}; ${isEditing ? 'background: #fff; border: 1px solid #583e04; border-radius: 4px;' : ''}"
@@ -641,10 +641,10 @@ if (isset($_SESSION['user_id'])) {
                     </td>
                     <td class="actions" style="width: 35px !important; min-width: 35px !important; max-width: 35px !important; padding: 8px 2px !important;">
                         ${isEditing ? 
-                            `<button class="edit-button" onclick="saveRecord(${item.id})" title="保存" style="background: #2aa745;">
+                            `<button class="edit-button" onclick="saveRecord('${item.id}')" title="保存" style="background: #2aa745;">
                                 <img src="../images/icons/edit.svg" alt="" aria-hidden="true" style="filter: brightness(0) invert(1);">
                             </button>` :
-                            `<button class="edit-button" onclick="editRecord(${item.id})" title="编辑">
+                            `<button class="edit-button" onclick="editRecord('${item.id}')" title="编辑">
                                 <img src="../images/icons/edit.svg" alt="" aria-hidden="true">
                             </button>`
                         }
