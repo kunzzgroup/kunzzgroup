@@ -700,7 +700,7 @@ function syncToJ2StockEditData($pdo, $data, $operation = 'insert') {
             return $pdo->lastInsertId();
         }
 
-        // 出库：智能分层扣货
+        // 出库：智能分层扣货（并匹配规格）
         $tierParams = [$productName];
         $codeFilter = '';
         if ($codeNumber !== null && $codeNumber !== '') {
@@ -708,11 +708,20 @@ function syncToJ2StockEditData($pdo, $data, $operation = 'insert') {
             $tierParams[] = $codeNumber;
         }
 
+        $specFilter = '';
+        $specIn = $data['specification'] ?? null;
+        if ($specIn === null || $specIn === "" || $specIn === "none") {
+            $specFilter = " AND (specification IS NULL OR specification = '' OR specification = 'none')";
+        } else {
+            $specFilter = " AND specification = ?";
+            $tierParams[] = $specIn;
+        }
+
         $tierStmt = $pdo->prepare(
             "SELECT specification, price, type,
                     (SUM(in_quantity) - SUM(out_quantity)) AS available
              FROM j2stockedit_data
-             WHERE product_name = ? {$codeFilter}
+             WHERE product_name = ? {$codeFilter} {$specFilter}
              AND price IS NOT NULL AND price > 0
              GROUP BY specification, price, type
              HAVING available > 0
@@ -735,8 +744,11 @@ function syncToJ2StockEditData($pdo, $data, $operation = 'insert') {
             $deduct = min(floatval($tier['available']), $remaining);
             $insertStmt->execute([
                 $data['date'], $data['time'], $codeNumber, $productName,
-                $deduct, $tier['specification'], floatval($tier['price']),
-                $tier['type'], $mobileRefId,
+                $deduct,
+                $tier['specification'],
+                floatval($tier['price']),
+                $tier['type'] ?? $data['type'] ?? null,
+                $mobileRefId,
             ]);
             $remaining -= $deduct;
         }
@@ -770,12 +782,14 @@ function updateStocklistTotal($productName, $codeNumber, $inQty, $outQty, $isAdd
     }
     
     try {
-        // 查找或创建库存总数记录 (包含规格条件)
+        // 统一规格处理
+        $specification = ($specification === "none" || $specification === "") ? null : $specification;
+        
         $sql = "SELECT * FROM j2stocklist_total WHERE product_name = ? AND code_number = ? ";
         $params = [$productName, $codeNumber];
         
-        if ($specification === null || $specification === "") {
-            $sql .= " AND (specification IS NULL OR specification = '') ";
+        if ($specification === null) {
+            $sql .= " AND (specification IS NULL OR specification = '' OR specification = 'none') ";
         } else {
             $sql .= " AND specification = ? ";
             $params[] = $specification;
