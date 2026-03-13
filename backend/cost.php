@@ -282,6 +282,21 @@ $avatarLetter = strtoupper($username[0]);
                         </div>
                     </div>
 
+                    <!-- 供应→J2 (仅J1餐厅时显示) -->
+                    <div class="card supply-card">
+                        <div class="card-body">
+                            <div class="cost-card-vertical">
+                                <div class="icon dynamic-color">
+                                    <i class="fas fa-arrow-right"></i>
+                                </div>
+                                <div>
+                                    <p class="cost-label">供应→J2 (RM)</p>
+                                    <p class="cost-value" id="j2-supply">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Grab Food 成本 -->
                     <div class="card">
                         <div class="card-body">
@@ -322,36 +337,6 @@ $avatarLetter = strtoupper($username[0]);
                                 <div>
                                     <p class="cost-label">Shopee Food 成本 (RM)</p>
                                     <p class="cost-value" id="total-shopee-cost">0</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 供应→J2 (仅J1餐厅时显示) -->
-                    <div class="card supply-card">
-                        <div class="card-body">
-                            <div class="cost-card-vertical">
-                                <div class="icon dynamic-color">
-                                    <i class="fas fa-arrow-right"></i>
-                                </div>
-                                <div>
-                                    <p class="cost-label">供应→J2 (RM)</p>
-                                    <p class="cost-value" id="j2-supply">0</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 供应→J3 (仅J1餐厅时显示) -->
-                    <div class="card supply-card">
-                        <div class="card-body">
-                            <div class="cost-card-vertical">
-                                <div class="icon dynamic-color">
-                                    <i class="fas fa-arrow-right"></i>
-                                </div>
-                                <div>
-                                    <p class="cost-label">供应→J3 (RM)</p>
-                                    <p class="cost-value" id="j3-supply">0</p>
                                 </div>
                             </div>
                         </div>

@@ -139,6 +139,26 @@ body {
     border-color: #f99e00;
 }
 
+.cancel-edit-btn {
+    background-color: #6b7280;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+    height: 38px;
+    width: 38px;
+}
+
+.cancel-edit-btn:hover {
+    background-color: #4b5563;
+}
+
 .back-button {
     background-color: #583e04;
     color: white;
