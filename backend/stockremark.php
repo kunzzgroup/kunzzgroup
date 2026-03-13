@@ -8,6 +8,16 @@ if (!headers_sent()) {
 <?php
 // 包含会话验证
 require_once 'session_check.php';
+
+// 服务器端获取系统参数
+$system = isset($_GET['system']) ? $_GET['system'] : 'central';
+$system_names = [
+    'central' => '中央',
+    'j1' => 'J1',
+    'j2' => 'J2',
+    'j3' => 'J3'
+];
+$display_name = isset($system_names[$system]) ? $system_names[$system] : '中央';
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -41,7 +51,7 @@ require_once 'session_check.php';
                     </div>
                 </div>
                 <button class="selector-button" style="justify-content: center;">
-                    <span id="current-stock-type">中央</span>
+                    <span id="current-stock-type"><?php echo $display_name; ?></span>
                 </button>
             </div>
         </div>

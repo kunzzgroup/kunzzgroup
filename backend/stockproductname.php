@@ -48,6 +48,17 @@ if (isset($_SESSION['user_id'])) {
         $currentApplicant = '';
     }
 }
+
+// 服务器端获取系统参数
+$system = isset($_GET['system']) ? $_GET['system'] : 'central';
+$system_names = [
+    'overview' => '总览',
+    'central' => '中央',
+    'j1' => 'J1',
+    'j2' => 'J2',
+    'j3' => 'J3'
+];
+$display_name = isset($system_names[$system]) ? $system_names[$system] : '总览';
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -82,7 +93,7 @@ if (isset($_SESSION['user_id'])) {
                 </div>
                 <div class="system-selector">
                     <button class="selector-button" onclick="toggleSystemSelector()">
-                        <span id="current-system">总览</span>
+                        <span id="current-system"><?php echo $display_name; ?></span>
                         <i class="fas fa-chevron-down"></i>
                     </button>
                     <div class="selector-dropdown" id="system-selector-dropdown">

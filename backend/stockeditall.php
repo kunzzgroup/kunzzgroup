@@ -8,6 +8,16 @@ if (!headers_sent()) {
 <?php
 // 包含会话验证
 require_once 'session_check.php';
+
+// 服务器端获取系统参数
+$system = isset($_GET['system']) ? $_GET['system'] : 'central';
+$system_names = [
+    'central' => '中央',
+    'j1' => 'J1',
+    'j2' => 'J2',
+    'j3' => 'J3'
+];
+$display_name = isset($system_names[$system]) ? $system_names[$system] : '中央';
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -28,7 +38,7 @@ require_once 'session_check.php';
     <div class="container">
         <div class="header">
             <div>
-                <h1 id="page-title">进出货 - 中央</h1>
+                <h1 id="page-title">进出货 - <?php echo $display_name; ?></h1>
             </div>
             <div class="controls">
                 <div class="mobile-selector" id="mobile-selector" style="display: none;">
@@ -55,7 +65,7 @@ require_once 'session_check.php';
                 </div>
                 <div class="system-selector">
                     <button class="selector-button" onclick="toggleStockSelector()">
-                        <span id="current-stock-type">中央</span>
+                        <span id="current-stock-type"><?php echo $display_name; ?></span>
                         <i class="fas fa-chevron-down"></i>
                     </button>
                     <div class="selector-dropdown" id="stock-dropdown">
