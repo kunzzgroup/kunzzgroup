@@ -297,9 +297,12 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                     <tr>
                         <th style="width: 10%;">日期</th>
                         <th style="width: 12%;">销售额</th>
-                        <th style="width: 12%;">饮料成本</th>
-                        <th style="width: 12%;">厨房成本</th>
-                        <th style="width: 12%;">总成本</th>
+                        <th style="width: 10%;">饮料成本</th>
+                        <th style="width: 10%;">厨房成本</th>
+                        <th style="width: 10%;">Grab</th>
+                        <th style="width: 10%;">Foodpanda</th>
+                        <th style="width: 10%;">Shopee</th>
+                        <th style="width: 10%;">总成本</th>
                         <th style="width: 12%;">毛利润</th>
                         <th style="width: 10%;">成本率 (%)</th>
                         <th style="width: 10%;">操作</th>

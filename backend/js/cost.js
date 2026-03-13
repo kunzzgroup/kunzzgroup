@@ -1094,7 +1094,10 @@ function convertToCostFormat(data) {
         const sales = parseFloat(item.sales) || 0;
         const cBeverage = parseFloat(item.c_beverage) || 0;
         const cKitchen = parseFloat(item.c_kitchen) || 0;
-        const cTotal = cBeverage + cKitchen;
+        const cGrab = parseFloat(item.c_grab) || 0;
+        const cFoodpanda = parseFloat(item.c_foodpanda) || 0;
+        const cShopee = parseFloat(item.c_shopee) || 0;
+        const cTotal = cBeverage + cKitchen + cGrab + cFoodpanda + cShopee;
         const grossTotal = sales - cTotal;
         const costPercent = sales > 0 ? (cTotal / sales) * 100 : 0;
 
@@ -1103,6 +1106,9 @@ function convertToCostFormat(data) {
             sales: sales,
             cBeverage: cBeverage,
             cKitchen: cKitchen,
+            cGrab: cGrab,
+            cFoodpanda: cFoodpanda,
+            cShopee: cShopee,
             cTotal: cTotal,
             grossTotal: grossTotal,
             costPercent: costPercent
@@ -1135,6 +1141,9 @@ function fillMissingDates(costData) {
                 sales: 0,
                 cBeverage: 0,
                 cKitchen: 0,
+                cGrab: 0,
+                cFoodpanda: 0,
+                cShopee: 0,
                 cTotal: 0,
                 grossTotal: 0,
                 costPercent: 0
@@ -1166,6 +1175,9 @@ async function updateDashboard() {
             total_sales: filteredData.reduce((sum, item) => sum + item.sales, 0),
             data_total_cost: filteredData.reduce((sum, item) => sum + item.cTotal, 0),
             total_profit: filteredData.reduce((sum, item) => sum + item.grossTotal, 0),
+            total_grab_cost: filteredData.reduce((sum, item) => sum + (item.cGrab || 0), 0),
+            total_foodpanda_cost: filteredData.reduce((sum, item) => sum + (item.cFoodpanda || 0), 0),
+            total_shopee_cost: filteredData.reduce((sum, item) => sum + (item.cShopee || 0), 0),
             total_days: filteredData.length,
             last_stock: parseFloat(summary.last_stock || 0),
             current_stock: parseFloat(summary.current_stock || 0)
@@ -1175,6 +1187,9 @@ async function updateDashboard() {
             total_sales: parseFloat(summary.total_sales || 0),
             data_total_cost: parseFloat(summary.total_cost || 0),
             total_profit: parseFloat(summary.total_profit || 0),
+            total_grab_cost: parseFloat(summary.total_grab_cost || 0),
+            total_foodpanda_cost: parseFloat(summary.total_foodpanda_cost || 0),
+            total_shopee_cost: parseFloat(summary.total_shopee_cost || 0),
             total_days: parseInt(summary.total_days || 0),
             last_stock: parseFloat(summary.last_stock || 0),
             current_stock: parseFloat(summary.current_stock || 0)
@@ -1187,32 +1202,51 @@ async function updateDashboard() {
     let j3Supply = 0;
 
     if (currentRestaurant === 'j1') {
-        // J1: 库存（最后）- 库存（现在）+ 详细数据的总成本 - J2供应 - J3供应
         const supplyData = await loadSupplyData(dateRange.startDate, dateRange.endDate);
         j2Supply = parseFloat(supplyData.j2_supply || 0);
         j3Supply = parseFloat(supplyData.j3_supply || 0);
 
         actualTotalCost = displaySummary.last_stock - displaySummary.current_stock + displaySummary.data_total_cost - j2Supply - j3Supply;
 
-        // 显示供应数据
         document.getElementById('j2-supply').textContent = `${j2Supply.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         document.getElementById('j3-supply').textContent = `${j3Supply.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     } else {
-        // J2/J3/总计: 库存（最后）- 库存（现在）+ 详细数据的总成本
         actualTotalCost = displaySummary.last_stock - displaySummary.current_stock + displaySummary.data_total_cost;
     }
 
-    // 重新计算成本率和毛利润（基于实际总成本）
     displaySummary.total_cost = actualTotalCost;
     displaySummary.avg_cost_percent = displaySummary.total_sales > 0 ?
         (actualTotalCost / displaySummary.total_sales) * 100 : 0;
     displaySummary.total_profit = displaySummary.total_sales - actualTotalCost;
 
-    // 更新显示
-    document.getElementById('total-sales').textContent = `${parseFloat(displaySummary.total_sales || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    document.getElementById('total-cost').textContent = `${parseFloat(actualTotalCost || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    document.getElementById('gross-total').textContent = `${parseFloat(displaySummary.total_profit || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    document.getElementById('cost-percent').textContent = `${parseFloat(displaySummary.avg_cost_percent || 0).toFixed(2)}%`;
+    // 获取动画相关的各项属性
+    const totalSales = displaySummary.total_sales;
+    const totalCost = actualTotalCost;
+    const grossTotal = displaySummary.total_profit;
+    const costPercent = displaySummary.avg_cost_percent;
+    const grabCost = displaySummary.total_grab_cost;
+    const foodpandaCost = displaySummary.total_foodpanda_cost;
+    const shopeeCost = displaySummary.total_shopee_cost;
+
+    // 执行数值动画
+    if (typeof animateValue === 'function') {
+        animateValue("total-sales", totalSales);
+        animateValue("total-cost", totalCost);
+        animateValue("gross-total", grossTotal);
+        animateValue("cost-percent", costPercent, true);
+        animateValue("total-grab-cost", grabCost);
+        animateValue("total-foodpanda-cost", foodpandaCost);
+        animateValue("total-shopee-cost", shopeeCost);
+    } else {
+        document.getElementById('total-sales').textContent = `${totalSales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        document.getElementById('total-cost').textContent = `${totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        document.getElementById('gross-total').textContent = `${grossTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        document.getElementById('cost-percent').textContent = `${costPercent.toFixed(2)}%`;
+        if (document.getElementById('total-grab-cost')) document.getElementById('total-grab-cost').textContent = `${grabCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        if (document.getElementById('total-foodpanda-cost')) document.getElementById('total-foodpanda-cost').textContent = `${foodpandaCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        if (document.getElementById('total-shopee-cost')) document.getElementById('total-shopee-cost').textContent = `${shopeeCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
     document.getElementById('last-stock').textContent = `${parseFloat(displaySummary.last_stock || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     document.getElementById('current-stock').textContent = `${parseFloat(displaySummary.current_stock || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -1532,6 +1566,9 @@ function updateDashboardTable(data) {
                     <td>RM ${item.sales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     <td>RM ${item.cBeverage.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     <td>RM ${item.cKitchen.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td>RM ${(item.cGrab || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td>RM ${(item.cFoodpanda || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td>RM ${(item.cShopee || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     <td>RM ${item.cTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     <td>RM ${item.grossTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     <td>${item.costPercent.toFixed(2)}%</td>

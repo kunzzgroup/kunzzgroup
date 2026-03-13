@@ -311,6 +311,51 @@ $avatarLetter = strtoupper($username[0]);
                             </div>
                         </div>
                     </div>
+
+                    <!-- Grab 成本 -->
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="cost-card-vertical">
+                                <div class="icon dynamic-color">
+                                    <i class="fas fa-shuttle-van"></i>
+                                </div>
+                                <div>
+                                    <p class="cost-label">Grab 成本 (RM)</p>
+                                    <p class="cost-value" id="total-grab-cost">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Foodpanda 成本 -->
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="cost-card-vertical">
+                                <div class="icon dynamic-color">
+                                    <i class="fas fa-bicycle"></i>
+                                </div>
+                                <div>
+                                    <p class="cost-label">Foodpanda 成本 (RM)</p>
+                                    <p class="cost-value" id="total-foodpanda-cost">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shopee 成本 -->
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="cost-card-vertical">
+                                <div class="icon dynamic-color">
+                                    <i class="fas fa-shopping-bag"></i>
+                                </div>
+                                <div>
+                                    <p class="cost-label">Shopee 成本 (RM)</p>
+                                    <p class="cost-value" id="total-shopee-cost">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Main Chart - 全宽显示 -->
@@ -359,6 +404,9 @@ $avatarLetter = strtoupper($username[0]);
                                 <th>销售额</th>
                                 <th>饮料成本</th>
                                 <th>厨房成本</th>
+                                <th>Grab</th>
+                                <th>Foodpanda</th>
+                                <th>Shopee</th>
                                 <th>总成本</th>
                                 <th>毛利润</th>
                                 <th>成本率 (%)</th>

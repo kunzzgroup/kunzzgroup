@@ -30,7 +30,7 @@ let pasteTargetDay = null;
 const editingDays = new Set();
 
 // 货币字段列表
-const currencyFields = ['sales', 'c_beverage', 'c_kitchen'];
+const currencyFields = ['sales', 'c_beverage', 'c_kitchen', 'c_grab', 'c_foodpanda', 'c_shopee'];
 let preservedRowValues = new Map();
 
 if (!availableRestaurants.includes(currentRestaurant)) {
@@ -385,6 +385,30 @@ function generateExcelTable() {
                                 placeholder="0.00" onchange="updateCalculations(${day})" oninput="formatCurrencyInput(this)">
                         </div>
                     </td>
+                    <td>
+                        <div class="input-container">
+                            <span class="currency-prefix">RM</span>
+                            <input type="number" class="excel-input currency-input" data-field="c_grab" data-day="${day}" 
+                                value="${formatCurrencyDisplay(existingData.c_grab)}" min="0" step="0.01" 
+                                placeholder="0.00" onchange="updateCalculations(${day})" oninput="formatCurrencyInput(this)">
+                        </div>
+                    </td>
+                    <td>
+                        <div class="input-container">
+                            <span class="currency-prefix">RM</span>
+                            <input type="number" class="excel-input currency-input" data-field="c_foodpanda" data-day="${day}" 
+                                value="${formatCurrencyDisplay(existingData.c_foodpanda)}" min="0" step="0.01" 
+                                placeholder="0.00" onchange="updateCalculations(${day})" oninput="formatCurrencyInput(this)">
+                        </div>
+                    </td>
+                    <td>
+                        <div class="input-container">
+                            <span class="currency-prefix">RM</span>
+                            <input type="number" class="excel-input currency-input" data-field="c_shopee" data-day="${day}" 
+                                value="${formatCurrencyDisplay(existingData.c_shopee)}" min="0" step="0.01" 
+                                placeholder="0.00" onchange="updateCalculations(${day})" oninput="formatCurrencyInput(this)">
+                        </div>
+                    </td>
                     <td class="calculated-cell" id="c-total-${day}">RM 0.00</td>
                     <td class="calculated-cell" id="gross-total-${day}">RM 0.00</td>
                     <td class="calculated-cell" id="cost-percent-${day}">0%</td>
@@ -598,9 +622,12 @@ function updateCalculations(day) {
     const sales = parseFloat(getInputValue('sales', day)) || 0;
     const cBeverage = parseFloat(getInputValue('c_beverage', day)) || 0;
     const cKitchen = parseFloat(getInputValue('c_kitchen', day)) || 0;
+    const cGrab = parseFloat(getInputValue('c_grab', day)) || 0;
+    const cFoodpanda = parseFloat(getInputValue('c_foodpanda', day)) || 0;
+    const cShopee = parseFloat(getInputValue('c_shopee', day)) || 0;
 
-    // 总成本 = 饮料成本 + 厨房成本
-    const cTotal = cBeverage + cKitchen;
+    // 总成本 = 饮料成本 + 厨房成本 + Grab + Foodpanda + Shopee
+    const cTotal = cBeverage + cKitchen + cGrab + cFoodpanda + cShopee;
     document.getElementById(`c-total-${day}`).textContent = `RM ${cTotal.toFixed(2)}`;
 
     // 毛利润 = 销售额 - 总成本
@@ -632,11 +659,17 @@ function updateInputColors() {
         const sales = getInputValue('sales', day).trim();
         const cBeverage = getInputValue('c_beverage', day).trim();
         const cKitchen = getInputValue('c_kitchen', day).trim();
+        const cGrab = getInputValue('c_grab', day).trim();
+        const cFoodpanda = getInputValue('c_foodpanda', day).trim();
+        const cShopee = getInputValue('c_shopee', day).trim();
 
         let filledKeyFields = 0;
         if (sales && sales !== '0' && sales !== '0.00') filledKeyFields++;
         if (cBeverage && cBeverage !== '0' && cBeverage !== '0.00') filledKeyFields++;
         if (cKitchen && cKitchen !== '0' && cKitchen !== '0.00') filledKeyFields++;
+        if (cGrab && cGrab !== '0' && cGrab !== '0.00') filledKeyFields++;
+        if (cFoodpanda && cFoodpanda !== '0' && cFoodpanda !== '0.00') filledKeyFields++;
+        if (cShopee && cShopee !== '0' && cShopee !== '0.00') filledKeyFields++;
 
         const rowHasKeyData = filledKeyFields >= 1;
 
@@ -675,12 +708,15 @@ function updateMonthStats() {
         const sales = parseFloat(getInputValue('sales', day)) || 0;
         const cBeverage = parseFloat(getInputValue('c_beverage', day)) || 0;
         const cKitchen = parseFloat(getInputValue('c_kitchen', day)) || 0;
+        const cGrab = parseFloat(getInputValue('c_grab', day)) || 0;
+        const cFoodpanda = parseFloat(getInputValue('c_foodpanda', day)) || 0;
+        const cShopee = parseFloat(getInputValue('c_shopee', day)) || 0;
 
-        if (sales > 0 || cBeverage > 0 || cKitchen > 0) {
+        if (sales > 0 || cBeverage > 0 || cKitchen > 0 || cGrab > 0 || cFoodpanda > 0 || cShopee > 0) {
             filledDays++;
         }
 
-        const cTotal = cBeverage + cKitchen;
+        const cTotal = cBeverage + cKitchen + cGrab + cFoodpanda + cShopee;
         const grossTotal = sales - cTotal;
 
         totalSales += sales;
@@ -961,7 +997,11 @@ async function saveAllData() {
             const cBeverage = parseFloat(getInputValue('c_beverage', day)) || 0;
             const cKitchen = parseFloat(getInputValue('c_kitchen', day)) || 0;
 
-            const hasData = cBeverage > 0 || cKitchen > 0;
+            const cGrab = parseFloat(getInputValue('c_grab', day)) || 0;
+            const cFoodpanda = parseFloat(getInputValue('c_foodpanda', day)) || 0;
+            const cShopee = parseFloat(getInputValue('c_shopee', day)) || 0;
+
+            const hasData = cBeverage > 0 || cKitchen > 0 || cGrab > 0 || cFoodpanda > 0 || cShopee > 0;
 
             if (hasData) {
                 const dateStr = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
@@ -970,6 +1010,10 @@ async function saveAllData() {
                     date: dateStr,
                     c_beverage: cBeverage,
                     c_kitchen: cKitchen,
+                    c_grab: parseFloat(getInputValue('c_grab', day)) || 0,
+                    c_foodpanda: parseFloat(getInputValue('c_foodpanda', day)) || 0,
+                    c_shopee: parseFloat(getInputValue('c_shopee', day)) || 0,
+                    c_total: cBeverage + cKitchen + (parseFloat(getInputValue('c_grab', day)) || 0) + (parseFloat(getInputValue('c_foodpanda', day)) || 0) + (parseFloat(getInputValue('c_shopee', day)) || 0),
                     restaurant: currentRestaurant
                 };
 
@@ -1091,6 +1135,10 @@ async function clearDayData(day) {
             date: dateStr,
             c_beverage: 0,
             c_kitchen: 0,
+            c_grab: 0,
+            c_foodpanda: 0,
+            c_shopee: 0,
+            c_total: 0,
             restaurant: currentRestaurant
         };
 
@@ -1113,6 +1161,10 @@ async function clearDayData(day) {
                 date: dateStr,
                 c_beverage: 0,
                 c_kitchen: 0,
+                c_grab: 0,
+                c_foodpanda: 0,
+                c_shopee: 0,
+                c_total: 0,
                 restaurant: currentRestaurant
             };
             result = await apiCall('', {
@@ -1132,7 +1184,7 @@ async function clearDayData(day) {
         }
 
         // 清空输入框（仅成本字段），销售额保持
-        const costFields = ['c_beverage', 'c_kitchen'];
+        const costFields = ['c_beverage', 'c_kitchen', 'c_grab', 'c_foodpanda', 'c_shopee'];
         costFields.forEach(field => {
             const input = document.querySelector(`input[data-field="${field}"][data-day="${day}"]`);
             if (input) input.value = '';

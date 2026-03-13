@@ -222,6 +222,9 @@ function handleGet() {
                                 c.day_name,
                                 c.c_beverage,
                                 c.c_kitchen,
+                                c.c_grab,
+                                c.c_foodpanda,
+                                c.c_shopee,
                                 c.c_total,
                                 COALESCE((k.gross_sales - IFNULL(k.discounts, 0)), 0) as sales
                             FROM " . $rConfig['data_table'] . " c
@@ -257,12 +260,18 @@ function handleGet() {
                             'sales' => 0,
                             'c_beverage' => 0,
                             'c_kitchen' => 0,
+                            'c_grab' => 0,
+                            'c_foodpanda' => 0,
+                            'c_shopee' => 0,
                             'c_total' => 0
                         ];
                     }
                     $dateMap[$date]['sales'] += floatval($record['sales'] ?? 0);
                     $dateMap[$date]['c_beverage'] += floatval($record['c_beverage'] ?? 0);
                     $dateMap[$date]['c_kitchen'] += floatval($record['c_kitchen'] ?? 0);
+                    $dateMap[$date]['c_grab'] += floatval($record['c_grab'] ?? 0);
+                    $dateMap[$date]['c_foodpanda'] += floatval($record['c_foodpanda'] ?? 0);
+                    $dateMap[$date]['c_shopee'] += floatval($record['c_shopee'] ?? 0);
                     $dateMap[$date]['c_total'] += floatval($record['c_total'] ?? 0);
                 }
                 
@@ -294,6 +303,9 @@ function handleGet() {
                                 c.day_name,
                                 c.c_beverage,
                                 c.c_kitchen,
+                                c.c_grab,
+                                c.c_foodpanda,
+                                c.c_shopee,
                                 c.c_total,
                                 0 as sales
                             FROM " . $config['data_table'] . " c
@@ -341,6 +353,9 @@ function handleGet() {
                     'total_sales' => 0,
                     'total_beverage_cost' => 0,
                     'total_kitchen_cost' => 0,
+                    'total_grab_cost' => 0,
+                    'total_foodpanda_cost' => 0,
+                    'total_shopee_cost' => 0,
                     'total_cost' => 0,
                     'total_profit' => 0,
                     'avg_cost_percent' => 0
@@ -356,6 +371,9 @@ function handleGet() {
                                 COUNT(*) as total_days,
                                 SUM(c_beverage) as total_beverage_cost,
                                 SUM(c_kitchen) as total_kitchen_cost,
+                                SUM(c_grab) as total_grab_cost,
+                                SUM(c_foodpanda) as total_foodpanda_cost,
+                                SUM(c_shopee) as total_shopee_cost,
                                 SUM(c_total) as total_cost
                             FROM " . $rConfig['data_table'] . " WHERE 1=1";
                     $costParams = [];
@@ -398,6 +416,9 @@ function handleGet() {
                         $summary['total_sales'] += $totalSales;
                         $summary['total_beverage_cost'] += floatval($costSummary['total_beverage_cost'] ?? 0);
                         $summary['total_kitchen_cost'] += floatval($costSummary['total_kitchen_cost'] ?? 0);
+                        $summary['total_grab_cost'] += floatval($costSummary['total_grab_cost'] ?? 0);
+                        $summary['total_foodpanda_cost'] += floatval($costSummary['total_foodpanda_cost'] ?? 0);
+                        $summary['total_shopee_cost'] += floatval($costSummary['total_shopee_cost'] ?? 0);
                         $summary['total_cost'] += $totalCost;
                         $summary['total_profit'] += $totalProfit;
                     }
@@ -416,6 +437,9 @@ function handleGet() {
                             COUNT(*) as total_days,
                             SUM(c_beverage) as total_beverage_cost,
                             SUM(c_kitchen) as total_kitchen_cost,
+                            SUM(c_grab) as total_grab_cost,
+                            SUM(c_foodpanda) as total_foodpanda_cost,
+                            SUM(c_shopee) as total_shopee_cost,
                             SUM(c_total) as total_cost
                         FROM " . $config['data_table'] . " WHERE 1=1";
                 $costParams = [];
@@ -460,6 +484,9 @@ function handleGet() {
                     'total_sales' => $totalSales,
                     'total_beverage_cost' => floatval($costSummary['total_beverage_cost'] ?? 0),
                     'total_kitchen_cost' => floatval($costSummary['total_kitchen_cost'] ?? 0),
+                    'total_grab_cost' => floatval($costSummary['total_grab_cost'] ?? 0),
+                    'total_foodpanda_cost' => floatval($costSummary['total_foodpanda_cost'] ?? 0),
+                    'total_shopee_cost' => floatval($costSummary['total_shopee_cost'] ?? 0),
                     'total_cost' => $totalCost,
                     'total_profit' => $totalProfit,
                     'avg_cost_percent' => $avgCostPercent
@@ -687,8 +714,8 @@ function handlePost() {
     
     try {
         $sql = "INSERT INTO " . $config['data_table'] . " 
-                (date, day_name, c_beverage, c_kitchen) 
-                VALUES (?, ?, ?, ?)";
+                (date, day_name, c_beverage, c_kitchen, c_grab, c_foodpanda, c_shopee, c_total) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         
         $stmt = $pdo->prepare($sql);
         
@@ -697,7 +724,11 @@ function handlePost() {
             $data['date'],
             $dayName,
             $data['c_beverage'] ?? 0,
-            $data['c_kitchen'] ?? 0
+            $data['c_kitchen'] ?? 0,
+            $data['c_grab'] ?? 0,
+            $data['c_foodpanda'] ?? 0,
+            $data['c_shopee'] ?? 0,
+            $data['c_total'] ?? 0
         ]);
         
         $newId = $pdo->lastInsertId();
@@ -750,6 +781,18 @@ function handlePut() {
         $kitchenValue = (array_key_exists('c_kitchen', $data) && $data['c_kitchen'] !== null && $data['c_kitchen'] !== '')
             ? $data['c_kitchen']
             : ($existing['c_kitchen'] ?? 0);
+        $grabValue = (array_key_exists('c_grab', $data) && $data['c_grab'] !== null && $data['c_grab'] !== '')
+            ? $data['c_grab']
+            : ($existing['c_grab'] ?? 0);
+        $foodpandaValue = (array_key_exists('c_foodpanda', $data) && $data['c_foodpanda'] !== null && $data['c_foodpanda'] !== '')
+            ? $data['c_foodpanda']
+            : ($existing['c_foodpanda'] ?? 0);
+        $shopeeValue = (array_key_exists('c_shopee', $data) && $data['c_shopee'] !== null && $data['c_shopee'] !== '')
+            ? $data['c_shopee']
+            : ($existing['c_shopee'] ?? 0);
+        $totalValue = (array_key_exists('c_total', $data) && $data['c_total'] !== null && $data['c_total'] !== '')
+            ? $data['c_total']
+            : ($existing['c_total'] ?? 0);
 
         // 添加日志记录
         error_log("=== PUT 请求调试 ===");
@@ -759,9 +802,13 @@ function handlePut() {
         error_log("日期: " . $data['date']);
         error_log("饮料成本: " . $beverageValue);
         error_log("厨房成本: " . $kitchenValue);
+        error_log("Grab成本: " . $grabValue);
+        error_log("Foodpanda成本: " . $foodpandaValue);
+        error_log("Shopee成本: " . $shopeeValue);
+        error_log("总成本: " . $totalValue);
         
         $sql = "UPDATE " . $config['data_table'] . " 
-                SET date = ?, day_name = ?, c_beverage = ?, c_kitchen = ?
+                SET date = ?, day_name = ?, c_beverage = ?, c_kitchen = ?, c_grab = ?, c_foodpanda = ?, c_shopee = ?, c_total = ?
                 WHERE id = ?";
         
         $stmt = $pdo->prepare($sql);
@@ -772,6 +819,10 @@ function handlePut() {
             $dayName,
             $beverageValue,
             $kitchenValue,
+            $grabValue,
+            $foodpandaValue,
+            $shopeeValue,
+            $totalValue,
             $data['id']
         ]);
         
