@@ -1963,14 +1963,52 @@ function handleDelete() {
                     $getJ1EditStmt->execute([$recordToDelete['product_name'], $recordToDelete['receiver']]);
                     $j1EditRecordId = $getJ1EditStmt->fetchColumn();
 
-                    if ($j1EditRecordId) {
-                        $j1EditDeleteSql = "DELETE FROM j1stockedit_data WHERE id = ?";
-                        $j1EditDelStmt = $pdo->prepare($j1EditDeleteSql);
-                        $j1EditDelStmt->execute([$j1EditRecordId]);
-                        error_log("已同步删除J1表和J1Edit表记录");
-                    } else {
-                        error_log("未找到对应的J1Edit记录进行删除");
-                    }
+                        if ($j1EditRecordId) {
+                            // 获取要同步扣除的详情
+                            $getJ1DetailSql = "SELECT product_name, code_number, specification, in_quantity, out_quantity FROM j1stockedit_data WHERE id = ?";
+                            $j1Stmt = $pdo->prepare($getJ1DetailSql);
+                            $j1Stmt->execute([$j1EditRecordId]);
+                            $j1Rec = $j1Stmt->fetch(PDO::FETCH_ASSOC);
+
+                            $j1EditDeleteSql = "DELETE FROM j1stockedit_data WHERE id = ?";
+                            $j1EditDelStmt = $pdo->prepare($j1EditDeleteSql);
+                            $j1EditDelStmt->execute([$j1EditRecordId]);
+                            error_log("已同步删除J1表和J1Edit表记录");
+
+                            if ($j1Rec) {
+                                try {
+                                    $inQty = floatval($j1Rec['in_quantity'] ?? 0);
+                                    $outQty = floatval($j1Rec['out_quantity'] ?? 0);
+                                    $netQty = $inQty - $outQty;
+                                    $specMatch = ($j1Rec['specification'] === "none" || $j1Rec['specification'] === "") ? null : $j1Rec['specification'];
+                                    
+                                    $checkSql = "SELECT id, total_qty FROM j1stocklist_total WHERE product_name = ? AND code_number = ? ";
+                                    $checkParams = [$j1Rec['product_name'], $j1Rec['code_number']];
+                                    if ($specMatch === null) {
+                                        $checkSql .= " AND (specification IS NULL OR specification = '' OR specification = 'none') ";
+                                    } else {
+                                        $checkSql .= " AND specification = ? ";
+                                        $checkParams[] = $specMatch;
+                                    }
+                                    $checkStmt = $pdo->prepare($checkSql);
+                                    $checkStmt->execute($checkParams);
+                                    $existingTotal = $checkStmt->fetch(PDO::FETCH_ASSOC);
+                                    if ($existingTotal) {
+                                        $newTotal = floatval($existingTotal['total_qty']) - $netQty;
+                                        if ($newTotal <= 0.0001 && $newTotal >= -0.0001) {
+                                            $pdo->prepare("DELETE FROM j1stocklist_total WHERE id = ?")->execute([$existingTotal['id']]);
+                                        } else {
+                                            $pdo->prepare("UPDATE j1stocklist_total SET total_qty = ?, last_updated = NOW() WHERE id = ?")->execute([$newTotal, $existingTotal['id']]);
+                                        }
+                                        error_log("已同步更新J1移动端库存总表");
+                                    }
+                                } catch (PDOException $e) {
+                                    error_log("同步更新J1移动端库存总表失败: " . $e->getMessage());
+                                }
+                            }
+                        } else {
+                            error_log("未找到对应的J1Edit记录进行删除");
+                        }
                 } elseif ($targetSystem === 'j2') {
                     // 删除J2stockinout_data表记录
                     $j2DeleteSql = "DELETE FROM j2stockinout_data WHERE main_record_id = ?";
@@ -1983,11 +2021,50 @@ function handleDelete() {
                     $getJ2EditStmt->execute([$recordToDelete['product_name'], $recordToDelete['receiver']]);
                     $j2EditRecordId = $getJ2EditStmt->fetchColumn();
 
-                    if ($j2EditRecordId) {
-                        $j2EditDeleteSql = "DELETE FROM j2stockedit_data WHERE id = ?";
-                        $j2EditDelStmt = $pdo->prepare($j2EditDeleteSql);
-                        $j2EditDelStmt->execute([$j2EditRecordId]);
-                    }
+                        if ($j2EditRecordId) {
+                            // 获取细节
+                            $getJ2DetailSql = "SELECT product_name, code_number, specification, in_quantity, out_quantity FROM j2stockedit_data WHERE id = ?";
+                            $j2Stmt = $pdo->prepare($getJ2DetailSql);
+                            $j2Stmt->execute([$j2EditRecordId]);
+                            $j2Rec = $j2Stmt->fetch(PDO::FETCH_ASSOC);
+
+                            $j2EditDeleteSql = "DELETE FROM j2stockedit_data WHERE id = ?";
+                            $j2EditDelStmt = $pdo->prepare($j2EditDeleteSql);
+                            $j2EditDelStmt->execute([$j2EditRecordId]);
+                            error_log("已同步删除J2表和J2Edit表记录");
+
+                            if ($j2Rec) {
+                                try {
+                                    $inQty = floatval($j2Rec['in_quantity'] ?? 0);
+                                    $outQty = floatval($j2Rec['out_quantity'] ?? 0);
+                                    $netQty = $inQty - $outQty;
+                                    $specMatch = ($j2Rec['specification'] === "none" || $j2Rec['specification'] === "") ? null : $j2Rec['specification'];
+                                    
+                                    $checkSql = "SELECT id, total_qty FROM j2stocklist_total WHERE product_name = ? AND code_number = ? ";
+                                    $checkParams = [$j2Rec['product_name'], $j2Rec['code_number']];
+                                    if ($specMatch === null) {
+                                        $checkSql .= " AND (specification IS NULL OR specification = '' OR specification = 'none') ";
+                                    } else {
+                                        $checkSql .= " AND specification = ? ";
+                                        $checkParams[] = $specMatch;
+                                    }
+                                    $checkStmt = $pdo->prepare($checkSql);
+                                    $checkStmt->execute($checkParams);
+                                    $existingTotal = $checkStmt->fetch(PDO::FETCH_ASSOC);
+                                    if ($existingTotal) {
+                                        $newTotal = floatval($existingTotal['total_qty']) - $netQty;
+                                        if ($newTotal <= 0.0001 && $newTotal >= -0.0001) {
+                                            $pdo->prepare("DELETE FROM j2stocklist_total WHERE id = ?")->execute([$existingTotal['id']]);
+                                        } else {
+                                            $pdo->prepare("UPDATE j2stocklist_total SET total_qty = ?, last_updated = NOW() WHERE id = ?")->execute([$newTotal, $existingTotal['id']]);
+                                        }
+                                        error_log("已同步更新J2移动端库存总表");
+                                    }
+                                } catch (PDOException $e) {
+                                    error_log("同步更新J2移动端库存总表失败: " . $e->getMessage());
+                                }
+                            }
+                        }
                     
                     error_log("已同步删除J2表和J2Edit表记录");
                 } elseif ($targetSystem === 'j3') {
@@ -2002,14 +2079,52 @@ function handleDelete() {
                     $getJ3EditStmt->execute([$recordToDelete['product_name'], $recordToDelete['receiver']]);
                     $j3EditRecordId = $getJ3EditStmt->fetchColumn();
 
-                    if ($j3EditRecordId) {
-                        $j3EditDeleteSql = "DELETE FROM j3stockedit_data WHERE id = ?";
-                        $j3EditDelStmt = $pdo->prepare($j3EditDeleteSql);
-                        $j3EditDelStmt->execute([$j3EditRecordId]);
-                        error_log("已同步删除J3表和J3Edit表记录");
-                    } else {
-                        error_log("未找到对应的J3Edit记录进行删除");
-                    }
+                        if ($j3EditRecordId) {
+                            // 获取细节
+                            $getJ3DetailSql = "SELECT product_name, code_number, specification, in_quantity, out_quantity FROM j3stockedit_data WHERE id = ?";
+                            $j3Stmt = $pdo->prepare($getJ3DetailSql);
+                            $j3Stmt->execute([$j3EditRecordId]);
+                            $j3Rec = $j3Stmt->fetch(PDO::FETCH_ASSOC);
+
+                            $j3EditDeleteSql = "DELETE FROM j3stockedit_data WHERE id = ?";
+                            $j3EditDelStmt = $pdo->prepare($j3EditDeleteSql);
+                            $j3EditDelStmt->execute([$j3EditRecordId]);
+                            error_log("已同步删除J3表和J3Edit表记录");
+
+                            if ($j3Rec) {
+                                try {
+                                    $inQty = floatval($j3Rec['in_quantity'] ?? 0);
+                                    $outQty = floatval($j3Rec['out_quantity'] ?? 0);
+                                    $netQty = $inQty - $outQty;
+                                    $specMatch = ($j3Rec['specification'] === "none" || $j3Rec['specification'] === "") ? null : $j3Rec['specification'];
+                                    
+                                    $checkSql = "SELECT id, total_qty FROM j3stocklist_total WHERE product_name = ? AND code_number = ? ";
+                                    $checkParams = [$j3Rec['product_name'], $j3Rec['code_number']];
+                                    if ($specMatch === null) {
+                                        $checkSql .= " AND (specification IS NULL OR specification = '' OR specification = 'none') ";
+                                    } else {
+                                        $checkSql .= " AND specification = ? ";
+                                        $checkParams[] = $specMatch;
+                                    }
+                                    $checkStmt = $pdo->prepare($checkSql);
+                                    $checkStmt->execute($checkParams);
+                                    $existingTotal = $checkStmt->fetch(PDO::FETCH_ASSOC);
+                                    if ($existingTotal) {
+                                        $newTotal = floatval($existingTotal['total_qty']) - $netQty;
+                                        if ($newTotal <= 0.0001 && $newTotal >= -0.0001) {
+                                            $pdo->prepare("DELETE FROM j3stocklist_total WHERE id = ?")->execute([$existingTotal['id']]);
+                                        } else {
+                                            $pdo->prepare("UPDATE j3stocklist_total SET total_qty = ?, last_updated = NOW() WHERE id = ?")->execute([$newTotal, $existingTotal['id']]);
+                                        }
+                                        error_log("已同步更新J3移动端库存总表");
+                                    }
+                                } catch (PDOException $e) {
+                                    error_log("同步更新J3移动端库存总表失败: " . $e->getMessage());
+                                }
+                            }
+                        } else {
+                            error_log("未找到对应的J3Edit记录进行删除");
+                        }
                 } elseif ($targetSystem === 'central') {
                     error_log("Central记录删除：仅删除主表记录");
                 }

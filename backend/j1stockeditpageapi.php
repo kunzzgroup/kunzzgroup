@@ -845,8 +845,58 @@ function handleDelete() {
         $result = $stmt->execute([$id]);
         
         if ($stmt->rowCount() > 0) {
+            // 如果有移动端关联ID，同步删除移动端记录表
+            if (!empty($recordToDelete['mobile_ref_id'])) {
+                try {
+                    $mobileDeleteSql = "DELETE FROM j1stockeditmobile_data WHERE id = ?";
+                    $mobileStmt = $pdo->prepare($mobileDeleteSql);
+                    $mobileStmt->execute([$recordToDelete['mobile_ref_id']]);
+                    error_log("已同步删除J1移动端历史记录 ID: " . $recordToDelete['mobile_ref_id']);
+                } catch (PDOException $e) {
+                    error_log("同步删除J1移动端历史记录失败: " . $e->getMessage());
+                }
+            }
+
+            // 同步更新移动端库存总表 (j1stocklist_total)
+            try {
+                $productName = $recordToDelete['product_name'];
+                $codeNumber = $recordToDelete['code_number'];
+                $specification = $recordToDelete['specification'];
+                $inQty = floatval($recordToDelete['in_quantity'] ?? 0);
+                $outQty = floatval($recordToDelete['out_quantity'] ?? 0);
+                $netQty = $inQty - $outQty;
+
+                // 统一规格处理 (与 mobile_api 逻辑一致)
+                $specMatch = ($specification === "none" || $specification === "") ? null : $specification;
+                
+                $checkSql = "SELECT id, total_qty FROM j1stocklist_total WHERE product_name = ? AND code_number = ? ";
+                $checkParams = [$productName, $codeNumber];
+                if ($specMatch === null) {
+                    $checkSql .= " AND (specification IS NULL OR specification = '' OR specification = 'none') ";
+                } else {
+                    $checkSql .= " AND specification = ? ";
+                    $checkParams[] = $specMatch;
+                }
+
+                $checkStmt = $pdo->prepare($checkSql);
+                $checkStmt->execute($checkParams);
+                $existingTotal = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($existingTotal) {
+                    $newTotal = floatval($existingTotal['total_qty']) - $netQty;
+                    if ($newTotal <= 0.0001 && $newTotal >= -0.0001) {
+                        $pdo->prepare("DELETE FROM j1stocklist_total WHERE id = ?")->execute([$existingTotal['id']]);
+                    } else {
+                        $pdo->prepare("UPDATE j1stocklist_total SET total_qty = ?, last_updated = NOW() WHERE id = ?")->execute([$newTotal, $existingTotal['id']]);
+                    }
+                    error_log("已同步更新J1移动端库存总表");
+                }
+            } catch (PDOException $e) {
+                error_log("同步更新J1移动端库存总表失败: " . $e->getMessage());
+            }
+
             // 如果是Central记录，同步删除stockinout_data表记录
-                $targetSystem = $recordToDelete['target_system'] ?? 'j1'; // 默认j1
+            $targetSystem = $recordToDelete['target_system'] ?? 'j1'; // 默认j1
 
                 if (strtolower($targetSystem) === 'central') {
                     // 删除对应的stockinout_data记录
