@@ -29,8 +29,8 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=<?php echo time(); ?>" />
-    <link rel="stylesheet" href="animation.css?v=<?php echo time(); ?>" />
-    <link rel="stylesheet" href="/backend/css/stockeditall.css?v=<?php echo time(); ?>" />
+    <link rel="stylesheet" href="../animation.css?v=<?php echo time(); ?>" />
+    <link rel="stylesheet" href="css/stockeditall.css?v=<?php echo time(); ?>" />
     
 </head>
 <body>
