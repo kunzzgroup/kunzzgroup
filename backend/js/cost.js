@@ -2162,13 +2162,8 @@ async function selectRestaurant(number) {
     document.getElementById('restaurant-dropdown').classList.remove('show');
     updateThemeColors(currentRestaurant);
 
-    // 控制 J1 模式显示
-    const costGrid = document.getElementById('cost-grid');
-    if (currentRestaurant === 'j1') {
-        costGrid.classList.add('j1-mode');
-    } else {
-        costGrid.classList.remove('j1-mode');
-    }
+    // 更新 body 类以控制供应卡片显示
+    document.body.className = `restaurant-${currentRestaurant}`;
 
     await loadData();
     updateDashboard();

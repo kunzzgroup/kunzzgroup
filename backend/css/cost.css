@@ -508,20 +508,16 @@
            margin-bottom: clamp(14px, 1.67vw, 32px);
        }
 
-       /* J1餐厅时显示8个卡片 - 上4下4 */
-       .cost-grid.j1-mode {
-           grid-template-columns: repeat(4, 1fr);
-       }
 
        /* J2和J3供应卡片默认隐藏 */
        .supply-card {
            display: none;
        }
 
-       /* J1模式下显示供应卡片 */
-       .cost-grid.j1-mode .supply-card {
-           display: block;
-       }
+        /* J1模式下显示供应卡片 */
+        body.restaurant-j1 .supply-card {
+            display: block;
+        }
 
        /* 图表容器 - 改为全宽 */
        .main-chart-container {
