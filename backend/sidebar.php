@@ -118,18 +118,18 @@ if (isset($_SESSION['user_id'])) {
     $dbname = 'u690174784_kunzz';
     $dbuser = 'u690174784_kunzz';
     $dbpass = 'Kunzz1688';
-    
+
     try {
         $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
-        $restrictedCodes = ['SUPPORT88','PHOTO001','AZGQOY','NR7FNW']; // 限制访问的注册码
+
+        $restrictedCodes = ['SUPPORT88', 'PHOTO001', 'AZGQOY', 'NR7FNW']; // 限制访问的注册码
         $userId = $_SESSION['user_id'];
-        
+
         $stmt = $pdo->prepare("SELECT registration_code FROM users WHERE id = ?");
         $stmt->execute([$userId]);
         $userCode = $stmt->fetchColumn();
-        
+
         $canViewAnalytics = !($userCode && in_array($userCode, $restrictedCodes));
 
         // 加载基于用户的侧边栏权限（如不存在则默认全开）
@@ -141,13 +141,22 @@ if (isset($_SESSION['user_id'])) {
                 submenu_permissions_json TEXT NULL,
                 updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
-            try { $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN page_permissions_json TEXT NULL"); } catch (Throwable $e) { /* ignore */ }
-            try { $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN submenu_permissions_json TEXT NULL"); } catch (Throwable $e) { /* ignore */ }
-            try { $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN brand_permissions_json TEXT NULL"); } catch (Throwable $e) { /* ignore */ }
+            try {
+                $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN page_permissions_json TEXT NULL");
+            } catch (Throwable $e) { /* ignore */
+            }
+            try {
+                $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN submenu_permissions_json TEXT NULL");
+            } catch (Throwable $e) { /* ignore */
+            }
+            try {
+                $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN brand_permissions_json TEXT NULL");
+            } catch (Throwable $e) { /* ignore */
+            }
             $permStmt = $pdo->prepare("SELECT permissions_json, page_permissions_json, submenu_permissions_json, brand_permissions_json FROM user_sidebar_permissions WHERE user_id = ?");
             $permStmt->execute([$userId]);
             $permRow = $permStmt->fetch(PDO::FETCH_ASSOC);
-            
+
             // 读取kpi_upload权限，用于决定数据上传的默认跳转页面
             if ($permRow && !empty($permRow['page_permissions_json'])) {
                 $pagePerms = json_decode($permRow['page_permissions_json'], true);
@@ -199,7 +208,7 @@ if (isset($_SESSION['user_id'])) {
                         }
                     }
                     unset($subItems);
-                    
+
                     // 处理visual权限：如果主模块可见，则所有子选项都可见
                     if ($canSeeVisual) {
                         foreach ($submenuVisibility['visual'] as $key => $value) {
@@ -215,7 +224,7 @@ if (isset($_SESSION['user_id'])) {
                     $submenuVisibility['visual'][$key] = true;
                 }
             }
-            
+
             // 处理brand权限（三级和四级）
             // 首先从submenu_permissions_json读取二级分类权限
             $brandSubmenu = isset($subList['brand']) && is_array($subList['brand']) && !empty($subList['brand']) ? $subList['brand'] : [];
@@ -226,17 +235,17 @@ if (isset($_SESSION['user_id'])) {
                 $submenuVisibility['brand']['tokyo_izakaya'] = in_array('tokyo_izakaya', $brandSubmenu, true);
             }
             // 如果brandSubmenu为空，保持默认值（全部为true）
-            
+
             // 然后从brand_permissions_json读取三级和四级权限（店面权限）
             // 初始化店面的schedule权限标志（默认为true，如果有权限数据才会被设置为false）
             $submenuVisibility['brand']['j1_schedule'] = true;
             $submenuVisibility['brand']['j2_schedule'] = true;
             $submenuVisibility['brand']['j3_schedule'] = true;
-            
+
             if ($permRow && isset($permRow['brand_permissions_json']) && !empty($permRow['brand_permissions_json'])) {
                 $brandPerms = json_decode($permRow['brand_permissions_json'], true);
                 if (is_array($brandPerms)) {
-                    
+
                     // 检查三级分类（店面）- 兼容旧格式（数组）和新格式（对象）
                     if (isset($brandPerms['tokyo_cuisine'])) {
                         if (is_array($brandPerms['tokyo_cuisine']) && isset($brandPerms['tokyo_cuisine'][0])) {
@@ -253,7 +262,7 @@ if (isset($_SESSION['user_id'])) {
                                 // 对象不为空，检查具体权限
                                 $submenuVisibility['brand']['j1'] = isset($brandPerms['tokyo_cuisine']['j1']);
                                 $submenuVisibility['brand']['j2'] = isset($brandPerms['tokyo_cuisine']['j2']);
-                                
+
                                 // 检查四级权限（schedule）- J1
                                 if (isset($brandPerms['tokyo_cuisine']['j1']) && is_array($brandPerms['tokyo_cuisine']['j1'])) {
                                     // 如果数组不为空，检查是否包含schedule
@@ -262,7 +271,7 @@ if (isset($_SESSION['user_id'])) {
                                     }
                                     // 如果数组为空，保持默认开启（true）
                                 }
-                                
+
                                 // 检查四级权限（schedule）- J2
                                 if (isset($brandPerms['tokyo_cuisine']['j2']) && is_array($brandPerms['tokyo_cuisine']['j2'])) {
                                     // 如果数组不为空，检查是否包含schedule
@@ -276,7 +285,7 @@ if (isset($_SESSION['user_id'])) {
                         // 如果没有tokyo_cuisine数据，保持默认值（全部为true）
                     }
                     // 如果没有tokyo_cuisine，保持默认值（j1和j2为true）
-                    
+
                     if (isset($brandPerms['tokyo_izakaya'])) {
                         if (is_array($brandPerms['tokyo_izakaya']) && isset($brandPerms['tokyo_izakaya'][0])) {
                             // 旧格式：索引数组
@@ -290,7 +299,7 @@ if (isset($_SESSION['user_id'])) {
                             } else {
                                 // 对象不为空，检查具体权限
                                 $submenuVisibility['brand']['j3'] = isset($brandPerms['tokyo_izakaya']['j3']);
-                                
+
                                 // 检查四级权限（schedule）- J3
                                 if (isset($brandPerms['tokyo_izakaya']['j3']) && is_array($brandPerms['tokyo_izakaya']['j3'])) {
                                     // 如果数组不为空，检查是否包含schedule
@@ -306,7 +315,7 @@ if (isset($_SESSION['user_id'])) {
                     // 如果没有tokyo_izakaya，保持默认值（j3为true）
                 }
             }
-            
+
             // 如果没有brand_permissions_json，保持默认全部开启（不需要额外处理，初始值已经是true）
         } catch (Exception $e) {
             $canSeeAnalytics = $canSeeHR = $canSeeResource = $canSeeVisual = $canSeeBrand = true;
@@ -318,23 +327,33 @@ if (isset($_SESSION['user_id'])) {
 }
 // 如果主模块不可见，则对应子选项全部关闭
 if (!$canSeeAnalytics) {
-    foreach ($submenuVisibility['analytics'] as &$flag) { $flag = false; }
+    foreach ($submenuVisibility['analytics'] as &$flag) {
+        $flag = false;
+    }
     unset($flag);
 }
 if (!$canSeeHR) {
-    foreach ($submenuVisibility['hr'] as &$flag) { $flag = false; }
+    foreach ($submenuVisibility['hr'] as &$flag) {
+        $flag = false;
+    }
     unset($flag);
 }
 if (!$canSeeResource) {
-    foreach ($submenuVisibility['resource'] as &$flag) { $flag = false; }
+    foreach ($submenuVisibility['resource'] as &$flag) {
+        $flag = false;
+    }
     unset($flag);
 }
 if (!$canSeeVisual) {
-    foreach ($submenuVisibility['visual'] as &$flag) { $flag = false; }
+    foreach ($submenuVisibility['visual'] as &$flag) {
+        $flag = false;
+    }
     unset($flag);
 }
 if (!$canSeeBrand) {
-    foreach ($submenuVisibility['brand'] as &$flag) { $flag = false; }
+    foreach ($submenuVisibility['brand'] as &$flag) {
+        $flag = false;
+    }
     unset($flag);
 }
 ?>
@@ -362,284 +381,280 @@ if (!$canSeeBrand) {
 
     <div class="informationmenu-content">
         <?php if ($canSeeBrand): ?>
-        <div class="informationmenu-section">
-            <div class="informationmenu-section-title" data-target="brand-items">
-                <img src="../images/images/网页照片上传.svg?v=<?php echo time(); ?>" alt="" class="section-icon">
-                集团架构
-                <span class="section-arrow">⮞</span>
+            <div class="informationmenu-section">
+                <div class="informationmenu-section-title" data-target="brand-items">
+                    <img src="../images/images/网页照片上传.svg?v=<?php echo time(); ?>" alt="" class="section-icon">
+                    集团架构
+                    <span class="section-arrow">⮞</span>
+                </div>
+                <div class="dropdown-menu-items" id="brand-items">
+                    <?php if (!empty($submenuVisibility['brand']['kunzz_holdings'])): ?>
+                        <div class="menu-item-wrapper">
+                            <a href="#" class="informationmenu-item">
+                                KUNZZ HOLDINGS SDN BHD
+                                <span class="informationmenu-arrow">›</span>
+                            </a>
+                            <div class="submenu">
+                                <div class="submenu-header">
+                                    <div class="submenu-title">KUNZZ HOLDINGS SDN BHD</div>
+                                </div>
+                                <div class="submenu-content">
+                                    <a href="corporate_blueprint" class="submenu-item">企业蓝图</a>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <!-- Tokyo Japanese Cuisine Sdn Bhd -->
+                    <?php if (!empty($submenuVisibility['brand']['tokyo_cuisine'])): ?>
+                        <div class="menu-item-wrapper">
+                            <a href="#" class="informationmenu-item">
+                                TOKYO JAPANESE CUISINE SDN BHD
+                                <span class="informationmenu-arrow">›</span>
+                            </a>
+                            <div class="submenu">
+                                <div class="submenu-header">
+                                    <div class="submenu-title">TOKYO JAPANESE CUISINE SDN BHD</div>
+                                </div>
+                                <div class="submenu-content">
+                                    <?php if (!empty($submenuVisibility['brand']['j1'])): ?>
+                                        <a href="#" class="submenu-item expandable" data-target="j1-options">
+                                            J1 (MIDVALLEY)
+                                            <span class="expand-arrow">›</span>
+                                        </a>
+                                        <div class="sub-options" id="j1-options">
+                                            <?php if (!empty($submenuVisibility['brand']['j1_schedule'])): ?>
+                                                <a href="schedule_manager?restaurant=J1" class="sub-option">员工排班表</a>
+                                                <a href="phone_manage?restaurant=J1" class="sub-option">员工手机记录</a>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <?php if (!empty($submenuVisibility['brand']['j2'])): ?>
+                                        <a href="#" class="submenu-item expandable" data-target="j2-options">
+                                            J2 (PARADIGM MALL)
+                                            <span class="expand-arrow">›</span>
+                                        </a>
+                                        <div class="sub-options" id="j2-options">
+                                            <?php if (!empty($submenuVisibility['brand']['j2_schedule'])): ?>
+                                                <a href="schedule_manager?restaurant=J2" class="sub-option">员工排班表</a>
+                                                <a href="phone_manage?restaurant=J2" class="sub-option">员工手机记录</a>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <!-- Tokyo Izakaya Sdn Bhd -->
+                    <?php if (!empty($submenuVisibility['brand']['tokyo_izakaya'])): ?>
+                        <div class="menu-item-wrapper">
+                            <a href="#" class="informationmenu-item">
+                                TOKYO IZAKAYA SDN BHD
+                                <span class="informationmenu-arrow">›</span>
+                            </a>
+                            <div class="submenu">
+                                <div class="submenu-header">
+                                    <div class="submenu-title">TOKYO IZAKAYA SDN BHD</div>
+                                </div>
+                                <div class="submenu-content">
+                                    <?php if (!empty($submenuVisibility['brand']['j3'])): ?>
+                                        <a href="#" class="submenu-item expandable" data-target="j3-options">
+                                            J3 (DESA TEBRAU)
+                                            <span class="expand-arrow">›</span>
+                                        </a>
+                                        <div class="sub-options" id="j3-options">
+                                            <?php if (!empty($submenuVisibility['brand']['j3_schedule'])): ?>
+                                                <a href="schedule_manager?restaurant=J3" class="sub-option">员工排班表</a>
+                                                <a href="phone_manage?restaurant=J3" class="sub-option">员工手机记录</a>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
-            <div class="dropdown-menu-items" id="brand-items">
-                <?php if (!empty($submenuVisibility['brand']['kunzz_holdings'])): ?>
-                <div class="menu-item-wrapper">
-                    <a href="#" class="informationmenu-item">
-                        KUNZZ HOLDINGS SDN BHD
-                        <span class="informationmenu-arrow">›</span>
-                    </a>
-                    <div class="submenu">
-                        <div class="submenu-header">
-                            <div class="submenu-title">KUNZZ HOLDINGS SDN BHD</div>
-                        </div>
-                        <div class="submenu-content">
-                            <a href="corporate_blueprint" class="submenu-item">企业蓝图</a>
-                        </div>
-                    </div>
-                </div>
-                <?php endif; ?>
-                
-                <!-- Tokyo Japanese Cuisine Sdn Bhd -->
-                <?php if (!empty($submenuVisibility['brand']['tokyo_cuisine'])): ?>
-                <div class="menu-item-wrapper">
-                    <a href="#" class="informationmenu-item">
-                        TOKYO JAPANESE CUISINE SDN BHD
-                        <span class="informationmenu-arrow">›</span>
-                    </a>
-                    <div class="submenu">
-                        <div class="submenu-header">
-                            <div class="submenu-title">TOKYO JAPANESE CUISINE SDN BHD</div>
-                        </div>
-                        <div class="submenu-content">
-                            <?php if (!empty($submenuVisibility['brand']['j1'])): ?>
-                            <a href="#" class="submenu-item expandable" data-target="j1-options">
-                                J1 (MIDVALLEY)
-                                <span class="expand-arrow">›</span>
-                            </a>
-                            <div class="sub-options" id="j1-options">
-                                <?php if (!empty($submenuVisibility['brand']['j1_schedule'])): ?>
-                                <a href="schedule_manager?restaurant=J1" class="sub-option">员工排班表</a>
-                                <a href="phone_manage?restaurant=J1" class="sub-option">员工手机记录</a>
-                                <?php endif; ?>
-                            </div>
-                            <?php endif; ?>
-                            
-                            <?php if (!empty($submenuVisibility['brand']['j2'])): ?>
-                            <a href="#" class="submenu-item expandable" data-target="j2-options">
-                                J2 (PARADIGM MALL)
-                                <span class="expand-arrow">›</span>
-                            </a>
-                            <div class="sub-options" id="j2-options">
-                                <?php if (!empty($submenuVisibility['brand']['j2_schedule'])): ?>
-                                <a href="schedule_manager?restaurant=J2" class="sub-option">员工排班表</a>
-                                <a href="phone_manage?restaurant=J2" class="sub-option">员工手机记录</a>
-                                <?php endif; ?>
-                            </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-                <?php endif; ?>
-                
-                <!-- Tokyo Izakaya Sdn Bhd -->
-                <?php if (!empty($submenuVisibility['brand']['tokyo_izakaya'])): ?>
-                <div class="menu-item-wrapper">
-                    <a href="#" class="informationmenu-item">
-                        TOKYO IZAKAYA SDN BHD
-                        <span class="informationmenu-arrow">›</span>
-                    </a>
-                    <div class="submenu">
-                        <div class="submenu-header">
-                            <div class="submenu-title">TOKYO IZAKAYA SDN BHD</div>
-                        </div>
-                        <div class="submenu-content">
-                            <?php if (!empty($submenuVisibility['brand']['j3'])): ?>
-                            <a href="#" class="submenu-item expandable" data-target="j3-options">
-                                J3 (DESA TEBRAU)
-                                <span class="expand-arrow">›</span>
-                            </a>
-                            <div class="sub-options" id="j3-options">
-                                <?php if (!empty($submenuVisibility['brand']['j3_schedule'])): ?>
-                                <a href="schedule_manager?restaurant=J3" class="sub-option">员工排班表</a>
-                                <a href="phone_manage?restaurant=J3" class="sub-option">员工手机记录</a>
-                                <?php endif; ?>
-                            </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-                <?php endif; ?>
-            </div>
-        </div>
         <?php endif; ?>
 
         <?php if ($canSeeAnalytics): ?>
-        <div class="informationmenu-section">
-            <div class="informationmenu-section-title" data-target="analytics-items">
-                <img src="../images/images/运营分析与报表.svg?v=<?php echo time(); ?>" alt="" class="section-icon">
-                营收数据
-                <span class="section-arrow">⮞</span>
-            </div>
-            <div class="dropdown-menu-items" id="analytics-items">
-                <?php if (!empty($submenuVisibility['analytics']['kpi_report'])): ?>
-                <div class="menu-item-wrapper">
-                    <a href="kpi" class="informationmenu-item">
-                        KPI报表
-                    </a>
+            <div class="informationmenu-section">
+                <div class="informationmenu-section-title" data-target="analytics-items">
+                    <img src="../images/images/运营分析与报表.svg?v=<?php echo time(); ?>" alt="" class="section-icon">
+                    营收数据
+                    <span class="section-arrow">⮞</span>
                 </div>
-                <?php endif; ?>
-                <?php if (!empty($submenuVisibility['analytics']['kpi_upload'])): ?>
-                <div class="menu-item-wrapper">
-                    <a href="<?php echo $kpiUploadDefaultPage; ?>" class="informationmenu-item">
-                        数据上传
-                    </a>
+                <div class="dropdown-menu-items" id="analytics-items">
+                    <?php if (!empty($submenuVisibility['analytics']['kpi_report'])): ?>
+                        <div class="menu-item-wrapper">
+                            <a href="kpi" class="informationmenu-item">
+                                KPI报表
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (!empty($submenuVisibility['analytics']['kpi_upload'])): ?>
+                        <div class="menu-item-wrapper">
+                            <a href="<?php echo $kpiUploadDefaultPage; ?>" class="informationmenu-item">
+                                数据上传
+                            </a>
+                        </div>
+                    <?php endif; ?>
                 </div>
-                <?php endif; ?>
             </div>
-        </div>
         <?php endif; ?>
 
         <?php if ($canSeeHR): ?>
-        <div class="informationmenu-section">
-            <div class="informationmenu-section-title" data-target="hr-items">
-                <img src="../images/images/人事与资源管理.svg?v=<?php echo time(); ?>" alt="" class="section-icon">
-                人事管理
+            <div class="informationmenu-section">
+                <div class="informationmenu-section-title" data-target="hr-items">
+                    <img src="../images/images/人事与资源管理.svg?v=<?php echo time(); ?>" alt="" class="section-icon">
+                    人事管理
+                </div>
+                <div class="dropdown-menu-items" id="hr-items">
+                    <?php if (!empty($submenuVisibility['hr']['staff_management'])): ?>
+                        <div class="menu-item-wrapper">
+                            <a href="generatecode" class="informationmenu-item">
+                                职员管理
+                            </a>
+                        </div>
+                        <div class="menu-item-wrapper">
+                            <a href="qna" class="informationmenu-item">
+                                问卷回答
+                            </a>
+                        </div>
+                        <div class="menu-item-wrapper">
+                            <a href="evaluation_form" class="informationmenu-item">
+                                考核表单
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
-            <div class="dropdown-menu-items" id="hr-items">               
-                <?php if (!empty($submenuVisibility['hr']['staff_management'])): ?>
-                <div class="menu-item-wrapper">
-                    <a href="generatecode" class="informationmenu-item">
-                        职员管理
-                    </a>
-                </div>
-                <div class="menu-item-wrapper">
-                    <a href="qna" class="informationmenu-item">
-                        问卷回答
-                    </a>
-                </div>
-                <div class="menu-item-wrapper">
-                    <a href="evaluation_form" class="informationmenu-item">
-                        考核表单
-                    </a>
-                </div>
-                <?php endif; ?>
-            </div>
-        </div>
         <?php endif; ?>
 
         <?php if ($canSeeResource): ?>
-        <div class="informationmenu-section">
-            <div class="informationmenu-section-title" data-target="resource-items">
-                <img src="../images/images/资源库管理.svg?v=<?php echo time(); ?>" alt="" class="section-icon">
-                资源总库
-                <span class="section-arrow">⮞</span>
+            <div class="informationmenu-section">
+                <div class="informationmenu-section-title" data-target="resource-items">
+                    <img src="../images/images/资源库管理.svg?v=<?php echo time(); ?>" alt="" class="section-icon">
+                    资源总库
+                    <span class="section-arrow">⮞</span>
+                </div>
+                <div class="dropdown-menu-items" id="resource-items">
+                    <?php if (!empty($submenuVisibility['resource']['stock_inventory'])): ?>
+                        <div class="menu-item-wrapper">
+                            <a href="stocklistall" class="informationmenu-item" id="stock-link"
+                                onclick="redirectToAllowedStockPage(event)">
+                                库存
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (!empty($submenuVisibility['resource']['dishware'])): ?>
+                        <div class="menu-item-wrapper">
+                            <a href="dishware_stock" class="informationmenu-item">
+                                碗碟
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (!empty($submenuVisibility['resource']['price_comparison'])): ?>
+                        <div class="menu-item-wrapper">
+                            <a href="price" class="informationmenu-item">
+                                价格对比
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
-            <div class="dropdown-menu-items" id="resource-items">               
-                <?php if (!empty($submenuVisibility['resource']['stock_inventory'])): ?>
-                <div class="menu-item-wrapper">
-                    <a href="stocklistall" class="informationmenu-item" id="stock-link" onclick="redirectToAllowedStockPage(event)">
-                        库存
-                    </a>
-                </div>
-                <div class="menu-item-wrapper">
-                    <a href="stock_recycle" class="informationmenu-item">
-                        回收站
-                    </a>
-                </div>
-                <?php endif; ?>
-                <?php if (!empty($submenuVisibility['resource']['dishware'])): ?>
-                <div class="menu-item-wrapper">
-                    <a href="dishware_stock" class="informationmenu-item">
-                        碗碟
-                    </a>
-                </div>
-                <?php endif; ?>
-                <?php if (!empty($submenuVisibility['resource']['price_comparison'])): ?>
-                <div class="menu-item-wrapper">
-                    <a href="price" class="informationmenu-item">
-                        价格对比
-                    </a>
-                </div>
-                <?php endif; ?>
-            </div>
-        </div>
         <?php endif; ?>
 
         <?php if ($canSeeVisual): ?>
-        <div class="informationmenu-section">
-            <div class="informationmenu-section-title" data-target="photoupload-items">
-                <img src="../images/images/网页照片上传.svg?v=<?php echo time(); ?>" alt="" class="section-icon">
-                视觉管理
-                <span class="section-arrow">⮞</span>
+            <div class="informationmenu-section">
+                <div class="informationmenu-section-title" data-target="photoupload-items">
+                    <img src="../images/images/网页照片上传.svg?v=<?php echo time(); ?>" alt="" class="section-icon">
+                    视觉管理
+                    <span class="section-arrow">⮞</span>
+                </div>
+                <div class="dropdown-menu-items" id="photoupload-items">
+                    <div class="menu-item-wrapper">
+                        <a href="bgmusicupload" class="informationmenu-item">
+                            背景音乐
+                        </a>
+                    </div>
+                    <div class="menu-item-wrapper">
+                        <a href="#" class="informationmenu-item">
+                            首页
+                            <span class="informationmenu-arrow">›</span>
+                        </a>
+
+                        <div class="submenu">
+                            <div class="submenu-header">
+                                <div class="submenu-title">首页</div>
+                            </div>
+                            <div class="submenu-content">
+                                <a href="homepage1upload" class="submenu-item">第一页</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="menu-item-wrapper">
+                        <a href="#" class="informationmenu-item">
+                            关于我们
+                            <span class="informationmenu-arrow">›</span>
+                        </a>
+                        <div class="submenu">
+                            <div class="submenu-header">
+                                <div class="submenu-title">关于我们</div>
+                            </div>
+                            <div class="submenu-content">
+                                <a href="aboutpage1upload" class="submenu-item">第一页</a>
+                                <a href="aboutpage4upload" class="submenu-item">第四页</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="menu-item-wrapper">
+                        <a href="#" class="informationmenu-item">
+                            旗下品牌
+                            <span class="informationmenu-arrow">›</span>
+                        </a>
+                        <div class="submenu">
+                            <div class="submenu-header">
+                                <div class="submenu-title">旗下品牌</div>
+                            </div>
+                            <div class="submenu-content">
+                                <a href="tokyopage1upload" class="submenu-item">第一页</a>
+                                <a href="tokyopage5upload" class="submenu-item">第五页</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="menu-item-wrapper">
+                        <a href="#" class="informationmenu-item">
+                            加入我们
+                            <span class="informationmenu-arrow">›</span>
+                        </a>
+                        <div class="submenu">
+                            <div class="submenu-header">
+                                <div class="submenu-title">加入我们</div>
+                            </div>
+                            <div class="submenu-content">
+                                <a href="joinpage1upload" class="submenu-item">第一页</a>
+                                <a href="joinpage2upload" class="submenu-item">第二页</a>
+                                <a href="joinpage3upload" class="submenu-item">第三页</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="menu-item-wrapper">
+                        <a href="corporate_blueprint_edit" class="informationmenu-item">
+                            企业蓝图管理
+                        </a>
+                    </div>
+                    <?php if (!empty($submenuVisibility['visual']['menu_management'])): ?>
+                        <div class="menu-item-wrapper">
+                            <a href="menu_dashboard" class="informationmenu-item">
+                                菜单管理
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
-            <div class="dropdown-menu-items" id="photoupload-items">
-                <div class="menu-item-wrapper">
-                    <a href="bgmusicupload" class="informationmenu-item">
-                        背景音乐
-                    </a>
-                </div>
-                <div class="menu-item-wrapper">
-                    <a href="#" class="informationmenu-item">
-                        首页
-                        <span class="informationmenu-arrow">›</span>
-                    </a>
-                    
-                    <div class="submenu">
-                        <div class="submenu-header">
-                            <div class="submenu-title">首页</div>
-                        </div>
-                        <div class="submenu-content">
-                            <a href="homepage1upload" class="submenu-item">第一页</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="menu-item-wrapper">
-                    <a href="#" class="informationmenu-item">
-                        关于我们
-                        <span class="informationmenu-arrow">›</span>
-                    </a>
-                    <div class="submenu">
-                        <div class="submenu-header">
-                            <div class="submenu-title">关于我们</div>
-                        </div>
-                        <div class="submenu-content">
-                            <a href="aboutpage1upload" class="submenu-item">第一页</a>
-                            <a href="aboutpage4upload" class="submenu-item">第四页</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="menu-item-wrapper">
-                    <a href="#" class="informationmenu-item">
-                        旗下品牌
-                        <span class="informationmenu-arrow">›</span>
-                    </a>
-                    <div class="submenu">
-                        <div class="submenu-header">
-                            <div class="submenu-title">旗下品牌</div>
-                        </div>
-                        <div class="submenu-content">
-                            <a href="tokyopage1upload" class="submenu-item">第一页</a>
-                            <a href="tokyopage5upload" class="submenu-item">第五页</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="menu-item-wrapper">
-                    <a href="#" class="informationmenu-item">
-                        加入我们
-                        <span class="informationmenu-arrow">›</span>
-                    </a>
-                    <div class="submenu">
-                        <div class="submenu-header">
-                            <div class="submenu-title">加入我们</div>
-                        </div>
-                        <div class="submenu-content">
-                            <a href="joinpage1upload" class="submenu-item">第一页</a>
-                            <a href="joinpage2upload" class="submenu-item">第二页</a>
-                            <a href="joinpage3upload" class="submenu-item">第三页</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="menu-item-wrapper">
-                    <a href="corporate_blueprint_edit" class="informationmenu-item">
-                        企业蓝图管理
-                    </a>
-                </div>
-                <?php if (!empty($submenuVisibility['visual']['menu_management'])): ?>
-                <div class="menu-item-wrapper">
-                    <a href="menu_dashboard" class="informationmenu-item">
-                        菜单管理
-                    </a>
-                </div>
-                <?php endif; ?>
-            </div>
-        </div>
         <?php endif; ?>
 
         <div class="informationmenu-footer">
@@ -650,5 +665,5 @@ if (!$canSeeBrand) {
     </div>
 </div>
 
-    <script src="js/sidebar.js?v=<?php echo time(); ?>"></script>
+<script src="js/sidebar.js?v=<?php echo time(); ?>"></script>
 </script>
