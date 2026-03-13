@@ -673,28 +673,37 @@ function syncToJ1StockEditData($pdo, $data, $operation = 'insert') {
         $codeNumber  = $data['code_number'] ?? null;
         $productName = $data['product_name'] ?? '';
 
-        // ── 入库（或无出货）：单行插入，匹配最新进货的 specification/price/type ──
+        // ── 智能匹配信息 (specification/price/type) ──
+        $matchInfo = null;
+        $q = "SELECT specification, price, type FROM j1stockedit_data
+              WHERE product_name = ?
+              AND (receiver IS NULL OR receiver NOT IN ('Mobile','mobile'))
+              AND price IS NOT NULL
+              ORDER BY id DESC LIMIT 1";
+        $qStmt = $pdo->prepare($q);
+        $qStmt->execute([$productName]);
+        $matchInfo = $qStmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$matchInfo) {
+            $infoStmt = $pdo->prepare("SELECT product_code, specification, price, category as type FROM stock_data WHERE product_name = ? LIMIT 1");
+            $infoStmt->execute([$productName]);
+            $matchInfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
+        }
+
+        // 统一类型 (category) 补全，确保同步到 PC 端时字段完整
+        $type = $data['type'] ?? $matchInfo['type'] ?? null;
+        if (empty($type) && !empty($productName)) {
+            $catStmt = $pdo->prepare("SELECT category FROM stock_data WHERE product_name = ? LIMIT 1");
+            $catStmt->execute([$productName]);
+            $type = $catStmt->fetchColumn();
+        }
+
+        $price = isset($data['price']) && $data['price'] !== null && $data['price'] !== ''
+            ? floatval($data['price'])
+            : floatval($matchInfo['price'] ?? 0);
+
+        // ── 入库（或无出货）：单行插入 ──
         if ($outQty <= 0) {
-            // 找最新桌面行
-            $matchInfo = null;
-            $q = "SELECT specification, price, type FROM j1stockedit_data
-                  WHERE product_name = ?
-                  AND (receiver IS NULL OR receiver NOT IN ('Mobile','mobile'))
-                  AND price IS NOT NULL AND price > 0
-                  ORDER BY id DESC LIMIT 1";
-            $qStmt = $pdo->prepare($q);
-            $qStmt->execute([$productName]);
-            $matchInfo = $qStmt->fetch(PDO::FETCH_ASSOC);
-
-            if (!$matchInfo) {
-                $infoStmt = $pdo->prepare("SELECT specification, price, category as type FROM stock_data WHERE product_name = ? LIMIT 1");
-                $infoStmt->execute([$productName]);
-                $matchInfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
-            }
-
-            $price = isset($data['price']) && $data['price'] !== null && $data['price'] !== ''
-                ? floatval($data['price'])
-                : floatval($matchInfo['price'] ?? 0);
 
             $stmt = $pdo->prepare(
                 "INSERT INTO j1stockedit_data
@@ -707,7 +716,7 @@ function syncToJ1StockEditData($pdo, $data, $operation = 'insert') {
                 $inQty, 0,
                 $matchInfo['specification'] ?? $data['specification'] ?? null,
                 $price,
-                $matchInfo['type'] ?? $data['type'] ?? null,
+                $type,
                 $mobileRefId,
             ]);
             return $pdo->lastInsertId();
@@ -736,7 +745,7 @@ function syncToJ1StockEditData($pdo, $data, $operation = 'insert') {
                     WHERE product_name = ?
                     {$codeFilter}
                     {$specFilter}
-                    AND price IS NOT NULL AND price > 0
+                    AND price IS NOT NULL
                     GROUP BY specification, price, type
                     HAVING available > 0
                     ORDER BY price DESC
@@ -769,7 +778,7 @@ function syncToJ1StockEditData($pdo, $data, $operation = 'insert') {
                 $deduct,
                 $tier['specification'],
                 floatval($tier['price']),
-                $tier['type'] ?? $data['type'] ?? null,
+                $tier['type'] ?? $type ?? null,
                 $mobileRefId,
             ]);
             $remaining -= $deduct;
@@ -787,7 +796,7 @@ function syncToJ1StockEditData($pdo, $data, $operation = 'insert') {
                 $remaining,
                 $lastTier['specification'] ?? $data['specification'] ?? null,
                 $lastTier['price'] ?? floatval($data['price'] ?? 0),
-                $lastTier['type'] ?? $data['type'] ?? null,
+                $lastTier['type'] ?? $type ?? null,
                 $mobileRefId,
             ]);
         }

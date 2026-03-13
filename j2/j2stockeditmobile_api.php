@@ -667,23 +667,33 @@ function syncToJ2StockEditData($pdo, $data, $operation = 'insert') {
         $codeNumber  = $data['code_number'] ?? null;
         $productName = $data['product_name'] ?? '';
 
+        // 智能匹配信息 (specification/price/type)
+        $matchInfo = null;
+        $qStmt = $pdo->prepare("SELECT specification, price, type FROM j2stockedit_data
+            WHERE product_name = ? AND (receiver IS NULL OR receiver NOT IN ('Mobile','mobile'))
+            AND price IS NOT NULL ORDER BY id DESC LIMIT 1");
+        $qStmt->execute([$productName]);
+        $matchInfo = $qStmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$matchInfo) {
+            $infoStmt = $pdo->prepare("SELECT product_code, specification, price, category as type FROM stock_data WHERE product_name = ? LIMIT 1");
+            $infoStmt->execute([$productName]);
+            $matchInfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
+        }
+
+        // 统一类型 (category) 补全，确保同步到 PC 端时字段完整
+        $type = $data['type'] ?? $matchInfo['type'] ?? null;
+        if (empty($type) && !empty($productName)) {
+            $catStmt = $pdo->prepare("SELECT category FROM stock_data WHERE product_name = ? LIMIT 1");
+            $catStmt->execute([$productName]);
+            $type = $catStmt->fetchColumn();
+        }
+
+        $price = isset($data['price']) && $data['price'] !== null && $data['price'] !== ''
+            ? floatval($data['price']) : floatval($matchInfo['price'] ?? 0);
+
         // 入库或无出货：单行插入
         if ($outQty <= 0) {
-            $matchInfo = null;
-            $qStmt = $pdo->prepare("SELECT specification, price, type FROM j2stockedit_data
-                WHERE product_name = ? AND (receiver IS NULL OR receiver NOT IN ('Mobile','mobile'))
-                AND price IS NOT NULL AND price > 0 ORDER BY id DESC LIMIT 1");
-            $qStmt->execute([$productName]);
-            $matchInfo = $qStmt->fetch(PDO::FETCH_ASSOC);
-
-            if (!$matchInfo) {
-                $infoStmt = $pdo->prepare("SELECT specification, price, category as type FROM stock_data WHERE product_name = ? LIMIT 1");
-                $infoStmt->execute([$productName]);
-                $matchInfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
-            }
-
-            $price = isset($data['price']) && $data['price'] !== null && $data['price'] !== ''
-                ? floatval($data['price']) : floatval($matchInfo['price'] ?? 0);
 
             $stmt = $pdo->prepare(
                 "INSERT INTO j2stockedit_data
@@ -695,7 +705,7 @@ function syncToJ2StockEditData($pdo, $data, $operation = 'insert') {
                 $data['date'], $data['time'], $codeNumber, $productName,
                 $inQty, 0,
                 $matchInfo['specification'] ?? $data['specification'] ?? null, $price,
-                $matchInfo['type'] ?? $data['type'] ?? null, $mobileRefId,
+                $type, $mobileRefId,
             ]);
             return $pdo->lastInsertId();
         }
@@ -722,7 +732,7 @@ function syncToJ2StockEditData($pdo, $data, $operation = 'insert') {
                     (SUM(in_quantity) - SUM(out_quantity)) AS available
              FROM j2stockedit_data
              WHERE product_name = ? {$codeFilter} {$specFilter}
-             AND price IS NOT NULL AND price > 0
+             AND price IS NOT NULL
              GROUP BY specification, price, type
              HAVING available > 0
              ORDER BY price DESC
@@ -747,7 +757,7 @@ function syncToJ2StockEditData($pdo, $data, $operation = 'insert') {
                 $deduct,
                 $tier['specification'],
                 floatval($tier['price']),
-                $tier['type'] ?? $data['type'] ?? null,
+                $tier['type'] ?? $type ?? null,
                 $mobileRefId,
             ]);
             $remaining -= $deduct;
@@ -755,12 +765,17 @@ function syncToJ2StockEditData($pdo, $data, $operation = 'insert') {
 
         if ($remaining > 0.0001) {
             $lastTier = !empty($tiers) ? end($tiers) : [
-                'specification' => null, 'price' => floatval($data['price'] ?? 0), 'type' => null
+                'specification' => $data['specification'] ?? null, 
+                'price' => floatval($data['price'] ?? 0), 
+                'type' => $type
             ];
             $insertStmt->execute([
                 $data['date'], $data['time'], $codeNumber, $productName,
-                $remaining, $lastTier['specification'], floatval($lastTier['price']),
-                $lastTier['type'], $mobileRefId,
+                $remaining, 
+                $lastTier['specification'] ?? $data['specification'] ?? null, 
+                floatval($lastTier['price'] ?? $data['price'] ?? 0),
+                $lastTier['type'] ?? $type ?? null, 
+                $mobileRefId,
             ]);
         }
 
