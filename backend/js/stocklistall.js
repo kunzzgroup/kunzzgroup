@@ -343,7 +343,7 @@ async function applyPagePermissions() {
 function switchView(view) {
     if (view === currentView) return;
 
-    const systemParam = (currentSystem && currentSystem !== 'central') ? `?system=${currentSystem}` : '';
+    const systemParam = `?system=${currentSystem || 'central'}`;
 
     if (view === 'records') {
         window.location.href = `stockeditall${systemParam}`;

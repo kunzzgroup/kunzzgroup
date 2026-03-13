@@ -272,6 +272,10 @@ function refreshData() {
     loadProductsAndSettings();
 }
 
+// 检查URL参数中的system
+const urlParams = new URLSearchParams(window.location.search);
+const currentSystem = urlParams.get('system') || 'central';
+
 // 返回库存管理
 function goBack() {
     if (pendingChanges.size > 0) {
@@ -280,7 +284,8 @@ function goBack() {
         }
     }
 
-    window.location.href = 'stocklistall';
+    const systemParam = `?system=${currentSystem}`;
+    window.location.href = `stocklistall${systemParam}`;
 }
 
 // 完全替换现有的 showAlert 函数

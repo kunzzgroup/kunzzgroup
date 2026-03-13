@@ -568,19 +568,39 @@ function toggleViewSelector() {
     dropdown.classList.toggle('show');
 }
 
+// 检查URL参数中的system
+const urlParams = new URLSearchParams(window.location.search);
+const currentSystem = urlParams.get('system') || 'central';
+
 function switchView(viewType) {
+    const systemParam = `?system=${currentSystem}`;
+
     if (viewType === 'list') {
-        window.location.href = 'stocklistall';
+        window.location.href = `stocklistall${systemParam}`;
     } else if (viewType === 'records') {
-        window.location.href = 'stockeditall';
+        window.location.href = `stockeditall${systemParam}`;
     } else if (viewType === 'remark') {
-        window.location.href = 'stockremark';
+        window.location.href = `stockremark${systemParam}`;
     } else if (viewType === 'product') {
-        window.location.href = 'stockproductname';
+        window.location.href = `stockproductname${systemParam}`;
     } else {
         hideViewDropdown();
     }
 }
+
+// 在 DOMContentLoaded 后更新系统显示
+document.addEventListener('DOMContentLoaded', () => {
+    const systemNames = {
+        'central': '中央',
+        'j1': 'J1',
+        'j2': 'J2',
+        'j3': 'J3'
+    };
+    const displayElement = document.getElementById('current-stock-type');
+    if (displayElement && systemNames[currentSystem]) {
+        displayElement.textContent = systemNames[currentSystem];
+    }
+});
 
 function hideViewDropdown() {
     const dropdown = document.getElementById('view-selector-dropdown');

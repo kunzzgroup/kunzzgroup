@@ -1144,6 +1144,11 @@ function switchStock(stockType, event = null) {
     loadStockData();
     loadCodeNumbers();
     loadProducts();
+
+    // 更新 URL 参数以保持持久性
+    const newParams = new URLSearchParams(window.location.search);
+    newParams.set('system', stockType);
+    window.history.replaceState(null, "", "?" + newParams.toString());
 }
 
 function rebuildStockSystemDropdown(allowedSet) {
@@ -1333,18 +1338,16 @@ function toggleViewSelector() {
 }
 
 function switchView(viewType) {
+    const systemParam = `?system=${currentStockType || 'central'}`;
+
     if (viewType === 'list') {
-        // 直接跳转到库存清单页面，不带参数
-        window.location.href = 'stocklistall';
+        window.location.href = `stocklistall${systemParam}`;
     } else if (viewType === 'remark') {
-        // 跳转到备注页面
-        window.location.href = 'stockremark';
+        window.location.href = `stockremark${systemParam}`;
     } else if (viewType === 'product') {
-        // 跳转到货品种类页面
-        window.location.href = 'stockproductname';
+        window.location.href = `stockproductname${systemParam}`;
     } else if (viewType === 'sot') {
-        // 跳转到货品异常页面
-        window.location.href = 'stocksot';
+        window.location.href = `stocksot${systemParam}`;
     } else {
         // 保持在当前页面（库存记录）
         hideViewDropdown();

@@ -255,18 +255,20 @@ function toggleViewSelector() {
 }
 
 function switchView(viewType) {
+    const systemParam = `?system=${currentSystem || 'overview'}`;
+    
     if (viewType === 'list') {
         // 跳转到总库存页面
-        window.location.href = 'stocklistall';
+        window.location.href = `stocklistall${systemParam}`;
     } else if (viewType === 'records') {
         // 跳转到进出货页面
-        window.location.href = 'stockeditall';
+        window.location.href = `stockeditall${systemParam}`;
     } else if (viewType === 'remark') {
         // 跳转到货品备注页面
-        window.location.href = 'stockremark';
+        window.location.href = `stockremark${systemParam}`;
     } else if (viewType === 'sot') {
         // 跳转到货品异常页面
-        window.location.href = 'stocksot';
+        window.location.href = `stocksot${systemParam}`;
     } else {
         // 保持在当前页面（货品种类）
         hideViewDropdown();
@@ -300,6 +302,11 @@ function switchSystem(system) {
     }
 
     currentSystem = system;
+
+    // 更新 URL 参数以保持持久性
+    const newParams = new URLSearchParams(window.location.search);
+    newParams.set('system', system);
+    window.history.replaceState(null, "", "?" + newParams.toString());
 
     // 更新系统选择器显示文本
     const systemNames = {

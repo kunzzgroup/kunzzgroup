@@ -120,17 +120,23 @@ function toggleViewSelector() {
     dropdown.classList.toggle('show');
 }
 
+// 检查URL参数中的system
+const urlParams = new URLSearchParams(window.location.search);
+const currentSystem = urlParams.get('system') || 'central';
+
 function switchView(viewType) {
+    const systemParam = `?system=${currentSystem}`;
+
     if (viewType === 'list') {
-        window.location.href = 'stocklistall';
+        window.location.href = `stocklistall${systemParam}`;
     } else if (viewType === 'records') {
-        window.location.href = 'stockeditall';
+        window.location.href = `stockeditall${systemParam}`;
     } else if (viewType === 'product') {
         // 跳转到货品种类页面
-        window.location.href = 'stockproductname';
+        window.location.href = `stockproductname${systemParam}`;
     } else if (viewType === 'sot') {
         // 跳转到货品异常页面
-        window.location.href = 'stocksot';
+        window.location.href = `stocksot${systemParam}`;
     } else {
         // 保持在当前页面（库存价格分析）
         hideViewDropdown();
@@ -664,3 +670,17 @@ setInterval(() => {
         loadStockRemarks();
     }
 }, 600000); // 10分钟 = 600000毫秒
+
+// 在 DOMContentLoaded 后更新系统显示
+document.addEventListener('DOMContentLoaded', () => {
+    const systemNames = {
+        'central': '中央',
+        'j1': 'J1',
+        'j2': 'J2',
+        'j3': 'J3'
+    };
+    const displayElement = document.getElementById('current-stock-type');
+    if (displayElement && systemNames[currentSystem]) {
+        displayElement.textContent = systemNames[currentSystem];
+    }
+});
