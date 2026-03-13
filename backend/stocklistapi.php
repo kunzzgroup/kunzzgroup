@@ -49,86 +49,125 @@ function sendResponse($success, $message = "", $data = null) {
 }
 
 // 获取库存汇总数据
-function getStockSummary($startDate = null, $endDate = null) {
+function getStockSummary($system = 'central', $startDate = null, $endDate = null) {
     global $pdo;
     
     try {
-        // 如果提供了结束日期，计算到该日期为止的所有库存（包括历史累计）
-        if ($endDate) {
-            // 计算到结束日期为止的所有库存
-            $sql = "SELECT 
-                        product_name,
-                        specification,
-                        price,
-                        code_number,
-                        SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
-                        SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
-                        (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
-                         SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
-                    FROM stockinout_data 
-                    WHERE product_name IS NOT NULL AND product_name != ''
-                    AND date <= ?
-                    GROUP BY product_name, specification, price, code_number
-                    HAVING current_stock > 0
-                    ORDER BY product_name ASC, price ASC";
-            
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$endDate]);
-        } else {
-            // 没有日期范围，返回所有库存
-            $sql = "SELECT 
-                        product_name,
-                        specification,
-                        price,
-                        code_number,
-                        SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
-                        SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
-                        (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
-                         SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
-                    FROM stockinout_data 
-                    WHERE product_name IS NOT NULL AND product_name != ''
-                    GROUP BY product_name, specification, price, code_number
-                    HAVING current_stock > 0
-                    ORDER BY product_name ASC, price ASC";
-            
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute();
+        $tableMap = [
+            'central' => 'stockinout_data',
+            'j1' => 'j1stockedit_data',
+            'j2' => 'j2stockedit_data',
+            'j3' => 'j3stockedit_data'
+        ];
+        
+        $tableName = $tableMap[$system] ?? 'stockinout_data';
+        $isBranch = ($system !== 'central');
+
+        // 构建基础查询
+        $sql = "SELECT 
+                    REPLACE(product_name, '&amp;', '&') as product_name,
+                    specification,
+                    price,
+                    code_number";
+        
+        if ($isBranch) {
+            $sql .= ", type";
         }
+
+        $sql .= ", SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
+                   SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
+                   (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
+                    SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
+                FROM $tableName 
+                WHERE product_name IS NOT NULL AND product_name != ''";
+        
+        $queryParams = [];
+        if ($endDate) {
+            $sql .= " AND date <= ?";
+            $queryParams[] = $endDate;
+        }
+
+        $groupBy = "REPLACE(product_name, '&amp;', '&'), specification, price, code_number";
+        if ($isBranch) {
+            $groupBy .= ", type";
+        }
+
+        $sql .= " GROUP BY $groupBy
+                  HAVING current_stock != 0
+                  ORDER BY product_name ASC, price ASC";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($queryParams);
         $stockData = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // 计算总价值 - 使用原始数值计算，只在显示时格式化
         $totalValue = 0;
         $summaryData = [];
         $counter = 1;
+        
+        // 分支机构特有的类型统计
+        $typeStats = $isBranch ? [
+            'Kitchen' => 0,
+            'Sushi Bar' => 0,
+            'Service Line' => 0,
+            'Sake' => 0
+        ] : null;
         
         foreach ($stockData as $row) {
             $currentStock = floatval($row['current_stock']);
             $price = floatval($row['price']);
             $totalPrice = $currentStock * $price;
             
-            // 使用原始数值累加，不进行四舍五入
             $totalValue += $totalPrice;
             
-            $summaryData[] = [
+            $item = [
                 'no' => $counter++,
                 'product_name' => $row['product_name'],
                 'code_number' => $row['code_number'] ?? '',
                 'total_stock' => $currentStock,
                 'specification' => $row['specification'] ?? '',
                 'price' => $price,
-                'total_price' => $totalPrice, // 使用原始计算值
+                'total_price' => $totalPrice,
                 'formatted_stock' => number_format($currentStock, 2),
                 'formatted_price' => number_format($price, 2),
-                'formatted_total_price' => number_format($totalPrice, 2) // 显示时格式化为两位小数
+                'formatted_total_price' => number_format($totalPrice, 2)
             ];
+
+            if ($isBranch) {
+                $type = $row['type'] ?? '';
+                if ($type === 'Drinks') $type = 'Service Line';
+                $item['type'] = $type;
+
+                if (!empty($type) && isset($typeStats[$type])) {
+                    $typeStats[$type] += $totalPrice;
+                }
+            }
+            
+            $summaryData[] = $item;
         }
         
-        return [
+        $result = [
             'summary' => $summaryData,
             'total_value' => $totalValue,
             'formatted_total_value' => number_format($totalValue, 2),
             'total_products' => count($summaryData)
         ];
+
+        if ($isBranch) {
+            $result['type_stats'] = [
+                'kitchen' => $typeStats['Kitchen'],
+                'sushi_bar' => $typeStats['Sushi Bar'],
+                'service_line' => $typeStats['Service Line'],
+                'sake' => $typeStats['Sake'],
+                'formatted_kitchen' => number_format($typeStats['Kitchen'], 2),
+                'formatted_sushi_bar' => number_format($typeStats['Sushi Bar'], 2),
+                'formatted_service_line' => number_format($typeStats['Service Line'], 2),
+                'formatted_sake' => number_format($typeStats['Sake'], 2)
+            ];
+        } else {
+            // 中央库存特有的逻辑（可选供前端扩展，目前前端是通过 loadData 里的特定逻辑处理供货统计）
+        }
+        
+        return $result;
         
     } catch (PDOException $e) {
         throw new Exception("查询库存数据失败：" . $e->getMessage());
@@ -136,10 +175,19 @@ function getStockSummary($startDate = null, $endDate = null) {
 }
 
 // 修改现有的 getLowStockAlerts() 函数
-function getLowStockAlerts() {
+function getLowStockAlerts($system = 'central') {
     global $pdo;
     
     try {
+        $tableMap = [
+            'central' => 'stockinout_data',
+            'j1' => 'j1stockedit_data',
+            'j2' => 'j2stockedit_data',
+            'j3' => 'j3stockedit_data'
+        ];
+        
+        $tableName = $tableMap[$system] ?? 'stockinout_data';
+
         // 获取当前库存和最低库存设置，只显示有设置且库存不足的货品
         $sql = "SELECT 
                     TRIM(s.product_name) as product_name,
@@ -157,7 +205,7 @@ function getLowStockAlerts() {
                          SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock,
                         FORMAT((SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
                                SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)), 2) as formatted_stock
-                    FROM stockinout_data 
+                    FROM $tableName 
                     WHERE product_name IS NOT NULL AND product_name != ''
                     GROUP BY product_name, code_number, specification
                 ) s
@@ -176,6 +224,45 @@ function getLowStockAlerts() {
     }
 }
 
+// 获取供货总额（当前月份）
+function getSupplyTotal($system = 'central') {
+    global $pdo;
+    
+    try {
+        $tableMap = [
+            'central' => 'stockinout_data',
+            'j1' => 'j1stockinout_data',
+            'j2' => 'j2stockinout_data',
+            'j3' => 'j3stockinout_data'
+        ];
+        
+        $tableName = $tableMap[$system] ?? 'stockinout_data';
+        
+        // 获取当前月份的第一天和最后一天
+        $firstDayOfMonth = date('Y-m-01');
+        $lastDayOfMonth = date('Y-m-t');
+        
+        $sql = "SELECT SUM(in_quantity * price) as total_supply_value 
+                FROM $tableName 
+                WHERE in_quantity > 0 
+                AND date >= ? AND date <= ?";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$firstDayOfMonth, $lastDayOfMonth]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $totalSupplyValue = floatval($result['total_supply_value'] ?? 0);
+        
+        return [
+            'total_supply_value' => $totalSupplyValue,
+            'formatted_total_value' => number_format($totalSupplyValue, 2),
+            'month' => date('Y-m')
+        ];
+    } catch (PDOException $e) {
+        throw new Exception("查询供货总额失败：" . $e->getMessage());
+    }
+}
+
 // 主要路由处理
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -185,9 +272,10 @@ if ($method === 'GET') {
     switch ($action) {
         case 'summary':
             try {
+                $system = $_GET['system'] ?? 'central';
                 $endDate = $_GET['end_date'] ?? null;
-                $result = getStockSummary(null, $endDate);
-                sendResponse(true, "库存汇总数据获取成功", $result);
+                $result = getStockSummary($system, null, $endDate);
+                sendResponse(true, ucfirst($system) . "库存汇总数据获取成功", $result);
             } catch (Exception $e) {
                 sendResponse(false, $e->getMessage());
             }
@@ -195,8 +283,19 @@ if ($method === 'GET') {
 
         case 'low_stock_alerts':
             try {
-                $result = getLowStockAlerts();
-                sendResponse(true, "低库存预警数据获取成功", ['alerts' => $result, 'count' => count($result)]);
+                $system = $_GET['system'] ?? 'central';
+                $result = getLowStockAlerts($system);
+                sendResponse(true, ucfirst($system) . "低库存预警数据获取成功", ['alerts' => $result, 'count' => count($result)]);
+            } catch (Exception $e) {
+                sendResponse(false, $e->getMessage());
+            }
+            break;
+
+        case 'supply_total':
+            try {
+                $system = $_GET['system'] ?? 'central';
+                $result = getSupplyTotal($system);
+                sendResponse(true, ucfirst($system) . "供货总值获取成功", $result);
             } catch (Exception $e) {
                 sendResponse(false, $e->getMessage());
             }

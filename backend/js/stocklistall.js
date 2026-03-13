@@ -53,9 +53,9 @@ let cachedAllowedViews = new Set();
 // API配置
 const API_CONFIG = {
     central: 'stocklistapi.php',
-    j1: 'j1stocklistapi.php',
-    j2: 'j2stocklistapi.php',
-    j3: 'j3stocklistapi.php',
+    j1: 'stocklistapi.php',
+    j2: 'stocklistapi.php',
+    j3: 'stocklistapi.php',
     remark: 'stockremarkapi.php'
 };
 
@@ -139,52 +139,16 @@ async function initApp() {
     // 启动会话自动刷新
     startSessionRefresh();
 
-    // 先应用页面权限，获取允许的系统列表
-    await applyPagePermissions();
-
-    // 检查URL参数中的system（在权限检查之后）
+    // 检查URL参数中的system
     const urlParams = new URLSearchParams(window.location.search);
     const urlSystem = urlParams.get('system');
 
-    // 如果URL中有系统参数，验证它是否在允许列表中
     if (urlSystem && ['central', 'j1', 'j2', 'j3'].includes(urlSystem)) {
-        // 再次检查权限，确保URL中的系统是被允许的
-        try {
-            const res = await fetch('generatecodeapi.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'get_page_permissions' })
-            });
-            const data = await res.json();
-            if (data.success && data.page_permissions && data.page_permissions.stock_inventory) {
-                const allowedSystems = new Set(data.page_permissions.stock_inventory.system || []);
-                // 如果有权限限制，检查URL中的系统是否被允许
-                if (allowedSystems.size > 0 && !allowedSystems.has(urlSystem)) {
-                    // URL中的系统不在允许列表中，使用第一个允许的系统
-                    const firstAllowed = Array.from(allowedSystems)[0];
-                    if (firstAllowed) {
-                        currentSystem = firstAllowed;
-                        // 更新URL参数
-                        const newUrl = new URL(window.location);
-                        newUrl.searchParams.set('system', firstAllowed);
-                        window.history.replaceState({}, '', newUrl);
-                    }
-                } else if (allowedSystems.size === 0) {
-                    // 没有权限限制，使用URL中的系统
-                    currentSystem = urlSystem;
-                } else {
-                    // URL中的系统在允许列表中，使用它
-                    currentSystem = urlSystem;
-                }
-            } else {
-                // 没有权限限制，使用URL中的系统
-                currentSystem = urlSystem;
-            }
-        } catch (e) {
-            // 权限检查失败，使用URL中的系统（向后兼容）
-            currentSystem = urlSystem;
-        }
+        currentSystem = urlSystem;
     }
+
+    // 先应用页面权限，获取允许的系统列表并验证当前系统
+    await applyPagePermissions();
 
     loadData(currentSystem);
     checkLowStockAlerts();
@@ -320,56 +284,33 @@ async function applyPagePermissions() {
         const allowedSystems = new Set(current.system || []);
         const allowedViews = new Set(current.view || []);
 
-        // 如果有权限限制，检查当前系统是否被允许
-        if (allowedSystems.size > 0) {
-            // 检查URL参数
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlSystem = urlParams.get('system');
-
-            // 如果当前系统不在允许列表中，或者没有设置系统（首次进入），切换到第一个允许的系统
-            if (!allowedSystems.has(currentSystem) || (!urlSystem && allowedSystems.size > 0)) {
-                const firstAllowed = Array.from(allowedSystems)[0];
-                if (firstAllowed) {
-                    currentSystem = firstAllowed;
-                    // 更新URL参数（不刷新页面）
-                    const newUrl = new URL(window.location);
-                    newUrl.searchParams.set('system', firstAllowed);
-                    window.history.replaceState({}, '', newUrl);
-                    // 更新UI
-                    const currentSystemEl = document.getElementById('current-system');
-                    const pageTitleEl = document.getElementById('page-title');
-                    if (currentSystemEl) {
-                        currentSystemEl.textContent = SYSTEM_NAMES[firstAllowed];
-                    }
-                    if (pageTitleEl) {
-                        pageTitleEl.textContent = PAGE_TITLES[firstAllowed];
-                    }
-                    // 切换页面显示
-                    document.querySelectorAll('.page-section').forEach(page => {
-                        page.classList.remove('active');
-                    });
-                    const targetPage = document.getElementById(firstAllowed + '-page');
-                    if (targetPage) {
-                        targetPage.classList.add('active');
-                    }
-                }
-            }
-
-            // 系统下拉 - 隐藏不允许的选项
-            const sysDropdown = document.getElementById('selector-dropdown');
-            if (sysDropdown) {
-                const map = { '中央': 'central', 'J1': 'j1', 'J2': 'j2', 'J3': 'j3' };
-                Array.from(sysDropdown.children).forEach(item => {
-                    const text = item.textContent.trim();
-                    const key = map[text];
-                    if (key && !allowedSystems.has(key)) {
-                        item.remove();
-                    }
-                });
+        cachedAllowedSystems = new Set(allowedSystems);
+        
+        // 权限校验：如果当前系统不在允许列表中，强制切换到第一个允许的系统
+        if (allowedSystems.size > 0 && !allowedSystems.has(currentSystem)) {
+            const firstAllowed = Array.from(allowedSystems)[0];
+            if (firstAllowed) {
+                currentSystem = firstAllowed;
+                // 更新URL以便刷新后保持
+                const newUrl = new URL(window.location);
+                newUrl.searchParams.set('system', firstAllowed);
+                window.history.replaceState({}, '', newUrl);
             }
         }
-        cachedAllowedSystems = new Set(allowedSystems);
+
         rebuildSystemDropdown(allowedSystems);
+
+        // 如果设置了系统，确保UI同步
+        if (currentSystem) {
+            const currentSystemEl = document.getElementById('current-system');
+            const pageTitleEl = document.getElementById('page-title');
+            if (currentSystemEl) currentSystemEl.textContent = SYSTEM_NAMES[currentSystem];
+            if (pageTitleEl) pageTitleEl.textContent = PAGE_TITLES[currentSystem];
+            
+            document.querySelectorAll('.page-section').forEach(page => page.classList.remove('active'));
+            const targetPage = document.getElementById(currentSystem + '-page');
+            if (targetPage) targetPage.classList.add('active');
+        }
 
         // 视图下拉 - 隐藏不允许的选项
         cachedAllowedViews = new Set(allowedViews);
@@ -492,7 +433,16 @@ function showSessionExpiredMessage() {
 async function apiCall(system, endpoint, options = {}) {
     try {
         const baseUrl = API_CONFIG[system];
-        const response = await fetch(`${baseUrl}${endpoint}`, {
+        
+        // 自动在 endpoint 中加入 system 参数（如果尚未存在）
+        // 这确保了统一后端 stocklistapi.php 能识别系统
+        let finalEndpoint = endpoint;
+        if (system !== 'remark' && !endpoint.includes('system=')) {
+            const separator = endpoint.includes('?') ? '&' : '?';
+            finalEndpoint = `${endpoint}${separator}system=${system}`;
+        }
+
+        const response = await fetch(`${baseUrl}${finalEndpoint}`, {
             headers: {
                 'Content-Type': 'application/json',
                 ...options.headers
@@ -1185,25 +1135,8 @@ async function performExport(system, endDate) {
                 return;
             }
         } else {
-            // 构建带日期的API URL（只使用结束日期）
-            const apiUrl = `${API_CONFIG[system]}?action=summary&end_date=${endDate}`;
-            const response = await fetch(apiUrl, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP错误: ${response.status}`);
-            }
-
-            result = await response.json();
-
-            // 检查是否是会话过期
-            if (result.code === 'SESSION_EXPIRED') {
-                showSessionExpiredMessage();
-                return;
-            }
+            // 使用 apiCall 重新获取指定日期的库存数据，系统参数会自动添加
+            result = await apiCall(system, `?action=summary&end_date=${endDate}`);
 
             if (result.success) {
                 dataToExport = result.data.summary || [];
