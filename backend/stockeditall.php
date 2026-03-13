@@ -28,9 +28,9 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
     <title>库存管理系统</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=<?php echo time(); ?>" />
     <link rel="stylesheet" href="../animation.css?v=<?php echo time(); ?>" />
     <link rel="stylesheet" href="css/stockeditall.css?v=<?php echo time(); ?>" />
+    <link rel="stylesheet" href="css/sidebar.css?v=<?php echo time(); ?>" />
     
 </head>
 <body>
