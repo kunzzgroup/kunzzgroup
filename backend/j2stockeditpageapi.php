@@ -106,7 +106,7 @@ function handleGet() {
                 $endDate = date('Y-m-t');
             }
 
-            $sql = "SELECT * FROM j2stockedit_data WHERE 1=1";
+            $sql = "SELECT * FROM j2stockedit_data WHERE deleted_at IS NULL";
             $params = [];
             
             if ($searchDate) {
@@ -190,7 +190,7 @@ function handleGet() {
                         SUM(in_quantity) as total_in_quantity,
                         SUM(out_quantity) as total_out_quantity,
                         SUM(in_quantity - out_quantity) as total_balance_quantity
-                    FROM j2stockedit_data WHERE 1=1";
+                    FROM j2stockedit_data WHERE deleted_at IS NULL";
             $params = [];
             
             if ($startDate && $endDate) {
@@ -216,7 +216,7 @@ function handleGet() {
             if (!$id) {
                 sendResponse(false, "缺少记录ID");
             }
-            $stmt = $pdo->prepare("SELECT * FROM j2stockedit_data WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT * FROM j2stockedit_data WHERE id = ? AND deleted_at IS NULL");
             $stmt->execute([$id]);
             $record = $stmt->fetch(PDO::FETCH_ASSOC);
             
@@ -228,7 +228,7 @@ function handleGet() {
             
         case 'suppliers':
             // 获取所有供应商列表
-            $stmt = $pdo->prepare("SELECT DISTINCT receiver FROM j2stockedit_data ORDER BY receiver");
+            $stmt = $pdo->prepare("SELECT DISTINCT receiver FROM j2stockedit_data WHERE deleted_at IS NULL ORDER BY receiver");
             $stmt->execute();
             $suppliers = $stmt->fetchAll(PDO::FETCH_COLUMN);
             
@@ -236,7 +236,7 @@ function handleGet() {
             
         case 'products':
             // 获取所有产品列表
-            $stmt = $pdo->prepare("SELECT DISTINCT code_number, product_name FROM j2stockedit_data ORDER BY code_number");
+            $stmt = $pdo->prepare("SELECT DISTINCT code_number, product_name FROM j2stockedit_data WHERE deleted_at IS NULL ORDER BY code_number");
             $stmt->execute();
             $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
@@ -323,7 +323,7 @@ function handleGet() {
             
             $sql = "SELECT DISTINCT price 
                 FROM j2stockedit_data 
-                WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND in_quantity > 0
+                WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND in_quantity > 0 AND deleted_at IS NULL
                 ORDER BY price DESC";
             
             $stmt = $pdo->prepare($sql);
@@ -346,7 +346,7 @@ function handleGet() {
                         (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
                         SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as available_stock
                     FROM j2stockedit_data
-                    WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&'))";
+                    WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND deleted_at IS NULL";
             
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$productName, $productName]);
@@ -389,7 +389,7 @@ function handleGet() {
                         (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
                         SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as available_stock
                     FROM j2stockedit_data
-                    WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND price = ?";
+                    WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND price = ? AND deleted_at IS NULL";
             
             error_log("J2 DEBUG stock by price: [productName=" . ($productName ?? 'null') . "] [price=" . ($price ?? 'null') . "]"); $stmt = $pdo->prepare($sql);
             $stmt->execute([$productName, $productName, $price]);
@@ -437,7 +437,7 @@ function handleGet() {
                             (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
                             SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as available_stock
                         FROM j2stockedit_data
-                        WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&'))";
+                        WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND deleted_at IS NULL";
                 $params = [$productName, $productName];
                 if (!empty($codeNumber)) {
                     $sql .= " AND code_number = ?";
@@ -623,7 +623,7 @@ function handlePost() {
         $pdo->commit();
         
         // 获取新插入的记录
-        $stmt = $pdo->prepare("SELECT * FROM j2stockedit_data WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT * FROM j2stockedit_data WHERE id = ? AND deleted_at IS NULL");
         $stmt->execute([$newId]);
         $newRecord = $stmt->fetch(PDO::FETCH_ASSOC);
         $newRecord['approval_status'] = (!empty($newRecord['approver'])) ? 'approved' : 'pending';
@@ -674,13 +674,13 @@ function handleApprove() {
     $approver = $_SESSION['username'] ?? 'System';
     
     try {
-        $sql = "UPDATE j2stockedit_data SET approver = ? WHERE id = ?";
+        $sql = "UPDATE j2stockedit_data SET approver = ? WHERE id = ? AND deleted_at IS NULL";
         $stmt = $pdo->prepare($sql);
         $result = $stmt->execute([$approver, $id]);
         
         if ($stmt->rowCount() > 0) {
             // 获取更新后的记录
-            $stmt = $pdo->prepare("SELECT * FROM j2stockedit_data WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT * FROM j2stockedit_data WHERE id = ? AND deleted_at IS NULL");
             $stmt->execute([$id]);
             $updatedRecord = $stmt->fetch(PDO::FETCH_ASSOC);
             $updatedRecord['approval_status'] = 'approved';
@@ -736,7 +736,7 @@ function handlePut() {
                 SET date = ?, time = ?, product_name = ?, 
                     in_quantity = ?, out_quantity = ?, 
                     specification = ?, price = ?, code_number = ?, remark = ?, receiver = ?, target_system = ?, type = ?
-                WHERE id = ?";
+                WHERE id = ? AND deleted_at IS NULL";
 
         $stmt = $pdo->prepare($sql);
 
@@ -757,13 +757,13 @@ function handlePut() {
         ]);
         
         // 检查记录是否存在
-        $checkStmt = $pdo->prepare("SELECT * FROM j2stockedit_data WHERE id = ?");
+        $checkStmt = $pdo->prepare("SELECT * FROM j2stockedit_data WHERE id = ? AND deleted_at IS NULL");
         $checkStmt->execute([$data['id']]);
         $existingRecord = $checkStmt->fetch(PDO::FETCH_ASSOC);
 
         if ($existingRecord) {
             // 记录存在，获取更新后的记录
-            $stmt = $pdo->prepare("SELECT * FROM j2stockedit_data WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT * FROM j2stockedit_data WHERE id = ? AND deleted_at IS NULL");
             $stmt->execute([$data['id']]);
             $updatedRecord = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -776,7 +776,7 @@ function handlePut() {
                                     SET date = ?, time = ?, product_name = ?, 
                                         in_quantity = ?, out_quantity = ?, 
                                         specification = ?, price = ?, code_number = ?, remark = ?, receiver = ?
-                                    WHERE product_name = ? AND date = ? AND receiver = ? AND target_system = 'Central'
+                                    WHERE product_name = ? AND date = ? AND receiver = ? AND target_system = 'Central' AND deleted_at IS NULL
                                     ORDER BY id DESC LIMIT 1";
                 
                 $centralStmt = $pdo->prepare($centralUpdateSql);
@@ -819,105 +819,69 @@ function handlePut() {
 
 function handleDelete() {
     global $pdo;
-    
+    session_start();
+    $username = $_SESSION['username'] ?? 'System';
     $id = $_GET['id'] ?? null;
-    
-    if (!$id) {
+    $ids = $_GET['ids'] ?? null; // 支持批量删除
+
+    if (!$id && !$ids) {
         sendResponse(false, "缺少记录ID");
     }
-    
+
+    $targetIds = $id ? [$id] : explode(',', $ids);
+
     try {
-        // 先获取要删除的记录信息
-        $getRecordSql = "SELECT * FROM j2stockedit_data WHERE id = ?";
-        $getStmt = $pdo->prepare($getRecordSql);
-        $getStmt->execute([$id]);
-        $recordToDelete = $getStmt->fetch(PDO::FETCH_ASSOC);
-        
-        if (!$recordToDelete) {
-            sendResponse(false, "记录不存在");
-        }
-        
-        // 执行删除主表记录
-        $stmt = $pdo->prepare("DELETE FROM j2stockedit_data WHERE id = ?");
-        $result = $stmt->execute([$id]);
-        
-        if ($stmt->rowCount() > 0) {
-            // 如果有移动端关联ID，同步删除移动端记录表
-            if (!empty($recordToDelete['mobile_ref_id'])) {
-                try {
-                    $mobileDeleteSql = "DELETE FROM j2stockeditmobile_data WHERE id = ?";
-                    $mobileStmt = $pdo->prepare($mobileDeleteSql);
-                    $mobileStmt->execute([$recordToDelete['mobile_ref_id']]);
-                    error_log("已同步删除J2移动端历史记录 ID: " . $recordToDelete['mobile_ref_id']);
-                } catch (PDOException $e) {
-                    error_log("同步删除J2移动端历史记录失败: " . $e->getMessage());
-                }
+        $pdo->beginTransaction();
+
+        foreach ($targetIds as $currentId) {
+            // 先获取要删除的记录信息
+            $getRecordSql = "SELECT * FROM j2stockedit_data WHERE id = ? AND deleted_at IS NULL";
+            $getStmt = $pdo->prepare($getRecordSql);
+            $getStmt->execute([$currentId]);
+            $recordToDelete = $getStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$recordToDelete) {
+                continue; // 如果记录不存在或已删除，跳过
             }
 
-            // 同步更新移动端库存总表 (j2stocklist_total)
-            try {
-                $productName = $recordToDelete['product_name'];
-                $codeNumber = $recordToDelete['code_number'];
-                $specification = $recordToDelete['specification'];
-                $inQty = floatval($recordToDelete['in_quantity'] ?? 0);
-                $outQty = floatval($recordToDelete['out_quantity'] ?? 0);
-                $netQty = $inQty - $outQty;
+            // 执行软删除主表记录
+            $stmt = $pdo->prepare("UPDATE j2stockedit_data SET deleted_at = NOW(), deleted_by = ? WHERE id = ?");
+            $result = $stmt->execute([$username, $currentId]);
 
-                // 统一规格处理 (与 mobile_api 逻辑一致)
-                $specMatch = ($specification === "none" || $specification === "") ? null : $specification;
-                
-                $checkSql = "SELECT id, total_qty FROM j2stocklist_total WHERE product_name = ? AND code_number = ? ";
-                $checkParams = [$productName, $codeNumber];
-                if ($specMatch === null) {
-                    $checkSql .= " AND (specification IS NULL OR specification = '' OR specification = 'none') ";
-                } else {
-                    $checkSql .= " AND specification = ? ";
-                    $checkParams[] = $specMatch;
-                }
-
-                $checkStmt = $pdo->prepare($checkSql);
-                $checkStmt->execute($checkParams);
-                $existingTotal = $checkStmt->fetch(PDO::FETCH_ASSOC);
-
-                if ($existingTotal) {
-                    $newTotal = floatval($existingTotal['total_qty']) - $netQty;
-                    if ($newTotal <= 0.0001 && $newTotal >= -0.0001) {
-                        $pdo->prepare("DELETE FROM j2stocklist_total WHERE id = ?")->execute([$existingTotal['id']]);
-                    } else {
-                        $pdo->prepare("UPDATE j2stocklist_total SET total_qty = ?, last_updated = NOW() WHERE id = ?")->execute([$newTotal, $existingTotal['id']]);
+            if ($stmt->rowCount() > 0) {
+                // 如果有移动端关联ID，同步软删除移动端记录表
+                if (!empty($recordToDelete['mobile_ref_id'])) {
+                    try {
+                        $mobileDeleteSql = "UPDATE j2stockeditmobile_data SET deleted_at = NOW(), deleted_by = ? WHERE id = ?";
+                        $mobileStmt = $pdo->prepare($mobileDeleteSql);
+                        $mobileStmt->execute([$username, $recordToDelete['mobile_ref_id']]);
+                    } catch (PDOException $e) {
+                        error_log("同步软删除J2移动端历史记录失败: " . $e->getMessage());
                     }
-                    error_log("已同步更新J2移动端库存总表");
                 }
-            } catch (PDOException $e) {
-                error_log("同步更新J2移动端库存总表失败: " . $e->getMessage());
-            }
 
-            // 如果是Central记录，同步删除stockinout_data表记录
-            $targetSystem = $recordToDelete['target_system'] ?? 'j2'; // 默认j2
-
-            if (strtolower($targetSystem) === 'central') {
-                // 删除对应的stockinout_data记录
-                $centralDeleteSql = "DELETE FROM stockinout_data 
-                                    WHERE product_name = ? AND date = ? AND receiver = ? AND target_system = 'central'
-                                    ORDER BY created_at DESC LIMIT 1";
-                
-                $centralDelStmt = $pdo->prepare($centralDeleteSql);
-                $centralDelStmt->execute([
-                    $recordToDelete['product_name'],
-                    $recordToDelete['date'],
-                    $recordToDelete['receiver']
-                ]);
-                error_log("已同步删除Central表记录");
-            } elseif ($targetSystem === 'j2') {
-                error_log("J2记录删除：仅删除J2编辑表记录");
+                // 如果是Central记录，同步软删除stockinout_data表记录
+                $targetSystem = $recordToDelete['target_system'] ?? 'j2';
+                if (strtolower($targetSystem) === 'central') {
+                    $centralDeleteSql = "UPDATE stockinout_data SET deleted_at = NOW(), deleted_by = ? 
+                                        WHERE product_name = ? AND date = ? AND receiver = ? AND target_system = 'central' AND deleted_at IS NULL
+                                        ORDER BY created_at DESC LIMIT 1";
+                    $centralDelStmt = $pdo->prepare($centralDeleteSql);
+                    $centralDelStmt->execute([
+                        $username,
+                        $recordToDelete['product_name'],
+                        $recordToDelete['date'],
+                        $recordToDelete['receiver']
+                    ]);
+                }
             }
-            sendResponse(true, "进出库记录删除成功");
-        } else {
-            sendResponse(false, "删除失败");
         }
-        
+
+        $pdo->commit();
+        sendResponse(true, "记录已成功移至回收站");
     } catch (PDOException $e) {
-        sendResponse(false, "删除记录失败：" . $e->getMessage());
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        sendResponse(false, "删除失败：" . $e->getMessage());
     }
 }
 

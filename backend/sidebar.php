@@ -528,6 +528,11 @@ if (!$canSeeBrand) {
                         库存
                     </a>
                 </div>
+                <div class="menu-item-wrapper">
+                    <a href="stock_recycle" class="informationmenu-item">
+                        回收站
+                    </a>
+                </div>
                 <?php endif; ?>
                 <?php if (!empty($submenuVisibility['resource']['dishware'])): ?>
                 <div class="menu-item-wrapper">

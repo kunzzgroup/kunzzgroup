@@ -425,7 +425,7 @@ function handleGet() {
                 $endDate = date('Y-m-d'); // 今天
             }
 
-            $sql = "SELECT * FROM stockinout_data WHERE 1=1";
+            $sql = "SELECT * FROM stockinout_data WHERE deleted_at IS NULL";
             $params = [];
             
             // 排除货品异常（SOT）的记录，因为它们在 stocksot.php 中管理
@@ -506,7 +506,7 @@ function handleGet() {
                         SUM(in_quantity) as total_in_quantity,
                         SUM(out_quantity) as total_out_quantity,
                         SUM(in_quantity - out_quantity) as total_balance_quantity
-                    FROM stockinout_data WHERE 1=1";
+                    FROM stockinout_data WHERE deleted_at IS NULL";
             $params = [];
             
             if ($startDate && $endDate) {
@@ -534,7 +534,7 @@ function handleGet() {
                 sendResponse(false, "缺少记录ID");
             }
             
-            $stmt = $pdo->prepare("SELECT * FROM stockinout_data WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT * FROM stockinout_data WHERE id = ? AND deleted_at IS NULL");
             $stmt->execute([$id]);
             $record = $stmt->fetch(PDO::FETCH_ASSOC);
             
@@ -547,7 +547,7 @@ function handleGet() {
             
         case 'suppliers':
             // 获取所有供应商列表
-            $stmt = $pdo->prepare("SELECT DISTINCT supplier FROM stockinout_data ORDER BY supplier");
+            $stmt = $pdo->prepare("SELECT DISTINCT supplier FROM stockinout_data WHERE deleted_at IS NULL ORDER BY supplier");
             $stmt->execute();
             $suppliers = $stmt->fetchAll(PDO::FETCH_COLUMN);
             
@@ -556,7 +556,7 @@ function handleGet() {
             
         case 'products':
             // 获取所有产品列表
-            $stmt = $pdo->prepare("SELECT DISTINCT product_code, product_name FROM stockinout_data ORDER BY product_code");
+            $stmt = $pdo->prepare("SELECT DISTINCT product_code, product_name FROM stockinout_data WHERE deleted_at IS NULL ORDER BY product_code");
             $stmt->execute();
             $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
@@ -646,7 +646,7 @@ function handleGet() {
             
             $sql = "SELECT DISTINCT price 
                     FROM stockinout_data 
-                    WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND in_quantity > 0
+                    WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND in_quantity > 0 AND deleted_at IS NULL
                     ORDER BY price DESC";
             
             $stmt = $pdo->prepare($sql);
@@ -669,7 +669,7 @@ function handleGet() {
                         (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
                         SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as available_stock
                     FROM stockinout_data 
-                    WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&'))";
+                    WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND deleted_at IS NULL";
             
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$productName, $productName]);
@@ -712,7 +712,7 @@ function handleGet() {
                         (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
                         SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as available_stock
                     FROM stockinout_data 
-                    WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND price = ?";
+                    WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND price = ? AND deleted_at IS NULL";
             
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$productName, $productName, $price]);
@@ -760,7 +760,7 @@ function handleGet() {
                             (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
                             SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as available_stock
                         FROM stockinout_data 
-                        WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&'))";
+                        WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND deleted_at IS NULL";
                 $params = [$productName, $productName];
                 if (!empty($codeNumber)) {
                     $sql .= " AND code_number = ?";
@@ -808,7 +808,7 @@ function handleGet() {
             $includeOut = $_GET['include_out'] ?? '1';
             
             // 构建查询条件
-            $conditions = ["1=1"];
+            $conditions = ["deleted_at IS NULL"];
             $params = [];
             
             // 排除货品异常（SOT）的记录
@@ -895,7 +895,7 @@ function handleGet() {
         
         case 'remark_numbers':
             // 获取所有唯一的备注编号
-            $stmt = $pdo->prepare("SELECT DISTINCT remark_number FROM stockinout_data WHERE remark_number IS NOT NULL AND remark_number != '' ORDER BY remark_number");
+            $stmt = $pdo->prepare("SELECT DISTINCT remark_number FROM stockinout_data WHERE remark_number IS NOT NULL AND remark_number != '' AND deleted_at IS NULL ORDER BY remark_number");
             $stmt->execute();
             $remarkNumbers = $stmt->fetchAll(PDO::FETCH_COLUMN);
             
@@ -1051,7 +1051,7 @@ function handlePost() {
         $pdo->commit();
         
         // 获取新插入的记录
-        $stmt = $pdo->prepare("SELECT * FROM stockinout_data WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT * FROM stockinout_data WHERE id = ? AND deleted_at IS NULL");
         $stmt->execute([$newId]);
         $newRecord = $stmt->fetch(PDO::FETCH_ASSOC);
         $newRecord['approval_status'] = (!empty($newRecord['approver'])) ? 'approved' : 'pending';
@@ -1204,13 +1204,13 @@ function handleApprove() {
     $approver = $_SESSION['username'] ?? 'System';
     
     try {
-        $sql = "UPDATE stockinout_data SET approver = ? WHERE id = ?";
+        $sql = "UPDATE stockinout_data SET approver = ? WHERE id = ? AND deleted_at IS NULL";
         $stmt = $pdo->prepare($sql);
         $result = $stmt->execute([$approver, $id]);
         
         if ($stmt->rowCount() > 0) {
             // 获取更新后的记录
-            $stmt = $pdo->prepare("SELECT * FROM stockinout_data WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT * FROM stockinout_data WHERE id = ? AND deleted_at IS NULL");
             $stmt->execute([$id]);
             $updatedRecord = $stmt->fetch(PDO::FETCH_ASSOC);
             $updatedRecord['approval_status'] = 'approved';
@@ -1252,7 +1252,7 @@ function handlePut() {
     
     try {
         // 先获取原始记录，用于比较target_system是否发生变化
-        $originalStmt = $pdo->prepare("SELECT * FROM stockinout_data WHERE id = ?");
+        $originalStmt = $pdo->prepare("SELECT * FROM stockinout_data WHERE id = ? AND deleted_at IS NULL");
         $originalStmt->execute([$data['id']]);
         $originalRecord = $originalStmt->fetch(PDO::FETCH_ASSOC);
         
@@ -1320,7 +1320,7 @@ function handlePut() {
                     in_quantity = ?, out_quantity = ?, 
                     specification = ?, price = ?, code_number = ?, remark = ?, 
                     target_system = ?, product_remark_checked = ?, remark_number = ?
-                WHERE id = ?";
+                WHERE id = ? AND deleted_at IS NULL";
 
         $stmt = $pdo->prepare($sql);
         $result = $stmt->execute([
@@ -1391,7 +1391,7 @@ function handlePut() {
             // 根据新的target_system创建或更新记录
             if ($newTargetSystem === 'j1') {
                 // 检查J1表中是否已存在记录
-                $j1CheckSql = "SELECT COUNT(*) FROM j1stockinout_data WHERE main_record_id = ?";
+                $j1CheckSql = "SELECT COUNT(*) FROM j1stockinout_data WHERE main_record_id = ? AND deleted_at IS NULL";
                 $j1CheckStmt = $pdo->prepare($j1CheckSql);
                 $j1CheckStmt->execute([$data['id']]);
                 $j1Exists = $j1CheckStmt->fetchColumn() > 0;
@@ -1401,7 +1401,7 @@ function handlePut() {
                     $j1UpdateSql = "UPDATE j1stockinout_data 
                                     SET date = ?, time = ?, code_number = ?, product_name = ?, 
                                         in_quantity = ?, out_quantity = ?, specification = ?, price = ?, total_value = ?, receiver = ?, remark = ?, target_system = ?
-                                    WHERE main_record_id = ?";
+                                    WHERE main_record_id = ? AND deleted_at IS NULL";
                     
                     $j1Stmt = $pdo->prepare($j1UpdateSql);
                     $j1Stmt->execute([
@@ -1452,7 +1452,7 @@ function handlePut() {
                 
                 // 先尝试用日期、时间和旧的receiver值查找记录（如果receiver改变了）
                 $j1EditCheckSql = "SELECT COUNT(*) FROM j1stockedit_data 
-                                    WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j1'";
+                                    WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j1' AND deleted_at IS NULL";
                 $j1EditCheckStmt = $pdo->prepare($j1EditCheckSql);
                 $j1EditCheckStmt->execute([
                     $data['product_name'], 
@@ -1467,7 +1467,7 @@ function handlePut() {
                     $j1EditUpdateSql = "UPDATE j1stockedit_data 
                                         SET date = ?, time = ?, code_number = ?, product_name = ?, 
                                             in_quantity = ?, out_quantity = ?, specification = ?, price = ?, receiver = ?, remark = ?, target_system = ?
-                                        WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j1'
+                                        WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j1' AND deleted_at IS NULL
                                         LIMIT 1";
                     
                     $j1EditStmt = $pdo->prepare($j1EditUpdateSql);
@@ -1491,7 +1491,7 @@ function handlePut() {
                 } else {
                     // 如果没找到，再尝试用日期、时间和新的receiver值查找
                     $j1EditCheckSql2 = "SELECT COUNT(*) FROM j1stockedit_data 
-                                        WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j1'";
+                                        WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j1' AND deleted_at IS NULL";
                     $j1EditCheckStmt2 = $pdo->prepare($j1EditCheckSql2);
                     $j1EditCheckStmt2->execute([$data['product_name'], $data['date'], $data['time'], $newReceiver]);
                     $j1EditExists2 = $j1EditCheckStmt2->fetchColumn() > 0;
@@ -1501,7 +1501,7 @@ function handlePut() {
                         $j1EditUpdateSql2 = "UPDATE j1stockedit_data 
                                             SET date = ?, time = ?, code_number = ?, product_name = ?, 
                                                 in_quantity = ?, out_quantity = ?, specification = ?, price = ?, receiver = ?, remark = ?, target_system = ?
-                                            WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j1'
+                                            WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j1' AND deleted_at IS NULL
                                             LIMIT 1";
                         
                         $j1EditStmt2 = $pdo->prepare($j1EditUpdateSql2);
@@ -1549,7 +1549,7 @@ function handlePut() {
                 
             } elseif ($newTargetSystem === 'j2') {
                 // 检查J2表中是否已存在记录
-                $j2CheckSql = "SELECT COUNT(*) FROM j2stockinout_data WHERE main_record_id = ?";
+                $j2CheckSql = "SELECT COUNT(*) FROM j2stockinout_data WHERE main_record_id = ? AND deleted_at IS NULL";
                 $j2CheckStmt = $pdo->prepare($j2CheckSql);
                 $j2CheckStmt->execute([$data['id']]);
                 $j2Exists = $j2CheckStmt->fetchColumn() > 0;
@@ -1610,7 +1610,7 @@ function handlePut() {
                 
                 // 先尝试用日期、时间和旧的receiver值查找记录（如果receiver改变了）
                 $j2EditCheckSql = "SELECT COUNT(*) FROM j2stockedit_data 
-                                    WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j2'";
+                                    WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j2' AND deleted_at IS NULL";
                 $j2EditCheckStmt = $pdo->prepare($j2EditCheckSql);
                 $j2EditCheckStmt->execute([
                     $data['product_name'], 
@@ -1625,7 +1625,7 @@ function handlePut() {
                     $j2EditUpdateSql = "UPDATE j2stockedit_data 
                                         SET date = ?, time = ?, code_number = ?, product_name = ?, 
                                             in_quantity = ?, out_quantity = ?, specification = ?, price = ?, receiver = ?, remark = ?, target_system = ?
-                                        WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j2'
+                                        WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j2' AND deleted_at IS NULL
                                         LIMIT 1";
 
                     $j2EditStmt = $pdo->prepare($j2EditUpdateSql);
@@ -1649,7 +1649,7 @@ function handlePut() {
                 } else {
                     // 如果没找到，再尝试用日期、时间和新的receiver值查找
                     $j2EditCheckSql2 = "SELECT COUNT(*) FROM j2stockedit_data 
-                                        WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j2'";
+                                        WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j2' AND deleted_at IS NULL";
                     $j2EditCheckStmt2 = $pdo->prepare($j2EditCheckSql2);
                     $j2EditCheckStmt2->execute([$data['product_name'], $data['date'], $data['time'], $newReceiver]);
                     $j2EditExists2 = $j2EditCheckStmt2->fetchColumn() > 0;
@@ -1659,7 +1659,7 @@ function handlePut() {
                         $j2EditUpdateSql2 = "UPDATE j2stockedit_data 
                                             SET date = ?, time = ?, code_number = ?, product_name = ?, 
                                                 in_quantity = ?, out_quantity = ?, specification = ?, price = ?, receiver = ?, remark = ?, target_system = ?
-                                            WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j2'
+                                            WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j2' AND deleted_at IS NULL
                                             LIMIT 1";
                         
                         $j2EditStmt2 = $pdo->prepare($j2EditUpdateSql2);
@@ -1707,7 +1707,7 @@ function handlePut() {
                 
             } elseif ($newTargetSystem === 'j3') {
                 // 检查J3表中是否已存在记录
-                $j3CheckSql = "SELECT COUNT(*) FROM j3stockinout_data WHERE main_record_id = ?";
+                $j3CheckSql = "SELECT COUNT(*) FROM j3stockinout_data WHERE main_record_id = ? AND deleted_at IS NULL";
                 $j3CheckStmt = $pdo->prepare($j3CheckSql);
                 $j3CheckStmt->execute([$data['id']]);
                 $j3Exists = $j3CheckStmt->fetchColumn() > 0;
@@ -1768,7 +1768,7 @@ function handlePut() {
                 
                 // 先尝试用日期、时间和旧的receiver值查找记录（如果receiver改变了）
                 $j3EditCheckSql = "SELECT COUNT(*) FROM j3stockedit_data 
-                                    WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j3'";
+                                    WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j3' AND deleted_at IS NULL";
                 $j3EditCheckStmt = $pdo->prepare($j3EditCheckSql);
                 $j3EditCheckStmt->execute([
                     $data['product_name'], 
@@ -1783,7 +1783,7 @@ function handlePut() {
                     $j3EditUpdateSql = "UPDATE j3stockedit_data 
                                         SET date = ?, time = ?, code_number = ?, product_name = ?, 
                                             in_quantity = ?, out_quantity = ?, specification = ?, price = ?, receiver = ?, remark = ?, target_system = ?
-                                        WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j3'
+                                        WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j3' AND deleted_at IS NULL
                                         LIMIT 1";
 
                     $j3EditStmt = $pdo->prepare($j3EditUpdateSql);
@@ -1807,7 +1807,7 @@ function handlePut() {
                 } else {
                     // 如果没找到，再尝试用日期、时间和新的receiver值查找
                     $j3EditCheckSql2 = "SELECT COUNT(*) FROM j3stockedit_data 
-                                        WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j3'";
+                                        WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j3' AND deleted_at IS NULL";
                     $j3EditCheckStmt2 = $pdo->prepare($j3EditCheckSql2);
                     $j3EditCheckStmt2->execute([$data['product_name'], $data['date'], $data['time'], $newReceiver]);
                     $j3EditExists2 = $j3EditCheckStmt2->fetchColumn() > 0;
@@ -1817,7 +1817,7 @@ function handlePut() {
                         $j3EditUpdateSql2 = "UPDATE j3stockedit_data 
                                             SET date = ?, time = ?, code_number = ?, product_name = ?, 
                                                 in_quantity = ?, out_quantity = ?, specification = ?, price = ?, receiver = ?, remark = ?, target_system = ?
-                                            WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j3'
+                                            WHERE product_name = ? AND date = ? AND time = ? AND receiver = ? AND target_system = 'j3' AND deleted_at IS NULL
                                             LIMIT 1";
                         
                         $j3EditStmt2 = $pdo->prepare($j3EditUpdateSql2);
@@ -1899,7 +1899,7 @@ function handlePut() {
         $pdo->commit();
         
         // 获取更新后的记录
-        $stmt = $pdo->prepare("SELECT * FROM stockinout_data WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT * FROM stockinout_data WHERE id = ? AND deleted_at IS NULL");
         $stmt->execute([$data['id']]);
         $updatedRecord = $stmt->fetch(PDO::FETCH_ASSOC);
         
@@ -1924,217 +1924,78 @@ function handlePut() {
 
 function handleDelete() {
     global $pdo;
+    session_start();
+    $username = $_SESSION['username'] ?? 'System';
     
     $id = $_GET['id'] ?? null;
+    $ids = $_GET['ids'] ?? null; // 支持批量删除
     
-    if (!$id) {
+    if (!$id && !$ids) {
         sendResponse(false, "缺少记录ID");
     }
+
+    $targetIds = $id ? [$id] : explode(',', $ids);
     
     try {
-        // 先获取要删除的记录信息
-        $getRecordSql = "SELECT * FROM stockinout_data WHERE id = ?";
-        $getStmt = $pdo->prepare($getRecordSql);
-        $getStmt->execute([$id]);
-        $recordToDelete = $getStmt->fetch(PDO::FETCH_ASSOC);
-        
-        if (!$recordToDelete) {
-            sendResponse(false, "记录不存在");
-        }
-        
-        // 执行删除主表记录
-        $stmt = $pdo->prepare("DELETE FROM stockinout_data WHERE id = ?");
-        $result = $stmt->execute([$id]);
-        
-        if ($stmt->rowCount() > 0) {
-            // 如果是出库记录，根据target_system同步删除相应的表记录
-            if (floatval($recordToDelete['out_quantity'] ?? 0) > 0) {
-                $targetSystem = $recordToDelete['target_system'] ?? 'j1'; // 默认j1
-                
-                if ($targetSystem === 'j1') {
-                    // 删除J1stockinout_data表记录
-                    $j1DeleteSql = "DELETE FROM j1stockinout_data WHERE main_record_id = ?";
-                    $j1DelStmt = $pdo->prepare($j1DeleteSql);
-                    $j1DelStmt->execute([$id]);
+        $pdo->beginTransaction();
+
+        foreach ($targetIds as $currentId) {
+            // 先获取要删除的记录信息
+            $getRecordSql = "SELECT * FROM stockinout_data WHERE id = ? AND deleted_at IS NULL";
+            $getStmt = $pdo->prepare($getRecordSql);
+            $getStmt->execute([$currentId]);
+            $recordToDelete = $getStmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$recordToDelete) {
+                continue;
+            }
+            
+            // 执行软删除主表记录
+            $stmt = $pdo->prepare("UPDATE stockinout_data SET deleted_at = NOW(), deleted_by = ? WHERE id = ?");
+            $result = $stmt->execute([$username, $currentId]);
+            
+            if ($stmt->rowCount() > 0) {
+                // 如果是出库记录，根据target_system同步软删除相应的表记录
+                if (floatval($recordToDelete['out_quantity'] ?? 0) > 0) {
+                    $targetSystem = $recordToDelete['target_system'] ?? 'j1';
                     
-                    // 同时删除J1stockedit_data表记录 - 通过产品名称和接收者匹配最新记录
-                    $getJ1EditRecordSql = "SELECT id FROM j1stockedit_data WHERE product_name = ? AND receiver = ? ORDER BY created_at DESC LIMIT 1";
-                    $getJ1EditStmt = $pdo->prepare($getJ1EditRecordSql);
-                    $getJ1EditStmt->execute([$recordToDelete['product_name'], $recordToDelete['receiver']]);
-                    $j1EditRecordId = $getJ1EditStmt->fetchColumn();
-
-                        if ($j1EditRecordId) {
-                            // 获取要同步扣除的详情
-                            $getJ1DetailSql = "SELECT product_name, code_number, specification, in_quantity, out_quantity FROM j1stockedit_data WHERE id = ?";
-                            $j1Stmt = $pdo->prepare($getJ1DetailSql);
-                            $j1Stmt->execute([$j1EditRecordId]);
-                            $j1Rec = $j1Stmt->fetch(PDO::FETCH_ASSOC);
-
-                            $j1EditDeleteSql = "DELETE FROM j1stockedit_data WHERE id = ?";
-                            $j1EditDelStmt = $pdo->prepare($j1EditDeleteSql);
-                            $j1EditDelStmt->execute([$j1EditRecordId]);
-                            error_log("已同步删除J1表和J1Edit表记录");
-
-                            if ($j1Rec) {
-                                try {
-                                    $inQty = floatval($j1Rec['in_quantity'] ?? 0);
-                                    $outQty = floatval($j1Rec['out_quantity'] ?? 0);
-                                    $netQty = $inQty - $outQty;
-                                    $specMatch = ($j1Rec['specification'] === "none" || $j1Rec['specification'] === "") ? null : $j1Rec['specification'];
-                                    
-                                    $checkSql = "SELECT id, total_qty FROM j1stocklist_total WHERE product_name = ? AND code_number = ? ";
-                                    $checkParams = [$j1Rec['product_name'], $j1Rec['code_number']];
-                                    if ($specMatch === null) {
-                                        $checkSql .= " AND (specification IS NULL OR specification = '' OR specification = 'none') ";
-                                    } else {
-                                        $checkSql .= " AND specification = ? ";
-                                        $checkParams[] = $specMatch;
-                                    }
-                                    $checkStmt = $pdo->prepare($checkSql);
-                                    $checkStmt->execute($checkParams);
-                                    $existingTotal = $checkStmt->fetch(PDO::FETCH_ASSOC);
-                                    if ($existingTotal) {
-                                        $newTotal = floatval($existingTotal['total_qty']) - $netQty;
-                                        if ($newTotal <= 0.0001 && $newTotal >= -0.0001) {
-                                            $pdo->prepare("DELETE FROM j1stocklist_total WHERE id = ?")->execute([$existingTotal['id']]);
-                                        } else {
-                                            $pdo->prepare("UPDATE j1stocklist_total SET total_qty = ?, last_updated = NOW() WHERE id = ?")->execute([$newTotal, $existingTotal['id']]);
-                                        }
-                                        error_log("已同步更新J1移动端库存总表");
-                                    }
-                                } catch (PDOException $e) {
-                                    error_log("同步更新J1移动端库存总表失败: " . $e->getMessage());
-                                }
-                            }
-                        } else {
-                            error_log("未找到对应的J1Edit记录进行删除");
-                        }
-                } elseif ($targetSystem === 'j2') {
-                    // 删除J2stockinout_data表记录
-                    $j2DeleteSql = "DELETE FROM j2stockinout_data WHERE main_record_id = ?";
-                    $j2DelStmt = $pdo->prepare($j2DeleteSql);
-                    $j2DelStmt->execute([$id]);
-                    
-                    // 同时删除J2stockedit_data表记录 - 通过产品名称和接收者匹配最新记录
-                    $getJ2EditRecordSql = "SELECT id FROM j2stockedit_data WHERE product_name = ? AND receiver = ? ORDER BY created_at DESC LIMIT 1";
-                    $getJ2EditStmt = $pdo->prepare($getJ2EditRecordSql);
-                    $getJ2EditStmt->execute([$recordToDelete['product_name'], $recordToDelete['receiver']]);
-                    $j2EditRecordId = $getJ2EditStmt->fetchColumn();
-
-                        if ($j2EditRecordId) {
-                            // 获取细节
-                            $getJ2DetailSql = "SELECT product_name, code_number, specification, in_quantity, out_quantity FROM j2stockedit_data WHERE id = ?";
-                            $j2Stmt = $pdo->prepare($getJ2DetailSql);
-                            $j2Stmt->execute([$j2EditRecordId]);
-                            $j2Rec = $j2Stmt->fetch(PDO::FETCH_ASSOC);
-
-                            $j2EditDeleteSql = "DELETE FROM j2stockedit_data WHERE id = ?";
-                            $j2EditDelStmt = $pdo->prepare($j2EditDeleteSql);
-                            $j2EditDelStmt->execute([$j2EditRecordId]);
-                            error_log("已同步删除J2表和J2Edit表记录");
-
-                            if ($j2Rec) {
-                                try {
-                                    $inQty = floatval($j2Rec['in_quantity'] ?? 0);
-                                    $outQty = floatval($j2Rec['out_quantity'] ?? 0);
-                                    $netQty = $inQty - $outQty;
-                                    $specMatch = ($j2Rec['specification'] === "none" || $j2Rec['specification'] === "") ? null : $j2Rec['specification'];
-                                    
-                                    $checkSql = "SELECT id, total_qty FROM j2stocklist_total WHERE product_name = ? AND code_number = ? ";
-                                    $checkParams = [$j2Rec['product_name'], $j2Rec['code_number']];
-                                    if ($specMatch === null) {
-                                        $checkSql .= " AND (specification IS NULL OR specification = '' OR specification = 'none') ";
-                                    } else {
-                                        $checkSql .= " AND specification = ? ";
-                                        $checkParams[] = $specMatch;
-                                    }
-                                    $checkStmt = $pdo->prepare($checkSql);
-                                    $checkStmt->execute($checkParams);
-                                    $existingTotal = $checkStmt->fetch(PDO::FETCH_ASSOC);
-                                    if ($existingTotal) {
-                                        $newTotal = floatval($existingTotal['total_qty']) - $netQty;
-                                        if ($newTotal <= 0.0001 && $newTotal >= -0.0001) {
-                                            $pdo->prepare("DELETE FROM j2stocklist_total WHERE id = ?")->execute([$existingTotal['id']]);
-                                        } else {
-                                            $pdo->prepare("UPDATE j2stocklist_total SET total_qty = ?, last_updated = NOW() WHERE id = ?")->execute([$newTotal, $existingTotal['id']]);
-                                        }
-                                        error_log("已同步更新J2移动端库存总表");
-                                    }
-                                } catch (PDOException $e) {
-                                    error_log("同步更新J2移动端库存总表失败: " . $e->getMessage());
-                                }
-                            }
-                        }
-                    
-                    error_log("已同步删除J2表和J2Edit表记录");
-                } elseif ($targetSystem === 'j3') {
-                    // 删除J3stockinout_data表记录
-                    $j3DeleteSql = "DELETE FROM j3stockinout_data WHERE main_record_id = ?";
-                    $j3DelStmt = $pdo->prepare($j3DeleteSql);
-                    $j3DelStmt->execute([$id]);
-                    
-                    // 同时删除J3stockedit_data表记录 - 通过产品名称和接收者匹配最新记录
-                    $getJ3EditRecordSql = "SELECT id FROM j3stockedit_data WHERE product_name = ? AND receiver = ? ORDER BY created_at DESC LIMIT 1";
-                    $getJ3EditStmt = $pdo->prepare($getJ3EditRecordSql);
-                    $getJ3EditStmt->execute([$recordToDelete['product_name'], $recordToDelete['receiver']]);
-                    $j3EditRecordId = $getJ3EditStmt->fetchColumn();
-
-                        if ($j3EditRecordId) {
-                            // 获取细节
-                            $getJ3DetailSql = "SELECT product_name, code_number, specification, in_quantity, out_quantity FROM j3stockedit_data WHERE id = ?";
-                            $j3Stmt = $pdo->prepare($getJ3DetailSql);
-                            $j3Stmt->execute([$j3EditRecordId]);
-                            $j3Rec = $j3Stmt->fetch(PDO::FETCH_ASSOC);
-
-                            $j3EditDeleteSql = "DELETE FROM j3stockedit_data WHERE id = ?";
-                            $j3EditDelStmt = $pdo->prepare($j3EditDeleteSql);
-                            $j3EditDelStmt->execute([$j3EditRecordId]);
-                            error_log("已同步删除J3表和J3Edit表记录");
-
-                            if ($j3Rec) {
-                                try {
-                                    $inQty = floatval($j3Rec['in_quantity'] ?? 0);
-                                    $outQty = floatval($j3Rec['out_quantity'] ?? 0);
-                                    $netQty = $inQty - $outQty;
-                                    $specMatch = ($j3Rec['specification'] === "none" || $j3Rec['specification'] === "") ? null : $j3Rec['specification'];
-                                    
-                                    $checkSql = "SELECT id, total_qty FROM j3stocklist_total WHERE product_name = ? AND code_number = ? ";
-                                    $checkParams = [$j3Rec['product_name'], $j3Rec['code_number']];
-                                    if ($specMatch === null) {
-                                        $checkSql .= " AND (specification IS NULL OR specification = '' OR specification = 'none') ";
-                                    } else {
-                                        $checkSql .= " AND specification = ? ";
-                                        $checkParams[] = $specMatch;
-                                    }
-                                    $checkStmt = $pdo->prepare($checkSql);
-                                    $checkStmt->execute($checkParams);
-                                    $existingTotal = $checkStmt->fetch(PDO::FETCH_ASSOC);
-                                    if ($existingTotal) {
-                                        $newTotal = floatval($existingTotal['total_qty']) - $netQty;
-                                        if ($newTotal <= 0.0001 && $newTotal >= -0.0001) {
-                                            $pdo->prepare("DELETE FROM j3stocklist_total WHERE id = ?")->execute([$existingTotal['id']]);
-                                        } else {
-                                            $pdo->prepare("UPDATE j3stocklist_total SET total_qty = ?, last_updated = NOW() WHERE id = ?")->execute([$newTotal, $existingTotal['id']]);
-                                        }
-                                        error_log("已同步更新J3移动端库存总表");
-                                    }
-                                } catch (PDOException $e) {
-                                    error_log("同步更新J3移动端库存总表失败: " . $e->getMessage());
-                                }
-                            }
-                        } else {
-                            error_log("未找到对应的J3Edit记录进行删除");
-                        }
-                } elseif ($targetSystem === 'central') {
-                    error_log("Central记录删除：仅删除主表记录");
+                    if ($targetSystem === 'j1') {
+                        // 软删除J1stockinout_data表记录
+                        $pdo->prepare("UPDATE j1stockinout_data SET deleted_at = NOW(), deleted_by = ? WHERE main_record_id = ? AND deleted_at IS NULL")
+                            ->execute([$username, $currentId]);
+                        
+                        // 软删除J1stockedit_data表记录
+                        $pdo->prepare("UPDATE j1stockedit_data SET deleted_at = NOW(), deleted_by = ? 
+                                       WHERE product_name = ? AND receiver = ? AND target_system = 'j1' AND deleted_at IS NULL")
+                            ->execute([$username, $recordToDelete['product_name'], $recordToDelete['receiver']]);
+                    } elseif ($targetSystem === 'j2') {
+                        // 软删除J2stockinout_data表记录
+                        $pdo->prepare("UPDATE j2stockinout_data SET deleted_at = NOW(), deleted_by = ? WHERE main_record_id = ? AND deleted_at IS NULL")
+                            ->execute([$username, $currentId]);
+                        
+                        // 软删除J2stockedit_data表记录
+                        $pdo->prepare("UPDATE j2stockedit_data SET deleted_at = NOW(), deleted_by = ? 
+                                       WHERE product_name = ? AND receiver = ? AND target_system = 'j2' AND deleted_at IS NULL")
+                            ->execute([$username, $recordToDelete['product_name'], $recordToDelete['receiver']]);
+                    } elseif ($targetSystem === 'j3') {
+                        // 软删除J3stockinout_data表记录
+                        $pdo->prepare("UPDATE j3stockinout_data SET deleted_at = NOW(), deleted_by = ? WHERE main_record_id = ? AND deleted_at IS NULL")
+                            ->execute([$username, $currentId]);
+                        
+                        // 软删除J3stockedit_data表记录
+                        $pdo->prepare("UPDATE j3stockedit_data SET deleted_at = NOW(), deleted_by = ? 
+                                       WHERE product_name = ? AND receiver = ? AND target_system = 'j3' AND deleted_at IS NULL")
+                            ->execute([$username, $recordToDelete['product_name'], $recordToDelete['receiver']]);
+                    }
                 }
             }
-            sendResponse(true, "进出库记录删除成功");
-        } else {
-            sendResponse(false, "删除失败");
         }
+
+        $pdo->commit();
+        sendResponse(true, "记录已移至回收站");
         
     } catch (PDOException $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
         sendResponse(false, "删除记录失败：" . $e->getMessage());
     }
 }
@@ -2162,7 +2023,7 @@ function handlePatch() {
         $pdo->beginTransaction();
         
         // 更新单个字段
-        $sql = "UPDATE stockinout_data SET {$field} = ? WHERE id = ?";
+        $sql = "UPDATE stockinout_data SET {$field} = ? WHERE id = ? AND deleted_at IS NULL";
         $stmt = $pdo->prepare($sql);
         $result = $stmt->execute([$value, $id]);
         

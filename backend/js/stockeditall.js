@@ -73,6 +73,8 @@ let originalEditData = new Map();
 // 批量删除状态
 let isBatchDeleteMode = false;
 let selectedRecords = new Set();
+let lastDeletedIds = []; // 存储最后一次删除的记录ID，用于撤销
+let undoTimer = null;
 
 // 规格选项
 const specifications = ['Tub', 'Kilo', 'Piece', 'Bottle', 'Box', 'Packet', 'Carton', 'Tin', 'Roll', 'Nos', 'mL', 'Glass'];
@@ -95,12 +97,18 @@ let isSelectingRange = false;
 
 // 全局键盘快捷键 (CTRL+S 保存) - 使用 Capture 模式确保最高优先级
 window.addEventListener('keydown', function (e) {
-    // 检查是否按下 Ctrl+S 或 Cmd+S
-    if ((e.ctrlKey || e.metaKey) && (e.code === 'KeyS' || e.key === 's' || e.key === 'S')) {
-        e.preventDefault(); // 阻止浏览器默认保存行为
-        e.stopPropagation(); // 阻止事件进一步传播
+    // A. 撤销删除 (Ctrl+Shift+Z)
+    if (e.ctrlKey && e.shiftKey && (e.code === 'KeyZ' || e.key === 'z' || e.key === 'Z')) {
+        console.log('StockEdit Shortcut: CTRL+SHIFT+Z triggered (Undo Delete)');
+        undoDelete();
+        return;
+    }
 
-        // A. 检查是否按下 SHIFT (CTRL+SHIFT+S) -> 触发批量保存
+    // B. 检查是否按下 Ctrl+S 或 Cmd+S
+    if ((e.ctrlKey || e.metaKey) && (e.code === 'KeyS' || e.key === 's' || e.key === 'S')) {
+        e.preventDefault(); 
+        e.stopPropagation(); 
+        
         if (e.shiftKey) {
             console.log('StockEdit Shortcut: CTRL+SHIFT+S triggered (Batch Save)');
             if (typeof batchSaveNewRows === 'function') {
@@ -108,15 +116,11 @@ window.addEventListener('keydown', function (e) {
             }
             return;
         }
-
-        // B. 正常的 CTRL+S -> 保存单个项
+        
         const activeElement = document.activeElement;
-
-        // 1. 优先保存当前聚焦的行
         if (activeElement && activeElement !== document.body) {
             const row = activeElement.closest('tr');
             if (row) {
-                // 如果是新创建的行
                 if (row.classList.contains('new-row')) {
                     const saveBtn = row.querySelector('.save-new-btn');
                     if (saveBtn) {
@@ -124,14 +128,11 @@ window.addEventListener('keydown', function (e) {
                         return;
                     }
                 }
-
-                // 如果是正在编辑的行
                 let recordId = activeElement.getAttribute('data-record-id');
                 if (!recordId) {
                     const inputWithId = row.querySelector('input[data-record-id]');
                     if (inputWithId) recordId = inputWithId.getAttribute('data-record-id');
                 }
-
                 if (recordId) {
                     const rid = parseInt(recordId);
                     if (typeof editingRowIds !== 'undefined' && editingRowIds.has(rid)) {
@@ -141,27 +142,19 @@ window.addEventListener('keydown', function (e) {
                 }
             }
         }
-
-        // 2. 检查是否在新增弹窗中
         const addForm = document.getElementById('add-form');
         if (addForm && addForm.classList.contains('show')) {
             saveNewRecord();
             return;
         }
-
-        // 3. 兜底方案：保存当前可见的第一个未保存项（支持无光标下的“一个一个保存”）
-        // 优先保存表格中的“新行”
         const newRows = document.querySelectorAll('.new-row');
         if (newRows.length > 0) {
-            // 通常新行在底部，但我们从第一个开始保存
             const saveBtn = newRows[0].querySelector('.save-new-btn');
             if (saveBtn) {
                 saveNewRowRecord(saveBtn);
                 return;
             }
         }
-
-        // 其次尝试保存“正在编辑”的旧行
         if (typeof editingRowIds !== 'undefined' && editingRowIds.size > 0) {
             const rid = Array.from(editingRowIds)[0];
             saveRecord(rid);
@@ -4260,7 +4253,7 @@ async function approveRecord(id) {
 
 // 删除记录
 async function deleteRecord(id) {
-    if (!confirm('确定要删除此记录吗？此操作不可恢复！')) return;
+    if (!confirm('确定要删除此记录吗？记录将移至回收站。')) return;
 
     try {
         const result = await apiCall(`?id=${id}`, {
@@ -4268,19 +4261,14 @@ async function deleteRecord(id) {
         });
 
         if (result.success) {
-            showAlert('记录删除成功', 'success');
-
-            // 保存其他正在编辑的行的输入值
+            lastDeletedIds = [id];
+            showUndoBar(1);
+            
             const editingValues = saveEditingRowsInputValues();
-
-            // 保存所有新创建的行
             const newRows = saveNewRows();
 
-            // 重新搜索数据（保持搜索状态）但保留新行
             searchData().then(() => {
-                // 恢复新创建的行
                 restoreNewRows(newRows);
-                // 恢复其他正在编辑的行的输入值
                 restoreEditingRowsInputValues(editingValues);
             });
         } else {
@@ -4288,6 +4276,109 @@ async function deleteRecord(id) {
         }
     } catch (error) {
         showAlert('删除时发生错误', 'error');
+    }
+}
+
+// 撤销删除功能
+async function undoDelete() {
+    if (!lastDeletedIds || lastDeletedIds.length === 0) return;
+
+    try {
+        const response = await fetch('restore_stock.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids: lastDeletedIds })
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            hideUndoBar();
+            lastDeletedIds = [];
+            showAlert('已撤销成功', 'success');
+            
+            const editingValues = saveEditingRowsInputValues();
+            const newRows = saveNewRows();
+            searchData().then(() => {
+                restoreNewRows(newRows);
+                restoreEditingRowsInputValues(editingValues);
+            });
+        } else {
+            showAlert('撤销失败: ' + result.message, 'error');
+        }
+    } catch (error) {
+        console.error('Undo failed:', error);
+        showAlert('撤销时发生错误', 'error');
+    }
+}
+
+// 显示撤销条
+function showUndoBar(count) {
+    let undoBar = document.getElementById('undoBar');
+    if (!undoBar) {
+        undoBar = document.createElement('div');
+        undoBar.id = 'undoBar';
+        document.body.appendChild(undoBar);
+        
+        // 注入样式
+        const style = document.createElement('style');
+        style.innerHTML = `
+            #undoBar {
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%) translateY(100px);
+                background: #333;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                transition: transform 0.3s ease;
+                font-size: 14px;
+            }
+            #undoBar.show {
+                transform: translateX(-50%) translateY(0);
+            }
+            #undoBar button {
+                background: #4f46e5;
+                color: white;
+                border: none;
+                padding: 6px 12px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-weight: bold;
+            }
+            #undoBar button:hover {
+                background: #4338ca;
+            }
+            #undoBar .shortcut-tip {
+                color: #aaa;
+                font-size: 11px;
+                margin-left: 5px;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    undoBar.innerHTML = `
+        <span>已删除 ${count} 条记录</span>
+        <button onclick="undoDelete()">撤销 <span class="shortcut-tip">(Ctrl+Shift+Z)</span></button>
+    `;
+    
+    undoBar.classList.add('show');
+
+    // 10秒后自动消失
+    if (undoTimer) clearTimeout(undoTimer);
+    undoTimer = setTimeout(hideUndoBar, 10000);
+}
+
+function hideUndoBar() {
+    const undoBar = document.getElementById('undoBar');
+    if (undoBar) {
+        undoBar.classList.remove('show');
     }
 }
 
@@ -7614,47 +7705,26 @@ async function confirmBatchDelete() {
     confirmBtn.disabled = true;
 
     try {
-        let successCount = 0;
-        let failCount = 0;
-
-        // 逐个删除选中的记录
-        for (const recordId of selectedRecords) {
-            try {
-                const result = await apiCall(`?id=${recordId}`, {
-                    method: 'DELETE'
-                });
-
-                if (result.success) {
-                    successCount++;
-                } else {
-                    failCount++;
-                }
-            } catch (error) {
-                failCount++;
-                console.error(`删除记录 ${recordId} 失败:`, error);
-            }
-        }
-
-        // 显示删除结果
-        if (successCount > 0) {
-            showAlert(`成功删除 ${successCount} 条记录${failCount > 0 ? `，${failCount} 条失败` : ''}`,
-                failCount > 0 ? 'warning' : 'success');
-        } else {
-            showAlert('删除失败', 'error');
-        }
-
-        // 退出批量删除模式并刷新数据
-        cancelBatchDelete();
-
-        // 保存所有新创建的行
-        const newRows = saveNewRows();
-
-        // 重新加载数据但保留新行
-        loadStockData().then(() => {
-            // 恢复新创建的行
-            restoreNewRows(newRows);
+        // 使用批量删除 API (现在后端 handleDelete 已支持 ids 参数)
+        const idList = Array.from(selectedRecords);
+        const result = await apiCall(`?ids=${idList.join(',')}`, {
+            method: 'DELETE'
         });
 
+        if (result.success) {
+            lastDeletedIds = [...idList];
+            showUndoBar(idList.length);
+            cancelBatchDelete();
+            
+            const newRows = saveNewRows();
+            loadStockData().then(() => {
+                restoreNewRows(newRows);
+            });
+        } else {
+            showAlert('删除失败: ' + (result.message || '未知错误'), 'error');
+            confirmBtn.innerHTML = originalText;
+            confirmBtn.disabled = false;
+        }
     } catch (error) {
         showAlert('批量删除时发生错误', 'error');
         confirmBtn.innerHTML = originalText;
