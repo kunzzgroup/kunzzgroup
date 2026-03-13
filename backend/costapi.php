@@ -290,6 +290,9 @@ function handleGet() {
                                 c.day_name,
                                 c.c_beverage,
                                 c.c_kitchen,
+                                c.c_grab,
+                                c.c_foodpanda,
+                                c.c_shopee,
                                 c.c_total,
                                 COALESCE((k.gross_sales - IFNULL(k.discounts, 0)), 0) as sales
                             FROM " . $config['data_table'] . " c

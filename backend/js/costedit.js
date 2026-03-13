@@ -416,7 +416,10 @@ function generateExcelTable() {
                         <button class="edit-btn" id="edit-btn-${day}" onclick="toggleEdit(${day})" title="编辑${day}日数据">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="delete-day-btn" onclick="clearDayData(${day})" title="清空${day}日成本（保留销售额）">
+                        <button class="cancel-edit-btn" id="cancel-btn-${day}" onclick="cancelEdit(${day})" title="取消编辑" style="display: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <button class="delete-day-btn" id="delete-btn-${day}" onclick="clearDayData(${day})" title="清空${day}日成本（保留销售额）">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </td>
@@ -562,8 +565,16 @@ function setRowReadonly(day, readonly, skipTracking = false) {
 
     if (readonly) {
         row.classList.remove('editing-row');
+        const cancelBtn = document.getElementById(`cancel-btn-${day}`);
+        const deleteBtn = document.getElementById(`delete-btn-${day}`);
+        if (cancelBtn) cancelBtn.style.display = 'none';
+        if (deleteBtn) deleteBtn.style.display = 'inline-block';
     } else {
         row.classList.add('editing-row');
+        const cancelBtn = document.getElementById(`cancel-btn-${day}`);
+        const deleteBtn = document.getElementById(`delete-btn-${day}`);
+        if (cancelBtn) cancelBtn.style.display = 'inline-block';
+        if (deleteBtn) deleteBtn.style.display = 'none';
     }
 
     if (!skipTracking) {
@@ -608,13 +619,52 @@ function restoreEditingStates() {
     if (!editingDays.size) return;
     editingDays.forEach(day => {
         const editBtn = document.getElementById(`edit-btn-${day}`);
+        const cancelBtn = document.getElementById(`cancel-btn-${day}`);
+        const deleteBtn = document.getElementById(`delete-btn-${day}`);
         if (!editBtn) return;
         setRowReadonly(day, false, true);
         editBtn.classList.add('save-mode');
         editBtn.innerHTML = '<i class="fas fa-save"></i>';
         editBtn.title = `保存${day}日数据`;
+        if (cancelBtn) cancelBtn.style.display = 'inline-block';
+        if (deleteBtn) deleteBtn.style.display = 'none';
     });
     restoreEditingRowValues();
+}
+
+// 取消编辑
+function cancelEdit(day) {
+    const editBtn = document.getElementById(`edit-btn-${day}`);
+    const cancelBtn = document.getElementById(`cancel-btn-${day}`);
+    const deleteBtn = document.getElementById(`delete-btn-${day}`);
+    
+    // 恢复原始值
+    if (preservedRowValues.has(day)) {
+        const values = preservedRowValues.get(day);
+        Object.entries(values).forEach(([field, value]) => {
+            const input = document.querySelector(`input[data-field="${field}"][data-day="${day}"]`);
+            if (input) input.value = value;
+        });
+        preservedRowValues.delete(day);
+    } else {
+        // 如果没有备份，尝试从 monthData 恢复
+        const data = monthData[day] || {};
+        const fields = ['c_beverage', 'c_kitchen', 'c_grab', 'c_foodpanda', 'c_shopee'];
+        fields.forEach(field => {
+            const input = document.querySelector(`input[data-field="${field}"][data-day="${day}"]`);
+            if (input) input.value = formatCurrencyDisplay(data[field]);
+        });
+    }
+    
+    setRowReadonly(day, true);
+    editBtn.classList.remove('save-mode');
+    editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+    editBtn.title = `编辑${day}日数据`;
+    if (cancelBtn) cancelBtn.style.display = 'none';
+    if (deleteBtn) deleteBtn.style.display = 'inline-block';
+    
+    updateCalculations(day);
+    updateInputColors();
 }
 
 // 更新计算字段
@@ -788,7 +838,10 @@ function handlePasteData(pasteData, targetDay, startField = null) {
     // 销售额字段不可编辑，从粘贴字段列表中移除
     const pasteFields = [
         'c_beverage',
-        'c_kitchen'
+        'c_kitchen',
+        'c_grab',
+        'c_foodpanda',
+        'c_shopee'
     ];
 
     // 如果起始字段是销售额，则从饮料成本开始
@@ -935,7 +988,10 @@ function handlePasteData(pasteData, targetDay, startField = null) {
         if (pasteCount > 0) {
             const fieldNames = {
                 'c_beverage': '饮料成本',
-                'c_kitchen': '厨房成本'
+                'c_kitchen': '厨房成本',
+                'c_grab': 'Grab',
+                'c_foodpanda': 'Foodpanda',
+                'c_shopee': 'Shopee'
             };
             const startFieldName = startField && startField !== 'sales' ? fieldNames[startField] : '第一列';
             showAlert(`从${startFieldName}开始成功粘贴 ${pasteCount} 个字段到第${targetDay}日（销售额字段自动从KPI获取，不可编辑）`, 'success');
@@ -1455,6 +1511,14 @@ function toggleEdit(day) {
     if (isEditing) {
         saveSingleRowData(day);
     } else {
+        // 备份当前值
+        const dayInputs = document.querySelectorAll(`input[data-day="${day}"]`);
+        const values = {};
+        dayInputs.forEach(input => {
+            values[input.dataset.field] = input.value;
+        });
+        preservedRowValues.set(day, values);
+
         setRowReadonly(day, false);
 
         editBtn.classList.add('save-mode');
@@ -1473,8 +1537,11 @@ async function saveSingleRowData(day) {
     try {
         const cBeverage = parseFloat(getInputValue('c_beverage', day)) || 0;
         const cKitchen = parseFloat(getInputValue('c_kitchen', day)) || 0;
+        const cGrab = parseFloat(getInputValue('c_grab', day)) || 0;
+        const cFoodpanda = parseFloat(getInputValue('c_foodpanda', day)) || 0;
+        const cShopee = parseFloat(getInputValue('c_shopee', day)) || 0;
 
-        const hasData = cBeverage > 0 || cKitchen > 0;
+        const hasData = cBeverage > 0 || cKitchen > 0 || cGrab > 0 || cFoodpanda > 0 || cShopee > 0;
 
         if (hasData) {
             const dateStr = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
@@ -1483,6 +1550,10 @@ async function saveSingleRowData(day) {
                 date: dateStr,
                 c_beverage: cBeverage,
                 c_kitchen: cKitchen,
+                c_grab: cGrab,
+                c_foodpanda: cFoodpanda,
+                c_shopee: cShopee,
+                c_total: cBeverage + cKitchen + cGrab + cFoodpanda + cShopee,
                 restaurant: currentRestaurant
             };
 
