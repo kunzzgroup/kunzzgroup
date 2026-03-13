@@ -265,10 +265,10 @@ function switchView(viewType) {
         window.location.href = `stockeditall${systemParam}`;
     } else if (viewType === 'remark') {
         // 跳转到货品备注页面
-        window.location.href = `stockremark${systemParam}`;
+        window.location.href = `stockremark?system=central`;
     } else if (viewType === 'sot') {
         // 跳转到货品异常页面
-        window.location.href = `stocksot${systemParam}`;
+        window.location.href = `stocksot?system=central`;
     } else {
         // 保持在当前页面（货品种类）
         hideViewDropdown();

@@ -351,7 +351,7 @@ function switchView(view) {
     }
 
     if (view === 'remark') {
-        window.location.href = `stockremark${systemParam}`;
+        window.location.href = `stockremark?system=central`;
         return;
     }
 
@@ -361,7 +361,7 @@ function switchView(view) {
     }
 
     if (view === 'sot') {
-        window.location.href = `stocksot${systemParam}`;
+        window.location.href = `stocksot?system=central`;
         return;
     }
 

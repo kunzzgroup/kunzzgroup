@@ -136,7 +136,7 @@ function switchView(viewType) {
         window.location.href = `stockproductname${systemParam}`;
     } else if (viewType === 'sot') {
         // 跳转到货品异常页面
-        window.location.href = `stocksot${systemParam}`;
+        window.location.href = `stocksot?system=central`;
     } else {
         // 保持在当前页面（库存价格分析）
         hideViewDropdown();

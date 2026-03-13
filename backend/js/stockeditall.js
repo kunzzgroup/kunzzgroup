@@ -1331,16 +1331,17 @@ function toggleViewSelector() {
 }
 
 function switchView(viewType) {
-    const systemParam = `?system=${currentStockType || 'central'}`;
+    const currentSystem = currentStockType || 'central';
+    const systemParam = `?system=${currentSystem}`;
 
     if (viewType === 'list') {
         window.location.href = `stocklistall${systemParam}`;
     } else if (viewType === 'remark') {
-        window.location.href = `stockremark${systemParam}`;
+        window.location.href = `stockremark?system=central`;
     } else if (viewType === 'product') {
         window.location.href = `stockproductname${systemParam}`;
     } else if (viewType === 'sot') {
-        window.location.href = `stocksot${systemParam}`;
+        window.location.href = `stocksot?system=central`;
     } else {
         // 保持在当前页面（库存记录）
         hideViewDropdown();
