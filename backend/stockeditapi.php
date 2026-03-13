@@ -902,6 +902,40 @@ function handleGet() {
             sendResponse(true, "备注编号列表获取成功", $remarkNumbers);
             break;
             
+        case 'deleted':
+            // 获取回收站数据 (已删除记录)
+            try {
+                $results = [];
+                $tables = [
+                    'j1' => 'j1stockedit_data',
+                    'j2' => 'j2stockedit_data',
+                    'j3' => 'j3stockedit_data',
+                    'central' => 'stockinout_data'
+                ];
+
+                foreach ($tables as $system => $table) {
+                    $sql = "SELECT id, product_name, in_quantity, out_quantity, specification, receiver, date, deleted_at, deleted_by 
+                            FROM $table 
+                            WHERE deleted_at IS NOT NULL 
+                            ORDER BY deleted_at DESC";
+                    $stmt = $pdo->query($sql);
+                    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                        $row['system'] = $system;
+                        $results[] = $row;
+                    }
+                }
+
+                // 按删除时间排序
+                usort($results, function($a, $b) {
+                    return strtotime($b['deleted_at'] ?? '') - strtotime($a['deleted_at'] ?? '');
+                });
+
+                sendResponse(true, "回收站数据获取成功", $results);
+            } catch (PDOException $e) {
+                sendResponse(false, "获取回收站数据失败: " . $e->getMessage());
+            }
+            break;
+
         default:
             sendResponse(false, "无效的操作");
     }
@@ -918,6 +952,45 @@ function handlePost() {
     // 优先处理批量保存
     if (($data['action'] ?? '') === 'batch_save') {
         handleBatchSave();
+        return;
+    }
+
+    // 处理恢复操作
+    if (($data['action'] ?? '') === 'restore') {
+        $ids = $data['ids'] ?? [];
+        if (empty($ids)) {
+            sendResponse(false, "缺少要恢复的记录ID");
+        }
+
+        try {
+            $pdo->beginTransaction();
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            
+            // 1. 恢复主表
+            $sql = "UPDATE stockinout_data SET deleted_at = NULL, deleted_by = NULL WHERE id IN ($placeholders)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($ids);
+            
+            // 2. 恢复子系统表 (如果有的话)
+            $otherTables = ['j1stockedit_data', 'j2stockedit_data', 'j3stockedit_data', 'j1stockeditmobile_data', 'j2stockeditmobile_data', 'j3stockeditmobile_data', 'j1stockinout_data', 'j2stockinout_data', 'j3stockinout_data'];
+            foreach ($otherTables as $table) {
+                try {
+                    // 对于 inout 表，可能需要根据 main_record_id 恢复
+                    $idField = (strpos($table, 'inout') !== false) ? 'main_record_id' : 'id';
+                    $sql = "UPDATE $table SET deleted_at = NULL, deleted_by = NULL WHERE $idField IN ($placeholders)";
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute($ids);
+                } catch (PDOException $e) {
+                    // 忽略不存在字段或表的错误
+                }
+            }
+            
+            $pdo->commit();
+            sendResponse(true, "记录已成功恢复");
+        } catch (PDOException $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            sendResponse(false, "恢复失败: " . $e->getMessage());
+        }
         return;
     }
     
@@ -1928,13 +2001,42 @@ function handleDelete() {
     $username = $_SESSION['username'] ?? 'System';
     
     $id = $_GET['id'] ?? null;
-    $ids = $_GET['ids'] ?? null; // 支持批量删除
-    
-    if (!$id && !$ids) {
+    $ids = $_GET['ids'] ?? $_GET['id'] ?? null; // 支持批量删除
+    $action = $_GET['action'] ?? '';
+
+    if (!$ids) {
         sendResponse(false, "缺少记录ID");
     }
 
-    $targetIds = $id ? [$id] : explode(',', $ids);
+    $targetIds = explode(',', $ids);
+
+    // 如果 action 是 permanent，执行物理删除
+    if ($action === 'permanent') {
+        try {
+            $pdo->beginTransaction();
+            $placeholders = implode(',', array_fill(0, count($targetIds), '?'));
+            
+            $tables = ['j1stockedit_data', 'j2stockedit_data', 'j3stockedit_data', 'stockinout_data', 'j1stockeditmobile_data', 'j2stockeditmobile_data', 'j3stockeditmobile_data', 'j1stockinout_data', 'j2stockinout_data', 'j3stockinout_data'];
+            
+            foreach ($tables as $table) {
+                try {
+                    $idField = (strpos($table, 'inout') !== false) ? 'main_record_id' : 'id';
+                    $sql = "DELETE FROM $table WHERE $idField IN ($placeholders) AND deleted_at IS NOT NULL";
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute($targetIds);
+                } catch (PDOException $e) {
+                    // 忽略错误
+                }
+            }
+            
+            $pdo->commit();
+            sendResponse(true, "记录已彻底删除");
+        } catch (PDOException $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            sendResponse(false, "彻底删除失败: " . $e->getMessage());
+        }
+        return;
+    }
     
     try {
         $pdo->beginTransaction();

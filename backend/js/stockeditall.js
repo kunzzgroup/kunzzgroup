@@ -4284,10 +4284,10 @@ async function undoDelete() {
     if (!lastDeletedIds || lastDeletedIds.length === 0) return;
 
     try {
-        const response = await fetch('restore_stock.php', {
+        const response = await fetch('stockeditapi.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ids: lastDeletedIds })
+            body: JSON.stringify({ action: 'restore', ids: lastDeletedIds })
         });
         const result = await response.json();
 

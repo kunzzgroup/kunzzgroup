@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadDeletedData() {
     try {
-        const response = await fetch('fetch_deleted.php');
+        const response = await fetch('stockeditapi.php?action=deleted');
         const result = await response.json();
         if (result.success) {
             deletedData = result.data;
@@ -71,10 +71,10 @@ async function restoreRecord(id, system) {
     if (!confirm('确定要恢复此记录吗？')) return;
 
     try {
-        const response = await fetch('restore_stock.php', {
+        const response = await fetch('stockeditapi.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ids: [id] })
+            body: JSON.stringify({ action: 'restore', ids: [id] })
         });
         const result = await response.json();
         if (result.success) {
@@ -92,10 +92,8 @@ async function permanentDelete(id, system) {
     if (!confirm('警告：彻底删除后数据将无法恢复！确定要继续吗？')) return;
 
     try {
-        const response = await fetch('delete_permanent.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ids: [id], system: system })
+        const response = await fetch(`stockeditapi.php?action=permanent&ids=${id}`, {
+            method: 'DELETE'
         });
         const result = await response.json();
         if (result.success) {
