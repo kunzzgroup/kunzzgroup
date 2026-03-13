@@ -63,37 +63,40 @@ $avatarLetter = strtoupper($username[0]);
 
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
     <link rel="icon" type="image/png" href="../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>餐厅成本管理系统</title>    
+    <title>餐厅成本管理系统</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap"
+        rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/backend/css/cost.css?v=<?php echo time(); ?>">
 </head>
+
 <body class="restaurant-j1">
     <?php include 'sidebar.php'; ?>
-        <div class="container">
-            <div class="header">
-                <div>
-                    <h1>成本分析仪表盘</h1>
-                </div>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>成本分析仪表盘</h1>
             </div>
-            
-            <!-- 日期信息显示 -->
-            <div class="date-info" id="date-info" style="margin-bottom: 16px; border: 1px solid #e5e7eb;">
-                正在加载数据...
-            </div>
-            <div id="app">         
+        </div>
+
+        <!-- 日期信息显示 -->
+        <div class="date-info" id="date-info" style="margin-bottom: 16px; border: 1px solid #e5e7eb;">
+            正在加载数据...
+        </div>
+        <div id="app">
             <!-- Date Controls -->
             <div class="card" style="margin-bottom: clamp(14px, 1.67vw, 32px);">
                 <div class="card-body">
                     <div class="date-controls">
-    
+
                         <!-- 日期范围选择器 -->
                         <div style="display: flex; flex-direction: column; gap: 4px;">
                             <label class="form-label" style="margin: 0;">日期范围</label>
@@ -120,7 +123,7 @@ $avatarLetter = strtoupper($username[0]);
                                     <span id="month-month-display">01</span>
                                 </div>
                                 <span class="date-separator">月</span>
-            
+
                                 <div class="date-dropdown" id="month-dropdown">
                                 </div>
                             </div>
@@ -189,197 +192,221 @@ $avatarLetter = strtoupper($username[0]);
                     </div>
                 </div>
             </div>
-            
+
             <!-- 成本指标卡片 - 单行6列（J1时为4x2） -->
-                <div class="cost-grid" id="cost-grid">
-                    <!-- 销售额 -->
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="cost-card-vertical">
-                                <div class="icon text-green">
-                                    <i class="fas fa-dollar-sign"></i>
-                                </div>
-                                <div>
-                                    <p class="cost-label">销售额 (RM)</p>
-                                    <p class="cost-value" id="total-sales">0</p>
-                                </div>
+            <div class="cost-grid" id="cost-grid">
+                <!-- 销售额 -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="cost-card-vertical">
+                            <div class="icon text-green">
+                                <i class="fas fa-dollar-sign"></i>
                             </div>
-                        </div>
-                    </div>
-    
-                    <!-- 总成本 -->
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="cost-card-vertical">
-                                <div class="icon text-green">
-                                    <i class="fas fa-chart-pie"></i>
-                                </div>
-                                <div>
-                                    <p class="cost-label">总成本 (RM)</p>
-                                    <p class="cost-value" id="total-cost">0</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-    
-                    <!-- 毛利润 -->
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="cost-card-vertical">
-                                <div class="icon dynamic-color">
-                                    <i class="fas fa-money-bill-wave"></i>
-                                </div>
-                                <div>
-                                    <p class="cost-label">毛利润 (RM)</p>
-                                    <p class="cost-value" id="gross-total">0</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-    
-                    <!-- 成本百分比 -->
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="cost-card-vertical">
-                                <div class="icon dynamic-color">
-                                    <i class="fas fa-percentage"></i>
-                                </div>
-                                <div>
-                                    <p class="cost-label">成本率</p>
-                                    <p class="cost-value" id="cost-percent">0%</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-    
-                    <!-- 库存（最后） -->
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="cost-card-vertical">
-                                <div class="icon dynamic-color">
-                                    <i class="fas fa-box"></i>
-                                </div>
-                                <div>
-                                    <p class="cost-label">库存（最后）</p>
-                                    <p class="cost-value" id="last-stock">0</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-    
-                    <!-- 库存（现在） -->
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="cost-card-vertical">
-                                <div class="icon dynamic-color">
-                                    <i class="fas fa-warehouse"></i>
-                                </div>
-                                <div>
-                                    <p class="cost-label">库存（现在）</p>
-                                    <p class="cost-value" id="current-stock">0</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 供应→J2 (仅J1餐厅时显示) -->
-                    <div class="card supply-card">
-                        <div class="card-body">
-                            <div class="cost-card-vertical">
-                                <div class="icon dynamic-color">
-                                    <i class="fas fa-arrow-right"></i>
-                                </div>
-                                <div>
-                                    <p class="cost-label">供应→J2 (RM)</p>
-                                    <p class="cost-value" id="j2-supply">0</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Grab Food 成本 -->
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="cost-card-vertical">
-                                <div class="icon dynamic-color">
-                                    <i class="fas fa-shuttle-van"></i>
-                                </div>
-                                <div>
-                                    <p class="cost-label">Grab Food 成本 (RM)</p>
-                                    <p class="cost-value" id="total-grab-cost">0</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Foodpanda 成本 -->
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="cost-card-vertical">
-                                <div class="icon dynamic-color">
-                                    <i class="fas fa-bicycle"></i>
-                                </div>
-                                <div>
-                                    <p class="cost-label">Foodpanda 成本 (RM)</p>
-                                    <p class="cost-value" id="total-foodpanda-cost">0</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Shopee Food 成本 -->
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="cost-card-vertical">
-                                <div class="icon dynamic-color">
-                                    <i class="fas fa-shopping-bag"></i>
-                                </div>
-                                <div>
-                                    <p class="cost-label">Shopee Food 成本 (RM)</p>
-                                    <p class="cost-value" id="total-shopee-cost">0</p>
-                                </div>
+                            <div>
+                                <p class="cost-label">销售额 (RM)</p>
+                                <p class="cost-value" id="total-sales">0</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Main Chart - 全宽显示 -->
-                <div class="main-chart-container">
-                    <div class="card" style="height: 400px;">
-                        <div class="card-body" style="height: 100%; display: flex; flex-direction: column;">
-                            <div class="chart-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                                <h3 id="main-chart-title" style="font-size: clamp(14px, 1.04vw, 20px); font-weight: 600; color: #111827; margin: 0;">成本趋势分析</h3>
-                                
-                                <!-- 数据类型切换按钮组 -->
-                                <div class="chart-data-buttons" style="display: flex; gap: 8px; align-items: center;">
-                                    <button class="chart-data-btn active" data-type="totalCost" onclick="switchChartData('totalCost')">
-                                        总成本
-                                    </button>
-                                    <button class="chart-data-btn" data-type="grossTotal" onclick="switchChartData('grossTotal')">
-                                        毛利润
-                                    </button>
-                                    <button class="chart-data-btn" data-type="costPercent" onclick="switchChartData('costPercent')">
-                                        成本率
-                                    </button>
-                                </div>
-                                
-                                <div class="date-range-display" id="chart-date-range" style="font-size: clamp(8px, 0.74vw, 14px); color: #6b7280; font-weight: 500;">
-                                </div>
+                <!-- 总成本 -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="cost-card-vertical">
+                            <div class="icon text-green">
+                                <i class="fas fa-chart-pie"></i>
                             </div>
-                            <div class="chart-container" style="flex: 1;">
-                                <button class="chart-back-button" id="cost-chart-back" onclick="exitDrillDown()">
-                                    <i class="fas fa-arrow-left"></i> 返回年度视图
+                            <div>
+                                <p class="cost-label">总成本 (RM)</p>
+                                <p class="cost-value" id="total-cost">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 毛利润 -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="cost-card-vertical">
+                            <div class="icon dynamic-color">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div>
+                                <p class="cost-label">毛利润 (RM)</p>
+                                <p class="cost-value" id="gross-total">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 成本百分比 -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="cost-card-vertical">
+                            <div class="icon dynamic-color">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <div>
+                                <p class="cost-label">成本率</p>
+                                <p class="cost-value" id="cost-percent">0%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 库存（最后） -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="cost-card-vertical">
+                            <div class="icon dynamic-color">
+                                <i class="fas fa-box"></i>
+                            </div>
+                            <div>
+                                <p class="cost-label">库存（最后）</p>
+                                <p class="cost-value" id="last-stock">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 库存（现在） -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="cost-card-vertical">
+                            <div class="icon dynamic-color">
+                                <i class="fas fa-warehouse"></i>
+                            </div>
+                            <div>
+                                <p class="cost-label">库存（现在）</p>
+                                <p class="cost-value" id="current-stock">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grab Food 成本 -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="cost-card-vertical">
+                            <div class="icon dynamic-color">
+                                <i class="fas fa-shuttle-van"></i>
+                            </div>
+                            <div>
+                                <p class="cost-label">Grab Food 成本 (RM)</p>
+                                <p class="cost-value" id="total-grab-cost">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Foodpanda 成本 -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="cost-card-vertical">
+                            <div class="icon dynamic-color">
+                                <i class="fas fa-bicycle"></i>
+                            </div>
+                            <div>
+                                <p class="cost-label">Foodpanda 成本 (RM)</p>
+                                <p class="cost-value" id="total-foodpanda-cost">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shopee Food 成本 -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="cost-card-vertical">
+                            <div class="icon dynamic-color">
+                                <i class="fas fa-shopping-bag"></i>
+                            </div>
+                            <div>
+                                <p class="cost-label">Shopee Food 成本 (RM)</p>
+                                <p class="cost-value" id="total-shopee-cost">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 供应→J2 (仅J1餐厅时显示) -->
+                <div class="card supply-card">
+                    <div class="card-body">
+                        <div class="cost-card-vertical">
+                            <div class="icon dynamic-color">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                            <div>
+                                <p class="cost-label">供应→J2 (RM)</p>
+                                <p class="cost-value" id="j2-supply">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 供应→J3 (仅J1餐厅时显示) -->
+                <div class="card supply-card">
+                    <div class="card-body">
+                        <div class="cost-card-vertical">
+                            <div class="icon dynamic-color">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                            <div>
+                                <p class="cost-label">供应→J3 (RM)</p>
+                                <p class="cost-value" id="j3-supply">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Chart - 全宽显示 -->
+            <div class="main-chart-container">
+                <div class="card" style="height: 400px;">
+                    <div class="card-body" style="height: 100%; display: flex; flex-direction: column;">
+                        <div class="chart-header"
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <h3 id="main-chart-title"
+                                style="font-size: clamp(14px, 1.04vw, 20px); font-weight: 600; color: #111827; margin: 0;">
+                                成本趋势分析</h3>
+
+                            <!-- 数据类型切换按钮组 -->
+                            <div class="chart-data-buttons" style="display: flex; gap: 8px; align-items: center;">
+                                <button class="chart-data-btn active" data-type="totalCost"
+                                    onclick="switchChartData('totalCost')">
+                                    总成本
                                 </button>
-                                <canvas id="cost-chart"></canvas>
+                                <button class="chart-data-btn" data-type="grossTotal"
+                                    onclick="switchChartData('grossTotal')">
+                                    毛利润
+                                </button>
+                                <button class="chart-data-btn" data-type="costPercent"
+                                    onclick="switchChartData('costPercent')">
+                                    成本率
+                                </button>
                             </div>
+
+                            <div class="date-range-display" id="chart-date-range"
+                                style="font-size: clamp(8px, 0.74vw, 14px); color: #6b7280; font-weight: 500;">
+                            </div>
+                        </div>
+                        <div class="chart-container" style="flex: 1;">
+                            <button class="chart-back-button" id="cost-chart-back" onclick="exitDrillDown()">
+                                <i class="fas fa-arrow-left"></i> 返回年度视图
+                            </button>
+                            <canvas id="cost-chart"></canvas>
                         </div>
                     </div>
                 </div>
-                        
+            </div>
+
             <!-- Detail Table -->
             <div class="card">
                 <div class="card-body" style="padding-bottom: 0;">
-                    <h3 style="font-size: clamp(14px, 1.04vw, 20px); font-weight: 600; color: #111827; margin-bottom: 24px;">详细数据</h3>
+                    <h3
+                        style="font-size: clamp(14px, 1.04vw, 20px); font-weight: 600; color: #111827; margin-bottom: 24px;">
+                        详细数据</h3>
                 </div>
                 <div style="overflow-x: auto;">
                     <table class="table" id="dashboard-table">
@@ -449,5 +476,5 @@ $avatarLetter = strtoupper($username[0]);
     </div>
     <script src="js/cost.js?v=<?php echo time(); ?>"></script>
 </body>
-</html>
 
+</html>

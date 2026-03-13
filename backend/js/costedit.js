@@ -637,7 +637,7 @@ function cancelEdit(day) {
     const editBtn = document.getElementById(`edit-btn-${day}`);
     const cancelBtn = document.getElementById(`cancel-btn-${day}`);
     const deleteBtn = document.getElementById(`delete-btn-${day}`);
-    
+
     // 恢复原始值
     if (preservedRowValues.has(day)) {
         const values = preservedRowValues.get(day);
@@ -655,14 +655,14 @@ function cancelEdit(day) {
             if (input) input.value = formatCurrencyDisplay(data[field]);
         });
     }
-    
+
     setRowReadonly(day, true);
     editBtn.classList.remove('save-mode');
     editBtn.innerHTML = '<i class="fas fa-edit"></i>';
     editBtn.title = `编辑${day}日数据`;
     if (cancelBtn) cancelBtn.style.display = 'none';
     if (deleteBtn) deleteBtn.style.display = 'inline-block';
-    
+
     updateCalculations(day);
     updateInputColors();
 }

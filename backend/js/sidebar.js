@@ -243,8 +243,8 @@ async function redirectToAllowedStockPage(event) {
             body: JSON.stringify({ action: 'get_page_permissions' })
         });
         const data = await res.json();
-        
-        let targetSystem = currentSystemParam || 'central'; 
+
+        let targetSystem = currentSystemParam || 'central'; // 优先使用当前参数，否则默认中央
         let targetView = 'list';
         const viewOrder = ['list', 'records', 'remark', 'product', 'sot'];
         const viewRedirectMap = {
@@ -258,13 +258,15 @@ async function redirectToAllowedStockPage(event) {
         if (data.success && data.page_permissions && data.page_permissions.stock_inventory) {
             const allowedSystems = data.page_permissions.stock_inventory.system || [];
             const allowedViews = data.page_permissions.stock_inventory.view || [];
-            
+
             // 如果指定了系统参数，验证权限
             if (currentSystemParam) {
                 if (allowedSystems.length > 0 && !allowedSystems.includes(currentSystemParam)) {
+                    // 如果当前参数不在允许列表中，且有权限限制，则使用第一个允许的
                     targetSystem = allowedSystems[0];
                 }
             } else if (allowedSystems.length > 0) {
+                // 如果没指定参数且有权限限制，使用第一个允许的系统
                 targetSystem = allowedSystems[0];
             }
 
@@ -274,11 +276,6 @@ async function redirectToAllowedStockPage(event) {
                     targetView = firstAllowedView;
                 }
             }
-        }
-        
-        // 特殊处理：货品备注 (remark) 和 货品异常 (sot) 强制回中央
-        if (targetView === 'remark' || targetView === 'sot') {
-            targetSystem = 'central';
         }
         const redirectBase = viewRedirectMap[targetView] || viewRedirectMap.list;
 

@@ -57,7 +57,7 @@ if (isset($_SESSION['user_id'])) {
                     $restaurantPermissions = $uploadSystems;
                 }
             }
-            
+
             // 如果新权限系统没有数据，回退到旧权限系统（向后兼容）
             if (!$hasNewPermissions) {
                 if (!empty($row['report_permissions_json'])) {
@@ -100,7 +100,7 @@ if (!$hasNewPermissions) {
     // 使用新权限系统时，确保值是正确的格式（只做格式验证，不使用默认值）
     $reportPermissions = array_values(array_intersect(['kpi', 'cost'], $reportPermissions));
     $restaurantPermissions = array_values(array_intersect(['j1', 'j2', 'j3'], $restaurantPermissions));
-    
+
     // 如果新权限系统返回了空数组，说明用户没有任何权限
     // 为了安全，这里不设置默认值，而是保持空数组
     // 后续代码需要处理空权限的情况
@@ -139,6 +139,7 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <link rel="icon" type="image/png" href="../images/images/logo.png">
     <meta charset="UTF-8">
@@ -146,15 +147,17 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
     <title>餐厅成本管理后台 - Excel模式</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <link rel="icon" type="image/png" href="../images/images/logo.png">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>餐厅成本管理后台 - Excel模式</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/backend/css/costedit.css?v=<?php echo time(); ?>">
-</head>
+    <html lang="zh-CN">
+
+    <head>
+        <link rel="icon" type="image/png" href="../images/images/logo.png">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>餐厅成本管理后台 - Excel模式</title>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="/backend/css/costedit.css?v=<?php echo time(); ?>">
+    </head>
+
 <body>
     <?php include 'sidebar.php'; ?>
     <div class="container">
@@ -165,61 +168,65 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
             <div class="controls">
                 <!-- 报表类型选择器 -->
                 <?php if ($showReportDropdown): ?>
-                <div class="report-type-selector" onclick="toggleReportTypeDropdown()">
-                    <button class="report-type-btn">
-                        <i class="fas fa-chart-pie"></i>
-                        <?php echo $reportLabelMap['cost']; ?>
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                    <div class="report-dropdown-menu" id="report-type-dropdown">
-                        <?php if (in_array('kpi', $reportPermissions, true)): ?>
-                        <a href="kpiedit.php" class="report-dropdown-item">
-                            <i class="fas fa-chart-line"></i> <?php echo $reportLabelMap['kpi']; ?>
-                        </a>
-                        <?php endif; ?>
-                        <?php if (in_array('cost', $reportPermissions, true)): ?>
-                        <a href="costedit.php" class="report-dropdown-item">
-                            <i class="fas fa-chart-pie"></i> <?php echo $reportLabelMap['cost']; ?>
-                        </a>
-                        <?php endif; ?>
+                    <div class="report-type-selector" onclick="toggleReportTypeDropdown()">
+                        <button class="report-type-btn">
+                            <i class="fas fa-chart-pie"></i>
+                            <?php echo $reportLabelMap['cost']; ?>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="report-dropdown-menu" id="report-type-dropdown">
+                            <?php if (in_array('kpi', $reportPermissions, true)): ?>
+                                <a href="kpiedit.php" class="report-dropdown-item">
+                                    <i class="fas fa-chart-line"></i> <?php echo $reportLabelMap['kpi']; ?>
+                                </a>
+                            <?php endif; ?>
+                            <?php if (in_array('cost', $reportPermissions, true)): ?>
+                                <a href="costedit.php" class="report-dropdown-item">
+                                    <i class="fas fa-chart-pie"></i> <?php echo $reportLabelMap['cost']; ?>
+                                </a>
+                            <?php endif; ?>
+                        </div>
                     </div>
-                </div>
                 <?php else: ?>
-                <div class="report-type-selector report-type-selector--disabled">
-                    <button class="report-type-btn" style="cursor:default;">
-                        <i class="fas fa-chart-pie"></i>
-                        <?php echo $reportLabelMap['cost']; ?>
-                    </button>
-                </div>
+                    <div class="report-type-selector report-type-selector--disabled">
+                        <button class="report-type-btn" style="cursor:default;">
+                            <i class="fas fa-chart-pie"></i>
+                            <?php echo $reportLabelMap['cost']; ?>
+                        </button>
+                    </div>
                 <?php endif; ?>
-                
+
                 <!-- 餐厅选择器 -->
                 <div class="restaurant-selector">
-                    <div class="restaurant-prefix"><?php echo substr($restaurantConfigAllowed[$defaultRestaurant]['name'], 0, 1); ?></div>
+                    <div class="restaurant-prefix">
+                        <?php echo substr($restaurantConfigAllowed[$defaultRestaurant]['name'], 0, 1); ?></div>
                     <div class="number-dropdown">
-                        <button class="number-btn dropdown-toggle"<?php if ($showRestaurantDropdown): ?> onclick="toggleNumberDropdown()"<?php else: ?> style="cursor:default;"<?php endif; ?>>
+                        <button class="number-btn dropdown-toggle" <?php if ($showRestaurantDropdown): ?>
+                                onclick="toggleNumberDropdown()" <?php else: ?> style="cursor:default;" <?php endif; ?>>
                             <?php echo $restaurantConfigAllowed[$defaultRestaurant]['number']; ?>
                             <?php if ($showRestaurantDropdown): ?>
-                            <i class="fas fa-chevron-down"></i>
+                                <i class="fas fa-chevron-down"></i>
                             <?php endif; ?>
                         </button>
-                        <div class="number-dropdown-menu" id="number-dropdown"<?php if (!$showRestaurantDropdown): ?> style="display:none;"<?php endif; ?>>
+                        <div class="number-dropdown-menu" id="number-dropdown" <?php if (!$showRestaurantDropdown): ?>
+                                style="display:none;" <?php endif; ?>>
                             <?php if ($showRestaurantDropdown): ?>
-                            <div class="number-grid">
-                                <?php foreach ($restaurantPermissions as $storeKey): ?>
-                                <button class="number-item" onclick="selectNumber(<?php echo $restaurantConfigAllowed[$storeKey]['number']; ?>)"><?php echo $restaurantConfigAllowed[$storeKey]['number']; ?></button>
-                                <?php endforeach; ?>
-                            </div>
+                                <div class="number-grid">
+                                    <?php foreach ($restaurantPermissions as $storeKey): ?>
+                                        <button class="number-item"
+                                            onclick="selectNumber(<?php echo $restaurantConfigAllowed[$storeKey]['number']; ?>)"><?php echo $restaurantConfigAllowed[$storeKey]['number']; ?></button>
+                                    <?php endforeach; ?>
+                                </div>
                             <?php endif; ?>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <!-- Alert Messages -->
         <div id="alert-container"></div>
-        
+
         <!-- 月份选择器 -->
         <div class="month-selector">
             <div>
@@ -246,10 +253,11 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
             </div>
             <div id="current-restaurant-info" class="stat-item">
                 <i class="fas fa-store"></i>
-                <span>当前: <span class="stat-value"><?php echo $restaurantConfigAllowed[$defaultRestaurant]['name']; ?></span></span>
+                <span>当前: <span
+                        class="stat-value"><?php echo $restaurantConfigAllowed[$defaultRestaurant]['name']; ?></span></span>
             </div>
         </div>
-        
+
         <!-- Excel表格 -->
         <div class="excel-container">
             <div class="action-buttons">
@@ -275,15 +283,15 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                         <span>平均成本率: <span class="stat-value" id="avg-cost-percent">0</span>%</span>
                     </div>
                 </div>
-                
+
                 <div style="display: flex; gap: 12px; align-items: center;">
                     <div class="stock-input-container">
                         <label for="current-stock-input">
                             <i class="fas fa-warehouse"></i>
                             当前库存 (RM):
                         </label>
-                        <input type="number" id="current-stock-input" min="0" step="0.01" 
-                               placeholder="0.00" oninput="formatStockInput(this)">
+                        <input type="number" id="current-stock-input" min="0" step="0.01" placeholder="0.00"
+                            oninput="formatStockInput(this)">
                     </div>
                     <button class="btn btn-primary" onclick="saveAllData()">
                         <i class="fas fa-save"></i>
@@ -292,25 +300,25 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                 </div>
             </div>
             <div class="table-scroll-container">
-            <table class="excel-table" id="excel-table">
-                <thead>
-                    <tr>
-                        <th style="width: 10%;">日期</th>
-                        <th style="width: 12%;">销售额</th>
-                        <th style="width: 10%;">饮料成本</th>
-                        <th style="width: 10%;">厨房成本</th>
-                        <th style="width: 10%;">Grab Food (RM)</th>
-                        <th style="width: 10%;">Foodpanda (RM)</th>
-                        <th style="width: 10%;">Shopee Food (RM)</th>
-                        <th style="width: 10%;">总成本</th>
-                        <th style="width: 12%;">毛利润</th>
-                        <th style="width: 10%;">成本率 (%)</th>
-                        <th style="width: 10%;">操作</th>
-                    </tr>
-                </thead>
-                <tbody id="excel-tbody">
-                </tbody>
-            </table>
+                <table class="excel-table" id="excel-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%;">日期</th>
+                            <th style="width: 12%;">销售额</th>
+                            <th style="width: 10%;">饮料成本</th>
+                            <th style="width: 10%;">厨房成本</th>
+                            <th style="width: 10%;">Grab Food</th>
+                            <th style="width: 10%;">Foodpanda</th>
+                            <th style="width: 10%;">Shopee Food</th>
+                            <th style="width: 10%;">总成本</th>
+                            <th style="width: 12%;">毛利润</th>
+                            <th style="width: 10%;">成本率 (%)</th>
+                            <th style="width: 10%;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="excel-tbody">
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -330,7 +338,8 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
     </script>
     <script src="js/costedit.js?v=<?php echo time(); ?>"></script>
 </body>
+
 </html>
 </body>
-</html>
 
+</html>
