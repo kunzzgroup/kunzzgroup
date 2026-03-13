@@ -818,6 +818,7 @@ function handlePut() {
     } catch (PDOException $e) {
         sendResponse(false, "更新记录失败：" . $e->getMessage());
     }
+}
 function handleDelete() {
     global $pdo;
     session_start();
