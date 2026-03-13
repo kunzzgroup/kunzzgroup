@@ -72,9 +72,18 @@ try {
     // 4. 同时也恢复其他可能的表 (如果是直接在分店表删除的情况)
     $otherTables = ['j1stockedit_data', 'j2stockedit_data', 'j3stockedit_data', 'j1stockeditmobile_data', 'j2stockeditmobile_data', 'j3stockeditmobile_data'];
     foreach ($otherTables as $table) {
-        $sql = "UPDATE $table SET deleted_at = NULL, deleted_by = NULL WHERE id IN ($placeholders)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($ids);
+        try {
+            $sql = "UPDATE $table SET deleted_at = NULL, deleted_by = NULL WHERE id IN ($placeholders)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($ids);
+        } catch (PDOException $e) {
+            // 如果是字段不存在错误，记录日志但继续执行
+            if ($e->getCode() == '42S22') {
+                error_log("Restore sync skipped for table $table: " . $e->getMessage());
+            } else {
+                throw $e;
+            }
+        }
     }
     
     $pdo->commit();
