@@ -385,11 +385,6 @@ $avatarLetter = strtoupper($username[0]);
                                     onclick="switchChartData('costPercent')">
                                     成本率
                                 </button>
-                                <button class="chart-data-btn delivery-btn" data-type="deliveryCost"
-                                    onclick="switchChartData('deliveryCost')">
-                                    外卖总成本
-                                    <span class="badge-new">NEW</span>
-                                </button>
                             </div>
 
                             <div class="date-range-display" id="chart-date-range"
@@ -427,59 +422,6 @@ $avatarLetter = strtoupper($username[0]);
                                 <th>总成本</th>
                                 <th>毛利润</th>
                                 <th>成本率 (%)</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-            <!-- 外卖分类数据表 (默认隐藏) -->
-            <div id="delivery-tables" class="delivery-tables-container">
-                <!-- Grab Food Table -->
-                <div class="delivery-table-card">
-                    <div class="delivery-table-header">
-                        <div class="delivery-table-icon icon-grab"><i class="fas fa-shuttle-van"></i></div>
-                        <h4>Grab Food 详情</h4>
-                    </div>
-                    <table class="delivery-mini-table" id="grab-mini-table">
-                        <thead>
-                            <tr>
-                                <th>日期</th>
-                                <th>成本 (RM)</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-
-                <!-- Foodpanda Table -->
-                <div class="delivery-table-card">
-                    <div class="delivery-table-header">
-                        <div class="delivery-table-icon icon-foodpanda"><i class="fas fa-bicycle"></i></div>
-                        <h4>Foodpanda 详情</h4>
-                    </div>
-                    <table class="delivery-mini-table" id="foodpanda-mini-table">
-                        <thead>
-                            <tr>
-                                <th>日期</th>
-                                <th>成本 (RM)</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-
-                <!-- Shopee Food Table -->
-                <div class="delivery-table-card">
-                    <div class="delivery-table-header">
-                        <div class="delivery-table-icon icon-shopee"><i class="fas fa-shopping-bag"></i></div>
-                        <h4>Shopee Food 详情</h4>
-                    </div>
-                    <table class="delivery-mini-table" id="shopee-mini-table">
-                        <thead>
-                            <tr>
-                                <th>日期</th>
-                                <th>成本 (RM)</th>
                             </tr>
                         </thead>
                         <tbody></tbody>

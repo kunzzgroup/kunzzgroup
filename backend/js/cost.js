@@ -1254,10 +1254,9 @@ async function updateDashboard() {
 
     const chartTitle = document.getElementById('main-chart-title');
     const titles = {
-        costPercent: '成本率趋势分析',
-        grossTotal: '毛利润趋势分析',
-        totalCost: '总成本趋势分析',
-        deliveryCost: '外卖总成本趋势'
+        costPercent: '成本率趋势',
+        grossTotal: '毛利润趋势',
+        totalCost: '总成本趋势'
     };
 
     let titleText = titles[currentChartDataType] || '总成本趋势';
@@ -1268,7 +1267,6 @@ async function updateDashboard() {
 
     updateCharts(filteredData);
     updateDashboardTable(filteredData);
-    updateDeliveryTables(filteredData);
     updateChartDateRange();
 }
 
@@ -1479,84 +1477,8 @@ function updateCharts(data) {
                 }
             }
         });
-    } else if (currentChartDataType === 'deliveryCost') {
-        // 外卖总成本模式：显示三条线（Grab, Foodpanda, Shopee）
-        const deliveryColors = {
-            grab: { primary: '#00b14f', secondary: '#00b14f33' },
-            foodpanda: { primary: '#d70f64', secondary: '#d70f6433' },
-            shopee: { primary: '#ee4d2d', secondary: '#ee4d2d33' }
-        };
-
-        const chartLabels = isMonthlyView ?
-            aggregatedData.map(item => item.displayDate) :
-            aggregatedData.map(item => new Date(item.date).getDate().toString());
-
-        costChart = new Chart(ctx1, {
-            type: 'line',
-            data: {
-                labels: chartLabels,
-                datasets: [
-                    {
-                        label: 'Grab Food',
-                        data: aggregatedData.map(item => item.cGrab),
-                        borderColor: deliveryColors.grab.primary,
-                        backgroundColor: deliveryColors.grab.secondary,
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        pointHoverRadius: 6
-                    },
-                    {
-                        label: 'Foodpanda',
-                        data: aggregatedData.map(item => item.cFoodpanda),
-                        borderColor: deliveryColors.foodpanda.primary,
-                        backgroundColor: deliveryColors.foodpanda.secondary,
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        pointHoverRadius: 6
-                    },
-                    {
-                        label: 'Shopee Food',
-                        data: aggregatedData.map(item => item.cShopee),
-                        borderColor: deliveryColors.shopee.primary,
-                        backgroundColor: deliveryColors.shopee.secondary,
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        pointHoverRadius: 6
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: getYAxisFormatter('totalCost')
-                        }
-                    }
-                },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: getTooltipFormatter('totalCost')
-                        }
-                    }
-                }
-            }
-        });
     } else {
-        // 单店模式 (其他数据类型)
+        // 单店模式
         const chartLabels = isMonthlyView ?
             aggregatedData.map(item => item.displayDate) :
             aggregatedData.map(item => new Date(item.date).getDate().toString());
@@ -1748,24 +1670,18 @@ function switchChartData(dataType) {
     });
     document.querySelector(`[data-type="${dataType}"]`).classList.add('active');
 
+    const chartTitle = document.getElementById('main-chart-title');
     const titles = {
-        costPercent: '成本率趋势分析',
-        grossTotal: '毛利润趋势分析',
-        totalCost: '总成本趋势分析',
-        deliveryCost: '外卖总成本趋势'
+        costPercent: '成本率趋势',
+        grossTotal: '毛利润趋势',
+        totalCost: '总成本趋势'
     };
 
     let titleText = titles[dataType];
-    if (currentRestaurant === 'total' && dataType !== 'deliveryCost') {
+    if (currentRestaurant === 'total') {
         titleText += ' (三店合计)';
     }
     chartTitle.textContent = titleText;
-
-    // 显示/隐藏 外卖分类表
-    const deliveryTables = document.getElementById('delivery-tables');
-    if (deliveryTables) {
-        deliveryTables.style.display = dataType === 'deliveryCost' ? 'grid' : 'none';
-    }
 
     const filteredData = getFilteredCostData();
     updateCharts(filteredData);
@@ -1779,8 +1695,6 @@ function getChartDataByType(item, dataType) {
             return item.grossTotal;
         case 'totalCost':
             return item.cTotal;
-        case 'deliveryCost':
-            return item.cGrab + item.cFoodpanda + item.cShopee;
         default:
             return item.costPercent;
     }
@@ -2280,36 +2194,4 @@ function hideNumberOptions() {
 function updateRestaurantButton(text) {
     const restaurantBtn = document.querySelector('.restaurant-btn');
     restaurantBtn.innerHTML = `${text} <i class="fas fa-chevron-down"></i>`;
-}
-function updateDeliveryTables(data) {
-    const grabBody = document.querySelector('#grab-mini-table tbody');
-    const foodpandaBody = document.querySelector('#foodpanda-mini-table tbody');
-    const shopeeBody = document.querySelector('#shopee-mini-table tbody');
-
-    if (!grabBody || !foodpandaBody || !shopeeBody) return;
-
-    grabBody.innerHTML = '';
-    foodpandaBody.innerHTML = '';
-    shopeeBody.innerHTML = '';
-
-    // 只显示有数值的日期
-    data.filter(item => (item.cGrab || 0) > 0 || (item.cFoodpanda || 0) > 0 || (item.cShopee || 0) > 0)
-        .sort((a, b) => new Date(b.date) - new Date(a.date)) // 最新的在上面
-        .forEach(item => {
-            if (item.cGrab > 0) {
-                const tr = document.createElement('tr');
-                tr.innerHTML = '<td>' + item.date + '</td><td>RM ' + item.cGrab.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</td>';
-                grabBody.appendChild(tr);
-            }
-            if (item.cFoodpanda > 0) {
-                const tr = document.createElement('tr');
-                tr.innerHTML = '<td>' + item.date + '</td><td>RM ' + item.cFoodpanda.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</td>';
-                foodpandaBody.appendChild(tr);
-            }
-            if (item.cShopee > 0) {
-                const tr = document.createElement('tr');
-                tr.innerHTML = '<td>' + item.date + '</td><td>RM ' + item.cShopee.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</td>';
-                shopeeBody.appendChild(tr);
-            }
-        });
 }
