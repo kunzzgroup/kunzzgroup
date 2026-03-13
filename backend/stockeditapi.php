@@ -482,20 +482,8 @@ function handleGet() {
                     // 格式化数字
                     $record['in_quantity'] = $inQty;
                     $record['out_quantity'] = $outQty;
-                    $record['balance_quantity'] = $record['balance_quantity'];
                     $record['price'] = $price;
-                    $record['in_value'] = $record['in_value'];
-                    $record['out_value'] = $record['out_value'];
-                    $record['balance_value'] = $record['balance_value'];
                 }
-
-                $record['in_quantity'] = $inQty;
-                    $record['out_quantity'] = $outQty;
-                    $record['balance_quantity'] = $record['balance_quantity'];
-                    $record['price'] = $price;
-                    $record['in_value'] = $record['in_value'];
-                    $record['out_value'] = $record['out_value'];
-                    $record['balance_value'] = $record['balance_value'];
                 
                 sendResponse(true, "进出库数据获取成功，共找到 " . count($records) . " 条记录", $records);
             } catch (PDOException $e) {

@@ -51,6 +51,8 @@ function ensureTables(PDO $pdo) {
       `time` time NOT NULL,
       `product_name` varchar(255) NOT NULL,
       `code_number` varchar(100) DEFAULT NULL,
+      `specification` varchar(255) DEFAULT NULL,
+      `type` varchar(100) DEFAULT NULL,
       `in_quantity` decimal(10,3) DEFAULT 0.000,
       `out_quantity` decimal(10,3) DEFAULT 0.000,
       `receiver` varchar(100) DEFAULT NULL,
@@ -61,6 +63,14 @@ function ensureTables(PDO $pdo) {
       KEY `idx_product_name` (`product_name`),
       KEY `idx_code_number` (`code_number`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+    // 更新表结构以包含缺失字段
+    try {
+        $pdo->exec("ALTER TABLE `j1stockeditmobile_data` ADD COLUMN `specification` varchar(255) DEFAULT NULL AFTER `code_number` ");
+    } catch (PDOException $e) {}
+    try {
+        $pdo->exec("ALTER TABLE `j1stockeditmobile_data` ADD COLUMN `type` varchar(100) DEFAULT NULL AFTER `specification` ");
+    } catch (PDOException $e) {}
     
     // 如果表已存在但缺少receiver字段，则添加该字段
     try {
@@ -344,6 +354,8 @@ function handleGet() {
                 // 过滤掉 price 为 NULL 的记录，并按价格从高到低排序
                 $sql = "SELECT 
                             COALESCE(price, 0) as price,
+                            specification,
+                            type,
                             SUM(in_quantity) as total_in,
                             SUM(out_quantity) as total_out,
                             (SUM(in_quantity) - SUM(out_quantity)) as available_stock
@@ -356,7 +368,7 @@ function handleGet() {
                     $params[] = $codeNumber;
                 }
                 
-                $sql .= " GROUP BY price ORDER BY price DESC";
+                $sql .= " GROUP BY price, specification, type ORDER BY price DESC";
                 
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
@@ -370,6 +382,8 @@ function handleGet() {
                     // 只返回有库存的价格（包括负数，因为负数表示已经超扣了）
                     $result[] = [
                         'price' => $price,
+                        'specification' => $row['specification'] ?? null,
+                        'type' => $row['type'] ?? null,
                         'available_stock' => $availableStock,
                         'total_in' => floatval($row['total_in'] ?? 0),
                         'total_out' => floatval($row['total_out'] ?? 0)
@@ -403,8 +417,8 @@ function handlePost() {
         $pdo->beginTransaction();
         
         $sql = "INSERT INTO j1stockeditmobile_data 
-                (date, time, product_name, code_number, in_quantity, out_quantity, receiver) 
-                VALUES (?, ?, ?, ?, ?, ?, ?)";
+                (date, time, product_name, code_number, specification, type, in_quantity, out_quantity, receiver) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $pdo->prepare($sql);
 
@@ -413,6 +427,8 @@ function handlePost() {
             $data['time'],
             $data['product_name'],
             $data['code_number'] ?? null,
+            $data['specification'] ?? null,
+            $data['type'] ?? null,
             floatval($data['in_quantity'] ?? 0),
             floatval($data['out_quantity'] ?? 0),
             $data['receiver'] ?? null
@@ -465,7 +481,7 @@ function handlePut() {
         
         $sql = "UPDATE j1stockeditmobile_data 
                 SET date = ?, time = ?, product_name = ?, code_number = ?, 
-                    in_quantity = ?, out_quantity = ?, receiver = ?
+                    specification = ?, type = ?, in_quantity = ?, out_quantity = ?, receiver = ?
                 WHERE id = ?";
 
         $stmt = $pdo->prepare($sql);
@@ -475,6 +491,8 @@ function handlePut() {
             $data['time'] ?? $oldRecord['time'],
             $data['product_name'] ?? $oldRecord['product_name'],
             $data['code_number'] ?? $oldRecord['code_number'],
+            $data['specification'] ?? $oldRecord['specification'],
+            $data['type'] ?? $oldRecord['type'],
             floatval($data['in_quantity'] ?? $oldRecord['in_quantity']),
             floatval($data['out_quantity'] ?? $oldRecord['out_quantity']),
             $data['receiver'] ?? $oldRecord['receiver'] ?? null,
@@ -644,9 +662,9 @@ function syncToJ1StockEditData($pdo, $data, $operation = 'insert') {
             $stmt->execute([
                 $data['date'], $data['time'], $codeNumber, $productName,
                 $inQty, 0,
-                $matchInfo['specification'] ?? null,
+                $matchInfo['specification'] ?? $data['specification'] ?? null,
                 $price,
-                $matchInfo['type'] ?? null,
+                $matchInfo['type'] ?? $data['type'] ?? null,
                 $mobileRefId,
             ]);
             return $pdo->lastInsertId();
@@ -804,14 +822,16 @@ function handleBatchSave() {
 
             // 1. 插入到移动端流水表
             $sql = "INSERT INTO j1stockeditmobile_data 
-                    (date, time, product_name, code_number, in_quantity, out_quantity, receiver) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?)";
+                    (date, time, product_name, code_number, specification, type, in_quantity, out_quantity, receiver) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 $documentDate,
                 $row['time'],
                 $row['product_name'],
                 $row['code_number'] ?? null,
+                $row['specification'] ?? null,
+                $row['type'] ?? null,
                 floatval($row['in_quantity'] ?? 0),
                 floatval($row['out_quantity'] ?? 0),
                 $row['receiver'] ?? 'Mobile'

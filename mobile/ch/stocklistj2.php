@@ -737,6 +737,8 @@ if (isset($_SESSION['user_id'])) {
                         time: baseTimeStr,
                         product_name: record.product_name,
                         code_number: record.product_code || null,
+                        specification: record.specification || null,
+                        type: record.category || null,
                         in_quantity: 0,
                         out_quantity: soldQty,
                         receiver: CURRENT_USERNAME || 'Mobile'
@@ -757,6 +759,8 @@ if (isset($_SESSION['user_id'])) {
                                 time: timeStr,
                                 product_name: record.product_name,
                                 code_number: record.product_code || null,
+                                specification: priceStock.specification || record.specification || null,
+                                type: priceStock.type || record.category || null,
                                 in_quantity: 0,
                                 out_quantity: deductQty,
                                 price: priceStock.price,
