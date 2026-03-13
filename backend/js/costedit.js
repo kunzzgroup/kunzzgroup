@@ -932,9 +932,12 @@ function handlePasteData(pasteData, targetDay, startField = null) {
         if (totalPasteCount > 0) {
             const fieldNames = {
                 'c_beverage': '饮料成本',
-                'c_kitchen': '厨房成本'
+                'c_kitchen': '厨房成本',
+                'c_grab': 'Grab Food',
+                'c_foodpanda': 'Foodpanda',
+                'c_shopee': 'Shopee Food'
             };
-            const startFieldName = startField && startField !== 'sales' ? fieldNames[startField] : '第一列';
+            const startFieldName = startField && startField !== 'sales' ? (fieldNames[startField] || '指定列') : '第一列';
             showAlert(`第一行从${startFieldName}开始，后续行从第一列开始，成功粘贴 ${lines.length} 行数据，共 ${totalPasteCount} 个字段到第 ${pastedDays.join(', ')} 日（销售额字段自动从KPI获取，不可编辑）`, 'success');
         } else {
             showAlert('未能识别有效的数据格式', 'error');
@@ -989,11 +992,11 @@ function handlePasteData(pasteData, targetDay, startField = null) {
             const fieldNames = {
                 'c_beverage': '饮料成本',
                 'c_kitchen': '厨房成本',
-                'c_grab': 'Grab',
+                'c_grab': 'Grab Food',
                 'c_foodpanda': 'Foodpanda',
-                'c_shopee': 'Shopee'
+                'c_shopee': 'Shopee Food'
             };
-            const startFieldName = startField && startField !== 'sales' ? fieldNames[startField] : '第一列';
+            const startFieldName = startField && startField !== 'sales' ? (fieldNames[startField] || '指定列') : '第一列';
             showAlert(`从${startFieldName}开始成功粘贴 ${pasteCount} 个字段到第${targetDay}日（销售额字段自动从KPI获取，不可编辑）`, 'success');
         } else {
             showAlert('未能识别有效的数据格式', 'error');
