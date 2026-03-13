@@ -316,32 +316,70 @@ if (isset($_SESSION['user_id'])) {
                         console.log('应用货品类型过滤后数量:', productList.length);
                     }
                     
-                    stockData = productList.map(item => ({
-                        id: item.id,
-                        product_code: item.product_code || '',
-                        product_name: item.product_name || '',
-                        freezer_category: item.freezer_category || '',
-                        category: item.category || '',
-                        qty: '0.00',
-                        original_qty: '0.00'
-                    }));
-                    
+                    // 创建产品查找表，用于快速获取主档信息（如分类、区域）
+                    const productMap = new Map();
+                    allProductList.forEach(p => {
+                        productMap.set(`${(p.product_name||'').trim()}|${(p.product_code||'').trim()}`, p);
+                    });
+
                     // 读取库存总数并合并到列表
                     try {
                         const totalsResp = await fetch(`${STOCK_EDIT_API}?action=stocklist_total`);
                         const totalsJson = await totalsResp.json();
                         if (totalsJson.success && totalsJson.data) {
                             const items = totalsJson.data.items || [];
-                            const keyOf = (name, code) => `${(name||'').trim()}|${(code||'').trim()}`;
-                            const totalMap = new Map(items.map(it => [keyOf(it.product_name, it.code_number), parseFloat(it.total_qty || 0).toFixed(3)]));
-                            stockData = stockData.map(it => {
-                                const key = keyOf(it.product_name, it.product_code);
-                                const qty = totalMap.get(key) || '0.00';
-                                return { ...it, qty, original_qty: qty };
+                            const processedProducts = new Set();
+                            stockData = [];
+
+                            // 首先根据库存总数中的记录创建行（支持一个产品多个规格）
+                            items.forEach(it => {
+                                const prodKey = `${(it.product_name||'').trim()}|${(it.code_number||'').trim()}`;
+                                const prodInfo = productMap.get(prodKey) || {};
+                                processedProducts.add(prodKey);
+                                
+                                const qty = parseFloat(it.total_qty || 0).toFixed(3);
+                                stockData.push({
+                                    id: `${prodInfo.id || 'new'}-${it.specification || 'none'}`,
+                                    product_code: it.code_number || '',
+                                    product_name: it.product_name || '',
+                                    specification: it.specification || '',
+                                    freezer_category: prodInfo.freezer_category || '',
+                                    category: prodInfo.category || it.type || '',
+                                    qty: qty,
+                                    original_qty: qty
+                                });
+                            });
+
+                            // 然后添加剩下的主档产品（无库存记录的产品）
+                            productList.forEach(p => {
+                                const prodKey = `${(p.product_name||'').trim()}|${(p.product_code||'').trim()}`;
+                                if (!processedProducts.has(prodKey)) {
+                                    stockData.push({
+                                        id: p.id,
+                                        product_code: p.product_code || '',
+                                        product_name: p.product_name || '',
+                                        specification: '',
+                                        freezer_category: p.freezer_category || '',
+                                        category: p.category || '',
+                                        qty: '0.000',
+                                        original_qty: '0.000'
+                                    });
+                                }
                             });
                         }
                     } catch (e) {
                         console.warn('合并库存总数失败:', e);
+                        // 回退到基础列表
+                        stockData = productList.map(item => ({
+                            id: item.id,
+                            product_code: item.product_code || '',
+                            product_name: item.product_name || '',
+                            specification: '',
+                            freezer_category: item.freezer_category || '',
+                            category: item.category || '',
+                            qty: '0.00',
+                            original_qty: '0.00'
+                        }));
                     }
                     
                     // 更新货品类型下拉选项（在合并库存总数之后）
@@ -583,7 +621,10 @@ if (isset($_SESSION['user_id'])) {
                 return `
                 <tr>
                     <td class="product-code-cell" style="width: 60px !important; min-width: 60px !important; max-width: 60px !important; padding: 8px 4px !important;">${escapeHtml(item.product_code || '')}</td>
-                    <td style="width: 130px !important; min-width: 130px !important; max-width: 130px !important; padding: 8px 6px !important; word-wrap: break-word; overflow-wrap: break-word;">${escapeHtml(item.product_name || '')}</td>
+                    <td style="width: 130px !important; min-width: 130px !important; max-width: 130px !important; padding: 8px 6px !important; word-wrap: break-word; overflow-wrap: break-word;">
+                        ${escapeHtml(item.product_name || '')}
+                        ${item.specification ? `<br><small style="color: #666; font-size: 11px;">(${escapeHtml(item.specification)})</small>` : ''}
+                    </td>
                     <td class="qty" style="width: 50px !important; min-width: 50px !important; max-width: 50px !important; padding: 8px 4px !important; text-align: right !important;">
                         <input 
                             type="number" 
@@ -649,8 +690,8 @@ if (isset($_SESSION['user_id'])) {
                 const totalsJson = await totalsResp.json();
                 if (totalsJson.success && totalsJson.data) {
                     const items = totalsJson.data.items || [];
-                    const keyOf = (name, code) => `${(name||'').trim()}|${(code||'').trim()}`;
-                    const totalMap = new Map(items.map(it => [keyOf(it.product_name, it.code_number), parseFloat(it.total_qty || 0).toFixed(3)]));
+                    const keyOf = (name, code, spec) => `${(name||'').trim()}|${(code||'').trim()}|${(spec||'').trim()}`;
+                    const totalMap = new Map(items.map(it => [keyOf(it.product_name, it.code_number, it.specification), parseFloat(it.total_qty || 0).toFixed(3)]));
                     
                     // 保存正在编辑的记录的值（避免被覆盖）
                     const editingValues = new Map();
@@ -673,8 +714,8 @@ if (isset($_SESSION['user_id'])) {
                         }
                         
                         // 否则更新为最新的库存总数
-                        const key = keyOf(it.product_name, it.product_code);
-                        const qty = totalMap.get(key) || '0.00';
+                        const key = keyOf(it.product_name, it.product_code, it.specification);
+                        const qty = totalMap.get(key) || '0.000';
                         return { ...it, qty, original_qty: qty };
                     });
                     
@@ -722,8 +763,8 @@ if (isset($_SESSION['user_id'])) {
                     return;
                 }
                 
-                // 获取该产品的所有不同价格的库存记录（按价格从高到低）
-                const stockByPriceUrl = `${STOCK_EDIT_API}?action=product_stock_by_price&product_name=${encodeURIComponent(record.product_name)}${record.product_code ? '&code_number=' + encodeURIComponent(record.product_code) : ''}`;
+                // 获取该产品的所有不同价格的库存记录（按价格从高到低，并指定规格）
+                const stockByPriceUrl = `${STOCK_EDIT_API}?action=product_stock_by_price&product_name=${encodeURIComponent(record.product_name)}${record.product_code ? '&code_number=' + encodeURIComponent(record.product_code) : ''}&specification=${encodeURIComponent(record.specification || '')}`;
                 const stockResp = await fetch(stockByPriceUrl);
                 const stockResult = await stockResp.json();
                 

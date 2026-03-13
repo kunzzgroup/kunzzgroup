@@ -86,12 +86,24 @@ function ensureTables(PDO $pdo) {
       `id` int(11) NOT NULL AUTO_INCREMENT,
       `product_name` varchar(255) NOT NULL,
       `code_number` varchar(100) DEFAULT NULL,
+      `specification` varchar(255) DEFAULT NULL,
       `total_qty` decimal(10,3) DEFAULT 0.000,
       `last_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       PRIMARY KEY (`id`),
-      UNIQUE KEY `unique_product` (`product_name`, `code_number`),
+      UNIQUE KEY `unique_product_spec` (`product_name`, `code_number`, `specification`),
       KEY `idx_product_name` (`product_name`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+    // 更新索引和字段以支持规格
+    try {
+        $pdo->exec("ALTER TABLE `j2stocklist_total` ADD COLUMN `specification` varchar(255) DEFAULT NULL AFTER `code_number` ");
+    } catch (PDOException $e) {}
+    try {
+        $pdo->exec("ALTER TABLE `j2stocklist_total` DROP INDEX `unique_product` ");
+    } catch (PDOException $e) {}
+    try {
+        $pdo->exec("ALTER TABLE `j2stocklist_total` ADD UNIQUE KEY `unique_product_spec` (`product_name`, `code_number`, `specification`) ");
+    } catch (PDOException $e) {}
 
     // 添加 mobile_ref_id 列
     try {
@@ -294,12 +306,13 @@ function handleGet() {
                 $sql = "SELECT 
                             product_name,
                             code_number,
+                            specification,
                             SUM(in_quantity) as total_in,
                             SUM(out_quantity) as total_out,
                             SUM(in_quantity) - SUM(out_quantity) as total_qty
                         FROM j2stockedit_data
                         WHERE product_name IS NOT NULL AND product_name != ''
-                        GROUP BY product_name, code_number
+                        GROUP BY product_name, code_number, specification
                         ORDER BY product_name";
                 
                 $stmt = $pdo->prepare($sql);
@@ -315,6 +328,7 @@ function handleGet() {
                     $items[] = [
                         'product_name' => $item['product_name'],
                         'code_number' => $item['code_number'] ?? null,
+                        'specification' => $item['specification'] ?? null,
                         'total_qty' => number_format($qty, 3, '.', '')
                     ];
                 }
@@ -366,6 +380,14 @@ function handleGet() {
                 if (!empty($codeNumber)) {
                     $sql .= " AND code_number = ?";
                     $params[] = $codeNumber;
+                }
+                
+                $specification = $_GET['specification'] ?? null;
+                if ($specification !== null && $specification !== "") {
+                    $sql .= " AND specification = ?";
+                    $params[] = $specification;
+                } elseif ($specification === "") {
+                    $sql .= " AND (specification IS NULL OR specification = '')";
                 }
                 
                 $sql .= " GROUP BY price, specification, type ORDER BY price DESC";
@@ -437,7 +459,7 @@ function handlePost() {
         $newId = $pdo->lastInsertId();
         
         // 更新库存总数表
-        updateStocklistTotal($data['product_name'], $data['code_number'] ?? null, floatval($data['in_quantity'] ?? 0), floatval($data['out_quantity'] ?? 0), true);
+        updateStocklistTotal($data['product_name'], $data['code_number'] ?? null, floatval($data['in_quantity'] ?? 0), floatval($data['out_quantity'] ?? 0), true, $data['specification'] ?? null);
         
         // 同步到 j2stockedit_data 表（传入 mobile_ref_id）
         $data['mobile_ref_id'] = $newId;
@@ -505,16 +527,35 @@ function handlePut() {
         $newInQty = floatval($data['in_quantity'] ?? $oldInQty);
         $newOutQty = floatval($data['out_quantity'] ?? $oldOutQty);
         
-        $diffInQty = $newInQty - $oldInQty;
-        $diffOutQty = $newOutQty - $oldOutQty;
+        $oldSpec = $oldRecord['specification'] ?? null;
+        $newSpec = $data['specification'] ?? $oldSpec;
         
-        updateStocklistTotal(
-            $data['product_name'] ?? $oldRecord['product_name'],
-            $data['code_number'] ?? $oldRecord['code_number'],
-            $diffInQty,
-            $diffOutQty,
-            true
-        );
+        $nameChanged = isset($data['product_name']) && $data['product_name'] !== $oldRecord['product_name'];
+        $codeChanged = isset($data['code_number']) && $data['code_number'] !== $oldRecord['code_number'];
+        $specChanged = isset($data['specification']) && $data['specification'] !== $oldRecord['specification'];
+
+        if ($nameChanged || $codeChanged || $specChanged) {
+            // 如果关键字段改变，撤销旧的，增加新的
+            updateStocklistTotal($oldRecord['product_name'], $oldRecord['code_number'], -$oldInQty, -$oldOutQty, true, $oldSpec);
+            updateStocklistTotal(
+                $data['product_name'] ?? $oldRecord['product_name'],
+                $data['code_number'] ?? $oldRecord['code_number'],
+                $newInQty,
+                $newOutQty,
+                true,
+                $newSpec
+            );
+        } else {
+            // 否则只更新差值
+            updateStocklistTotal(
+                $oldRecord['product_name'],
+                $oldRecord['code_number'],
+                $newInQty - $oldInQty,
+                $newOutQty - $oldOutQty,
+                true,
+                $oldSpec
+            );
+        }
         
         // 同步更新到 j2stockedit_data：先删除旧扣货行，再重新智能分层扣货
         $mobileId = $data['id'];
@@ -586,8 +627,9 @@ function handleDelete() {
                 $record['product_name'],
                 $record['code_number'],
                 -$inQty,  // 撤销入库
-                -$outQty, // 撤销出库（负数出库 = 加回库存）
-                true
+                -$outQty, // 撤销出库
+                true,
+                $record['specification'] ?? null
             );
             
             // 同步删除 j2stockedit_data 表中的记录
@@ -719,8 +761,8 @@ function syncToJ2StockEditData($pdo, $data, $operation = 'insert') {
     }
 }
 
-// 更新库存总数表
-function updateStocklistTotal($productName, $codeNumber, $inQty, $outQty, $isAdd = true) {
+// 更新库存总数表 (支持按规格分组)
+function updateStocklistTotal($productName, $codeNumber, $inQty, $outQty, $isAdd = true, $specification = null) {
     global $pdo;
     
     if (empty($productName)) {
@@ -728,9 +770,19 @@ function updateStocklistTotal($productName, $codeNumber, $inQty, $outQty, $isAdd
     }
     
     try {
-        // 查找或创建库存总数记录
-        $stmt = $pdo->prepare("SELECT * FROM j2stocklist_total WHERE product_name = ? AND code_number = ?");
-        $stmt->execute([$productName, $codeNumber]);
+        // 查找或创建库存总数记录 (包含规格条件)
+        $sql = "SELECT * FROM j2stocklist_total WHERE product_name = ? AND code_number = ? ";
+        $params = [$productName, $codeNumber];
+        
+        if ($specification === null || $specification === "") {
+            $sql .= " AND (specification IS NULL OR specification = '') ";
+        } else {
+            $sql .= " AND specification = ? ";
+            $params[] = $specification;
+        }
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
         $existing = $stmt->fetch(PDO::FETCH_ASSOC);
         
         $netQty = $inQty - $outQty;
@@ -743,8 +795,8 @@ function updateStocklistTotal($productName, $codeNumber, $inQty, $outQty, $isAdd
                 $newTotal = floatval($existing['total_qty']) - $netQty;
             }
             
-            // 如果总数小于等于0，删除记录而不是保留为0
-            if ($newTotal <= 0) {
+            // 如果总数小于等于0，删除记录
+            if ($newTotal <= 0.0001 && $newTotal >= -0.0001) {
                 $deleteStmt = $pdo->prepare("DELETE FROM j2stocklist_total WHERE id = ?");
                 $deleteStmt->execute([$existing['id']]);
             } else {
@@ -754,13 +806,12 @@ function updateStocklistTotal($productName, $codeNumber, $inQty, $outQty, $isAdd
         } else {
             // 创建新记录
             if ($netQty > 0 || $isAdd) {
-                $insertStmt = $pdo->prepare("INSERT INTO j2stocklist_total (product_name, code_number, total_qty) VALUES (?, ?, ?)");
-                $insertStmt->execute([$productName, $codeNumber, $netQty > 0 ? $netQty : 0]);
+                $insertStmt = $pdo->prepare("INSERT INTO j2stocklist_total (product_name, code_number, specification, total_qty) VALUES (?, ?, ?, ?)");
+                $insertStmt->execute([$productName, $codeNumber, $specification, $netQty > 0 ? $netQty : 0]);
             }
         }
     } catch (PDOException $e) {
         error_log("更新库存总数失败: " . $e->getMessage());
-        // 不抛出异常，避免影响主流程
     }
 }
 
@@ -807,7 +858,7 @@ function handleBatchSave() {
             ]);
             
             $newMobileId = $pdo->lastInsertId();
-            updateStocklistTotal($row['product_name'], $row['code_number'] ?? null, floatval($row['in_quantity'] ?? 0), floatval($row['out_quantity'] ?? 0), true);
+            updateStocklistTotal($row['product_name'], $row['code_number'] ?? null, floatval($row['in_quantity'] ?? 0), floatval($row['out_quantity'] ?? 0), true, $row['specification'] ?? null);
             
             $syncData = $row;
             $syncData['date'] = $documentDate;
