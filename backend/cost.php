@@ -361,7 +361,6 @@ $avatarLetter = strtoupper($username[0]);
                         </div>
                     </div>
                 </div>
-
             </div>
 
             <!-- Main Chart - 全宽显示 -->
