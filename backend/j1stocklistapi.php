@@ -62,7 +62,7 @@ function getJ1StockSummary($startDate = null, $endDate = null) {
                         specification,
                         price,
                         code_number,
-                        type,
+                        MAX(type) as type,
                         SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
                         SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
                         (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
@@ -71,7 +71,7 @@ function getJ1StockSummary($startDate = null, $endDate = null) {
                     WHERE product_name IS NOT NULL AND product_name != ''
                     AND deleted_at IS NULL
                     AND date <= ?
-                    GROUP BY REPLACE(product_name, '&amp;', '&'), specification, price, code_number, type
+                    GROUP BY REPLACE(product_name, '&amp;', '&'), specification, price, code_number
                     HAVING current_stock != 0
                     ORDER BY product_name ASC, price ASC";
             
@@ -84,7 +84,7 @@ function getJ1StockSummary($startDate = null, $endDate = null) {
                         specification,
                         price,
                         code_number,
-                        type,
+                        MAX(type) as type,
                         SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
                         SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
                         (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
@@ -92,7 +92,7 @@ function getJ1StockSummary($startDate = null, $endDate = null) {
                     FROM j1stockedit_data
                     WHERE product_name IS NOT NULL AND product_name != ''
                     AND deleted_at IS NULL
-                    GROUP BY REPLACE(product_name, '&amp;', '&'), specification, price, code_number, type
+                    GROUP BY REPLACE(product_name, '&amp;', '&'), specification, price, code_number
                     HAVING current_stock != 0
                     ORDER BY product_name ASC, price ASC";
             

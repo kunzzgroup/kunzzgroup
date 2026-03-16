@@ -71,7 +71,7 @@ function getStockSummary($system = 'central', $startDate = null, $endDate = null
                     code_number";
         
         if ($isBranch) {
-            $sql .= ", type";
+            $sql .= ", MAX(type) as type";
         }
 
         $sql .= ", SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
@@ -89,9 +89,6 @@ function getStockSummary($system = 'central', $startDate = null, $endDate = null
         }
 
         $groupBy = "REPLACE(product_name, '&amp;', '&'), specification, price, code_number";
-        if ($isBranch) {
-            $groupBy .= ", type";
-        }
 
         $sql .= " GROUP BY $groupBy
                   HAVING current_stock != 0
