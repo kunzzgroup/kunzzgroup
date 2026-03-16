@@ -4996,9 +4996,9 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
           </div>
 
           <div class="zen-images">
-            <img src="image/tokyologo.png" class="zen-img zen-img-top"
+            <img id="tokyo-about-img1" src="image/tokyologo.png" class="zen-img zen-img-top"
               style="height: 500px; object-fit: cover; border-radius: 16px;">
-            <img src="image/sushi-dish-asian-restaurant.jpg" class="zen-img zen-img-bottom">
+            <img id="tokyo-about-img2" src="image/sushi-dish-asian-restaurant.jpg" class="zen-img zen-img-bottom">
           </div>
 
         </div>
@@ -5613,20 +5613,17 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
       fetch('https://kunzzgroup.com/backend/get_media_config.php')
         .then(response => response.json())
         .then(data => {
-            if (data && data.tokyo_background) {
+            if (!data) return;
+
+            const mainBase = 'https://kunzzgroup.com/';
+            
+            // --- SECTION 1: HERO BACKGROUND ---
+            if (data.tokyo_background) {
                 const bgInfo = data.tokyo_background;
                 const bgContainer = document.getElementById('hero-bg-container');
                 
-                // Construct the absolute base URL for media if needed
-                const baseUrl = 'https://media.kunzzgroup.com/public_html/comphotos/'; // Or main domain
-                // Based on tokyopage1upload.php saving to ../images/images/
-                // The main domain base is https://kunzzgroup.com/
-                const mainBase = 'https://kunzzgroup.com/';
-
                 let mediaUrl = bgInfo.file;
-                if(mediaUrl.startsWith('../')) {
-                     mediaUrl = mediaUrl.substring(3);
-                }
+                if(mediaUrl.startsWith('../')) mediaUrl = mediaUrl.substring(3);
                 const finalUrl = mainBase + mediaUrl;
 
                 if (bgInfo.type === 'video') {
@@ -5639,6 +5636,20 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
                 } else if (bgInfo.type === 'image') {
                     bgContainer.style.backgroundImage = `url('${finalUrl}')`;
                 }
+            }
+
+            // --- SECTION 2: ABOUT US IMAGES ---
+            if (data.tokyo_about_image1) {
+                const img1 = document.getElementById('tokyo-about-img1');
+                let mediaUrl = data.tokyo_about_image1.file;
+                if(mediaUrl.startsWith('../')) mediaUrl = mediaUrl.substring(3);
+                img1.src = mainBase + mediaUrl;
+            }
+            if (data.tokyo_about_image2) {
+                const img2 = document.getElementById('tokyo-about-img2');
+                let mediaUrl = data.tokyo_about_image2.file;
+                if(mediaUrl.startsWith('../')) mediaUrl = mediaUrl.substring(3);
+                img2.src = mainBase + mediaUrl;
             }
         })
         .catch(err => console.error('Error fetching media config:', err));
