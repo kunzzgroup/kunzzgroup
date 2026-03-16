@@ -95,6 +95,9 @@ let calendarStartDate = null;
 let calendarEndDate = null;
 let isSelectingRange = false;
 
+// 全局计数器，确保新行具有唯一 ID
+let newRowCounter = 0;
+
 // 全局键盘快捷键 (CTRL+S 保存) - 使用 Capture 模式确保最高优先级
 window.addEventListener('keydown', function (e) {
     // A. 撤销删除 (Ctrl+Shift+Z)
@@ -2830,7 +2833,7 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
     const row = document.createElement('tr');
     row.className = 'new-row';
 
-    const rowId = 'new-' + Date.now(); // 生成唯一ID
+    const rowId = 'new-' + Date.now() + '-' + (newRowCounter++); // 使用时间戳+计数器确保绝对唯一
 
     row.innerHTML = `
                 <td><input type="date" class="table-input" value="${selectedDate}" id="${rowId}-date"></td>
@@ -2998,7 +3001,8 @@ function updateSupplierIfNeeded(row, recordId) {
 // 更新新行的总价计算
 function updateNewRowTotal(element) {
     const row = element.closest('tr');
-    const rowId = element.id.split('-')[0] + '-' + element.id.split('-')[1]; // 获取行的唯一ID
+    const idParts = element.id.split('-');
+    const rowId = idParts[0] + '-' + idParts[1] + '-' + idParts[2]; // 获取行的唯一ID
 
     const inQtyInput = document.getElementById(`${rowId}-in-qty`);
     const outQtyInput = document.getElementById(`${rowId}-out-qty`);
@@ -3277,7 +3281,9 @@ function updateNewRowRemarkNumber(rowId) {
 
 // 提取行数据的辅助函数
 function extractRowData(row) {
-    const rowId = row.querySelector('input').id.split('-')[0] + '-' + row.querySelector('input').id.split('-')[1];
+    const firstInput = row.querySelector('input');
+    const idParts = firstInput.id.split('-');
+    const rowId = idParts[0] + '-' + idParts[1] + '-' + idParts[2];
 
     // 获取收货人值（可能是combobox输入框）
     const receiverInput = document.getElementById(`${rowId}-receiver-input`);
@@ -3302,7 +3308,9 @@ function extractRowData(row) {
 
 // 恢复行数据的辅助函数
 function restoreRowData(element, data) {
-    const rowId = element.querySelector('input').id.split('-')[0] + '-' + element.querySelector('input').id.split('-')[1];
+    const firstInput = element.querySelector('input');
+    const idParts = firstInput.id.split('-');
+    const rowId = idParts[0] + '-' + idParts[1] + '-' + idParts[2];
 
     if (document.getElementById(`${rowId}-date`)) document.getElementById(`${rowId}-date`).value = data.date;
     if (document.getElementById(`${rowId}-code_number-input`)) document.getElementById(`${rowId}-code_number-input`).value = data.codeValue;
@@ -3369,7 +3377,9 @@ function restoreRowData(element, data) {
 // 保存新行记录
 async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
     const row = buttonElement.closest('tr');
-    const rowId = row.querySelector('input').id.split('-')[0] + '-' + row.querySelector('input').id.split('-')[1];
+    const firstInput = row.querySelector('input');
+    const idParts = firstInput.id.split('-');
+    const rowId = idParts[0] + '-' + idParts[1] + '-' + idParts[2];
 
     console.log('保存新行记录，rowId:', rowId);
     console.log('行元素:', row);
@@ -5026,10 +5036,10 @@ async function selectComboboxOption(optionElement, input) {
 
             let relatedInputId;
             if (isNewRow) {
-                // 对于新增行，提取行ID
-                const rowIdMatch = containerId.match(/^(new-\d+)-/);
-                if (rowIdMatch) {
-                    relatedInputId = `${rowIdMatch[1]}-product_name-input`;
+                // 对于新增行，提取行ID (new-TIMESTAMP-COUNTER)
+                const idParts = containerId.split('-');
+                if (idParts.length >= 3) {
+                    relatedInputId = `${idParts[0]}-${idParts[1]}-${idParts[2]}-product_name-input`;
                 } else {
                     relatedInputId = 'new-product_name-input'; // 兼容旧格式
                 }
@@ -5090,9 +5100,9 @@ async function selectComboboxOption(optionElement, input) {
                     if (remarkCheckbox && !remarkCheckbox.disabled) {
                         remarkCheckbox.checked = shouldCheckRemark;
                         // 触发toggleNewRowRemarkNumber以更新备注编号输入框状态
-                        const rowIdMatch = containerId.match(/^(new-\d+)-/);
-                        if (rowIdMatch && typeof toggleNewRowRemarkNumber === 'function') {
-                            toggleNewRowRemarkNumber(rowIdMatch[1]);
+                        const idParts = containerId.split('-');
+                        if (idParts.length >= 3 && typeof toggleNewRowRemarkNumber === 'function') {
+                            toggleNewRowRemarkNumber(`${idParts[0]}-${idParts[1]}-${idParts[2]}`);
                         }
                     }
                 }
@@ -5152,10 +5162,10 @@ async function selectComboboxOption(optionElement, input) {
 
             let relatedInputId;
             if (isNewRow) {
-                // 对于新增行，提取行ID
-                const rowIdMatch = containerId.match(/^(new-\d+)-/);
-                if (rowIdMatch) {
-                    relatedInputId = `${rowIdMatch[1]}-code_number-input`;
+                // 对于新增行，提取行ID (new-TIMESTAMP-COUNTER)
+                const idParts = containerId.split('-');
+                if (idParts.length >= 3) {
+                    relatedInputId = `${idParts[0]}-${idParts[1]}-${idParts[2]}-code_number-input`;
                 } else {
                     relatedInputId = 'new-code_number-input'; // 兼容旧格式
                 }
@@ -5216,9 +5226,9 @@ async function selectComboboxOption(optionElement, input) {
                     if (remarkCheckbox && !remarkCheckbox.disabled) {
                         remarkCheckbox.checked = shouldCheckRemark;
                         // 触发toggleNewRowRemarkNumber以更新备注编号输入框状态
-                        const rowIdMatch = containerId.match(/^(new-\d+)-/);
-                        if (rowIdMatch && typeof toggleNewRowRemarkNumber === 'function') {
-                            toggleNewRowRemarkNumber(rowIdMatch[1]);
+                        const idParts = containerId.split('-');
+                        if (idParts.length >= 3 && typeof toggleNewRowRemarkNumber === 'function') {
+                            toggleNewRowRemarkNumber(`${idParts[0]}-${idParts[1]}-${idParts[2]}`);
                         }
                     }
                 }
@@ -5437,9 +5447,9 @@ function bindComboboxEvents() {
                                 remarkCheckbox.checked = shouldCheckRemark;
                                 // 触发toggleNewRowRemarkNumber以更新备注编号输入框状态
                                 const containerId = input.closest('.combobox-container').id;
-                                const rowIdMatch = containerId.match(/^(new-\d+)-/);
-                                if (rowIdMatch && typeof toggleNewRowRemarkNumber === 'function') {
-                                    toggleNewRowRemarkNumber(rowIdMatch[1]);
+                                const idParts = containerId.split('-');
+                                if (idParts.length >= 3 && typeof toggleNewRowRemarkNumber === 'function') {
+                                    toggleNewRowRemarkNumber(`${idParts[0]}-${idParts[1]}-${idParts[2]}`);
                                 }
                             }
                         }
@@ -7761,10 +7771,14 @@ async function batchSaveNewRows() {
     // 提取所有行数据并寻找统一的 document_date
     const rowsData = [];
     let commonDate = null;
-    
     try {
         for (const row of newRows) {
-            const rowId = row.querySelector('input').id.split('-')[0] + '-' + row.querySelector('input').id.split('-')[1];
+            // 获取行的唯一 ID (new-TIMESTAMP-COUNTER)
+            const firstInput = row.querySelector('input');
+            if (!firstInput || !firstInput.id) continue;
+            
+            const idParts = firstInput.id.split('-');
+            const rowId = idParts[0] + '-' + idParts[1] + '-' + idParts[2];
             
             // 获取各行的基本数据
             const codeInput = document.getElementById(`${rowId}-code_number-input`);
