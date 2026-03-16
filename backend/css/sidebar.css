@@ -349,9 +349,9 @@
 }
 
 .sub-option::before {
-    content: '·';
+    content: '›';
     margin-right: 10px;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: bold;
 }
 
