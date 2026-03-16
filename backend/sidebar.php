@@ -651,11 +651,31 @@ endif; ?>
                                 <div class="submenu-title">旗下品牌</div>
                             </div>
                             <div class="submenu-content">
-                                <a href="tokyopage1upload" class="submenu-item">第一页</a>
-                                <a href="tokyopage2upload" class="submenu-item">第二页</a>
-                                <a href="tokyopage3upload" class="submenu-item">第三页</a>
-                                <a href="tokyopage4upload" class="submenu-item">第四页</a>
-                                <a href="tokyopage5upload" class="submenu-item">第五页</a>
+                                <!-- Tokyo Cuisine Japanese -->
+                                <a href="#" class="submenu-item expandable" data-target="brand-tokyo-cuisine">
+                                    Tokyo Cuisine Japanese
+                                    <span class="expand-arrow">›</span>
+                                </a>
+                                <div class="sub-options" id="brand-tokyo-cuisine">
+                                    <a href="tokyopage1upload" class="sub-option">第一页</a>
+                                    <a href="tokyopage2upload" class="sub-option">第二页</a>
+                                    <a href="tokyopage3upload" class="sub-option">第三页</a>
+                                    <a href="tokyopage4upload" class="sub-option">第四页</a>
+                                    <a href="tokyopage5upload" class="sub-option">第五页</a>
+                                </div>
+
+                                <!-- Tokyo Izakaya Cuisine -->
+                                <a href="#" class="submenu-item expandable" data-target="brand-tokyo-izakaya">
+                                    Tokyo Izakaya Cuisine
+                                    <span class="expand-arrow">›</span>
+                                </a>
+                                <div class="sub-options" id="brand-tokyo-izakaya">
+                                    <a href="#" class="sub-option">第一页</a>
+                                    <a href="#" class="sub-option">第二页</a>
+                                    <a href="#" class="sub-option">第三页</a>
+                                    <a href="#" class="sub-option">第四页</a>
+                                    <a href="#" class="sub-option">第五页</a>
+                                </div>
                             </div>
                         </div>
                     </div>
