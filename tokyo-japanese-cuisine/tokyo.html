@@ -5054,11 +5054,11 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
             </div>
 
             <h2 class="zen-title">
-              <span>关于我们</span>
+              <span id="tokyo-about-title">关于我们</span>
 
             </h2>
 
-            <p class="zen-desc">
+            <p class="zen-desc" id="tokyo-about-desc">
               我们是一家致力于提供精致料理与品越服务的日式料理餐厅。
               以极致的匠心打造美食。严选当季新鲜食材,融合传统与创意,呈现日本料理美。
               餐厅环境清雅舒适,充满日式格调。宾客在此不仅能品味精妙料理,更能感受到细致入微的服务与文化魅力。
@@ -5712,18 +5712,31 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
             }
           }
 
-          // --- SECTION 2: ABOUT US IMAGES ---
+          // --- SECTION 2: ABOUT US TEXT & IMAGES ---
+          if (data.tokyo_about_text) {
+            const aboutTitle = document.getElementById('tokyo-about-title');
+            const aboutDesc = document.getElementById('tokyo-about-desc');
+            if (aboutTitle && data.tokyo_about_text.title) aboutTitle.textContent = data.tokyo_about_text.title;
+            if (aboutDesc && data.tokyo_about_text.desc) {
+              aboutDesc.innerHTML = data.tokyo_about_text.desc.replace(/\n/g, '<br>');
+            }
+          }
+
           if (data.tokyo_about_image1) {
             const img1 = document.getElementById('tokyo-about-img1');
-            let mediaUrl = data.tokyo_about_image1.file;
-            if (mediaUrl.startsWith('../')) mediaUrl = mediaUrl.substring(3);
-            img1.src = mainBase + mediaUrl;
+            if (img1) {
+              let mediaUrl = data.tokyo_about_image1.file;
+              if (mediaUrl.startsWith('../')) mediaUrl = mediaUrl.substring(3);
+              img1.src = mainBase + mediaUrl;
+            }
           }
           if (data.tokyo_about_image2) {
             const img2 = document.getElementById('tokyo-about-img2');
-            let mediaUrl = data.tokyo_about_image2.file;
-            if (mediaUrl.startsWith('../')) mediaUrl = mediaUrl.substring(3);
-            img2.src = mainBase + mediaUrl;
+            if (img2) {
+              let mediaUrl = data.tokyo_about_image2.file;
+              if (mediaUrl.startsWith('../')) mediaUrl = mediaUrl.substring(3);
+              img2.src = mainBase + mediaUrl;
+            }
           }
 
           // --- SECTION 3: CULTURE CAROUSEL IMAGES ---

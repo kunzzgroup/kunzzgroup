@@ -36,6 +36,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $config = json_decode(file_get_contents($configFile), true) ?: [];
     }
 
+    // 处理文本更新
+    $section_title = $_POST['tokyo_about_title'] ?? '关于我们';
+    $section_desc = $_POST['tokyo_about_desc'] ?? '';
+
+    if (!isset($config['tokyo_about_text'])) {
+        $config['tokyo_about_text'] = [];
+    }
+    $config['tokyo_about_text']['title'] = $section_title;
+    $config['tokyo_about_text']['desc'] = $section_desc;
+
     foreach ($mediaTypes as $type) {
         if (isset($_FILES[$type]) && $_FILES[$type]['error'] === UPLOAD_ERR_OK) {
             $file = $_FILES[$type];
@@ -50,11 +60,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $targetPath = $uploadDir . $newFileName;
                 
                 if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-                    $config[$type] = [
-                        'file' => $targetPath,
-                        'type' => 'image',
-                        'updated' => date('Y-m-d H:i:s')
-                    ];
+                    if (!isset($config[$type])) {
+                        $config[$type] = ['type' => 'image'];
+                    }
+                    $config[$type]['file'] = $targetPath;
+                    $config[$type]['updated'] = date('Y-m-d H:i:s');
                     $success_files[] = ($type === 'tokyo_about_image1' ? "左边小图" : "右边背景图");
                 } else {
                     $errors[] = ($type === 'tokyo_about_image1' ? "左边小图" : "右边背景图") . "上传失败！";
@@ -65,17 +75,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // 始终保存文本部分（即使没有文件上传）
+    file_put_contents($configFile, json_encode($config, JSON_PRETTY_PRINT));
+    
     if (!empty($success_files)) {
-        file_put_contents($configFile, json_encode($config, JSON_PRETTY_PRINT));
-        $success = implode('、', $success_files) . " 上传成功！";
-
-        // 清除缓存重定向
-        echo "<script>
-            setTimeout(function() {
-                window.location.href = window.location.href + (window.location.href.indexOf('?') > -1 ? '&' : '?') + 'updated=' + Date.now();
-            }, 2000);
-        </script>";
+        $success = implode('、', $success_files) . " 上传成功！且文字内容已保存。";
+    } else {
+        $success = "设置已成功更新！";
     }
+
+    // 清除缓存重定向
+    echo "<script>
+        setTimeout(function() {
+            window.location.href = window.location.href + (window.location.href.indexOf('?') > -1 ? '&' : '?') + 'updated=' + Date.now();
+        }, 1500);
+    </script>";
     
     if (!empty($errors)) {
         $error = implode('<br>', $errors);
@@ -121,6 +135,19 @@ if (file_exists($configFile)) {
             <?php endif; ?>
             
             <form method="post" enctype="multipart/form-data" class="upload-form">
+                <!-- 文字内容 section -->
+                <div class="media-section" style="margin-bottom: 30px;">
+                    <h2>关于我们 - 文字内容</h2>
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label>标题文字</label>
+                        <input type="text" name="tokyo_about_title" value="<?php echo htmlspecialchars($config['tokyo_about_text']['title'] ?? '关于我们'); ?>" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>描述文字</label>
+                        <textarea name="tokyo_about_desc" class="form-control" rows="6"><?php echo htmlspecialchars($config['tokyo_about_text']['desc'] ?? "我们是一家致力于提供精致料理与品越服务的日式料理餐厅。\n以极致的匠心打造美食。严选当季新鲜食材,融合传统与创意,呈现日本料理美。\n餐厅环境清雅舒适,充满日式格调。宾客在此不仅能品味精妙料理,更能感受到细致入微的服务与文化魅力。\n我们立志将每一次用餐变成难忘的美食之旅, 以品越的服务和精致的料理成为世界级日料品牌。"); ?></textarea>
+                    </div>
+                </div>
+
                 <div class="media-section">
                     <h2>关于我们 - 左侧悬浮图 (Image 1)</h2>
                     <div class="form-group">
@@ -171,5 +198,25 @@ if (file_exists($configFile)) {
     </div>
 
     <script src="js/tokyopage1upload.js?v=<?php echo time(); ?>"></script>
+    <style>
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            background: #fff;
+            font-family: inherit;
+        }
+        .media-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 5px solid #a68a64;
+        }
+        textarea.form-control {
+            resize: vertical;
+        }
+    </style>
 </body>
 </html>
