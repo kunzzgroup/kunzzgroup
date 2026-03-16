@@ -1315,64 +1315,58 @@ function updateCharts(data) {
         let baseDatasets = [];
 
         if (currentChartDataType === 'deliveryCost') {
-            const grabData = comparisonData.dates.map((_, i) => {
+            const j1DeliveryData = comparisonData.dates.map((_, i) => {
                 const j1 = comparisonData.restaurants.j1[i] || createEmptyCostDataPoint();
-                const j2 = comparisonData.restaurants.j2[i] || createEmptyCostDataPoint();
-                const j3 = comparisonData.restaurants.j3[i] || createEmptyCostDataPoint();
-                return (j1.cGrab || 0) + (j2.cGrab || 0) + (j3.cGrab || 0);
+                return (j1.cGrab || 0) + (j1.cFoodpanda || 0) + (j1.cShopee || 0);
             });
-            const fpData = comparisonData.dates.map((_, i) => {
-                const j1 = comparisonData.restaurants.j1[i] || createEmptyCostDataPoint();
+            const j2DeliveryData = comparisonData.dates.map((_, i) => {
                 const j2 = comparisonData.restaurants.j2[i] || createEmptyCostDataPoint();
-                const j3 = comparisonData.restaurants.j3[i] || createEmptyCostDataPoint();
-                return (j1.cFoodpanda || 0) + (j2.cFoodpanda || 0) + (j3.cFoodpanda || 0);
+                return (j2.cGrab || 0) + (j2.cFoodpanda || 0) + (j2.cShopee || 0);
             });
-            const shopeeData = comparisonData.dates.map((_, i) => {
-                const j1 = comparisonData.restaurants.j1[i] || createEmptyCostDataPoint();
-                const j2 = comparisonData.restaurants.j2[i] || createEmptyCostDataPoint();
+            const j3DeliveryData = comparisonData.dates.map((_, i) => {
                 const j3 = comparisonData.restaurants.j3[i] || createEmptyCostDataPoint();
-                return (j1.cShopee || 0) + (j2.cShopee || 0) + (j3.cShopee || 0);
+                return (j3.cGrab || 0) + (j3.cFoodpanda || 0) + (j3.cShopee || 0);
             });
 
             baseDatasets = [
                 {
-                    label: 'Grab 总成本',
-                    data: grabData,
-                    borderColor: '#00B14F',
+                    label: 'J1 总外卖成本',
+                    data: j1DeliveryData,
+                    borderColor: restaurantColors.j1.primary,
                     backgroundColor: function (context) {
                         const { ctx, chartArea } = context.chart;
                         if (!chartArea) return null;
                         const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                        gradient.addColorStop(0, 'rgba(0, 177, 79, 0.3)');
-                        gradient.addColorStop(1, 'rgba(0, 177, 79, 0.05)');
+                        gradient.addColorStop(0, 'rgba(88, 62, 4, 0.3)');
+                        gradient.addColorStop(1, 'rgba(88, 62, 4, 0.05)');
                         return gradient;
                     },
                     fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 6
                 },
                 {
-                    label: 'Foodpanda 总成本',
-                    data: fpData,
-                    borderColor: '#D70F64',
+                    label: 'J2 总外卖成本',
+                    data: j2DeliveryData,
+                    borderColor: restaurantColors.j2.primary,
                     backgroundColor: function (context) {
                         const { ctx, chartArea } = context.chart;
                         if (!chartArea) return null;
                         const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                        gradient.addColorStop(0, 'rgba(215, 15, 100, 0.3)');
-                        gradient.addColorStop(1, 'rgba(215, 15, 100, 0.05)');
+                        gradient.addColorStop(0, 'rgba(217, 119, 6, 0.3)');
+                        gradient.addColorStop(1, 'rgba(217, 119, 6, 0.05)');
                         return gradient;
                     },
                     fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 6
                 },
                 {
-                    label: 'Shopee 总成本',
-                    data: shopeeData,
-                    borderColor: '#EE4D2D',
+                    label: 'J3 总外卖成本',
+                    data: j3DeliveryData,
+                    borderColor: restaurantColors.j3.primary,
                     backgroundColor: function (context) {
                         const { ctx, chartArea } = context.chart;
                         if (!chartArea) return null;
                         const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                        gradient.addColorStop(0, 'rgba(238, 77, 45, 0.3)');
-                        gradient.addColorStop(1, 'rgba(238, 77, 45, 0.05)');
+                        gradient.addColorStop(0, 'rgba(220, 38, 38, 0.3)');
+                        gradient.addColorStop(1, 'rgba(220, 38, 38, 0.05)');
                         return gradient;
                     },
                     fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 6
