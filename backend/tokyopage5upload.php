@@ -139,6 +139,17 @@ $currentConfig = getTokyoLocationConfig();
                         <div class="help-text">显示在位置信息顶部的标题</div>
                     </div>
                 </div>
+
+                <div class="alert alert-info" style="margin-bottom: 20px; background-color: #e3f2fd; border-left: 5px solid #2196f3; padding: 15px; border-radius: 4px;">
+                    <h4 style="margin-top: 0; color: #0d47a1;">💡 如何获取地图嵌入代码？</h4>
+                    <ol style="margin-bottom: 0; font-size: 0.9em; padding-left: 20px;">
+                        <li>在 Google Maps 中找到您的店铺。</li>
+                        <li>点击“分享” (Share)。</li>
+                        <li>选择“嵌入地图” (Embed a map) 标签。</li>
+                        <li>点击“复制 HTML” (Copy HTML) 按钮。</li>
+                        <li>将复制的内容直接粘贴到下方的“地图链接”输入框中，系统会自动提取链接。</li>
+                    </ol>
+                </div>
                 
                 <button type="button" class="btn btn-add" onclick="addNewStore()">
                     + 添加新店铺

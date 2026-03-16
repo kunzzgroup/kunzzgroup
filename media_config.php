@@ -808,7 +808,7 @@ function deleteTimelineYear($year, $configFile = 'timeline_config.json') {
  * @return array Tokyo位置信息
  */
 function getTokyoLocationConfig() {
-    $configFile = 'tokyo_location_config.json';
+    $configFile = __DIR__ . '/tokyo_location_config.json';
     $defaultConfig = [
         'section_title' => '我们在这', // 添加这行
         'main_store' => [
@@ -853,7 +853,7 @@ function getTokyoLocationConfig() {
  * @return bool 成功返回true
  */
 function saveTokyoLocationConfig($config) {
-    $configFile = 'tokyo_location_config.json';
+    $configFile = __DIR__ . '/tokyo_location_config.json';
     
     // 检查目录权限
     $dir = dirname($configFile);

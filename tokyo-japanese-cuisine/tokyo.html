@@ -10,6 +10,7 @@
     href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=DM+Serif+Display&family=Noto+Sans+SC:wght@300;400;500;600&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <style>
     /* Typography and Color Variables - Tokyo Theme */
     :root {
@@ -2233,6 +2234,46 @@
       width: 100%;
       height: 100%;
       border: none;
+    }
+
+    .map-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+      color: #4b5563;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .map-fallback i {
+      font-size: 3rem;
+      margin-bottom: 12px;
+      color: var(--color-brown);
+      opacity: 0.6;
+    }
+
+    .btn-view-map {
+      margin-top: 15px;
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: var(--color-brown);
+      color: white !important;
+      text-decoration: none;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .btn-view-map:hover {
+      background-color: #5c4a3a;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
     }
 
     .location-card-info {
@@ -5750,22 +5791,42 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
                 const revealClass = isLeft ? 'fade-left' : 'fade-right';
                 const delay = (index + 1) * 100;
 
-                // Simple check for embed URL, fallback if it's a regular link
+                // Improved check for embed URL
                 let mapSrc = store.map_url || '';
-                if (mapSrc && !mapSrc.includes('embed')) {
+                let isEmbeddable = mapSrc.includes('google.com/maps/embed') || mapSrc.includes('pb=!');
+                
+                if (mapSrc && !isEmbeddable) {
                     if (mapSrc.includes('google.com/maps/place')) {
                         const match = mapSrc.match(/!1m.*!2s/);
-                        if (match) mapSrc = `https://www.google.com/maps/embed?pb=${match[0]}`;
+                        if (match) {
+                            mapSrc = `https://www.google.com/maps/embed?pb=${match[0]}`;
+                            isEmbeddable = true;
+                        }
                     }
                 }
 
                 const cardDiv = document.createElement('div');
                 cardDiv.className = `location-card reveal ${revealClass} delay-${delay}`;
+                
+                let mapContent = '';
+                if (isEmbeddable) {
+                    mapContent = `<iframe title="${store.label || '地图'}"
+                                src="${mapSrc}"
+                                allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+                } else {
+                    // Fallback for non-embeddable links (like short goo.gl links)
+                    mapContent = `
+                        <div class="map-fallback">
+                            <i class="fas fa-map-marked-alt"></i>
+                            <p>无法直接显示地图预览</p>
+                            <a href="${store.map_url}" target="_blank" class="btn-view-map">在 Google Maps 中查看</a>
+                        </div>
+                    `;
+                }
+
                 cardDiv.innerHTML = `
                         <div class="location-card-map">
-                            <iframe title="${store.label || '地图'}"
-                                src="${mapSrc}"
-                                allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                            ${mapContent}
                         </div>
                         <div class="location-card-info">
                             <h3>${store.label || ''}</h3>
