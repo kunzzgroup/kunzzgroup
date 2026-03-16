@@ -322,7 +322,7 @@ $avatarLetter = strtoupper($username[0]);
                     <div class="card-body">
                         <div class="cost-card-vertical">
                             <div class="icon dynamic-color">
-                                <i class="fas fa-shuttle-van"></i>
+                                <i class="fas fa-car-side"></i>
                             </div>
                             <div>
                                 <p class="cost-label">Grab Food 成本 (RM)</p>
@@ -337,7 +337,17 @@ $avatarLetter = strtoupper($username[0]);
                     <div class="card-body">
                         <div class="cost-card-vertical">
                             <div class="icon dynamic-color">
-                                <i class="fas fa-bicycle"></i>
+                                <svg viewBox="0 0 64 64" fill="currentColor" style="width: 1.5em; height: 1.5em; vertical-align: middle;">
+                                    <circle cx="32" cy="36" r="24" fill="currentColor" opacity="0.1"/>
+                                    <path d="M18,12c2.2,0,4,1.8,4,4c0,2.2-1.8,4-4,4c-2.2,0-4-1.8-4-4C10,13.8,15.8,12,18,12z"/>
+                                    <path d="M46,12c2.2,0,4,1.8,4,4c0,2.2-1.8,4-4,4c-2.2,0-4-1.8-4-4C42,13.8,43.8,12,46,12z"/>
+                                    <path d="M32,20c11,0,20,9,20,20s-9,20-20,20s-20-9-20-20S21,20,32,20z"/>
+                                    <circle cx="43" cy="38" r="6" fill="white"/>
+                                    <circle cx="21" cy="38" r="6" fill="white"/>
+                                    <circle cx="43" cy="38" r="3" fill="black"/>
+                                    <circle cx="21" cy="38" r="3" fill="black"/>
+                                    <path d="M32,48c2,0,4,1.5,4,3s-2,3-4,3s-4-1.5-4-3S30,48,32,48z" fill="black"/>
+                                </svg>
                             </div>
                             <div>
                                 <p class="cost-label">Foodpanda 成本 (RM)</p>
