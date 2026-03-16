@@ -109,9 +109,17 @@ window.addEventListener('keydown', function (e) {
     // A2. 批量删除 (Ctrl+D)
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.code === 'KeyD' || e.key === 'd' || e.key === 'D')) {
         e.preventDefault(); 
-        console.log('StockEdit Shortcut: CTRL+D triggered (Batch Delete)');
-        if (typeof toggleBatchDelete === 'function') {
-            toggleBatchDelete();
+        
+        if (typeof isBatchDeleteMode !== 'undefined' && isBatchDeleteMode) {
+            console.log('StockEdit Shortcut: CTRL+D triggered (Confirm Batch Delete)');
+            if (typeof confirmBatchDelete === 'function') {
+                confirmBatchDelete();
+            }
+        } else {
+            console.log('StockEdit Shortcut: CTRL+D triggered (Toggle Batch Delete)');
+            if (typeof toggleBatchDelete === 'function') {
+                toggleBatchDelete();
+            }
         }
         return;
     }
