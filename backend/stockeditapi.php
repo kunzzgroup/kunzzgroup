@@ -2058,7 +2058,13 @@ function handleDelete() {
             
             foreach ($tables as $table) {
                 try {
-                    $idField = (strpos($table, 'inout') !== false) ? 'main_record_id' : 'id';
+                    $idField = 'id';
+                    // 中心库彻底删除时，分支系统的 inout 表使用 main_record_id 来关联中心库 ID
+                    $branchInoutTables = ['j1stockinout_data', 'j2stockinout_data', 'j3stockinout_data'];
+                    if ($system === 'central' && in_array($table, $branchInoutTables)) {
+                        $idField = 'main_record_id';
+                    }
+                    
                     $sql = "DELETE FROM $table WHERE $idField IN ($placeholders) AND deleted_at IS NOT NULL";
                     $stmt = $pdo->prepare($sql);
                     $stmt->execute($targetIds);
