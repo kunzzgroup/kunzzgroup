@@ -488,32 +488,6 @@
       color: var(--color-primary);
     }
 
-    .btn {
-      background: var(--color-primary);
-      color: #1e1a17;
-      border: none;
-      padding: 13px 30px;
-      font-family: 'Cinzel', serif;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      cursor: pointer;
-      border-radius: 2px;
-      transition: background 0.25s, transform 0.18s, box-shadow 0.25s;
-    }
-
-    .btn:hover {
-      background: #b89a78;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(166, 138, 100, 0.3);
-    }
-
-    .btn:active {
-      transform: translateY(0);
-      box-shadow: none;
-    }
-
 
     /* Hero Section */
     #hero {
@@ -1856,23 +1830,31 @@
     }
 
     .featured-card-btn {
-      padding: 12px 24px;
-      background-color: transparent;
+      background: transparent;
       color: white;
       border: 1px solid #c9a227;
-      /* Gold border button */
-      border-radius: 9999px;
+      padding: 13px 30px;
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
       font-weight: 600;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      font-size: 14px;
-      letter-spacing: 0.05em;
+      cursor: pointer;
+      border-radius: 2px;
       transform: translateY(10px);
-      transition: all 0.3s ease;
+      transition: background 0.25s, transform 0.18s, box-shadow 0.25s;
     }
 
     .featured-card-btn:hover {
-      background-color: #c9a227;
+      background: #c9a227;
       color: #2c1810;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(201, 168, 76, 0.3);
+    }
+
+    .featured-card-btn:active {
+      transform: translateY(0);
+      box-shadow: none;
     }
 
     .featured-card:hover .featured-card-btn {
@@ -4940,7 +4922,9 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
           <span></span><span></span><span></span><span></span><span></span><span></span>
         </div>
         <div class="hero-slider" id="hero-slider">
-          <div class="hero-slide active" id="hero-bg-container" style="background-image: url('image/sushi-dish-asian-restaurant.jpg'); height: 100%; width: 100%; background-size: cover; background-position: center; position: relative; overflow: hidden;"></div>
+          <div class="hero-slide active" id="hero-bg-container"
+            style="background-image: url('image/sushi-dish-asian-restaurant.jpg'); height: 100%; width: 100%; background-size: cover; background-position: center; position: relative; overflow: hidden;">
+          </div>
         </div>
         <div class="hero-overlay"></div>
         <div class="shoji-lattice"></div>
@@ -5639,63 +5623,63 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
       fetch('https://kunzzgroup.com/backend/get_media_config.php')
         .then(response => response.json())
         .then(data => {
-            if (!data) return;
+          if (!data) return;
 
-            const mainBase = 'https://kunzzgroup.com/';
-            
-            // --- SECTION 1: HERO BACKGROUND ---
-            if (data.tokyo_background) {
-                const bgInfo = data.tokyo_background;
-                const bgContainer = document.getElementById('hero-bg-container');
-                
-                let mediaUrl = bgInfo.file;
-                if(mediaUrl.startsWith('../')) mediaUrl = mediaUrl.substring(3);
-                const finalUrl = mainBase + mediaUrl;
+          const mainBase = 'https://kunzzgroup.com/';
 
-                if (bgInfo.type === 'video') {
-                    bgContainer.innerHTML = `
+          // --- SECTION 1: HERO BACKGROUND ---
+          if (data.tokyo_background) {
+            const bgInfo = data.tokyo_background;
+            const bgContainer = document.getElementById('hero-bg-container');
+
+            let mediaUrl = bgInfo.file;
+            if (mediaUrl.startsWith('../')) mediaUrl = mediaUrl.substring(3);
+            const finalUrl = mainBase + mediaUrl;
+
+            if (bgInfo.type === 'video') {
+              bgContainer.innerHTML = `
                         <video autoplay loop muted playsinline style="position: absolute; width: 100%; height: 100%; object-fit: cover; top: 0; left: 0;">
                             <source src="${finalUrl}" type="video/mp4">
                         </video>
                     `;
-                    bgContainer.style.backgroundImage = 'none';
-                } else if (bgInfo.type === 'image') {
-                    bgContainer.style.backgroundImage = `url('${finalUrl}')`;
-                }
+              bgContainer.style.backgroundImage = 'none';
+            } else if (bgInfo.type === 'image') {
+              bgContainer.style.backgroundImage = `url('${finalUrl}')`;
             }
+          }
 
-            // --- SECTION 2: ABOUT US IMAGES ---
-            if (data.tokyo_about_image1) {
-                const img1 = document.getElementById('tokyo-about-img1');
-                let mediaUrl = data.tokyo_about_image1.file;
-                if(mediaUrl.startsWith('../')) mediaUrl = mediaUrl.substring(3);
-                img1.src = mainBase + mediaUrl;
+          // --- SECTION 2: ABOUT US IMAGES ---
+          if (data.tokyo_about_image1) {
+            const img1 = document.getElementById('tokyo-about-img1');
+            let mediaUrl = data.tokyo_about_image1.file;
+            if (mediaUrl.startsWith('../')) mediaUrl = mediaUrl.substring(3);
+            img1.src = mainBase + mediaUrl;
+          }
+          if (data.tokyo_about_image2) {
+            const img2 = document.getElementById('tokyo-about-img2');
+            let mediaUrl = data.tokyo_about_image2.file;
+            if (mediaUrl.startsWith('../')) mediaUrl = mediaUrl.substring(3);
+            img2.src = mainBase + mediaUrl;
+          }
+
+          // --- SECTION 3: CULTURE CAROUSEL IMAGES ---
+          const cultureImages = [
+            { id: 'tokyo-culture-img1', key: 'tokyo_mission' },
+            { id: 'tokyo-culture-img2', key: 'tokyo_vision' },
+            { id: 'tokyo-culture-img3', key: 'tokyo_values' },
+            { id: 'tokyo-culture-img4', key: 'tokyo_character' }
+          ];
+
+          cultureImages.forEach(item => {
+            if (data[item.key]) {
+              const img = document.getElementById(item.id);
+              if (img) {
+                let mediaUrl = data[item.key].file;
+                if (mediaUrl.startsWith('../')) mediaUrl = mediaUrl.substring(3);
+                img.src = mainBase + mediaUrl;
+              }
             }
-            if (data.tokyo_about_image2) {
-                const img2 = document.getElementById('tokyo-about-img2');
-                let mediaUrl = data.tokyo_about_image2.file;
-                if(mediaUrl.startsWith('../')) mediaUrl = mediaUrl.substring(3);
-                img2.src = mainBase + mediaUrl;
-            }
-
-            // --- SECTION 3: CULTURE CAROUSEL IMAGES ---
-            const cultureImages = [
-                { id: 'tokyo-culture-img1', key: 'tokyo_mission' },
-                { id: 'tokyo-culture-img2', key: 'tokyo_vision' },
-                { id: 'tokyo-culture-img3', key: 'tokyo_values' },
-                { id: 'tokyo-culture-img4', key: 'tokyo_character' }
-            ];
-
-            cultureImages.forEach(item => {
-                if (data[item.key]) {
-                    const img = document.getElementById(item.id);
-                    if (img) {
-                        let mediaUrl = data[item.key].file;
-                        if(mediaUrl.startsWith('../')) mediaUrl = mediaUrl.substring(3);
-                        img.src = mainBase + mediaUrl;
-                    }
-                }
-            });
+          });
         })
         .catch(err => console.error('Error fetching media config:', err));
 
