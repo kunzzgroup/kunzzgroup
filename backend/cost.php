@@ -337,17 +337,22 @@ $avatarLetter = strtoupper($username[0]);
                     <div class="card-body">
                         <div class="cost-card-vertical">
                             <div class="icon dynamic-color">
-                                <svg viewBox="0 0 64 64" fill="currentColor" style="width: 1.6em; height: 1.6em; vertical-align: middle;">
+                                <svg viewBox="0 0 100 100" style="width: 1.6em; height: 1.6em; vertical-align: middle;">
                                     <!-- Ears -->
-                                    <circle cx="15" cy="15" r="7"/>
-                                    <circle cx="49" cy="15" r="7"/>
-                                    <!-- Head -->
-                                    <path d="M32 12C12 12 8 28 8 40C8 52 16 58 32 58S56 52 56 40C56 28 52 12 32 12z"/>
-                                    <!-- Eye patches (holes/fills) -->
-                                    <path d="M22 34c-2.5 0-4.5 2-4.5 4.5S19.5 43 22 43s4.5-2 4.5-4.5S24.5 34 22 34z" fill="white"/>
-                                    <path d="M42 34c-2.5 0-4.5 2-4.5 4.5S39.5 43 42 43s4.5-2 4.5-4.5S44.5 34 42 34z" fill="white"/>
+                                    <circle cx="28" cy="22" r="10" fill="black"/>
+                                    <circle cx="72" cy="22" r="10" fill="black"/>
+                                    <!-- Face -->
+                                    <circle cx="50" cy="52" r="40" fill="white" stroke="black" stroke-width="4"/>
+                                    <!-- Eye Patches -->
+                                    <path d="M42,48 c0,7 -3,13 -9,13 s-9,-6 -9,-13 s3,-13 9,-13 s9,6 9,13" fill="black" transform="rotate(-15, 33, 48)"/>
+                                    <path d="M76,48 c0,7 -3,13 -9,13 s-9,-6 -9,-13 s3,-13 9,-13 s9,6 9,13" fill="black" transform="rotate(15, 67, 48)"/>
+                                    <!-- Pupils -->
+                                    <circle cx="36" cy="44" r="3.5" fill="white"/>
+                                    <circle cx="64" cy="44" r="3.5" fill="white"/>
                                     <!-- Nose -->
-                                    <path d="M32 48c-1.5 0-2.5 1-2.5 2s1 2 2.5 2 2.5-1 2.5-2-1-2-2.5-2z" fill="white"/>
+                                    <path d="M44,62 c0,0 3,-3 6,-3 s6,3 6,3 s-3,5 -6,5 s-6,-5 -6,-5" fill="black"/>
+                                    <!-- Mouth -->
+                                    <path d="M40,72 a10,10 0 0,0 20,0 z" fill="black"/>
                                 </svg>
                             </div>
                             <div>
