@@ -47,13 +47,37 @@ function addNewStore() {
         inputs[3].placeholder = 'https://maps.app.goo.gl/...';
 
         // 添加事件监听
-        inputs.forEach(input => {
+        inputs.forEach((input, idx) => {
+            if (idx === 3) { // 针对地图链接字段
+                input.addEventListener('paste', handleMapUrlPaste);
+            }
             input.addEventListener('input', updatePreview);
         });
     }
 
     // 滚动到新添加的店铺
     storeSection.scrollIntoView({ behavior: 'smooth' });
+}
+
+// 处理地图链接粘贴
+function handleMapUrlPaste(e) {
+    // 延迟执行以便获取粘贴后的文本
+    setTimeout(() => {
+        const input = e.target;
+        const value = input.value.trim();
+        
+        // 如果粘贴的是 <iframe> 标签，提取 src
+        if (value.startsWith('<iframe') && value.includes('src="')) {
+            const match = value.match(/src="([^"]+)"/);
+            if (match && match[1]) {
+                input.value = match[1];
+                updatePreview();
+                // 可以给个视觉提示
+                input.style.backgroundColor = '#e8f5e9';
+                setTimeout(() => input.style.backgroundColor = '', 500);
+            }
+        }
+    }, 10);
 }
 
 // 移除新店铺（未保存的）
@@ -113,6 +137,11 @@ function updatePreview() {
 // 为所有现有输入框添加实时预览
 document.querySelectorAll('.form-input').forEach(input => {
     input.addEventListener('input', updatePreview);
+    
+    // 如果是地图链接字段，添加粘贴提取逻辑
+    if (input.name && input.name.includes('_map_url')) {
+        input.addEventListener('paste', handleMapUrlPaste);
+    }
 });
 
 // 表单验证 - 修改为更宽松的验证
