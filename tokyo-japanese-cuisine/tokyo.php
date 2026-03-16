@@ -1,3 +1,4 @@
+<?php include_once '../media_config.php'; ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
 
@@ -4914,7 +4915,15 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
           <span></span><span></span><span></span><span></span><span></span><span></span>
         </div>
         <div class="hero-slider" id="hero-slider">
-          <div class="hero-slide active" style="background-image: url('image/sushi-dish-asian-restaurant.jpg'); height: 100%; width: 100%; background-size: cover; background-position: center;"></div>
+          <?php if (isset($mediaConfig['tokyo_background']) && $mediaConfig['tokyo_background']['type'] === 'video'): ?>
+            <video autoplay loop muted playsinline style="position: absolute; width: 100%; height: 100%; object-fit: cover;">
+              <source src="<?php echo htmlspecialchars($mediaConfig['tokyo_background']['url']); ?>" type="video/mp4">
+            </video>
+          <?php elseif (isset($mediaConfig['tokyo_background']) && $mediaConfig['tokyo_background']['type'] === 'image'): ?>
+            <div class="hero-slide active" style="background-image: url('<?php echo htmlspecialchars($mediaConfig['tokyo_background']['url']); ?>'); height: 100%; width: 100%; background-size: cover; background-position: center;"></div>
+          <?php else: ?>
+            <div class="hero-slide active" style="background-image: url('image/sushi-dish-asian-restaurant.jpg'); height: 100%; width: 100%; background-size: cover; background-position: center;"></div>
+          <?php endif; ?>
         </div>
         <div class="hero-overlay"></div>
         <div class="shoji-lattice"></div>

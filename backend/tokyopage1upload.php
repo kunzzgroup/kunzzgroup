@@ -70,8 +70,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
 
 // 读取当前配置
 $config = [];
-if (file_exists('media_config.json')) {
-    $config = json_decode(file_get_contents('media_config.json'), true) ?: [];
+if (file_exists('../media_config.json')) {
+    $config = json_decode(file_get_contents('../media_config.json'), true) ?: [];
 }
 ?>
 
@@ -111,7 +111,7 @@ if (file_exists('media_config.json')) {
             <?php if (isset($_GET['debug'])): ?>
                 <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px;">
                     <strong>调试信息：</strong><br>
-                    配置文件路径: <?php echo realpath('media_config.json') ?: '文件不存在'; ?><br>
+                    配置文件路径: <?php echo realpath('../media_config.json') ?: '文件不存在'; ?><br>
                     当前配置: <?php echo json_encode($config, JSON_PRETTY_PRINT); ?><br>
                     文件是否存在: <?php echo isset($config['tokyo_background']) && file_exists($config['tokyo_background']['file']) ? '是' : '否'; ?>
                 </div>
