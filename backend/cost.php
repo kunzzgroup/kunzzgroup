@@ -16,9 +16,9 @@ if (isset($_SESSION['user_id'])) {
 
     // 如果超过 1 分钟没活动，并且没有记住我
     if (
-        isset($_SESSION['last_activity']) &&
-        (time() - $_SESSION['last_activity'] > SESSION_TIMEOUT) &&
-        (!isset($_COOKIE['remember_token']) || $_COOKIE['remember_token'] !== '1')
+    isset($_SESSION['last_activity']) &&
+    (time() - $_SESSION['last_activity'] > SESSION_TIMEOUT) &&
+    (!isset($_COOKIE['remember_token']) || $_COOKIE['remember_token'] !== '1')
     ) {
         // 清除 session
         session_unset();
@@ -38,18 +38,20 @@ if (isset($_SESSION['user_id'])) {
     // 更新活动时间戳
     $_SESSION['last_activity'] = time();
 
-} elseif (
-    isset($_COOKIE['user_id']) &&
-    isset($_COOKIE['username']) &&
-    isset($_COOKIE['remember_token']) &&
-    $_COOKIE['remember_token'] === '1'
+}
+elseif (
+isset($_COOKIE['user_id']) &&
+isset($_COOKIE['username']) &&
+isset($_COOKIE['remember_token']) &&
+$_COOKIE['remember_token'] === '1'
 ) {
     // 记住我逻辑（恢复 session）
     $_SESSION['user_id'] = $_COOKIE['user_id'];
     $_SESSION['username'] = $_COOKIE['username'];
     $_SESSION['position'] = isset($_COOKIE['position']) ? $_COOKIE['position'] : null;
     $_SESSION['last_activity'] = time();
-} else {
+}
+else {
     // 没有 session，也没有有效 cookie
     header("Location: index.php");
     exit();
@@ -284,6 +286,35 @@ $avatarLetter = strtoupper($username[0]);
                         </div>
                     </div>
                 </div>
+                <!-- 供应→J2 (仅J1餐厅时显示) -->
+                <div class="card supply-card">
+                    <div class="card-body">
+                        <div class="cost-card-vertical">
+                            <div class="icon dynamic-color">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                            <div>
+                                <p class="cost-label">供应→J2 (RM)</p>
+                                <p class="cost-value" id="j2-supply">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 供应→J3 (仅J1餐厅时显示) -->
+                <div class="card supply-card">
+                    <div class="card-body">
+                        <div class="cost-card-vertical">
+                            <div class="icon dynamic-color">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                            <div>
+                                <p class="cost-label">供应→J3 (RM)</p>
+                                <p class="cost-value" id="j3-supply">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Grab Food 成本 -->
                 <div class="card">
@@ -329,37 +360,6 @@ $avatarLetter = strtoupper($username[0]);
                         </div>
                     </div>
                 </div>
-
-                <!-- 供应→J2 (仅J1餐厅时显示) -->
-                <div class="card supply-card">
-                    <div class="card-body">
-                        <div class="cost-card-vertical">
-                            <div class="icon dynamic-color">
-                                <i class="fas fa-arrow-right"></i>
-                            </div>
-                            <div>
-                                <p class="cost-label">供应→J2 (RM)</p>
-                                <p class="cost-value" id="j2-supply">0</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 供应→J3 (仅J1餐厅时显示) -->
-                <div class="card supply-card">
-                    <div class="card-body">
-                        <div class="cost-card-vertical">
-                            <div class="icon dynamic-color">
-                                <i class="fas fa-arrow-right"></i>
-                            </div>
-                            <div>
-                                <p class="cost-label">供应→J3 (RM)</p>
-                                <p class="cost-value" id="j3-supply">0</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Main Chart - 全宽显示 -->
             <div class="main-chart-container">
