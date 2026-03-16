@@ -5022,27 +5022,27 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
               <div class="cc-card" data-title="使命 Mission"
                 data-desc="以极致的匠心和热情为每一位顾客呈现最正宗的日式料理体验我们致力于将传统日本饮食文化与现代创新完美融合"
                 style="background: linear-gradient(135deg,#2d5a27,#1a3a16)">
-                <img src="image/使命.jpeg" alt="Mission">
+                <img id="tokyo-culture-img1" src="image/使命.jpeg" alt="Mission">
                 <div class="cc-card-overlay"></div>
                 <span class="cc-card-num">01</span>
               </div>
               <div class="cc-card" data-title="愿景 Vision"
                 data-desc="成为世界级的日料品牌让更多人感受到日本料理的精致与美好我们希望通过品越的服务和品质成为顾客心中最值得信赖的日式餐厅"
                 style="background: linear-gradient(135deg,#3d4a2d,#232e1a)">
-                <img src="image/愿景.jpeg" alt="Vision">
+                <img id="tokyo-culture-img2" src="image/愿景.jpeg" alt="Vision">
                 <div class="cc-card-overlay"></div>
                 <span class="cc-card-num">02</span>
               </div>
               <div class="cc-card" data-title="价值观 Values" data-desc="专注品质追求完美尊重传统勇于创新我们相信细节决定成败每一个环节都精益求精为顾客创造难忘的用餐体验"
                 style="background: linear-gradient(135deg,#4a3d1a,#2e2610)">
-                <img src="image/价值观.jpeg" alt="Values">
+                <img id="tokyo-culture-img3" src="image/价值观.jpeg" alt="Values">
                 <div class="cc-card-overlay"></div>
                 <span class="cc-card-num">03</span>
               </div>
               <div class="cc-card" data-title="人品 Character"
                 data-desc="诚信为本匠心独运服务至上我们以最真诚的态度对待每一位顾客用心制作每一道料理让顾客感受到家一般的温暖和关怀"
                 style="background: linear-gradient(135deg,#1a2d4a,#101e2e)">
-                <img src="image/人品.jpeg" alt="Character">
+                <img id="tokyo-culture-img4" src="image/人品.jpeg" alt="Character">
                 <div class="cc-card-overlay"></div>
                 <span class="cc-card-num">04</span>
               </div>
@@ -5651,6 +5651,25 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
                 if(mediaUrl.startsWith('../')) mediaUrl = mediaUrl.substring(3);
                 img2.src = mainBase + mediaUrl;
             }
+
+            // --- SECTION 3: CULTURE CAROUSEL IMAGES ---
+            const cultureImages = [
+                { id: 'tokyo-culture-img1', key: 'tokyo_mission' },
+                { id: 'tokyo-culture-img2', key: 'tokyo_vision' },
+                { id: 'tokyo-culture-img3', key: 'tokyo_values' },
+                { id: 'tokyo-culture-img4', key: 'tokyo_character' }
+            ];
+
+            cultureImages.forEach(item => {
+                if (data[item.key]) {
+                    const img = document.getElementById(item.id);
+                    if (img) {
+                        let mediaUrl = data[item.key].file;
+                        if(mediaUrl.startsWith('../')) mediaUrl = mediaUrl.substring(3);
+                        img.src = mainBase + mediaUrl;
+                    }
+                }
+            });
         })
         .catch(err => console.error('Error fetching media config:', err));
 
