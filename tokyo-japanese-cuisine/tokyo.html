@@ -4949,17 +4949,7 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
           <span></span><span></span><span></span><span></span><span></span><span></span>
         </div>
         <div class="hero-slider" id="hero-slider">
-          <div class="hero-slider-track" id="hero-slider-track">
-            <div class="hero-slide active" style="background-image: url('image/tokyologo.png');"></div>
-            <div class="hero-slide" style="background-image: url('image/sushi-dish-asian-restaurant.jpg');"></div>
-            <div class="hero-slide" style="background-image: url('image/sushi-dish-asian-restaurant.jpg');"></div>
-          </div>
-          <!-- Add dot indicators -->
-          <div class="hero-slider-dots" id="hero-slider-dots">
-            <button class="hero-dot active" data-index="0" aria-label="Slide 1"></button>
-            <button class="hero-dot" data-index="1" aria-label="Slide 2"></button>
-            <button class="hero-dot" data-index="2" aria-label="Slide 3"></button>
-          </div>
+          <div class="hero-slide active" style="background-image: url('image/sushi-dish-asian-restaurant.jpg'); height: 100%; width: 100%; background-size: cover; background-position: center;"></div>
         </div>
         <div class="hero-overlay"></div>
         <div class="shoji-lattice"></div>
@@ -5524,136 +5514,7 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
       }
 
       // --- Swipable Hero Carousel Logic ---
-      const heroTrack = document.getElementById('hero-slider-track');
-      const heroSlides = document.querySelectorAll('.hero-slide');
-      const heroDots = document.querySelectorAll('.hero-dot');
-
-      if (heroTrack && heroSlides.length > 0) {
-        let currentSlide = 0;
-        const totalSlides = heroSlides.length;
-        let slideInterval;
-
-        function updateSlider() {
-          // Move the track horizontally
-          heroTrack.style.transform = `translateX(-${currentSlide * 100}%)`;
-
-          // Update dot indicators
-          heroDots.forEach((dot, index) => {
-            if (index === currentSlide) {
-              dot.classList.add('active');
-            } else {
-              dot.classList.remove('active');
-            }
-          });
-        }
-
-        function nextSlide() {
-          currentSlide = (currentSlide + 1) % totalSlides;
-          updateSlider();
-        }
-
-        function prevSlide() {
-          currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-          updateSlider();
-        }
-
-        function startAutoSlide() {
-          if (slideInterval) clearInterval(slideInterval);
-          slideInterval = setInterval(nextSlide, 5000);
-        }
-
-        function resetAutoSlide() {
-          startAutoSlide();
-        }
-
-        // Dot Click Navigation
-        heroDots.forEach(dot => {
-          dot.addEventListener('click', function () {
-            currentSlide = parseInt(this.getAttribute('data-index'));
-            updateSlider();
-            resetAutoSlide();
-          });
-        });
-
-        // --- Touch & Mouse Drag Swap Implementation ---
-        let isDragging = false;
-        let startPos = 0;
-        let diff = 0;
-
-        function getPositionX(e) {
-          return e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
-        }
-
-        function dragStart(e) {
-          isDragging = true;
-          startPos = getPositionX(e);
-          if (slideInterval) clearInterval(slideInterval);
-
-          // Disable animation for 1:1 drag feedback
-          heroTrack.style.transition = 'none';
-          heroTrack.style.cursor = 'grabbing';
-          diff = 0;
-        }
-
-        function dragMove(e) {
-          if (!isDragging) return;
-          const currentPosition = getPositionX(e);
-          diff = currentPosition - startPos;
-
-          // Calculate percentage moved relative to screen width
-          const diffPercent = (diff / window.innerWidth) * 100;
-          const translatePercent = -(currentSlide * 100) + diffPercent;
-          heroTrack.style.transform = `translateX(${translatePercent}%)`;
-        }
-
-        function dragEnd() {
-          if (!isDragging) return;
-          isDragging = false;
-
-          // Re-enable snapping animation
-          heroTrack.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
-          heroTrack.style.cursor = 'grab';
-
-          const swipeThreshold = window.innerWidth * 0.15; // 15% of screen width to register a swipe
-
-          if (diff < -swipeThreshold) {
-            // Swiped left
-            currentSlide = (currentSlide + 1) % totalSlides;
-          } else if (diff > swipeThreshold) {
-            // Swiped right
-            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-          }
-
-          updateSlider();
-          resetAutoSlide();
-        }
-
-        heroTrack.style.cursor = 'grab';
-
-        // Attach events to the entire hero section so text and overlays don't block the swipe
-        const heroSection = document.getElementById('hero');
-        if (heroSection) {
-          heroSection.style.cursor = 'grab';
-
-          // Touch events
-          heroSection.addEventListener('touchstart', dragStart, { passive: true });
-          heroSection.addEventListener('touchmove', dragMove, { passive: true });
-
-          // Mouse events for desktop testing
-          heroSection.addEventListener('mousedown', (e) => {
-            // Ignore drag if clicking on a button or link
-            if (e.target.closest('a') || e.target.closest('button')) return;
-            dragStart(e);
-          });
-        }
-
-        window.addEventListener('touchend', dragEnd);
-        window.addEventListener('mousemove', dragMove);
-        window.addEventListener('mouseup', dragEnd);
-
-        // Init auto-slide
-        startAutoSlide();
-      }
+      // (Removed: hero section is now a single image)
 
       // --- Haidilao Menu Logic ---
       const haidilaoTopTabs = document.querySelectorAll('.haidilao-top-tab');
