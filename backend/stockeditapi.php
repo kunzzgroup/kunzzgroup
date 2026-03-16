@@ -958,6 +958,7 @@ function handlePost() {
     // 处理恢复操作
     if (($data['action'] ?? '') === 'restore') {
         $ids = $data['ids'] ?? [];
+        $system = $data['system'] ?? '';
         if (empty($ids)) {
             sendResponse(false, "缺少要恢复的记录ID");
         }
@@ -966,22 +967,46 @@ function handlePost() {
             $pdo->beginTransaction();
             $placeholders = implode(',', array_fill(0, count($ids), '?'));
             
-            // 1. 恢复主表
-            $sql = "UPDATE stockinout_data SET deleted_at = NULL, deleted_by = NULL WHERE id IN ($placeholders)";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute($ids);
-            
-            // 2. 恢复子系统表 (如果有的话)
-            $otherTables = ['j1stockedit_data', 'j2stockedit_data', 'j3stockedit_data', 'j1stockeditmobile_data', 'j2stockeditmobile_data', 'j3stockeditmobile_data', 'j1stockinout_data', 'j2stockinout_data', 'j3stockinout_data'];
-            foreach ($otherTables as $table) {
-                try {
-                    // 对于 inout 表，可能需要根据 main_record_id 恢复
-                    $idField = (strpos($table, 'inout') !== false) ? 'main_record_id' : 'id';
-                    $sql = "UPDATE $table SET deleted_at = NULL, deleted_by = NULL WHERE $idField IN ($placeholders)";
-                    $stmt = $pdo->prepare($sql);
-                    $stmt->execute($ids);
-                } catch (PDOException $e) {
-                    // 忽略不存在字段或表的错误
+            if ($system === 'central' || empty($system)) {
+                // 1. 恢复主表
+                $sql = "UPDATE stockinout_data SET deleted_at = NULL, deleted_by = NULL WHERE id IN ($placeholders)";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute($ids);
+                
+                // 2. 对于 Central 记录，我们需要根据同步逻辑恢复关联的子表记录
+                foreach ($ids as $currentId) {
+                    $stmt = $pdo->prepare("SELECT * FROM stockinout_data WHERE id = ?");
+                    $stmt->execute([$currentId]);
+                    $record = $stmt->fetch(PDO::FETCH_ASSOC);
+                    
+                    if ($record && floatval($record['out_quantity'] ?? 0) > 0) {
+                        $targetSystem = $record['target_system'] ?? '';
+                        if (in_array($targetSystem, ['j1', 'j2', 'j3'])) {
+                            // 恢复 inout 子表
+                            $pdo->prepare("UPDATE {$targetSystem}stockinout_data SET deleted_at = NULL, deleted_by = NULL WHERE main_record_id = ?")
+                                ->execute([$currentId]);
+                            
+                            // 恢复 edit 子表
+                            $pdo->prepare("UPDATE {$targetSystem}stockedit_data SET deleted_at = NULL, deleted_by = NULL 
+                                           WHERE product_name = ? AND receiver = ? AND target_system = ?")
+                                ->execute([$record['product_name'], $record['receiver'], $targetSystem]);
+                        }
+                    }
+                }
+            } else {
+                // 恢复特定的子系统记录
+                $tables = [];
+                if ($system === 'j1') $tables = ['j1stockedit_data', 'j1stockinout_data', 'j1stockeditmobile_data'];
+                if ($system === 'j2') $tables = ['j2stockedit_data', 'j2stockinout_data', 'j2stockeditmobile_data'];
+                if ($system === 'j3') $tables = ['j3stockedit_data', 'j3stockinout_data', 'j3stockeditmobile_data'];
+
+                foreach ($tables as $table) {
+                    try {
+                        $idField = (strpos($table, 'inout') !== false) ? 'main_record_id' : 'id';
+                        $sql = "UPDATE $table SET deleted_at = NULL, deleted_by = NULL WHERE $idField IN ($placeholders)";
+                        $stmt = $pdo->prepare($sql);
+                        $stmt->execute($ids);
+                    } catch (PDOException $e) {}
                 }
             }
             
@@ -2012,11 +2037,24 @@ function handleDelete() {
 
     // 如果 action 是 permanent，执行物理删除
     if ($action === 'permanent') {
+        $system = $_GET['system'] ?? '';
         try {
             $pdo->beginTransaction();
             $placeholders = implode(',', array_fill(0, count($targetIds), '?'));
             
-            $tables = ['j1stockedit_data', 'j2stockedit_data', 'j3stockedit_data', 'stockinout_data', 'j1stockeditmobile_data', 'j2stockeditmobile_data', 'j3stockeditmobile_data', 'j1stockinout_data', 'j2stockinout_data', 'j3stockinout_data'];
+            $tables = [];
+            if ($system === 'central') {
+                $tables = ['stockinout_data', 'j1stockinout_data', 'j2stockinout_data', 'j3stockinout_data'];
+            } elseif ($system === 'j1') {
+                $tables = ['j1stockedit_data', 'j1stockinout_data', 'j1stockeditmobile_data'];
+            } elseif ($system === 'j2') {
+                $tables = ['j2stockedit_data', 'j2stockinout_data', 'j2stockeditmobile_data'];
+            } elseif ($system === 'j3') {
+                $tables = ['j3stockedit_data', 'j3stockinout_data', 'j3stockeditmobile_data'];
+            } else {
+                // 回退逻辑，如果没传 system
+                $tables = ['j1stockedit_data', 'j2stockedit_data', 'j3stockedit_data', 'stockinout_data', 'j1stockinout_data', 'j2stockinout_data', 'j3stockinout_data'];
+            }
             
             foreach ($tables as $table) {
                 try {

@@ -74,7 +74,11 @@ async function restoreRecord(id, system) {
         const response = await fetch('stockeditapi.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'restore', ids: [id] })
+            body: JSON.stringify({ 
+                action: 'restore', 
+                ids: [id],
+                system: system
+            })
         });
         const result = await response.json();
         if (result.success) {
@@ -92,7 +96,7 @@ async function permanentDelete(id, system) {
     if (!confirm('警告：彻底删除后数据将无法恢复！确定要继续吗？')) return;
 
     try {
-        const response = await fetch(`stockeditapi.php?action=permanent&ids=${id}`, {
+        const response = await fetch(`stockeditapi.php?action=permanent&ids=${id}&system=${system}`, {
             method: 'DELETE'
         });
         const result = await response.json();
