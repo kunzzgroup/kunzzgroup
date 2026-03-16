@@ -5108,28 +5108,28 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
           <h2>特色推荐</h2>
           <div class="featured-cards-wrapper">
             <span class="featured-corner-br"></span>
-            <a href="menu#sushi" class="featured-card reveal scale-up delay-100">
+            <a href="menu#sushi" class="featured-card reveal scale-up delay-100" id="tokyo-featured-card1">
               <div class="featured-card-image-wrapper">
-                <img src="image/menu1.png" alt="Sushi Menu" class="featured-card-img">
+                <img src="image/menu1.png" alt="Sushi & Sashimi" class="featured-card-img" id="tokyo-featured-img1">
                 <div class="featured-card-overlay">
-                  <span class="featured-card-btn">View Sushi & Sashimi Menu</span>
+                  <span class="featured-card-btn">View Sushi Menu</span>
                 </div>
               </div>
               <div class="featured-card-info">
-                <h3>Sushi & Sashimi Menu</h3>
-                <p>Fresh catch from Tokyo Bay</p>
+                <h3 id="tokyo-featured-title1">Sushi & Sashimi Menu</h3>
+                <p id="tokyo-featured-desc1">Fresh catch from Tokyo Bay</p>
               </div>
             </a>
-            <a href="menu#grand" class="featured-card reveal scale-up delay-200">
+            <a href="menu#grand" class="featured-card reveal scale-up delay-200" id="tokyo-featured-card2">
               <div class="featured-card-image-wrapper">
-                <img src="image/menu2.png" alt="Grand Menu" class="featured-card-img">
+                <img src="image/menu2.png" alt="Grand Menu" class="featured-card-img" id="tokyo-featured-img2">
                 <div class="featured-card-overlay">
                   <span class="featured-card-btn">View Grand Menu</span>
                 </div>
               </div>
               <div class="featured-card-info">
-                <h3>Grand Menu</h3>
-                <p>Authentic Hot Dishes & Sets</p>
+                <h3 id="tokyo-featured-title2">Grand Menu</h3>
+                <p id="tokyo-featured-desc2">Authentic Hot Dishes & Sets</p>
               </div>
             </a>
           </div>
@@ -5704,6 +5704,24 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
             }
           });
 
+          // --- SECTION 4: FEATURED RECOMMENDED ---
+          for (let i = 1; i <= 2; i++) {
+            const key = `tokyo_featured_${i}`;
+            if (data[key]) {
+              const img = document.getElementById(`tokyo-featured-img${i}`);
+              const title = document.getElementById(`tokyo-featured-title${i}`);
+              const desc = document.getElementById(`tokyo-featured-desc${i}`);
+
+              if (img && data[key].file) {
+                let mediaUrl = data[key].file;
+                if (mediaUrl.startsWith('../')) mediaUrl = mediaUrl.substring(3);
+                img.src = mainBase + mediaUrl;
+              }
+              if (title && data[key].title) title.textContent = data[key].title;
+              if (desc && data[key].desc) desc.textContent = data[key].desc;
+            }
+          }
+
           // --- SECTION 5: LOCATIONS ---
           if (data.locations) {
             const locations = data.locations;
@@ -5735,31 +5753,32 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
                 // Simple check for embed URL, fallback if it's a regular link
                 let mapSrc = store.map_url || '';
                 if (mapSrc && !mapSrc.includes('embed')) {
-                    // Try to convert standard long URL if detected
                     if (mapSrc.includes('google.com/maps/place')) {
-                        // This is a rough conversion and might not work for all links
                         const match = mapSrc.match(/!1m.*!2s/);
-                        if (match) {
-                            mapSrc = `https://www.google.com/maps/embed?pb=${match[0]}`;
-                        }
+                        if (match) mapSrc = `https://www.google.com/maps/embed?pb=${match[0]}`;
                     }
                 }
 
-                const cardHtml = `
-                        <div class="location-card reveal ${revealClass} delay-${delay}">
-                            <div class="location-card-map">
-                                <iframe title="${store.label || '地图'}"
-                                    src="${mapSrc}"
-                                    allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                            </div>
-                            <div class="location-card-info">
-                                <h3>${store.label || ''}</h3>
-                                <p>地址：<a href="${store.map_url || '#'}" target="_blank" rel="noopener noreferrer">${store.address || ''}</a></p>
-                                <p>电话：<a href="tel:${(store.phone || '').replace(/\s+/g, '')}">${store.phone || ''}</a></p>
-                            </div>
+                const cardDiv = document.createElement('div');
+                cardDiv.className = `location-card reveal ${revealClass} delay-${delay}`;
+                cardDiv.innerHTML = `
+                        <div class="location-card-map">
+                            <iframe title="${store.label || '地图'}"
+                                src="${mapSrc}"
+                                allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                        </div>
+                        <div class="location-card-info">
+                            <h3>${store.label || ''}</h3>
+                            <p>地址：<a href="${store.map_url || '#'}" target="_blank" rel="noopener noreferrer">${store.address || ''}</a></p>
+                            <p>电话：<a href="tel:${(store.phone || '').replace(/\s+/g, '')}">${store.phone || ''}</a></p>
                         </div>
                     `;
-                cardsContainer.innerHTML += cardHtml;
+                cardsContainer.appendChild(cardDiv);
+                
+                // CRITICAL: Observe the newly added card for animation
+                if (typeof observer !== 'undefined') {
+                    observer.observe(cardDiv);
+                }
               });
             }
           }
