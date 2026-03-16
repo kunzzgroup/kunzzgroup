@@ -106,6 +106,15 @@ window.addEventListener('keydown', function (e) {
         undoDelete();
         return;
     }
+    // A2. 批量删除 (Ctrl+D)
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.code === 'KeyD' || e.key === 'd' || e.key === 'D')) {
+        e.preventDefault(); 
+        console.log('StockEdit Shortcut: CTRL+D triggered (Batch Delete)');
+        if (typeof toggleBatchDelete === 'function') {
+            toggleBatchDelete();
+        }
+        return;
+    }
 
     // B. 检查是否按下 Ctrl+S 或 Cmd+S
     if ((e.ctrlKey || e.metaKey) && (e.code === 'KeyS' || e.key === 's' || e.key === 'S')) {
