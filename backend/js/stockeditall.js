@@ -7792,7 +7792,8 @@ async function batchSaveNewRows() {
                 remark: document.getElementById(`${rowId}-remark`) ? document.getElementById(`${rowId}-remark`).value : '',
                 product_remark_checked: document.getElementById(`${rowId}-product-remark`) ? document.getElementById(`${rowId}-product-remark`).checked : false,
                 remark_number: document.getElementById(`${rowId}-remark-number`) ? document.getElementById(`${rowId}-remark-number`).value.trim().toUpperCase() : '',
-                target_system: document.getElementById(`${rowId}-target`) ? document.getElementById(`${rowId}-target`).value : ''
+                target_system: document.getElementById(`${rowId}-target`) ? document.getElementById(`${rowId}-target`).value : '',
+                type: document.getElementById(`${rowId}-type`) ? document.getElementById(`${rowId}-type`).value : ''
             };
 
             // 基本验证

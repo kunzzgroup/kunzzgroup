@@ -1081,8 +1081,8 @@ function handlePost() {
         
         $sql = "INSERT INTO stockinout_data 
                 (date, time, product_name, receiver, in_quantity, out_quantity, 
-                specification, price, code_number, remark, target_system, product_remark_checked, remark_number) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                specification, price, code_number, remark, target_system, product_remark_checked, remark_number, type) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $pdo->prepare($sql);
 
@@ -1099,7 +1099,8 @@ function handlePost() {
             $data['remark'] ?? null,
             $data['target_system'] ?? null,
             $data['product_remark_checked'] ?? 0,
-            $data['remark_number'] ?? ''
+            $data['remark_number'] ?? '',
+            $data['type'] ?? null
         ]);
         
         $newId = $pdo->lastInsertId();
@@ -1256,7 +1257,8 @@ function handleBatchSave() {
                 $row['remark'] ?? null,
                 $row['target_system'] ?? null,
                 $row['product_remark_checked'] ?? 0,
-                $row['remark_number'] ?? ''
+                $row['remark_number'] ?? '',
+                $row['type'] ?? null
             ]);
             
             $newId = $pdo->lastInsertId();
@@ -1436,7 +1438,8 @@ function handlePut() {
                 SET date = ?, time = ?, product_name = ?, receiver = ?,
                     in_quantity = ?, out_quantity = ?, 
                     specification = ?, price = ?, code_number = ?, remark = ?, 
-                    target_system = ?, product_remark_checked = ?, remark_number = ?
+                    target_system = ?, product_remark_checked = ?, remark_number = ?,
+                    type = ?
                 WHERE id = ? AND deleted_at IS NULL";
 
         $stmt = $pdo->prepare($sql);
@@ -1454,6 +1457,7 @@ function handlePut() {
             $data['target_system'] ?? null,
             $data['product_remark_checked'] ?? 0,
             $data['remark_number'] ?? '',
+            $data['type'] ?? null,
             $data['id']
         ]);
         
