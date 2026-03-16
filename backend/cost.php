@@ -389,6 +389,10 @@ $avatarLetter = strtoupper($username[0]);
                                     onclick="switchChartData('costPercent')">
                                     成本率
                                 </button>
+                                <button class="chart-data-btn" data-type="deliveryCost"
+                                    onclick="switchChartData('deliveryCost')">
+                                    外卖成本
+                                </button>
                             </div>
 
                             <div class="date-range-display" id="chart-date-range"
