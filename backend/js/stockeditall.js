@@ -4288,7 +4288,11 @@ async function undoDelete() {
         const response = await fetch('stockeditapi.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'restore', ids: lastDeletedIds })
+            body: JSON.stringify({ 
+                action: 'restore', 
+                ids: lastDeletedIds,
+                system: currentStockType 
+            })
         });
         const result = await response.json();
 

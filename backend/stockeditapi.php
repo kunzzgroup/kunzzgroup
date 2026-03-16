@@ -965,6 +965,7 @@ function handlePost() {
 
         try {
             $pdo->beginTransaction();
+            
             $placeholders = implode(',', array_fill(0, count($ids), '?'));
             
             if ($system === 'central' || empty($system)) {
@@ -973,28 +974,28 @@ function handlePost() {
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($ids);
                 
-                // 2. 对于 Central 记录，我们需要根据同步逻辑恢复关联的子表记录
+                // 2. 对于 Central 记录，同步恢复分支系统记录
                 foreach ($ids as $currentId) {
                     $stmt = $pdo->prepare("SELECT * FROM stockinout_data WHERE id = ?");
                     $stmt->execute([$currentId]);
                     $record = $stmt->fetch(PDO::FETCH_ASSOC);
                     
-                    if ($record && floatval($record['out_quantity'] ?? 0) > 0) {
-                        $targetSystem = $record['target_system'] ?? '';
+                    if ($record) {
+                        $targetSystem = strtolower($record['target_system'] ?? '');
                         if (in_array($targetSystem, ['j1', 'j2', 'j3'])) {
-                            // 恢复 inout 子表
-                            $pdo->prepare("UPDATE {$targetSystem}stockinout_data SET deleted_at = NULL, deleted_by = NULL WHERE main_record_id = ?")
-                                ->execute([$currentId]);
-                            
-                            // 恢复 edit 子表
+                            // 恢复分支编辑表和进出库表
                             $pdo->prepare("UPDATE {$targetSystem}stockedit_data SET deleted_at = NULL, deleted_by = NULL 
-                                           WHERE product_name = ? AND receiver = ? AND target_system = ?")
-                                ->execute([$record['product_name'], $record['receiver'], $targetSystem]);
+                                           WHERE product_name = ? AND date = ? AND receiver = ? AND deleted_at IS NOT NULL")
+                                ->execute([$record['product_name'], $record['date'], $record['receiver']]);
+                            
+                            $pdo->prepare("UPDATE {$targetSystem}stockinout_data SET deleted_at = NULL, deleted_by = NULL 
+                                           WHERE main_record_id = ? AND deleted_at IS NOT NULL")
+                                ->execute([$currentId]);
                         }
                     }
                 }
             } else {
-                // 恢复特定的子系统记录
+                // 恢复特定的子系统记录 (J1, J2, J3)
                 $tables = [];
                 if ($system === 'j1') $tables = ['j1stockedit_data', 'j1stockinout_data', 'j1stockeditmobile_data'];
                 if ($system === 'j2') $tables = ['j2stockedit_data', 'j2stockinout_data', 'j2stockeditmobile_data'];
@@ -1006,7 +1007,25 @@ function handlePost() {
                         $sql = "UPDATE $table SET deleted_at = NULL, deleted_by = NULL WHERE $idField IN ($placeholders)";
                         $stmt = $pdo->prepare($sql);
                         $stmt->execute($ids);
-                    } catch (PDOException $e) {}
+                        
+                        // 如果是主表恢复，同步恢复关联的中心库记录
+                        if ($table === "{$system}stockedit_data") {
+                            foreach ($ids as $currentId) {
+                                $stmt = $pdo->prepare("SELECT * FROM $table WHERE id = ?");
+                                $stmt->execute([$currentId]);
+                                $record = $stmt->fetch(PDO::FETCH_ASSOC);
+                                
+                                if ($record && strtolower($record['target_system'] ?? '') === 'central') {
+                                    $pdo->prepare("UPDATE stockinout_data SET deleted_at = NULL, deleted_by = NULL 
+                                                   WHERE product_name = ? AND date = ? AND receiver = ? AND target_system = 'central' AND deleted_at IS NOT NULL
+                                                   ORDER BY id DESC LIMIT 1")
+                                        ->execute([$record['product_name'], $record['date'], $record['receiver']]);
+                                }
+                            }
+                        }
+                    } catch (PDOException $e) {
+                        error_log("恢复表 $table 失败: " . $e->getMessage());
+                    }
                 }
             }
             
