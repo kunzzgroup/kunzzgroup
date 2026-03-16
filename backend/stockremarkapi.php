@@ -96,6 +96,7 @@ function getMultiPriceAnalysis() {
                 AND product_name != ''
                 AND remark_number IS NOT NULL 
                 AND remark_number != ''
+                AND deleted_at IS NULL
                 ORDER BY product_name ASC, remark_number ASC, date DESC";
         
         $stmt = $pdo->prepare($sql);
@@ -207,6 +208,7 @@ function getProductDetails($productName) {
                     SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out
                 FROM stockinout_data 
                 WHERE product_name = :product_name
+                AND deleted_at IS NULL
                 GROUP BY product_name, specification, price, code_number
                 ORDER BY price DESC, date_created DESC";
         

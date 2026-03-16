@@ -79,7 +79,8 @@ function getStockSummary($system = 'central', $startDate = null, $endDate = null
                    (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
                     SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
                 FROM $tableName 
-                WHERE product_name IS NOT NULL AND product_name != ''";
+                WHERE product_name IS NOT NULL AND product_name != ''
+                AND deleted_at IS NULL";
         
         $queryParams = [];
         if ($endDate) {
@@ -207,6 +208,7 @@ function getLowStockAlerts($system = 'central') {
                                SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)), 2) as formatted_stock
                     FROM $tableName 
                     WHERE product_name IS NOT NULL AND product_name != ''
+                    AND deleted_at IS NULL
                     GROUP BY product_name, code_number, specification
                 ) s
                 INNER JOIN stock_minimum_settings m ON TRIM(s.product_name) = TRIM(m.product_name)
@@ -245,6 +247,7 @@ function getSupplyTotal($system = 'central') {
         $sql = "SELECT SUM(in_quantity * price) as total_supply_value 
                 FROM $tableName 
                 WHERE in_quantity > 0 
+                AND deleted_at IS NULL
                 AND date >= ? AND date <= ?";
         
         $stmt = $pdo->prepare($sql);

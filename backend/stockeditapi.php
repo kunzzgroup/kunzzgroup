@@ -500,12 +500,12 @@ function handleGet() {
                         COUNT(*) as total_records,
                         COUNT(DISTINCT product_code) as total_products,
                         COUNT(DISTINCT supplier) as total_suppliers,
-                        SUM(in_quantity * price) as total_in_value,
-                        SUM(out_quantity * price) as total_out_value,
-                        SUM((in_quantity - out_quantity) * price) as total_balance_value,
-                        SUM(in_quantity) as total_in_quantity,
-                        SUM(out_quantity) as total_out_quantity,
-                        SUM(in_quantity - out_quantity) as total_balance_quantity
+                        COALESCE(SUM(in_quantity * price), 0) as total_in_value,
+                        COALESCE(SUM(out_quantity * price), 0) as total_out_value,
+                        COALESCE(SUM((in_quantity - out_quantity) * price), 0) as total_balance_value,
+                        COALESCE(SUM(in_quantity), 0) as total_in_quantity,
+                        COALESCE(SUM(out_quantity), 0) as total_out_quantity,
+                        COALESCE(SUM(in_quantity - out_quantity), 0) as total_balance_quantity
                     FROM stockinout_data WHERE deleted_at IS NULL";
             $params = [];
             
@@ -664,10 +664,10 @@ function handleGet() {
             }
             
             $sql = "SELECT 
-                        SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
-                        SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
-                        (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
-                        SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as available_stock
+                        COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) as total_in,
+                        COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0) as total_out,
+                        (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) - 
+                        COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) as available_stock
                     FROM stockinout_data 
                     WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND deleted_at IS NULL";
             
@@ -707,10 +707,10 @@ function handleGet() {
             }
             
             $sql = "SELECT 
-                        SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
-                        SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
-                        (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
-                        SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as available_stock
+                        COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) as total_in,
+                        COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0) as total_out,
+                        (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) - 
+                        COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) as available_stock
                     FROM stockinout_data 
                     WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND price = ? AND deleted_at IS NULL";
             
@@ -755,10 +755,10 @@ function handleGet() {
                 // 获取该产品所有不同价格的库存情况（包括价格为0的记录）
                 $sql = "SELECT 
                             price,
-                            SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
-                            SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
-                            (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
-                            SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as available_stock
+                            COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) as total_in,
+                            COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0) as total_out,
+                            (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) - 
+                            COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) as available_stock
                         FROM stockinout_data 
                         WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND deleted_at IS NULL";
                 $params = [$productName, $productName];

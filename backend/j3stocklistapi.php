@@ -69,6 +69,7 @@ function getJ3StockSummary($startDate = null, $endDate = null) {
                          SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
                     FROM j3stockedit_data
                     WHERE product_name IS NOT NULL AND product_name != ''
+                    AND deleted_at IS NULL
                     AND date <= ?
                     GROUP BY REPLACE(product_name, '&amp;', '&'), specification, price, code_number, type
                     HAVING current_stock != 0
@@ -90,6 +91,7 @@ function getJ3StockSummary($startDate = null, $endDate = null) {
                          SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock
                     FROM j3stockedit_data
                     WHERE product_name IS NOT NULL AND product_name != ''
+                    AND deleted_at IS NULL
                     GROUP BY REPLACE(product_name, '&amp;', '&'), specification, price, code_number, type
                     HAVING current_stock != 0
                     ORDER BY product_name ASC, price ASC";
@@ -192,6 +194,7 @@ if ($method === 'GET') {
                 $sql = "SELECT SUM(in_quantity * price) as total_supply_value 
                         FROM j3stockinout_data 
                         WHERE in_quantity > 0 
+                        AND deleted_at IS NULL
                         AND date >= ? AND date <= ?";
                 
                 $stmt = $pdo->prepare($sql);

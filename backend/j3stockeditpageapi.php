@@ -345,10 +345,10 @@ function handleGet() {
             }
             
             $sql = "SELECT 
-                        SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
-                        SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
-                        (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
-                        SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as available_stock
+                        COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) as total_in,
+                        COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0) as total_out,
+                        (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) - 
+                        COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) as available_stock
                     FROM j3stockedit_data 
                     WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND deleted_at IS NULL";
             
@@ -388,10 +388,10 @@ function handleGet() {
             }
             
             $sql = "SELECT 
-                        SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
-                        SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
-                        (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
-                        SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as available_stock
+                        COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) as total_in,
+                        COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0) as total_out,
+                        (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) - 
+                        COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) as available_stock
                     FROM j3stockedit_data 
                     WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND price = ? AND deleted_at IS NULL";
             
@@ -436,10 +436,10 @@ function handleGet() {
                 // 获取该产品所有不同价格的库存情况（包括价格为0的记录）
                 $sql = "SELECT 
                             price,
-                            SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
-                            SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out,
-                            (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
-                            SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as available_stock
+                            COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) as total_in,
+                            COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0) as total_out,
+                            (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) - 
+                            COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) as available_stock
                         FROM j3stockedit_data 
                         WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND deleted_at IS NULL";
                 $params = [$productName, $productName];
