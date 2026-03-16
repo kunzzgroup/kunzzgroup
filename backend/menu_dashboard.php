@@ -40,6 +40,10 @@ if (!isset($_SESSION['user_id'])) {
                     </div>
                 </div>
                 <div class="tb-right">
+                    <div class="type-tabs">
+                        <button class="type-tab active" id="tab-grand" onclick="switchType('grand')">GRAND</button>
+                        <button class="type-tab"        id="tab-sushi" onclick="switchType('sushi')">SUSHI</button>
+                    </div>
                     <span class="tb-badge" id="tb-stats">0 项目</span>
                 </div>
         </header>
@@ -60,10 +64,7 @@ if (!isset($_SESSION['user_id'])) {
                     <button class="btn-ok" onclick="doAddCat()">OK</button>
                 </div>
 
-                <div class="type-tabs">
-                    <button class="type-tab active" id="tab-grand" onclick="switchType('grand')">GRAND</button>
-                    <button class="type-tab"        id="tab-sushi" onclick="switchType('sushi')">SUSHI</button>
-                </div>
+
 
                 <div class="cat-scroll" id="cat-scroll">
                     <!-- Loaded by JS -->
