@@ -230,9 +230,10 @@ body {
 }
 
 .type-tab.active {
-    background: var(--surface);
-    color: var(--brown);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    background: var(--gold);
+    color: #ffffff;
+    box-shadow: 0 2px 8px var(--gold-glow);
+    border: 1px solid var(--gold);
 }
 
 .cat-scroll {
