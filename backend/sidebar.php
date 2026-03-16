@@ -623,6 +623,7 @@ if (!$canSeeBrand) {
                                 <a href="tokyopage1upload" class="submenu-item">第一页</a>
                                 <a href="tokyopage2upload" class="submenu-item">第二页</a>
                                 <a href="tokyopage3upload" class="submenu-item">第三页</a>
+                                <a href="tokyopage4upload" class="submenu-item">第四页</a>
                                 <a href="tokyopage5upload" class="submenu-item">第五页</a>
                             </div>
                         </div>
