@@ -5149,12 +5149,12 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
           <path d="M5 25 Q25 12 45 25 T85 25" opacity="0.5" />
         </svg>
         <div class="location-container">
-          <h2>
+          <h2 id="tokyo-location-title">
             <span class="location-divider"></span>
             我们在这
             <span class="location-divider"></span>
           </h2>
-          <div class="location-cards">
+          <div class="location-cards" id="tokyo-location-cards">
             <div class="location-card reveal fade-left delay-100">
               <div class="location-card-map">
                 <iframe title="总店地图"
@@ -5703,6 +5703,66 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
               }
             }
           });
+
+          // --- SECTION 5: LOCATIONS ---
+          if (data.locations) {
+            const locations = data.locations;
+            const titleEl = document.getElementById('tokyo-location-title');
+            const cardsContainer = document.getElementById('tokyo-location-cards');
+
+            if (titleEl && locations.section_title) {
+              titleEl.innerHTML = `
+                        <span class="location-divider"></span>
+                        ${locations.section_title}
+                        <span class="location-divider"></span>
+                    `;
+            }
+
+            if (cardsContainer) {
+              // Clear existing static cards
+              cardsContainer.innerHTML = '';
+
+              // Filter out non-store keys and sort by order
+              const storeEntries = Object.entries(locations)
+                .filter(([key, val]) => typeof val === 'object' && val !== null && key !== 'section_title')
+                .sort((a, b) => (a[1].order || 999) - (b[1].order || 999));
+
+              storeEntries.forEach(([key, store], index) => {
+                const isLeft = index % 2 === 0;
+                const revealClass = isLeft ? 'fade-left' : 'fade-right';
+                const delay = (index + 1) * 100;
+
+                // Simple check for embed URL, fallback if it's a regular link
+                let mapSrc = store.map_url || '';
+                if (mapSrc && !mapSrc.includes('embed')) {
+                    // Try to convert standard long URL if detected
+                    if (mapSrc.includes('google.com/maps/place')) {
+                        // This is a rough conversion and might not work for all links
+                        const match = mapSrc.match(/!1m.*!2s/);
+                        if (match) {
+                            mapSrc = `https://www.google.com/maps/embed?pb=${match[0]}`;
+                        }
+                    }
+                }
+
+                const cardHtml = `
+                        <div class="location-card reveal ${revealClass} delay-${delay}">
+                            <div class="location-card-map">
+                                <iframe title="${store.label || '地图'}"
+                                    src="${mapSrc}"
+                                    allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                            </div>
+                            <div class="location-card-info">
+                                <h3>${store.label || ''}</h3>
+                                <p>地址：<a href="${store.map_url || '#'}" target="_blank" rel="noopener noreferrer">${store.address || ''}</a></p>
+                                <p>电话：<a href="tel:${(store.phone || '').replace(/\s+/g, '')}">${store.phone || ''}</a></p>
+                            </div>
+                        </div>
+                    `;
+                cardsContainer.innerHTML += cardHtml;
+              });
+            }
+          }
         })
         .catch(err => console.error('Error fetching media config:', err));
 
