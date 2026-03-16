@@ -1312,11 +1312,7 @@ function updateCharts(data) {
             costPercent: ['J1 成本率', 'J2 成本率', 'J3 成本率']
         };
 
-        costChart = new Chart(ctx1, {
-            type: 'line',
-            data: {
-                labels: chartLabels,
-                datasets: [
+        const baseDatasets = [
                     {
                         label: dataLabels[currentChartDataType][0],
                         data: comparisonData.restaurants.j1.map(item => getChartDataByType(item, currentChartDataType)),
@@ -1389,7 +1385,47 @@ function updateCharts(data) {
                         pointRadius: 0,
                         pointHoverRadius: 6
                     }
-                ]
+                ];
+
+        if (currentChartDataType === 'costPercent') {
+            const threeStoreDeliveryRates = comparisonData.dates.map((_, i) => {
+                const j1 = comparisonData.restaurants.j1[i] || createEmptyCostDataPoint();
+                const j2 = comparisonData.restaurants.j2[i] || createEmptyCostDataPoint();
+                const j3 = comparisonData.restaurants.j3[i] || createEmptyCostDataPoint();
+                const sumDelivery = (j1.cGrab || 0) + (j1.cFoodpanda || 0) + (j1.cShopee || 0) +
+                                  (j2.cGrab || 0) + (j2.cFoodpanda || 0) + (j2.cShopee || 0) +
+                                  (j3.cGrab || 0) + (j3.cFoodpanda || 0) + (j3.cShopee || 0);
+                const sumSales = (j1.sales || 0) + (j2.sales || 0) + (j3.sales || 0);
+                return sumSales > 0 ? (sumDelivery / sumSales) * 100 : 0;
+            });
+
+            baseDatasets.push({
+                label: '三店外卖率',
+                data: threeStoreDeliveryRates,
+                borderColor: '#10b981', // Emerald 500 for distinct visibility
+                backgroundColor: function (context) {
+                    const chart = context.chart;
+                    const { ctx, chartArea } = chart;
+                    if (!chartArea) return null;
+                    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                    gradient.addColorStop(0, 'rgba(16, 185, 129, 0.3)');
+                    gradient.addColorStop(1, 'rgba(16, 185, 129, 0.05)');
+                    return gradient;
+                },
+                fill: true,
+                tension: 0.4,
+                borderWidth: 2,
+                pointRadius: 0,
+                pointHoverRadius: 6,
+                borderDash: [5, 5] // Dashed line to differentiate from cost lines
+            });
+        }
+
+        costChart = new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: chartLabels,
+                datasets: baseDatasets
             },
             options: {
                 responsive: true,
@@ -1608,6 +1644,9 @@ function aggregateByMonth(data) {
                 sales: 0,
                 cBeverage: 0,
                 cKitchen: 0,
+                cGrab: 0,
+                cFoodpanda: 0,
+                cShopee: 0,
                 cTotal: 0,
                 grossTotal: 0,
                 daysCount: 0
@@ -1618,6 +1657,9 @@ function aggregateByMonth(data) {
         monthData.sales += item.sales;
         monthData.cBeverage += item.cBeverage;
         monthData.cKitchen += item.cKitchen;
+        monthData.cGrab += (item.cGrab || 0);
+        monthData.cFoodpanda += (item.cFoodpanda || 0);
+        monthData.cShopee += (item.cShopee || 0);
         monthData.cTotal += item.cTotal;
         monthData.grossTotal += item.grossTotal;
         monthData.daysCount += 1;
@@ -1792,7 +1834,10 @@ function mergeAllRestaurantsData() {
                     date: date,
                     sales: 0,
                     c_beverage: 0,
-                    c_kitchen: 0
+                    c_kitchen: 0,
+                    c_grab: 0,
+                    c_foodpanda: 0,
+                    c_shopee: 0
                 });
             }
 
@@ -1800,6 +1845,9 @@ function mergeAllRestaurantsData() {
             existing.sales += parseFloat(item.sales) || 0;
             existing.c_beverage += parseFloat(item.c_beverage) || 0;
             existing.c_kitchen += parseFloat(item.c_kitchen) || 0;
+            existing.c_grab += parseFloat(item.c_grab) || 0;
+            existing.c_foodpanda += parseFloat(item.c_foodpanda) || 0;
+            existing.c_shopee += parseFloat(item.c_shopee) || 0;
         });
     });
 
@@ -1898,6 +1946,9 @@ function createEmptyCostDataPoint() {
         sales: 0,
         cBeverage: 0,
         cKitchen: 0,
+        cGrab: 0,
+        cFoodpanda: 0,
+        cShopee: 0,
         cTotal: 0,
         grossTotal: 0,
         costPercent: 0
