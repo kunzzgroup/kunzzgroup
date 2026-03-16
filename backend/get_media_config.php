@@ -11,7 +11,10 @@ header("Cache-Control: no-cache, must-revalidate");
 $possiblePaths = [
     __DIR__ . '/../media_config.json',
     __DIR__ . '/../../media_config.json',
-    __DIR__ . '/media_config.json'
+    __DIR__ . '/media_config.json',
+    dirname(__DIR__) . '/media_config.json',
+    dirname(dirname(__DIR__)) . '/media_config.json',
+    $_SERVER['DOCUMENT_ROOT'] . '/media_config.json'
 ];
 
 $configFile = null;

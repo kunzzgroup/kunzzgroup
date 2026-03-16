@@ -5610,31 +5610,34 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
       // =========================================
       // DYNAMIC BACKGROUND FETCH LOGIC
       // =========================================
-      fetch('../backend/get_media_config.php')
+      fetch('https://kunzzgroup.com/backend/get_media_config.php')
         .then(response => response.json())
         .then(data => {
             if (data && data.tokyo_background) {
                 const bgInfo = data.tokyo_background;
                 const bgContainer = document.getElementById('hero-bg-container');
                 
+                // Construct the absolute base URL for media if needed
+                const baseUrl = 'https://media.kunzzgroup.com/public_html/comphotos/'; // Or main domain
+                // Based on tokyopage1upload.php saving to ../images/images/
+                // The main domain base is https://kunzzgroup.com/
+                const mainBase = 'https://kunzzgroup.com/';
+
+                let mediaUrl = bgInfo.file;
+                if(mediaUrl.startsWith('../')) {
+                     mediaUrl = mediaUrl.substring(3);
+                }
+                const finalUrl = mainBase + mediaUrl;
+
                 if (bgInfo.type === 'video') {
-                     // Get correctly formatted url (replace backend specific paths if needed or use relative paths correctly depending on json format)
-                    let mediaUrl = bgInfo.file;
-                    if(mediaUrl.startsWith('../')) {
-                         mediaUrl = mediaUrl.substring(3);
-                    }
                     bgContainer.innerHTML = `
                         <video autoplay loop muted playsinline style="position: absolute; width: 100%; height: 100%; object-fit: cover; top: 0; left: 0;">
-                            <source src="../${mediaUrl}" type="video/mp4">
+                            <source src="${finalUrl}" type="video/mp4">
                         </video>
                     `;
                     bgContainer.style.backgroundImage = 'none';
                 } else if (bgInfo.type === 'image') {
-                    let mediaUrl = bgInfo.file;
-                    if(mediaUrl.startsWith('../')) {
-                         mediaUrl = mediaUrl.substring(3);
-                    }
-                    bgContainer.style.backgroundImage = `url('../${mediaUrl}')`;
+                    bgContainer.style.backgroundImage = `url('${finalUrl}')`;
                 }
             }
         })
