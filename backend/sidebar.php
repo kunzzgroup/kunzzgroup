@@ -26,9 +26,9 @@ if (isset($_SESSION['user_id'])) {
 
     // 如果超过 1 分钟没活动，并且没有记住我
     if (
-        isset($_SESSION['last_activity']) &&
-        (time() - $_SESSION['last_activity'] > SESSION_TIMEOUT) &&
-        (!isset($_COOKIE['remember_token']) || $_COOKIE['remember_token'] !== '1')
+    isset($_SESSION['last_activity']) &&
+    (time() - $_SESSION['last_activity'] > SESSION_TIMEOUT) &&
+    (!isset($_COOKIE['remember_token']) || $_COOKIE['remember_token'] !== '1')
     ) {
         // 清除 session
         session_unset();
@@ -48,18 +48,20 @@ if (isset($_SESSION['user_id'])) {
     // 更新活动时间戳
     $_SESSION['last_activity'] = time();
 
-} elseif (
-    isset($_COOKIE['user_id']) &&
-    isset($_COOKIE['username']) &&
-    isset($_COOKIE['remember_token']) &&
-    $_COOKIE['remember_token'] === '1'
+}
+elseif (
+isset($_COOKIE['user_id']) &&
+isset($_COOKIE['username']) &&
+isset($_COOKIE['remember_token']) &&
+$_COOKIE['remember_token'] === '1'
 ) {
     // 记住我逻辑（恢复 session）
     $_SESSION['user_id'] = $_COOKIE['user_id'];
     $_SESSION['username'] = $_COOKIE['username'];
     $_SESSION['position'] = isset($_COOKIE['position']) ? $_COOKIE['position'] : null;
     $_SESSION['last_activity'] = time();
-} else {
+}
+else {
     // 没有 session，也没有有效 cookie
     header("Location: index.php");
     exit();
@@ -143,15 +145,18 @@ if (isset($_SESSION['user_id'])) {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
             try {
                 $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN page_permissions_json TEXT NULL");
-            } catch (Throwable $e) { /* ignore */
+            }
+            catch (Throwable $e) { /* ignore */
             }
             try {
                 $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN submenu_permissions_json TEXT NULL");
-            } catch (Throwable $e) { /* ignore */
+            }
+            catch (Throwable $e) { /* ignore */
             }
             try {
                 $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN brand_permissions_json TEXT NULL");
-            } catch (Throwable $e) { /* ignore */
+            }
+            catch (Throwable $e) { /* ignore */
             }
             $permStmt = $pdo->prepare("SELECT permissions_json, page_permissions_json, submenu_permissions_json, brand_permissions_json FROM user_sidebar_permissions WHERE user_id = ?");
             $permStmt->execute([$userId]);
@@ -166,13 +171,14 @@ if (isset($_SESSION['user_id'])) {
                     if (count($uploadTypes) === 1 && $uploadTypes[0] === 'cost') {
                         $kpiUploadDefaultPage = 'costedit';
                     }
-                    // 如果只有kpi权限，或者两者都有，默认跳转到kpiedit.php（已经是默认值）
+                // 如果只有kpi权限，或者两者都有，默认跳转到kpiedit.php（已经是默认值）
                 }
             }
             // 如果没有权限记录，默认全部开启
             if (!$permRow || empty($permRow['permissions_json'])) {
-                // 保持默认值（全部为true）
-            } else {
+            // 保持默认值（全部为true）
+            }
+            else {
                 $list = json_decode($permRow['permissions_json'], true);
                 if (is_array($list) && !empty($list)) {
                     $map = array_flip($list);
@@ -182,7 +188,7 @@ if (isset($_SESSION['user_id'])) {
                     $canSeeVisual = isset($map['visual']);
                     $canSeeBrand = isset($map['brand']);
                 }
-                // 如果权限数组为空，保持默认全部开启
+            // 如果权限数组为空，保持默认全部开启
             }
             $subList = [];
             // 如果没有submenu_permissions_json，默认全部开启（保持初始值）
@@ -216,7 +222,7 @@ if (isset($_SESSION['user_id'])) {
                         }
                     }
                 }
-                // 如果权限数组为空或无效，保持默认全部开启
+            // 如果权限数组为空或无效，保持默认全部开启
             }
             // 如果没有submenu_permissions_json，但主模块可见，则所有visual子选项都可见
             if ($canSeeVisual) {
@@ -252,13 +258,15 @@ if (isset($_SESSION['user_id'])) {
                             // 旧格式：索引数组
                             $submenuVisibility['brand']['j1'] = in_array('j1', $brandPerms['tokyo_cuisine'], true);
                             $submenuVisibility['brand']['j2'] = in_array('j2', $brandPerms['tokyo_cuisine'], true);
-                            // 旧格式没有schedule权限，保持默认开启
-                        } else if (is_array($brandPerms['tokyo_cuisine'])) {
+                        // 旧格式没有schedule权限，保持默认开启
+                        }
+                        else if (is_array($brandPerms['tokyo_cuisine'])) {
                             // 新格式：关联数组（对象），检查是否有权限
                             // 如果对象为空，保持默认开启（全部为true）
                             if (empty($brandPerms['tokyo_cuisine'])) {
-                                // 对象为空，保持默认值（全部为true）
-                            } else {
+                            // 对象为空，保持默认值（全部为true）
+                            }
+                            else {
                                 // 对象不为空，检查具体权限
                                 $submenuVisibility['brand']['j1'] = isset($brandPerms['tokyo_cuisine']['j1']);
                                 $submenuVisibility['brand']['j2'] = isset($brandPerms['tokyo_cuisine']['j2']);
@@ -269,7 +277,7 @@ if (isset($_SESSION['user_id'])) {
                                     if (!empty($brandPerms['tokyo_cuisine']['j1'])) {
                                         $submenuVisibility['brand']['j1_schedule'] = in_array('schedule', $brandPerms['tokyo_cuisine']['j1'], true);
                                     }
-                                    // 如果数组为空，保持默认开启（true）
+                                // 如果数组为空，保持默认开启（true）
                                 }
 
                                 // 检查四级权限（schedule）- J2
@@ -278,11 +286,11 @@ if (isset($_SESSION['user_id'])) {
                                     if (!empty($brandPerms['tokyo_cuisine']['j2'])) {
                                         $submenuVisibility['brand']['j2_schedule'] = in_array('schedule', $brandPerms['tokyo_cuisine']['j2'], true);
                                     }
-                                    // 如果数组为空，保持默认开启（true）
+                                // 如果数组为空，保持默认开启（true）
                                 }
                             }
                         }
-                        // 如果没有tokyo_cuisine数据，保持默认值（全部为true）
+                    // 如果没有tokyo_cuisine数据，保持默认值（全部为true）
                     }
                     // 如果没有tokyo_cuisine，保持默认值（j1和j2为true）
 
@@ -290,13 +298,15 @@ if (isset($_SESSION['user_id'])) {
                         if (is_array($brandPerms['tokyo_izakaya']) && isset($brandPerms['tokyo_izakaya'][0])) {
                             // 旧格式：索引数组
                             $submenuVisibility['brand']['j3'] = in_array('j3', $brandPerms['tokyo_izakaya'], true);
-                            // 旧格式没有schedule权限，保持默认开启
-                        } else if (is_array($brandPerms['tokyo_izakaya'])) {
+                        // 旧格式没有schedule权限，保持默认开启
+                        }
+                        else if (is_array($brandPerms['tokyo_izakaya'])) {
                             // 新格式：关联数组（对象）
                             // 如果对象为空，保持默认开启（全部为true）
                             if (empty($brandPerms['tokyo_izakaya'])) {
-                                // 对象为空，保持默认值（全部为true）
-                            } else {
+                            // 对象为空，保持默认值（全部为true）
+                            }
+                            else {
                                 // 对象不为空，检查具体权限
                                 $submenuVisibility['brand']['j3'] = isset($brandPerms['tokyo_izakaya']['j3']);
 
@@ -306,21 +316,23 @@ if (isset($_SESSION['user_id'])) {
                                     if (!empty($brandPerms['tokyo_izakaya']['j3'])) {
                                         $submenuVisibility['brand']['j3_schedule'] = in_array('schedule', $brandPerms['tokyo_izakaya']['j3'], true);
                                     }
-                                    // 如果数组为空，保持默认开启（true）
+                                // 如果数组为空，保持默认开启（true）
                                 }
                             }
                         }
-                        // 如果没有tokyo_izakaya数据，保持默认值（全部为true）
+                    // 如果没有tokyo_izakaya数据，保持默认值（全部为true）
                     }
-                    // 如果没有tokyo_izakaya，保持默认值（j3为true）
+                // 如果没有tokyo_izakaya，保持默认值（j3为true）
                 }
             }
 
-            // 如果没有brand_permissions_json，保持默认全部开启（不需要额外处理，初始值已经是true）
-        } catch (Exception $e) {
+        // 如果没有brand_permissions_json，保持默认全部开启（不需要额外处理，初始值已经是true）
+        }
+        catch (Exception $e) {
             $canSeeAnalytics = $canSeeHR = $canSeeResource = $canSeeVisual = $canSeeBrand = true;
         }
-    } catch (PDOException $e) {
+    }
+    catch (PDOException $e) {
         $canViewAnalytics = true; // 出错时默认允许访问
         $canSeeAnalytics = $canSeeHR = $canSeeResource = $canSeeVisual = $canSeeBrand = true;
     }
@@ -403,7 +415,8 @@ if (!$canSeeBrand) {
                                 </div>
                             </div>
                         </div>
-                    <?php endif; ?>
+                    <?php
+    endif; ?>
 
                     <!-- Tokyo Japanese Cuisine Sdn Bhd -->
                     <?php if (!empty($submenuVisibility['brand']['tokyo_cuisine'])): ?>
@@ -426,9 +439,11 @@ if (!$canSeeBrand) {
                                             <?php if (!empty($submenuVisibility['brand']['j1_schedule'])): ?>
                                                 <a href="schedule_manager?restaurant=J1" class="sub-option">员工排班表</a>
                                                 <a href="phone_manage?restaurant=J1" class="sub-option">员工手机记录</a>
-                                            <?php endif; ?>
+                                            <?php
+            endif; ?>
                                         </div>
-                                    <?php endif; ?>
+                                    <?php
+        endif; ?>
 
                                     <?php if (!empty($submenuVisibility['brand']['j2'])): ?>
                                         <a href="#" class="submenu-item expandable" data-target="j2-options">
@@ -439,13 +454,16 @@ if (!$canSeeBrand) {
                                             <?php if (!empty($submenuVisibility['brand']['j2_schedule'])): ?>
                                                 <a href="schedule_manager?restaurant=J2" class="sub-option">员工排班表</a>
                                                 <a href="phone_manage?restaurant=J2" class="sub-option">员工手机记录</a>
-                                            <?php endif; ?>
+                                            <?php
+            endif; ?>
                                         </div>
-                                    <?php endif; ?>
+                                    <?php
+        endif; ?>
                                 </div>
                             </div>
                         </div>
-                    <?php endif; ?>
+                    <?php
+    endif; ?>
 
                     <!-- Tokyo Izakaya Sdn Bhd -->
                     <?php if (!empty($submenuVisibility['brand']['tokyo_izakaya'])): ?>
@@ -468,16 +486,20 @@ if (!$canSeeBrand) {
                                             <?php if (!empty($submenuVisibility['brand']['j3_schedule'])): ?>
                                                 <a href="schedule_manager?restaurant=J3" class="sub-option">员工排班表</a>
                                                 <a href="phone_manage?restaurant=J3" class="sub-option">员工手机记录</a>
-                                            <?php endif; ?>
+                                            <?php
+            endif; ?>
                                         </div>
-                                    <?php endif; ?>
+                                    <?php
+        endif; ?>
                                 </div>
                             </div>
                         </div>
-                    <?php endif; ?>
+                    <?php
+    endif; ?>
                 </div>
             </div>
-        <?php endif; ?>
+        <?php
+endif; ?>
 
         <?php if ($canSeeAnalytics): ?>
             <div class="informationmenu-section">
@@ -493,17 +515,20 @@ if (!$canSeeBrand) {
                                 KPI报表
                             </a>
                         </div>
-                    <?php endif; ?>
+                    <?php
+    endif; ?>
                     <?php if (!empty($submenuVisibility['analytics']['kpi_upload'])): ?>
                         <div class="menu-item-wrapper">
                             <a href="<?php echo $kpiUploadDefaultPage; ?>" class="informationmenu-item">
                                 数据上传
                             </a>
                         </div>
-                    <?php endif; ?>
+                    <?php
+    endif; ?>
                 </div>
             </div>
-        <?php endif; ?>
+        <?php
+endif; ?>
 
         <?php if ($canSeeHR): ?>
             <div class="informationmenu-section">
@@ -528,10 +553,12 @@ if (!$canSeeBrand) {
                                 考核表单
                             </a>
                         </div>
-                    <?php endif; ?>
+                    <?php
+    endif; ?>
                 </div>
             </div>
-        <?php endif; ?>
+        <?php
+endif; ?>
 
         <?php if ($canSeeResource): ?>
             <div class="informationmenu-section">
@@ -548,24 +575,28 @@ if (!$canSeeBrand) {
                                 库存
                             </a>
                         </div>
-                    <?php endif; ?>
+                    <?php
+    endif; ?>
                     <?php if (!empty($submenuVisibility['resource']['dishware'])): ?>
                         <div class="menu-item-wrapper">
                             <a href="dishware_stock" class="informationmenu-item">
                                 碗碟
                             </a>
                         </div>
-                    <?php endif; ?>
+                    <?php
+    endif; ?>
                     <?php if (!empty($submenuVisibility['resource']['price_comparison'])): ?>
                         <div class="menu-item-wrapper">
                             <a href="price" class="informationmenu-item">
                                 价格对比
                             </a>
                         </div>
-                    <?php endif; ?>
+                    <?php
+    endif; ?>
                 </div>
             </div>
-        <?php endif; ?>
+        <?php
+endif; ?>
 
         <?php if ($canSeeVisual): ?>
             <div class="informationmenu-section">
@@ -623,7 +654,6 @@ if (!$canSeeBrand) {
                                 <a href="tokyopage1upload" class="submenu-item">第一页</a>
                                 <a href="tokyopage2upload" class="submenu-item">第二页</a>
                                 <a href="tokyopage3upload" class="submenu-item">第三页</a>
-                                <a href="tokyopage4upload" class="submenu-item">第四页</a>
                                 <a href="tokyopage5upload" class="submenu-item">第五页</a>
                             </div>
                         </div>
@@ -655,10 +685,12 @@ if (!$canSeeBrand) {
                                 菜单管理
                             </a>
                         </div>
-                    <?php endif; ?>
+                    <?php
+    endif; ?>
                 </div>
             </div>
-        <?php endif; ?>
+        <?php
+endif; ?>
 
         <div class="informationmenu-footer">
             <button class="logout-btn" onclick="location.href='logout'">
