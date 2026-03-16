@@ -164,6 +164,19 @@ window.addEventListener('keydown', function (e) {
             return;
         }
     }
+
+    // C. 检查是否在新增记录弹窗中按下 Enter
+    if (e.key === 'Enter') {
+        const modal = document.getElementById('date-rows-modal');
+        if (modal && modal.classList.contains('show')) {
+            // 确保不是在 button 上按下的（浏览器默认会处理 button 的 click）
+            if (e.target.tagName !== 'BUTTON') {
+                e.preventDefault();
+                createMultipleRows();
+                return;
+            }
+        }
+    }
 }, true);
 
 
