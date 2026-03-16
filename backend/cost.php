@@ -337,16 +337,17 @@ $avatarLetter = strtoupper($username[0]);
                     <div class="card-body">
                         <div class="cost-card-vertical">
                             <div class="icon dynamic-color">
-                                <svg viewBox="0 0 64 64" fill="currentColor" style="width: 1.5em; height: 1.5em; vertical-align: middle;">
-                                    <circle cx="32" cy="36" r="24" fill="currentColor" opacity="0.1"/>
-                                    <path d="M18,12c2.2,0,4,1.8,4,4c0,2.2-1.8,4-4,4c-2.2,0-4-1.8-4-4C10,13.8,15.8,12,18,12z"/>
-                                    <path d="M46,12c2.2,0,4,1.8,4,4c0,2.2-1.8,4-4,4c-2.2,0-4-1.8-4-4C42,13.8,43.8,12,46,12z"/>
-                                    <path d="M32,20c11,0,20,9,20,20s-9,20-20,20s-20-9-20-20S21,20,32,20z"/>
-                                    <circle cx="43" cy="38" r="6" fill="white"/>
-                                    <circle cx="21" cy="38" r="6" fill="white"/>
-                                    <circle cx="43" cy="38" r="3" fill="black"/>
-                                    <circle cx="21" cy="38" r="3" fill="black"/>
-                                    <path d="M32,48c2,0,4,1.5,4,3s-2,3-4,3s-4-1.5-4-3S30,48,32,48z" fill="black"/>
+                                <svg viewBox="0 0 64 64" fill="currentColor" style="width: 1.6em; height: 1.6em; vertical-align: middle;">
+                                    <!-- Ears -->
+                                    <circle cx="15" cy="15" r="7"/>
+                                    <circle cx="49" cy="15" r="7"/>
+                                    <!-- Head -->
+                                    <path d="M32 12C12 12 8 28 8 40C8 52 16 58 32 58S56 52 56 40C56 28 52 12 32 12z"/>
+                                    <!-- Eye patches (holes/fills) -->
+                                    <path d="M22 34c-2.5 0-4.5 2-4.5 4.5S19.5 43 22 43s4.5-2 4.5-4.5S24.5 34 22 34z" fill="white"/>
+                                    <path d="M42 34c-2.5 0-4.5 2-4.5 4.5S39.5 43 42 43s4.5-2 4.5-4.5S44.5 34 42 34z" fill="white"/>
+                                    <!-- Nose -->
+                                    <path d="M32 48c-1.5 0-2.5 1-2.5 2s1 2 2.5 2 2.5-1 2.5-2-1-2-2.5-2z" fill="white"/>
                                 </svg>
                             </div>
                             <div>
