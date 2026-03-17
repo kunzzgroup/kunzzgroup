@@ -1047,31 +1047,8 @@ body { background: #f3f4f6; }
                             <i class="fas fa-exclamation-triangle"></i> 请至少选择一项权限
                         </div>
                     </div>
-                </div>tion-title">系统选项</div>
-                                            <label><input type="checkbox" class="perm-stock-system" value="central"> 中央</label>
-                                            <label><input type="checkbox" class="perm-stock-system" value="j1"> J1</label>
-                                            <label><input type="checkbox" class="perm-stock-system" value="j2"> J2</label>
-                                            <label><input type="checkbox" class="perm-stock-system" value="j3"> J3</label>
-                                        </div>
-                                        <div class="perm-level-3-section">
-                                            <div class="perm-section-title">视图选项</div>
-                                            <label><input type="checkbox" class="perm-stock-view" value="list"> 总库存</label>
-                                            <label><input type="checkbox" class="perm-stock-view" value="records"> 进出货</label>
-                                            <label><input type="checkbox" class="perm-stock-view" value="remark"> 货品备注</label>
-                                            <label><input type="checkbox" class="perm-stock-view" value="product"> 货品种类</label>
-                                            <label><input type="checkbox" class="perm-stock-view" value="sot"> 货品异常</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- 权限验证和展示警告 -->
-                        <div class="perm-warning" style="display: none; color: #dc2626; font-size: 13px; font-weight: bold; margin-top: 10px; text-align: center;">
-                            <i class="fas fa-exclamation-triangle"></i> 请至少选择一项权限
-                        </div>
-                    </div>
-                </div>
+                </div> <!-- /form-section editUserPermLayout -->
+
                 </div> <!-- /Right Column -->
 
             </form>
