@@ -996,11 +996,10 @@ tr:hover {
     flex: 1;
     max-height: 60vh;
     overflow-y: auto;
-    border: 1.5px solid #eaeaea !important; /* Balanced border point */
-    border-radius: 12px;
-    padding: 18px;
-    background: #ffffff;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 15px;
+    background: #f9fafb;
     transform: translateZ(0);
     /* 启用GPU加速 */
     -webkit-overflow-scrolling: touch;
@@ -1258,7 +1257,7 @@ tr:hover {
     opacity: 0;
     transform: translateY(10px);
     height: 100%;
-    /* overflow-y: auto;  <-- REMOVED to let parent handle scroll */
+    overflow-y: auto;
     transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
         transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
         visibility 0.3s;
@@ -1767,22 +1766,14 @@ tr:hover {
 .editUserPermLayout .perm-tree-container {
     flex: 1 !important;
     min-width: 300px;
-    height: 520px !important; /* Sturdier fixed height */
-    max-height: none !important;
+    max-height: 60vh !important;
 }
 
 .editUserPermLayout .perm-detail-card {
-    flex: 0 0 420px !important;
-    min-width: 420px;
-    height: 520px !important;
+    flex: 0 0 400px !important;
     display: block !important;
-    background: #fff;
-    border: 1.5px solid #eaeaea !important;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
-    overflow-y: auto;
-    overflow-x: hidden; /* Prevent horizontal bleed */
-    position: relative; /* Anchor for absolute elements like placeholder */
+    position: sticky;
+    top: 0;
 }
 
 .editUserPermLayout .perm-level-3-panel-inline {
