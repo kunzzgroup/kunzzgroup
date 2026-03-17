@@ -541,11 +541,13 @@ function displayData(data) {
     const rows = sortedData.map((item, index) => `
                 <tr id="row-${item.id}" data-id="${item.id}" data-branch="${item.branch || ''}" data-user='${escapeHTML(JSON.stringify(item))}'>
                     <td style="text-align: center; font-weight: bold; color: black;">${index + 1}</td>
-                    <td>${item.position ? escapeHTML(item.position) : '<em style="color: #999;">-</em>'}</td>
+                    <td>
+                        <div style="font-weight: 700; color: #333; margin-bottom: 4px;">${item.position ? escapeHTML(item.position) : '-'}</div>
+                        ${item.branch ? '<span style="background:#fff3e0;color:#e65100;padding:2px 6px;border-radius:4px;font-size:0.75em;font-weight:700;display:inline-block;">' + escapeHTML(item.branch.toUpperCase()) + '</span>' : '<em style="color:#bbb;font-size:0.75em;">总部/HQ</em>'}
+                    </td>
                     <td>${item.username ? escapeHTML(item.username) : '<em style="color: #999;">-</em>'}</td>
                     <td>${item.email ? escapeHTML(item.email) : '<em style="color: #999;">-</em>'}</td>
                     <td>${item.phone_number ? escapeHTML(item.phone_number) : '<em style="color: #999;">-</em>'}</td>
-                    <td>${item.branch ? '<span style="background:#fff3e0;color:#e65100;padding:2px 8px;border-radius:4px;font-size:0.85em;font-weight:600;">' + escapeHTML(item.branch.toUpperCase()) + '</span>' : '<em style="color:#bbb;font-size:0.85em;">总部</em>'}</td>
                     <td>
                         <div class="action-buttons">
                             <button class="btn-action btn-edit" onclick="openEditModal(${item.id})" title="编辑">
