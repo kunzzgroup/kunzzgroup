@@ -130,181 +130,178 @@ html, body {
     padding: 20px;
 }
 
-/* Permission section - Refactored Layout */
+/* Permission section - Emergency Visibility & Visual Fix */
 .editUserPermLayout {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06) !important;
 }
 
 .editUserPermLayout .form-section-header {
-    background: #f97316;
-    color: #ffffff;
-    padding: 12px 20px;
-    font-weight: 700;
-    border-radius: 8px 8px 0 0;
-    text-transform: uppercase;
+    background: #f97316 !important;
+    color: #ffffff !important;
+    padding: 14px 24px !important;
+    font-weight: 800 !important;
+    font-size: 15px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.025em !important;
+    border-bottom: 2px solid #ea580c !important;
 }
 
 .editUserPermLayout .form-section-content {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    padding: 0 !important; /* Managed by children */
+    flex: 1 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    padding: 0 !important;
 }
 
 .editUserPermLayout .perm-layout-container {
     display: flex !important;
-    gap: 20px !important;
+    gap: 0 !important; /* Managed by dividers */
     flex: 1 !important;
     min-height: 0 !important;
-    padding: 20px !important;
+    padding: 0 !important;
     background: #ffffff !important;
     border: 2px solid #f97316 !important;
     border-radius: 0 0 12px 12px !important;
 }
 
+/* Tree Container - Force Visibility */
 .editUserPermLayout .perm-tree-container {
-    flex: 0 0 35% !important; /* Slightly more than 28% locally for better tree visibility */
+    flex: 0 0 35% !important;
     background: #fffcf9 !important;
-    border-radius: 10px !important;
-    border: 1px solid #fed7aa !important;
-    padding: 15px !important;
+    border-right: 2px solid #f97316 !important;
+    padding: 20px !important;
     height: 100% !important;
     overflow-y: auto !important;
 }
 
+/* Detail Card - Force Visibility */
 .editUserPermLayout .perm-detail-card {
     flex: 1 !important;
     background: #ffffff !important;
-    border-radius: 10px !important;
-    border: 1px solid #fed7aa !important;
-    padding: 20px !important;
+    padding: 24px !important;
     height: 100% !important;
     overflow-y: auto !important;
     position: relative !important;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #f1f1f1; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-/* Permission Tree Styling */
-.perm-level-1 { margin-bottom: 10px; }
-.perm-level-1-item {
-    padding: 10px 14px;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    cursor: pointer;
-    background: #fff;
-    transition: all 0.2s;
-    color: #1f2937;
-    font-weight: 600;
-}
-.perm-level-1-item:hover { background: #fff7ed; border-color: #fdba74; }
-.perm-level-1-item.expanded { background: #f97316; color: #fff; border-color: #ea580c; }
-
+/* CRITICAL: Force Text Visibility in Tree */
 .perm-checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    cursor: pointer;
-}
-.perm-checkbox-label input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    accent-color: #f97316;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: 100% !important;
+    cursor: pointer !important;
+    padding: 6px 0 !important;
 }
 
+.perm-checkbox-label strong,
+.perm-checkbox-label span {
+    color: #111827 !important; /* Forced deep dark gray */
+    font-size: 14px !important;
+    font-weight: 700 !important; /* Forced bold */
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.perm-level-1-item {
+    margin-bottom: 8px !important;
+    padding: 12px 16px !important;
+    border: 1px solid #fed7aa !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+}
+
+.perm-level-1-item:hover {
+    background: #fff7ed !important;
+    border-color: #f97316 !important;
+}
+
+.perm-level-1-item.expanded {
+    background: #f97316 !important;
+    border-color: #ea580c !important;
+}
+
+.perm-level-1-item.expanded .perm-checkbox-label strong,
+.perm-level-1-item.expanded .perm-checkbox-label span {
+    color: #ffffff !important; /* White text on orange background */
+}
+
+/* Detail Panel Enhancements */
 .perm-section-title {
-    font-size: 14px;
-    font-weight: 800;
-    color: #f97316;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid #fff7ed;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    color: #f97316 !important;
+    margin-bottom: 16px !important;
+    padding-bottom: 8px !important;
+    border-bottom: 2px solid #fff7ed !important;
+    text-transform: uppercase !important;
 }
 
-/* ── 平板视图 (<1200px) ── */
+.perm-detail-header {
+    background: #f8fafc !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    padding: 16px 20px !important;
+    margin: -24px -24px 20px -24px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+
+.perm-detail-header strong {
+    color: #111827 !important;
+    font-size: 16px !important;
+    font-weight: 800 !important;
+}
+
+.perm-level-3-section {
+    margin-bottom: 20px !important;
+    padding: 16px !important;
+    background: #ffffff !important;
+    border: 1px solid #f1f5f9 !important;
+    border-radius: 8px !important;
+}
+
+.perm-level-3-section label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin-bottom: 10px !important;
+    color: #374151 !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+}
+
+.perm-level-3-section input[type="checkbox"] {
+    width: 18px !important;
+    height: 18px !important;
+    accent-color: #f97316 !important;
+}
+
+/* Scrollbar Customization */
+::-webkit-scrollbar { width: 8px !important; }
+::-webkit-scrollbar-track { background: #f8fafc !important; }
+::-webkit-scrollbar-thumb { 
+    background: #cbd5e1 !important; 
+    border-radius: 4px !important;
+    border: 2px solid #f8fafc !important;
+}
+::-webkit-scrollbar-thumb:hover { background: #94a3b8 !important; }
+
+/* ── Responsive & Cards ── */
 @media (max-width: 1200px) {
-    .form-scroll-area {
-        overflow-y: auto;
-        align-items: flex-start;
-    }
-    #addUserForm {
-        grid-template-columns: 1fr;
-        max-width: 100%;
-        height: auto;
-    }
-    .form-col {
-        height: auto;
-        overflow-y: visible;
-        overflow: visible;
-    }
-    .left-card {
-        flex: none;
-        height: auto;
-        min-height: unset;
-        overflow-y: visible;
-        padding-bottom: 16px;
-    }
-    .form-col > .form-section:last-child,
-    .form-col > .editUserPermLayout:last-child {
-        flex: none;
-        overflow: visible;
-    }
-}
-
-/* ── 手机视图 (<768px) ── */
-@media (max-width: 768px) {
-    .page-header-bar {
-        padding: 12px 14px;
-    }
-    .page-header-bar h1 {
-        font-size: 16px;
-    }
-    .back-btn {
-        padding: 6px 12px;
-        font-size: 13px;
-    }
-    .form-scroll-area {
-        padding: 10px;
-    }
-    .form-grid-3, .form-grid-2, .form-row-2col {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-    .form-section-content {
-        padding: 14px 14px;
-    }
-    .form-section-header,
-    .form-section-header-bank {
-        padding: 10px 14px;
-        font-size: 13px;
-    }
-    .page-action-bar {
-        padding: 12px 16px;
-        flex-direction: column-reverse;
-        gap: 8px;
-    }
-    .btn-save, .btn-back-action {
-        width: 100%;
-        justify-content: center;
-        padding: 12px;
-        font-size: 15px;
-    }
-    #toast-container {
-        bottom: 110px;
-        left: 50%;
-        right: auto;
-        transform: translateX(-50%);
-        align-items: center;
-        width: 90vw;
-    }
+    .editUserPermLayout .perm-layout-container { flex-direction: column !important; }
+    .editUserPermLayout .perm-tree-container { flex: 0 0 50% !important; border-right: none !important; border-bottom: 2px solid #f97316 !important; }
 }
 
 /* Cards */
