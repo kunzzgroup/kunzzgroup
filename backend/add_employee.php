@@ -172,9 +172,9 @@ body { background: #f3f4f6; }
     flex: 1;
     height: 100% !important;
     max-height: none !important;
-    overflow-y: auto;
+    overflow-y: auto !important; /* Ensure vertical scroll is always available when needed */
     overflow-x: hidden;
-    position: relative;
+    position: relative; /* Anchor for absolute elements */
     background: #ffffff;
     border: 1.5px solid #eaeaea !important; /* Balanced border point */
     border-radius: 12px;
@@ -186,6 +186,21 @@ body { background: #f3f4f6; }
 .editUserPermLayout .perm-detail-card {
     flex: 0 0 420px !important; /* Prevent right content from being squeezed */
     min-width: 420px;
+}
+
+/* Ensure detail content doesn't capture scroll or hide scrollbar */
+.editUserPermLayout .perm-detail-content {
+    height: auto !important;
+    overflow: visible !important;
+    pointer-events: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+/* Ensure placeholder is hidden properly when hidden class is added */
+.editUserPermLayout .perm-detail-placeholder.hidden {
+    display: none !important;
 }
 
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar,
