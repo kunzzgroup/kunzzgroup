@@ -1,4 +1,3 @@
-
 // 职位配置 - 根据账号类型显示不同职位选项
 const positionsByAccountType = {
     'special': [
@@ -287,9 +286,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 添加实时搜索功能
     const searchInput = document.getElementById('searchInput');
-    searchInput.addEventListener('input', function (e) {
-        filterTable(e.target.value);
-    });
+    if (searchInput) {
+        searchInput.addEventListener('input', function (e) {
+            filterTable(e.target.value);
+        });
+    }
 
     // 初始化事件监听器
     rebindEventListeners();
@@ -329,25 +330,28 @@ function stopSessionRefresh() {
 // 显示会话过期消息
 function showSessionExpiredMessage() {
     const tableBody = document.getElementById('tableBody');
-    tableBody.innerHTML = `
-                <tr>
-                    <td colspan="6" style="text-align: center; padding: 30px; color: #C62828;">
-                        <div style="background: #ffebee; border: 1px solid #f44336; border-radius: 8px; padding: 20px; margin: 10px;">
-                            <h3 style="color: #C62828; margin: 0 0 10px 0;">🔒 会话已过期</h3>
-                            <p style="margin: 0 0 15px 0;">您的登录会话已过期，请重新登录以继续使用。</p>
-                            <button onclick="window.location.href='../frontend/login'" 
-                                    style="background: #C62828; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
-                                重新登录
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `;
+    if (tableBody) {
+        tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 30px; color: #C62828;">
+                            <div style="background: #ffebee; border: 1px solid #f44336; border-radius: 8px; padding: 20px; margin: 10px;">
+                                <h3 style="color: #C62828; margin: 0 0 10px 0;">🔒 会话已过期</h3>
+                                <p style="margin: 0 0 15px 0;">您的登录会话已过期，请重新登录以继续使用。</p>
+                                <button onclick="window.location.href='../frontend/login'" 
+                                        style="background: #C62828; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
+                                    重新登录
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+    }
 }
 
 // 加载代码和职员数据
 async function loadCodesAndUsers() {
     const tableBody = document.getElementById('tableBody');
+    if (!tableBody) return;
 
     try {
         const response = await fetch('generatecodeapi.php?action=list');
@@ -381,7 +385,7 @@ async function loadCodesAndUsers() {
                 `;
     }
 
-    // 添加这段代码来重新绑定事件监听器
+    // 重新绑定事件监听器
     rebindEventListeners();
 }
 
@@ -446,6 +450,7 @@ function goBack() {
 // 显示数据
 function displayData(data) {
     const tableBody = document.getElementById('tableBody');
+    if (!tableBody) return;
 
     if (!data || data.length === 0) {
         tableBody.innerHTML = `
@@ -534,12 +539,13 @@ function displayData(data) {
     });
 
     const rows = sortedData.map((item, index) => `
-                <tr id="row-${item.id}" data-id="${item.id}" data-user='${escapeHTML(JSON.stringify(item))}'>
+                <tr id="row-${item.id}" data-id="${item.id}" data-branch="${item.branch || ''}" data-user='${escapeHTML(JSON.stringify(item))}'>
                     <td style="text-align: center; font-weight: bold; color: black;">${index + 1}</td>
                     <td>${item.position ? escapeHTML(item.position) : '<em style="color: #999;">-</em>'}</td>
                     <td>${item.username ? escapeHTML(item.username) : '<em style="color: #999;">-</em>'}</td>
                     <td>${item.email ? escapeHTML(item.email) : '<em style="color: #999;">-</em>'}</td>
                     <td>${item.phone_number ? escapeHTML(item.phone_number) : '<em style="color: #999;">-</em>'}</td>
+                    <td>${item.branch ? '<span style="background:#fff3e0;color:#e65100;padding:2px 8px;border-radius:4px;font-size:0.85em;font-weight:600;">' + escapeHTML(item.branch.toUpperCase()) + '</span>' : '<em style="color:#bbb;font-size:0.85em;">总部</em>'}</td>
                     <td>
                         <div class="action-buttons">
                             <button class="btn-action btn-edit" onclick="openEditModal(${item.id})" title="编辑">
@@ -606,14 +612,14 @@ function showMessage(message, type = 'success') {
 
     // 先检查并限制通知数量（在添加新通知之前）
     const existingToasts = container.querySelectorAll('.toast');
-    while (existingToasts.length >= 3) {
-        closeToast(existingToasts[0].id);
+    let toastList = Array.from(existingToasts);
+    while (toastList.length >= 3) {
+        closeToast(toastList[0].id);
         // 立即从DOM移除，不等待动画
-        if (existingToasts[0].parentNode) {
-            existingToasts[0].parentNode.removeChild(existingToasts[0]);
+        if (toastList[0].parentNode) {
+            toastList[0].parentNode.removeChild(toastList[0]);
         }
-        // 重新获取当前通知列表
-        existingToasts = container.querySelectorAll('.toast');
+        toastList.shift();
     }
 
     const toastId = 'toast-' + Date.now();
@@ -668,19 +674,169 @@ function refreshTable() {
     loadCodesAndUsers();
 }
 
+// ── 分类筛选器逻辑 ──
+let branchL1Current = 'all';   // 'all' | 'kunzz' | 'branch'
+let branchL2Current = 'all';   // 'all' | 'j1' | 'j2' | 'j3'
+
+const branchL2Options = {
+    'all':    [],                                           // 不需要二层
+    'kunzz':  [],                                           // 只有一个选项"-"，不展开
+    'branch': [
+        { value: 'all', label: '全部分店' },
+        { value: 'j1',  label: 'J1' },
+        { value: 'j2',  label: 'J2' },
+        { value: 'j3',  label: 'J3' },
+    ]
+};
+
+function toggleBranchL1() {
+    const d = document.getElementById('branchL1Dropdown');
+    const open = d ? (d.style.display !== 'none') : false;
+    closeBranchDropdowns();
+    if (d && !open) d.style.display = 'block';
+}
+
+function toggleBranchL2() {
+    // 如果第一层是 kunzz，二层不可点（只显示"-"）
+    if (branchL1Current === 'all' || branchL1Current === 'kunzz') return;
+    const d = document.getElementById('branchL2Dropdown');
+    const open = d ? (d.style.display !== 'none') : false;
+    closeBranchDropdowns();
+    if (d && !open) d.style.display = 'block';
+}
+
+function closeBranchDropdowns() {
+    const d1 = document.getElementById('branchL1Dropdown');
+    const d2 = document.getElementById('branchL2Dropdown');
+    if (d1) d1.style.display = 'none';
+    if (d2) d2.style.display = 'none';
+}
+
+function selectBranchL1(value, label) {
+    branchL1Current = value;
+    branchL2Current = 'all';
+
+    const lbl1 = document.getElementById('branchL1Label');
+    if (lbl1) lbl1.textContent = label;
+
+    const l2Btn = document.getElementById('branchL2Btn');
+    const l2Label = document.getElementById('branchL2Label');
+    const l2Chevron = l2Btn ? l2Btn.querySelector('.fa-chevron-down') : null;
+
+    if (l2Btn && l2Label) {
+        if (value === 'all') {
+            // 全部 → 二层显示 "-"，不可点
+            l2Label.textContent = '-';
+            l2Btn.style.cursor = 'default';
+            l2Btn.style.opacity = '0.45';
+            if (l2Chevron) l2Chevron.style.display = 'none';
+        } else if (value === 'kunzz') {
+            // KunzzGroup → 二层显示 "-"，不可点
+            l2Label.textContent = '-';
+            l2Btn.style.cursor = 'default';
+            l2Btn.style.opacity = '0.45';
+            if (l2Chevron) l2Chevron.style.display = 'none';
+        } else {
+            // 分店 → 二层显示 dropdown
+            l2Label.textContent = '全部分店';
+            l2Btn.style.cursor = 'pointer';
+            l2Btn.style.opacity = '1';
+            if (l2Chevron) l2Chevron.style.display = '';
+            // 填充二层选项
+            buildBranchL2Dropdown();
+        }
+    }
+
+    closeBranchDropdowns();
+    applyBranchFilter();
+}
+
+function selectBranchL2(value, label) {
+    branchL2Current = value;
+    const lbl2 = document.getElementById('branchL2Label');
+    if (lbl2) lbl2.textContent = label;
+    closeBranchDropdowns();
+    applyBranchFilter();
+}
+
+function buildBranchL2Dropdown() {
+    const d = document.getElementById('branchL2Dropdown');
+    if (!d) return;
+    const options = branchL2Options['branch'];
+    d.innerHTML = options.map(opt =>
+        `<div class="bl2-item" onclick="selectBranchL2('${opt.value}','${opt.label}')"
+            style="padding:8px 14px;font-size:13px;cursor:pointer;color:#374151;transition:background 0.1s;"
+            onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background=''">${opt.label}</div>`
+    ).join('');
+}
+
+function applyBranchFilter() {
+    const tableBody = document.getElementById('tableBody');
+    if (!tableBody) return;
+    const rows = tableBody.getElementsByTagName('tr');
+
+    for (let row of rows) {
+        if (row.cells.length <= 1) continue;  // 跳过加载中/空行
+
+        // 读取该行的 branch 值（来自 data-branch 或从行数据推断）
+        const rowBranch = (row.getAttribute('data-branch') || '').toLowerCase().trim();
+
+        let show = true;
+
+        if (branchL1Current === 'kunzz') {
+            // 只显示无分店的职员（branch 为空）
+            show = (rowBranch === '' || rowBranch === 'null');
+        } else if (branchL1Current === 'branch') {
+            // 只显示有分店的职员
+            const hasBranch = rowBranch !== '' && rowBranch !== 'null';
+            if (!hasBranch) {
+                show = false;
+            } else if (branchL2Current !== 'all') {
+                // 进一步筛选具体分店
+                show = (rowBranch === branchL2Current);
+            }
+        }
+        // 'all' → 全部显示
+
+        if (show) {
+            row.classList.remove('hidden-row');
+        } else {
+            row.classList.add('hidden-row');
+        }
+    }
+}
+
+// 点击页面其他地方关闭 dropdown
+document.addEventListener('click', function(e) {
+    const wrap = document.querySelector('.branch-filter-wrap');
+    if (wrap && !wrap.contains(e.target)) {
+        closeBranchDropdowns();
+    }
+});
+
+// hover 样式注入
+(function() {
+    const style = document.createElement('style');
+    style.textContent = '.bl1-item:hover, .bl2-item:hover { background: #f9fafb !important; }';
+    document.head.appendChild(style);
+})();
+
 // 全局变量存储原始数据
 let originalTableData = [];
 
 // 实时过滤表格（搜索英文姓名和邮箱列）
 function filterTable(searchTerm) {
     const tableBody = document.getElementById('tableBody');
+    if (!tableBody) return;
     const rows = tableBody.getElementsByTagName('tr');
 
-    // 如果没有搜索词，显示所有行
-    if (!searchTerm.trim()) {
+    // 如果没有搜索词，恢复并重新应用分类筛选
+    if (!searchTerm || !searchTerm.trim()) {
         for (let row of rows) {
             row.classList.remove('hidden-row');
         }
+        // 重新应用分类筛选
+        if (typeof applyBranchFilter === 'function') applyBranchFilter();
         return;
     }
 
@@ -727,7 +883,7 @@ function filterTable(searchTerm) {
 // 清除搜索
 function clearSearch() {
     const searchInput = document.getElementById('searchInput');
-    searchInput.value = '';
+    if (searchInput) searchInput.value = '';
     filterTable('');
 }
 
@@ -742,10 +898,12 @@ function scrollToTop() {
 // 打开编辑模态框
 function openEditModal(id) {
     const row = document.getElementById(`row-${id}`);
+    if (!row) return;
     const userData = JSON.parse(row.getAttribute('data-user').replace(/&apos;/g, "'"));
 
     // 先展示模态框以便获取尺寸
     const modal = document.getElementById('editUserModal');
+    if (!modal) return;
     modal.style.display = 'block';
 
     // 填充表单数据
@@ -767,21 +925,25 @@ function openEditModal(id) {
     document.getElementById('edit_emergency_contact_name').value = userData.emergency_contact_name || '';
     document.getElementById('edit_emergency_phone_number').value = userData.emergency_phone_number || '';
     document.getElementById('edit_account_type').value = userData.account_type || '';
+    document.getElementById('edit_branch').value = userData.branch || '';
 
     // 先设置账号类型，然后更新职位选项
     if (userData.account_type) {
         updatePositionOptions(userData.account_type, 'edit_position');
         // 在职位选项加载后设置职位值
         setTimeout(() => {
-            document.getElementById('edit_position').value = userData.position || '';
+            const posSelect = document.getElementById('edit_position');
+            if (posSelect) posSelect.value = userData.position || '';
         }, 50);
     }
 
     // 添加账号类型变化监听器
     const accountTypeSelect = document.getElementById('edit_account_type');
-    accountTypeSelect.addEventListener('change', function () {
-        updatePositionOptions(this.value, 'edit_position');
-    });
+    if (accountTypeSelect) {
+        accountTypeSelect.addEventListener('change', function () {
+            updatePositionOptions(this.value, 'edit_position');
+        });
+    }
 
     // 添加输入格式化
     const fieldsToFormat = [
@@ -800,15 +962,19 @@ function openEditModal(id) {
 
 // 关闭编辑模态框
 function closeEditUserModal() {
-    document.getElementById('editUserModal').style.display = 'none';
-    document.getElementById('editUserForm').reset();
+    const modal = document.getElementById('editUserModal');
+    if (modal) modal.style.display = 'none';
+    const form = document.getElementById('editUserForm');
+    if (form) form.reset();
 }
 
 // 处理编辑表单提交
 async function handleEditUserSubmit(e) {
     e.preventDefault();
 
-    const formData = new FormData(document.getElementById('editUserForm'));
+    const form = document.getElementById('editUserForm');
+    if (!form) return;
+    const formData = new FormData(form);
     const userData = {};
 
     // 收集表单数据
@@ -838,10 +1004,12 @@ async function handleEditUserSubmit(e) {
     }
 
     // 显示加载状态
-    const submitBtn = document.querySelector('#editUserForm .btn-save');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<div class="loading"></div>保存中...';
-    submitBtn.disabled = true;
+    const submitBtn = form.querySelector('.btn-save');
+    const originalText = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) {
+        submitBtn.innerHTML = '<div class="loading"></div>保存中...';
+        submitBtn.disabled = true;
+    }
 
     try {
         const response = await fetch('generatecodeapi.php', {
@@ -870,8 +1038,10 @@ async function handleEditUserSubmit(e) {
         showMessage('网络错误，请检查连接！', 'error');
     } finally {
         // 恢复按钮状态
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
+        if (submitBtn) {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
     }
 }
 
@@ -1017,10 +1187,12 @@ function getAccountTypeKey(displayName) {
 // 打开添加职员模态框
 function openAddUserModal() {
     const modal = document.getElementById('addUserModal');
+    if (!modal) return;
     modal.style.display = 'block';
 
     // 重置表单
-    document.getElementById('addUserForm').reset();
+    const form = document.getElementById('addUserForm');
+    if (form) form.reset();
 
     // 重置并初始化权限树及验证系统
     resetPermissionTree(modal);
@@ -1032,14 +1204,18 @@ function openAddUserModal() {
 
     // 重置职位选择框
     const positionSelect = document.getElementById('add_position');
-    positionSelect.innerHTML = '<option value="">请先选择账号类型</option>';
-    positionSelect.disabled = true;
+    if (positionSelect) {
+        positionSelect.innerHTML = '<option value="">请先选择账号类型</option>';
+        positionSelect.disabled = true;
+    }
 
     // 添加账号类型变化监听器
     const accountTypeSelect = document.getElementById('add_account_type');
-    accountTypeSelect.addEventListener('change', function () {
-        updatePositionOptions(this.value, 'add_position');
-    });
+    if (accountTypeSelect) {
+        accountTypeSelect.addEventListener('change', function () {
+            updatePositionOptions(this.value, 'add_position');
+        });
+    }
 
     // 添加输入格式化
     const fieldsToFormat = [
@@ -1058,13 +1234,17 @@ function openAddUserModal() {
 
 // 关闭添加职员模态框
 function closeAddUserModal() {
-    document.getElementById('addUserModal').style.display = 'none';
-    document.getElementById('addUserForm').reset();
+    const modal = document.getElementById('addUserModal');
+    if (modal) modal.style.display = 'none';
+    const form = document.getElementById('addUserForm');
+    if (form) form.reset();
 }
 
 // 修改 addNewUser 函数，添加更多调试信息
 async function addNewUser() {
-    const formData = new FormData(document.getElementById('addUserForm'));
+    const form = document.getElementById('addUserForm');
+    if (!form) return;
+    const formData = new FormData(form);
     const userData = {};
 
     // 收集表单数据
@@ -1112,10 +1292,12 @@ async function addNewUser() {
     const { perms, submenuPermissions, pagePermissions, brandPermissions, reportPermissions, restaurantPermissions } = extractPermissionsData(modal);
 
     // 显示加载状态
-    const submitBtn = document.querySelector('#addUserForm .btn-save');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<div class="loading"></div>添加中...';
-    submitBtn.disabled = true;
+    const submitBtn = form.querySelector('.btn-save');
+    const originalText = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) {
+        submitBtn.innerHTML = '<div class="loading"></div>添加中...';
+        submitBtn.disabled = true;
+    }
 
     try {
         const response = await fetch('generatecodeapi.php', {
@@ -1162,8 +1344,10 @@ async function addNewUser() {
         showMessage(`网络错误：${error.message}`, 'error');
     } finally {
         // 恢复按钮状态
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
+        if (submitBtn) {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
     }
 }
 
@@ -1171,13 +1355,15 @@ async function addNewUser() {
 async function deleteRowAndClose(id) {
     // 显示删除中状态
     const modal = document.querySelector('.modal');
-    const deleteBtn = modal.querySelector('.btn-delete');
-    const cancelBtn = modal.querySelector('.btn-cancel');
+    const deleteBtn = modal ? modal.querySelector('.btn-delete') : null;
+    const cancelBtn = modal ? modal.querySelector('.btn-cancel') : null;
 
     // 禁用按钮并显示加载状态
-    deleteBtn.innerHTML = '<div class="loading"></div>删除中...';
-    deleteBtn.disabled = true;
-    cancelBtn.disabled = true;
+    if (deleteBtn) {
+        deleteBtn.innerHTML = '<div class="loading"></div>删除中...';
+        deleteBtn.disabled = true;
+    }
+    if (cancelBtn) cancelBtn.disabled = true;
 
     try {
         const response = await fetch('generatecodeapi.php', {
@@ -1209,26 +1395,6 @@ async function deleteRowAndClose(id) {
     }
 }
 
-// 点击模态框外部关闭（为添加职员模态框）
-const addUserModalEl = document.getElementById('addUserModal');
-if (addUserModalEl) {
-    addUserModalEl.onclick = function (event) {
-        if (event.target === this) {
-            closeAddUserModal();
-        }
-    };
-}
-
-// 点击模态框外部关闭（用户权限）
-const permissionsModalEl = document.getElementById('permissionsModal');
-if (permissionsModalEl) {
-    permissionsModalEl.onclick = function (event) {
-        if (event.target === this) {
-            closePermissionsModal();
-        }
-    };
-}
-
 // 监听滚动事件，控制回到顶部按钮显示
 let scrollTimeout;
 window.addEventListener('scroll', function () {
@@ -1238,10 +1404,12 @@ window.addEventListener('scroll', function () {
         const backToTopBtn = document.getElementById('back-to-top-btn');
         const scrollThreshold = 150; // 滚动超过150px后显示按钮
 
-        if (window.pageYOffset > scrollThreshold) {
-            backToTopBtn.classList.add('show');
-        } else {
-            backToTopBtn.classList.remove('show');
+        if (backToTopBtn) {
+            if (window.pageYOffset > scrollThreshold) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
         }
     }, 10);
 });
@@ -1253,13 +1421,10 @@ const sidebarSubOptions = {
     resource: ['stock_inventory', 'dishware', 'price_comparison'],
     brand: ['kunzz_holdings', 'tokyo_cuisine', 'tokyo_izakaya']
 };
-const STOCK_SYSTEM_KEYS = ['central', 'j1', 'j2', 'j3'];
-const STOCK_VIEW_KEYS = ['list', 'records', 'remark', 'product', 'sot'];
-const reportTypeOptions = ['kpi', 'cost'];
-const restaurantOptions = ['j1', 'j2', 'j3'];
-
-// 全局标记，避免重复绑定
-let permissionTreeEventsBound = false;
+// const STOCK_SYSTEM_KEYS = ['central', 'j1', 'j2', 'j3'];
+// const STOCK_VIEW_KEYS = ['list', 'records', 'remark', 'product', 'sot'];
+// const reportTypeOptions = ['kpi', 'cost'];
+// const restaurantOptions = ['j1', 'j2', 'j3'];
 
 // 初始化权限树事件监听器
 function initPermissionTreeEvents(container) {
@@ -1360,12 +1525,12 @@ function initPermissionTreeEvents(container) {
             const hasLevel3 = item.classList.contains('has-level-3');
             const sub = item.getAttribute('data-sub');
 
-            // 如果是一级分类有三级配置（如视觉管理）
+            // 如果是一级分类有三级配置
             if (hasLevel3 && sub) {
-                // 先尝试寻找当前项内部的内联面板 (Add Staff 常用)
+                // 先尝试寻找当前项内部的内联面板
                 let panel = item.querySelector('.perm-level-3-panel-inline');
 
-                // 如果没找到内联面板，则去外部详细卡片找 (Edit Staff 常用)
+                // 如果没找到内联面板，则去外部详细卡片找
                 if (!panel) {
                     panel = container.querySelector(`.perm-detail-content .perm-level-3-panel[data-for="${sub}"]`);
                 }
@@ -1444,8 +1609,8 @@ function initPermissionTreeEvents(container) {
                 container.querySelectorAll('.perm-level-1-item.has-level-3.expanded').forEach(level1Item => {
                     level1Item.classList.remove('expanded');
                 });
-                container.querySelectorAll('.perm-level-3-panel').forEach(panel => {
-                    panel.classList.remove('show');
+                container.querySelectorAll('.perm-level-3-panel').forEach(p => {
+                    p.classList.remove('show');
                 });
                 if (detailContent) detailContent.classList.remove('active');
                 if (placeholder) placeholder.classList.remove('hidden');
@@ -1479,7 +1644,9 @@ function initPermissionTreeEvents(container) {
 
     // 二级复选框变化 - 检查父级状态并同步三级权限
     container.querySelectorAll('.perm-l2-check').forEach(checkbox => {
-        checkbox.dataset.fromChild = checkbox.dataset.fromChild || 'false';
+        if (!checkbox.dataset.fromChild) {
+            checkbox.dataset.fromChild = 'false';
+        }
 
         checkbox.addEventListener('change', function () {
             const level2Value = this.value;
@@ -1492,11 +1659,10 @@ function initPermissionTreeEvents(container) {
 
             // 检查父级状态
             const parentCheckbox = container.querySelector(`.perm-l1-check[value="${parent}"]`);
-            if (parentCheckbox && !parentCheckbox.checked) {
+            if (parentCheckbox && !parentCheckbox.checked && isChecked) {
                 parentCheckbox.dataset.fromChild = 'true';
                 parentCheckbox.checked = true;
                 parentCheckbox.dispatchEvent(new Event('change'));
-                this.checked = true;
             }
 
             // 同步三级权限（仅在不是从子级触发时，才向下联动）
@@ -1530,10 +1696,10 @@ function initPermissionTreeEvents(container) {
             const placeholder = container.querySelector('.perm-detail-placeholder');
             const isCurrentlyExpanded = item.classList.contains('expanded');
 
-            // 先尝试寻找当前项内部的内联面板 (Add Staff 常用)
+            // 先尝试寻找当前项内部的内联面板
             let panel = item.querySelector('.perm-level-3-panel-inline');
 
-            // 如果没找到内联面板，则去外部详细卡片找 (Edit Staff 常用)
+            // 如果没找到内联面板，则去外部详细卡片找
             if (!panel) {
                 panel = container.querySelector(`.perm-detail-content .perm-level-3-panel[data-for="${sub}"]`);
             }
@@ -1543,8 +1709,6 @@ function initPermissionTreeEvents(container) {
                 container.querySelectorAll('.perm-level-2-item.has-level-3.expanded').forEach(otherItem => {
                     if (otherItem !== item) {
                         otherItem.classList.remove('expanded');
-                        // 统一关闭三级面板
-                        const otherSub = otherItem.getAttribute('data-sub');
                         container.querySelectorAll('.perm-level-3-panel, .perm-level-3-panel-inline').forEach(p => {
                             p.classList.remove('show');
                         });
@@ -1635,10 +1799,6 @@ function initPermissionTreeEvents(container) {
             }
         });
     });
-
-    // 二级复选框变化 - 不自动勾选三级
-    // 移除自动勾选逻辑，用户需要手动勾选三级选项
-
 }
 
 // 设置默认全选所有权限
@@ -1658,18 +1818,11 @@ function setDefaultAllPermissions(container) {
     // 全选所有二级权限
     container.querySelectorAll('.perm-l2-check').forEach(cb => {
         cb.checked = true;
-        cb.disabled = false;
     });
 
-    // 全选所有三级权限（库存、数据上传、集团架构页面权限）
+    // 全选所有三级权限
     container.querySelectorAll('.perm-stock-system, .perm-stock-view, .perm-upload-system, .perm-upload-type, .perm-page-schedule, .perm-page-blueprint').forEach(cb => {
         cb.checked = true;
-        cb.disabled = false;
-    });
-
-    // 确保所有checkbox都是active的（不设置disabled）
-    container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        cb.disabled = false;
     });
 }
 
@@ -1677,18 +1830,15 @@ function setDefaultAllPermissions(container) {
 function updatePermissionValidationState(container) {
     if (!container) return;
 
-    // 找到当前容器下的 submit 按钮和 warning 信息
     const submitBtn = container.querySelector('button[type="submit"]');
     const warningDiv = container.querySelector('.perm-warning');
 
-    // 检查是否有任何选中的 checkbox（排除已禁用的）
     const checkedBoxes = Array.from(container.querySelectorAll('.perm-l1-check, .perm-l2-check, .perm-stock-system, .perm-stock-view, .perm-upload-system, .perm-upload-type, .perm-page-schedule, .perm-page-blueprint'))
         .filter(cb => cb.checked && !cb.disabled);
 
     const hasSelection = checkedBoxes.length > 0;
 
-    // 只有在 addUser 和 editUser 的模态框内需要严格校验
-    if (container.id === 'addUserModal' || container.id === 'editUserModal') {
+    if (container.id === 'addUserModal' || container.id === 'editUserModal' || container.id === 'permissionsModal') {
         if (warningDiv) {
             warningDiv.style.display = hasSelection ? 'none' : 'block';
         }
@@ -1705,33 +1855,24 @@ function updatePermissionValidationState(container) {
 function resetPermissionTree(container) {
     if (!container) return;
 
-    // 取消所有 checkbox 勾选
     container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
         cb.checked = false;
-        // 如果是 editUserModal 或 addUserModal，移除 data-fromChild 防止干扰
         cb.dataset.fromChild = 'false';
     });
 
-    // 折叠所有面板
-    container.querySelectorAll('.perm-level-1-item.expanded').forEach(item => item.classList.remove('expanded'));
-    container.querySelectorAll('.perm-level-2-container.expanded').forEach(item => item.classList.remove('expanded'));
-    container.querySelectorAll('.perm-level-2-item.has-level-3.expanded').forEach(item => item.classList.remove('expanded'));
-    container.querySelectorAll('.perm-level-3-panel.show, .perm-level-3-panel-inline.show').forEach(item => item.classList.remove('show'));
-    container.querySelectorAll('.perm-store-item.expanded').forEach(item => item.classList.remove('expanded'));
+    container.querySelectorAll('.expanded').forEach(item => item.classList.remove('expanded'));
+    container.querySelectorAll('.show').forEach(item => item.classList.remove('show'));
 
-    // 重置右侧卡片显示
     const detailContent = container.querySelector('.perm-detail-content');
     const placeholder = container.querySelector('.perm-detail-placeholder');
     if (detailContent) detailContent.classList.remove('active');
     if (placeholder) placeholder.classList.remove('hidden');
 
-    // 重置验证状态
     updatePermissionValidationState(container);
 }
 
 // 同步二级权限状态
 function syncLevel2Permissions(container, parentValue, parentChecked) {
-    // 获取该父级下的所有二级权限
     container.querySelectorAll(`.perm-l2-check[data-parent="${parentValue}"]`).forEach(cb => {
         if (parentChecked) {
             if (!cb.checked) {
@@ -1747,98 +1888,31 @@ function syncLevel2Permissions(container, parentValue, parentChecked) {
 
 // 同步三级权限状态
 function syncLevel3Permissions(container, level2Value, level2Checked) {
-    // 库存权限
     if (level2Value === 'stock_inventory') {
         container.querySelectorAll('.perm-stock-system, .perm-stock-view').forEach(cb => {
-            cb.checked = level2Checked ? true : false;
+            cb.checked = level2Checked;
         });
     }
-
-    // 数据上传权限
     if (level2Value === 'kpi_upload') {
         container.querySelectorAll('.perm-upload-system, .perm-upload-type').forEach(cb => {
-            cb.checked = level2Checked ? true : false;
+            cb.checked = level2Checked;
         });
     }
-
-    // 集团架构权限 - KUNZZ HOLDINGS
     if (level2Value === 'kunzz_holdings') {
         container.querySelectorAll('.perm-page-blueprint[data-brand="kunzz_holdings"]').forEach(cb => {
-            cb.checked = level2Checked ? true : false;
+            cb.checked = level2Checked;
         });
     }
-
-    // 集团架构权限 - TOKYO CUISINE
     if (level2Value === 'tokyo_cuisine') {
         container.querySelectorAll('.perm-page-schedule[data-store="j1"], .perm-page-schedule[data-store="j2"]').forEach(cb => {
-            cb.checked = level2Checked ? true : false;
+            cb.checked = level2Checked;
         });
     }
-
-    // 集团架构权限 - TOKYO IZAKAYA
     if (level2Value === 'tokyo_izakaya') {
         container.querySelectorAll('.perm-page-schedule[data-store="j3"]').forEach(cb => {
-            cb.checked = level2Checked ? true : false;
+            cb.checked = level2Checked;
         });
     }
-}
-
-// 隐藏所有右侧面板
-function closeDetailPanel() {
-    // Use proper selector across multiple modales or the focused one
-    document.querySelectorAll('.perm-level-3-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.perm-level-2-item').forEach(i => i.classList.remove('active'));
-
-    // Replace hardcoded ID search with class-based logic
-    document.querySelectorAll('.perm-detail-content').forEach(content => {
-        content.classList.remove('active');
-        const placeholder = content.previousElementSibling;
-        if (placeholder && placeholder.classList.contains('perm-detail-placeholder')) {
-            placeholder.classList.remove('hidden');
-        }
-    });
-}
-
-// 更新库存权限（三级）
-function updateStockInventoryPerms(checked) {
-    document.querySelectorAll('.perm-stock-system').forEach(cb => cb.checked = checked);
-    document.querySelectorAll('.perm-stock-view').forEach(cb => cb.checked = checked);
-}
-
-// 更新数据上传权限（三级）
-function updateKpiUploadPerms(checked) {
-    document.querySelectorAll('.perm-upload-type').forEach(cb => cb.checked = checked);
-}
-
-function hasCustomPermissions(data) {
-    if (!data) return false;
-    const { permissions, submenu_permissions, page_permissions, report_permissions, restaurant_permissions, brand_permissions, upload_permissions } = data;
-    if (Array.isArray(permissions) && permissions.length) return true;
-    if (Array.isArray(report_permissions) && report_permissions.length) return true;
-    if (Array.isArray(restaurant_permissions) && restaurant_permissions.length) return true;
-    if (Array.isArray(upload_permissions) && upload_permissions.length) return true;
-
-    if (submenu_permissions && typeof submenu_permissions === 'object') {
-        if (Object.values(submenu_permissions).some(arr => Array.isArray(arr) && arr.length)) {
-            return true;
-        }
-    }
-
-    if (page_permissions && typeof page_permissions === 'object') {
-        const stock = page_permissions.stock_inventory || {};
-        if ((Array.isArray(stock.system) && stock.system.length) ||
-            (Array.isArray(stock.view) && stock.view.length)) {
-            return true;
-        }
-    }
-
-    if (brand_permissions && typeof brand_permissions === 'object') {
-        if (Object.values(brand_permissions).some(arr => Array.isArray(arr) && arr.length)) {
-            return true;
-        }
-    }
-
-    return false;
 }
 
 function openPermissionsModal(userId) {
@@ -1848,208 +1922,104 @@ function openPermissionsModal(userId) {
     }
 
     const modal = document.getElementById('permissionsModal');
+    const userIdInput = document.getElementById('perm_current_user_id');
+    const titleEl = document.getElementById('perm_modal_title');
 
-    // 保存当前用户ID
-    document.getElementById('perm_current_user_id').value = userId;
+    if (userIdInput) userIdInput.value = userId;
 
-    // 查找用户信息并更新标题
     const user = originalTableData.find(u => u.id == userId);
-    if (user) {
-        document.getElementById('perm_modal_title').textContent = `用户权限设定 - ${user.username || '未命名用户'}`;
-    } else {
-        document.getElementById('perm_modal_title').textContent = '用户权限设定';
+    if (titleEl) {
+        titleEl.textContent = user ? `用户权限设定 - ${user.username || '未命名用户'}` : '用户权限设定';
     }
 
-    // 加载该用户的权限
     loadUserPermissions(userId);
-
-    // 重置并初始化权限树及验证系统
     initPermissionTreeEvents(modal);
 
-    modal.style.display = 'block';
+    if (modal) modal.style.display = 'block';
 }
 
 function closePermissionsModal() {
-    // 关闭所有展开的项
-    document.querySelectorAll('.perm-level-1-item.expanded').forEach(item => {
-        item.classList.remove('expanded');
-    });
-    document.querySelectorAll('.perm-level-2-container.expanded').forEach(container => {
-        container.classList.remove('expanded');
-    });
-    document.querySelectorAll('.perm-level-3-panel.show, .perm-level-3-panel-inline.show').forEach(panel => {
-        panel.classList.remove('show');
-    });
-    document.querySelectorAll('.perm-level-2-item.has-level-3.expanded').forEach(item => {
-        item.classList.remove('expanded');
-    });
-    document.querySelectorAll('.perm-level-1-item.has-level-3.expanded').forEach(item => {
-        item.classList.remove('expanded');
-    });
-    document.querySelectorAll('.perm-level-4-item.expanded').forEach(item => {
-        item.classList.remove('expanded');
-        const container = item.querySelector('.perm-level-4-container');
-        if (container) container.classList.remove('expanded');
-    });
+    const modal = document.getElementById('permissionsModal');
+    if (!modal) return;
+    
+    resetPermissionTree(modal);
 
-    // 重置右侧详细配置卡片
-    const detailContent = document.getElementById('perm-detail-content');
-    const placeholder = document.querySelector('.perm-detail-placeholder');
-    if (detailContent) detailContent.classList.remove('active');
-    if (placeholder) placeholder.classList.remove('hidden');
+    const titleEl = document.getElementById('perm_modal_title');
+    if (titleEl) titleEl.textContent = '用户权限设定';
+    const userIdInput = document.getElementById('perm_current_user_id');
+    if (userIdInput) userIdInput.value = '';
 
-    // 重置标题和用户ID
-    document.getElementById('perm_modal_title').textContent = '用户权限设定';
-    document.getElementById('perm_current_user_id').value = '';
-
-    document.getElementById('permissionsModal').style.display = 'none';
+    modal.style.display = 'none';
 }
 
-// 设置权限复选框状态 - 重构版
-function setPermCheckboxes(perms, pagePerms, submenuPerms, reportPerms, restaurantPerms, brandPerms, uploadPerms) {
-    const mainList = Array.isArray(perms) ? perms : [];
-    const values = new Set(mainList);
+function setPermCheckboxes(perms, pagePerms, submenuPerms, reportPerms, restaurantPerms, brandPerms) {
+    const values = new Set(Array.isArray(perms) ? perms : []);
 
-    // 设置一级分类
     document.querySelectorAll('.perm-l1-check').forEach(cb => {
         cb.checked = values.has(cb.value);
     });
 
-    // 设置二级分类
     const submenuData = (submenuPerms && typeof submenuPerms === 'object') ? submenuPerms : {};
     document.querySelectorAll('.perm-l2-check').forEach(cb => {
         const parent = cb.dataset.parent;
         const parentEnabled = values.has(parent);
-        const hasCustom = Object.prototype.hasOwnProperty.call(submenuData, parent);
-        const source = hasCustom ? submenuData[parent] : undefined;
+        const source = submenuData[parent];
         const allowed = Array.isArray(source) ? source : (sidebarSubOptions[parent] || []);
         cb.checked = parentEnabled && allowed.includes(cb.value);
     });
 
-    // 设置库存三级权限
     const stockPagePerms = (pagePerms && typeof pagePerms === 'object') ? (pagePerms.stock_inventory || {}) : {};
     const stockSystems = Array.isArray(stockPagePerms.system) ? stockPagePerms.system : [];
-    // 注意：后端现在统一使用 'views' (复数)
     const stockViews = Array.isArray(stockPagePerms.views) ? stockPagePerms.views : (Array.isArray(stockPagePerms.view) ? stockPagePerms.view : []);
     const systemSet = new Set(stockSystems);
     const viewSet = new Set(stockViews);
 
-    // 检查stock_inventory二级权限是否选中
-    const stockInventoryChecked = document.querySelector('.perm-l2-check[value="stock_inventory"]')?.checked || false;
+    document.querySelectorAll('.perm-stock-system').forEach(cb => cb.checked = systemSet.has(cb.value));
+    document.querySelectorAll('.perm-stock-view').forEach(cb => cb.checked = viewSet.has(cb.value));
 
-    document.querySelectorAll('.perm-stock-system').forEach(cb => {
-        cb.checked = systemSet.has(cb.value);
-    });
-    document.querySelectorAll('.perm-stock-view').forEach(cb => {
-        cb.checked = viewSet.has(cb.value);
-    });
-
-    // 设置数据上传三级权限
     const uploadPagePerms = (pagePerms && typeof pagePerms === 'object') ? (pagePerms.kpi_upload || {}) : {};
     const uploadSystems = Array.isArray(uploadPagePerms.system) ? uploadPagePerms.system : [];
     const uploadTypes = Array.isArray(uploadPagePerms.type) ? uploadPagePerms.type : [];
-    const uploadSystemSet = new Set(uploadSystems);
+    const uploadSysSet = new Set(uploadSystems);
     const uploadTypeSet = new Set(uploadTypes);
 
-    document.querySelectorAll('.perm-upload-system').forEach(cb => {
-        cb.checked = uploadSystemSet.has(cb.value);
-    });
-    document.querySelectorAll('.perm-upload-type').forEach(cb => {
-        cb.checked = uploadTypeSet.has(cb.value);
-    });
+    document.querySelectorAll('.perm-upload-system').forEach(cb => cb.checked = uploadSysSet.has(cb.value));
+    document.querySelectorAll('.perm-upload-type').forEach(cb => cb.checked = uploadTypeSet.has(cb.value));
 
-    // 设置集团架构三级和四级权限
     const brandData = (brandPerms && typeof brandPerms === 'object') ? brandPerms : {};
 
-    // 兼容旧格式（数组）和新格式（对象）
-    let cuisineStores = [];
-    let izakayaStores = [];
-    let cuisineStorePerms = {};
-    let izakayaStorePerms = {};
-
-    if (Array.isArray(brandData.tokyo_cuisine)) {
-        // 旧格式：数组
-        cuisineStores = brandData.tokyo_cuisine;
-    } else if (brandData.tokyo_cuisine && typeof brandData.tokyo_cuisine === 'object') {
-        // 新格式：对象，包含第四级权限
-        cuisineStorePerms = brandData.tokyo_cuisine;
-        cuisineStores = Object.keys(cuisineStorePerms);
-    }
-
-    if (Array.isArray(brandData.tokyo_izakaya)) {
-        // 旧格式：数组
-        izakayaStores = brandData.tokyo_izakaya;
-    } else if (brandData.tokyo_izakaya && typeof brandData.tokyo_izakaya === 'object') {
-        // 新格式：对象，包含第四级权限
-        izakayaStorePerms = brandData.tokyo_izakaya;
-        izakayaStores = Object.keys(izakayaStorePerms);
-    }
-
-    // 检查相关二级权限是否选中
-    const kunzzHoldingsChecked = document.querySelector('.perm-l2-check[value="kunzz_holdings"]')?.checked || false;
-    const tokyoCuisineChecked = document.querySelector('.perm-l2-check[value="tokyo_cuisine"]')?.checked || false;
-    const tokyoIzakayaChecked = document.querySelector('.perm-l2-check[value="tokyo_izakaya"]')?.checked || false;
-
-    // 设置KUNZZ HOLDINGS的页面权限（企业蓝图）
-    if (brandData.kunzz_holdings && typeof brandData.kunzz_holdings === 'object') {
-        // 如果是对象格式，检查是否有blueprint权限
-        const kunzzPerms = brandData.kunzz_holdings.blueprint;
-        if (Array.isArray(kunzzPerms) && kunzzPerms.includes('blueprint')) {
-            document.querySelectorAll('.perm-page-blueprint[data-brand="kunzz_holdings"]').forEach(cb => {
-                cb.checked = true;
-            });
-        }
-    }
-
-    // 设置三级页面权限（员工排班表）- 每个店面独立设置
-    // 设置J1的页面权限
-    if (cuisineStorePerms && typeof cuisineStorePerms === 'object') {
-        const j1Perms = Array.isArray(cuisineStorePerms['j1']) ? cuisineStorePerms['j1'] : [];
-        document.querySelectorAll('.perm-page-schedule[data-store="j1"]').forEach(cb => {
-            cb.checked = j1Perms.includes('schedule');
+    if (brandData.kunzz_holdings && brandData.kunzz_holdings.blueprint) {
+        document.querySelectorAll('.perm-page-blueprint[data-brand="kunzz_holdings"]').forEach(cb => {
+            cb.checked = brandData.kunzz_holdings.blueprint.includes('blueprint');
         });
     }
 
-    // 设置J2的页面权限
-    if (cuisineStorePerms && typeof cuisineStorePerms === 'object') {
-        const j2Perms = Array.isArray(cuisineStorePerms['j2']) ? cuisineStorePerms['j2'] : [];
-        document.querySelectorAll('.perm-page-schedule[data-store="j2"]').forEach(cb => {
-            cb.checked = j2Perms.includes('schedule');
-        });
-    }
-
-    // 设置J3的页面权限
-    if (izakayaStorePerms && typeof izakayaStorePerms === 'object') {
-        const j3Perms = Array.isArray(izakayaStorePerms['j3']) ? izakayaStorePerms['j3'] : [];
-        document.querySelectorAll('.perm-page-schedule[data-store="j3"]').forEach(cb => {
-            cb.checked = j3Perms.includes('schedule');
-        });
-    }
-
-    // 设置额外权限
-    const reportSetSource = Array.isArray(reportPerms) && reportPerms.length ? reportPerms : [];
-    const reportSet = new Set(reportSetSource);
-    document.querySelectorAll('.perm-report').forEach(cb => {
-        cb.checked = reportSet.has(cb.value);
+    const cuisinePerms = brandData.tokyo_cuisine || {};
+    document.querySelectorAll('.perm-page-schedule[data-store="j1"]').forEach(cb => {
+        cb.checked = (cuisinePerms.j1 && cuisinePerms.j1.includes('schedule'));
+    });
+    document.querySelectorAll('.perm-page-schedule[data-store="j2"]').forEach(cb => {
+        cb.checked = (cuisinePerms.j2 && cuisinePerms.j2.includes('schedule'));
     });
 
-    const restaurantSetSource = Array.isArray(restaurantPerms) && restaurantPerms.length ? restaurantPerms : [];
-    const restaurantSet = new Set(restaurantSetSource);
-    document.querySelectorAll('.perm-restaurant').forEach(cb => {
-        cb.checked = restaurantSet.has(cb.value);
+    const izakayaPerms = brandData.tokyo_izakaya || {};
+    document.querySelectorAll('.perm-page-schedule[data-store="j3"]').forEach(cb => {
+        cb.checked = (izakayaPerms.j3 && izakayaPerms.j3.includes('schedule'));
     });
 
-    // 确保所有checkbox都是active的（不设置disabled）
-    // 因为用户要求所有checkbox都应该是active的，不管父级是否选中
-    document.querySelectorAll('#permissionsModal input[type="checkbox"]').forEach(cb => {
-        cb.disabled = false;
-    });
+    const rSet = new Set(Array.isArray(reportPerms) ? reportPerms : []);
+    document.querySelectorAll('.perm-report').forEach(cb => cb.checked = rSet.has(cb.value));
+
+    const resSet = new Set(Array.isArray(restaurantPerms) ? restaurantPerms : []);
+    document.querySelectorAll('.perm-restaurant').forEach(cb => cb.checked = resSet.has(cb.value));
+
+    document.querySelectorAll('#permissionsModal input[type="checkbox"]').forEach(cb => cb.disabled = false);
 }
 
 async function loadUserPermissions(userId) {
     try {
-        // 先设置默认全选（所有checkbox都是active且全选）
-        setDefaultAllPermissions();
+        const modal = document.getElementById('permissionsModal');
+        setDefaultAllPermissions(modal);
 
         const res = await fetch('generatecodeapi.php', {
             method: 'POST',
@@ -2058,60 +2028,33 @@ async function loadUserPermissions(userId) {
         });
         const data = await res.json();
         if (data.success) {
-            const permsPayload = {
-                permissions: data.permissions || [],
-                submenu_permissions: data.submenu_permissions || {},
-                page_permissions: data.page_permissions || {},
-                report_permissions: data.report_permissions || [],
-                restaurant_permissions: data.restaurant_permissions || [],
-                brand_permissions: data.brand_permissions || {}
-            };
-
-            // 检查是否有权限数据（即使brand_permissions的值为空数组，只要键存在就表示有权限数据）
-            const hasAnyPermissions =
-                permsPayload.permissions.length > 0 ||
-                Object.keys(permsPayload.submenu_permissions).length > 0 ||
-                Object.keys(permsPayload.page_permissions).length > 0 ||
-                Object.keys(permsPayload.brand_permissions).length > 0 ||
-                (permsPayload.report_permissions && permsPayload.report_permissions.length > 0) ||
-                (permsPayload.restaurant_permissions && permsPayload.restaurant_permissions.length > 0);
-
-            if (hasAnyPermissions) {
-                // 有权限数据，根据实际数据更新（覆盖默认全选）
-                // 但确保所有checkbox都是active的
-                setPermCheckboxes(
-                    permsPayload.permissions,
-                    permsPayload.page_permissions,
-                    permsPayload.submenu_permissions,
-                    permsPayload.report_permissions,
-                    permsPayload.restaurant_permissions,
-                    permsPayload.brand_permissions,
-                    null
-                );
-                // 确保所有checkbox都是active的（不设置disabled）
-                document.querySelectorAll('#permissionsModal input[type="checkbox"]').forEach(cb => {
-                    cb.disabled = false;
-                });
-            }
-            // 如果没有权限数据，保持默认全选状态
+            setPermCheckboxes(
+                data.permissions || [],
+                data.page_permissions || {},
+                data.submenu_permissions || {},
+                data.report_permissions || [],
+                data.restaurant_permissions || [],
+                data.brand_permissions || {}
+            );
         }
-        // 如果加载失败，保持默认全选状态
     } catch (e) {
-        // 出错时，保持默认全选状态
         console.error('加载权限失败:', e);
     }
 }
 
 async function savePermissions() {
-    const userId = document.getElementById('perm_current_user_id').value;
+    const userIdInput = document.getElementById('perm_current_user_id');
+    const userId = userIdInput ? userIdInput.value : '';
     const modal = document.getElementById('permissionsModal');
 
     const { perms, submenuPermissions, pagePermissions, brandPermissions, reportPermissions, restaurantPermissions } = extractPermissionsData(modal);
 
-    const btn = document.querySelector('#permissionsModal .btn-save');
-    const old = btn.innerHTML;
-    btn.innerHTML = '<div class="loading"></div>保存中...';
-    btn.disabled = true;
+    const btn = modal.querySelector('.btn-save');
+    const old = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.innerHTML = '<div class="loading"></div>保存中...';
+        btn.disabled = true;
+    }
 
     try {
         const res = await fetch('generatecodeapi.php', {
@@ -2138,102 +2081,74 @@ async function savePermissions() {
     } catch (e) {
         showMessage('网络错误，稍后重试', 'error');
     } finally {
-        btn.innerHTML = old;
-        btn.disabled = false;
+        if (btn) {
+            btn.innerHTML = old;
+            btn.disabled = false;
+        }
     }
 }
 
-// 提取权限数据
 function extractPermissionsData(container) {
     if (!container) return {};
 
-    // 获取一级权限
     const perms = Array.from(container.querySelectorAll('.perm-l1-check:checked')).map(cb => cb.value);
 
-    // 获取二级权限（按父级分组）
     const submenuPermissions = {};
     Object.keys(sidebarSubOptions).forEach(parent => {
         const mainCheckbox = container.querySelector(`.perm-l1-check[value="${parent}"]`);
         const selectedSubs = Array.from(container.querySelectorAll(`.perm-l2-check[data-parent="${parent}"]:checked`)).map(cb => cb.value);
-        if (mainCheckbox && mainCheckbox.checked) {
-            submenuPermissions[parent] = selectedSubs;
-        } else {
-            submenuPermissions[parent] = [];
-        }
+        submenuPermissions[parent] = (mainCheckbox && mainCheckbox.checked) ? selectedSubs : [];
     });
-
-    // 获取库存三级权限
-    const selectedStockSystems = Array.from(container.querySelectorAll('.perm-stock-system:checked')).map(cb => cb.value);
-    const selectedStockViews = Array.from(container.querySelectorAll('.perm-stock-view:checked')).map(cb => cb.value);
-
-    // 获取数据上传三级权限
-    const selectedUploadSystems = Array.from(container.querySelectorAll('.perm-upload-system:checked')).map(cb => cb.value);
-    const selectedUploadTypes = Array.from(container.querySelectorAll('.perm-upload-type:checked')).map(cb => cb.value);
 
     const pagePermissions = {
         stock_inventory: {
-            system: selectedStockSystems,
-            views: selectedStockViews
+            system: Array.from(container.querySelectorAll('.perm-stock-system:checked')).map(cb => cb.value),
+            views: Array.from(container.querySelectorAll('.perm-stock-view:checked')).map(cb => cb.value)
         },
         kpi_upload: {
-            system: selectedUploadSystems,
-            type: selectedUploadTypes
+            system: Array.from(container.querySelectorAll('.perm-upload-system:checked')).map(cb => cb.value),
+            type: Array.from(container.querySelectorAll('.perm-upload-type:checked')).map(cb => cb.value)
         }
     };
 
-    // 获取集团架构三级页面权限，每个店面独立保存
-    // 获取KUNZZ HOLDINGS的页面权限（企业蓝图）
-    const kunzzHoldingsPermissions = {};
-    const blueprintChecked = container.querySelector('.perm-page-blueprint[data-brand="kunzz_holdings"]')?.checked || false;
-    if (blueprintChecked) {
-        kunzzHoldingsPermissions['blueprint'] = ['blueprint'];
-    }
-
-    const cuisineStorePermissions = {};
-    // 获取J1的页面权限
-    const j1ScheduleChecked = container.querySelector('.perm-page-schedule[data-store="j1"]')?.checked || false;
-    if (j1ScheduleChecked) {
-        cuisineStorePermissions['j1'] = ['schedule'];
-    }
-    // 获取J2的页面权限
-    const j2ScheduleChecked = container.querySelector('.perm-page-schedule[data-store="j2"]')?.checked || false;
-    if (j2ScheduleChecked) {
-        cuisineStorePermissions['j2'] = ['schedule'];
-    }
-
-    const izakayaStorePermissions = {};
-    // 获取J3的页面权限
-    const j3ScheduleChecked = container.querySelector('.perm-page-schedule[data-store="j3"]')?.checked || false;
-    if (j3ScheduleChecked) {
-        izakayaStorePermissions['j3'] = ['schedule'];
-    }
-
     const brandPermissions = {
-        kunzz_holdings: kunzzHoldingsPermissions,
-        tokyo_cuisine: cuisineStorePermissions,
-        tokyo_izakaya: izakayaStorePermissions
+        kunzz_holdings: container.querySelector('.perm-page-blueprint[data-brand="kunzz_holdings"]')?.checked ? { blueprint: ['blueprint'] } : {},
+        tokyo_cuisine: {
+            j1: container.querySelector('.perm-page-schedule[data-store="j1"]')?.checked ? ['schedule'] : [],
+            j2: container.querySelector('.perm-page-schedule[data-store="j2"]')?.checked ? ['schedule'] : []
+        },
+        tokyo_izakaya: {
+            j3: container.querySelector('.perm-page-schedule[data-store="j3"]')?.checked ? ['schedule'] : []
+        }
     };
 
-    // 获取额外权限
-    const reportPermissions = Array.from(container.querySelectorAll('.perm-report:checked')).map(cb => cb.value);
-    const restaurantPermissions = Array.from(container.querySelectorAll('.perm-restaurant:checked')).map(cb => cb.value);
-
-    return { perms, submenuPermissions, pagePermissions, brandPermissions, reportPermissions, restaurantPermissions };
+    return { 
+        perms, 
+        submenuPermissions, 
+        pagePermissions, 
+        brandPermissions, 
+        reportPermissions: Array.from(container.querySelectorAll('.perm-report:checked')).map(cb => cb.value),
+        restaurantPermissions: Array.from(container.querySelectorAll('.perm-restaurant:checked')).map(cb => cb.value)
+    };
 }
 
-// 下载申请表相关函数
 function openDownloadModal() {
     const modal = document.getElementById('downloadModal');
-    document.getElementById('company_select').value = ''; // 重置选择
-    modal.style.display = 'block';
+    if (modal) {
+        const companySelect = document.getElementById('company_select');
+        if (companySelect) companySelect.value = ''; 
+        modal.style.display = 'block';
+    }
 }
 
 function closeDownloadModal() {
-    document.getElementById('downloadModal').style.display = 'none';
+    const modal = document.getElementById('downloadModal');
+    if (modal) modal.style.display = 'none';
 }
 
 function confirmDownload() {
     const select = document.getElementById('company_select');
+    if (!select) return;
     const company = select.value;
 
     if (!company) {
@@ -2241,7 +2156,6 @@ function confirmDownload() {
         return;
     }
 
-    // PDF文件路径映射
     const pdfFiles = {
         'KUNZZHOLDINGS': '../form/kh.pdf',
         'TOKYO_J1': '../form/j1.pdf',
@@ -2252,10 +2166,9 @@ function confirmDownload() {
     const pdfPath = pdfFiles[company];
 
     if (pdfPath) {
-        // 创建一个隐藏的a标签来触发下载
         const link = document.createElement('a');
         link.href = pdfPath;
-        link.download = pdfPath.split('/').pop(); // 使用文件名作为下载名
+        link.download = pdfPath.split('/').pop(); 
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -2267,9 +2180,11 @@ function confirmDownload() {
     }
 }
 
-// 点击模态框外部关闭（下载申请表）
-document.getElementById('downloadModal').onclick = function (event) {
-    if (event.target === this) {
-        closeDownloadModal();
-    }
-};
+const downloadModalEl = document.getElementById('downloadModal');
+if (downloadModalEl) {
+    downloadModalEl.onclick = function (event) {
+        if (event.target === this) {
+            closeDownloadModal();
+        }
+    };
+}

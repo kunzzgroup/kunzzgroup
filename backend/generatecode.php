@@ -30,42 +30,63 @@ require_once 'session_check.php';
 
         <!-- 生成代码表单 -->
         <div class="generate-form">
-            
             <div id="messageArea"></div>
-
             <form id="generateForm">
-                <form id="generateForm">
-                    <div class="form-row" style="justify-content: space-between; align-items: end;">
-                        <!-- 添加新职员 + 下载申请表 按钮组 -->
-                        <div class="form-group" style="flex: 0 0 auto; display: flex; align-items: center; gap: 12px;">
-                            <a href="add_employee" class="btn-generate" style="text-decoration: none;">
-                                <i class="fas fa-user-plus"></i> 添加新职员
-                            </a>
-                            <button type="button" class="btn-generate" onclick="openDownloadModal()">
-                                <i class="fas fa-download"></i> 下载面试表
+                <div class="form-row" style="justify-content: space-between; align-items: end;">
+                    <!-- 添加新职员 + 下载申请表 按钮组 -->
+                    <div class="form-group" style="flex: 0 0 auto; display: flex; align-items: center; gap: 12px;">
+                        <button type="button" class="btn-generate" onclick="openAddUserModal()">
+                            <i class="fas fa-user-plus"></i> 添加新职员
+                        </button>
+                        <button type="button" class="btn-generate" onclick="openDownloadModal()">
+                            <i class="fas fa-download"></i> 下载面试表
+                        </button>
+                    </div>
+                    
+                    <div class="form-group" style="flex: 0 0 auto; position: relative; display: flex; align-items: center; gap: 10px;">
+                        <div style="position: relative;">
+                            <input type="text" id="searchInput" placeholder="输入英文姓名或邮箱进行搜索..."
+                                style="padding: 10px 40px 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: clamp(8px, 0.74vw, 14px);">
+                            <button type="button" onclick="clearSearch()" 
+                                    style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #999; cursor: pointer; font-size: 16px;"
+                                    title="清除搜索">
+                                ×
                             </button>
                         </div>
-                        
-                        <div class="form-group" style="flex: 0 0 auto; position: relative; display: flex; align-items: center; gap: 10px;">
-                            <div style="position: relative;">
-                                <input type="text" id="searchInput" placeholder="输入英文姓名或邮箱进行搜索..."
-                                    style="padding: 10px 40px 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: clamp(8px, 0.74vw, 14px);">
-                                <button type="button" onclick="clearSearch()" 
-                                        style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #999; cursor: pointer; font-size: 16px;"
-                                        title="清除搜索">
-                                    ×
-                                </button>
-                            </div>
-                        </div>
                     </div>
-                </form>
+                </div>
             </form>
         </div>
 
         <!-- 代码和职员列表 -->
         <div class="table-container">
-            <div class="table-title">
-                职员列表
+            <div class="table-title" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <span>职员列表</span>
+                <!-- 分类筛选器 -->
+                <div class="branch-filter-wrap" style="display: flex; align-items: center; gap: 8px;">
+                    <!-- 第一层：全部 / KunzzGroup / 分店 -->
+                    <div style="position: relative;">
+                        <button id="branchL1Btn" onclick="toggleBranchL1()" style="display:flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;font-size:clamp(8px,0.74vw,13px);cursor:pointer;color:#374151;white-space:nowrap;">
+                            <span id="branchL1Label">全部</span>
+                            <i class="fas fa-chevron-down" style="font-size:10px;color:#9ca3af;"></i>
+                        </button>
+                        <div id="branchL1Dropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.1);z-index:999;min-width:130px;overflow:hidden;">
+                            <div class="bl1-item" data-value="all" onclick="selectBranchL1('all','全部')" style="padding:8px 14px;font-size:13px;cursor:pointer;color:#374151;transition:background 0.1s;">全部</div>
+                            <div class="bl1-item" data-value="kunzz" onclick="selectBranchL1('kunzz','KunzzGroup')" style="padding:8px 14px;font-size:13px;cursor:pointer;color:#374151;transition:background 0.1s;">KunzzGroup</div>
+                            <div class="bl1-item" data-value="branch" onclick="selectBranchL1('branch','分店')" style="padding:8px 14px;font-size:13px;cursor:pointer;color:#374151;transition:background 0.1s;">分店</div>
+                        </div>
+                    </div>
+                    <!-- 第二层：根据第一层显示 -->
+                    <div style="position: relative;">
+                        <button id="branchL2Btn" onclick="toggleBranchL2()" style="display:flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;font-size:clamp(8px,0.74vw,13px);cursor:pointer;color:#374151;white-space:nowrap;">
+                            <span id="branchL2Label">-</span>
+                            <i class="fas fa-chevron-down" style="font-size:10px;color:#9ca3af;"></i>
+                        </button>
+                        <div id="branchL2Dropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.1);z-index:999;min-width:130px;overflow:hidden;">
+                            <!-- 动态填充 -->
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="table-wrapper">
@@ -93,7 +114,206 @@ require_once 'session_check.php';
         </div>
     </div>
 
-    <!-- 用户权限模态框 -->
+    <!-- 添加职员模态框 -->
+    <div id="addUserModal" class="modal">
+        <div class="modal-content" style="max-width: 1200px !important; width: 85vw !important;">
+            <div class="modal-header" style="color: #10b981;">
+                <i class="fas fa-user-plus"></i> 添加新职员
+                <button type="button" class="btn-close-modal" onclick="closeAddUserModal()" style="float: right; background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm">
+                    <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+                        <!-- 左侧：基本信息录入 -->
+                        <div style="flex: 1; min-width: 400px;">
+                            <div class="form-section">
+                                <div class="form-section-header">基本信息</div>
+                                <div class="form-section-content">
+                                    <div class="form-row-2col">
+                                        <div class="form-group">
+                                            <label for="add_username">英文姓名 *</label>
+                                            <input type="text" id="add_username" name="username" required maxlength="50" placeholder="如: Tan Ah Kow">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="add_username_cn">中文姓名</label>
+                                            <input type="text" id="add_username_cn" name="username_cn" maxlength="100" placeholder="如: 陈亚狗">
+                                        </div>
+                                    </div>
+                                    <div class="form-row-2col">
+                                        <div class="form-group">
+                                            <label for="add_email">邮箱 *</label>
+                                            <input type="email" id="add_email" name="email" required maxlength="100" placeholder="example@mail.com">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="add_phone_number">联络号码</label>
+                                            <input type="tel" id="add_phone_number" name="phone_number" maxlength="20">
+                                        </div>
+                                    </div>
+                                    <div class="form-row-2col">
+                                        <div class="form-group">
+                                            <label for="add_ic_number">身份证号码</label>
+                                            <input type="text" id="add_ic_number" name="ic_number" maxlength="20">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="add_branch">所属分店</label>
+                                            <select id="add_branch" name="branch">
+                                                <option value="">总部 / 未指定</option>
+                                                <option value="j1">J1 (Midvalley Southkey)</option>
+                                                <option value="j2">J2 (Paradigm Mall)</option>
+                                                <option value="j3">J3 (Desa Tebrau)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-row-2col">
+                                        <div class="form-group">
+                                            <label for="add_account_type">账号类型 *</label>
+                                            <select id="add_account_type" name="account_type" required>
+                                                <option value="">请选择账号类型</option>
+                                                <option value="special">特殊 (Special)</option>
+                                                <option value="hr">人事部 (HR)</option>
+                                                <option value="account">会计部 (Accountant)</option>
+                                                <option value="media">媒体制作部 (Media Production)</option>
+                                                <option value="marketing">推广部 (Marketing)</option>
+                                                <option value="support">支援部 (Support)</option>
+                                                <option value="production">生产部 (Production)</option>
+                                                <option value="r&d">研发部 (R&D)</option>
+                                                <option value="technical">科技部 (Technical)</option>
+                                                <option value="design">设计部 (Design)</option>
+                                                <option value="operation">Operation</option>
+                                                <option value="service">前台 (Service)</option>
+                                                <option value="sushi">Sushi Bar</option>
+                                                <option value="kitchen">厨房 (Kitchen)</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="add_position">职位</label>
+                                            <select id="add_position" name="position" disabled>
+                                                <option value="">请先选择账号类型</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 更多信息（折叠或简化） -->
+                            <div class="form-section" style="margin-top: 20px;">
+                                <div class="form-section-header">更多资料 (可选)</div>
+                                <div class="form-section-content">
+                                    <div class="form-row-2col">
+                                        <div class="form-group">
+                                            <label for="add_gender">性别</label>
+                                            <select id="add_gender" name="gender">
+                                                <option value="">请选择</option>
+                                                <option value="male">男</option>
+                                                <option value="female">女</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="add_bank_account">银行账号</label>
+                                            <input type="text" id="add_bank_account" name="bank_account">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 右侧：权限配置 (复用结构) -->
+                        <div style="flex: 1.5; min-width: 500px; border-left: 1px solid #eee; padding-left: 30px;">
+                            <div class="form-section-header" style="margin-bottom: 15px;">初始权限配置</div>
+                            <div class="perm-warning" style="display:none; color: #ef4444; background: #fee2e2; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 13px;">
+                                <i class="fas fa-exclamation-triangle"></i> 请至少选择一项用户权限
+                            </div>
+                            <!-- 权限树容器 -->
+                            <div class="perm-layout-container" style="height: 500px;">
+                                <div class="perm-tree-container" style="overflow-y: auto;">
+                                    <!-- 这里放置与 permissionsModal 相同的权限树结构 -->
+                                    <!-- 一级：集团架构 -->
+                                    <div class="perm-level-1">
+                                        <div class="perm-level-1-item" data-perm="brand">
+                                            <label class="perm-checkbox-label">
+                                                <input type="checkbox" class="perm-l1-check" value="brand">
+                                                <span class="perm-arrow">▶</span>
+                                                <strong>集团架构</strong>
+                                            </label>
+                                        </div>
+                                        <div class="perm-level-2-container" data-parent="brand">
+                                            <div class="perm-level-2-item has-level-3" data-sub="kunzz_holdings">
+                                                <label class="perm-checkbox-label"><input type="checkbox" class="perm-l2-check" data-parent="brand" value="kunzz_holdings"><span class="perm-arrow-sub">▶</span><span>KUNZZ HOLDINGS</span></label>
+                                            </div>
+                                            <div class="perm-level-2-item has-level-3" data-sub="tokyo_cuisine">
+                                                <label class="perm-checkbox-label"><input type="checkbox" class="perm-l2-check" data-parent="brand" value="tokyo_cuisine"><span class="perm-arrow-sub">▶</span><span>TOKYO CUISINE</span></label>
+                                            </div>
+                                            <div class="perm-level-2-item has-level-3" data-sub="tokyo_izakaya">
+                                                <label class="perm-checkbox-label"><input type="checkbox" class="perm-l2-check" data-parent="brand" value="tokyo_izakaya"><span class="perm-arrow-sub">▶</span><span>TOKYO IZAKAYA</span></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- 营收数据 -->
+                                    <div class="perm-level-1">
+                                        <div class="perm-level-1-item" data-perm="analytics">
+                                            <label class="perm-checkbox-label">
+                                                <input type="checkbox" class="perm-l1-check" value="analytics">
+                                                <span class="perm-arrow">▶</span>
+                                                <strong>营收数据</strong>
+                                            </label>
+                                        </div>
+                                        <div class="perm-level-2-container" data-parent="analytics">
+                                            <div class="perm-level-2-item"><label class="perm-checkbox-label"><input type="checkbox" class="perm-l2-check" data-parent="analytics" value="kpi_report"><span>KPI报表</span></label></div>
+                                            <div class="perm-level-2-item has-level-3" data-sub="kpi_upload"><label class="perm-checkbox-label"><input type="checkbox" class="perm-l2-check" data-parent="analytics" value="kpi_upload"><span class="perm-arrow-sub">▶</span><span>数据上传</span></label></div>
+                                        </div>
+                                    </div>
+                                    <!-- 人事管理 -->
+                                    <div class="perm-level-1">
+                                        <div class="perm-level-1-item" data-perm="hr">
+                                            <label class="perm-checkbox-label">
+                                                <input type="checkbox" class="perm-l1-check" value="hr">
+                                                <span class="perm-arrow">▶</span>
+                                                <strong>人事管理</strong>
+                                            </label>
+                                        </div>
+                                        <div class="perm-level-2-container" data-parent="hr">
+                                            <div class="perm-level-2-item"><label class="perm-checkbox-label"><input type="checkbox" class="perm-l2-check" data-parent="hr" value="staff_management"><span>职员管理</span></label></div>
+                                        </div>
+                                    </div>
+                                    <!-- 资源总库 -->
+                                    <div class="perm-level-1">
+                                        <div class="perm-level-1-item" data-perm="resource">
+                                            <label class="perm-checkbox-label">
+                                                <input type="checkbox" class="perm-l1-check" value="resource">
+                                                <span class="perm-arrow">▶</span>
+                                                <strong>资源总库</strong>
+                                            </label>
+                                        </div>
+                                        <div class="perm-level-2-container" data-parent="resource">
+                                            <div class="perm-level-2-item has-level-3" data-sub="stock_inventory"><label class="perm-checkbox-label"><input type="checkbox" class="perm-l2-check" data-parent="resource" value="stock_inventory"><span class="perm-arrow-sub">▶</span><span>库存</span></label></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- 三级面板 (简略版，通过JS动态处理) -->
+                                <div class="perm-detail-card" style="flex: 0 0 300px;">
+                                     <div class="perm-detail-content active" style="display: block;">
+                                          <!-- 这里可以通过JS或PHP填充详细配置 -->
+                                          <!-- 为简洁起见，初始全选逻辑将通过JS setDefaultAllPermissions 处理 -->
+                                          <p style="font-size: 12px; color: #666; padding: 10px;">三级详细配置已默认全选。如需微调，请在添加后通过“设定权限”修改。</p>
+                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-buttons" style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+                        <button type="button" class="btn-action btn-save" onclick="addNewUser()" style="background: #10b981;">
+                            <i class="fas fa-check"></i> 确认添加
+                        </button>
+                        <button type="button" class="btn-action btn-cancel" onclick="closeAddUserModal()">
+                            <i class="fas fa-times"></i> 取消
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div id="permissionsModal" class="modal">
         <div class="modal-content" style="max-width: 1200px !important; width: 85vw !important;">
             <div class="modal-header" style="color: #ff5c00; font-size: 24px; margin-bottom: 20px; font-weight: 600;">
@@ -621,6 +841,17 @@ require_once 'session_check.php';
                     <div class="form-section">
                         <div class="form-section-header">账号设置</div>
                         <div class="form-section-content">
+                            <div class="form-row-2col">
+                                <div class="form-group">
+                                    <label for="edit_branch">所属分店</label>
+                                    <select id="edit_branch" name="branch">
+                                        <option value="">总部 / 未指定</option>
+                                        <option value="j1">J1 (Midvalley Southkey)</option>
+                                        <option value="j2">J2 (Paradigm Mall)</option>
+                                        <option value="j3">J3 (Desa Tebrau)</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div class="form-row-2col">
                                 <div class="form-group">
                                     <label for="edit_account_type">账号类型 *</label>
