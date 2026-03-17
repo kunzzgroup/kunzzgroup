@@ -36,11 +36,10 @@ body {
 .header h1::after {
     content: "";
     display: block;
-    height: 2px;
+    height: 3px;
     width: 100%;
-    margin-top: 12px;
-    background: linear-gradient(90deg, #f99e00 0%, #000 50%, #f99e00 100%);
-    opacity: 0.8;
+    margin-top: 16px;
+    background: linear-gradient(90deg, rgba(255, 92, 0, 0) 0%, rgba(0, 0, 0, 1) 25%, rgba(0, 0, 0, 1) 75%, rgba(255, 92, 0, 0) 100%);
 }
 
 .header p {
@@ -293,22 +292,19 @@ body {
 
 /* 搜索框特殊样式 */
 #searchInput {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    width: clamp(200px, 16vw, 320px);
-    border: 1.5px solid #e5e7eb !important;
-    background: #fdfdfd;
+    transition: all 0.3s ease;
+    width: clamp(160px, 13vw, 260px);
 }
 
 #searchInput:focus {
     outline: none;
-    border-color: #f99e00 !important;
-    box-shadow: 0 0 0 3px rgba(249, 158, 0, 0.1) !important;
-    background: #ffffff;
+    border-color: #000000ff !important;
+    box-shadow: 0 0 10px rgba(31, 14, 0, 0.8) !important;
 }
 
 #searchInput::placeholder {
-    color: #9ca3af;
-    font-size: 0.9em;
+    color: #999;
+    font-style: italic;
 }
 
 /* 高亮搜索结果 */
@@ -407,17 +403,15 @@ thead {
 }
 
 th {
-    background: #f8fafc;
-    color: #475569;
-    padding: clamp(10px, 1vw, 18px) 8px;
+    background: #636363;
+    color: white;
+    padding: clamp(8px, 0.8vw, 15px) 0px;
     text-align: center;
-    font-weight: 700;
-    font-size: clamp(9px, 0.8vw, 14px);
-    border-bottom: 2px solid #e2e8f0;
+    font-weight: bold;
+    font-size: clamp(8px, 0.74vw, 14px);
+    border: 1px solid #d1d5db;
     position: sticky;
     top: 0;
-    text-transform: uppercase;
-    letter-spacing: 0.025em;
 }
 
 th:first-child {
@@ -434,37 +428,37 @@ td:nth-child(1) {
     width: 60px;
 }
 
+/* 序号 */
 th:nth-child(2),
 td:nth-child(2) {
-    width: 140px;
+    width: 120px;
 }
 
+/* 职位 */
 th:nth-child(3),
 td:nth-child(3) {
     width: 220px;
 }
 
+/* 英文姓名 */
 th:nth-child(4),
 td:nth-child(4) {
-    width: auto;
-    min-width: 180px;
-    text-align: left;
+    width: 410px;
 }
 
+/* 邮箱 */
 th:nth-child(5),
 td:nth-child(5) {
-    width: 140px;
+    width: 120px;
 }
 
+/* 联络号码 */
 th:nth-child(6),
 td:nth-child(6) {
-    width: 130px;
+    width: 120px;
 }
 
-th:nth-child(7),
-td:nth-child(7) {
-    width: 150px;
-}
+/* 操作 */
 
 /* 当地址列显示"-"时居中对齐 */
 td:nth-child(13) em {
@@ -474,13 +468,12 @@ td:nth-child(13) em {
 }
 
 td {
-    padding: clamp(12px, 0.8vw, 16px) 12px;
-    font-size: clamp(9px, 0.78vw, 14px);
+    padding: clamp(0px, 0.31vw, 6px) 6px;
+    font-size: clamp(8px, 0.74vw, 14px);
     font-weight: 500;
-    border-bottom: 1px solid #f1f5f9;
+    border: 1px solid #d1d5db;
     vertical-align: middle;
     text-align: center;
-    color: #334155;
 }
 
 /* 地址列编辑状态下的样式 */
@@ -498,12 +491,8 @@ td:nth-child(13) .edit-input {
 
 /* 表格行悬停效果 - 保持边框 */
 tr:hover {
-    background: #f8fafc;
-    transition: background 0.2s ease;
-}
-
-tr:last-child td {
-    border-bottom: none;
+    background: #fff9f1;
+    transition: all 0.2s ease;
 }
 
 /* 状态标签样式 */
@@ -603,10 +592,11 @@ tr:last-child td {
 /* 操作按钮样式 */
 .action-buttons {
     display: flex;
-    gap: 8px;
+    gap: 4px;
     justify-content: center;
     align-items: center;
-    padding: 4px;
+    flex-wrap: nowrap;
+    width: 100%;
 }
 
 .btn-action {
