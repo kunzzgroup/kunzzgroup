@@ -158,57 +158,63 @@ body { background: #f3f4f6; }
     flex-shrink: 0;
 }
 
-/* Permission layout - Independent Scroll & Balanced Design */
+/* Permission section */
 .editUserPermLayout .perm-layout-container {
+    height: 520px !important;
     display: flex !important;
     gap: 16px;
     align-items: stretch;
-    height: 520px; /* Fixed height to anchor the independent scrolls */
-    margin-top: 10px;
 }
 
-.editUserPermLayout .perm-tree-container,
-.editUserPermLayout .perm-detail-card {
+.editUserPermLayout .perm-tree-container {
     flex: 1;
-    height: 100% !important;
-    max-height: none !important;
-    overflow-y: auto !important; /* Ensure vertical scroll is always available when needed */
-    overflow-x: hidden;
-    position: relative; /* Anchor for absolute elements */
-    background: #ffffff;
-    border: 1.5px solid #eaeaea !important; /* Balanced border point */
-    border-radius: 12px;
-    padding: 18px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
-    box-sizing: border-box;
+    max-height: 100% !important;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 15px;
+    background: #fff;
 }
 
 .editUserPermLayout .perm-detail-card {
-    flex: 0 0 420px !important; /* Prevent right content from being squeezed */
-    min-width: 420px;
+    flex: 0 0 420px !important;
+    max-height: 100% !important;
+    position: relative;
+    overflow: hidden !important; /* Card itself doesn't scroll, content does */
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fff;
 }
 
-/* Ensure detail content doesn't capture scroll or hide scrollbar */
+/* Ensure detail content scrolls properly and doesn't conflict */
 .editUserPermLayout .perm-detail-content {
-    height: auto !important;
-    overflow: visible !important;
-    pointer-events: auto !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    transform: none !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+    padding: 15px;
+    box-sizing: border-box;
+    display: none;
 }
 
-/* Ensure placeholder is hidden properly when hidden class is added */
+.editUserPermLayout .perm-detail-content.active {
+    display: block !important;
+}
+
+/* Force hide placeholder when content is active */
 .editUserPermLayout .perm-detail-placeholder.hidden {
     display: none !important;
 }
 
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar { width: 6px; }
+.editUserPermLayout .perm-detail-card::-webkit-scrollbar,
+.editUserPermLayout .perm-detail-content::-webkit-scrollbar { width: 6px; }
+
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar-track,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar-track { background: #f8fafc; border-radius: 4px; }
+.editUserPermLayout .perm-detail-card::-webkit-scrollbar-track,
+.editUserPermLayout .perm-detail-content::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+.editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb,
+.editUserPermLayout .perm-detail-content::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb:hover,
 .editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
