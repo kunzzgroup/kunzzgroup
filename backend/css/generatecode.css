@@ -2014,6 +2014,7 @@ tr:hover {
     color: #111827 !important;
     font-weight: 500 !important;
     flex: 1 !important;
+    text-align: left !important;
 }
 
 .custom-multi-select .select-header i {

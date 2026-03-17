@@ -28,10 +28,10 @@ function refreshMultiSelectHeader(container) {
         selectedTextSpan.style.color = "#999";
     } else if (checked.length <= 2) {
         selectedTextSpan.textContent = checked.map(cb => cb.parentElement.textContent.trim().split(' ')[0]).join(', ');
-        selectedTextSpan.style.color = "black";
+        selectedTextSpan.style.color = "#111827";
     } else {
         selectedTextSpan.textContent = `已选择 ${checked.length} 个分店`;
-        selectedTextSpan.style.color = "black";
+        selectedTextSpan.style.color = "#111827";
     }
 }
 
