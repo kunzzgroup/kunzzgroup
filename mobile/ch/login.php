@@ -5,6 +5,27 @@ session_start();
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
+// === 自动登录检查 ===
+// 如果已经有 Session，或者有有效的“记住我” Cookie，直接跳转
+$is_logged_in = isset($_SESSION['user_id']);
+$is_remembered = (isset($_COOKIE['user_id']) && isset($_COOKIE['remember_token']) && $_COOKIE['remember_token'] === '1');
+
+if ($is_logged_in || $is_remembered) {
+    // 恢复 Session 如果是通过 Cookie 记录的
+    if (!$is_logged_in && $is_remembered) {
+        $_SESSION['user_id'] = $_COOKIE['user_id'];
+        $_SESSION['username'] = $_COOKIE['username'] ?? '';
+        $_SESSION['position'] = $_COOKIE['position'] ?? '';
+        $_SESSION['account_type'] = $_COOKIE['account_type'] ?? '';
+        $_SESSION['last_activity'] = time();
+    }
+    
+    $redirect = $_GET['redirect'] ?? 'stocklistj1.php';
+    header("Location: " . $redirect);
+    exit();
+}
+// ===================
+
 // 数据库连接信息
 $host = 'localhost';
 $dbname = 'u690174784_kunzz';
