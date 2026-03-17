@@ -35,9 +35,9 @@ require_once 'session_check.php';
                 <div class="form-row" style="justify-content: space-between; align-items: end;">
                     <!-- 添加新职员 + 下载申请表 按钮组 -->
                     <div class="form-group" style="flex: 0 0 auto; display: flex; align-items: center; gap: 12px;">
-                        <button type="button" class="btn-generate" onclick="openAddUserModal()">
+                        <a href="add_employee.php" class="btn-generate">
                             <i class="fas fa-user-plus"></i> 添加新职员
-                        </button>
+                        </a>
                         <button type="button" class="btn-generate" onclick="openDownloadModal()">
                             <i class="fas fa-download"></i> 下载面试表
                         </button>
