@@ -86,7 +86,7 @@ if ($result->num_rows === 1) {
                 'expires' => time() + 86400 * 30,
                 'path' => '/',
                 'secure' => false, // 有 HTTPS 改 true
-                'httponly' => true,
+                'httponly' => false, // ✅ 改为 false，让 login.html 的 JS 能检测到
                 'samesite' => 'Lax'
             ]);
 
