@@ -19,7 +19,7 @@ if ($is_logged_in || $is_remembered) {
         $_SESSION['account_type'] = $_COOKIE['account_type'] ?? '';
         $_SESSION['last_activity'] = time();
     }
-    
+
     $redirect = $_GET['redirect'] ?? 'stocklistj1.php';
     header("Location: " . $redirect);
     exit();
@@ -69,60 +69,35 @@ if ($result->num_rows === 1) {
         }
 
         if ($remember) {
-            error_log("Setting remember cookies for user: " . $user['id']);
             // ✅ 勾选了"记住我"，设置 cookie（30天）
             $expire = time() + (86400 * 30);
-            $is_secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' || 
-                         isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https';
-            
-            $options = [
-                'expires' => $expire,
-                'path' => '/',
-                'secure' => $is_secure,
-                'httponly' => true,
-                'samesite' => 'Lax'
-            ];
-            setcookie('user_id', $user['id'], $options);
-            setcookie('username', $user['username'], $options);
-            setcookie('position', $user['position'] ?? '', $options);
-            setcookie('account_type', $user['account_type'] ?? '', $options);
-
-            // ✅ 对于 remember_token，我们将 httponly 设为 false，
-            // 这样 login.html 里的 JavaScript 才能读取到它并执行自动跳转。
-            $options['httponly'] = false;
-            setcookie('remember_token', '1', $options);
-        } else {
-            error_log("Clearing remember cookies for user: " . $user['id']);
+            setcookie('user_id', $user['id'], $expire, "/");
+            setcookie('username', $user['username'], $expire, "/");
+            setcookie('position', $user['position'], $expire, "/");
+            setcookie('account_type', $user['account_type'], $expire, "/"); // ⭐ 添加这行
+            setcookie('remember_token', '1', $expire, "/");
+        }
+        else {
             // ❌ 没勾选记住我，清除残留 cookie
-            $expire = time() - 3600;
-            $options = [
-                'expires' => $expire, 
-                'path' => '/', 
-                'secure' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' || isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https'), 
-                'httponly' => true, 
-                'samesite' => 'Lax'
-            ];
-            setcookie('user_id', '', $options);
-            setcookie('username', '', $options);
-            setcookie('position', '', $options);
-            setcookie('account_type', '', $options);
-            setcookie('remember_token', '', $options);
+            setcookie('user_id', '', time() - 3600, "/");
+            setcookie('username', '', time() - 3600, "/");
+            setcookie('position', '', time() - 3600, "/");
+            setcookie('account_type', '', time() - 3600, "/"); // ⭐ 添加这行
+            setcookie('remember_token', '', time() - 3600, "/");
         }
 
-        $redirect_page = $_GET['redirect'] ?? 'stocklistj1.php';
-        error_log("Login successful, redirecting to: " . $redirect_page);
-        session_write_close();
+        $redirect_page = $_GET['redirect'] ?? 'stocklistj1.php'; // 优先使用 URL 参数
         header("Location: " . $redirect_page);
         exit();
 
-    } else {
-        error_log("Password mismatch for email: " . $email);
+    }
+    else {
         echo "<script>alert('密码错误'); window.location.href='login.html';</script>";
         exit();
     }
 
-} else {
-    error_log("User not found for email: " . $email);
+}
+else {
     exit();
 }
 ?>

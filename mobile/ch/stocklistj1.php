@@ -1,5 +1,41 @@
 <?php
-require_once 'auth_check.php';
+session_start();
+
+// 检查用户是否登录
+if (!isset($_SESSION['user_id'])) {
+    $current_page = basename($_SERVER['PHP_SELF']);
+    header('Location: login.html?redirect=' . urlencode($current_page));
+    exit;
+}
+
+// 获取当前登录用户的用户名（优先昵称，其次中文名，最后英文名）
+$currentUsername = '';
+if (isset($_SESSION['user_id'])) {
+    $host = 'localhost';
+    $dbname = 'u690174784_kunzz';
+    $dbuser = 'u690174784_kunzz';
+    $dbpass = 'Kunzz1688';
+
+    try {
+        $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        $userId = $_SESSION['user_id'];
+        $stmt = $pdo->prepare("SELECT nickname, username_cn, username FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        $userRow = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($userRow) {
+            $nickname = trim((string)($userRow['nickname'] ?? ''));
+            $usernameCn = trim((string)($userRow['username_cn'] ?? ''));
+            $username = trim((string)($userRow['username'] ?? ''));
+            $currentUsername = $nickname !== '' ? $nickname : ($usernameCn !== '' ? $usernameCn : $username);
+        }
+    }
+    catch (PDOException $e) {
+        $currentUsername = '';
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="zh">
@@ -12,7 +48,7 @@ require_once 'auth_check.php';
 <body>
     <div class="stocklist-page">
         <header class="page-header">
-            <a class="logout-button" href="logout.php?redirect=stocklistj1.php" aria-label="退出登录">
+            <a class="logout-button" href="login.html?redirect=stocklistj1.php" aria-label="退出登录">
                 <img src="../images/icons/logout.svg" alt="" aria-hidden="true">
             </a>
             <h1>库存列表 (J1)</h1>

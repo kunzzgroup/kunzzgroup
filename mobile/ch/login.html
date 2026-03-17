@@ -49,19 +49,6 @@
 
   <script src="../app.js?v=2"></script>
   <script>
-    function getCookie(name) {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop().split(';').shift();
-    }
-
-    // 如果检测到记住我 Cookie，直接跳转到 login.php 进行自动登录处理
-    if (getCookie('remember_token') === '1' && getCookie('user_id')) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const redirect = urlParams.get('redirect') || 'stocklistj1.php';
-      window.location.href = 'login.php?redirect=' + encodeURIComponent(redirect);
-    }
-
     document.addEventListener("DOMContentLoaded", function () {
       // 捕获 URL 中的 redirect 参数并加到 form action 中
       const urlParams = new URLSearchParams(window.location.search);
