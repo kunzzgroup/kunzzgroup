@@ -72,11 +72,13 @@ if ($result->num_rows === 1) {
             error_log("Setting remember cookies for user: " . $user['id']);
             // ✅ 勾选了"记住我"，设置 cookie（30天）
             $expire = time() + (86400 * 30);
+            $is_secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' || 
+                         isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https';
+            
             $options = [
                 'expires' => $expire,
                 'path' => '/',
-                'domain' => '', // Default to current domain
-                'secure' => true,
+                'secure' => $is_secure,
                 'httponly' => true,
                 'samesite' => 'Lax'
             ];
@@ -89,7 +91,13 @@ if ($result->num_rows === 1) {
             error_log("Clearing remember cookies for user: " . $user['id']);
             // ❌ 没勾选记住我，清除残留 cookie
             $expire = time() - 3600;
-            $options = ['expires' => $expire, 'path' => '/', 'secure' => true, 'httponly' => true, 'samesite' => 'Lax'];
+            $options = [
+                'expires' => $expire, 
+                'path' => '/', 
+                'secure' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' || isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https'), 
+                'httponly' => true, 
+                'samesite' => 'Lax'
+            ];
             setcookie('user_id', '', $options);
             setcookie('username', '', $options);
             setcookie('position', '', $options);
