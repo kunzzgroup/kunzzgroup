@@ -151,7 +151,7 @@ body { background: #f3f4f6; }
     min-height: 0;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: auto;
 }
 
 /* 表头不缩小 */
