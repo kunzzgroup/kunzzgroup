@@ -159,18 +159,242 @@ body { background: #f3f4f6; }
     flex-shrink: 0;
 }
 
-/* Permission section */
-.editUserPermLayout .perm-tree-container { min-height: 450px; max-height: 650px !important; overflow-y: auto; }
-.editUserPermLayout .perm-detail-card    { min-height: 450px; max-height: 650px !important; overflow-y: auto; }
+/* ── 权限管理优化 ── */
+.perm-layout-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    min-height: 420px;
+}
 
-.editUserPermLayout .perm-tree-container::-webkit-scrollbar,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar { width: 6px; }
-.editUserPermLayout .perm-tree-container::-webkit-scrollbar-track,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-.editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-.editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb:hover,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+/* 左侧权限树 */
+.perm-tree-container {
+    border-right: 1px solid #e5e7eb;
+    overflow-y: auto;
+    min-height: 420px;
+    max-height: 560px !important;
+    padding: 10px 8px;
+    background: #fff;
+}
+
+/* 一级菜单 */
+.perm-level-1 { margin-bottom: 3px; }
+
+.perm-level-1-item {
+    background: #f97316;
+    border-radius: 5px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    user-select: none;
+}
+.perm-level-1-item:hover { background: #ea6b0a; }
+
+.perm-level-1-item .perm-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    margin: 0;
+    width: 100%;
+}
+.perm-level-1-item input[type="checkbox"] {
+    width: 15px; height: 15px;
+    accent-color: #fff;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+.perm-arrow {
+    font-size: 10px;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    color: #fff;
+}
+.perm-arrow.open { transform: rotate(90deg); }
+
+/* 二级菜单容器 */
+.perm-level-2-container {
+    display: none;
+    background: #fff8f3;
+    border-left: 3px solid #f97316;
+    margin: 2px 2px 3px 2px;
+    border-radius: 0 0 5px 5px;
+    padding: 4px 0;
+}
+.perm-level-2-container.open { display: block; }
+
+/* 二级菜单项 */
+.perm-level-2-item {
+    padding: 7px 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-radius: 3px;
+    margin: 1px 4px;
+}
+.perm-level-2-item:hover { background: #ffe8d6; }
+
+.perm-level-2-item .perm-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+    margin: 0;
+    width: 100%;
+}
+.perm-level-2-item input[type="checkbox"] {
+    width: 14px; height: 14px;
+    accent-color: #f97316;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+.perm-arrow-sub {
+    font-size: 10px;
+    color: #f97316;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+}
+.perm-arrow-sub.open { transform: rotate(90deg); }
+
+/* 二级配置链接 */
+.perm-cfg-link {
+    margin-left: auto;
+    font-size: 11px;
+    color: #f97316;
+    white-space: nowrap;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.perm-cfg-link:hover { text-decoration: underline; }
+
+/* 右侧详情面板 */
+.perm-detail-card {
+    overflow-y: auto;
+    min-height: 420px;
+    max-height: 560px !important;
+    padding: 14px;
+    background: #fff;
+}
+
+/* 空状态提示 */
+.perm-detail-placeholder {
+    height: 100%;
+    min-height: 380px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    text-align: center;
+    gap: 10px;
+}
+.perm-detail-placeholder i { font-size: 40px; color: #d1d5db; }
+.perm-detail-placeholder p { font-size: 13px; line-height: 1.7; }
+
+/* 三级面板 */
+.perm-level-3-panel { display: none; }
+.perm-level-3-panel.active { display: block; }
+
+.perm-detail-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f97316;
+}
+.perm-detail-header strong { font-size: 14px; color: #f97316; }
+
+.perm-close-btn {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: #f97316;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s;
+}
+.perm-close-btn:hover { background: #ea6b0a; }
+
+/* 三级内部分组 */
+.perm-level-3-section { margin-bottom: 14px; }
+
+.perm-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 8px;
+}
+
+.perm-level-3-section label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 4px;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.15s;
+}
+.perm-level-3-section label:hover { background: #fff5ee; }
+.perm-level-3-section label input[type="checkbox"] {
+    width: 14px; height: 14px;
+    accent-color: #f97316;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* 店面展开项 */
+.perm-store-item { margin-bottom: 6px; }
+.perm-store-item > .perm-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    background: #f3f4f6;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    user-select: none;
+    transition: background 0.15s;
+}
+.perm-store-item > .perm-checkbox-label:hover { background: #e5e7eb; }
+.perm-arrow-store {
+    font-size: 10px;
+    color: #f97316;
+    transition: transform 0.2s;
+}
+.perm-arrow-store.open { transform: rotate(90deg); }
+.perm-store-content {
+    display: none;
+    padding: 8px 8px 4px 20px;
+}
+.perm-store-content.open { display: block; }
+
+/* 滚动条 */
+.perm-tree-container::-webkit-scrollbar,
+.perm-detail-card::-webkit-scrollbar { width: 5px; }
+.perm-tree-container::-webkit-scrollbar-thumb,
+.perm-detail-card::-webkit-scrollbar-thumb { background: #f0a060; border-radius: 3px; }
+.perm-tree-container::-webkit-scrollbar-track,
+.perm-detail-card::-webkit-scrollbar-track { background: #f9f9f9; }
 
 /* ── 平板视图 (<1200px) ── */
 @media (max-width: 1200px) {
@@ -702,6 +926,7 @@ body { background: #f3f4f6; }
                                                 <input type="checkbox" class="perm-l2-check" data-parent="brand" value="kunzz_holdings">
                                                 <span class="perm-arrow-sub">▶</span>
                                                 <span>KUNZZ HOLDINGS SDN BHD</span>
+                                                <span class="perm-cfg-link" data-target="kunzz_holdings">详细配置 ▶</span>
                                             </label>
                                         </div>
                                         <div class="perm-level-2-item has-level-3" data-sub="tokyo_cuisine">
@@ -709,6 +934,7 @@ body { background: #f3f4f6; }
                                                 <input type="checkbox" class="perm-l2-check" data-parent="brand" value="tokyo_cuisine">
                                                 <span class="perm-arrow-sub">▶</span>
                                                 <span>TOKYO JAPANESE CUISINE SDN BHD</span>
+                                                <span class="perm-cfg-link" data-target="tokyo_cuisine">详细配置 ▶</span>
                                             </label>
                                         </div>
                                         <div class="perm-level-2-item has-level-3" data-sub="tokyo_izakaya">
@@ -716,6 +942,7 @@ body { background: #f3f4f6; }
                                                 <input type="checkbox" class="perm-l2-check" data-parent="brand" value="tokyo_izakaya">
                                                 <span class="perm-arrow-sub">▶</span>
                                                 <span>TOKYO IZAKAYA SDN BHD</span>
+                                                <span class="perm-cfg-link" data-target="tokyo_izakaya">详细配置 ▶</span>
                                             </label>
                                         </div>
                                     </div>
@@ -742,6 +969,7 @@ body { background: #f3f4f6; }
                                                 <input type="checkbox" class="perm-l2-check" data-parent="analytics" value="kpi_upload">
                                                 <span class="perm-arrow-sub">▶</span>
                                                 <span>数据上传</span>
+                                                <span class="perm-cfg-link" data-target="kpi_upload">详细配置 ▶</span>
                                             </label>
                                         </div>
                                     </div>
@@ -781,6 +1009,7 @@ body { background: #f3f4f6; }
                                                 <input type="checkbox" class="perm-l2-check" data-parent="resource" value="stock_inventory">
                                                 <span class="perm-arrow-sub">▶</span>
                                                 <span>库存</span>
+                                                <span class="perm-cfg-link" data-target="stock_inventory">详细配置 ▶</span>
                                             </label>
                                         </div>
                                         <div class="perm-level-2-item">
@@ -812,8 +1041,8 @@ body { background: #f3f4f6; }
                             <!-- 右侧：三级详细配置卡片 -->
                             <div class="perm-detail-card">
                                 <div class="perm-detail-placeholder">
-                                    <i class="fas fa-hand-pointer" style="font-size: 48px; color: #d1d5db; margin-bottom: 15px;"></i>
-                                    <p style="color: #9ca3af; font-size: 14px;">点击左侧带有箭头的选项<br>查看详细配置</p>
+                                    <i class="fas fa-hand-pointer"></i>
+                                    <p>点击左侧带有箭头的选项<br>查看详细配置</p>
                                 </div>
                                 <div class="perm-detail-content">
                                     <!-- 面板内容由JS根据 context 动态查找或初始化时存在 -->
@@ -1013,6 +1242,92 @@ body { background: #f3f4f6; }
                     }, 320);
                 }
             }, delay);
+        }
+
+        function initPermissionTreeEvents(container) {
+            // ── 一级展开/折叠 ──
+            container.querySelectorAll('.perm-level-1-item').forEach(item => {
+                item.addEventListener('click', function (e) {
+                    if (e.target.type === 'checkbox') return;
+                    const perm = this.dataset.perm;
+                    const sub = container.querySelector(`.perm-level-2-container[data-parent="${perm}"]`);
+                    const arrow = this.querySelector('.perm-arrow');
+                    if (!sub) return;
+                    const isOpen = sub.classList.toggle('open');
+                    arrow?.classList.toggle('open', isOpen);
+                });
+
+                // 一级 checkbox 联动二级
+                const cb = item.querySelector('.perm-l1-check');
+                cb?.addEventListener('change', function () {
+                    const perm = item.dataset.perm;
+                    container.querySelectorAll(`.perm-l2-check[data-parent="${perm}"]`)
+                        .forEach(c => c.checked = this.checked);
+                });
+            });
+
+            // ── 二级 checkbox 联动一级 ──
+            container.querySelectorAll('.perm-l2-check').forEach(cb => {
+                cb.addEventListener('change', function () {
+                    const parent = this.dataset.parent;
+                    const siblings = container.querySelectorAll(`.perm-l2-check[data-parent="${parent}"]`);
+                    const l1 = container.querySelector(`.perm-l1-check[value="${parent}"]`);
+                    if (!l1) return;
+                    const checkedCount = [...siblings].filter(c => c.checked).length;
+                    l1.checked = checkedCount > 0;
+                    l1.indeterminate = checkedCount > 0 && checkedCount < siblings.length;
+                });
+            });
+
+            // ── 详细配置链接点击 ──
+            container.querySelectorAll('.perm-cfg-link').forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const target = this.dataset.target;
+                    showDetailPanel(container, target);
+                    // 同时展开对应父级 L2 容器（若未展开）
+                    const l2item = this.closest('.perm-level-2-item');
+                    const l1container = l2item?.closest('.perm-level-2-container');
+                    if (l1container && !l1container.classList.contains('open')) {
+                        l1container.classList.add('open');
+                        const perm = l1container.dataset.parent;
+                        container.querySelector(`.perm-level-1-item[data-perm="${perm}"] .perm-arrow`)
+                            ?.classList.add('open');
+                    }
+                });
+            });
+
+            // ── 店面展开/折叠 ──
+            container.querySelectorAll('.perm-store-item > .perm-checkbox-label').forEach(label => {
+                label.addEventListener('click', function () {
+                    const storeItem = this.closest('.perm-store-item');
+                    const content = storeItem.querySelector('.perm-store-content');
+                    const arrow = this.querySelector('.perm-arrow-store');
+                    const isOpen = content?.classList.toggle('open');
+                    arrow?.classList.toggle('open', isOpen);
+                });
+            });
+
+            // ── 权限警告隐藏 ──
+            container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    const warn = container.closest('.editUserPermLayout')?.querySelector('.perm-warning');
+                    if (warn) warn.style.display = 'none';
+                });
+            });
+        }
+
+        function showDetailPanel(container, target) {
+            const detail = container.querySelector('.perm-detail-card');
+            detail.querySelector('.perm-detail-placeholder').style.display = 'none';
+            detail.querySelectorAll('.perm-level-3-panel').forEach(p => p.classList.remove('active'));
+            const panel = detail.querySelector(`.perm-level-3-panel[data-for="${target}"]`);
+            if (panel) panel.classList.add('active');
+        }
+
+        function closeDetailPanel() {
+            document.querySelectorAll('.perm-level-3-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.perm-detail-placeholder').forEach(p => p.style.display = 'flex');
         }
 
         async function addNewUserAndRedirect() {
