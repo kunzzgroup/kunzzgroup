@@ -889,15 +889,14 @@ async function saveAllData() {
             const diners = parseInt(getInputValue('diners', day)) || 0;
 
             // 只保存有数据的行
-            const hasData = grossSales !== '' && !isNaN(grossSales) ||
-                diners !== '' && !isNaN(diners) ||
-                (parseFloat(getInputValue('discounts', day)) !== '' && !isNaN(parseFloat(getInputValue('discounts', day)))) ||
-                (parseFloat(getInputValue('tax', day)) !== '' && !isNaN(parseFloat(getInputValue('tax', day)))) ||
-                (parseFloat(getInputValue('service_fee', day)) !== '' && !isNaN(parseFloat(getInputValue('service_fee', day)))) ||
-                (parseFloat(getInputValue('adj_amount', day)) !== '' && !isNaN(parseFloat(getInputValue('adj_amount', day)))) ||
-                (parseInt(getInputValue('tables_used', day)) !== '' && !isNaN(parseInt(getInputValue('tables_used', day)))) ||
-                (parseInt(getInputValue('returning_customers', day)) !== '' && !isNaN(parseInt(getInputValue('returning_customers', day)))) ||
-                (parseInt(getInputValue('new_customers', day)) !== '' && !isNaN(parseInt(getInputValue('new_customers', day))));
+            const hasData = grossSales > 0 || diners > 0 ||
+                (parseFloat(getInputValue('discounts', day)) || 0) > 0 ||
+                (parseFloat(getInputValue('tax', day)) || 0) > 0 ||
+                (parseFloat(getInputValue('service_fee', day)) || 0) > 0 ||
+                (parseFloat(getInputValue('adj_amount', day)) || 0) !== 0 ||
+                (parseInt(getInputValue('tables_used', day)) || 0) > 0 ||
+                (parseInt(getInputValue('returning_customers', day)) || 0) > 0 ||
+                (parseInt(getInputValue('new_customers', day)) || 0) > 0;
 
             if (hasData) {
                 const dateStr = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
