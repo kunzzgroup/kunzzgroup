@@ -159,53 +159,51 @@ body { background: #f3f4f6; }
 }
 
 /* Permission section */
-/* Permission section - Modern Premium Overhaul */
+/* Permission section - Brand Corrective Design */
 .editUserPermLayout .perm-layout-container {
     display: flex;
     gap: 20px;
-    background: #f8fafc;
-    padding: 24px;
-    border-radius: 16px;
-    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    border: 2px solid #f97316; /* Strong brand border */
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.1);
 }
 
 .editUserPermLayout .perm-tree-container {
     flex: 1;
-    background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    padding: 16px;
-    max-height: 500px !important;
+    background: #fffcf9; /* Very light orange tint */
+    border-radius: 10px;
+    border: 1px solid #fed7aa;
+    padding: 12px;
+    max-height: 550px !important;
     overflow-y: auto;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .editUserPermLayout .perm-detail-card {
-    flex: 1;
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 12px;
-    border: 1px solid rgba(249, 115, 22, 0.2);
-    padding: 24px;
-    max-height: 500px !important;
+    flex: 1.2;
+    background: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #fed7aa;
+    padding: 20px;
+    max-height: 550px !important;
     overflow-y: auto;
     position: relative;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
 }
 
-/* Custom Scrollbar for modern look */
+/* Custom Scrollbar - Orange theme */
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar,
 .editUserPermLayout .perm-detail-card::-webkit-scrollbar {
-    width: 5px;
+    width: 6px;
 }
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar-track,
 .editUserPermLayout .perm-detail-card::-webkit-scrollbar-track {
-    background: transparent;
+    background: #fff7ed;
 }
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb,
 .editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: #fdba74;
     border-radius: 10px;
 }
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb:hover,
@@ -213,69 +211,84 @@ body { background: #f3f4f6; }
     background: #f97316;
 }
 
-/* Tree Item Styles */
-.perm-level-1 { margin-bottom: 8px; }
+/* Tree Item Styles - Bold & Visible */
+.perm-level-1 { margin-bottom: 10px; }
 .perm-level-1-item {
     display: flex;
     align-items: center;
-    padding: 12px 16px;
+    padding: 12px 15px;
     background: #ffffff;
-    border: 1px solid #f1f5f9;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
+    color: #1e293b;
 }
 .perm-level-1-item:hover {
+    border-color: #f97316;
     background: #fff7ed;
-    border-color: #fdba74;
-    transform: translateX(4px);
 }
 .perm-level-1-item.expanded {
-    background: #fff7ed;
-    border-color: #f97316;
-    margin-bottom: 8px;
+    background: #f97316;
+    color: #ffffff;
+    border-color: #ea580c;
+}
+.perm-level-1-item.expanded .perm-arrow, 
+.perm-level-1-item.expanded strong {
+    color: #ffffff !important;
 }
 
 .perm-level-2-container {
-    padding-left: 24px;
+    padding-left: 15px;
+    margin-top: 5px;
     display: none;
     flex-direction: column;
-    gap: 6px;
-    margin-bottom: 12px;
+    gap: 4px;
+    border-left: 2px solid #fed7aa;
+    margin-left: 25px;
 }
-.perm-level-2-container.expanded { display: flex; animation: slideInDown 0.3s ease-out; }
+.perm-level-2-container.expanded { display: flex; }
 
 .perm-level-2-item {
     padding: 8px 12px;
     border-radius: 6px;
-    background: #f8fafc;
-    border: 1px solid transparent;
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
     transition: all 0.2s;
+    color: #475569;
 }
 .perm-level-2-item:hover {
-    background: #f1f5f9;
-    border-color: #cbd5e1;
+    background: #fff7ed;
+    border-color: #fdba74;
+    color: #f97316;
+}
+.perm-level-2-item.expanded {
+    background: #fff7ed;
+    border-color: #f97316;
+    color: #c2410c;
+    font-weight: 600;
 }
 
-/* Checkbox Modernization */
+/* Checkbox Alignment & Visibility */
 .perm-checkbox-label {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     width: 100%;
     cursor: pointer;
+    font-size: 14px;
 }
 .perm-checkbox-label input[type="checkbox"] {
     width: 18px;
     height: 18px;
+    margin: 0;
     accent-color: #f97316;
-    cursor: pointer;
 }
 .perm-arrow, .perm-arrow-sub {
-    font-size: 10px;
+    font-size: 12px;
     color: #94a3b8;
-    transition: transform 0.3s ease;
-    width: 16px;
+    transition: transform 0.2s;
+    width: 20px;
     text-align: center;
 }
 .expanded .perm-arrow, .expanded .perm-arrow-sub {
@@ -287,35 +300,41 @@ body { background: #f3f4f6; }
 .perm-detail-header {
     margin-bottom: 20px;
     padding-bottom: 12px;
-    border-bottom: 2px solid #f97316;
+    border-bottom: 3px solid #f97316;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
-.perm-detail-header strong { font-size: 16px; color: #1e293b; }
+.perm-detail-header strong { font-size: 18px; color: #1e293b; }
 .perm-close-btn {
-    background: none;
+    background: #f1f5f9;
     border: none;
-    font-size: 24px;
-    color: #94a3b8;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #64748b;
     cursor: pointer;
-    line-height: 1;
+    transition: all 0.2s;
 }
-.perm-close-btn:hover { color: #f97316; }
+.perm-close-btn:hover { background: #fee2e2; color: #dc2626; }
 
 .perm-level-3-section {
-    background: #ffffff;
+    background: #fdfdfd;
     padding: 16px;
-    border-radius: 10px;
-    border: 1px solid #f1f5f9;
-    margin-bottom: 16px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #f97316;
+    margin-bottom: 15px;
 }
 .perm-section-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: #64748b;
+    font-size: 13px;
+    font-weight: 800;
+    color: #f97316;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
     margin-bottom: 12px;
 }
 .perm-level-3-section label {
