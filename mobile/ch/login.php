@@ -86,6 +86,10 @@ if ($result->num_rows === 1) {
             setcookie('username', $user['username'], $options);
             setcookie('position', $user['position'] ?? '', $options);
             setcookie('account_type', $user['account_type'] ?? '', $options);
+
+            // ✅ 对于 remember_token，我们将 httponly 设为 false，
+            // 这样 login.html 里的 JavaScript 才能读取到它并执行自动跳转。
+            $options['httponly'] = false;
             setcookie('remember_token', '1', $options);
         } else {
             error_log("Clearing remember cookies for user: " . $user['id']);
