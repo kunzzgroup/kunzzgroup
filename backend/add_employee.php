@@ -96,8 +96,7 @@ body { background: #f3f4f6; }
     gap: 14px;
     height: 100%;
     min-height: 0;
-    overflow-y: auto; /* 允许整个右列在内容过多时滚动 */
-    padding-right: 4px; /* 为滚动条留出一点空间 */
+    overflow: hidden; /* 防止 col 本身溢出 */
 }
 
 /* 左侧主卡片 — 关键滚动容器 */
@@ -159,206 +158,18 @@ body { background: #f3f4f6; }
     flex-shrink: 0;
 }
 
-/* ── Permission Management (Restored & Optimized) ── */
-.perm-layout-container {
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    gap: 0;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    overflow: hidden;
-    min-height: 480px;
-    background: #fff;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-}
+/* Permission section */
+.editUserPermLayout .perm-tree-container { max-height: 420px !important; overflow-y: auto; }
+.editUserPermLayout .perm-detail-card    { max-height: 420px !important; overflow-y: auto; }
 
-/* Left: Permission Tree */
-.perm-tree-container {
-    border-right: 1px solid #f0f0f0;
-    overflow-y: auto;
-    max-height: 600px;
-    padding: 15px;
-    background: #fafafa;
-}
-
-.perm-level-1 { margin-bottom: 8px; }
-
-.perm-level-1-item {
-    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-    border-radius: 8px;
-    padding: 10px 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-    user-select: none;
-    box-shadow: 0 2px 4px rgba(234, 88, 12, 0.2);
-}
-.perm-level-1-item:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(234, 88, 12, 0.3); }
-
-.perm-level-1-item .perm-checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.perm-l1-check {
-    width: 16px; height: 16px;
-    accent-color: #fff;
-    cursor: pointer;
-}
-
-.perm-arrow {
-    margin-left: auto;
-    font-size: 10px;
-    transition: transform 0.3s;
-}
-.perm-arrow.open { transform: rotate(90deg); }
-
-.perm-level-2-container {
-    display: none;
-    padding: 4px 0 8px 10px;
-}
-.perm-level-2-container.open { display: block; animation: slideDown 0.3s ease-out; }
-
-@keyframes slideDown {
-    from { opacity: 0; transform: translateY(-5px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.perm-level-2-item {
-    display: flex;
-    align-items: center;
-    padding: 8px 12px;
-    margin: 2px 0;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.15s;
-}
-.perm-level-2-item:hover { background: #fee2e2; }
-
-.perm-level-2-item .perm-checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    color: #4b5563;
-    flex: 1;
-    cursor: pointer;
-}
-
-.perm-l2-check { width: 14px; height: 14px; accent-color: #f97316; }
-
-.perm-arrow-sub {
-    font-size: 9px;
-    color: #f97316;
-    margin-right: 4px;
-}
-
-/* Right: Detail Card */
-.perm-detail-card {
-    padding: 20px;
-    overflow-y: auto;
-    max-height: 600px;
-    background: #fff;
-    position: relative;
-}
-
-.perm-detail-placeholder {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #9ca3af;
-    text-align: center;
-    opacity: 0.7;
-}
-
-.perm-detail-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-bottom: 12px;
-    margin-bottom: 20px;
-    border-bottom: 2px solid #f97316;
-}
-.perm-detail-header strong { font-size: 16px; color: #1f2937; }
-
-.perm-close-btn {
-    width: 26px; height: 26px;
-    border-radius: 50%;
-    background: #f3f4f6;
-    border: none;
-    color: #6b7280;
-    font-size: 18px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-}
-.perm-close-btn:hover { background: #ef4444; color: #fff; }
-
-.perm-level-3-section { margin-bottom: 20px; }
-.perm-section-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: #f97316;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.perm-section-title::before {
-    content: '';
-    width: 3px; height: 14px;
-    background: #f97316;
-    border-radius: 2px;
-}
-
-.perm-level-3-section label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-    font-size: 13px;
-    color: #374151;
-    cursor: pointer;
-    border-radius: 6px;
-    transition: background 0.15s;
-    margin-bottom: 4px;
-}
-.perm-level-3-section label:hover { background: #fef2f2; }
-.perm-level-3-section label input { accent-color: #f97316; }
-
-.perm-level-3-panel { display: none; }
-.perm-level-3-panel.active { display: block; animation: fadeIn 0.3s ease; }
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-/* Store Items */
-.perm-store-item { margin-bottom: 15px; border: 1px solid #f3f4f6; border-radius: 8px; overflow: hidden; }
-.perm-store-item > .perm-checkbox-label {
-    background: #f9fafb;
-    padding: 10px 14px;
-    font-weight: 600;
-    color: #374151;
-    border-bottom: 1px solid #f3f4f6;
-}
-
-.perm-store-content {
-    background: #fff;
-    padding: 12px;
-    display: none;
-}
-.perm-store-content.open { display: block; }
-
+.editUserPermLayout .perm-tree-container::-webkit-scrollbar,
+.editUserPermLayout .perm-detail-card::-webkit-scrollbar { width: 6px; }
+.editUserPermLayout .perm-tree-container::-webkit-scrollbar-track,
+.editUserPermLayout .perm-detail-card::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+.editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb,
+.editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+.editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb:hover,
+.editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 /* ── 平板视图 (<1200px) ── */
 @media (max-width: 1200px) {
@@ -604,7 +415,6 @@ body { background: #f3f4f6; }
     line-height: 1;
 }
 </style>
-</head>
 <body>
     <?php include 'sidebar.php'; ?>
     <div class="container" style="padding:0; height:100vh; max-width:100%;">
@@ -858,8 +668,6 @@ body { background: #f3f4f6; }
                                         <option value="j1">J1 (Midvalley Southkey)</option>
                                         <option value="j2">J2 (Paradigm Mall)</option>
                                         <option value="j3">J3 (Desa Tebrau)</option>
-                                        <option value="j4">J4</option>
-                                        <option value="j5">J5</option>
                                     </select>
                                 </div>
                             </div>
@@ -867,7 +675,9 @@ body { background: #f3f4f6; }
                     </div>
 
                 <!-- ── Permissions ── -->
-                <!-- 权限设置区块 (Snippet Based) -->
+
+                    <!-- 权限设置区块 -->
+                <!-- 编辑职员专用权限布局 (复用至添加页面) -->
                 <div class="form-section editUserPermLayout">
                     <div class="form-section-header" style="text-transform: uppercase;">权限管理 PERMISSION MANAGEMENT</div>
                     <div class="form-section-content">
@@ -921,8 +731,8 @@ body { background: #f3f4f6; }
                                     <div class="perm-level-2-container" data-parent="analytics">
                                         <div class="perm-level-2-item">
                                             <label class="perm-checkbox-label">
-                                                <input type="checkbox" class="perm-l2-check" data-parent="analytics" value="monthly_report">
-                                                <span>月度报表</span>
+                                                <input type="checkbox" class="perm-l2-check" data-parent="analytics" value="kpi_report">
+                                                <span>KPI报表</span>
                                             </label>
                                         </div>
                                         <div class="perm-level-2-item has-level-3" data-sub="kpi_upload">
@@ -1117,9 +927,6 @@ body { background: #f3f4f6; }
                         </div>
                     </div>
                 </div>
-                    </div>
-                </div> <!-- /form-section editUserPermLayout -->
-
                 </div> <!-- /Right Column -->
 
             </form>
@@ -1204,102 +1011,6 @@ body { background: #f3f4f6; }
                     }, 320);
                 }
             }, delay);
-        }
-
-        // ── Permission UI Handlers (Restored & Optimized) ──
-        function initPermissionTreeEvents(container) {
-            // L1 Tree Toggle
-            container.querySelectorAll('.perm-level-1-item').forEach(item => {
-                item.addEventListener('click', function(e) {
-                    if (e.target.type === 'checkbox') return;
-                    const l2Container = this.nextElementSibling;
-                    const arrow = this.querySelector('.perm-arrow');
-                    if (l2Container && l2Container.classList.contains('perm-level-2-container')) {
-                        const isOpen = l2Container.classList.toggle('open');
-                        if (arrow) arrow.classList.toggle('open', isOpen);
-                    }
-                });
-            });
-
-            // L1 Checkbox Sync
-            container.querySelectorAll('.perm-l1-check').forEach(l1Check => {
-                l1Check.addEventListener('change', function() {
-                    const parentId = this.value;
-                    const l2Checks = container.querySelectorAll(`.perm-l2-check[data-parent="${parentId}"]`);
-                    l2Checks.forEach(l2 => {
-                        l2.checked = this.checked;
-                        l2.dispatchEvent(new Event('change'));
-                    });
-                    hidePermWarning();
-                });
-            });
-
-            // L2 Items & Detail Trigger
-            container.querySelectorAll('.perm-level-2-item').forEach(item => {
-                item.addEventListener('click', function(e) {
-                    if (e.target.type === 'checkbox') return;
-                    const subId = this.dataset.sub;
-                    if (subId) showDetailPanel(subId);
-                });
-            });
-
-            // L2 Checkbox Sync
-            container.querySelectorAll('.perm-l2-check').forEach(l2Check => {
-                l2Check.addEventListener('change', function() {
-                    const parentId = this.dataset.parent;
-                    const l1Check = container.querySelector(`.perm-l1-check[value="${parentId}"]`);
-                    if (l1Check) {
-                        const siblings = container.querySelectorAll(`.perm-l2-check[data-parent="${parentId}"]`);
-                        const checkedCount = Array.from(siblings).filter(s => s.checked).length;
-                        l1Check.checked = checkedCount > 0;
-                        l1Check.indeterminate = checkedCount > 0 && checkedCount < siblings.length;
-                    }
-                    hidePermWarning();
-                });
-            });
-
-            // Store Toggle
-            container.querySelectorAll('.perm-store-item > .perm-checkbox-label').forEach(label => {
-                label.addEventListener('click', function() {
-                    const content = this.nextElementSibling;
-                    const arrow = this.querySelector('.perm-arrow-store');
-                    if (content) {
-                        const isOpen = content.classList.toggle('open');
-                        if (arrow) arrow.classList.toggle('open', isOpen);
-                    }
-                });
-            });
-        }
-
-        function showDetailPanel(subId) {
-            const detailCard = document.querySelector('.perm-detail-card');
-            const placeholder = detailCard.querySelector('.perm-detail-placeholder');
-            const content = detailCard.querySelector('.perm-detail-content');
-
-            if (placeholder) placeholder.style.display = 'none';
-            if (content) {
-                content.style.display = 'block';
-                content.querySelectorAll('.perm-level-3-panel').forEach(p => p.classList.remove('active'));
-                const target = content.querySelector(`.perm-level-3-panel[data-for="${subId}"]`);
-                if (target) target.classList.add('active');
-            }
-        }
-
-        function closeDetailPanel() {
-            const detailCard = document.querySelector('.perm-detail-card');
-            const placeholder = detailCard.querySelector('.perm-detail-placeholder');
-            const content = detailCard.querySelector('.perm-detail-content');
-
-            if (placeholder) placeholder.style.display = 'flex';
-            if (content) {
-                content.style.display = 'none';
-                content.querySelectorAll('.perm-level-3-panel').forEach(p => p.classList.remove('active'));
-            }
-        }
-
-        function hidePermWarning() {
-            const warn = document.querySelector('.perm-warning');
-            if (warn) warn.style.display = 'none';
         }
 
         async function addNewUserAndRedirect() {
