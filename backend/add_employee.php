@@ -116,19 +116,20 @@ body { background: #f3f4f6; }
     box-shadow: 0 1px 3px rgba(0,0,0,.04);
 }
 
-/* Scrollbar styling */
-.left-card::-webkit-scrollbar {
+/* Global Scrollbar styling */
+::-webkit-scrollbar {
     width: 6px;
+    height: 6px;
 }
-.left-card::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
     background: #f1f1f1;
     border-radius: 4px;
 }
-.left-card::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 4px;
 }
-.left-card::-webkit-scrollbar-thumb:hover {
+::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
 
@@ -205,19 +206,6 @@ body { background: #f3f4f6; }
     display: none !important;
 }
 
-.editUserPermLayout .perm-tree-container::-webkit-scrollbar,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar,
-.editUserPermLayout .perm-detail-content::-webkit-scrollbar { width: 6px; }
-
-.editUserPermLayout .perm-tree-container::-webkit-scrollbar-track,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar-track,
-.editUserPermLayout .perm-detail-content::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-
-.editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb,
-.editUserPermLayout .perm-detail-content::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-.editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb:hover,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 /* ── 平板视图 (<1200px) ── */
 @media (max-width: 1200px) {
