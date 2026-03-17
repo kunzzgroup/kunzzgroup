@@ -721,30 +721,30 @@ function selectBranchL1(value, label) {
     const lbl1 = document.getElementById('branchL1Label');
     if (lbl1) lbl1.textContent = label;
 
+    // 更新 active 样式
+    document.querySelectorAll('.bl1-item').forEach(item => {
+        if (item.getAttribute('data-value') === value) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+
     const l2Btn = document.getElementById('branchL2Btn');
     const l2Label = document.getElementById('branchL2Label');
     const l2Chevron = l2Btn ? l2Btn.querySelector('.fa-chevron-down') : null;
 
     if (l2Btn && l2Label) {
-        if (value === 'all') {
-            // 全部 → 二层显示 "-"，不可点
-            l2Label.textContent = '-';
-            l2Btn.style.cursor = 'default';
-            l2Btn.style.opacity = '0.45';
-            if (l2Chevron) l2Chevron.style.display = 'none';
-        } else if (value === 'kunzz') {
-            // KunzzGroup → 二层显示 "-"，不可点
+        if (value === 'all' || value === 'kunzz') {
             l2Label.textContent = '-';
             l2Btn.style.cursor = 'default';
             l2Btn.style.opacity = '0.45';
             if (l2Chevron) l2Chevron.style.display = 'none';
         } else {
-            // 分店 → 二层显示 dropdown
             l2Label.textContent = '全部分店';
             l2Btn.style.cursor = 'pointer';
             l2Btn.style.opacity = '1';
             if (l2Chevron) l2Chevron.style.display = '';
-            // 填充二层选项
             buildBranchL2Dropdown();
         }
     }
@@ -757,6 +757,16 @@ function selectBranchL2(value, label) {
     branchL2Current = value;
     const lbl2 = document.getElementById('branchL2Label');
     if (lbl2) lbl2.textContent = label;
+
+    // 更新 active 样式
+    document.querySelectorAll('.bl2-item').forEach(item => {
+        if (item.getAttribute('data-value') === value) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+
     closeBranchDropdowns();
     applyBranchFilter();
 }
@@ -766,9 +776,11 @@ function buildBranchL2Dropdown() {
     if (!d) return;
     const options = branchL2Options['branch'];
     d.innerHTML = options.map(opt =>
-        `<div class="bl2-item" onclick="selectBranchL2('${opt.value}','${opt.label}')"
-            style="padding:8px 14px;font-size:13px;cursor:pointer;color:#374151;transition:background 0.1s;"
-            onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background=''">${opt.label}</div>`
+        `<div class="bl2-item ${branchL2Current === opt.value ? 'active' : ''}" 
+              data-value="${opt.value}"
+              onclick="selectBranchL2('${opt.value}','${opt.label}')">
+            ${opt.label}
+        </div>`
     ).join('');
 }
 

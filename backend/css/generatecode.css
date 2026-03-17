@@ -794,6 +794,85 @@ tr:hover {
 }
 
 
+/* 分店筛选器包装器 */
+.branch-filter-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 筛选器按钮基础样式 */
+.branch-filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #ffffff;
+    font-size: clamp(8px, 0.74vw, 13px);
+    font-weight: 500;
+    cursor: pointer;
+    color: #334155;
+    white-space: nowrap;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.branch-filter-btn:hover {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.branch-filter-btn:active {
+    transform: translateY(0);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* 筛选器下拉菜单容器 */
+.branch-filter-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+    min-width: 140px;
+    padding: 4px;
+    overflow: hidden;
+    animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 下拉菜单单项样式 */
+.bl-item, .bl1-item, .bl2-item {
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: #475569;
+    border-radius: 6px;
+    transition: all 0.15s ease;
+}
+
+.bl-item:hover, .bl1-item:hover, .bl2-item:hover {
+    background-color: #f1f5f9;
+    color: #1e293b;
+}
+
+.bl-item.active, .bl1-item.active, .bl2-item.active {
+    background-color: #f99e00;
+    color: #ffffff !important;
+}
+
 /* 分店筛选器下拉项样式 */
 .bl1-item:hover,
 .bl2-item:hover {

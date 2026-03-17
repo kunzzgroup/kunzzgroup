@@ -63,26 +63,26 @@ require_once 'session_check.php';
             <div class="table-title" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
                 <span>职员列表</span>
                 <!-- 分类筛选器 -->
-                <div class="branch-filter-wrap" style="display: flex; align-items: center; gap: 8px;">
+                <div class="branch-filter-wrap">
                     <!-- 第一层：全部 / KunzzGroup / 分店 -->
                     <div style="position: relative;">
-                        <button id="branchL1Btn" onclick="toggleBranchL1()" style="display:flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;font-size:clamp(8px,0.74vw,13px);cursor:pointer;color:#374151;white-space:nowrap;">
+                        <button id="branchL1Btn" class="branch-filter-btn" onclick="toggleBranchL1()">
                             <span id="branchL1Label">全部</span>
                             <i class="fas fa-chevron-down" style="font-size:10px;color:#9ca3af;"></i>
                         </button>
-                        <div id="branchL1Dropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.1);z-index:999;min-width:130px;overflow:hidden;">
-                            <div class="bl1-item" data-value="all" onclick="selectBranchL1('all','全部')" style="padding:8px 14px;font-size:13px;cursor:pointer;color:#374151;transition:background 0.1s;">全部</div>
-                            <div class="bl1-item" data-value="kunzz" onclick="selectBranchL1('kunzz','KunzzGroup')" style="padding:8px 14px;font-size:13px;cursor:pointer;color:#374151;transition:background 0.1s;">KunzzGroup</div>
-                            <div class="bl1-item" data-value="branch" onclick="selectBranchL1('branch','分店')" style="padding:8px 14px;font-size:13px;cursor:pointer;color:#374151;transition:background 0.1s;">分店</div>
+                        <div id="branchL1Dropdown" class="branch-filter-dropdown">
+                            <div class="bl1-item active" data-value="all" onclick="selectBranchL1('all','全部')">全部</div>
+                            <div class="bl1-item" data-value="kunzz" onclick="selectBranchL1('kunzz','KunzzGroup')">KunzzGroup</div>
+                            <div class="bl1-item" data-value="branch" onclick="selectBranchL1('branch','分店')">分店</div>
                         </div>
                     </div>
                     <!-- 第二层：根据第一层显示 -->
                     <div style="position: relative;">
-                        <button id="branchL2Btn" onclick="toggleBranchL2()" style="display:flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;font-size:clamp(8px,0.74vw,13px);cursor:pointer;color:#374151;white-space:nowrap;">
+                        <button id="branchL2Btn" class="branch-filter-btn" onclick="toggleBranchL2()">
                             <span id="branchL2Label">-</span>
                             <i class="fas fa-chevron-down" style="font-size:10px;color:#9ca3af;"></i>
                         </button>
-                        <div id="branchL2Dropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.1);z-index:999;min-width:130px;overflow:hidden;">
+                        <div id="branchL2Dropdown" class="branch-filter-dropdown">
                             <!-- 动态填充 -->
                         </div>
                     </div>
