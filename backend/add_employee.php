@@ -96,7 +96,8 @@ body { background: #f3f4f6; }
     gap: 14px;
     height: 100%;
     min-height: 0;
-    overflow: hidden; /* 防止 col 本身溢出 */
+    overflow-y: auto; /* 允许右侧列内容过多时滚动 */
+    overflow-x: hidden;
 }
 
 /* 左侧主卡片 — 关键滚动容器 */
@@ -159,8 +160,8 @@ body { background: #f3f4f6; }
 }
 
 /* Permission section */
-.editUserPermLayout .perm-tree-container { max-height: 420px !important; overflow-y: auto; }
-.editUserPermLayout .perm-detail-card    { max-height: 420px !important; overflow-y: auto; }
+.editUserPermLayout .perm-tree-container { max-height: 600px; overflow-y: auto; }
+.editUserPermLayout .perm-detail-card    { max-height: 600px; overflow-y: auto; }
 
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar,
 .editUserPermLayout .perm-detail-card::-webkit-scrollbar { width: 6px; }
@@ -415,6 +416,7 @@ body { background: #f3f4f6; }
     line-height: 1;
 }
 </style>
+</head>
 <body>
     <?php include 'sidebar.php'; ?>
     <div class="container" style="padding:0; height:100vh; max-width:100%;">
