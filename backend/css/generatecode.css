@@ -759,6 +759,7 @@ tr:hover {
     margin-bottom: 0px;
     color: #333;
     line-height: 1.5;
+    padding-bottom: 220px !important; /* Ensure space for dropdowns */
 }
 
 .modal-buttons {
@@ -2043,9 +2044,15 @@ tr:hover {
     border: 1px solid #e2e8f0 !important;
     border-radius: 10px !important;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
-    z-index: 10000 !important;
+    z-index: 99999 !important; /* Ultra high to clear everything */
     display: none;
-    padding: 6px !important; /* Internal padding for ivory look */
+    padding: 6px !important;
+}
+
+/* Ensure form groups housing the dropdown don't clip it */
+.form-group:has(.custom-multi-select.active) {
+    overflow: visible !important;
+    z-index: 100 !important;
 }
 
 .custom-multi-select.active .select-options {
