@@ -98,7 +98,6 @@ require_once 'session_check.php';
                             <th>英文姓名</th>
                             <th>邮箱</th>
                             <th>联络号码</th>
-                            <th>分店</th>
                             <th>操作</th>
                         </tr>
                     </thead>

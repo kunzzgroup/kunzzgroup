@@ -429,13 +429,42 @@ th:last-child {
 }
 
 /* 设置各列的宽度 */
-th:nth-child(1), td:nth-child(1) { width: 60px; }
-th:nth-child(2), td:nth-child(2) { width: 140px; }
-th:nth-child(3), td:nth-child(3) { width: 220px; }
-th:nth-child(4), td:nth-child(4) { width: auto; min-width: 180px; text-align: left; }
-th:nth-child(5), td:nth-child(5) { width: 140px; }
-th:nth-child(6), td:nth-child(6) { width: 130px; }
-th:nth-child(7), td:nth-child(7) { width: 150px; }
+th:nth-child(1),
+td:nth-child(1) {
+    width: 60px;
+}
+
+th:nth-child(2),
+td:nth-child(2) {
+    width: 140px;
+}
+
+th:nth-child(3),
+td:nth-child(3) {
+    width: 220px;
+}
+
+th:nth-child(4),
+td:nth-child(4) {
+    width: auto;
+    min-width: 180px;
+    text-align: left;
+}
+
+th:nth-child(5),
+td:nth-child(5) {
+    width: 140px;
+}
+
+th:nth-child(6),
+td:nth-child(6) {
+    width: 130px;
+}
+
+th:nth-child(7),
+td:nth-child(7) {
+    width: 150px;
+}
 
 /* 当地址列显示"-"时居中对齐 */
 td:nth-child(13) em {
@@ -774,37 +803,10 @@ tr:last-child td {
     transform: translateY(0);
 }
 
-
-/* 分店标签样式 */
-.branch-badge {
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 0.8em;
-    font-weight: 700;
-    text-transform: uppercase;
-    display: inline-block;
-    letter-spacing: 0.05em;
-}
-
-.branch-hq {
-    color: #94a3b8;
-    background: #f1f5f9;
-    border: 1px solid #e2e8f0;
-}
-
-.branch-outlet {
-    color: #f59e0b;
-    background: #fffbeb;
-    border: 1px solid #fef3c7;
-}
-
-/* 分店筛选器下拉项样式 */
-.bl1-item:hover, .bl2-item:hover {
-    background-color: #f3f4f6;
-}
-.bl1-item.active, .bl2-item.active {
-    background-color: #f99e00;
-    color: white !important;
+.back-to-top:hover {
+    background-color: #d16003ff;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(88, 62, 4, 0.4);
 }
 
 .back-to-top:active {

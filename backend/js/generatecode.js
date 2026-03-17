@@ -545,7 +545,7 @@ function displayData(data) {
                     <td>${item.username ? escapeHTML(item.username) : '<em style="color: #999;">-</em>'}</td>
                     <td>${item.email ? escapeHTML(item.email) : '<em style="color: #999;">-</em>'}</td>
                     <td>${item.phone_number ? escapeHTML(item.phone_number) : '<em style="color: #999;">-</em>'}</td>
-                    <td>${item.branch ? '<span class="branch-badge branch-outlet">' + escapeHTML(item.branch.toUpperCase()) + '</span>' : '<span class="branch-badge branch-hq">总部</span>'}</td>
+                    <td>${item.branch ? '<span style="background:#fff3e0;color:#e65100;padding:2px 8px;border-radius:4px;font-size:0.85em;font-weight:600;">' + escapeHTML(item.branch.toUpperCase()) + '</span>' : '<em style="color:#bbb;font-size:0.85em;">总部</em>'}</td>
                     <td>
                         <div class="action-buttons">
                             <button class="btn-action btn-edit" onclick="openEditModal(${item.id})" title="编辑">
@@ -679,13 +679,13 @@ let branchL1Current = 'all';   // 'all' | 'kunzz' | 'branch'
 let branchL2Current = 'all';   // 'all' | 'j1' | 'j2' | 'j3'
 
 const branchL2Options = {
-    'all':    [],                                           // 不需要二层
-    'kunzz':  [],                                           // 只有一个选项"-"，不展开
+    'all': [],                                           // 不需要二层
+    'kunzz': [],                                           // 只有一个选项"-"，不展开
     'branch': [
         { value: 'all', label: '全部分店' },
-        { value: 'j1',  label: 'J1' },
-        { value: 'j2',  label: 'J2' },
-        { value: 'j3',  label: 'J3' },
+        { value: 'j1', label: 'J1' },
+        { value: 'j2', label: 'J2' },
+        { value: 'j3', label: 'J3' },
     ]
 };
 
@@ -807,7 +807,7 @@ function applyBranchFilter() {
 }
 
 // 点击页面其他地方关闭 dropdown
-document.addEventListener('click', function(e) {
+document.addEventListener('click', function (e) {
     const wrap = document.querySelector('.branch-filter-wrap');
     if (wrap && !wrap.contains(e.target)) {
         closeBranchDropdowns();
@@ -815,7 +815,7 @@ document.addEventListener('click', function(e) {
 });
 
 // hover 样式注入
-(function() {
+(function () {
     const style = document.createElement('style');
     style.textContent = '.bl1-item:hover, .bl2-item:hover { background: #f9fafb !important; }';
     document.head.appendChild(style);
@@ -1941,7 +1941,7 @@ function openPermissionsModal(userId) {
 function closePermissionsModal() {
     const modal = document.getElementById('permissionsModal');
     if (!modal) return;
-    
+
     resetPermissionTree(modal);
 
     const titleEl = document.getElementById('perm_modal_title');
@@ -2122,11 +2122,11 @@ function extractPermissionsData(container) {
         }
     };
 
-    return { 
-        perms, 
-        submenuPermissions, 
-        pagePermissions, 
-        brandPermissions, 
+    return {
+        perms,
+        submenuPermissions,
+        pagePermissions,
+        brandPermissions,
         reportPermissions: Array.from(container.querySelectorAll('.perm-report:checked')).map(cb => cb.value),
         restaurantPermissions: Array.from(container.querySelectorAll('.perm-restaurant:checked')).map(cb => cb.value)
     };
@@ -2136,7 +2136,7 @@ function openDownloadModal() {
     const modal = document.getElementById('downloadModal');
     if (modal) {
         const companySelect = document.getElementById('company_select');
-        if (companySelect) companySelect.value = ''; 
+        if (companySelect) companySelect.value = '';
         modal.style.display = 'block';
     }
 }
@@ -2168,7 +2168,7 @@ function confirmDownload() {
     if (pdfPath) {
         const link = document.createElement('a');
         link.href = pdfPath;
-        link.download = pdfPath.split('/').pop(); 
+        link.download = pdfPath.split('/').pop();
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
