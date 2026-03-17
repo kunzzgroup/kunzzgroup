@@ -96,15 +96,9 @@ body { background: #f3f4f6; }
     gap: 14px;
     height: 100%;
     min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding-right: 4px;
+    overflow-y: auto; /* 允许整个右列在内容过多时滚动 */
+    padding-right: 4px; /* 为滚动条留出一点空间 */
 }
-
-.form-col::-webkit-scrollbar { width: 6px; }
-.form-col::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-.form-col::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-.form-col::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 /* 左侧主卡片 — 关键滚动容器 */
 .form-col > .left-card {
@@ -157,16 +151,6 @@ body { background: #f3f4f6; }
     min-height: 0;
     display: flex;
     flex-direction: column;
-    padding: 15px;
-}
-
-.editUserPermLayout .perm-layout-container {
-    display: grid !important;
-    grid-template-columns: 1fr 1.2fr !important;
-    gap: 15px !important;
-    flex: 1;
-    min-height: 520px;
-    margin-bottom: 0 !important;
 }
 
 /* 表头不缩小 */
@@ -176,15 +160,8 @@ body { background: #f3f4f6; }
 }
 
 /* Permission section */
-.editUserPermLayout .perm-tree-container,
-.editUserPermLayout .perm-detail-card { 
-    height: 520px !important; 
-    max-height: 520px !important; 
-    overflow-y: auto !important; 
-    flex: none !important;
-    width: 100% !important;
-    margin: 0 !important;
-}
+.editUserPermLayout .perm-tree-container { min-height: 450px; max-height: 650px !important; overflow-y: auto; }
+.editUserPermLayout .perm-detail-card    { min-height: 450px; max-height: 650px !important; overflow-y: auto; }
 
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar,
 .editUserPermLayout .perm-detail-card::-webkit-scrollbar { width: 6px; }
