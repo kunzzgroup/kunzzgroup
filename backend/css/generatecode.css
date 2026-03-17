@@ -365,12 +365,13 @@ body {
 .table-container {
     background: white;
     border-radius: 15px;
-    overflow: hidden;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     border: 2px solid #000000ff;
     min-height: 0;
     display: flex;
     flex-direction: column;
+    position: relative;
+    /* 移除 overflow: hidden 以允许下拉菜单溢出 */
 }
 
 .table-title {
@@ -380,6 +381,10 @@ body {
     font-size: clamp(12px, 1.04vw, 20px);
     font-weight: bold;
     text-align: center;
+    position: relative;
+    z-index: 1001; /* 确保标题层级高于 sticky header */
+    border-bottom: 2px solid #000000ff;
+    border-radius: 15px 15px 0 0;
 }
 
 .table-wrapper {
@@ -840,11 +845,16 @@ tr:hover {
     border: 1px solid #e2e8f0;
     border-radius: 10px;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    z-index: 1000;
+    z-index: 2000; /* 极高层级 */
     min-width: 140px;
     padding: 4px;
     overflow: hidden;
     animation: dropdownFadeIn 0.2s ease-out;
+}
+
+#branchL2Dropdown {
+    left: auto;
+    right: 0;
 }
 
 @keyframes dropdownFadeIn {
