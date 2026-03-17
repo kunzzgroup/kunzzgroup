@@ -159,183 +159,169 @@ body { background: #f3f4f6; }
 }
 
 /* Permission section */
-/* Permission section - Brand Corrective Design */
+/* Permission section - Absolute Brand Correction */
 .editUserPermLayout .perm-layout-container {
-    display: flex;
-    gap: 20px;
-    background: #ffffff;
-    padding: 20px;
-    border-radius: 12px;
-    border: 2px solid #f97316; /* Strong brand border */
-    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.1);
+    display: flex !important;
+    gap: 20px !important;
+    background: #ffffff !important;
+    padding: 24px !important;
+    border-radius: 12px !important;
+    border: 3px solid #f97316 !important; /* Thick orange border */
+    box-shadow: 0 8px 24px rgba(249, 115, 22, 0.15) !important;
+    margin: 4px !important;
 }
 
 .editUserPermLayout .perm-tree-container {
-    flex: 1;
-    background: #fffcf9; /* Very light orange tint */
-    border-radius: 10px;
-    border: 1px solid #fed7aa;
-    padding: 12px;
-    max-height: 550px !important;
-    overflow-y: auto;
+    flex: 1 !important;
+    background: #fffcf9 !important;
+    border-radius: 10px !important;
+    border: 2px solid #fed7aa !important;
+    padding: 16px !important;
+    max-height: 600px !important;
+    overflow-y: auto !important;
 }
 
 .editUserPermLayout .perm-detail-card {
-    flex: 1.2;
-    background: #ffffff;
-    border-radius: 10px;
-    border: 1px solid #fed7aa;
-    padding: 20px;
-    max-height: 550px !important;
-    overflow-y: auto;
-    position: relative;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+    flex: 1.3 !important;
+    background: #ffffff !important;
+    border-radius: 10px !important;
+    border: 2px solid #fed7aa !important;
+    padding: 24px !important;
+    max-height: 600px !important;
+    overflow-y: auto !important;
+    position: relative !important;
 }
 
-/* Custom Scrollbar - Orange theme */
+/* Force Text Visibility */
+.perm-checkbox-label strong,
+.perm-checkbox-label span {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: #111827 !important; /* Dark text by default */
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    margin-left: 5px !important;
+}
+
+/* Custom Scrollbar - High contrast orange */
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar,
 .editUserPermLayout .perm-detail-card::-webkit-scrollbar {
-    width: 6px;
-}
-.editUserPermLayout .perm-tree-container::-webkit-scrollbar-track,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar-track {
-    background: #fff7ed;
+    width: 8px !important;
 }
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb,
 .editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb {
-    background: #fdba74;
-    border-radius: 10px;
-}
-.editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb:hover,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb:hover {
-    background: #f97316;
+    background: #f97316 !important;
+    border-radius: 10px !important;
 }
 
-/* Tree Item Styles - Bold & Visible */
-.perm-level-1 { margin-bottom: 10px; }
+/* Tree Item Styles - Corrective */
+.perm-level-1 { margin-bottom: 12px !important; }
 .perm-level-1-item {
-    display: flex;
-    align-items: center;
-    padding: 12px 15px;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    color: #1e293b;
+    display: flex !important;
+    align-items: center !important;
+    padding: 14px 18px !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
 }
 .perm-level-1-item:hover {
-    border-color: #f97316;
-    background: #fff7ed;
+    border-color: #f97316 !important;
+    background: #fff7ed !important;
 }
+
+/* Expanded state - Keep text visible! */
 .perm-level-1-item.expanded {
-    background: #f97316;
-    color: #ffffff;
-    border-color: #ea580c;
+    background: #f97316 !important;
+    border-color: #ea580c !important;
 }
-.perm-level-1-item.expanded .perm-arrow, 
-.perm-level-1-item.expanded strong {
-    color: #ffffff !important;
+.perm-level-1-item.expanded strong,
+.perm-level-1-item.expanded .perm-arrow {
+    color: #ffffff !important; /* Only white text when background is orange */
 }
 
 .perm-level-2-container {
-    padding-left: 15px;
-    margin-top: 5px;
+    padding-left: 20px !important;
+    margin-top: 8px !important;
     display: none;
-    flex-direction: column;
-    gap: 4px;
-    border-left: 2px solid #fed7aa;
-    margin-left: 25px;
+    flex-direction: column !important;
+    gap: 6px !important;
+    border-left: 3px solid #fed7aa !important;
+    margin-left: 30px !important;
 }
-.perm-level-2-container.expanded { display: flex; }
+.perm-level-2-container.expanded { display: flex !important; }
 
 .perm-level-2-item {
-    padding: 8px 12px;
-    border-radius: 6px;
-    background: #ffffff;
-    border: 1px solid #f1f5f9;
-    transition: all 0.2s;
-    color: #475569;
+    padding: 10px 14px !important;
+    border-radius: 6px !important;
+    background: #ffffff !important;
+    border: 1px solid #f1f5f9 !important;
+    transition: all 0.2s !important;
+}
+.perm-level-2-item span {
+    color: #4b5563 !important;
+    font-weight: 600 !important;
 }
 .perm-level-2-item:hover {
-    background: #fff7ed;
-    border-color: #fdba74;
-    color: #f97316;
+    background: #fff7ed !important;
+    border-color: #fdba74 !important;
 }
 .perm-level-2-item.expanded {
-    background: #fff7ed;
-    border-color: #f97316;
-    color: #c2410c;
-    font-weight: 600;
+    background: #fff7ed !important;
+    border-color: #f97316 !important;
+}
+.perm-level-2-item.expanded span {
+    color: #c2410c !important;
 }
 
-/* Checkbox Alignment & Visibility */
+/* Checkbox & Arrows */
 .perm-checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    cursor: pointer;
-    font-size: 14px;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: 100% !important;
+    cursor: pointer !important;
 }
 .perm-checkbox-label input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    margin: 0;
-    accent-color: #f97316;
+    width: 20px !important;
+    height: 20px !important;
+    margin: 0 !important;
+    accent-color: #f97316 !important;
 }
 .perm-arrow, .perm-arrow-sub {
-    font-size: 12px;
-    color: #94a3b8;
-    transition: transform 0.2s;
-    width: 20px;
-    text-align: center;
-}
-.expanded .perm-arrow, .expanded .perm-arrow-sub {
-    transform: rotate(90deg);
-    color: #f97316;
+    font-size: 14px !important;
+    color: #94a3b8 !important;
+    width: 20px !important;
+    text-align: center !important;
 }
 
 /* Detail Card Content */
 .perm-detail-header {
-    margin-bottom: 20px;
-    padding-bottom: 12px;
-    border-bottom: 3px solid #f97316;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    margin-bottom: 24px !important;
+    padding-bottom: 12px !important;
+    border-bottom: 4px solid #f97316 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
 }
-.perm-detail-header strong { font-size: 18px; color: #1e293b; }
-.perm-close-btn {
-    background: #f1f5f9;
-    border: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    color: #64748b;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-.perm-close-btn:hover { background: #fee2e2; color: #dc2626; }
+.perm-detail-header strong { font-size: 20px !important; color: #1e293b !important; }
 
 .perm-level-3-section {
-    background: #fdfdfd;
-    padding: 16px;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
-    border-left: 4px solid #f97316;
-    margin-bottom: 15px;
+    background: #fdfdfd !important;
+    padding: 20px !important;
+    border-radius: 8px !important;
+    border: 1px solid #e2e8f0 !important;
+    border-left: 5px solid #f97316 !important;
+    margin-bottom: 20px !important;
 }
 .perm-section-title {
-    font-size: 13px;
-    font-weight: 800;
-    color: #f97316;
-    text-transform: uppercase;
-    margin-bottom: 12px;
+    font-size: 14px !important;
+    font-weight: 900 !important;
+    color: #f97316 !important;
+    text-transform: uppercase !important;
+    margin-bottom: 15px !important;
 }
 .perm-level-3-section label {
     display: flex;
