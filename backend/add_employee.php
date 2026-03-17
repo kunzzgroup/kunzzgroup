@@ -336,8 +336,8 @@ body { background: #f3f4f6; }
     text-transform: uppercase;
     letter-spacing: 0.5px;
     padding-bottom: 6px;
-    border-bottom: 1px solid #e5e7eb;
-    margin-bottom: 8px;
+    border-bottom: 1.5px solid #f97316; /* 橙色分割线 */
+    margin-bottom: 10px;
 }
 
 .perm-level-3-section label {
@@ -958,18 +958,28 @@ body { background: #f3f4f6; }
                                         </label>
                                     </div>
                                     <div class="perm-level-2-container" data-parent="analytics">
-                                        <div class="perm-level-2-item">
+                                        <div class="perm-level-2-item has-level-3" data-sub="monthly_report">
                                             <label class="perm-checkbox-label">
-                                                <input type="checkbox" class="perm-l2-check" data-parent="analytics" value="kpi_report">
-                                                <span>KPI报表</span>
+                                                <input type="checkbox" class="perm-l2-check" data-parent="analytics" value="monthly_report">
+                                                <span class="perm-arrow-sub">▶</span>
+                                                <span>月度报表</span>
+                                                <span class="perm-cfg-link" data-target="monthly_report">详细配置 ▶</span>
                                             </label>
                                         </div>
-                                        <div class="perm-level-2-item has-level-3" data-sub="kpi_upload">
+                                        <div class="perm-level-2-item has-level-3" data-sub="annual_summary">
                                             <label class="perm-checkbox-label">
-                                                <input type="checkbox" class="perm-l2-check" data-parent="analytics" value="kpi_upload">
+                                                <input type="checkbox" class="perm-l2-check" data-parent="analytics" value="annual_summary">
                                                 <span class="perm-arrow-sub">▶</span>
-                                                <span>数据上传</span>
-                                                <span class="perm-cfg-link" data-target="kpi_upload">详细配置 ▶</span>
+                                                <span>年度汇总</span>
+                                                <span class="perm-cfg-link" data-target="annual_summary">详细配置 ▶</span>
+                                            </label>
+                                        </div>
+                                        <div class="perm-level-2-item has-level-3" data-sub="branch_comparison">
+                                            <label class="perm-checkbox-label">
+                                                <input type="checkbox" class="perm-l2-check" data-parent="analytics" value="branch_comparison">
+                                                <span class="perm-arrow-sub">▶</span>
+                                                <span>分店对比</span>
+                                                <span class="perm-cfg-link" data-target="branch_comparison">详细配置 ▶</span>
                                             </label>
                                         </div>
                                     </div>
@@ -1047,10 +1057,61 @@ body { background: #f3f4f6; }
                                 <div class="perm-detail-content">
                                     <!-- 面板内容由JS根据 context 动态查找或初始化时存在 -->
                                     <!-- 为保证逻辑统一，这里也放入三级面板，但样式会由 .editUserPermLayout 控制 -->
+                                    <!-- 月度报表 -->
+                                    <div class="perm-level-3-panel" data-for="monthly_report">
+                                        <div class="perm-detail-header">
+                                            <strong><i class="fas fa-cog" style="margin-right:8px;"></i>月度报表</strong>
+                                            <button type="button" class="perm-close-btn" onclick="closeDetailPanel()">×</button>
+                                        </div>
+                                        <div class="perm-level-3-section">
+                                            <div class="perm-section-title">系统选项</div>
+                                            <label><input type="checkbox" class="perm-stock-system" value="central"> 中央</label>
+                                            <label><input type="checkbox" class="perm-stock-system" value="j1"> J1</label>
+                                            <label><input type="checkbox" class="perm-stock-system" value="j2"> J2</label>
+                                            <label><input type="checkbox" class="perm-stock-system" value="j3"> J3</label>
+                                            <label><input type="checkbox" class="perm-stock-system" value="j4"> J4</label>
+                                            <label><input type="checkbox" class="perm-stock-system" value="j5"> J5</label>
+                                        </div>
+                                        <div class="perm-level-3-section">
+                                            <div class="perm-section-title">视图选项</div>
+                                            <label><input type="checkbox" class="perm-stock-view" value="list"> 总库存</label>
+                                            <label><input type="checkbox" class="perm-stock-view" value="records"> 进出货</label>
+                                            <label><input type="checkbox" class="perm-stock-view" value="report"> 库存报表</label>
+                                            <label><input type="checkbox" class="perm-stock-view" value="warning"> 库存预警</label>
+                                        </div>
+                                    </div>
+
+                                    <!-- 年度汇总 -->
+                                    <div class="perm-level-3-panel" data-for="annual_summary">
+                                        <div class="perm-detail-header">
+                                            <strong><i class="fas fa-cog" style="margin-right:8px;"></i>年度汇总</strong>
+                                            <button type="button" class="perm-close-btn" onclick="closeDetailPanel()">×</button>
+                                        </div>
+                                        <div class="perm-level-3-section">
+                                            <div class="perm-section-title">系统选项</div>
+                                            <label><input type="checkbox" class="perm-annual-system" value="total"> 全局汇总</label>
+                                            <label><input type="checkbox" class="perm-annual-system" value="split"> 分店拆分</label>
+                                        </div>
+                                    </div>
+
+                                    <!-- 分店对比 -->
+                                    <div class="perm-level-3-panel" data-for="branch_comparison">
+                                        <div class="perm-detail-header">
+                                            <strong><i class="fas fa-cog" style="margin-right:8px;"></i>分店对比</strong>
+                                            <button type="button" class="perm-close-btn" onclick="closeDetailPanel()">×</button>
+                                        </div>
+                                        <div class="perm-level-3-section">
+                                            <div class="perm-section-title">对比项</div>
+                                            <label><input type="checkbox" class="perm-comp-view" value="revenue"> 营收对比</label>
+                                            <label><input type="checkbox" class="perm-comp-view" value="cost"> 成本对比</label>
+                                            <label><input type="checkbox" class="perm-comp-view" value="labor"> 人工对比</label>
+                                        </div>
+                                    </div>
+
                                     <!-- 集团架构 - KUNZZ HOLDINGS -->
                                     <div class="perm-level-3-panel" data-for="kunzz_holdings">
                                         <div class="perm-detail-header">
-                                            <strong>KUNZZ HOLDINGS SDN BHD</strong>
+                                            <strong><i class="fas fa-cog" style="margin-right:8px;"></i>KUNZZ HOLDINGS SDN BHD</strong>
                                             <button type="button" class="perm-close-btn" onclick="closeDetailPanel()">×</button>
                                         </div>
                                         <div class="perm-level-3-section">
@@ -1061,7 +1122,7 @@ body { background: #f3f4f6; }
                                     <!-- TOKYO CUISINE -->
                                     <div class="perm-level-3-panel" data-for="tokyo_cuisine">
                                         <div class="perm-detail-header">
-                                            <strong>TOKYO JAPANESE CUISINE SDN BHD</strong>
+                                            <strong><i class="fas fa-cog" style="margin-right:8px;"></i>TOKYO JAPANESE CUISINE SDN BHD</strong>
                                             <button type="button" class="perm-close-btn" onclick="closeDetailPanel()">×</button>
                                         </div>
                                         <div class="perm-level-3-section">
@@ -1091,7 +1152,7 @@ body { background: #f3f4f6; }
                                     <!-- TOKYO IZAKAYA -->
                                     <div class="perm-level-3-panel" data-for="tokyo_izakaya">
                                         <div class="perm-detail-header">
-                                            <strong>TOKYO IZAKAYA SDN BHD</strong>
+                                            <strong><i class="fas fa-cog" style="margin-right:8px;"></i>TOKYO IZAKAYA SDN BHD</strong>
                                             <button type="button" class="perm-close-btn" onclick="closeDetailPanel()">×</button>
                                         </div>
                                         <div class="perm-level-3-section">
@@ -1129,7 +1190,7 @@ body { background: #f3f4f6; }
                                     <!-- STOCK INVENTORY -->
                                     <div class="perm-level-3-panel" data-for="stock_inventory">
                                         <div class="perm-detail-header">
-                                            <strong>库存</strong>
+                                            <strong><i class="fas fa-cog" style="margin-right:8px;"></i>库存</strong>
                                             <button type="button" class="perm-close-btn" onclick="closeDetailPanel()">×</button>
                                         </div>
                                         <div class="perm-level-3-section">
