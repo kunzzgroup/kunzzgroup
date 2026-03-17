@@ -793,10 +793,17 @@ tr:hover {
     transform: translateY(0);
 }
 
-.back-to-top:hover {
-    background-color: #d16003ff;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgba(88, 62, 4, 0.4);
+
+/* 分店筛选器下拉项样式 */
+.bl1-item:hover,
+.bl2-item:hover {
+    background-color: #f3f4f6;
+}
+
+.bl1-item.active,
+.bl2-item.active {
+    background-color: #f99e00;
+    color: white !important;
 }
 
 .back-to-top:active {
