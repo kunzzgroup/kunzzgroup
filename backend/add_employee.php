@@ -699,10 +699,16 @@ body { background: #f3f4f6; }
 
                                 <div class="form-group" id="group-add-branch">
                                     <label>所属分店 Branch</label>
-                                    <div class="branch-checkbox-group">
-                                        <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j1"> J1 (Midvalley Southkey)</label>
-                                        <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j2"> J2 (Paradigm Mall)</label>
-                                        <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j3"> J3 (Desa Tebrau)</label>
+                                    <div class="custom-multi-select" id="add-branch-select">
+                                        <div class="select-header" onclick="toggleMultiSelect(this)">
+                                            <span class="selected-text">请选择分店</span>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                        <div class="select-options">
+                                            <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j1" onchange="updateMultiSelectText(this)"> J1 (Midvalley Southkey)</label>
+                                            <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j2" onchange="updateMultiSelectText(this)"> J2 (Paradigm Mall)</label>
+                                            <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j3" onchange="updateMultiSelectText(this)"> J3 (Desa Tebrau)</label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -985,6 +991,12 @@ body { background: #f3f4f6; }
 
     <script src="js/generatecode.js?v=<?php echo time(); ?>"></script>
     <script>
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            const multiSelect = document.querySelector('.custom-multi-select');
+            if (multiSelect) refreshMultiSelectHeader(multiSelect);
+        });
+
         // 避免 DOM 型 XSS：安全地转义 HTML 特殊字符
         function escapeHTML(str) {
             if (str === null || str === undefined) return '';
@@ -1051,7 +1063,14 @@ body { background: #f3f4f6; }
         async function addNewUserAndRedirect() {
             const formData = new FormData(document.getElementById('addUserForm'));
             const userData = {};
-            for (let [key, value] of formData.entries()) userData[key] = value.trim();
+            for (let [key, value] of formData.entries()) {
+                if (key === 'branch[]') continue;
+                userData[key] = value.trim();
+            }
+            
+            // 多选分店处理
+            const checkedBranches = Array.from(document.querySelectorAll('input[name="branch[]"]:checked')).map(cb => cb.value);
+            userData['branch'] = checkedBranches.join(',');
 
             // Validate required fields
             let hasError = false;

@@ -156,10 +156,16 @@ require_once 'session_check.php';
                                         </div>
                                         <div class="form-group">
                                             <label>所属分店 Branch</label>
-                                            <div class="branch-checkbox-group">
-                                                <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j1"> J1 (Midvalley Southkey)</label>
-                                                <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j2"> J2 (Paradigm Mall)</label>
-                                                <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j3"> J3 (Desa Tebrau)</label>
+                                            <div class="custom-multi-select" id="add-branch-select-modal">
+                                                <div class="select-header" onclick="toggleMultiSelect(this)">
+                                                    <span class="selected-text">请选择分店</span>
+                                                    <i class="fas fa-chevron-down"></i>
+                                                </div>
+                                                <div class="select-options">
+                                                    <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j1" onchange="updateMultiSelectText(this)"> J1 (Midvalley Southkey)</label>
+                                                    <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j2" onchange="updateMultiSelectText(this)"> J2 (Paradigm Mall)</label>
+                                                    <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j3" onchange="updateMultiSelectText(this)"> J3 (Desa Tebrau)</label>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -843,10 +849,16 @@ require_once 'session_check.php';
                             <div class="form-row-2col">
                                 <div class="form-group">
                                     <label>所属分店 Branch</label>
-                                    <div class="branch-checkbox-group">
-                                        <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j1"> J1 (Midvalley Southkey)</label>
-                                        <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j2"> J2 (Paradigm Mall)</label>
-                                        <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j3"> J3 (Desa Tebrau)</label>
+                                    <div class="custom-multi-select" id="edit-branch-select">
+                                        <div class="select-header" onclick="toggleMultiSelect(this)">
+                                            <span class="selected-text">请选择分店</span>
+                                            <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                        <div class="select-options">
+                                            <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j1" onchange="updateMultiSelectText(this)"> J1 (Midvalley Southkey)</label>
+                                            <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j2" onchange="updateMultiSelectText(this)"> J2 (Paradigm Mall)</label>
+                                            <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j3" onchange="updateMultiSelectText(this)"> J3 (Desa Tebrau)</label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

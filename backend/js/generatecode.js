@@ -1,3 +1,49 @@
+/**
+ * Custom Multi-select Dropdown Helpers
+ */
+function toggleMultiSelect(header) {
+    const container = header.parentElement;
+    const isActive = container.classList.contains('active');
+    
+    // Close all other multi-selects first
+    document.querySelectorAll('.custom-multi-select').forEach(ms => {
+        if (ms !== container) ms.classList.remove('active');
+    });
+    
+    container.classList.toggle('active');
+}
+
+function updateMultiSelectText(checkbox) {
+    const container = checkbox.closest('.custom-multi-select');
+    refreshMultiSelectHeader(container);
+}
+
+function refreshMultiSelectHeader(container) {
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+    const selectedTextSpan = container.querySelector('.selected-text');
+    const checked = Array.from(checkboxes).filter(cb => cb.checked);
+    
+    if (checked.length === 0) {
+        selectedTextSpan.textContent = "请选择分店";
+        selectedTextSpan.style.color = "#999";
+    } else if (checked.length <= 2) {
+        selectedTextSpan.textContent = checked.map(cb => cb.parentElement.textContent.trim().split(' ')[0]).join(', ');
+        selectedTextSpan.style.color = "black";
+    } else {
+        selectedTextSpan.textContent = `已选择 ${checked.length} 个分店`;
+        selectedTextSpan.style.color = "black";
+    }
+}
+
+// Global click listener to close dropdowns
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.custom-multi-select')) {
+        document.querySelectorAll('.custom-multi-select').forEach(ms => {
+            ms.classList.remove('active');
+        });
+    }
+});
+
 // 职位配置 - 根据账号类型显示不同职位选项
 const positionsByAccountType = {
     'special': [
@@ -947,6 +993,10 @@ function openEditModal(id) {
     branchCheckboxes.forEach(cb => {
         cb.checked = userBranches.includes(cb.value);
     });
+    
+    // 刷新多选框头部文字
+    const multiSelect = modal.querySelector('.custom-multi-select');
+    if (multiSelect) refreshMultiSelectHeader(multiSelect);
 
     // 先设置账号类型，然后更新职位选项
     if (userData.account_type) {
@@ -1242,6 +1292,10 @@ function openAddUserModal() {
             updatePositionOptions(this.value, 'add_position');
         });
     }
+    
+    // 初始化分店多选框标题
+    const multiSelect = modal.querySelector('.custom-multi-select');
+    if (multiSelect) refreshMultiSelectHeader(multiSelect);
 
     // 添加输入格式化
     const fieldsToFormat = [
