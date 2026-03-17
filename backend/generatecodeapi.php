@@ -39,7 +39,8 @@ try {
 
     // 设置时区为马来西亚时间 (UTC+8)
     $pdo->exec("SET time_zone = '+08:00'");
-} catch(PDOException $e) {
+}
+catch (PDOException $e) {
     // 数据库连接失败
     echo json_encode([
         'success' => false,
@@ -54,7 +55,8 @@ $action = '';
 
 if ($method === 'GET') {
     $action = $_GET['action'] ?? '';
-} else if ($method === 'POST') {
+}
+else if ($method === 'POST') {
     // 使用 xss_protect.php 中定义的安全获取 JSON 输入函数
     $input = get_safe_json_input();
     $action = $input['action'] ?? '';
@@ -66,17 +68,17 @@ try {
             // 生成新代码
             generateCode($pdo, $input);
             break;
-            
+
         case 'list':
             // 获取代码和用户列表
             getCodesAndUsers($pdo);
             break;
-            
+
         case 'update':
             // 更新代码和用户信息
             updateCodeAndUser($pdo, $input);
             break;
-            
+
         case 'delete':
             // 删除代码
             deleteCode($pdo, $input);
@@ -86,7 +88,7 @@ try {
             // 添加新用户
             addNewUser($pdo, $input);
             break;
-        
+
         case 'get_permissions':
             getUserSidebarPermissions($pdo, $input);
             break;
@@ -102,7 +104,7 @@ try {
         case 'save_page_permissions':
             saveUserPagePermissions($pdo, $input);
             break;
-            
+
         default:
             echo json_encode([
                 'success' => false,
@@ -110,7 +112,8 @@ try {
             ]);
             break;
     }
-} catch (\Exception $e) {
+}
+catch (\Exception $e) {
     echo json_encode([
         'success' => false,
         'message' => '服务器错误: ' . $e->getMessage()
@@ -120,26 +123,27 @@ try {
 /**
  * 生成随机密码
  */
-function generateRandomPassword($length = 10) {
+function generateRandomPassword($length = 10)
+{
     $uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $lowercase = 'abcdefghijklmnopqrstuvwxyz';
     $numbers = '0123456789';
     $symbols = '!@#$%&*';
-    
+
     $password = '';
-    
+
     // 确保密码包含每种类型的字符
     $password .= $uppercase[rand(0, strlen($uppercase) - 1)];
     $password .= $lowercase[rand(0, strlen($lowercase) - 1)];
     $password .= $numbers[rand(0, strlen($numbers) - 1)];
     $password .= $symbols[rand(0, strlen($symbols) - 1)];
-    
+
     // 填充剩余长度
     $allChars = $uppercase . $lowercase . $numbers . $symbols;
     for ($i = 4; $i < $length; $i++) {
         $password .= $allChars[rand(0, strlen($allChars) - 1)];
     }
-    
+
     // 打乱密码字符顺序
     return str_shuffle($password);
 }
@@ -147,24 +151,25 @@ function generateRandomPassword($length = 10) {
 /**
  * 发送欢迎邮件（PHPMailer SMTP 版）
  */
-function sendWelcomeEmail($email, $username, $password, $accountType) {
+function sendWelcomeEmail($email, $username, $password, $accountType)
+{
 
     // 格式化账户类型
     $typeNames = [
-        'special'    => '特殊',
-        'hr'         => '人事部',
-        'account'    => '会计部',
-        'media'      => '媒体制作部',
-        'marketing'  => '推广部',
-        'support'    => '支援部',
+        'special' => '特殊',
+        'hr' => '人事部',
+        'account' => '会计部',
+        'media' => '媒体制作部',
+        'marketing' => '推广部',
+        'support' => '支援部',
         'production' => '生产部',
-        'r&d'        => '研发部',
-        'technical'  => '科技部',
-        'design'     => '设计部',
-        'operation'  => 'Operation',
-        'service'    => '前台',
-        'sushi'      => 'Sushi Bar',
-        'kitchen'    => '厨房'
+        'r&d' => '研发部',
+        'technical' => '科技部',
+        'design' => '设计部',
+        'operation' => 'Operation',
+        'service' => '前台',
+        'sushi' => 'Sushi Bar',
+        'kitchen' => '厨房'
     ];
     $accountTypeName = $typeNames[$accountType] ?? $accountType;
 
@@ -229,13 +234,13 @@ function sendWelcomeEmail($email, $username, $password, $accountType) {
 
         // SMTP 设置
         $mail->isSMTP();
-        $mail->Host       = SMTP_HOST;
-        $mail->SMTPAuth   = true;
-        $mail->Username   = SMTP_USER;
-        $mail->Password   = SMTP_PASS;
+        $mail->Host = SMTP_HOST;
+        $mail->SMTPAuth = true;
+        $mail->Username = SMTP_USER;
+        $mail->Password = SMTP_PASS;
         $mail->SMTPSecure = SMTP_SECURE;
-        $mail->Port       = SMTP_PORT;
-        $mail->CharSet    = 'UTF-8';
+        $mail->Port = SMTP_PORT;
+        $mail->CharSet = 'UTF-8';
 
         // 发件人 & 收件人
         $mail->setFrom(SMTP_FROM, SMTP_FROM_NAME);
@@ -245,13 +250,14 @@ function sendWelcomeEmail($email, $username, $password, $accountType) {
         // 内容
         $mail->isHTML(true);
         $mail->Subject = '欢迎加入 Kunzz Group - 您的登录信息';
-        $mail->Body    = $htmlBody;
+        $mail->Body = $htmlBody;
         $mail->AltBody = "亲爱的 {$username}，\n\n您的账户已创建。\n邮箱：{$email}\n账户类型：{$accountTypeName}\n临时密码：{$password}\n\n请登录：{$loginUrl}\n\n请勿回复此邮件。";
 
         $mail->send();
         return true;
 
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
         // 记录错误到日志（不暴露给前端）
         error_log('[sendWelcomeEmail] SMTP Error: ' . $e->getMessage());
         return false;
@@ -262,7 +268,8 @@ function sendWelcomeEmail($email, $username, $password, $accountType) {
 /**
  * 生成新的应用代码
  */
-function generateCode($pdo, $input) {
+function generateCode($pdo, $input)
+{
     // 验证输入数据
     if (empty($input['account_type'])) {
         echo json_encode([
@@ -273,7 +280,7 @@ function generateCode($pdo, $input) {
     }
 
     $account_type = trim($input['account_type']);
-    
+
     // 生成6位随机代码
     $code = generateRandomCode($pdo);
 
@@ -316,7 +323,7 @@ function generateCode($pdo, $input) {
         $insertStmt = $pdo->prepare($insertSql);
         $insertStmt->bindParam(':code', $code);
         $insertStmt->bindParam(':account_type', $account_type);
-        
+
         if ($insertStmt->execute()) {
             echo json_encode([
                 'success' => true,
@@ -326,14 +333,16 @@ function generateCode($pdo, $input) {
                     'account_type' => $account_type
                 ]
             ]);
-        } else {
+        }
+        else {
             echo json_encode([
                 'success' => false,
                 'message' => '代码生成失败，请重试'
             ]);
         }
 
-    } catch (PDOException $e) {
+    }
+    catch (PDOException $e) {
         echo json_encode([
             'success' => false,
             'message' => '数据库操作失败: ' . $e->getMessage()
@@ -344,10 +353,15 @@ function generateCode($pdo, $input) {
 /**
  * 获取代码和用户列表
  */
-function getCodesAndUsers($pdo) {
+function getCodesAndUsers($pdo)
+{
     try {
-        // 查询所有代码和对应的用户信息
-        $sql = "
+        // 从 session 读取当前用户的 branch
+        if (!isset($_SESSION))
+            @session_start();
+        $sessionBranch = $_SESSION['branch'] ?? 'kunzz'; // 默认总部
+
+        $baseSelect = "
             SELECT 
                 u.id,
                 u.username,
@@ -369,13 +383,25 @@ function getCodesAndUsers($pdo) {
                 u.bank_account_holder_en,
                 u.registration_code,
                 u.account_type,
+                u.branch,
                 u.created_at
             FROM users u
-            ORDER BY u.created_at DESC, u.id DESC
         ";
-        
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute();
+
+        if ($sessionBranch === 'kunzz') {
+            // 总部：查看所有职员
+            $sql = $baseSelect . " ORDER BY u.created_at DESC, u.id DESC";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute();
+        }
+        else {
+            // 分店：只看本店职员（branch 匹配或未设置）
+            $sql = $baseSelect . " WHERE u.branch = :branch OR u.branch IS NULL OR u.branch = '' ORDER BY u.created_at DESC, u.id DESC";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':branch', $sessionBranch);
+            $stmt->execute();
+        }
+
         $results = $stmt->fetchAll();
 
         echo json_encode([
@@ -384,7 +410,8 @@ function getCodesAndUsers($pdo) {
             'data' => $results
         ]);
 
-    } catch (PDOException $e) {
+    }
+    catch (PDOException $e) {
         echo json_encode([
             'success' => false,
             'message' => '数据查询失败: ' . $e->getMessage()
@@ -395,12 +422,13 @@ function getCodesAndUsers($pdo) {
 /**
  * 验证代码格式
  */
-function validateCodeFormat($code) {
+function validateCodeFormat($code)
+{
     // 代码长度限制：3-50个字符
     if (strlen($code) < 3 || strlen($code) > 50) {
         return false;
     }
-    
+
     // 只允许大写字母、数字、下划线和连字符
     return preg_match('/^[A-Z0-9_-]+$/', $code);
 }
@@ -408,16 +436,18 @@ function validateCodeFormat($code) {
 /**
  * 记录操作日志（可选功能）
  */
-function logOperation($pdo, $action, $details) {
+function logOperation($pdo, $action, $details)
+{
     try {
-        // 如果你有日志表，可以在这里记录操作
-        // $logSql = "INSERT INTO operation_logs (action, details, ip_address, created_at) VALUES (:action, :details, :ip, NOW())";
-        // $logStmt = $pdo->prepare($logSql);
-        // $logStmt->bindParam(':action', $action);
-        // $logStmt->bindParam(':details', $details);
-        // $logStmt->bindParam(':ip', $_SERVER['REMOTE_ADDR']);
-        // $logStmt->execute();
-    } catch (Exception $e) {
+    // 如果你有日志表，可以在这里记录操作
+    // $logSql = "INSERT INTO operation_logs (action, details, ip_address, created_at) VALUES (:action, :details, :ip, NOW())";
+    // $logStmt = $pdo->prepare($logSql);
+    // $logStmt->bindParam(':action', $action);
+    // $logStmt->bindParam(':details', $details);
+    // $logStmt->bindParam(':ip', $_SERVER['REMOTE_ADDR']);
+    // $logStmt->execute();
+    }
+    catch (Exception $e) {
         // 日志记录失败不影响主要功能
         error_log("日志记录失败: " . $e->getMessage());
     }
@@ -426,21 +456,22 @@ function logOperation($pdo, $action, $details) {
 /**
  * 获取统计信息（扩展功能）
  */
-function getStatistics($pdo) {
+function getStatistics($pdo)
+{
     try {
         $stats = [];
-        
+
         // 总代码数
         $totalStmt = $pdo->query("SELECT COUNT(*) as total FROM application_codes");
         $stats['total_codes'] = $totalStmt->fetch()['total'];
-        
+
         // 已使用代码数
         $usedStmt = $pdo->query("SELECT COUNT(*) as used FROM application_codes WHERE used = 1");
         $stats['used_codes'] = $usedStmt->fetch()['used'];
-        
+
         // 未使用代码数
         $stats['unused_codes'] = $stats['total_codes'] - $stats['used_codes'];
-        
+
         // 各类型账户统计
         $typeStmt = $pdo->query("
             SELECT account_type, COUNT(*) as count 
@@ -448,13 +479,14 @@ function getStatistics($pdo) {
             GROUP BY account_type
         ");
         $stats['by_type'] = $typeStmt->fetchAll();
-        
+
         echo json_encode([
             'success' => true,
             'data' => $stats
         ]);
-        
-    } catch (PDOException $e) {
+
+    }
+    catch (PDOException $e) {
         echo json_encode([
             'success' => false,
             'message' => '统计数据获取失败: ' . $e->getMessage()
@@ -465,27 +497,28 @@ function getStatistics($pdo) {
 /**
  * 生成6位随机代码并确保唯一性
  */
-function generateRandomCode($pdo) {
+function generateRandomCode($pdo)
+{
     $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     $maxAttempts = 100; // 最大尝试次数，避免无限循环
-    
+
     for ($attempt = 0; $attempt < $maxAttempts; $attempt++) {
         $code = '';
         for ($i = 0; $i < 6; $i++) {
             $code .= $chars[rand(0, strlen($chars) - 1)];
         }
-        
+
         // 检查代码是否已存在
         $checkSql = "SELECT id FROM application_codes WHERE code = :code";
         $checkStmt = $pdo->prepare($checkSql);
         $checkStmt->bindParam(':code', $code);
         $checkStmt->execute();
-        
+
         if ($checkStmt->rowCount() == 0) {
             return $code; // 返回唯一的代码
         }
     }
-    
+
     // 如果尝试次数过多仍未找到唯一代码，抛出异常
     throw new Exception('无法生成唯一的申请码，请稍后重试');
 }
@@ -493,7 +526,8 @@ function generateRandomCode($pdo) {
 /**
  * 更新申请码和用户信息
  */
-function updateCodeAndUser($pdo, $input) {
+function updateCodeAndUser($pdo, $input)
+{
     // 验证输入数据
     if (empty($input['id']) || empty($input['account_type'])) {
         echo json_encode([
@@ -523,9 +557,10 @@ function updateCodeAndUser($pdo, $input) {
     $bank_account = trim($input['bank_account'] ?? '');
     $bank_account_holder_en = trim($input['bank_account_holder_en'] ?? '');
     $registration_code = trim($input['registration_code'] ?? '');
+    $branch = !empty($input['branch']) ? trim($input['branch']) : null;
 
     // 验证账户类型
-    $valid_types = ['special', 'hr', 'account', 'media', 'marketing', 'support', 'production', 'r&d', 'technical', 'design','operation','service','sushi','kitchen'];
+    $valid_types = ['special', 'hr', 'account', 'media', 'marketing', 'support', 'production', 'r&d', 'technical', 'design', 'operation', 'service', 'sushi', 'kitchen'];
     if (!in_array($account_type, $valid_types)) {
         echo json_encode([
             'success' => false,
@@ -593,7 +628,8 @@ function updateCodeAndUser($pdo, $input) {
             emergency_phone_number = :emergency_phone_number,
             bank_name = :bank_name,
             bank_account = :bank_account,
-            bank_account_holder_en = :bank_account_holder_en
+            bank_account_holder_en = :bank_account_holder_en,
+            branch = :branch
             WHERE id = :id";
 
         $params = [
@@ -615,6 +651,7 @@ function updateCodeAndUser($pdo, $input) {
             ':bank_name' => $bank_name,
             ':bank_account' => $bank_account,
             ':bank_account_holder_en' => $bank_account_holder_en,
+            ':branch' => $branch,
             ':id' => $id
         ];
 
@@ -637,7 +674,8 @@ function updateCodeAndUser($pdo, $input) {
             'message' => '更新成功'
         ]);
 
-    } catch (PDOException $e) {
+    }
+    catch (PDOException $e) {
         $pdo->rollBack();
         echo json_encode([
             'success' => false,
@@ -649,7 +687,8 @@ function updateCodeAndUser($pdo, $input) {
 /**
  * 删除申请码
  */
-function deleteCode($pdo, $input) {
+function deleteCode($pdo, $input)
+{
     // 验证输入数据
     if (empty($input['id'])) {
         echo json_encode([
@@ -670,7 +709,7 @@ function deleteCode($pdo, $input) {
         $checkStmt = $pdo->prepare($checkSql);
         $checkStmt->bindParam(':id', $id);
         $checkStmt->execute();
-        
+
         $result = $checkStmt->fetch();
         if (!$result) {
             $pdo->rollBack();
@@ -688,7 +727,7 @@ function deleteCode($pdo, $input) {
         $deleteSql = "DELETE FROM users WHERE id = :id";
         $deleteStmt = $pdo->prepare($deleteSql);
         $deleteStmt->bindParam(':id', $id);
-        
+
         if (!$deleteStmt->execute()) {
             $pdo->rollBack();
             echo json_encode([
@@ -711,7 +750,8 @@ function deleteCode($pdo, $input) {
             ]
         ]);
 
-    } catch (PDOException $e) {
+    }
+    catch (PDOException $e) {
         $pdo->rollBack();
         echo json_encode([
             'success' => false,
@@ -723,7 +763,8 @@ function deleteCode($pdo, $input) {
 /**
  * 添加新用户
  */
-function addNewUser($pdo, $input) {
+function addNewUser($pdo, $input)
+{
     // 验证必填字段
     if (empty($input['username']) || empty($input['email']) || empty($input['account_type'])) {
         echo json_encode([
@@ -734,7 +775,7 @@ function addNewUser($pdo, $input) {
     }
 
     // 验证账户类型
-    $valid_types = ['special', 'hr', 'account', 'media', 'marketing', 'support', 'production', 'r&d', 'technical', 'design','operation','service','sushi','kitchen'];
+    $valid_types = ['special', 'hr', 'account', 'media', 'marketing', 'support', 'production', 'r&d', 'technical', 'design', 'operation', 'service', 'sushi', 'kitchen'];
     if (!in_array($input['account_type'], $valid_types)) {
         echo json_encode([
             'success' => false,
@@ -788,7 +829,7 @@ function addNewUser($pdo, $input) {
         // 插入申请码
         $insertCodeSql = "INSERT INTO application_codes (code, account_type, used, created_at) VALUES (?, ?, 1, NOW())";
         $insertCodeStmt = $pdo->prepare($insertCodeSql);
-        
+
         if (!$insertCodeStmt->execute([$code, $input['account_type']])) {
             $pdo->rollBack();
             echo json_encode([
@@ -804,7 +845,7 @@ function addNewUser($pdo, $input) {
 
         // 处理日期格式
         $dateOfBirth = !empty($input['date_of_birth']) ? $input['date_of_birth'] : null;
-        
+
         // 插入用户数据 - 只插入数据库中存在的字段
         $insertUserSql = "INSERT INTO users (
             username, username_cn, nickname, email, password, ic_number, 
@@ -812,14 +853,14 @@ function addNewUser($pdo, $input) {
             home_address, current_address, city, state, postcode,
             date_of_birth, gender, nationality, race, 
             emergency_contact_name, emergency_phone_number, 
-            bank_account_holder_en, account_type, registration_code, is_first_login, created_at
+            bank_account_holder_en, account_type, registration_code, branch, is_first_login, created_at
         ) VALUES (
             ?, ?, ?, ?, ?, ?,
             ?, ?, ?, ?,
             ?, ?, ?, ?, ?,
             ?, ?, ?, ?,
             ?, ?,
-            ?, ?, ?, 1, NOW()
+            ?, ?, ?, ?, 1, NOW()
         )";
 
         $insertUserStmt = $pdo->prepare($insertUserSql);
@@ -847,7 +888,8 @@ function addNewUser($pdo, $input) {
             !empty($input['emergency_phone_number']) ? trim($input['emergency_phone_number']) : null,
             !empty($input['bank_account_holder_en']) ? trim($input['bank_account_holder_en']) : null,
             $input['account_type'],
-            $code
+            $code,
+            !empty($input['branch']) ? trim($input['branch']) : null
         ];
 
         if (!$insertUserStmt->execute($userData)) {
@@ -862,7 +904,7 @@ function addNewUser($pdo, $input) {
         $newUserId = $pdo->lastInsertId();
 
         // ======= 保存初始权限数据 =======
-        
+
         $perms = isset($input['permissions']) && is_array($input['permissions']) ? $input['permissions'] : [];
         $pagePerms = isset($input['page_permissions']) && is_array($input['page_permissions']) ? $input['page_permissions'] : [];
         $submenuPerms = isset($input['submenu_permissions']) && is_array($input['submenu_permissions']) ? $input['submenu_permissions'] : [];
@@ -882,7 +924,7 @@ function addNewUser($pdo, $input) {
             upload_permissions_json,
             updated_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NOW())";
-        
+
         $insertPermsStmt = $pdo->prepare($insertPermsSql);
         $insertPermsStmt->execute([
             $newUserId,
@@ -893,7 +935,7 @@ function addNewUser($pdo, $input) {
             empty($restaurantPerms) ? NULL : json_encode($restaurantPerms, JSON_UNESCAPED_UNICODE),
             empty($brandPerms) ? NULL : json_encode($brandPerms, JSON_UNESCAPED_UNICODE)
         ]);
-        
+
         // 尝试写入 user_page_permissions（如果使用了新表结构）
         try {
             $checkStmt = $pdo->query("SHOW TABLES LIKE 'user_page_permissions'");
@@ -910,8 +952,9 @@ function addNewUser($pdo, $input) {
                     }
                 }
             }
-        } catch (Throwable $e) {
-            // 忽略表不存在等错误
+        }
+        catch (Throwable $e) {
+        // 忽略表不存在等错误
         }
         // ================================
 
@@ -924,7 +967,8 @@ function addNewUser($pdo, $input) {
         $message = '用户添加成功！';
         if ($emailSent) {
             $message .= ' 登录信息已发送到用户邮箱。';
-        } else {
+        }
+        else {
             $message .= ' 但邮件发送失败，请手动告知用户登录信息。';
         }
 
@@ -941,7 +985,8 @@ function addNewUser($pdo, $input) {
             ]
         ]);
 
-    } catch (PDOException $e) {
+    }
+    catch (PDOException $e) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
@@ -949,7 +994,8 @@ function addNewUser($pdo, $input) {
             'success' => false,
             'message' => '数据库操作失败: ' . $e->getMessage()
         ]);
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
@@ -963,7 +1009,8 @@ function addNewUser($pdo, $input) {
 /**
  * 确保权限表存在
  */
-function ensurePermissionsTable($pdo) {
+function ensurePermissionsTable($pdo)
+{
     // 主表（若不存在则创建）
     $pdo->exec("CREATE TABLE IF NOT EXISTS user_sidebar_permissions (
         user_id INT PRIMARY KEY,
@@ -978,18 +1025,43 @@ function ensurePermissionsTable($pdo) {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     ");
     // 确保新增列存在（向后兼容）
-    try { $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN page_permissions_json TEXT NULL"); } catch (Throwable $e) { /* 已存在则忽略 */ }
-    try { $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN submenu_permissions_json TEXT NULL"); } catch (Throwable $e) { /* 已存在则忽略 */ }
-    try { $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN report_permissions_json TEXT NULL"); } catch (Throwable $e) { /* 已存在则忽略 */ }
-    try { $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN restaurant_permissions_json TEXT NULL"); } catch (Throwable $e) { /* 已存在则忽略 */ }
-    try { $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN brand_permissions_json TEXT NULL"); } catch (Throwable $e) { /* 已存在则忽略 */ }
-    try { $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN upload_permissions_json TEXT NULL"); } catch (Throwable $e) { /* 已存在则忽略 */ }
+    try {
+        $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN page_permissions_json TEXT NULL");
+    }
+    catch (Throwable $e) { /* 已存在则忽略 */
+    }
+    try {
+        $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN submenu_permissions_json TEXT NULL");
+    }
+    catch (Throwable $e) { /* 已存在则忽略 */
+    }
+    try {
+        $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN report_permissions_json TEXT NULL");
+    }
+    catch (Throwable $e) { /* 已存在则忽略 */
+    }
+    try {
+        $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN restaurant_permissions_json TEXT NULL");
+    }
+    catch (Throwable $e) { /* 已存在则忽略 */
+    }
+    try {
+        $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN brand_permissions_json TEXT NULL");
+    }
+    catch (Throwable $e) { /* 已存在则忽略 */
+    }
+    try {
+        $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN upload_permissions_json TEXT NULL");
+    }
+    catch (Throwable $e) { /* 已存在则忽略 */
+    }
 }
 
 /**
  * 获取用户的侧边栏权限
  */
-function getUserSidebarPermissions($pdo, $input) {
+function getUserSidebarPermissions($pdo, $input)
+{
     if (empty($input['user_id'])) {
         echo json_encode(['success' => false, 'message' => '缺少用户ID']);
         return;
@@ -999,30 +1071,31 @@ function getUserSidebarPermissions($pdo, $input) {
         $perms = [];
         $pagePerms = [];
         $submenuPerms = [];
-        $reportPerms = ['kpi','cost'];
-        $restaurantPerms = ['j1','j2','j3'];
-        
+        $reportPerms = ['kpi', 'cost'];
+        $restaurantPerms = ['j1', 'j2', 'j3'];
+
         // 检查是否使用 user_page_permissions 表（新表结构）
         $tableExists = false;
         try {
             $checkStmt = $pdo->query("SHOW TABLES LIKE 'user_page_permissions'");
             $tableExists = $checkStmt->rowCount() > 0;
-        } catch (Throwable $e) {
-            // 表不存在
         }
-        
+        catch (Throwable $e) {
+        // 表不存在
+        }
+
         if ($tableExists) {
             // 使用 user_page_permissions 表（每个页面单独记录）
             $stmt = $pdo->prepare("SELECT page_key, permissions_json FROM user_page_permissions WHERE user_id = ?");
             $stmt->execute([$userId]);
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
+
             $stockSystems = [];
             $stockViews = [];
             $uploadSystems = [];
             $uploadTypes = [];
-            $legacyKeys = ['stocklistall','stockeditall','stockproductname','stockremark','stocksot'];
-            
+            $legacyKeys = ['stocklistall', 'stockeditall', 'stockproductname', 'stockremark', 'stocksot'];
+
             foreach ($rows as $row) {
                 $pageKey = $row['page_key'];
                 $permData = [];
@@ -1036,17 +1109,19 @@ function getUserSidebarPermissions($pdo, $input) {
                 $views = $permData['views'] ?? $permData['view'] ?? [];
                 $types = $permData['types'] ?? $permData['type'] ?? [];
                 if ($pageKey === 'stock_inventory') {
-                    $stockSystems = is_array($systems) ? array_values(array_intersect($systems, ['central','j1','j2','j3'])) : [];
-                    $stockViews = is_array($views) ? array_values(array_intersect($views, ['list','records','remark','product','sot','approve','apply'])) : [];
-                } elseif ($pageKey === 'kpi_upload') {
-                    $uploadSystems = is_array($systems) ? array_values(array_intersect($systems, ['j1','j2','j3'])) : [];
-                    $uploadTypes = is_array($types) ? array_values(array_intersect($types, ['kpi','cost'])) : [];
-                } elseif (in_array($pageKey, $legacyKeys, true)) {
+                    $stockSystems = is_array($systems) ? array_values(array_intersect($systems, ['central', 'j1', 'j2', 'j3'])) : [];
+                    $stockViews = is_array($views) ? array_values(array_intersect($views, ['list', 'records', 'remark', 'product', 'sot', 'approve', 'apply'])) : [];
+                }
+                elseif ($pageKey === 'kpi_upload') {
+                    $uploadSystems = is_array($systems) ? array_values(array_intersect($systems, ['j1', 'j2', 'j3'])) : [];
+                    $uploadTypes = is_array($types) ? array_values(array_intersect($types, ['kpi', 'cost'])) : [];
+                }
+                elseif (in_array($pageKey, $legacyKeys, true)) {
                     if (is_array($systems)) {
-                        $stockSystems = array_merge($stockSystems, array_values(array_intersect($systems, ['central','j1','j2','j3'])));
+                        $stockSystems = array_merge($stockSystems, array_values(array_intersect($systems, ['central', 'j1', 'j2', 'j3'])));
                     }
                     if (is_array($views)) {
-                        $stockViews = array_merge($stockViews, array_values(array_intersect($views, ['list','records','remark','product','sot','approve','apply'])));
+                        $stockViews = array_merge($stockViews, array_values(array_intersect($views, ['list', 'records', 'remark', 'product', 'sot', 'approve', 'apply'])));
                     }
                 }
             }
@@ -1061,10 +1136,10 @@ function getUserSidebarPermissions($pdo, $input) {
                 'type' => $uploadTypes
             ];
         }
-        
+
         $brandPerms = [];
         $uploadPerms = [];
-        
+
         // 尝试从 user_sidebar_permissions 表获取（如果存在）
         try {
             ensurePermissionsTable($pdo);
@@ -1073,7 +1148,9 @@ function getUserSidebarPermissions($pdo, $input) {
             $row = $stmt->fetch();
             if ($row && !empty($row['permissions_json'])) {
                 $decoded = json_decode($row['permissions_json'], true);
-                if (is_array($decoded)) { $perms = $decoded; }
+                if (is_array($decoded)) {
+                    $perms = $decoded;
+                }
             }
             // 如果 user_page_permissions 表不存在，才使用 user_sidebar_permissions 的页面权限
             if (!$tableExists && $row && !empty($row['page_permissions_json'])) {
@@ -1082,16 +1159,17 @@ function getUserSidebarPermissions($pdo, $input) {
                     $stockSystems = [];
                     $stockViews = [];
                     if (isset($decoded2['stock_inventory'])) {
-                        $stockSystems = array_values(array_intersect($decoded2['stock_inventory']['system'] ?? [], ['central','j1','j2','j3']));
-                        $stockViews = array_values(array_intersect($decoded2['stock_inventory']['view'] ?? [], ['list','records','remark','product','sot','approve','apply']));
-                    } else {
-                        $legacyKeys = ['stocklistall','stockeditall','stockproductname','stockremark','stocksot'];
+                        $stockSystems = array_values(array_intersect($decoded2['stock_inventory']['system'] ?? [], ['central', 'j1', 'j2', 'j3']));
+                        $stockViews = array_values(array_intersect($decoded2['stock_inventory']['view'] ?? [], ['list', 'records', 'remark', 'product', 'sot', 'approve', 'apply']));
+                    }
+                    else {
+                        $legacyKeys = ['stocklistall', 'stockeditall', 'stockproductname', 'stockremark', 'stocksot'];
                         foreach ($legacyKeys as $legacyKey) {
                             if (!empty($decoded2[$legacyKey]['system']) && is_array($decoded2[$legacyKey]['system'])) {
-                                $stockSystems = array_merge($stockSystems, array_values(array_intersect($decoded2[$legacyKey]['system'], ['central','j1','j2','j3'])));
+                                $stockSystems = array_merge($stockSystems, array_values(array_intersect($decoded2[$legacyKey]['system'], ['central', 'j1', 'j2', 'j3'])));
                             }
                             if (!empty($decoded2[$legacyKey]['view']) && is_array($decoded2[$legacyKey]['view'])) {
-                                $stockViews = array_merge($stockViews, array_values(array_intersect($decoded2[$legacyKey]['view'], ['list','records','remark','product','sot','approve','apply'])));
+                                $stockViews = array_merge($stockViews, array_values(array_intersect($decoded2[$legacyKey]['view'], ['list', 'records', 'remark', 'product', 'sot', 'approve', 'apply'])));
                             }
                         }
                         $stockSystems = array_values(array_unique($stockSystems));
@@ -1101,13 +1179,13 @@ function getUserSidebarPermissions($pdo, $input) {
                         'system' => $stockSystems,
                         'view' => $stockViews
                     ];
-                    
+
                     // 读取 kpi_upload 权限
                     $uploadSystems = [];
                     $uploadTypes = [];
                     if (isset($decoded2['kpi_upload'])) {
-                        $uploadSystems = array_values(array_intersect($decoded2['kpi_upload']['system'] ?? [], ['j1','j2','j3']));
-                        $uploadTypes = array_values(array_intersect($decoded2['kpi_upload']['type'] ?? [], ['kpi','cost']));
+                        $uploadSystems = array_values(array_intersect($decoded2['kpi_upload']['system'] ?? [], ['j1', 'j2', 'j3']));
+                        $uploadTypes = array_values(array_intersect($decoded2['kpi_upload']['type'] ?? [], ['kpi', 'cost']));
                     }
                     $pagePerms['kpi_upload'] = [
                         'system' => $uploadSystems,
@@ -1117,12 +1195,14 @@ function getUserSidebarPermissions($pdo, $input) {
             }
             if ($row && !empty($row['submenu_permissions_json'])) {
                 $decoded3 = json_decode($row['submenu_permissions_json'], true);
-                if (is_array($decoded3)) { $submenuPerms = $decoded3; }
+                if (is_array($decoded3)) {
+                    $submenuPerms = $decoded3;
+                }
             }
             if ($row && !empty($row['report_permissions_json'])) {
                 $decoded4 = json_decode($row['report_permissions_json'], true);
                 if (is_array($decoded4) && !empty($decoded4)) {
-                    $filtered = array_values(array_intersect($decoded4, ['kpi','cost']));
+                    $filtered = array_values(array_intersect($decoded4, ['kpi', 'cost']));
                     if (!empty($filtered)) {
                         $reportPerms = $filtered;
                     }
@@ -1131,7 +1211,7 @@ function getUserSidebarPermissions($pdo, $input) {
             if ($row && !empty($row['restaurant_permissions_json'])) {
                 $decoded5 = json_decode($row['restaurant_permissions_json'], true);
                 if (is_array($decoded5) && !empty($decoded5)) {
-                    $filtered = array_values(array_intersect($decoded5, ['j1','j2','j3']));
+                    $filtered = array_values(array_intersect($decoded5, ['j1', 'j2', 'j3']));
                     if (!empty($filtered)) {
                         $restaurantPerms = $filtered;
                     }
@@ -1139,14 +1219,19 @@ function getUserSidebarPermissions($pdo, $input) {
             }
             if ($row && !empty($row['brand_permissions_json'])) {
                 $decoded6 = json_decode($row['brand_permissions_json'], true);
-                if (is_array($decoded6)) { $brandPerms = $decoded6; }
+                if (is_array($decoded6)) {
+                    $brandPerms = $decoded6;
+                }
             }
             if ($row && !empty($row['upload_permissions_json'])) {
                 $decoded7 = json_decode($row['upload_permissions_json'], true);
-                if (is_array($decoded7)) { $uploadPerms = $decoded7; }
+                if (is_array($decoded7)) {
+                    $uploadPerms = $decoded7;
+                }
             }
-        } catch (PDOException $e) {
-            // 如果表不存在，忽略错误
+        }
+        catch (PDOException $e) {
+        // 如果表不存在，忽略错误
         }
         if (!isset($pagePerms['stock_inventory'])) {
             $pagePerms['stock_inventory'] = [
@@ -1160,7 +1245,7 @@ function getUserSidebarPermissions($pdo, $input) {
                 'type' => []
             ];
         }
-        
+
         echo json_encode([
             'success' => true,
             'permissions' => $perms,
@@ -1171,46 +1256,50 @@ function getUserSidebarPermissions($pdo, $input) {
             'brand_permissions' => $brandPerms,
             'upload_permissions' => $uploadPerms
         ]);
-    } catch (PDOException $e) {
-        echo json_encode(['success' => false, 'message' => '获取失败: '.$e->getMessage()]);
+    }
+    catch (PDOException $e) {
+        echo json_encode(['success' => false, 'message' => '获取失败: ' . $e->getMessage()]);
     }
 }
 
 /**
  * 保存用户的侧边栏权限
  */
-function saveUserSidebarPermissions($pdo, $input) {
+function saveUserSidebarPermissions($pdo, $input)
+{
     if (empty($input['user_id']) || !isset($input['permissions'])) {
         echo json_encode(['success' => false, 'message' => '参数不完整']);
         return;
     }
     $userId = intval($input['user_id']);
     $perms = $input['permissions'];
-    if (!is_array($perms)) { $perms = []; }
+    if (!is_array($perms)) {
+        $perms = [];
+    }
     // 仅允许这些键
-    $allowedKeys = ['analytics','hr','resource','visual','brand'];
+    $allowedKeys = ['analytics', 'hr', 'resource', 'visual', 'brand'];
     $perms = array_values(array_intersect($perms, $allowedKeys));
     // 页面权限（可选）
     $pagePerms = isset($input['page_permissions']) && is_array($input['page_permissions']) ? $input['page_permissions'] : [];
     // 规范化：仅允许已知键
-    $normalize = function($arr, $allow) {
+    $normalize = function ($arr, $allow) {
         return array_values(array_intersect(is_array($arr) ? $arr : [], $allow));
     };
-    $stockSystemsAllowed = ['central','j1','j2','j3'];
-    $stockViewsAllowed = ['list','records','remark','product','sot','approve','apply'];
-    $uploadSystemsAllowed = ['j1','j2','j3'];
-    $uploadTypesAllowed = ['kpi','cost'];
-    
+    $stockSystemsAllowed = ['central', 'j1', 'j2', 'j3'];
+    $stockViewsAllowed = ['list', 'records', 'remark', 'product', 'sot', 'approve', 'apply'];
+    $uploadSystemsAllowed = ['j1', 'j2', 'j3'];
+    $uploadTypesAllowed = ['kpi', 'cost'];
+
     $stockViewsRequested = $pagePerms['stock_inventory']['views'] ?? ($pagePerms['stock_inventory']['view'] ?? []);
-    
+
     $pagePermsNorm = [
         'stock_inventory' => [
             'system' => $normalize($pagePerms['stock_inventory']['system'] ?? [], $stockSystemsAllowed),
-            'views'  => $normalize($stockViewsRequested, $stockViewsAllowed)
+            'views' => $normalize($stockViewsRequested, $stockViewsAllowed)
         ],
         'kpi_upload' => [
             'system' => $normalize($pagePerms['kpi_upload']['system'] ?? [], $uploadSystemsAllowed),
-            'type'   => $normalize($pagePerms['kpi_upload']['type'] ?? [], $uploadTypesAllowed)
+            'type' => $normalize($pagePerms['kpi_upload']['type'] ?? [], $uploadTypesAllowed)
         ]
     ];
     $submenuInput = isset($input['submenu_permissions']) && is_array($input['submenu_permissions']) ? $input['submenu_permissions'] : [];
@@ -1231,8 +1320,8 @@ function saveUserSidebarPermissions($pdo, $input) {
             $submenuPermsNorm[$parent] = [];
         }
     }
-    $reportAllowed = ['kpi','cost'];
-    $restaurantAllowed = ['j1','j2','j3'];
+    $reportAllowed = ['kpi', 'cost'];
+    $restaurantAllowed = ['j1', 'j2', 'j3'];
     $reportPerms = isset($input['report_permissions']) && is_array($input['report_permissions'])
         ? array_values(array_intersect($input['report_permissions'], $reportAllowed))
         : $reportAllowed;
@@ -1255,10 +1344,11 @@ function saveUserSidebarPermissions($pdo, $input) {
         try {
             $checkStmt = $pdo->query("SHOW TABLES LIKE 'user_page_permissions'");
             $tableExists = $checkStmt->rowCount() > 0;
-        } catch (Throwable $e) {
-            // 表不存在
         }
-        
+        catch (Throwable $e) {
+        // 表不存在
+        }
+
         if ($tableExists && !empty($pagePermsNorm)) {
             // 使用 user_page_permissions 表（每个页面单独记录）
             // 确保表存在
@@ -1272,38 +1362,38 @@ function saveUserSidebarPermissions($pdo, $input) {
             // 清理旧的库存页面记录
             $del = $pdo->prepare("DELETE FROM user_page_permissions WHERE user_id = :uid AND page_key IN ('stocklistall','stockeditall','stockproductname','stockremark','stocksot')");
             $del->execute([':uid' => $userId]);
-            
+
             // 保存统一库存权限
-            $stockPermData = $pagePermsNorm['stock_inventory'] ?? ['system'=>[], 'views'=>[]];
+            $stockPermData = $pagePermsNorm['stock_inventory'] ?? ['system' => [], 'views' => []];
             $permJson = json_encode([
                 'systems' => $stockPermData['system'] ?? [],
                 'views' => $stockPermData['views'] ?? []
             ], JSON_UNESCAPED_UNICODE);
-            
+
             $up = $pdo->prepare("INSERT INTO user_page_permissions (user_id, page_key, permissions_json, updated_at)
                 VALUES (:uid, 'stock_inventory', :permJson, NOW())
                 ON DUPLICATE KEY UPDATE permissions_json = VALUES(permissions_json), updated_at = NOW()");
-            $ok = $up->execute([':uid'=>$userId, ':permJson'=>$permJson]);
+            $ok = $up->execute([':uid' => $userId, ':permJson' => $permJson]);
             if (!$ok) {
                 throw new Exception("保存页面权限失败: stock_inventory");
             }
-            
+
             // 保存 kpi_upload 权限
-            $uploadPermData = $pagePermsNorm['kpi_upload'] ?? ['system'=>[], 'type'=>[]];
+            $uploadPermData = $pagePermsNorm['kpi_upload'] ?? ['system' => [], 'type' => []];
             $uploadPermJson = json_encode([
                 'systems' => $uploadPermData['system'] ?? [],
                 'types' => $uploadPermData['type'] ?? []
             ], JSON_UNESCAPED_UNICODE);
-            
+
             $upUpload = $pdo->prepare("INSERT INTO user_page_permissions (user_id, page_key, permissions_json, updated_at)
                 VALUES (:uid, 'kpi_upload', :permJson, NOW())
                 ON DUPLICATE KEY UPDATE permissions_json = VALUES(permissions_json), updated_at = NOW()");
-            $okUpload = $upUpload->execute([':uid'=>$userId, ':permJson'=>$uploadPermJson]);
+            $okUpload = $upUpload->execute([':uid' => $userId, ':permJson' => $uploadPermJson]);
             if (!$okUpload) {
                 throw new Exception("保存页面权限失败: kpi_upload");
             }
         }
-        
+
         // 同时保存到 user_sidebar_permissions 表（如果存在，用于侧边栏权限）
         try {
             ensurePermissionsTable($pdo);
@@ -1318,60 +1408,69 @@ function saveUserSidebarPermissions($pdo, $input) {
                 VALUES (:uid, :json, :jsonPages, :jsonSub, :jsonReport, :jsonRestaurant, :jsonBrand, :jsonUpload, NOW())
                 ON DUPLICATE KEY UPDATE permissions_json = VALUES(permissions_json), page_permissions_json = VALUES(page_permissions_json), submenu_permissions_json = VALUES(submenu_permissions_json), report_permissions_json = VALUES(report_permissions_json), restaurant_permissions_json = VALUES(restaurant_permissions_json), brand_permissions_json = VALUES(brand_permissions_json), upload_permissions_json = VALUES(upload_permissions_json), updated_at = NOW()");
             $up->execute([
-                ':uid'=>$userId,
-                ':json'=>$json,
-                ':jsonPages'=>$jsonPages,
-                ':jsonSub'=>$jsonSubmenu,
-                ':jsonReport'=>$jsonReport,
-                ':jsonRestaurant'=>$jsonRestaurant,
-                ':jsonBrand'=>$jsonBrand,
-                ':jsonUpload'=>$jsonUpload
+                ':uid' => $userId,
+                ':json' => $json,
+                ':jsonPages' => $jsonPages,
+                ':jsonSub' => $jsonSubmenu,
+                ':jsonReport' => $jsonReport,
+                ':jsonRestaurant' => $jsonRestaurant,
+                ':jsonBrand' => $jsonBrand,
+                ':jsonUpload' => $jsonUpload
             ]);
-        } catch (PDOException $e) {
+        }
+        catch (PDOException $e) {
             // 如果表不存在，忽略错误（只使用 user_page_permissions）
             if (strpos($e->getMessage(), "doesn't exist") === false) {
                 throw $e;
             }
         }
-        
+
         echo json_encode(['success' => true]);
-    } catch (PDOException $e) {
-        echo json_encode(['success' => false, 'message' => '保存失败: '.$e->getMessage()]);
+    }
+    catch (PDOException $e) {
+        echo json_encode(['success' => false, 'message' => '保存失败: ' . $e->getMessage()]);
     }
 }
 
 // 单独的获取/保存页面权限接口（可供其他页面直接调用）
-function getUserPagePermissions($pdo, $input) {
-    if (!isset($_SESSION)) { @session_start(); }
+function getUserPagePermissions($pdo, $input)
+{
+    if (!isset($_SESSION)) {
+        @session_start();
+    }
     $userId = isset($input['user_id']) ? intval($input['user_id']) : (isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : 0);
-    if ($userId <= 0) { echo json_encode(['success'=>false, 'message'=>'未登录']); return; }
+    if ($userId <= 0) {
+        echo json_encode(['success' => false, 'message' => '未登录']);
+        return;
+    }
     try {
         // 检查是否使用 user_page_permissions 表（新表结构）
         $tableExists = false;
         try {
             $checkStmt = $pdo->query("SHOW TABLES LIKE 'user_page_permissions'");
             $tableExists = $checkStmt->rowCount() > 0;
-        } catch (Throwable $e) {
-            // 表不存在
         }
-        
+        catch (Throwable $e) {
+        // 表不存在
+        }
+
         $pagePerms = [];
-        $reportPerms = ['kpi','cost'];
-        $restaurantPerms = ['j1','j2','j3'];
-        
+        $reportPerms = ['kpi', 'cost'];
+        $restaurantPerms = ['j1', 'j2', 'j3'];
+
         if ($tableExists) {
             // 使用 user_page_permissions 表（每个页面单独记录）
             $stmt = $pdo->prepare("SELECT page_key, permissions_json FROM user_page_permissions WHERE user_id = ?");
             $stmt->execute([$userId]);
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
+
             $stockSystems = [];
             $stockViews = [];
             $uploadSystems = [];
             $uploadTypes = [];
             $hasUnifiedStockEntry = false;
-            $legacyKeys = ['stocklistall','stockeditall','stockproductname','stockremark','stocksot'];
-            
+            $legacyKeys = ['stocklistall', 'stockeditall', 'stockproductname', 'stockremark', 'stocksot'];
+
             foreach ($rows as $row) {
                 $pageKey = $row['page_key'];
                 $permData = [];
@@ -1386,17 +1485,19 @@ function getUserPagePermissions($pdo, $input) {
                 $types = $permData['types'] ?? $permData['type'] ?? [];
                 if ($pageKey === 'stock_inventory') {
                     $hasUnifiedStockEntry = true;
-                    $stockSystems = is_array($systems) ? array_values(array_intersect($systems, ['central','j1','j2','j3'])) : [];
-                    $stockViews = is_array($views) ? array_values(array_intersect($views, ['list','records','remark','product','sot','approve','apply'])) : [];
-                } elseif ($pageKey === 'kpi_upload') {
-                    $uploadSystems = is_array($systems) ? array_values(array_intersect($systems, ['j1','j2','j3'])) : [];
-                    $uploadTypes = is_array($types) ? array_values(array_intersect($types, ['kpi','cost'])) : [];
-                } elseif (in_array($pageKey, $legacyKeys, true)) {
+                    $stockSystems = is_array($systems) ? array_values(array_intersect($systems, ['central', 'j1', 'j2', 'j3'])) : [];
+                    $stockViews = is_array($views) ? array_values(array_intersect($views, ['list', 'records', 'remark', 'product', 'sot', 'approve', 'apply'])) : [];
+                }
+                elseif ($pageKey === 'kpi_upload') {
+                    $uploadSystems = is_array($systems) ? array_values(array_intersect($systems, ['j1', 'j2', 'j3'])) : [];
+                    $uploadTypes = is_array($types) ? array_values(array_intersect($types, ['kpi', 'cost'])) : [];
+                }
+                elseif (in_array($pageKey, $legacyKeys, true)) {
                     if (is_array($systems)) {
-                        $stockSystems = array_merge($stockSystems, array_values(array_intersect($systems, ['central','j1','j2','j3'])));
+                        $stockSystems = array_merge($stockSystems, array_values(array_intersect($systems, ['central', 'j1', 'j2', 'j3'])));
                     }
                     if (is_array($views)) {
-                        $stockViews = array_merge($stockViews, array_values(array_intersect($views, ['list','records','remark','product','sot','approve','apply'])));
+                        $stockViews = array_merge($stockViews, array_values(array_intersect($views, ['list', 'records', 'remark', 'product', 'sot', 'approve', 'apply'])));
                     }
                 }
             }
@@ -1410,7 +1511,7 @@ function getUserPagePermissions($pdo, $input) {
                 'system' => $uploadSystems,
                 'type' => $uploadTypes
             ];
-            
+
             // 同时尝试从 user_sidebar_permissions 读取报表/餐厅权限
             try {
                 ensurePermissionsTable($pdo);
@@ -1420,7 +1521,7 @@ function getUserPagePermissions($pdo, $input) {
                 if ($row && !empty($row['report_permissions_json'])) {
                     $decoded = json_decode($row['report_permissions_json'], true);
                     if (is_array($decoded) && !empty($decoded)) {
-                        $filtered = array_values(array_intersect($decoded, ['kpi','cost']));
+                        $filtered = array_values(array_intersect($decoded, ['kpi', 'cost']));
                         if (!empty($filtered)) {
                             $reportPerms = $filtered;
                         }
@@ -1429,16 +1530,18 @@ function getUserPagePermissions($pdo, $input) {
                 if ($row && !empty($row['restaurant_permissions_json'])) {
                     $decoded = json_decode($row['restaurant_permissions_json'], true);
                     if (is_array($decoded) && !empty($decoded)) {
-                        $filtered = array_values(array_intersect($decoded, ['j1','j2','j3']));
+                        $filtered = array_values(array_intersect($decoded, ['j1', 'j2', 'j3']));
                         if (!empty($filtered)) {
                             $restaurantPerms = $filtered;
                         }
                     }
                 }
-            } catch (Throwable $e) {
-                // ignore
             }
-        } else {
+            catch (Throwable $e) {
+            // ignore
+            }
+        }
+        else {
             // 使用 user_sidebar_permissions 表（旧表结构）
             ensurePermissionsTable($pdo);
             $stmt = $pdo->prepare("SELECT page_permissions_json, report_permissions_json, restaurant_permissions_json FROM user_sidebar_permissions WHERE user_id = ?");
@@ -1450,16 +1553,17 @@ function getUserPagePermissions($pdo, $input) {
                 $tmp = json_decode($row['page_permissions_json'], true);
                 if (is_array($tmp)) {
                     if (isset($tmp['stock_inventory'])) {
-                        $stockSystems = array_values(array_intersect($tmp['stock_inventory']['system'] ?? ($tmp['stock_inventory']['systems'] ?? []), ['central','j1','j2','j3']));
-                        $stockViews = array_values(array_intersect($tmp['stock_inventory']['view'] ?? ($tmp['stock_inventory']['views'] ?? []), ['list','records','remark','product','sot','approve','apply']));
-                    } else {
-                        $legacyKeys = ['stocklistall','stockeditall','stockproductname','stockremark','stocksot'];
+                        $stockSystems = array_values(array_intersect($tmp['stock_inventory']['system'] ?? ($tmp['stock_inventory']['systems'] ?? []), ['central', 'j1', 'j2', 'j3']));
+                        $stockViews = array_values(array_intersect($tmp['stock_inventory']['view'] ?? ($tmp['stock_inventory']['views'] ?? []), ['list', 'records', 'remark', 'product', 'sot', 'approve', 'apply']));
+                    }
+                    else {
+                        $legacyKeys = ['stocklistall', 'stockeditall', 'stockproductname', 'stockremark', 'stocksot'];
                         foreach ($legacyKeys as $legacyKey) {
                             if (!empty($tmp[$legacyKey]['system']) && is_array($tmp[$legacyKey]['system'])) {
-                                $stockSystems = array_merge($stockSystems, array_values(array_intersect($tmp[$legacyKey]['system'], ['central','j1','j2','j3'])));
+                                $stockSystems = array_merge($stockSystems, array_values(array_intersect($tmp[$legacyKey]['system'], ['central', 'j1', 'j2', 'j3'])));
                             }
                             if (!empty($tmp[$legacyKey]['view']) && is_array($tmp[$legacyKey]['view'])) {
-                                $stockViews = array_merge($stockViews, array_values(array_intersect($tmp[$legacyKey]['view'], ['list','records','remark','product','sot','approve','apply'])));
+                                $stockViews = array_merge($stockViews, array_values(array_intersect($tmp[$legacyKey]['view'], ['list', 'records', 'remark', 'product', 'sot', 'approve', 'apply'])));
                             }
                         }
                         $stockSystems = array_values(array_unique($stockSystems));
@@ -1471,26 +1575,26 @@ function getUserPagePermissions($pdo, $input) {
                 'systems' => $stockSystems,
                 'views' => $stockViews
             ];
-            
+
             // 读取 kpi_upload 权限
             $uploadSystems = [];
             $uploadTypes = [];
             if ($row && !empty($row['page_permissions_json'])) {
                 $tmp = json_decode($row['page_permissions_json'], true);
                 if (is_array($tmp) && isset($tmp['kpi_upload'])) {
-                    $uploadSystems = array_values(array_intersect($tmp['kpi_upload']['system'] ?? [], ['j1','j2','j3']));
-                    $uploadTypes = array_values(array_intersect($tmp['kpi_upload']['type'] ?? [], ['kpi','cost']));
+                    $uploadSystems = array_values(array_intersect($tmp['kpi_upload']['system'] ?? [], ['j1', 'j2', 'j3']));
+                    $uploadTypes = array_values(array_intersect($tmp['kpi_upload']['type'] ?? [], ['kpi', 'cost']));
                 }
             }
             $pagePerms['kpi_upload'] = [
                 'system' => $uploadSystems,
                 'type' => $uploadTypes
             ];
-            
+
             if ($row && !empty($row['report_permissions_json'])) {
                 $decoded = json_decode($row['report_permissions_json'], true);
                 if (is_array($decoded) && !empty($decoded)) {
-                    $filtered = array_values(array_intersect($decoded, ['kpi','cost']));
+                    $filtered = array_values(array_intersect($decoded, ['kpi', 'cost']));
                     if (!empty($filtered)) {
                         $reportPerms = $filtered;
                     }
@@ -1499,7 +1603,7 @@ function getUserPagePermissions($pdo, $input) {
             if ($row && !empty($row['restaurant_permissions_json'])) {
                 $decoded = json_decode($row['restaurant_permissions_json'], true);
                 if (is_array($decoded) && !empty($decoded)) {
-                    $filtered = array_values(array_intersect($decoded, ['j1','j2','j3']));
+                    $filtered = array_values(array_intersect($decoded, ['j1', 'j2', 'j3']));
                     if (!empty($filtered)) {
                         $restaurantPerms = $filtered;
                     }
@@ -1508,30 +1612,33 @@ function getUserPagePermissions($pdo, $input) {
         }
 
         echo json_encode([
-            'success'=>true,
-            'page_permissions'=>$pagePerms,
-            'report_permissions'=>$reportPerms,
-            'restaurant_permissions'=>$restaurantPerms
+            'success' => true,
+            'page_permissions' => $pagePerms,
+            'report_permissions' => $reportPerms,
+            'restaurant_permissions' => $restaurantPerms
         ]);
-    } catch (Throwable $e) {
-        echo json_encode(['success'=>false, 'message'=>'获取失败: '.$e->getMessage()]);
+    }
+    catch (Throwable $e) {
+        echo json_encode(['success' => false, 'message' => '获取失败: ' . $e->getMessage()]);
     }
 }
 
-function saveUserPagePermissions($pdo, $input) {
+function saveUserPagePermissions($pdo, $input)
+{
     if (empty($input['user_id']) || !isset($input['page_permissions'])) {
-        echo json_encode(['success'=>false, 'message'=>'参数不完整']);
+        echo json_encode(['success' => false, 'message' => '参数不完整']);
         return;
     }
     $userId = intval($input['user_id']);
     $pagePerms = is_array($input['page_permissions']) ? $input['page_permissions'] : [];
-    $normalize = function($arr, $allow) { return array_values(array_intersect(is_array($arr)?$arr:[], $allow)); };
-    $stockSystemsAllowed = ['central','j1','j2','j3'];
-    $stockViewsAllowed = ['list','records','remark','product','sot'];
+    $normalize = function ($arr, $allow) {
+        return array_values(array_intersect(is_array($arr) ? $arr : [], $allow)); };
+    $stockSystemsAllowed = ['central', 'j1', 'j2', 'j3'];
+    $stockViewsAllowed = ['list', 'records', 'remark', 'product', 'sot'];
     $pagePermsNorm = [
         'stock_inventory' => [
             'system' => $normalize($pagePerms['stock_inventory']['system'] ?? [], $stockSystemsAllowed),
-            'view'   => $normalize($pagePerms['stock_inventory']['view'] ?? [], $stockViewsAllowed)
+            'view' => $normalize($pagePerms['stock_inventory']['view'] ?? [], $stockViewsAllowed)
         ]
     ];
     try {
@@ -1540,10 +1647,11 @@ function saveUserPagePermissions($pdo, $input) {
         try {
             $checkStmt = $pdo->query("SHOW TABLES LIKE 'user_page_permissions'");
             $tableExists = $checkStmt->rowCount() > 0;
-        } catch (Throwable $e) {
-            // 表不存在
         }
-        
+        catch (Throwable $e) {
+        // 表不存在
+        }
+
         if ($tableExists) {
             // 使用 user_page_permissions 表（每个页面单独记录）
             // 确保表存在
@@ -1554,11 +1662,11 @@ function saveUserPagePermissions($pdo, $input) {
                 updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 PRIMARY KEY (user_id, page_key)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci");
-            
+
             // 清理旧的库存页面记录
             $del = $pdo->prepare("DELETE FROM user_page_permissions WHERE user_id = :uid AND page_key IN ('stocklistall','stockeditall','stockproductname','stockremark','stocksot')");
             $del->execute([':uid' => $userId]);
-            $permData = $pagePermsNorm['stock_inventory'] ?? ['system'=>[], 'view'=>[]];
+            $permData = $pagePermsNorm['stock_inventory'] ?? ['system' => [], 'view' => []];
             $permJson = json_encode([
                 'systems' => $permData['system'] ?? [],
                 'views' => $permData['view'] ?? []
@@ -1566,23 +1674,25 @@ function saveUserPagePermissions($pdo, $input) {
             $up = $pdo->prepare("INSERT INTO user_page_permissions (user_id, page_key, permissions_json, updated_at)
                 VALUES (:uid, 'stock_inventory', :permJson, NOW())
                 ON DUPLICATE KEY UPDATE permissions_json = VALUES(permissions_json), updated_at = NOW()");
-            $ok = $up->execute([':uid'=>$userId, ':permJson'=>$permJson]);
+            $ok = $up->execute([':uid' => $userId, ':permJson' => $permJson]);
             if (!$ok) {
                 throw new Exception("保存页面权限失败: stock_inventory");
             }
-            echo json_encode(['success'=>true]);
-        } else {
+            echo json_encode(['success' => true]);
+        }
+        else {
             // 使用 user_sidebar_permissions 表（旧表结构）
             ensurePermissionsTable($pdo);
             $jsonPages = json_encode($pagePermsNorm, JSON_UNESCAPED_UNICODE);
             $up = $pdo->prepare("INSERT INTO user_sidebar_permissions (user_id, page_permissions_json, updated_at)
                 VALUES (:uid, :jsonPages, NOW())
                 ON DUPLICATE KEY UPDATE page_permissions_json = VALUES(page_permissions_json), updated_at = NOW()");
-            $ok = $up->execute([':uid'=>$userId, ':jsonPages'=>$jsonPages]);
-            echo json_encode(['success'=>(bool)$ok]);
+            $ok = $up->execute([':uid' => $userId, ':jsonPages' => $jsonPages]);
+            echo json_encode(['success' => (bool)$ok]);
         }
-    } catch (Throwable $e) {
-        echo json_encode(['success'=>false, 'message'=>'保存失败: '.$e->getMessage()]);
+    }
+    catch (Throwable $e) {
+        echo json_encode(['success' => false, 'message' => '保存失败: ' . $e->getMessage()]);
     }
 }
 ?>
