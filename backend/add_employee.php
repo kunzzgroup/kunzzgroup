@@ -63,7 +63,7 @@ body { background: #f3f4f6; }
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 .back-btn:hover { 
-    background: #ea6b0a;
+    background: #1f2937;
     color: #fff;
     transform: translateY(-1px);
 }
@@ -309,8 +309,8 @@ body { background: #f3f4f6; }
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #f97316;
-    box-shadow: 0 0 0 3px rgba(249,115,22,.12);
+    border-color: #374151;
+    box-shadow: 0 0 0 3px rgba(55, 65, 81, 0.1);
 }
 .form-group input[type="text"],
 .form-group input[type="email"],
