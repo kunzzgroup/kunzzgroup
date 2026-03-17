@@ -36,10 +36,11 @@ body {
 .header h1::after {
     content: "";
     display: block;
-    height: 3px;
+    height: 2px;
     width: 100%;
-    margin-top: 16px;
-    background: linear-gradient(90deg, rgba(255, 92, 0, 0) 0%, rgba(0, 0, 0, 1) 25%, rgba(0, 0, 0, 1) 75%, rgba(255, 92, 0, 0) 100%);
+    margin-top: 12px;
+    background: linear-gradient(90deg, #f99e00 0%, #000 50%, #f99e00 100%);
+    opacity: 0.8;
 }
 
 .header p {
@@ -292,19 +293,22 @@ body {
 
 /* 搜索框特殊样式 */
 #searchInput {
-    transition: all 0.3s ease;
-    width: clamp(160px, 13vw, 260px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: clamp(200px, 16vw, 320px);
+    border: 1.5px solid #e5e7eb !important;
+    background: #fdfdfd;
 }
 
 #searchInput:focus {
     outline: none;
-    border-color: #000000ff !important;
-    box-shadow: 0 0 10px rgba(31, 14, 0, 0.8) !important;
+    border-color: #f99e00 !important;
+    box-shadow: 0 0 0 3px rgba(249, 158, 0, 0.1) !important;
+    background: #ffffff;
 }
 
 #searchInput::placeholder {
-    color: #999;
-    font-style: italic;
+    color: #9ca3af;
+    font-size: 0.9em;
 }
 
 /* 高亮搜索结果 */
@@ -403,15 +407,17 @@ thead {
 }
 
 th {
-    background: #636363;
-    color: white;
-    padding: clamp(8px, 0.8vw, 15px) 0px;
+    background: #f8fafc;
+    color: #475569;
+    padding: clamp(10px, 1vw, 18px) 8px;
     text-align: center;
-    font-weight: bold;
-    font-size: clamp(8px, 0.74vw, 14px);
-    border: 1px solid #d1d5db;
+    font-weight: 700;
+    font-size: clamp(9px, 0.8vw, 14px);
+    border-bottom: 2px solid #e2e8f0;
     position: sticky;
     top: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
 }
 
 th:first-child {
@@ -423,42 +429,13 @@ th:last-child {
 }
 
 /* 设置各列的宽度 */
-th:nth-child(1),
-td:nth-child(1) {
-    width: 60px;
-}
-
-/* 序号 */
-th:nth-child(2),
-td:nth-child(2) {
-    width: 120px;
-}
-
-/* 职位 */
-th:nth-child(3),
-td:nth-child(3) {
-    width: 220px;
-}
-
-/* 英文姓名 */
-th:nth-child(4),
-td:nth-child(4) {
-    width: 410px;
-}
-
-/* 邮箱 */
-th:nth-child(5),
-td:nth-child(5) {
-    width: 120px;
-}
-
-/* 联络号码 */
-th:nth-child(6),
-td:nth-child(6) {
-    width: 120px;
-}
-
-/* 操作 */
+th:nth-child(1), td:nth-child(1) { width: 60px; }
+th:nth-child(2), td:nth-child(2) { width: 140px; }
+th:nth-child(3), td:nth-child(3) { width: 220px; }
+th:nth-child(4), td:nth-child(4) { width: auto; min-width: 180px; text-align: left; }
+th:nth-child(5), td:nth-child(5) { width: 140px; }
+th:nth-child(6), td:nth-child(6) { width: 130px; }
+th:nth-child(7), td:nth-child(7) { width: 150px; }
 
 /* 当地址列显示"-"时居中对齐 */
 td:nth-child(13) em {
@@ -468,12 +445,13 @@ td:nth-child(13) em {
 }
 
 td {
-    padding: clamp(0px, 0.31vw, 6px) 6px;
-    font-size: clamp(8px, 0.74vw, 14px);
+    padding: clamp(12px, 0.8vw, 16px) 12px;
+    font-size: clamp(9px, 0.78vw, 14px);
     font-weight: 500;
-    border: 1px solid #d1d5db;
+    border-bottom: 1px solid #f1f5f9;
     vertical-align: middle;
     text-align: center;
+    color: #334155;
 }
 
 /* 地址列编辑状态下的样式 */
@@ -491,8 +469,12 @@ td:nth-child(13) .edit-input {
 
 /* 表格行悬停效果 - 保持边框 */
 tr:hover {
-    background: #fff9f1;
-    transition: all 0.2s ease;
+    background: #f8fafc;
+    transition: background 0.2s ease;
+}
+
+tr:last-child td {
+    border-bottom: none;
 }
 
 /* 状态标签样式 */
@@ -592,11 +574,10 @@ tr:hover {
 /* 操作按钮样式 */
 .action-buttons {
     display: flex;
-    gap: 4px;
+    gap: 8px;
     justify-content: center;
     align-items: center;
-    flex-wrap: nowrap;
-    width: 100%;
+    padding: 4px;
 }
 
 .btn-action {
@@ -793,6 +774,29 @@ tr:hover {
     transform: translateY(0);
 }
 
+
+/* 分店标签样式 */
+.branch-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8em;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: inline-block;
+    letter-spacing: 0.05em;
+}
+
+.branch-hq {
+    color: #94a3b8;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+}
+
+.branch-outlet {
+    color: #f59e0b;
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+}
 
 /* 分店筛选器下拉项样式 */
 .bl1-item:hover, .bl2-item:hover {

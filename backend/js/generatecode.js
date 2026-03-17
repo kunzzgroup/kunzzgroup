@@ -545,7 +545,7 @@ function displayData(data) {
                     <td>${item.username ? escapeHTML(item.username) : '<em style="color: #999;">-</em>'}</td>
                     <td>${item.email ? escapeHTML(item.email) : '<em style="color: #999;">-</em>'}</td>
                     <td>${item.phone_number ? escapeHTML(item.phone_number) : '<em style="color: #999;">-</em>'}</td>
-                    <td>${item.branch ? '<span style="background:#fff3e0;color:#e65100;padding:2px 8px;border-radius:4px;font-size:0.85em;font-weight:600;">' + escapeHTML(item.branch.toUpperCase()) + '</span>' : '<em style="color:#bbb;font-size:0.85em;">总部</em>'}</td>
+                    <td>${item.branch ? '<span class="branch-badge branch-outlet">' + escapeHTML(item.branch.toUpperCase()) + '</span>' : '<span class="branch-badge branch-hq">总部</span>'}</td>
                     <td>
                         <div class="action-buttons">
                             <button class="btn-action btn-edit" onclick="openEditModal(${item.id})" title="编辑">
