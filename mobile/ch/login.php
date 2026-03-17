@@ -6,20 +6,16 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 // === 自动登录检查 ===
-// 如果已经有 Session，或者有有效的“记住我” Cookie，直接跳转
-$is_logged_in = isset($_SESSION['user_id']);
-$is_remembered = (isset($_COOKIE['user_id']) && isset($_COOKIE['remember_token']) && $_COOKIE['remember_token'] === '1');
-
-if ($is_logged_in || $is_remembered) {
-    // 恢复 Session 如果是通过 Cookie 记录的
-    if (!$is_logged_in && $is_remembered) {
-        $_SESSION['user_id'] = $_COOKIE['user_id'];
-        $_SESSION['username'] = $_COOKIE['username'] ?? '';
-        $_SESSION['position'] = $_COOKIE['position'] ?? '';
-        $_SESSION['account_type'] = $_COOKIE['account_type'] ?? '';
-        $_SESSION['last_activity'] = time();
-    }
-
+// 优先用 session
+if (isset($_SESSION['user_id'])) {
+    $redirect = $_GET['redirect'] ?? 'stocklistj1.php';
+    header("Location: " . $redirect);
+    exit();
+}
+// 如果 session 没有，再用 cookie
+elseif (isset($_COOKIE['user_login'])) {
+    $_SESSION['user_id'] = $_COOKIE['user_login'];
+    // 注意：这里建议在正式页面（auth_check.php）恢复更完整的 session 资料
     $redirect = $_GET['redirect'] ?? 'stocklistj1.php';
     header("Location: " . $redirect);
     exit();
@@ -38,66 +34,75 @@ if ($conn->connect_error) {
     die("连接失败: " . $conn->connect_error);
 }
 
-// 获取提交数据
-$email = $_POST['username'] ?? '';
-$password = $_POST['password'] ?? '';
-$remember = isset($_POST['remember']); // true/false
+// ================= 登录处理 =================
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = $_POST['username'] ?? '';
+    $password = $_POST['password'] ?? '';
+    $remember = isset($_POST['remember']);
 
-// 查询用户
-$sql = "SELECT * FROM users WHERE email = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $email);
-$stmt->execute();
-$result = $stmt->get_result();
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email=?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-if ($result->num_rows === 1) {
-    $user = $result->fetch_assoc();
+    if ($result->num_rows === 1) {
+        $user = $result->fetch_assoc();
 
-    if (verify_secure_password($password, $user['password'])) {
-        // ✅ 登录成功，设置 Session
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['username'] = $user['username'];
-        $_SESSION['position'] = $user['position'];
-        $_SESSION['account_type'] = $user['account_type']; // ⭐ 添加这行 - 关键！
-        $_SESSION['last_activity'] = time(); // ➤ 当前登录时间（用于 1 分钟自动登出）
+        if (verify_secure_password($password, $user['password'])) {
+            // ✅ 保存 session
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['position'] = $user['position'];
+            $_SESSION['account_type'] = $user['account_type'];
+            $_SESSION['last_activity'] = time();
 
-        // 检查是否为首次登录
-        if ($user['is_first_login'] == 1) {
-            // 首次登录，跳转到密码重置页面
-            header("Location: reset_password.html");
+            // 判断用户是否勾选“记住我”
+            $cookie_options = [
+                'path' => '/',
+                'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' || 
+                           isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https',
+                'httponly' => true,
+                'samesite' => 'Lax'
+            ];
+
+            if ($remember) {
+                // 设置长期 cookie（30天）
+                $cookie_options['expires'] = time() + 86400 * 30;
+                setcookie("user_login", $user['id'], $cookie_options);
+                
+                // 为了兼容 login.html 的 JavaScript 检测自动跳转，
+                // 我们还是需要一个脚本可读的 remember_token
+                $cookie_options['httponly'] = false;
+                setcookie("remember_token", "1", $cookie_options);
+            } else {
+                // 会话 cookie（关闭浏览器就过期）
+                $cookie_options['expires'] = 0;
+                setcookie("user_login", $user['id'], $cookie_options);
+                
+                // 清除残留的记住我标记
+                setcookie("remember_token", "", time() - 3600, "/");
+            }
+
+            // 检查是否为首次登录
+            if ($user['is_first_login'] == 1) {
+                header("Location: reset_password.html");
+                exit();
+            }
+
+            $redirect = $_GET['redirect'] ?? 'stocklistj1.php';
+            header("Location: " . $redirect);
+            exit();
+        } else {
+            echo "<script>alert('密码错误'); window.location.href='login.html';</script>";
             exit();
         }
-
-        if ($remember) {
-            // ✅ 勾选了"记住我"，设置 cookie（30天）
-            $expire = time() + (86400 * 30);
-            setcookie('user_id', $user['id'], $expire, "/");
-            setcookie('username', $user['username'], $expire, "/");
-            setcookie('position', $user['position'], $expire, "/");
-            setcookie('account_type', $user['account_type'], $expire, "/"); // ⭐ 添加这行
-            setcookie('remember_token', '1', $expire, "/");
-        }
-        else {
-            // ❌ 没勾选记住我，清除残留 cookie
-            setcookie('user_id', '', time() - 3600, "/");
-            setcookie('username', '', time() - 3600, "/");
-            setcookie('position', '', time() - 3600, "/");
-            setcookie('account_type', '', time() - 3600, "/"); // ⭐ 添加这行
-            setcookie('remember_token', '', time() - 3600, "/");
-        }
-
-        $redirect_page = $_GET['redirect'] ?? 'stocklistj1.php'; // 优先使用 URL 参数
-        header("Location: " . $redirect_page);
-        exit();
-
-    }
-    else {
-        echo "<script>alert('密码错误'); window.location.href='login.html';</script>";
+    } else {
+        echo "<script>alert('用户不存在'); window.location.href='login.html';</script>";
         exit();
     }
-
-}
-else {
+} else {
+    // 如果不是 POST 请求且没自动登录成功，就去登录页
+    header("Location: login.html");
     exit();
 }
 ?>

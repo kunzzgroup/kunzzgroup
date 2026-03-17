@@ -1,23 +1,30 @@
 <?php
+/**
+ * Mobile 退出登录（优化版）
+ */
 session_start();
 
-$conn = new mysqli('localhost', 'u690174784_kunzz', 'Kunzz1688', 'u690174784_kunzz');
-
-if (isset($_SESSION['user_id'])) {
-
-    $stmt = $conn->prepare("
-        UPDATE users 
-        SET remember_token=NULL, remember_expiry=NULL 
-        WHERE id=?
-    ");
-    $stmt->bind_param("i", $_SESSION['user_id']);
-    $stmt->execute();
-}
-
-// 删除 cookie
-setcookie("remember_token", "", time() - 3600, "/");
-
+// 清除所有 Session
+session_unset();
 session_destroy();
 
+// 彻底清除所有相关的 Cookie
+$options = [
+    'expires' => time() - 3600,
+    'path' => '/',
+    'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' || 
+               isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https',
+    'httponly' => true,
+    'samesite' => 'Lax'
+];
+
+setcookie("user_login", "", $options);
+
+// remember_token 可能是非 httponly，单独清除
+$options['httponly'] = false;
+setcookie("remember_token", "", $options);
+
+// 跳转回登录页
 header("Location: login.html");
 exit();
+?>
