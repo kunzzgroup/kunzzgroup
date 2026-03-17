@@ -35,7 +35,7 @@
     left: 0;
     top: 0;
     overflow: visible;
-    z-index: 1000;
+    z-index: 5000;
     /* 修改：默认显示菜单（移除负的transform） */
     transform: translateX(0);
     transition: transform 0.3s ease;
