@@ -698,13 +698,12 @@ body { background: #f3f4f6; }
                                 </div>
 
                                 <div class="form-group" id="group-add-branch">
-                                    <label for="add_branch">所属分店 Branch</label>
-                                    <select id="add_branch" name="branch">
-                                        <option value="">总部 / 未指定</option>
-                                        <option value="j1">J1 (Midvalley Southkey)</option>
-                                        <option value="j2">J2 (Paradigm Mall)</option>
-                                        <option value="j3">J3 (Desa Tebrau)</option>
-                                    </select>
+                                    <label>所属分店 Branch</label>
+                                    <div class="branch-checkbox-group">
+                                        <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j1"> J1 (Midvalley Southkey)</label>
+                                        <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j2"> J2 (Paradigm Mall)</label>
+                                        <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j3"> J3 (Desa Tebrau)</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>

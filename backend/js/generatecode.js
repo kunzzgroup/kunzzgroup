@@ -543,7 +543,7 @@ function displayData(data) {
                     <td style="text-align: center; font-weight: bold; color: black;">${index + 1}</td>
                     <td>
                         <div style="font-weight: 700; color: #333; margin-bottom: 4px;">${item.position ? escapeHTML(item.position) : '-'}</div>
-                        ${item.branch ? '<span style="background:#fff3e0;color:#e65100;padding:2px 6px;border-radius:4px;font-size:0.75em;font-weight:700;display:inline-block;">' + escapeHTML(item.branch.toUpperCase()) + '</span>' : '<em style="color:#bbb;font-size:0.75em;">总部/HQ</em>'}
+                        ${item.branch ? item.branch.split(',').map(b => `<span class="branch-tag">${escapeHTML(b.trim().toUpperCase())}</span>`).join('') : '<em style="color:#bbb;font-size:0.75em;">总部/HQ</em>'}
                     </td>
                     <td>${item.username ? escapeHTML(item.username) : '<em style="color: #999;">-</em>'}</td>
                     <td>${item.email ? escapeHTML(item.email) : '<em style="color: #999;">-</em>'}</td>
@@ -801,13 +801,14 @@ function applyBranchFilter() {
             // 只显示无分店的职员（branch 为空）
             show = (rowBranch === '' || rowBranch === 'null');
         } else if (branchL1Current === 'branch') {
-            // 只显示有分店的职员
+            // 只显示有分店的职员 (支持多选)
             const hasBranch = rowBranch !== '' && rowBranch !== 'null';
             if (!hasBranch) {
                 show = false;
             } else if (branchL2Current !== 'all') {
-                // 进一步筛选具体分店
-                show = (rowBranch === branchL2Current);
+                // 检查逗号分隔的字符串中是否包含选中的分店
+                const branches = rowBranch.split(',').map(b => b.trim());
+                show = branches.includes(branchL2Current);
             }
         }
         // 'all' → 全部显示
@@ -939,7 +940,13 @@ function openEditModal(id) {
     document.getElementById('edit_emergency_contact_name').value = userData.emergency_contact_name || '';
     document.getElementById('edit_emergency_phone_number').value = userData.emergency_phone_number || '';
     document.getElementById('edit_account_type').value = userData.account_type || '';
-    document.getElementById('edit_branch').value = userData.branch || '';
+    
+    // 设置分店多选框
+    const branchCheckboxes = modal.querySelectorAll('input[name="branch[]"]');
+    const userBranches = userData.branch ? userData.branch.split(',').map(b => b.trim()) : [];
+    branchCheckboxes.forEach(cb => {
+        cb.checked = userBranches.includes(cb.value);
+    });
 
     // 先设置账号类型，然后更新职位选项
     if (userData.account_type) {
@@ -993,8 +1000,13 @@ async function handleEditUserSubmit(e) {
 
     // 收集表单数据
     for (let [key, value] of formData.entries()) {
+        if (key === 'branch[]') continue; // 单独处理分店数组
         userData[key] = value.trim();
     }
+
+    // 处理分店多选
+    const checkedBranches = Array.from(form.querySelectorAll('input[name="branch[]"]:checked')).map(cb => cb.value);
+    userData['branch'] = checkedBranches.join(',');
 
     // 验证必填字段
     if (!userData.username || !userData.email || !userData.account_type) {
@@ -1263,8 +1275,13 @@ async function addNewUser() {
 
     // 收集表单数据
     for (let [key, value] of formData.entries()) {
+        if (key === 'branch[]') continue;
         userData[key] = value.trim();
     }
+
+    // 处理分店多选
+    const checkedBranches = Array.from(form.querySelectorAll('input[name="branch[]"]:checked')).map(cb => cb.value);
+    userData['branch'] = checkedBranches.join(',');
 
     console.log('发送的数据:', userData); // 调试信息
 
