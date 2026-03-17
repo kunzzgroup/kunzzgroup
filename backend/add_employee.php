@@ -159,17 +159,181 @@ body { background: #f3f4f6; }
 }
 
 /* Permission section */
-.editUserPermLayout .perm-tree-container { max-height: 420px !important; overflow-y: auto; }
-.editUserPermLayout .perm-detail-card    { max-height: 420px !important; overflow-y: auto; }
+/* Permission section - Modern Premium Overhaul */
+.editUserPermLayout .perm-layout-container {
+    display: flex;
+    gap: 20px;
+    background: #f8fafc;
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+}
 
+.editUserPermLayout .perm-tree-container {
+    flex: 1;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 16px;
+    max-height: 500px !important;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.editUserPermLayout .perm-detail-card {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 12px;
+    border: 1px solid rgba(249, 115, 22, 0.2);
+    padding: 24px;
+    max-height: 500px !important;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Custom Scrollbar for modern look */
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar { width: 6px; }
+.editUserPermLayout .perm-detail-card::-webkit-scrollbar {
+    width: 5px;
+}
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar-track,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+.editUserPermLayout .perm-detail-card::-webkit-scrollbar-track {
+    background: transparent;
+}
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+.editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb:hover,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+.editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb:hover {
+    background: #f97316;
+}
+
+/* Tree Item Styles */
+.perm-level-1 { margin-bottom: 8px; }
+.perm-level-1-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.perm-level-1-item:hover {
+    background: #fff7ed;
+    border-color: #fdba74;
+    transform: translateX(4px);
+}
+.perm-level-1-item.expanded {
+    background: #fff7ed;
+    border-color: #f97316;
+    margin-bottom: 8px;
+}
+
+.perm-level-2-container {
+    padding-left: 24px;
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+.perm-level-2-container.expanded { display: flex; animation: slideInDown 0.3s ease-out; }
+
+.perm-level-2-item {
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: #f8fafc;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+}
+.perm-level-2-item:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+/* Checkbox Modernization */
+.perm-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    cursor: pointer;
+}
+.perm-checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #f97316;
+    cursor: pointer;
+}
+.perm-arrow, .perm-arrow-sub {
+    font-size: 10px;
+    color: #94a3b8;
+    transition: transform 0.3s ease;
+    width: 16px;
+    text-align: center;
+}
+.expanded .perm-arrow, .expanded .perm-arrow-sub {
+    transform: rotate(90deg);
+    color: #f97316;
+}
+
+/* Detail Card Content */
+.perm-detail-header {
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f97316;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.perm-detail-header strong { font-size: 16px; color: #1e293b; }
+.perm-close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #94a3b8;
+    cursor: pointer;
+    line-height: 1;
+}
+.perm-close-btn:hover { color: #f97316; }
+
+.perm-level-3-section {
+    background: #ffffff;
+    padding: 16px;
+    border-radius: 10px;
+    border: 1px solid #f1f5f9;
+    margin-bottom: 16px;
+}
+.perm-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+}
+.perm-level-3-section label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+.perm-level-3-section label:hover { background: #f8fafc; }
+
+@keyframes slideInDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.perm-detail-placeholder.hidden { display: none !important; }
 
 /* ── 平板视图 (<1200px) ── */
 @media (max-width: 1200px) {
@@ -690,7 +854,7 @@ body { background: #f3f4f6; }
                                     <div class="perm-level-1-item" data-perm="brand">
                                         <label class="perm-checkbox-label">
                                             <input type="checkbox" class="perm-l1-check" value="brand">
-                                            <span class="perm-arrow">▶</span>
+                                            <i class="fas fa-chevron-right perm-arrow"></i>
                                             <strong>集团架构</strong>
                                         </label>
                                     </div>
@@ -698,21 +862,21 @@ body { background: #f3f4f6; }
                                         <div class="perm-level-2-item has-level-3" data-sub="kunzz_holdings">
                                             <label class="perm-checkbox-label">
                                                 <input type="checkbox" class="perm-l2-check" data-parent="brand" value="kunzz_holdings">
-                                                <span class="perm-arrow-sub">▶</span>
+                                                <i class="fas fa-chevron-right perm-arrow-sub"></i>
                                                 <span>KUNZZ HOLDINGS SDN BHD</span>
                                             </label>
                                         </div>
                                         <div class="perm-level-2-item has-level-3" data-sub="tokyo_cuisine">
                                             <label class="perm-checkbox-label">
                                                 <input type="checkbox" class="perm-l2-check" data-parent="brand" value="tokyo_cuisine">
-                                                <span class="perm-arrow-sub">▶</span>
+                                                <i class="fas fa-chevron-right perm-arrow-sub"></i>
                                                 <span>TOKYO JAPANESE CUISINE SDN BHD</span>
                                             </label>
                                         </div>
                                         <div class="perm-level-2-item has-level-3" data-sub="tokyo_izakaya">
                                             <label class="perm-checkbox-label">
                                                 <input type="checkbox" class="perm-l2-check" data-parent="brand" value="tokyo_izakaya">
-                                                <span class="perm-arrow-sub">▶</span>
+                                                <i class="fas fa-chevron-right perm-arrow-sub"></i>
                                                 <span>TOKYO IZAKAYA SDN BHD</span>
                                             </label>
                                         </div>
@@ -724,7 +888,7 @@ body { background: #f3f4f6; }
                                     <div class="perm-level-1-item" data-perm="analytics">
                                         <label class="perm-checkbox-label">
                                             <input type="checkbox" class="perm-l1-check" value="analytics">
-                                            <span class="perm-arrow">▶</span>
+                                            <i class="fas fa-chevron-right perm-arrow"></i>
                                             <strong>营收数据</strong>
                                         </label>
                                     </div>
@@ -738,7 +902,7 @@ body { background: #f3f4f6; }
                                         <div class="perm-level-2-item has-level-3" data-sub="kpi_upload">
                                             <label class="perm-checkbox-label">
                                                 <input type="checkbox" class="perm-l2-check" data-parent="analytics" value="kpi_upload">
-                                                <span class="perm-arrow-sub">▶</span>
+                                                <i class="fas fa-chevron-right perm-arrow-sub"></i>
                                                 <span>数据上传</span>
                                             </label>
                                         </div>
@@ -750,7 +914,7 @@ body { background: #f3f4f6; }
                                     <div class="perm-level-1-item" data-perm="hr">
                                         <label class="perm-checkbox-label">
                                             <input type="checkbox" class="perm-l1-check" value="hr">
-                                            <span class="perm-arrow">▶</span>
+                                            <i class="fas fa-chevron-right perm-arrow"></i>
                                             <strong>人事管理</strong>
                                         </label>
                                     </div>
@@ -769,7 +933,7 @@ body { background: #f3f4f6; }
                                     <div class="perm-level-1-item" data-perm="resource">
                                         <label class="perm-checkbox-label">
                                             <input type="checkbox" class="perm-l1-check" value="resource">
-                                            <span class="perm-arrow">▶</span>
+                                            <i class="fas fa-chevron-right perm-arrow"></i>
                                             <strong>资源总库</strong>
                                         </label>
                                     </div>
@@ -777,7 +941,7 @@ body { background: #f3f4f6; }
                                         <div class="perm-level-2-item has-level-3" data-sub="stock_inventory">
                                             <label class="perm-checkbox-label">
                                                 <input type="checkbox" class="perm-l2-check" data-parent="resource" value="stock_inventory">
-                                                <span class="perm-arrow-sub">▶</span>
+                                                <i class="fas fa-chevron-right perm-arrow-sub"></i>
                                                 <span>库存</span>
                                             </label>
                                         </div>
@@ -810,8 +974,11 @@ body { background: #f3f4f6; }
                             <!-- 右侧：三级详细配置卡片 -->
                             <div class="perm-detail-card">
                                 <div class="perm-detail-placeholder">
-                                    <i class="fas fa-hand-pointer" style="font-size: 48px; color: #d1d5db; margin-bottom: 15px;"></i>
-                                    <p style="color: #9ca3af; font-size: 14px;">点击左侧带有箭头的选项<br>查看详细配置</p>
+                                    <div class="placeholder-icon-wrap">
+                                        <i class="fas fa-shield-halved"></i>
+                                    </div>
+                                    <h3>权限配置详情</h3>
+                                    <p>请从左侧选择一个包含二级选项（带图标 <i class="fas fa-chevron-right" style="font-size: 10px;"></i>）的模块，以在此处配置详细的三级权限。</p>
                                 </div>
                                 <div class="perm-detail-content">
                                     <!-- 面板内容由JS根据 context 动态查找或初始化时存在 -->
@@ -837,7 +1004,7 @@ body { background: #f3f4f6; }
                                             <div class="perm-section-title">店面</div>
                                             <div class="perm-store-item" data-store="j1">
                                                 <label class="perm-checkbox-label">
-                                                    <span class="perm-arrow-store">▶</span>
+                                                    <i class="fas fa-store perm-arrow-store" style="color: #f97316; margin-right: 8px;"></i>
                                                     <span>J1 (Midvalley Southkey)</span>
                                                 </label>
                                                 <div class="perm-store-content">
@@ -847,7 +1014,7 @@ body { background: #f3f4f6; }
                                             </div>
                                             <div class="perm-store-item" data-store="j2">
                                                 <label class="perm-checkbox-label">
-                                                    <span class="perm-arrow-store">▶</span>
+                                                    <i class="fas fa-store perm-arrow-store" style="color: #f97316; margin-right: 8px;"></i>
                                                     <span>J2 (Paradigm Mall)</span>
                                                 </label>
                                                 <div class="perm-store-content">
@@ -867,7 +1034,7 @@ body { background: #f3f4f6; }
                                             <div class="perm-section-title">店面</div>
                                             <div class="perm-store-item" data-store="j3">
                                                 <label class="perm-checkbox-label">
-                                                    <span class="perm-arrow-store">▶</span>
+                                                    <i class="fas fa-store perm-arrow-store" style="color: #f97316; margin-right: 8px;"></i>
                                                     <span>J3 (Desa Tebrau)</span>
                                                 </label>
                                                 <div class="perm-store-content">
