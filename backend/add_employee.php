@@ -290,7 +290,7 @@ body { background: #f3f4f6; }
     background: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
-    overflow: hidden;
+    overflow: visible !important;
     box-shadow: 0 1px 3px rgba(0,0,0,.04);
 }
 .form-section-header {

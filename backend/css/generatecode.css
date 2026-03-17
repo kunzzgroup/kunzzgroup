@@ -1974,10 +1974,15 @@ tr:hover {
 
 /* Custom Multi-select Dropdown Styles - Premium Refinement */
 .custom-multi-select {
-    position: relative;
+    position: relative !important;
     width: 100%;
     user-select: none;
     font-family: inherit;
+    z-index: 10; /* Base z-index */
+}
+
+.custom-multi-select.active {
+    z-index: 10001 !important; /* Higher than any standard card or sibling */
 }
 
 .custom-multi-select .select-header {
