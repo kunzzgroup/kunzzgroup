@@ -382,7 +382,8 @@ body {
     font-weight: bold;
     text-align: center;
     position: relative;
-    z-index: 1001; /* 确保标题层级高于 sticky header */
+    z-index: 1001;
+    /* 确保标题层级高于 sticky header */
     border-bottom: 2px solid #000000ff;
     border-radius: 15px 15px 0 0;
 }
@@ -845,7 +846,8 @@ tr:hover {
     border: 1px solid #e2e8f0;
     border-radius: 10px;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    z-index: 2000; /* 极高层级 */
+    z-index: 2000;
+    /* 极高层级 */
     min-width: 140px;
     padding: 4px;
     overflow: hidden;
@@ -858,12 +860,21 @@ tr:hover {
 }
 
 @keyframes dropdownFadeIn {
-    from { opacity: 0; transform: translateY(-4px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* 下拉菜单单项样式 */
-.bl-item, .bl1-item, .bl2-item {
+.bl-item,
+.bl1-item,
+.bl2-item {
     padding: 8px 12px;
     font-size: 13px;
     font-weight: 500;
@@ -873,12 +884,16 @@ tr:hover {
     transition: all 0.15s ease;
 }
 
-.bl-item:hover, .bl1-item:hover, .bl2-item:hover {
+.bl-item:hover,
+.bl1-item:hover,
+.bl2-item:hover {
     background-color: #f1f5f9;
     color: #1e293b;
 }
 
-.bl-item.active, .bl1-item.active, .bl2-item.active {
+.bl-item.active,
+.bl1-item.active,
+.bl2-item.active {
     background-color: #f99e00;
     color: #ffffff !important;
 }
@@ -1002,9 +1017,9 @@ tr:hover {
 
 .perm-level-1-item {
     padding: 12px 15px;
-    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+    background: linear-gradient(135deg, #ff8019 0%, #ffb342 100%);
     cursor: pointer;
-    /* 一级分类可以点击展现 */
+    /* 一级分类可以点击展开 */
     transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     will-change: background;
 }
@@ -1015,7 +1030,7 @@ tr:hover {
 }
 
 .perm-level-1-item:hover {
-    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+    background: linear-gradient(135deg, #ff5c00 0%, #ff8019 100%);
 }
 
 .perm-level-1-item label {
@@ -1052,7 +1067,7 @@ tr:hover {
 }
 
 .perm-level-1-item.has-level-3.expanded {
-    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+    background: linear-gradient(135deg, #ff5c00 0%, #ff8019 100%);
 }
 
 .perm-level-1-item .perm-arrow {
@@ -1110,7 +1125,7 @@ tr:hover {
     padding: 10px 15px;
     margin: 5px 0;
     background: white;
-    border-left: 3px solid #94a3b8;
+    border-left: 3px solid #ff8019;
     border-radius: 4px;
     position: relative;
 }
@@ -1134,7 +1149,7 @@ tr:hover {
     width: 16px;
     height: 16px;
     cursor: pointer;
-    accent-color: #374151;
+    accent-color: #ff8019;
 }
 
 /* 有三级菜单的二级项 */
@@ -1157,7 +1172,7 @@ tr:hover {
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-size: 12px;
     margin-right: 5px;
-    color: #64748b;
+    color: #ff8019;
     cursor: pointer;
     /* 箭头可点击 */
     user-select: none;
@@ -1170,10 +1185,10 @@ tr:hover {
 }
 
 .perm-level-2-item.has-level-3.expanded {
-    background: #f8fafc;
-    border-left-color: #374151;
+    background: #fff4e6;
+    border-left-color: #ff5c00;
     border-left-width: 5px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px rgba(255, 128, 25, 0.2);
     transition: background-color 0.3s ease,
         border-left-color 0.3s ease,
         border-left-width 0.3s ease,
@@ -1187,7 +1202,7 @@ tr:hover {
     top: 50%;
     transform: translateY(-50%);
     font-size: 11px;
-    color: #64748b;
+    color: #ff8019;
     font-weight: 600;
     opacity: 0.7;
 }
@@ -1197,10 +1212,10 @@ tr:hover {
     flex: 0 0 400px;
     min-height: 400px;
     max-height: 60vh;
-    border: 2px solid #374151;
+    border: 2px solid #ff8019;
     border-radius: 8px;
     background: white;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(255, 128, 25, 0.15);
     position: relative;
     overflow: hidden;
     transform: translateZ(0);
@@ -1285,7 +1300,7 @@ tr:hover {
     justify-content: space-between;
     align-items: center;
     padding: 15px 20px;
-    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+    background: linear-gradient(135deg, #ff8019 0%, #ffb342 100%);
     color: white;
     font-size: 16px;
     font-weight: 600;
@@ -1338,7 +1353,7 @@ tr:hover {
     color: #1f2937;
     margin-bottom: 12px;
     padding-bottom: 8px;
-    border-bottom: 2px solid #374151;
+    border-bottom: 2px solid #ff8019;
     text-align: center;
     position: relative;
 }
@@ -1418,7 +1433,7 @@ tr:hover {
     width: 15px;
     height: 15px;
     cursor: pointer;
-    accent-color: #374151;
+    accent-color: #ff8019;
 }
 
 .perm-level-3-section label input[type="checkbox"] {
@@ -1558,7 +1573,7 @@ tr:hover {
     color: #1f2937;
     margin-bottom: 12px;
     padding-bottom: 8px;
-    border-bottom: 2px solid #374151;
+    border-bottom: 2px solid #ff8019;
 }
 
 .extra-perm-section label {
@@ -1576,7 +1591,7 @@ tr:hover {
     width: 15px;
     height: 15px;
     cursor: pointer;
-    accent-color: #374151;
+    accent-color: #ff8019;
 }
 
 .extra-perm-section label input[type="checkbox"] {

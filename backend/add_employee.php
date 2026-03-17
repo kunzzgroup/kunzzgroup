@@ -51,7 +51,7 @@ body { background: #f3f4f6; }
     align-items: center;
     gap: 8px;
     padding: 8px 16px;
-    background: #374151;
+    background: #f97316;
     color: #ffffff;
     border: 1px solid transparent;
     border-radius: 6px;
@@ -60,10 +60,10 @@ body { background: #f3f4f6; }
     cursor: pointer;
     text-decoration: none;
     transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(249,115,22,0.2);
 }
 .back-btn:hover { 
-    background: #1f2937;
+    background: #ea6b0a;
     color: #fff;
     transform: translateY(-1px);
 }
@@ -258,14 +258,14 @@ body { background: #f3f4f6; }
     box-shadow: 0 1px 3px rgba(0,0,0,.04);
 }
 .form-section-header {
-    background: #636363;
+    background: #f97316;
     padding: 13px 20px;
     font-size: 15px;
     font-weight: 600;
     color: #fff;
 }
 .form-section-header-bank {
-    background: #636363;
+    background: #f97316;
     padding: 13px 20px;
     font-size: 15px;
     font-weight: 600;
@@ -309,8 +309,8 @@ body { background: #f3f4f6; }
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #374151;
-    box-shadow: 0 0 0 3px rgba(55, 65, 81, 0.1);
+    border-color: #f97316;
+    box-shadow: 0 0 0 3px rgba(249,115,22,.12);
 }
 .form-group input[type="text"],
 .form-group input[type="email"],
@@ -339,7 +339,7 @@ body { background: #f3f4f6; }
 }
 .btn-save {
     padding: 10px 28px;
-    background: #f99e00;
+    background: #f97316;
     color: #fff;
     border: none;
     border-radius: 8px;
@@ -349,7 +349,7 @@ body { background: #f3f4f6; }
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 2px 6px rgba(249,158,0,0.3);
+    box-shadow: 0 2px 6px rgba(249,115,22,.3);
     transition: all .2s;
 }
 .btn-save:hover { background: #ea6b0a; transform: translateY(-1px); }
@@ -659,16 +659,6 @@ body { background: #f3f4f6; }
                                     <label for="add_position">职位 Position</label>
                                     <select id="add_position" name="position">
                                         <option value="">请先选择账号类型</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group" id="group-add-branch">
-                                    <label for="add_branch">所属分店 Branch</label>
-                                    <select id="add_branch" name="branch">
-                                        <option value="">总部 / 未指定</option>
-                                        <option value="j1">J1 (Midvalley Southkey)</option>
-                                        <option value="j2">J2 (Paradigm Mall)</option>
-                                        <option value="j3">J3 (Desa Tebrau)</option>
                                     </select>
                                 </div>
                             </div>
