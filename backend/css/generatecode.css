@@ -9,14 +9,17 @@
     width: 6px;
     height: 6px;
 }
+
 ::-webkit-scrollbar-track {
     background: #f1f1f1;
     border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
@@ -759,7 +762,6 @@ tr:hover {
     margin-bottom: 0px;
     color: #333;
     line-height: 1.5;
-    padding-bottom: 220px !important; /* Ensure space for dropdowns */
 }
 
 .modal-buttons {
@@ -1979,11 +1981,13 @@ tr:hover {
     width: 100%;
     user-select: none;
     font-family: inherit;
-    z-index: 10; /* Base z-index */
+    z-index: 10;
+    /* Base z-index */
 }
 
 .custom-multi-select.active {
-    z-index: 10001 !important; /* Higher than any standard card or sibling */
+    z-index: 10001 !important;
+    /* Higher than any standard card or sibling */
 }
 
 .custom-multi-select .select-header {
@@ -2009,7 +2013,7 @@ tr:hover {
 
 .custom-multi-select.active .select-header {
     border-color: #f97316 !important;
-    box-shadow: 0 0 0 3px rgba(249,115,22,0.12) !important;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12) !important;
 }
 
 .custom-multi-select .selected-text {
@@ -2044,15 +2048,10 @@ tr:hover {
     border: 1px solid #e2e8f0 !important;
     border-radius: 10px !important;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
-    z-index: 99999 !important; /* Ultra high to clear everything */
+    z-index: 10000 !important;
     display: none;
     padding: 6px !important;
-}
-
-/* Ensure form groups housing the dropdown don't clip it */
-.form-group:has(.custom-multi-select.active) {
-    overflow: visible !important;
-    z-index: 100 !important;
+    /* Internal padding for ivory look */
 }
 
 .custom-multi-select.active .select-options {
@@ -2061,8 +2060,15 @@ tr:hover {
 }
 
 @keyframes dropdownPop {
-    from { opacity: 0; transform: translateY(-12px) scale(0.98); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+    from {
+        opacity: 0;
+        transform: translateY(-12px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .custom-multi-select .checkbox-item {
@@ -2080,7 +2086,8 @@ tr:hover {
     margin-bottom: 2px !important;
     min-height: unset !important;
     font-weight: 500 !important;
-    width: auto !important; /* Overriding possible column stretches */
+    width: auto !important;
+    /* Overriding possible column stretches */
 }
 
 .custom-multi-select .checkbox-item:hover {
@@ -2106,17 +2113,20 @@ tr:hover {
     margin: 0 !important;
     flex-shrink: 0 !important;
     border-radius: 4px !important;
-    appearance: auto !important; /* Ensure browser-native checkbox styles aren't stripped */
+    appearance: auto !important;
+    /* Ensure browser-native checkbox styles aren't stripped */
 }
 
 /* Scrollbar refinement for the options list */
 .custom-multi-select .select-options::-webkit-scrollbar {
     width: 5px;
 }
+
 .custom-multi-select .select-options::-webkit-scrollbar-thumb {
     background: #e2e8f0;
     border-radius: 10px;
 }
+
 .custom-multi-select .select-options::-webkit-scrollbar-thumb:hover {
     background: #cbd5e1;
 }

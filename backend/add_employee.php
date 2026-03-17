@@ -106,9 +106,9 @@ body { background: #f3f4f6; }
     min-height: 0;         /* 关键：允许子元素溢出触发滚动 */
     max-height: 100%;      /* 关键：限制高度上限 */
     overflow-y: auto !important;
-    overflow-x: visible !important; /* Allow horizontal overflow if needed */
+    overflow-x: hidden;
     padding-right: 0px;
-    padding-bottom: 200px !important; /* Extra space for dropdowns at the bottom */
+    padding-bottom: 16px;
     box-sizing: border-box;
     border-radius: 10px;
     border: 1px solid #e5e7eb;
