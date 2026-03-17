@@ -1,3 +1,4 @@
+
 // 职位配置 - 根据账号类型显示不同职位选项
 const positionsByAccountType = {
     'special': [
@@ -533,16 +534,15 @@ function displayData(data) {
     });
 
     const rows = sortedData.map((item, index) => `
-                <tr id="row-${item.id}" data-id="${item.id}" data-branch="${item.branch || ''}" data-user='${escapeHTML(JSON.stringify(item))}'>
+                <tr id="row-${item.id}" data-id="${item.id}" data-user='${escapeHTML(JSON.stringify(item))}'>
                     <td style="text-align: center; font-weight: bold; color: black;">${index + 1}</td>
                     <td>${item.position ? escapeHTML(item.position) : '<em style="color: #999;">-</em>'}</td>
                     <td>${item.username ? escapeHTML(item.username) : '<em style="color: #999;">-</em>'}</td>
                     <td>${item.email ? escapeHTML(item.email) : '<em style="color: #999;">-</em>'}</td>
                     <td>${item.phone_number ? escapeHTML(item.phone_number) : '<em style="color: #999;">-</em>'}</td>
-                    <td>\${item.branch ? '<span style="background:#fff3e0;color:#e65100;padding:2px 8px;border-radius:4px;font-size:0.85em;font-weight:600;">' + escapeHTML(item.branch.toUpperCase()) + '</span>' : '<em style="color:#bbb;font-size:0.85em;">总部</em>'}</td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn-action btn-edit" onclick="openEditModal(\${item.id})" title="编辑">
+                            <button class="btn-action btn-edit" onclick="openEditModal(${item.id})" title="编辑">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn-action btn-save" onclick="openPermissionsModal(${item.id})" title="权限设定" style="background: #ff8019;">
@@ -668,146 +668,6 @@ function refreshTable() {
     loadCodesAndUsers();
 }
 
-// ── 分类筛选器逻辑 ──
-let branchL1Current = 'all';   // 'all' | 'kunzz' | 'branch'
-let branchL2Current = 'all';   // 'all' | 'j1' | 'j2' | 'j3'
-
-const branchL2Options = {
-    'all': [],                                           // 不需要二层
-    'kunzz': [],                                           // 只有一个选项"-"，不展开
-    'branch': [
-        { value: 'all', label: '全部分店' },
-        { value: 'j1', label: 'J1' },
-        { value: 'j2', label: 'J2' },
-        { value: 'j3', label: 'J3' },
-    ]
-};
-
-function toggleBranchL1() {
-    const d = document.getElementById('branchL1Dropdown');
-    const open = d.style.display !== 'none';
-    closeBranchDropdowns();
-    if (!open) d.style.display = 'block';
-}
-
-function toggleBranchL2() {
-    // 如果第一层是 kunzz，二层不可点（只显示"-"）
-    if (branchL1Current === 'all' || branchL1Current === 'kunzz') return;
-    const d = document.getElementById('branchL2Dropdown');
-    const open = d.style.display !== 'none';
-    closeBranchDropdowns();
-    if (!open) d.style.display = 'block';
-}
-
-function closeBranchDropdowns() {
-    document.getElementById('branchL1Dropdown').style.display = 'none';
-    document.getElementById('branchL2Dropdown').style.display = 'none';
-}
-
-function selectBranchL1(value, label) {
-    branchL1Current = value;
-    branchL2Current = 'all';
-
-    document.getElementById('branchL1Label').textContent = label;
-
-    const l2Btn = document.getElementById('branchL2Btn');
-    const l2Label = document.getElementById('branchL2Label');
-    const l2Chevron = l2Btn.querySelector('.fa-chevron-down');
-
-    if (value === 'all') {
-        // 全部 → 二层显示 "-"，不可点
-        l2Label.textContent = '-';
-        l2Btn.style.cursor = 'default';
-        l2Btn.style.opacity = '0.45';
-        if (l2Chevron) l2Chevron.style.display = 'none';
-    } else if (value === 'kunzz') {
-        // KunzzGroup → 二层显示 "-"，不可点
-        l2Label.textContent = '-';
-        l2Btn.style.cursor = 'default';
-        l2Btn.style.opacity = '0.45';
-        if (l2Chevron) l2Chevron.style.display = 'none';
-    } else {
-        // 分店 → 二层显示 dropdown
-        l2Label.textContent = '全部分店';
-        l2Btn.style.cursor = 'pointer';
-        l2Btn.style.opacity = '1';
-        if (l2Chevron) l2Chevron.style.display = '';
-        // 填充二层选项
-        buildBranchL2Dropdown();
-    }
-
-    closeBranchDropdowns();
-    applyBranchFilter();
-}
-
-function selectBranchL2(value, label) {
-    branchL2Current = value;
-    document.getElementById('branchL2Label').textContent = label;
-    closeBranchDropdowns();
-    applyBranchFilter();
-}
-
-function buildBranchL2Dropdown() {
-    const d = document.getElementById('branchL2Dropdown');
-    const options = branchL2Options['branch'];
-    d.innerHTML = options.map(opt =>
-        `<div class="bl2-item" onclick="selectBranchL2('${opt.value}','${opt.label}')"
-            style="padding:8px 14px;font-size:13px;cursor:pointer;color:#374151;transition:background 0.1s;"
-            onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background=''">${opt.label}</div>`
-    ).join('');
-}
-
-function applyBranchFilter() {
-    const tableBody = document.getElementById('tableBody');
-    const rows = tableBody.getElementsByTagName('tr');
-
-    for (let row of rows) {
-        if (row.cells.length <= 1) continue;  // 跳过加载中/空行
-
-        // 读取该行的 branch 值（来自 data-branch 或从行数据推断）
-        // 我们在 displayData 里给每行加 data-branch 属性
-        const rowBranch = (row.getAttribute('data-branch') || '').toLowerCase().trim();
-
-        let show = true;
-
-        if (branchL1Current === 'kunzz') {
-            // 只显示无分店的职员（branch 为空）
-            show = (rowBranch === '' || rowBranch === 'null');
-        } else if (branchL1Current === 'branch') {
-            // 只显示有分店的职员
-            const hasBranch = rowBranch !== '' && rowBranch !== 'null';
-            if (!hasBranch) {
-                show = false;
-            } else if (branchL2Current !== 'all') {
-                // 进一步筛选具体分店
-                show = (rowBranch === branchL2Current);
-            }
-        }
-        // 'all' → 全部显示
-
-        if (show) {
-            row.classList.remove('hidden-row');
-        } else {
-            row.classList.add('hidden-row');
-        }
-    }
-}
-
-// 点击页面其他地方关闭 dropdown
-document.addEventListener('click', function (e) {
-    const wrap = document.querySelector('.branch-filter-wrap');
-    if (wrap && !wrap.contains(e.target)) {
-        closeBranchDropdowns();
-    }
-});
-
-// hover 样式注入
-(function () {
-    const style = document.createElement('style');
-    style.textContent = '.bl1-item:hover, .bl2-item:hover { background: #f9fafb !important; }';
-    document.head.appendChild(style);
-})();
-
 // 全局变量存储原始数据
 let originalTableData = [];
 
@@ -816,13 +676,11 @@ function filterTable(searchTerm) {
     const tableBody = document.getElementById('tableBody');
     const rows = tableBody.getElementsByTagName('tr');
 
-    // 如果没有搜索词，恢复并重新应用分类筛选
+    // 如果没有搜索词，显示所有行
     if (!searchTerm.trim()) {
         for (let row of rows) {
             row.classList.remove('hidden-row');
         }
-        // 重新应用分类筛选
-        if (typeof applyBranchFilter === 'function') applyBranchFilter();
         return;
     }
 
@@ -909,7 +767,6 @@ function openEditModal(id) {
     document.getElementById('edit_emergency_contact_name').value = userData.emergency_contact_name || '';
     document.getElementById('edit_emergency_phone_number').value = userData.emergency_phone_number || '';
     document.getElementById('edit_account_type').value = userData.account_type || '';
-    document.getElementById('edit_branch').value = userData.branch || '';
 
     // 先设置账号类型，然后更新职位选项
     if (userData.account_type) {

@@ -356,12 +356,8 @@ function generateCode($pdo, $input)
 function getCodesAndUsers($pdo)
 {
     try {
-        // 从 session 读取当前用户的 branch
-        if (!isset($_SESSION))
-            @session_start();
-        $sessionBranch = $_SESSION['branch'] ?? 'kunzz'; // 默认总部
-
-        $baseSelect = "
+        // 查询所有代码和对应的用户信息
+        $sql = "
             SELECT 
                 u.id,
                 u.username,
@@ -383,25 +379,13 @@ function getCodesAndUsers($pdo)
                 u.bank_account_holder_en,
                 u.registration_code,
                 u.account_type,
-                u.branch,
                 u.created_at
             FROM users u
+            ORDER BY u.created_at DESC, u.id DESC
         ";
 
-        if ($sessionBranch === 'kunzz') {
-            // 总部：查看所有职员
-            $sql = $baseSelect . " ORDER BY u.created_at DESC, u.id DESC";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute();
-        }
-        else {
-            // 分店：只看本店职员（branch 匹配或未设置）
-            $sql = $baseSelect . " WHERE u.branch = :branch OR u.branch IS NULL OR u.branch = '' ORDER BY u.created_at DESC, u.id DESC";
-            $stmt = $pdo->prepare($sql);
-            $stmt->bindParam(':branch', $sessionBranch);
-            $stmt->execute();
-        }
-
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
         $results = $stmt->fetchAll();
 
         echo json_encode([
@@ -557,7 +541,6 @@ function updateCodeAndUser($pdo, $input)
     $bank_account = trim($input['bank_account'] ?? '');
     $bank_account_holder_en = trim($input['bank_account_holder_en'] ?? '');
     $registration_code = trim($input['registration_code'] ?? '');
-    $branch = !empty($input['branch']) ? trim($input['branch']) : null;
 
     // 验证账户类型
     $valid_types = ['special', 'hr', 'account', 'media', 'marketing', 'support', 'production', 'r&d', 'technical', 'design', 'operation', 'service', 'sushi', 'kitchen'];
@@ -628,8 +611,7 @@ function updateCodeAndUser($pdo, $input)
             emergency_phone_number = :emergency_phone_number,
             bank_name = :bank_name,
             bank_account = :bank_account,
-            bank_account_holder_en = :bank_account_holder_en,
-            branch = :branch
+            bank_account_holder_en = :bank_account_holder_en
             WHERE id = :id";
 
         $params = [
@@ -651,7 +633,6 @@ function updateCodeAndUser($pdo, $input)
             ':bank_name' => $bank_name,
             ':bank_account' => $bank_account,
             ':bank_account_holder_en' => $bank_account_holder_en,
-            ':branch' => $branch,
             ':id' => $id
         ];
 
@@ -853,14 +834,14 @@ function addNewUser($pdo, $input)
             home_address, current_address, city, state, postcode,
             date_of_birth, gender, nationality, race, 
             emergency_contact_name, emergency_phone_number, 
-            bank_account_holder_en, account_type, registration_code, branch, is_first_login, created_at
+            bank_account_holder_en, account_type, registration_code, is_first_login, created_at
         ) VALUES (
             ?, ?, ?, ?, ?, ?,
             ?, ?, ?, ?,
             ?, ?, ?, ?, ?,
             ?, ?, ?, ?,
             ?, ?,
-            ?, ?, ?, ?, 1, NOW()
+            ?, ?, ?, 1, NOW()
         )";
 
         $insertUserStmt = $pdo->prepare($insertUserSql);
@@ -888,8 +869,7 @@ function addNewUser($pdo, $input)
             !empty($input['emergency_phone_number']) ? trim($input['emergency_phone_number']) : null,
             !empty($input['bank_account_holder_en']) ? trim($input['bank_account_holder_en']) : null,
             $input['account_type'],
-            $code,
-            !empty($input['branch']) ? trim($input['branch']) : null
+            $code
         ];
 
         if (!$insertUserStmt->execute($userData)) {

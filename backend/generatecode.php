@@ -64,33 +64,8 @@ require_once 'session_check.php';
 
         <!-- 代码和职员列表 -->
         <div class="table-container">
-            <div class="table-title" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-                <span>职员列表</span>
-                <!-- 分类筛选器 -->
-                <div class="branch-filter-wrap" style="display: flex; align-items: center; gap: 8px;">
-                    <!-- 第一层：全部 / KunzzGroup / 分店 -->
-                    <div style="position: relative;">
-                        <button id="branchL1Btn" onclick="toggleBranchL1()" style="display:flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;font-size:clamp(8px,0.74vw,13px);cursor:pointer;color:#374151;white-space:nowrap;">
-                            <span id="branchL1Label">全部</span>
-                            <i class="fas fa-chevron-down" style="font-size:10px;color:#9ca3af;"></i>
-                        </button>
-                        <div id="branchL1Dropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.1);z-index:999;min-width:130px;overflow:hidden;">
-                            <div class="bl1-item" data-value="all" onclick="selectBranchL1('all','全部')" style="padding:8px 14px;font-size:13px;cursor:pointer;color:#374151;transition:background 0.1s;">全部</div>
-                            <div class="bl1-item" data-value="kunzz" onclick="selectBranchL1('kunzz','KunzzGroup')" style="padding:8px 14px;font-size:13px;cursor:pointer;color:#374151;transition:background 0.1s;">KunzzGroup</div>
-                            <div class="bl1-item" data-value="branch" onclick="selectBranchL1('branch','分店')" style="padding:8px 14px;font-size:13px;cursor:pointer;color:#374151;transition:background 0.1s;">分店</div>
-                        </div>
-                    </div>
-                    <!-- 第二层：根据第一层显示 -->
-                    <div style="position: relative;">
-                        <button id="branchL2Btn" onclick="toggleBranchL2()" style="display:flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;font-size:clamp(8px,0.74vw,13px);cursor:pointer;color:#374151;white-space:nowrap;">
-                            <span id="branchL2Label">-</span>
-                            <i class="fas fa-chevron-down" style="font-size:10px;color:#9ca3af;"></i>
-                        </button>
-                        <div id="branchL2Dropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.1);z-index:999;min-width:130px;overflow:hidden;">
-                            <!-- 动态填充 -->
-                        </div>
-                    </div>
-                </div>
+            <div class="table-title">
+                职员列表
             </div>
             
             <div class="table-wrapper">
@@ -646,17 +621,6 @@ require_once 'session_check.php';
                     <div class="form-section">
                         <div class="form-section-header">账号设置</div>
                         <div class="form-section-content">
-                            <div class="form-row-2col">
-                                <div class="form-group">
-                                    <label for="edit_branch">所属分店</label>
-                                    <select id="edit_branch" name="branch">
-                                        <option value="">总部 / 未指定</option>
-                                        <option value="j1">J1 (Midvalley Southkey)</option>
-                                        <option value="j2">J2 (Paradigm Mall)</option>
-                                        <option value="j3">J3 (Desa Tebrau)</option>
-                                    </select>
-                                </div>
-                            </div>
                             <div class="form-row-2col">
                                 <div class="form-group">
                                     <label for="edit_account_type">账号类型 *</label>
