@@ -2115,23 +2115,25 @@ function extractPermissionsData(container) {
         submenuPermissions[parent] = selectedSubs;
     });
 
+    // Page permissions (Detail panel checkboxes)
     const pagePermissions = {
-        monthly_report: {
-            system: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="monthly_report"] .perm-stock-system:checked')).map(cb => cb.value),
-            views: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="monthly_report"] .perm-stock-view:checked')).map(cb => cb.value)
+        kpi_upload: {
+            system: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="kpi_upload"] .perm-stock-system:checked')).map(cb => cb.value),
+            views: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="kpi_upload"] .perm-stock-view:checked')).map(cb => cb.value)
+        },
+        stock_inventory: {
+            system: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="stock_inventory"] .perm-stock-system:checked')).map(cb => cb.value),
+            views: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="stock_inventory"] .perm-stock-view:checked')).map(cb => cb.value)
         },
         annual_summary: {
             system: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="annual_summary"] .perm-annual-system:checked')).map(cb => cb.value)
         },
         branch_comparison: {
             views: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="branch_comparison"] .perm-comp-view:checked')).map(cb => cb.value)
-        },
-        stock_inventory: {
-            system: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="stock_inventory"] .perm-stock-system:checked')).map(cb => cb.value),
-            views: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="stock_inventory"] .perm-stock-view:checked')).map(cb => cb.value)
         }
     };
 
+    // Store/Brand permissions
     const brandPermissions = {
         kunzz_holdings: container.querySelector('.perm-page-blueprint[data-brand="kunzz_holdings"]')?.checked ? { blueprint: ['blueprint'] } : {},
         tokyo_cuisine: {
@@ -2148,8 +2150,8 @@ function extractPermissionsData(container) {
         submenuPermissions,
         pagePermissions,
         brandPermissions,
-        reportPermissions: [], // Not used in new UI yet
-        restaurantPermissions: [] // Not used in new UI yet
+        reportPermissions: [],
+        restaurantPermissions: []
     };
 }
 
