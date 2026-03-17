@@ -69,32 +69,47 @@ if ($result->num_rows === 1) {
         }
 
         if ($remember) {
+            error_log("Setting remember cookies for user: " . $user['id']);
             // ✅ 勾选了"记住我"，设置 cookie（30天）
             $expire = time() + (86400 * 30);
-            setcookie('user_id', $user['id'], $expire, "/");
-            setcookie('username', $user['username'], $expire, "/");
-            setcookie('position', $user['position'], $expire, "/");
-            setcookie('account_type', $user['account_type'], $expire, "/"); // ⭐ 添加这行
-            setcookie('remember_token', '1', $expire, "/");
+            $options = [
+                'expires' => $expire,
+                'path' => '/',
+                'domain' => '', // Default to current domain
+                'secure' => true,
+                'httponly' => true,
+                'samesite' => 'Lax'
+            ];
+            setcookie('user_id', $user['id'], $options);
+            setcookie('username', $user['username'], $options);
+            setcookie('position', $user['position'] ?? '', $options);
+            setcookie('account_type', $user['account_type'] ?? '', $options);
+            setcookie('remember_token', '1', $options);
         } else {
+            error_log("Clearing remember cookies for user: " . $user['id']);
             // ❌ 没勾选记住我，清除残留 cookie
-            setcookie('user_id', '', time() - 3600, "/");
-            setcookie('username', '', time() - 3600, "/");
-            setcookie('position', '', time() - 3600, "/");
-            setcookie('account_type', '', time() - 3600, "/"); // ⭐ 添加这行
-            setcookie('remember_token', '', time() - 3600, "/");
+            $expire = time() - 3600;
+            $options = ['expires' => $expire, 'path' => '/', 'secure' => true, 'httponly' => true, 'samesite' => 'Lax'];
+            setcookie('user_id', '', $options);
+            setcookie('username', '', $options);
+            setcookie('position', '', $options);
+            setcookie('account_type', '', $options);
+            setcookie('remember_token', '', $options);
         }
 
-        $redirect_page = $_GET['redirect'] ?? 'stocklistj1.php'; // 优先使用 URL 参数
+        error_log("Login successful, redirecting to: " . $redirect_page);
+        session_write_close();
         header("Location: " . $redirect_page);
         exit();
 
     } else {
+        error_log("Password mismatch for email: " . $email);
         echo "<script>alert('密码错误'); window.location.href='login.html';</script>";
         exit();
     }
 
 } else {
+    error_log("User not found for email: " . $email);
     exit();
 }
 ?>
