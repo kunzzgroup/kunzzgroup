@@ -2107,32 +2107,39 @@ function extractPermissionsData(container) {
 
     const perms = Array.from(container.querySelectorAll('.perm-l1-check:checked')).map(cb => cb.value);
 
+    // Submenu permissions (L2 checkboxes)
     const submenuPermissions = {};
-    Object.keys(sidebarSubOptions).forEach(parent => {
-        const mainCheckbox = container.querySelector(`.perm-l1-check[value="${parent}"]`);
+    container.querySelectorAll('.perm-l1-check').forEach(l1 => {
+        const parent = l1.value;
         const selectedSubs = Array.from(container.querySelectorAll(`.perm-l2-check[data-parent="${parent}"]:checked`)).map(cb => cb.value);
-        submenuPermissions[parent] = (mainCheckbox && mainCheckbox.checked) ? selectedSubs : [];
+        submenuPermissions[parent] = selectedSubs;
     });
 
     const pagePermissions = {
-        stock_inventory: {
-            system: Array.from(container.querySelectorAll('.perm-stock-system:checked')).map(cb => cb.value),
-            views: Array.from(container.querySelectorAll('.perm-stock-view:checked')).map(cb => cb.value)
+        monthly_report: {
+            system: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="monthly_report"] .perm-stock-system:checked')).map(cb => cb.value),
+            views: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="monthly_report"] .perm-stock-view:checked')).map(cb => cb.value)
         },
-        kpi_upload: {
-            system: Array.from(container.querySelectorAll('.perm-upload-system:checked')).map(cb => cb.value),
-            type: Array.from(container.querySelectorAll('.perm-upload-type:checked')).map(cb => cb.value)
+        annual_summary: {
+            system: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="annual_summary"] .perm-annual-system:checked')).map(cb => cb.value)
+        },
+        branch_comparison: {
+            views: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="branch_comparison"] .perm-comp-view:checked')).map(cb => cb.value)
+        },
+        stock_inventory: {
+            system: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="stock_inventory"] .perm-stock-system:checked')).map(cb => cb.value),
+            views: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="stock_inventory"] .perm-stock-view:checked')).map(cb => cb.value)
         }
     };
 
     const brandPermissions = {
         kunzz_holdings: container.querySelector('.perm-page-blueprint[data-brand="kunzz_holdings"]')?.checked ? { blueprint: ['blueprint'] } : {},
         tokyo_cuisine: {
-            j1: container.querySelector('.perm-page-schedule[data-store="j1"]')?.checked ? ['schedule'] : [],
-            j2: container.querySelector('.perm-page-schedule[data-store="j2"]')?.checked ? ['schedule'] : []
+            j1: container.querySelector('.perm-page-schedule[data-store="j1"][data-brand="tokyo_cuisine"]')?.checked ? ['schedule'] : [],
+            j2: container.querySelector('.perm-page-schedule[data-store="j2"][data-brand="tokyo_cuisine"]')?.checked ? ['schedule'] : []
         },
         tokyo_izakaya: {
-            j3: container.querySelector('.perm-page-schedule[data-store="j3"]')?.checked ? ['schedule'] : []
+            j3: container.querySelector('.perm-page-schedule[data-store="j3"][data-brand="tokyo_izakaya"]')?.checked ? ['schedule'] : []
         }
     };
 
@@ -2141,8 +2148,8 @@ function extractPermissionsData(container) {
         submenuPermissions,
         pagePermissions,
         brandPermissions,
-        reportPermissions: Array.from(container.querySelectorAll('.perm-report:checked')).map(cb => cb.value),
-        restaurantPermissions: Array.from(container.querySelectorAll('.perm-restaurant:checked')).map(cb => cb.value)
+        reportPermissions: [], // Not used in new UI yet
+        restaurantPermissions: [] // Not used in new UI yet
     };
 }
 
