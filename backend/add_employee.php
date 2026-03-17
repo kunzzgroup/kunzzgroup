@@ -159,186 +159,17 @@ body { background: #f3f4f6; }
 }
 
 /* Permission section */
-/* Permission section - Absolute Brand Correction */
-.editUserPermLayout .perm-layout-container {
-    display: flex !important;
-    gap: 20px !important;
-    background: #ffffff !important;
-    padding: 24px !important;
-    border-radius: 12px !important;
-    border: 3px solid #f97316 !important; /* Thick orange border */
-    box-shadow: 0 8px 24px rgba(249, 115, 22, 0.15) !important;
-    margin: 4px !important;
-}
+.editUserPermLayout .perm-tree-container { max-height: 420px !important; overflow-y: auto; }
+.editUserPermLayout .perm-detail-card    { max-height: 420px !important; overflow-y: auto; }
 
-.editUserPermLayout .perm-tree-container {
-    flex: 1 !important;
-    background: #fffcf9 !important;
-    border-radius: 10px !important;
-    border: 2px solid #fed7aa !important;
-    padding: 16px !important;
-    max-height: 600px !important;
-    overflow-y: auto !important;
-}
-
-.editUserPermLayout .perm-detail-card {
-    flex: 1.3 !important;
-    background: #ffffff !important;
-    border-radius: 10px !important;
-    border: 2px solid #fed7aa !important;
-    padding: 24px !important;
-    max-height: 600px !important;
-    overflow-y: auto !important;
-    position: relative !important;
-}
-
-/* Force Text Visibility */
-.perm-checkbox-label strong,
-.perm-checkbox-label span {
-    display: inline-block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    color: #111827 !important; /* Dark text by default */
-    font-size: 14px !important;
-    font-weight: 700 !important;
-    margin-left: 5px !important;
-}
-
-/* Custom Scrollbar - High contrast orange */
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar {
-    width: 8px !important;
-}
+.editUserPermLayout .perm-detail-card::-webkit-scrollbar { width: 6px; }
+.editUserPermLayout .perm-tree-container::-webkit-scrollbar-track,
+.editUserPermLayout .perm-detail-card::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb {
-    background: #f97316 !important;
-    border-radius: 10px !important;
-}
-
-/* Tree Item Styles - Corrective */
-.perm-level-1 { margin-bottom: 12px !important; }
-.perm-level-1-item {
-    display: flex !important;
-    align-items: center !important;
-    padding: 14px 18px !important;
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 8px !important;
-    cursor: pointer !important;
-    transition: all 0.2s !important;
-}
-.perm-level-1-item:hover {
-    border-color: #f97316 !important;
-    background: #fff7ed !important;
-}
-
-/* Expanded state - Keep text visible! */
-.perm-level-1-item.expanded {
-    background: #f97316 !important;
-    border-color: #ea580c !important;
-}
-.perm-level-1-item.expanded strong,
-.perm-level-1-item.expanded .perm-arrow {
-    color: #ffffff !important; /* Only white text when background is orange */
-}
-
-.perm-level-2-container {
-    padding-left: 20px !important;
-    margin-top: 8px !important;
-    display: none;
-    flex-direction: column !important;
-    gap: 6px !important;
-    border-left: 3px solid #fed7aa !important;
-    margin-left: 30px !important;
-}
-.perm-level-2-container.expanded { display: flex !important; }
-
-.perm-level-2-item {
-    padding: 10px 14px !important;
-    border-radius: 6px !important;
-    background: #ffffff !important;
-    border: 1px solid #f1f5f9 !important;
-    transition: all 0.2s !important;
-}
-.perm-level-2-item span {
-    color: #4b5563 !important;
-    font-weight: 600 !important;
-}
-.perm-level-2-item:hover {
-    background: #fff7ed !important;
-    border-color: #fdba74 !important;
-}
-.perm-level-2-item.expanded {
-    background: #fff7ed !important;
-    border-color: #f97316 !important;
-}
-.perm-level-2-item.expanded span {
-    color: #c2410c !important;
-}
-
-/* Checkbox & Arrows */
-.perm-checkbox-label {
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
-    width: 100% !important;
-    cursor: pointer !important;
-}
-.perm-checkbox-label input[type="checkbox"] {
-    width: 20px !important;
-    height: 20px !important;
-    margin: 0 !important;
-    accent-color: #f97316 !important;
-}
-.perm-arrow, .perm-arrow-sub {
-    font-size: 14px !important;
-    color: #94a3b8 !important;
-    width: 20px !important;
-    text-align: center !important;
-}
-
-/* Detail Card Content */
-.perm-detail-header {
-    margin-bottom: 24px !important;
-    padding-bottom: 12px !important;
-    border-bottom: 4px solid #f97316 !important;
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-}
-.perm-detail-header strong { font-size: 20px !important; color: #1e293b !important; }
-
-.perm-level-3-section {
-    background: #fdfdfd !important;
-    padding: 20px !important;
-    border-radius: 8px !important;
-    border: 1px solid #e2e8f0 !important;
-    border-left: 5px solid #f97316 !important;
-    margin-bottom: 20px !important;
-}
-.perm-section-title {
-    font-size: 14px !important;
-    font-weight: 900 !important;
-    color: #f97316 !important;
-    text-transform: uppercase !important;
-    margin-bottom: 15px !important;
-}
-.perm-level-3-section label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px;
-    border-radius: 6px;
-    transition: background 0.2s;
-}
-.perm-level-3-section label:hover { background: #f8fafc; }
-
-@keyframes slideInDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.perm-detail-placeholder.hidden { display: none !important; }
+.editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+.editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb:hover,
+.editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 /* ── 平板视图 (<1200px) ── */
 @media (max-width: 1200px) {
@@ -859,7 +690,7 @@ body { background: #f3f4f6; }
                                     <div class="perm-level-1-item" data-perm="brand">
                                         <label class="perm-checkbox-label">
                                             <input type="checkbox" class="perm-l1-check" value="brand">
-                                            <i class="fas fa-chevron-right perm-arrow"></i>
+                                            <span class="perm-arrow">▶</span>
                                             <strong>集团架构</strong>
                                         </label>
                                     </div>
@@ -867,21 +698,21 @@ body { background: #f3f4f6; }
                                         <div class="perm-level-2-item has-level-3" data-sub="kunzz_holdings">
                                             <label class="perm-checkbox-label">
                                                 <input type="checkbox" class="perm-l2-check" data-parent="brand" value="kunzz_holdings">
-                                                <i class="fas fa-chevron-right perm-arrow-sub"></i>
+                                                <span class="perm-arrow-sub">▶</span>
                                                 <span>KUNZZ HOLDINGS SDN BHD</span>
                                             </label>
                                         </div>
                                         <div class="perm-level-2-item has-level-3" data-sub="tokyo_cuisine">
                                             <label class="perm-checkbox-label">
                                                 <input type="checkbox" class="perm-l2-check" data-parent="brand" value="tokyo_cuisine">
-                                                <i class="fas fa-chevron-right perm-arrow-sub"></i>
+                                                <span class="perm-arrow-sub">▶</span>
                                                 <span>TOKYO JAPANESE CUISINE SDN BHD</span>
                                             </label>
                                         </div>
                                         <div class="perm-level-2-item has-level-3" data-sub="tokyo_izakaya">
                                             <label class="perm-checkbox-label">
                                                 <input type="checkbox" class="perm-l2-check" data-parent="brand" value="tokyo_izakaya">
-                                                <i class="fas fa-chevron-right perm-arrow-sub"></i>
+                                                <span class="perm-arrow-sub">▶</span>
                                                 <span>TOKYO IZAKAYA SDN BHD</span>
                                             </label>
                                         </div>
@@ -893,7 +724,7 @@ body { background: #f3f4f6; }
                                     <div class="perm-level-1-item" data-perm="analytics">
                                         <label class="perm-checkbox-label">
                                             <input type="checkbox" class="perm-l1-check" value="analytics">
-                                            <i class="fas fa-chevron-right perm-arrow"></i>
+                                            <span class="perm-arrow">▶</span>
                                             <strong>营收数据</strong>
                                         </label>
                                     </div>
@@ -907,7 +738,7 @@ body { background: #f3f4f6; }
                                         <div class="perm-level-2-item has-level-3" data-sub="kpi_upload">
                                             <label class="perm-checkbox-label">
                                                 <input type="checkbox" class="perm-l2-check" data-parent="analytics" value="kpi_upload">
-                                                <i class="fas fa-chevron-right perm-arrow-sub"></i>
+                                                <span class="perm-arrow-sub">▶</span>
                                                 <span>数据上传</span>
                                             </label>
                                         </div>
@@ -919,7 +750,7 @@ body { background: #f3f4f6; }
                                     <div class="perm-level-1-item" data-perm="hr">
                                         <label class="perm-checkbox-label">
                                             <input type="checkbox" class="perm-l1-check" value="hr">
-                                            <i class="fas fa-chevron-right perm-arrow"></i>
+                                            <span class="perm-arrow">▶</span>
                                             <strong>人事管理</strong>
                                         </label>
                                     </div>
@@ -938,7 +769,7 @@ body { background: #f3f4f6; }
                                     <div class="perm-level-1-item" data-perm="resource">
                                         <label class="perm-checkbox-label">
                                             <input type="checkbox" class="perm-l1-check" value="resource">
-                                            <i class="fas fa-chevron-right perm-arrow"></i>
+                                            <span class="perm-arrow">▶</span>
                                             <strong>资源总库</strong>
                                         </label>
                                     </div>
@@ -946,7 +777,7 @@ body { background: #f3f4f6; }
                                         <div class="perm-level-2-item has-level-3" data-sub="stock_inventory">
                                             <label class="perm-checkbox-label">
                                                 <input type="checkbox" class="perm-l2-check" data-parent="resource" value="stock_inventory">
-                                                <i class="fas fa-chevron-right perm-arrow-sub"></i>
+                                                <span class="perm-arrow-sub">▶</span>
                                                 <span>库存</span>
                                             </label>
                                         </div>
@@ -979,11 +810,8 @@ body { background: #f3f4f6; }
                             <!-- 右侧：三级详细配置卡片 -->
                             <div class="perm-detail-card">
                                 <div class="perm-detail-placeholder">
-                                    <div class="placeholder-icon-wrap">
-                                        <i class="fas fa-shield-halved"></i>
-                                    </div>
-                                    <h3>权限配置详情</h3>
-                                    <p>请从左侧选择一个包含二级选项（带图标 <i class="fas fa-chevron-right" style="font-size: 10px;"></i>）的模块，以在此处配置详细的三级权限。</p>
+                                    <i class="fas fa-hand-pointer" style="font-size: 48px; color: #d1d5db; margin-bottom: 15px;"></i>
+                                    <p style="color: #9ca3af; font-size: 14px;">点击左侧带有箭头的选项<br>查看详细配置</p>
                                 </div>
                                 <div class="perm-detail-content">
                                     <!-- 面板内容由JS根据 context 动态查找或初始化时存在 -->
@@ -1009,7 +837,7 @@ body { background: #f3f4f6; }
                                             <div class="perm-section-title">店面</div>
                                             <div class="perm-store-item" data-store="j1">
                                                 <label class="perm-checkbox-label">
-                                                    <i class="fas fa-store perm-arrow-store" style="color: #f97316; margin-right: 8px;"></i>
+                                                    <span class="perm-arrow-store">▶</span>
                                                     <span>J1 (Midvalley Southkey)</span>
                                                 </label>
                                                 <div class="perm-store-content">
@@ -1019,7 +847,7 @@ body { background: #f3f4f6; }
                                             </div>
                                             <div class="perm-store-item" data-store="j2">
                                                 <label class="perm-checkbox-label">
-                                                    <i class="fas fa-store perm-arrow-store" style="color: #f97316; margin-right: 8px;"></i>
+                                                    <span class="perm-arrow-store">▶</span>
                                                     <span>J2 (Paradigm Mall)</span>
                                                 </label>
                                                 <div class="perm-store-content">
@@ -1039,7 +867,7 @@ body { background: #f3f4f6; }
                                             <div class="perm-section-title">店面</div>
                                             <div class="perm-store-item" data-store="j3">
                                                 <label class="perm-checkbox-label">
-                                                    <i class="fas fa-store perm-arrow-store" style="color: #f97316; margin-right: 8px;"></i>
+                                                    <span class="perm-arrow-store">▶</span>
                                                     <span>J3 (Desa Tebrau)</span>
                                                 </label>
                                                 <div class="perm-store-content">

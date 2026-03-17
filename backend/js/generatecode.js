@@ -2102,34 +2102,6 @@ async function savePermissions() {
     }
 }
 
-// 关闭三级详细配置面板
-function closeDetailPanel() {
-    const container = document.querySelector('.editUserPermLayout');
-    if (!container) return;
-
-    // 获取面板和占位符
-    const panels = container.querySelectorAll('.perm-level-3-panel, .perm-level-3-panel-inline');
-    const detailContent = container.querySelector('.perm-detail-content');
-    const placeholder = container.querySelector('.perm-detail-placeholder');
-
-    // 隐藏所有三级面板
-    panels.forEach(p => p.classList.remove('show'));
-
-    // 取消选中所有已展开的二级项（带三级配置的）
-    container.querySelectorAll('.perm-level-2-item.has-level-3.expanded').forEach(item => {
-        item.classList.remove('expanded');
-    });
-    
-    // 取消选中所有已展开的一级项（带三级配置的）
-    container.querySelectorAll('.perm-level-1-item.has-level-3.expanded').forEach(item => {
-        item.classList.remove('expanded');
-    });
-
-    // 恢复占位符显示
-    if (detailContent) detailContent.classList.remove('active');
-    if (placeholder) placeholder.classList.remove('hidden');
-}
-
 function extractPermissionsData(container) {
     if (!container) return {};
 
