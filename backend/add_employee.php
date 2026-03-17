@@ -158,14 +158,38 @@ body { background: #f3f4f6; }
     flex-shrink: 0;
 }
 
-/* Permission section */
-.editUserPermLayout .perm-tree-container { max-height: 420px !important; overflow-y: auto; }
-.editUserPermLayout .perm-detail-card    { max-height: 420px !important; overflow-y: auto; }
+/* Permission layout - Independent Scroll & Balanced Design */
+.editUserPermLayout .perm-layout-container {
+    display: flex !important;
+    gap: 16px;
+    align-items: stretch;
+    height: 520px; /* Fixed height to anchor the independent scrolls */
+    margin-top: 10px;
+}
+
+.editUserPermLayout .perm-tree-container,
+.editUserPermLayout .perm-detail-card {
+    flex: 1;
+    height: 100% !important;
+    max-height: none !important;
+    overflow-y: auto;
+    background: #ffffff;
+    border: 1.5px solid #eaeaea !important; /* Balanced border point */
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    box-sizing: border-box;
+}
+
+.editUserPermLayout .perm-detail-card {
+    flex: 0 0 420px !important; /* Prevent right content from being squeezed */
+    min-width: 420px;
+}
 
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar,
 .editUserPermLayout .perm-detail-card::-webkit-scrollbar { width: 6px; }
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar-track,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+.editUserPermLayout .perm-detail-card::-webkit-scrollbar-track { background: #f8fafc; border-radius: 4px; }
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb,
 .editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 .editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb:hover,

@@ -996,10 +996,11 @@ tr:hover {
     flex: 1;
     max-height: 60vh;
     overflow-y: auto;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 15px;
-    background: #f9fafb;
+    border: 1.5px solid #eaeaea !important; /* Balanced border point */
+    border-radius: 12px;
+    padding: 18px;
+    background: #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
     transform: translateZ(0);
     /* 启用GPU加速 */
     -webkit-overflow-scrolling: touch;
@@ -1766,14 +1767,20 @@ tr:hover {
 .editUserPermLayout .perm-tree-container {
     flex: 1 !important;
     min-width: 300px;
-    max-height: 60vh !important;
+    height: 520px !important; /* Sturdier fixed height */
+    max-height: none !important;
 }
 
 .editUserPermLayout .perm-detail-card {
-    flex: 0 0 400px !important;
+    flex: 0 0 420px !important;
+    min-width: 420px;
+    height: 520px !important;
     display: block !important;
-    position: sticky;
-    top: 0;
+    background: #fff;
+    border: 1.5px solid #eaeaea !important;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    overflow-y: auto;
 }
 
 .editUserPermLayout .perm-level-3-panel-inline {
