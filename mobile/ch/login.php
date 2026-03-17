@@ -97,6 +97,7 @@ if ($result->num_rows === 1) {
             setcookie('remember_token', '', $options);
         }
 
+        $redirect_page = $_GET['redirect'] ?? 'stocklistj1.php';
         error_log("Login successful, redirecting to: " . $redirect_page);
         session_write_close();
         header("Location: " . $redirect_page);
