@@ -6,89 +6,70 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>登入 - KUNZZ HOLDINGS</title>
-
   <link rel="stylesheet" href="css/login.css" />
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
-  <!-- 字体 -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
-
+  <!-- 登录表单区域 -->
   <section class="login-section">
     <div class="login-form">
       <h2>登入</h2>
-
-      <!-- ✅ FORM -->
-      <form id="loginForm" action="login.php" method="POST" autocomplete="on">
-
-        <!-- 邮箱 -->
-        <label class="input-label">账号</label>
-        <input type="email" name="username" placeholder="请输入邮箱地址" required autocomplete="username">
-
-        <!-- 密码 -->
-        <label class="input-label">密码</label>
+      <form action="login.php" method="POST">
+        <label for="username" class="input-label">账号</label>
+        <input type="email" name="username" placeholder="请输入邮箱地址" pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$" required>
+        <label for="password" class="input-label">密码</label>
         <div class="password-container">
-          <input type="password" id="password" name="password" placeholder="密码" required
-            autocomplete="current-password">
-
-          <img src="../images/icons/eye.svg" id="toggle-password" class="eye-icon">
+          <input type="password" id="password" name="password" placeholder="密码"
+            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])(?!.*[\u4e00-\u9fa5]).{8,}$"
+            title="密码至少包含一个大写字母、一个小写字母、一个数字和一个特殊符号，且不少于8个字符，且不能包含中文字符" required>
+          <img src="../images/icons/eye.svg" id="toggle-password" alt="显示密码" class="eye-icon">
         </div>
 
-        <!-- 选项 -->
         <div class="form-options">
           <label class="remember-me">
-            <input type="checkbox" id="remember" name="remember" value="1">
+            <input type="checkbox" name="remember" value="1">
             记住我
           </label>
-
           <div class="forgot-password">
             <a href="reset_password.html">忘记密码？</a>
           </div>
         </div>
-
-        <!-- 登录按钮 -->
-        <button type="submit" id="loginBtn">登入</button>
-
+        <button type="submit">登入</button>
       </form>
-
       <hr class="form-divider">
-
-      <!-- 错误提示（取代 alert） -->
-      <div id="error-msg" style="color:red; text-align:center; margin-top:10px; display:none;"></div>
-
-    </div>
+      <div class="form-links">
+      </div>
+  </section>
+  </div>
   </section>
 
   <script src="../app.js?v=2"></script>
-
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-
-      const form = document.getElementById("loginForm");
-      const btn = document.getElementById("loginBtn");
-      const errorMsg = document.getElementById("error-msg");
-
-      // ✅ redirect 自动带入
+      // 捕获 URL 中的 redirect 参数并加到 form action 中
       const urlParams = new URLSearchParams(window.location.search);
       const redirect = urlParams.get('redirect');
       if (redirect) {
-        form.action = 'login.php?redirect=' + encodeURIComponent(redirect);
+        document.querySelector('form').action = 'login.php?redirect=' + encodeURIComponent(redirect);
       }
 
-      // ✅ 显示/隐藏密码
       const toggle = document.getElementById("toggle-password");
       const password = document.getElementById("password");
+      const emailInput = document.querySelector('input[name="username"]');
+      const modal = document.getElementById("register-modal");
+      const openBtn = document.getElementById("open-register-modal");
+      const closeBtn = document.getElementById("close-modal");
+
+      let visible = false;
 
       toggle.addEventListener("click", function () {
-        password.type = password.type === "password" ? "text" : "password";
+        visible = !visible;
+        password.type = visible ? "text" : "password";
       });
-
-      // ✅ 防中文输入
-      const emailInput = document.querySelector('input[name="username"]');
 
       [emailInput, password].forEach(input => {
         input.addEventListener("input", function () {
@@ -96,24 +77,28 @@
         });
       });
 
-      // ✅ 防重复提交（mobile 很重要）
-      form.addEventListener("submit", function () {
-        btn.disabled = true;
-        btn.innerText = "登入中...";
+      openBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        modal.classList.remove("hidden");
       });
 
-      // ✅ 如果已经登录（有cookie且不为空），自动跳过登录页
-      const hasRememberToken = document.cookie.split(';').some(item => item.trim().startsWith('remember_token=') && item.split('=')[1] !== '');
-      if (hasRememberToken) {
-        console.log("检测到记住我，自动跳转...");
-        const urlParams = new URLSearchParams(window.location.search);
-        const redirect = urlParams.get('redirect') || 'stocklistj1.php';
-        window.location.href = 'login.php?redirect=' + encodeURIComponent(redirect);
-      }
+      closeBtn.addEventListener("click", function () {
+        modal.classList.add("hidden");
+      });
 
+      modal.addEventListener("click", function (e) {
+        if (e.target === modal) {
+          modal.classList.add("hidden");
+        }
+      });
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+          modal.classList.add("hidden");
+        }
+      });
     });
   </script>
-
 </body>
 
 </html>

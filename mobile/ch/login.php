@@ -2,127 +2,102 @@
 require_once __DIR__ . '/../../backend/xss_protect.php';
 ob_start();
 session_start();
-
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// ================= 数据库 =================
-$conn = new mysqli('localhost', 'u690174784_kunzz', 'Kunzz1688', 'u690174784_kunzz');
+// === 自动登录检查 ===
+// 如果已经有 Session，或者有有效的“记住我” Cookie，直接跳转
+$is_logged_in = isset($_SESSION['user_id']);
+$is_remembered = (isset($_COOKIE['user_id']) && isset($_COOKIE['remember_token']) && $_COOKIE['remember_token'] === '1');
+
+if ($is_logged_in || $is_remembered) {
+    // 恢复 Session 如果是通过 Cookie 记录的
+    if (!$is_logged_in && $is_remembered) {
+        $_SESSION['user_id'] = $_COOKIE['user_id'];
+        $_SESSION['username'] = $_COOKIE['username'] ?? '';
+        $_SESSION['position'] = $_COOKIE['position'] ?? '';
+        $_SESSION['account_type'] = $_COOKIE['account_type'] ?? '';
+        $_SESSION['last_activity'] = time();
+    }
+
+    $redirect = $_GET['redirect'] ?? 'stocklistj1.php';
+    header("Location: " . $redirect);
+    exit();
+}
+// ===================
+
+// 数据库连接信息
+$host = 'localhost';
+$dbname = 'u690174784_kunzz';
+$dbuser = 'u690174784_kunzz';
+$dbpass = 'Kunzz1688';
+
+// 创建连接
+$conn = new mysqli($host, $dbuser, $dbpass, $dbname);
 if ($conn->connect_error) {
     die("连接失败: " . $conn->connect_error);
 }
 
-// ================= 自动登录（Remember Me）=================
-if (!isset($_SESSION['user_id']) && isset($_COOKIE['remember_token'])) {
+// 获取提交数据
+$email = $_POST['username'] ?? '';
+$password = $_POST['password'] ?? '';
+$remember = isset($_POST['remember']); // true/false
 
-    $token = $_COOKIE['remember_token'];
+// 查询用户
+$sql = "SELECT * FROM users WHERE email = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $email);
+$stmt->execute();
+$result = $stmt->get_result();
 
-    $stmt = $conn->prepare("
-        SELECT * FROM users 
-        WHERE remember_token=? 
-        AND remember_expiry > NOW()
-    ");
-    $stmt->bind_param("s", $token);
-    $stmt->execute();
-    $result = $stmt->get_result();
+if ($result->num_rows === 1) {
+    $user = $result->fetch_assoc();
 
-    if ($user = $result->fetch_assoc()) {
-
+    if (verify_secure_password($password, $user['password'])) {
+        // ✅ 登录成功，设置 Session
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
         $_SESSION['position'] = $user['position'];
-        $_SESSION['account_type'] = $user['account_type'];
-        $_SESSION['last_activity'] = time();
+        $_SESSION['account_type'] = $user['account_type']; // ⭐ 添加这行 - 关键！
+        $_SESSION['last_activity'] = time(); // ➤ 当前登录时间（用于 1 分钟自动登出）
 
-        header("Location: stocklistj1.php");
-        exit();
-    }
-}
-
-// ================= 登录处理 =================
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
-    $remember = isset($_POST['remember']);
-
-    $stmt = $conn->prepare("SELECT * FROM users WHERE email=?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows === 1) {
-
-        $user = $result->fetch_assoc();
-
-        if (verify_secure_password($password, $user['password'])) {
-
-            // ✅ Session
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['position'] = $user['position'];
-            $_SESSION['account_type'] = $user['account_type'];
-            $_SESSION['last_activity'] = time();
-
-            // ✅ 首次登录
-            if ($user['is_first_login'] == 1) {
-                header("Location: reset_password.html");
-                exit();
-            }
-
-            // ================= Remember Me =================
-            if ($remember) {
-
-                $token = bin2hex(random_bytes(32));
-
-                $stmt = $conn->prepare("
-                    UPDATE users 
-                    SET remember_token=?, 
-                        remember_expiry=DATE_ADD(NOW(), INTERVAL 30 DAY)
-                    WHERE id=?
-                ");
-                $stmt->bind_param("si", $token, $user['id']);
-                $stmt->execute();
-
-                setcookie("remember_token", $token, [
-                    'expires' => time() + 86400 * 30,
-                    'path' => '/',
-                    'secure' => false, // 有 HTTPS 改 true
-                    'httponly' => false, // ✅ 改为 false，让 login.html 的 JS 能检测到
-                    'samesite' => 'Lax'
-                ]);
-
-            }
-            else {
-
-                $stmt = $conn->prepare("
-                    UPDATE users 
-                    SET remember_token=NULL, remember_expiry=NULL 
-                    WHERE id=?
-                ");
-                $stmt->bind_param("i", $user['id']);
-                $stmt->execute();
-
-                setcookie("remember_token", "", time() - 3600, "/");
-            }
-
-            $redirect = $_GET['redirect'] ?? 'stocklistj1.php';
-            header("Location: " . $redirect);
+        // 检查是否为首次登录
+        if ($user['is_first_login'] == 1) {
+            // 首次登录，跳转到密码重置页面
+            header("Location: reset_password.html");
             exit();
+        }
 
+        if ($remember) {
+            // ✅ 勾选了"记住我"，设置 cookie（30天）
+            $expire = time() + (86400 * 30);
+            setcookie('user_id', $user['id'], $expire, "/");
+            setcookie('username', $user['username'], $expire, "/");
+            setcookie('position', $user['position'], $expire, "/");
+            setcookie('account_type', $user['account_type'], $expire, "/"); // ⭐ 添加这行
+            setcookie('remember_token', '1', $expire, "/");
         }
         else {
-            echo "<script>alert('密码错误');window.location.href='login.html';</script>";
-            exit();
+            // ❌ 没勾选记住我，清除残留 cookie
+            setcookie('user_id', '', time() - 3600, "/");
+            setcookie('username', '', time() - 3600, "/");
+            setcookie('position', '', time() - 3600, "/");
+            setcookie('account_type', '', time() - 3600, "/"); // ⭐ 添加这行
+            setcookie('remember_token', '', time() - 3600, "/");
         }
+
+        $redirect_page = $_GET['redirect'] ?? 'stocklistj1.php'; // 优先使用 URL 参数
+        header("Location: " . $redirect_page);
+        exit();
 
     }
     else {
-        echo "<script>alert('用户不存在');window.location.href='login.html';</script>";
+        echo "<script>alert('密码错误'); window.location.href='login.html';</script>";
         exit();
     }
-} else {
-    // 如果不是 POST 请求，且没有自动登录成功，就呆在登录页
-    header("Location: login.html");
+
+}
+else {
     exit();
 }
 ?>
