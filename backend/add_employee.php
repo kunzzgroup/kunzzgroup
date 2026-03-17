@@ -173,6 +173,8 @@ body { background: #f3f4f6; }
     height: 100% !important;
     max-height: none !important;
     overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
     background: #ffffff;
     border: 1.5px solid #eaeaea !important; /* Balanced border point */
     border-radius: 12px;

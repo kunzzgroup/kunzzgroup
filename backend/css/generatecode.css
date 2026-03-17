@@ -1258,7 +1258,7 @@ tr:hover {
     opacity: 0;
     transform: translateY(10px);
     height: 100%;
-    overflow-y: auto;
+    /* overflow-y: auto;  <-- REMOVED to let parent handle scroll */
     transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
         transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
         visibility 0.3s;
@@ -1781,6 +1781,8 @@ tr:hover {
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
     overflow-y: auto;
+    overflow-x: hidden; /* Prevent horizontal bleed */
+    position: relative; /* Anchor for absolute elements like placeholder */
 }
 
 .editUserPermLayout .perm-level-3-panel-inline {
