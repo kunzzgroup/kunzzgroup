@@ -19,7 +19,15 @@ require_once 'session_check.php';
     <link rel="stylesheet" href="css/generatecode.css?v=<?php echo time(); ?>">
     <title>添加职员 - 职员管理系统</title>
     <style>
-body { background: #f3f4f6; }
+* { box-sizing: border-box; }
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Prevent body scroll */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
 
 .add-employee-page {
     display: flex;
@@ -34,8 +42,8 @@ body { background: #f3f4f6; }
     align-items: center;
     gap: 14px;
     padding: 14px 24px;
-    background: #fff;
-    border-bottom: 1px solid #e5e7eb;
+    background: #ffffff;
+    border-bottom: 2px solid #f97316; /* Brand orange accent */
     flex-shrink: 0;
     box-shadow: 0 1px 3px rgba(0,0,0,.04);
     z-index: 10;
@@ -63,8 +71,7 @@ body { background: #f3f4f6; }
     box-shadow: 0 2px 4px rgba(249,115,22,0.2);
 }
 .back-btn:hover { 
-    background: #ea6b0a;
-    color: #fff;
+    background: #ea580c;
     transform: translateY(-1px);
 }
 
@@ -72,20 +79,18 @@ body { background: #f3f4f6; }
 .form-scroll-area {
     flex: 1;
     overflow: hidden;
-    padding: 10px 14px;
+    padding: 20px;
     display: flex;
     justify-content: center;
-    align-items: stretch;
+    background: #f8fafc;
     min-height: 0;
 }
 
 #addUserForm {
     width: 100%;
     max-width: 1600px;
-    display: grid;
-    grid-template-columns: 35fr 55fr;
-    gap: 10px;
-    align-items: stretch;
+    display: flex;
+    gap: 20px;
     height: 100%;
     min-height: 0;
 }
@@ -93,83 +98,136 @@ body { background: #f3f4f6; }
 .form-col {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 20px;
     height: 100%;
     min-height: 0;
-    overflow: hidden; /* 防止 col 本身溢出 */
 }
 
-/* 左侧主卡片 — 关键滚动容器 */
-.form-col > .left-card {
-    display: block;
-    flex: 1 1 0;           /* 强制占用剩余空间 */
-    min-height: 0;         /* 关键：允许子元素溢出触发滚动 */
-    max-height: 100%;      /* 关键：限制高度上限 */
-    overflow-y: auto !important;
-    overflow-x: hidden;
-    padding-right: 0px;
-    padding-bottom: 16px;
-    box-sizing: border-box;
-    border-radius: 10px;
-    border: 1px solid #e5e7eb;
-    background: #fff;
-    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+/* 左侧主卡片 (28% width as requested) */
+.form-col.left-col {
+    flex: 0 0 28%;
 }
 
-/* Scrollbar styling */
-.left-card::-webkit-scrollbar {
-    width: 6px;
-}
-.left-card::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-}
-.left-card::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
-}
-.left-card::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-}
-
-/* 右侧 col 最后一个 section 填满剩余高度 */
-.form-col > .form-section:last-child {
+.form-col.right-col {
     flex: 1;
-    min-height: 0;
 }
 
-.form-col > .editUserPermLayout:last-child {
+.left-card {
     display: flex;
     flex-direction: column;
     flex: 1;
     min-height: 0;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    overflow: hidden;
+}
+
+.left-card-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+/* Permission section - Refactored Layout */
+.editUserPermLayout {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+.editUserPermLayout .form-section-header {
+    background: #f97316;
+    color: #ffffff;
+    padding: 12px 20px;
+    font-weight: 700;
+    border-radius: 8px 8px 0 0;
+    text-transform: uppercase;
 }
 
 .editUserPermLayout .form-section-content {
     flex: 1;
     min-height: 0;
     display: flex;
-    flex-direction: column;
+    padding: 0 !important; /* Managed by children */
 }
 
-/* 表头不缩小 */
-.form-section-header,
-.form-section-header-bank {
-    flex-shrink: 0;
+.editUserPermLayout .perm-layout-container {
+    display: flex !important;
+    gap: 20px !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    padding: 20px !important;
+    background: #ffffff !important;
+    border: 2px solid #f97316 !important;
+    border-radius: 0 0 12px 12px !important;
 }
 
-/* Permission section */
-.editUserPermLayout .perm-tree-container { max-height: 420px !important; overflow-y: auto; }
-.editUserPermLayout .perm-detail-card    { max-height: 420px !important; overflow-y: auto; }
+.editUserPermLayout .perm-tree-container {
+    flex: 0 0 35% !important; /* Slightly more than 28% locally for better tree visibility */
+    background: #fffcf9 !important;
+    border-radius: 10px !important;
+    border: 1px solid #fed7aa !important;
+    padding: 15px !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+}
 
-.editUserPermLayout .perm-tree-container::-webkit-scrollbar,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar { width: 6px; }
-.editUserPermLayout .perm-tree-container::-webkit-scrollbar-track,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-.editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-.editUserPermLayout .perm-tree-container::-webkit-scrollbar-thumb:hover,
-.editUserPermLayout .perm-detail-card::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+.editUserPermLayout .perm-detail-card {
+    flex: 1 !important;
+    background: #ffffff !important;
+    border-radius: 10px !important;
+    border: 1px solid #fed7aa !important;
+    padding: 20px !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+    position: relative !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Permission Tree Styling */
+.perm-level-1 { margin-bottom: 10px; }
+.perm-level-1-item {
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #fff;
+    transition: all 0.2s;
+    color: #1f2937;
+    font-weight: 600;
+}
+.perm-level-1-item:hover { background: #fff7ed; border-color: #fdba74; }
+.perm-level-1-item.expanded { background: #f97316; color: #fff; border-color: #ea580c; }
+
+.perm-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    cursor: pointer;
+}
+.perm-checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #f97316;
+}
+
+.perm-section-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #f97316;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #fff7ed;
+}
 
 /* ── 平板视图 (<1200px) ── */
 @media (max-width: 1200px) {
@@ -435,11 +493,12 @@ body { background: #f3f4f6; }
             <!-- Single-page scroll area -->
             <div class="form-scroll-area">
             <form id="addUserForm" style="animation: fadeIn .3s ease;">
-                <div class="form-col">
-                <div class="form-section left-card">
-    <!-- ── 个人资料 PERSONAL DETAILS ── -->
-    <div class="form-section-header" style="text-transform: uppercase;">个人资料 PERSONAL DETAILS</div>
-    <div class="form-section-content">
+                <div class="form-col left-col">
+                    <div class="left-card">
+                        <div class="left-card-scroll">
+                            <!-- ── 个人资料 PERSONAL DETAILS ── -->
+                            <div class="form-section-header" style="text-transform: uppercase;">个人资料 PERSONAL DETAILS</div>
+                            <div class="form-section-content">
         <div class="form-grid-3">
             <div class="form-group" id="group-add-username">
                 <label for="add_username">英语姓名 English Name <span class="required-mark">*</span></label>
@@ -621,12 +680,11 @@ body { background: #f3f4f6; }
         </div>
     </div>
 
-</div>  <!-- ← left-card 在这里才关闭 -->
-
-                
+                        </div> <!-- /left-card-scroll -->
+                    </div> <!-- /left-card -->
                 </div> <!-- /Left Column -->
 
-                <div class="form-col">
+                <div class="form-col right-col">
                     <!-- Moved Account Settings to Step 1 -->
                     <div class="form-section">
                         <div class="form-section-header" style="text-transform: uppercase;">账号设置 ACCOUNT SETTINGS</div>
