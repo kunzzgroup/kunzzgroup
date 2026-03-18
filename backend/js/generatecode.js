@@ -893,26 +893,8 @@ function reindexTable() {
     }
 }
 
-// hover 样式注入
-(function () {
-    const style = document.createElement('style');
-    style.textContent = `
-        /* 常规项 hover (仅当非 active 时变色) */
-        .bl1-item:not(.active):hover, 
-        .bl2-item:not(.active):hover { 
-            background: #f1f5f9 !important; 
-            color: #1e293b !important;
-        }
+// hover 样式已移动至 generatecode.css
 
-        /* 确保 active 项在 hover 时维持品牌橘背景及白色文字 */
-        .bl1-item.active:hover, 
-        .bl2-item.active:hover {
-            background: #f99e00 !important;
-            color: white !important;
-        }
-    `;
-    document.head.appendChild(style);
-})();
 
 // 全局变量存储原始数据
 let originalTableData = [];

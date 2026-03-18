@@ -904,9 +904,9 @@ tr:hover {
     transition: all 0.15s ease;
 }
 
-.bl-item:hover,
-.bl1-item:hover,
-.bl2-item:hover {
+.bl-item:not(.active):hover,
+.bl1-item:not(.active):hover,
+.bl2-item:not(.active):hover {
     background-color: #f1f5f9;
     color: #1e293b;
 }
@@ -914,15 +914,19 @@ tr:hover {
 .bl-item.active,
 .bl1-item.active,
 .bl2-item.active {
-    background-color: #f99e00;
+    background-color: #f99e00 !important;
     color: #ffffff !important;
 }
 
-/* 分店筛选器下拉项样式 */
-.bl1-item:hover,
-.bl2-item:hover {
-    background-color: #f3f4f6;
+.bl-item.active:hover,
+.bl1-item.active:hover,
+.bl2-item.active:hover {
+    background-color: #f99e00 !important;
+    color: #ffffff !important;
 }
+
+/* 移除重复的 hover 定义 */
+
 
 .bl1-item.active,
 .bl2-item.active {
