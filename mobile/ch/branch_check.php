@@ -36,13 +36,17 @@ if ($user_branch !== $required_branch) {
     <title>无权访问 | Access Denied</title>
     <style>
         :root {
-            --primary-bg: #f3f4f6;
+            /* Backend theme colors */
+            --primary-bg: #faf7f2;
             --card-bg: #ffffff;
-            --text-main: #1f2937;
+            --text-main: #000000;
             --text-muted: #6b7280;
-            --danger: #ef4444;
-            --danger-bg: #fef2f2;
-            --danger-border: #fecaca;
+            --danger: #ef4444;       
+            --danger-bg: #fef2f2;     
+            --danger-border: #fecaca; 
+            /* Incorporating backend accent colors */
+            --accent-orange: #ff5c00;
+            --accent-yellow: #f99e00;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -126,18 +130,19 @@ if ($user_branch !== $required_branch) {
         }
         .btn-back {
             display: block;
-            background-color: var(--text-main);
+            background-color: var(--accent-yellow);
             color: #ffffff;
             text-decoration: none;
             padding: 14px 24px;
             border-radius: 10px;
             font-size: 16px;
-            font-weight: 500;
+            font-weight: bold;
             transition: all 0.2s ease;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: none;
         }
         .btn-back:hover {
-            background-color: #374151;
+            background-color: var(--accent-orange);
             transform: translateY(-2px);
             box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.15);
         }
