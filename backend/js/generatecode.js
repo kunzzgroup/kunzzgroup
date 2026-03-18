@@ -4,12 +4,12 @@
 function toggleMultiSelect(header) {
     const container = header.parentElement;
     const isActive = container.classList.contains('active');
-    
+
     // Close all other multi-selects first
     document.querySelectorAll('.custom-multi-select').forEach(ms => {
         if (ms !== container) ms.classList.remove('active');
     });
-    
+
     container.classList.toggle('active');
 }
 
@@ -22,7 +22,7 @@ function refreshMultiSelectHeader(container) {
     const checkboxes = container.querySelectorAll('input[type="checkbox"]');
     const selectedTextSpan = container.querySelector('.selected-text');
     const checked = Array.from(checkboxes).filter(cb => cb.checked);
-    
+
     if (checked.length === 0) {
         selectedTextSpan.textContent = "请选择区域运营单位";
         selectedTextSpan.style.color = "#999";
@@ -36,7 +36,7 @@ function refreshMultiSelectHeader(container) {
 }
 
 // Global click listener to close dropdowns
-document.addEventListener('click', function(e) {
+document.addEventListener('click', function (e) {
     if (!e.target.closest('.custom-multi-select')) {
         document.querySelectorAll('.custom-multi-select').forEach(ms => {
             ms.classList.remove('active');
@@ -852,7 +852,7 @@ function applyBranchFilter() {
             // 只显示有具体分店 (j1/j2/j3) 的职员
             const branches = rowBranch.split(',').map(b => b.trim()).filter(b => b !== '' && b !== 'null');
             const storeBranches = branches.filter(b => b !== 'kh');
-            
+
             if (storeBranches.length === 0) {
                 show = false;
             } else if (branchL2Current !== 'all') {
@@ -893,42 +893,10 @@ function reindexTable() {
     }
 }
 
-// hover 样式注入 & KH 锁死效果
+// hover 样式注入
 (function () {
     const style = document.createElement('style');
-    style.textContent = `
-        /* 常规项 hover */
-        .bl1-item:not([data-value="kunzz"]):hover, 
-        .bl2-item:hover { 
-            background: #f1f5f9 !important; 
-            color: #1e293b !important;
-        }
-        
-        /* KH (kunzz) 锁死样式 - 即使 hover 也不变色 */
-        .bl1-item[data-value="kunzz"] {
-            background: #fff6e9 !important; /* 非常淡的橘黄背景 */
-            color: #f99e00 !important;      /* 品牌橘文字 */
-            cursor: pointer;
-            transition: none !important;
-            border-radius: 20px !important; /* 圆角药丸形 */
-            margin: 4px 6px !important;
-            text-align: center !important;
-            box-shadow: 0 2px 4px rgba(249, 158, 0, 0.05) !important;
-        }
-
-        /* KH 被激活时的高亮锁死 */
-        .bl1-item[data-value="kunzz"].active {
-            background: #f99e00 !important; /* 品牌橙背景 */
-            color: white !important;         /* 文字白色 */
-            font-weight: 700 !important;
-        }
-
-        /* 确保 hover 时不改变 KH 的激活状态颜色 */
-        .bl1-item[data-value="kunzz"].active:hover {
-            background: #f99e00 !important;
-            color: white !important;
-        }
-    `;
+    style.textContent = '.bl1-item:hover, .bl2-item:hover { background: #f9fafb !important; }';
     document.head.appendChild(style);
 })();
 
@@ -1037,14 +1005,14 @@ function openEditModal(id) {
     document.getElementById('edit_emergency_contact_name').value = userData.emergency_contact_name || '';
     document.getElementById('edit_emergency_phone_number').value = userData.emergency_phone_number || '';
     document.getElementById('edit_account_type').value = userData.account_type || '';
-    
+
     // 设置分店多选框
     const branchCheckboxes = modal.querySelectorAll('input[name="branch[]"]');
     const userBranches = userData.branch ? userData.branch.split(',').map(b => b.trim()) : [];
     branchCheckboxes.forEach(cb => {
         cb.checked = userBranches.includes(cb.value);
     });
-    
+
     // 刷新多选框头部文字
     const multiSelect = modal.querySelector('.custom-multi-select');
     if (multiSelect) refreshMultiSelectHeader(multiSelect);
@@ -1343,7 +1311,7 @@ function openAddUserModal() {
             updatePositionOptions(this.value, 'add_position');
         });
     }
-    
+
     // 初始化分店多选框标题
     const multiSelect = modal.querySelector('.custom-multi-select');
     if (multiSelect) refreshMultiSelectHeader(multiSelect);
