@@ -6,7 +6,6 @@ if (!headers_sent()) {
 }
 require_once __DIR__ . '/../../backend/xss_protect.php';
 ob_start();
-session_name('MOBILE_SESSION'); // 独立会话名称，防止与后端/前端干扰
 session_start();
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
@@ -54,27 +53,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // ✅ 勾选了"记住我"，设置 cookie（30天）
                 $expire = time() + (86400 * 30);
                 $p = "/";
-                $d = "kunzzgroup.com"; // 明确指定域名，增加 Edge 兼容性
 
-                setcookie('mobile_user_id', $user['id'], $expire, $p, $d);
-                setcookie('mobile_username', $user['username'], $expire, $p, $d);
-                setcookie('mobile_position', $user['position'], $expire, $p, $d);
-                setcookie('mobile_account_type', $user['account_type'], $expire, $p, $d);
-                setcookie('mobile_nickname', $user['nickname'], $expire, $p, $d);
-                setcookie('mobile_username_cn', $user['username_cn'], $expire, $p, $d);
-                setcookie('mobile_remember_token', '1', $expire, $p, $d);
+                // 采用 frontend/login.php 的原始风格，去掉 Domain 指定以使用浏览器默认 Host
+                setcookie('mobile_user_id', $user['id'], $expire, $p);
+                setcookie('mobile_username', $user['username'], $expire, $p);
+                setcookie('mobile_position', $user['position'], $expire, $p);
+                setcookie('mobile_account_type', $user['account_type'], $expire, $p);
+                setcookie('mobile_nickname', $user['nickname'] ?? '', $expire, $p);
+                setcookie('mobile_username_cn', $user['username_cn'] ?? '', $expire, $p);
+                setcookie('mobile_remember_token', '1', $expire, $p);
             } else {
                 // ❌ 没勾选记住我，清除残留 cookie
                 $expire_past = time() - 3600;
                 $p = "/";
-                $d = "kunzzgroup.com";
-                setcookie('mobile_user_id', '', $expire_past, $p, $d);
-                setcookie('mobile_username', '', $expire_past, $p, $d);
-                setcookie('mobile_position', '', $expire_past, $p, $d);
-                setcookie('mobile_account_type', '', $expire_past, $p, $d);
-                setcookie('mobile_nickname', '', $expire_past, $p, $d);
-                setcookie('mobile_username_cn', '', $expire_past, $p, $d);
-                setcookie('mobile_remember_token', '', $expire_past, $p, $d);
+                setcookie('mobile_user_id', '', $expire_past, $p);
+                setcookie('mobile_username', '', $expire_past, $p);
+                setcookie('mobile_position', '', $expire_past, $p);
+                setcookie('mobile_account_type', '', $expire_past, $p);
+                setcookie('mobile_nickname', '', $expire_past, $p);
+                setcookie('mobile_username_cn', '', $expire_past, $p);
+                setcookie('mobile_remember_token', '', $expire_past, $p);
             }
 
             session_write_close(); // 确保强制写入

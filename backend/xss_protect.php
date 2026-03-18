@@ -51,7 +51,7 @@ if (!function_exists('sanitize_input_recursive')) {
         } else if (is_string($data)) {
             // 如果是密码字段，跳过 XSS 转义，防止由于 HTML 实体化（如 & -> &amp;）导致验证失败
             if (strtolower($keyName) === 'password') {
-                return trim($data);
+                return $data; // 绝对不要对密码进行 trim 或转义，防止损坏用户凭据
             }
             // 使用 strip_tags 过滤 HTML 标签是种选择，但 htmlspecialchars 可以完整保留用户意图而不被执行
             return htmlspecialchars(trim($data), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
