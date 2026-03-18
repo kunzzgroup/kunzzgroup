@@ -25,6 +25,12 @@
       --color-border: #E5E5E5;
       --color-line: rgba(255, 255, 255, 0.5);
 
+      /* Responsive Typography */
+      --fs-h1: clamp(2.5rem, 8vw, 4.5rem);
+      --fs-h2: clamp(1.8rem, 5vw, 2.8rem);
+      --fs-h3: clamp(1.4rem, 4vw, 2rem);
+      --fs-body: clamp(0.9rem, 2vw, 1.1rem);
+
       /* Culture Carousel Variables */
       --card-w: 340px;
       --card-h: 480px;
@@ -33,6 +39,12 @@
 
     * {
       box-sizing: border-box;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
     }
 
     html,
@@ -428,14 +440,21 @@
     }
 
 
-    @media (max-width: 640px) {
-      .nav-text-group .primary {
-        font-size: 16px;
-      }
+    @media (max-width: 1366px) {
+      .nav-links { gap: 20px; }
+    }
 
-      .nav-text-group .secondary {
-        font-size: 10px;
-      }
+    @media (max-width: 1024px) {
+      #nav { width: 98%; }
+      .nav-links { gap: 15px; }
+    }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-btn { font-size: 16px; padding: 12px 24px; } /* Larger buttons for mobile */
+      .mobile-menu-btn { display: flex !important; }
+      .hero-title { font-size: var(--fs-h1); }
+      .nav-hamburger { display: flex; }
     }
 
     /* Buttons */
@@ -493,95 +512,79 @@
     /* Hero Section */
     #hero {
       position: relative;
-      height: 100vh;
-      /* Changed from min-height to height */
+      min-height: 100vh;
       display: flex;
+      flex-direction: row; /* Desktop: side-by-side */
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      padding: clamp(80px, 10vw, 140px) 0;
-      padding-top: clamp(120px, 15vw, 200px);
-      /* Adjusting for navbar + breathing room */
-      background-color: #333;
-    }
-
-    .hero-slider {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      overflow: hidden;
-    }
-
-    .hero-slide {
-      flex: 0 0 100%;
-      /* Each slide is exactly 100% width of the container */
-      width: 100%;
-      height: 100%;
-      background-size: cover;
-      background-position: center;
-    }
-
-
-    .hero-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg,
-          rgba(0, 0, 0, 0.45) 0%,
-          rgba(0, 0, 0, 0.25) 40%,
-          rgba(0, 0, 0, 0.6) 100%);
-      z-index: 5;
-      pointer-events: none;
-    }
-
-    .shoji-lattice {
-      display: none;
+      padding: clamp(2rem, 5vw, 5rem);
+      background-color: var(--color-bg);
     }
 
     .hero-content {
+      flex: 1;
       position: relative;
       z-index: 10;
       text-align: left;
-      padding: 0 5%;
-      max-width: 1300px;
-      width: 100%;
-      margin: 0 auto;
+      max-width: 600px;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
       justify-content: center;
+      order: 1; /* Left on desktop */
     }
 
-    .hero-logo {
-      width: 112px;
-      height: 112px;
-      margin: 0 0 24px 0;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 4px solid white;
+    .hero-slider {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      height: 60vh;
+      z-index: 5;
+      border-radius: 20px;
+      overflow: hidden;
+      order: 2; /* Right on desktop */
     }
 
     .hero-title {
       font-family: var(--font-serif);
-      font-size: 35px;
-      line-height: 1.15;
-      color: white;
-      margin-bottom: 13px;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      font-size: var(--fs-h1);
+      line-height: 1.1;
+      color: var(--color-text);
+      margin-bottom: 1rem;
     }
 
     .hero-subtitle {
-      color: rgba(255, 255, 255, 0.95);
-      font-size: 18px;
+      color: var(--color-primary);
+      font-size: var(--fs-h2);
       font-weight: 500;
-      margin-bottom: 8px;
+      margin-bottom: 0.5rem;
     }
 
     .hero-tagline {
-      color: rgba(255, 255, 255, 0.8);
-      font-size: 15px;
-      margin-bottom: 32px;
+      color: var(--color-text-light);
+      font-size: var(--fs-body);
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      #hero {
+        flex-direction: column; /* Mobile: stacked */
+        text-align: center;
+        padding-top: 100px;
+      }
+      .hero-content {
+        align-items: center;
+        order: 1;
+      }
+      .hero-slider {
+        order: 2;
+        height: 40vh;
+        margin-top: 2rem;
+      }
+      .hero-buttons {
+        justify-content: center;
+      }
     }
 
     @media (min-width: 768px) {
@@ -785,7 +788,7 @@
 
     .section-title {
       font-family: var(--font-serif);
-      font-size: 29px;
+      font-size: var(--fs-h2);
       color: var(--color-text);
       margin-bottom: 16px;
       position: relative;
@@ -1754,11 +1757,11 @@
       background-color: transparent;
       border: 1px solid var(--color-border);
       border-radius: 24px;
-      padding: 32px;
+      padding: clamp(1rem, 5vw, 3rem);
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 32px;
-      max-width: 1000px;
+      max-width: 1200px;
       margin: 0 auto;
     }
 
@@ -2185,12 +2188,12 @@
       gap: 16px;
     }
 
-    @media (min-width: 768px) {
-      #location h2 {
-        font-size: 36px;
-        line-height: 40px;
+      @media (min-width: 768px) {
+        #location h2 {
+          font-size: var(--fs-h2);
+          line-height: 1.2;
+        }
       }
-    }
 
     .location-divider {
       display: inline-block;
@@ -2795,7 +2798,7 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
 
     .zen-title {
       font-family: var(--font-serif, "Cormorant Garamond", serif);
-      font-size: 90px;
+      font-size: var(--fs-h1);
       font-weight: 400;
       line-height: 1.1;
       color: #2b2b2b;
@@ -3035,7 +3038,7 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
     /* ── Grid ── */
     .tc-card-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 18px;
     }
 
@@ -3387,7 +3390,7 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
 
     .haidilao-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 32px;
     }
 
@@ -4911,6 +4914,45 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
 
       .cc-nav.right {
         right: 2px;
+      }
+    }
+    /* Global Spacing Utilities */
+    .section-spacing {
+      padding: clamp(3rem, 10vw, 8rem) 1rem;
+    }
+
+    /* Requirement 9: Media Queries */
+    @media (max-width: 1366px) {
+      .nav-container { max-width: 1200px; }
+      .cc-main-title { font-size: 52px; }
+    }
+
+    @media (max-width: 1024px) {
+      .about-split-card { grid-template-columns: 1fr; }
+      .about-split-left { padding: 3rem 2rem; }
+      .wa-cinema { aspect-ratio: 16 / 9; }
+      .cc-main-title { font-size: 42px; }
+    }
+
+    @media (max-width: 768px) {
+      .hero-title { font-size: var(--fs-h1); }
+      .section-header { margin-bottom: 2rem; }
+      .bento-grid { grid-template-columns: 1fr; grid-template-rows: auto; }
+      .bento-large, .bento-wide { grid-column: span 1; grid-row: span 1; }
+      
+      .btn-primary, .btn-secondary {
+        width: 100%; /* Full width buttons on mobile for easier tapping */
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+      }
+
+      .location-cards { grid-template-columns: 1fr; }
+      
+      /* Spacing reduction for mobile */
+      .section-padding, #hero, #about-culture, #featured, #location {
+        padding-top: 4rem !important;
+        padding-bottom: 4rem !important;
+        height: auto !important; /* Avoid height: 100vh on mobile */
       }
     }
   </style>
