@@ -593,7 +593,6 @@ function displayData(data) {
                     </td>
                     <td>
                         <div style="font-weight: 500;">${item.username ? escapeHTML(item.username) : '<em style="color: #999;">-</em>'}</div>
-                        ${!item.branch || item.branch.trim() === '' ? '<div style="color: #ef4444; font-size: 0.8em; margin-top: 2px; font-weight: 500;">无</div>' : ''}
                     </td>
                     <td>${item.email ? escapeHTML(item.email) : '<em style="color: #999;">-</em>'}</td>
                     <td>${item.phone_number ? escapeHTML(item.phone_number) : '<em style="color: #999;">-</em>'}</td>
