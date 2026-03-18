@@ -3078,17 +3078,19 @@
         }
 
         if (nav) {
-          if (window.innerWidth > 767) {
-            /* ── Desktop / Laptop：
-               往前滑 → 推走 nav
-               往回滑任意一格 → 立即出现
-               在 Hero (index 0) → 永远显示 ── */
+          if (window.innerWidth >= 1280) {
+            /* ── 大屏 (≥1280px)：永远显示，不受 slide 影响 ── */
+            nav.classList.remove('nav-pushed');
+
+          } else if (window.innerWidth > 767) {
+            /* ── Laptop (768–1279px)：往下滑隐藏，往回滑显示 ── */
             const goingBack = index < lastSlideIndex;
             (index === 0 || goingBack)
               ? nav.classList.remove('nav-pushed')
               : nav.classList.add('nav-pushed');
+
           } else {
-            /* ── 小屏：sticky 处理，JS 不干预 ── */
+            /* ── 小屏 (≤767px)：sticky 自然行为，JS 不介入 ── */
             nav.classList.remove('nav-pushed');
           }
         }
@@ -3124,12 +3126,10 @@
       function handleResize() {
         if (window.innerWidth <= 767) {
           if (swiper.enabled) swiper.disable();
-          // On mobile nav is sticky — remove any desktop push class
-          if (nav) nav.classList.remove('nav-pushed');
+          if (nav) nav.classList.remove('nav-pushed'); // sticky, never hide
         } else {
           if (!swiper.enabled) swiper.enable();
-          // Re-apply correct nav state for current slide
-          updateNav(swiper.activeIndex);
+          updateNav(swiper.activeIndex); // re-apply correct state for current breakpoint
         }
       }
       window.addEventListener('resize', handleResize);
