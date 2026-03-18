@@ -2237,6 +2237,7 @@ require_once '../backend/session_check.php';
                         <th class="product-name-col" style="min-width: 200px;">货品</th>
                         <th style="min-width: 120px;">出货</th>
                         <th style="min-width: 100px;">出货人</th>
+                        <th style="min-width: 60px;" id="action-header">操作</th>
                     </tr>
                 </thead>
                 <tbody id="stock-tbody">
@@ -3937,30 +3938,29 @@ require_once '../backend/session_check.php';
                             `<span>${record.receiver || '-'}</span>`
                         }
                     </td>
-                    <td class="action-cell">
-                        ${isEditing ? 
-                            `<div class="action-buttons-container">
-                                <button class="btn-icon btn-save" onclick="saveRecord(${record.id})" title="保存">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                <button class="btn-icon btn-cancel" onclick="cancelEdit(${record.id})" title="取消">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>` :
-                            (!isBatchDeleteMode ? 
-                                `<div class="action-buttons-container">
-                                    <button class="btn-icon btn-edit" onclick="editRecord(${record.id})" title="编辑">
+                    <td>
+                        <span class="action-cell">
+                            ${isBatchDeleteMode ? 
+                                `<input type="checkbox" class="batch-select-checkbox" 
+                                        data-record-id="${record.id}" 
+                                        onchange="toggleRecordSelection(${record.id}, this.checked)"
+                                        ${selectedRecords.has(record.id) ? 'checked' : ''}>` :
+                                (isEditing ? 
+                                    `<button class="action-btn edit-btn save-mode" onclick="saveRecord(${record.id})" title="保存">
+                                        <i class="fas fa-save"></i>
+                                    </button>
+                                    <button class="action-btn" onclick="cancelEdit(${record.id})" title="取消" style="background: #6b7280;">
+                                        <i class="fas fa-times"></i>
+                                    </button>` :
+                                    `<button class="action-btn edit-btn" onclick="editRecord(${record.id})" title="编辑">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn-icon btn-delete" onclick="deleteRecord(${record.id})" title="删除">
+                                    <button class="action-btn delete-btn" onclick="deleteRecord(${record.id})" title="删除">
                                         <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>` :
-                                `<input type="checkbox" class="batch-select-checkbox" 
-                                    onchange="toggleRecordSelection(${record.id}, this.checked)"
-                                    ${selectedRecords.has(record.id) ? 'checked' : ''}>`
-                            )
-                        }
+                                    </button>`
+                                )
+                            }
+                        </span>
                     </td>
                 `;
                 
@@ -4128,16 +4128,15 @@ require_once '../backend/session_check.php';
                 <td>${createCombobox('code', '', null, rowId)}</td>
                 <td>${createCombobox('product', '', null, rowId)}</td>
                 <td><input type="number" class="table-input" min="0" step="0.001" placeholder="0.000" id="${rowId}-out-qty" oninput="updateNewRowTotal(this)"></td>
-                <td>${createCombobox('receiver', '', null, rowId, true)}</td>
-                <td class="action-cell">
-                    <div class="action-buttons-container">
-                        <button class="btn-icon btn-save save-new-btn" onclick="saveNewRowRecord(this)" title="保存">
-                            <i class="fas fa-check"></i>
+                <td>
+                    <span class="action-cell">
+                        <button class="action-btn save-new-btn" onclick="saveNewRowRecord(this)" title="保存">
+                            <i class="fas fa-save"></i>
                         </button>
-                        <button class="btn-icon btn-cancel cancel-new-btn" onclick="cancelNewRow(this)" title="取消">
+                        <button class="action-btn cancel-new-btn" onclick="cancelNewRow(this)" title="取消">
                             <i class="fas fa-times"></i>
                         </button>
-                    </div>
+                    </span>
                 </td>
             `;
             
