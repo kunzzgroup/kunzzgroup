@@ -124,20 +124,20 @@ if (!isset($_SESSION['user_id'])) {
     sendResponse(false, "用户未登录");
 }
 
-$user_branch = $_SESSION['branch'] ?? '';
+$user_branch = strtoupper($_SESSION['branch'] ?? '');
 
 // 如果不是 HQ (KH) 用户，且请求了特定的系统分配，验证是否匹配其所属分支
 // 或者自动根据其所属分支进行过滤
 if ($user_branch !== 'KH' && !empty($user_branch)) {
     // 如果是 GET 请求列表，强制限制 system_assign
     if ($method === 'GET' && isset($_GET['system_assign'])) {
-        if ($_GET['system_assign'] !== $user_branch) {
+        if (strtoupper($_GET['system_assign']) !== $user_branch) {
             sendResponse(false, "无权访问此分支的数据 (您的分支: $user_branch)");
         }
     }
     // 如果是 POST/PUT，确保数据中的 system_assign 匹配（或者强制覆盖）
     if (($method === 'POST' || $method === 'PUT') && isset($data['system_assign'])) {
-        if ($data['system_assign'] !== $user_branch) {
+        if (strtoupper($data['system_assign']) !== $user_branch) {
             sendResponse(false, "无权向此分支添加/修改数据");
         }
     }

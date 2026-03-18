@@ -17,6 +17,13 @@ if (session_status() === PHP_SESSION_NONE) {
 // 1. 优先从 Session 获取
 if (isset($_SESSION['user_id']) && isset($_SESSION['username'])) {
     $current_user_id = $_SESSION['user_id'];
+    
+    // 如果 Session 中缺少分支信息（可能是旧会话），尝试从 Cookie 恢复
+    if (!isset($_SESSION['branch']) && isset($_COOKIE['mobile_branch'])) {
+        $_SESSION['branch'] = strtoupper($_COOKIE['mobile_branch']);
+    } elseif (isset($_SESSION['branch'])) {
+        $_SESSION['branch'] = strtoupper($_SESSION['branch']);
+    }
 } 
 // 2. 如果 Session 没有，且有自动登录标记，模仿 backend/session_check.php 直接从 Cookie 恢复
 elseif (
@@ -29,7 +36,7 @@ elseif (
     $_SESSION['username'] = $_COOKIE['mobile_username'] ?? '';
     $_SESSION['position'] = $_COOKIE['mobile_position'] ?? '';
     $_SESSION['account_type'] = $_COOKIE['mobile_account_type'] ?? '';
-    $_SESSION['branch'] = $_COOKIE['mobile_branch'] ?? ''; // Added branch restoration
+    $_SESSION['branch'] = strtoupper($_COOKIE['mobile_branch'] ?? ''); // Added branch restoration (Force Uppercase)
     $_SESSION['nickname'] = $_COOKIE['mobile_nickname'] ?? '';
     $_SESSION['username_cn'] = $_COOKIE['mobile_username_cn'] ?? '';
     $_SESSION['last_activity'] = time();

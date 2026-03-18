@@ -26,7 +26,7 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$user_branch = $_SESSION['branch'] ?? '';
+$user_branch = strtoupper($_SESSION['branch'] ?? '');
 if ($user_branch !== 'KH' && $user_branch !== 'J1') {
     http_response_code(403);
     echo json_encode(["success" => false, "message" => "Access denied: Unauthorized branch. (User: $user_branch, Required: J1)"]);

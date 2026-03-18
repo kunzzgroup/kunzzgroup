@@ -5,12 +5,13 @@
  */
 
 if (!isset($_SESSION['branch'])) {
-    // If branch is not set, we assume restricted access unless authenticated
-    if (isset($_SESSION['user_id'])) {
-        // Logged in but no branch info? This shouldn't happen with new login logic.
-        // For safety, we can allow 'KH' as default if they are admin, but better to deny.
-        http_response_code(403);
-        echo "Access denied: Missing branch information in session.";
+    // 如果 Session 中没有分支信息，尝试从 Cookie 恢复
+    if (isset($_COOKIE['mobile_branch'])) {
+        $_SESSION['branch'] = strtoupper($_COOKIE['mobile_branch']);
+    } elseif (isset($_SESSION['user_id'])) {
+        // 如果已登录但完全没有分支信息（旧会话），强制重新登录以刷新权限
+        $current_page = basename($_SERVER['PHP_SELF']);
+        header("Location: login.html?redirect=" . urlencode($current_page) . "&msg=refresh_required");
         exit;
     }
 }
