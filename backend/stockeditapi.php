@@ -2039,6 +2039,49 @@ function handlePut() {
     }
 }
 
+function updateStocklistTotal($pdo, $branch, $productName, $codeNumber, $inQty, $outQty, $specification = null) {
+    if (empty($productName) || empty($branch)) {
+        return;
+    }
+    
+    $tableName = $branch . 'stocklist_total';
+    
+    try {
+        $specification = ($specification === "none" || $specification === "") ? null : $specification;
+        
+        $sql = "SELECT * FROM {$tableName} WHERE product_name = ? AND code_number = ? ";
+        $params = [$productName, $codeNumber];
+        
+        if ($specification === null) {
+            $sql .= " AND (specification IS NULL OR specification = '' OR specification = 'none') ";
+        } else {
+            $sql .= " AND specification = ? ";
+            $params[] = $specification;
+        }
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Reverse the quantities for deletion
+        $netQty = - ($inQty - $outQty);
+        
+        if ($existing) {
+            $newTotal = floatval($existing['total_qty']) + $netQty;
+            
+            if ($newTotal <= 0.0001 && $newTotal >= -0.0001) {
+                $deleteStmt = $pdo->prepare("DELETE FROM {$tableName} WHERE id = ?");
+                $deleteStmt->execute([$existing['id']]);
+            } else {
+                $updateStmt = $pdo->prepare("UPDATE {$tableName} SET total_qty = ?, last_updated = NOW() WHERE id = ?");
+                $updateStmt->execute([$newTotal, $existing['id']]);
+            }
+        }
+    } catch (PDOException $e) {
+        error_log("更新库存总数失败 (sync delete): " . $e->getMessage());
+    }
+}
+
 function handleDelete() {
     global $pdo;
     session_start();
@@ -2089,19 +2132,24 @@ function handleDelete() {
                     
                     if ($system !== 'central' && in_array($table, ['j1stockedit_data', 'j2stockedit_data', 'j3stockedit_data', 'j1stockeditmobile_data', 'j2stockeditmobile_data', 'j3stockeditmobile_data'])) {
                         // For the branch tables, we use date, time, product_name, and receiver
-                        $sql = "DELETE FROM $table WHERE date = ? AND time = ? AND product_name = ? AND receiver = ? AND deleted_at IS NOT NULL";
-                        
-                        // We need the data. Fortunately, in 'permanent', targetIds is just one id for the branch.
-                        // Or we can just get it. But usually action=permanent passes the ID of the deleted record.
-                        // Let's modify the above flow to correctly fetch before delete or update. 
-                        // Actually, wait, Physical delete in the recycle bin might only need ID if it's j1stockeditmobile_data.
-                        // But wait! j1stockeditmobile_data and j1stockedit_data were soft-deleted using date/time/product_name/receiver.
-                        // So, the easiest way for *physical* deletion is to do the same!
+                        // Since we just have the IDs, we need to fetch the record first to get the exact matching details
+                        foreach ($targetIds as $id) {
+                            // Find out which table is the main one to fetch from. Let's just use the current table.
+                            $fetchStmt = $pdo->prepare("SELECT date, time, product_name, receiver FROM $table WHERE id = ?");
+                            $fetchStmt->execute([$id]);
+                            $record = $fetchStmt->fetch(PDO::FETCH_ASSOC);
+                            
+                            if ($record) {
+                                $sql = "DELETE FROM $table WHERE date = ? AND time = ? AND product_name = ? AND receiver = ? AND deleted_at IS NOT NULL";
+                                $stmt = $pdo->prepare($sql);
+                                $stmt->execute([$record['date'], $record['time'], $record['product_name'], $record['receiver']]);
+                            }
+                        }
+                    } else {
+                        $sql = "DELETE FROM $table WHERE $idField IN ($placeholders) AND deleted_at IS NOT NULL";
+                        $stmt = $pdo->prepare($sql);
+                        $stmt->execute($targetIds);
                     }
-                    
-                    $sql = "DELETE FROM $table WHERE $idField IN ($placeholders) AND deleted_at IS NOT NULL";
-                    $stmt = $pdo->prepare($sql);
-                    $stmt->execute($targetIds);
                 } catch (PDOException $e) {
                     // 忽略错误
                 }
@@ -2153,6 +2201,8 @@ function handleDelete() {
                         $pdo->prepare("UPDATE j1stockeditmobile_data SET deleted_at = NOW(), deleted_by = ? 
                                        WHERE date = ? AND time = ? AND product_name = ? AND receiver = ? AND deleted_at IS NULL")
                             ->execute([$username, $recordToDelete['date'], $recordToDelete['time'], $recordToDelete['product_name'], $recordToDelete['receiver']]);
+
+                        updateStocklistTotal($pdo, 'j1', $recordToDelete['product_name'], $recordToDelete['code_number'], floatval($recordToDelete['in_quantity'] ?? 0), floatval($recordToDelete['out_quantity'] ?? 0), $recordToDelete['specification'] ?? null);
                     } elseif ($targetSystem === 'j2') {
                         // 软删除J2stockinout_data表记录
                         $pdo->prepare("UPDATE j2stockinout_data SET deleted_at = NOW(), deleted_by = ? WHERE main_record_id = ? AND deleted_at IS NULL")
@@ -2167,6 +2217,8 @@ function handleDelete() {
                         $pdo->prepare("UPDATE j2stockeditmobile_data SET deleted_at = NOW(), deleted_by = ? 
                                        WHERE date = ? AND time = ? AND product_name = ? AND receiver = ? AND deleted_at IS NULL")
                             ->execute([$username, $recordToDelete['date'], $recordToDelete['time'], $recordToDelete['product_name'], $recordToDelete['receiver']]);
+                            
+                        updateStocklistTotal($pdo, 'j2', $recordToDelete['product_name'], $recordToDelete['code_number'], floatval($recordToDelete['in_quantity'] ?? 0), floatval($recordToDelete['out_quantity'] ?? 0), $recordToDelete['specification'] ?? null);
                     } elseif ($targetSystem === 'j3') {
                         // 软删除J3stockinout_data表记录
                         $pdo->prepare("UPDATE j3stockinout_data SET deleted_at = NOW(), deleted_by = ? WHERE main_record_id = ? AND deleted_at IS NULL")
@@ -2181,6 +2233,8 @@ function handleDelete() {
                         $pdo->prepare("UPDATE j3stockeditmobile_data SET deleted_at = NOW(), deleted_by = ? 
                                        WHERE date = ? AND time = ? AND product_name = ? AND receiver = ? AND deleted_at IS NULL")
                             ->execute([$username, $recordToDelete['date'], $recordToDelete['time'], $recordToDelete['product_name'], $recordToDelete['receiver']]);
+                            
+                        updateStocklistTotal($pdo, 'j3', $recordToDelete['product_name'], $recordToDelete['code_number'], floatval($recordToDelete['in_quantity'] ?? 0), floatval($recordToDelete['out_quantity'] ?? 0), $recordToDelete['specification'] ?? null);
                     }
                 }
             }
