@@ -2120,12 +2120,14 @@
     ============================================================ */
     @media (max-width: 767px) {
 
-      /* Allow native scroll — let window handle scroll so sticky works perfectly to viewport */
+      /* Allow native scroll — overflow-x hidden prevents horizontal drag */
       html,
       body {
         overflow: visible !important;
+        overflow-x: hidden !important;
         height: auto !important;
         position: static !important;
+        max-width: 100vw !important;
       }
 
       /* Reset swiper — 禁用 swiper 滑动，让各 section 变回普通块元素 */
@@ -2164,9 +2166,10 @@
       }
 
       .hero-content {
-        padding-top: 48px;
+        padding-top: 0;
         align-items: center;
         text-align: center;
+        justify-content: center;
       }
 
       .hero-buttons {
