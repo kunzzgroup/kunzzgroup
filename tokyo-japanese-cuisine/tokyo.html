@@ -171,11 +171,21 @@
       background-color: #ffffffc9;
       border-radius: 9999px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-      transition: all 0.3s ease;
+      /* transition covers both normal hover AND the slide-away */
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+        top 0.3s ease;
       height: var(--nav-h);
       display: flex;
       align-items: center;
       padding: 0 16px;
+    }
+
+    /* Applied by JS on slideChange when leaving slide 0 on desktop */
+    #nav.nav-pushed {
+      transform: translateX(-50%) translateY(calc(-100% - var(--nav-top) - 8px));
+      opacity: 0;
+      pointer-events: none;
     }
 
     .nav-container {
@@ -2082,7 +2092,8 @@
     ============================================================ */
     @media (max-width: 767px) {
 
-      /* Allow native scroll */
+      /* Allow native scroll — body 是 nav sticky 的滚动容器
+         overflow 必须保持 auto/scroll，不能是 hidden，否则 sticky 失效 */
       html,
       body {
         overflow: auto !important;
@@ -2090,7 +2101,7 @@
         position: static !important;
       }
 
-      /* Reset swiper */
+      /* Reset swiper — 禁用 swiper 滑动，让各 section 变回普通块元素 */
       .swiper {
         height: auto !important;
         overflow: visible !important;
@@ -2100,6 +2111,7 @@
         height: auto !important;
         display: block !important;
         transform: none !important;
+        overflow: visible !important;
       }
 
       .swiper-slide {
@@ -2107,7 +2119,7 @@
         min-height: auto;
         display: block !important;
         position: relative !important;
-        justify-content: flex-start;
+        overflow: visible !important;
       }
 
       /* Hide bamboo pagination */
@@ -2117,32 +2129,37 @@
 
       /* Each section fills viewport or content */
       #hero {
-        height: 100svh;
-        min-height: 100svh;
+        height: calc(100svh - 56px);
+        min-height: calc(100svh - 56px);
       }
 
+      .hero-content {
+        padding-top: 0;
+      }
+
+      /* nav is sticky, no longer fixed-offset needed */
       .zen-about {
         height: auto;
         min-height: 100svh;
-        padding: 100px 0 60px;
+        padding: 60px 0 60px;
       }
 
       .culture-carousel-section {
         height: auto;
         min-height: 100svh;
-        padding: 80px 0;
+        padding: 60px 0;
       }
 
       #featured {
         height: auto;
         min-height: 100svh;
-        padding: 80px 0;
+        padding: 60px 0;
       }
 
       #location {
         height: auto;
         min-height: auto;
-        padding: 80px 0 60px;
+        padding: 60px 0 60px;
       }
 
       .footer-section {
@@ -2177,12 +2194,26 @@
         padding: 0 16px;
       }
 
-      /* Nav */
+      /* Nav: sticky on mobile */
       #nav {
-        width: 92%;
+        position: sticky;
+        top: 0;
+        left: 0;
+        width: 100%;
         max-width: 100%;
-        height: 61px;
-        top: 12px;
+        height: 56px;
+        border-radius: 0;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+        background-color: #fffffff5;
+        transform: none;
+        z-index: 1000;
+      }
+
+      /* nav-pushed must never hide the sticky nav on mobile */
+      #nav.nav-pushed {
+        transform: none !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
       }
 
       /* Zen about: no floating second image on mobile */
@@ -3036,6 +3067,35 @@
       });
 
       /* ─── Swiper Init ─── */
+      const nav = document.getElementById('nav');
+      let lastSlideIndex = 0;
+
+      function updateNav(index) {
+        const pag = document.querySelector('.swiper-pagination');
+        if (pag) {
+          pag.style.opacity = index === 0 ? '0' : '1';
+          pag.style.visibility = index === 0 ? 'hidden' : 'visible';
+        }
+
+        if (nav) {
+          if (window.innerWidth > 767) {
+            /* ── Desktop / Laptop：
+               往前滑 → 推走 nav
+               往回滑任意一格 → 立即出现
+               在 Hero (index 0) → 永远显示 ── */
+            const goingBack = index < lastSlideIndex;
+            (index === 0 || goingBack)
+              ? nav.classList.remove('nav-pushed')
+              : nav.classList.add('nav-pushed');
+          } else {
+            /* ── 小屏：sticky 处理，JS 不干预 ── */
+            nav.classList.remove('nav-pushed');
+          }
+        }
+
+        lastSlideIndex = index;
+      }
+
       const swiper = new Swiper('.swiper', {
         direction: 'vertical',
         mousewheel: { enabled: true, releaseOnEdges: true },
@@ -3056,20 +3116,21 @@
           768: { enabled: true }
         },
         on: {
-          init() {
-            const pag = document.querySelector('.swiper-pagination');
-            if (pag) { pag.style.opacity = this.activeIndex === 0 ? '0' : '1'; pag.style.visibility = this.activeIndex === 0 ? 'hidden' : 'visible'; }
-          },
-          slideChange() {
-            const pag = document.querySelector('.swiper-pagination');
-            if (pag) { pag.style.opacity = this.activeIndex === 0 ? '0' : '1'; pag.style.visibility = this.activeIndex === 0 ? 'hidden' : 'visible'; }
-          }
+          init() { updateNav(this.activeIndex); },
+          slideChange() { updateNav(this.activeIndex); }
         }
       });
 
       function handleResize() {
-        if (window.innerWidth <= 767 && swiper.enabled) swiper.disable();
-        else if (window.innerWidth > 767 && !swiper.enabled) swiper.enable();
+        if (window.innerWidth <= 767) {
+          if (swiper.enabled) swiper.disable();
+          // On mobile nav is sticky — remove any desktop push class
+          if (nav) nav.classList.remove('nav-pushed');
+        } else {
+          if (!swiper.enabled) swiper.enable();
+          // Re-apply correct nav state for current slide
+          updateNav(swiper.activeIndex);
+        }
       }
       window.addEventListener('resize', handleResize);
       handleResize();
@@ -3274,10 +3335,6 @@
 
     }); // DOMContentLoaded
   </script>
-</body>
-
-</html>
-</script>
 </body>
 
 </html>
