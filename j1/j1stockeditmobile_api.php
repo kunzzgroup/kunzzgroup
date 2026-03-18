@@ -110,6 +110,12 @@ function ensureTables(PDO $pdo) {
         }
     }
 
+    // 添加被回收站软删除的支持
+    try {
+        $pdo->exec("ALTER TABLE `j1stockeditmobile_data` ADD COLUMN `deleted_at` timestamp NULL DEFAULT NULL");
+        $pdo->exec("ALTER TABLE `j1stockeditmobile_data` ADD COLUMN `deleted_by` varchar(100) DEFAULT NULL");
+    } catch (PDOException $e) {}
+
     $pdo->exec("CREATE TABLE IF NOT EXISTS `j1stocklist_total` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
       `product_name` varchar(255) NOT NULL,
@@ -200,9 +206,9 @@ function handleGet() {
             $productName = $_GET['product_name'] ?? null;
             $limit = $_GET['limit'] ?? 5000;
 
-            // 不设置默认日期范围：未提供日期参数时返回全部记录
+            // 不设置默认日期范围：未提供日期参数时返回全部未删除记录
 
-            $sql = "SELECT * FROM j1stockeditmobile_data WHERE 1=1";
+            $sql = "SELECT * FROM j1stockeditmobile_data WHERE deleted_at IS NULL";
             $params = [];
             
             if ($searchDate) {
