@@ -333,7 +333,7 @@ function handleGet() {
             // 手机记录已经通过 sync 写入 j1stockedit_data，直接查该表即可，避免双重计算
             try {
                 $sql = "SELECT 
-                            product_name,
+                            REPLACE(product_name, '&amp;', '&') as product_name,
                             code_number,
                             specification,
                             SUM(in_quantity) as total_in,
@@ -341,8 +341,8 @@ function handleGet() {
                             SUM(in_quantity) - SUM(out_quantity) as total_qty
                         FROM j1stockedit_data
                         WHERE product_name IS NOT NULL AND product_name != ''
-                        GROUP BY product_name, code_number, specification
-                        ORDER BY product_name";
+                        GROUP BY REPLACE(product_name, '&amp;', '&'), code_number, specification
+                        ORDER BY REPLACE(product_name, '&amp;', '&')";
                 
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute();
@@ -403,7 +403,7 @@ function handleGet() {
                             SUM(out_quantity) as total_out,
                             (SUM(in_quantity) - SUM(out_quantity)) as available_stock
                         FROM j1stockedit_data 
-                        WHERE product_name = ? AND price IS NOT NULL";
+                        WHERE REPLACE(product_name, '&amp;', '&') = REPLACE(?, '&amp;', '&') AND price IS NOT NULL";
                 $params = [$productName];
                 
                 if (!empty($codeNumber)) {
@@ -463,6 +463,9 @@ function handlePost() {
         sendResponse(false, "日期、时间和产品名称是必填字段");
     }
     
+    // Normalize &amp; to &
+    $data['product_name'] = str_replace('&amp;', '&', $data['product_name']);
+    
     try {
         // 开始事务
         $pdo->beginTransaction();
@@ -516,6 +519,11 @@ function handlePut() {
     
     if (empty($data['id'])) {
         sendResponse(false, "缺少记录ID");
+    }
+    
+    // Normalize &amp; to &
+    if (isset($data['product_name'])) {
+        $data['product_name'] = str_replace('&amp;', '&', $data['product_name']);
     }
     
     try {
