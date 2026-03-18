@@ -2207,6 +2207,11 @@
         background-color: #fffffff5;
         transform: none;
         z-index: 1000;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      #nav.nav-mobile-hidden {
+        transform: translateY(-100%) !important;
       }
 
       /* nav-pushed must never hide the sticky nav on mobile */
@@ -3135,11 +3140,34 @@
           if (nav) nav.classList.remove('nav-pushed'); // sticky, never hide
         } else {
           if (!swiper.enabled) swiper.enable();
+          if (nav) nav.classList.remove('nav-mobile-hidden'); // clean up mobile hide
           updateNav(swiper.activeIndex); // re-apply correct state for current breakpoint
         }
       }
       window.addEventListener('resize', handleResize);
       handleResize();
+
+      /* ─── Mobile Scroll behavior for Nav ─── */
+      let lastScrollY = window.scrollY || document.documentElement.scrollTop;
+      window.addEventListener('scroll', () => {
+        if (window.innerWidth <= 767) {
+          const currentScrollY = window.scrollY || document.documentElement.scrollTop;
+          
+          if (currentScrollY <= 0) {
+            if (nav) nav.classList.remove('nav-mobile-hidden');
+            lastScrollY = currentScrollY;
+            return;
+          }
+
+          // down vs up scrolling
+          if (currentScrollY > lastScrollY && currentScrollY > 60) {
+            if (nav) nav.classList.add('nav-mobile-hidden');
+          } else if (currentScrollY < lastScrollY) {
+            if (nav) nav.classList.remove('nav-mobile-hidden');
+          }
+          lastScrollY = currentScrollY;
+        }
+      }, { passive: true });
 
       /* ─── Culture Carousel ─── */
       (function () {
