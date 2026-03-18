@@ -20,9 +20,9 @@ $options = [
 
 setcookie("user_login", "", $options);
 
-// remember_token 可能是非 httponly，单独清除
+// mobile_remember_token 可能是非 httponly，单独清除
 $options['httponly'] = false;
-setcookie("remember_token", "", $options);
+setcookie("mobile_remember_token", "", $options);
 
 // 跳转回登录页
 header("Location: login.html");

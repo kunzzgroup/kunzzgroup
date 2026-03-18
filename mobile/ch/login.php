@@ -71,16 +71,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 setcookie("user_login", $user['id'], $cookie_options);
                 
                 // 为了兼容 login.html 的 JavaScript 检测自动跳转，
-                // 我们还是需要一个脚本可读的 remember_token
+                // 我们还是需要一个脚本可读的 mobile_remember_token
                 $cookie_options['httponly'] = false;
-                setcookie("remember_token", "1", $cookie_options);
+                setcookie("mobile_remember_token", "1", $cookie_options);
             } else {
                 // 会话 cookie（关闭浏览器就过期）
                 $cookie_options['expires'] = 0;
                 setcookie("user_login", $user['id'], $cookie_options);
                 
                 // 清除残留的记住我标记
-                setcookie("remember_token", "", time() - 3600, "/");
+                setcookie("mobile_remember_token", "", time() - 3600, "/");
             }
 
             // 检查是否为首次登录

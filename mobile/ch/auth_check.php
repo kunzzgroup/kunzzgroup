@@ -42,7 +42,7 @@ elseif (isset($_COOKIE['user_login'])) {
         } else {
             // Cookie 无效（用户不存在），清理后跳转
             setcookie("user_login", "", time() - 3600, "/");
-            setcookie("remember_token", "", time() - 3600, "/");
+            setcookie("mobile_remember_token", "", time() - 3600, "/");
             header("Location: login.html");
             exit();
         }

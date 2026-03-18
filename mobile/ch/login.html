@@ -99,7 +99,7 @@
       });
 
       // ✅ 如果已经登录（有cookie且不为空），自动跳过登录页
-      const hasRememberToken = document.cookie.split(';').some(item => item.trim().startsWith('user_login=') || item.trim().startsWith('remember_token='));
+      const hasRememberToken = document.cookie.split(';').some(item => item.trim().startsWith('user_login=') || item.trim().startsWith('mobile_remember_token='));
       if (hasRememberToken) {
         const urlParams = new URLSearchParams(window.location.search);
         const redirect = urlParams.get('redirect') || 'stocklistj1.php';
