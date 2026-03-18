@@ -155,10 +155,10 @@ require_once 'session_check.php';
                                             <input type="text" id="add_ic_number" name="ic_number" maxlength="20">
                                         </div>
                                         <div class="form-group">
-                                            <label>所属分店 Branch</label>
+                                            <label>所属公司</label>
                                             <div class="custom-multi-select" id="add-branch-select-modal">
                                                 <div class="select-header" onclick="toggleMultiSelect(this)">
-                                                    <span class="selected-text">请选择分店</span>
+                                                    <span class="selected-text">请选择区域运营单位</span>
                                                     <i class="fas fa-chevron-down"></i>
                                                 </div>
                                                 <div class="select-options">
@@ -849,10 +849,10 @@ require_once 'session_check.php';
                         <div class="form-section-content">
                             <div class="form-row-2col">
                                 <div class="form-group">
-                                    <label>所属分店 Branch</label>
+                                    <label>所属公司</label>
                                     <div class="custom-multi-select" id="edit-branch-select">
                                         <div class="select-header" onclick="toggleMultiSelect(this)">
-                                            <span class="selected-text">请选择分店</span>
+                                            <span class="selected-text">请选择区域运营单位</span>
                                             <i class="fas fa-chevron-down"></i>
                                         </div>
                                         <div class="select-options">

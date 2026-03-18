@@ -24,13 +24,13 @@ function refreshMultiSelectHeader(container) {
     const checked = Array.from(checkboxes).filter(cb => cb.checked);
     
     if (checked.length === 0) {
-        selectedTextSpan.textContent = "请选择分店";
+        selectedTextSpan.textContent = "请选择区域运营单位";
         selectedTextSpan.style.color = "#999";
     } else if (checked.length <= 2) {
         selectedTextSpan.textContent = checked.map(cb => cb.parentElement.textContent.trim().split(' ')[0]).join(', ');
         selectedTextSpan.style.color = "#111827";
     } else {
-        selectedTextSpan.textContent = `已选择 ${checked.length} 个分店`;
+        selectedTextSpan.textContent = `已选择 ${checked.length} 个单位`;
         selectedTextSpan.style.color = "#111827";
     }
 }

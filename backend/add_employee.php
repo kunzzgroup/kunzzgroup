@@ -698,10 +698,10 @@ body { background: #f3f4f6; }
                                 </div>
 
                                 <div class="form-group" id="group-add-branch">
-                                    <label>所属分店 Branch</label>
+                                    <label>所属公司</label>
                                     <div class="custom-multi-select" id="add-branch-select">
                                         <div class="select-header" onclick="toggleMultiSelect(this)">
-                                            <span class="selected-text">请选择分店</span>
+                                            <span class="selected-text">请选择区域运营单位</span>
                                             <i class="fas fa-chevron-down"></i>
                                         </div>
                                         <div class="select-options">
