@@ -454,37 +454,41 @@ td:nth-child(1) {
     width: 60px;
 }
 
-/* 序号 */
+/* 所属公司 */
 th:nth-child(2),
 td:nth-child(2) {
-    width: 120px;
+    width: 150px;
 }
 
 /* 职位 */
 th:nth-child(3),
 td:nth-child(3) {
-    width: 220px;
+    width: 180px;
 }
 
 /* 英文姓名 */
 th:nth-child(4),
 td:nth-child(4) {
-    width: 410px;
+    width: 250px;
 }
 
 /* 邮箱 */
 th:nth-child(5),
 td:nth-child(5) {
-    width: 120px;
+    width: 200px;
 }
 
 /* 联络号码 */
 th:nth-child(6),
 td:nth-child(6) {
-    width: 120px;
+    width: 140px;
 }
 
 /* 操作 */
+th:nth-child(7),
+td:nth-child(7) {
+    width: 120px;
+}
 
 /* 当地址列显示"-"时居中对齐 */
 td:nth-child(13) em {

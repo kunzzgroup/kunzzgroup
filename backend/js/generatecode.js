@@ -414,7 +414,7 @@ async function loadCodesAndUsers() {
 
             tableBody.innerHTML = `
                         <tr>
-                            <td colspan="6" style="text-align: center; padding: 30px; color: #C62828;">
+                            <td colspan="7" style="text-align: center; padding: 30px; color: #C62828;">
                                 ❌ 加载失败: ${result.message}
                             </td>
                         </tr>
@@ -424,7 +424,7 @@ async function loadCodesAndUsers() {
         console.error('Error:', error);
         tableBody.innerHTML = `
                     <tr>
-                        <td colspan="6" style="text-align: center; padding: 30px; color: #C62828;">
+                        <td colspan="7" style="text-align: center; padding: 30px; color: #C62828;">
                             ❌ 网络错误，请检查连接
                         </td>
                     </tr>
@@ -501,7 +501,7 @@ function displayData(data) {
     if (!data || data.length === 0) {
         tableBody.innerHTML = `
                     <tr>
-                        <td colspan="6" style="text-align: center; padding: 30px; color: #666;">
+                        <td colspan="7" style="text-align: center; padding: 30px; color: #666;">
                             📝 暂无数据
                         </td>
                     </tr>
@@ -587,9 +587,11 @@ function displayData(data) {
     const rows = sortedData.map((item, index) => `
                 <tr id="row-${item.id}" data-id="${item.id}" data-branch="${item.branch || ''}" data-user='${escapeHTML(JSON.stringify(item))}'>
                     <td style="text-align: center; font-weight: bold; color: black;">${index + 1}</td>
-                    <td>
-                        <div style="font-weight: 700; color: #333; margin-bottom: 4px;">${item.position ? escapeHTML(item.position) : '-'}</div>
+                    <td style="text-align: center;">
                         ${item.branch ? item.branch.split(',').map(b => `<span class="branch-tag">${escapeHTML(b.trim().toUpperCase())}</span>`).join('') : '<em style="color:#bbb;font-size:0.75em;">无</em>'}
+                    </td>
+                    <td>
+                        <div style="font-weight: 700; color: #333;">${item.position ? escapeHTML(item.position) : '-'}</div>
                     </td>
                     <td>
                         <div style="font-weight: 500;">${item.username ? escapeHTML(item.username) : '<em style="color: #999;">-</em>'}</div>
@@ -924,9 +926,9 @@ function filterTable(searchTerm) {
             continue;
         }
 
-        // 检查英文姓名列（第3列，索引为2）和邮箱列（第4列，索引为3）
-        const usernameCell = row.cells[2]; // 英文姓名列
-        const emailCell = row.cells[3]; // 邮箱列
+        // 检查英文姓名列（第4列，索引为3）和邮箱列（第5列，索引为4）
+        const usernameCell = row.cells[3]; // 英文姓名列
+        const emailCell = row.cells[4]; // 邮箱列
 
         let isMatch = false;
 

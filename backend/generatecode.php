@@ -94,6 +94,7 @@ require_once 'session_check.php';
                     <thead>
                         <tr>
                             <th>序号</th>
+                            <th>所属公司</th>
                             <th>职位</th>
                             <th>英文姓名</th>
                             <th>邮箱</th>
@@ -103,7 +104,7 @@ require_once 'session_check.php';
                     </thead>
                     <tbody id="tableBody">
                         <tr>
-                            <td colspan="6" style="text-align: center; padding: 30px;">
+                            <td colspan="7" style="text-align: center; padding: 30px;">
                                 <div class="loading"></div>
                                 正在加载数据...
                             </td>
