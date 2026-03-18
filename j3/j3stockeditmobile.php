@@ -2182,23 +2182,7 @@ require_once '../backend/session_check.php';
                     导出数据
                 </button>
                 
-                <div class="batch-actions" style="display: flex; gap: 8px;">
-                    <button class="btn btn-primary" id="batch-save-btn" onclick="batchSaveNewRows()" style="display: none;">
-                        <i class="fas fa-save"></i>
-                        批量保存
-                    </button>
-                    <button class="btn btn-danger" id="batch-delete-btn" onclick="toggleBatchDelete()">
-                        <i class="fas fa-trash-alt"></i>
-                        批量删除
-                    </button>
-                    <button class="btn btn-success" id="confirm-batch-delete-btn" onclick="confirmBatchDelete()" style="display: none;">
-                        <i class="fas fa-check"></i>
-                        确认删除
-                    </button>
-                    <button class="btn btn-secondary" id="cancel-batch-delete-btn" onclick="cancelBatchDelete()" style="display: none;">
-                        <i class="fas fa-times"></i>
-                        取消
-                    </button>
+                <div class="batch-actions" style="display: none;">
                 </div>
                 
                 <div class="header-stats">
@@ -2218,7 +2202,6 @@ require_once '../backend/session_check.php';
                         <th class="product-name-col" style="min-width: 200px;">货品</th>
                         <th style="min-width: 80px;">出货</th>
                         <th style="min-width: 100px;">出货人</th>
-                        <th style="min-width: 80px;" id="action-header">操作</th>
                     </tr>
                 </thead>
                 <tbody id="stock-tbody">
@@ -3924,30 +3907,6 @@ require_once '../backend/session_check.php';
                             `<span>${record.receiver || '-'}</span>`
                         }
                     </td>
-                    <td>
-                        <span class="action-cell">
-                            ${isBatchDeleteMode ? 
-                                `<input type="checkbox" class="batch-select-checkbox" 
-                                        data-record-id="${record.id}" 
-                                        onchange="toggleRecordSelection(${record.id}, this.checked)"
-                                        ${selectedRecords.has(record.id) ? 'checked' : ''}>` :
-                                (isEditing ? 
-                                    `<button class="action-btn edit-btn save-mode" onclick="saveRecord(${record.id})" title="保存">
-                                        <i class="fas fa-save"></i>
-                                    </button>
-                                    <button class="action-btn" onclick="cancelEdit(${record.id})" title="取消" style="background: #6b7280;">
-                                        <i class="fas fa-times"></i>
-                                    </button>` :
-                                    `<button class="action-btn edit-btn" onclick="editRecord(${record.id})" title="编辑">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="action-btn delete-btn" onclick="deleteRecord(${record.id})" title="删除">
-                                        <i class="fas fa-trash"></i>
-                                    </button>`
-                                )
-                            }
-                        </span>
-                    </td>
                 `;
                 
                 tbody.appendChild(row);
@@ -4115,16 +4074,6 @@ require_once '../backend/session_check.php';
                 <td>${createCombobox('product', '', null, rowId)}</td>
 
                 <td><input type="number" class="table-input" min="0" step="0.001" placeholder="0.000" id="${rowId}-out-qty" oninput="updateNewRowTotal(this)"></td>
-                <td>
-                    <span class="action-cell">
-                        <button class="action-btn save-new-btn" onclick="saveNewRowRecord(this)" title="保存">
-                            <i class="fas fa-save"></i>
-                        </button>
-                        <button class="action-btn cancel-new-btn" onclick="cancelNewRow(this)" title="取消">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </span>
-                </td>
             `;
             
             // 添加到表格底部

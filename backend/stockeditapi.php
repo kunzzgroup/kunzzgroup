@@ -2134,13 +2134,12 @@ function handleDelete() {
                         // For the branch tables, we use date, time, product_name, and receiver
                         // Since we just have the IDs, we need to fetch the record first to get the exact matching details
                         foreach ($targetIds as $id) {
-                            // Find out which table is the main one to fetch from. Let's just use the current table.
                             $fetchStmt = $pdo->prepare("SELECT date, time, product_name, receiver FROM $table WHERE id = ?");
                             $fetchStmt->execute([$id]);
                             $record = $fetchStmt->fetch(PDO::FETCH_ASSOC);
                             
                             if ($record) {
-                                $sql = "DELETE FROM $table WHERE date = ? AND time = ? AND product_name = ? AND receiver = ? AND deleted_at IS NOT NULL";
+                                $sql = "DELETE FROM $table WHERE date = ? AND time = ? AND product_name = ? AND (receiver = ? OR receiver = 'Mobile' OR receiver = 'mobile') AND deleted_at IS NOT NULL";
                                 $stmt = $pdo->prepare($sql);
                                 $stmt->execute([$record['date'], $record['time'], $record['product_name'], $record['receiver']]);
                             }
@@ -2194,7 +2193,7 @@ function handleDelete() {
                         
                         // 软删除J1stockedit_data表记录
                         $pdo->prepare("UPDATE j1stockedit_data SET deleted_at = NOW(), deleted_by = ? 
-                                       WHERE date = ? AND time = ? AND product_name = ? AND receiver = ? AND target_system = 'j1' AND deleted_at IS NULL")
+                                       WHERE date = ? AND time = ? AND product_name = ? AND (receiver = ? OR receiver = 'Mobile' OR receiver = 'mobile') AND target_system = 'j1' AND deleted_at IS NULL")
                             ->execute([$username, $recordToDelete['date'], $recordToDelete['time'], $recordToDelete['product_name'], $recordToDelete['receiver']]);
 
                         // 软删除J1stockeditmobile_data表记录
@@ -2210,7 +2209,7 @@ function handleDelete() {
                         
                         // 软删除J2stockedit_data表记录
                         $pdo->prepare("UPDATE j2stockedit_data SET deleted_at = NOW(), deleted_by = ? 
-                                       WHERE date = ? AND time = ? AND product_name = ? AND receiver = ? AND target_system = 'j2' AND deleted_at IS NULL")
+                                       WHERE date = ? AND time = ? AND product_name = ? AND (receiver = ? OR receiver = 'Mobile' OR receiver = 'mobile') AND target_system = 'j2' AND deleted_at IS NULL")
                             ->execute([$username, $recordToDelete['date'], $recordToDelete['time'], $recordToDelete['product_name'], $recordToDelete['receiver']]);
 
                         // 软删除J2stockeditmobile_data表记录
@@ -2226,7 +2225,7 @@ function handleDelete() {
                         
                         // 软删除J3stockedit_data表记录
                         $pdo->prepare("UPDATE j3stockedit_data SET deleted_at = NOW(), deleted_by = ? 
-                                       WHERE date = ? AND time = ? AND product_name = ? AND receiver = ? AND target_system = 'j3' AND deleted_at IS NULL")
+                                       WHERE date = ? AND time = ? AND product_name = ? AND (receiver = ? OR receiver = 'Mobile' OR receiver = 'mobile') AND target_system = 'j3' AND deleted_at IS NULL")
                             ->execute([$username, $recordToDelete['date'], $recordToDelete['time'], $recordToDelete['product_name'], $recordToDelete['receiver']]);
 
                         // 软删除J3stockeditmobile_data表记录
