@@ -893,43 +893,18 @@ function reindexTable() {
     }
 }
 
-// hover 样式注入 & KH 锁死效果
+// hover 样式注入
 (function () {
     const style = document.createElement('style');
     style.textContent = `
         /* 常规项 hover (仅当非 active 时变色) */
-        .bl1-item:not(.active):not([data-value="kunzz"]):hover, 
+        .bl1-item:not(.active):hover, 
         .bl2-item:not(.active):hover { 
             background: #f1f5f9 !important; 
             color: #1e293b !important;
         }
-        
-        /* KH (kunzz) 锁死样式 - 即使 hover 也不变色 */
-        .bl1-item[data-value="kunzz"] {
-            background: #fff6e9 !important; /* 非常淡的橘黄背景 */
-            color: #f99e00 !important;      /* 品牌橘文字 */
-            cursor: pointer;
-            transition: none !important;
-            border-radius: 20px !important; /* 圆角药丸形 */
-            margin: 4px 6px !important;
-            text-align: center !important;
-            box-shadow: 0 2px 4px rgba(249, 158, 0, 0.05) !important;
-        }
 
-        /* KH 被激活时的高亮锁死 */
-        .bl1-item[data-value="kunzz"].active {
-            background: #f99e00 !important; /* 品牌橙背景 */
-            color: white !important;         /* 文字白色 */
-            font-weight: 700 !important;
-        }
-
-        /* 确保 hover 时不改变 KH 的激活状态颜色 */
-        .bl1-item[data-value="kunzz"].active:hover {
-            background: #f99e00 !important;
-            color: white !important;
-        }
-
-        /* 确保其他 active 项在 hover 时维持品牌橘背景及白色文字 */
+        /* 确保 active 项在 hover 时维持品牌橘背景及白色文字 */
         .bl1-item.active:hover, 
         .bl2-item.active:hover {
             background: #f99e00 !important;
