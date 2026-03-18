@@ -780,20 +780,21 @@ function selectBranchL1(value, label) {
         }
     });
 
+    const l2Container = document.getElementById('branchL2Container');
     const l2Btn = document.getElementById('branchL2Btn');
     const l2Label = document.getElementById('branchL2Label');
     const l2Chevron = l2Btn ? l2Btn.querySelector('.fa-chevron-down') : null;
 
-    if (l2Btn && l2Label) {
+    if (l2Container) {
         if (value === 'all' || value === 'kunzz') {
-            l2Label.textContent = '-';
-            l2Btn.style.cursor = 'default';
-            l2Btn.style.opacity = '0.45';
-            if (l2Chevron) l2Chevron.style.display = 'none';
+            l2Container.style.display = 'none';
         } else {
-            l2Label.textContent = '全部分店';
-            l2Btn.style.cursor = 'pointer';
-            l2Btn.style.opacity = '1';
+            l2Container.style.display = 'block';
+            if (l2Label) l2Label.textContent = '全部分店';
+            if (l2Btn) {
+                l2Btn.style.cursor = 'pointer';
+                l2Btn.style.opacity = '1';
+            }
             if (l2Chevron) l2Chevron.style.display = '';
             buildBranchL2Dropdown();
         }

@@ -77,7 +77,7 @@ require_once 'session_check.php';
                         </div>
                     </div>
                     <!-- 第二层：根据第一层显示 -->
-                    <div style="position: relative;">
+                    <div id="branchL2Container" style="position: relative; display: none;">
                         <button id="branchL2Btn" class="branch-filter-btn" onclick="toggleBranchL2()">
                             <span id="branchL2Label">-</span>
                             <i class="fas fa-chevron-down" style="font-size:10px;color:#9ca3af;"></i>
