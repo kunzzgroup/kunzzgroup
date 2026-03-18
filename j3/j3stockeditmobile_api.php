@@ -26,10 +26,20 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$user_branch = strtoupper($_SESSION['branch'] ?? '');
-if ($user_branch !== 'KH' && $user_branch !== 'J3') {
+$user_branches = explode(',', strtoupper($_SESSION['branch'] ?? ''));
+
+// 如果 Session 中缺少分支信息，尝试从 Cookie 恢复（提高鲁棒性，应对 Session 意外丢失）
+if (empty($_SESSION['branch'])) {
+    $cookie_branch = $_COOKIE['branch'] ?? $_COOKIE['mobile_branch'] ?? '';
+    if (!empty($cookie_branch)) {
+        $_SESSION['branch'] = strtoupper($cookie_branch);
+        $user_branches = explode(',', $_SESSION['branch']);
+    }
+}
+
+if (!in_array('KH', $user_branches) && !in_array('J3', $user_branches)) {
     http_response_code(403);
-    echo json_encode(["success" => false, "message" => "Access denied: Unauthorized branch. (User: $user_branch, Required: J3)"]);
+    echo json_encode(["success" => false, "message" => "Access denied: Unauthorized branch. (User Branch: " . ($_SESSION['branch'] ?? '') . ", Required: J3 or KH)"]);
     exit;
 }
 

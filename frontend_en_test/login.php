@@ -39,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['username'] = $user['username'];
             $_SESSION['position'] = $user['position'];
             $_SESSION['account_type'] = $user['account_type']; // ⭐ 添加这行 - 关键！
+            $_SESSION['branch'] = strtoupper($user['branch'] ?? ''); // ⭐ 添加这行 - 关键！
             $_SESSION['last_activity'] = time(); // ➤ 当前登录时间（用于 1 分钟自动登出）
 
             // 检查是否为首次登录
@@ -55,6 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 setcookie('username', $user['username'], $expire, "/");
                 setcookie('position', $user['position'], $expire, "/");
                 setcookie('account_type', $user['account_type'], $expire, "/"); // ⭐ 添加这行
+                setcookie('branch', strtoupper($user['branch'] ?? ''), $expire, "/"); // ⭐ 添加这行
                 setcookie('remember_token', '1', $expire, "/");
             } else {
                 // ❌ 没勾选记住我，清除残留 cookie
@@ -62,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 setcookie('username', '', time() - 3600, "/");
                 setcookie('position', '', time() - 3600, "/");
                 setcookie('account_type', '', time() - 3600, "/"); // ⭐ 添加这行
+                setcookie('branch', '', time() - 3600, "/"); // ⭐ 添加这行
                 setcookie('remember_token', '', time() - 3600, "/");
             }
 
