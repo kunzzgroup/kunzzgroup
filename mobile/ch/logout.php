@@ -9,20 +9,15 @@ session_unset();
 session_destroy();
 
 // 彻底清除所有相关的 Cookie
-$options = [
-    'expires' => time() - 3600,
-    'path' => '/',
-    'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' || 
-               isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https',
-    'httponly' => true,
-    'samesite' => 'Lax'
-];
-
-setcookie("mobile_user_id", "", $options);
-
-// mobile_remember_token 可能是非 httponly，单独清除
-$options['httponly'] = false;
-setcookie("mobile_remember_token", "", $options);
+$p = "/";
+$t = time() - 3600;
+setcookie("mobile_user_id", "", $t, $p);
+setcookie("mobile_username", "", $t, $p);
+setcookie("mobile_position", "", $t, $p);
+setcookie("mobile_account_type", "", $t, $p);
+setcookie("mobile_nickname", "", $t, $p);
+setcookie("mobile_username_cn", "", $t, $p);
+setcookie("mobile_remember_token", "", $t, $p);
 
 // 跳转回登录页
 header("Location: login.html");
