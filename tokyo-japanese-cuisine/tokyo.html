@@ -3129,12 +3129,12 @@
         }
 
         if (nav) {
-          if (window.innerWidth >= 1280) {
-            /* ── 大屏 (≥1280px)：永远显示，不受 slide 影响 ── */
+          if (window.innerWidth >= 1367) {
+            /* ── 大屏 (≥1367px)：永远显示，不受 slide 影响 ── */
             nav.classList.remove('nav-pushed');
 
           } else if (window.innerWidth > 767) {
-            /* ── Laptop (768–1279px)：往下滑隐藏，往回滑显示 ── */
+            /* ── Laptop + 13" (768–1366px)：往下滑隐藏，往回滑显示 ── */
             const goingBack = index < lastSlideIndex;
             (index === 0 || goingBack)
               ? nav.classList.remove('nav-pushed')
