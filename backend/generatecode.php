@@ -72,7 +72,7 @@ require_once 'session_check.php';
                         </button>
                         <div id="branchL1Dropdown" class="branch-filter-dropdown">
                             <div class="bl1-item active" data-value="all" onclick="selectBranchL1('all','全部')">全部</div>
-                            <div class="bl1-item" data-value="kunzz" onclick="selectBranchL1('kunzz','KunzzGroup')">KunzzGroup</div>
+                            <div class="bl1-item" data-value="kunzz" onclick="selectBranchL1('kunzz','KH')">KH</div>
                             <div class="bl1-item" data-value="branch" onclick="selectBranchL1('branch','分店')">分店</div>
                         </div>
                     </div>
@@ -162,7 +162,7 @@ require_once 'session_check.php';
                                                     <i class="fas fa-chevron-down"></i>
                                                 </div>
                                                 <div class="select-options">
-                                                    <label class="checkbox-item"><input type="checkbox" name="branch[]" value="kunzzgroup" onchange="updateMultiSelectText(this)"> KUNZZGROUP</label>
+                                                    <label class="checkbox-item"><input type="checkbox" name="branch[]" value="kh" onchange="updateMultiSelectText(this)"> KH</label>
                                                     <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j1" onchange="updateMultiSelectText(this)"> J1 (Midvalley Southkey)</label>
                                                     <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j2" onchange="updateMultiSelectText(this)"> J2 (Paradigm Mall)</label>
                                                     <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j3" onchange="updateMultiSelectText(this)"> J3 (Desa Tebrau)</label>
@@ -856,7 +856,7 @@ require_once 'session_check.php';
                                             <i class="fas fa-chevron-down"></i>
                                         </div>
                                         <div class="select-options">
-                                            <label class="checkbox-item"><input type="checkbox" name="branch[]" value="kunzzgroup" onchange="updateMultiSelectText(this)"> KUNZZGROUP</label>
+                                            <label class="checkbox-item"><input type="checkbox" name="branch[]" value="kh" onchange="updateMultiSelectText(this)"> KH</label>
                                             <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j1" onchange="updateMultiSelectText(this)"> J1 (Midvalley Southkey)</label>
                                             <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j2" onchange="updateMultiSelectText(this)"> J2 (Paradigm Mall)</label>
                                             <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j3" onchange="updateMultiSelectText(this)"> J3 (Desa Tebrau)</label>
