@@ -21,6 +21,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['username'])) {
 // 2. 如果 Session 没有，且有自动登录标记，模仿 backend/session_check.php 直接从 Cookie 恢复
 elseif (
     isset($_COOKIE['mobile_user_id']) && 
+    !empty($_COOKIE['mobile_user_id']) &&
     isset($_COOKIE['mobile_remember_token']) && 
     $_COOKIE['mobile_remember_token'] === '1'
 ) {

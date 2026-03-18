@@ -39,16 +39,20 @@ if (!function_exists('sanitize_input_recursive')) {
     /**
      * 将输入数据进行深度 XSS 过滤（将特殊字符转换为 HTML 实体）
      */
-    function sanitize_input_recursive($data) {
+    function sanitize_input_recursive($data, $keyName = '') {
         if (is_array($data)) {
             $sanitized = [];
             foreach ($data as $key => $value) {
                 // 清洗键名
                 $clean_key = htmlspecialchars((string)$key, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-                $sanitized[$clean_key] = sanitize_input_recursive($value);
+                $sanitized[$clean_key] = sanitize_input_recursive($value, $key);
             }
             return $sanitized;
         } else if (is_string($data)) {
+            // 如果是密码字段，跳过 XSS 转义，防止由于 HTML 实体化（如 & -> &amp;）导致验证失败
+            if (strtolower($keyName) === 'password') {
+                return trim($data);
+            }
             // 使用 strip_tags 过滤 HTML 标签是种选择，但 htmlspecialchars 可以完整保留用户意图而不被执行
             return htmlspecialchars(trim($data), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         } else {

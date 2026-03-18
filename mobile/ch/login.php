@@ -43,6 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['username'] = $user['username'];
             $_SESSION['position'] = $user['position'];
             $_SESSION['account_type'] = $user['account_type'];
+            $_SESSION['nickname'] = $user['nickname'] ?? '';
+            $_SESSION['username_cn'] = $user['username_cn'] ?? '';
             $_SESSION['last_activity'] = time();
 
             // 判断用户是否勾选“记住我”
