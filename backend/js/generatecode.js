@@ -867,6 +867,7 @@ function applyBranchFilter() {
             row.classList.add('hidden-row');
         }
     }
+    reindexTable();
 }
 
 // 点击页面其他地方关闭 dropdown
@@ -876,6 +877,21 @@ document.addEventListener('click', function (e) {
         closeBranchDropdowns();
     }
 });
+
+// 重新排列序号
+function reindexTable() {
+    const tableBody = document.getElementById('tableBody');
+    if (!tableBody) return;
+    const rows = tableBody.getElementsByTagName('tr');
+    let visibleIndex = 1;
+    for (let row of rows) {
+        if (!row.classList.contains('hidden-row') && row.cells.length > 1) {
+            if (row.cells[0]) {
+                row.cells[0].textContent = visibleIndex++;
+            }
+        }
+    }
+}
 
 // hover 样式注入
 (function () {
@@ -941,6 +957,7 @@ function filterTable(searchTerm) {
             row.classList.add('hidden-row');
         }
     }
+    reindexTable();
 }
 
 // 清除搜索
