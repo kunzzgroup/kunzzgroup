@@ -8,8 +8,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 1. 优先从 Session 获取当前用户
-if (isset($_SESSION['user_id'])) {
+// 1. 优先从 Session 获取当前用户，且确保 Session 完整（包含用户名）
+if (isset($_SESSION['user_id']) && isset($_SESSION['username'])) {
     $current_user_id = $_SESSION['user_id'];
 } 
 // 2. 如果 Session 没有，尝试从 Cookie 恢复
