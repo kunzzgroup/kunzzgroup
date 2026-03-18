@@ -849,14 +849,14 @@ function applyBranchFilter() {
             // 只显示显式属于 kh 的职员
             show = (rowBranch.split(',').includes('kh'));
         } else if (branchL1Current === 'branch') {
-            // 只显示有分店的职员 (支持多选)
-            const hasBranch = rowBranch !== '' && rowBranch !== 'null';
-            if (!hasBranch) {
+            // 只显示有具体分店 (j1/j2/j3) 的职员
+            const branches = rowBranch.split(',').map(b => b.trim()).filter(b => b !== '' && b !== 'null');
+            const storeBranches = branches.filter(b => b !== 'kh');
+            
+            if (storeBranches.length === 0) {
                 show = false;
             } else if (branchL2Current !== 'all') {
-                // 检查逗号分隔的字符串中是否包含选中的分店
-                const branches = rowBranch.split(',').map(b => b.trim());
-                show = branches.includes(branchL2Current);
+                show = storeBranches.includes(branchL2Current);
             }
         }
         // 'all' → 全部显示
