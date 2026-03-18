@@ -1319,6 +1319,22 @@
         --gap: 20px;
       }
 
+      /* Fix centering on mobile */
+      .cc-carousel-outer {
+        max-width: 100vw !important;
+        width: 100vw !important;
+      }
+
+      .cc-viewport {
+        margin: 0 !important;
+        overflow: visible !important;
+      }
+
+      .cc-track {
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
       /* Hide side navigation on mobile, swipe is natural */
       .cc-nav {
         display: none !important;
