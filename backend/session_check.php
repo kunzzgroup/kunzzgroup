@@ -11,8 +11,8 @@ require_once __DIR__ . '/xss_protect.php';
 
 session_start();
 
-// 超时时间（秒）
-define('SESSION_TIMEOUT', 60);
+// 超时时间（秒） - 增加到 1 小时以避免频繁退出
+define('SESSION_TIMEOUT', 3600);
 
 // 如果 session 存在，检查是否过期
 if (isset($_SESSION['user_id'])) {
@@ -32,6 +32,7 @@ if (isset($_SESSION['user_id'])) {
         setcookie('username', '', time() - 60, "/");
         setcookie('position', '', time() - 60, "/");
         setcookie('account_type', '', time() - 60, "/");
+        setcookie('branch', '', time() - 60, "/");
         setcookie('remember_token', '', time() - 60, "/");
 
         // 跳转登录页
@@ -53,6 +54,7 @@ if (isset($_SESSION['user_id'])) {
     $_SESSION['username'] = $_COOKIE['username'];
     $_SESSION['position'] = isset($_COOKIE['position']) ? $_COOKIE['position'] : null;
     $_SESSION['account_type'] = isset($_COOKIE['account_type']) ? $_COOKIE['account_type'] : null;
+    $_SESSION['branch'] = isset($_COOKIE['branch']) ? strtoupper($_COOKIE['branch']) : (isset($_COOKIE['mobile_branch']) ? strtoupper($_COOKIE['mobile_branch']) : null);
     $_SESSION['last_activity'] = time();
 } else {
     // 没有 session，也没有有效 cookie
