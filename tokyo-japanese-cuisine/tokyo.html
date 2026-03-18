@@ -1025,7 +1025,7 @@
        SECTION 3: CULTURE CAROUSEL
     ============================================================ */
     .culture-carousel-section {
-      padding: clamp(60px, 8vw, 120px) 0 clamp(80px, 10vw, 140px);
+      padding: clamp(40px, 6vw, 80px) 0 clamp(40px, 6vw, 80px);
       text-align: center;
       background: var(--color-bg);
       overflow: hidden;
@@ -2257,19 +2257,235 @@
     }
 
     /* ============================================================
-       LARGE DESKTOP (≥ 1440px) — subtle bump
+       13-INCH LAPTOP  (1280px – 1366px)
+       典型：MacBook Air 13", 1280×800 / 1366×768 Windows laptop
+       Swiper 启用，viewport 较窄，需要收紧间距和字号
     ============================================================ */
-    @media (min-width: 1440px) {
-      .zen-title {
-        font-size: 96px;
+    @media (min-width: 1024px) and (max-width: 1366px) {
+
+      /* Nav: 收窄 gap，避免链接被挤压 */
+      .nav-links {
+        gap: 24px;
       }
 
-      .cc-main-title {
-        font-size: 68px;
+      .nav-links a,
+      .nav-dropdown-trigger {
+        font-size: 13.5px;
+      }
+
+      .nav-btn {
+        padding: 7px 16px;
+        font-size: 13px;
+      }
+
+      /* Hero: 13寸屏字体稍小 */
+      .hero-title {
+        font-size: clamp(36px, 4.5vw, 52px);
+      }
+
+      .hero-subtitle {
+        font-size: 16px;
+      }
+
+      .hero-tagline {
+        font-size: 14px;
+      }
+
+      .hero-logo {
+        width: 88px;
+        height: 88px;
+      }
+
+      /* About: 两栏保留，但收窄 padding，图片高度调低 */
+      .zen-container {
+        gap: 40px;
+        padding: 36px 40px;
+        width: 88%;
+      }
+
+      .zen-title {
+        font-size: clamp(36px, 4vw, 60px);
+      }
+
+      .zen-desc {
+        font-size: 14px;
+      }
+
+      .zen-img-top {
+        height: 340px;
+      }
+
+      .zen-img-bottom {
+        width: 60%;
+        bottom: -50px;
+        left: -40px;
+      }
+
+      /* Culture carousel: 卡片缩小一档 */
+      :root {
+        --card-w: 260px;
+        --card-h: 370px;
+        --gap: 28px;
+      }
+
+      .cc-slide-title {
+        font-size: 28px;
+        margin-top: 48px;
+      }
+
+      .cc-description {
+        font-size: 14px;
+      }
+
+      .culture-carousel-section {
+        padding: 40px 0 60px;
+      }
+
+      /* Featured: 卡片高度由 aspect-ratio 控制，收窄 max-width */
+      .featured-container {
+        padding-top: 48px;
       }
 
       #featured h2 {
-        font-size: 48px;
+        font-size: 32px;
+        margin-bottom: 28px;
+      }
+
+      .featured-card {
+        max-width: 260px;
+      }
+
+      .featured-cards-wrapper {
+        padding: 32px 40px;
+        gap: 24px;
+      }
+
+      /* Location: 地图稍矮 */
+      .location-card-map {
+        aspect-ratio: 16/8;
+      }
+
+      #location h2 {
+        font-size: 28px;
+        margin-bottom: 28px;
+      }
+
+      .location-container {
+        width: 88%;
+      }
+
+      /* Footer */
+      .footer-content {
+        gap: 24px;
+      }
+    }
+
+    /* ============================================================
+       15-INCH LAPTOP  (1367px – 1600px)
+       典型：MacBook Pro 15"/16"，1440×900 / 1536×864 Windows
+       空间稍大，但仍需适度收紧避免过于稀疏
+    ============================================================ */
+    @media (min-width: 1367px) and (max-width: 1600px) {
+
+      /* Nav: 间距适中 */
+      .nav-links {
+        gap: 32px;
+      }
+
+      .nav-links a,
+      .nav-dropdown-trigger {
+        font-size: 14.5px;
+      }
+
+      /* Hero */
+      .hero-title {
+        font-size: clamp(46px, 5vw, 64px);
+      }
+
+      .hero-subtitle {
+        font-size: 18px;
+      }
+
+      .hero-logo {
+        width: 96px;
+        height: 96px;
+      }
+
+      /* About */
+      .zen-container {
+        gap: 56px;
+        padding: 44px 56px;
+        width: 88%;
+      }
+
+      .zen-title {
+        font-size: clamp(52px, 5.5vw, 76px);
+      }
+
+      .zen-img-top {
+        height: 400px;
+      }
+
+      .zen-img-bottom {
+        width: 62%;
+        bottom: -64px;
+        left: -50px;
+      }
+
+      /* Culture carousel */
+      :root {
+        --card-w: 300px;
+        --card-h: 425px;
+        --gap: 36px;
+      }
+
+      .cc-slide-title {
+        font-size: 34px;
+        margin-top: 64px;
+      }
+
+      .cc-description {
+        font-size: 16px;
+      }
+
+      /* Featured */
+      .featured-container {
+        padding-top: 64px;
+      }
+
+      #featured h2 {
+        font-size: 36px;
+      }
+
+      .featured-card {
+        max-width: 320px;
+      }
+
+      .featured-cards-wrapper {
+        padding: 44px 56px;
+        gap: 28px;
+      }
+
+      /* Location */
+      #location h2 {
+        font-size: 32px;
+      }
+
+      .location-container {
+        width: 88%;
+      }
+    }
+
+    /* ============================================================
+       LARGE DESKTOP (≥ 1601px)
+    ============================================================ */
+    @media (min-width: 1601px) {
+      .zen-title {
+        font-size: 90px;
+      }
+
+      #featured h2 {
+        font-size: 40px;
       }
     }
   </style>
@@ -2433,9 +2649,6 @@
 
       <!-- SLIDE 3: Culture Carousel -->
       <section id="mission-vision" class="culture-carousel-section swiper-slide">
-        <div class="cc-eyebrow">文化与精神</div>
-        <h2 class="cc-main-title">我们的 <em>核心价值</em></h2>
-        <div class="cc-rule"></div>
 
         <h3 class="cc-slide-title" id="cc-title"></h3>
 
@@ -3061,6 +3274,10 @@
 
     }); // DOMContentLoaded
   </script>
+</body>
+
+</html>
+</script>
 </body>
 
 </html>
