@@ -25,14 +25,26 @@
       --color-border: #E5E5E5;
       --color-line: rgba(255, 255, 255, 0.5);
 
+      /* Responsive Typography */
+      --fs-h1: clamp(2.5rem, 8vw, 4.5rem);
+      --fs-h2: clamp(1.8rem, 5vw, 2.8rem);
+      --fs-h3: clamp(1.4rem, 4vw, 2rem);
+      --fs-body: clamp(0.9rem, 2vw, 1.1rem);
+
       /* Culture Carousel Variables */
-      --card-w: 340px;
-      --card-h: 480px;
-      --gap: 40px;
+      --card-w: clamp(280px, 80vw, 340px);
+      --card-h: clamp(400px, 60vh, 480px);
+      --gap: clamp(20px, 5vw, 40px);
     }
 
     * {
       box-sizing: border-box;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
     }
 
     html,
@@ -49,18 +61,27 @@
       /* Allow native scroll so footer is reachable */
     }
 
-    /* --- Swiper Configuration --- */
+    /* --- Full-Page Scroll Configuration --- */
     .swiper {
       width: 100%;
       height: 100vh;
+      scroll-snap-type: y mandatory;
+      overflow-y: auto;
+      scroll-behavior: smooth;
     }
 
     .swiper-slide {
       height: 100vh;
+      width: 100%;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
       box-sizing: border-box;
       display: flex !important;
-      flex-direction: column;
+      flex-direction: row; /* Desktop: side-by-side */
+      align-items: center;
       justify-content: center;
+      position: relative;
+      overflow: hidden;
     }
 
 
@@ -428,13 +449,44 @@
     }
 
 
-    @media (max-width: 640px) {
-      .nav-text-group .primary {
-        font-size: 16px;
+    @media (max-width: 1366px) {
+      .nav-links { gap: 20px; }
+      .nav-container { max-width: 1200px; }
+    }
+
+    @media (max-width: 1024px) {
+      #nav { width: 98%; }
+      .nav-links { gap: 15px; }
+      .swiper-slide { padding: 2rem; }
+    }
+
+    @media (max-width: 768px) {
+      #nav .nav-links { display: none; }
+      .mobile-menu-btn { display: flex !important; }
+      
+      .swiper {
+        scroll-snap-type: none;
+        height: auto;
+        overflow-y: visible;
       }
 
-      .nav-text-group .secondary {
-        font-size: 10px;
+      .swiper-slide {
+        height: auto !important;
+        scroll-snap-align: none;
+        flex-direction: column !important;
+        padding: 4rem 1rem !important;
+        display: block !important;
+      }
+
+      .hero-content, .zen-container, .featured-container, .location-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+      }
+
+      .btn-primary, .btn-secondary {
+        width: 100%;
+        margin-bottom: 0.5rem;
       }
     }
 
@@ -490,98 +542,70 @@
     }
 
 
-    /* Hero Section */
+    /* Hero Section Refactoring */
     #hero {
-      position: relative;
-      height: 100vh;
-      /* Changed from min-height to height */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      padding: clamp(80px, 10vw, 140px) 0;
-      padding-top: clamp(120px, 15vw, 200px);
-      /* Adjusting for navbar + breathing room */
-      background-color: #333;
-    }
-
-    .hero-slider {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      overflow: hidden;
-    }
-
-    .hero-slide {
-      flex: 0 0 100%;
-      /* Each slide is exactly 100% width of the container */
-      width: 100%;
-      height: 100%;
-      background-size: cover;
-      background-position: center;
-    }
-
-
-    .hero-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg,
-          rgba(0, 0, 0, 0.45) 0%,
-          rgba(0, 0, 0, 0.25) 40%,
-          rgba(0, 0, 0, 0.6) 100%);
-      z-index: 5;
-      pointer-events: none;
-    }
-
-    .shoji-lattice {
-      display: none;
+      background-color: var(--color-bg);
+      gap: 2rem;
     }
 
     .hero-content {
-      position: relative;
-      z-index: 10;
+      flex: 1.2;
       text-align: left;
-      padding: 0 5%;
-      max-width: 1300px;
-      width: 100%;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: center;
+      z-index: 10;
+      order: 1;
     }
 
-    .hero-logo {
-      width: 112px;
-      height: 112px;
-      margin: 0 0 24px 0;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 4px solid white;
+    .hero-slider {
+      flex: 1;
+      height: 60vh;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      order: 2;
     }
 
     .hero-title {
-      font-family: var(--font-serif);
-      font-size: 35px;
-      line-height: 1.15;
-      color: white;
-      margin-bottom: 13px;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      font-size: var(--fs-h1);
+      color: var(--color-text);
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
     }
 
     .hero-subtitle {
-      color: rgba(255, 255, 255, 0.95);
-      font-size: 18px;
-      font-weight: 500;
-      margin-bottom: 8px;
+       font-size: var(--fs-h2);
+       color: var(--color-primary);
+       margin-bottom: 1rem;
     }
 
     .hero-tagline {
-      color: rgba(255, 255, 255, 0.8);
-      font-size: 15px;
-      margin-bottom: 32px;
+      font-size: var(--fs-body);
+      color: var(--color-text-light);
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      #hero {
+        padding-top: 100px !important;
+      }
+      .hero-slider {
+        height: 40vh;
+        margin-top: 2rem;
+      }
+      .hero-content {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .hero-buttons {
+        flex-direction: column;
+        width: 100%;
+      }
     }
 
     @media (min-width: 768px) {
@@ -823,15 +847,14 @@
       }
     }
 
-    /* Unified About & Culture Section - Bento Grid */
+    /* Unified About & Culture Section */
     #about-culture {
       background-color: var(--color-bg);
-      position: relative;
-      overflow: hidden;
-      height: 100vh;
       display: flex !important;
       align-items: center;
       justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
     }
 
     .about-culture-container {
@@ -1754,12 +1777,15 @@
       background-color: transparent;
       border: 1px solid var(--color-border);
       border-radius: 24px;
-      padding: 32px;
+      padding: clamp(2rem, 5vw, 4rem);
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 32px;
-      max-width: 1000px;
+      width: 100%;
+      max-width: 1280px;
       margin: 0 auto;
+      background: white;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
     }
 
     @media (min-width: 768px) {
@@ -3035,7 +3061,7 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
     /* ── Grid ── */
     .tc-card-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 18px;
     }
 
@@ -3387,7 +3413,7 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
 
     .haidilao-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 32px;
     }
 
@@ -4641,7 +4667,7 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
 
     .cc-main-title {
       font-family: var(--font-serif);
-      font-size: 62px;
+      font-size: var(--fs-h1);
       font-weight: 300;
       color: var(--color-text);
       letter-spacing: -0.5px;
@@ -4663,10 +4689,10 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
     /* ── Dynamic title ── */
     .cc-slide-title {
       font-family: var(--font-serif);
-      font-size: 42px;
+      font-size: var(--fs-h2);
       font-weight: 300;
       color: var(--color-text);
-      margin: 90px auto 0;
+      margin: 60px auto 0;
       letter-spacing: 0.5px;
       transition: opacity 0.25s ease, transform 0.25s ease;
       min-height: 52px;
