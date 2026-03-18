@@ -2092,11 +2092,10 @@
     ============================================================ */
     @media (max-width: 767px) {
 
-      /* Allow native scroll — body 是 nav sticky 的滚动容器
-         overflow 必须保持 auto/scroll，不能是 hidden，否则 sticky 失效 */
+      /* Allow native scroll — let window handle scroll so sticky works perfectly to viewport */
       html,
       body {
-        overflow: auto !important;
+        overflow: visible !important;
         height: auto !important;
         position: static !important;
       }
@@ -3151,10 +3150,12 @@
       handleResize();
 
       /* ─── Mobile Scroll behavior for Nav ─── */
-      let lastScrollY = window.scrollY || document.documentElement.scrollTop;
-      window.addEventListener('scroll', () => {
+      let lastScrollY = 0;
+      window.addEventListener('scroll', (e) => {
         if (window.innerWidth <= 767) {
-          const currentScrollY = window.scrollY || document.documentElement.scrollTop;
+          // Find actual scroll value regardless of what element is scrolling
+          const target = e.target === document ? (document.documentElement || document.body) : e.target;
+          const currentScrollY = target.scrollTop || window.scrollY || 0;
           
           if (currentScrollY <= 0) {
             if (nav) nav.classList.remove('nav-mobile-hidden');
@@ -3170,7 +3171,7 @@
           }
           lastScrollY = currentScrollY;
         }
-      }, { passive: true });
+      }, true); // useCapture to catch all scroll events
 
       /* ─── Culture Carousel ─── */
       (function () {
