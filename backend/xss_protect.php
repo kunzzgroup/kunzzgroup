@@ -87,28 +87,27 @@ if (!function_exists('sanitize_sql_injection')) {
      * 注意：最佳的防 SQL 注入方式始终是使用 PDO 预处理语句 (Prepared Statements)。
      * 此函数作为额外的防线，防止在未按规范使用预处理的遗留代码中发生注入。
      */
-    function sanitize_sql_injection($data) {
+    function sanitize_sql_injection($data, $keyName = '') {
         if (is_array($data)) {
             $sanitized = [];
             foreach ($data as $key => $value) {
                 // 不对键名做SQL拦截，仅过滤值
-                $sanitized[$key] = sanitize_sql_injection($value);
+                $sanitized[$key] = sanitize_sql_injection($value, $key);
             }
             return $sanitized;
         } else if (is_string($data)) {
+            // 如果是密码字段，直接返回原始值，防止损坏
+            if (strtolower($keyName) === 'password') {
+                return $data;
+            }
             // 常见的 SQL 注入恶意关键字特征正则 (忽略大小写)
             $sql_pattern = '/\b(UNION\s+SELECT|DROP\s+TABLE|ALTER\s+TABLE|INSERT\s+INTO|DELETE\s+FROM|UPDATE\s+.*?\s+SET|EXEC(\s|\+)+(s|x)p_)\b/i';
             
-            // 如果检测到高度危险的SQL语法，直接清空或阻断（这里选择替换为空或可疑标记，视业务需求也可直接 die()）
+            // 如果检测到高度危险的SQL语法，直接清空或阻断
             if (preg_match($sql_pattern, $data)) {
-                // 记录日志 (可选): error_log("Possible SQL Injection detected: " . $data);
-                // 将危险关键字替换为 [SQL_BLOCKED]
                 return preg_replace($sql_pattern, '[SQL_BLOCKED]', $data);
             }
             
-            // 如果项目中没有全部使用 PDO，也可以在这里进行 addslashes 转义:
-            // return addslashes($data); 
-            // 但如果使用了 PDO，增加 addslashes 会导致数据库里存入多余的反斜杠，因此这里仅用正则过滤恶意拼接。
             return $data;
         } else {
             return $data;

@@ -6,6 +6,7 @@ if (!headers_sent()) {
 }
 require_once __DIR__ . '/../../backend/xss_protect.php';
 ob_start();
+session_name('MOBILE_SESSION'); // 独立会话名称，防止与后端/前端干扰
 session_start();
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
@@ -52,25 +53,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($remember) {
                 // ✅ 勾选了"记住我"，设置 cookie（30天）
                 $expire = time() + (86400 * 30);
-                // 采用 frontend/login.php 的简单风格，增加可靠性
-                setcookie('mobile_user_id', $user['id'], $expire, "/");
-                setcookie('mobile_username', $user['username'], $expire, "/");
-                setcookie('mobile_position', $user['position'], $expire, "/");
-                setcookie('mobile_account_type', $user['account_type'], $expire, "/");
-                setcookie('mobile_nickname', $user['nickname'], $expire, "/");
-                setcookie('mobile_username_cn', $user['username_cn'], $expire, "/");
-                setcookie('mobile_remember_token', '1', $expire, "/");
+                $p = "/";
+                $d = "kunzzgroup.com"; // 明确指定域名，增加 Edge 兼容性
+
+                setcookie('mobile_user_id', $user['id'], $expire, $p, $d);
+                setcookie('mobile_username', $user['username'], $expire, $p, $d);
+                setcookie('mobile_position', $user['position'], $expire, $p, $d);
+                setcookie('mobile_account_type', $user['account_type'], $expire, $p, $d);
+                setcookie('mobile_nickname', $user['nickname'], $expire, $p, $d);
+                setcookie('mobile_username_cn', $user['username_cn'], $expire, $p, $d);
+                setcookie('mobile_remember_token', '1', $expire, $p, $d);
             } else {
-                // ❌ 没勾选记住我，清除残留 cookie (会话级别不需要再设置，依靠 session)
+                // ❌ 没勾选记住我，清除残留 cookie
                 $expire_past = time() - 3600;
-                setcookie('mobile_user_id', '', $expire_past, "/");
-                setcookie('mobile_username', '', $expire_past, "/");
-                setcookie('mobile_position', '', $expire_past, "/");
-                setcookie('mobile_account_type', '', $expire_past, "/");
-                setcookie('mobile_nickname', '', $expire_past, "/");
-                setcookie('mobile_username_cn', '', $expire_past, "/");
-                setcookie('mobile_remember_token', '', $expire_past, "/");
+                $p = "/";
+                $d = "kunzzgroup.com";
+                setcookie('mobile_user_id', '', $expire_past, $p, $d);
+                setcookie('mobile_username', '', $expire_past, $p, $d);
+                setcookie('mobile_position', '', $expire_past, $p, $d);
+                setcookie('mobile_account_type', '', $expire_past, $p, $d);
+                setcookie('mobile_nickname', '', $expire_past, $p, $d);
+                setcookie('mobile_username_cn', '', $expire_past, $p, $d);
+                setcookie('mobile_remember_token', '', $expire_past, $p, $d);
             }
+
+            session_write_close(); // 确保强制写入
 
             // 检查是否为首次登录
             if ($user['is_first_login'] == 1) {
