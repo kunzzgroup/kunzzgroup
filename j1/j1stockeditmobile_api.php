@@ -346,7 +346,7 @@ function handleGet() {
                             SUM(out_quantity) as total_out,
                             SUM(in_quantity) - SUM(out_quantity) as total_qty
                         FROM j1stockedit_data
-                        WHERE product_name IS NOT NULL AND product_name != ''
+                        WHERE product_name IS NOT NULL AND product_name != '' AND deleted_at IS NULL
                         GROUP BY REPLACE(product_name, '&amp;', '&'), code_number, specification
                         ORDER BY REPLACE(product_name, '&amp;', '&')";
                 
@@ -409,7 +409,7 @@ function handleGet() {
                             SUM(out_quantity) as total_out,
                             (SUM(in_quantity) - SUM(out_quantity)) as available_stock
                         FROM j1stockedit_data 
-                        WHERE REPLACE(product_name, '&amp;', '&') = REPLACE(?, '&amp;', '&') AND price IS NOT NULL";
+                        WHERE REPLACE(product_name, '&amp;', '&') = REPLACE(?, '&amp;', '&') AND price IS NOT NULL AND deleted_at IS NULL";
                 $params = [$productName];
                 
                 if (!empty($codeNumber)) {
