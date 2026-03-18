@@ -705,6 +705,7 @@ body { background: #f3f4f6; }
                                             <i class="fas fa-chevron-down"></i>
                                         </div>
                                         <div class="select-options">
+                                            <label class="checkbox-item"><input type="checkbox" name="branch[]" value="kunzzgroup" onchange="updateMultiSelectText(this)"> KUNZZGROUP</label>
                                             <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j1" onchange="updateMultiSelectText(this)"> J1 (Midvalley Southkey)</label>
                                             <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j2" onchange="updateMultiSelectText(this)"> J2 (Paradigm Mall)</label>
                                             <label class="checkbox-item"><input type="checkbox" name="branch[]" value="j3" onchange="updateMultiSelectText(this)"> J3 (Desa Tebrau)</label>

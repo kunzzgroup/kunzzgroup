@@ -591,7 +591,10 @@ function displayData(data) {
                         <div style="font-weight: 700; color: #333; margin-bottom: 4px;">${item.position ? escapeHTML(item.position) : '-'}</div>
                         ${item.branch ? item.branch.split(',').map(b => `<span class="branch-tag">${escapeHTML(b.trim().toUpperCase())}</span>`).join('') : '<em style="color:#bbb;font-size:0.75em;">总部/HQ</em>'}
                     </td>
-                    <td>${item.username ? escapeHTML(item.username) : '<em style="color: #999;">-</em>'}</td>
+                    <td>
+                        <div style="font-weight: 500;">${item.username ? escapeHTML(item.username) : '<em style="color: #999;">-</em>'}</div>
+                        ${!item.branch || item.branch.trim() === '' ? '<div style="color: #ef4444; font-size: 0.8em; margin-top: 2px; font-weight: 500;">无</div>' : ''}
+                    </td>
                     <td>${item.email ? escapeHTML(item.email) : '<em style="color: #999;">-</em>'}</td>
                     <td>${item.phone_number ? escapeHTML(item.phone_number) : '<em style="color: #999;">-</em>'}</td>
                     <td>
@@ -844,8 +847,8 @@ function applyBranchFilter() {
         let show = true;
 
         if (branchL1Current === 'kunzz') {
-            // 只显示无分店的职员（branch 为空）
-            show = (rowBranch === '' || rowBranch === 'null');
+            // 只显示无分店的职员（branch 为空）或显式属于 kunzzgroup 的职员
+            show = (rowBranch === '' || rowBranch === 'null' || rowBranch.split(',').includes('kunzzgroup'));
         } else if (branchL1Current === 'branch') {
             // 只显示有分店的职员 (支持多选)
             const hasBranch = rowBranch !== '' && rowBranch !== 'null';
