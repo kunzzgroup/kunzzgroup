@@ -2063,7 +2063,10 @@ function handleDelete() {
             
             $tables = [];
             if ($system === 'central') {
-                $tables = ['stockinout_data', 'j1stockinout_data', 'j2stockinout_data', 'j3stockinout_data'];
+                $tables = [
+                    'stockinout_data', 
+                    'j1stockinout_data', 'j2stockinout_data', 'j3stockinout_data'
+                ];
             } elseif ($system === 'j1') {
                 $tables = ['j1stockedit_data', 'j1stockinout_data', 'j1stockeditmobile_data'];
             } elseif ($system === 'j2') {
@@ -2082,6 +2085,18 @@ function handleDelete() {
                     $branchInoutTables = ['j1stockinout_data', 'j2stockinout_data', 'j3stockinout_data'];
                     if ($system === 'central' && in_array($table, $branchInoutTables)) {
                         $idField = 'main_record_id';
+                    }
+                    
+                    if ($system !== 'central' && in_array($table, ['j1stockedit_data', 'j2stockedit_data', 'j3stockedit_data', 'j1stockeditmobile_data', 'j2stockeditmobile_data', 'j3stockeditmobile_data'])) {
+                        // For the branch tables, we use date, time, product_name, and receiver
+                        $sql = "DELETE FROM $table WHERE date = ? AND time = ? AND product_name = ? AND receiver = ? AND deleted_at IS NOT NULL";
+                        
+                        // We need the data. Fortunately, in 'permanent', targetIds is just one id for the branch.
+                        // Or we can just get it. But usually action=permanent passes the ID of the deleted record.
+                        // Let's modify the above flow to correctly fetch before delete or update. 
+                        // Actually, wait, Physical delete in the recycle bin might only need ID if it's j1stockeditmobile_data.
+                        // But wait! j1stockeditmobile_data and j1stockedit_data were soft-deleted using date/time/product_name/receiver.
+                        // So, the easiest way for *physical* deletion is to do the same!
                     }
                     
                     $sql = "DELETE FROM $table WHERE $idField IN ($placeholders) AND deleted_at IS NOT NULL";
@@ -2131,8 +2146,13 @@ function handleDelete() {
                         
                         // 软删除J1stockedit_data表记录
                         $pdo->prepare("UPDATE j1stockedit_data SET deleted_at = NOW(), deleted_by = ? 
-                                       WHERE product_name = ? AND receiver = ? AND target_system = 'j1' AND deleted_at IS NULL")
-                            ->execute([$username, $recordToDelete['product_name'], $recordToDelete['receiver']]);
+                                       WHERE date = ? AND time = ? AND product_name = ? AND receiver = ? AND target_system = 'j1' AND deleted_at IS NULL")
+                            ->execute([$username, $recordToDelete['date'], $recordToDelete['time'], $recordToDelete['product_name'], $recordToDelete['receiver']]);
+
+                        // 软删除J1stockeditmobile_data表记录
+                        $pdo->prepare("UPDATE j1stockeditmobile_data SET deleted_at = NOW(), deleted_by = ? 
+                                       WHERE date = ? AND time = ? AND product_name = ? AND receiver = ? AND deleted_at IS NULL")
+                            ->execute([$username, $recordToDelete['date'], $recordToDelete['time'], $recordToDelete['product_name'], $recordToDelete['receiver']]);
                     } elseif ($targetSystem === 'j2') {
                         // 软删除J2stockinout_data表记录
                         $pdo->prepare("UPDATE j2stockinout_data SET deleted_at = NOW(), deleted_by = ? WHERE main_record_id = ? AND deleted_at IS NULL")
@@ -2140,8 +2160,13 @@ function handleDelete() {
                         
                         // 软删除J2stockedit_data表记录
                         $pdo->prepare("UPDATE j2stockedit_data SET deleted_at = NOW(), deleted_by = ? 
-                                       WHERE product_name = ? AND receiver = ? AND target_system = 'j2' AND deleted_at IS NULL")
-                            ->execute([$username, $recordToDelete['product_name'], $recordToDelete['receiver']]);
+                                       WHERE date = ? AND time = ? AND product_name = ? AND receiver = ? AND target_system = 'j2' AND deleted_at IS NULL")
+                            ->execute([$username, $recordToDelete['date'], $recordToDelete['time'], $recordToDelete['product_name'], $recordToDelete['receiver']]);
+
+                        // 软删除J2stockeditmobile_data表记录
+                        $pdo->prepare("UPDATE j2stockeditmobile_data SET deleted_at = NOW(), deleted_by = ? 
+                                       WHERE date = ? AND time = ? AND product_name = ? AND receiver = ? AND deleted_at IS NULL")
+                            ->execute([$username, $recordToDelete['date'], $recordToDelete['time'], $recordToDelete['product_name'], $recordToDelete['receiver']]);
                     } elseif ($targetSystem === 'j3') {
                         // 软删除J3stockinout_data表记录
                         $pdo->prepare("UPDATE j3stockinout_data SET deleted_at = NOW(), deleted_by = ? WHERE main_record_id = ? AND deleted_at IS NULL")
@@ -2149,8 +2174,13 @@ function handleDelete() {
                         
                         // 软删除J3stockedit_data表记录
                         $pdo->prepare("UPDATE j3stockedit_data SET deleted_at = NOW(), deleted_by = ? 
-                                       WHERE product_name = ? AND receiver = ? AND target_system = 'j3' AND deleted_at IS NULL")
-                            ->execute([$username, $recordToDelete['product_name'], $recordToDelete['receiver']]);
+                                       WHERE date = ? AND time = ? AND product_name = ? AND receiver = ? AND target_system = 'j3' AND deleted_at IS NULL")
+                            ->execute([$username, $recordToDelete['date'], $recordToDelete['time'], $recordToDelete['product_name'], $recordToDelete['receiver']]);
+
+                        // 软删除J3stockeditmobile_data表记录
+                        $pdo->prepare("UPDATE j3stockeditmobile_data SET deleted_at = NOW(), deleted_by = ? 
+                                       WHERE date = ? AND time = ? AND product_name = ? AND receiver = ? AND deleted_at IS NULL")
+                            ->execute([$username, $recordToDelete['date'], $recordToDelete['time'], $recordToDelete['product_name'], $recordToDelete['receiver']]);
                     }
                 }
             }
