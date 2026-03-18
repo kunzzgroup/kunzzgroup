@@ -44,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['username'] = $user['username'];
             $_SESSION['position'] = $user['position'];
             $_SESSION['account_type'] = $user['account_type'];
+            $_SESSION['branch'] = $user['branch']; // Added branch
             $_SESSION['nickname'] = $user['nickname'] ?? '';
             $_SESSION['username_cn'] = $user['username_cn'] ?? '';
             $_SESSION['last_activity'] = time();
@@ -59,6 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 setcookie('mobile_username', $user['username'], $expire, $p);
                 setcookie('mobile_position', $user['position'], $expire, $p);
                 setcookie('mobile_account_type', $user['account_type'], $expire, $p);
+                setcookie('mobile_branch', $user['branch'] ?? '', $expire, $p); // Added branch cookie
                 setcookie('mobile_nickname', $user['nickname'] ?? '', $expire, $p);
                 setcookie('mobile_username_cn', $user['username_cn'] ?? '', $expire, $p);
                 setcookie('mobile_remember_token', '1', $expire, $p);
@@ -70,6 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 setcookie('mobile_username', '', $expire_past, $p);
                 setcookie('mobile_position', '', $expire_past, $p);
                 setcookie('mobile_account_type', '', $expire_past, $p);
+                setcookie('mobile_branch', '', $expire_past, $p); // Clear branch cookie
                 setcookie('mobile_nickname', '', $expire_past, $p);
                 setcookie('mobile_username_cn', '', $expire_past, $p);
                 setcookie('mobile_remember_token', '', $expire_past, $p);

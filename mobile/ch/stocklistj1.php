@@ -1,5 +1,7 @@
 <?php
 require_once 'auth_check.php';
+$page_branch = 'J1';
+require_once 'branch_check.php';
 ?>
 <!DOCTYPE html>
 <html lang="zh">

@@ -29,6 +29,7 @@ elseif (
     $_SESSION['username'] = $_COOKIE['mobile_username'] ?? '';
     $_SESSION['position'] = $_COOKIE['mobile_position'] ?? '';
     $_SESSION['account_type'] = $_COOKIE['mobile_account_type'] ?? '';
+    $_SESSION['branch'] = $_COOKIE['mobile_branch'] ?? ''; // Added branch restoration
     $_SESSION['nickname'] = $_COOKIE['mobile_nickname'] ?? '';
     $_SESSION['username_cn'] = $_COOKIE['mobile_username_cn'] ?? '';
     $_SESSION['last_activity'] = time();

@@ -15,6 +15,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
+// 启动 session 并检查权限
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (!isset($_SESSION['user_id'])) {
+    http_response_code(401);
+    echo json_encode(["success" => false, "message" => "Unauthorized: Please login."]);
+    exit;
+}
+
+$user_branch = $_SESSION['branch'] ?? '';
+if ($user_branch !== 'KH' && $user_branch !== 'J2') {
+    http_response_code(403);
+    echo json_encode(["success" => false, "message" => "Access denied: Unauthorized branch. (User: $user_branch, Required: J2)"]);
+    exit;
+}
+
 // 数据库配置（与 j1 同一库，使用 j2 表）
 $host = 'localhost';
 $dbname = 'u690174784_kunzz';
