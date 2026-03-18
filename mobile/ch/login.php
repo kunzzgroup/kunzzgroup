@@ -5,21 +5,6 @@ session_start();
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// === 自动登录检查 ===
-// 优先用 session
-if (isset($_SESSION['user_id'])) {
-    $redirect = $_GET['redirect'] ?? 'stocklistj1.php';
-    header("Location: " . $redirect);
-    exit();
-}
-// 如果 session 没有，再用 cookie
-elseif (isset($_COOKIE['user_login'])) {
-    $_SESSION['user_id'] = $_COOKIE['user_login'];
-    // 注意：这里建议在正式页面（auth_check.php）恢复更完整的 session 资料
-    $redirect = $_GET['redirect'] ?? 'stocklistj1.php';
-    header("Location: " . $redirect);
-    exit();
-}
 // ===================
 
 // 数据库连接信息

@@ -36,6 +36,8 @@ elseif (isset($_COOKIE['user_login'])) {
             $_SESSION['username'] = $user['username'];
             $_SESSION['position'] = $user['position'];
             $_SESSION['account_type'] = $user['account_type'];
+            $_SESSION['nickname'] = $user['nickname'];
+            $_SESSION['username_cn'] = $user['username_cn'];
             $_SESSION['last_activity'] = time();
             
             $current_user_id = $user['id'];
@@ -50,16 +52,21 @@ elseif (isset($_COOKIE['user_login'])) {
         $conn_auth->close();
     }
 } 
-// 3. 都没有，跳转登录
+// 3. 都没有，排除 login.html 自身以避免死循环（虽然通常不需要，但在重构时保持安全）
 else {
     $current_page = basename($_SERVER['PHP_SELF']);
-    header("Location: login.html?redirect=" . urlencode($current_page));
-    exit();
+    if ($current_page !== 'login.html') {
+        header("Location: login.html?redirect=" . urlencode($current_page));
+        exit();
+    }
 }
 
 // 统一提供给页面的当前用户名变量
 $currentUsername = '';
-if (isset($_SESSION['username'])) {
-    $currentUsername = $_SESSION['username'];
+if (isset($_SESSION['user_id'])) {
+    $nickname = trim((string)($_SESSION['nickname'] ?? ''));
+    $usernameCn = trim((string)($_SESSION['username_cn'] ?? ''));
+    $username = trim((string)($_SESSION['username'] ?? ''));
+    $currentUsername = $nickname !== '' ? $nickname : ($usernameCn !== '' ? $usernameCn : $username);
 }
 ?>
