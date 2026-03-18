@@ -42,10 +42,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['last_activity'] = time();
 
             // 判断用户是否勾选“记住我”
+            $is_https = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || 
+                        (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ||
+                        (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+
             $cookie_options = [
                 'path' => '/',
-                'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' || 
-                           isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https',
+                'secure' => $is_https,
                 'httponly' => true,
                 'samesite' => 'Lax'
             ];
@@ -53,16 +56,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($remember) {
                 // 设置长期 cookie（30天）
                 $cookie_options['expires'] = time() + 86400 * 30;
-                setcookie("user_login", $user['id'], $cookie_options);
+                setcookie("mobile_user_id", $user['id'], $cookie_options);
                 
-                // 为了兼容 login.html 的 JavaScript 检测自动跳转，
-                // 我们还是需要一个脚本可读的 mobile_remember_token
+                // 为了兼容 login.html 的 JavaScript 检测自动跳转（虽然现在主要靠服务端），
+                // 暂时保留这个标记
                 $cookie_options['httponly'] = false;
                 setcookie("mobile_remember_token", "1", $cookie_options);
             } else {
                 // 会话 cookie（关闭浏览器就过期）
                 $cookie_options['expires'] = 0;
-                setcookie("user_login", $user['id'], $cookie_options);
+                setcookie("mobile_user_id", $user['id'], $cookie_options);
                 
                 // 清除残留的记住我标记
                 setcookie("mobile_remember_token", "", time() - 3600, "/");

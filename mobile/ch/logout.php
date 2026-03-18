@@ -18,7 +18,7 @@ $options = [
     'samesite' => 'Lax'
 ];
 
-setcookie("user_login", "", $options);
+setcookie("mobile_user_id", "", $options);
 
 // mobile_remember_token 可能是非 httponly，单独清除
 $options['httponly'] = false;

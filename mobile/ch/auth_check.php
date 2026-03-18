@@ -13,9 +13,10 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['username'])) {
     $current_user_id = $_SESSION['user_id'];
 } 
 // 2. 如果 Session 没有，尝试从 Cookie 恢复
-elseif (isset($_COOKIE['user_login'])) {
+elseif (isset($_COOKIE['mobile_user_id'])) {
     
-    $user_id = intval($_COOKIE['user_login']);
+    $user_id = intval($_COOKIE['mobile_user_id']);
+    $restored = false;
     
     // 连接数据库以获取完整用户信息并校验
     $host = 'localhost';
@@ -23,7 +24,7 @@ elseif (isset($_COOKIE['user_login'])) {
     $dbuser = 'u690174784_kunzz';
     $dbpass = 'Kunzz1688';
     
-    $conn_auth = new mysqli($host, $dbuser, $dbpass, $dbname);
+    $conn_auth = @new mysqli($host, $dbuser, $dbpass, $dbname);
     if (!$conn_auth->connect_error) {
         $stmt_auth = $conn_auth->prepare("SELECT * FROM users WHERE id = ?");
         $stmt_auth->bind_param("i", $user_id);
@@ -41,18 +42,21 @@ elseif (isset($_COOKIE['user_login'])) {
             $_SESSION['last_activity'] = time();
             
             $current_user_id = $user['id'];
-        } else {
-            // Cookie 无效（用户不存在），清理后跳转
-            setcookie("user_login", "", time() - 3600, "/");
-            setcookie("mobile_remember_token", "", time() - 3600, "/");
-            header("Location: login.html");
-            exit();
+            $restored = true;
         }
         $stmt_auth->close();
         $conn_auth->close();
     }
+    
+    // 如果 Cookie 存在但恢复失败（比如用户不存在或数据库挂了），清理并强制重定向
+    if (!$restored) {
+        setcookie("mobile_user_id", "", time() - 3600, "/");
+        setcookie("mobile_remember_token", "", time() - 3600, "/");
+        header("Location: login.html?error=session_restore_failed");
+        exit();
+    }
 } 
-// 3. 都没有，排除 login.html 自身以避免死循环（虽然通常不需要，但在重构时保持安全）
+// 3. 都没有，排除 login.html 自身以避免死循环
 else {
     $current_page = basename($_SERVER['PHP_SELF']);
     if ($current_page !== 'login.html') {
