@@ -1,3 +1,10 @@
 {
-    "liveServer.settings.port": 5501
+    "liveServer.settings.port": 5501,
+    "php.problems.exclude": {
+        "vendor/thecodingmachine/safe/**": true
+    },
+    "files.exclude": {
+        "vendor/thecodingmachine/safe/deprecated": true,
+        "vendor/thecodingmachine/safe/generated": true
+    }
 }
