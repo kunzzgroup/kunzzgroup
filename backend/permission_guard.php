@@ -11,6 +11,19 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// 如果 session 中没有 user_id，尝试从 cookie 恢复（和 session_check.php 同逻辑）
+if (empty($_SESSION['user_id']) &&
+    isset($_COOKIE['user_id']) &&
+    isset($_COOKIE['username']) &&
+    isset($_COOKIE['remember_token']) &&
+    $_COOKIE['remember_token'] === '1'
+) {
+    $_SESSION['user_id'] = $_COOKIE['user_id'];
+    $_SESSION['username'] = $_COOKIE['username'];
+    $_SESSION['position'] = $_COOKIE['position'] ?? null;
+    $_SESSION['last_activity'] = time();
+}
+
 /**
  * 获取当前用户的权限数据（带缓存）
  */
@@ -218,61 +231,137 @@ function requireStockViewApi($view) {
  */
 function _denyAccess() {
     http_response_code(403);
+    $username = $_SESSION['username'] ?? '未知用户';
     echo '<!DOCTYPE html>
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>403 - 无权限</title>
+<title>403 - 无权限访问</title>
+<link rel="icon" type="image/png" href="../images/images/logo.png">
 <style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    color: #fff;
+    background: #f8f4ef;
+    font-family: "Inter", "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #333;
 }
-.container {
+.card {
     text-align: center;
-    padding: 60px 40px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 20px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.1);
-    max-width: 500px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 48px 40px 40px;
+    max-width: 440px;
+    width: 90%;
+    animation: fadeUp 0.5s ease;
 }
-.icon { font-size: 80px; margin-bottom: 20px; }
-h1 { font-size: 48px; font-weight: 700; color: #e94560; margin-bottom: 10px; }
-h2 { font-size: 22px; font-weight: 400; color: #ccc; margin-bottom: 30px; }
-p { color: #888; line-height: 1.6; margin-bottom: 30px; }
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.icon-circle {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: #fff0ed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+}
+.icon-circle svg {
+    width: 36px; height: 36px;
+    color: #e8654a;
+}
+h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 6px;
+}
+.subtitle {
+    font-size: 14px;
+    color: #999;
+    margin-bottom: 28px;
+}
+.info-box {
+    background: #fafafa;
+    border: 1px solid #f0f0f0;
+    border-radius: 10px;
+    padding: 0;
+    margin-bottom: 28px;
+    overflow: hidden;
+}
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    font-size: 14px;
+}
+.info-row + .info-row {
+    border-top: 1px solid #f0f0f0;
+}
+.info-label {
+    color: #888;
+}
+.info-value {
+    background: #f5f5f5;
+    color: #555;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 13px;
+}
 .btn {
-    display: inline-block;
-    padding: 12px 36px;
-    background: linear-gradient(135deg, #e94560, #c23152);
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #f5a623, #e8961e);
     color: #fff;
     text-decoration: none;
-    border-radius: 30px;
-    font-size: 16px;
-    transition: all 0.3s;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
     border: none;
     cursor: pointer;
+    transition: all 0.3s;
+    letter-spacing: 0.5px;
 }
 .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(233,69,96,0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(245,166,35,0.35);
+    background: linear-gradient(135deg, #f7b13d, #e8961e);
 }
 </style>
 </head>
 <body>
-<div class="container">
-    <div class="icon">🔒</div>
-    <h1>403</h1>
-    <h2>无权限访问</h2>
-    <p>您没有访问此页面的权限。<br>请联系管理员获取授权。</p>
-    <a href="javascript:history.back()" class="btn">← 返回上一页</a>
+<div class="card">
+    <div class="icon-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+    </div>
+    <h1>抱歉，您无权访问此页面</h1>
+    <p class="subtitle">Access Denied</p>
+    <div class="info-box">
+        <div class="info-row">
+            <span class="info-label">当前账户</span>
+            <span class="info-value">' . htmlspecialchars($username) . '</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">请求页面</span>
+            <span class="info-value">' . htmlspecialchars(basename($_SERVER['REQUEST_URI'] ?? '')) . '</span>
+        </div>
+    </div>
+    <a href="javascript:history.back()" class="btn">返回上一页 / Go Back</a>
 </div>
 </body>
 </html>';
