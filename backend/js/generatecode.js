@@ -2243,8 +2243,8 @@ function extractPermissionsData(container) {
         submenuPermissions,
         pagePermissions,
         brandPermissions,
-        reportPermissions: [],
-        restaurantPermissions: []
+        reportPermissions: Array.from(container.querySelectorAll('.perm-report:checked')).map(cb => cb.value),
+        restaurantPermissions: Array.from(container.querySelectorAll('.perm-restaurant:checked')).map(cb => cb.value)
     };
 }
 

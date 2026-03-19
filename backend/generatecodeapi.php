@@ -1069,15 +1069,15 @@ function getUserSidebarPermissions($pdo, $input)
                 if ($row['page_key'] === 'stock_inventory') {
                     $decoded = json_decode($row['permissions_json'], true);
                     $pagePerms['stock_inventory'] = [
-                        'system' => $decoded['systems'] ?? [],
-                        'view' => $decoded['views'] ?? []
+                        'system' => $decoded['system'] ?? ($decoded['systems'] ?? []),
+                        'views' => $decoded['views'] ?? ($decoded['view'] ?? [])
                     ];
                 }
                 elseif ($row['page_key'] === 'kpi_upload') {
                     $decoded = json_decode($row['permissions_json'], true);
                     $pagePerms['kpi_upload'] = [
-                        'system' => $decoded['systems'] ?? [],
-                        'type' => $decoded['types'] ?? []
+                        'system' => $decoded['system'] ?? ($decoded['systems'] ?? []),
+                        'type' => $decoded['type'] ?? ($decoded['types'] ?? [])
                     ];
                 }
             }
@@ -1167,8 +1167,8 @@ function saveUserSidebarPermissions($pdo, $input)
         // 保存库存权限
         if (isset($pagePerms['stock_inventory'])) {
             $json = json_encode([
-                'systems' => $pagePerms['stock_inventory']['system'] ?? [],
-                'views' => $pagePerms['stock_inventory']['view'] ?? []
+                'system' => $pagePerms['stock_inventory']['system'] ?? [],
+                'views' => $pagePerms['stock_inventory']['views'] ?? ($pagePerms['stock_inventory']['view'] ?? [])
             ], JSON_UNESCAPED_UNICODE);
             $stmt = $pdo->prepare("INSERT INTO user_page_permissions (user_id, page_key, permissions_json) VALUES (?, 'stock_inventory', ?) ON DUPLICATE KEY UPDATE permissions_json = VALUES(permissions_json)");
             $stmt->execute([$userId, $json]);
@@ -1177,23 +1177,25 @@ function saveUserSidebarPermissions($pdo, $input)
         // 保存KPI上传权限
         if (isset($pagePerms['kpi_upload'])) {
             $json = json_encode([
-                'systems' => $pagePerms['kpi_upload']['system'] ?? [],
-                'types' => $pagePerms['kpi_upload']['type'] ?? []
+                'system' => $pagePerms['kpi_upload']['system'] ?? [],
+                'type' => $pagePerms['kpi_upload']['type'] ?? []
             ], JSON_UNESCAPED_UNICODE);
             $stmt = $pdo->prepare("INSERT INTO user_page_permissions (user_id, page_key, permissions_json) VALUES (?, 'kpi_upload', ?) ON DUPLICATE KEY UPDATE permissions_json = VALUES(permissions_json)");
             $stmt->execute([$userId, $json]);
         }
 
         // 维护旧表兼容
+        $brandPerms = $input['brand_permissions'] ?? [];
         $sql = "INSERT INTO user_sidebar_permissions 
-                (user_id, permissions_json, page_permissions_json, submenu_permissions_json, report_permissions_json, restaurant_permissions_json, updated_at) 
-                VALUES (?, ?, ?, ?, ?, ?, NOW()) 
+                (user_id, permissions_json, page_permissions_json, submenu_permissions_json, report_permissions_json, restaurant_permissions_json, brand_permissions_json, updated_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, NOW()) 
                 ON DUPLICATE KEY UPDATE 
                 permissions_json = VALUES(permissions_json),
                 page_permissions_json = VALUES(page_permissions_json),
                 submenu_permissions_json = VALUES(submenu_permissions_json),
                 report_permissions_json = VALUES(report_permissions_json),
                 restaurant_permissions_json = VALUES(restaurant_permissions_json),
+                brand_permissions_json = VALUES(brand_permissions_json),
                 updated_at = NOW()";
 
         $stmt = $pdo->prepare($sql);
@@ -1203,7 +1205,8 @@ function saveUserSidebarPermissions($pdo, $input)
             json_encode($pagePerms, JSON_UNESCAPED_UNICODE),
             json_encode($submenuPerms, JSON_UNESCAPED_UNICODE),
             json_encode($reportPerms, JSON_UNESCAPED_UNICODE),
-            json_encode($restaurantPerms, JSON_UNESCAPED_UNICODE)
+            json_encode($restaurantPerms, JSON_UNESCAPED_UNICODE),
+            json_encode($brandPerms, JSON_UNESCAPED_UNICODE)
         ]);
 
         $pdo->commit();
