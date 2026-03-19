@@ -849,8 +849,9 @@ function applyBranchFilter() {
         let show = true;
 
         if (branchL1Current === 'kunzz') {
-            // 只显示显式属于 kh 的职员
-            show = (rowBranch.split(',').includes('kh'));
+            // 显示显式属于 kh 的职员，或没有任何分店的总部职员
+            const branches = rowBranch.split(',').map(b => b.trim()).filter(b => b !== '' && b !== 'null');
+            show = branches.includes('kh') || branches.length === 0;
         } else if (branchL1Current === 'branch') {
             // 只显示有具体分店 (j1/j2/j3) 的职员
             const branches = rowBranch.split(',').map(b => b.trim()).filter(b => b !== '' && b !== 'null');
