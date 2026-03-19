@@ -1134,6 +1134,18 @@ function saveUserSidebarPermissions($pdo, $input) {
     
     try {
         $userId = intval($input['user_id']);
+        
+        // ======= 确保表结构存在 (必须在事务外，否则会触发隐式提交) =======
+        ensurePermissionsTable($pdo);
+        $pdo->exec("CREATE TABLE IF NOT EXISTS user_page_permissions (
+            user_id INT(11) NOT NULL,
+            page_key VARCHAR(50) NOT NULL,
+            permissions_json TEXT DEFAULT NULL,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (user_id, page_key)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+        // =========================================================
+
         $pdo->beginTransaction();
 
         $perms = $input['permissions'] ?? [];
@@ -1142,39 +1154,25 @@ function saveUserSidebarPermissions($pdo, $input) {
         $reportPerms = $input['report_permissions'] ?? ['kpi', 'cost'];
         $restaurantPerms = $input['restaurant_permissions'] ?? ['j1', 'j2', 'j3'];
 
-        // 维护新表
-        try {
-            $pdo->exec("CREATE TABLE IF NOT EXISTS user_page_permissions (
-                user_id INT(11) NOT NULL,
-                page_key VARCHAR(50) NOT NULL,
-                permissions_json TEXT DEFAULT NULL,
-                updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                PRIMARY KEY (user_id, page_key)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-            
-            // 保存库存权限
-            if (isset($pagePerms['stock_inventory'])) {
-                $json = json_encode([
-                    'systems' => $pagePerms['stock_inventory']['system'] ?? [],
-                    'views' => $pagePerms['stock_inventory']['view'] ?? []
-                ], JSON_UNESCAPED_UNICODE);
-                $stmt = $pdo->prepare("INSERT INTO user_page_permissions (user_id, page_key, permissions_json) VALUES (?, 'stock_inventory', ?) ON DUPLICATE KEY UPDATE permissions_json = VALUES(permissions_json)");
-                $stmt->execute([$userId, $json]);
-            }
-            
-            // 保存KPI上传权限
-            if (isset($pagePerms['kpi_upload'])) {
-                $json = json_encode([
-                    'systems' => $pagePerms['kpi_upload']['system'] ?? [],
-                    'types' => $pagePerms['kpi_upload']['type'] ?? []
-                ], JSON_UNESCAPED_UNICODE);
-                $stmt = $pdo->prepare("INSERT INTO user_page_permissions (user_id, page_key, permissions_json) VALUES (?, 'kpi_upload', ?) ON DUPLICATE KEY UPDATE permissions_json = VALUES(permissions_json)");
-                $stmt->execute([$userId, $json]);
-            }
-        } catch (Throwable $e) {}
-
-        // 维护旧表兼容
-        ensurePermissionsTable($pdo);
+        // 保存库存权限
+        if (isset($pagePerms['stock_inventory'])) {
+            $json = json_encode([
+                'systems' => $pagePerms['stock_inventory']['system'] ?? [],
+                'views' => $pagePerms['stock_inventory']['view'] ?? []
+            ], JSON_UNESCAPED_UNICODE);
+            $stmt = $pdo->prepare("INSERT INTO user_page_permissions (user_id, page_key, permissions_json) VALUES (?, 'stock_inventory', ?) ON DUPLICATE KEY UPDATE permissions_json = VALUES(permissions_json)");
+            $stmt->execute([$userId, $json]);
+        }
+        
+        // 保存KPI上传权限
+        if (isset($pagePerms['kpi_upload'])) {
+            $json = json_encode([
+                'systems' => $pagePerms['kpi_upload']['system'] ?? [],
+                'types' => $pagePerms['kpi_upload']['type'] ?? []
+            ], JSON_UNESCAPED_UNICODE);
+            $stmt = $pdo->prepare("INSERT INTO user_page_permissions (user_id, page_key, permissions_json) VALUES (?, 'kpi_upload', ?) ON DUPLICATE KEY UPDATE permissions_json = VALUES(permissions_json)");
+            $stmt->execute([$userId, $json]);
+        }
         $sql = "INSERT INTO user_sidebar_permissions 
                 (user_id, permissions_json, page_permissions_json, submenu_permissions_json, report_permissions_json, restaurant_permissions_json, updated_at) 
                 VALUES (?, ?, ?, ?, ?, ?, NOW()) 
