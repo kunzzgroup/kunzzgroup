@@ -3907,7 +3907,7 @@ function cancelEdit(id = null) {
 
 // 更新字段
 function updateField(id, field, value) {
-    if ((field === 'in_quantity' || field === 'out_quantity' || field === 'price') && value === '') {
+    if ((field === 'in_quantity' || field === 'out_quantity') && value === '') {
         value = '0.00';
     }
     const record = stockData.find(r => r.id === id);
