@@ -261,7 +261,8 @@
       white-space: nowrap;
     }
 
-    .nav-links a:hover {
+    .nav-links a:hover,
+    .nav-links a.active {
       color: var(--color-primary);
     }
 
@@ -276,7 +277,8 @@
       transition: width 0.3s;
     }
 
-    .nav-links a:hover::after {
+    .nav-links a:hover::after,
+    .nav-links a.active::after {
       width: 100%;
     }
 
@@ -298,7 +300,8 @@
       transition: color 0.2s;
     }
 
-    .nav-dropdown:hover .nav-dropdown-trigger {
+    .nav-dropdown:hover .nav-dropdown-trigger,
+    .nav-dropdown-trigger.active {
       color: var(--color-primary);
     }
 
@@ -3136,6 +3139,28 @@
             /* ── 小屏 (≤767px)：sticky 自然行为，JS 不介入 ── */
             nav.classList.remove('nav-pushed');
           }
+        }
+
+        /* Update active link states based on current slide */
+        const slides = document.querySelectorAll('.swiper-slide');
+        if (slides[index]) {
+          const slideHash = slides[index].getAttribute('data-hash') || slides[index].id;
+          
+          // Desktop Links Update
+          document.querySelectorAll('.nav-links a').forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${slideHash}`) {
+              link.classList.add('active');
+            }
+          });
+          
+          // Mobile Links Update
+          document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${slideHash}`) {
+              link.classList.add('active');
+            }
+          });
         }
 
         lastSlideIndex = index;
