@@ -7816,9 +7816,12 @@ async function batchSaveNewRows() {
             const receiverInput = document.getElementById(`${rowId}-receiver-input`);
             
             const rowDate = document.getElementById(`${rowId}-date`) ? document.getElementById(`${rowId}-date`).value : '';
-            if (!commonDate && rowDate) commonDate = rowDate; // 使用第一行日期作为基准
+            if (!rowDate) {
+                throw new Error('请确保所有行都选择了日期');
+            }
 
             const data = {
+                date: rowDate,
                 time: new Date().toTimeString().slice(0, 5),
                 product_name: productInput ? productInput.value : '',
                 in_quantity: parseFloat(document.getElementById(`${rowId}-in-qty`) ? document.getElementById(`${rowId}-in-qty`).value : 0) || 0,
@@ -7858,11 +7861,6 @@ async function batchSaveNewRows() {
         return;
     }
 
-    if (!commonDate) {
-        showAlert('无法确定文件日期', 'error');
-        return;
-    }
-
     const batchSaveBtn = document.getElementById('batch-save-btn');
     const originalText = batchSaveBtn.innerHTML;
     batchSaveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
@@ -7871,7 +7869,6 @@ async function batchSaveNewRows() {
     try {
         const payload = {
             action: 'batch_save',
-            document_date: commonDate,
             rows: rowsData
         };
 

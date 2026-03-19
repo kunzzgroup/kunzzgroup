@@ -895,12 +895,7 @@ function handleDelete() {
 function handleBatchSave() {
     global $pdo, $data;
     
-    $documentDate = $data['document_date'] ?? null;
     $rows = $data['rows'] ?? [];
-    
-    if (!$documentDate) {
-        sendResponse(false, "缺少文件日期 (document_date)");
-    }
     
     if (empty($rows)) {
         sendResponse(false, "没有需要保存的数据行");
@@ -921,11 +916,12 @@ function handleBatchSave() {
 
         $successCount = 0;
         foreach ($rows as $index => $row) {
-            // 验证每行的必填字段
-            $required = ['time', 'product_name', 'receiver'];
+            $rowNum = $index + 1;
+            
+            // 验证每行的必填字段 (包含日期)
+            $required = ['date', 'time', 'product_name', 'receiver'];
             foreach ($required as $field) {
                 if (empty($row[$field])) {
-                    $rowNum = $index + 1;
                     throw new Exception("第 {$rowNum} 行缺少必填字段：{$field}");
                 }
             }
@@ -936,9 +932,11 @@ function handleBatchSave() {
                 $type = 'Service Line';
             }
             
+            $rowDate = $row['date'];
+
             // 写入 J1 数据库表
             $stmt->execute([
-                $documentDate,
+                $rowDate,
                 $row['time'],
                 $row['product_name'],
                 $row['in_quantity'] ?? 0,
@@ -959,7 +957,7 @@ function handleBatchSave() {
             $targetSystem = $row['target_system'] ?? 'j1';
             if (strtolower($targetSystem) === 'central') {
                 $centralStmt->execute([
-                    $documentDate,
+                    $rowDate,
                     $row['time'],
                     $row['product_name'],
                     floatval($row['out_quantity'] ?? 0),

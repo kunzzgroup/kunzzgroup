@@ -1212,12 +1212,7 @@ function handlePost() {
 function handleBatchSave() {
     global $pdo, $data;
     
-    $documentDate = $data['document_date'] ?? null;
     $rows = $data['rows'] ?? [];
-    
-    if (!$documentDate) {
-        sendResponse(false, "缺少文件日期 (document_date)");
-    }
     
     if (empty($rows)) {
         sendResponse(false, "没有需要保存的数据行");
@@ -1234,17 +1229,20 @@ function handleBatchSave() {
         
         $successCount = 0;
         foreach ($rows as $index => $row) {
-            // 验证每行的必填字段 (除了日期，统一使用 documentDate)
-            $required = ['time', 'product_name', 'receiver'];
+            $rowNum = $index + 1;
+            
+            // 验证每行的必填字段 (包含日期)
+            $required = ['date', 'time', 'product_name', 'receiver'];
             foreach ($required as $field) {
                 if (empty($row[$field])) {
-                    $rowNum = $index + 1;
                     throw new Exception("第 {$rowNum} 行缺少必填字段：{$field}");
                 }
             }
             
+            $rowDate = $row['date'];
+            
             $stmt->execute([
-                $documentDate, // 强制使用联合日期
+                $rowDate, // 使用每行自带的日期
                 $row['time'],
                 $row['product_name'],
                 $row['receiver'],
@@ -1266,8 +1264,8 @@ function handleBatchSave() {
             $outQty = floatval($row['out_quantity'] ?? 0);
             if ($outQty > 0) {
                 $targetSystem = $row['target_system'] ?? 'j1';
-                // 构造子系统同步所需的完整数据（包含日期）
-                $syncData = array_merge($row, ['date' => $documentDate]);
+                // 使用单行数据进行同步
+                $syncData = $row;
                 
                 if ($targetSystem === 'j1') {
                     saveToJ1Table($pdo, $syncData, $newId);
