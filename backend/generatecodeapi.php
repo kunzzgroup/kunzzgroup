@@ -1038,13 +1038,23 @@ function ensurePermissionsTable($pdo)
  */
 function getUserSidebarPermissions($pdo, $input)
 {
-    if (empty($input['user_id'])) {
+    // 如果没有传 user_id，使用当前登录用户的 session user_id
+    $userId = null;
+    if (!empty($input['user_id'])) {
+        $userId = intval($input['user_id']);
+    } else {
+        if (!isset($_SESSION)) @session_start();
+        if (!empty($_SESSION['user_id'])) {
+            $userId = intval($_SESSION['user_id']);
+        }
+    }
+
+    if (!$userId) {
         echo json_encode(['success' => false, 'message' => '缺少用户ID']);
         return;
     }
 
     try {
-        $userId = intval($input['user_id']);
         $perms = [];
         $pagePerms = [];
         $submenuPerms = [];
