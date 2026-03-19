@@ -3,10 +3,10 @@
     "php.problems.exclude": {
         "vendor/**": true
     },
-    "files.exclude": {
-        "vendor": true
-    },
     "search.exclude": {
         "vendor": true
-    }
+    },
+    "intelephense.environment.includePaths": [
+        "vendor"
+    ]
 }
