@@ -425,6 +425,27 @@
             }
         }
 
+        /* CTA Buttons in nav — show/hide at breakpoints */
+        .nav-btn-contact {
+            display: none;
+        }
+
+        .nav-btn-menu {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .nav-btn-contact {
+                display: inline-block;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .nav-btn-menu {
+                display: inline-block;
+            }
+        }
+
 
         @media (max-width: 640px) {
             .nav-text-group .primary {
@@ -6482,15 +6503,27 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
                 </div>
             </a>
             <div class="nav-links">
+                <a href="https://kunzzgroup.com/frontend/index">首页</a>
                 <a href="tokyo#about-culture">关于我们</a>
-                <a href="tokyo#mission-vision">使命愿景</a>
-                <a href="tokyo#featured" style="color: #a68a64; font-weight: 500;">特色推荐</a>
+                <a href="tokyo#mission-vision">文化+服务</a>
+                <div class="nav-dropdown">
+                    <a href="tokyo#featured" class="nav-dropdown-trigger">
+                        特色推荐 <span class="nav-dropdown-arrow">▾</span>
+                    </a>
+                    <div class="nav-dropdown-menu">
+                        <div class="nav-dropdown-card">
+                            <a href="menu#sushi" class="nav-dropdown-item">Sushi Menu</a>
+                            <a href="menu#grand" class="nav-dropdown-item">Grand Menu</a>
+                        </div>
+                    </div>
+                </div>
                 <a href="tokyo#location">我们在这</a>
             </div>
             <div class="nav-actions">
-                <a href="tokyo#location" class="btn-primary nav-btn"
-                    style="background-color: #a68a64; border-color: #a68a64; box-shadow: 0 4px 10px rgba(166, 138, 100, 0.3);">预订餐桌</a>
-                <a href="tokyo" class="btn-secondary nav-btn" style="color: #33322f; border-color: #33322f;">返回首页</a>
+                <a href="tokyo#location" class="btn-primary nav-btn nav-btn-contact"
+                    style="background-color:#a68a64;border-color:#a68a64;box-shadow:0 4px 10px rgba(166,138,100,0.3);">联系我们</a>
+                <a href="tokyo#featured" class="btn-secondary nav-btn nav-btn-menu"
+                    style="color:#33322f;border-color:#33322f;">查看菜单</a>
                 <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">
                     <span></span><span></span><span></span>
                 </button>
@@ -6503,11 +6536,12 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
     <aside class="mobile-sidebar" id="mobile-sidebar">
         <button class="mobile-sidebar-close" id="mobile-sidebar-close" aria-label="Close menu">×</button>
         <div class="mobile-sidebar-content">
+            <a href="https://kunzzgroup.com/frontend/index" class="sidebar-link">首页</a>
             <a href="tokyo#about-culture" class="sidebar-link">关于我们</a>
             <a href="tokyo#mission-vision" class="sidebar-link">文化+服务</a>
-            <a href="tokyo#featured" class="sidebar-link" style="color: #a68a64; font-weight: 600;">特色推荐</a>
+            <a href="menu" class="sidebar-link">查看菜单</a>
             <a href="tokyo#location" class="sidebar-link">我们在这</a>
-            <a href="tokyo" class="sidebar-link">返回首页</a>
+            <a href="tokyo#location" class="sidebar-link">联系我们</a>
         </div>
     </aside>
 
