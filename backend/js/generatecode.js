@@ -2211,8 +2211,8 @@ function extractPermissionsData(container) {
     // Page permissions (Detail panel checkboxes)
     const pagePermissions = {
         kpi_upload: {
-            system: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="kpi_upload"] .perm-stock-system:checked')).map(cb => cb.value),
-            views: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="kpi_upload"] .perm-stock-view:checked')).map(cb => cb.value)
+            system: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="kpi_upload"] .perm-upload-system:checked')).map(cb => cb.value),
+            type: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="kpi_upload"] .perm-upload-type:checked')).map(cb => cb.value)
         },
         stock_inventory: {
             system: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="stock_inventory"] .perm-stock-system:checked')).map(cb => cb.value),
