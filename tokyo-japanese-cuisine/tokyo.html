@@ -3174,6 +3174,26 @@
         }
       });
 
+      /* ─── Handle Direct Hash Navigation on Load ─── */
+      if (window.location.hash) {
+        const hash = window.location.hash;
+        const target = document.querySelector(hash);
+        if (target && target.classList.contains('swiper-slide')) {
+          const slides = Array.from(document.querySelectorAll('.swiper-slide'));
+          const idx = slides.indexOf(target);
+          if (idx !== -1 && window.innerWidth > 767) {
+            // Wait a tick for Swiper to finish rendering
+            setTimeout(() => {
+              swiper.slideTo(idx, 0); // 0ms speed for instant jump
+            }, 50);
+          } else if (window.innerWidth <= 767) {
+               setTimeout(() => {
+                 target.scrollIntoView({ behavior: 'smooth' });
+               }, 100);
+          }
+        }
+      }
+
       function handleResize() {
         if (window.innerWidth <= 767) {
           if (swiper.enabled) swiper.disable();
