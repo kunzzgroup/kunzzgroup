@@ -544,3 +544,8 @@ tbody tr:last-child td {
 .edit-button:active {
     transform: scale(0.95);
 }
+
+/* KH 总部用户：隐藏分支相关 UI */
+.is-hq .branch-only {
+    display: none !important;
+}
