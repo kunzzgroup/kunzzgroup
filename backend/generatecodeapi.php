@@ -393,7 +393,8 @@ function getCodesAndUsers($pdo)
         ";
 
         // 如果拥有 'KUNZZ' 或 'KH' 分支权限，则视为总部，查看所有职员
-        if (in_array('KUNZZ', $user_branches) || in_array('KH', $user_branches)) {
+        // [DEBUG] 临时允许所有用户查看所有职员以确认数据是否丢失
+        if (true || in_array('KUNZZ', $user_branches) || in_array('KH', $user_branches)) {
             // 总部：查看所有职员
             $sql = $baseSelect . " ORDER BY u.created_at DESC, u.id DESC";
             $stmt = $pdo->prepare($sql);
