@@ -3439,7 +3439,7 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
             // 当价格下拉列表激活时，hidden input 是空的，需要读 select 的值
             if (hiddenInput && hiddenInput.value !== '') return hiddenInput.value;
             if (priceSelect && priceSelect.value !== '' && priceSelect.value !== 'manual') return priceSelect.value;
-            return hiddenInput ? hiddenInput.value : 0;
+            return hiddenInput ? hiddenInput.value : '';
         })(),
         receiver: receiverInput ? receiverInput.value : '',
         code_number: codeInput ? codeInput.value : '',
@@ -4156,13 +4156,12 @@ async function saveRecord(id) {
         if (priceSelect && priceSelect.value !== '' && priceSelect.value !== 'manual') {
             // 从下拉列表读取并更新 record
             record.price = priceSelect.value;
-        } else {
-            // 没有下拉值，默认当作 0 处理（RM0 允许出货）
-            record.price = 0;
         }
     }
-    if (parseFloat(record.price) < 0) {
-        showAlert('单价不能小于0', 'error');
+
+    // 验证单价：不能为空且不能小于0（允许RM0）
+    if (record.price === '' || record.price === null || record.price === undefined || parseFloat(record.price) < 0) {
+        showAlert('单价不能为空且不能小于0', 'error');
         return;
     }
 

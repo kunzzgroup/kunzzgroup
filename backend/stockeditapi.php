@@ -1039,9 +1039,9 @@ function handlePost() {
     }
     
     // 验证必填字段
-    $required_fields = ['date', 'time', 'product_name', 'receiver'];
+    $required_fields = ['date', 'time', 'product_name', 'receiver', 'price'];
     foreach ($required_fields as $field) {
-        if (empty($data[$field])) {
+        if (!isset($data[$field]) || $data[$field] === '') {
             sendResponse(false, "缺少必填字段：$field");
         }
     }
@@ -1231,10 +1231,10 @@ function handleBatchSave() {
         foreach ($rows as $index => $row) {
             $rowNum = $index + 1;
             
-            // 验证每行的必填字段 (包含日期)
-            $required = ['date', 'time', 'product_name', 'receiver'];
+            // 验证每行的必填字段 (包含日期和价格)
+            $required = ['date', 'time', 'product_name', 'receiver', 'price'];
             foreach ($required as $field) {
-                if (empty($row[$field])) {
+                if (!isset($row[$field]) || $row[$field] === '') {
                     throw new Exception("第 {$rowNum} 行缺少必填字段：{$field}");
                 }
             }
@@ -1349,9 +1349,9 @@ function handlePut() {
     }
     
     // 验证必填字段
-    $required_fields = ['date', 'time', 'product_name', 'receiver'];
+    $required_fields = ['date', 'time', 'product_name', 'receiver', 'price'];
     foreach ($required_fields as $field) {
-        if (empty($data[$field])) {
+        if (!isset($data[$field]) || $data[$field] === '') {
             sendResponse(false, "缺少必填字段：$field");
         }
     }
