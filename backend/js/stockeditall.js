@@ -2564,8 +2564,6 @@ function renderStockTable() {
                                             data-product-name="${record.product_name}" 
                                             data-current-price="${record.price_raw ?? record.price}">
                                         <option value="">请选择价格</option>
-                                        ${(record.price_raw ?? record.price) !== '' && (record.price_raw ?? record.price) !== null ? 
-                                            `<option value="${record.price_raw ?? record.price}" selected>${parseFloat(record.price_raw ?? record.price).toFixed(5)}</option>` : ''}
                                     </select>
                                 </div>` :
                     `<div class="currency-display">
@@ -5853,20 +5851,18 @@ async function loadProductPricesWithStock(productName, selectElementId, currentP
                     availableStock = parseFloat(availableStock) + parseFloat(oldQtyForCurrentPrice);
                 }
 
-                // 仅当 currentPrice 非空且匹配时才标记为 selected
-                const selected = (currentPrice !== '' && currentPrice !== null && currentPrice !== undefined && price == currentPrice) ? 'selected' : '';
+                const selected = price == currentPrice ? 'selected' : '';
 
                 // 只显示库存足够的价格选项，但当前价格即使库存不足也要显示（已选中的选项）
-                if (availableStock >= requiredQty || (currentPrice !== '' && price == currentPrice)) {
+                if (availableStock >= requiredQty || price == currentPrice) {
                     const stockInfo = availableStock >= requiredQty ? `(库存: ${availableStock})` : `(库存不足: ${availableStock})`;
                     options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
-                    if (currentPrice !== '' && price == currentPrice) currentPriceIncluded = true;
+                    if (price == currentPrice) currentPriceIncluded = true;
                 }
             });
 
             // 若当前价格未在 API 结果中（库存为0被过滤），仍补上显示（库存: 0）供编辑保存
-            // 若当前价格未在 API 结果中（库存为0被过滤），仍补上显示（库存: 0）供编辑保存
-            if (currentPrice !== '' && currentPrice !== null && currentPrice !== undefined && !currentPriceIncluded) {
+            if (currentPrice !== '' && currentPrice !== null && currentPrice !== undefined && !currentPriceIncluded && parseFloat(currentPrice) > 0) {
                 options += `<option value="${currentPrice}" selected>${parseFloat(currentPrice).toFixed(5)} (库存: 0)</option>`;
             }
 
@@ -5874,7 +5870,7 @@ async function loadProductPricesWithStock(productName, selectElementId, currentP
         } else {
             // 无数据时若有当前价格（编辑模式），仍显示该选项供保存
             let fallbackOption = '';
-            if (currentPrice !== '' && currentPrice !== null && currentPrice !== undefined) {
+            if (currentPrice !== '' && currentPrice !== null && currentPrice !== undefined && parseFloat(currentPrice) > 0) {
                 fallbackOption = `<option value="${currentPrice}" selected>${parseFloat(currentPrice).toFixed(5)} (库存: 0)</option>`;
             }
             selectElement.innerHTML = `<option value="">暂无足够库存的价格</option><option value="manual">手动输入价格</option>${fallbackOption}`;
