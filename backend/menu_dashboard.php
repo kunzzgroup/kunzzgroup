@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/permission_guard.php';
+requirePermission('visual');
+
 /**
  * TOKYO JAPANESE CUISINE — Menu Management Dashboard
  * Redesigned to match the current backend style and integrate sidebar.php

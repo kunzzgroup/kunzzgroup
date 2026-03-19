@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/permission_guard.php';
+requirePermission('resource', 'stock_inventory');
+
 // stock_recycle.php
 require_once 'session_check.php';
 ?>

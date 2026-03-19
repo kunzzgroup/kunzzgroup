@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/permission_guard.php';
+requirePermissionApi('resource', 'stock_inventory');
+
 require_once __DIR__ . '/xss_protect.php';
 ob_start();
 header("Content-Type: application/json");

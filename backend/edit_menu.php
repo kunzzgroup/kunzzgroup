@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/permission_guard.php';
+requirePermission('visual');
+
 require_once 'config.php';
 
 $id  = (int)($_GET['id'] ?? 0);

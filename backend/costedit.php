@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/permission_guard.php';
+requirePermission('analytics', 'kpi_upload');
+
 // 包含会话验证
 require_once 'session_check.php';
 

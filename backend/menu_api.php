@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/permission_guard.php';
+requirePermissionApi('visual');
+
 // ============================================================
 //  TOKYO JAPANESE CUISINE — Menu API
 // ============================================================
