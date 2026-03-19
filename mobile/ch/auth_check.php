@@ -14,6 +14,19 @@ if (!headers_sent()) {
 }
 
 if (session_status() === PHP_SESSION_NONE) {
+    // ★ Edge 修复：为 PHPSESSID 设置 SameSite=Lax
+    // Edge 对缺少 SameSite 属性的 cookie 特别严格，会静默拦截
+    $cookie_lifetime = 0; // 默认：浏览器关闭即失效
+    // 如果有 "记住我" cookie，将 PHPSESSID 也延长为 30 天
+    if (isset($_COOKIE['mobile_remember_token']) && $_COOKIE['mobile_remember_token'] === '1') {
+        $cookie_lifetime = 86400 * 30;
+    }
+    session_set_cookie_params([
+        'lifetime' => $cookie_lifetime,
+        'path'     => '/',
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
     session_start();
 }
 

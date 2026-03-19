@@ -6,6 +6,13 @@ if (!headers_sent()) {
 }
 require_once __DIR__ . '/../../backend/xss_protect.php';
 ob_start();
+// ★ Edge 修复：PHPSESSID 也需要 SameSite，否则 Edge 会静默拦截
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path'     => '/',
+    'httponly' => true,
+    'samesite' => 'Lax',
+]);
 session_start();
 ini_set('display_errors', 1);
 error_reporting(E_ALL);

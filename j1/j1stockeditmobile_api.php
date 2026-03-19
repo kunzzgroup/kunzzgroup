@@ -17,6 +17,12 @@ error_reporting(E_ALL);
 
 // 启动 session 并检查权限
 if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => '/',
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
     session_start();
 }
 
