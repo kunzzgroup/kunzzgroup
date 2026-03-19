@@ -1286,12 +1286,9 @@
 
     /* Responsive carousel */
     @media (max-width: 1300px) {
-      .cc-nav.left {
-        left: -20px;
-      }
-
-      .cc-nav.right {
-        right: -20px;
+      /* Hide side navigation on tablet/laptop, touch/trackpad swipe is natural */
+      .cc-nav {
+        display: none !important;
       }
     }
 
@@ -1299,11 +1296,6 @@
       :root {
         --card-w: 220px;
         --card-h: 310px;
-      }
-
-      /* Hide side navigation on tablet/mobile, swipe is natural */
-      .cc-nav {
-        display: none !important;
       }
     }
 
