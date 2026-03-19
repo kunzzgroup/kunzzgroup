@@ -49,33 +49,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['username_cn'] = $user['username_cn'] ?? '';
             $_SESSION['last_activity'] = time();
 
-            // 判断用户是否勾选“记住我”
+            // 判断用户是否勾选"记住我"
             if ($remember) {
                 // ✅ 勾选了"记住我"，设置 cookie（30天）
                 $expire = time() + (86400 * 30);
-                $p = "/";
+                $opts = [
+                    'expires'  => $expire,
+                    'path'     => '/',
+                    'httponly' => false,
+                    'samesite' => 'Lax',
+                ];
 
-                // 采用 frontend/login.php 的原始风格，去掉 Domain 指定以使用浏览器默认 Host
-                setcookie('mobile_user_id', $user['id'], $expire, $p);
-                setcookie('mobile_username', $user['username'], $expire, $p);
-                setcookie('mobile_position', $user['position'], $expire, $p);
-                setcookie('mobile_account_type', $user['account_type'], $expire, $p);
-                setcookie('mobile_branch', strtoupper($user['branch'] ?? ''), $expire, $p); // Added branch cookie (Force Uppercase)
-                setcookie('mobile_nickname', $user['nickname'] ?? '', $expire, $p);
-                setcookie('mobile_username_cn', $user['username_cn'] ?? '', $expire, $p);
-                setcookie('mobile_remember_token', '1', $expire, $p);
+                setcookie('mobile_user_id', $user['id'], $opts);
+                setcookie('mobile_username', $user['username'], $opts);
+                setcookie('mobile_position', $user['position'], $opts);
+                setcookie('mobile_account_type', $user['account_type'], $opts);
+                setcookie('mobile_branch', strtoupper($user['branch'] ?? ''), $opts);
+                setcookie('mobile_nickname', $user['nickname'] ?? '', $opts);
+                setcookie('mobile_username_cn', $user['username_cn'] ?? '', $opts);
+                setcookie('mobile_remember_token', '1', $opts);
             } else {
                 // ❌ 没勾选记住我，清除残留 cookie
                 $expire_past = time() - 3600;
-                $p = "/";
-                setcookie('mobile_user_id', '', $expire_past, $p);
-                setcookie('mobile_username', '', $expire_past, $p);
-                setcookie('mobile_position', '', $expire_past, $p);
-                setcookie('mobile_account_type', '', $expire_past, $p);
-                setcookie('mobile_branch', '', $expire_past, $p); // Clear branch cookie
-                setcookie('mobile_nickname', '', $expire_past, $p);
-                setcookie('mobile_username_cn', '', $expire_past, $p);
-                setcookie('mobile_remember_token', '', $expire_past, $p);
+                $opts = [
+                    'expires'  => $expire_past,
+                    'path'     => '/',
+                    'samesite' => 'Lax',
+                ];
+                setcookie('mobile_user_id', '', $opts);
+                setcookie('mobile_username', '', $opts);
+                setcookie('mobile_position', '', $opts);
+                setcookie('mobile_account_type', '', $opts);
+                setcookie('mobile_branch', '', $opts);
+                setcookie('mobile_nickname', '', $opts);
+                setcookie('mobile_username_cn', '', $opts);
+                setcookie('mobile_remember_token', '', $opts);
             }
 
             session_write_close(); // 确保强制写入
