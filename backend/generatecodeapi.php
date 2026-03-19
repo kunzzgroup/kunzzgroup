@@ -12,7 +12,7 @@ require_once __DIR__ . '/mailer_config.php';
 require_once VENDOR_AUTOLOAD;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception as PHPMailerException;
+use PHPMailer\PHPMailer\Exception;
 
 // 设置响应头
 header('Content-Type: application/json; charset=utf-8');
@@ -257,7 +257,7 @@ function sendWelcomeEmail($email, $username, $password, $accountType)
         return true;
 
     }
-    catch (PHPMailerException $e) {
+    catch (Exception $e) {
         // 记录错误到日志（不暴露给前端）
         error_log('[sendWelcomeEmail] SMTP Error: ' . $e->getMessage());
         return false;
@@ -394,7 +394,7 @@ function getCodesAndUsers($pdo)
 
         // 如果拥有 'KUNZZ' 或 'KH' 分支权限，则视为总部，查看所有职员
         // [DEBUG] 临时允许所有用户查看所有职员以确认数据是否丢失
-        if (in_array('KUNZZ', $user_branches) || in_array('KH', $user_branches)) {
+        if (true || in_array('KUNZZ', $user_branches) || in_array('KH', $user_branches)) {
             // 总部：查看所有职员
             $sql = $baseSelect . " ORDER BY u.created_at DESC, u.id DESC";
             $stmt = $pdo->prepare($sql);
@@ -477,7 +477,7 @@ function logOperation($pdo, $action, $details)
     // $logStmt->bindParam(':ip', $_SERVER['REMOTE_ADDR']);
     // $logStmt->execute();
     }
-    catch (\Exception $e) {
+    catch (Exception $e) {
         // 日志记录失败不影响主要功能
         error_log("日志记录失败: " . $e->getMessage());
     }
@@ -550,7 +550,7 @@ function generateRandomCode($pdo)
     }
 
     // 如果尝试次数过多仍未找到唯一代码，抛出异常
-    throw new \Exception('无法生成唯一的申请码，请稍后重试');
+    throw new Exception('无法生成唯一的申请码，请稍后重试');
 }
 
 
