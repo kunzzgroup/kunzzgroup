@@ -127,7 +127,7 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
         <div id="alert-container"></div>
         
         <!-- 中央库存页面 -->
-        <div id="central-page" class="page-section active">
+        <div id="central-page" class="page-section <?php echo $system === 'central' ? 'active' : ''; ?>">
             <div class="unified-header-row">
                 <div class="header-summary">
                     <div class="summary-title">总库存</div>
@@ -200,7 +200,7 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
         </div>
 
         <!-- J1库存页面 -->
-        <div id="j1-page" class="page-section">
+        <div id="j1-page" class="page-section <?php echo $system === 'j1' ? 'active' : ''; ?>">
             <div class="unified-header-row">
                 <div class="header-summary">
                     <div class="summary-title">总库存</div>
@@ -277,7 +277,7 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
         </div>
 
         <!-- J2库存页面 -->
-        <div id="j2-page" class="page-section">
+        <div id="j2-page" class="page-section <?php echo $system === 'j2' ? 'active' : ''; ?>">
             <div class="unified-header-row">
                 <div class="header-summary">
                     <div class="summary-title">总库存</div>
@@ -354,7 +354,7 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
         </div>
 
         <!-- J3库存页面 -->
-        <div id="j3-page" class="page-section">
+        <div id="j3-page" class="page-section <?php echo $system === 'j3' ? 'active' : ''; ?>">
             <div class="unified-header-row">
                 <div class="header-summary">
                     <div class="summary-title">总库存</div>

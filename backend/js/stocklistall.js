@@ -134,6 +134,32 @@ function rebuildViewDropdown(allowedSet) {
     });
 }
 
+// 同步UI显示以匹配当前系统
+function syncUIWithSystem(system) {
+    if (!system) return;
+    
+    // 更新显示名称
+    const currentSystemEl = document.getElementById('current-system');
+    const pageTitleEl = document.getElementById('page-title');
+    if (currentSystemEl) currentSystemEl.textContent = SYSTEM_NAMES[system] || system.toUpperCase();
+    if (pageTitleEl) pageTitleEl.textContent = PAGE_TITLES[system] || `总库存 - ${system.toUpperCase()}`;
+
+    // 更新页面可见性
+    document.querySelectorAll('.page-section').forEach(page => {
+        page.classList.remove('active');
+    });
+    const targetPage = document.getElementById(system + '-page');
+    if (targetPage) targetPage.classList.add('active');
+
+    // 更新下拉菜单激活状态
+    document.querySelectorAll('#selector-dropdown .dropdown-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.systemValue === system) {
+            item.classList.add('active');
+        }
+    });
+}
+
 // 初始化应用
 async function initApp() {
     // 启动会话自动刷新
@@ -147,10 +173,14 @@ async function initApp() {
         currentSystem = urlSystem;
     }
 
+    // 立即同步UI显示，避免渲染延迟或权限检查失败导致的界面卡死
+    syncUIWithSystem(currentSystem);
+
     // 先应用页面权限，获取允许的系统列表并验证当前系统
     await applyPagePermissions();
 
     loadData(currentSystem);
+
     checkLowStockAlerts();
 
     // 添加实时搜索监听器

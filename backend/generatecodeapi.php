@@ -1038,14 +1038,18 @@ function ensurePermissionsTable($pdo) {
  * 获取用户的侧边栏及页面权限
  */
 function getUserSidebarPermissions($pdo, $input) {
-    if (empty($input['user_id'])) {
+    if (!isset($_SESSION)) @session_start();
+    $userId = !empty($input['user_id']) ? intval($input['user_id']) : ($_SESSION['user_id'] ?? null);
+
+    if (!$userId) {
         echo json_encode(['success' => false, 'message' => '缺少用户ID']);
         return;
     }
     
     try {
-        $userId = intval($input['user_id']);
+        $userId = intval($userId);
         $perms = [];
+
         $pagePerms = [];
         $submenuPerms = [];
         $reportPerms = ['kpi', 'cost'];
