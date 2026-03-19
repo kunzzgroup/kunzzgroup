@@ -147,15 +147,7 @@
       justify-content: center;
     }
 
-    /* Anchor offset */
-    #hero,
-    #about-culture,
-    #about,
-    #mission-vision,
-    #featured,
-    #location {
-      scroll-margin-top: calc(var(--nav-h) + var(--nav-top) + 16px);
-    }
+
 
     /* ============================================================
        NAVIGATION
@@ -2637,7 +2629,7 @@
     <div class="swiper-wrapper">
 
       <!-- SLIDE 1: Hero -->
-      <section id="hero" class="swiper-slide">
+      <section id="hero" data-hash="hero" class="swiper-slide">
         <div class="hero-bokeh">
           <span></span><span></span><span></span><span></span><span></span>
         </div>
@@ -2690,7 +2682,7 @@
       </section>
 
       <!-- SLIDE 2: About -->
-      <section id="about-culture" class="zen-about swiper-slide">
+      <section id="about-culture" data-hash="about-culture" class="zen-about swiper-slide">
         <svg class="section-decoration left" viewBox="0 0 80 40" fill="none" stroke="#c9a227" stroke-width="1.5"
           xmlns="http://www.w3.org/2000/svg">
           <path d="M10 20 Q30 8 50 20 T90 20" opacity="0.6" />
@@ -2730,7 +2722,7 @@
       </section>
 
       <!-- SLIDE 3: Culture Carousel -->
-      <section id="mission-vision" class="culture-carousel-section swiper-slide">
+      <section id="mission-vision" data-hash="mission-vision" class="culture-carousel-section swiper-slide">
 
         <h3 class="cc-slide-title" id="cc-title"></h3>
 
@@ -2783,7 +2775,7 @@
       </section>
 
       <!-- SLIDE 4: Featured -->
-      <section id="featured" class="swiper-slide">
+      <section id="featured" data-hash="featured" class="swiper-slide">
         <svg class="section-decoration left" viewBox="0 0 80 40" fill="none" stroke="#c9a227" stroke-width="1.5"
           xmlns="http://www.w3.org/2000/svg">
           <path d="M10 20 Q30 8 50 20 T90 20" opacity="0.6" />
@@ -2827,7 +2819,7 @@
       </section>
 
       <!-- SLIDE 5: Location -->
-      <section id="location" class="swiper-slide">
+      <section id="location" data-hash="location" class="swiper-slide">
         <svg class="section-decoration left" viewBox="0 0 80 40" fill="none" stroke="#c9a227" stroke-width="1"
           xmlns="http://www.w3.org/2000/svg">
           <path d="M10 20 Q30 8 50 20 T90 20" opacity="0.8" />
@@ -2880,7 +2872,7 @@
       </section>
 
       <!-- SLIDE 6: Footer -->
-      <section id="footer" class="footer-section swiper-slide">
+      <section id="footer" data-hash="footer" class="footer-section swiper-slide">
         <div class="footer-container">
           <div class="footer-content">
             <div class="footer-brand">
@@ -3159,6 +3151,9 @@
         keyboard: { enabled: true },
         observer: true,
         observeParents: true,
+        hashNavigation: {
+          watchState: true,
+        },
         pagination: {
           el: '.swiper-pagination',
           clickable: true,
@@ -3173,26 +3168,6 @@
           slideChange() { updateNav(this.activeIndex); }
         }
       });
-
-      /* ─── Handle Direct Hash Navigation on Load ─── */
-      if (window.location.hash) {
-        const hash = window.location.hash;
-        const target = document.querySelector(hash);
-        if (target && target.classList.contains('swiper-slide')) {
-          const slides = Array.from(document.querySelectorAll('.swiper-slide'));
-          const idx = slides.indexOf(target);
-          if (idx !== -1 && window.innerWidth > 767) {
-            // Wait a tick for Swiper to finish rendering
-            setTimeout(() => {
-              swiper.slideTo(idx, 0); // 0ms speed for instant jump
-            }, 50);
-          } else if (window.innerWidth <= 767) {
-               setTimeout(() => {
-                 target.scrollIntoView({ behavior: 'smooth' });
-               }, 100);
-          }
-        }
-      }
 
       function handleResize() {
         if (window.innerWidth <= 767) {
