@@ -3198,6 +3198,8 @@
       handleResize();
 
       /* ─── Mobile Scroll behavior for Nav ─── */
+      // Disabled as per user request: "电话版 nav header 也要sticky" (Keep it always sticky)
+      /*
       let lastScrollY = 0;
       window.addEventListener('scroll', (e) => {
         if (window.innerWidth <= 767 || window.innerHeight <= 500) {
@@ -3220,6 +3222,7 @@
           lastScrollY = currentScrollY;
         }
       }, true); // useCapture to catch all scroll events
+      */
 
       /* ─── Culture Carousel ─── */
       (function () {
