@@ -392,45 +392,10 @@ function getCodesAndUsers($pdo)
             FROM users u
         ";
 
-        // 如果拥有 'KUNZZ' 或 'KH' 分支权限，则视为总部，查看所有职员
-        // [DEBUG] 临时允许所有用户查看所有职员以确认数据是否丢失
-        if (true || in_array('KUNZZ', $user_branches) || in_array('KH', $user_branches)) {
-            // 总部：查看所有职员
-            $sql = $baseSelect . " ORDER BY u.created_at DESC, u.id DESC";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute();
-        }
-        else {
-            // 分店：只看本店职员（branch 匹配或未设置）
-            // 我们需要构建一个动态的 SQL 来匹配这名用户的任意一个分店，或者为空的情况
-            $branchConditions = [];
-            $params = [];
-
-            foreach ($user_branches as $index => $br) {
-                $br = trim($br);
-                if (empty($br))
-                    continue;
-                // 如果数据库里存的可能是单分支，也可能是逗号分隔的多分支
-                // 为了严谨，这里使用 FIND_IN_SET，或者简单的 LIKE，或者直接等于。
-                // 因为 u.branch 大部分情况下是一个单分支，但如果是多分支例如 'J1,J2'，普通 = 会不匹配
-                // 这里我们简化处理，由于原逻辑是 =:branch，我们扩展为支持多个
-                $branchConditions[] = "(u.branch LIKE :br_$index)";
-                $params[":br_$index"] = "%$br%";
-            }
-
-            if (empty($branchConditions)) {
-                // 回退逻辑防出错
-                $whereClause = "u.branch = :branch OR u.branch IS NULL OR u.branch = ''";
-                $params = [':branch' => $sessionBranch];
-            }
-            else {
-                $whereClause = implode(" OR ", $branchConditions) . " OR u.branch IS NULL OR u.branch = ''";
-            }
-
-            $sql = $baseSelect . " WHERE " . $whereClause . " ORDER BY u.created_at DESC, u.id DESC";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute($params);
-        }
+        // 查看所有职员
+        $sql = $baseSelect . " ORDER BY u.created_at DESC, u.id DESC";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
 
         $results = $stmt->fetchAll();
 
