@@ -1299,7 +1299,7 @@
       }
     }
 
-    @media (max-width: 767px) {
+    @media (max-width: 767px), (max-height: 500px) {
       :root {
         --card-w: 230px;
         --card-h: 330px;
@@ -2099,10 +2099,10 @@
     }
 
     /* ============================================================
-       MOBILE OVERRIDES  (≤ 767px)
+       MOBILE OVERRIDES  (≤ 767px OR height ≤ 500px)
        - Disable swiper, allow native scroll
     ============================================================ */
-    @media (max-width: 767px) {
+    @media (max-width: 767px), (max-height: 500px) {
 
       /* Allow native scroll — overflow-x hidden prevents horizontal drag */
       html,
@@ -3185,7 +3185,7 @@
       });
 
       function handleResize() {
-        if (window.innerWidth <= 767) {
+        if (window.innerWidth <= 767 || window.innerHeight <= 500) {
           if (swiper.enabled) swiper.disable();
           if (nav) nav.classList.remove('nav-pushed'); // sticky, never hide
         } else {
@@ -3200,7 +3200,7 @@
       /* ─── Mobile Scroll behavior for Nav ─── */
       let lastScrollY = 0;
       window.addEventListener('scroll', (e) => {
-        if (window.innerWidth <= 767) {
+        if (window.innerWidth <= 767 || window.innerHeight <= 500) {
           // Find actual scroll value regardless of what element is scrolling
           const target = e.target === document ? (document.documentElement || document.body) : e.target;
           const currentScrollY = target.scrollTop || window.scrollY || 0;
