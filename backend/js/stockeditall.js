@@ -108,8 +108,8 @@ window.addEventListener('keydown', function (e) {
     }
     // A2. 批量删除 (Ctrl+D)
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.code === 'KeyD' || e.key === 'd' || e.key === 'D')) {
-        e.preventDefault(); 
-        
+        e.preventDefault();
+
         if (typeof isBatchDeleteMode !== 'undefined' && isBatchDeleteMode) {
             console.log('StockEdit Shortcut: CTRL+D triggered (Confirm Batch Delete)');
             if (typeof confirmBatchDelete === 'function') {
@@ -126,9 +126,9 @@ window.addEventListener('keydown', function (e) {
 
     // B. 检查是否按下 Ctrl+S 或 Cmd+S
     if ((e.ctrlKey || e.metaKey) && (e.code === 'KeyS' || e.key === 's' || e.key === 'S')) {
-        e.preventDefault(); 
-        e.stopPropagation(); 
-        
+        e.preventDefault();
+        e.stopPropagation();
+
         if (e.shiftKey) {
             console.log('StockEdit Shortcut: CTRL+SHIFT+S triggered (Batch Save)');
             if (typeof batchSaveNewRows === 'function') {
@@ -136,7 +136,7 @@ window.addEventListener('keydown', function (e) {
             }
             return;
         }
-        
+
         const activeElement = document.activeElement;
         if (activeElement && activeElement !== document.body) {
             const row = activeElement.closest('tr');
@@ -2564,6 +2564,8 @@ function renderStockTable() {
                                             data-product-name="${record.product_name}" 
                                             data-current-price="${record.price_raw ?? record.price}">
                                         <option value="">请选择价格</option>
+                                        ${(record.price_raw ?? record.price) !== '' && (record.price_raw ?? record.price) !== null ?
+                        `<option value="${record.price_raw ?? record.price}" selected>${parseFloat(record.price_raw ?? record.price).toFixed(5)}</option>` : ''}
                                     </select>
                                 </div>` :
                     `<div class="currency-display">
@@ -4303,7 +4305,7 @@ async function deleteRecord(id) {
         if (result.success) {
             lastDeletedIds = [id];
             showUndoBar(1);
-            
+
             const editingValues = saveEditingRowsInputValues();
             const newRows = saveNewRows();
 
@@ -4327,10 +4329,10 @@ async function undoDelete() {
         const response = await fetch('stockeditapi.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                action: 'restore', 
+            body: JSON.stringify({
+                action: 'restore',
                 ids: lastDeletedIds,
-                system: currentStockType 
+                system: currentStockType
             })
         });
         const result = await response.json();
@@ -4339,7 +4341,7 @@ async function undoDelete() {
             hideUndoBar();
             lastDeletedIds = [];
             showAlert('已撤销成功', 'success');
-            
+
             const editingValues = saveEditingRowsInputValues();
             const newRows = saveNewRows();
             searchData().then(() => {
@@ -4362,7 +4364,7 @@ function showUndoBar(count) {
         undoBar = document.createElement('div');
         undoBar.id = 'undoBar';
         document.body.appendChild(undoBar);
-        
+
         // 注入样式
         const style = document.createElement('style');
         style.innerHTML = `
@@ -4411,7 +4413,7 @@ function showUndoBar(count) {
         <span>已删除 ${count} 条记录</span>
         <button onclick="undoDelete()">撤销 <span class="shortcut-tip">(Ctrl+Shift+Z)</span></button>
     `;
-    
+
     undoBar.classList.add('show');
 
     // 10秒后自动消失
@@ -5851,18 +5853,20 @@ async function loadProductPricesWithStock(productName, selectElementId, currentP
                     availableStock = parseFloat(availableStock) + parseFloat(oldQtyForCurrentPrice);
                 }
 
-                const selected = price == currentPrice ? 'selected' : '';
+                // 仅当 currentPrice 非空且匹配时才标记为 selected
+                const selected = (currentPrice !== '' && currentPrice !== null && currentPrice !== undefined && price == currentPrice) ? 'selected' : '';
 
                 // 只显示库存足够的价格选项，但当前价格即使库存不足也要显示（已选中的选项）
-                if (availableStock >= requiredQty || price == currentPrice) {
+                if (availableStock >= requiredQty || (currentPrice !== '' && price == currentPrice)) {
                     const stockInfo = availableStock >= requiredQty ? `(库存: ${availableStock})` : `(库存不足: ${availableStock})`;
                     options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
-                    if (price == currentPrice) currentPriceIncluded = true;
+                    if (currentPrice !== '' && price == currentPrice) currentPriceIncluded = true;
                 }
             });
 
             // 若当前价格未在 API 结果中（库存为0被过滤），仍补上显示（库存: 0）供编辑保存
-            if (currentPrice !== '' && currentPrice !== null && currentPrice !== undefined && !currentPriceIncluded && parseFloat(currentPrice) > 0) {
+            // 若当前价格未在 API 结果中（库存为0被过滤），仍补上显示（库存: 0）供编辑保存
+            if (currentPrice !== '' && currentPrice !== null && currentPrice !== undefined && !currentPriceIncluded) {
                 options += `<option value="${currentPrice}" selected>${parseFloat(currentPrice).toFixed(5)} (库存: 0)</option>`;
             }
 
@@ -5870,7 +5874,7 @@ async function loadProductPricesWithStock(productName, selectElementId, currentP
         } else {
             // 无数据时若有当前价格（编辑模式），仍显示该选项供保存
             let fallbackOption = '';
-            if (currentPrice !== '' && currentPrice !== null && currentPrice !== undefined && parseFloat(currentPrice) > 0) {
+            if (currentPrice !== '' && currentPrice !== null && currentPrice !== undefined) {
                 fallbackOption = `<option value="${currentPrice}" selected>${parseFloat(currentPrice).toFixed(5)} (库存: 0)</option>`;
             }
             selectElement.innerHTML = `<option value="">暂无足够库存的价格</option><option value="manual">手动输入价格</option>${fallbackOption}`;
@@ -7759,7 +7763,7 @@ async function confirmBatchDelete() {
             lastDeletedIds = [...idList];
             showUndoBar(idList.length);
             cancelBatchDelete();
-            
+
             const newRows = saveNewRows();
             loadStockData().then(() => {
                 restoreNewRows(newRows);
@@ -7805,15 +7809,15 @@ async function batchSaveNewRows() {
             // 获取行的唯一 ID (new-TIMESTAMP-COUNTER)
             const firstInput = row.querySelector('input');
             if (!firstInput || !firstInput.id) continue;
-            
+
             const idParts = firstInput.id.split('-');
             const rowId = idParts[0] + '-' + idParts[1] + '-' + idParts[2];
-            
+
             // 获取各行的基本数据
             const codeInput = document.getElementById(`${rowId}-code_number-input`);
             const productInput = document.getElementById(`${rowId}-product_name-input`);
             const receiverInput = document.getElementById(`${rowId}-receiver-input`);
-            
+
             const rowDate = document.getElementById(`${rowId}-date`) ? document.getElementById(`${rowId}-date`).value : '';
             if (!rowDate) {
                 throw new Error('请确保所有行都选择了日期');
@@ -7881,11 +7885,11 @@ async function batchSaveNewRows() {
 
         if (result.success) {
             showAlert(result.message || `成功保存 ${rowsData.length} 条记录`, 'success');
-            
+
             // 成功后清空所有新行并重新加载
             const tbody = document.getElementById('stock-tbody');
             newRows.forEach(row => row.remove());
-            
+
             await searchData(); // 刷新表格数据
             updateStats();
             updateBatchSaveButtonVisibility();
