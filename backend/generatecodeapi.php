@@ -9,7 +9,7 @@ if (!headers_sent()) {
 // 引入全局防护脚本
 require_once __DIR__ . '/xss_protect.php';
 require_once __DIR__ . '/mailer_config.php';
-require_once VENDOR_AUTOLOAD;
+require_once __DIR__ . '/../vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
