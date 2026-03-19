@@ -312,7 +312,7 @@ async function applyPagePermissions() {
         const perms = data.page_permissions || {};
         const current = perms.stock_inventory || {};
         const allowedSystems = new Set(current.system || []);
-        const allowedViews = new Set(current.view || []);
+        const allowedViews = new Set(current.views || current.view || []);
 
         cachedAllowedSystems = new Set(allowedSystems);
         

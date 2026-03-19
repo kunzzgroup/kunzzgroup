@@ -90,7 +90,7 @@ async function applyPagePermissions() {
         if (!data.success) return;
         const perms = data.page_permissions || {};
         const current = perms.stock_inventory || {};
-        const allowedViews = new Set(current.view || []);
+        const allowedViews = new Set(current.views || current.view || []);
         cachedSotAllowedViews = new Set(allowedViews);
         rebuildSotViewDropdown(allowedViews);
         if (allowedViews.size > 0 && !allowedViews.has('sot')) {

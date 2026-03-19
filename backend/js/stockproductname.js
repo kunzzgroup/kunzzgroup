@@ -182,7 +182,7 @@ async function applyPagePermissions() {
         const perms = data.page_permissions || {};
         const current = perms.stock_inventory || {};
         const allowedSystems = new Set(current.system || []);
-        const allowedViews = new Set(current.view || []); // Use stockproductname views
+        const allowedViews = new Set(current.views || current.view || []); // Use stockproductname views
         cachedProductAllowedSystems = new Set(allowedSystems);
         cachedProductAllowedViews = new Set(allowedViews);
         rebuildProductSystemDropdown(allowedSystems);

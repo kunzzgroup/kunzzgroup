@@ -1239,7 +1239,7 @@ async function applyPagePermissions() {
         const perms = data.page_permissions || {};
         const current = perms.stock_inventory || {};
         const allowedSystems = new Set(current.system || []);
-        const allowedViews = new Set(current.view || []); // Use stockeditall views
+        const allowedViews = new Set(current.views || current.view || []); // Use stockeditall views
 
         // 如果有权限限制，检查当前系统是否被允许
         cachedStockAllowedSystems = new Set(allowedSystems);
