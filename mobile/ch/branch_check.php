@@ -16,17 +16,22 @@ if (!isset($_SESSION['branch'])) {
     }
 }
 
-$user_branch = strtoupper($_SESSION['branch'] ?? '');
+$user_branch_raw = strtoupper($_SESSION['branch'] ?? '');
+
+// 将用户分支按逗号拆分为数组（支持多分支，如 "KBI, J1"）
+$user_branches = array_map('trim', explode(',', $user_branch_raw));
+$user_branches = array_filter($user_branches); // 移除空值
 
 // HQ (KH) users can access everything
-if ($user_branch === 'KH') {
+if (in_array('KH', $user_branches, true)) {
     return;
 }
 
 // Check if page_branch is set, otherwise default to "KH" (locked down)
 $required_branch = strtoupper($page_branch ?? 'KH');
 
-if ($user_branch !== $required_branch) {
+// 检查用户的分支列表中是否包含页面要求的分支
+if (!in_array($required_branch, $user_branches, true)) {
     http_response_code(403);
     echo '<!DOCTYPE html>
 <html lang="zh-CN">
@@ -165,7 +170,7 @@ if ($user_branch !== $required_branch) {
         <div class="details-box">
             <div class="detail-row">
                 <span class="detail-label">当前账户分支</span>
-                <span class="detail-value">' . htmlspecialchars(empty($user_branch) ? '未分配' : $user_branch) . '</span>
+                <span class="detail-value">' . htmlspecialchars(empty($user_branch_raw) ? '未分配' : $user_branch_raw) . '</span>
             </div>
             <div class="detail-row">
                 <span class="detail-label">页面要求分支</span>
