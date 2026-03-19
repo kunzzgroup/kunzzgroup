@@ -8,8 +8,6 @@ if (!headers_sent()) {
 <?php
 // 包含会话验证
 require_once 'session_check.php';
-// 包含权限验证
-require_once 'stock_permission_check.php';
 
 // 服务器端获取系统参数
 $system = isset($_GET['system']) ? $_GET['system'] : 'central';

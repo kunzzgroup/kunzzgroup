@@ -39,7 +39,8 @@ try {
 
     // 设置时区为马来西亚时间 (UTC+8)
     $pdo->exec("SET time_zone = '+08:00'");
-} catch(PDOException $e) {
+}
+catch (PDOException $e) {
     // 数据库连接失败
     echo json_encode([
         'success' => false,
@@ -54,7 +55,8 @@ $action = '';
 
 if ($method === 'GET') {
     $action = $_GET['action'] ?? '';
-} else if ($method === 'POST') {
+}
+else if ($method === 'POST') {
     // 使用 xss_protect.php 中定义的安全获取 JSON 输入函数
     $input = get_safe_json_input();
     $action = $input['action'] ?? '';
@@ -66,17 +68,17 @@ try {
             // 生成新代码
             generateCode($pdo, $input);
             break;
-            
+
         case 'list':
             // 获取代码和用户列表
             getCodesAndUsers($pdo);
             break;
-            
+
         case 'update':
             // 更新代码和用户信息
             updateCodeAndUser($pdo, $input);
             break;
-            
+
         case 'delete':
             // 删除代码
             deleteCode($pdo, $input);
@@ -86,7 +88,7 @@ try {
             // 添加新用户
             addNewUser($pdo, $input);
             break;
-        
+
         case 'get_permissions':
             getUserSidebarPermissions($pdo, $input);
             break;
@@ -102,7 +104,7 @@ try {
         case 'save_page_permissions':
             saveUserPagePermissions($pdo, $input);
             break;
-            
+
         default:
             echo json_encode([
                 'success' => false,
@@ -110,7 +112,8 @@ try {
             ]);
             break;
     }
-} catch (\Exception $e) {
+}
+catch (\Exception $e) {
     echo json_encode([
         'success' => false,
         'message' => '服务器错误: ' . $e->getMessage()
@@ -120,26 +123,27 @@ try {
 /**
  * 生成随机密码
  */
-function generateRandomPassword($length = 10) {
+function generateRandomPassword($length = 10)
+{
     $uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $lowercase = 'abcdefghijklmnopqrstuvwxyz';
     $numbers = '0123456789';
     $symbols = '!@#$%&*';
-    
+
     $password = '';
-    
+
     // 确保密码包含每种类型的字符
     $password .= $uppercase[rand(0, strlen($uppercase) - 1)];
     $password .= $lowercase[rand(0, strlen($lowercase) - 1)];
     $password .= $numbers[rand(0, strlen($numbers) - 1)];
     $password .= $symbols[rand(0, strlen($symbols) - 1)];
-    
+
     // 填充剩余长度
     $allChars = $uppercase . $lowercase . $numbers . $symbols;
     for ($i = 4; $i < $length; $i++) {
         $password .= $allChars[rand(0, strlen($allChars) - 1)];
     }
-    
+
     // 打乱密码字符顺序
     return str_shuffle($password);
 }
@@ -147,24 +151,25 @@ function generateRandomPassword($length = 10) {
 /**
  * 发送欢迎邮件（PHPMailer SMTP 版）
  */
-function sendWelcomeEmail($email, $username, $password, $accountType) {
+function sendWelcomeEmail($email, $username, $password, $accountType)
+{
 
     // 格式化账户类型
     $typeNames = [
-        'special'    => '特殊',
-        'hr'         => '人事部',
-        'account'    => '会计部',
-        'media'      => '媒体制作部',
-        'marketing'  => '推广部',
-        'support'    => '支援部',
+        'special' => '特殊',
+        'hr' => '人事部',
+        'account' => '会计部',
+        'media' => '媒体制作部',
+        'marketing' => '推广部',
+        'support' => '支援部',
         'production' => '生产部',
-        'r&d'        => '研发部',
-        'technical'  => '科技部',
-        'design'     => '设计部',
-        'operation'  => 'Operation',
-        'service'    => '前台',
-        'sushi'      => 'Sushi Bar',
-        'kitchen'    => '厨房'
+        'r&d' => '研发部',
+        'technical' => '科技部',
+        'design' => '设计部',
+        'operation' => 'Operation',
+        'service' => '前台',
+        'sushi' => 'Sushi Bar',
+        'kitchen' => '厨房'
     ];
     $accountTypeName = $typeNames[$accountType] ?? $accountType;
 
@@ -229,13 +234,13 @@ function sendWelcomeEmail($email, $username, $password, $accountType) {
 
         // SMTP 设置
         $mail->isSMTP();
-        $mail->Host       = SMTP_HOST;
-        $mail->SMTPAuth   = true;
-        $mail->Username   = SMTP_USER;
-        $mail->Password   = SMTP_PASS;
+        $mail->Host = SMTP_HOST;
+        $mail->SMTPAuth = true;
+        $mail->Username = SMTP_USER;
+        $mail->Password = SMTP_PASS;
         $mail->SMTPSecure = SMTP_SECURE;
-        $mail->Port       = SMTP_PORT;
-        $mail->CharSet    = 'UTF-8';
+        $mail->Port = SMTP_PORT;
+        $mail->CharSet = 'UTF-8';
 
         // 发件人 & 收件人
         $mail->setFrom(SMTP_FROM, SMTP_FROM_NAME);
@@ -245,13 +250,14 @@ function sendWelcomeEmail($email, $username, $password, $accountType) {
         // 内容
         $mail->isHTML(true);
         $mail->Subject = '欢迎加入 Kunzz Group - 您的登录信息';
-        $mail->Body    = $htmlBody;
+        $mail->Body = $htmlBody;
         $mail->AltBody = "亲爱的 {$username}，\n\n您的账户已创建。\n邮箱：{$email}\n账户类型：{$accountTypeName}\n临时密码：{$password}\n\n请登录：{$loginUrl}\n\n请勿回复此邮件。";
 
         $mail->send();
         return true;
 
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
         // 记录错误到日志（不暴露给前端）
         error_log('[sendWelcomeEmail] SMTP Error: ' . $e->getMessage());
         return false;
@@ -262,7 +268,8 @@ function sendWelcomeEmail($email, $username, $password, $accountType) {
 /**
  * 生成新的应用代码
  */
-function generateCode($pdo, $input) {
+function generateCode($pdo, $input)
+{
     // 验证输入数据
     if (empty($input['account_type'])) {
         echo json_encode([
@@ -273,7 +280,7 @@ function generateCode($pdo, $input) {
     }
 
     $account_type = trim($input['account_type']);
-    
+
     // 生成6位随机代码
     $code = generateRandomCode($pdo);
 
@@ -316,7 +323,7 @@ function generateCode($pdo, $input) {
         $insertStmt = $pdo->prepare($insertSql);
         $insertStmt->bindParam(':code', $code);
         $insertStmt->bindParam(':account_type', $account_type);
-        
+
         if ($insertStmt->execute()) {
             echo json_encode([
                 'success' => true,
@@ -326,14 +333,16 @@ function generateCode($pdo, $input) {
                     'account_type' => $account_type
                 ]
             ]);
-        } else {
+        }
+        else {
             echo json_encode([
                 'success' => false,
                 'message' => '代码生成失败，请重试'
             ]);
         }
 
-    } catch (PDOException $e) {
+    }
+    catch (PDOException $e) {
         echo json_encode([
             'success' => false,
             'message' => '数据库操作失败: ' . $e->getMessage()
@@ -344,13 +353,15 @@ function generateCode($pdo, $input) {
 /**
  * 获取代码和用户列表
  */
-function getCodesAndUsers($pdo) {
+function getCodesAndUsers($pdo)
+{
     try {
         // 从 session 读取当前用户的 branch
         // 从 session 读取当前用户的 branch
-        if (!isset($_SESSION)) @session_start();
+        if (!isset($_SESSION))
+            @session_start();
         $sessionBranch = $_SESSION['branch'] ?? 'kunzz'; // 默认总部
-        
+
         // 解析可能包含多个分支的字符串
         $user_branches = explode(',', strtoupper($sessionBranch));
 
@@ -387,15 +398,17 @@ function getCodesAndUsers($pdo) {
             $sql = $baseSelect . " ORDER BY u.created_at DESC, u.id DESC";
             $stmt = $pdo->prepare($sql);
             $stmt->execute();
-        } else {
+        }
+        else {
             // 分店：只看本店职员（branch 匹配或未设置）
             // 我们需要构建一个动态的 SQL 来匹配这名用户的任意一个分店，或者为空的情况
             $branchConditions = [];
             $params = [];
-            
+
             foreach ($user_branches as $index => $br) {
                 $br = trim($br);
-                if (empty($br)) continue;
+                if (empty($br))
+                    continue;
                 // 如果数据库里存的可能是单分支，也可能是逗号分隔的多分支
                 // 为了严谨，这里使用 FIND_IN_SET，或者简单的 LIKE，或者直接等于。
                 // 因为 u.branch 大部分情况下是一个单分支，但如果是多分支例如 'J1,J2'，普通 = 会不匹配
@@ -403,15 +416,16 @@ function getCodesAndUsers($pdo) {
                 $branchConditions[] = "(u.branch LIKE :br_$index)";
                 $params[":br_$index"] = "%$br%";
             }
-            
+
             if (empty($branchConditions)) {
                 // 回退逻辑防出错
                 $whereClause = "u.branch = :branch OR u.branch IS NULL OR u.branch = ''";
                 $params = [':branch' => $sessionBranch];
-            } else {
+            }
+            else {
                 $whereClause = implode(" OR ", $branchConditions) . " OR u.branch IS NULL OR u.branch = ''";
             }
-            
+
             $sql = $baseSelect . " WHERE " . $whereClause . " ORDER BY u.created_at DESC, u.id DESC";
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
@@ -425,7 +439,8 @@ function getCodesAndUsers($pdo) {
             'data' => $results
         ]);
 
-    } catch (PDOException $e) {
+    }
+    catch (PDOException $e) {
         echo json_encode([
             'success' => false,
             'message' => '数据查询失败: ' . $e->getMessage()
@@ -436,12 +451,13 @@ function getCodesAndUsers($pdo) {
 /**
  * 验证代码格式
  */
-function validateCodeFormat($code) {
+function validateCodeFormat($code)
+{
     // 代码长度限制：3-50个字符
     if (strlen($code) < 3 || strlen($code) > 50) {
         return false;
     }
-    
+
     // 只允许大写字母、数字、下划线和连字符
     return preg_match('/^[A-Z0-9_-]+$/', $code);
 }
@@ -449,16 +465,18 @@ function validateCodeFormat($code) {
 /**
  * 记录操作日志（可选功能）
  */
-function logOperation($pdo, $action, $details) {
+function logOperation($pdo, $action, $details)
+{
     try {
-        // 如果你有日志表，可以在这里记录操作
-        // $logSql = "INSERT INTO operation_logs (action, details, ip_address, created_at) VALUES (:action, :details, :ip, NOW())";
-        // $logStmt = $pdo->prepare($logSql);
-        // $logStmt->bindParam(':action', $action);
-        // $logStmt->bindParam(':details', $details);
-        // $logStmt->bindParam(':ip', $_SERVER['REMOTE_ADDR']);
-        // $logStmt->execute();
-    } catch (Exception $e) {
+    // 如果你有日志表，可以在这里记录操作
+    // $logSql = "INSERT INTO operation_logs (action, details, ip_address, created_at) VALUES (:action, :details, :ip, NOW())";
+    // $logStmt = $pdo->prepare($logSql);
+    // $logStmt->bindParam(':action', $action);
+    // $logStmt->bindParam(':details', $details);
+    // $logStmt->bindParam(':ip', $_SERVER['REMOTE_ADDR']);
+    // $logStmt->execute();
+    }
+    catch (Exception $e) {
         // 日志记录失败不影响主要功能
         error_log("日志记录失败: " . $e->getMessage());
     }
@@ -467,21 +485,22 @@ function logOperation($pdo, $action, $details) {
 /**
  * 获取统计信息（扩展功能）
  */
-function getStatistics($pdo) {
+function getStatistics($pdo)
+{
     try {
         $stats = [];
-        
+
         // 总代码数
         $totalStmt = $pdo->query("SELECT COUNT(*) as total FROM application_codes");
         $stats['total_codes'] = $totalStmt->fetch()['total'];
-        
+
         // 已使用代码数
         $usedStmt = $pdo->query("SELECT COUNT(*) as used FROM application_codes WHERE used = 1");
         $stats['used_codes'] = $usedStmt->fetch()['used'];
-        
+
         // 未使用代码数
         $stats['unused_codes'] = $stats['total_codes'] - $stats['used_codes'];
-        
+
         // 各类型账户统计
         $typeStmt = $pdo->query("
             SELECT account_type, COUNT(*) as count 
@@ -489,13 +508,14 @@ function getStatistics($pdo) {
             GROUP BY account_type
         ");
         $stats['by_type'] = $typeStmt->fetchAll();
-        
+
         echo json_encode([
             'success' => true,
             'data' => $stats
         ]);
-        
-    } catch (PDOException $e) {
+
+    }
+    catch (PDOException $e) {
         echo json_encode([
             'success' => false,
             'message' => '统计数据获取失败: ' . $e->getMessage()
@@ -506,27 +526,28 @@ function getStatistics($pdo) {
 /**
  * 生成6位随机代码并确保唯一性
  */
-function generateRandomCode($pdo) {
+function generateRandomCode($pdo)
+{
     $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     $maxAttempts = 100; // 最大尝试次数，避免无限循环
-    
+
     for ($attempt = 0; $attempt < $maxAttempts; $attempt++) {
         $code = '';
         for ($i = 0; $i < 6; $i++) {
             $code .= $chars[rand(0, strlen($chars) - 1)];
         }
-        
+
         // 检查代码是否已存在
         $checkSql = "SELECT id FROM application_codes WHERE code = :code";
         $checkStmt = $pdo->prepare($checkSql);
         $checkStmt->bindParam(':code', $code);
         $checkStmt->execute();
-        
+
         if ($checkStmt->rowCount() == 0) {
             return $code; // 返回唯一的代码
         }
     }
-    
+
     // 如果尝试次数过多仍未找到唯一代码，抛出异常
     throw new Exception('无法生成唯一的申请码，请稍后重试');
 }
@@ -535,7 +556,8 @@ function generateRandomCode($pdo) {
 /**
  * 更新申请码和用户信息
  */
-function updateCodeAndUser($pdo, $input) {
+function updateCodeAndUser($pdo, $input)
+{
     // 验证输入数据
     if (empty($input['id']) || empty($input['account_type'])) {
         echo json_encode([
@@ -568,7 +590,7 @@ function updateCodeAndUser($pdo, $input) {
     $branch = !empty($input['branch']) ? trim($input['branch']) : null;
 
     // 验证账户类型
-    $valid_types = ['special', 'hr', 'account', 'media', 'marketing', 'support', 'production', 'r&d', 'technical', 'design','operation','service','sushi','kitchen'];
+    $valid_types = ['special', 'hr', 'account', 'media', 'marketing', 'support', 'production', 'r&d', 'technical', 'design', 'operation', 'service', 'sushi', 'kitchen'];
     if (!in_array($account_type, $valid_types)) {
         echo json_encode([
             'success' => false,
@@ -682,7 +704,8 @@ function updateCodeAndUser($pdo, $input) {
             'message' => '更新成功'
         ]);
 
-    } catch (PDOException $e) {
+    }
+    catch (PDOException $e) {
         $pdo->rollBack();
         echo json_encode([
             'success' => false,
@@ -694,7 +717,8 @@ function updateCodeAndUser($pdo, $input) {
 /**
  * 删除申请码
  */
-function deleteCode($pdo, $input) {
+function deleteCode($pdo, $input)
+{
     // 验证输入数据
     if (empty($input['id'])) {
         echo json_encode([
@@ -715,7 +739,7 @@ function deleteCode($pdo, $input) {
         $checkStmt = $pdo->prepare($checkSql);
         $checkStmt->bindParam(':id', $id);
         $checkStmt->execute();
-        
+
         $result = $checkStmt->fetch();
         if (!$result) {
             $pdo->rollBack();
@@ -733,7 +757,7 @@ function deleteCode($pdo, $input) {
         $deleteSql = "DELETE FROM users WHERE id = :id";
         $deleteStmt = $pdo->prepare($deleteSql);
         $deleteStmt->bindParam(':id', $id);
-        
+
         if (!$deleteStmt->execute()) {
             $pdo->rollBack();
             echo json_encode([
@@ -756,7 +780,8 @@ function deleteCode($pdo, $input) {
             ]
         ]);
 
-    } catch (PDOException $e) {
+    }
+    catch (PDOException $e) {
         $pdo->rollBack();
         echo json_encode([
             'success' => false,
@@ -768,7 +793,8 @@ function deleteCode($pdo, $input) {
 /**
  * 添加新用户
  */
-function addNewUser($pdo, $input) {
+function addNewUser($pdo, $input)
+{
     // 验证必填字段
     if (empty($input['username']) || empty($input['email']) || empty($input['account_type'])) {
         echo json_encode([
@@ -779,7 +805,7 @@ function addNewUser($pdo, $input) {
     }
 
     // 验证账户类型
-    $valid_types = ['special', 'hr', 'account', 'media', 'marketing', 'support', 'production', 'r&d', 'technical', 'design','operation','service','sushi','kitchen'];
+    $valid_types = ['special', 'hr', 'account', 'media', 'marketing', 'support', 'production', 'r&d', 'technical', 'design', 'operation', 'service', 'sushi', 'kitchen'];
     if (!in_array($input['account_type'], $valid_types)) {
         echo json_encode([
             'success' => false,
@@ -833,7 +859,7 @@ function addNewUser($pdo, $input) {
         // 插入申请码
         $insertCodeSql = "INSERT INTO application_codes (code, account_type, used, created_at) VALUES (?, ?, 1, NOW())";
         $insertCodeStmt = $pdo->prepare($insertCodeSql);
-        
+
         if (!$insertCodeStmt->execute([$code, $input['account_type']])) {
             $pdo->rollBack();
             echo json_encode([
@@ -849,7 +875,7 @@ function addNewUser($pdo, $input) {
 
         // 处理日期格式
         $dateOfBirth = !empty($input['date_of_birth']) ? $input['date_of_birth'] : null;
-        
+
         // 插入用户数据 - 只插入数据库中存在的字段
         $insertUserSql = "INSERT INTO users (
             username, username_cn, nickname, email, password, ic_number, 
@@ -908,7 +934,7 @@ function addNewUser($pdo, $input) {
         $newUserId = $pdo->lastInsertId();
 
         // ======= 保存初始权限数据 =======
-        
+
         $perms = isset($input['permissions']) && is_array($input['permissions']) ? $input['permissions'] : [];
         $pagePerms = isset($input['page_permissions']) && is_array($input['page_permissions']) ? $input['page_permissions'] : [];
         $submenuPerms = isset($input['submenu_permissions']) && is_array($input['submenu_permissions']) ? $input['submenu_permissions'] : [];
@@ -928,7 +954,7 @@ function addNewUser($pdo, $input) {
             upload_permissions_json,
             updated_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NOW())";
-        
+
         $insertPermsStmt = $pdo->prepare($insertPermsSql);
         $insertPermsStmt->execute([
             $newUserId,
@@ -939,7 +965,7 @@ function addNewUser($pdo, $input) {
             empty($restaurantPerms) ? NULL : json_encode($restaurantPerms, JSON_UNESCAPED_UNICODE),
             empty($brandPerms) ? NULL : json_encode($brandPerms, JSON_UNESCAPED_UNICODE)
         ]);
-        
+
         // 尝试写入 user_page_permissions（如果使用了新表结构）
         try {
             $checkStmt = $pdo->query("SHOW TABLES LIKE 'user_page_permissions'");
@@ -956,8 +982,9 @@ function addNewUser($pdo, $input) {
                     }
                 }
             }
-        } catch (\Throwable $e) {
-            // 忽略表不存在等错误
+        }
+        catch (\Throwable $e) {
+        // 忽略表不存在等错误
         }
         // ================================
 
@@ -970,7 +997,8 @@ function addNewUser($pdo, $input) {
         $message = '用户添加成功！';
         if ($emailSent) {
             $message .= ' 登录信息已发送到用户邮箱。';
-        } else {
+        }
+        else {
             $message .= ' 但邮件发送失败，请手动告知用户登录信息。';
         }
 
@@ -987,7 +1015,8 @@ function addNewUser($pdo, $input) {
             ]
         ]);
 
-    } catch (PDOException $e) {
+    }
+    catch (PDOException $e) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
@@ -995,7 +1024,8 @@ function addNewUser($pdo, $input) {
             'success' => false,
             'message' => '数据库操作失败: ' . $e->getMessage()
         ]);
-    } catch (\Exception $e) {
+    }
+    catch (\Exception $e) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
@@ -1009,7 +1039,8 @@ function addNewUser($pdo, $input) {
 /**
  * 确保权限表结构正确
  */
-function ensurePermissionsTable($pdo) {
+function ensurePermissionsTable($pdo)
+{
     // 基础表
     $pdo->exec("CREATE TABLE IF NOT EXISTS user_sidebar_permissions (
         user_id INT(11) PRIMARY KEY,
@@ -1030,22 +1061,26 @@ function ensurePermissionsTable($pdo) {
     foreach ($columns as $col) {
         try {
             $pdo->exec("ALTER TABLE user_sidebar_permissions ADD COLUMN $col TEXT NULL");
-        } catch (Throwable $e) { /* 忽略已存在列 */ }
+        }
+        catch (Throwable $e) { /* 忽略已存在列 */
+        }
     }
 }
 
 /**
  * 获取用户的侧边栏及页面权限
  */
-function getUserSidebarPermissions($pdo, $input) {
-    if (!isset($_SESSION)) @session_start();
+function getUserSidebarPermissions($pdo, $input)
+{
+    if (!isset($_SESSION))
+        @session_start();
     $userId = !empty($input['user_id']) ? intval($input['user_id']) : ($_SESSION['user_id'] ?? null);
 
     if (!$userId) {
         echo json_encode(['success' => false, 'message' => '缺少用户ID']);
         return;
     }
-    
+
     try {
         $userId = intval($userId);
         $perms = [];
@@ -1060,7 +1095,9 @@ function getUserSidebarPermissions($pdo, $input) {
         try {
             $checkStmt = $pdo->query("SHOW TABLES LIKE 'user_page_permissions'");
             $tableExists = $checkStmt->rowCount() > 0;
-        } catch (Throwable $e) {}
+        }
+        catch (Throwable $e) {
+        }
 
         if ($tableExists) {
             $stmt = $pdo->prepare("SELECT page_key, permissions_json FROM user_page_permissions WHERE user_id = ?");
@@ -1074,7 +1111,8 @@ function getUserSidebarPermissions($pdo, $input) {
                         'system' => $decoded['systems'] ?? [],
                         'view' => $decoded['views'] ?? []
                     ];
-                } elseif ($row['page_key'] === 'kpi_upload') {
+                }
+                elseif ($row['page_key'] === 'kpi_upload') {
                     $decoded = json_decode($row['permissions_json'], true);
                     $pagePerms['kpi_upload'] = [
                         'system' => $decoded['systems'] ?? [],
@@ -1093,18 +1131,22 @@ function getUserSidebarPermissions($pdo, $input) {
         if ($row) {
             $perms = json_decode($row['permissions_json'] ?? '[]', true);
             $submenuPerms = json_decode($row['submenu_permissions_json'] ?? '[]', true);
-            
+
             if (!$tableExists) {
                 $rawPage = json_decode($row['page_permissions_json'] ?? '[]', true);
-                if (isset($rawPage['stock_inventory'])) $pagePerms['stock_inventory'] = $rawPage['stock_inventory'];
-                if (isset($rawPage['kpi_upload'])) $pagePerms['kpi_upload'] = $rawPage['kpi_upload'];
+                if (isset($rawPage['stock_inventory']))
+                    $pagePerms['stock_inventory'] = $rawPage['stock_inventory'];
+                if (isset($rawPage['kpi_upload']))
+                    $pagePerms['kpi_upload'] = $rawPage['kpi_upload'];
             }
 
             $rep = json_decode($row['report_permissions_json'] ?? '[]', true);
-            if (!empty($rep)) $reportPerms = array_values(array_intersect($rep, ['kpi', 'cost']));
+            if (!empty($rep))
+                $reportPerms = array_values(array_intersect($rep, ['kpi', 'cost']));
 
             $res = json_decode($row['restaurant_permissions_json'] ?? '[]', true);
-            if (!empty($res)) $restaurantPerms = array_values(array_intersect($res, ['j1', 'j2', 'j3']));
+            if (!empty($res))
+                $restaurantPerms = array_values(array_intersect($res, ['j1', 'j2', 'j3']));
         }
 
         echo json_encode([
@@ -1117,8 +1159,9 @@ function getUserSidebarPermissions($pdo, $input) {
             'brand_permissions' => json_decode($row['brand_permissions_json'] ?? '[]', true),
             'upload_permissions' => json_decode($row['upload_permissions_json'] ?? '[]', true)
         ]);
-        
-    } catch (PDOException $e) {
+
+    }
+    catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => '获取失败: ' . $e->getMessage()]);
     }
 }
@@ -1126,26 +1169,15 @@ function getUserSidebarPermissions($pdo, $input) {
 /**
  * 保存用户权限
  */
-function saveUserSidebarPermissions($pdo, $input) {
+function saveUserSidebarPermissions($pdo, $input)
+{
     if (empty($input['user_id'])) {
         echo json_encode(['success' => false, 'message' => '参数不完整']);
         return;
     }
-    
+
     try {
         $userId = intval($input['user_id']);
-        
-        // ======= 确保表结构存在 (必须在事务外，否则会触发隐式提交) =======
-        ensurePermissionsTable($pdo);
-        $pdo->exec("CREATE TABLE IF NOT EXISTS user_page_permissions (
-            user_id INT(11) NOT NULL,
-            page_key VARCHAR(50) NOT NULL,
-            permissions_json TEXT DEFAULT NULL,
-            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            PRIMARY KEY (user_id, page_key)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-        // =========================================================
-
         $pdo->beginTransaction();
 
         $perms = $input['permissions'] ?? [];
@@ -1154,25 +1186,41 @@ function saveUserSidebarPermissions($pdo, $input) {
         $reportPerms = $input['report_permissions'] ?? ['kpi', 'cost'];
         $restaurantPerms = $input['restaurant_permissions'] ?? ['j1', 'j2', 'j3'];
 
-        // 保存库存权限
-        if (isset($pagePerms['stock_inventory'])) {
-            $json = json_encode([
-                'systems' => $pagePerms['stock_inventory']['system'] ?? [],
-                'views' => $pagePerms['stock_inventory']['view'] ?? []
-            ], JSON_UNESCAPED_UNICODE);
-            $stmt = $pdo->prepare("INSERT INTO user_page_permissions (user_id, page_key, permissions_json) VALUES (?, 'stock_inventory', ?) ON DUPLICATE KEY UPDATE permissions_json = VALUES(permissions_json)");
-            $stmt->execute([$userId, $json]);
+        // 维护新表
+        try {
+            $pdo->exec("CREATE TABLE IF NOT EXISTS user_page_permissions (
+                user_id INT(11) NOT NULL,
+                page_key VARCHAR(50) NOT NULL,
+                permissions_json TEXT DEFAULT NULL,
+                updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (user_id, page_key)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+            // 保存库存权限
+            if (isset($pagePerms['stock_inventory'])) {
+                $json = json_encode([
+                    'systems' => $pagePerms['stock_inventory']['system'] ?? [],
+                    'views' => $pagePerms['stock_inventory']['view'] ?? []
+                ], JSON_UNESCAPED_UNICODE);
+                $stmt = $pdo->prepare("INSERT INTO user_page_permissions (user_id, page_key, permissions_json) VALUES (?, 'stock_inventory', ?) ON DUPLICATE KEY UPDATE permissions_json = VALUES(permissions_json)");
+                $stmt->execute([$userId, $json]);
+            }
+
+            // 保存KPI上传权限
+            if (isset($pagePerms['kpi_upload'])) {
+                $json = json_encode([
+                    'systems' => $pagePerms['kpi_upload']['system'] ?? [],
+                    'types' => $pagePerms['kpi_upload']['type'] ?? []
+                ], JSON_UNESCAPED_UNICODE);
+                $stmt = $pdo->prepare("INSERT INTO user_page_permissions (user_id, page_key, permissions_json) VALUES (?, 'kpi_upload', ?) ON DUPLICATE KEY UPDATE permissions_json = VALUES(permissions_json)");
+                $stmt->execute([$userId, $json]);
+            }
         }
-        
-        // 保存KPI上传权限
-        if (isset($pagePerms['kpi_upload'])) {
-            $json = json_encode([
-                'systems' => $pagePerms['kpi_upload']['system'] ?? [],
-                'types' => $pagePerms['kpi_upload']['type'] ?? []
-            ], JSON_UNESCAPED_UNICODE);
-            $stmt = $pdo->prepare("INSERT INTO user_page_permissions (user_id, page_key, permissions_json) VALUES (?, 'kpi_upload', ?) ON DUPLICATE KEY UPDATE permissions_json = VALUES(permissions_json)");
-            $stmt->execute([$userId, $json]);
+        catch (Throwable $e) {
         }
+
+        // 维护旧表兼容
+        ensurePermissionsTable($pdo);
         $sql = "INSERT INTO user_sidebar_permissions 
                 (user_id, permissions_json, page_permissions_json, submenu_permissions_json, report_permissions_json, restaurant_permissions_json, updated_at) 
                 VALUES (?, ?, ?, ?, ?, ?, NOW()) 
@@ -1183,7 +1231,7 @@ function saveUserSidebarPermissions($pdo, $input) {
                 report_permissions_json = VALUES(report_permissions_json),
                 restaurant_permissions_json = VALUES(restaurant_permissions_json),
                 updated_at = NOW()";
-        
+
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
             $userId,
@@ -1196,9 +1244,11 @@ function saveUserSidebarPermissions($pdo, $input) {
 
         $pdo->commit();
         echo json_encode(['success' => true]);
-        
-    } catch (Throwable $e) {
-        if ($pdo->inTransaction()) $pdo->rollBack();
+
+    }
+    catch (Throwable $e) {
+        if ($pdo->inTransaction())
+            $pdo->rollBack();
         echo json_encode(['success' => false, 'message' => '保存失败: ' . $e->getMessage()]);
     }
 }
@@ -1206,14 +1256,16 @@ function saveUserSidebarPermissions($pdo, $input) {
 /**
  * 获取单页面权限
  */
-function getUserPagePermissions($pdo, $input) {
+function getUserPagePermissions($pdo, $input)
+{
     getUserSidebarPermissions($pdo, $input); // 直接复用
 }
 
 /**
  * 保存单页面权限
  */
-function saveUserPagePermissions($pdo, $input) {
+function saveUserPagePermissions($pdo, $input)
+{
     if (empty($input['user_id'])) {
         echo json_encode(['success' => false, 'message' => '参数不完整']);
         return;

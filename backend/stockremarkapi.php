@@ -31,17 +31,16 @@ $dbpass = 'Kunzz1688';
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    // 权限验证
-    require_once 'stock_permission_check.php';
-} catch (PDOException $e) {
+}
+catch (PDOException $e) {
     ob_end_clean();
     http_response_code(500);
     echo json_encode(["success" => false, "message" => "数据库连接失败：" . $e->getMessage()]);
     exit;
 }
 
-function sendResponse($success, $message = "", $data = null) {
+function sendResponse($success, $message = "", $data = null)
+{
     ob_end_clean();
     echo json_encode([
         "success" => $success,
@@ -52,34 +51,38 @@ function sendResponse($success, $message = "", $data = null) {
 }
 
 // 智能格式化数量函数
-function formatQuantity($number) {
+function formatQuantity($number)
+{
     // 转换为浮点数
     $num = floatval($number);
-    
+
     // 如果是整数，不显示小数点
     if (floor($num) == $num) {
         return number_format($num, 0);
     }
-    
+
     // 检查原始精度，最多3位小数
     $decimalPart = $num - floor($num);
-    
+
     if (round($decimalPart, 1) == round($decimalPart, 3)) {
         // 只有1位有效小数
         return number_format($num, 1);
-    } elseif (round($decimalPart, 2) == round($decimalPart, 3)) {
+    }
+    elseif (round($decimalPart, 2) == round($decimalPart, 3)) {
         // 有2位有效小数
         return number_format($num, 2);
-    } else {
+    }
+    else {
         // 有3位有效小数
         return number_format($num, 3);
     }
 }
 
 // 获取多价格产品分析数据
-function getMultiPriceAnalysis() {
+function getMultiPriceAnalysis()
+{
     global $pdo;
-    
+
     try {
         // 获取所有product_remark_checked=1的记录
         $sql = "SELECT 
@@ -101,38 +104,38 @@ function getMultiPriceAnalysis() {
                 AND remark_number != ''
                 AND deleted_at IS NULL
                 ORDER BY product_name ASC, remark_number ASC, date DESC";
-        
+
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
         $remarkData = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+
         // 按产品名称分组
         $productGroups = [];
 
         foreach ($remarkData as $row) {
             $productName = $row['product_name'];
             $remarkNumber = $row['remark_number'];
-            
+
             // 只使用产品名称作为分组标识
             $groupKey = $productName;
-            
+
             if (!isset($productGroups[$groupKey])) {
                 $productGroups[$groupKey] = [
                     'product_name' => $productName,
                     'variants' => []
                 ];
             }
-            
+
             // 创建备注编号的唯一标识
             $remarkKey = $remarkNumber;
-            
+
             if (!isset($productGroups[$groupKey]['variants'][$remarkKey])) {
                 $productGroups[$groupKey]['variants'][$remarkKey] = [
                     'code_number' => $row['code_number'] ?? '',
                     'specification' => $row['specification'] ?? '',
                     'remark_number' => $remarkNumber,
                     'in_quantity' => 0,
-                    'out_quantity' => 0,  // 添加出货数量字段
+                    'out_quantity' => 0, // 添加出货数量字段
                     'price' => floatval($row['price'])
                 ];
             }
@@ -148,14 +151,14 @@ function getMultiPriceAnalysis() {
                 $productGroups[$groupKey]['variants'][$remarkKey]['out_quantity'] += $outQty;
             }
         }
-        
+
         // 转换为最终格式
         $remarkProducts = [];
         foreach ($productGroups as $group) {
             $variants = [];
             foreach ($group['variants'] as $variant) {
                 $currentStock = $variant['in_quantity'] - $variant['out_quantity'];
-                
+
                 // 只有库存大于0的才添加到结果中（使用更严格的比较来处理浮点数精度问题）
                 if (round($currentStock, 3) > 0) {
                     $variants[] = [
@@ -171,12 +174,12 @@ function getMultiPriceAnalysis() {
                     ];
                 }
             }
-            
+
             // 只有当该产品还有库存变种时才添加到结果中
             if (!empty($variants)) {
                 // 计算总数量
                 $totalQuantity = array_sum(array_column($variants, 'current_stock'));
-                
+
                 $remarkProducts[] = [
                     'product_name' => $group['product_name'],
                     'variants' => $variants,
@@ -184,20 +187,22 @@ function getMultiPriceAnalysis() {
                 ];
             }
         }
-        
+
         return [
             'products' => $remarkProducts
         ];
-        
-    } catch (PDOException $e) {
+
+    }
+    catch (PDOException $e) {
         throw new Exception("查询货品备注数据失败：" . $e->getMessage());
     }
 }
 
 // 获取产品详细信息（可选功能）
-function getProductDetails($productName) {
+function getProductDetails($productName)
+{
     global $pdo;
-    
+
     try {
         $sql = "SELECT 
                     product_name,
@@ -214,50 +219,52 @@ function getProductDetails($productName) {
                 AND deleted_at IS NULL
                 GROUP BY product_name, specification, price, code_number
                 ORDER BY price DESC, date_created DESC";
-        
+
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':product_name', $productName, PDO::PARAM_STR);
         $stmt->execute();
-        
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-    } catch (PDOException $e) {
+
+    }
+    catch (PDOException $e) {
         throw new Exception("查询产品详细信息失败：" . $e->getMessage());
     }
 }
 
 // 导出CSV数据
-function exportMultiPriceData() {
+function exportMultiPriceData()
+{
     try {
         $result = getMultiPriceAnalysis();
-        
+
         // 设置CSV头信息
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="multi_price_analysis_' . date('Y-m-d') . '.csv"');
-        
+
         ob_end_clean();
-        
+
         // 创建CSV输出
         $output = fopen('php://output', 'w');
-        
+
         // 写入BOM以支持中文
-        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-        
+        fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
         // 写入表头
         fputcsv($output, [
-            'Product Name', 
-            'Rank', 
-            'Code Number', 
-            'Stock Quantity', 
+            'Product Name',
+            'Rank',
+            'Code Number',
+            'Stock Quantity',
             'Unit Price (RM)'
         ]);
-        
+
         // 写入数据
         foreach ($result['products'] as $product) {
             foreach ($product['variants'] as $index => $variant) {
                 $priceDiff = $product['max_price'] - $variant['price'];
                 $priceRank = $index + 1;
-                
+
                 fputcsv($output, [
                     $product['product_name'],
                     $priceRank,
@@ -267,11 +274,12 @@ function exportMultiPriceData() {
                 ]);
             }
         }
-        
+
         fclose($output);
         exit;
-        
-    } catch (Exception $e) {
+
+    }
+    catch (Exception $e) {
         ob_end_clean();
         sendResponse(false, "导出失败：" . $e->getMessage());
     }
@@ -282,39 +290,42 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
     $action = $_GET['action'] ?? 'analysis';
-    
+
     switch ($action) {
         case 'analysis':
             try {
                 $result = getMultiPriceAnalysis();
                 sendResponse(true, "多价格产品分析数据获取成功", $result);
-            } catch (Exception $e) {
+            }
+            catch (Exception $e) {
                 sendResponse(false, $e->getMessage());
             }
             break;
-            
+
         case 'details':
             $productName = $_GET['product'] ?? '';
             if (empty($productName)) {
                 sendResponse(false, "产品名称不能为空");
             }
-            
+
             try {
                 $result = getProductDetails($productName);
                 sendResponse(true, "产品详细信息获取成功", $result);
-            } catch (Exception $e) {
+            }
+            catch (Exception $e) {
                 sendResponse(false, $e->getMessage());
             }
             break;
-            
+
         case 'export':
             exportMultiPriceData();
             break;
-            
+
         default:
             sendResponse(false, "无效的操作");
     }
-} else {
+}
+else {
     sendResponse(false, "不支持的请求方法");
 }
 ?>
