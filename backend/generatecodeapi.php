@@ -1072,19 +1072,14 @@ function ensurePermissionsTable($pdo)
  */
 function getUserSidebarPermissions($pdo, $input)
 {
-    if (!isset($_SESSION))
-        @session_start();
-    $userId = !empty($input['user_id']) ? intval($input['user_id']) : ($_SESSION['user_id'] ?? null);
-
-    if (!$userId) {
+    if (empty($input['user_id'])) {
         echo json_encode(['success' => false, 'message' => '缺少用户ID']);
         return;
     }
 
     try {
-        $userId = intval($userId);
+        $userId = intval($input['user_id']);
         $perms = [];
-
         $pagePerms = [];
         $submenuPerms = [];
         $reportPerms = ['kpi', 'cost'];
