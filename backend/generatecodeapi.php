@@ -1174,7 +1174,7 @@ function saveUserSidebarPermissions($pdo, $input)
 
     try {
         $userId = intval($input['user_id']);
-        
+
         // ======= 确保表结构存在 (必须在事务外，否则会触发隐式提交) =======
         ensurePermissionsTable($pdo);
         try {
@@ -1185,8 +1185,9 @@ function saveUserSidebarPermissions($pdo, $input)
                 updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 PRIMARY KEY (user_id, page_key)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-        } catch (Throwable $e) {
-            // 忽略创建表失败
+        }
+        catch (Throwable $e) {
+        // 忽略创建表失败
         }
         // =========================================================
 
