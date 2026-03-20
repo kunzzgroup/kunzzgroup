@@ -1367,6 +1367,11 @@
       overflow: hidden;
     }
 
+    /* Hidden on desktop — shown only in mobile media query */
+    .featured-mobile {
+      display: none;
+    }
+
     .featured-container {
       max-width: 1400px;
       width: 90%;
@@ -2190,24 +2195,80 @@
         height: auto !important;
       }
 
-      /* Featured: stack cards */
+      /* Featured: hide desktop cards, show mobile tab selector */
       .featured-container {
         padding-top: 0;
       }
 
       .featured-cards-wrapper {
-        flex-direction: column;
+        display: none !important;
+      }
+
+      /* ── Mobile tab selector ── */
+      .featured-mobile {
+        display: block !important;
+        max-width: 360px;
+        margin: 0 auto;
+      }
+
+      .featured-mobile-tabs {
+        display: flex;
         align-items: center;
+        justify-content: center;
+        gap: 16px;
+        margin-bottom: 24px;
       }
 
-      .featured-card {
-        max-width: min(320px, 80vw);
+      .featured-mobile-tab {
+        background: none;
+        border: none;
+        font-family: var(--font-sans);
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--color-text-light);
+        cursor: pointer;
+        padding: 8px 20px;
+        border-radius: 9999px;
+        transition: all 0.25s ease;
+        letter-spacing: 0.03em;
+      }
+
+      .featured-mobile-tab.active {
+        background-color: var(--color-primary);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(166, 138, 100, 0.35);
+      }
+
+      .featured-mobile-divider {
+        color: #d4cfc6;
+        font-size: 18px;
+        user-select: none;
+      }
+
+      .featured-mobile-card {
+        display: block;
+        text-decoration: none;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(201, 162, 39, 0.3);
+      }
+
+      .featured-mobile-img-wrap {
         width: 100%;
+        aspect-ratio: 3/4;
+        overflow: hidden;
       }
 
-      .featured-card-image-wrapper {
-        aspect-ratio: 3/4;
+      .featured-mobile-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: opacity 0.3s ease;
       }
+
+
 
       /* Location: single column always */
       .location-cards {
@@ -2786,6 +2847,22 @@
         </svg>
         <div class="featured-container">
           <h2>特色推荐</h2>
+
+          <!-- Mobile-only tab selector -->
+          <div class="featured-mobile" id="featured-mobile">
+            <div class="featured-mobile-tabs">
+              <button class="featured-mobile-tab active" data-menu="sushi">Sushi</button>
+              <span class="featured-mobile-divider">|</span>
+              <button class="featured-mobile-tab" data-menu="grand">Grand</button>
+            </div>
+            <a href="menu#sushi" class="featured-mobile-card" id="featured-mobile-link">
+              <div class="featured-mobile-img-wrap">
+                <img src="image/menu1.png" alt="Sushi Menu" id="featured-mobile-img" class="featured-mobile-img">
+              </div>
+            </a>
+          </div>
+
+          <!-- Desktop cards (hidden on mobile) -->
           <div class="featured-cards-wrapper">
             <span class="featured-corner-br"></span>
             <a href="menu#sushi" class="featured-card reveal scale-up delay-100" id="tokyo-featured-card1">
@@ -3428,6 +3505,35 @@
         function init() { measure(); layout(true); syncDots(cur); syncText(cur, true); startAuto(); }
         window.addEventListener('resize', () => { measure(); layout(true); });
         setTimeout(init, 60);
+      })();
+
+      /* ─── Featured: mobile tab switching ─── */
+      (function () {
+        const tabs = document.querySelectorAll('.featured-mobile-tab');
+        const link = document.getElementById('featured-mobile-link');
+        const img  = document.getElementById('featured-mobile-img');
+        if (!tabs.length || !link) return;
+
+        const menus = {
+          sushi: { href: 'menu#sushi', src: 'image/menu1.png', alt: 'Sushi Menu' },
+          grand: { href: 'menu#grand', src: 'image/menu2.png', alt: 'Grand Menu' }
+        };
+
+        tabs.forEach(tab => {
+          tab.addEventListener('click', () => {
+            const data = menus[tab.dataset.menu];
+            if (!data) return;
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            img.style.opacity = '0';
+            setTimeout(() => {
+              link.href = data.href;
+              img.src = data.src;
+              img.alt = data.alt;
+              img.style.opacity = '1';
+            }, 200);
+          });
+        });
       })();
 
     }); // DOMContentLoaded
