@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/permission_guard.php';
-requirePermissionApi('analytics', 'kpi_report');
+requirePermissionApi('analytics', 'kpi_upload');
 
 if (!headers_sent()) {
     header("Cache-Control: max-age=0, no-cache, no-store, must-revalidate, proxy-revalidate");
