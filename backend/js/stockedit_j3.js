@@ -1883,6 +1883,9 @@ function renderStockTable() {
             }
                     </td>
                     <td>
+                        <span class="created-user" data-user="${record.created_by || '-'}" data-time="${record.date || ''}${record.time ? ' ' + record.time : ''}">${record.created_by || '-'}</span>
+                    </td>
+                    <td>
                         ${isEditing ?
                 `<input type="text" class="table-input" value="${record.remark || ''}" onchange="updateField(${record.id}, 'remark', this.value)">` :
                 `<span>${record.remark || '-'}</span>`
@@ -2134,6 +2137,7 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
                     ${createNewRowRemarkNumberInput(rowId)}
                 </td>
                 <td>${createCombobox('receiver', (currentStockType && currentStockType !== 'central' ? currentStockType.toUpperCase() : ''), null, rowId)}</td>
+                <td><span class="created-user" data-user="-" data-time="-">-</span></td>
                 <td><input type="text" class="table-input" placeholder="输入备注..." id="${rowId}-remark" value="${remarkValue}"></td>
                 <td>
                     <span class="action-cell">

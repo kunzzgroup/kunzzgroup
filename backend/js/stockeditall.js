@@ -2921,6 +2921,7 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
                     ${createNewRowRemarkNumberInput(rowId)}
                 </td>
                 <td>${createCombobox('receiver', '', null, rowId)}</td>
+                <td><span class="created-user" data-user="-" data-time="-">-</span></td>
                 <td><input type="text" class="table-input" placeholder="输入备注..." id="${rowId}-remark" value="${remarkValue}"></td>
                 <td>
                     <span class="action-cell">

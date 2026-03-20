@@ -540,10 +540,13 @@ function handlePost() {
 
         $sql = "INSERT INTO j3stockedit_data 
                 (date, time, product_name, 
-                in_quantity, out_quantity, specification, price, code_number, remark, receiver, target_system, type) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                in_quantity, out_quantity, specification, price, code_number, remark, receiver, target_system, type, created_by) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $pdo->prepare($sql);
+
+        // 获取当前用户名
+        $createdBy = $_SESSION['username'] ?? 'System';
 
         $stmt->execute([
             $data['date'],
@@ -557,7 +560,8 @@ function handlePost() {
             $data['remark'] ?? null,
             $data['receiver'] ?? null,
             'j3',  // 强制使用 j3，防止前端笺改
-            $type
+            $type,
+            $createdBy
         ]);
         
         $newId = $pdo->lastInsertId();
@@ -907,14 +911,17 @@ function handleBatchSave() {
         $pdo->beginTransaction();
         
         $sql = "INSERT INTO j3stockedit_data 
-                (date, time, product_name, in_quantity, out_quantity, specification, price, code_number, remark, receiver, target_system, type) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                (date, time, product_name, in_quantity, out_quantity, specification, price, code_number, remark, receiver, target_system, type, created_by) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $pdo->prepare($sql);
         
         $centralSql = "INSERT INTO stockinout_data 
-                      (date, time, product_name, in_quantity, out_quantity, specification, price, code_number, remark, receiver, target_system) 
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                      (date, time, product_name, in_quantity, out_quantity, specification, price, code_number, remark, receiver, target_system, created_by) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $centralStmt = $pdo->prepare($centralSql);
+        
+        // 获取当前用户名
+        $createdBy = $_SESSION['username'] ?? 'System';
 
         $successCount = 0;
         foreach ($rows as $index => $row) {
@@ -949,7 +956,8 @@ function handleBatchSave() {
                 $row['remark'] ?? null,
                 $row['receiver'] ?? null,
                 'j3',
-                $type
+                $type,
+                $createdBy
             ]);
             
             $newId = $pdo->lastInsertId();
@@ -969,7 +977,8 @@ function handleBatchSave() {
                     $row['code_number'] ?? null,
                     $row['remark'] ?? null,
                     $row['receiver'] ?? null,
-                    'central'
+                    'central',
+                    $createdBy
                 ]);
             }
         }
