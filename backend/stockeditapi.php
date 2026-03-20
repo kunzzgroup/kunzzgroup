@@ -939,6 +939,78 @@ function handleGet() {
             }
             break;
 
+        case 'fix_branch_types':
+            // 修复所有分店表中 type 为 NULL 的记录，从 stock_data 表的 category 字段获取
+            try {
+                $tables = [
+                    'j1stockedit_data',
+                    'j2stockedit_data',
+                    'j3stockedit_data',
+                    'j1stockinout_data',
+                    'j2stockinout_data',
+                    'j3stockinout_data',
+                    'stockinout_data'
+                ];
+                
+                $totalUpdated = 0;
+                $details = [];
+                
+                foreach ($tables as $table) {
+                    // 通过 product_name 匹配更新
+                    $sql = "UPDATE $table t
+                            INNER JOIN stock_data sd ON t.product_name = sd.product_name
+                            SET t.type = CASE 
+                                WHEN sd.category = 'Drinks' THEN 'Service Line'
+                                WHEN LOWER(sd.category) = 'service line' THEN 'Service Line'
+                                ELSE sd.category 
+                            END
+                            WHERE (t.type IS NULL OR t.type = '')
+                            AND sd.category IS NOT NULL AND sd.category != ''
+                            AND t.deleted_at IS NULL";
+                    
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute();
+                    $updatedByName = $stmt->rowCount();
+                    
+                    // 通过 code_number / product_code 匹配更新（补充上一步未匹配到的）
+                    $sql2 = "UPDATE $table t
+                             INNER JOIN stock_data sd ON t.code_number = sd.product_code
+                             SET t.type = CASE 
+                                 WHEN sd.category = 'Drinks' THEN 'Service Line'
+                                 WHEN LOWER(sd.category) = 'service line' THEN 'Service Line'
+                                 ELSE sd.category 
+                             END
+                             WHERE (t.type IS NULL OR t.type = '')
+                             AND sd.category IS NOT NULL AND sd.category != ''
+                             AND t.deleted_at IS NULL";
+                    
+                    $stmt2 = $pdo->prepare($sql2);
+                    $stmt2->execute();
+                    $updatedByCode = $stmt2->rowCount();
+                    
+                    $tableTotal = $updatedByName + $updatedByCode;
+                    $totalUpdated += $tableTotal;
+                    
+                    if ($tableTotal > 0) {
+                        $details[] = "$table: 更新了 $tableTotal 条记录";
+                    }
+                }
+                
+                $message = "修复完成，共更新了 $totalUpdated 条记录";
+                if (!empty($details)) {
+                    $message .= "。详情：" . implode('；', $details);
+                }
+                
+                sendResponse(true, $message, [
+                    'total_updated' => $totalUpdated,
+                    'details' => $details
+                ]);
+                
+            } catch (PDOException $e) {
+                sendResponse(false, "修复失败：" . $e->getMessage());
+            }
+            break;
+
         default:
             sendResponse(false, "无效的操作");
     }
