@@ -83,8 +83,9 @@ if (isset($_SESSION['user_id'])) {
                 }
             }
         }
-    } catch (Throwable $e) {
-        // 忽略数据库错误，使用默认权限
+    }
+    catch (Throwable $e) {
+    // 忽略数据库错误，使用默认权限
     }
 }
 
@@ -99,14 +100,15 @@ if (!$hasNewPermissions) {
     if (empty($restaurantPermissions)) {
         $restaurantPermissions = ['j1', 'j2', 'j3'];
     }
-} else {
+}
+else {
     // 使用新权限系统时，确保值是正确的格式（只做格式验证，不使用默认值）
     $reportPermissions = array_values(array_intersect(['kpi', 'cost'], $reportPermissions));
     $restaurantPermissions = array_values(array_intersect(['j1', 'j2', 'j3'], $restaurantPermissions));
 
-    // 如果新权限系统返回了空数组，说明用户没有任何权限
-    // 为了安全，这里不设置默认值，而是保持空数组
-    // 后续代码需要处理空权限的情况
+// 如果新权限系统返回了空数组，说明用户没有任何权限
+// 为了安全，这里不设置默认值，而是保持空数组
+// 后续代码需要处理空权限的情况
 }
 
 if (!in_array('cost', $reportPermissions, true)) {
@@ -179,25 +181,29 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                         </button>
                         <div class="report-dropdown-menu" id="report-type-dropdown">
                             <?php if (in_array('kpi', $reportPermissions, true)): ?>
-                                <a href="kpiedit.php" class="report-dropdown-item">
+                                <a href="kpiedit" class="report-dropdown-item">
                                     <i class="fas fa-chart-line"></i> <?php echo $reportLabelMap['kpi']; ?>
                                 </a>
-                            <?php endif; ?>
+                            <?php
+    endif; ?>
                             <?php if (in_array('cost', $reportPermissions, true)): ?>
-                                <a href="costedit.php" class="report-dropdown-item">
+                                <a href="costedit" class="report-dropdown-item">
                                     <i class="fas fa-chart-pie"></i> <?php echo $reportLabelMap['cost']; ?>
                                 </a>
-                            <?php endif; ?>
+                            <?php
+    endif; ?>
                         </div>
                     </div>
-                <?php else: ?>
+                <?php
+else: ?>
                     <div class="report-type-selector report-type-selector--disabled">
                         <button class="report-type-btn" style="cursor:default;">
                             <i class="fas fa-chart-pie"></i>
                             <?php echo $reportLabelMap['cost']; ?>
                         </button>
                     </div>
-                <?php endif; ?>
+                <?php
+endif; ?>
 
                 <!-- 餐厅选择器 -->
                 <div class="restaurant-selector">
@@ -205,22 +211,28 @@ $showRestaurantDropdown = count($restaurantPermissions) > 1;
                         <?php echo substr($restaurantConfigAllowed[$defaultRestaurant]['name'], 0, 1); ?></div>
                     <div class="number-dropdown">
                         <button class="number-btn dropdown-toggle" <?php if ($showRestaurantDropdown): ?>
-                                onclick="toggleNumberDropdown()" <?php else: ?> style="cursor:default;" <?php endif; ?>>
+                                onclick="toggleNumberDropdown()" <?php
+else: ?> style="cursor:default;" <?php
+endif; ?>>
                             <?php echo $restaurantConfigAllowed[$defaultRestaurant]['number']; ?>
                             <?php if ($showRestaurantDropdown): ?>
                                 <i class="fas fa-chevron-down"></i>
-                            <?php endif; ?>
+                            <?php
+endif; ?>
                         </button>
                         <div class="number-dropdown-menu" id="number-dropdown" <?php if (!$showRestaurantDropdown): ?>
-                                style="display:none;" <?php endif; ?>>
+                                style="display:none;" <?php
+endif; ?>>
                             <?php if ($showRestaurantDropdown): ?>
                                 <div class="number-grid">
                                     <?php foreach ($restaurantPermissions as $storeKey): ?>
                                         <button class="number-item"
                                             onclick="selectNumber(<?php echo $restaurantConfigAllowed[$storeKey]['number']; ?>)"><?php echo $restaurantConfigAllowed[$storeKey]['number']; ?></button>
-                                    <?php endforeach; ?>
+                                    <?php
+    endforeach; ?>
                                 </div>
-                            <?php endif; ?>
+                            <?php
+endif; ?>
                         </div>
                     </div>
                 </div>
