@@ -848,22 +848,32 @@ function applyBranchFilter() {
 
         let show = true;
 
-        if (branchL1Current === 'kunzz') {
-            // 显示属于 KH（总部）的职员
-            const branches = rowBranch.split(',').map(b => b.trim()).filter(b => b !== '' && b !== 'null' && b !== 'undefined' && b !== '-');
-            // KH 筛选：包含 kh 或 kunzz 标签的，或没有任何分店标签的总部职员
-            const hasKh = branches.some(b => b === 'kh' || b === 'kunzz');
-            const hasStoreBranch = branches.some(b => ['j1','j2','j3'].includes(b));
-            show = hasKh || (!hasStoreBranch);
-        } else if (branchL1Current === 'branch') {
-            // 只显示有具体分店 (j1/j2/j3) 的职员
-            const branches = rowBranch.split(',').map(b => b.trim()).filter(b => b !== '' && b !== 'null');
-            const storeBranches = branches.filter(b => b !== 'kh');
+        // 解析分支列表（所有筛选器共用）
+        const branches = rowBranch.split(',').map(b => b.trim()).filter(b => b !== '' && b !== 'null' && b !== 'undefined' && b !== '-');
+        const hasNoBranch = branches.length === 0;
 
-            if (storeBranches.length === 0) {
+        if (branchL1Current === 'kunzz') {
+            // 没有分配任何分支的职员 → 只能在"全部"里看到
+            if (hasNoBranch) {
                 show = false;
-            } else if (branchL2Current !== 'all') {
-                show = storeBranches.includes(branchL2Current);
+            } else {
+                // 显示属于 KH（总部）的职员
+                const hasKh = branches.some(b => b === 'kh' || b === 'kunzz');
+                show = hasKh;
+            }
+        } else if (branchL1Current === 'branch') {
+            // 没有分配任何分支的职员 → 只能在"全部"里看到
+            if (hasNoBranch) {
+                show = false;
+            } else {
+                // 只显示有具体分店 (j1/j2/j3) 的职员
+                const storeBranches = branches.filter(b => b !== 'kh');
+
+                if (storeBranches.length === 0) {
+                    show = false;
+                } else if (branchL2Current !== 'all') {
+                    show = storeBranches.includes(branchL2Current);
+                }
             }
         }
         // 'all' → 全部显示
