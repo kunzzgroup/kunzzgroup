@@ -1156,10 +1156,13 @@ function handlePost() {
         
         $sql = "INSERT INTO stockinout_data 
                 (date, time, product_name, receiver, in_quantity, out_quantity, 
-                specification, price, code_number, remark, target_system, product_remark_checked, remark_number) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                specification, price, code_number, remark, target_system, product_remark_checked, remark_number, created_by) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $pdo->prepare($sql);
+
+        // 获取当前用户名
+        $createdBy = $_SESSION['username'] ?? 'System';
 
         $stmt->execute([
             $data['date'],
@@ -1174,7 +1177,8 @@ function handlePost() {
             $data['remark'] ?? null,
             $data['target_system'] ?? null,
             $data['product_remark_checked'] ?? 0,
-            $data['remark_number'] ?? ''
+            $data['remark_number'] ?? '',
+            $createdBy
         ]);
         
         $newId = $pdo->lastInsertId();
@@ -1298,10 +1302,13 @@ function handleBatchSave() {
         
         $sql = "INSERT INTO stockinout_data 
                 (date, time, product_name, receiver, in_quantity, out_quantity, 
-                specification, price, code_number, remark, target_system, product_remark_checked, remark_number) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                specification, price, code_number, remark, target_system, product_remark_checked, remark_number, created_by) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $pdo->prepare($sql);
         
+        // 获取当前用户名
+        $createdBy = $_SESSION['username'] ?? 'System';
+
         $successCount = 0;
         foreach ($rows as $index => $row) {
             $rowNum = $index + 1;
@@ -1329,7 +1336,8 @@ function handleBatchSave() {
                 $row['remark'] ?? null,
                 $row['target_system'] ?? null,
                 $row['product_remark_checked'] ?? 0,
-                $row['remark_number'] ?? ''
+                $row['remark_number'] ?? '',
+                $createdBy
             ]);
             
             $newId = $pdo->lastInsertId();

@@ -352,6 +352,7 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
                         <th style="min-width: 80px;">货品备注</th>
                         <th style="min-width: 100px;">备注编号</th>
                         <th class="receiver-col">供应商/出货人</th>
+                        <th style="min-width: 100px;">创建人</th>
                         <th style="min-width: 100px;">备注</th>
                         <th style="min-width: 80px;" id="action-header">操作</th>
                     </tr>
@@ -471,7 +472,53 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
         </div>
     </div>
 
+    <style>
+    .user-hover-box {
+        position: absolute;
+        background: #fff;
+        border: 1px solid #ddd;
+        padding: 10px 14px;
+        border-radius: 10px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+        font-size: 13px;
+        z-index: 9999;
+        display: none;
+        min-width: 160px;
+        pointer-events: none;
+    }
+    .created-user {
+        cursor: pointer;
+        color: #2c7be5;
+        font-weight: 500;
+    }
+    </style>
+    <div id="userHoverBox" class="user-hover-box"></div>
     <script src="js/stockeditall.js?v=<?php echo time(); ?>"></script>
+    <script>
+    (function() {
+        const hoverBox = document.getElementById("userHoverBox");
+        if (!hoverBox) return;
+        document.addEventListener("mouseover", function(e) {
+            if (e.target.classList.contains("created-user")) {
+                const user = e.target.getAttribute("data-user") || "-";
+                const time = e.target.getAttribute("data-time") || "-";
+                hoverBox.innerHTML = '<div style="font-weight:600;">' + user + '</div>' + '<div style="margin-top:4px;color:#666;">操作时间：' + time + '</div>';
+                hoverBox.style.display = "block";
+            }
+        });
+        document.addEventListener("mousemove", function(e) {
+            if (hoverBox.style.display === "block") {
+                hoverBox.style.top = (e.pageY + 12) + "px";
+                hoverBox.style.left = (e.pageX + 12) + "px";
+            }
+        });
+        document.addEventListener("mouseout", function(e) {
+            if (e.target.classList.contains("created-user")) {
+                hoverBox.style.display = "none";
+            }
+        });
+    })();
+    </script>
 </body>
 <script>
 // 页面权限检查已在 applyPagePermissions 函数中处理，这里不需要重复代码

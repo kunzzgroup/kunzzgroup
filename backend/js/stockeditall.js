@@ -2621,6 +2621,9 @@ function renderStockTable() {
             }
                     </td>
                     <td>
+                        <span class="created-user" data-user="${record.created_by || '-'}" data-time="${record.date || ''}${record.time ? ' ' + record.time : ''}">${record.created_by || '-'}</span>
+                    </td>
+                    <td>
                         ${isEditing ?
                 `<input type="text" class="table-input" value="${record.remark || ''}" onchange="updateField(${record.id}, 'remark', this.value)">` :
                 `<span>${record.remark || '-'}</span>`
