@@ -4539,6 +4539,32 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
                 /* Remove flex constraints */
                 position: relative !important;
             }
+
+            /* Nav: fixed full-width bar on mobile — auto-hide on scroll */
+            #nav {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                max-width: 100%;
+                height: 56px;
+                border-radius: 0;
+                box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+                background-color: #fffffff5;
+                transform: translateY(0);
+                z-index: 1000;
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            /* Slide nav up off-screen */
+            #nav.nav-mobile-hidden {
+                transform: translateY(-100%) !important;
+            }
+
+            /* Compensate for fixed nav height */
+            body {
+                padding-top: 56px;
+            }
         }
 
         /* --- Generic Prominent Section Decoration --- */
@@ -6775,6 +6801,31 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
 
             initHash();
             loadMenuData();
+
+            /* ─── Mobile Scroll auto-hide Nav ─── */
+            (function () {
+                const nav = document.getElementById('nav');
+                if (!nav) return;
+                let lastScrollY = window.scrollY || 0;
+                const DEADZONE = 5;
+                window.addEventListener('scroll', () => {
+                    if (window.innerWidth <= 768) {
+                        const currentScrollY = window.scrollY;
+                        if (currentScrollY <= 0) {
+                            nav.classList.remove('nav-mobile-hidden');
+                            lastScrollY = currentScrollY;
+                            return;
+                        }
+                        const delta = currentScrollY - lastScrollY;
+                        if (delta > DEADZONE && currentScrollY > 60) {
+                            nav.classList.add('nav-mobile-hidden');
+                        } else if (delta < -DEADZONE) {
+                            nav.classList.remove('nav-mobile-hidden');
+                        }
+                        lastScrollY = currentScrollY;
+                    }
+                }, { passive: true });
+            })();
         });
     </script>
 </body>
