@@ -21,6 +21,7 @@ let currentMonth = new Date().getMonth() + 1;
 let monthData = {};
 let isLoading = false;
 let pasteTargetDay = null;
+let preservedRowValues = new Map();
 
 // 货币字段列表 - 添加 adj_amount 字段
 const currencyFields = ['gross_sales', 'discounts', 'tax', 'service_fee', 'adj_amount', 'tender_amount'];
@@ -230,9 +231,17 @@ async function loadMonthData() {
     }
 }
 
+// 辅助函数：显示整数字段值，保留0
+function displayIntValue(val) {
+    if (val === null || val === undefined || val === '') return '';
+    const n = parseInt(val);
+    if (isNaN(n)) return '';
+    return String(n);
+}
+
 // 格式化货币输入值显示
 function formatCurrencyDisplay(value) {
-    if (!value || value === '') return '';
+    if (value === null || value === undefined || value === '') return '';
     const num = parseFloat(value);
     if (isNaN(num) || num === 0) return '';
     return num.toFixed(2);
@@ -298,24 +307,27 @@ function generateExcelTable() {
                     </td>
                     <td class="calculated-cell" id="tender-amount-${day}">RM 0.00</td>
                     <td><input type="number" class="excel-input" data-field="tables_used" data-day="${day}" 
-                        value="${existingData.tables_used || ''}" min="0" max="50" 
+                        value="${displayIntValue(existingData.tables_used)}" min="0" max="50" 
                         placeholder="0"></td>
                     <td><input type="number" class="excel-input" data-field="diners" data-day="${day}" 
-                        value="${existingData.diners || ''}" min="0" 
+                        value="${displayIntValue(existingData.diners)}" min="0" 
                         placeholder="0" onchange="updateCalculations(${day})"></td>
                     <td class="calculated-cell" id="avg-per-diner-${day}">RM 0</td>
                     <td><input type="number" class="excel-input" data-field="new_customers" data-day="${day}" 
-                        value="${existingData.new_customers || ''}" min="0" 
+                        value="${displayIntValue(existingData.new_customers)}" min="0" 
                         placeholder="0" onchange="updateCalculations(${day})"></td>
                     <td><input type="number" class="excel-input" data-field="returning_customers" data-day="${day}" 
-                        value="${existingData.returning_customers || ''}" min="0" 
+                        value="${displayIntValue(existingData.returning_customers)}" min="0" 
                         placeholder="0" onchange="updateCalculations(${day})"></td>
                     <td class="calculated-cell" id="returning-customer-rate-${day}">0%</td>
                     <td class="action-cell">
                         <button class="edit-btn" id="edit-btn-${day}" onclick="toggleEdit(${day})" title="编辑${day}日数据">
                             <i class="fas fa-edit"></i>
                         </button>
-                        ${!isOperationManager ? '<button class="delete-day-btn" onclick="clearDayData(' + day + ')" title="清空' + day + '日数据"><i class="fas fa-trash-alt"></i></button>' : ''}
+                        <button class="cancel-edit-btn" id="cancel-btn-${day}" onclick="cancelEdit(${day})" title="取消编辑" style="display: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        ${!isOperationManager ? '<button class="delete-day-btn" id="delete-btn-' + day + '" onclick="clearDayData(' + day + ')" title="清空' + day + '日数据"><i class="fas fa-trash-alt"></i></button>' : ''}
                     </td>
                 `;
 
@@ -429,7 +441,9 @@ window.addEventListener('beforeunload', function () {
 // 设置行的只读状态
 function setRowReadonly(day, readonly) {
     const inputs = document.querySelectorAll(`input[data-day="${day}"]`);
-    const row = document.querySelector(`input[data-day="${day}"]`).closest('tr');
+    if (!inputs.length) return;
+    const row = inputs[0].closest('tr');
+    if (!row) return;
 
     inputs.forEach(input => {
         const field = input.dataset.field;
@@ -460,9 +474,13 @@ function setRowReadonly(day, readonly) {
         }
     });
 
-    // 切换行的编辑样式（只有当至少有一个字段可编辑时才显示编辑样式）
+    // 切换行的编辑样式和按钮显示
+    const cancelBtn = document.getElementById(`cancel-btn-${day}`);
+    const deleteBtn = document.getElementById(`delete-btn-${day}`);
     if (readonly) {
         row.classList.remove('editing-row');
+        if (cancelBtn) cancelBtn.style.display = 'none';
+        if (deleteBtn) deleteBtn.style.display = 'inline-block';
     } else {
         // 检查是否有可编辑的字段
         const hasEditableField = Array.from(inputs).some(input => {
@@ -474,6 +492,8 @@ function setRowReadonly(day, readonly) {
         if (hasEditableField) {
             row.classList.add('editing-row');
         }
+        if (cancelBtn) cancelBtn.style.display = 'inline-block';
+        if (deleteBtn) deleteBtn.style.display = 'none';
     }
 }
 
@@ -888,8 +908,8 @@ async function saveAllData() {
             const grossSales = parseFloat(getInputValue('gross_sales', day)) || 0;
             const diners = parseInt(getInputValue('diners', day)) || 0;
 
-            // 只保存有数据的行
-            const hasData = grossSales > 0 || diners > 0 ||
+            // 只保存有数据的行，或者数据库中已存在记录的行（支持将值改为0）
+            const hasInputData = grossSales > 0 || diners > 0 ||
                 (parseFloat(getInputValue('discounts', day)) || 0) > 0 ||
                 (parseFloat(getInputValue('tax', day)) || 0) > 0 ||
                 (parseFloat(getInputValue('service_fee', day)) || 0) > 0 ||
@@ -897,6 +917,7 @@ async function saveAllData() {
                 (parseInt(getInputValue('tables_used', day)) || 0) > 0 ||
                 (parseInt(getInputValue('returning_customers', day)) || 0) > 0 ||
                 (parseInt(getInputValue('new_customers', day)) || 0) > 0;
+            const hasData = hasInputData || !!monthData[day];
 
             if (hasData) {
                 const dateStr = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
@@ -1336,12 +1357,59 @@ function toggleEdit(day) {
         // 保存模式 - 保存这一行
         saveSingleRowData(day);
     } else {
+        // 进入编辑模式前保存当前值（用于取消恢复）
+        const currentValues = {};
+        inputs.forEach(input => {
+            currentValues[input.dataset.field] = input.value;
+        });
+        preservedRowValues.set(day, currentValues);
+
         setRowReadonly(day, false);
 
         editBtn.classList.add('save-mode');
         editBtn.innerHTML = '<i class="fas fa-save"></i>';
         editBtn.title = `保存${day}日数据`;
     }
+}
+
+// 取消编辑
+function cancelEdit(day) {
+    const editBtn = document.getElementById(`edit-btn-${day}`);
+    const cancelBtn = document.getElementById(`cancel-btn-${day}`);
+    const deleteBtn = document.getElementById(`delete-btn-${day}`);
+
+    // 恢复原始值
+    if (preservedRowValues.has(day)) {
+        const values = preservedRowValues.get(day);
+        Object.entries(values).forEach(([field, value]) => {
+            const input = document.querySelector(`input[data-field="${field}"][data-day="${day}"]`);
+            if (input) input.value = value;
+        });
+        preservedRowValues.delete(day);
+    } else {
+        // 如果没有备份，尝试从 monthData 恢复
+        const data = monthData[day] || {};
+        const currFields = ['gross_sales', 'discounts', 'tax', 'service_fee', 'adj_amount'];
+        const intFields = ['tables_used', 'diners', 'new_customers', 'returning_customers'];
+        currFields.forEach(field => {
+            const input = document.querySelector(`input[data-field="${field}"][data-day="${day}"]`);
+            if (input) input.value = formatCurrencyDisplay(data[field]);
+        });
+        intFields.forEach(field => {
+            const input = document.querySelector(`input[data-field="${field}"][data-day="${day}"]`);
+            if (input) input.value = displayIntValue(data[field]);
+        });
+    }
+
+    setRowReadonly(day, true);
+    editBtn.classList.remove('save-mode');
+    editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+    editBtn.title = `编辑${day}日数据`;
+    if (cancelBtn) cancelBtn.style.display = 'none';
+    if (deleteBtn) deleteBtn.style.display = 'inline-block';
+
+    updateCalculations(day);
+    updateInputColors();
 }
 
 // 保存单行数据
@@ -1355,8 +1423,8 @@ async function saveSingleRowData(day) {
         const grossSales = parseFloat(getInputValue('gross_sales', day)) || 0;
         const diners = parseInt(getInputValue('diners', day)) || 0;
 
-        // 检查是否有数据需要保存
-        const hasData = grossSales > 0 || diners > 0 ||
+        // 检查是否有数据需要保存（包括数据库中已存在记录的行，支持将值改为0）
+        const hasInputData = grossSales > 0 || diners > 0 ||
             (parseFloat(getInputValue('discounts', day)) || 0) > 0 ||
             (parseFloat(getInputValue('tax', day)) || 0) > 0 ||
             (parseFloat(getInputValue('service_fee', day)) || 0) > 0 ||
@@ -1364,6 +1432,7 @@ async function saveSingleRowData(day) {
             (parseInt(getInputValue('tables_used', day)) || 0) > 0 ||
             (parseInt(getInputValue('returning_customers', day)) || 0) > 0 ||
             (parseInt(getInputValue('new_customers', day)) || 0) > 0;
+        const hasData = hasInputData || !!monthData[day];
 
         if (hasData) {
             const dateStr = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;

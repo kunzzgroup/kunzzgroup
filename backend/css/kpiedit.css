@@ -704,6 +704,33 @@ body {
     background: #059669;
 }
 
+/* 取消编辑按钮样式 */
+.cancel-edit-btn {
+    background: #6b7280;
+    color: white;
+    border: none;
+    border-radius: clamp(4px, 0.32vw, 6px);
+    width: clamp(18px, 1.67vw, 32px);
+    height: clamp(18px, 1.67vw, 32px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-size: clamp(6px, 0.63vw, 12px);
+    margin: clamp(1px, 0.21vw, 2px);
+}
+
+.cancel-edit-btn:hover {
+    background: #4b5563;
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
+}
+
+.cancel-edit-btn i {
+    font-size: clamp(6px, 0.63vw, 12px);
+}
+
 /* 只读输入框样式 */
 .excel-input.readonly {
     background: #f9fafb !important;

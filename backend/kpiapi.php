@@ -300,15 +300,15 @@ function handlePut() {
             $data['id']
         ]);
         
-        if ($stmt->rowCount() > 0) {
-            // 获取更新后的记录
-            $stmt = $pdo->prepare("SELECT * FROM " . $config['data_table'] . " WHERE id = ?");
-            $stmt->execute([$data['id']]);
-            $updatedRecord = $stmt->fetch(PDO::FETCH_ASSOC);
-            
+        // 获取更新后的记录（即使rowCount为0也返回成功，因为数据可能相同）
+        $stmt2 = $pdo->prepare("SELECT * FROM " . $config['data_table'] . " WHERE id = ?");
+        $stmt2->execute([$data['id']]);
+        $updatedRecord = $stmt2->fetch(PDO::FETCH_ASSOC);
+        
+        if ($updatedRecord) {
             sendResponse(true, $config['name'] . "记录更新成功", $updatedRecord);
         } else {
-            sendResponse(false, "记录不存在或无变化");
+            sendResponse(false, "记录不存在");
         }
         
     } catch (PDOException $e) {
