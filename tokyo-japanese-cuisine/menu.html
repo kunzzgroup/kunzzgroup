@@ -26,7 +26,7 @@
             /* Culture Carousel Variables */
             --card-w: 340px;
             --card-h: 480px;
-            --gap: 39px;
+            --gap: 40px;
         }
 
         * {
@@ -6491,30 +6491,15 @@ Actually, I'll use `::before` for TL and I'll modify HTML to add an element for 
                 display: none;
             }
 
-            .mobile-menu-btn,
-            .mobile-nav-dropdown {
-                display: none !important;
-            }
+            /* hamburger button — keep visible on mobile for sidebar nav */
 
             .nav-actions .btn-primary,
             .nav-actions .btn-secondary {
                 display: none !important;
             }
 
-            /* Make nav a floating pill / capsule on mobile as requested */
-            #nav {
-                width: 92%;
-                max-width: 400px;
-                /* Limits width on extra large phones so it doesn't look stretched */
-                height: 61px;
-                top: 16px;
-                left: 50%;
-                transform: translateX(-50%);
-                border-radius: 9999px;
-                padding: 0 16px;
-                background-color: #fdfaf6;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            }
+            /* Nav mobile override is handled in the MOBILE OPTIMIZATIONS
+               media query above (search: "Nav: fixed full-width bar") */
         }
 
 
