@@ -134,7 +134,7 @@ function handleGet() {
                 $params[] = "%$productName%";
             }
             
-            $sql .= " ORDER BY date ASC, time ASC";
+            $sql .= " ORDER BY date ASC, id ASC";
             
             // 从请求参数中获取limit，如果没有则默认使用10000
             $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10000;
