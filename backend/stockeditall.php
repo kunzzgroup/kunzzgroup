@@ -349,11 +349,11 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
                         <th style="min-width: 100px;">单价</th>
                         <th style="min-width: 100px;">总价</th>
                         <th style="min-width: 80px;" id="type-header">类型</th>
-                        <th style="min-width: 60px;">货品备注</th>
-                        <th style="min-width: 70px;">备注编号</th>
+                        <th style="min-width: 80px;">货品备注</th>
+                        <th style="min-width: 100px;">备注编号</th>
                         <th class="receiver-col">供应商/出货人</th>
                         <th style="min-width: 60px;">创建人</th>
-                        <th style="min-width: 70px;">备注</th>
+                        <th style="min-width: 100px;">备注</th>
                         <th style="min-width: 80px;" id="action-header">操作</th>
                     </tr>
                 </thead>
