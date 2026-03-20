@@ -727,8 +727,9 @@ async function selectQuickRange(range) {
 
 // 初始化应用
 function initApp() {
-    // 设置默认日期为今天
-    const today = new Date().toISOString().split('T')[0];
+    // 设置默认日期为今天（使用本地时间，避免UTC时差导致日期偏移）
+    const now0 = new Date();
+    const today = `${now0.getFullYear()}-${String(now0.getMonth() + 1).padStart(2, '0')}-${String(now0.getDate()).padStart(2, '0')}`;
     document.getElementById('add-date').value = today;
     document.getElementById('add-time').value = new Date().toTimeString().slice(0, 5);
 
@@ -2012,8 +2013,9 @@ function showDateRowsModal() {
     const modal = document.getElementById('date-rows-modal');
     const dateInput = document.getElementById('selected-date');
 
-    // 设置默认日期为今天
-    const today = new Date().toISOString().split('T')[0];
+    // 设置默认日期为今天（使用本地时间，避免UTC时差导致日期偏移）
+    const now1 = new Date();
+    const today = `${now1.getFullYear()}-${String(now1.getMonth() + 1).padStart(2, '0')}-${String(now1.getDate()).padStart(2, '0')}`;
     dateInput.value = today;
 
     // 显示弹窗
@@ -2171,7 +2173,9 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
 
 // 添加新行到表格（使用今天的日期）
 function addNewRow() {
-    const today = new Date().toISOString().split('T')[0];
+    // 使用本地时间，避免UTC时差导致日期偏移
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     addNewRowWithDate(today);
 }
 

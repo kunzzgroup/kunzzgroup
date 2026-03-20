@@ -93,31 +93,37 @@ const restaurantConfig = {
 
 // 工具函数
 function getToday() {
-    return new Date().toISOString().split('T')[0];
+    // 使用本地时间，避免UTC时差导致日期偏移
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 }
 
 function getTodayMinusMonth() {
     const date = new Date();
     date.setMonth(date.getMonth() - 1);
-    return date.toISOString().split('T')[0];
+    // 使用本地时间，避免UTC时差导致日期偏移
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
 function getCurrentMonth() {
-    return new Date().toISOString().slice(0, 7);
+    // 使用本地时间，避免UTC时差导致日期偏移
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 }
 
 // 新增：获取当前月份的第一天
 function getCurrentMonthFirstDay() {
     const date = new Date();
-    return new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
+    // 使用本地时间，避免UTC时差导致日期偏移
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01`;
 }
 
 // 新增：获取当前月份的最后一天
 function getCurrentMonthLastDay() {
     const date = new Date();
-    // 获取下个月的第0天，即本月最后一天
+    // 获取下个月的第0天，即本月最后一天（使用本地时间）
     const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-    return lastDay.toISOString().split('T')[0];
+    return `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`;
 }
 
 // 增强的日期选择器功能

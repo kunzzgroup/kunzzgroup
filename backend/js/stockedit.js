@@ -1,4 +1,4 @@
-﻿
+
 // API 配置
 const API_BASE_URL = 'stockeditapi.php';
 
@@ -13,9 +13,9 @@ const specifications = ['Tub', 'Kilo', 'Piece', 'Bottle', 'Box', 'Packet', 'Cart
 
 // 初始化应用
 function initApp() {
-    // 设置默认日期为今天
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('add-date').value = today;
+    // 设置默认日期为今天（使用本地时间，避免UTC时差导致日期偏移）
+    const now0 = new Date();
+    const today = `${now0.getFullYear()}-${String(now0.getMonth() + 1).padStart(2, '0')}-${String(now0.getDate()).padStart(2, '0')}`;
     document.getElementById('add-time').value = new Date().toTimeString().slice(0, 5);
 
     // 加载数据
@@ -495,7 +495,7 @@ function addNewRow() {
     row.className = 'new-row';
 
     const now = new Date();
-    const today = now.toISOString().split('T')[0];
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     const rowId = 'new-' + Date.now(); // 生成唯一ID
 
     row.innerHTML = `
@@ -1177,8 +1177,12 @@ function exportData() {
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - 30);
 
-    document.getElementById('export-start-date').value = startDate.toISOString().split('T')[0];
-    document.getElementById('export-end-date').value = endDate.toISOString().split('T')[0];
+    // 使用本地时间，避免UTC时差导致日期偏移
+    function toLocalDateStr(d) {
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    document.getElementById('export-start-date').value = toLocalDateStr(startDate);
+    document.getElementById('export-end-date').value = toLocalDateStr(endDate);
 
     // 显示导出弹窗
     document.getElementById('export-modal').style.display = 'block';

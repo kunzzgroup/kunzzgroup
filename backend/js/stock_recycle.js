@@ -40,9 +40,24 @@ function renderDeletedTable(filter = '') {
         return;
     }
 
+    // 将UTC时间转换为本地时间显示
+    function toLocalTime(utcStr) {
+        if (!utcStr) return '';
+        // 服务器存储的是UTC时间，需要转换为本地时间
+        const utcDate = new Date(utcStr + ' UTC');
+        if (isNaN(utcDate.getTime())) return utcStr;
+        const y = utcDate.getFullYear();
+        const m = String(utcDate.getMonth() + 1).padStart(2, '0');
+        const d = String(utcDate.getDate()).padStart(2, '0');
+        const h = String(utcDate.getHours()).padStart(2, '0');
+        const min = String(utcDate.getMinutes()).padStart(2, '0');
+        const s = String(utcDate.getSeconds()).padStart(2, '0');
+        return `${y}-${m}-${d} ${h}:${min}:${s}`;
+    }
+
     tbody.innerHTML = filtered.map(item => `
         <tr>
-            <td>${item.deleted_at}</td>
+            <td>${toLocalTime(item.deleted_at)}</td>
             <td>${item.deleted_by || 'Unknown'}</td>
             <td><span class="badge system-${item.system}">${item.system.toUpperCase()}</span></td>
             <td>${item.date}</td>

@@ -955,8 +955,9 @@ async function initApp() {
         }
     }, 500);
 
-    // 设置默认日期为今天
-    const today = new Date().toISOString().split('T')[0];
+    // 设置默认日期为今天（使用本地时间，避免UTC时差导致日期偏移）
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     document.getElementById('add-date').value = today;
     document.getElementById('add-time').value = new Date().toTimeString().slice(0, 5);
 
@@ -2790,8 +2791,9 @@ function showDateRowsModal() {
     const dateInput = document.getElementById('selected-date');
     const rowsCountInput = document.getElementById('rows-count');
 
-    // 设置默认日期为今天
-    const today = new Date().toISOString().split('T')[0];
+    // 设置默认日期为今天（使用本地时间，避免UTC时差导致日期偏移）
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     dateInput.value = today;
 
     // 重置行数输入框为1
@@ -2958,7 +2960,9 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
 
 // 添加新行到表格（使用今天的日期）
 function addNewRow() {
-    const today = new Date().toISOString().split('T')[0];
+    // 使用本地时间，避免UTC时差导致日期偏移
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     addNewRowWithDate(today);
 }
 

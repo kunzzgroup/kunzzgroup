@@ -1564,7 +1564,9 @@ function openBreakModal(shopType) {
 
     populateDamageSelects();
 
-    const today = new Date().toISOString().split('T')[0];
+    // 使用本地时间，避免UTC时差导致日期偏移
+    const _now0 = new Date();
+    const today = `${_now0.getFullYear()}-${String(_now0.getMonth() + 1).padStart(2, '0')}-${String(_now0.getDate()).padStart(2, '0')}`;
     document.getElementById('damage-date').value = today;
     document.getElementById('damage-form').reset();
     document.getElementById('damage-date').value = today;
@@ -2825,7 +2827,9 @@ async function batchSaveBreakRows(shopType) {
         return;
     }
     const allSingles = getAllSingleDishwareForBreak();
-    const today = new Date().toISOString().split('T')[0];
+    // 使用本地时间，避免UTC时差导致日期偏移
+    const _now1 = new Date();
+    const today = `${_now1.getFullYear()}-${String(_now1.getMonth() + 1).padStart(2, '0')}-${String(_now1.getDate()).padStart(2, '0')}`;
     const rowsToRemove = [];
 
     // 1. 先保存所有编辑行
@@ -2966,7 +2970,9 @@ async function batchSaveTransferRows(shopType) {
         showAlert('没有待保存的新增或编辑转卖记录', 'warning');
         return;
     }
-    const today = new Date().toISOString().split('T')[0];
+    // 使用本地时间，避免UTC时差导致日期偏移
+    const _now2 = new Date();
+    const today = `${_now2.getFullYear()}-${String(_now2.getMonth() + 1).padStart(2, '0')}-${String(_now2.getDate()).padStart(2, '0')}`;
     const allSingles = getAllSingleDishwareForBreak();
     const rowsToRemove = [];
     const shopsToRefresh = new Set([shopType]);
@@ -3139,7 +3145,9 @@ async function saveNewBreakRow(rowId, shopType) {
     const chargeable = product ? getChargeableQuantityForBreak(product, shopType, quantity, qtyBefore) : quantity;
 
     try {
-        const today = new Date().toISOString().split('T')[0];
+        // 使用本地时间，避免UTC时差导致日期偏移
+        const _now3 = new Date();
+        const today = `${_now3.getFullYear()}-${String(_now3.getMonth() + 1).padStart(2, '0')}-${String(_now3.getDate()).padStart(2, '0')}`;
         const result = await apiCall('', {
             method: 'POST',
             headers: {
@@ -7605,7 +7613,9 @@ async function saveNewTransferRow(rowId, shopType) {
     const unitPrice = product.unit_price || 0;
 
     try {
-        const today = new Date().toISOString().split('T')[0];
+        // 使用本地时间，避免UTC时差导致日期偏移
+        const _now4 = new Date();
+        const today = `${_now4.getFullYear()}-${String(_now4.getMonth() + 1).padStart(2, '0')}-${String(_now4.getDate()).padStart(2, '0')}`;
         const result = await apiCall('', {
             method: 'POST',
             headers: {

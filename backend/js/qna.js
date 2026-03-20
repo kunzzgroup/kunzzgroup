@@ -359,7 +359,9 @@ async function generatePDF() {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        const dateStr = new Date().toISOString().split('T')[0];
+        // 使用本地时间，避免UTC时差导致日期偏移
+        const _now = new Date();
+        const dateStr = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`;
         link.download = `surveyform_${dateStr}.pdf`;
         document.body.appendChild(link);
         link.click();

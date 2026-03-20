@@ -2,7 +2,9 @@
 // 全局变量
 let employees = [];
 let currentRestaurant = 'J1';
-let selectedDate = new Date().toISOString().split('T')[0];
+// 使用本地时间，避免UTC时差导致日期偏移
+const _now = new Date();
+let selectedDate = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`;
 let phoneRecords = [];
 
 // 从URL参数获取餐厅，如果没有则默认J1
