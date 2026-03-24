@@ -532,6 +532,26 @@ function handlePost() {
         // 开始事务
         $pdo->beginTransaction();
         
+        // ========== 库存校验（出库时检查） ==========
+        if ($outQty > 0) {
+            $stockSql = "SELECT 
+                            (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) - 
+                            COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) as available_stock
+                        FROM j3stockedit_data 
+                        WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) 
+                        AND price = ? AND deleted_at IS NULL";
+            $stockStmt = $pdo->prepare($stockSql);
+            $stockStmt->execute([$data['product_name'], $data['product_name'], $data['price'] ?? 0]);
+            $stockRow = $stockStmt->fetch(PDO::FETCH_ASSOC);
+            $availableStock = floatval($stockRow['available_stock'] ?? 0);
+            
+            if ($outQty > $availableStock) {
+                $pdo->rollBack();
+                sendResponse(false, "产品 [{$data['product_name']}] 库存不足！可用库存: {$availableStock}，请求出库: {$outQty}");
+            }
+        }
+        // ========== 库存校验结束 ==========
+        
         // 将 Drinks 转换为 Service Line
         $type = $data['type'] ?? null;
         if ($type === 'Drinks' || strtolower($type) === 'drinks') {
@@ -909,6 +929,41 @@ function handleBatchSave() {
     
     try {
         $pdo->beginTransaction();
+        
+        // ========== 库存校验 ==========
+        $outSummary = [];
+        foreach ($rows as $row) {
+            $outQty = floatval($row['out_quantity'] ?? 0);
+            if ($outQty > 0) {
+                $key = ($row['product_name'] ?? '') . '||' . ($row['price'] ?? 0);
+                if (!isset($outSummary[$key])) {
+                    $outSummary[$key] = [
+                        'product_name' => $row['product_name'],
+                        'price' => $row['price'] ?? 0,
+                        'total_out' => 0
+                    ];
+                }
+                $outSummary[$key]['total_out'] += $outQty;
+            }
+        }
+        
+        foreach ($outSummary as $item) {
+            $stockSql = "SELECT 
+                            (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) - 
+                            COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) as available_stock
+                        FROM j3stockedit_data 
+                        WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) 
+                        AND price = ? AND deleted_at IS NULL";
+            $stockStmt = $pdo->prepare($stockSql);
+            $stockStmt->execute([$item['product_name'], $item['product_name'], $item['price']]);
+            $stockRow = $stockStmt->fetch(PDO::FETCH_ASSOC);
+            $availableStock = floatval($stockRow['available_stock'] ?? 0);
+            
+            if ($item['total_out'] > $availableStock) {
+                throw new Exception("产品 [{$item['product_name']}] 库存不足！可用库存: {$availableStock}，请求出库: {$item['total_out']}");
+            }
+        }
+        // ========== 库存校验结束 ==========
         
         $sql = "INSERT INTO j3stockedit_data 
                 (date, time, product_name, in_quantity, out_quantity, specification, price, code_number, remark, receiver, target_system, type, created_by) 
