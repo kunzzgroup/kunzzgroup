@@ -747,6 +747,10 @@ function handlePost()
         $newRecord = $stmt->fetch(PDO::FETCH_ASSOC);
         $newRecord['approval_status'] = (!empty($newRecord['approver'])) ? 'approved' : 'pending';
 
+        // 将 created_by 解析为 nickname（与 GET list 保持一致）
+        $resolved = resolveCreatedByNicknames($pdo, [$newRecord]);
+        $newRecord = $resolved[0];
+
         $message = "进出库记录添加成功";
         if (strtolower($targetSystem) === 'central') {
             $message .= "，已同时保存到Central系统";
@@ -890,6 +894,10 @@ function handlePut()
             $stmt = $pdo->prepare("SELECT * FROM j3stockedit_data WHERE id = ? AND deleted_at IS NULL");
             $stmt->execute([$data['id']]);
             $updatedRecord = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // 将 created_by 解析为 nickname（与 GET list 保持一致）
+            $resolved = resolveCreatedByNicknames($pdo, [$updatedRecord]);
+            $updatedRecord = $resolved[0];
 
             // 当前 system=j3页面，收货单位始终是 j3
             $targetSystem = 'j3'; // 强制锁定
