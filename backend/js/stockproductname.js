@@ -241,15 +241,31 @@ async function applyPagePermissions() {
 async function initApp() {
     await initPermissions();
 
+    // 判断 URL 是否明确指定了 overview
+    const _urlSys = new URLSearchParams(window.location.search).get('system');
+    const _overviewRequested = (_urlSys === 'overview');
+
     // 应用页面权限，自动切换到第一个允许的系统
     const systemSwitched = await applyPagePermissions();
 
-    // 如果系统未切换，才加载数据（如果已切换，switchSystem 会处理数据加载）
-    if (!systemSwitched) {
+    // 如果 URL 明确要求 overview，强制恢复到 overview（防止 applyPagePermissions 切走）
+    if (_overviewRequested && currentSystem !== 'overview') {
+        currentSystem = 'overview';
+        const el = document.getElementById('current-system');
+        if (el) el.textContent = '总览';
+        // 更新 active 状态
+        document.querySelectorAll('#system-selector-dropdown .dropdown-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.systemValue === 'overview');
+        });
+    }
+
+    // 如果系统未切换（或已强制回 overview），才加载数据
+    if (!systemSwitched || _overviewRequested) {
         loadStockData();
     }
-    initRealTimeSearch(); // 添加这行
+    initRealTimeSearch();
 }
+
 
 // 切换视图选择器下拉菜单
 function toggleViewSelector() {
