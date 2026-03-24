@@ -2606,7 +2606,7 @@ function renderStockTable() {
             }
                     </td>
                     <td>
-                        <span class="created-user" data-user="${record.created_by || '-'}" data-time="${record.created_at || '-'}">${record.created_by || '-'}</span>
+                        <span class="created-user" data-user="${record.created_by || '-'}" data-time="${record.date || ''}${record.time ? ' ' + record.time : ''}">${record.created_by || '-'}</span>
                     </td>
                     <td>
                         <span class="action-cell">
@@ -3583,7 +3583,9 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
                 product_remark_checked: formData.product_remark_checked,
                 remark_number: formData.remark_number,
                 type: (result.data && result.data.type !== undefined) ? result.data.type : (formData.type || ''),
-                created_at: new Date().toISOString()
+                // 立即从服务端响应获取 created_by（已解析为 nickname）和 created_at
+                created_by: (result.data && result.data.created_by) ? result.data.created_by : '-',
+                created_at: (result.data && result.data.created_at) ? result.data.created_at : new Date().toISOString()
             };
 
             stockData.push(newRecord); // 添加到数组末尾
@@ -3760,10 +3762,12 @@ async function saveNewRecord() {
                 receiver: formData.receiver,
                 applicant: formData.applicant,
                 remark: formData.remark,
-                product_remark_checked: formData.product_remark_checked,  // 添加这行
-                remark_number: formData.remark_number,  // 添加这行
+                product_remark_checked: formData.product_remark_checked,
+                remark_number: formData.remark_number,
                 type: (result.data && result.data.type !== undefined) ? result.data.type : (formData.type || ''),
-                created_at: new Date().toISOString()
+                // 立即从服务端响应获取 created_by（已解析为 nickname）和 created_at
+                created_by: (result.data && result.data.created_by) ? result.data.created_by : '-',
+                created_at: (result.data && result.data.created_at) ? result.data.created_at : new Date().toISOString()
             };
 
             stockData.push(newRecord); // 添加到数组末尾

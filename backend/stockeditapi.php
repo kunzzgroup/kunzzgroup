@@ -1362,6 +1362,9 @@ function handlePost()
         $stmt->execute([$newId]);
         $newRecord = $stmt->fetch(PDO::FETCH_ASSOC);
         $newRecord['approval_status'] = (!empty($newRecord['approver'])) ? 'approved' : 'pending';
+        // 解析 created_by 为 nickname 再返回给前端
+        $resolved = resolveCreatedByNicknames($pdo, [$newRecord]);
+        $newRecord = $resolved[0];
 
         $message = "进出库记录添加成功";
         if ($outQuantity > 0) {
@@ -2280,6 +2283,9 @@ function handlePut()
         $stmt = $pdo->prepare("SELECT * FROM stockinout_data WHERE id = ? AND deleted_at IS NULL");
         $stmt->execute([$data['id']]);
         $updatedRecord = $stmt->fetch(PDO::FETCH_ASSOC);
+        // 解析 created_by 为 nickname 再返回给前端
+        $resolvedUpd = resolveCreatedByNicknames($pdo, [$updatedRecord]);
+        $updatedRecord = $resolvedUpd[0];
 
         sendResponse(true, "进出库记录更新成功", $updatedRecord);
 
