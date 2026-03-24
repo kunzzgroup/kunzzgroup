@@ -398,6 +398,7 @@
      display: flex;
      align-items: center;
      justify-content: flex-end;
+     gap: 2px;
      padding: 0 clamp(4px, 0.42vw, 8px);
      box-sizing: border-box;
      font-size: 14px;
@@ -406,8 +407,7 @@
  .currency-display .currency-symbol {
      color: #6b7280;
      font-weight: 500;
-     margin-right: 2px;
-     min-width: auto;
+     flex: 0 0 auto;
      width: auto;
      text-align: left;
  }
@@ -415,9 +415,10 @@
  .currency-display .currency-amount {
      font-weight: 500;
      color: #000000ff;
-     text-align: center;
-     min-width: 28px;
+     flex: 0 0 auto;
      width: auto;
+     min-width: 55px;
+     text-align: right;
  }
 
  /* 输入框容器样式 */
