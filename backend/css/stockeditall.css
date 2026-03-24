@@ -468,7 +468,7 @@
  /* 货品编号 */
  .stock-table th:nth-child(3),
  .stock-table td:nth-child(3) {
-     width: 11%;
+     width: 13%;
  }
 
  /* 货品 */
@@ -498,13 +498,13 @@
  /* 规格 */
  .stock-table th:nth-child(8),
  .stock-table td:nth-child(8) {
-     width: 7%;
+     width: 8%;
  }
 
  /* 单价 */
  .stock-table th:nth-child(9),
  .stock-table td:nth-child(9) {
-     width: 8%;
+     width: 10%;
  }
 
  /* 总价 */
@@ -522,31 +522,31 @@
  /* 产品备注 checkbox */
  .stock-table th:nth-child(12),
  .stock-table td:nth-child(12) {
-     width: 3%;
+     width: 5%;
  }
 
  /* 备注编号 */
  .stock-table th:nth-child(13),
  .stock-table td:nth-child(13) {
-     width: 6%;
+     width: 10%;
  }
 
- /* 供应商/出货人 */
+ /* 名字/收货人 */
  .stock-table th:nth-child(14),
  .stock-table td:nth-child(14) {
-     width: 7%;
- }
-
- /* 备注 */
- .stock-table th:nth-child(15),
- .stock-table td:nth-child(15) {
-     width: 9%;
+     width: 8%;
  }
 
  /* 创建人 */
+ .stock-table th:nth-child(15),
+ .stock-table td:nth-child(15) {
+     width: 5%;
+ }
+
+ /* 备注 */
  .stock-table th:nth-child(16),
  .stock-table td:nth-child(16) {
-     width: 4%;
+     width: 5%;
  }
 
  /* 操作 */
@@ -2229,12 +2229,14 @@
      display: flex;
      gap: 8px;
  }
-/* Remove number input spinners */
-input[type='number']::-webkit-outer-spin-button,
-input[type='number']::-webkit-inner-spin-button {
-    -webkit-appearance: none !important;
-    margin: 0 !important;
-}
-input[type='number'] {
-    -moz-appearance: textfield !important;
-}
+
+ /* Remove number input spinners */
+ input[type='number']::-webkit-outer-spin-button,
+ input[type='number']::-webkit-inner-spin-button {
+     -webkit-appearance: none !important;
+     margin: 0 !important;
+ }
+
+ input[type='number'] {
+     -moz-appearance: textfield !important;
+ }

@@ -2621,13 +2621,13 @@ function renderStockTable() {
             }
                     </td>
                     <td>
+                        <span class="created-user" data-user="${record.created_by || '-'}" data-time="${record.created_at || '-'}">${record.created_by || '-'}</span>
+                    </td>
+                    <td>
                         ${isEditing ?
                 `<input type="text" class="table-input" value="${record.remark || ''}" onchange="updateField(${record.id}, 'remark', this.value)">` :
                 `<span>${record.remark || '-'}</span>`
             }
-                    </td>
-                    <td>
-                        <span class="created-user" data-user="${record.created_by || '-'}" data-time="${record.created_at || '-'}">${record.created_by || '-'}</span>
                     </td>
                     <td>
                         <span class="action-cell">
@@ -2924,8 +2924,8 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
                     ${createNewRowRemarkNumberInput(rowId)}
                 </td>
                 <td>${createCombobox('receiver', '', null, rowId)}</td>
-                <td><input type="text" class="table-input" placeholder="输入备注..." id="${rowId}-remark" value="${remarkValue}"></td>
                 <td><span class="created-user" data-user="-" data-time="-">-</span></td>
+                <td><input type="text" class="table-input" placeholder="输入备注..." id="${rowId}-remark" value="${remarkValue}"></td>
                 <td>
                     <span class="action-cell">
                         <button class="action-btn save-new-btn" onclick="saveNewRowRecord(this)" title="保存">
@@ -3610,7 +3610,7 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
                 product_remark_checked: formData.product_remark_checked,
                 remark_number: formData.remark_number,
                 type: (result.data && result.data.type !== undefined) ? result.data.type : (formData.type || ''),
-                created_at: result.data.created_at || new Date().toISOString()
+                created_at: new Date().toISOString()
             };
 
             stockData.push(newRecord); // 添加到数组末尾
@@ -3790,7 +3790,7 @@ async function saveNewRecord() {
                 product_remark_checked: formData.product_remark_checked,  // 添加这行
                 remark_number: formData.remark_number,  // 添加这行
                 type: (result.data && result.data.type !== undefined) ? result.data.type : (formData.type || ''),
-                created_at: result.data.created_at || new Date().toISOString()
+                created_at: new Date().toISOString()
             };
 
             stockData.push(newRecord); // 添加到数组末尾
