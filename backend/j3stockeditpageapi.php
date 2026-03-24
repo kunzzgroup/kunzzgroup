@@ -43,6 +43,32 @@ catch (PDOException $e) {
     exit;
 }
 
+// 启动 session（用于获取当前登录用户）
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+/**
+ * 获取当前登录用户的显示名称（优先级：nickname > username_cn > username）
+ */
+function getCurrentApplicantName(PDO $pdo): string
+{
+    if (!isset($_SESSION['user_id'])) {
+        return $_SESSION['username'] ?? 'System';
+    }
+    $userId = $_SESSION['user_id'];
+    $stmt = $pdo->prepare("SELECT nickname, username_cn, username FROM users WHERE id = ?");
+    $stmt->execute([$userId]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+    $nickname = trim((string)($row['nickname'] ?? ''));
+    if ($nickname !== '')
+        return $nickname;
+    $usernameCn = trim((string)($row['username_cn'] ?? ''));
+    if ($usernameCn !== '')
+        return $usernameCn;
+    return trim((string)($row['username'] ?? 'System'));
+}
+
 // 调试信息
 error_log("数据库连接成功 - stockeditapi");
 error_log("请求方法: " . $_SERVER['REQUEST_METHOD']);
@@ -577,8 +603,8 @@ function handlePost()
 
         $stmt = $pdo->prepare($sql);
 
-        // 获取当前用户名
-        $createdBy = $_SESSION['username'] ?? 'System';
+        // 获取当前用户昵称
+        $createdBy = getCurrentApplicantName($pdo);
 
         $stmt->execute([
             $data['date'],
@@ -1003,8 +1029,8 @@ function handleBatchSave()
                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $centralStmt = $pdo->prepare($centralSql);
 
-        // 获取当前用户名
-        $createdBy = $_SESSION['username'] ?? 'System';
+        // 获取当前用户昵称
+        $createdBy = getCurrentApplicantName($pdo);
 
         $successCount = 0;
         foreach ($rows as $index => $row) {
