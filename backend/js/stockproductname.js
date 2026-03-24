@@ -55,7 +55,10 @@ const availableReportTypes = CURRENT_USER_APPLICANT;
 let stockData = [];
 let isLoading = false;
 let nextRowId = 1;
-let currentSystem = 'overview'; // 当前选择的系统：overview, central, j1, j2, j3
+// 从 URL 参数读取初始系统，与 PHP 渲染保持一致
+const _initSystemParam = new URLSearchParams(window.location.search).get('system');
+const _validSystems = new Set(['overview', 'central', 'j1', 'j2', 'j3']);
+let currentSystem = (_initSystemParam && _validSystems.has(_initSystemParam)) ? _initSystemParam : 'overview';
 const PRODUCT_SYSTEM_OPTIONS = [
     { value: 'overview', label: '总览' },
     { value: 'central', label: '中央' },
