@@ -1249,7 +1249,8 @@ function handlePost()
                             COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) as available_stock
                         FROM stockinout_data 
                         WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) 
-                        AND price = ? AND deleted_at IS NULL";
+                        AND CAST(price AS DECIMAL(15,6)) = CAST(? AS DECIMAL(15,6)) AND deleted_at IS NULL
+                        AND (target_system IS NULL OR target_system != 'SOT')";
             $stockStmt = $pdo->prepare($stockSql);
             $stockStmt->execute([$data['product_name'], $data['product_name'], $data['price']]);
             $stockRow = $stockStmt->fetch(PDO::FETCH_ASSOC);
@@ -1446,7 +1447,8 @@ function handleBatchSave()
                             COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) as available_stock
                         FROM stockinout_data 
                         WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) 
-                        AND price = ? AND deleted_at IS NULL";
+                        AND CAST(price AS DECIMAL(15,6)) = CAST(? AS DECIMAL(15,6)) AND deleted_at IS NULL
+                        AND (target_system IS NULL OR target_system != 'SOT')";
             $stockStmt = $pdo->prepare($stockSql);
             $stockStmt->execute([$item['product_name'], $item['product_name'], $item['price']]);
             $stockRow = $stockStmt->fetch(PDO::FETCH_ASSOC);

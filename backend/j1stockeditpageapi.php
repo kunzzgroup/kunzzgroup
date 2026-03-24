@@ -587,7 +587,7 @@ function handlePost()
                             COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) as available_stock
                         FROM j1stockedit_data 
                         WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) 
-                        AND price = ? AND deleted_at IS NULL";
+                        AND CAST(price AS DECIMAL(15,6)) = CAST(? AS DECIMAL(15,6)) AND deleted_at IS NULL";
             $stockStmt = $pdo->prepare($stockSql);
             $stockStmt->execute([$data['product_name'], $data['product_name'], $data['price'] ?? 0]);
             $stockRow = $stockStmt->fetch(PDO::FETCH_ASSOC);
@@ -595,7 +595,7 @@ function handlePost()
 
             if ($outQty > $availableStock) {
                 $pdo->rollBack();
-                sendResponse(false, "产品 [{$data['product_name']}] 库存不足！可用库存: {$availableStock}，请求出库: {$outQty}");
+                sendResponse(false, "产品 [{$data['product_name']}] (价格 RM" . ($data['price'] ?? 0) . ") 库存不足！可用库存: {$availableStock}，请求出库: {$outQty}");
             }
         }
         // ========== 库存校验结束 ==========
@@ -1026,14 +1026,14 @@ function handleBatchSave()
                             COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) as available_stock
                         FROM j1stockedit_data 
                         WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) 
-                        AND price = ? AND deleted_at IS NULL";
+                        AND CAST(price AS DECIMAL(15,6)) = CAST(? AS DECIMAL(15,6)) AND deleted_at IS NULL";
             $stockStmt = $pdo->prepare($stockSql);
             $stockStmt->execute([$item['product_name'], $item['product_name'], $item['price']]);
             $stockRow = $stockStmt->fetch(PDO::FETCH_ASSOC);
             $availableStock = floatval($stockRow['available_stock'] ?? 0);
 
             if ($item['total_out'] > $availableStock) {
-                throw new Exception("产品 [{$item['product_name']}] 库存不足！可用库存: {$availableStock}，请求出库: {$item['total_out']}");
+                throw new Exception("产品 [{$item['product_name']}] (价格 RM{$item['price']}) 库存不足！可用库存: {$availableStock}，请求出库: {$item['total_out']}");
             }
         }
         // ========== 库存校验结束 ==========
