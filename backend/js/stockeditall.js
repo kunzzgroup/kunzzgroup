@@ -2891,16 +2891,10 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
                     </select>
                 </td>
                 <td>
-                    <div class="currency-display">
-                        <span class="currency-symbol">RM</span>
-                        <input type="number" class="currency-input-edit" min="0" step="0.00001" placeholder="0.00" id="${rowId}-price" oninput="updateNewRowTotal(this)">
-                    </div>
+                    <div class="currency-display"><span class="currency-symbol">RM</span><input type="number" class="currency-input-edit" min="0" step="0.00001" placeholder="0.00" id="${rowId}-price" oninput="updateNewRowTotal(this)"></div>
                 </td>
                 <td class="calculated-cell">
-                    <div class="currency-display">
-                        <span class="currency-symbol">RM</span>
-                        <span class="currency-amount">0.00</span>
-                    </div>
+                    <div class="currency-display"><span class="currency-symbol">RM</span><span class="currency-amount">0.00</span></div>
                 </td>
                 <td>
                     <select class="table-select" id="${rowId}-type" ${currentStockType === 'central' ? 'disabled' : ''}>

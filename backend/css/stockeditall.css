@@ -395,11 +395,13 @@
 
  /* 货币显示容器 */
  .currency-display {
-     display: flex;
+     display: inline-flex;
      align-items: center;
      justify-content: center;
      gap: 2px;
-     padding: 0 clamp(2px, 0.21vw, 4px);
+     width: fit-content;
+     margin: 0 auto;
+     padding: 0;
      box-sizing: border-box;
      font-size: 14px;
  }
