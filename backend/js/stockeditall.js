@@ -5581,7 +5581,8 @@ async function loadProductPrices(productName, selectElementId, currentPrice = ''
                 const price = item.price;
                 const availableStock = item.available_stock;
                 const selected = price == currentPrice ? 'selected' : '';
-                options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(3)}</option>`;
+                const stockInfo = `(库存: ${availableStock})`;
+                options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(3)} ${stockInfo}</option>`;
             });
             selectElement.innerHTML = options;
         } else {
@@ -5658,7 +5659,10 @@ async function loadNewRowProductPricesWithStock(productName, selectElementId, cu
                 const selected = price == currentPrice ? 'selected' : '';
 
                 if (availableStock >= requiredQty) {
-                    options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(3)}</option>`;
+                    const stockInfo = requiredQty > 0 && availableStock < requiredQty
+                        ? `(库存: ${availableStock}, 不足)`
+                        : `(库存: ${availableStock})`;
+                    options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(3)} ${stockInfo}</option>`;
                 }
             });
 
