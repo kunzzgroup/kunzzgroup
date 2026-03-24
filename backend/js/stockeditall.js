@@ -2558,35 +2558,14 @@ function renderStockTable() {
                     <td>
                         ${isEditing ?
                 (parseFloat(record.out_quantity || 0) > 0 && parseFloat(record.in_quantity || 0) === 0 ?
-                    `<div class="currency-display">
-                                    <span class="currency-symbol">RM</span>
-                                    <select class="table-select price-select" id="price-select-${record.id}" 
-                                            onchange="updateField(${record.id}, 'price', this.value)"
-                                            data-product-name="${record.product_name}" 
-                                            data-current-price="${record.price_raw ?? record.price}">
-                                        <option value="">请选择价格</option>
-                                        ${(record.price_raw ?? record.price) !== '' && (record.price_raw ?? record.price) !== null ?
-                        `<option value="${record.price_raw ?? record.price}" selected>${parseFloat(record.price_raw ?? record.price).toFixed(5)}</option>` : ''}
-                                    </select>
-                                </div>` :
-                    `<div class="currency-display">
-                                    <span class="currency-symbol">RM</span>
-                                    <input type="number" class="currency-input-edit" 
-                                        value="${parseFloat(record.price_raw ?? (record.price || 0)) === 0 ? '' : formatCurrencyEdit(record.price_raw ?? record.price)}" min="0" step="0.00001" placeholder="0.00" 
-                                        onchange="updateField(${record.id}, 'price', this.value)">
-                                </div>`
+                    `<span class="currency-display"><span class="currency-symbol">RM</span><select class="table-select price-select" id="price-select-${record.id}" onchange="updateField(${record.id}, 'price', this.value)" data-product-name="${record.product_name}" data-current-price="${record.price_raw ?? record.price}"><option value="">请选择价格</option>${(record.price_raw ?? record.price) !== '' && (record.price_raw ?? record.price) !== null ? `<option value="${record.price_raw ?? record.price}" selected>${parseFloat(record.price_raw ?? record.price).toFixed(5)}</option>` : ''}</select></span>` :
+                    `<span class="currency-display"><span class="currency-symbol">RM</span><input type="number" class="currency-input-edit" value="${parseFloat(record.price_raw ?? (record.price || 0)) === 0 ? '' : formatCurrencyEdit(record.price_raw ?? record.price)}" min="0" step="0.00001" placeholder="0.00" onchange="updateField(${record.id}, 'price', this.value)"></span>`
                 ) :
-                `<div class="currency-display">
-                                <span class="currency-symbol">RM</span>
-                                <span class="currency-amount">${formatCurrency(record.price)}</span>
-                            </div>`
+                `<span class="currency-display"><span class="currency-symbol">RM</span><span class="currency-amount">${formatCurrency(record.price)}</span></span>`
             }
                     </td>
                     <td class="calculated-cell ${total < 0 ? 'negative-value negative-parentheses' : ''}">
-                        <div class="currency-display ${total < 0 ? 'negative-value negative-parentheses' : ''}">
-                            <span class="currency-symbol">RM</span>
-                            <span class="currency-amount">${formatCurrency(Math.abs(total))}</span>
-                        </div>
+                        <span class="currency-display ${total < 0 ? 'negative-value negative-parentheses' : ''}"><span class="currency-symbol">RM</span><span class="currency-amount">${formatCurrency(Math.abs(total))}</span></span>
                     </td>
                     <td>
                         ${isEditing ?
@@ -2897,16 +2876,10 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
                     </select>
                 </td>
                 <td>
-                    <div class="currency-display">
-                        <span class="currency-symbol">RM</span>
-                        <input type="number" class="currency-input-edit" min="0" step="0.00001" placeholder="0.00" id="${rowId}-price" oninput="updateNewRowTotal(this)">
-                    </div>
+                    <span class="currency-display"><span class="currency-symbol">RM</span><input type="number" class="currency-input-edit" min="0" step="0.00001" placeholder="0.00" id="${rowId}-price" oninput="updateNewRowTotal(this)"></span>
                 </td>
                 <td class="calculated-cell">
-                    <div class="currency-display">
-                        <span class="currency-symbol">RM</span>
-                        <span class="currency-amount">0.00</span>
-                    </div>
+                    <span class="currency-display"><span class="currency-symbol">RM</span><span class="currency-amount">0.00</span></span>
                 </td>
                 <td>
                     <select class="table-select" id="${rowId}-type" ${currentStockType === 'central' ? 'disabled' : ''}>
