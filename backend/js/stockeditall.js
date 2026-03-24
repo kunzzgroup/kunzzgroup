@@ -2558,7 +2558,7 @@ function renderStockTable() {
                     <td>
                         ${isEditing ?
                 (parseFloat(record.out_quantity || 0) > 0 && parseFloat(record.in_quantity || 0) === 0 ?
-                    `<div class="currency-display"><span class="currency-symbol">RM</span><select class="table-select price-select" id="price-select-${record.id}" onchange="updateField(${record.id}, 'price', this.value)" data-product-name="${record.product_name}" data-current-price="${record.price_raw ?? record.price}"><option value="">请选择价格</option>${(record.price_raw ?? record.price) !== '' && (record.price_raw ?? record.price) !== null ? `<option value="${record.price_raw ?? record.price}" selected>${parseFloat(record.price_raw ?? record.price).toFixed(5)}</option>` : ''}</select></div>` :
+                    `<div class="currency-display"><span class="currency-symbol">RM</span><select class="table-select price-select" id="price-select-${record.id}" onchange="updateField(${record.id}, 'price', this.value)" data-product-name="${record.product_name}" data-current-price="${record.price_raw ?? record.price}"><option value="">请选择价格</option>${(record.price_raw ?? record.price) !== '' && (record.price_raw ?? record.price) !== null ? `<option value="${record.price_raw ?? record.price}" selected>${parseFloat(record.price_raw ?? record.price).toFixed(3)}</option>` : ''}</select></div>` :
                     `<div class="currency-display"><span class="currency-symbol">RM</span><input type="number" class="currency-input-edit" value="${parseFloat(record.price_raw ?? (record.price || 0)) === 0 ? '' : formatCurrencyEdit(record.price_raw ?? record.price)}" min="0" step="0.00001" placeholder="0.00" onchange="updateField(${record.id}, 'price', this.value)"></div>`
                 ) :
                 `<div class="currency-display"><span class="currency-symbol">RM</span><span class="currency-amount">${formatCurrency(record.price)}</span></div>`
@@ -2747,11 +2747,11 @@ function formatCurrency(value) {
     return rounded.toFixed(2);
 }
 
-// 格式化货币 - 编辑时使用五位小数
+// 格式化货币 - 编辑时使用三位小数
 function formatCurrencyEdit(value) {
-    if (!value || value === '' || value === '0') return '0.00000';
+    if (!value || value === '' || value === '0') return '0.000';
     const num = parseFloat(value);
-    return isNaN(num) ? '0.00000' : num.toFixed(5);
+    return isNaN(num) ? '0.000' : num.toFixed(3);
 }
 
 // 格式化货币用于PDF生成 - 使用进位逻辑
@@ -5583,7 +5583,7 @@ async function loadProductPrices(productName, selectElementId, currentPrice = ''
                 const selected = price == currentPrice ? 'selected' : '';
                 // 显示所有价格选项，不管库存是否足够
                 const stockInfo = `(库存: ${availableStock})`;
-                options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
+                options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(3)} ${stockInfo}</option>`;
             });
             selectElement.innerHTML = options;
         } else {
@@ -5661,7 +5661,7 @@ async function loadNewRowProductPricesWithStock(productName, selectElementId, cu
 
                 // 只显示库存足够的价格选项
                 if (availableStock >= requiredQty) {
-                    options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} (库存: ${availableStock})</option>`;
+                    options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(3)} (库存: ${availableStock})</option>`;
                 }
             });
 
@@ -5716,9 +5716,9 @@ window.loadAddFormProductPricesWithStock = async function (productName, required
 
             // 有库存，根据价格数量决定显示方式
             if (pricesWithStock.length === 1) {
-                // 只有一个价格，自动填充
                 const singlePrice = pricesWithStock[0].price;
                 const priceValue = parseFloat(singlePrice);
+                const displayPrice = priceValue.toFixed(3);
                 console.log('✓ 只有一个价格，自动填充单价:', priceValue, '原始值:', singlePrice);
                 console.log('价格元素状态 - selectElement:', selectElement, 'priceInput:', priceInput);
 
