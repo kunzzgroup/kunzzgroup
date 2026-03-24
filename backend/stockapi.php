@@ -139,18 +139,78 @@ $user_branch_raw = strtoupper($_SESSION['branch'] ?? '');
 $user_branches = array_map('trim', explode(',', $user_branch_raw));
 $user_branches = array_filter($user_branches);
 
-// 如果不是 HQ (KH) 用户，且请求了特定的系统分配，验证是否匹配其所属分支
-// 或者自动根据其所属分支进行过滤
-if (!in_array('KH', $user_branches, true) && !empty($user_branches)) {
-    // 如果是 GET 请求列表，强制限制 system_assign
+// 从 page_permissions 中读取用户被授权的 stock_systems（e.g. ['j1','j2']）
+// 优先以此为准，先于 session branch 检查
+$page_allowed_systems = [];
+try {
+    $permStmt2 = $pdo->prepare("SELECT permissions_json FROM user_page_permissions WHERE user_id = ? AND page_key = 'stock_inventory'");
+    $permStmt2->execute([intval($_SESSION['user_id'])]);
+    $permJson2 = $permStmt2->fetchColumn();
+    if ($permJson2) {
+        $permDecoded2 = json_decode($permJson2, true);
+        if (is_array($permDecoded2)) {
+            $rawSystems = $permDecoded2['system'] ?? ($permDecoded2['systems'] ?? []);
+            // 统一大写，方便比较（j1 → J1）
+            $page_allowed_systems = array_map('strtoupper', (array)$rawSystems);
+        }
+    }
+    // 也查 user_sidebar_permissions 中的 page_permissions_json
+    if (empty($page_allowed_systems)) {
+        $sidebarStmt = $pdo->prepare("SELECT page_permissions_json FROM user_sidebar_permissions WHERE user_id = ?");
+        $sidebarStmt->execute([intval($_SESSION['user_id'])]);
+        $sidebarJson = $sidebarStmt->fetchColumn();
+        if ($sidebarJson) {
+            $sidebarDecoded = json_decode($sidebarJson, true);
+            if (is_array($sidebarDecoded) && isset($sidebarDecoded['stock_inventory'])) {
+                $rawSystems = $sidebarDecoded['stock_inventory']['system'] ?? ($sidebarDecoded['stock_inventory']['systems'] ?? []);
+                $page_allowed_systems = array_map('strtoupper', (array)$rawSystems);
+            }
+        }
+    }
+} catch (Throwable $e) {
+    // 查询失败时退回到 session branch 检查
+}
+
+// 辅助：检查请求的 system_assign 是否被允许
+function isBranchAllowed($requested_system, $page_allowed_systems, $user_branches) {
+    $requestedUpper = strtoupper($requested_system);
+
+    // 优先：如果 page_permissions 中有明确授权的系统列表，以此为准
+    if (!empty($page_allowed_systems)) {
+        // HQ（KH）等总部账户不受分支限制
+        if (in_array('KH', $GLOBALS['user_branches'] ?? [], true)) return true;
+        // 系统名映射：J1→J1, CENTRAL→Central 等（比较时统一大写）
+        return in_array($requestedUpper, $page_allowed_systems, true);
+    }
+
+    // 退回到 session branch 检查（原有逻辑）
+    if (in_array('KH', $user_branches, true)) return true;
+    if (empty($user_branches)) return true;
+    return in_array($requestedUpper, $user_branches, true);
+}
+
+// 如果不是 HQ (KH) 用户，且请求了特定的系统分配，验证是否匹配权限
+if (!in_array('KH', $user_branches, true) && empty($page_allowed_systems) && !empty($user_branches)) {
+    // 无 page_permissions 配置时回退到原有 session branch 检查
     if ($method === 'GET' && isset($_GET['system_assign'])) {
         if (!in_array(strtoupper($_GET['system_assign']), $user_branches, true)) {
             sendResponse(false, "无权访问此分支的数据 (您的分支: $user_branch_raw)");
         }
     }
-    // 如果是 POST/PUT，确保数据中的 system_assign 匹配
     if (($method === 'POST' || $method === 'PUT') && isset($data['system_assign'])) {
         if (!in_array(strtoupper($data['system_assign']), $user_branches, true)) {
+            sendResponse(false, "无权向此分支添加/修改数据");
+        }
+    }
+} elseif (!empty($page_allowed_systems)) {
+    // 有 page_permissions：以 page_permissions 中的 stock_systems 为准
+    if ($method === 'GET' && isset($_GET['system_assign'])) {
+        if (!in_array(strtoupper($_GET['system_assign']), $page_allowed_systems, true)) {
+            sendResponse(false, "无权访问此分支的数据 (您的分支权限: " . implode(', ', $page_allowed_systems) . ")");
+        }
+    }
+    if (($method === 'POST' || $method === 'PUT') && isset($data['system_assign'])) {
+        if (!in_array(strtoupper($data['system_assign']), $page_allowed_systems, true)) {
             sendResponse(false, "无权向此分支添加/修改数据");
         }
     }
