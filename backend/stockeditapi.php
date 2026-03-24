@@ -54,6 +54,28 @@ function sendResponse($success, $message = "", $data = null) {
     exit;
 }
 
+// 获取当前用户昵称（优先昵称 > 中文名 > 英文名）
+function getCreatorNickname($pdo) {
+    if (!isset($_SESSION['user_id'])) {
+        return $_SESSION['username'] ?? 'System';
+    }
+    try {
+        $stmt = $pdo->prepare("SELECT nickname, username_cn, username FROM users WHERE id = ?");
+        $stmt->execute([$_SESSION['user_id']]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row) {
+            $nickname = trim((string)($row['nickname'] ?? ''));
+            if ($nickname !== '') return $nickname;
+            $usernameCn = trim((string)($row['username_cn'] ?? ''));
+            if ($usernameCn !== '') return $usernameCn;
+            return trim((string)($row['username'] ?? 'System'));
+        }
+    } catch (PDOException $e) {
+        error_log("获取用户昵称失败: " . $e->getMessage());
+    }
+    return $_SESSION['username'] ?? 'System';
+}
+
 function saveToJ1Table($pdo, $data, $mainRecordId = null) {
     try {
         // 从stock_data获取该货品的category
@@ -1182,8 +1204,8 @@ function handlePost() {
 
         $stmt = $pdo->prepare($sql);
 
-        // 获取当前用户名
-        $createdBy = $_SESSION['username'] ?? 'System';
+        // 获取当前用户昵称
+        $createdBy = getCreatorNickname($pdo);
 
         $stmt->execute([
             $data['date'],
@@ -1364,8 +1386,8 @@ function handleBatchSave() {
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $pdo->prepare($sql);
         
-        // 获取当前用户名
-        $createdBy = $_SESSION['username'] ?? 'System';
+        // 获取当前用户昵称
+        $createdBy = getCreatorNickname($pdo);
 
         $successCount = 0;
         foreach ($rows as $index => $row) {
