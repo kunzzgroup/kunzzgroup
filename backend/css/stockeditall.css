@@ -395,13 +395,10 @@
 
  /* 货币显示容器 */
  .currency-display {
-     display: inline-flex;
+     display: flex;
      align-items: center;
-     justify-content: center;
-     gap: 2px;
-     width: fit-content;
-     margin: 0 auto;
-     padding: 0;
+     justify-content: flex-end;
+     padding: 0 clamp(4px, 0.42vw, 8px);
      box-sizing: border-box;
      font-size: 14px;
  }
@@ -409,8 +406,8 @@
  .currency-display .currency-symbol {
      color: #6b7280;
      font-weight: 500;
-     margin-right: 0;
-     min-width: 0;
+     margin-right: 0px;
+     min-width: 16px;
      text-align: left;
  }
 
@@ -498,7 +495,7 @@
      width: 5%;
  }
 
- /* 单价 */
+ /* 规格 */
  .stock-table th:nth-child(8),
  .stock-table td:nth-child(8) {
      width: 8%;
@@ -529,21 +526,15 @@
  }
 
  /* 备注编号 */
- .stock-table th:nth-child(12),
- .stock-table td:nth-child(12) {
-     width: 5%;
- }
-
- /* 供应商/出货人 */
  .stock-table th:nth-child(13),
  .stock-table td:nth-child(13) {
-     width: 8%;
+     width: 10%;
  }
 
- /* 备注 */
+ /* 名字/收货人 */
  .stock-table th:nth-child(14),
  .stock-table td:nth-child(14) {
-     width: 6%;
+     width: 8%;
  }
 
  /* 创建人 */
@@ -552,10 +543,16 @@
      width: 5%;
  }
 
- /* 操作 */
+ /* 备注 */
  .stock-table th:nth-child(16),
  .stock-table td:nth-child(16) {
-     width: 7%;
+     width: 5%;
+ }
+
+ /* 操作 */
+ .stock-table th:nth-child(17),
+ .stock-table td:nth-child(17) {
+     width: 5%;
  }
 
  /* 确保输入框和选择框填满单元格 */

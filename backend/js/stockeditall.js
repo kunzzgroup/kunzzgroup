@@ -2576,11 +2576,17 @@ function renderStockTable() {
                                         onchange="updateField(${record.id}, 'price', this.value)">
                                 </div>`
                 ) :
-                `<div class="currency-display"><span class="currency-symbol">RM</span><span class="currency-amount">${formatCurrency(record.price)}</span></div>`
+                `<div class="currency-display">
+                                <span class="currency-symbol">RM</span>
+                                <span class="currency-amount">${formatCurrency(record.price)}</span>
+                            </div>`
             }
                     </td>
                     <td class="calculated-cell ${total < 0 ? 'negative-value negative-parentheses' : ''}">
-                        <div class="currency-display ${total < 0 ? 'negative-value negative-parentheses' : ''}"><span class="currency-symbol">RM</span><span class="currency-amount">${formatCurrency(Math.abs(total))}</span></div>
+                        <div class="currency-display ${total < 0 ? 'negative-value negative-parentheses' : ''}">
+                            <span class="currency-symbol">RM</span>
+                            <span class="currency-amount">${formatCurrency(Math.abs(total))}</span>
+                        </div>
                     </td>
                     <td>
                         ${isEditing ?
@@ -2615,13 +2621,13 @@ function renderStockTable() {
             }
                     </td>
                     <td>
+                        <span class="created-user" data-user="${record.created_by || '-'}" data-time="${record.created_at || '-'}">${record.created_by || '-'}</span>
+                    </td>
+                    <td>
                         ${isEditing ?
                 `<input type="text" class="table-input" value="${record.remark || ''}" onchange="updateField(${record.id}, 'remark', this.value)">` :
                 `<span>${record.remark || '-'}</span>`
             }
-                    </td>
-                    <td>
-                        <span class="created-user" data-user="${record.created_by || '-'}" data-time="${record.created_at || '-'}">${record.created_by || '-'}</span>
                     </td>
                     <td>
                         <span class="action-cell">
@@ -2891,10 +2897,16 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
                     </select>
                 </td>
                 <td>
-                    <div class="currency-display"><span class="currency-symbol">RM</span><input type="number" class="currency-input-edit" min="0" step="0.00001" placeholder="0.00" id="${rowId}-price" oninput="updateNewRowTotal(this)"></div>
+                    <div class="currency-display">
+                        <span class="currency-symbol">RM</span>
+                        <input type="number" class="currency-input-edit" min="0" step="0.00001" placeholder="0.00" id="${rowId}-price" oninput="updateNewRowTotal(this)">
+                    </div>
                 </td>
                 <td class="calculated-cell">
-                    <div class="currency-display"><span class="currency-symbol">RM</span><span class="currency-amount">0.00</span></div>
+                    <div class="currency-display">
+                        <span class="currency-symbol">RM</span>
+                        <span class="currency-amount">0.00</span>
+                    </div>
                 </td>
                 <td>
                     <select class="table-select" id="${rowId}-type" ${currentStockType === 'central' ? 'disabled' : ''}>
@@ -2912,8 +2924,8 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
                     ${createNewRowRemarkNumberInput(rowId)}
                 </td>
                 <td>${createCombobox('receiver', '', null, rowId)}</td>
-                <td><input type="text" class="table-input" placeholder="输入备注..." id="${rowId}-remark" value="${remarkValue}"></td>
                 <td><span class="created-user" data-user="-" data-time="-">-</span></td>
+                <td><input type="text" class="table-input" placeholder="输入备注..." id="${rowId}-remark" value="${remarkValue}"></td>
                 <td>
                     <span class="action-cell">
                         <button class="action-btn save-new-btn" onclick="saveNewRowRecord(this)" title="保存">

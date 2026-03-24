@@ -509,7 +509,7 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
         document.addEventListener("mousemove", function(e) {
             if (hoverBox.style.display === "block") {
                 hoverBox.style.top = (e.pageY + 12) + "px";
-                hoverBox.style.left = (e.pageX - hoverBox.offsetWidth - 12) + "px";
+                hoverBox.style.left = (e.pageX + 12) + "px";
             }
         });
         document.addEventListener("mouseout", function(e) {
