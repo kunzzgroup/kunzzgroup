@@ -415,9 +415,7 @@
  .currency-display .currency-amount {
      font-weight: 500;
      color: #000000ff;
-     flex: 0 0 auto;
-     width: auto;
-     min-width: 55px;
+     flex: 0 0 65px;
      text-align: right;
  }
 
@@ -498,16 +496,16 @@
      width: 5%;
  }
 
- /* 规格 */
+ /* 单价 */
  .stock-table th:nth-child(8),
  .stock-table td:nth-child(8) {
-     width: 8%;
+     width: 6%;
  }
 
- /* 单价 */
+ /* 总价 */
  .stock-table th:nth-child(9),
  .stock-table td:nth-child(9) {
-     width: 10%;
+     width: 7%;
  }
 
  /* 总价 */
@@ -534,10 +532,10 @@
      width: 10%;
  }
 
- /* 名字/收货人 */
+ /* 备注 */
  .stock-table th:nth-child(14),
  .stock-table td:nth-child(14) {
-     width: 8%;
+     width: 13%;
  }
 
  /* 创建人 */
