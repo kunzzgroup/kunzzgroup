@@ -504,13 +504,13 @@
  /* 单价 */
  .stock-table th:nth-child(9),
  .stock-table td:nth-child(9) {
-     width: 6%;
+     width: 8%;
  }
 
  /* 总价 */
  .stock-table th:nth-child(10),
  .stock-table td:nth-child(10) {
-     width: 6%;
+     width: 7%;
  }
 
  /* 类型 */
@@ -522,13 +522,13 @@
  /* 产品备注 checkbox */
  .stock-table th:nth-child(12),
  .stock-table td:nth-child(12) {
-     width: 5%;
+     width: 3%;
  }
 
  /* 备注编号 */
  .stock-table th:nth-child(13),
  .stock-table td:nth-child(13) {
-     width: 8%;
+     width: 6%;
  }
 
  /* 供应商/出货人 */
