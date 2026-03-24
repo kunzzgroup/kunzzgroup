@@ -2621,13 +2621,13 @@ function renderStockTable() {
             }
                     </td>
                     <td>
-                        <span class="created-user" data-user="${record.created_by || '-'}" data-time="${record.created_at || '-'}">${record.created_by || '-'}</span>
-                    </td>
-                    <td>
                         ${isEditing ?
                 `<input type="text" class="table-input" value="${record.remark || ''}" onchange="updateField(${record.id}, 'remark', this.value)">` :
                 `<span>${record.remark || '-'}</span>`
             }
+                    </td>
+                    <td>
+                        <span class="created-user" data-user="${record.created_by || '-'}" data-time="${record.created_at || '-'}">${record.created_by || '-'}</span>
                     </td>
                     <td>
                         <span class="action-cell">
@@ -2924,8 +2924,8 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
                     ${createNewRowRemarkNumberInput(rowId)}
                 </td>
                 <td>${createCombobox('receiver', '', null, rowId)}</td>
-                <td><span class="created-user" data-user="-" data-time="-">-</span></td>
                 <td><input type="text" class="table-input" placeholder="输入备注..." id="${rowId}-remark" value="${remarkValue}"></td>
+                <td><span class="created-user" data-user="-" data-time="-">-</span></td>
                 <td>
                     <span class="action-cell">
                         <button class="action-btn save-new-btn" onclick="saveNewRowRecord(this)" title="保存">
