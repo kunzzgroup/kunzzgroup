@@ -5575,15 +5575,13 @@ async function loadProductPrices(productName, selectElementId, currentPrice = ''
         if (result.success && result.data && result.data.length > 0) {
             let options = '<option value="">请选择价格</option>';
             // 始终保留手动输入价格选项
-            options += '<option value="manual">手动输入价格</option>';
+            options += '<option value="manual">手动输入</option>';;
 
             result.data.forEach(item => {
                 const price = item.price;
                 const availableStock = item.available_stock;
                 const selected = price == currentPrice ? 'selected' : '';
-                // 显示所有价格选项，不管库存是否足够
-                const stockInfo = `(库存: ${availableStock})`;
-                options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(3)} ${stockInfo}</option>`;
+                options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(3)}</option>`;
             });
             selectElement.innerHTML = options;
         } else {
@@ -5652,16 +5650,15 @@ async function loadNewRowProductPricesWithStock(productName, selectElementId, cu
 
         if (result.success && result.data && result.data.length > 0) {
             let options = '<option value="">请选择价格</option>';
-            options += '<option value="manual">手动输入价格</option>';
+            options += '<option value="manual">手动输入</option>';
 
             result.data.forEach(item => {
                 const price = item.price;
                 const availableStock = item.available_stock;
                 const selected = price == currentPrice ? 'selected' : '';
 
-                // 只显示库存足够的价格选项
                 if (availableStock >= requiredQty) {
-                    options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(3)} (库存: ${availableStock})</option>`;
+                    options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(3)}</option>`;
                 }
             });
 
