@@ -393,40 +393,29 @@
      outline: none;
  }
 
-
  /* 货币显示容器 */
- .price {
-     display: inline-flex;
-     align-items: center;
-     gap: 3px;
-     width: fit-content;
- }
-
- /* 同时支持旧类名 */
  .currency-display {
-     display: inline-flex;
+     display: flex;
      align-items: center;
-     gap: 3px;
-     width: fit-content;
+     justify-content: flex-end;
+     padding: 0 clamp(4px, 0.42vw, 8px);
+     box-sizing: border-box;
+     font-size: 14px;
  }
 
- .price .currency,
  .currency-display .currency-symbol {
-     color: inherit;
-     font-weight: inherit;
-     min-width: 0;
+     color: #6b7280;
+     font-weight: 500;
+     margin-right: 0px;
+     min-width: 16px;
+     text-align: left;
  }
 
- .price .amount,
  .currency-display .currency-amount {
-     font-weight: inherit;
-     min-width: 0;
- }
-
- /* 让 td 内居中显示 */
- .stock-table td:has(.price),
- .stock-table td:has(.currency-display) {
+     font-weight: 500;
+     color: #000000ff;
      text-align: center;
+     min-width: 28px;
  }
 
  /* 输入框容器样式 */
@@ -1057,19 +1046,15 @@
  }
 
  /* 负数括号样式 - 只对数字部分添加括号 */
- .negative-value.negative-parentheses .amount::before,
  .negative-value.negative-parentheses .currency-amount::before {
      content: "(";
  }
 
- .negative-value.negative-parentheses .amount::after,
  .negative-value.negative-parentheses .currency-amount::after {
      content: ")";
  }
 
  /* 确保负数的货币显示也是红色 */
- .negative-value .currency,
- .negative-value .amount,
  .negative-value .currency-symbol,
  .negative-value .currency-amount {
      color: #dc2626 !important;
