@@ -604,23 +604,22 @@
      box-sizing: border-box;
  }
 
- /* 单价列 currency-display 防止溢出 */
+ /* 单价列 currency-display - 移除 overflow:hidden 防止截断正常显示 */
  .stock-table td .currency-display {
-     overflow: hidden;
      flex-wrap: nowrap;
      min-width: 0;
      gap: 1px;
  }
+
  .stock-table td .currency-display .currency-symbol {
      flex-shrink: 0;
  }
- .stock-table td .currency-display .currency-amount,
+
+ /* 仅对编辑模式的 input/select 自适应 */
  .stock-table td .currency-display input,
  .stock-table td .currency-display select {
      flex: 1 1 0;
      min-width: 0;
-     overflow: hidden;
-     text-overflow: ellipsis;
  }
 
  .currency-input-edit:focus {
