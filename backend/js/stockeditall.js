@@ -2621,7 +2621,7 @@ function renderStockTable() {
             }
                     </td>
                     <td>
-                        <span class="created-user" data-user="${record.created_by || '-'}" data-time="${record.date || ''}${record.time ? ' ' + record.time : ''}">${record.created_by || '-'}</span>
+                        <span class="created-user" data-user="${record.created_by || '-'}" data-time="${record.created_at || '-'}">${record.created_by || '-'}</span>
                     </td>
                     <td>
                         ${isEditing ?
