@@ -397,8 +397,9 @@
  .currency-display {
      display: flex;
      align-items: center;
-     justify-content: flex-end;
-     padding: 0 clamp(4px, 0.42vw, 8px);
+     justify-content: center;
+     gap: 2px;
+     padding: 0 clamp(2px, 0.21vw, 4px);
      box-sizing: border-box;
      font-size: 14px;
  }
