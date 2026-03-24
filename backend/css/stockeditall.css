@@ -528,25 +528,25 @@
  /* 备注编号 */
  .stock-table th:nth-child(13),
  .stock-table td:nth-child(13) {
-     width: 10%;
- }
-
- /* 名字/收货人 */
- .stock-table th:nth-child(14),
- .stock-table td:nth-child(14) {
      width: 8%;
  }
 
- /* 创建人 */
- .stock-table th:nth-child(15),
- .stock-table td:nth-child(15) {
-     width: 5%;
+ /* 供应商/出货人 */
+ .stock-table th:nth-child(14),
+ .stock-table td:nth-child(14) {
+     width: 7%;
  }
 
  /* 备注 */
+ .stock-table th:nth-child(15),
+ .stock-table td:nth-child(15) {
+     width: 9%;
+ }
+
+ /* 创建人 */
  .stock-table th:nth-child(16),
  .stock-table td:nth-child(16) {
-     width: 5%;
+     width: 4%;
  }
 
  /* 操作 */
