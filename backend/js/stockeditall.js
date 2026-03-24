@@ -2576,17 +2576,11 @@ function renderStockTable() {
                                         onchange="updateField(${record.id}, 'price', this.value)">
                                 </div>`
                 ) :
-                `<div class="currency-display">
-                                <span class="currency-symbol">RM</span>
-                                <span class="currency-amount">${formatCurrency(record.price)}</span>
-                            </div>`
+                `<div class="currency-display"><span class="currency-symbol">RM</span><span class="currency-amount">${formatCurrency(record.price)}</span></div>`
             }
                     </td>
                     <td class="calculated-cell ${total < 0 ? 'negative-value negative-parentheses' : ''}">
-                        <div class="currency-display ${total < 0 ? 'negative-value negative-parentheses' : ''}">
-                            <span class="currency-symbol">RM</span>
-                            <span class="currency-amount">${formatCurrency(Math.abs(total))}</span>
-                        </div>
+                        <div class="currency-display ${total < 0 ? 'negative-value negative-parentheses' : ''}"><span class="currency-symbol">RM</span><span class="currency-amount">${formatCurrency(Math.abs(total))}</span></div>
                     </td>
                     <td>
                         ${isEditing ?
