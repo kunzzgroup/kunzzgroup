@@ -408,6 +408,7 @@
      font-weight: 500;
      margin-right: 2px;
      min-width: auto;
+     width: auto;
      text-align: left;
  }
 
@@ -416,6 +417,7 @@
      color: #000000ff;
      text-align: center;
      min-width: 28px;
+     width: auto;
  }
 
  /* 输入框容器样式 */
