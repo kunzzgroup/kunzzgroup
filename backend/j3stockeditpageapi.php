@@ -73,6 +73,55 @@ function getCurrentApplicantName(PDO $pdo): string
 error_log("数据库连接成功 - stockeditapi");
 error_log("请求方法: " . $_SERVER['REQUEST_METHOD']);
 
+/**
+ * 批量将记录中的 created_by（存储的是 username）替换为对应的 nickname 用于显示
+ * 优先级：nickname > username_cn > username（原值）
+ */
+function resolveCreatedByNicknames(PDO $pdo, array $records): array
+{
+    // 收集所有唯一的 created_by 值
+    $usernames = [];
+    foreach ($records as $record) {
+        $cb = trim((string)($record['created_by'] ?? ''));
+        if ($cb !== '' && $cb !== 'System') {
+            $usernames[$cb] = true;
+        }
+    }
+    if (empty($usernames)) {
+        return $records;
+    }
+
+    // 批量查询 nickname
+    $placeholders = implode(',', array_fill(0, count($usernames), '?'));
+    $stmt = $pdo->prepare("SELECT username, nickname, username_cn FROM users WHERE username IN ($placeholders)");
+    $stmt->execute(array_keys($usernames));
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // 构建映射表
+    $nicknameMap = [];
+    foreach ($rows as $row) {
+        $nick = trim((string)($row['nickname'] ?? ''));
+        if ($nick !== '') {
+            $nicknameMap[$row['username']] = $nick;
+        } else {
+            $cn = trim((string)($row['username_cn'] ?? ''));
+            if ($cn !== '') {
+                $nicknameMap[$row['username']] = $cn;
+            }
+        }
+    }
+
+    // 替换 created_by 为 nickname
+    foreach ($records as &$record) {
+        $cb = trim((string)($record['created_by'] ?? ''));
+        if (isset($nicknameMap[$cb])) {
+            $record['created_by'] = $nicknameMap[$cb];
+        }
+    }
+
+    return $records;
+}
+
 // 获取请求方法和数据
 $method = $_SERVER['REQUEST_METHOD'];
 $data = get_safe_json_input();
@@ -201,7 +250,7 @@ function handleGet()
                     $record['balance_value'] = number_format($record['balance_value'], 2, '.', '');
                 }
 
-                sendResponse(true, "进出库数据获取成功，共找到 " . count($records) . " 条记录", $records);
+                sendResponse(true, "进出库数据获取成功，共找到 " . count($records) . " 条记录", resolveCreatedByNicknames($pdo, $records));
             }
             catch (PDOException $e) {
                 sendResponse(false, "查询数据失败：" . $e->getMessage());
