@@ -4567,10 +4567,11 @@ function showAlert(message, type = 'success') {
         toast.classList.add('show');
     }, 0);
 
-    // 自动关闭
+    // 自动关闭：错误消息保留8秒，成功消息保留2秒
+    const duration = (type === 'error' || type === 'warning') ? 8000 : 2000;
     setTimeout(() => {
         closeToast(toastId);
-    }, 700);
+    }, duration);
 }
 
 // 添加关闭通知的函数
@@ -7926,7 +7927,7 @@ async function batchSaveNewRows() {
 
     } catch (error) {
         console.error('批量保存错误:', error);
-        showAlert('批量保存时发生网络连接或解析错误', 'error');
+        showAlert(error.message || '批量保存时发生网络连接或解析错误', 'error');
     } finally {
         batchSaveBtn.innerHTML = originalText;
         batchSaveBtn.disabled = false;
