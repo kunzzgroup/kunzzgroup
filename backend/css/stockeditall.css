@@ -468,7 +468,7 @@
  /* 货品编号 */
  .stock-table th:nth-child(3),
  .stock-table td:nth-child(3) {
-     width: 13%;
+     width: 11%;
  }
 
  /* 货品 */
@@ -498,7 +498,7 @@
  /* 规格 */
  .stock-table th:nth-child(8),
  .stock-table td:nth-child(8) {
-     width: 5%;
+     width: 7%;
  }
 
  /* 单价 */
