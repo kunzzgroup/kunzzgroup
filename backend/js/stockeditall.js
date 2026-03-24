@@ -1373,7 +1373,7 @@ function switchView(viewType) {
     } else if (viewType === 'remark') {
         window.location.href = `stockremark?system=central`;
     } else if (viewType === 'product') {
-        window.location.href = `stockproductname${systemParam}`;
+        window.location.href = `stockproductname?system=overview`;
     } else if (viewType === 'sot') {
         window.location.href = `stocksot?system=central`;
     } else {
