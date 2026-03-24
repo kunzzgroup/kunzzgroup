@@ -3610,7 +3610,7 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
                 product_remark_checked: formData.product_remark_checked,
                 remark_number: formData.remark_number,
                 type: (result.data && result.data.type !== undefined) ? result.data.type : (formData.type || ''),
-                created_at: new Date().toISOString()
+                created_at: result.data.created_at || new Date().toISOString()
             };
 
             stockData.push(newRecord); // 添加到数组末尾
@@ -3790,7 +3790,7 @@ async function saveNewRecord() {
                 product_remark_checked: formData.product_remark_checked,  // 添加这行
                 remark_number: formData.remark_number,  // 添加这行
                 type: (result.data && result.data.type !== undefined) ? result.data.type : (formData.type || ''),
-                created_at: new Date().toISOString()
+                created_at: result.data.created_at || new Date().toISOString()
             };
 
             stockData.push(newRecord); // 添加到数组末尾
