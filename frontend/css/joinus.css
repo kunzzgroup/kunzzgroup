@@ -1649,23 +1649,6 @@ form select:focus {
     background: url('../../images/images/背景4.jpg') no-repeat center center/cover;
 }
 
-/* 温暖光晕效果层 */
-.contact-form-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background:
-        radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(255, 165, 0, 0.3) 0%, transparent 50%);
-    z-index: 1;
-    pointer-events: none;
-    animation: glow-pulse 10s ease-in-out infinite;
-}
-
 .contact-form-container {
     position: relative;
     z-index: 10;
