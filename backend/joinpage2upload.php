@@ -20,38 +20,40 @@ if (!isset($_SESSION['user_id'])) {
 // 处理文件上传
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
     // 子域名存储配置
-    $subdomainUrl = 'https://media.kunzzgroup.com/comphotos/';
-    $uploadDir = '/home/u857194726/domains/media.kunzzgroup.com/public_html/comphotos/';
+    $uploadDir = '../images/images/';
     $configFile = '../media_config.json';
-    
+
     // 确保上传目录存在
     if (!is_dir($uploadDir)) {
         if (!mkdir($uploadDir, 0755, true)) {
             $error = "无法创建上传目录：" . $uploadDir . " (请检查服务器路径配置)";
         }
     }
-    
+
     // 验证目录是否可写
     if (!isset($error) && !is_writable($uploadDir)) {
         $error = "上传目录不可写：" . $uploadDir . " (请检查文件夹权限)";
     }
-    
+
     if (!isset($error)) {
         $file = $_FILES['media_file'];
         $photoNumber = $_POST['photo_number'];
         $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-        
+
         // 允许的文件类型
         $allowedImage = ['jpg', 'jpeg', 'png', 'webp'];
 
         // 验证文件安全性
         if ($file['error'] !== UPLOAD_ERR_OK) {
             $error = "文件上传错误，错误代码：" . $file['error'];
-        } elseif ($file['size'] > 10 * 1024 * 1024) { // 限制10MB
+        }
+        elseif ($file['size'] > 10 * 1024 * 1024) { // 限制10MB
             $error = "文件大小超过10MB限制！";
-        } elseif (!in_array($fileExtension, $allowedImage)) {
+        }
+        elseif (!in_array($fileExtension, $allowedImage)) {
             $error = "只支持图片格式（JPG, PNG, WebP）！";
-        } else {
+        }
+        else {
             // MIME类型验证
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
             $mimeType = finfo_file($finfo, $file['tmp_name']);
@@ -60,11 +62,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
             $allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
             if (!in_array($mimeType, $allowedMimes)) {
                 $error = "文件MIME类型验证失败！";
-            } else {
+            }
+            else {
                 // 生成新文件名
                 $newFileName = $photoNumber . '.' . $fileExtension;
                 $targetPath = $uploadDir . $newFileName;
-                
+
                 if (move_uploaded_file($file['tmp_name'], $targetPath)) {
                     // 设置文件权限
                     chmod($targetPath, 0644);
@@ -74,14 +77,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
                     if (file_exists($configFile)) {
                         $config = json_decode(file_get_contents($configFile), true) ?: [];
                     }
-                    
+
                     $config['comphoto_' . $photoNumber] = [
-                        'file' => $targetPath,  // 物理路径，用于后端验证
-                        'url' => $subdomainUrl . $newFileName,  // 子域名URL，用于前端访问
+                        'file' => $targetPath, // 物理路径，用于后端验证
+                        'url' => $subdomainUrl . $newFileName, // 子域名URL，用于前端访问
                         'type' => 'image',
                         'updated' => date('Y-m-d H:i:s')
                     ];
-                    
+
                     file_put_contents($configFile, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
                     $success = "照片 #{$photoNumber} 上传成功！已保存到子域名存储：" . $subdomainUrl . $newFileName;
 
@@ -91,7 +94,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
                             window.location.href = window.location.href + '?updated=' + Date.now();
                         }, 1500);
                     </script>";
-                } else {
+                }
+                else {
                     $error = "照片上传失败！无法移动文件到：" . $targetPath;
                 }
             }
@@ -131,31 +135,34 @@ if (file_exists('../media_config.json')) {
         <div class="content">            
             <?php if (isset($success)): ?>
                 <div class="alert alert-success"><?php echo $success; ?></div>
-            <?php endif; ?>
+            <?php
+endif; ?>
             
             <?php if (isset($error)): ?>
                 <div class="alert alert-error"><?php echo $error; ?></div>
-            <?php endif; ?>
+            <?php
+endif; ?>
 
             <?php
-            // 统计已上传的照片（检查本地和子域名路径）
-            $uploadedCount = 0;
-            $subdomainPhysicalPath = '/home/u857194726/domains/media.kunzzgroup.com/public_html/comphotos/';
+// 统计已上传的照片（检查本地和子域名路径）
+$uploadedCount = 0;
+$subdomainPhysicalPath = '/home/u857194726/domains/media.kunzzgroup.com/public_html/comphotos/';
 
-            for ($i = 1; $i <= 30; $i++) {
-                $photoKey = 'comphoto_' . $i;
-                if (isset($config[$photoKey])) {
-                    // 优先检查子域名路径
-                    $subdomainPath = $subdomainPhysicalPath . basename($config[$photoKey]['file']);
-                    if (file_exists($subdomainPath)) {
-                        $uploadedCount++;
-                    } elseif (file_exists($config[$photoKey]['file'])) {
-                        // 检查本地文件
-                        $uploadedCount++;
-                    }
-                }
-            }
-            ?>
+for ($i = 1; $i <= 30; $i++) {
+    $photoKey = 'comphoto_' . $i;
+    if (isset($config[$photoKey])) {
+        // 优先检查子域名路径
+        $subdomainPath = $subdomainPhysicalPath . basename($config[$photoKey]['file']);
+        if (file_exists($subdomainPath)) {
+            $uploadedCount++;
+        }
+        elseif (file_exists($config[$photoKey]['file'])) {
+            // 检查本地文件
+            $uploadedCount++;
+        }
+    }
+}
+?>
             
             <div class="stats-bar">
                 <div class="stats-item">
@@ -180,30 +187,32 @@ if (file_exists('../media_config.json')) {
                         </div>
                         
                         <?php
-                        // 检查文件是否存在（优先检查子域名路径）
-                        $photoKey = 'comphoto_' . $i;
-                        $fileExists = false;
-                        $displayUrl = '';
-                        $subdomainPhysicalPath = '/home/u857194726/domains/media.kunzzgroup.com/public_html/comphotos/';
+    // 检查文件是否存在（优先检查子域名路径）
+    $photoKey = 'comphoto_' . $i;
+    $fileExists = false;
+    $displayUrl = '';
+    $subdomainPhysicalPath = '/home/u857194726/domains/media.kunzzgroup.com/public_html/comphotos/';
 
-                        if (isset($config[$photoKey])) {
-                            // 优先检查子域名路径
-                            $subdomainPath = $subdomainPhysicalPath . basename($config[$photoKey]['file']);
-                            if (file_exists($subdomainPath)) {
-                                $fileExists = true;
-                            } elseif (file_exists($config[$photoKey]['file'])) {
-                                $fileExists = true;
-                            }
+    if (isset($config[$photoKey])) {
+        // 优先检查子域名路径
+        $subdomainPath = $subdomainPhysicalPath . basename($config[$photoKey]['file']);
+        if (file_exists($subdomainPath)) {
+            $fileExists = true;
+        }
+        elseif (file_exists($config[$photoKey]['file'])) {
+            $fileExists = true;
+        }
 
-                            // 使用子域名URL显示图片
-                            if ($fileExists && isset($config[$photoKey]['url'])) {
-                                $displayUrl = $config[$photoKey]['url'];
-                            } elseif ($fileExists) {
-                                $displayUrl = $config[$photoKey]['file'];
-                            }
-                        }
+        // 使用子域名URL显示图片
+        if ($fileExists && isset($config[$photoKey]['url'])) {
+            $displayUrl = $config[$photoKey]['url'];
+        }
+        elseif ($fileExists) {
+            $displayUrl = $config[$photoKey]['file'];
+        }
+    }
 
-                        if ($fileExists && $displayUrl): ?>
+    if ($fileExists && $displayUrl): ?>
                             <div class="current-image">
                                 <img src="<?php echo $displayUrl; ?>?v=<?php echo time(); ?>" alt="照片 <?php echo $i; ?>">
                                 <div class="image-info">
@@ -211,10 +220,12 @@ if (file_exists('../media_config.json')) {
                                     <small>更新: <?php echo $config[$photoKey]['updated']; ?></small>
                                     <?php if (isset($config[$photoKey]['url'])): ?>
                                         <br><small>URL: <?php echo htmlspecialchars($config[$photoKey]['url']); ?></small>
-                                    <?php endif; ?>
+                                    <?php
+        endif; ?>
                                 </div>
                             </div>
-                        <?php endif; ?>
+                        <?php
+    endif; ?>
                         
                         <form method="post" enctype="multipart/form-data">
                             <input type="hidden" name="photo_number" value="<?php echo $i; ?>">
@@ -232,7 +243,8 @@ if (file_exists('../media_config.json')) {
                             </button>
                         </form>
                     </div>
-                <?php endfor; ?>
+                <?php
+endfor; ?>
             </div>
         </div>
     </div>
