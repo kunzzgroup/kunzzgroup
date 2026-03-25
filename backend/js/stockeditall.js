@@ -124,7 +124,21 @@ window.addEventListener('keydown', function (e) {
         return;
     }
 
-    // A3. 新增一行 (Ctrl+A)
+    // A3. 打开新增记录弹窗 (Ctrl+Shift+A)
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.code === 'KeyA' || e.key === 'a' || e.key === 'A')) {
+        const activeElement = document.activeElement;
+        const isInput = activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.isContentEditable);
+        if (!isInput) {
+            e.preventDefault();
+            console.log('StockEdit Shortcut: CTRL+SHIFT+A triggered (Open Add Record Modal)');
+            if (typeof showDateRowsModal === 'function') {
+                showDateRowsModal();
+            }
+            return;
+        }
+    }
+
+    // A4. 新增一行 (Ctrl+A)
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.code === 'KeyA' || e.key === 'a' || e.key === 'A')) {
         const activeElement = document.activeElement;
         const isInput = activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.isContentEditable);
