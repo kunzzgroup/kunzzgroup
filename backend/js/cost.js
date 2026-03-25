@@ -1617,23 +1617,48 @@ function updateCharts(data) {
                 }
             ];
         } else if (currentChartDataType === 'grossTotal') {
-            // 正负分色 (Diverging Color): 盈利=绿色(#e6e1d8), 亏损=红色(#e24b4a)
+            // 正负分色: 正值用与其他图表一致的渐变，负值用红色渐变
             const grossData = aggregatedData.map(item => getChartDataByType(item, currentChartDataType));
             baseDatasets = [
                 {
+                    // 正值数据集 — 渐变填充与其他图表一致，零线以下透明
                     label: '毛利润',
                     data: grossData,
                     borderColor: CHART_COLORS.grossBorder,
-                    backgroundColor: 'transparent',
-                    fill: {
-                        value: 0,
-                        above: CHART_COLORS.grossPositive,
-                        below: CHART_COLORS.grossNegative
+                    backgroundColor: function (context) {
+                        const { ctx, chartArea } = context.chart;
+                        if (!chartArea) return 'transparent';
+                        const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                        gradient.addColorStop(0,   'rgba(88, 62, 4, 0.4)');
+                        gradient.addColorStop(0.3, 'rgba(88, 62, 4, 0.2)');
+                        gradient.addColorStop(0.7, 'rgba(88, 62, 4, 0.1)');
+                        gradient.addColorStop(1,   'rgba(88, 62, 4, 0.02)');
+                        return gradient;
                     },
+                    fill: { value: 0, below: 'transparent' },
                     tension: 0.4,
                     borderWidth: 2,
                     pointRadius: 0,
                     pointHoverRadius: 8
+                },
+                {
+                    // 负值数据集 — 红色渐变，零线以上透明（不显示在图例/tooltip）
+                    label: '_gross_negative',
+                    data: grossData,
+                    borderColor: 'transparent',
+                    backgroundColor: function (context) {
+                        const { ctx, chartArea } = context.chart;
+                        if (!chartArea) return 'transparent';
+                        const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                        gradient.addColorStop(0,   CHART_COLORS.grossNegative);
+                        gradient.addColorStop(1,   'rgba(226, 75, 74, 0.7)');
+                        return gradient;
+                    },
+                    fill: { value: 0, above: 'transparent' },
+                    tension: 0.4,
+                    borderWidth: 0,
+                    pointRadius: 0,
+                    pointHoverRadius: 0
                 }
             ];
         } else {
