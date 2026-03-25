@@ -2093,6 +2093,7 @@ function setPermCheckboxes(perms, pagePerms, submenuPerms, reportPerms, restaura
 
     document.querySelectorAll('.perm-stock-system').forEach(cb => cb.checked = systemSet.has(cb.value));
     document.querySelectorAll('.perm-stock-view').forEach(cb => cb.checked = viewSet.has(cb.value));
+    document.querySelectorAll('.perm-stock-shipper').forEach(cb => cb.checked = stockPagePerms.is_shipper === true);
 
     const uploadPagePerms = (pagePerms && typeof pagePerms === 'object') ? (pagePerms.kpi_upload || {}) : {};
     const uploadSystems = Array.isArray(uploadPagePerms.system) ? uploadPagePerms.system : [];
@@ -2226,7 +2227,8 @@ function extractPermissionsData(container) {
         },
         stock_inventory: {
             system: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="stock_inventory"] .perm-stock-system:checked')).map(cb => cb.value),
-            views: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="stock_inventory"] .perm-stock-view:checked')).map(cb => cb.value)
+            views: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="stock_inventory"] .perm-stock-view:checked')).map(cb => cb.value),
+            is_shipper: container.querySelector('.perm-level-3-panel[data-for="stock_inventory"] .perm-stock-shipper')?.checked === true
         },
         annual_summary: {
             system: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="annual_summary"] .perm-annual-system:checked')).map(cb => cb.value)

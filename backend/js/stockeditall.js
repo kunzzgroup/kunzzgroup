@@ -977,6 +977,7 @@ async function initApp() {
             loadStockData();
             loadCodeNumbers();
             loadProducts();
+            loadShippers();  // 动态加载出货人列表
         }
     }
 
@@ -1171,6 +1172,7 @@ function switchStock(stockType, event = null) {
     loadStockData();
     loadCodeNumbers();
     loadProducts();
+    loadShippers();  // 动态加载出货人列表
 
     // 更新 URL 参数以保持持久性
     const newParams = new URLSearchParams(window.location.search);
@@ -1736,9 +1738,23 @@ async function refreshEditPriceSelect(recordId, productName) {
 }
 
 // 收货人选项列表
-const receiverOptions = [
-    '中央', 'JUN HAO', 'A KIM', 'MJ', 'HY', 'CINDY', 'KAI', 'BX', 'ZX'
-];
+// 出货人选项列表（由 loadShippers() 动态加载，中央为默认值）
+let receiverOptions = ['中央'];
+
+// 从 stockeditapi 获取被赋予「出货人」权限的用户昵称
+async function loadShippers() {
+    try {
+        const response = await fetch('stockeditapi.php?action=get_shippers');
+        if (!response.ok) return;
+        const result = await response.json();
+        if (result.success && Array.isArray(result.data) && result.data.length > 0) {
+            receiverOptions = result.data;
+        }
+    } catch (e) {
+        // 静默失败，保持默认值 ['中央']
+        console.warn('加载出货人列表失败，使用默认值', e);
+    }
+}
 
 // 处理出货数量变化，控制收货单位输入框状态
 function handleOutQuantityChange(container, outQty) {

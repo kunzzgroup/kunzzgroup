@@ -583,6 +583,10 @@ require_once 'session_check.php';
                                     </div>
                                     <label><input type="checkbox" class="perm-stock-view" value="sot"> 货品异常</label>
                                 </div>
+                                <div class="perm-level-3-section">
+                                    <div class="perm-section-title">进出货权限</div>
+                                    <label><input type="checkbox" class="perm-stock-shipper" value="is_shipper"> 出货人（昵称显示在出货人下拉列表）</label>
+                                </div>
                             </div>
                             
                         </div>

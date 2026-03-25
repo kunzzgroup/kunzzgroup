@@ -686,6 +686,32 @@ function handleGet()
             sendResponse(true, "产品列表获取成功", $products);
             break;
 
+        case 'get_shippers':
+            // 获取所有被赋予「出货人」权限的用户昵称，中央始终为第一项
+            try {
+                $shipperStmt = $pdo->prepare("
+                    SELECT u.nickname, u.username
+                    FROM user_page_permissions p
+                    JOIN users u ON u.id = p.user_id
+                    WHERE p.page_key = 'stock_inventory'
+                      AND JSON_UNQUOTE(JSON_EXTRACT(p.permissions_json, '$.is_shipper')) = 'true'
+                ");
+                $shipperStmt->execute();
+                $rows = $shipperStmt->fetchAll(PDO::FETCH_ASSOC);
+                $shippers = ['中央'];
+                foreach ($rows as $row) {
+                    $name = !empty(trim($row['nickname'])) ? trim($row['nickname']) : trim($row['username']);
+                    if ($name && !in_array($name, $shippers)) {
+                        $shippers[] = $name;
+                    }
+                }
+                sendResponse(true, "出货人列表获取成功", $shippers);
+            } catch (PDOException $e) {
+                sendResponse(true, "ok", ['中央']); // 降级：返回默认值
+            }
+            break;
+
+
         case 'code_by_product':
             // 根据product_name获取对应的product_code、specification、supplier和category
             $productName = $_GET['product_name'] ?? null;

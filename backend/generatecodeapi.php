@@ -1178,7 +1178,8 @@ function saveUserSidebarPermissions($pdo, $input)
         if (isset($pagePerms['stock_inventory'])) {
             $json = json_encode([
                 'system' => $pagePerms['stock_inventory']['system'] ?? [],
-                'views' => $pagePerms['stock_inventory']['views'] ?? ($pagePerms['stock_inventory']['view'] ?? [])
+                'views' => $pagePerms['stock_inventory']['views'] ?? ($pagePerms['stock_inventory']['view'] ?? []),
+                'is_shipper' => !empty($pagePerms['stock_inventory']['is_shipper'])
             ], JSON_UNESCAPED_UNICODE);
             $stmt = $pdo->prepare("INSERT INTO user_page_permissions (user_id, page_key, permissions_json) VALUES (?, 'stock_inventory', ?) ON DUPLICATE KEY UPDATE permissions_json = VALUES(permissions_json)");
             $stmt->execute([$userId, $json]);
