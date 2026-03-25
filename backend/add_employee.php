@@ -957,6 +957,9 @@ body { background: #f3f4f6; }
                                             <div class="perm-section-title">视图选项</div>
                                             <label><input type="checkbox" class="perm-stock-view" value="list"> 总库存</label>
                                             <label><input type="checkbox" class="perm-stock-view" value="records"> 进出货</label>
+                                            <div style="margin-left: 20px; margin-top: 5px; display: flex; flex-direction: column; gap: 5px; border-left: 2px solid #eee; padding-left: 10px;">
+                                                <label style="font-size: 0.9em;"><input type="checkbox" class="perm-stock-shipper" value="is_shipper"> 出货人</label>
+                                            </div>
                                             <label><input type="checkbox" class="perm-stock-view" value="remark"> 货品备注</label>
                                             <label><input type="checkbox" class="perm-stock-view" value="product"> 货品种类</label>
                                             <div style="margin-left: 20px; margin-top: 5px; display: flex; flex-direction: column; gap: 5px; border-left: 2px solid #eee; padding-left: 10px;">
