@@ -1,5 +1,6 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/permission_guard.php';
+require_once __DIR__ . '/heic_convert.php';
 requirePermission('visual');
 
 if (!headers_sent()) {
@@ -21,7 +22,7 @@ if (!isset($_SESSION['user_id'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
     // 根据文件类型决定上传目录
     $allowedVideo = ['mp4', 'webm', 'mov', 'avi'];
-    $allowedImage = ['jpg', 'jpeg', 'png', 'webp'];
+    $allowedImage = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'];
     $isVideo = in_array($fileExtension, $allowedVideo);
     $uploadDir = $isVideo ? '../video/video/' : '../images/images/';
     $configFile = '../media_config.json';  // 根目录 media_config.json（前端读取的）
@@ -43,6 +44,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
         $targetPath = $uploadDir . $newFileName;
         
         if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+            // HEIC/HEIF 自动转换为 JPG
+            $converted = convertHeicToJpg($targetPath, $fileExtension);
+            if ($converted['converted']) {
+                $targetPath = $converted['path'];
+                $newFileName = $converted['filename'];
+                $fileExtension = 'jpg';
+            }
+
             // 更新配置文件
             $config = [];
             if (file_exists($configFile)) {
@@ -117,7 +126,7 @@ if (file_exists('../media_config.json')) {
                             <input type="file" id="home-page1-file" name="media_file" accept="video/*,image/*">
                             <div class="file-input-text">
                                 点击选择文件或拖拽到此处<br>
-                                <small>支持 MP4, WebM, MOV, AVI, JPG, PNG, WebP 格式 (1920x1080)</small>
+                                <small>支持 MP4, WebM, MOV, AVI, JPG, PNG, WebP 格式（HEIC 自动转换）(1920x1080)</small>
                             </div>
                         </div>
                         

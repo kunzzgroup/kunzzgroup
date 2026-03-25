@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!headers_sent()) {
     header("Cache-Control: max-age=0, no-cache, no-store, must-revalidate, proxy-revalidate");
     header("Pragma: no-cache");
@@ -57,13 +57,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_FILES[$key . '_file']) && $_FILES[$key . '_file']['error'] === UPLOAD_ERR_OK) {
             $file = $_FILES[$key . '_file'];
             $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-            $allowedImage = ['jpg', 'jpeg', 'png', 'webp'];
+            $allowedImage = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'];
 
             if (in_array($fileExtension, $allowedImage)) {
                 $newFileName = $key . '.' . $fileExtension;
                 $targetPath = $uploadDir . $newFileName;
                 
                 if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+                    // HEIC/HEIF 自动转换为 JPG
+                    $converted = convertHeicToJpg($targetPath, $fileExtension);
+                    if ($converted['converted']) {
+                        $targetPath = $converted['path'];
+                        $newFileName = basename($converted['path']);
+                        $fileExtension = 'jpg';
+                    }
                     $config[$key]['file'] = $targetPath;
                     $config[$key]['updated'] = date('Y-m-d H:i:s');
                 } else {

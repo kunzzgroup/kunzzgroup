@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/permission_guard.php';
+require_once __DIR__ . '/heic_convert.php';
 requirePermissionApi('resource', 'dishware');
 
 if (!headers_sent()) {
@@ -751,7 +752,7 @@ function uploadPhoto() {
     }
     
     $file_extension = pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
-    $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
+    $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'heic', 'heif'];
     
     if (!in_array(strtolower($file_extension), $allowed_extensions)) {
         sendResponse(false, "不支持的文件格式");
@@ -761,6 +762,11 @@ function uploadPhoto() {
     $file_path = $upload_dir . $filename;
     
     if (move_uploaded_file($_FILES['photo']['tmp_name'], $file_path)) {
+        // HEIC/HEIF 自动转换为 JPG
+        $converted = convertHeicToJpg($file_path, $file_extension);
+        if ($converted['converted']) {
+            $file_path = $converted['path'];
+        }
         sendResponse(true, "照片上传成功", ['photo_path' => $file_path]);
     } else {
         sendResponse(false, "照片保存失败");

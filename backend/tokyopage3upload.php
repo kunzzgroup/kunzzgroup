@@ -1,5 +1,6 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/permission_guard.php';
+require_once __DIR__ . '/heic_convert.php';
 requirePermission('visual');
 
 if (!headers_sent()) {
@@ -51,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
             
             // 允许的文件类型
-            $allowedImage = ['jpg', 'jpeg', 'png', 'webp'];
+            $allowedImage = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'];
 
             if (in_array($fileExtension, $allowedImage)) {
                 // 生成新文件名
@@ -59,6 +60,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $targetPath = $uploadDir . $newFileName;
                 
                 if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+                    // HEIC/HEIF 自动转换为 JPG
+                    $converted = convertHeicToJpg($targetPath, $fileExtension);
+                    if ($converted['converted']) {
+                        $targetPath = $converted['path'];
+                        $newFileName = basename($converted['path']);
+                        $fileExtension = 'jpg';
+                    }
                     $config[$type] = [
                         'file' => $targetPath,
                         'type' => 'image',

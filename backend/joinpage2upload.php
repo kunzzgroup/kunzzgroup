@@ -1,5 +1,6 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/permission_guard.php';
+require_once __DIR__ . '/heic_convert.php';
 requirePermission('visual');
 
 if (!headers_sent()) {
@@ -42,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
         $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 
         // 允许的文件类型
-        $allowedImage = ['jpg', 'jpeg', 'png', 'webp'];
+        $allowedImage = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'];
 
         // 验证文件安全性
         if ($file['error'] === UPLOAD_ERR_NO_FILE) {
@@ -63,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
             $mimeType = finfo_file($finfo, $file['tmp_name']);
             finfo_close($finfo);
 
-            $allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
+            $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
             if (!in_array($mimeType, $allowedMimes)) {
                 $error = "文件MIME类型验证失败！";
             }
@@ -72,7 +73,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
                 $newFileName = $photoNumber . '.' . $fileExtension;
                 $targetPath = $uploadDir . $newFileName;
 
-                if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+                                if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+                    // HEIC/HEIF 自动转换为 JPG
+                    $converted = convertHeicToJpg($targetPath, $fileExtension);
+                    if ($converted['converted']) {
+                        $targetPath = $converted['path'];
+                        $newFileName = basename($converted['path']);
+                        $fileExtension = 'jpg';
+                    }
+
                     // 设置文件权限
                     chmod($targetPath, 0644);
 
@@ -237,7 +246,7 @@ for ($i = 1; $i <= 30; $i++) {
                                 <input type="file" id="file-<?php echo $i; ?>" name="media_file" accept="image/*">
                                 <div class="file-input-text">
                                     点击选择图片<br>
-                                    <small>支持 JPG, PNG, WebP</small>
+                                    <small>支持 JPG, PNG, WebP（HEIC 自动转换）</small>
                                 </div>
                             </div>
                             

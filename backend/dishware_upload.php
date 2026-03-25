@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/permission_guard.php';
 requirePermission('resource', 'dishware');
 
@@ -94,7 +94,7 @@ if (!headers_sent()) {
                                 <i class="fas fa-cloud-upload-alt"></i>
                             </div>
                             <div class="photo-upload-text">点击上传照片或拖拽照片到此处</div>
-                            <div class="photo-upload-hint">支持 JPG, PNG, GIF 格式，最大 5MB</div>
+                            <div class="photo-upload-hint">支持 JPG, PNG, GIF 格式（HEIC 自动转换），最大 5MB</div>
                             <img id="photo-preview" class="photo-preview" style="display: none;">
                         </div>
                         <input type="file" id="photo" name="photo" class="file-input" accept="image/*">

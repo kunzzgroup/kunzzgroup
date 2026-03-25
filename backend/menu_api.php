@@ -1,5 +1,6 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/permission_guard.php';
+require_once __DIR__ . '/heic_convert.php';
 requirePermissionApi('visual');
 
 // ============================================================
@@ -87,7 +88,7 @@ function buildImageUrl(?string $path): ?string {
 }
 
 function uploadImage(array $file, string $menu_type, string $item_code): string {
-    $allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    $allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif'];
     $maxSize = 5 * 1024 * 1024; // 5MB
 
     if (!in_array($file['type'], $allowed)) {
@@ -106,6 +107,13 @@ function uploadImage(array $file, string $menu_type, string $item_code): string 
 
     if (!move_uploaded_file($file['tmp_name'], $dest)) {
         respond(false, '图片保存失败，请检查目录权限', null, 500);
+    }
+
+        // HEIC/HEIF 自动转换为 JPG
+    $converted = convertHeicToJpg($dest, $ext);
+    if ($converted['converted']) {
+        $dest = $converted['path'];
+        $filename = $converted['filename'];
     }
 
     return $menu_type . '/' . $filename; // Stored path (relative to UPLOAD_BASE)

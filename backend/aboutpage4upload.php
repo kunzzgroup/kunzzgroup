@@ -1,5 +1,6 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/permission_guard.php';
+require_once __DIR__ . '/heic_convert.php';
 requirePermission('visual');
 
 if (!headers_sent()) {
@@ -267,7 +268,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
         
         // 允许的文件类型
-        $allowedImage = ['jpg', 'jpeg', 'png', 'webp'];
+        $allowedImage = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'];
         
         if (in_array($fileExtension, $allowedImage)) {
             // 生成新文件名（以记录ID）
@@ -275,6 +276,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $targetPath = $uploadDir . $newFileName;
             
             if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+                // HEIC/HEIF 自动转换为 JPG
+                $converted = convertHeicToJpg($targetPath, $fileExtension);
+                if ($converted['converted']) {
+                    $targetPath = $converted['path'];
+                    $newFileName = basename($converted['path']);
+                    $fileExtension = 'jpg';
+                }
                 // 更新配置文件
                 $config = [];
                 if (file_exists($configFile)) {
@@ -323,7 +331,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = $isEnglish ? "Photo upload failed!" : "照片上传失败！";
             }
         } else {
-            $error = $isEnglish ? "Unsupported file type! Only JPG, PNG, WebP formats are supported" : "不支持的文件类型！仅支持 JPG, PNG, WebP 格式";
+            $error = $isEnglish ? "Unsupported file type! Only JPG, PNG, WebP formats are supported" : "不支持的文件类型！仅支持 JPG, PNG, WebP 格式（HEIC 自动转换）";
         }
     }
     
@@ -599,7 +607,7 @@ if (file_exists($configFile) && is_readable($configFile)) {
                                     <input type="file" id="image-<?php echo $recordId; ?>" name="timeline_image" accept="image/*">
                                     <div class="file-input-text">
                                         <?php echo $isEnglish ? 'Click to select photo or drag here' : '点击选择照片或拖拽到此处'; ?><br>
-                                        <small><?php echo $isEnglish ? 'Supports JPG, PNG, WebP formats, recommended size 800x600' : '支持 JPG, PNG, WebP 格式，建议尺寸 800x600'; ?></small>
+                                        <small><?php echo $isEnglish ? 'Supports JPG, PNG, WebP formats, recommended size 800x600' : '支持 JPG, PNG, WebP 格式（HEIC 自动转换），建议尺寸 800x600'; ?></small>
                                     </div>
                                 </div>
                                 
