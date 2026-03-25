@@ -2606,7 +2606,7 @@ function renderStockTable() {
             }
                     </td>
                     <td>
-                        <span class="created-user" data-user="${record.created_by || '-'}" data-time="${record.created_at ? record.created_at.replace('T', ' ').replace('.000Z', '').slice(0, 16) : (record.date || '-')}">${record.created_by || '-'}</span>
+                        <span class="created-user" data-user="${record.created_by || '-'}" data-time="${formatCreatedAt(record.created_at)}">${record.created_by || '-'}</span>
                     </td>
                     <td>
                         <span class="action-cell">
@@ -2662,6 +2662,24 @@ function formatDate(dateString) {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const month = months[date.getMonth()];
     return `${day} ${month}`;
+}
+
+// 格式化创建时间（MySQL UTC 转 UTC+8 马来西亚时间）
+function formatCreatedAt(createdAt) {
+    if (!createdAt || createdAt === '-') return '-';
+    // MySQL 返回格式: "2026-03-25 01:04:00"，需当作 UTC 解析
+    const utcStr = createdAt.replace(' ', 'T') + 'Z';
+    const date = new Date(utcStr);
+    if (isNaN(date.getTime())) return createdAt.slice(0, 16);
+    // 转换为 UTC+8
+    const offset = 8 * 60; // 分钟
+    const local = new Date(date.getTime() + offset * 60 * 1000);
+    const yyyy = local.getUTCFullYear();
+    const mm = String(local.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(local.getUTCDate()).padStart(2, '0');
+    const hh = String(local.getUTCHours()).padStart(2, '0');
+    const mi = String(local.getUTCMinutes()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
 }
 
 // 格式化数字 - 统一显示三位小数
