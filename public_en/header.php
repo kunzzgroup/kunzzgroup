@@ -102,7 +102,7 @@ function getLanguageSwitchUrl($targetLang) {
             <div class="header-login-dropdown">
                 <button class="header-login-btn" id="loginBtn">LOGIN</button>
                 <div class="header-login-dropdown-menu" id="loginDropdownMenu">
-                    <a href="/frontend_en/login" class="header-login-dropdown-item">Staff Login</a>
+                    <a href="/frontend_en/login.html" class="header-login-dropdown-item">Staff Login</a>
                 </div>
             </div>
 

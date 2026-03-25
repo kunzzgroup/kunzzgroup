@@ -6,6 +6,12 @@ if (!headers_sent()) {
 }
 ?>
 <?php
+// 如果不是 POST 请求（如直接访问 /frontend_en/login），跳转到登录表单页
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header("Location: login.html");
+    exit();
+}
+
 require_once __DIR__ . '/../backend/xss_protect.php';
 ob_start();
 session_start();
@@ -78,12 +84,12 @@ if ($result->num_rows === 1) {
         exit();
 
     } else {
-        echo "<script>alert('密码错误'); window.location.href='login';</script>";
+        echo "<script>alert('密码错误'); window.location.href='login.html';</script>";
         exit();
     }
 
 } else {
-    echo "<script>alert('该账号不存在'); window.location.href='login';</script>";
+    echo "<script>alert('该账号不存在'); window.location.href='login.html';</script>";
     exit();
 }
 ?>
