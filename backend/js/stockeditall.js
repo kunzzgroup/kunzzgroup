@@ -1836,7 +1836,7 @@ function handleEditOutQuantityChange(recordId, value) {
                     targetSelect.required = true;
                 } else {
                     targetSelect.disabled = true;
-                    targetSelect.value = '';
+                    targetSelect.value = 'central';
                     targetSelect.required = false;
                 }
             }
@@ -1864,7 +1864,7 @@ function handleNewRowOutQuantityChange(rowId, value) {
                     targetSelect.required = true;
                 } else {
                     targetSelect.disabled = true;
-                    targetSelect.value = '';
+                    targetSelect.value = 'central';
                     targetSelect.required = false;
                 }
             }
@@ -2939,7 +2939,7 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
             // central：保留 select
             `<select class="table-select" id="${rowId}-target" disabled>
                             <option value="">请选择</option>
-                            ${generateTargetOptions()}
+                            ${generateTargetOptions('central')}
                         </select>`
         }
                 </td>
@@ -3565,6 +3565,9 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
             throw new Error(errorMsg);
         }
         formData.target_system = targetInput.value;
+    } else {
+        // central页面 + 进货：收货单位默认为 central
+        formData.target_system = 'central';
     }
 
     // 验证货品名称是否存在于数据库中
@@ -3809,6 +3812,9 @@ async function saveNewRecord() {
             showAlert(errorMsg, 'error');
             return;
         }
+    } else if (currentStockType === 'central') {
+        // central页面 + 进货：收货单位默认为 central
+        formData.target_system = 'central';
     }
 
     try {
@@ -4000,8 +4006,8 @@ function updateField(id, field, value) {
                         targetSelect.value = currentStockType;
                         record.target_system = currentStockType;
                     } else {
-                        targetSelect.value = '';
-                        record.target_system = '';
+                        targetSelect.value = 'central';
+                        record.target_system = 'central';
                     }
                 }
             }
@@ -6148,7 +6154,7 @@ window.handleAddFormOutQuantityChange = function () {
         if (typeof currentStockType !== 'undefined' && currentStockType && currentStockType !== 'central') {
             targetSelect.value = currentStockType;
         } else {
-            targetSelect.value = '';
+            targetSelect.value = 'central';
         }
         targetSelect.required = false;
     }
