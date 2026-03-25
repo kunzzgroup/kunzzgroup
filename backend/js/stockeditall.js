@@ -1739,7 +1739,7 @@ async function refreshEditPriceSelect(recordId, productName) {
 
 // 收货人选项列表
 // 出货人选项列表（硬编码基础名单 + 动态追加权限用户）
-let receiverOptions = ['中央', 'JUN HAO', 'A KIM', 'MJ', 'HY', 'CINDY', 'KAI', 'BX', 'ZX'];
+let receiverOptions = ['中央', 'JUN HAO', 'A KIM', 'MJ', 'HY', 'CINDY', 'BX', 'ZX'];
 
 // 从 stockeditapi 获取被赋予「出货人」权限的用户昵称，追加到现有列表
 async function loadShippers() {
