@@ -1654,11 +1654,10 @@ form select:focus {
     z-index: 10;
     display: flex;
     flex-direction: row;
-    gap: clamp(20px, 2vw, 40px);
-    width: clamp(900px, 72vw, 1300px);
-    height: auto;
-    max-height: 85vh;
-    padding: clamp(15px, 1.5vw, 30px);
+    gap: clamp(16px, 1.8vw, 32px);
+    width: clamp(860px, 70vw, 1200px);
+    height: clamp(520px, 82vh, 780px);
+    padding: clamp(40px, 4vh, 70px) clamp(15px, 1.5vw, 30px);
     box-sizing: border-box;
     align-items: stretch;
 }
@@ -1667,13 +1666,14 @@ form select:focus {
 .contact-card {
     flex: 1;
     background: rgba(255, 255, 255, 0.97);
-    border-radius: clamp(14px, 1.5vw, 22px);
-    padding: clamp(24px, 2vw, 36px);
+    border-radius: clamp(14px, 1.5vw, 20px);
+    padding: clamp(20px, 1.8vw, 30px);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
     overflow: hidden;
+    height: 100%;
 }
 
 .contact-card-header {
@@ -1700,8 +1700,8 @@ form select:focus {
 .contact-details {
     display: flex;
     flex-direction: column;
-    gap: clamp(10px, 0.9vw, 16px);
-    margin-bottom: clamp(10px, 1vw, 18px);
+    gap: clamp(8px, 0.7vw, 13px);
+    margin-bottom: clamp(8px, 0.8vw, 14px);
 }
 
 .contact-detail-item {
@@ -1783,10 +1783,11 @@ form select:focus {
 
 .contact-map-embed {
     flex: 1;
-    min-height: clamp(100px, 10vw, 180px);
-    border-radius: clamp(10px, 1vw, 16px);
+    min-height: 160px;
+    border-radius: clamp(8px, 0.8vw, 14px);
     overflow: hidden;
     background: #eee;
+    margin-top: auto;
 }
 
 .contact-map-embed iframe {
@@ -1794,20 +1795,21 @@ form select:focus {
     height: 100%;
     border: none;
     display: block;
-    min-height: clamp(100px, 10vw, 180px);
+    min-height: 160px;
 }
 
 /* --- 右侧意见表单卡片 --- */
 .feedback-card {
     flex: 1;
     background: rgba(255, 255, 255, 0.97);
-    border-radius: clamp(14px, 1.5vw, 22px);
-    padding: clamp(24px, 2vw, 36px);
+    border-radius: clamp(14px, 1.5vw, 20px);
+    padding: clamp(20px, 1.8vw, 30px);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
     overflow-y: auto;
+    height: 100%;
 }
 
 .feedback-title {
