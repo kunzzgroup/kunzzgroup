@@ -260,17 +260,9 @@ function getCompanyPhotos() {
             for ($i = 1; $i <= 30; $i++) {
                 $key = 'comphoto_' . $i;
                 if (isset($config[$key])) {
-                    // updated for subdomain storage
-                    // 优先使用配置中的URL，如果没有则构建
-                    if (isset($config[$key]['url'])) {
-                        $photoUrl = $config[$key]['url'];
-                    } else {
-                        $fileName = basename($config[$key]['file']);
-                        $photoUrl = $subdomainMediaUrl . $fileName;
-                    }
-
                     // 检查文件是否存在（优先检查子域名路径）
                     $fileExists = false;
+                    $photoUrl = '';
                     $timestamp = time();
 
                     // 优先检查子域名路径
@@ -278,9 +270,21 @@ function getCompanyPhotos() {
                     if (file_exists($subdomainFilePath)) {
                         $fileExists = true;
                         $timestamp = filemtime($subdomainFilePath);
+                        
+                        if (isset($config[$key]['url'])) {
+                            $photoUrl = $config[$key]['url'];
+                        } else {
+                            $photoUrl = $subdomainMediaUrl . basename($config[$key]['file']);
+                        }
                     } elseif (file_exists($config[$key]['file'])) {
                         $fileExists = true;
                         $timestamp = filemtime($config[$key]['file']);
+                        
+                        if (isset($config[$key]['url'])) {
+                            $photoUrl = $config[$key]['url'];
+                        } else {
+                            $photoUrl = $config[$key]['file'];
+                        }
                     }
 
                     if ($fileExists) {
@@ -322,9 +326,13 @@ function getCompanyPhotos() {
                     sort($files);
 
                     foreach ($files as $file) {
-                        // 使用子域名URL代替本地路径
-                        $fileName = basename($file);
-                        $photoUrl = $subdomainMediaUrl . $fileName . '?v=' . filemtime($file);
+                        // 如果是从子域名物理路径扫描出来的，使用子域名URL
+                        if ($comphotoDir === $subdomainPhysicalPath) {
+                            $photoUrl = $subdomainMediaUrl . basename($file) . '?v=' . filemtime($file);
+                        } else {
+                            // 否则直接使用本地扫描到的相对路径
+                            $photoUrl = $file . '?v=' . filemtime($file);
+                        }
                         $photos[] = $photoUrl;
                         error_log("getCompanyPhotos: 直接添加照片: $photoUrl");
                     }
