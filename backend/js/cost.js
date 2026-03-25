@@ -1673,7 +1673,8 @@ function updateCharts(data) {
                         return gradient;
                     },
                     fill: 'origin',
-                    tension: 0, // 关键修复：关闭贝塞尔曲线拉伸，防止零线部分出现曲线波动（瑕疵）
+                    tension: 0.4, 
+                    cubicInterpolationMode: 'monotone', // 关键修复: 恢复波浪，但使用单调三次插值，防止超调(overshoot)突出零线
                     borderWidth: 2,
                     pointRadius: 0,
                     pointHoverRadius: 8
@@ -1691,7 +1692,8 @@ function updateCharts(data) {
                         return gradient;
                     },
                     fill: 'origin',
-                    tension: 0, // 关键修复同样适用
+                    tension: 0.4, 
+                    cubicInterpolationMode: 'monotone', // 防止超调
                     borderWidth: 2,
                     pointRadius: 0,
                     pointHoverRadius: 8
