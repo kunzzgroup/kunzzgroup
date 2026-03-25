@@ -20,6 +20,7 @@ if (!isset($_SESSION['user_id'])) {
 // 处理文件上传
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
     // 子域名存储配置
+    $subdomainUrl = 'https://media.kunzzgroup.com/comphotos/';
     $uploadDir = '../images/images/';
     $configFile = '../media_config.json';
 
