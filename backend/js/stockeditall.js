@@ -1738,20 +1738,24 @@ async function refreshEditPriceSelect(recordId, productName) {
 }
 
 // 收货人选项列表
-// 出货人选项列表（由 loadShippers() 动态加载，中央为默认值）
-let receiverOptions = ['中央'];
+// 出货人选项列表（硬编码基础名单 + 动态追加权限用户）
+let receiverOptions = ['中央', 'JUN HAO', 'A KIM', 'MJ', 'HY', 'CINDY', 'KAI', 'BX', 'ZX'];
 
-// 从 stockeditapi 获取被赋予「出货人」权限的用户昵称
+// 从 stockeditapi 获取被赋予「出货人」权限的用户昵称，追加到现有列表
 async function loadShippers() {
     try {
         const response = await fetch('stockeditapi.php?action=get_shippers');
         if (!response.ok) return;
         const result = await response.json();
-        if (result.success && Array.isArray(result.data) && result.data.length > 0) {
-            receiverOptions = result.data;
+        if (result.success && Array.isArray(result.data)) {
+            result.data.forEach(name => {
+                if (name && !receiverOptions.includes(name)) {
+                    receiverOptions.push(name);
+                }
+            });
         }
     } catch (e) {
-        // 静默失败，保持默认值 ['中央']
+        // 静默失败，保持硬编码列表不变
         console.warn('加载出货人列表失败，使用默认值', e);
     }
 }
