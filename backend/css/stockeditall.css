@@ -525,7 +525,7 @@
  /* 产品备注 checkbox */
  .stock-table th:nth-child(12),
  .stock-table td:nth-child(12) {
-     width: 7%;
+     width: 5%;
  }
 
  /* 备注编号 */
@@ -555,7 +555,7 @@
  /* 操作 */
  .stock-table th:nth-child(17),
  .stock-table td:nth-child(17) {
-     width: 3%;
+     width: 5%;
  }
 
  /* 确保输入框和选择框填满单元格 */
