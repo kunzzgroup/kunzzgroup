@@ -1382,38 +1382,108 @@ function updateCharts(data) {
                 }
             ];
         } else if (currentChartDataType === 'grossTotal') {
-            // 毛利润: 每家餐厅各用正负分色渐变
-            const restaurants = [
-                { key: 'j1', label: dataLabels.grossTotal[0], r: '88, 62, 4',   border: restaurantColors.j1.primary },
-                { key: 'j2', label: dataLabels.grossTotal[1], r: '217, 119, 6', border: restaurantColors.j2.primary },
-                { key: 'j3', label: dataLabels.grossTotal[2], r: '220, 38, 38', border: restaurantColors.j3.primary }
-            ];
-            baseDatasets = restaurants.map(rest => ({
-                label: rest.label,
-                data: comparisonData.restaurants[rest.key].map(item => getChartDataByType(item, currentChartDataType)),
-                borderColor: rest.border,
-                backgroundColor: function (context) {
-                    const { ctx, chartArea, scales } = context.chart;
-                    if (!chartArea || !scales || !scales.y) return 'transparent';
-                    const zeroY = scales.y.getPixelForValue(0);
-                    const top = chartArea.top;
-                    const bottom = chartArea.bottom;
-                    const zeroRatio = Math.min(1, Math.max(0, (zeroY - top) / (bottom - top)));
-                    const gradient = ctx.createLinearGradient(0, top, 0, bottom);
-                    // 正值: 该餐厅本色渐变
-                    gradient.addColorStop(0, `rgba(${rest.r}, 0.40)`);
-                    gradient.addColorStop(Math.max(0, zeroRatio - 0.001), `rgba(${rest.r}, 0.03)`);
-                    // 负值: 红色渐变
-                    gradient.addColorStop(Math.min(1, zeroRatio + 0.001), 'rgba(226, 75, 74, 0.03)');
-                    gradient.addColorStop(1, 'rgba(226, 75, 74, 0.55)');
-                    return gradient;
+        } else if (currentChartDataType === 'grossTotal') {
+            // 三店合计：默认展示合集的 盈利/亏损面积图，剩余 J1, J2, J3 作为可选线条（默认隐藏）
+            
+            // 1. 计算合计数据
+            const totalRawData = comparisonData.dates.map((_, i) => {
+                const j1 = comparisonData.restaurants.j1[i] ? comparisonData.restaurants.j1[i].grossTotal : 0;
+                const j2 = comparisonData.restaurants.j2[i] ? comparisonData.restaurants.j2[i].grossTotal : 0;
+                const j3 = comparisonData.restaurants.j3[i] ? comparisonData.restaurants.j3[i].grossTotal : 0;
+                return j1 + j2 + j3;
+            });
+            
+            const totalPositiveData = totalRawData.map(val => val >= 0 ? val : 0);
+            const totalNegativeData = totalRawData.map(val => val < 0 ? val : 0);
+
+            // 2. 准备单店数据
+            const j1Data = comparisonData.restaurants.j1.map(item => item.grossTotal);
+            const j2Data = comparisonData.restaurants.j2.map(item => item.grossTotal);
+            const j3Data = comparisonData.restaurants.j3.map(item => item.grossTotal);
+
+            baseDatasets = [
+                // 合计的盈利（绿色面积）
+                {
+                    label: '盈利合计',
+                    data: totalPositiveData,
+                    borderColor: '#22c55e',
+                    backgroundColor: function (context) {
+                        const { ctx, chartArea } = context.chart;
+                        if (!chartArea) return 'transparent';
+                        const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                        gradient.addColorStop(0, 'rgba(34, 197, 94, 0.4)');
+                        gradient.addColorStop(1, 'rgba(34, 197, 94, 0.05)');
+                        return gradient;
+                    },
+                    fill: 'origin',
+                    tension: 0.4, 
+                    cubicInterpolationMode: 'monotone',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 8
                 },
-                fill: 'origin',
-                tension: 0.4,
-                borderWidth: 2,
-                pointRadius: 0,
-                pointHoverRadius: 6
-            }));
+                // 合计的亏损（红色面积）
+                {
+                    label: '亏损合计',
+                    data: totalNegativeData,
+                    borderColor: '#ef4444',
+                    backgroundColor: function (context) {
+                        const { ctx, chartArea } = context.chart;
+                        if (!chartArea) return 'transparent';
+                        const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                        gradient.addColorStop(0, 'rgba(239, 68, 68, 0.05)');
+                        gradient.addColorStop(1, 'rgba(239, 68, 68, 0.4)');
+                        return gradient;
+                    },
+                    fill: 'origin',
+                    tension: 0.4, 
+                    cubicInterpolationMode: 'monotone',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 8
+                },
+                // 分店独立线条（默认隐藏，点击图例可显示）
+                {
+                    label: 'J1 毛利润',
+                    data: j1Data,
+                    borderColor: restaurantColors.j1.primary,
+                    backgroundColor: 'transparent',
+                    fill: false,
+                    hidden: true,
+                    tension: 0.4,
+                    borderWidth: 2,
+                    borderDash: [5, 5], // 虚线区分
+                    pointRadius: 0,
+                    pointHoverRadius: 6
+                },
+                {
+                    label: 'J2 毛利润',
+                    data: j2Data,
+                    borderColor: restaurantColors.j2.primary,
+                    backgroundColor: 'transparent',
+                    fill: false,
+                    hidden: true,
+                    tension: 0.4,
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    pointRadius: 0,
+                    pointHoverRadius: 6
+                },
+                {
+                    label: 'J3 毛利润',
+                    data: j3Data,
+                    borderColor: restaurantColors.j3.primary,
+                    backgroundColor: 'transparent',
+                    fill: false,
+                    hidden: true,
+                    tension: 0.4,
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    pointRadius: 0,
+                    pointHoverRadius: 6
+                }
+            ];
+
         } else {
             baseDatasets = [
                     {
@@ -1758,6 +1828,9 @@ function updateCharts(data) {
                                 if (currentChartDataType === 'grossTotal') {
                                     if (context.dataset.label === '盈利' && context.parsed.y === 0) return null;
                                     if (context.dataset.label === '亏损' && context.parsed.y === 0) return null;
+                                    
+                                    if (context.dataset.label === '盈利合计' && context.parsed.y === 0) return null;
+                                    if (context.dataset.label === '亏损合计' && context.parsed.y === 0) return null;
                                 }
                                 return getTooltipFormatter(currentChartDataType)(context);
                             }
@@ -1957,9 +2030,10 @@ function getTooltipFormatter(dataType) {
         case 'grossTotal':
             return function (context) {
                 // 对于毛利润的正负分色双线图，不显示"盈利/亏损"前缀，直接显示金额和颜色指示
-                if (currentRestaurant !== 'total') {
+                if (currentRestaurant !== 'total' || context.dataset.label === '盈利合计' || context.dataset.label === '亏损合计') {
                     return 'RM ' + context.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 }
+                // 对于三店合计里单独勾选出的 J1/J2/J3，显示前缀
                 return context.dataset.label + ': RM ' + context.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             };
         case 'totalCost':
