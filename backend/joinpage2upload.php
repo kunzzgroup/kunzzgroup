@@ -45,7 +45,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
         $allowedImage = ['jpg', 'jpeg', 'png', 'webp'];
 
         // 验证文件安全性
-        if ($file['error'] !== UPLOAD_ERR_OK) {
+        if ($file['error'] === UPLOAD_ERR_NO_FILE) {
+            $error = "请先选择要上传的照片！";
+        }
+        elseif ($file['error'] !== UPLOAD_ERR_OK) {
             $error = "文件上传错误，错误代码：" . $file['error'];
         }
         elseif ($file['size'] > 10 * 1024 * 1024) { // 限制10MB
@@ -81,13 +84,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
 
                     $config['comphoto_' . $photoNumber] = [
                         'file' => $targetPath, // 物理路径，用于后端验证
-                        'url' => $subdomainUrl . $newFileName, // 子域名URL，用于前端访问
                         'type' => 'image',
                         'updated' => date('Y-m-d H:i:s')
                     ];
 
                     file_put_contents($configFile, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-                    $success = "照片 #{$photoNumber} 上传成功！已保存到子域名存储：" . $subdomainUrl . $newFileName;
+                    $success = "照片 #{$photoNumber} 上传成功！";
 
                     // 页面重定向，清除缓存
                     echo "<script>

@@ -38,3 +38,16 @@ document.querySelectorAll('.file-input').forEach(input => {
         }
     });
 });
+
+// 表单提交验证
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function (e) {
+        const fileInput = this.querySelector('input[type="file"]');
+        if (fileInput && fileInput.files.length === 0) {
+            // 如果是在"更新照片"的情况下，如果没有选择新照片，可能只是误点，或者想清空？
+            // 我们要求必须选择照片才能提交
+            e.preventDefault();
+            alert("请先点击虚线框选择要上传的照片，然后再点击上传按钮！");
+        }
+    });
+});
