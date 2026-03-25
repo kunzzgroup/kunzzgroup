@@ -337,8 +337,8 @@ body::-webkit-scrollbar {
 
 .comphoto {
     position: absolute;
-    width: clamp(60px, 8vw, 120px);
-    height: clamp(40px, 5.33vw, 80px);
+    width: clamp(100px, 13vw, 200px);
+    height: clamp(67px, 8.67vw, 133px);
     border-radius: clamp(4px, 0.67vw, 8px);
     box-shadow: 
         0 4px 15px rgba(0, 0, 0, 0.3),

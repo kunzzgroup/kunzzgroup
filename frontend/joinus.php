@@ -1001,8 +1001,8 @@ window.addEventListener('resize', () => {
         let isPaused = false;
 
         // 物理参数（响应式）
-        const getPhotoWidth = () => Math.min(120, Math.max(60, window.innerWidth * 0.08));
-        const getPhotoHeight = () => Math.min(80, Math.max(40, window.innerWidth * 0.0533));
+        const getPhotoWidth = () => Math.min(200, Math.max(100, window.innerWidth * 0.13));
+        const getPhotoHeight = () => Math.min(133, Math.max(67, window.innerWidth * 0.0867));
         const PHOTO_WIDTH = getPhotoWidth();
         const PHOTO_HEIGHT = getPhotoHeight();
         const NAVBAR_HEIGHT = 80;
@@ -1315,7 +1315,7 @@ window.addEventListener('resize', () => {
                 requestAnimationFrame(() => {
                     modal.classList.add('show');
                     
-                    const scaleMultiplier = 8;
+                    const scaleMultiplier = 5;
                     const centerX = window.innerWidth / 2;
                     const centerY = window.innerHeight / 2;
                     
