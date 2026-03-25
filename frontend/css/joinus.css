@@ -1646,7 +1646,7 @@ form select:focus {
     overflow: hidden;
 
     /* 背景图 */
-    background: url('../../images/images/背景4.jpg') no-repeat center center/cover;
+    background: url('../../images/images/背景4.webp') no-repeat center center/cover;
 }
 
 .contact-form-container {
