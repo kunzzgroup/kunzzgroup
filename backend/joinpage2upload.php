@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
             finfo_close($finfo);
 
             $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
-            if (!in_array($mimeType, $allowedMimes)) {
+            if (!in_array($mimeType, $allowedMimes) && !isHeicMimeType($mimeType, $fileExtension)) {
                 $error = "文件MIME类型验证失败！";
             }
             else {

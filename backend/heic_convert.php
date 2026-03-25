@@ -1,7 +1,10 @@
 <?php
 /**
  * HEIC/HEIF 转 JPG 工具函数
- * 需要服务器安装: apt install imagemagick libheif1 -y
+ * 支持三种转换方式（自动选择可用方式）：
+ * 1. PHP Imagick 扩展（Hostinger 共享主机推荐）
+ * 2. magick 命令行（VPS/独立服务器）
+ * 3. convert 命令行（旧版 ImageMagick）
  */
 
 /**
@@ -27,12 +30,58 @@ function convertHeicToJpg($filePath, $extension) {
     $newFileName = uniqid() . '.jpg';
     $newPath = $dir . '/' . $newFileName;
     
-    // 使用 ImageMagick 转换
-    $escapedInput = escapeshellarg($filePath);
-    $escapedOutput = escapeshellarg($newPath);
-    exec("magick {$escapedInput} {$escapedOutput} 2>&1", $output, $returnCode);
+    $converted = false;
+    $errorMsg = '';
     
-    if ($returnCode === 0 && file_exists($newPath)) {
+    // 方式1: 使用 PHP Imagick 扩展（Hostinger 共享主机通常支持）
+    if (!$converted && extension_loaded('imagick')) {
+        try {
+            $imagick = new Imagick($filePath);
+            $imagick->setImageFormat('jpeg');
+            $imagick->setImageCompressionQuality(90);
+            $imagick->writeImage($newPath);
+            $imagick->destroy();
+            $converted = true;
+        } catch (Exception $e) {
+            $errorMsg .= "Imagick 失败: " . $e->getMessage() . "; ";
+        }
+    }
+    
+    // 方式2: 使用 magick 命令行（ImageMagick 7+）
+    if (!$converted && function_exists('exec')) {
+        $escapedInput = escapeshellarg($filePath);
+        $escapedOutput = escapeshellarg($newPath);
+        @exec("magick {$escapedInput} {$escapedOutput} 2>&1", $output, $returnCode);
+        if ($returnCode === 0 && file_exists($newPath)) {
+            $converted = true;
+        } else {
+            $errorMsg .= "magick 失败: " . implode(" ", $output ?? []) . "; ";
+            // 方式3: 使用 convert 命令行（ImageMagick 6.x）
+            @exec("convert {$escapedInput} {$escapedOutput} 2>&1", $output2, $returnCode2);
+            if ($returnCode2 === 0 && file_exists($newPath)) {
+                $converted = true;
+            } else {
+                $errorMsg .= "convert 失败: " . implode(" ", $output2 ?? []) . "; ";
+            }
+        }
+    }
+    
+    // 方式4: 使用 GD（PHP 8.1+ 的 GD 可能支持 HEIC）
+    if (!$converted && function_exists('imagecreatefromstring')) {
+        $imageData = @file_get_contents($filePath);
+        if ($imageData !== false) {
+            $img = @imagecreatefromstring($imageData);
+            if ($img !== false) {
+                imagejpeg($img, $newPath, 90);
+                imagedestroy($img);
+                if (file_exists($newPath) && filesize($newPath) > 0) {
+                    $converted = true;
+                }
+            }
+        }
+    }
+    
+    if ($converted && file_exists($newPath)) {
         // 转换成功，删除原始 HEIC 文件
         @unlink($filePath);
         @chmod($newPath, 0644);
@@ -45,12 +94,34 @@ function convertHeicToJpg($filePath, $extension) {
         ];
     }
     
-    // 转换失败，返回原始文件
-    error_log("HEIC 转换失败: " . implode("\n", $output));
+    // 所有方式都失败 - 记录错误但不中断，保留原始文件
+    error_log("HEIC 转换失败 [{$filePath}]: " . $errorMsg);
     return [
         'path' => $filePath,
         'extension' => $extension,
         'converted' => false,
-        'error' => implode("\n", $output)
+        'error' => $errorMsg
     ];
+}
+
+/**
+ * 检查 HEIC MIME 类型（兼容不同服务器环境）
+ * 某些服务器的 finfo 可能不识别 HEIC，返回 application/octet-stream
+ */
+function isHeicMimeType($mimeType, $extension) {
+    $heicMimes = ['image/heic', 'image/heif', 'image/heic-sequence', 'image/heif-sequence'];
+    $heicExts = ['heic', 'heif'];
+    
+    // 直接匹配 MIME
+    if (in_array(strtolower($mimeType), $heicMimes)) {
+        return true;
+    }
+    
+    // 某些服务器无法识别 HEIC MIME，通过扩展名辅助判断
+    if (in_array(strtolower($extension), $heicExts) && 
+        in_array($mimeType, ['application/octet-stream', 'application/x-empty', ''])) {
+        return true;
+    }
+    
+    return false;
 }
