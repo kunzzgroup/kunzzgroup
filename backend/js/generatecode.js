@@ -2006,7 +2006,7 @@ function syncLevel2Permissions(container, parentValue, parentChecked) {
 // 同步三级权限状态
 function syncLevel3Permissions(container, level2Value, level2Checked) {
     if (level2Value === 'stock_inventory') {
-        container.querySelectorAll('.perm-stock-system, .perm-stock-view').forEach(cb => {
+        container.querySelectorAll('.perm-stock-system, .perm-stock-view, .perm-stock-shipper').forEach(cb => {
             cb.checked = level2Checked;
         });
     }
