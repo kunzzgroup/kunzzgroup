@@ -93,18 +93,18 @@ $avatarLetter = strtoupper($username[0]);
         </div>
 
         <!-- 日期信息显示 -->
-        <div class="date-info" id="date-info" style="margin-bottom: 16px; border: 1px solid #e5e7eb;">
+        <div class="date-info" id="date-info">
             正在加载数据...
         </div>
         <div id="app">
             <!-- Date Controls -->
-            <div class="card" style="margin-bottom: clamp(14px, 1.67vw, 32px);">
+            <div class="card date-controls-card">
                 <div class="card-body">
                     <div class="date-controls">
 
                         <!-- 日期范围选择器 -->
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                            <label class="form-label" style="margin: 0;">日期范围</label>
+                        <div class="date-control-group">
+                            <label class="form-label">日期范围</label>
                             <div class="date-range-picker" id="date-range-picker" onclick="toggleCalendar()">
                                 <i class="fas fa-calendar-alt"></i>
                                 <span id="date-range-display">选择日期范围</span>
@@ -114,9 +114,9 @@ $avatarLetter = strtoupper($username[0]);
                         <div class="divider"></div>
 
                         <!-- 月份选择器 -->
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                            <label class="form-label" style="margin: 0; display: flex; align-items: center; gap: 4px;">
-                                <i class="fas fa-calendar" style="color: #000000ff;"></i>
+                        <div class="date-control-group">
+                            <label class="form-label">
+                                <i class="fas fa-calendar"></i>
                                 选择年份和月份
                             </label>
                             <div class="enhanced-date-picker month-only" id="month-date-picker">
@@ -134,9 +134,9 @@ $avatarLetter = strtoupper($username[0]);
                             </div>
                         </div>
 
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                            <label class="form-label" style="margin: 0; display: flex; align-items: center; gap: 4px;">
-                                <i class="fas fa-clock" style="color: #000000ff;"></i>
+                        <div class="date-control-group">
+                            <label class="form-label">
+                                <i class="fas fa-clock"></i>
                                 快速选择
                             </label>
                             <div class="dropdown">
@@ -370,16 +370,14 @@ $avatarLetter = strtoupper($username[0]);
 
             <!-- Main Chart - 全宽显示 -->
             <div class="main-chart-container">
-                <div class="card" style="height: 400px;">
-                    <div class="card-body" style="height: 100%; display: flex; flex-direction: column;">
-                        <div class="chart-header"
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                            <h3 id="main-chart-title"
-                                style="font-size: clamp(14px, 1.04vw, 20px); font-weight: 600; color: #111827; margin: 0;">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="chart-header">
+                            <h3 id="main-chart-title">
                                 成本趋势分析</h3>
 
                             <!-- 数据类型切换按钮组 -->
-                            <div class="chart-data-buttons" style="display: flex; gap: 8px; align-items: center;">
+                            <div class="chart-data-buttons">
                                 <button class="chart-data-btn active" data-type="totalCost"
                                     onclick="switchChartData('totalCost')">
                                     总成本
@@ -398,11 +396,10 @@ $avatarLetter = strtoupper($username[0]);
                                 </button>
                             </div>
 
-                            <div class="date-range-display" id="chart-date-range"
-                                style="font-size: clamp(8px, 0.74vw, 14px); color: #6b7280; font-weight: 500;">
+                            <div class="date-range-display" id="chart-date-range">
                             </div>
                         </div>
-                        <div class="chart-container" style="flex: 1;">
+                        <div class="chart-container chart-fill">
                             <button class="chart-back-button" id="cost-chart-back" onclick="exitDrillDown()">
                                 <i class="fas fa-arrow-left"></i> 返回年度视图
                             </button>
@@ -413,13 +410,12 @@ $avatarLetter = strtoupper($username[0]);
             </div>
 
             <!-- Detail Table -->
-            <div class="card">
-                <div class="card-body" style="padding-bottom: 0;">
-                    <h3
-                        style="font-size: clamp(14px, 1.04vw, 20px); font-weight: 600; color: #111827; margin-bottom: 24px;">
+            <div class="card detail-card">
+                <div class="card-body">
+                    <h3>
                         详细数据</h3>
                 </div>
-                <div style="overflow-x: auto;">
+                <div class="table-scroll">
                     <table class="table" id="dashboard-table">
                         <thead>
                             <tr id="table-header">
@@ -444,7 +440,7 @@ $avatarLetter = strtoupper($username[0]);
     </div>
 
     <!-- 日历弹窗 -->
-    <div class="calendar-popup" id="calendar-popup" style="display: none;">
+    <div class="calendar-popup" id="calendar-popup">
         <div class="calendar-header">
             <button class="calendar-nav-btn" onclick="event.stopPropagation(); changeMonth(-1)">
                 <i class="fas fa-chevron-left"></i>

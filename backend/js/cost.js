@@ -2,6 +2,15 @@
 // API 配置
 const API_BASE_URL = 'costapi.php';
 
+// 图表颜色常量（Canvas 绘图，无法用 CSS 控制）
+const CHART_COLORS = {
+    grossPositive: 'rgba(230, 225, 216, 0.55)',  // 毛利润正值: #e6e1d8
+    grossNegative: 'rgba(226, 75, 74, 0.45)',     // 毛利润负值: #e24b4a
+    grossBorder:   '#a09060',
+    primary:       'rgba(88, 62, 4, 0.4)',
+};
+
+
 // 应用状态
 let actualData = [];
 let allRestaurantsData = {};
@@ -573,7 +582,7 @@ function generateDropdownContent(prefix, type) {
         const noneOption = document.createElement('div');
         noneOption.className = 'date-option';
         noneOption.textContent = '无';
-        noneOption.style.gridColumn = '1 / -1';
+        noneOption.classList.add('date-option-span');
 
         if (!dateValue.month) {
             noneOption.classList.add('selected');
@@ -1607,6 +1616,26 @@ function updateCharts(data) {
                     fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 8
                 }
             ];
+        } else if (currentChartDataType === 'grossTotal') {
+            // 正负分色 (Diverging Color): 盈利=绿色(#e6e1d8), 亏损=红色(#e24b4a)
+            const grossData = aggregatedData.map(item => getChartDataByType(item, currentChartDataType));
+            baseDatasets = [
+                {
+                    label: '毛利润',
+                    data: grossData,
+                    borderColor: CHART_COLORS.grossBorder,
+                    backgroundColor: 'transparent',
+                    fill: {
+                        value: 0,
+                        above: CHART_COLORS.grossPositive,
+                        below: CHART_COLORS.grossNegative
+                    },
+                    tension: 0.4,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 8
+                }
+            ];
         } else {
             baseDatasets = [{
                 label: dataLabel[currentChartDataType],
@@ -1651,7 +1680,7 @@ function updateCharts(data) {
                 },
                 scales: {
                     y: {
-                        beginAtZero: true,
+                        beginAtZero: currentChartDataType !== 'grossTotal',
                         ticks: {
                             callback: getYAxisFormatter(currentChartDataType)
                         }
@@ -1660,7 +1689,19 @@ function updateCharts(data) {
                 plugins: {
                     tooltip: {
                         callbacks: {
-                            label: getTooltipFormatter(currentChartDataType)
+                            label: function (context) {
+                                // 隐藏内部负值数据集的tooltip
+                                if (context.dataset.label === '_gross_negative') return null;
+                                return getTooltipFormatter(currentChartDataType)(context);
+                            }
+                        }
+                    },
+                    legend: {
+                        labels: {
+                            filter: function (item) {
+                                // 隐藏内部负值数据集的图例
+                                return item.text !== '_gross_negative';
+                            }
                         }
                     }
                 }
@@ -2283,8 +2324,7 @@ function showNumberOptions(letter) {
                 `;
     }
 
-    numberSelection.style.visibility = 'visible';
-    numberSelection.style.opacity = '1';
+    numberSelection.classList.add('show');
 }
 
 async function selectRestaurant(number) {
@@ -2318,8 +2358,7 @@ function hideNumberOptions() {
     const sectionTitle = numberSelection.querySelector('.section-title');
     const numberGrid = numberSelection.querySelector('.number-grid');
 
-    numberSelection.style.visibility = 'hidden';
-    numberSelection.style.opacity = '0';
+    numberSelection.classList.remove('show');
 
     sectionTitle.textContent = '选择餐厅';
     numberGrid.innerHTML = '';

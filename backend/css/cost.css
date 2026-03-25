@@ -1426,3 +1426,107 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* ============================================
+           从 cost.php 内联样式提取 + cost.js 提取
+           ============================================ */
+
+        /* 主图表卡片固定高度 */
+        .main-chart-container > .card {
+            height: 400px;
+        }
+
+        /* 主图表 card-body 填满高度 */
+        .main-chart-container .card-body {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 图表头部布局 */
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        /* 主图表标题 */
+        #main-chart-title {
+            font-size: clamp(14px, 1.04vw, 20px);
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+        }
+
+        /* 图表内部容器填充可用空间 */
+        .chart-container.chart-fill {
+            flex: 1;
+        }
+
+        /* 图表右上角日期范围文字 */
+        #chart-date-range {
+            font-size: clamp(8px, 0.74vw, 14px);
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        /* 详细数据卡片：去掉底部 padding */
+        .detail-card > .card-body {
+            padding-bottom: 0;
+        }
+
+        /* 详细数据标题 */
+        .detail-card h3 {
+            font-size: clamp(14px, 1.04vw, 20px);
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 24px;
+        }
+
+        /* 日期控件卡片底部间距 */
+        .date-controls-card {
+            margin-bottom: clamp(14px, 1.67vw, 32px);
+        }
+
+        /* date-info 边框和间距 */
+        .date-info {
+            margin-bottom: 16px;
+            border: 1px solid #e5e7eb;
+        }
+
+        /* 月份选择"无"选项：跨满所有列（替代 JS 内联 style.gridColumn） */
+        .date-option-span {
+            grid-column: 1 / -1;
+        }
+
+        /* 表格横向滚动容器 */
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        /* date-controls 内的列式布局块 */
+        .date-control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        /* date-controls 内的 form-label 去除默认底部边距 */
+        .date-controls .form-label {
+            margin: 0;
+        }
+
+        /* date-controls 内的图标色 */
+        .date-controls .form-label i {
+            color: #000000ff;
+        }
+
+        /* 日历弹窗默认隐藏 */
+        .calendar-popup {
+            display: none;
+        }
+
+        .calendar-popup.open {
+            display: block;
+        }
