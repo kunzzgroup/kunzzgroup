@@ -71,12 +71,12 @@ if ($result->num_rows === 1) {
         exit();
 
     } else {
-        echo "<script>alert('密码错误'); window.location.href='login.html';</script>";
+        echo "<script>alert('密码错误'); window.location.href='login';</script>";
         exit();
     }
 
 } else {
-    echo "<script>alert('该账号不存在'); window.location.href='login.html';</script>";
+    echo "<script>alert('该账号不存在'); window.location.href='login';</script>";
     exit();
 }
 ?>

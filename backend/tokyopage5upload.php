@@ -14,7 +14,7 @@ include_once '../media_config.php';
 
 // 检查是否已登录（根据你的登录系统调整）
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.html");
+    header("Location: /frontend/login");
     exit();
 }
 

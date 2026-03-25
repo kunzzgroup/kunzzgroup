@@ -31,7 +31,7 @@ if (isset($_SESSION['user_id'])) {
         setcookie('remember_token', '', time() - 60, "/");
 
         // 跳转登录页
-        header("Location: /frontend/login.html");
+        header("Location: /frontend/login");
         exit();
     }
 
@@ -51,7 +51,7 @@ if (isset($_SESSION['user_id'])) {
     $_SESSION['last_activity'] = time();
 } else {
     // 没有 session，也没有有效 cookie
-    header("Location: /frontend/login.html");
+    header("Location: /frontend/login");
     exit();
 }
 

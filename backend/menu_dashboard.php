@@ -10,7 +10,7 @@ session_start();
 
 // Authentication guard
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.html");
+    header("Location: /frontend/login");
     exit();
 }
 ?>

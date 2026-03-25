@@ -52,8 +52,8 @@ header("Expires: Wed, 11 Jan 1984 05:00:00 GMT");
     <div class="login-dropdown">
       <button class="login-btn" id="loginBtn">LOGIN</button>
         <div class="login-dropdown-menu" id="loginDropdownMenu">
-          <a href="login.html" class="login-dropdown-item">员工登入</a>
-          <a href="login.html" class="login-dropdown-item">会员登入</a>
+          <a href="login.php" class="login-dropdown-item">员工登入</a>
+          <a href="login.php" class="login-dropdown-item">会员登入</a>
         </div>
       </div>
 
