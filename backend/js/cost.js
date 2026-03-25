@@ -1403,7 +1403,7 @@ function updateCharts(data) {
             baseDatasets = [
                 // 合计的盈利（绿色面积）
                 {
-                    label: '盈利合计',
+                    label: '合计盈利',
                     data: totalPositiveData,
                     borderColor: '#22c55e',
                     backgroundColor: function (context) {
@@ -1423,7 +1423,7 @@ function updateCharts(data) {
                 },
                 // 合计的亏损（红色面积）
                 {
-                    label: '亏损合计',
+                    label: '合计亏损',
                     data: totalNegativeData,
                     borderColor: '#ef4444',
                     backgroundColor: function (context) {
@@ -1441,43 +1441,40 @@ function updateCharts(data) {
                     pointRadius: 0,
                     pointHoverRadius: 8
                 },
-                // 分店独立线条（默认隐藏，点击图例可显示）
+                // 分店独立线条（默认显示，实线）
                 {
-                    label: 'J1 毛利润',
+                    label: 'J1',
                     data: j1Data,
                     borderColor: restaurantColors.j1.primary,
                     backgroundColor: 'transparent',
                     fill: false,
-                    hidden: true,
                     tension: 0.4,
+                    cubicInterpolationMode: 'monotone',
                     borderWidth: 2,
-                    borderDash: [5, 5], // 虚线区分
                     pointRadius: 0,
                     pointHoverRadius: 6
                 },
                 {
-                    label: 'J2 毛利润',
+                    label: 'J2',
                     data: j2Data,
                     borderColor: restaurantColors.j2.primary,
                     backgroundColor: 'transparent',
                     fill: false,
-                    hidden: true,
                     tension: 0.4,
+                    cubicInterpolationMode: 'monotone',
                     borderWidth: 2,
-                    borderDash: [5, 5],
                     pointRadius: 0,
                     pointHoverRadius: 6
                 },
                 {
-                    label: 'J3 毛利润',
+                    label: 'J3',
                     data: j3Data,
                     borderColor: restaurantColors.j3.primary,
                     backgroundColor: 'transparent',
                     fill: false,
-                    hidden: true,
                     tension: 0.4,
+                    cubicInterpolationMode: 'monotone',
                     borderWidth: 2,
-                    borderDash: [5, 5],
                     pointRadius: 0,
                     pointHoverRadius: 6
                 }
@@ -1820,56 +1817,37 @@ function updateCharts(data) {
                     }
                 },
                 plugins: {
-                    legend: {
-                        onClick: function(e, legendItem, legend) {
-                            // 调用默认的切换逻辑
-                            Chart.defaults.plugins.legend.onClick.call(this, e, legendItem, legend);
-                            
-                            // 只针对三店合计且处于毛利润图表时
-                            if (currentRestaurant === 'total' && currentChartDataType === 'grossTotal') {
-                                const chart = legend.chart;
-                                let totalIndices = [];
-                                let shopIndices = [];
-                                
-                                // 分类数据集
-                                chart.data.datasets.forEach((dataset, index) => {
-                                    if (dataset.label === '盈利合计' || dataset.label === '亏损合计') {
-                                        totalIndices.push(index);
-                                    } else if (dataset.label.includes('J1') || dataset.label.includes('J2') || dataset.label.includes('J3')) {
-                                        shopIndices.push(index);
-                                    }
-                                });
-
-                                // 如果点击的是分店数据集
-                                if (shopIndices.includes(legendItem.datasetIndex)) {
-                                    const anyShopVisible = shopIndices.some(index => chart.isDatasetVisible(index));
-                                    
-                                    if (anyShopVisible) {
-                                        // 有任意一个分店显示时，自动关闭合计
-                                        totalIndices.forEach(index => {
-                                            chart.setDatasetVisibility(index, false);
-                                        });
-                                    } else {
-                                        // 所有分店都关闭时，自动补回合计
-                                        totalIndices.forEach(index => {
-                                            chart.setDatasetVisibility(index, true);
-                                        });
-                                    }
-                                    chart.update();
-                                }
-                            }
-                        }
-                    },
                     tooltip: {
                         callbacks: {
+                            afterTitle: function (context) {
+                                // 针对三店合计毛利润，添加“合计: RM xxx (盈利/亏损)”的副标题
+                                if (currentRestaurant === 'total' && currentChartDataType === 'grossTotal' && context.length > 0) {
+                                    const dataIndex = context[0].dataIndex;
+                                    const chart = context[0].chart;
+                                    let sum = 0;
+                                    chart.data.datasets.forEach(dataset => {
+                                        if (dataset.label === 'J1' || dataset.label === 'J2' || dataset.label === 'J3') {
+                                            sum += dataset.data[dataIndex] || 0;
+                                        }
+                                    });
+                                    const formattedSum = Math.abs(sum).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                    const statusLabel = sum >= 0 ? '(盈利)' : '(亏损)';
+                                    return `合计: RM ${formattedSum} ${statusLabel}`;
+                                }
+                                return null;
+                            },
                             label: function (context) {
-                                // 针对正负分色的图表，隐藏值为 0 的被截断数据集，保持 tooltip 简洁
+                                // 针对正负分色的图表，隐藏值为 0 的被截断数据集
                                 if (currentChartDataType === 'grossTotal') {
                                     if (context.dataset.label === '盈利' && context.parsed.y === 0) return null;
                                     if (context.dataset.label === '亏损' && context.parsed.y === 0) return null;
                                     
-                                    if (context.dataset.label === '盈利合计' && context.parsed.y === 0) return null;
-                                    if (context.dataset.label === '亏损合计' && context.parsed.y === 0) return null;
+                                    // 针对三店合计，隐藏“合计盈利”和“合计亏损”的系统标签，因为我们已经在标题下方(afterTitle)统一显示了
+                                    if (currentRestaurant === 'total') {
+                                        if (context.dataset.label === '合计盈利' || context.dataset.label === '合计亏损') {
+                                            return null;
+                                        }
+                                    }
                                 }
                                 return getTooltipFormatter(currentChartDataType)(context);
                             }
