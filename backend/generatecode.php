@@ -452,24 +452,6 @@ require_once 'session_check.php';
                         </div>
                     </div>
 
-                    <!-- 一级：进出货 -->
-                    <div class="perm-level-1">
-                        <div class="perm-level-1-item" data-perm="stock_inout">
-                            <label class="perm-checkbox-label">
-                                <input type="checkbox" class="perm-l1-check" value="stock_inout">
-                                <span class="perm-arrow">▶</span>
-                                <strong>进出货</strong>
-                            </label>
-                        </div>
-                        <div class="perm-level-2-container" data-parent="stock_inout">
-                            <div class="perm-level-2-item">
-                                <label class="perm-checkbox-label">
-                                    <input type="checkbox" class="perm-l2-check" data-parent="stock_inout" value="is_shipper">
-                                    <span>出货人</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- 一级：视觉管理 -->
                     <div class="perm-level-1">
@@ -594,6 +576,9 @@ require_once 'session_check.php';
                                     <div class="perm-section-title">视图选项</div>
                                     <label><input type="checkbox" class="perm-stock-view" value="list"> 总库存</label>
                                     <label><input type="checkbox" class="perm-stock-view" value="records"> 进出货</label>
+                                    <div style="margin-left: 20px; margin-top: 5px; display: flex; flex-direction: column; gap: 5px; border-left: 2px solid #eee; padding-left: 10px;">
+                                        <label style="font-size: 0.9em;"><input type="checkbox" class="perm-stock-shipper" value="is_shipper"> 出货人</label>
+                                    </div>
                                     <label><input type="checkbox" class="perm-stock-view" value="remark"> 货品备注</label>
                                     <label><input type="checkbox" class="perm-stock-view" value="product"> 货品种类</label>
                                     <div style="margin-left: 20px; margin-top: 5px; display: flex; flex-direction: column; gap: 5px; border-left: 2px solid #eee; padding-left: 10px;">

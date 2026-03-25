@@ -687,14 +687,15 @@ function handleGet()
             break;
 
         case 'get_shippers':
-            // 获取所有被赋予「出货人」权限的用户昵称，中央始终为第一项
-            // 权限存储位置: user_sidebar_permissions.submenu_permissions_json -> stock_inout -> is_shipper
+            // 获取所有被赋予「出货人」权限的用户昵称
+            // 存储位置: user_page_permissions.stock_inventory.is_shipper = true
             try {
                 $shipperStmt = $pdo->prepare("
                     SELECT u.nickname, u.username
-                    FROM user_sidebar_permissions p
+                    FROM user_page_permissions p
                     JOIN users u ON u.id = p.user_id
-                    WHERE JSON_CONTAINS(p.submenu_permissions_json, '\"is_shipper\"', '$.stock_inout')
+                    WHERE p.page_key = 'stock_inventory'
+                      AND JSON_UNQUOTE(JSON_EXTRACT(p.permissions_json, '$.is_shipper')) = 'true'
                 ");
                 $shipperStmt->execute();
                 $rows = $shipperStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -707,7 +708,7 @@ function handleGet()
                 }
                 sendResponse(true, "出货人列表获取成功", $shippers);
             } catch (PDOException $e) {
-                sendResponse(true, "ok", ['中央']); // 降级：返回默认值
+                sendResponse(true, "ok", ['中央']);
             }
             break;
 

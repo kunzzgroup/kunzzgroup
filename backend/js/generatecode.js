@@ -1536,8 +1536,7 @@ const sidebarSubOptions = {
     analytics: ['kpi_report', 'kpi_upload'],
     hr: ['staff_management'],
     resource: ['stock_inventory', 'dishware', 'price_comparison'],
-    brand: ['kunzz_holdings', 'tokyo_cuisine', 'tokyo_izakaya'],
-    stock_inout: ['is_shipper']
+    brand: ['kunzz_holdings', 'tokyo_cuisine', 'tokyo_izakaya']
 };
 // const STOCK_SYSTEM_KEYS = ['central', 'j1', 'j2', 'j3'];
 // const STOCK_VIEW_KEYS = ['list', 'records', 'remark', 'product', 'sot'];
@@ -1553,7 +1552,7 @@ function initPermissionTreeEvents(container) {
     container.dataset.permValidationInit = 'true';
 
     // 绑定所有的 checkbox 的 change 事件来触发验证
-    const allCheckboxes = container.querySelectorAll('.perm-l1-check, .perm-l2-check, .perm-stock-system, .perm-stock-view, .perm-upload-system, .perm-upload-type, .perm-page-schedule, .perm-page-blueprint');
+    const allCheckboxes = container.querySelectorAll('.perm-l1-check, .perm-l2-check, .perm-stock-system, .perm-stock-view, .perm-stock-shipper, .perm-upload-system, .perm-upload-type, .perm-page-schedule, .perm-page-blueprint');
     allCheckboxes.forEach(cb => {
         cb.addEventListener('change', () => {
             updatePermissionValidationState(container);
@@ -1873,10 +1872,10 @@ function initPermissionTreeEvents(container) {
     });
 
     // 三级页面权限和库存/上传权限的向上联动
-    container.querySelectorAll('.perm-stock-system, .perm-stock-view, .perm-upload-system, .perm-upload-type, .perm-page-schedule, .perm-page-blueprint').forEach(checkbox => {
+    container.querySelectorAll('.perm-stock-system, .perm-stock-view, .perm-stock-shipper, .perm-upload-system, .perm-upload-type, .perm-page-schedule, .perm-page-blueprint').forEach(checkbox => {
         checkbox.addEventListener('change', function () {
             let level2Value = '';
-            if (this.classList.contains('perm-stock-system') || this.classList.contains('perm-stock-view')) {
+            if (this.classList.contains('perm-stock-system') || this.classList.contains('perm-stock-view') || this.classList.contains('perm-stock-shipper')) {
                 level2Value = 'stock_inventory';
             } else if (this.classList.contains('perm-upload-system') || this.classList.contains('perm-upload-type')) {
                 level2Value = 'kpi_upload';
@@ -1900,7 +1899,7 @@ function initPermissionTreeEvents(container) {
             } else {
                 let otherChecked = 0;
                 if (level2Value === 'stock_inventory') {
-                    otherChecked = container.querySelectorAll('.perm-stock-system:checked, .perm-stock-view:checked').length;
+                    otherChecked = container.querySelectorAll('.perm-stock-system:checked, .perm-stock-view:checked, .perm-stock-shipper:checked').length;
                 } else if (level2Value === 'kpi_upload') {
                     otherChecked = container.querySelectorAll('.perm-upload-system:checked, .perm-upload-type:checked').length;
                 } else if (level2Value === 'kunzz_holdings') {
@@ -1939,7 +1938,7 @@ function setDefaultAllPermissions(container) {
     });
 
     // 全选所有三级权限
-    container.querySelectorAll('.perm-stock-system, .perm-stock-view, .perm-upload-system, .perm-upload-type, .perm-page-schedule, .perm-page-blueprint').forEach(cb => {
+    container.querySelectorAll('.perm-stock-system, .perm-stock-view, .perm-stock-shipper, .perm-upload-system, .perm-upload-type, .perm-page-schedule, .perm-page-blueprint').forEach(cb => {
         cb.checked = true;
     });
 }
@@ -1951,7 +1950,7 @@ function updatePermissionValidationState(container) {
     const submitBtn = container.querySelector('button[type="submit"]');
     const warningDiv = container.querySelector('.perm-warning');
 
-    const checkedBoxes = Array.from(container.querySelectorAll('.perm-l1-check, .perm-l2-check, .perm-stock-system, .perm-stock-view, .perm-upload-system, .perm-upload-type, .perm-page-schedule, .perm-page-blueprint'))
+    const checkedBoxes = Array.from(container.querySelectorAll('.perm-l1-check, .perm-l2-check, .perm-stock-system, .perm-stock-view, .perm-stock-shipper, .perm-upload-system, .perm-upload-type, .perm-page-schedule, .perm-page-blueprint'))
         .filter(cb => cb.checked && !cb.disabled);
 
     const hasSelection = checkedBoxes.length > 0;
@@ -2094,6 +2093,7 @@ function setPermCheckboxes(perms, pagePerms, submenuPerms, reportPerms, restaura
 
     document.querySelectorAll('.perm-stock-system').forEach(cb => cb.checked = systemSet.has(cb.value));
     document.querySelectorAll('.perm-stock-view').forEach(cb => cb.checked = viewSet.has(cb.value));
+    document.querySelectorAll('.perm-stock-shipper').forEach(cb => cb.checked = stockPagePerms.is_shipper === true);
 
     const uploadPagePerms = (pagePerms && typeof pagePerms === 'object') ? (pagePerms.kpi_upload || {}) : {};
     const uploadSystems = Array.isArray(uploadPagePerms.system) ? uploadPagePerms.system : [];
@@ -2227,7 +2227,8 @@ function extractPermissionsData(container) {
         },
         stock_inventory: {
             system: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="stock_inventory"] .perm-stock-system:checked')).map(cb => cb.value),
-            views: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="stock_inventory"] .perm-stock-view:checked')).map(cb => cb.value)
+            views: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="stock_inventory"] .perm-stock-view:checked')).map(cb => cb.value),
+            is_shipper: container.querySelector('.perm-level-3-panel[data-for="stock_inventory"] .perm-stock-shipper')?.checked === true
         },
         annual_summary: {
             system: Array.from(container.querySelectorAll('.perm-level-3-panel[data-for="annual_summary"] .perm-annual-system:checked')).map(cb => cb.value)
