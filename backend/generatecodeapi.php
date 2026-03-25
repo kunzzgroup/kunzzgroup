@@ -1080,7 +1080,8 @@ function getUserSidebarPermissions($pdo, $input)
                     $decoded = json_decode($row['permissions_json'], true);
                     $pagePerms['stock_inventory'] = [
                         'system' => $decoded['system'] ?? ($decoded['systems'] ?? []),
-                        'views' => $decoded['views'] ?? ($decoded['view'] ?? [])
+                        'views'  => $decoded['views']  ?? ($decoded['view']    ?? []),
+                        'is_shipper' => !empty($decoded['is_shipper'])
                     ];
                 }
                 elseif ($row['page_key'] === 'kpi_upload') {
