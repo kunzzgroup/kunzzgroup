@@ -124,6 +124,28 @@ window.addEventListener('keydown', function (e) {
         return;
     }
 
+    // A3. 新增一行 (Ctrl+A)
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.code === 'KeyA' || e.key === 'a' || e.key === 'A')) {
+        const activeElement = document.activeElement;
+        const isInput = activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.isContentEditable);
+        if (!isInput) {
+            e.preventDefault();
+            console.log('StockEdit Shortcut: CTRL+A triggered (Add New Row)');
+            const now = new Date();
+            const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            if (typeof addNewRowWithDate === 'function') {
+                addNewRowWithDate(today, '');
+                setTimeout(() => {
+                    const tableContainer = document.querySelector('.table-scroll-container');
+                    if (tableContainer) {
+                        tableContainer.scrollTop = tableContainer.scrollHeight;
+                    }
+                }, 100);
+            }
+            return;
+        }
+    }
+
     // B. 检查是否按下 Ctrl+S 或 Cmd+S
     if ((e.ctrlKey || e.metaKey) && (e.code === 'KeyS' || e.key === 's' || e.key === 'S')) {
         e.preventDefault();
