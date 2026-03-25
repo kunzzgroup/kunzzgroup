@@ -452,6 +452,25 @@ require_once 'session_check.php';
                         </div>
                     </div>
 
+                    <!-- 一级：进出货 -->
+                    <div class="perm-level-1">
+                        <div class="perm-level-1-item" data-perm="stock_inout">
+                            <label class="perm-checkbox-label">
+                                <input type="checkbox" class="perm-l1-check" value="stock_inout">
+                                <span class="perm-arrow">▶</span>
+                                <strong>进出货</strong>
+                            </label>
+                        </div>
+                        <div class="perm-level-2-container" data-parent="stock_inout">
+                            <div class="perm-level-2-item">
+                                <label class="perm-checkbox-label">
+                                    <input type="checkbox" class="perm-l2-check" data-parent="stock_inout" value="is_shipper">
+                                    <span>出货人</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- 一级：视觉管理 -->
                     <div class="perm-level-1">
                         <div class="perm-level-1-item" data-perm="visual">
@@ -582,10 +601,6 @@ require_once 'session_check.php';
                                         <label style="font-size: 0.9em;"><input type="checkbox" class="perm-stock-view" value="approve"> 批准权限 (Approver)</label>
                                     </div>
                                     <label><input type="checkbox" class="perm-stock-view" value="sot"> 货品异常</label>
-                                </div>
-                                <div class="perm-level-3-section">
-                                    <div class="perm-section-title">进出货权限</div>
-                                    <label><input type="checkbox" class="perm-stock-shipper" value="is_shipper"> 出货人（昵称显示在出货人下拉列表）</label>
                                 </div>
                             </div>
                             

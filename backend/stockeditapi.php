@@ -688,13 +688,13 @@ function handleGet()
 
         case 'get_shippers':
             // 获取所有被赋予「出货人」权限的用户昵称，中央始终为第一项
+            // 权限存储位置: user_sidebar_permissions.submenu_permissions_json -> stock_inout -> is_shipper
             try {
                 $shipperStmt = $pdo->prepare("
                     SELECT u.nickname, u.username
-                    FROM user_page_permissions p
+                    FROM user_sidebar_permissions p
                     JOIN users u ON u.id = p.user_id
-                    WHERE p.page_key = 'stock_inventory'
-                      AND JSON_UNQUOTE(JSON_EXTRACT(p.permissions_json, '$.is_shipper')) = 'true'
+                    WHERE JSON_CONTAINS(p.submenu_permissions_json, '\"is_shipper\"', '$.stock_inout')
                 ");
                 $shipperStmt->execute();
                 $rows = $shipperStmt->fetchAll(PDO::FETCH_ASSOC);
