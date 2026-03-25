@@ -4,9 +4,9 @@ const API_BASE_URL = 'costapi.php';
 
 // 图表颜色常量（Canvas 绘图，无法用 CSS 控制）
 const CHART_COLORS = {
-    grossPositive: 'rgba(230, 225, 216, 0.55)',  // 毛利润正值: #e6e1d8
+    grossPositive: 'rgba(88, 62, 4, 0.35)',      // 毛利润正值：与其他图表一致的棕色系
     grossNegative: 'rgba(226, 75, 74, 0.45)',     // 毛利润负值: #e24b4a
-    grossBorder:   '#a09060',
+    grossBorder:   '#583e04',                     // 与其他图表边框色一致
     primary:       'rgba(88, 62, 4, 0.4)',
 };
 
