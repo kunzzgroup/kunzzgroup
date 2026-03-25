@@ -230,10 +230,6 @@ include '../public/header.php';
             </div>
           </div>
         </div>
-        <div class="contact-company-badge">
-          <span class="badge-dot"></span>
-          <span>Kunzz Holdings Sdn. Bhd.</span>
-        </div>
         <div class="contact-map-embed">
           <iframe
             id="custom-map"
