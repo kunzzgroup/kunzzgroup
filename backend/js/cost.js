@@ -1382,7 +1382,6 @@ function updateCharts(data) {
                 }
             ];
         } else if (currentChartDataType === 'grossTotal') {
-        } else if (currentChartDataType === 'grossTotal') {
             // 三店合计：默认展示合集的 盈利/亏损面积图，剩余 J1, J2, J3 作为可选线条（默认隐藏）
             
             // 1. 计算合计数据
