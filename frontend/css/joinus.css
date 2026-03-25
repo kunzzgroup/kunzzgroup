@@ -1587,23 +1587,8 @@ form select:focus {
     justify-content: center;
     overflow: hidden;
 
-    /* 橙色渐变背景 */
-    background: linear-gradient(45deg, 
-        #ff6b35,
-        #ff8c42,
-        #ffb347,
-        #ffa726,
-        #ff9800,
-        #ff7043,
-        #ff5722,
-        #ff6b35,
-        #ff8c42,
-        #ffb347,
-        #ffa726,
-        #ff9800
-    );
-    background-size: 600% 600%;
-    animation: comphoto-gradient-shift 20s linear infinite;
+    /* 背景图 */
+    background: url('../../images/images/背景3.jpg') no-repeat center center/cover;
 }
 
 /* 温暖光晕效果层 */
