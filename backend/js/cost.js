@@ -1650,34 +1650,44 @@ function updateCharts(data) {
                 }
             ];
         } else if (currentChartDataType === 'grossTotal') {
-            // 正负分色 + 渐变: 利用 scales.y.getPixelForValue(0) 在零线处切换颜色
-            const grossData = aggregatedData.map(item => getChartDataByType(item, currentChartDataType));
+            // 正负分色双线面积图 (参考图一): 分离正值和负值曲线，各自描边并填充
+            const rawData = aggregatedData.map(item => getChartDataByType(item, currentChartDataType));
+            
+            // 正值数据集: 负值部分被截断为 0
+            const positiveData = rawData.map(val => val >= 0 ? val : 0);
+            
+            // 负值数据集: 正值部分被截断为 0
+            const negativeData = rawData.map(val => val < 0 ? val : 0);
+
             baseDatasets = [
                 {
-                    label: '毛利润',
-                    data: grossData,
-                    borderColor: CHART_COLORS.grossBorder,
+                    label: '盈利',
+                    data: positiveData,
+                    borderColor: '#22c55e', // 绿色描边
                     backgroundColor: function (context) {
-                        const { ctx, chartArea, scales } = context.chart;
-                        if (!chartArea || !scales || !scales.y) return 'transparent';
-
-                        // 零线在画布上的像素 Y 坐标
-                        const zeroY = scales.y.getPixelForValue(0);
-                        const top = chartArea.top;
-                        const bottom = chartArea.bottom;
-
-                        // 零线占整个图表高度的比例 (0=顶部, 1=底部)
-                        const zeroRatio = Math.min(1, Math.max(0, (zeroY - top) / (bottom - top)));
-
-                        const gradient = ctx.createLinearGradient(0, top, 0, bottom);
-
-                        // 正值区域（零线以上）: 棕色渐变，从深到浅
-                        gradient.addColorStop(0, 'rgba(88, 62, 4, 0.45)');
-                        gradient.addColorStop(Math.max(0, zeroRatio - 0.001), 'rgba(88, 62, 4, 0.03)');
-                        // 负值区域（零线以下）: 红色渐变，从浅到深
-                        gradient.addColorStop(Math.min(1, zeroRatio + 0.001), 'rgba(226, 75, 74, 0.03)');
-                        gradient.addColorStop(1, 'rgba(226, 75, 74, 0.65)');
-
+                        const { ctx, chartArea } = context.chart;
+                        if (!chartArea) return 'transparent';
+                        const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                        gradient.addColorStop(0, 'rgba(34, 197, 94, 0.4)');
+                        gradient.addColorStop(1, 'rgba(34, 197, 94, 0.05)');
+                        return gradient;
+                    },
+                    fill: 'origin',
+                    tension: 0.4,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: '亏损',
+                    data: negativeData,
+                    borderColor: '#ef4444', // 红色描边
+                    backgroundColor: function (context) {
+                        const { ctx, chartArea } = context.chart;
+                        if (!chartArea) return 'transparent';
+                        const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                        gradient.addColorStop(0, 'rgba(239, 68, 68, 0.05)');
+                        gradient.addColorStop(1, 'rgba(239, 68, 68, 0.4)');
                         return gradient;
                     },
                     fill: 'origin',
@@ -1740,7 +1750,14 @@ function updateCharts(data) {
                 plugins: {
                     tooltip: {
                         callbacks: {
-                            label: getTooltipFormatter(currentChartDataType)
+                            label: function (context) {
+                                // 针对正负分色的图表，隐藏值为 0 的被截断数据集，保持 tooltip 简洁
+                                if (currentChartDataType === 'grossTotal') {
+                                    if (context.dataset.label === '盈利' && context.parsed.y === 0) return null;
+                                    if (context.dataset.label === '亏损' && context.parsed.y === 0) return null;
+                                }
+                                return getTooltipFormatter(currentChartDataType)(context);
+                            }
                         }
                     }
                 }
@@ -1935,6 +1952,13 @@ function getTooltipFormatter(dataType) {
                 return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + '%';
             };
         case 'grossTotal':
+            return function (context) {
+                // 对于毛利润的正负分色双线图，不显示"盈利/亏损"前缀，直接显示金额和颜色指示
+                if (currentRestaurant !== 'total') {
+                    return 'RM ' + context.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+                return context.dataset.label + ': RM ' + context.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            };
         case 'totalCost':
         case 'deliveryCost':
             return function (context) {
