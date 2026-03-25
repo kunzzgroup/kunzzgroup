@@ -1654,10 +1654,11 @@ form select:focus {
     z-index: 10;
     display: flex;
     flex-direction: row;
-    gap: clamp(16px, 1.8vw, 32px);
-    width: clamp(860px, 70vw, 1200px);
-    height: clamp(520px, 82vh, 780px);
-    padding: clamp(40px, 4vh, 70px) clamp(15px, 1.5vw, 30px);
+    gap: clamp(20px, 2vw, 40px);
+    width: clamp(900px, 72vw, 1300px);
+    height: auto;
+    max-height: 85vh;
+    padding: clamp(15px, 1.5vw, 30px);
     box-sizing: border-box;
     align-items: stretch;
 }
@@ -1666,14 +1667,13 @@ form select:focus {
 .contact-card {
     flex: 1;
     background: rgba(255, 255, 255, 0.97);
-    border-radius: clamp(14px, 1.5vw, 20px);
-    padding: clamp(20px, 1.8vw, 30px);
+    border-radius: clamp(14px, 1.5vw, 22px);
+    padding: clamp(24px, 2vw, 36px);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
     overflow: hidden;
-    height: 100%;
 }
 
 .contact-card-header {
@@ -1783,11 +1783,14 @@ form select:focus {
 
 .contact-map-embed {
     flex: 1;
-    min-height: 160px;
-    border-radius: clamp(8px, 0.8vw, 14px);
+    min-height: clamp(100px, 10vw, 180px);
+    border-radius: 0 0 clamp(14px, 1.5vw, 22px) clamp(14px, 1.5vw, 22px);
     overflow: hidden;
     background: #eee;
-    margin-top: auto;
+    /* 贴左右边框 - 抵消 card padding */
+    margin-left: calc(-1 * clamp(24px, 2vw, 36px));
+    margin-right: calc(-1 * clamp(24px, 2vw, 36px));
+    margin-bottom: calc(-1 * clamp(24px, 2vw, 36px));
 }
 
 .contact-map-embed iframe {
@@ -1795,21 +1798,40 @@ form select:focus {
     height: 100%;
     border: none;
     display: block;
-    min-height: 160px;
+    min-height: clamp(100px, 10vw, 180px);
 }
 
 /* --- 右侧意见表单卡片 --- */
 .feedback-card {
     flex: 1;
     background: rgba(255, 255, 255, 0.97);
-    border-radius: clamp(14px, 1.5vw, 20px);
-    padding: clamp(20px, 1.8vw, 30px);
+    border-radius: clamp(14px, 1.5vw, 22px);
+    padding: clamp(24px, 2vw, 36px);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
     overflow-y: auto;
-    height: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: #ffb471 #f1f5f9;
+}
+
+.feedback-card::-webkit-scrollbar {
+    width: 5px;
+}
+
+.feedback-card::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+.feedback-card::-webkit-scrollbar-thumb {
+    background: #ffb471;
+    border-radius: 10px;
+}
+
+.feedback-card::-webkit-scrollbar-thumb:hover {
+    background: #ff7c00;
 }
 
 .feedback-title {
