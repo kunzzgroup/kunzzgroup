@@ -1,4 +1,4 @@
-﻿
+
 // API 配置
 const API_BASE_URL = 'costapi.php';
 
@@ -1617,48 +1617,23 @@ function updateCharts(data) {
                 }
             ];
         } else if (currentChartDataType === 'grossTotal') {
-            // 正负分色: 正值用与其他图表一致的渐变，负值用红色渐变
+            // 正负分色: fill.above/below 只支持纯色字符串，不支持渐变函数
             const grossData = aggregatedData.map(item => getChartDataByType(item, currentChartDataType));
             baseDatasets = [
                 {
-                    // 正值数据集 — 渐变填充与其他图表一致，零线以下透明
                     label: '毛利润',
                     data: grossData,
                     borderColor: CHART_COLORS.grossBorder,
-                    backgroundColor: function (context) {
-                        const { ctx, chartArea } = context.chart;
-                        if (!chartArea) return 'transparent';
-                        const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                        gradient.addColorStop(0,   'rgba(88, 62, 4, 0.4)');
-                        gradient.addColorStop(0.3, 'rgba(88, 62, 4, 0.2)');
-                        gradient.addColorStop(0.7, 'rgba(88, 62, 4, 0.1)');
-                        gradient.addColorStop(1,   'rgba(88, 62, 4, 0.02)');
-                        return gradient;
+                    backgroundColor: 'transparent',
+                    fill: {
+                        value: 0,
+                        above: 'rgba(88, 62, 4, 0.28)',     // 正值: 与其他图表一致的棕色
+                        below: 'rgba(226, 75, 74, 0.45)'    // 负值: #e24b4a 红色
                     },
-                    fill: { value: 0, below: 'transparent' },
                     tension: 0.4,
                     borderWidth: 2,
                     pointRadius: 0,
                     pointHoverRadius: 8
-                },
-                {
-                    // 负值数据集 — 红色渐变，零线以上透明（不显示在图例/tooltip）
-                    label: '毛利润 (亏损)',
-                    data: grossData,
-                    borderColor: 'transparent',
-                    backgroundColor: function (context) {
-                        const { ctx, chartArea } = context.chart;
-                        if (!chartArea) return 'transparent';
-                        const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                        gradient.addColorStop(0,   CHART_COLORS.grossNegative);
-                        gradient.addColorStop(1,   'rgba(226, 75, 74, 0.7)');
-                        return gradient;
-                    },
-                    fill: { value: 0, above: 'transparent' },
-                    tension: 0.4,
-                    borderWidth: 0,
-                    pointRadius: 0,
-                    pointHoverRadius: 0
                 }
             ];
         } else {
@@ -1714,33 +1689,7 @@ function updateCharts(data) {
                 plugins: {
                     tooltip: {
                         callbacks: {
-                            label: function (context) {
-                                if (context.dataset.label === '毛利润 (\u4e8f\u635f)') {
-                                    const val = context.parsed.y;
-                                    if (val >= 0) return null;
-                                    return '毛利润 (\u4e8f\u635f): RM ' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                                }
-                                return getTooltipFormatter(currentChartDataType)(context);
-                            }
-                        }
-                    },
-                    legend: {
-                        labels: {
-                            generateLabels: function (chart) {
-                                // 使用默认图例，但自定义颜色方块
-                                const original = Chart.defaults.plugins.legend.labels.generateLabels(chart);
-                                original.forEach(item => {
-                                    if (item.text === '毛利润') {
-                                        item.fillStyle = 'rgba(88, 62, 4, 0.4)';
-                                        item.strokeStyle = '#583e04';
-                                    } else if (item.text === '毛利润 (\u4e8f\u635f)') {
-                                        item.fillStyle = 'rgba(226, 75, 74, 0.55)';
-                                        item.strokeStyle = 'rgba(226, 75, 74, 0.8)';
-                                        item.hidden = false;
-                                    }
-                                });
-                                return original.filter(i => i.text !== '_gross_negative');
-                            }
+                            label: getTooltipFormatter(currentChartDataType)
                         }
                     }
                 }
