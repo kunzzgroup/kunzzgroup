@@ -1381,6 +1381,39 @@ function updateCharts(data) {
                     fill: true, tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 6
                 }
             ];
+        } else if (currentChartDataType === 'grossTotal') {
+            // 毛利润: 每家餐厅各用正负分色渐变
+            const restaurants = [
+                { key: 'j1', label: dataLabels.grossTotal[0], r: '88, 62, 4',   border: restaurantColors.j1.primary },
+                { key: 'j2', label: dataLabels.grossTotal[1], r: '217, 119, 6', border: restaurantColors.j2.primary },
+                { key: 'j3', label: dataLabels.grossTotal[2], r: '220, 38, 38', border: restaurantColors.j3.primary }
+            ];
+            baseDatasets = restaurants.map(rest => ({
+                label: rest.label,
+                data: comparisonData.restaurants[rest.key].map(item => getChartDataByType(item, currentChartDataType)),
+                borderColor: rest.border,
+                backgroundColor: function (context) {
+                    const { ctx, chartArea, scales } = context.chart;
+                    if (!chartArea || !scales || !scales.y) return 'transparent';
+                    const zeroY = scales.y.getPixelForValue(0);
+                    const top = chartArea.top;
+                    const bottom = chartArea.bottom;
+                    const zeroRatio = Math.min(1, Math.max(0, (zeroY - top) / (bottom - top)));
+                    const gradient = ctx.createLinearGradient(0, top, 0, bottom);
+                    // 正值: 该餐厅本色渐变
+                    gradient.addColorStop(0, `rgba(${rest.r}, 0.40)`);
+                    gradient.addColorStop(Math.max(0, zeroRatio - 0.001), `rgba(${rest.r}, 0.03)`);
+                    // 负值: 红色渐变
+                    gradient.addColorStop(Math.min(1, zeroRatio + 0.001), 'rgba(226, 75, 74, 0.03)');
+                    gradient.addColorStop(1, 'rgba(226, 75, 74, 0.55)');
+                    return gradient;
+                },
+                fill: 'origin',
+                tension: 0.4,
+                borderWidth: 2,
+                pointRadius: 0,
+                pointHoverRadius: 6
+            }));
         } else {
             baseDatasets = [
                     {
@@ -1473,7 +1506,7 @@ function updateCharts(data) {
                 },
                 scales: {
                     y: {
-                        beginAtZero: true,
+                        beginAtZero: currentChartDataType !== 'grossTotal',
                         ticks: {
                             callback: getYAxisFormatter(currentChartDataType)
                         }
@@ -1617,19 +1650,37 @@ function updateCharts(data) {
                 }
             ];
         } else if (currentChartDataType === 'grossTotal') {
-            // 正负分色: fill.above/below 只支持纯色字符串，不支持渐变函数
+            // 正负分色 + 渐变: 利用 scales.y.getPixelForValue(0) 在零线处切换颜色
             const grossData = aggregatedData.map(item => getChartDataByType(item, currentChartDataType));
             baseDatasets = [
                 {
                     label: '毛利润',
                     data: grossData,
                     borderColor: CHART_COLORS.grossBorder,
-                    backgroundColor: 'transparent',
-                    fill: {
-                        value: 0,
-                        above: 'rgba(88, 62, 4, 0.28)',     // 正值: 与其他图表一致的棕色
-                        below: 'rgba(226, 75, 74, 0.45)'    // 负值: #e24b4a 红色
+                    backgroundColor: function (context) {
+                        const { ctx, chartArea, scales } = context.chart;
+                        if (!chartArea || !scales || !scales.y) return 'transparent';
+
+                        // 零线在画布上的像素 Y 坐标
+                        const zeroY = scales.y.getPixelForValue(0);
+                        const top = chartArea.top;
+                        const bottom = chartArea.bottom;
+
+                        // 零线占整个图表高度的比例 (0=顶部, 1=底部)
+                        const zeroRatio = Math.min(1, Math.max(0, (zeroY - top) / (bottom - top)));
+
+                        const gradient = ctx.createLinearGradient(0, top, 0, bottom);
+
+                        // 正值区域（零线以上）: 棕色渐变，从深到浅
+                        gradient.addColorStop(0, 'rgba(88, 62, 4, 0.45)');
+                        gradient.addColorStop(Math.max(0, zeroRatio - 0.001), 'rgba(88, 62, 4, 0.03)');
+                        // 负值区域（零线以下）: 红色渐变，从浅到深
+                        gradient.addColorStop(Math.min(1, zeroRatio + 0.001), 'rgba(226, 75, 74, 0.03)');
+                        gradient.addColorStop(1, 'rgba(226, 75, 74, 0.65)');
+
+                        return gradient;
                     },
+                    fill: 'origin',
                     tension: 0.4,
                     borderWidth: 2,
                     pointRadius: 0,
