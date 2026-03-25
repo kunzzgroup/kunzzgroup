@@ -1820,6 +1820,46 @@ function updateCharts(data) {
                     }
                 },
                 plugins: {
+                    legend: {
+                        onClick: function(e, legendItem, legend) {
+                            // 调用默认的切换逻辑
+                            Chart.defaults.plugins.legend.onClick.call(this, e, legendItem, legend);
+                            
+                            // 只针对三店合计且处于毛利润图表时
+                            if (currentRestaurant === 'total' && currentChartDataType === 'grossTotal') {
+                                const chart = legend.chart;
+                                let totalIndices = [];
+                                let shopIndices = [];
+                                
+                                // 分类数据集
+                                chart.data.datasets.forEach((dataset, index) => {
+                                    if (dataset.label === '盈利合计' || dataset.label === '亏损合计') {
+                                        totalIndices.push(index);
+                                    } else if (dataset.label.includes('J1') || dataset.label.includes('J2') || dataset.label.includes('J3')) {
+                                        shopIndices.push(index);
+                                    }
+                                });
+
+                                // 如果点击的是分店数据集
+                                if (shopIndices.includes(legendItem.datasetIndex)) {
+                                    const anyShopVisible = shopIndices.some(index => chart.isDatasetVisible(index));
+                                    
+                                    if (anyShopVisible) {
+                                        // 有任意一个分店显示时，自动关闭合计
+                                        totalIndices.forEach(index => {
+                                            chart.setDatasetVisibility(index, false);
+                                        });
+                                    } else {
+                                        // 所有分店都关闭时，自动补回合计
+                                        totalIndices.forEach(index => {
+                                            chart.setDatasetVisibility(index, true);
+                                        });
+                                    }
+                                    chart.update();
+                                }
+                            }
+                        }
+                    },
                     tooltip: {
                         callbacks: {
                             label: function (context) {
