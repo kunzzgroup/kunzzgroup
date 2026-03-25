@@ -1,4 +1,4 @@
-
+﻿
 // API 配置
 const API_BASE_URL = 'costapi.php';
 
@@ -1643,7 +1643,7 @@ function updateCharts(data) {
                 },
                 {
                     // 负值数据集 — 红色渐变，零线以上透明（不显示在图例/tooltip）
-                    label: '_gross_negative',
+                    label: '毛利润 (亏损)',
                     data: grossData,
                     borderColor: 'transparent',
                     backgroundColor: function (context) {
@@ -1715,17 +1715,31 @@ function updateCharts(data) {
                     tooltip: {
                         callbacks: {
                             label: function (context) {
-                                // 隐藏内部负值数据集的tooltip
-                                if (context.dataset.label === '_gross_negative') return null;
+                                if (context.dataset.label === '毛利润 (\u4e8f\u635f)') {
+                                    const val = context.parsed.y;
+                                    if (val >= 0) return null;
+                                    return '毛利润 (\u4e8f\u635f): RM ' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                }
                                 return getTooltipFormatter(currentChartDataType)(context);
                             }
                         }
                     },
                     legend: {
                         labels: {
-                            filter: function (item) {
-                                // 隐藏内部负值数据集的图例
-                                return item.text !== '_gross_negative';
+                            generateLabels: function (chart) {
+                                // 使用默认图例，但自定义颜色方块
+                                const original = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+                                original.forEach(item => {
+                                    if (item.text === '毛利润') {
+                                        item.fillStyle = 'rgba(88, 62, 4, 0.4)';
+                                        item.strokeStyle = '#583e04';
+                                    } else if (item.text === '毛利润 (\u4e8f\u635f)') {
+                                        item.fillStyle = 'rgba(226, 75, 74, 0.55)';
+                                        item.strokeStyle = 'rgba(226, 75, 74, 0.8)';
+                                        item.hidden = false;
+                                    }
+                                });
+                                return original.filter(i => i.text !== '_gross_negative');
                             }
                         }
                     }
