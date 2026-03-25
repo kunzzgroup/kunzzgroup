@@ -1673,7 +1673,7 @@ function updateCharts(data) {
                         return gradient;
                     },
                     fill: 'origin',
-                    tension: 0.4,
+                    tension: 0, // 关键修复：关闭贝塞尔曲线拉伸，防止零线部分出现曲线波动（瑕疵）
                     borderWidth: 2,
                     pointRadius: 0,
                     pointHoverRadius: 8
@@ -1691,10 +1691,11 @@ function updateCharts(data) {
                         return gradient;
                     },
                     fill: 'origin',
-                    tension: 0.4,
+                    tension: 0, // 关键修复同样适用
                     borderWidth: 2,
                     pointRadius: 0,
                     pointHoverRadius: 8
+
                 }
             ];
         } else {
