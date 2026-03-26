@@ -137,7 +137,7 @@ $timelineItems = getTimelineItems('zh');
                     foreach ($timelineItems as $item): 
                         $year = $item['year'];
                     ?>
-                    <div class="timeline-item <?php echo $index === 0 ? 'active' : ''; ?>" data-year="<?php echo htmlspecialchars($year); ?>">
+                    <div class="timeline-item <?php echo $index === 0 ? 'active' : ''; ?>" data-year="<?php echo htmlspecialchars($year); ?>" data-month="<?php echo (int)($item['month'] ?? 0); ?>" data-index="<?php echo $index; ?>">
                         <div class="timeline-bullet"><?php echo htmlspecialchars($year); ?></div>
                     </div>
                     <?php 
@@ -148,9 +148,11 @@ $timelineItems = getTimelineItems('zh');
             </div>
         </div>
 
-        <!-- 卡片容器 -->
-        <div class="timeline-content-container">
-            <div class="timeline-cards-wrapper">
+        <!-- 时间线主体：月份侧栏 + 卡片 -->
+        <div class="timeline-body">
+            <div class="timeline-month-sidebar" id="monthSidebar"></div>
+            <div class="timeline-content-container">
+                <div class="timeline-cards-wrapper">
                 <?php 
                 $index = 0;
                 foreach ($timelineItems as $item): 
@@ -158,7 +160,7 @@ $timelineItems = getTimelineItems('zh');
                     $itemClass = $index === 0 ? 'active' : ($index === 1 ? 'next' : 'hidden');
                 ?>
                 <!-- <?php echo htmlspecialchars($year); ?>年内容 -->
-                <div class="timeline-content-item <?php echo $itemClass; ?>" data-year="<?php echo htmlspecialchars($year); ?>" data-index="<?php echo $index; ?>">
+                    <div class="timeline-content-item <?php echo $itemClass; ?>" data-year="<?php echo htmlspecialchars($year); ?>" data-index="<?php echo $index; ?>" data-month="<?php echo (int)($item['month'] ?? 0); ?>">
                     <div class="timeline-content" onclick="selectCardIndex(<?php echo (int)$index; ?>)">
                         <div class="timeline-image">
                             <img src="<?php echo $item['image_url']; ?>" alt="<?php echo htmlspecialchars($year); ?>年发展">
@@ -177,6 +179,7 @@ $timelineItems = getTimelineItems('zh');
                 ?>
             </div>
         </div>
+        </div> <!-- close timeline-body -->
     </section>
   </div>
 
@@ -469,6 +472,9 @@ if (slideParam !== null) {
         let currentIndex = 0;
         let years = <?php echo json_encode(getTimelineYearsFlat('zh')); ?>;
         let totalItems = years.length;
+        let timelineData = <?php echo json_encode(array_values(array_map(function($item) {
+            return ['year' => $item['year'], 'month' => (int)($item['month'] ?? 0)];
+        }, $timelineItems))); ?>;
         const navItems = document.querySelectorAll('.timeline-item');
         const container = document.getElementById('timelineContainer');
 
@@ -482,31 +488,33 @@ if (slideParam !== null) {
         let isAnimating = false; // 防止动画期间的操作冲突
 
         function updateTimelineNav() {
-            const navItems = document.querySelectorAll('.timeline-item');
+            const allNavItems = document.querySelectorAll('.timeline-item');
+            const currentYear = years[currentIndex];
             
-            // 更新导航状态
-            navItems.forEach((item, index) => {
-                item.classList.toggle('active', index === currentIndex);
+            // 按年份高亮（同年份的所有圆点都高亮）
+            allNavItems.forEach((item) => {
+                item.classList.toggle('active', item.getAttribute('data-year') === currentYear);
             });
 
-            // 简化的居中计算：让当前选中的年份在中间
+            // 居中计算：只考虑可见（非重复）年份
+            const visibleItems = Array.from(allNavItems).filter(item => !item.classList.contains('year-duplicate'));
             const containerWidth = container.parentElement.offsetWidth;
-            const totalItems = navItems.length;
-            const itemWidth = 120; // 使用固定的item宽度（与CSS中的min-width一致）
+            const itemWidth = 120;
             
-            // 计算让当前年份居中的translateX值
+            const activeVisibleIndex = visibleItems.findIndex(item => item.classList.contains('active'));
             const centerPosition = containerWidth / 2;
-            const currentItemPosition = currentIndex * itemWidth + itemWidth / 2;
+            const currentItemPosition = (activeVisibleIndex >= 0 ? activeVisibleIndex : 0) * itemWidth + itemWidth / 2;
             const translateX = centerPosition - currentItemPosition;
             
-            // 使用CSS transition实现平滑滚动
             container.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
             container.style.transform = `translateX(${translateX}px)`;
             
-            // 清除transition，避免影响后续操作
             setTimeout(() => {
                 container.style.transition = '';
             }, 400);
+
+            // 同步更新月份侧栏
+            updateMonthSidebar();
         }
 
         function updateCardPositions() {
@@ -716,6 +724,39 @@ if (slideParam !== null) {
         });
 
         // 初始化
+        // 构建年份-月份分组
+        let yearGroups = {};
+        timelineData.forEach((item, index) => {
+            if (!yearGroups[item.year]) yearGroups[item.year] = [];
+            yearGroups[item.year].push({ index, month: item.month });
+        });
+
+        // 隐藏重复年份导航项
+        let seenYears = {};
+        navItems.forEach(item => {
+            const year = item.getAttribute('data-year');
+            if (seenYears[year]) {
+                item.classList.add('year-duplicate');
+            } else {
+                seenYears[year] = true;
+            }
+        });
+
+        // 月份侧栏更新函数
+        function updateMonthSidebar() {
+            const currentYear = years[currentIndex];
+            const months = yearGroups[currentYear] || [];
+            const sidebar = document.getElementById('monthSidebar');
+            
+            // 只有一个条目时也显示侧栏
+            sidebar.innerHTML = months.map(m => 
+                `<div class="month-item ${m.index === currentIndex ? 'active' : ''}" onclick="selectCardIndex(${m.index})">
+                    <div class="month-dot"></div>
+                    <span>${m.month}月</span>
+                </div>`
+            ).join('');
+        }
+
         updateTimelineNav();
         updateCardPositions();
 

@@ -809,6 +809,116 @@ body::-webkit-scrollbar {
 }
 
 
+/* ===== Timeline Month Sidebar ===== */
+.timeline-body {
+    display: flex;
+    align-items: stretch;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    max-width: 1200px;
+    gap: 0;
+    margin: 0 auto;
+}
+
+.timeline-month-sidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0;
+    padding: 10px 16px 10px 4px;
+    min-width: 72px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+/* Connecting line between month dots */
+.timeline-month-sidebar::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 25%;
+    bottom: 25%;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 1px;
+}
+
+.month-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: clamp(13px, 1vw, 16px);
+    font-weight: 500;
+    transition: color 0.3s ease;
+    position: relative;
+    z-index: 1;
+    user-select: none;
+}
+
+.month-item:hover {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.month-item.active {
+    color: white;
+    font-weight: 700;
+}
+
+.month-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    background: transparent;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.month-item.active .month-dot {
+    background: #ff5c00;
+    border-color: #ff5c00;
+    box-shadow: 0 0 8px rgba(255, 92, 0, 0.5);
+}
+
+.month-item:hover .month-dot {
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Hide duplicate year nav items */
+.timeline-item.year-duplicate {
+    display: none !important;
+}
+
+/* ===== Timeline Mobile Sidebar ===== */
+@media (max-width: 768px) {
+    .timeline-body {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .timeline-month-sidebar {
+        flex-direction: row;
+        justify-content: center;
+        min-width: auto;
+        padding: 0 10px 8px;
+        gap: 4px;
+    }
+
+    .timeline-month-sidebar::before {
+        display: none;
+    }
+
+    .month-item {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+}
+
 /* ===========================================
    页面指示器样式
    =========================================== */
