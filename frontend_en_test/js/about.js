@@ -240,12 +240,11 @@ document.addEventListener("DOMContentLoaded", function () {
     if (aboutIntro) aboutObserver.observe(aboutIntro);
 
     // ==========================================
-    // 4. Timeline Logic
+    // 4. Timeline Logic (Scroll-Snap + IntersectionObserver)
     // ==========================================
     const timelineSection = document.querySelector('.timeline-section');
     if (timelineSection) {
 
-        // Items and State
         if (typeof years === 'undefined') {
             console.error("Timeline years data not found. Ensure PHP sets 'years' variable.");
             return;
@@ -255,160 +254,135 @@ document.addEventListener("DOMContentLoaded", function () {
         let totalItems = years.length;
         const container = document.getElementById('timelineContainer');
         const navItems = document.querySelectorAll('.timeline-item');
+        const contentContainer = document.querySelector('.timeline-content-container');
+        const contentItems = document.querySelectorAll('.timeline-content-item');
+        let isScrolling = false;
 
-        let isDragging = false;
-        let startX = 0;
-        let currentX = 0;
-        let dragThreshold = 15;
-        let hasTriggered = false;
-        let dragStartTime = 0;
-        let isAnimating = false;
+        // Build year groups from DOM data attributes
+        let yearGroups = {};
+        contentItems.forEach((item, index) => {
+            const year = item.getAttribute('data-year');
+            const month = parseInt(item.getAttribute('data-month') || '0', 10);
+            if (!yearGroups[year]) yearGroups[year] = [];
+            yearGroups[year].push({ index, month });
+        });
 
-        // Functions
+        // Hide duplicate year nav items
+        let seenYears = {};
+        navItems.forEach(item => {
+            const year = item.getAttribute('data-year');
+            if (seenYears[year]) {
+                item.classList.add('year-duplicate');
+            } else {
+                seenYears[year] = true;
+            }
+        });
+
+        // Year nav update
         function updateTimelineNav() {
-            const navItems = document.querySelectorAll('.timeline-item');
-            navItems.forEach((item, index) => {
-                item.classList.toggle('active', index === currentIndex);
+            const allNavItems = document.querySelectorAll('.timeline-item');
+            const currentYear = years[currentIndex];
+
+            allNavItems.forEach((item) => {
+                item.classList.toggle('active', item.getAttribute('data-year') === currentYear);
             });
 
             if (container && container.parentElement) {
+                const visibleItems = Array.from(allNavItems).filter(item => !item.classList.contains('year-duplicate'));
                 const containerWidth = container.parentElement.offsetWidth;
                 const itemWidth = 120;
+                const activeVisibleIndex = visibleItems.findIndex(item => item.classList.contains('active'));
                 const centerPosition = containerWidth / 2;
-                const currentItemPosition = currentIndex * itemWidth + itemWidth / 2;
+                const currentItemPosition = (activeVisibleIndex >= 0 ? activeVisibleIndex : 0) * itemWidth + itemWidth / 2;
                 const translateX = centerPosition - currentItemPosition;
 
                 container.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
                 container.style.transform = `translateX(${translateX}px)`;
-
-                setTimeout(() => {
-                    container.style.transition = '';
-                }, 400);
+                setTimeout(() => { container.style.transition = ''; }, 400);
             }
+
+            updateMonthSidebar();
         }
 
-        function updateCardPositions() {
-            const cards = document.querySelectorAll('.timeline-content-item');
-            cards.forEach((card, index) => {
-                card.classList.remove('active', 'prev', 'next', 'hidden');
-                if (index === currentIndex) card.classList.add('active');
-                else if (index === (currentIndex - 1 + totalItems) % totalItems) card.classList.add('prev');
-                else if (index === (currentIndex + 1) % totalItems) card.classList.add('next');
-                else card.classList.add('hidden');
+        // Month sidebar update
+        function updateMonthSidebar() {
+            const currentYear = years[currentIndex];
+            const months = yearGroups[currentYear] || [];
+            const sidebar = document.getElementById('monthSidebar');
+            if (!sidebar) return;
+
+            sidebar.innerHTML = months.map(m =>
+                `<div class="month-item ${m.index === currentIndex ? 'active' : ''}" onclick="selectCardIndex(${m.index})">
+                    <div class="month-dot"></div>
+                    <span>${m.month}月</span>
+                </div>`
+            ).join('');
+        }
+
+        // IntersectionObserver for scroll-snap card detection
+        const cardObserver = new IntersectionObserver((entries) => {
+            if (isScrolling) return;
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    contentItems.forEach(item => item.classList.remove('active'));
+                    entry.target.classList.add('active');
+                    const idx = parseInt(entry.target.getAttribute('data-index'), 10);
+                    if (!isNaN(idx) && idx !== currentIndex) {
+                        currentIndex = idx;
+                        updateTimelineNav();
+                    }
+                }
             });
+        }, {
+            root: contentContainer,
+            threshold: 0.6
+        });
+
+        contentItems.forEach(item => cardObserver.observe(item));
+
+        // Scroll to a specific card
+        function scrollToCard(index) {
+            if (index < 0 || index >= totalItems) return;
+            isScrolling = true;
+            currentIndex = index;
+            contentItems.forEach(item => item.classList.remove('active'));
+            contentItems[index].classList.add('active');
+            updateTimelineNav();
+            contentItems[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => { isScrolling = false; }, 600);
         }
 
+        // Navigate prev/next
         window.navigateTimeline = function (direction) {
-            if (isAnimating) return;
-            isAnimating = true;
-            if (direction === 'next') currentIndex = (currentIndex + 1) % totalItems;
-            else currentIndex = (currentIndex - 1 + totalItems) % totalItems;
-
-            updateTimelineNav();
-            updateCardPositions();
-            setTimeout(() => { isAnimating = false; }, 400);
+            if (direction === 'next') scrollToCard(Math.min(currentIndex + 1, totalItems - 1));
+            else scrollToCard(Math.max(currentIndex - 1, 0));
         };
 
         window.selectCardIndex = function (index) {
-            if (isAnimating) return;
-            if (index < 0 || index >= totalItems) return;
-            currentIndex = index;
-            updateTimelineNav();
-            updateCardPositions();
+            scrollToCard(index);
         };
 
-        // Drag Handling
-        function handleDragStart(e) {
-            if (isAnimating) return;
-            const clickedCard = e.target.closest('.timeline-content-item');
-            if (!clickedCard) return;
-
-            isDragging = true;
-            hasTriggered = false;
-            dragStartTime = Date.now();
-            startX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
-
-            document.body.style.cursor = 'grabbing';
-            document.body.style.userSelect = 'none';
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        function handleDragMove(e) {
-            if (!isDragging || hasTriggered || isAnimating) return;
-            currentX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
-            const deltaX = currentX - startX;
-            const dragTime = Date.now() - dragStartTime;
-
-            if (Math.abs(deltaX) >= dragThreshold && dragTime > 50) {
-                hasTriggered = true;
-                if (deltaX > 0) navigateTimeline('prev');
-                else navigateTimeline('next');
-                setTimeout(() => handleDragEnd(e), 50);
-            }
-            e.preventDefault();
-        }
-
-        function handleDragEnd(e) {
-            if (!isDragging) return;
-            isDragging = false;
-            hasTriggered = false;
-            dragStartTime = 0;
-            document.body.style.cursor = '';
-            document.body.style.userSelect = '';
-        }
-
-        // Event Listeners for Timeline
-        document.addEventListener('mousedown', (e) => {
-            const card = e.target.closest('.timeline-content-item');
-            if (card && !isAnimating) handleDragStart(e);
-        });
-        document.addEventListener('mousemove', handleDragMove);
-        document.addEventListener('mouseup', handleDragEnd);
-        document.addEventListener('mouseleave', handleDragEnd);
-
-        document.addEventListener('touchstart', (e) => {
-            const card = e.target.closest('.timeline-content-item');
-            if (card && !isAnimating) handleDragStart(e);
-        }, { passive: false });
-        document.addEventListener('touchmove', handleDragMove, { passive: false });
-        document.addEventListener('touchend', handleDragEnd);
-
-        // Click Handling
-        document.addEventListener('click', (e) => {
-            if (isDragging || hasTriggered || isAnimating) return;
-            const card = e.target.closest('.timeline-content-item');
-            if (card) {
-                if (card.classList.contains('prev')) navigateTimeline('prev');
-                else if (card.classList.contains('next')) navigateTimeline('next');
-                else if (!card.classList.contains('active')) {
-                    const idxAttr = card.getAttribute('data-index');
-                    const idx = parseInt(idxAttr, 10);
-                    if (!isNaN(idx)) selectCardIndex(idx);
-                }
-            }
-        });
-
-        // Nav Items Click
-        navItems.forEach((item, index) => {
+        // Nav item click -> jump to first card of that year
+        navItems.forEach((item) => {
             item.addEventListener('click', () => {
-                if (!isDragging && !isAnimating) {
-                    currentIndex = index;
-                    updateTimelineNav();
-                    updateCardPositions();
-                }
+                const year = item.getAttribute('data-year');
+                const group = yearGroups[year];
+                if (group && group.length > 0) scrollToCard(group[0].index);
             });
         });
 
         // Keyboard
         document.addEventListener('keydown', (e) => {
-            if (!isAnimating) {
-                if (e.key === 'ArrowLeft') navigateTimeline('prev');
-                else if (e.key === 'ArrowRight') navigateTimeline('next');
+            if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                navigateTimeline('prev');
+                e.preventDefault();
+            } else if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                navigateTimeline('next');
+                e.preventDefault();
             }
         });
 
-        // Timeline Observer (Animations)
+        // Timeline entry animation observer
         const timelineObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 const sec = entry.target;
@@ -425,12 +399,13 @@ document.addEventListener("DOMContentLoaded", function () {
         timelineObserver.observe(timelineSection);
         resetTimelineAnimation(timelineSection);
 
-        // Init positions
+        // Init: set first card active
+        contentItems.forEach(item => item.classList.remove('active'));
+        if (contentItems.length > 0) contentItems[0].classList.add('active');
         updateTimelineNav();
-        updateCardPositions();
 
         window.addEventListener('resize', () => {
-            if (!isAnimating) setTimeout(updateTimelineNav, 100);
+            setTimeout(updateTimelineNav, 100);
         });
     }
 
