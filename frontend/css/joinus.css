@@ -1664,7 +1664,7 @@ form select:focus {
 
 /* --- 左侧：地图 + 联系信息卡片 --- */
 .contact-card {
-    flex: 0 0 62%;
+    flex: 0 0 67%;
     background: rgba(255, 255, 255, 0.97);
     border-radius: clamp(14px, 1.2vw, 20px);
     box-sizing: border-box;
