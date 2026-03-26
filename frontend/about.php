@@ -638,11 +638,11 @@ if (slideParam !== null) {
                 if (dots.length === 1) {
                     // 只有一个月时，显示一小段竖线
                     const dotCenter = firstDot.top + firstDot.height / 2 - sidebarRect.top + sidebar.scrollTop;
-                    lineTop = dotCenter - 30;
-                    lineHeight = 60;
+                    lineTop = dotCenter - 50;
+                    lineHeight = 100;
                 } else {
-                    lineTop = firstDot.top + firstDot.height / 2 - sidebarRect.top + sidebar.scrollTop;
-                    const lineBottom = lastDot.top + lastDot.height / 2 - sidebarRect.top + sidebar.scrollTop;
+                    lineTop = firstDot.top + firstDot.height / 2 - sidebarRect.top + sidebar.scrollTop - 20;
+                    const lineBottom = lastDot.top + lastDot.height / 2 - sidebarRect.top + sidebar.scrollTop + 20;
                     lineHeight = lineBottom - lineTop;
                 }
                 const lineLeft = firstDot.left + firstDot.width / 2 - sidebarRect.left - 1.5;
