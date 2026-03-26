@@ -19,11 +19,11 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// 处理照片删除
+// 处理照片删除 (AJAX)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
+    header('Content-Type: application/json; charset=utf-8');
     $photoNumber = intval($_POST['photo_number']);
     $configFile = '../media_config.json';
-    $uploadDir = '../images/images/';
     $subdomainPhysicalPath = '/home/u857194726/domains/media.kunzzgroup.com/public_html/comphotos/';
 
     $config = [];
@@ -34,22 +34,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $photoKey = 'comphoto_' . $photoNumber;
     if (isset($config[$photoKey])) {
         $filePath = $config[$photoKey]['file'];
-        // 删除本地文件
-        if (file_exists($filePath)) {
-            unlink($filePath);
-        }
-        // 删除子域名文件
+        if (file_exists($filePath)) unlink($filePath);
         $subdomainFile = $subdomainPhysicalPath . basename($filePath);
-        if (file_exists($subdomainFile)) {
-            unlink($subdomainFile);
-        }
+        if (file_exists($subdomainFile)) unlink($subdomainFile);
         unset($config[$photoKey]);
         file_put_contents($configFile, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-        $success = "照片 #{$photoNumber} 已成功删除！";
-        echo "<script>setTimeout(function(){ window.location.href = window.location.href.split('?')[0] + '?updated=' + Date.now(); }, 1000);</script>";
+        echo json_encode(['ok' => true, 'msg' => "照片 #{$photoNumber} 已成功删除！"]);
     } else {
-        $error = "找不到照片 #{$photoNumber} 的记录！";
+        echo json_encode(['ok' => false, 'msg' => "找不到照片 #{$photoNumber} 的记录！"]);
     }
+    exit;
 }
 
 // 处理文件上传
@@ -132,16 +126,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
                     ];
 
                     file_put_contents($configFile, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-                    $success = "照片 #{$photoNumber} 上传成功！";
 
-                    // 页面重定向，清除缓存
-                    echo "<script>
-                        setTimeout(function() {
-                            window.location.href = window.location.href + '?updated=' + Date.now();
-                        }, 1500);
-                    </script>";
+                    // 如果是 AJAX 请求，返回 JSON
+                    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+                        header('Content-Type: application/json; charset=utf-8');
+                        // 生成显示 URL
+                        $displayUrlAjax = 'https://media.kunzzgroup.com/comphotos/' . $newFileName;
+                        echo json_encode([
+                            'ok'      => true,
+                            'msg'     => "照片 #{$photoNumber} 上传成功！",
+                            'url'     => $displayUrlAjax,
+                            'updated' => date('Y-m-d H:i:s'),
+                            'photo'   => $photoNumber
+                        ]);
+                        exit;
+                    }
+                    $success = "照片 #{$photoNumber} 上传成功！";
                 }
                 else {
+                    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+                        header('Content-Type: application/json; charset=utf-8');
+                        echo json_encode(['ok' => false, 'msg' => "照片上传失败！"]);
+                        exit;
+                    }
                     $error = "照片上传失败！无法移动文件到：" . $targetPath;
                 }
             }
