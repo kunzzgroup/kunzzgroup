@@ -272,7 +272,7 @@ for ($i = 1; $i <= 30; $i++) {
     if ($fileExists && $displayUrl): ?>
                             <div class="current-image">
                                 <img src="<?php echo $displayUrl; ?>?v=<?php echo time(); ?>" alt="照片 <?php echo $i; ?>">
-                                <form method="post" class="delete-form" onsubmit="return confirm('确定要删除这张照片吗？此操作无法复原！')">
+                                <form method="post" class="delete-form">
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="photo_number" value="<?php echo $i; ?>">
                                     <button type="submit" class="delete-btn" title="删除照片">✕</button>

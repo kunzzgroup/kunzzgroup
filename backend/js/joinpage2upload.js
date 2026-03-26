@@ -129,8 +129,7 @@ document.querySelectorAll('form:not(.delete-form)').forEach(form => {
                         imgWrap.className = 'current-image';
                         imgWrap.innerHTML = `
                             <img src="" alt="照片 ${photoNumber}">
-                            <form class="delete-form" method="post"
-                                  onsubmit="return confirm('确定要删除这张照片吗？此操作无法复原！')">
+                            <form class="delete-form" method="post">
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="photo_number" value="${photoNumber}">
                                 <button type="submit" class="delete-btn" title="删除照片">✕</button>
