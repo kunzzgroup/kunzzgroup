@@ -1664,7 +1664,7 @@ form select:focus {
 
 /* --- 左侧：地图 + 联系信息卡片 --- */
 .contact-card {
-    flex: 0 0 58%;
+    flex: 0 0 62%;
     background: rgba(255, 255, 255, 0.97);
     border-radius: clamp(14px, 1.2vw, 20px);
     box-sizing: border-box;
@@ -1672,7 +1672,7 @@ form select:focus {
     flex-direction: column;
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
     overflow: hidden;
-    padding: 0; /* no padding — map bleeds to edges */
+    padding: 0;
 }
 
 .contact-card-header {
@@ -1795,29 +1795,35 @@ form select:focus {
     margin-top: 2px;
 }
 
-/* 地图下方：联系详情横排（地址列積小宽一点，其他列等分） */
+/* 地图下方：联系详情横排（整齐一行） */
 .contact-info-bottom .contact-details {
-    display: grid;
-    grid-template-columns: 1.6fr 1fr 1.2fr 1fr;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
     gap: 0;
     margin-bottom: 0;
-    align-items: center;
+    align-items: stretch;
 }
 
 .contact-info-bottom .contact-detail-item {
-    padding: clamp(4px, 0.4vw, 8px) clamp(8px, 0.7vw, 14px);
-    border-right: 1px solid #f0f0f0;
+    flex: 1 1 0;
+    min-width: 0;
+    padding: clamp(4px, 0.4vw, 8px) clamp(10px, 0.9vw, 16px);
+    border-right: 1px solid #eee;
     border-bottom: none;
-    align-items: flex-start;
+    align-items: center;
     gap: clamp(6px, 0.5vw, 10px);
+    white-space: nowrap;
+}
+
+.contact-info-bottom .contact-detail-item:first-child {
+    flex: 1.5 1 0;
+    padding-left: 0;
+    white-space: normal;
 }
 
 .contact-info-bottom .contact-detail-item:last-child {
     border-right: none;
-}
-
-.contact-info-bottom .contact-detail-item:first-child {
-    padding-left: 0;
 }
 
 .contact-info-bottom .contact-icon {
