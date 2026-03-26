@@ -240,7 +240,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (aboutIntro) aboutObserver.observe(aboutIntro);
 
     // ==========================================
-    // 4. Timeline Logic (Scroll-Snap + IntersectionObserver)
+    // 4. Timeline Logic (Click-Based Card Switching)
     // ==========================================
     const timelineSection = document.querySelector('.timeline-section');
     if (timelineSection) {
@@ -254,9 +254,8 @@ document.addEventListener("DOMContentLoaded", function () {
         let totalItems = years.length;
         const container = document.getElementById('timelineContainer');
         const navItems = document.querySelectorAll('.timeline-item');
-        const contentContainer = document.querySelector('.timeline-content-container');
         const contentItems = document.querySelectorAll('.timeline-content-item');
-        let isScrolling = false;
+        let isAnimating = false;
 
         // Build year groups from DOM data attributes
         let yearGroups = {};
@@ -277,6 +276,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 seenYears[year] = true;
             }
         });
+
+        // Core: switch to a specific card
+        function switchToCard(index) {
+            if (index < 0 || index >= totalItems || isAnimating) return;
+            isAnimating = true;
+            currentIndex = index;
+            contentItems.forEach(item => item.classList.remove('active'));
+            contentItems[index].classList.add('active');
+            updateTimelineNav();
+            setTimeout(() => { isAnimating = false; }, 400);
+        }
 
         // Year nav update
         function updateTimelineNav() {
@@ -319,47 +329,14 @@ document.addEventListener("DOMContentLoaded", function () {
             ).join('');
         }
 
-        // IntersectionObserver for scroll-snap card detection
-        const cardObserver = new IntersectionObserver((entries) => {
-            if (isScrolling) return;
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    contentItems.forEach(item => item.classList.remove('active'));
-                    entry.target.classList.add('active');
-                    const idx = parseInt(entry.target.getAttribute('data-index'), 10);
-                    if (!isNaN(idx) && idx !== currentIndex) {
-                        currentIndex = idx;
-                        updateTimelineNav();
-                    }
-                }
-            });
-        }, {
-            root: contentContainer,
-            threshold: 0.6
-        });
-
-        contentItems.forEach(item => cardObserver.observe(item));
-
-        // Scroll to a specific card
-        function scrollToCard(index) {
-            if (index < 0 || index >= totalItems) return;
-            isScrolling = true;
-            currentIndex = index;
-            contentItems.forEach(item => item.classList.remove('active'));
-            contentItems[index].classList.add('active');
-            updateTimelineNav();
-            contentItems[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => { isScrolling = false; }, 600);
-        }
-
         // Navigate prev/next
         window.navigateTimeline = function (direction) {
-            if (direction === 'next') scrollToCard(Math.min(currentIndex + 1, totalItems - 1));
-            else scrollToCard(Math.max(currentIndex - 1, 0));
+            if (direction === 'next') switchToCard(Math.min(currentIndex + 1, totalItems - 1));
+            else switchToCard(Math.max(currentIndex - 1, 0));
         };
 
         window.selectCardIndex = function (index) {
-            scrollToCard(index);
+            switchToCard(index);
         };
 
         // Nav item click -> jump to first card of that year
@@ -367,19 +344,14 @@ document.addEventListener("DOMContentLoaded", function () {
             item.addEventListener('click', () => {
                 const year = item.getAttribute('data-year');
                 const group = yearGroups[year];
-                if (group && group.length > 0) scrollToCard(group[0].index);
+                if (group && group.length > 0) switchToCard(group[0].index);
             });
         });
 
         // Keyboard
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
-                navigateTimeline('prev');
-                e.preventDefault();
-            } else if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
-                navigateTimeline('next');
-                e.preventDefault();
-            }
+            if (e.key === 'ArrowLeft') navigateTimeline('prev');
+            else if (e.key === 'ArrowRight') navigateTimeline('next');
         });
 
         // Timeline entry animation observer

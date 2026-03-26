@@ -476,9 +476,24 @@ if (slideParam !== null) {
         }, $timelineItems))); ?>;
         const navItems = document.querySelectorAll('.timeline-item');
         const container = document.getElementById('timelineContainer');
-        const contentContainer = document.querySelector('.timeline-content-container');
         const contentItems = document.querySelectorAll('.timeline-content-item');
-        let isScrolling = false; // 防止点击跳转与 observer 冲突
+        let isAnimating = false;
+
+        // ===== 切换到指定卡片（核心函数）=====
+        function switchToCard(index) {
+            if (index < 0 || index >= totalItems || isAnimating) return;
+            isAnimating = true;
+            currentIndex = index;
+
+            // 更新卡片显示
+            contentItems.forEach(item => item.classList.remove('active'));
+            contentItems[index].classList.add('active');
+
+            // 同步年份导航 + 月份侧栏
+            updateTimelineNav();
+
+            setTimeout(() => { isAnimating = false; }, 400);
+        }
 
         // ===== 年份导航更新 =====
         function updateTimelineNav() {
@@ -506,72 +521,26 @@ if (slideParam !== null) {
             updateMonthSidebar();
         }
 
-        // ===== IntersectionObserver — 自动检测当前卡片 =====
-        const cardObserver = new IntersectionObserver((entries) => {
-            if (isScrolling) return; // 点击跳转时暂停 observer
-
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    // 移除全部 active
-                    contentItems.forEach(item => item.classList.remove('active'));
-                    // 当前加 active
-                    entry.target.classList.add('active');
-
-                    // 同步 currentIndex
-                    const idx = parseInt(entry.target.getAttribute('data-index'), 10);
-                    if (!isNaN(idx) && idx !== currentIndex) {
-                        currentIndex = idx;
-                        updateTimelineNav();
-                    }
-                }
-            });
-        }, {
-            root: contentContainer,
-            threshold: 0.6
-        });
-
-        contentItems.forEach(item => cardObserver.observe(item));
-
-        // ===== 滚动到指定卡片 =====
-        function scrollToCard(index) {
-            if (index < 0 || index >= totalItems) return;
-            isScrolling = true;
-            currentIndex = index;
-
-            // 先更新 active 状态
-            contentItems.forEach(item => item.classList.remove('active'));
-            contentItems[index].classList.add('active');
-            updateTimelineNav();
-
-            // 滚动到目标
-            contentItems[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-            // 滚动结束后恢复 observer
-            setTimeout(() => { isScrolling = false; }, 600);
-        }
-
         // ===== 前/后导航 =====
         function navigateTimeline(direction) {
             if (direction === 'next') {
-                scrollToCard(Math.min(currentIndex + 1, totalItems - 1));
+                switchToCard(Math.min(currentIndex + 1, totalItems - 1));
             } else {
-                scrollToCard(Math.max(currentIndex - 1, 0));
+                switchToCard(Math.max(currentIndex - 1, 0));
             }
         }
 
         // ===== 按索引跳转 =====
         function selectCardIndex(index) {
-            scrollToCard(index);
+            switchToCard(index);
         }
 
         // ===== 键盘导航 =====
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+            if (e.key === 'ArrowLeft') {
                 navigateTimeline('prev');
-                e.preventDefault();
-            } else if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+            } else if (e.key === 'ArrowRight') {
                 navigateTimeline('next');
-                e.preventDefault();
             }
         });
 
@@ -600,7 +569,7 @@ if (slideParam !== null) {
                 const year = item.getAttribute('data-year');
                 const group = yearGroups[year];
                 if (group && group.length > 0) {
-                    scrollToCard(group[0].index);
+                    switchToCard(group[0].index);
                 }
             });
         });
