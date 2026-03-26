@@ -1759,7 +1759,7 @@ form select:focus {
 
 /* 地图嵌入（占左卡上部，填满宽度） */
 .contact-map-embed {
-    flex: 1 1 0;
+    flex: 0 1 65%;
     min-height: 0;
     overflow: hidden;
     background: #eee;
