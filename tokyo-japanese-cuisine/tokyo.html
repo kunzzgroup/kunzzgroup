@@ -1286,6 +1286,7 @@
 
     /* Responsive carousel */
     @media (max-width: 1300px) {
+
       /* Hide side navigation on tablet/laptop, touch/trackpad swipe is natural */
       .cc-nav {
         display: none !important;
@@ -1299,7 +1300,8 @@
       }
     }
 
-    @media (max-width: 767px), (max-height: 500px) {
+    @media (max-width: 767px),
+    (max-height: 500px) {
       :root {
         --card-w: 230px;
         --card-h: 330px;
@@ -1659,8 +1661,8 @@
       background-color: #2c1a0e;
       color: #f5ebe0;
       padding: clamp(40px, 6vw, 60px) 20px 0;
-      height: 100vh;
-      justify-content: center;
+      height: auto !important;
+      min-height: max-content;
     }
 
     .footer-container {
@@ -2107,7 +2109,8 @@
        MOBILE OVERRIDES  (≤ 767px OR height ≤ 500px)
        - Disable swiper, allow native scroll
     ============================================================ */
-    @media (max-width: 767px), (max-height: 500px) {
+    @media (max-width: 767px),
+    (max-height: 500px) {
 
       /* Allow native scroll — overflow-x hidden prevents horizontal drag */
       html,
@@ -3218,7 +3221,7 @@
         const slides = document.querySelectorAll('.swiper-slide');
         if (slides[index]) {
           const slideHash = slides[index].getAttribute('data-hash') || slides[index].id;
-          
+
           // Desktop Links Update
           document.querySelectorAll('.nav-links a').forEach(link => {
             link.classList.remove('active');
@@ -3226,7 +3229,7 @@
               link.classList.add('active');
             }
           });
-          
+
           // Mobile Links Update
           document.querySelectorAll('.sidebar-link').forEach(link => {
             link.classList.remove('active');
@@ -3511,7 +3514,7 @@
       (function () {
         const tabs = document.querySelectorAll('.featured-mobile-tab');
         const link = document.getElementById('featured-mobile-link');
-        const img  = document.getElementById('featured-mobile-img');
+        const img = document.getElementById('featured-mobile-img');
         if (!tabs.length || !link) return;
 
         const menus = {
