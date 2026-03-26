@@ -779,7 +779,7 @@ body::-webkit-scrollbar {
 /* ===== Timeline Month Sidebar ===== */
 .timeline-body {
     display: flex;
-    align-items: stretch;
+    align-items: center;
     flex: 1;
     min-height: 0;
     width: 100%;
@@ -804,7 +804,7 @@ body::-webkit-scrollbar {
 .timeline-month-sidebar::before {
     content: '';
     position: absolute;
-    left: 20px;
+    left: 23px;
     top: 25%;
     bottom: 25%;
     width: 2px;
@@ -818,7 +818,7 @@ body::-webkit-scrollbar {
     gap: 10px;
     padding: 12px 14px;
     cursor: pointer;
-    color: rgba(255, 255, 255, 0.55);
+    color: rgba(255, 255, 255, 0.75);
     font-size: clamp(14px, 1.1vw, 18px);
     font-weight: 600;
     transition: color 0.3s ease;

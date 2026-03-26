@@ -324,7 +324,7 @@ document.addEventListener("DOMContentLoaded", function () {
             sidebar.innerHTML = months.map(m =>
                 `<div class="month-item ${m.index === currentIndex ? 'active' : ''}" onclick="selectCardIndex(${m.index})">
                     <div class="month-dot"></div>
-                    <span>${m.month}月</span>
+                    <span>${m.month > 0 ? m.month + '月' : years[m.index] + '年'}</span>
                 </div>`
             ).join('');
         }
