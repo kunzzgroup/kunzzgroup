@@ -1777,7 +1777,7 @@ form select:focus {
     flex: 0 0 auto;
     padding: clamp(12px, 1vw, 18px) clamp(20px, 1.6vw, 28px);
     border-top: 1px solid #f0f0f0;
-    background: rgba(255,255,255,0.98);
+    background: rgba(255, 255, 255, 0.98);
 }
 
 /* 地图下方：标题行更紧凑 */
