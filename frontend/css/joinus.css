@@ -1645,7 +1645,7 @@ form select:focus {
     justify-content: center;
     overflow: hidden;
     background: url('../../images/images/背景4.webp') no-repeat center center/cover;
-    padding: clamp(70px, 5vw, 90px) clamp(16px, 1.5vw, 28px) clamp(16px, 1.5vw, 28px);
+    padding: clamp(90px, 6.5vw, 110px) clamp(16px, 1.5vw, 28px) clamp(16px, 1.5vw, 28px);
 }
 
 .contact-form-container {
