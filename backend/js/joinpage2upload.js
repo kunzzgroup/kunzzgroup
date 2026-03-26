@@ -46,6 +46,17 @@
     };
 })();
 
+// ── 统计数字实时更新 ───────────────────────────────────────
+// delta: +1 = 新上传, -1 = 删除
+function updateStats(delta) {
+    const nums = document.querySelectorAll('.stats-number');
+    // nums[0]=总数(30), nums[1]=已上传, nums[2]=待上传
+    if (nums.length >= 3) {
+        nums[1].textContent = Math.max(0, parseInt(nums[1].textContent) + delta);
+        nums[2].textContent = Math.max(0, parseInt(nums[2].textContent) - delta);
+    }
+}
+
 // ── 文件选择时显示文件名 ──────────────────────────────────────
 document.querySelectorAll('input[type="file"]').forEach(input => {
     input.addEventListener('change', function () {
@@ -111,7 +122,8 @@ document.querySelectorAll('form:not(.delete-form)').forEach(form => {
                 const card = form.closest('.photo-card');
                 if (card && data.url) {
                     let imgWrap = card.querySelector('.current-image');
-                    if (!imgWrap) {
+                    const isNewPhoto = !imgWrap; // 记录是否是全新照片（之前无图）
+                    if (isNewPhoto) {
                         // 如果之前没有图片区块，插入一个
                         imgWrap = document.createElement('div');
                         imgWrap.className = 'current-image';
@@ -137,6 +149,8 @@ document.querySelectorAll('form:not(.delete-form)').forEach(form => {
                         `<strong>已上传</strong><br><small>更新: ${data.updated}</small>`;
                     // 更新按钮文字
                     if (btn) btn.textContent = '更新照片';
+                    // 只有全新照片才计入统计
+                    if (isNewPhoto) updateStats(+1);
                 }
                 // 重置文件选择框
                 form.reset();
@@ -166,6 +180,7 @@ function wireDeleteForm(form) {
         .then(data => {
             if (data.ok) {
                 showToast(data.msg, 'success');
+                updateStats(-1); // 统计：减少已上传
                 // 移除缩略图区块
                 const card = this.closest('.photo-card');
                 if (card) {
