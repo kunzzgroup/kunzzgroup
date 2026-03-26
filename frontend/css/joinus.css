@@ -1641,11 +1641,11 @@ form select:focus {
     height: 100vh;
     box-sizing: border-box;
     display: flex;
-    align-items: stretch;
+    align-items: center;
     justify-content: center;
     overflow: hidden;
     background: url('../../images/images/背景4.webp') no-repeat center center/cover;
-    padding: clamp(72px, 8.5vh, 100px) clamp(16px, 1.5vw, 28px) clamp(16px, 1.5vh, 28px);
+    padding: clamp(16px, 1.5vw, 28px);
 }
 
 .contact-form-container {
@@ -1656,7 +1656,8 @@ form select:focus {
     gap: clamp(14px, 1.2vw, 24px);
     width: 100%;
     max-width: 1600px;
-    height: 100%;
+    height: clamp(75vh, 80vh, 85vh);
+    max-height: 85vh;
     box-sizing: border-box;
     align-items: stretch;
 }
