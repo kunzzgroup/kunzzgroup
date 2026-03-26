@@ -863,7 +863,7 @@ body::-webkit-scrollbar {
 .timeline-month-sidebar::before {
   content: '';
   position: absolute;
-  left: 20px;
+  left: 23px;
   top: 25%;
   bottom: 25%;
   width: 3px;
