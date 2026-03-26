@@ -357,13 +357,13 @@ body::-webkit-scrollbar {
    =========================================== */
 .timeline-section {
     background: url('../../images/images/背景4.webp') no-repeat center center/cover;
-    padding: 40px 20px;
+    padding: 40px 20px 20px;
     position: relative;
     height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     box-sizing: border-box;
     overflow: hidden;
 }
@@ -800,6 +800,7 @@ body::-webkit-scrollbar {
     max-width: 1200px;
     gap: 0;
     margin: 0 auto;
+    overflow: hidden;
 }
 
 .timeline-month-sidebar {
