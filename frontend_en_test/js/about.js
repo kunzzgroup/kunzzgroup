@@ -240,7 +240,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (aboutIntro) aboutObserver.observe(aboutIntro);
 
     // ==========================================
-    // 4. Timeline Logic (Carousel)
+    // 4. Timeline Logic (Click-Based Card Switching)
     // ==========================================
     const timelineSection = document.querySelector('.timeline-section');
     if (timelineSection) {
@@ -255,14 +255,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const container = document.getElementById('timelineContainer');
         const navItems = document.querySelectorAll('.timeline-item');
         const contentItems = document.querySelectorAll('.timeline-content-item');
-
-        // Drag variables
-        let isDragging = false;
-        let startX = 0;
-        let currentX = 0;
-        let dragThreshold = 15;
-        let hasTriggered = false;
-        let dragStartTime = 0;
         let isAnimating = false;
 
         // Build year groups from DOM data attributes
@@ -285,6 +277,18 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
 
+        // Core: switch to a specific card
+        function switchToCard(index) {
+            if (index < 0 || index >= totalItems || isAnimating) return;
+            isAnimating = true;
+            currentIndex = index;
+            contentItems.forEach(item => item.classList.remove('active'));
+            contentItems[index].classList.add('active');
+            updateTimelineNav();
+            setTimeout(() => { isAnimating = false; }, 400);
+        }
+
+        // Year nav update
         function updateTimelineNav() {
             const allNavItems = document.querySelectorAll('.timeline-item');
             const currentYear = years[currentIndex];
@@ -310,43 +314,7 @@ document.addEventListener("DOMContentLoaded", function () {
             updateMonthSidebar();
         }
 
-        function updateCardPositions() {
-            contentItems.forEach((card, index) => {
-                card.classList.remove('active', 'prev', 'next', 'hidden');
-                if (index === currentIndex) {
-                    card.classList.add('active');
-                } else if (index === (currentIndex - 1 + totalItems) % totalItems) {
-                    card.classList.add('prev');
-                } else if (index === (currentIndex + 1) % totalItems) {
-                    card.classList.add('next');
-                } else {
-                    card.classList.add('hidden');
-                }
-            });
-        }
-
-        window.navigateTimeline = function (direction) {
-            if (isAnimating) return;
-            isAnimating = true;
-            if (direction === 'next') {
-                currentIndex = (currentIndex + 1) % totalItems;
-            } else {
-                currentIndex = (currentIndex - 1 + totalItems) % totalItems;
-            }
-            updateTimelineNav();
-            updateCardPositions();
-            setTimeout(() => { isAnimating = false; }, 400);
-        };
-
-        window.selectCardIndex = function (index) {
-            if (isAnimating) return;
-            if (index < 0 || index >= totalItems) return;
-            currentIndex = index;
-            updateTimelineNav();
-            updateCardPositions();
-        };
-
-        // Month sidebar
+        // Month sidebar update
         function updateMonthSidebar() {
             const currentYear = years[currentIndex];
             const months = yearGroups[currentYear] || [];
@@ -356,99 +324,34 @@ document.addEventListener("DOMContentLoaded", function () {
             sidebar.innerHTML = months.map(m =>
                 `<div class="month-item ${m.index === currentIndex ? 'active' : ''}" onclick="selectCardIndex(${m.index})">
                     <div class="month-dot"></div>
-                    <span>${m.month}月</span>
+                    <span>${m.month > 0 ? m.month + '月' : years[m.index] + '年'}</span>
                 </div>`
             ).join('');
         }
 
-        // Drag handling
-        function handleDragStart(e) {
-            if (isAnimating) return;
-            const clickedCard = e.target.closest('.timeline-content-item');
-            if (!clickedCard) return;
-            isDragging = true;
-            hasTriggered = false;
-            dragStartTime = Date.now();
-            startX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
-            document.body.style.cursor = 'grabbing';
-            document.body.style.userSelect = 'none';
-            e.preventDefault();
-            e.stopPropagation();
-        }
+        // Navigate prev/next
+        window.navigateTimeline = function (direction) {
+            if (direction === 'next') switchToCard(Math.min(currentIndex + 1, totalItems - 1));
+            else switchToCard(Math.max(currentIndex - 1, 0));
+        };
 
-        function handleDragMove(e) {
-            if (!isDragging || hasTriggered || isAnimating) return;
-            currentX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
-            const deltaX = currentX - startX;
-            const dragTime = Date.now() - dragStartTime;
-            if (Math.abs(deltaX) >= dragThreshold && dragTime > 50) {
-                hasTriggered = true;
-                if (deltaX > 0) navigateTimeline('prev');
-                else navigateTimeline('next');
-                setTimeout(() => handleDragEnd(e), 50);
-            }
-            e.preventDefault();
-        }
+        window.selectCardIndex = function (index) {
+            switchToCard(index);
+        };
 
-        function handleDragEnd(e) {
-            if (!isDragging) return;
-            isDragging = false;
-            hasTriggered = false;
-            dragStartTime = 0;
-            document.body.style.cursor = '';
-            document.body.style.userSelect = '';
-        }
-
-        // Event listeners
-        document.addEventListener('mousedown', (e) => {
-            const card = e.target.closest('.timeline-content-item');
-            if (card && !isAnimating) handleDragStart(e);
-        });
-        document.addEventListener('mousemove', handleDragMove);
-        document.addEventListener('mouseup', handleDragEnd);
-        document.addEventListener('mouseleave', handleDragEnd);
-
-        document.addEventListener('touchstart', (e) => {
-            const card = e.target.closest('.timeline-content-item');
-            if (card && !isAnimating) handleDragStart(e);
-        }, { passive: false });
-        document.addEventListener('touchmove', handleDragMove, { passive: false });
-        document.addEventListener('touchend', handleDragEnd);
-
-        // Nav item click (by index)
-        navItems.forEach((item, index) => {
+        // Nav item click -> jump to first card of that year
+        navItems.forEach((item) => {
             item.addEventListener('click', () => {
-                if (!isDragging && !isAnimating) {
-                    currentIndex = index;
-                    updateTimelineNav();
-                    updateCardPositions();
-                }
+                const year = item.getAttribute('data-year');
+                const group = yearGroups[year];
+                if (group && group.length > 0) switchToCard(group[0].index);
             });
-        });
-
-        // Click handling for prev/next cards
-        document.addEventListener('click', (e) => {
-            if (isDragging || hasTriggered || isAnimating) return;
-            const card = e.target.closest('.timeline-content-item');
-            if (card) {
-                if (card.classList.contains('prev')) {
-                    navigateTimeline('prev');
-                } else if (card.classList.contains('next')) {
-                    navigateTimeline('next');
-                } else if (!card.classList.contains('active')) {
-                    const idxAttr = card.getAttribute('data-index');
-                    const idx = parseInt(idxAttr, 10);
-                    if (!isNaN(idx)) selectCardIndex(idx);
-                }
-            }
         });
 
         // Keyboard
         document.addEventListener('keydown', (e) => {
-            if (!isAnimating) {
-                if (e.key === 'ArrowLeft') navigateTimeline('prev');
-                else if (e.key === 'ArrowRight') navigateTimeline('next');
-            }
+            if (e.key === 'ArrowLeft') navigateTimeline('prev');
+            else if (e.key === 'ArrowRight') navigateTimeline('next');
         });
 
         // Timeline entry animation observer
@@ -468,12 +371,13 @@ document.addEventListener("DOMContentLoaded", function () {
         timelineObserver.observe(timelineSection);
         resetTimelineAnimation(timelineSection);
 
-        // Init
+        // Init: set first card active
+        contentItems.forEach(item => item.classList.remove('active'));
+        if (contentItems.length > 0) contentItems[0].classList.add('active');
         updateTimelineNav();
-        updateCardPositions();
 
         window.addEventListener('resize', () => {
-            if (!isAnimating) setTimeout(updateTimelineNav, 100);
+            setTimeout(updateTimelineNav, 100);
         });
     }
 
