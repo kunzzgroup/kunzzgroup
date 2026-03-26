@@ -1654,25 +1654,25 @@ form select:focus {
     z-index: 10;
     display: flex;
     flex-direction: row;
-    gap: clamp(16px, 1.8vw, 32px);
-    width: clamp(900px, 82vw, 1400px);
+    gap: clamp(20px, 2vw, 40px);
+    width: clamp(900px, 72vw, 1300px);
     height: auto;
-    max-height: 88vh;
-    padding: clamp(20px, 2vw, 36px);
+    max-height: 85vh;
+    padding: clamp(15px, 1.5vw, 30px);
     box-sizing: border-box;
     align-items: stretch;
 }
 
 /* --- 左侧联系卡片 --- */
 .contact-card {
-    flex: 0 0 46%;
+    flex: 1;
     background: rgba(255, 255, 255, 0.97);
     border-radius: clamp(14px, 1.5vw, 22px);
-    padding: clamp(24px, 2vw, 34px);
+    padding: clamp(24px, 2vw, 36px);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.13);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
     overflow: hidden;
 }
 
@@ -1700,7 +1700,7 @@ form select:focus {
 .contact-details {
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: clamp(8px, 0.7vw, 13px);
     margin-bottom: clamp(8px, 0.8vw, 14px);
 }
 
@@ -1708,12 +1708,6 @@ form select:focus {
     display: flex;
     align-items: flex-start;
     gap: clamp(10px, 0.8vw, 14px);
-    padding: clamp(10px, 0.85vw, 15px) 0;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.contact-detail-item:last-child {
-    border-bottom: none;
 }
 
 .contact-icon {
@@ -1812,11 +1806,11 @@ form select:focus {
     flex: 1;
     background: rgba(255, 255, 255, 0.97);
     border-radius: clamp(14px, 1.5vw, 22px);
-    padding: clamp(20px, 1.8vw, 30px);
+    padding: clamp(20px, 1.6vw, 28px);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.13);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
     overflow: hidden;
 }
 
@@ -1834,16 +1828,6 @@ form select:focus {
     color: #ff5c00;
     margin: 0 0 clamp(6px, 0.6vw, 10px) 0;
     font-weight: 500;
-}
-
-/* feedback form flex layout to allow submit to stick to bottom */
-#feedbackForm {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    min-height: 0;
 }
 
 /* 表单字段 */
@@ -1891,7 +1875,7 @@ form select:focus {
 
 .fb-field textarea {
     resize: none;
-    min-height: clamp(60px, 5vw, 90px);
+    min-height: clamp(50px, 4.5vw, 75px);
     line-height: 1.5;
 }
 
@@ -1958,8 +1942,8 @@ form select:focus {
 /* 提交按钮 */
 .fb-submit-btn {
     width: 100%;
-    padding: clamp(12px, 1.1vw, 18px);
-    margin-top: auto;
+    padding: clamp(10px, 1vw, 16px);
+    margin-top: clamp(10px, 1vw, 18px);
     background: linear-gradient(135deg, #ff5c00 0%, #ff8c00 50%, #ff5c00 100%);
     background-size: 200% 100%;
     color: white;
@@ -1972,7 +1956,6 @@ form select:focus {
     letter-spacing: 4px;
     text-transform: uppercase;
     box-shadow: 0 4px 15px rgba(255, 92, 0, 0.35);
-    flex-shrink: 0;
 }
 
 .fb-submit-btn:hover {
