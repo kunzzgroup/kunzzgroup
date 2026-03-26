@@ -866,9 +866,9 @@ body::-webkit-scrollbar {
   left: 20px;
   top: 25%;
   bottom: 25%;
-  width: 2px;
-  background: rgba(255, 255, 255, 0.18);
-  border-radius: 1px;
+  width: 3px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 2px;
 }
 
 .month-item {
@@ -896,10 +896,10 @@ body::-webkit-scrollbar {
 }
 
 .month-dot {
-  width: 10px;
-  height: 10px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.25);
+  border: 2.5px solid rgba(255, 255, 255, 0.45);
   background: transparent;
   flex-shrink: 0;
   transition: all 0.3s ease;
