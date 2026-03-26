@@ -170,6 +170,7 @@ body {
 
 .current-image {
     margin-bottom: 15px;
+    position: relative;
 }
 
 .current-image img {
@@ -178,6 +179,37 @@ body {
     object-fit: cover;
     border-radius: 8px;
     border: 2px solid #e9ecef;
+}
+
+.delete-form {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    margin: 0;
+    padding: 0;
+}
+
+.delete-btn {
+    width: clamp(20px, 1.56vw, 30px);
+    height: clamp(20px, 1.56vw, 30px);
+    border-radius: 50%;
+    background: rgba(220, 53, 69, 0.88);
+    color: #fff;
+    border: 2px solid #fff;
+    font-size: clamp(10px, 0.84vw, 16px);
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.2s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.delete-btn:hover {
+    background: #dc3545;
+    transform: scale(1.15);
 }
 
 .image-info {

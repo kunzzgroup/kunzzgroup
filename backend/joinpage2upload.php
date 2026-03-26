@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/permission_guard.php';
 require_once __DIR__ . '/heic_convert.php';
 requirePermission('visual');
@@ -16,6 +16,39 @@ session_start();
 if (!isset($_SESSION['user_id'])) {
     header("Location: /frontend/login.html");
     exit();
+}
+
+// 处理照片删除
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
+    $photoNumber = intval($_POST['photo_number']);
+    $configFile = '../media_config.json';
+    $uploadDir = '../images/images/';
+    $subdomainPhysicalPath = '/home/u857194726/domains/media.kunzzgroup.com/public_html/comphotos/';
+
+    $config = [];
+    if (file_exists($configFile)) {
+        $config = json_decode(file_get_contents($configFile), true) ?: [];
+    }
+
+    $photoKey = 'comphoto_' . $photoNumber;
+    if (isset($config[$photoKey])) {
+        $filePath = $config[$photoKey]['file'];
+        // 删除本地文件
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+        // 删除子域名文件
+        $subdomainFile = $subdomainPhysicalPath . basename($filePath);
+        if (file_exists($subdomainFile)) {
+            unlink($subdomainFile);
+        }
+        unset($config[$photoKey]);
+        file_put_contents($configFile, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        $success = "照片 #{$photoNumber} 已成功删除！";
+        echo "<script>setTimeout(function(){ window.location.href = window.location.href.split('?')[0] + '?updated=' + Date.now(); }, 1000);</script>";
+    } else {
+        $error = "找不到照片 #{$photoNumber} 的记录！";
+    }
 }
 
 // 处理文件上传
@@ -227,6 +260,11 @@ for ($i = 1; $i <= 30; $i++) {
     if ($fileExists && $displayUrl): ?>
                             <div class="current-image">
                                 <img src="<?php echo $displayUrl; ?>?v=<?php echo time(); ?>" alt="照片 <?php echo $i; ?>">
+                                <form method="post" class="delete-form" onsubmit="return confirm('确定要删除这张照片吗？此操作无法复原！')">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="photo_number" value="<?php echo $i; ?>">
+                                    <button type="submit" class="delete-btn" title="删除照片">✕</button>
+                                </form>
                                 <div class="image-info">
                                     <strong>已上传</strong><br>
                                     <small>更新: <?php echo $config[$photoKey]['updated']; ?></small>
