@@ -544,6 +544,41 @@ if (slideParam !== null) {
             }
         });
 
+        // ===== 左右滑动/拖拽 =====
+        let isDragging = false, startX = 0, dragThreshold = 30, hasTriggered = false;
+
+        function handleDragStart(e) {
+            if (isAnimating) return;
+            if (!e.target.closest('.timeline-content-item')) return;
+            isDragging = true;
+            hasTriggered = false;
+            startX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
+            e.preventDefault();
+        }
+
+        function handleDragMove(e) {
+            if (!isDragging || hasTriggered || isAnimating) return;
+            const currentX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
+            const deltaX = currentX - startX;
+            if (Math.abs(deltaX) >= dragThreshold) {
+                hasTriggered = true;
+                navigateTimeline(deltaX > 0 ? 'prev' : 'next');
+            }
+            e.preventDefault();
+        }
+
+        function handleDragEnd() {
+            isDragging = false;
+            hasTriggered = false;
+        }
+
+        document.addEventListener('mousedown', handleDragStart);
+        document.addEventListener('mousemove', handleDragMove);
+        document.addEventListener('mouseup', handleDragEnd);
+        document.addEventListener('touchstart', handleDragStart, { passive: false });
+        document.addEventListener('touchmove', handleDragMove, { passive: false });
+        document.addEventListener('touchend', handleDragEnd);
+
         // ===== 初始化 =====
         // 构建年份-月份分组
         let yearGroups = {};
