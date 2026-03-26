@@ -194,42 +194,9 @@ include '../public/header.php';
   <div class="contact-form-section" id="map">
     <div class="contact-form-container">
 
-      <!-- 左侧：联系信息卡片 -->
+      <!-- 左侧：地图 + 联系信息卡片 -->
       <div class="contact-card">
-        <div class="contact-card-header">
-          <span class="contact-subtitle">CONTACT US</span>
-          <h2 class="contact-title">联系我们</h2>
-        </div>
-        <div class="contact-details">
-          <div class="contact-detail-item">
-            <div class="contact-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff5c00" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></div>
-            <div class="contact-detail-text">
-              <span class="contact-label">地址</span>
-              <a href="javascript:void(0);" onclick="goToLocation()" class="contact-link">25, Jln Tanjong 3, Taman Desa Cemerlang,<br>81800 Ulu Tiram, Johor Darul Ta'zim</a>
-            </div>
-          </div>
-          <div class="contact-detail-item">
-            <div class="contact-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff5c00" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></div>
-            <div class="contact-detail-text">
-              <span class="contact-label">电话</span>
-              <span>+60 13-553 5355</span>
-            </div>
-          </div>
-          <div class="contact-detail-item">
-            <div class="contact-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff5c00" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></div>
-            <div class="contact-detail-text">
-              <span class="contact-label">邮箱</span>
-              <span>kunzzholdings@gmail.com</span>
-            </div>
-          </div>
-          <div class="contact-detail-item">
-            <div class="contact-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff5c00" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
-            <div class="contact-detail-text">
-              <span class="contact-label">营业时间</span>
-              <span>周一至周五  9AM – 6PM</span>
-            </div>
-          </div>
-        </div>
+        <!-- 地图（主体） -->
         <div class="contact-map-embed">
           <iframe
             id="custom-map"
@@ -237,6 +204,43 @@ include '../public/header.php';
             width="100%"
             height="100%"
           ></iframe>
+        </div>
+        <!-- 联系信息（地图下方） -->
+        <div class="contact-info-bottom">
+          <div class="contact-card-header">
+            <span class="contact-subtitle">CONTACT US</span>
+            <h2 class="contact-title">联系我们</h2>
+          </div>
+          <div class="contact-details">
+            <div class="contact-detail-item">
+              <div class="contact-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff5c00" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></div>
+              <div class="contact-detail-text">
+                <span class="contact-label">地址</span>
+                <a href="javascript:void(0);" onclick="goToLocation()" class="contact-link">25, Jln Tanjong 3, Taman Desa Cemerlang,<br>81800 Ulu Tiram, Johor Darul Ta'zim</a>
+              </div>
+            </div>
+            <div class="contact-detail-item">
+              <div class="contact-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff5c00" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></div>
+              <div class="contact-detail-text">
+                <span class="contact-label">电话</span>
+                <span>+60 13-553 5355</span>
+              </div>
+            </div>
+            <div class="contact-detail-item">
+              <div class="contact-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff5c00" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></div>
+              <div class="contact-detail-text">
+                <span class="contact-label">邮箱</span>
+                <span>kunzzholdings@gmail.com</span>
+              </div>
+            </div>
+            <div class="contact-detail-item">
+              <div class="contact-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff5c00" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
+              <div class="contact-detail-text">
+                <span class="contact-label">营业时间</span>
+                <span>周一至周五  9AM – 6PM</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -304,6 +308,7 @@ include '../public/header.php';
     </div>
   </div>
   </div>
+
 
 <?php include '../public/footer.php'; ?>
 

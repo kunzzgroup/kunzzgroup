@@ -1641,12 +1641,11 @@ form select:focus {
     height: 100vh;
     box-sizing: border-box;
     display: flex;
-    align-items: center;
+    align-items: stretch;
     justify-content: center;
     overflow: hidden;
-
-    /* 背景图 */
     background: url('../../images/images/背景4.webp') no-repeat center center/cover;
+    padding: clamp(16px, 1.5vh, 28px) clamp(16px, 1.5vw, 28px);
 }
 
 .contact-form-container {
@@ -1654,26 +1653,25 @@ form select:focus {
     z-index: 10;
     display: flex;
     flex-direction: row;
-    gap: clamp(20px, 2vw, 40px);
-    width: clamp(900px, 72vw, 1300px);
-    height: auto;
-    max-height: 85vh;
-    padding: clamp(15px, 1.5vw, 30px);
+    gap: clamp(14px, 1.2vw, 24px);
+    width: 100%;
+    max-width: 1600px;
+    height: 100%;
     box-sizing: border-box;
     align-items: stretch;
 }
 
-/* --- 左侧联系卡片 --- */
+/* --- 左侧：地图 + 联系信息卡片 --- */
 .contact-card {
-    flex: 1;
+    flex: 0 0 58%;
     background: rgba(255, 255, 255, 0.97);
-    border-radius: clamp(14px, 1.5vw, 22px);
-    padding: clamp(24px, 2vw, 36px);
+    border-radius: clamp(14px, 1.2vw, 20px);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
     overflow: hidden;
+    padding: 0; /* no padding — map bleeds to edges */
 }
 
 .contact-card-header {
@@ -1758,6 +1756,57 @@ form select:focus {
     color: #ff5c00 !important;
 }
 
+/* 地图嵌入（占左卡上部，填满宽度） */
+.contact-map-embed {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+    background: #eee;
+}
+
+.contact-map-embed iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+
+/* 地图下方的联系信息区域 */
+.contact-info-bottom {
+    flex: 0 0 auto;
+    padding: clamp(10px, 0.9vw, 16px) clamp(18px, 1.5vw, 28px);
+    border-top: 1px solid #f0f0f0;
+    background: rgba(255,255,255,0.98);
+}
+
+/* 地图下方：CONTACT US 标题行 */
+.contact-info-bottom .contact-card-header {
+    margin-bottom: clamp(6px, 0.5vw, 10px);
+}
+
+/* 地图下方：联系详情横排 */
+.contact-info-bottom .contact-details {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-bottom: 0;
+}
+
+.contact-info-bottom .contact-detail-item {
+    padding: clamp(6px, 0.5vw, 10px) clamp(10px, 0.8vw, 16px);
+    border-right: 1px solid #f0f0f0;
+    border-bottom: none;
+    align-items: center;
+}
+
+.contact-info-bottom .contact-detail-item:last-child {
+    border-right: none;
+}
+
+.contact-info-bottom .contact-detail-item:first-child {
+    padding-left: 0;
+}
+
 .contact-company-badge {
     display: inline-flex;
     align-items: center;
@@ -1781,36 +1830,18 @@ form select:focus {
     display: inline-block;
 }
 
-.contact-map-embed {
-    flex: 1;
-    min-height: clamp(100px, 10vw, 180px);
-    border-radius: 0 0 clamp(14px, 1.5vw, 22px) clamp(14px, 1.5vw, 22px);
-    overflow: hidden;
-    background: #eee;
-    /* 贴左右边框 - 抵消 card padding */
-    margin-left: calc(-1 * clamp(24px, 2vw, 36px));
-    margin-right: calc(-1 * clamp(24px, 2vw, 36px));
-    margin-bottom: calc(-1 * clamp(24px, 2vw, 36px));
-}
 
-.contact-map-embed iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block;
-    min-height: clamp(100px, 10vw, 180px);
-}
 
 /* --- 右侧意见表单卡片 --- */
 .feedback-card {
     flex: 1;
     background: rgba(255, 255, 255, 0.97);
-    border-radius: clamp(14px, 1.5vw, 22px);
-    padding: clamp(20px, 1.6vw, 28px);
+    border-radius: clamp(14px, 1.2vw, 20px);
+    padding: clamp(20px, 1.8vw, 30px);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
     overflow: hidden;
 }
 
