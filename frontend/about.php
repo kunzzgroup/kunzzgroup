@@ -628,20 +628,29 @@ if (slideParam !== null) {
                 if (existingLine) existingLine.remove();
                 
                 const dots = sidebar.querySelectorAll('.month-dot');
-                if (dots.length < 2) return;
+                if (dots.length < 1) return;
                 
                 const sidebarRect = sidebar.getBoundingClientRect();
                 const firstDot = dots[0].getBoundingClientRect();
                 const lastDot = dots[dots.length - 1].getBoundingClientRect();
                 
-                const lineTop = firstDot.top + firstDot.height / 2 - sidebarRect.top + sidebar.scrollTop;
-                const lineBottom = lastDot.top + lastDot.height / 2 - sidebarRect.top + sidebar.scrollTop;
+                let lineTop, lineHeight;
+                if (dots.length === 1) {
+                    // 只有一个月时，显示一小段竖线
+                    const dotCenter = firstDot.top + firstDot.height / 2 - sidebarRect.top + sidebar.scrollTop;
+                    lineTop = dotCenter - 30;
+                    lineHeight = 60;
+                } else {
+                    lineTop = firstDot.top + firstDot.height / 2 - sidebarRect.top + sidebar.scrollTop;
+                    const lineBottom = lastDot.top + lastDot.height / 2 - sidebarRect.top + sidebar.scrollTop;
+                    lineHeight = lineBottom - lineTop;
+                }
                 const lineLeft = firstDot.left + firstDot.width / 2 - sidebarRect.left;
                 
                 const line = document.createElement('div');
                 line.className = 'sidebar-line';
                 line.style.top = lineTop + 'px';
-                line.style.height = (lineBottom - lineTop) + 'px';
+                line.style.height = lineHeight + 'px';
                 line.style.left = lineLeft + 'px';
                 sidebar.appendChild(line);
             });
