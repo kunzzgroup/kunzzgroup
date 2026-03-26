@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Asia/Kuala_Lumpur');
 require_once __DIR__ . '/permission_guard.php';
 require_once __DIR__ . '/heic_convert.php';
 requirePermission('visual');
@@ -299,6 +300,12 @@ endfor; ?>
         </div>
     </div>
     
+   <!-- Lightbox 照片查看器 -->
+   <div id="photo-lightbox">
+       <span id="photo-lightbox-close">&#x2715;</span>
+       <img id="photo-lightbox-img" src="" alt="查看照片">
+   </div>
+
    <script src="js/joinpage2upload.js?v=<?php echo time(); ?>"></script>    
 </body>
 </html>
