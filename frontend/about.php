@@ -621,6 +621,30 @@ if (slideParam !== null) {
                     <span>${m.month}月</span>
                 </div>`
             ).join('');
+
+            // 动态创建连接线，精确从第一个圆点中心到最后一个圆点中心
+            requestAnimationFrame(() => {
+                const existingLine = sidebar.querySelector('.sidebar-line');
+                if (existingLine) existingLine.remove();
+                
+                const dots = sidebar.querySelectorAll('.month-dot');
+                if (dots.length < 2) return;
+                
+                const sidebarRect = sidebar.getBoundingClientRect();
+                const firstDot = dots[0].getBoundingClientRect();
+                const lastDot = dots[dots.length - 1].getBoundingClientRect();
+                
+                const lineTop = firstDot.top + firstDot.height / 2 - sidebarRect.top + sidebar.scrollTop;
+                const lineBottom = lastDot.top + lastDot.height / 2 - sidebarRect.top + sidebar.scrollTop;
+                const lineLeft = firstDot.left + firstDot.width / 2 - sidebarRect.left;
+                
+                const line = document.createElement('div');
+                line.className = 'sidebar-line';
+                line.style.top = lineTop + 'px';
+                line.style.height = (lineBottom - lineTop) + 'px';
+                line.style.left = lineLeft + 'px';
+                sidebar.appendChild(line);
+            });
         }
 
         // 初始化：设置第一张为 active
