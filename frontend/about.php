@@ -645,7 +645,7 @@ if (slideParam !== null) {
                     const lineBottom = lastDot.top + lastDot.height / 2 - sidebarRect.top + sidebar.scrollTop;
                     lineHeight = lineBottom - lineTop;
                 }
-                const lineLeft = firstDot.left + firstDot.width / 2 - sidebarRect.left;
+                const lineLeft = firstDot.left + firstDot.width / 2 - sidebarRect.left - 1.5;
                 
                 const line = document.createElement('div');
                 line.className = 'sidebar-line';
