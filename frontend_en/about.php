@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // 禁用页面缓存
 header("Cache-Control: max-age=0, no-cache, no-store, must-revalidate, proxy-revalidate");
 header("Pragma: no-cache");
@@ -8,12 +8,12 @@ include_once '../media_config.php';
 
 // 设置页面特定的变量
 $pageTitle = 'KUNZZ HOLDINGS';
-$additionalCSS = ['css/about.css','../public_en/css/components/header.css','../public_en/css/components/footer.css','../public_en/css/components/social.css'];
+$additionalCSS = ['css/about.css','../public/css/components/header.css','../public/css/components/footer.css','../public/css/components/social.css'];
 $showPageIndicator = true;
 $totalSlides = 5;
 
 // 包含header
-include '../public_en/header.php';
+include '../public/header.php';
 
 // 在header之后获取时间线数据（扁平记录，允许同一年多条）
 $timelineItems = getTimelineItems('en');
@@ -27,18 +27,18 @@ $timelineItems = getTimelineItems('en');
     <div class="aboutus-banner">
         <?php echo getMediaHtml('about_background'); ?>
       <div class="aboutus-content">
-        <h1>About Us</h1>
-        <p>Explore Kunzz Holdings’ Vision and Growth Journey</p>
+        <h1>关于我们</h1>
+        <p>深入了解 Kunzz Holdings 的初心与成长轨迹</p>
       </div>
     </div>
 
     <div class="aboutus-intro">
       <div class="intro-content">
-        <h1>Group Profile</h1>
+        <h1>集团简介</h1>
         <p>
-          Kunzz Holdings is a diversified Malaysian group dedicated to resource integration and efficiency.<br>
-          We offer strategic guidance and operational synergy to all our subsidiaries.<br>
-          We build brands. We empower teams. We create impact.
+          Kunzz Holdings 是一家总部位于马来西亚的多元化控股集团，专注资源整合与效率提升，<br>
+          为旗下公司提供战略支持与运营协同。我们致力于用心打造品牌，<br>
+          激发团队潜力，助力企业在竞争中脱颖而出。
         </p>
       </div>
     </div>
@@ -48,34 +48,35 @@ $timelineItems = getTimelineItems('en');
     <div class="swiper-slide">
     <section id="vision" class="vision">
     <div class="vision-content animate-on-scroll vision-slide-down">
-      <h1>Our Beliefs and Direction</h1>
+      <h1>我们的信念与方向</h1>
       <p>
-        We believe that every great achievement begins with a clear belief.<br>
-        Our mission, vision, culture, and values are both the guiding light and the bottom line we all uphold.<br>
-        With these principles in mind, we continue to grow, to break through, and to lift each other higher.
+        我们相信，所有伟大的成就，都始于一份清晰的信念。<br>
+        使命、愿景、文化与价值观，是前进的灯塔，也是我们共同坚守的底线。<br>
+        在这样的理念指引下，我们持续成长、持续突破、持续成就彼此。
       </p>
 
       <div class="vision-cards">
         <!-- Card 1 -->
         <div class="vision-card animate-on-scroll slide-in-left">
-          <div class="vision-label">Our Mission</div>
-          <h2>Creating a positive and comfortable working environment</h2>
+          <div class="vision-label">我们的使命</div>
+          <h2>塑造积极向上和舒适的工作环境</h2>
           <p>
-            Here, we believe that a positive work environment nurtures stronger teams. 
-            We strive to create a warm and welcoming space where everyone feels a true sense of belonging — 
-            a place where each member can feel safe to give their best and grow together. In such an environment, 
-            challenges no longer feel cold, and every effort is seen, valued, and appreciated.
+            在这里，我们相信好的工作环境，能孕育出更好的团队。
+            我们努力打造一个温暖、有温度、有归属感的空间，
+            让每位成员都能安心发挥，共同成长。
+            在这里，挑战不再冰冷，努力也值得被看见。
           </p>
         </div>
 
         <!-- Card 2 -->
         <div class="vision-card animate-on-scroll slide-in-right">
-          <div class="vision-label">Our Vision</div>
-          <h2>Build an efficient team, create the future of the industry</h2>
+          <div class="vision-label">我们的愿景</div>
+          <h2>打造高效的团队，创造行业未来</h2>
           <p>
-            A great team is the source of continuous value creation for any enterprise. 
-            Only when efficiency and innovation go hand in hand can a team break boundaries and achieve greatness. 
-            With steady steps, we are on the path to becoming an industry benchmark — letting achievements speak and moving forward with belief.
+            一个好团队，是企业价值持续创造的源头。
+            唯有高效与创新并行，团队才能突破边界、成就非凡。
+            我们正以坚实步伐，走在打造行业标杆的路上，
+            用成就说话，用信念前行。
           </p>
         </div>
       </div>
@@ -86,34 +87,34 @@ $timelineItems = getTimelineItems('en');
   <div class="swiper-slide">
   <section id="values" class="values-section">
         <div class="values-top animate-on-scroll">
-            <h2 class="values-title animate-on-scroll values-scale-fade delay-3">Our Core <span style="color: #FF5C00;">Values</span></h2>
+            <h2 class="values-title animate-on-scroll values-scale-fade delay-3">我们的核心<span style="color: #FF5C00;">价值观</span></h2>
             <p class="values-description animate-on-scroll values-scale-fade delay-4">
-                Our core values are present in every effort and every act of collaboration. 
-                They unite us in culture, strengthen our belief through challenges, 
-                and keep our original purpose steady as we grow.
+                核心价值观，贯穿在每一份努力、每一个团队协作之中。
+                它让我们在文化中凝聚一致，在挑战中保持信念，
+                在成长中维持不变的初心。
             </p>
         </div>
       
         <div class="values-bottom animate-on-scroll card-tilt-in-left">
             <div class="values-card">
                 <img src="../images/images/目标导向.png?v=<?php echo time(); ?>" alt="icon" class="values-icon">
-                <h3>Goal-Oriented</h3>
-                <p>Result-oriented, focused on key tasks, with clear direction and purpose at every step.</p>
+                <h3>目标导向</h3>
+                <p>以结果为导向，聚焦关键任务，明确每一步的方向与意义。</p>
             </div>
             <div class="values-card">
                 <img src="../images/images/理念一致.png?v=<?php echo time(); ?>" alt="icon" class="values-icon">
-                <h3>Aligned Thinking</h3>
-                <p>Maintain strong consensus, stay mentally in sync, align on goals, and reduce internal friction.</p>
+                <h3>理念一致</h3>
+                <p>保持高度共识，思想同频，目标一致，减少内耗。</p>
             </div>
             <div class="values-card">
                 <img src="../images/images/追求卓越.png?v=<?php echo time(); ?>" alt="icon" class="values-icon">
-                <h3>Seek Excellence</h3>
-                <p>Not just completing tasks — but doing them better, aiming higher, and improving continuously.</p>
+                <h3>追求卓越</h3>
+                <p>不满足于完成任务，要追求干得更好，更高标准地完成目标，持续优化每项工作。</p>
             </div>
             <div class="values-card">
                 <img src="../images/images/创新精神.png?v=<?php echo time(); ?>" alt="icon" class="values-icon">
-                <h3>Creativity</h3>
-                <p>Embrace change, dare to try, break limits, and keep exploring new ways to grow.</p>
+                <h3>创新精神</h3>
+                <p>拥抱变化、敢于尝试，突破既有框架，不断探索新方法、新工具与新角度，推动企业成长。</p>
             </div>
         </div>
     </section>
@@ -121,7 +122,7 @@ $timelineItems = getTimelineItems('en');
 
   <div class="swiper-slide">
   <section class="timeline-section" id="timeline-1">
-        <h1>— Milestones —</h1>
+        <h1>— 我们的发展历史 —</h1>
         
         <!-- 横向时间线导航 -->
         <div class="timeline-nav">
@@ -136,7 +137,7 @@ $timelineItems = getTimelineItems('en');
                     foreach ($timelineItems as $item): 
                         $year = $item['year'];
                     ?>
-                    <div class="timeline-item <?php echo $index === 0 ? 'active' : ''; ?>" data-year="<?php echo htmlspecialchars($year); ?>">
+                    <div class="timeline-item <?php echo $index === 0 ? 'active' : ''; ?>" data-year="<?php echo htmlspecialchars($year); ?>" data-month="<?php echo (int)($item['month'] ?? 0); ?>" data-index="<?php echo $index; ?>">
                         <div class="timeline-bullet"><?php echo htmlspecialchars($year); ?></div>
                     </div>
                     <?php 
@@ -147,23 +148,24 @@ $timelineItems = getTimelineItems('en');
             </div>
         </div>
 
-        <!-- 卡片容器 -->
-        <div class="timeline-content-container">
-            <div class="timeline-cards-wrapper">
+        <!-- 时间线主体：月份侧栏 + 卡片 -->
+        <div class="timeline-body">
+            <div class="timeline-month-sidebar" id="monthSidebar"></div>
+            <div class="timeline-content-container">
+                <div class="timeline-cards-wrapper">
                 <?php 
                 $index = 0;
                 foreach ($timelineItems as $item): 
                     $year = $item['year'];
-                    $itemClass = $index === 0 ? 'active' : ($index === 1 ? 'next' : 'hidden');
                 ?>
                 <!-- <?php echo htmlspecialchars($year); ?>年内容 -->
-                <div class="timeline-content-item <?php echo $itemClass; ?>" data-year="<?php echo htmlspecialchars($year); ?>" data-index="<?php echo $index; ?>">
-                    <div class="timeline-content" onclick="selectCardIndex(<?php echo (int)$index; ?>)">
+                    <div class="timeline-content-item" data-year="<?php echo htmlspecialchars($year); ?>" data-index="<?php echo $index; ?>" data-month="<?php echo (int)($item['month'] ?? 0); ?>">
+                    <div class="timeline-content">
                         <div class="timeline-image">
                             <img src="<?php echo $item['image_url']; ?>" alt="<?php echo htmlspecialchars($year); ?>年发展">
                         </div>
                         <div class="timeline-text">
-                            <div class="year-badge"><?php echo $year; ?><?php echo !empty($item['month']) ? ' · ' . (int)$item['month'] : ''; ?></div>
+                            <div class="year-badge"><?php echo htmlspecialchars($year); ?>年<?php echo !empty($item['month']) ? ' · ' . (int)$item['month'] . '月' : ''; ?></div>
                             <h3><?php echo htmlspecialchars($item['title']); ?></h3>
                             <p><?php echo htmlspecialchars($item['description1']); ?></p>
                             <p><?php echo htmlspecialchars($item['description2']); ?></p>
@@ -176,197 +178,21 @@ $timelineItems = getTimelineItems('en');
                 ?>
             </div>
         </div>
+        </div> <!-- close timeline-body -->
     </section>
   </div>
 
-  <?php include '../public_en/footer.php'; ?>
+  <?php include '../public/footer.php'; ?>
 
   </div> <!-- 关闭 swiper-wrapper -->
 </div> <!-- 关闭 swiper -->
-<?php include '../public_en/social.php'; ?>
+<?php include '../public/social.php'; ?>
   
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="../app.js?v=<?php echo time(); ?>"></script>
-<script src="../public_en/header.js?v=<?php echo time(); ?>"></script>
-<script src="../public_en/footer.js?v=<?php echo time(); ?>"></script>
-<script src="../public_en/social.js?v=<?php echo time(); ?>"></script>
-<script>
-        const hamburger = document.getElementById('hamburger');
-        const navMenu = document.getElementById('navMenu');
-        const loginBtn = document.querySelector('.login-btn');
-
-        // 登录下拉菜单元素
-        const loginDropdownMenu = document.getElementById('loginDropdownMenu');
-
-        // 语言切换下拉菜单元素
-        const languageBtn = document.getElementById('languageBtn');
-        const languageDropdownMenu = document.getElementById('languageDropdownMenu');
-
-        function moveLoginBtn() {
-            if (window.innerWidth <= 768) {
-                if (!navMenu.contains(loginBtn)) {
-                    navMenu.appendChild(loginBtn);
-                }
-            } else {
-                // 如果宽度大于768，确保loginBtn在right-section中
-                const rightSection = document.querySelector('.right-section');
-                if (rightSection && !rightSection.contains(loginBtn)) {
-                    rightSection.insertBefore(loginBtn, rightSection.firstChild);
-                }
-            }
-        }
-
-        // 点击汉堡切换菜单
-        hamburger.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
-        });
-
-        // ========== 登录下拉菜单功能 ==========
-        let loginHoverTimeout;
-
-        // 鼠标进入登录按钮区域时显示下拉菜单
-        loginBtn.addEventListener('mouseenter', function() {
-            // 清除可能存在的隐藏延时
-            clearTimeout(loginHoverTimeout);
-            
-            // 显示菜单
-            loginDropdownMenu.classList.add('show');
-            loginBtn.classList.add('active');
-        });
-
-        // 鼠标离开登录按钮区域时延迟隐藏下拉菜单
-        loginBtn.addEventListener('mouseleave', function() {
-            // 设置延时隐藏，给用户时间移动到下拉菜单
-            loginHoverTimeout = setTimeout(() => {
-                loginDropdownMenu.classList.remove('show');
-                loginBtn.classList.remove('active');
-            }, 100); // 200ms延迟
-        });
-
-        // 鼠标进入登录下拉菜单时保持显示
-        loginDropdownMenu.addEventListener('mouseenter', function() {
-            // 清除隐藏延时
-            clearTimeout(loginHoverTimeout);
-            
-            // 确保菜单保持显示
-            loginDropdownMenu.classList.add('show');
-            loginBtn.classList.add('active');
-        });
-
-        // 鼠标离开登录下拉菜单时隐藏
-        loginDropdownMenu.addEventListener('mouseleave', function() {
-            loginDropdownMenu.classList.remove('show');
-            loginBtn.classList.remove('active');
-        });
-
-        // 点击登录下拉菜单项时的处理
-        const loginDropdownItems = document.querySelectorAll('.login-dropdown-item');
-        loginDropdownItems.forEach(item => {
-            item.addEventListener('click', function(e) {
-                console.log('选择了登录：', this.textContent);
-                
-                // 关闭下拉菜单
-                loginDropdownMenu.classList.remove('show');
-                loginBtn.classList.remove('active');
-            });
-        });
-
-        // ========== 语言切换下拉菜单功能 ==========
-        let languageHoverTimeout;
-
-        // 鼠标进入语言按钮区域时显示下拉菜单
-        languageBtn.addEventListener('mouseenter', function() {
-            // 清除可能存在的隐藏延时
-            clearTimeout(languageHoverTimeout);
-            
-            // 显示菜单
-            languageDropdownMenu.classList.add('show');
-            languageBtn.classList.add('active');
-        });
-
-        // 鼠标离开语言按钮区域时延迟隐藏下拉菜单
-        languageBtn.addEventListener('mouseleave', function() {
-            // 设置延时隐藏，给用户时间移动到下拉菜单
-            languageHoverTimeout = setTimeout(() => {
-                languageDropdownMenu.classList.remove('show');
-                languageBtn.classList.remove('active');
-            }, 200); // 200ms延迟
-        });
-
-        // 鼠标进入语言下拉菜单时保持显示
-        languageDropdownMenu.addEventListener('mouseenter', function() {
-            // 清除隐藏延时
-            clearTimeout(languageHoverTimeout);
-            
-            // 确保菜单保持显示
-            languageDropdownMenu.classList.add('show');
-            languageBtn.classList.add('active');
-        });
-
-        // 鼠标离开语言下拉菜单时隐藏
-        languageDropdownMenu.addEventListener('mouseleave', function() {
-            languageDropdownMenu.classList.remove('show');
-            languageBtn.classList.remove('active');
-        });
-
-        // 点击语言下拉菜单项时的处理
-        const languageDropdownItems = document.querySelectorAll('.language-dropdown-item');
-        languageDropdownItems.forEach(item => {
-            item.addEventListener('click', function() {
-                console.log('选择了语言：', this.textContent);
-
-                // 关闭下拉菜单（这仍然可以保留）
-                languageDropdownMenu.classList.remove('show');
-                languageBtn.classList.remove('active');
-                
-                // 更新语言按钮显示
-                const selectedLang = this.getAttribute('data-lang');
-                if (selectedLang === 'en') {
-                    languageBtn.textContent = 'EN';
-                } else {
-                    languageBtn.textContent = 'CN';
-                }
-                
-                // 关闭下拉菜单
-                languageDropdownMenu.classList.remove('show');
-                languageBtn.classList.remove('active');
-                
-                // 这里可以添加实际的语言切换逻辑
-                console.log('切换到语言：', selectedLang);
-            });
-        });
-
-        // ESC键关闭所有下拉菜单
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                loginDropdownMenu.classList.remove('show');
-                loginBtn.classList.remove('active');
-                languageDropdownMenu.classList.remove('show');
-                languageBtn.classList.remove('active');
-            }
-        });
-
-        // 点击页面其他地方关闭下拉菜单
-        document.addEventListener('click', function(e) {
-            // 如果点击的不是登录相关元素，关闭登录下拉菜单
-            if (!loginBtn.contains(e.target) && !loginDropdownMenu.contains(e.target)) {
-                loginDropdownMenu.classList.remove('show');
-                loginBtn.classList.remove('active');
-            }
-            
-            // 如果点击的不是语言相关元素，关闭语言下拉菜单
-            if (!languageBtn.contains(e.target) && !languageDropdownMenu.contains(e.target)) {
-                languageDropdownMenu.classList.remove('show');
-                languageBtn.classList.remove('active');
-            }
-        });
-
-        // 页面加载时处理
-        window.addEventListener('DOMContentLoaded', moveLoginBtn);
-
-        // 窗口大小改变时也处理，防止resize后login位置错乱
-        window.addEventListener('resize', moveLoginBtn);
-    </script>
+<script src="../public/header.js?v=<?php echo time(); ?>"></script>
+<script src="../public/footer.js?v=<?php echo time(); ?>"></script>
+<script src="../public/social.js?v=<?php echo time(); ?>"></script>
 <script>
         // 通用的 animate-on-scroll observer（保持原有逻辑）
         const observer = new IntersectionObserver((entries) => {
@@ -635,7 +461,7 @@ const slideParam = urlParams.get('slide');
 if (slideParam !== null) {
     const slideIndex = parseInt(slideParam, 10);
     if (!isNaN(slideIndex)) {
-        swiper.slideTo(slideIndex, 0);
+        swiper.slideTo(slideIndex, 0); // 第二个参数0表示不使用动画效果，立即跳转
     }
 }
     </script>
@@ -645,263 +471,162 @@ if (slideParam !== null) {
         let currentIndex = 0;
         let years = <?php echo json_encode(getTimelineYearsFlat('en')); ?>;
         let totalItems = years.length;
+        let timelineData = <?php echo json_encode(array_values(array_map(function($item) {
+            return ['year' => $item['year'], 'month' => (int)($item['month'] ?? 0)];
+        }, $timelineItems))); ?>;
         const navItems = document.querySelectorAll('.timeline-item');
         const container = document.getElementById('timelineContainer');
+        const contentContainer = document.querySelector('.timeline-content-container');
+        const contentItems = document.querySelectorAll('.timeline-content-item');
+        let isScrolling = false; // 防止点击跳转与 observer 冲突
 
-        // 拖拽相关变量 - 优化后的设置
-        let isDragging = false;
-        let startX = 0;
-        let currentX = 0;
-        let dragThreshold = 15; // 增加阈值，减少误触
-        let hasTriggered = false;
-        let dragStartTime = 0; // 记录拖拽开始时间
-        let isAnimating = false; // 防止动画期间的操作冲突
-
+        // ===== 年份导航更新 =====
         function updateTimelineNav() {
-            const navItems = document.querySelectorAll('.timeline-item');
+            const allNavItems = document.querySelectorAll('.timeline-item');
+            const currentYear = years[currentIndex];
             
-            // 更新导航状态
-            navItems.forEach((item, index) => {
-                item.classList.toggle('active', index === currentIndex);
+            allNavItems.forEach((item) => {
+                item.classList.toggle('active', item.getAttribute('data-year') === currentYear);
             });
 
-            // 简化的居中计算：让当前选中的年份在中间
+            const visibleItems = Array.from(allNavItems).filter(item => !item.classList.contains('year-duplicate'));
             const containerWidth = container.parentElement.offsetWidth;
-            const totalItems = navItems.length;
-            const itemWidth = 120; // 使用固定的item宽度（与CSS中的min-width一致）
+            const itemWidth = 120;
             
-            // 计算让当前年份居中的translateX值
+            const activeVisibleIndex = visibleItems.findIndex(item => item.classList.contains('active'));
             const centerPosition = containerWidth / 2;
-            const currentItemPosition = currentIndex * itemWidth + itemWidth / 2;
+            const currentItemPosition = (activeVisibleIndex >= 0 ? activeVisibleIndex : 0) * itemWidth + itemWidth / 2;
             const translateX = centerPosition - currentItemPosition;
             
-            // 使用CSS transition实现平滑滚动
             container.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
             container.style.transform = `translateX(${translateX}px)`;
             
-            // 清除transition，避免影响后续操作
-            setTimeout(() => {
-                container.style.transition = '';
-            }, 400);
+            setTimeout(() => { container.style.transition = ''; }, 400);
+
+            updateMonthSidebar();
         }
 
-        function updateCardPositions() {
-            const cards = document.querySelectorAll('.timeline-content-item');
-            
-            cards.forEach((card, index) => {
-                card.classList.remove('active', 'prev', 'next', 'hidden');
-                
-                if (index === currentIndex) {
-                    card.classList.add('active');
-                } else if (index === (currentIndex - 1 + totalItems) % totalItems) {
-                    card.classList.add('prev');
-                } else if (index === (currentIndex + 1) % totalItems) {
-                    card.classList.add('next');
-                } else {
-                    card.classList.add('hidden');
-                }
-            });
-        }
+        // ===== IntersectionObserver — 自动检测当前卡片 =====
+        const cardObserver = new IntersectionObserver((entries) => {
+            if (isScrolling) return; // 点击跳转时暂停 observer
 
-        function navigateTimeline(direction) {
-            if (isAnimating) return;
-            
-            isAnimating = true;
-            
-            if (direction === 'next') {
-                currentIndex = (currentIndex + 1) % totalItems;
-            } else {
-                currentIndex = (currentIndex - 1 + totalItems) % totalItems;
-            }
-            
-            updateTimelineNav();
-            updateCardPositions();
-            
-            // 动画完成后重置标志
-            setTimeout(() => {
-                isAnimating = false;
-            }, 400); // 增加到600ms匹配新的动画时长
-        }
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // 移除全部 active
+                    contentItems.forEach(item => item.classList.remove('active'));
+                    // 当前加 active
+                    entry.target.classList.add('active');
 
-        function selectCard(year) {
-            if (isAnimating) return;
-            
-            const index = years.indexOf(year.toString());
-            if (index !== -1 && index !== currentIndex) {
-                currentIndex = index;
-                showTimelineItem(year.toString());
-            }
-        }
-
-        function showTimelineItem(year) {
-            // Keep currentIndex; just refresh view to avoid jumping to first duplicate year
-            updateTimelineNav();
-            updateCardPositions();
-        }
-
-        // 新增：按索引选择，避免同一年份重复时跳到第一条
-        function selectCardIndex(index) {
-            if (isAnimating) return;
-            if (index < 0 || index >= totalItems) return;
-            currentIndex = index;
-            updateTimelineNav();
-            updateCardPositions();
-        }
-
-        // 优化后的拖拽处理
-        function handleDragStart(e) {
-            if (isAnimating) return;
-            
-            const clickedCard = e.target.closest('.timeline-content-item');
-            if (!clickedCard) return;
-            
-            isDragging = true;
-            hasTriggered = false;
-            dragStartTime = Date.now();
-            startX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
-            
-            document.body.style.cursor = 'grabbing';
-            document.body.style.userSelect = 'none';
-            
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        function handleDragMove(e) {
-            if (!isDragging || hasTriggered || isAnimating) return;
-            
-            currentX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
-            const deltaX = currentX - startX;
-            const dragTime = Date.now() - dragStartTime;
-            
-            // 增加时间限制，避免过快触发
-            if (Math.abs(deltaX) >= dragThreshold && dragTime > 50) {
-                hasTriggered = true;
-                
-                if (deltaX > 0) {
-                    navigateTimeline('prev');
-                } else {
-                    navigateTimeline('next');
-                }
-                
-                // 延迟结束拖拽，给动画时间
-                setTimeout(() => {
-                    handleDragEnd(e);
-                }, 50);
-            }
-            
-            e.preventDefault();
-        }
-
-        function handleDragEnd(e) {
-            if (!isDragging) return;
-            
-            isDragging = false;
-            hasTriggered = false;
-            dragStartTime = 0;
-            
-            document.body.style.cursor = '';
-            document.body.style.userSelect = '';
-            
-            startX = 0;
-            currentX = 0;
-        }
-
-        // 改进的事件监听器
-        let clickTimeout;
-
-        document.addEventListener('mousedown', (e) => {
-            const card = e.target.closest('.timeline-content-item');
-            if (card && !isAnimating) {
-                // 清除之前的点击超时
-                if (clickTimeout) {
-                    clearTimeout(clickTimeout);
-                }
-                handleDragStart(e);
-            }
-        });
-
-        document.addEventListener('mousemove', handleDragMove);
-        document.addEventListener('mouseup', handleDragEnd);
-        document.addEventListener('mouseleave', handleDragEnd);
-
-        // 触摸事件
-        document.addEventListener('touchstart', (e) => {
-            const card = e.target.closest('.timeline-content-item');
-            if (card && !isAnimating) {
-                handleDragStart(e);
-            }
-        }, { passive: false });
-
-        document.addEventListener('touchmove', handleDragMove, { passive: false });
-        document.addEventListener('touchend', handleDragEnd);
-
-        // 导航项点击（strictly by index）
-        navItems.forEach((item, index) => {
-            item.addEventListener('click', () => {
-                if (!isDragging && !isAnimating) {
-                    currentIndex = index;
-                    updateTimelineNav();
-                    updateCardPositions();
-                }
-            });
-        });
-
-        // 优化的点击处理 - 支持左右卡片切换（严格按索引，不按年份）
-        document.addEventListener('click', (e) => {
-            if (isDragging || hasTriggered || isAnimating) return;
-            
-            const card = e.target.closest('.timeline-content-item');
-            if (card) {
-                // 检查是否点击的是左右卡片
-                if (card.classList.contains('prev')) {
-                    // 点击左侧卡片，切换到上一个
-                    navigateTimeline('prev');
-                    return;
-                } else if (card.classList.contains('next')) {
-                    // 点击右侧卡片，切换到下一个
-                    navigateTimeline('next');
-                    return;
-                } else if (!card.classList.contains('active')) {
-                    // 点击其他卡片，直接按索引跳转
-                    const idxAttr = card.getAttribute('data-index');
-                    const idx = parseInt(idxAttr, 10);
-                    if (!isNaN(idx)) {
-                        selectCardIndex(idx);
+                    // 同步 currentIndex
+                    const idx = parseInt(entry.target.getAttribute('data-index'), 10);
+                    if (!isNaN(idx) && idx !== currentIndex) {
+                        currentIndex = idx;
+                        updateTimelineNav();
                     }
                 }
-            }
+            });
+        }, {
+            root: contentContainer,
+            threshold: 0.6
         });
 
-        // 键盘导航
+        contentItems.forEach(item => cardObserver.observe(item));
+
+        // ===== 滚动到指定卡片 =====
+        function scrollToCard(index) {
+            if (index < 0 || index >= totalItems) return;
+            isScrolling = true;
+            currentIndex = index;
+
+            // 先更新 active 状态
+            contentItems.forEach(item => item.classList.remove('active'));
+            contentItems[index].classList.add('active');
+            updateTimelineNav();
+
+            // 滚动到目标
+            contentItems[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // 滚动结束后恢复 observer
+            setTimeout(() => { isScrolling = false; }, 600);
+        }
+
+        // ===== 前/后导航 =====
+        function navigateTimeline(direction) {
+            if (direction === 'next') {
+                scrollToCard(Math.min(currentIndex + 1, totalItems - 1));
+            } else {
+                scrollToCard(Math.max(currentIndex - 1, 0));
+            }
+        }
+
+        // ===== 按索引跳转 =====
+        function selectCardIndex(index) {
+            scrollToCard(index);
+        }
+
+        // ===== 键盘导航 =====
         document.addEventListener('keydown', (e) => {
-            if (!isAnimating) {
-                if (e.key === 'ArrowLeft') {
-                    navigateTimeline('prev');
-                } else if (e.key === 'ArrowRight') {
-                    navigateTimeline('next');
-                }
-            }
-        });
-
-        // 防止文本选择
-        document.addEventListener('selectstart', (e) => {
-            if (isDragging) {
+            if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                navigateTimeline('prev');
+                e.preventDefault();
+            } else if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                navigateTimeline('next');
                 e.preventDefault();
             }
         });
 
-        // 初始化
-        updateTimelineNav();
-        updateCardPositions();
+        // ===== 初始化 =====
+        // 构建年份-月份分组
+        let yearGroups = {};
+        timelineData.forEach((item, index) => {
+            if (!yearGroups[item.year]) yearGroups[item.year] = [];
+            yearGroups[item.year].push({ index, month: item.month });
+        });
 
-        // 窗口大小改变时重新计算位置
-        window.addEventListener('resize', () => {
-            if (!isAnimating) {
-                setTimeout(() => {
-                    updateTimelineNav();
-                }, 100);
+        // 隐藏重复年份导航项
+        let seenYears = {};
+        navItems.forEach(item => {
+            const year = item.getAttribute('data-year');
+            if (seenYears[year]) {
+                item.classList.add('year-duplicate');
+            } else {
+                seenYears[year] = true;
             }
+        });
+
+        // 导航项点击 — 跳到该年份第一条
+        navItems.forEach((item) => {
+            item.addEventListener('click', () => {
+                const year = item.getAttribute('data-year');
+                const group = yearGroups[year];
+                if (group && group.length > 0) {
+                    scrollToCard(group[0].index);
+                }
+            });
+        });
+
+        // ===== 月份侧栏 =====
+        function updateMonthSidebar() {
+            const currentYear = years[currentIndex];
+            const months = yearGroups[currentYear] || [];
+            const sidebar = document.getElementById('monthSidebar');
+            
+            sidebar.innerHTML = months.map(m => 
+                `<div class="month-item ${m.index === currentIndex ? 'active' : ''}" onclick="selectCardIndex(${m.index})">
+                    <div class="month-dot"></div>
+                    <span>${m.month}月</span>
+                </div>`
+            ).join('');
+        }
+
+        // 初始化：设置第一张为 active
+        contentItems.forEach(item => item.classList.remove('active'));
+        if (contentItems.length > 0) contentItems[0].classList.add('active');
+        updateTimelineNav();
+
+        // 窗口大小改变时重新计算
+        window.addEventListener('resize', () => {
+            setTimeout(() => { updateTimelineNav(); }, 100);
         });
     </script>
     <script>
