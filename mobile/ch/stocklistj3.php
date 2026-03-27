@@ -312,11 +312,12 @@ require_once 'branch_check.php';
                                 processedProducts.add(prodKey);
                                 
                                 const qty = parseFloat(it.total_qty || 0).toFixed(3);
+                                const normSpec = (it.specification == null ? '' : String(it.specification));
                                 stockData.push({
-                                    id: `${prodInfo.id || 'new'}-${it.specification || 'none'}`,
+                                    id: `${prodInfo.id || 'new'}-${normSpec || 'none'}`,
                                     product_code: it.code_number || '',
                                     product_name: it.product_name || '',
-                                    specification: it.specification || '',
+                                    specification: normSpec,
                                     freezer_category: prodInfo.freezer_category || '',
                                     category: prodInfo.category || it.type || '',
                                     qty: qty,
@@ -608,6 +609,7 @@ require_once 'branch_check.php';
                             step="0.01"
                             data-id="${item.id}"
                             data-original="${item.original_qty}"
+                            oninput="updateQty('${item.id}', this.value)"
                             onchange="updateQty('${item.id}', this.value)"
                             onfocus="this.select()"
                             ${isEditing ? '' : 'readonly'}
@@ -664,7 +666,9 @@ require_once 'branch_check.php';
                 const totalsJson = await totalsResp.json();
                 if (totalsJson.success && totalsJson.data) {
                     const items = totalsJson.data.items || [];
-                    const keyOf = (name, code, spec) => `${(name||'').trim()}|${(code||'').trim()}|${(spec||'').trim()}`;
+                    // 规范化 spec：null/undefined/'' 统一视为 ''
+                    const normSpec = (s) => (s == null ? '' : String(s));
+                    const keyOf = (name, code, spec) => `${(name||'').trim()}|${(code||'').trim()}|${normSpec(spec).trim()}`;
                     const totalMap = new Map(items.map(it => [keyOf(it.product_name, it.code_number, it.specification), parseFloat(it.total_qty || 0).toFixed(3)]));
                     
                     // 保存正在编辑的记录的值（避免被覆盖）
@@ -687,10 +691,14 @@ require_once 'branch_check.php';
                             return { ...it, original_qty: saved.original_qty };
                         }
                         
-                        // 否则更新为最新的库存总数
+                        // 使用规范化 key 查找最新库存
                         const key = keyOf(it.product_name, it.product_code, it.specification);
-                        const qty = totalMap.get(key) || '0.000';
-                        return { ...it, qty, original_qty: qty };
+                        const qty = totalMap.get(key);
+                        // 如果找不到则保留当前值，不重置为 0
+                        if (qty !== undefined) {
+                            return { ...it, qty, original_qty: qty };
+                        }
+                        return it;
                     });
                     
                     // 恢复正在编辑的记录的数量值（保持用户正在编辑的值）
@@ -712,6 +720,29 @@ require_once 'branch_check.php';
             if (!record) return;
 
             try {
+                // 从 DOM 读取最新输入值，防止手机端 oninput/onchange 未及时触发
+                const domInput = document.querySelector(`input[data-id="${id}"]`);
+                if (domInput && !isNaN(parseFloat(domInput.value))) {
+                    record.qty = parseFloat(domInput.value);
+                }
+
+                // 实时从 DB 刷新 original_qty，避免内存状态陈旧导致误报
+                try {
+                    const normSpec = (s) => (s == null ? '' : String(s));
+                    const keyOf = (name, code, spec) => `${(name||'').trim()}|${(code||'').trim()}|${normSpec(spec).trim()}`;
+                    const freshResp = await fetch(`${STOCK_EDIT_API}?action=stocklist_total`);
+                    const freshJson = await freshResp.json();
+                    if (freshJson.success && freshJson.data) {
+                        const targetKey = keyOf(record.product_name, record.product_code, record.specification);
+                        const foundItem = freshJson.data.items.find(it => keyOf(it.product_name, it.code_number, it.specification) === targetKey);
+                        if (foundItem) {
+                            record.original_qty = foundItem.total_qty;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('实时刷新库存失败，使用缓存值:', e);
+                }
+
                 const originalQty = parseFloat(record.original_qty) || 0;
                 let currentQty = parseFloat(record.qty) || 0;
                 if (currentQty < 0) {
