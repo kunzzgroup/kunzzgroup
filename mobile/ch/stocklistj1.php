@@ -682,16 +682,16 @@ require_once 'branch_check.php';
                     
                     // 更新stockData中的库存数量
                     stockData = stockData.map(it => {
-                        // 如果正在编辑，保留编辑中的值
                         if (excludeEditingIds.has(it.id) && editingValues.has(it.id)) {
                             const saved = editingValues.get(it.id);
                             return { ...it, original_qty: saved.original_qty };
                         }
-                        
-                        // 否则更新为最新的库存总数
-                        const key = keyOf(it.product_name, it.product_code, it.specification);
-                        const qty = totalMap.get(key) || '0.000';
-                        return { ...it, qty, original_qty: qty };
+                        const key = keyOf(it.product_name, it.product_code || '', it.specification || '');
+                        const qty = totalMap.get(key);
+                        if (qty !== undefined) {
+                            return { ...it, qty, original_qty: qty };
+                        }
+                        return it;
                     });
                     
                     // 恢复正在编辑的记录的数量值（保持用户正在编辑的值）
@@ -737,6 +737,13 @@ require_once 'branch_check.php';
                     editingRowIds.delete(id);
                     generateTable();
                     alert(`数量未变化，已更新\n产品: ${record.product_name}`);
+                    return;
+                }
+                
+                if (soldQty < 0) {
+                    alert('出货数量异常（当前库存可能已更新），请刷新页面后重试');
+                    record.qty = originalQty;
+                    generateTable();
                     return;
                 }
                 
