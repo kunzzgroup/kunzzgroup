@@ -713,7 +713,6 @@ require_once 'branch_check.php';
             if (!record) return;
 
             try {
-                const originalQty = parseFloat(record.original_qty) || 0;
                 let currentQty = parseFloat(record.qty) || 0;
                 if (currentQty < 0) {
                     alert('数量不能为负数！');
@@ -721,16 +720,33 @@ require_once 'branch_check.php';
                     generateTable();
                     return;
                 }
-                const soldQty = originalQty - currentQty;
+                
+                // ★ 先从数据库获取真实库存（不依赖前端缓存的 original_qty）
+                const stockByPriceUrl = `${STOCK_EDIT_API}?action=product_stock_by_price&product_name=${encodeURIComponent(record.product_name)}${record.product_code ? '&code_number=' + encodeURIComponent(record.product_code) : ''}&specification=${encodeURIComponent(record.specification || '')}`;
+                const stockResp = await fetch(stockByPriceUrl);
+                const stockResult = await stockResp.json();
+                
+                const priceStocks = (stockResult.success && stockResult.data) ? stockResult.data : [];
+                
+                // ★ 计算数据库中的真实可用库存
+                let realStock = 0;
+                for (const ps of priceStocks) {
+                    const avail = parseFloat(ps.available_stock) || 0;
+                    if (avail > 0) realStock += avail;
+                }
+                
+                // ★ 用真实库存计算出货量
+                const soldQty = realStock - currentQty;
                 
                 if (soldQty < 0) {
-                    alert('出货数量不能大于当前库存！\n当前库存: ' + originalQty.toFixed(3) + '\n输入数量: ' + currentQty.toFixed(3));
-                    record.qty = originalQty;
+                    alert('出货数量不能大于当前库存！\n当前库存: ' + realStock.toFixed(3) + '\n输入数量: ' + currentQty.toFixed(3));
+                    record.qty = realStock;
+                    record.original_qty = realStock;
                     generateTable();
                     return;
                 }
                 
-                if (soldQty === 0) {
+                if (Math.abs(soldQty) < 0.001) {
                     record.original_qty = currentQty;
                     editingRowIds.delete(id);
                     generateTable();
@@ -738,18 +754,12 @@ require_once 'branch_check.php';
                     return;
                 }
                 
-                // 获取该产品的所有不同价格的库存记录（按价格从高到低，并指定规格）
-                const stockByPriceUrl = `${STOCK_EDIT_API}?action=product_stock_by_price&product_name=${encodeURIComponent(record.product_name)}${record.product_code ? '&code_number=' + encodeURIComponent(record.product_code) : ''}&specification=${encodeURIComponent(record.specification || '')}`;
-                const stockResp = await fetch(stockByPriceUrl);
-                const stockResult = await stockResp.json();
-                
                 const workDate = getDefaultWorkDate();
                 const now = new Date();
                 const baseTimeStr = now.toTimeString().slice(0, 8);
                 const outboundRows = [];
                 
-                if (!stockResult.success || !stockResult.data || stockResult.data.length === 0) {
-                    // 向后兼容处理
+                if (priceStocks.length === 0) {
                     outboundRows.push({
                         time: baseTimeStr,
                         product_name: record.product_name,
@@ -761,8 +771,6 @@ require_once 'branch_check.php';
                         receiver: CURRENT_USERNAME || 'Mobile'
                     });
                 } else {
-                    // 按价格分层逻辑
-                    const priceStocks = stockResult.data;
                     let remainingQty = soldQty;
                     
                     for (let i = 0; i < priceStocks.length && remainingQty > 0.001; i++) {
@@ -794,7 +802,7 @@ require_once 'branch_check.php';
                     }
                 }
                 
-                // 【核心改进】发送原子化的批量保存请求
+                // 发送原子化的批量保存请求
                 const batchPayload = {
                     action: 'batch_save',
                     document_date: workDate,

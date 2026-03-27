@@ -415,7 +415,7 @@ function handleGet() {
                             SUM(out_quantity) as total_out,
                             (SUM(in_quantity) - SUM(out_quantity)) as available_stock
                         FROM j1stockedit_data 
-                        WHERE REPLACE(product_name, '&amp;', '&') = REPLACE(?, '&amp;', '&') AND price IS NOT NULL AND deleted_at IS NULL";
+                        WHERE REPLACE(product_name, '&amp;', '&') = REPLACE(?, '&amp;', '&') AND deleted_at IS NULL";
                 $params = [$productName];
                 
                 if (!empty($codeNumber)) {
