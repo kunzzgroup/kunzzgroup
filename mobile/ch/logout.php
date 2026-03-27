@@ -21,7 +21,17 @@ setcookie("mobile_nickname", "", $opts);
 setcookie("mobile_username_cn", "", $opts);
 setcookie("mobile_remember_token", "", $opts);
 
-// 跳转回登录页
-header("Location: login.html");
+// 跳转回登录页，带上来源页以便重登后自动跳回
+$redirect_page = '';
+if (!empty($_SERVER['HTTP_REFERER'])) {
+    $referer_path = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH);
+    $referer_file = basename($referer_path);
+    // 只允许白名单页面，防止开放重定向
+    $allowed = ['stocklistj1.php', 'stocklistj2.php', 'stocklistj3.php'];
+    if (in_array($referer_file, $allowed, true)) {
+        $redirect_page = '?redirect=' . urlencode($referer_file);
+    }
+}
+header("Location: login.html" . $redirect_page);
 exit();
 ?>
