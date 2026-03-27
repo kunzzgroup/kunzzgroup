@@ -770,9 +770,9 @@ function syncToJ3StockEditData($pdo, $data, $operation = 'insert')
 
         // 智能匹配信息 (specification/price/type)
         $matchInfo = null;
-        $qStmt = $pdo->prepare("SELECT specification, price, type FROM j3stockedit_data
+        $qStmt = $pdo->prepare("SELECT specification, COALESCE(price, 0) as price, type FROM j3stockedit_data
             WHERE product_name = ? AND (receiver IS NULL OR receiver NOT IN ('Mobile','mobile'))
-            AND price IS NOT NULL ORDER BY id DESC LIMIT 1");
+            ORDER BY id DESC LIMIT 1");
         $qStmt->execute([$productName]);
         $matchInfo = $qStmt->fetch(PDO::FETCH_ASSOC);
 
@@ -829,14 +829,13 @@ function syncToJ3StockEditData($pdo, $data, $operation = 'insert')
         }
 
         $tierStmt = $pdo->prepare(
-            "SELECT specification, price, type,
+            "SELECT specification, COALESCE(price, 0) as price, type,
                     (SUM(in_quantity) - SUM(out_quantity)) AS available
              FROM j3stockedit_data
              WHERE product_name = ? {$codeFilter} {$specFilter}
-             AND price IS NOT NULL
-             GROUP BY specification, price, type
+             GROUP BY specification, COALESCE(price, 0), type
              HAVING available > 0
-             ORDER BY price DESC
+             ORDER BY COALESCE(price, 0) DESC
              FOR UPDATE"
         );
         $tierStmt->execute($tierParams);
