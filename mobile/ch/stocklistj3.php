@@ -722,8 +722,8 @@ require_once 'branch_check.php';
                 }
                 const soldQty = originalQty - currentQty;
                 
-                if (currentQty > originalQty) {
-                    alert('数量不能增加，只能减少！\n原始数量: ' + originalQty.toFixed(3) + '\n当前数量: ' + currentQty.toFixed(3));
+                if (soldQty < 0) {
+                    alert('出货数量不能大于当前库存！\n当前库存: ' + originalQty.toFixed(3) + '\n输入数量: ' + currentQty.toFixed(3));
                     record.qty = originalQty;
                     generateTable();
                     return;
