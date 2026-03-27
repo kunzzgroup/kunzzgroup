@@ -17,7 +17,7 @@ require_once 'branch_check.php';
             <a class="logout-button" href="logout.php" aria-label="退出登录">
                 <img src="../images/icons/logout.svg" alt="" aria-hidden="true">
             </a>
-            <h1>库存列表 <span class="branch-only">(J1)</span></h1>
+            <h1>库存列表 (J1)</h1>
             <div class="calendar-header-right">
                 <span id="calendar-selected-date-display" class="calendar-date-display" aria-live="polite"></span>
                 <button class="calendar-button" type="button" aria-label="日历">
@@ -117,13 +117,7 @@ require_once 'branch_check.php';
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
     <script>
-        // KH 总部用户检测：隐藏分支相关UI
-        (function() {
-            const b = (document.body.dataset.branch || '').toUpperCase();
-            if (b === 'KH' || b.split(',').map(s => s.trim()).includes('KH')) {
-                document.body.classList.add('is-hq');
-            }
-        })();
+
 
         // 全局变量
         let productList = [];

@@ -17,7 +17,7 @@ require_once 'branch_check.php';
             <a class="logout-button" href="logout.php" aria-label="退出登录">
                 <img src="../images/icons/logout.svg" alt="" aria-hidden="true">
             </a>
-            <h1>库存列表 <span class="branch-only">(J3)</span></h1>
+            <h1>库存列表 (J3)</h1>
             <div class="calendar-header-right">
                 <span id="calendar-selected-date-display" class="calendar-date-display" aria-live="polite"></span>
                 <button class="calendar-button" type="button" aria-label="日历">
@@ -116,13 +116,7 @@ require_once 'branch_check.php';
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
     <script>
-        // KH 总部用户检测：隐藏分支相关UI
-        (function() {
-            const b = (document.body.dataset.branch || '').toUpperCase();
-            if (b === 'KH' || b.split(',').map(s => s.trim()).includes('KH')) {
-                document.body.classList.add('is-hq');
-            }
-        })();
+
 
         // 全局变量
         let productList = [];
@@ -745,11 +739,6 @@ require_once 'branch_check.php';
                 // 3️⃣ 汇总所有价格层的可用库存 = total_stock（无需 key 匹配）
                 const priceStocks = (stockResult.success && stockResult.data) ? stockResult.data : [];
                 const total_stock = priceStocks.reduce((sum, t) => sum + Math.max(0, parseFloat(t.available_stock) || 0), 0);
-
-                // 🐛 临时 DEBUG - 确认后删除
-                alert(`[J3 DEBUG]\npCode: ${pCode}\n价格层数: ${priceStocks.length}\n` +
-                    priceStocks.map(t => `  RM ${t.price}: avail=${t.available_stock}`).join('\n') +
-                    `\ntotal_stock=${total_stock.toFixed(3)}, 输入=${currentQty}`);
 
 
                 // 4️⃣ 本次出货量 = DB实时库存 - 用户输入的剩余数量
