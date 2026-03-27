@@ -775,11 +775,10 @@ function syncToJ3StockEditData($pdo, $data, $operation = 'insert') {
         }
 
         $tierStmt = $pdo->prepare(
-            "SELECT specification, price, type,
+            "SELECT specification, COALESCE(price, 0) as price, type,
                     (SUM(in_quantity) - SUM(out_quantity)) AS available
              FROM j3stockedit_data
              WHERE product_name = ? {$codeFilter} {$specFilter}
-             AND price IS NOT NULL
              GROUP BY specification, price, type
              HAVING available > 0
              ORDER BY price DESC
