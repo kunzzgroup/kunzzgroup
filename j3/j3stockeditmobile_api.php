@@ -456,7 +456,7 @@ function handleGet()
                             SUM(out_quantity) as total_out,
                             (SUM(in_quantity) - SUM(out_quantity)) as available_stock
                         FROM j3stockedit_data 
-                        WHERE REPLACE(product_name, '&amp;', '&') = REPLACE(?, '&amp;', '&') AND price IS NOT NULL AND deleted_at IS NULL";
+                        WHERE REPLACE(product_name, '&amp;', '&') = REPLACE(?, '&amp;', '&') AND deleted_at IS NULL";
                 $params = [$productName];
 
                 if (!empty($codeNumber)) {
@@ -473,7 +473,7 @@ function handleGet()
                     $sql .= " AND (specification IS NULL OR specification = '')";
                 }
 
-                $sql .= " GROUP BY price, specification, type ORDER BY price DESC";
+                $sql .= " GROUP BY COALESCE(price, 0), specification, type ORDER BY COALESCE(price, 0) DESC";
 
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
