@@ -736,6 +736,11 @@ require_once 'branch_check.php';
 
                 // 3️⃣ 汇总所有价格层的可用库存 = total_stock（无需 key 匹配）
                 const priceStocks = (stockResult.success && stockResult.data) ? stockResult.data : [];
+                // 🔍 临时 DEBUG：查看 API 原始返回（确认问题后删除）
+                alert('[DEBUG] product_stock_by_price 返回:\n' +
+                    'success=' + stockResult.success + '\n' +
+                    'rows=' + priceStocks.length + '\n' +
+                    JSON.stringify(priceStocks, null, 2).slice(0, 500));
                 const total_stock = priceStocks.reduce((sum, t) => sum + Math.max(0, parseFloat(t.available_stock) || 0), 0);
 
                 // 4️⃣ 本次出货量 = DB实时库存 - 用户输入的剩余数量
