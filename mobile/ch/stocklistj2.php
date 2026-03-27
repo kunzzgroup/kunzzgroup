@@ -314,9 +314,15 @@ require_once 'branch_check.php';
                                 
                                 const qty = parseFloat(it.total_qty || 0).toFixed(3);
                                 const normSpec = (it.specification == null ? '' : String(it.specification));
+                                const itemCode = (it.code_number || '').trim();
+                                // ID: use code_number|spec to avoid collision between products with 'new' prodInfo.id
+                                const uniqueId = itemCode
+                                    ? `${itemCode}-${normSpec || 'none'}`
+                                    : `${prodInfo.id || 'new'}-${normSpec || 'none'}-${(it.product_name||'').trim().slice(0,8)}`;
                                 stockData.push({
-                                    id: `${prodInfo.id || 'new'}-${normSpec || 'none'}`,
-                                    product_code: it.code_number || '',
+                                    id: uniqueId,
+                                    product_code: itemCode,  // for outboundRow compatibility
+                                    code_number: itemCode,   // for pCode lookup in save logic
                                     product_name: it.product_name || '',
                                     specification: normSpec,
                                     freezer_category: prodInfo.freezer_category || '',
@@ -739,10 +745,8 @@ require_once 'branch_check.php';
 
                 // 3️⃣ 汇总所有价格层的可用库存 = total_stock（无需 key 匹配）
                 const priceStocks = (stockResult.success && stockResult.data) ? stockResult.data : [];
-                // 🔍 临时 DEBUG：查看 API 原始返回（确认问题后删除）
-                alert('[DEBUG v3] code=' + pCode + '\nrows=' + priceStocks.length + '\n' +
-                    JSON.stringify(priceStocks, null, 2).slice(0, 700));
                 const total_stock = priceStocks.reduce((sum, t) => sum + Math.max(0, parseFloat(t.available_stock) || 0), 0);
+
 
 
 
