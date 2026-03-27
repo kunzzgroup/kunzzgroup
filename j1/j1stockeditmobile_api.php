@@ -19,7 +19,7 @@ error_reporting(E_ALL);
 if (session_status() === PHP_SESSION_NONE) {
     session_set_cookie_params([
         'lifetime' => 0,
-        'path'     => '/',
+        'path' => '/',
         'httponly' => true,
         'samesite' => 'Lax',
     ]);
@@ -59,15 +59,21 @@ try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     // 确保所需数据表存在（静默失败以避免无权限导致500）
-    try { ensureTables($pdo); } catch (Throwable $ignore) {}
-} catch (PDOException $e) {
+    try {
+        ensureTables($pdo);
+    }
+    catch (Throwable $ignore) {
+    }
+}
+catch (PDOException $e) {
     ob_end_clean();
     http_response_code(500);
     echo json_encode(["success" => false, "message" => "数据库连接失败：" . $e->getMessage()]);
     exit;
 }
 
-function sendResponse($success, $message = "", $data = null) {
+function sendResponse($success, $message = "", $data = null)
+{
     ob_end_clean();
     echo json_encode([
         "success" => $success,
@@ -78,7 +84,8 @@ function sendResponse($success, $message = "", $data = null) {
 }
 
 // 如果缺少表则自动创建
-function ensureTables(PDO $pdo) {
+function ensureTables(PDO $pdo)
+{
     $pdo->exec("CREATE TABLE IF NOT EXISTS `j1stockeditmobile_data` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
       `date` date NOT NULL,
@@ -101,15 +108,20 @@ function ensureTables(PDO $pdo) {
     // 更新表结构以包含缺失字段
     try {
         $pdo->exec("ALTER TABLE `j1stockeditmobile_data` ADD COLUMN `specification` varchar(255) DEFAULT NULL AFTER `code_number` ");
-    } catch (PDOException $e) {}
+    }
+    catch (PDOException $e) {
+    }
     try {
         $pdo->exec("ALTER TABLE `j1stockeditmobile_data` ADD COLUMN `type` varchar(100) DEFAULT NULL AFTER `specification` ");
-    } catch (PDOException $e) {}
-    
+    }
+    catch (PDOException $e) {
+    }
+
     // 如果表已存在但缺少receiver字段，则添加该字段
     try {
         $pdo->exec("ALTER TABLE `j1stockeditmobile_data` ADD COLUMN `receiver` varchar(100) DEFAULT NULL AFTER `out_quantity`");
-    } catch (PDOException $e) {
+    }
+    catch (PDOException $e) {
         // 字段已存在，忽略错误
         if (strpos($e->getMessage(), 'Duplicate column name') === false) {
             throw $e;
@@ -120,7 +132,9 @@ function ensureTables(PDO $pdo) {
     try {
         $pdo->exec("ALTER TABLE `j1stockeditmobile_data` ADD COLUMN `deleted_at` timestamp NULL DEFAULT NULL");
         $pdo->exec("ALTER TABLE `j1stockeditmobile_data` ADD COLUMN `deleted_by` varchar(100) DEFAULT NULL");
-    } catch (PDOException $e) {}
+    }
+    catch (PDOException $e) {
+    }
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS `j1stocklist_total` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -137,21 +151,28 @@ function ensureTables(PDO $pdo) {
     // 更新索引和字段以支持规格
     try {
         $pdo->exec("ALTER TABLE `j1stocklist_total` ADD COLUMN `specification` varchar(255) DEFAULT NULL AFTER `code_number` ");
-    } catch (PDOException $e) {}
+    }
+    catch (PDOException $e) {
+    }
     try {
         // 先尝试删除旧的唯一索引，再添加包含规格的新唯一索引
         $pdo->exec("ALTER TABLE `j1stocklist_total` DROP INDEX `unique_product` ");
-    } catch (PDOException $e) {}
+    }
+    catch (PDOException $e) {
+    }
     try {
         $pdo->exec("ALTER TABLE `j1stocklist_total` ADD UNIQUE KEY `unique_product_spec` (`product_name`, `code_number`, `specification`) ");
-    } catch (PDOException $e) {}
+    }
+    catch (PDOException $e) {
+    }
 
     // 添加 mobile_ref_id 列（用于追踪手机端每笔记录对应的桌面端扣货行）
     try {
         $pdo->exec("ALTER TABLE `j1stockedit_data` ADD COLUMN `mobile_ref_id` int(11) DEFAULT NULL");
         $pdo->exec("ALTER TABLE `j1stockedit_data` ADD INDEX `idx_mobile_ref_id` (`mobile_ref_id`)");
-    } catch (PDOException $e) {
-        // 列已存在则忽略
+    }
+    catch (PDOException $e) {
+    // 列已存在则忽略
     }
 }
 
@@ -167,8 +188,8 @@ switch ($method) {
         break;
     case 'POST':
         if (($data['action'] ?? '') === 'batch_save') {
-             handleBatchSave();
-             return;
+            handleBatchSave();
+            return;
         }
         handlePost();
         break;
@@ -183,9 +204,10 @@ switch ($method) {
 }
 
 // 处理 GET 请求
-function handleGet() {
+function handleGet()
+{
     global $pdo, $dbname, $dbuser;
-    
+
     $action = $_GET['action'] ?? 'list';
 
     // 健康检查
@@ -198,10 +220,15 @@ function handleGet() {
 
     // 手动初始化（当权限允许但尚未建表时可调用一次）
     if ($action === 'init') {
-        try { ensureTables($pdo); } catch (Throwable $e) { sendResponse(false, $e->getMessage()); }
+        try {
+            ensureTables($pdo);
+        }
+        catch (Throwable $e) {
+            sendResponse(false, $e->getMessage());
+        }
         sendResponse(true, 'tables ensured');
     }
-    
+
     switch ($action) {
         case 'list':
             // 获取所有进出库数据
@@ -216,16 +243,17 @@ function handleGet() {
 
             $sql = "SELECT * FROM j1stockeditmobile_data WHERE deleted_at IS NULL";
             $params = [];
-            
+
             if ($searchDate) {
                 $sql .= " AND date = ?";
                 $params[] = $searchDate;
-            } elseif ($startDate && $endDate) {
+            }
+            elseif ($startDate && $endDate) {
                 $sql .= " AND date BETWEEN ? AND ?";
                 $params[] = $startDate;
                 $params[] = $endDate;
             }
-            
+
             if ($productCode) {
                 $sql .= " AND code_number LIKE ?";
                 $params[] = "%$productCode%";
@@ -235,112 +263,120 @@ function handleGet() {
                 $sql .= " AND product_name LIKE ?";
                 $params[] = "%$productName%";
             }
-            
+
             // 按顺序显示：日期升序 → 时间升序 → 进货在前（in_quantity>0）→ 最后按id
             $sql .= " ORDER BY date ASC, time ASC, CASE WHEN in_quantity>0 THEN 0 ELSE 1 END ASC, id ASC";
             $sql .= " LIMIT " . intval($limit);
-            
+
             try {
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
                 $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                
+
                 // 为每条记录添加计算字段
                 foreach ($records as &$record) {
                     $inQty = floatval($record['in_quantity'] ?? 0);
                     $outQty = floatval($record['out_quantity'] ?? 0);
                     $record['balance_quantity'] = $inQty - $outQty;
                 }
-                
+
                 sendResponse(true, "数据获取成功，共找到 " . count($records) . " 条记录", $records);
-            } catch (PDOException $e) {
+            }
+            catch (PDOException $e) {
                 // 表不存在：创建表并返回空数组，避免500
                 if ($e->getCode() === '42S02' || strpos($e->getMessage(), '1146') !== false) {
-                    try { ensureTables($pdo); } catch (Throwable $ignore) {}
+                    try {
+                        ensureTables($pdo);
+                    }
+                    catch (Throwable $ignore) {
+                    }
                     sendResponse(true, "首次初始化，表已创建", []);
                 }
                 sendResponse(false, "查询数据失败：" . $e->getMessage());
             }
             break;
-            
+
         case 'single':
             // 获取单条记录
             $id = $_GET['id'] ?? null;
             if (!$id) {
                 sendResponse(false, "缺少记录ID");
             }
-            
+
             $stmt = $pdo->prepare("SELECT * FROM j1stockeditmobile_data WHERE id = ?");
             $stmt->execute([$id]);
             $record = $stmt->fetch(PDO::FETCH_ASSOC);
-            
+
             if ($record) {
                 sendResponse(true, "记录获取成功", $record);
-            } else {
+            }
+            else {
                 sendResponse(false, "记录不存在");
             }
             break;
-            
+
         case 'codenumbers':
             // 获取所有唯一的code_number和对应的product_name列表（J1 分配，包含多系统分配，且不过滤 approver）
             $stmt = $pdo->prepare("SELECT DISTINCT product_code as code_number, product_name FROM stock_data WHERE product_code IS NOT NULL AND product_code != '' AND (system_assign = 'J1' OR system_assign LIKE '%J1%') ORDER BY product_code");
             $stmt->execute();
             $codeNumbers = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
+
             sendResponse(true, "编号列表获取成功", $codeNumbers);
             break;
-        
+
         case 'products_list':
             // 获取所有唯一的产品名称和对应的product_code列表（J1 分配，包含多系统分配，且不过滤 approver）
             $stmt = $pdo->prepare("SELECT DISTINCT product_name, product_code FROM stock_data WHERE product_name IS NOT NULL AND product_name != '' AND (system_assign = 'J1' OR system_assign LIKE '%J1%') ORDER BY product_name");
             $stmt->execute();
             $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
+
             sendResponse(true, "产品列表获取成功", $products);
             break;
-            
+
         case 'product_by_code':
             // 根据code_number获取对应的product_name
             $codeNumber = $_GET['code_number'] ?? null;
             if (!$codeNumber) {
                 sendResponse(false, "缺少编号参数");
             }
-            
+
             $stmt = $pdo->prepare("SELECT DISTINCT product_name, product_code FROM stock_data WHERE product_code = ? AND (system_assign = 'J1' OR system_assign LIKE '%J1%') LIMIT 1");
             $stmt->execute([$codeNumber]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            
+
             if ($result) {
                 sendResponse(true, "产品信息获取成功", [
                     'product_name' => $result['product_name'],
                     'product_code' => $result['product_code']
                 ]);
-            } else {
+            }
+            else {
                 sendResponse(false, "未找到对应的产品");
             }
             break;
-            
+
         case 'code_by_product':
             // 根据product_name获取对应的product_code
             $productName = $_GET['product_name'] ?? null;
             if (!$productName) {
                 sendResponse(false, "缺少产品名称参数");
             }
-            
+
             $stmt = $pdo->prepare("SELECT DISTINCT product_code, product_name FROM stock_data WHERE product_name = ? AND (system_assign = 'J1' OR system_assign LIKE '%J1%') LIMIT 1");
             $stmt->execute([$productName]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            
+
             if ($result) {
                 sendResponse(true, "产品编号获取成功", [
                     'product_code' => $result['product_code'],
                     'product_name' => $result['product_name']
                 ]);
-            } else {
+            }
+            else {
                 sendResponse(false, "未找到对应的产品编号");
             }
             break;
-            
+
         case 'stocklist_total':
             // 手机记录已经通过 sync 写入 j1stockedit_data，直接查该表即可，避免双重计算
             try {
@@ -355,11 +391,11 @@ function handleGet() {
                         WHERE product_name IS NOT NULL AND product_name != '' AND deleted_at IS NULL
                         GROUP BY REPLACE(product_name, '&amp;', '&'), code_number, specification
                         ORDER BY REPLACE(product_name, '&amp;', '&')";
-                
+
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute();
                 $totals = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                
+
                 // 格式化数据，匹配原来的格式
                 $items = [];
                 $totalQty = 0;
@@ -373,36 +409,42 @@ function handleGet() {
                         'total_qty' => number_format($qty, 3, '.', '')
                     ];
                 }
-                
+
                 sendResponse(true, "库存总数获取成功", [
                     'items' => $items,
                     'total_records' => count($items),
                     'total_qty' => number_format($totalQty, 3, '.', '')
                 ]);
-            } catch (PDOException $e) {
+            }
+            catch (PDOException $e) {
                 // 表不存在：返回空数组
                 if ($e->getCode() === '42S02' || strpos($e->getMessage(), '1146') !== false) {
-                    try { ensureTables($pdo); } catch (Throwable $ignore) {}
+                    try {
+                        ensureTables($pdo);
+                    }
+                    catch (Throwable $ignore) {
+                    }
                     sendResponse(true, "表已创建，暂无数据", [
                         'items' => [],
                         'total_records' => 0,
                         'total_qty' => '0.000'
                     ]);
-                } else {
+                }
+                else {
                     sendResponse(false, "计算库存总数失败：" . $e->getMessage());
                 }
             }
             break;
-            
+
         case 'product_stock_by_price':
             // 获取指定产品的按价格分组的库存记录（用于按价格从高到低扣除）
             $productName = $_GET['product_name'] ?? null;
             $codeNumber = $_GET['code_number'] ?? null;
-            
+
             if (!$productName) {
                 sendResponse(false, "缺少产品名称参数");
             }
-            
+
             try {
                 // 从 j1stockedit_data 表获取该产品的所有不同价格的库存情况
                 // 注意：需要计算每个价格的净库存（in - out），包括负数的情况
@@ -415,33 +457,34 @@ function handleGet() {
                             SUM(out_quantity) as total_out,
                             (SUM(in_quantity) - SUM(out_quantity)) as available_stock
                         FROM j1stockedit_data 
-                        WHERE REPLACE(product_name, '&amp;', '&') = REPLACE(?, '&amp;', '&') AND deleted_at IS NULL";
+                        WHERE REPLACE(product_name, '&amp;', '&') = REPLACE(?, '&amp;', '&') AND price IS NOT NULL AND deleted_at IS NULL";
                 $params = [$productName];
-                
+
                 if (!empty($codeNumber)) {
                     $sql .= " AND code_number = ?";
                     $params[] = $codeNumber;
                 }
-                
+
                 $specification = $_GET['specification'] ?? null;
                 if ($specification !== null && $specification !== "") {
                     $sql .= " AND specification = ?";
                     $params[] = $specification;
-                } elseif ($specification === "") {
+                }
+                elseif ($specification === "") {
                     $sql .= " AND (specification IS NULL OR specification = '')";
                 }
-                
-                $sql .= " GROUP BY COALESCE(price, 0), specification, type ORDER BY COALESCE(price, 0) DESC";
-                
+
+                $sql .= " GROUP BY price, specification, type ORDER BY price DESC";
+
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
                 $priceStockData = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                
+
                 $result = [];
                 foreach ($priceStockData as $row) {
                     $price = floatval($row['price'] ?? 0);
                     $availableStock = floatval($row['available_stock'] ?? 0);
-                    
+
                     // 只返回有库存的价格（包括负数，因为负数表示已经超扣了）
                     $result[] = [
                         'price' => $price,
@@ -452,36 +495,38 @@ function handleGet() {
                         'total_out' => floatval($row['total_out'] ?? 0)
                     ];
                 }
-                
+
                 sendResponse(true, "产品按价格分组的库存获取成功", $result);
-            } catch (PDOException $e) {
+            }
+            catch (PDOException $e) {
                 sendResponse(false, "查询失败：" . $e->getMessage());
             }
             break;
-            
+
         default:
             sendResponse(false, "未知的action参数");
     }
 }
 
 // 处理 POST 请求 - 创建新记录
-function handlePost() {
+function handlePost()
+{
     global $pdo;
-    
+
     global $data;
-    
+
     // 验证必填字段
     if (empty($data['date']) || empty($data['time']) || empty($data['product_name'])) {
         sendResponse(false, "日期、时间和产品名称是必填字段");
     }
-    
+
     // Normalize &amp; to &
     $data['product_name'] = str_replace('&amp;', '&', $data['product_name']);
-    
+
     try {
         // 开始事务
         $pdo->beginTransaction();
-        
+
         $sql = "INSERT INTO j1stockeditmobile_data 
                 (date, time, product_name, code_number, specification, type, in_quantity, out_quantity, receiver) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -499,57 +544,59 @@ function handlePost() {
             floatval($data['out_quantity'] ?? 0),
             $data['receiver'] ?? null
         ]);
-        
+
         $newId = $pdo->lastInsertId();
-        
+
         // 更新库存总数表
         updateStocklistTotal($data['product_name'], $data['code_number'] ?? null, floatval($data['in_quantity'] ?? 0), floatval($data['out_quantity'] ?? 0), true, $data['specification'] ?? null);
-        
+
         // 同步到 j1stockedit_data 表（传入 mobile_ref_id 用于后续精准删除）
         $data['mobile_ref_id'] = $newId;
         syncToJ1StockEditData($pdo, $data, 'insert');
-        
+
         $pdo->commit();
-        
+
         // 获取新创建的记录
         $stmt = $pdo->prepare("SELECT * FROM j1stockeditmobile_data WHERE id = ?");
         $stmt->execute([$newId]);
         $newRecord = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         sendResponse(true, "记录创建成功", $newRecord);
-        
-    } catch (PDOException $e) {
+
+    }
+    catch (PDOException $e) {
         $pdo->rollBack();
         sendResponse(false, "创建记录失败：" . $e->getMessage());
     }
 }
 
 // 处理 PUT 请求 - 更新记录
-function handlePut() {
+function handlePut()
+{
     global $pdo;
     global $data;
-    
+
     if (empty($data['id'])) {
         sendResponse(false, "缺少记录ID");
     }
-    
+
     // Normalize &amp; to &
     if (isset($data['product_name'])) {
         $data['product_name'] = str_replace('&amp;', '&', $data['product_name']);
     }
-    
+
     try {
         // 获取旧记录用于计算差值
         $oldStmt = $pdo->prepare("SELECT * FROM j1stockeditmobile_data WHERE id = ?");
         $oldStmt->execute([$data['id']]);
         $oldRecord = $oldStmt->fetch(PDO::FETCH_ASSOC);
-        
+
         if (!$oldRecord) {
             sendResponse(false, "记录不存在");
         }
-        
+
         $pdo->beginTransaction();
-        
+
         $sql = "UPDATE j1stockeditmobile_data 
                 SET date = ?, time = ?, product_name = ?, code_number = ?, 
                     specification = ?, type = ?, in_quantity = ?, out_quantity = ?, receiver = ?
@@ -569,16 +616,16 @@ function handlePut() {
             $data['receiver'] ?? $oldRecord['receiver'] ?? null,
             $data['id']
         ]);
-        
+
         // 计算差值并更新库存总数
         $oldInQty = floatval($oldRecord['in_quantity'] ?? 0);
         $oldOutQty = floatval($oldRecord['out_quantity'] ?? 0);
         $newInQty = floatval($data['in_quantity'] ?? $oldInQty);
         $newOutQty = floatval($data['out_quantity'] ?? $oldOutQty);
-        
+
         $oldSpec = $oldRecord['specification'] ?? null;
         $newSpec = $data['specification'] ?? $oldSpec;
-        
+
         $nameChanged = isset($data['product_name']) && $data['product_name'] !== $oldRecord['product_name'];
         $codeChanged = isset($data['code_number']) && $data['code_number'] !== $oldRecord['code_number'];
         $specChanged = isset($data['specification']) && $data['specification'] !== $oldRecord['specification'];
@@ -594,7 +641,8 @@ function handlePut() {
                 true,
                 $newSpec
             );
-        } else {
+        }
+        else {
             // 否则只更新差值
             updateStocklistTotal(
                 $oldRecord['product_name'],
@@ -605,7 +653,7 @@ function handlePut() {
                 $oldSpec
             );
         }
-        
+
         // 同步更新到 j1stockedit_data：先删除旧扣货行，再重新智能分层扣货
         $mobileId = $data['id'];
         $delSql = "DELETE FROM j1stockedit_data WHERE mobile_ref_id = ? AND receiver = 'Mobile' AND target_system = 'j1'";
@@ -613,91 +661,95 @@ function handlePut() {
         $delStmt->execute([$mobileId]);
 
         $updateData = [
-            'date'          => $data['date'] ?? $oldRecord['date'],
-            'time'          => $data['time'] ?? $oldRecord['time'],
-            'product_name'  => $data['product_name'] ?? $oldRecord['product_name'],
-            'code_number'   => $data['code_number'] ?? $oldRecord['code_number'],
-            'in_quantity'   => floatval($data['in_quantity'] ?? $oldRecord['in_quantity']),
-            'out_quantity'  => floatval($data['out_quantity'] ?? $oldRecord['out_quantity']),
-            'price'         => $data['price'] ?? null,
+            'date' => $data['date'] ?? $oldRecord['date'],
+            'time' => $data['time'] ?? $oldRecord['time'],
+            'product_name' => $data['product_name'] ?? $oldRecord['product_name'],
+            'code_number' => $data['code_number'] ?? $oldRecord['code_number'],
+            'in_quantity' => floatval($data['in_quantity'] ?? $oldRecord['in_quantity']),
+            'out_quantity' => floatval($data['out_quantity'] ?? $oldRecord['out_quantity']),
+            'price' => $data['price'] ?? null,
             'mobile_ref_id' => $mobileId,
         ];
         syncToJ1StockEditData($pdo, $updateData, 'insert');
-        
+
         $pdo->commit();
-        
+
         // 获取更新后的记录
         $stmt = $pdo->prepare("SELECT * FROM j1stockeditmobile_data WHERE id = ?");
         $stmt->execute([$data['id']]);
         $updatedRecord = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         sendResponse(true, "记录更新成功", $updatedRecord);
-        
-    } catch (PDOException $e) {
+
+    }
+    catch (PDOException $e) {
         $pdo->rollBack();
         sendResponse(false, "更新记录失败：" . $e->getMessage());
     }
 }
 
 // 处理 DELETE 请求
-function handleDelete() {
+function handleDelete()
+{
     global $pdo;
-    
+
     $id = $_GET['id'] ?? null;
-    
+
     if (!$id) {
         sendResponse(false, "缺少记录ID");
     }
-    
+
     try {
         // 获取要删除的记录用于更新库存总数
         $getStmt = $pdo->prepare("SELECT * FROM j1stockeditmobile_data WHERE id = ?");
         $getStmt->execute([$id]);
         $record = $getStmt->fetch(PDO::FETCH_ASSOC);
-        
+
         if (!$record) {
             sendResponse(false, "记录不存在");
         }
-        
+
         $pdo->beginTransaction();
-        
+
         // 删除记录
         $stmt = $pdo->prepare("DELETE FROM j1stockeditmobile_data WHERE id = ?");
         $stmt->execute([$id]);
-        
+
         // 更新库存总数（撤销被删除记录的影响）
         if ($record) {
             $inQty = floatval($record['in_quantity'] ?? 0);
             $outQty = floatval($record['out_quantity'] ?? 0);
-            
+
             // 删除记录时，需要撤销之前的影响
             // 如果原来是出库(out_quantity)，删除后应该加回去
             // 如果原来是入库(in_quantity)，删除后应该减回去
             updateStocklistTotal(
                 $record['product_name'],
                 $record['code_number'],
-                -$inQty,  // 撤销入库
+                -$inQty, // 撤销入库
                 -$outQty, // 撤销出库
                 true,
                 $record['specification'] ?? null
             );
-            
+
             // 同步删除 j1stockedit_data 表中的所有关联记录（通过 mobile_ref_id）
             syncToJ1StockEditData($pdo, ['mobile_ref_id' => $id], 'delete');
         }
-        
+
         $pdo->commit();
-        
+
         sendResponse(true, "记录删除成功");
-        
-    } catch (PDOException $e) {
+
+    }
+    catch (PDOException $e) {
         $pdo->rollBack();
         sendResponse(false, "删除记录失败：" . $e->getMessage());
     }
 }
 
 // 同步数据到 j1stockedit_data 表（智能按价格从高到低分层扣货）
-function syncToJ1StockEditData($pdo, $data, $operation = 'insert') {
+function syncToJ1StockEditData($pdo, $data, $operation = 'insert')
+{
     try {
         if ($operation === 'delete') {
             // 通过 mobile_ref_id 精准删除所有关联的分层扣货记录
@@ -715,28 +767,27 @@ function syncToJ1StockEditData($pdo, $data, $operation = 'insert') {
         }
 
         // ── INSERT 逻辑 ────────────────────────────────────────────────────────
-        $outQty     = floatval($data['out_quantity'] ?? 0);
-        $inQty      = floatval($data['in_quantity'] ?? 0);
+        $outQty = floatval($data['out_quantity'] ?? 0);
+        $inQty = floatval($data['in_quantity'] ?? 0);
         $mobileRefId = $data['mobile_ref_id'] ?? null;
-        $codeNumber  = $data['code_number'] ?? null;
+        $codeNumber = $data['code_number'] ?? null;
         $productName = $data['product_name'] ?? '';
 
         // ── 智能匹配信息 (specification/price/type) ──
-        // 优先从 stock_data 主档获取产品的标准单价，确保使用正确的价格
         $matchInfo = null;
-        $infoStmt = $pdo->prepare("SELECT product_code, specification, COALESCE(price, 0) as price, category as type FROM stock_data WHERE product_name = ? LIMIT 1");
-        $infoStmt->execute([$productName]);
-        $matchInfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
+        $q = "SELECT specification, price, type FROM j1stockedit_data
+              WHERE product_name = ?
+              AND (receiver IS NULL OR receiver NOT IN ('Mobile','mobile'))
+              AND price IS NOT NULL
+              ORDER BY id DESC LIMIT 1";
+        $qStmt = $pdo->prepare($q);
+        $qStmt->execute([$productName]);
+        $matchInfo = $qStmt->fetch(PDO::FETCH_ASSOC);
 
-        // 如果 stock_data 没有记录，回退到 j1stockedit_data 历史记录
         if (!$matchInfo) {
-            $q = "SELECT specification, COALESCE(price, 0) as price, type FROM j1stockedit_data
-                  WHERE product_name = ?
-                  AND (receiver IS NULL OR receiver NOT IN ('Mobile','mobile'))
-                  ORDER BY id DESC LIMIT 1";
-            $qStmt = $pdo->prepare($q);
-            $qStmt->execute([$productName]);
-            $matchInfo = $qStmt->fetch(PDO::FETCH_ASSOC);
+            $infoStmt = $pdo->prepare("SELECT product_code, specification, price, category as type FROM stock_data WHERE product_name = ? LIMIT 1");
+            $infoStmt->execute([$productName]);
+            $matchInfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
         }
 
         // 统一类型 (category) 补全，确保同步到 PC 端时字段完整
@@ -783,20 +834,22 @@ function syncToJ1StockEditData($pdo, $data, $operation = 'insert') {
         $specIn = $data['specification'] ?? null;
         if ($specIn === null || $specIn === "" || $specIn === "none") {
             $specFilter = " AND (specification IS NULL OR specification = '' OR specification = 'none')";
-        } else {
+        }
+        else {
             $specFilter = " AND specification = ?";
             $tierParams[] = $specIn;
         }
 
-        $tierSql = "SELECT specification, COALESCE(price, 0) as price, type,
+        $tierSql = "SELECT specification, price, type,
                            (SUM(in_quantity) - SUM(out_quantity)) AS available
                     FROM j1stockedit_data
                     WHERE product_name = ?
                     {$codeFilter}
                     {$specFilter}
-                    GROUP BY specification, COALESCE(price, 0), type
+                    AND price IS NOT NULL
+                    GROUP BY specification, price, type
                     HAVING available > 0
-                    ORDER BY COALESCE(price, 0) DESC
+                    ORDER BY price DESC
                     FOR UPDATE";
 
         $tierStmt = $pdo->prepare($tierSql);
@@ -807,7 +860,7 @@ function syncToJ1StockEditData($pdo, $data, $operation = 'insert') {
         $totalAvailable = array_sum(array_column($tiers, 'available'));
         if ($totalAvailable < $outQty) {
             error_log("j1 smart deduct: 库存不足 product={$productName} need={$outQty} available={$totalAvailable}");
-            // 库存不够时仍然允许扣货（保持与现有行为一致），但记录日志
+        // 库存不够时仍然允许扣货（保持与现有行为一致），但记录日志
         }
 
         $remaining = $outQty;
@@ -818,7 +871,8 @@ function syncToJ1StockEditData($pdo, $data, $operation = 'insert') {
         $insertStmt = $pdo->prepare($insertSql);
 
         foreach ($tiers as $tier) {
-            if ($remaining <= 0) break;
+            if ($remaining <= 0)
+                break;
 
             $deduct = min(floatval($tier['available']), $remaining);
             $insertStmt->execute([
@@ -836,8 +890,8 @@ function syncToJ1StockEditData($pdo, $data, $operation = 'insert') {
         if ($remaining > 0.0001) {
             $lastTier = !empty($tiers) ? end($tiers) : [
                 'specification' => $data['specification'] ?? null,
-                'price'         => floatval($data['price'] ?? 0),
-                'type'          => $data['type'] ?? null,
+                'price' => floatval($data['price'] ?? 0),
+                'type' => $data['type'] ?? null,
             ];
             $insertStmt->execute([
                 $data['date'], $data['time'], $codeNumber, $productName,
@@ -852,64 +906,71 @@ function syncToJ1StockEditData($pdo, $data, $operation = 'insert') {
         error_log("syncToJ1StockEditData: product={$productName}, out={$outQty}, tiers=" . count($tiers) . ", mobile_ref_id={$mobileRefId}");
         return true;
 
-    } catch (PDOException $e) {
+    }
+    catch (PDOException $e) {
         error_log("同步到j1stockedit_data失败: " . $e->getMessage());
         return false;
     }
 }
 
 // 更新库存总数表 (支持按规格分组)
-function updateStocklistTotal($productName, $codeNumber, $inQty, $outQty, $isAdd = true, $specification = null) {
+function updateStocklistTotal($productName, $codeNumber, $inQty, $outQty, $isAdd = true, $specification = null)
+{
     global $pdo;
-    
+
     if (empty($productName)) {
         return;
     }
-    
+
     try {
         // 统一规格处理 (空字符串转为 NULL 或 保持一致)
         $specification = ($specification === "none" || $specification === "") ? null : $specification;
-        
+
         $sql = "SELECT * FROM j1stocklist_total WHERE product_name = ? AND code_number = ? ";
         $params = [$productName, $codeNumber];
-        
+
         if ($specification === null) {
             $sql .= " AND (specification IS NULL OR specification = '' OR specification = 'none') ";
-        } else {
+        }
+        else {
             $sql .= " AND specification = ? ";
             $params[] = $specification;
         }
-        
+
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         $existing = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         $netQty = $inQty - $outQty;
-        
+
         if ($existing) {
             // 更新现有记录
             if ($isAdd) {
                 $newTotal = floatval($existing['total_qty']) + $netQty;
-            } else {
+            }
+            else {
                 $newTotal = floatval($existing['total_qty']) - $netQty;
             }
-            
+
             // 如果总数小于等于0，删除记录
             if ($newTotal <= 0.0001 && $newTotal >= -0.0001) {
                 $deleteStmt = $pdo->prepare("DELETE FROM j1stocklist_total WHERE id = ?");
                 $deleteStmt->execute([$existing['id']]);
-            } else {
+            }
+            else {
                 $updateStmt = $pdo->prepare("UPDATE j1stocklist_total SET total_qty = ?, last_updated = NOW() WHERE id = ?");
                 $updateStmt->execute([$newTotal, $existing['id']]);
             }
-        } else {
+        }
+        else {
             // 创建新记录
             if ($netQty > 0 || $isAdd) {
                 $insertStmt = $pdo->prepare("INSERT INTO j1stocklist_total (product_name, code_number, specification, total_qty) VALUES (?, ?, ?, ?)");
                 $insertStmt->execute([$productName, $codeNumber, $specification, $netQty > 0 ? $netQty : 0]);
             }
         }
-    } catch (PDOException $e) {
+    }
+    catch (PDOException $e) {
         error_log("更新库存总数失败: " . $e->getMessage());
     }
 }
@@ -918,23 +979,24 @@ function updateStocklistTotal($productName, $codeNumber, $inQty, $outQty, $isAdd
  * 处理移动端批量保存请求 (J1)
  * 预期负载结构: { "action": "batch_save", "document_date": "YYYY-MM-DD", "rows": [...] }
  */
-function handleBatchSave() {
+function handleBatchSave()
+{
     global $pdo, $data;
-    
+
     $documentDate = $data['document_date'] ?? null;
     $rows = $data['rows'] ?? [];
-    
+
     if (!$documentDate) {
         sendResponse(false, "缺少文件日期 (document_date)");
     }
-    
+
     if (empty($rows)) {
         sendResponse(false, "没有需要保存的数据行");
     }
-    
+
     try {
         $pdo->beginTransaction();
-        
+
         $successCount = 0;
         foreach ($rows as $index => $row) {
             if (empty($row['time']) || empty($row['product_name'])) {
@@ -957,25 +1019,26 @@ function handleBatchSave() {
                 floatval($row['out_quantity'] ?? 0),
                 $row['receiver'] ?? 'Mobile'
             ]);
-            
+
             $newMobileId = $pdo->lastInsertId();
-            
+
             // 2. 更新库存总数
             updateStocklistTotal($row['product_name'], $row['code_number'] ?? null, floatval($row['in_quantity'] ?? 0), floatval($row['out_quantity'] ?? 0), true, $row['specification'] ?? null);
-            
+
             // 3. 同步到桌面端主表
             $syncData = $row;
             $syncData['date'] = $documentDate;
             $syncData['mobile_ref_id'] = $newMobileId;
             syncToJ1StockEditData($pdo, $syncData, 'insert');
-            
+
             $successCount++;
         }
-        
+
         $pdo->commit();
         sendResponse(true, "J1 移动端批量保存成功，共保存 {$successCount} 条记录");
-        
-    } catch (Exception $e) {
+
+    }
+    catch (Exception $e) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
