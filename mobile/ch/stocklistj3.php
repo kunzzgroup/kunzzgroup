@@ -720,8 +720,8 @@ require_once 'branch_check.php';
                     return;
                 }
                 
-                // ★ 先从数据库获取真实库存（不依赖前端缓存的 original_qty）
-                const stockByPriceUrl = `${STOCK_EDIT_API}?action=product_stock_by_price&product_name=${encodeURIComponent(record.product_name)}${record.product_code ? '&code_number=' + encodeURIComponent(record.product_code) : ''}&specification=${encodeURIComponent(record.specification || '')}`;
+                // ★ 先从数据库获取真实库存（不依赖前端缓存的 original_qty，不按规格过滤）
+                const stockByPriceUrl = `${STOCK_EDIT_API}?action=product_stock_by_price&product_name=${encodeURIComponent(record.product_name)}${record.product_code ? '&code_number=' + encodeURIComponent(record.product_code) : ''}`;
                 const stockResp = await fetch(stockByPriceUrl);
                 const stockResult = await stockResp.json();
                 
