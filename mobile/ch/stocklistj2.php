@@ -730,7 +730,6 @@ require_once 'branch_check.php';
                 // 2️⃣ 实时获取按价格分组的库存（用于扣货 + 计算 total_stock）
                 const stockByPriceUrl = `${STOCK_EDIT_API}?action=product_stock_by_price` +
                     `&product_name=${encodeURIComponent(record.product_name)}` +
-                    (record.product_code ? `&code_number=${encodeURIComponent(record.product_code)}` : '') +
                     `&specification=${encodeURIComponent(record.specification || '')}`;
                 const stockResp = await fetch(stockByPriceUrl);
                 const stockResult = await stockResp.json();
