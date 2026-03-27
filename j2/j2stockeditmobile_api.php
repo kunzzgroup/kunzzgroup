@@ -403,25 +403,28 @@ function handleGet() {
             }
             
             try {
-                // 从 j2stockedit_data 表获取该产品的所有不同价格的库存情况
-                // 注意：需要计算每个价格的净库存（in - out），包括负数的情况
-                // 过滤掉 price 为 NULL 的记录，并按价格从高到低排序
-                $sql = "SELECT 
+                // 优先使用 code_number 过滤（更可靠，避免 product_name 格式/空格差异导致匹配失败）
+                // 当 code_number 可用时跳过 product_name 匹配
+                $selectCols = "SELECT 
                             COALESCE(price, 0) as price,
                             specification,
                             type,
                             SUM(in_quantity) as total_in,
                             SUM(out_quantity) as total_out,
                             (SUM(in_quantity) - SUM(out_quantity)) as available_stock
-                        FROM j2stockedit_data 
-                        WHERE TRIM(REPLACE(product_name, '&amp;', '&')) = TRIM(REPLACE(?, '&amp;', '&')) AND deleted_at IS NULL";
-                $params = [$productName];
-                
+                        FROM j2stockedit_data
+                        WHERE deleted_at IS NULL";
+
                 if (!empty($codeNumber)) {
-                    $sql .= " AND code_number = ?";
-                    $params[] = $codeNumber;
+                    // code_number 优先：完全绕过产品名格式差异
+                    $sql = $selectCols . " AND code_number = ?";
+                    $params = [$codeNumber];
+                } else {
+                    // 无 code_number 时回退到产品名（加 TRIM 兼容空格差异）
+                    $sql = $selectCols . " AND TRIM(REPLACE(product_name, '&amp;', '&')) = TRIM(REPLACE(?, '&amp;', '&'))";
+                    $params = [$productName];
                 }
-                
+
                 $specification = $_GET['specification'] ?? null;
                 if ($specification !== null && $specification !== "") {
                     $sql .= " AND specification = ?";
@@ -429,8 +432,9 @@ function handleGet() {
                 } elseif ($specification === "") {
                     $sql .= " AND (specification IS NULL OR specification = '')";
                 }
-                
+
                 $sql .= " GROUP BY price, specification, type ORDER BY price DESC";
+
                 
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);

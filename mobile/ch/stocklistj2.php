@@ -728,20 +728,22 @@ require_once 'branch_check.php';
                 record.qty = currentQty;
 
                 // 2️⃣ 实时获取按价格分组的库存（用于扣货 + 计算 total_stock）
-                // 不传 specification，让 API 返回该产品所有规格的价格层
-                // TRIM product_name to handle trailing spaces in DB
+                // 优先用 code_number 过滤（绕过 product_name 格式差异）
                 const pName = (record.product_name || '').trim();
+                const pCode = (record.code_number || record.product_code || '').trim();
                 const stockByPriceUrl = `${STOCK_EDIT_API}?action=product_stock_by_price` +
-                    `&product_name=${encodeURIComponent(pName)}`;
+                    `&product_name=${encodeURIComponent(pName)}` +
+                    (pCode ? `&code_number=${encodeURIComponent(pCode)}` : '');
                 const stockResp = await fetch(stockByPriceUrl);
                 const stockResult = await stockResp.json();
 
                 // 3️⃣ 汇总所有价格层的可用库存 = total_stock（无需 key 匹配）
                 const priceStocks = (stockResult.success && stockResult.data) ? stockResult.data : [];
                 // 🔍 临时 DEBUG：查看 API 原始返回（确认问题后删除）
-                alert('[DEBUG v2] query: ' + pName + '\nrows=' + priceStocks.length + '\n' +
-                    JSON.stringify(priceStocks, null, 2).slice(0, 600));
+                alert('[DEBUG v3] code=' + pCode + '\nrows=' + priceStocks.length + '\n' +
+                    JSON.stringify(priceStocks, null, 2).slice(0, 700));
                 const total_stock = priceStocks.reduce((sum, t) => sum + Math.max(0, parseFloat(t.available_stock) || 0), 0);
+
 
 
                 // 4️⃣ 本次出货量 = DB实时库存 - 用户输入的剩余数量
