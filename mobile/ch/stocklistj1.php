@@ -314,9 +314,14 @@ require_once 'branch_check.php';
                                 
                                 const qty = parseFloat(it.total_qty || 0).toFixed(3);
                                 const normSpec = (it.specification == null ? '' : String(it.specification));
+                                const itemCode = (it.code_number || '').trim();
+                                const uniqueId = itemCode
+                                    ? `${itemCode}-${normSpec || 'none'}`
+                                    : `${prodInfo.id || 'new'}-${normSpec || 'none'}-${(it.product_name||'').trim().slice(0,8)}`;
                                 stockData.push({
-                                    id: `${prodInfo.id || 'new'}-${normSpec || 'none'}`,
-                                    product_code: it.code_number || '',
+                                    id: uniqueId,
+                                    product_code: itemCode,
+                                    code_number: itemCode,
                                     product_name: it.product_name || '',
                                     specification: normSpec,
                                     freezer_category: prodInfo.freezer_category || '',
@@ -727,9 +732,12 @@ require_once 'branch_check.php';
                 if (isNaN(currentQty) || currentQty < 0) currentQty = 0;
                 record.qty = currentQty;
 
-                // 2️⃣ 实时获取按价格分组的库存（不传 spec，避免因 spec 不匹配导致返回 0）
+                // 2️⃣ 实时获取按价格分组的库存（优先用 code_number 过滤）
+                const pName = (record.product_name || '').trim();
+                const pCode = (record.code_number || record.product_code || '').trim();
                 const stockByPriceUrl = `${STOCK_EDIT_API}?action=product_stock_by_price` +
-                    `&product_name=${encodeURIComponent(record.product_name)}`;
+                    `&product_name=${encodeURIComponent(pName)}` +
+                    (pCode ? `&code_number=${encodeURIComponent(pCode)}` : '');
                 const stockResp = await fetch(stockByPriceUrl);
                 const stockResult = await stockResp.json();
 
