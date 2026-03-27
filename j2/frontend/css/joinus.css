@@ -1656,8 +1656,8 @@ form select:focus {
     gap: clamp(14px, 1.2vw, 24px);
     width: 100%;
     max-width: 1600px;
-    height: clamp(75vh, 80vh, 85vh);
-    max-height: 85vh;
+    height: clamp(65vh, 70vh, 75vh);
+    max-height: 75vh;
     box-sizing: border-box;
     align-items: stretch;
 }
