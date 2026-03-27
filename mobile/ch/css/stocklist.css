@@ -545,7 +545,4 @@ tbody tr:last-child td {
     transform: scale(0.95);
 }
 
-/* KH 总部用户：隐藏分支相关 UI */
-.is-hq .branch-only {
-    display: none !important;
-}
+/* KH 总部用户：不再隐藏分支标识，让用户能看到当前是哪个分支页面 */

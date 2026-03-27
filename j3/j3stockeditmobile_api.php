@@ -405,7 +405,7 @@ function handleGet() {
             try {
                 // 从 j3stockedit_data 表获取该产品的所有不同价格的库存情况
                 // 注意：需要计算每个价格的净库存（in - out），包括负数的情况
-                // 过滤掉 price 为 NULL 的记录，并按价格从高到低排序
+                // 包含 price 为 NULL 的记录（视为 RM 0.00），按价格从高到低排序
                 $sql = "SELECT 
                             COALESCE(price, 0) as price,
                             specification,
@@ -414,7 +414,7 @@ function handleGet() {
                             SUM(out_quantity) as total_out,
                             (SUM(in_quantity) - SUM(out_quantity)) as available_stock
                         FROM j3stockedit_data 
-                        WHERE REPLACE(product_name, '&amp;', '&') = REPLACE(?, '&amp;', '&') AND price IS NOT NULL AND deleted_at IS NULL";
+                        WHERE REPLACE(product_name, '&amp;', '&') = REPLACE(?, '&amp;', '&') AND deleted_at IS NULL";
                 $params = [$productName];
                 
                 if (!empty($codeNumber)) {
@@ -430,7 +430,7 @@ function handleGet() {
                     $sql .= " AND (specification IS NULL OR specification = '')";
                 }
                 
-                $sql .= " GROUP BY price, specification, type ORDER BY price DESC";
+                $sql .= " GROUP BY COALESCE(price, 0), specification, type ORDER BY COALESCE(price, 0) DESC";
                 
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
@@ -717,9 +717,9 @@ function syncToJ3StockEditData($pdo, $data, $operation = 'insert') {
 
         // 智能匹配信息 (specification/price/type)
         $matchInfo = null;
-        $qStmt = $pdo->prepare("SELECT specification, price, type FROM j3stockedit_data
+        $qStmt = $pdo->prepare("SELECT specification, COALESCE(price, 0) as price, type FROM j3stockedit_data
             WHERE product_name = ? AND (receiver IS NULL OR receiver NOT IN ('Mobile','mobile'))
-            AND price IS NOT NULL ORDER BY id DESC LIMIT 1");
+            ORDER BY id DESC LIMIT 1");
         $qStmt->execute([$productName]);
         $matchInfo = $qStmt->fetch(PDO::FETCH_ASSOC);
 
@@ -775,14 +775,13 @@ function syncToJ3StockEditData($pdo, $data, $operation = 'insert') {
         }
 
         $tierStmt = $pdo->prepare(
-            "SELECT specification, price, type,
+            "SELECT specification, COALESCE(price, 0) as price, type,
                     (SUM(in_quantity) - SUM(out_quantity)) AS available
              FROM j3stockedit_data
              WHERE product_name = ? {$codeFilter} {$specFilter}
-             AND price IS NOT NULL
-             GROUP BY specification, price, type
+             GROUP BY specification, COALESCE(price, 0), type
              HAVING available > 0
-             ORDER BY price DESC
+             ORDER BY COALESCE(price, 0) DESC
              FOR UPDATE"
         );
         $tierStmt->execute($tierParams);
