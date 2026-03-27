@@ -721,36 +721,25 @@ require_once 'branch_check.php';
             if (!record) return;
 
             try {
-                // 从 DOM 读取最新输入值，防止手机端 oninput/onchange 未及时触发
+                // 1️⃣ 从 DOM 读取用户输入的剩余数量
                 const domInput = document.querySelector(`input[data-id="${id}"]`);
                 let currentQty = parseFloat(domInput ? domInput.value : record.qty);
                 if (isNaN(currentQty) || currentQty < 0) currentQty = 0;
                 record.qty = currentQty;
 
-                // 实时从 DB 获取最新库存总量（total_stock），作为唯一比较基准
-                let total_stock = null;
-                try {
-                    const normSpec = (s) => (s == null ? '' : String(s));
-                    const keyOf = (name, code, spec) => `${(name||'').trim()}|${(code||'').trim()}|${normSpec(spec).trim()}`;
-                    const freshResp = await fetch(`${STOCK_EDIT_API}?action=stocklist_total`);
-                    const freshJson = await freshResp.json();
-                    if (freshJson.success && freshJson.data) {
-                        const targetKey = keyOf(record.product_name, record.product_code, record.specification);
-                        const foundItem = freshJson.data.items.find(it => keyOf(it.product_name, it.code_number, it.specification) === targetKey);
-                        if (foundItem) {
-                            total_stock = parseFloat(foundItem.total_qty);
-                            record.original_qty = foundItem.total_qty;
-                        }
-                    }
-                } catch (e) {
-                    console.warn('实时获取库存失败，回退到缓存值:', e);
-                }
-                // 如果 DB 获取失败，回退到内存缓存
-                if (total_stock === null) {
-                    total_stock = parseFloat(record.original_qty) || 0;
-                }
+                // 2️⃣ 实时获取按价格分组的库存（用于扣货 + 计算 total_stock）
+                const stockByPriceUrl = `${STOCK_EDIT_API}?action=product_stock_by_price` +
+                    `&product_name=${encodeURIComponent(record.product_name)}` +
+                    (record.product_code ? `&code_number=${encodeURIComponent(record.product_code)}` : '') +
+                    `&specification=${encodeURIComponent(record.specification || '')}`;
+                const stockResp = await fetch(stockByPriceUrl);
+                const stockResult = await stockResp.json();
 
-                // outQty = 本次出货量（total_stock - 用户输入值）
+                // 3️⃣ 汇总所有价格层的可用库存 = total_stock（无需 key 匹配）
+                const priceStocks = (stockResult.success && stockResult.data) ? stockResult.data : [];
+                const total_stock = priceStocks.reduce((sum, t) => sum + Math.max(0, parseFloat(t.available_stock) || 0), 0);
+
+                // 4️⃣ 本次出货量 = DB实时库存 - 用户输入的剩余数量
                 const outQty = total_stock - currentQty;
 
                 if (outQty < -0.0001) {
@@ -768,12 +757,8 @@ require_once 'branch_check.php';
                 }
 
                 const soldQty = outQty;  // 本次出货量（正数）
-                
-                // 获取该产品的所有不同价格的库存记录（指定规格）
-                const stockByPriceUrl = `${STOCK_EDIT_API}?action=product_stock_by_price&product_name=${encodeURIComponent(record.product_name)}${record.product_code ? '&code_number=' + encodeURIComponent(record.product_code) : ''}&specification=${encodeURIComponent(record.specification || '')}`;
-                const stockResp = await fetch(stockByPriceUrl);
-                const stockResult = await stockResp.json();
-                
+
+                // 5️⃣ 按价格从高到低依次扣除（priceStocks 已按 price DESC 排序）
                 const workDate = getDefaultWorkDate();
                 const now = new Date();
                 const baseTimeStr = now.toTimeString().slice(0, 8);
