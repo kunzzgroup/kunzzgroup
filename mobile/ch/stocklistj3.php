@@ -720,13 +720,14 @@ require_once 'branch_check.php';
             if (!record) return;
 
             try {
-                // 从 DOM 读取最新输入值，防止手机端 oninput/onchange 未及时触发
+                // 从 DOM 读取最新输入值
                 const domInput = document.querySelector(`input[data-id="${id}"]`);
-                if (domInput && !isNaN(parseFloat(domInput.value))) {
-                    record.qty = parseFloat(domInput.value);
-                }
+                let currentQty = parseFloat(domInput ? domInput.value : record.qty);
+                if (isNaN(currentQty) || currentQty < 0) currentQty = 0;
+                record.qty = currentQty;
 
-                // 实时从 DB 刷新 original_qty，避免内存状态陈旧导致误报
+                // 实时从 DB 获取最新库存总量（total_stock），作为唯一比较基准
+                let total_stock = null;
                 try {
                     const normSpec = (s) => (s == null ? '' : String(s));
                     const keyOf = (name, code, spec) => `${(name||'').trim()}|${(code||'').trim()}|${normSpec(spec).trim()}`;
@@ -736,37 +737,35 @@ require_once 'branch_check.php';
                         const targetKey = keyOf(record.product_name, record.product_code, record.specification);
                         const foundItem = freshJson.data.items.find(it => keyOf(it.product_name, it.code_number, it.specification) === targetKey);
                         if (foundItem) {
+                            total_stock = parseFloat(foundItem.total_qty);
                             record.original_qty = foundItem.total_qty;
                         }
                     }
                 } catch (e) {
-                    console.warn('实时刷新库存失败，使用缓存值:', e);
+                    console.warn('实时获取库存失败，回退到缓存值:', e);
+                }
+                if (total_stock === null) {
+                    total_stock = parseFloat(record.original_qty) || 0;
                 }
 
-                const originalQty = parseFloat(record.original_qty) || 0;
-                let currentQty = parseFloat(record.qty) || 0;
-                if (currentQty < 0) {
-                    alert('数量不能为负数！');
-                    record.qty = 0;
+                // outQty = 本次出货量（total_stock - 用户输入值）
+                const outQty = total_stock - currentQty;
+
+                if (outQty < -0.0001) {
+                    alert('库存不足！\n当前库存: ' + total_stock.toFixed(3) + '\n请输入 ≤ ' + total_stock.toFixed(3) + ' 的数量');
+                    record.qty = total_stock;
                     generateTable();
                     return;
                 }
-                const soldQty = originalQty - currentQty;
-                
-                if (currentQty > originalQty) {
-                    alert('数量不能增加，只能减少！\n原始数量: ' + originalQty.toFixed(3) + '\n当前数量: ' + currentQty.toFixed(3));
-                    record.qty = originalQty;
-                    generateTable();
-                    return;
-                }
-                
-                if (soldQty === 0) {
-                    record.original_qty = currentQty;
+
+                if (Math.abs(outQty) < 0.0001) {
                     editingRowIds.delete(id);
                     generateTable();
-                    alert(`数量未变化，已更新\n产品: ${record.product_name}`);
+                    alert(`数量未变化，已取消编辑\n产品: ${record.product_name}`);
                     return;
                 }
+
+                const soldQty = outQty;  // 本次出货量（正数）
                 
                 // 获取该产品的所有不同价格的库存记录（指定规格）
                 const stockByPriceUrl = `${STOCK_EDIT_API}?action=product_stock_by_price&product_name=${encodeURIComponent(record.product_name)}${record.product_code ? '&code_number=' + encodeURIComponent(record.product_code) : ''}&specification=${encodeURIComponent(record.specification || '')}`;
