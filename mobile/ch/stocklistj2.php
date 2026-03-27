@@ -728,9 +728,9 @@ require_once 'branch_check.php';
                 record.qty = currentQty;
 
                 // 2️⃣ 实时获取按价格分组的库存（用于扣货 + 计算 total_stock）
+                // 不传 specification，让 API 返回该产品所有规格的价格层（避免因 spec 不匹配导致返回 0）
                 const stockByPriceUrl = `${STOCK_EDIT_API}?action=product_stock_by_price` +
-                    `&product_name=${encodeURIComponent(record.product_name)}` +
-                    `&specification=${encodeURIComponent(record.specification || '')}`;
+                    `&product_name=${encodeURIComponent(record.product_name)}`;
                 const stockResp = await fetch(stockByPriceUrl);
                 const stockResult = await stockResp.json();
 
@@ -763,7 +763,8 @@ require_once 'branch_check.php';
                 const baseTimeStr = now.toTimeString().slice(0, 8);
                 const outboundRows = [];
                 
-                if (!stockResult.success || !stockResult.data || stockResult.data.length === 0) {
+                if (priceStocks.length === 0) {
+                    // 回退：无分层数据时直接以当前规格扣货
                     outboundRows.push({
                         time: baseTimeStr,
                         product_name: record.product_name,
@@ -775,32 +776,30 @@ require_once 'branch_check.php';
                         receiver: CURRENT_USERNAME || 'Mobile'
                     });
                 } else {
-                    const priceStocks = stockResult.data;
                     let remainingQty = soldQty;
-                    
                     for (let i = 0; i < priceStocks.length && remainingQty > 0.001; i++) {
-                        const priceStock = priceStocks[i];
-                        const availableStock = parseFloat(priceStock.available_stock) || 0;
-                        if (availableStock <= 0) continue;
-                        
-                        const deductQty = Math.min(remainingQty, availableStock);
+                        const tier = priceStocks[i];
+                        const available = parseFloat(tier.available_stock) || 0;
+                        if (available <= 0) continue;
+                        const deductQty = Math.min(remainingQty, available);
                         if (deductQty > 0.001) {
                             const timeStr = i === 0 ? baseTimeStr : new Date(now.getTime() + i * 1000).toTimeString().slice(0, 8);
                             outboundRows.push({
                                 time: timeStr,
                                 product_name: record.product_name,
                                 code_number: record.product_code || null,
-                                specification: priceStock.specification || record.specification || null,
-                                type: priceStock.type || record.category || null,
+                                // ✅ 直接用 tier 的实际 spec，保持与 j2stockedit_data 中的记录一致
+                                // ❌ 不能 fallback 到 record.specification（避免 spec 不匹配导致幽灵行）
+                                specification: (tier.specification !== undefined && tier.specification !== null) ? tier.specification : null,
+                                type: tier.type || record.category || null,
                                 in_quantity: 0,
                                 out_quantity: deductQty,
-                                price: priceStock.price,
+                                price: tier.price,
                                 receiver: CURRENT_USERNAME || 'Mobile'
                             });
                             remainingQty -= deductQty;
                         }
                     }
-                    
                     if (remainingQty > 0.001) {
                         alert(`警告：库存不足！\n产品: ${record.product_name}\n需要扣除: ${soldQty.toFixed(3)}\n实际可扣除: ${(soldQty - remainingQty).toFixed(3)}`);
                         return;

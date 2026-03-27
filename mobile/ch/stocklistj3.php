@@ -727,9 +727,9 @@ require_once 'branch_check.php';
                 record.qty = currentQty;
 
                 // 2️⃣ 实时获取按价格分组的库存（用于扣货 + 计算 total_stock）
+                // 不传 specification，让 API 返回该产品所有规格的价格层
                 const stockByPriceUrl = `${STOCK_EDIT_API}?action=product_stock_by_price` +
-                    `&product_name=${encodeURIComponent(record.product_name)}` +
-                    `&specification=${encodeURIComponent(record.specification || '')}`;
+                    `&product_name=${encodeURIComponent(record.product_name)}`;
                 const stockResp = await fetch(stockByPriceUrl);
                 const stockResult = await stockResp.json();
 
@@ -786,7 +786,8 @@ require_once 'branch_check.php';
                                 time: timeStr,
                                 product_name: record.product_name,
                                 code_number: record.product_code || null,
-                                specification: tier.specification || record.specification || null,
+                                // ✅ 直接用 tier 的实际 spec
+                                specification: (tier.specification !== undefined && tier.specification !== null) ? tier.specification : null,
                                 type: tier.type || record.category || null,
                                 in_quantity: 0,
                                 out_quantity: deductQty,

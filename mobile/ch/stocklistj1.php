@@ -727,29 +727,17 @@ require_once 'branch_check.php';
                 if (isNaN(currentQty) || currentQty < 0) currentQty = 0;
                 record.qty = currentQty;
 
-                // 实时从 DB 获取最新库存总量（total_stock），作为唯一比较基准
-                let total_stock = null;
-                try {
-                    const normSpec = (s) => (s == null ? '' : String(s));
-                    const keyOf = (name, code, spec) => `${(name||'').trim()}|${(code||'').trim()}|${normSpec(spec).trim()}`;
-                    const freshResp = await fetch(`${STOCK_EDIT_API}?action=stocklist_total`);
-                    const freshJson = await freshResp.json();
-                    if (freshJson.success && freshJson.data) {
-                        const targetKey = keyOf(record.product_name, record.product_code, record.specification);
-                        const foundItem = freshJson.data.items.find(it => keyOf(it.product_name, it.code_number, it.specification) === targetKey);
-                        if (foundItem) {
-                            total_stock = parseFloat(foundItem.total_qty);
-                            record.original_qty = foundItem.total_qty;
-                        }
-                    }
-                } catch (e) {
-                    console.warn('实时获取库存失败，回退到缓存值:', e);
-                }
-                if (total_stock === null) {
-                    total_stock = parseFloat(record.original_qty) || 0;
-                }
+                // 2️⃣ 实时获取按价格分组的库存（不传 spec，避免因 spec 不匹配导致返回 0）
+                const stockByPriceUrl = `${STOCK_EDIT_API}?action=product_stock_by_price` +
+                    `&product_name=${encodeURIComponent(record.product_name)}`;
+                const stockResp = await fetch(stockByPriceUrl);
+                const stockResult = await stockResp.json();
 
-                // outQty = 本次出货量（total_stock - 用户输入值）
+                // 3️⃣ 汇总所有价格层的可用库存 = total_stock
+                const priceStocks = (stockResult.success && stockResult.data) ? stockResult.data : [];
+                const total_stock = priceStocks.reduce((sum, t) => sum + Math.max(0, parseFloat(t.available_stock) || 0), 0);
+
+                // 4️⃣ 本次出货量 = DB实时库存 - 用户输入的剩余数量
                 const outQty = total_stock - currentQty;
 
                 if (outQty < -0.0001) {
@@ -767,19 +755,14 @@ require_once 'branch_check.php';
                 }
 
                 const soldQty = outQty;  // 本次出货量（正数）
-                
-                // 获取该产品的所有不同价格的库存记录（按价格从高到低，并指定规格）
-                const stockByPriceUrl = `${STOCK_EDIT_API}?action=product_stock_by_price&product_name=${encodeURIComponent(record.product_name)}${record.product_code ? '&code_number=' + encodeURIComponent(record.product_code) : ''}&specification=${encodeURIComponent(record.specification || '')}`;
-                const stockResp = await fetch(stockByPriceUrl);
-                const stockResult = await stockResp.json();
-                
+
+                // 5️⃣ 按价格从高到低依次扣除
                 const workDate = getDefaultWorkDate();
                 const now = new Date();
                 const baseTimeStr = now.toTimeString().slice(0, 8);
                 const outboundRows = [];
                 
-                if (!stockResult.success || !stockResult.data || stockResult.data.length === 0) {
-                    // 向后兼容处理
+                if (priceStocks.length === 0) {
                     outboundRows.push({
                         time: baseTimeStr,
                         product_name: record.product_name,
@@ -791,33 +774,28 @@ require_once 'branch_check.php';
                         receiver: CURRENT_USERNAME || 'Mobile'
                     });
                 } else {
-                    // 按价格分层逻辑
-                    const priceStocks = stockResult.data;
                     let remainingQty = soldQty;
-                    
                     for (let i = 0; i < priceStocks.length && remainingQty > 0.001; i++) {
-                        const priceStock = priceStocks[i];
-                        const availableStock = parseFloat(priceStock.available_stock) || 0;
-                        if (availableStock <= 0) continue;
-                        
-                        const deductQty = Math.min(remainingQty, availableStock);
+                        const tier = priceStocks[i];
+                        const available = parseFloat(tier.available_stock) || 0;
+                        if (available <= 0) continue;
+                        const deductQty = Math.min(remainingQty, available);
                         if (deductQty > 0.001) {
                             const timeStr = i === 0 ? baseTimeStr : new Date(now.getTime() + i * 1000).toTimeString().slice(0, 8);
                             outboundRows.push({
                                 time: timeStr,
                                 product_name: record.product_name,
                                 code_number: record.product_code || null,
-                                specification: priceStock.specification || record.specification || null,
-                                type: priceStock.type || record.category || null,
+                                specification: (tier.specification !== undefined && tier.specification !== null) ? tier.specification : null,
+                                type: tier.type || record.category || null,
                                 in_quantity: 0,
                                 out_quantity: deductQty,
-                                price: priceStock.price,
+                                price: tier.price,
                                 receiver: CURRENT_USERNAME || 'Mobile'
                             });
                             remainingQty -= deductQty;
                         }
                     }
-                    
                     if (remainingQty > 0.001) {
                         alert(`警告：库存不足！\n产品: ${record.product_name}\n需要扣除: ${soldQty.toFixed(3)}\n实际可扣除: ${(soldQty - remainingQty).toFixed(3)}`);
                         return;
