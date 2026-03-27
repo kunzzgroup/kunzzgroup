@@ -688,14 +688,10 @@ require_once 'branch_check.php';
                             return { ...it, original_qty: saved.original_qty };
                         }
                         
-                        // 否则更新为最新的库存总数（normalise null/undefined → ''）
-                        const key = keyOf(it.product_name, it.product_code || '', it.specification || '');
-                        const qty = totalMap.get(key);
-                        if (qty !== undefined) {
-                            return { ...it, qty, original_qty: qty };
-                        }
-                        // 如果找不到对应key，保留原值（不要重置为0）
-                        return it;
+                        // 否则更新为最新的库存总数
+                        const key = keyOf(it.product_name, it.product_code, it.specification);
+                        const qty = totalMap.get(key) || '0.000';
+                        return { ...it, qty, original_qty: qty };
                     });
                     
                     // 恢复正在编辑的记录的数量值（保持用户正在编辑的值）
@@ -717,7 +713,6 @@ require_once 'branch_check.php';
             if (!record) return;
 
             try {
-                // original_qty 来自 stocklist_total（从 j2stockedit_data 实时汇总），是真实库存
                 const originalQty = parseFloat(record.original_qty) || 0;
                 let currentQty = parseFloat(record.qty) || 0;
                 if (currentQty < 0) {
@@ -728,15 +723,14 @@ require_once 'branch_check.php';
                 }
                 const soldQty = originalQty - currentQty;
                 
-                // 仅当有真实库存时才做超库存检查（原始库存=0的产品跳过）
-                if (originalQty > 0.001 && soldQty < -0.001) {
-                    alert('出货数量不能大于当前库存！\n当前库存: ' + originalQty.toFixed(3) + '\n输入数量: ' + currentQty.toFixed(3));
+                if (currentQty > originalQty) {
+                    alert('数量不能增加，只能减少！\n原始数量: ' + originalQty.toFixed(3) + '\n当前数量: ' + currentQty.toFixed(3));
                     record.qty = originalQty;
                     generateTable();
                     return;
                 }
                 
-                if (Math.abs(soldQty) < 0.001) {
+                if (soldQty === 0) {
                     record.original_qty = currentQty;
                     editingRowIds.delete(id);
                     generateTable();
@@ -744,15 +738,7 @@ require_once 'branch_check.php';
                     return;
                 }
                 
-                // 兜底：确保出货量为正数才继续（防止数据异常）
-                if (soldQty < 0) {
-                    alert('出货数量异常（当前库存可能已更新），请刷新页面后重试');
-                    record.qty = originalQty;
-                    generateTable();
-                    return;
-                }
-                
-                // 获取该产品的所有不同价格的库存记录（按价格从高到低扣除）
+                // 获取该产品的所有不同价格的库存记录（指定规格）
                 const stockByPriceUrl = `${STOCK_EDIT_API}?action=product_stock_by_price&product_name=${encodeURIComponent(record.product_name)}${record.product_code ? '&code_number=' + encodeURIComponent(record.product_code) : ''}&specification=${encodeURIComponent(record.specification || '')}`;
                 const stockResp = await fetch(stockByPriceUrl);
                 const stockResult = await stockResp.json();
@@ -763,7 +749,6 @@ require_once 'branch_check.php';
                 const outboundRows = [];
                 
                 if (!stockResult.success || !stockResult.data || stockResult.data.length === 0) {
-                    // 无价格分层记录时，按整体出货
                     outboundRows.push({
                         time: baseTimeStr,
                         product_name: record.product_name,
@@ -775,7 +760,6 @@ require_once 'branch_check.php';
                         receiver: CURRENT_USERNAME || 'Mobile'
                     });
                 } else {
-                    // 按价格从高到低分层扣除
                     const priceStocks = stockResult.data;
                     let remainingQty = soldQty;
                     
@@ -802,18 +786,9 @@ require_once 'branch_check.php';
                         }
                     }
                     
-                    // 若分层扣完仍有剩余，作为无价格行补充
                     if (remainingQty > 0.001) {
-                        outboundRows.push({
-                            time: new Date(now.getTime() + priceStocks.length * 1000).toTimeString().slice(0, 8),
-                            product_name: record.product_name,
-                            code_number: record.product_code || null,
-                            specification: record.specification || null,
-                            type: record.category || null,
-                            in_quantity: 0,
-                            out_quantity: remainingQty,
-                            receiver: CURRENT_USERNAME || 'Mobile'
-                        });
+                        alert(`警告：库存不足！\n产品: ${record.product_name}\n需要扣除: ${soldQty.toFixed(3)}\n实际可扣除: ${(soldQty - remainingQty).toFixed(3)}`);
+                        return;
                     }
                 }
                 
@@ -847,7 +822,6 @@ require_once 'branch_check.php';
                 alert('保存失败: ' + error.message);
             }
         }
-        
         
         // 搜索处理
         function handleSearch() {
