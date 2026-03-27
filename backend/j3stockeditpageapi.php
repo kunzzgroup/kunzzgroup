@@ -985,15 +985,26 @@ function handleDelete()
             $result = $stmt->execute([$username, $currentId]);
 
             if ($stmt->rowCount() > 0) {
-                // 如果有移动端关联ID，同步软删除移动端记录表
+                // 如果有移动端关联ID，同步软删除移动端记录表，并同时删除所有同一 mobile_ref_id 的兄弟行
                 if (!empty($recordToDelete['mobile_ref_id'])) {
+                    $mobileRefId = $recordToDelete['mobile_ref_id'];
                     try {
+                        // 软删除手机原始记录
                         $mobileDeleteSql = "UPDATE j3stockeditmobile_data SET deleted_at = NOW(), deleted_by = ? WHERE id = ?";
                         $mobileStmt = $pdo->prepare($mobileDeleteSql);
-                        $mobileStmt->execute([$username, $recordToDelete['mobile_ref_id']]);
+                        $mobileStmt->execute([$username, $mobileRefId]);
                     }
                     catch (PDOException $e) {
                         error_log("同步软删除J3移动端历史记录失败: " . $e->getMessage());
+                    }
+                    try {
+                        // 同时软删除所有具有相同 mobile_ref_id 的兄弟桌面行（避免手机一次出货拆多行后遗留）
+                        $siblingDeleteSql = "UPDATE j3stockedit_data SET deleted_at = NOW(), deleted_by = ? WHERE mobile_ref_id = ? AND id != ? AND deleted_at IS NULL";
+                        $siblingStmt = $pdo->prepare($siblingDeleteSql);
+                        $siblingStmt->execute([$username, $mobileRefId, $currentId]);
+                    }
+                    catch (PDOException $e) {
+                        error_log("同步软删除J3兄弟行失败: " . $e->getMessage());
                     }
                 }
 
