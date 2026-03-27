@@ -810,77 +810,22 @@ function syncToJ3StockEditData($pdo, $data, $operation = 'insert')
             return $pdo->lastInsertId();
         }
 
-        // 出库：智能分层扣货（并匹配规格）
-        $tierParams = [$productName];
-        $codeFilter = '';
-        if ($codeNumber !== null && $codeNumber !== '') {
-            $codeFilter = ' AND code_number = ?';
-            $tierParams[] = $codeNumber;
-        }
-
-        $specFilter = '';
-        $specIn = $data['specification'] ?? null;
-        if ($specIn === null || $specIn === "" || $specIn === "none") {
-            $specFilter = " AND (specification IS NULL OR specification = '' OR specification = 'none')";
-        }
-        else {
-            $specFilter = " AND specification = ?";
-            $tierParams[] = $specIn;
-        }
-
-        $tierStmt = $pdo->prepare(
-            "SELECT specification, COALESCE(price, 0) as price, type,
-                    (SUM(in_quantity) - SUM(out_quantity)) AS available
-             FROM j3stockedit_data
-             WHERE product_name = ? {$codeFilter} {$specFilter}
-             GROUP BY specification, COALESCE(price, 0), type
-             HAVING available > 0
-             ORDER BY COALESCE(price, 0) DESC
-             FOR UPDATE"
-        );
-        $tierStmt->execute($tierParams);
-        $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $remaining = $outQty;
-        $insertStmt = $pdo->prepare(
+        // 出库：直接使用前端指定的价格插入（与电脑版 handlePost 逻辑一致）
+        $stmt = $pdo->prepare(
             "INSERT INTO j3stockedit_data
              (date, time, code_number, product_name, in_quantity, out_quantity,
               specification, price, receiver, remark, target_system, type, mobile_ref_id)
              VALUES (?,?,?,?,0,?,?,?,'Mobile',NULL,'j3',?,?)"
         );
+        $stmt->execute([
+            $data['date'], $data['time'], $codeNumber, $productName,
+            $outQty,
+            $matchInfo['specification'] ?? $data['specification'] ?? null,
+            $price,
+            $type, $mobileRefId,
+        ]);
 
-        foreach ($tiers as $tier) {
-            if ($remaining <= 0)
-                break;
-            $deduct = min(floatval($tier['available']), $remaining);
-            $insertStmt->execute([
-                $data['date'], $data['time'], $codeNumber, $productName,
-                $deduct,
-                $tier['specification'],
-                floatval($tier['price']),
-                $tier['type'] ?? $type ?? null,
-                $mobileRefId,
-            ]);
-            $remaining -= $deduct;
-        }
-
-        if ($remaining > 0.0001) {
-            $lastTier = !empty($tiers) ? end($tiers) : [
-                'specification' => $data['specification'] ?? null,
-                'price' => floatval($data['price'] ?? 0),
-                'type' => $type
-            ];
-            $insertStmt->execute([
-                $data['date'], $data['time'], $codeNumber, $productName,
-                $remaining,
-                $lastTier['specification'] ?? $data['specification'] ?? null,
-                floatval($lastTier['price'] ?? $data['price'] ?? 0),
-                $lastTier['type'] ?? $type ?? null,
-                $mobileRefId,
-            ]);
-        }
-
-        error_log("syncToJ3StockEditData: product={$productName}, out={$outQty}, tiers=" . count($tiers));
+        error_log("syncToJ3StockEditData: product={$productName}, out={$outQty}, price={$price}");
         return true;
 
     }

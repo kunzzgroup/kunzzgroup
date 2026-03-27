@@ -821,87 +821,22 @@ function syncToJ1StockEditData($pdo, $data, $operation = 'insert')
             return $pdo->lastInsertId();
         }
 
-        // ── 出库：智能按价格从高到低分层扣货（SELECT … FOR UPDATE，并匹配规格）──────
-        $tierParams = [$productName];
-        $codeFilter = '';
-        if ($codeNumber !== null && $codeNumber !== '') {
-            $codeFilter = ' AND code_number = ?';
-            $tierParams[] = $codeNumber;
-        }
+        // 出库：直接使用前端指定的价格插入（与电脑版 handlePost 逻辑一致）
+        $stmt = $pdo->prepare(
+            "INSERT INTO j1stockedit_data
+             (date, time, code_number, product_name, in_quantity, out_quantity,
+              specification, price, receiver, remark, target_system, type, mobile_ref_id)
+             VALUES (?,?,?,?,0,?,?,?,'Mobile',NULL,'j1',?,?)"
+        );
+        $stmt->execute([
+            $data['date'], $data['time'], $codeNumber, $productName,
+            $outQty,
+            $matchInfo['specification'] ?? $data['specification'] ?? null,
+            $price,
+            $type, $mobileRefId,
+        ]);
 
-        $specFilter = '';
-        $specIn = $data['specification'] ?? null;
-        if ($specIn === null || $specIn === "" || $specIn === "none") {
-            $specFilter = " AND (specification IS NULL OR specification = '' OR specification = 'none')";
-        }
-        else {
-            $specFilter = " AND specification = ?";
-            $tierParams[] = $specIn;
-        }
-
-        $tierSql = "SELECT specification, COALESCE(price, 0) as price, type,
-                           (SUM(in_quantity) - SUM(out_quantity)) AS available
-                    FROM j1stockedit_data
-                    WHERE product_name = ?
-                    {$codeFilter}
-                    {$specFilter}
-                    GROUP BY specification, COALESCE(price, 0), type
-                    HAVING available > 0
-                    ORDER BY COALESCE(price, 0) DESC
-                    FOR UPDATE";
-
-        $tierStmt = $pdo->prepare($tierSql);
-        $tierStmt->execute($tierParams);
-        $tiers = $tierStmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // 检查库存是否足够
-        $totalAvailable = array_sum(array_column($tiers, 'available'));
-        if ($totalAvailable < $outQty) {
-            error_log("j1 smart deduct: 库存不足 product={$productName} need={$outQty} available={$totalAvailable}");
-        // 库存不够时仍然允许扣货（保持与现有行为一致），但记录日志
-        }
-
-        $remaining = $outQty;
-        $insertSql = "INSERT INTO j1stockedit_data
-                      (date, time, code_number, product_name, in_quantity, out_quantity,
-                       specification, price, receiver, remark, target_system, type, mobile_ref_id)
-                      VALUES (?,?,?,?,0,?,?,?,'Mobile',NULL,'j1',?,?)";
-        $insertStmt = $pdo->prepare($insertSql);
-
-        foreach ($tiers as $tier) {
-            if ($remaining <= 0)
-                break;
-
-            $deduct = min(floatval($tier['available']), $remaining);
-            $insertStmt->execute([
-                $data['date'], $data['time'], $codeNumber, $productName,
-                $deduct,
-                $tier['specification'],
-                floatval($tier['price']),
-                $tier['type'] ?? $type ?? null,
-                $mobileRefId,
-            ]);
-            $remaining -= $deduct;
-        }
-
-        // 如果所有库存层都用完仍有剩余，用最低价层补一行（负库存兜底）
-        if ($remaining > 0.0001) {
-            $lastTier = !empty($tiers) ? end($tiers) : [
-                'specification' => $data['specification'] ?? null,
-                'price' => floatval($data['price'] ?? 0),
-                'type' => $data['type'] ?? null,
-            ];
-            $insertStmt->execute([
-                $data['date'], $data['time'], $codeNumber, $productName,
-                $remaining,
-                $lastTier['specification'] ?? $data['specification'] ?? null,
-                $lastTier['price'] ?? floatval($data['price'] ?? 0),
-                $lastTier['type'] ?? $type ?? null,
-                $mobileRefId,
-            ]);
-        }
-
-        error_log("syncToJ1StockEditData: product={$productName}, out={$outQty}, tiers=" . count($tiers) . ", mobile_ref_id={$mobileRefId}");
+        error_log("syncToJ1StockEditData: product={$productName}, out={$outQty}, price={$price}");
         return true;
 
     }
