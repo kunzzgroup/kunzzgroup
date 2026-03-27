@@ -7913,6 +7913,24 @@ async function batchSaveNewRows() {
                 type: document.getElementById(`${rowId}-type`) ? document.getElementById(`${rowId}-type`).value : ''
             };
 
+            // 与 saveNewRowRecord 保持一致：处理 target_system 默认值
+            if (currentStockType !== 'central') {
+                // 非central页面：强制使用当前系统
+                data.target_system = currentStockType;
+            } else if (data.out_quantity > 0) {
+                // central页面 + 出货：target_system 已从 select 读取，保持不变
+                if (!data.target_system) {
+                    throw new Error('当有出库数量时，请选择目标系统（J1、J2或J3）');
+                }
+            } else {
+                // central页面 + 进货：收货单位默认为 central
+                data.target_system = 'central';
+                // 若收货人为空，自动填入"中央"
+                if (!data.receiver) {
+                    data.receiver = '中央';
+                }
+            }
+
             // 基本验证
             if (!data.product_name || !data.specification || !data.receiver) {
                 throw new Error('请确保所有行都填写了货品名称、规格单位和收货人');
