@@ -716,17 +716,19 @@ function syncToJ3StockEditData($pdo, $data, $operation = 'insert') {
         $productName = $data['product_name'] ?? '';
 
         // 智能匹配信息 (specification/price/type)
+        // 优先从 stock_data 主档获取产品的标准单价，确保使用正确的价格
         $matchInfo = null;
-        $qStmt = $pdo->prepare("SELECT specification, COALESCE(price, 0) as price, type FROM j3stockedit_data
-            WHERE product_name = ? AND (receiver IS NULL OR receiver NOT IN ('Mobile','mobile'))
-            ORDER BY id DESC LIMIT 1");
-        $qStmt->execute([$productName]);
-        $matchInfo = $qStmt->fetch(PDO::FETCH_ASSOC);
+        $infoStmt = $pdo->prepare("SELECT product_code, specification, COALESCE(price, 0) as price, category as type FROM stock_data WHERE product_name = ? LIMIT 1");
+        $infoStmt->execute([$productName]);
+        $matchInfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
 
+        // 如果 stock_data 没有记录，回退到 j3stockedit_data 历史记录
         if (!$matchInfo) {
-            $infoStmt = $pdo->prepare("SELECT product_code, specification, price, category as type FROM stock_data WHERE product_name = ? LIMIT 1");
-            $infoStmt->execute([$productName]);
-            $matchInfo = $infoStmt->fetch(PDO::FETCH_ASSOC);
+            $qStmt = $pdo->prepare("SELECT specification, COALESCE(price, 0) as price, type FROM j3stockedit_data
+                WHERE product_name = ? AND (receiver IS NULL OR receiver NOT IN ('Mobile','mobile'))
+                ORDER BY id DESC LIMIT 1");
+            $qStmt->execute([$productName]);
+            $matchInfo = $qStmt->fetch(PDO::FETCH_ASSOC);
         }
 
         // 统一类型 (category) 补全，确保同步到 PC 端时字段完整

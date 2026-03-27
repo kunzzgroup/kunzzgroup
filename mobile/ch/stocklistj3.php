@@ -706,7 +706,7 @@ require_once 'branch_check.php';
             }
         }
         
-        // 保存单个记录（按价格从高到低依次扣除，原子化提交）
+        // 保存单个记录（简化出货：不在前端做价格分层，由后端 syncToJ3StockEditData 决定价格）
         async function saveRecord(id) {
             const record = stockData.find(r => r.id === id);
             if (!record) return;
@@ -737,61 +737,21 @@ require_once 'branch_check.php';
                     return;
                 }
                 
-                // 获取该产品的所有不同价格的库存记录（指定规格）
-                const stockByPriceUrl = `${STOCK_EDIT_API}?action=product_stock_by_price&product_name=${encodeURIComponent(record.product_name)}${record.product_code ? '&code_number=' + encodeURIComponent(record.product_code) : ''}&specification=${encodeURIComponent(record.specification || '')}`;
-                const stockResp = await fetch(stockByPriceUrl);
-                const stockResult = await stockResp.json();
-                
                 const workDate = getDefaultWorkDate();
                 const now = new Date();
                 const baseTimeStr = now.toTimeString().slice(0, 8);
-                const outboundRows = [];
                 
-                if (!stockResult.success || !stockResult.data || stockResult.data.length === 0) {
-                    // 向后兼容处理
-                    outboundRows.push({
-                        time: baseTimeStr,
-                        product_name: record.product_name,
-                        code_number: record.product_code || null,
-                        specification: record.specification || null,
-                        type: record.category || null,
-                        in_quantity: 0,
-                        out_quantity: soldQty,
-                        receiver: CURRENT_USERNAME || 'Mobile'
-                    });
-                } else {
-                    // 按价格分层逻辑
-                    const priceStocks = stockResult.data;
-                    let remainingQty = soldQty;
-                    
-                    for (let i = 0; i < priceStocks.length && remainingQty > 0.001; i++) {
-                        const priceStock = priceStocks[i];
-                        const availableStock = parseFloat(priceStock.available_stock) || 0;
-                        if (availableStock <= 0) continue;
-                        
-                        const deductQty = Math.min(remainingQty, availableStock);
-                        if (deductQty > 0.001) {
-                            const timeStr = i === 0 ? baseTimeStr : new Date(now.getTime() + i * 1000).toTimeString().slice(0, 8);
-                            outboundRows.push({
-                                time: timeStr,
-                                product_name: record.product_name,
-                                code_number: record.product_code || null,
-                                specification: priceStock.specification || record.specification || null,
-                                type: priceStock.type || record.category || null,
-                                in_quantity: 0,
-                                out_quantity: deductQty,
-                                price: priceStock.price,
-                                receiver: CURRENT_USERNAME || 'Mobile'
-                            });
-                            remainingQty -= deductQty;
-                        }
-                    }
-                    
-                    if (remainingQty > 0.001) {
-                        alert(`警告：库存不足！\n产品: ${record.product_name}\n需要扣除: ${soldQty.toFixed(3)}\n实际可扣除: ${(soldQty - remainingQty).toFixed(3)}`);
-                        return;
-                    }
-                }
+                // 简化出货：不传 price，由后端 syncToJ3StockEditData 从 stock_data 主档获取正确单价
+                const outboundRows = [{
+                    time: baseTimeStr,
+                    product_name: record.product_name,
+                    code_number: record.product_code || null,
+                    specification: record.specification || null,
+                    type: record.category || null,
+                    in_quantity: 0,
+                    out_quantity: soldQty,
+                    receiver: CURRENT_USERNAME || 'Mobile'
+                }];
                 
                 // 发送原子化的批量保存请求
                 const batchPayload = {
@@ -814,8 +774,7 @@ require_once 'branch_check.php';
                     if (updatedRecord) updatedRecord.qty = updatedRecord.original_qty;
                     generateTable();
                     
-                    const details = outboundRows.map(r => `RM ${(r.price||0).toFixed(2)}: ${r.out_quantity.toFixed(3)}`).join(', ');
-                    alert(`记录已保存 (J3)\n产品: ${record.product_name}\n总出货: ${soldQty.toFixed(3)}\n详情: ${details}`);
+                    alert(`记录已保存 (J3)\n产品: ${record.product_name}\n出货数量: ${soldQty.toFixed(3)}`);
                 } else {
                     throw new Error(result.message || '批量保存失败');
                 }
