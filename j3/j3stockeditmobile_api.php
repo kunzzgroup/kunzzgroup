@@ -430,7 +430,7 @@ function handleGet() {
                     $sql .= " AND (specification IS NULL OR specification = '')";
                 }
 
-                $sql .= " GROUP BY price, specification, type ORDER BY price DESC";
+                $sql .= " GROUP BY COALESCE(price,0), specification ORDER BY price DESC";
                 
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
@@ -779,7 +779,7 @@ function syncToJ3StockEditData($pdo, $data, $operation = 'insert') {
                     (SUM(in_quantity) - SUM(out_quantity)) AS available
              FROM j3stockedit_data
              WHERE product_name = ? {$codeFilter} {$specFilter}
-             GROUP BY specification, price, type
+             GROUP BY COALESCE(price,0), specification
              HAVING available > 0
              ORDER BY price DESC
              FOR UPDATE"

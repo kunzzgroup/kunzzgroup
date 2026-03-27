@@ -746,6 +746,11 @@ require_once 'branch_check.php';
                 const priceStocks = (stockResult.success && stockResult.data) ? stockResult.data : [];
                 const total_stock = priceStocks.reduce((sum, t) => sum + Math.max(0, parseFloat(t.available_stock) || 0), 0);
 
+                // 🐛 临时 DEBUG - 确认后删除
+                alert(`[J3 DEBUG]\npCode: ${pCode}\n价格层数: ${priceStocks.length}\n` +
+                    priceStocks.map(t => `  RM ${t.price}: avail=${t.available_stock}`).join('\n') +
+                    `\ntotal_stock=${total_stock.toFixed(3)}, 输入=${currentQty}`);
+
 
                 // 4️⃣ 本次出货量 = DB实时库存 - 用户输入的剩余数量
                 const outQty = total_stock - currentQty;
