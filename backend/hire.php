@@ -686,10 +686,10 @@ if (isset($_SESSION['user_id'])) {
             'TOKYO IZAKAYA': ['店长', '服务员', '厨师', '寿司师傅']
         };
         const statusConfig = [
-            { val: 0, label: '待处理', icon: '🔴' },
-            { val: 1, label: '沟通中', icon: '🟡' },
-            { val: 2, label: '已录用', icon: '🟢' },
-            { val: 3, label: '已淘汰', icon: '⚪' }
+            { val: '0', label: '待处理', icon: '🔴' },
+            { val: '1', label: '沟通中', icon: '🟡' },
+            { val: '2', label: '已录用', icon: '🟢' },
+            { val: '3', label: '已淘汰', icon: '⚪' }
         ];
 
         // ── 全局数据 ───────────────────────────────────────────────────────────
@@ -842,7 +842,8 @@ if (isset($_SESSION['user_id'])) {
                     // 同步更新 rawData，让 chip 计数立即反映新状态
                     const r = rawData.find(x => x.id == id);
                     if (r) r.status = String(newStatus);
-                    await fetchStats(); renderChips(); fetchData();
+                    state.page = 1;        // 状态变更后回到第 1 页
+                    applyState();          // 重建 chips + 刷新数据
                 }
             } catch(err) { console.warn('状态更新失败', err); }
         });
