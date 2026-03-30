@@ -19,7 +19,7 @@ if (session_status() === PHP_SESSION_NONE) {
             --primary-hover: #e66e00;
             --primary-light: #fff7ed; 
             
-            --bg-body: #f3f4f6;
+            --bg-body: #faf7f2;
             --bg-white: #ffffff;
             --text-main: #1f2937;
             --text-muted: #6b7280;
@@ -86,17 +86,26 @@ if (session_status() === PHP_SESSION_NONE) {
         /* ================= 头部区域 ================= */
         .header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 28px 32px 20px;
+            padding: 28px 0 20px;
         }
-        .header h1 { font-size: 32px; font-weight: bold; color: #1f2937; margin: 0; }
+        .header h1 {
+            font-size: clamp(24px, 2.6vw, 40px); font-weight: bold; color: #000; margin: 0;
+        }
+        .header h1::after {
+            content: ""; display: block; height: 3px; width: 100%; margin-top: 12px;
+            background: linear-gradient(90deg, rgba(255,92,0,0) 0%, rgba(0,0,0,1) 25%, rgba(0,0,0,1) 75%, rgba(255,92,0,0) 100%);
+        }
 
         /* 按钮与链接 */
         .btn {
-            padding: 8px 16px; border-radius: 4px; font-size: 14px; font-weight: bold;
+            padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: bold;
             cursor: pointer; border: 1px solid transparent; background: transparent; transition: all 0.2s;
         }
-        .btn-primary { background: var(--primary-color); color: white; }
-        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-primary {
+            background: var(--primary-color); color: white;
+            font-weight: bold; letter-spacing: 0.5px;
+        }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(249,158,0,0.35); }
         .btn-default { border-color: var(--border-color); color: var(--text-muted); background: white; }
         .btn-default:hover { border-color: var(--primary-color); color: var(--primary-color); }
         .btn-export { display: flex; align-items: center; gap: 4px; font-weight: normal; }
@@ -119,14 +128,14 @@ if (session_status() === PHP_SESSION_NONE) {
         .filter-bar-container {
             background-color: var(--bg-white);
             display: flex; flex-direction: column;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            margin-top: 16px;
+            border-radius: 12px;
+            border: 2px solid #000;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            margin-top: 20px;
         }
         
         .filter-content {
-            display: flex; flex-direction: column; gap: 16px; padding: 24px;
+            display: flex; flex-direction: column; gap: 14px; padding: 20px 24px;
         }
 
         .filter-row {
@@ -134,7 +143,8 @@ if (session_status() === PHP_SESSION_NONE) {
         }
         
         .filter-label {
-            font-size: 13px; color: var(--text-muted); font-weight: bold; width: 70px; flex-shrink: 0; padding-top: 8px;
+            font-size: 12px; color: var(--primary-color); font-weight: 700;
+            width: 70px; flex-shrink: 0; padding-top: 8px; letter-spacing: 0.5px;
         }
 
         .chip-list {
@@ -278,18 +288,25 @@ if (session_status() === PHP_SESSION_NONE) {
 
         /* ==================== 表格区域 ==================== */
         .table-container { 
-            overflow-x: auto; border-top: 1px solid var(--border-color); min-height: 400px;
+            overflow-x: auto;
+            border-top: 2px solid #000;
+            min-height: 400px;
             overflow-y: hidden;
         }
         .data-table { width: 100%; border-collapse: collapse; text-align: left; min-width: 1000px; margin: 0; }
         .data-table th {
-            padding: 16px; background-color: #52525b; font-size: 14px; color: #ffffff; 
-            font-weight: 500; letter-spacing: 0.5px; border-bottom: none; white-space: nowrap;
+            padding: 14px 16px; background-color: #636363; font-size: clamp(8px, 0.74vw, 14px);
+            color: #fff; font-weight: bold; letter-spacing: 0.5px; border-bottom: none;
+            white-space: nowrap; border: 1px solid #d1d5db;
         }
-        .data-table th:first-child, .data-table td:first-child { padding-left: 32px; }
-        .data-table td { padding: 16px; font-size: 14px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+        .data-table th:first-child, .data-table td:first-child { padding-left: 28px; }
+        .data-table td { 
+            padding: clamp(0px, 0.52vw, 10px) 16px;
+            font-size: clamp(8px, 0.74vw, 14px); border-bottom: 1px solid var(--border-color);
+            vertical-align: middle; border: 1px solid #d1d5db;
+        }
         .table-row { transition: background-color 0.2s; }
-        .table-row:hover { background-color: #fafafa; }
+        .table-row:hover { background-color: #fff9f1; }
         .empty-state { padding: 48px; text-align: center; color: var(--text-muted); }
 
         .company-badge {
