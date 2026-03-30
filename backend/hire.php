@@ -52,6 +52,15 @@ if (session_status() === PHP_SESSION_NONE) {
             width: 100%;
             min-width: 0;
         }
+        /* 内容卡片：筛选 + 表格 + 分页 包裹在一起 */
+        .content-card {
+            background: #fff;
+            border-radius: 12px;
+            border: 2px solid #000;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+            margin-top: 20px;
+            overflow: hidden;
+        }
         @media (max-width: 1024px) {
             .layout-container { min-width: auto; width: 100%; }
         }
@@ -128,10 +137,6 @@ if (session_status() === PHP_SESSION_NONE) {
         .filter-bar-container {
             background-color: var(--bg-white);
             display: flex; flex-direction: column;
-            border-radius: 12px;
-            border: 2px solid #000;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-            margin-top: 20px;
         }
         
         .filter-content {
@@ -290,7 +295,7 @@ if (session_status() === PHP_SESSION_NONE) {
         .table-container { 
             overflow-x: auto;
             border-top: 2px solid #000;
-            min-height: 400px;
+            min-height: 300px;
             overflow-y: hidden;
         }
         .data-table { width: 100%; border-collapse: collapse; text-align: left; min-width: 1000px; margin: 0; }
@@ -476,8 +481,10 @@ if (session_status() === PHP_SESSION_NONE) {
                 <button class="btn-link-action text-12" onclick="resetAllFilters()">清空全部</button>
             </div>
 
-        </div>
+        </div><!-- /#filterContainer -->
 
+        <div class="content-card">
+        <div id="filterContainer-inner"></div><!-- placeholder -->
         <div class="table-container">
             <table class="data-table">
                 <thead>
@@ -506,8 +513,9 @@ if (session_status() === PHP_SESSION_NONE) {
             </div>
         </footer>
 
-    </div>
+        </div><!-- /.content-card -->
 
+    </div>
     <div id="applicantModal" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header">
@@ -739,7 +747,8 @@ if (session_status() === PHP_SESSION_NONE) {
                     allData = json.data.list;
                     renderTable(allData);
                     await fetchStats();
-                    updateChipCounts();   // 只刷新计数，不重建 chip DOM，onclick 不丢失
+                    renderChips();        // 数据到位后重建 chips，确保公司/职位计数正确
+                    updateChipCounts();   // 更新状态计数
                     renderActiveTags();
                 } else {
                     els.tableBody.innerHTML = `<tr><td colspan="8" class="empty-state">加载失败：${json.msg}</td></tr>`;
