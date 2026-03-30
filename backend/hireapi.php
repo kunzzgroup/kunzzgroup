@@ -385,11 +385,34 @@ HTML;
         $headers  = "MIME-Version: 1.0\r\n";
         $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
         $headers .= "From: {$fromName} <{$fromEmail}>\r\n";
-        $headers .= "Reply-To: {$fromEmail}\r\n";
-        $headers .= "X-Mailer: PHP/" . phpversion();
 
-        @mail($hrEmail, $subject, $htmlBody, $headers);
-        // ── /HR 通知邮件 ───────────────────────────────────────────────────
+        // ── PHPMailer via SMTP (mailer_config.php) ─────────────────────────
+        try {
+            require_once __DIR__ . '/mailer_config.php';
+            require_once VENDOR_AUTOLOAD;
+
+            $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+            $mail->isSMTP();
+            $mail->Host       = SMTP_HOST;
+            $mail->SMTPAuth   = true;
+            $mail->Username   = SMTP_USER;
+            $mail->Password   = SMTP_PASS;
+            $mail->SMTPSecure = SMTP_SECURE;
+            $mail->Port       = SMTP_PORT;
+            $mail->CharSet    = 'UTF-8';
+
+            $mail->setFrom(SMTP_FROM, SMTP_FROM_NAME);
+            $mail->addAddress($hrEmail);
+            $mail->isHTML(true);
+            $mail->Subject = "[新招聘申请] {$chineseName} 申请 {$companyName} · {$jobTitle}";
+            $mail->Body    = $htmlBody;
+
+            $mail->send();
+        } catch (\Exception $e) {
+            // 邮件失败不阻断申请流程，静默记录
+            error_log('[hireapi] PHPMailer error: ' . $e->getMessage());
+        }
+        // ── /PHPMailer ─────────────────────────────────────────────────────
 
         sendResponse(200, "申请提交成功！我们会尽快与您联系。", ["id" => (int)$newId]);
     } catch (PDOException $e) {
