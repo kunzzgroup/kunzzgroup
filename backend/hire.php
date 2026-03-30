@@ -658,8 +658,11 @@ if (session_status() === PHP_SESSION_NONE) {
 
         document.addEventListener('DOMContentLoaded', () => {
             initDatePicker();
-            // 初始化时从 API 加载真实数据
-            fetchStats().then(() => fetchData());
+            // 先渲染 chip DOM（让筛选区立即可见），再拉取数据
+            fetchStats().then(() => {
+                renderChips();     // ← 必须先建立 chip DOM
+                fetchData();       // 拉数据，完成后只更新数字
+            });
             
             // 搜索框事件
             els.smartWrapper.addEventListener('click', (e) => {
@@ -811,7 +814,7 @@ if (session_status() === PHP_SESSION_NONE) {
                     i + 1, r.chinese_name||'', r.english_name||'', r.gender||'',
                     r.company_name||'', r.job_title||'', r.email||'',
                     r.phone_code||'', r.phone_number||'',
-                    r.resume_file_url ? (location.origin + '/' + r.resume_file_url) : '',
+                    r.resume_file_url ? (location.origin + '/backend/' + r.resume_file_url) : '',
                     statusLabel[r.status] !== undefined ? statusLabel[r.status] : String(r.status),
                     r.hr_remarks||'', (r.created_at||'').replace('T',' ')
                 ];
@@ -979,7 +982,7 @@ if (session_status() === PHP_SESSION_NONE) {
                 // 简历预览按鈕
                 const resumeBtn = clone.querySelector('.js-resume');
                 if (app.resume_file_url) {
-                    resumeBtn.onclick = () => window.open('/' + app.resume_file_url, '_blank');
+                    resumeBtn.onclick = () => window.open('/backend/' + app.resume_file_url, '_blank');
                 } else {
                     resumeBtn.textContent = '无附件';
                     resumeBtn.style.opacity = '0.4';
@@ -1087,7 +1090,7 @@ if (session_status() === PHP_SESSION_NONE) {
             // 简历按鈕
             const resumeBtn = document.getElementById('modalResumeBtn');
             if (app.resume_file_url) {
-                resumeBtn.onclick = () => window.open('/' + app.resume_file_url, '_blank');
+                resumeBtn.onclick = () => window.open('/backend/' + app.resume_file_url, '_blank');
                 resumeBtn.style.opacity = '1';
             } else {
                 resumeBtn.textContent = '无简历附件';
