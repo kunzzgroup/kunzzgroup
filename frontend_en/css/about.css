@@ -161,7 +161,8 @@ body::-webkit-scrollbar {
   margin: 0 58px 0 0;
   padding: 0;
   color: #888888;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
 }
 
 /* ===========================================
@@ -215,15 +216,16 @@ body::-webkit-scrollbar {
 
 .vision-card {
   width: clamp(27.0000rem, 39.2857vw + 1.8571rem, 49.0000rem);
-  height: clamp(12.0000rem, 9.7222vw + 7.3333rem, 19.0000rem);
+  min-height: clamp(12.0000rem, 9.7222vw + 7.3333rem, 19.0000rem);
   background-color: #FFF3E6;
   border-radius: 20px;
-  padding: 0 clamp(0px, 1.2vw, 32px);
+  padding: 0 clamp(0px, 1.2vw, 32px) clamp(16px, 1.5vw, 28px);
   text-align: left;
   color: #888888;
   box-shadow:
     0px 4px 6px rgba(0, 0, 0, 0.1),
     0px 10px 20px rgba(0, 0, 0, 0.15);
+  overflow: visible;
 }
 
 .vision-label {
@@ -333,7 +335,7 @@ body::-webkit-scrollbar {
 
 .values-card {
   width: clamp(13.1250rem, 15.6250vw + 3.1250rem, 21.8750rem);
-  height: clamp(13.7500rem, 14.5089vw + 4.4643rem, 21.8750rem);
+  min-height: clamp(13.7500rem, 14.5089vw + 4.4643rem, 21.8750rem);
   background-color: #FFF1E5;
   padding: clamp(15px, 2vw, 24px) clamp(10px, 1.5vw, 16px);
   border-radius: 16px;

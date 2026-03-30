@@ -612,7 +612,7 @@ if (slideParam !== null) {
         // ===== 月份侧栏 =====
         function updateMonthSidebar() {
             const currentYear = years[currentIndex];
-            const months = yearGroups[currentYear] || [];
+            const months = (yearGroups[currentYear] || []).filter(m => m.month > 0);
             const sidebar = document.getElementById('monthSidebar');
             
             sidebar.innerHTML = months.map(m => 
