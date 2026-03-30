@@ -628,7 +628,8 @@ if (session_status() === PHP_SESSION_NONE) {
         ];
 
         // ── 全局数据 ───────────────────────────────────────────────────────────
-        let allData   = [];   // 当前已加载的申请记录
+        let allData   = [];   // 当前过滤后的申请记录
+        let rawData   = [];   // 全量未过滤数据（用于公司/职位 chip 计数）
         let statsData = { total: 0, '0': 0, '1': 0, '2': 0, '3': 0 };  // 统计数据
 
         // 核心：全局状态管理
@@ -676,10 +677,11 @@ if (session_status() === PHP_SESSION_NONE) {
 
         document.addEventListener('DOMContentLoaded', () => {
             initDatePicker();
-            // 先渲染 chip DOM（让筛选区立即可见），再拉取数据
-            fetchStats().then(() => {
-                renderChips();     // ← 必须先建立 chip DOM
-                fetchData();       // 拉数据，完成后只更新数字
+            // 加载全量数据（用于 chip 计数）+ 芯片化 + 拉取当前过滤结果
+            fetchStats().then(async () => {
+                await loadRawData();   // 这里获取全量 rawData
+                renderChips();         // chip DOM 建立（此时 rawData 已就位）
+                fetchData();           // 拉当前过滤结果
             });
             
             // 搜索框事件
@@ -723,6 +725,14 @@ if (session_status() === PHP_SESSION_NONE) {
         });
 
         // ── API 拉取函数 ─────────────────────────────────────────────────────────
+        async function loadRawData() {
+            try {
+                const res  = await fetch('hireapi.php?action=list&page_size=500');
+                const json = await res.json();
+                if (json.code === 200) rawData = json.data.list;
+            } catch(e) { console.warn('loadRawData failed', e); }
+        }
+
         async function fetchStats() {
             try {
                 const res  = await fetch('hireapi.php?action=stats');
@@ -770,7 +780,10 @@ if (session_status() === PHP_SESSION_NONE) {
                 const span = btn.querySelector('.chip-count');
                 if (!span) return;
                 const v = btn.getAttribute('data-chip-status');
-                span.textContent = v === '' ? (statsData.total || 0) : (statsData[String(v)] || 0);
+                // 状态用 allData（当前过滤结果）统计
+                span.textContent = v === ''
+                    ? allData.length
+                    : allData.filter(r => String(r.status) === v).length;
             });
         }
 
@@ -809,17 +822,22 @@ if (session_status() === PHP_SESSION_NONE) {
             // 计算每个 chip 的数量
             let cnt = 0;
             if (type === 'status') {
-                // 状态：来自 statsData（服务端统计，不受当前筛选影响）
-                cnt = isAllButton ? (statsData.total || 0) : (statsData[String(value)] || 0);
-                btn.setAttribute('data-chip-status', String(value));
-            } else if (type === 'company') {
-                // 公司：从 allData 客户端统计
+                // 状态：用 allData（当前过滤结果）统计 → 放映当前公司/条件下的真实数据
                 cnt = isAllButton
                     ? allData.length
-                    : allData.filter(r => r.company_name === value).length;
+                    : allData.filter(r => String(r.status) === String(value)).length;
+                btn.setAttribute('data-chip-status', String(value));
+            } else if (type === 'company') {
+                // 公司：用 rawData（全量）统计 → 无论当前选检哪个公司，其他公司计数不变
+                cnt = isAllButton
+                    ? rawData.length
+                    : rawData.filter(r => r.company_name === value).length;
             } else if (type === 'jobTitle') {
-                // 职位：从 allData 统计（受当前 company 筛选影响）
-                cnt = allData.filter(r => r.job_title === value).length;
+                // 职位：用 rawData，但若有公司过滤则局限在该公司的 rawData
+                const base = state.company
+                    ? rawData.filter(r => r.company_name === state.company)
+                    : rawData;
+                cnt = base.filter(r => r.job_title === value).length;
             }
 
             const countHtml = `<span class="chip-count">${cnt}</span>`;
