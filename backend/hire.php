@@ -2,6 +2,37 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+// ── 登录检查（在输出任何 HTML 之前）────────────────────────────────────────
+define('SESSION_TIMEOUT_HIRE', 60);
+$hasRemember = (
+    isset($_COOKIE['user_id'], $_COOKIE['username'], $_COOKIE['remember_token']) &&
+    $_COOKIE['remember_token'] === '1'
+);
+
+if (isset($_SESSION['user_id'])) {
+    // session 超时检查
+    if (
+        isset($_SESSION['last_activity']) &&
+        (time() - $_SESSION['last_activity'] > SESSION_TIMEOUT_HIRE) &&
+        !$hasRemember
+    ) {
+        session_unset(); session_destroy();
+        header('Location: /frontend/login.html');
+        exit;
+    }
+    $_SESSION['last_activity'] = time();
+} elseif ($hasRemember) {
+    // 恢复 remember-me session
+    $_SESSION['user_id']       = $_COOKIE['user_id'];
+    $_SESSION['username']      = $_COOKIE['username'];
+    $_SESSION['position']      = $_COOKIE['position'] ?? null;
+    $_SESSION['last_activity'] = time();
+} else {
+    // 未登录 → 跳转登录页，登录后返回 hire
+    header('Location: /frontend/login.html?redirect=hire');
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
