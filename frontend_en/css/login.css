@@ -298,3 +298,52 @@ form select {
     margin: 20px 0 0 0;
     padding: 0;
 }
+
+/* ===========================================
+   移动端响应式 (< 768px)
+   =========================================== */
+@media (max-width: 768px) {
+    .login-section {
+        padding: 16px;
+        align-items: center;
+        background-size: cover;
+    }
+
+    .login-form {
+        width: 90vw;
+        max-width: 360px;
+        padding: 20px 24px 40px;
+        box-sizing: border-box;
+    }
+
+    .login-form h2 {
+        font-size: clamp(26px, 7.5vw, 38px);
+        margin-bottom: 12px;
+    }
+
+    .login-form button[type="submit"] {
+        font-size: 15px;
+        padding: 10px;
+        margin-top: 16px;
+    }
+
+    .form-links a {
+        font-size: 12px;
+    }
+
+    .remember-me {
+        font-size: 11px;
+    }
+}
+
+/* 超小屏 (< 480px) */
+@media (max-width: 480px) {
+    .login-form {
+        width: 94vw;
+        padding: 16px 16px 30px;
+    }
+
+    .login-form h2 {
+        font-size: clamp(20px, 7vw, 30px);
+    }
+}

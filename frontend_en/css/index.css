@@ -717,3 +717,214 @@ body::-webkit-scrollbar {
     color: #FF5C00;
 }
 
+/* ===========================================
+   平板端响应式 (768px - 1280px)
+   =========================================== */
+@media (max-width: 1280px) {
+    .comprofile-section {
+        width: 95vw;
+        gap: clamp(30px, 5vw, 80px);
+        padding: clamp(30px, 4vw, 60px) clamp(24px, 3vw, 48px) 0;
+    }
+
+    .about-section {
+        padding: 60px 0;
+    }
+}
+
+/* ===========================================
+   移动端响应式 (< 768px)
+   =========================================== */
+@media (max-width: 768px) {
+
+    /* ===== 首页 ===== */
+    .home h1 {
+        font-size: clamp(22px, 6.5vw, 42px);
+        margin-bottom: 12px;
+        line-height: 130%;
+    }
+
+    .home p {
+        font-size: clamp(11px, 3.5vw, 16px);
+        letter-spacing: 0.5px;
+        margin-bottom: 20px;
+    }
+
+    .decor-line {
+        width: 80vw;
+        margin-left: 10vw;
+    }
+
+    /* ===== 公司简介 ===== */
+    .about-section {
+        padding: 50px 0 0 0;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .comprofile-section {
+        flex-direction: column;
+        width: 100%;
+        height: auto;
+        align-items: center;
+        padding: 20px 20px 0;
+        gap: 16px;
+    }
+
+    .comprofile-text {
+        text-align: center;
+        min-width: unset;
+        width: 100%;
+    }
+
+    .comprofile-subtitle {
+        justify-content: center;
+        font-size: 14px;
+        height: auto;
+        margin-bottom: 4px;
+    }
+
+    .comprofile-title {
+        font-size: clamp(24px, 7vw, 40px);
+        margin-bottom: 8px;
+    }
+
+    .comprofile-description {
+        font-size: 13px;
+        height: auto;
+        line-height: 1.7;
+        max-width: 100%;
+        text-align: left;
+    }
+
+    .comprofile-image {
+        width: 140px;
+        max-width: 140px;
+        padding: 10px 0;
+    }
+
+    .comprofile-image img {
+        width: 120px;
+        height: 120px;
+    }
+
+    /* ===== 数据栏 ===== */
+    .stats-section {
+        height: auto;
+        padding: 20px 16px;
+        margin-bottom: 0;
+        gap: 12px;
+        flex-wrap: nowrap;
+    }
+
+    .stat-number {
+        font-size: clamp(20px, 6vw, 32px);
+    }
+
+    .stat-label {
+        font-size: clamp(10px, 3vw, 13px);
+    }
+
+    .divider {
+        height: clamp(24px, 5vh, 40px);
+    }
+
+    /* ===== 文化区域 ===== */
+    .culture-section {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        padding: 60px 16px 30px;
+        gap: 24px;
+    }
+
+    .culture-left {
+        grid-template-columns: repeat(2, 1fr);
+        grid-gap: 12px;
+        margin: 0;
+        width: 100%;
+    }
+
+    .culture-card {
+        width: 100%;
+        height: clamp(130px, 40vw, 180px);
+        padding: 12px 8px;
+    }
+
+    .culture-icon {
+        width: clamp(28px, 10vw, 50px);
+        height: clamp(28px, 10vw, 50px);
+        margin-top: 8px;
+    }
+
+    .culture-card h3 {
+        font-size: clamp(12px, 4vw, 18px);
+    }
+
+    .culture-card p {
+        font-size: 11px;
+        width: 100%;
+        padding: 0 4px;
+        margin-bottom: 8px;
+    }
+
+    .culture-right {
+        width: 100%;
+        height: auto;
+        padding-right: 0;
+        text-align: center;
+        align-items: center;
+    }
+
+    .culture-title {
+        font-size: clamp(22px, 6vw, 36px);
+        margin-top: 8px;
+        margin-bottom: 8px;
+    }
+
+    .culture-description {
+        font-size: clamp(12px, 3.5vw, 15px);
+        margin-bottom: 16px;
+    }
+
+    .culture-button {
+        width: auto;
+        height: auto;
+        padding: 8px 20px;
+        font-size: 13px;
+        border-radius: 8px;
+        margin-bottom: 0;
+    }
+}
+
+/* ===========================================
+   超小屏 (< 480px)
+   =========================================== */
+@media (max-width: 480px) {
+    .home h1 {
+        font-size: clamp(18px, 6vw, 30px);
+    }
+
+    .decor-line {
+        width: 90vw;
+        margin-left: 5vw;
+    }
+
+    .stats-section {
+        gap: 8px;
+        padding: 16px 8px;
+    }
+
+    .stat-number {
+        font-size: clamp(18px, 5.5vw, 26px);
+    }
+
+    .culture-left {
+        grid-template-columns: repeat(2, 1fr);
+        grid-gap: 8px;
+    }
+
+    .culture-card {
+        height: clamp(110px, 38vw, 160px);
+    }
+}

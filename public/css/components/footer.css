@@ -29,14 +29,14 @@
     z-index: 2;
 }
 
-/* Footer - Slide 顶部遮罩 */
+/* Footer - Slide 顶部遮罩（覆盖上方页面残影） */
 .swiper-slide.footer-slide::before {
     content: '';
     position: absolute;
-    top: clamp(-45rem, -71vh, -40rem); /* 响应式顶部位置 */
+    top: -71vh;     /* 向上延伸覆盖前一页 */
     left: 0;
     right: 0;
-    height: clamp(40rem, 64vh, 45rem); /* 响应式遮罩高度 */
+    height: 64vh;   /* 遮罩高度 */
     background: #2a2a2a;
     z-index: 1;
 }
@@ -342,5 +342,126 @@
     
     .swiper-slide.footer-slide::before {
         top: -74vh;
+    }
+}
+
+/* =============================================
+   移动端专属 Footer 样式 (< 768px)
+   ============================================= */
+@media (max-width: 768px) {
+    /* footer-slide 高度自适应，允许内容撑开 */
+    .swiper-slide.footer-slide {
+        height: auto;
+        min-height: 44vh;
+    }
+
+    .footer-scroll-buffer {
+        min-height: 44vh;
+    }
+
+    /* 遮罩覆盖上方整个区域，防止白底 */
+    .swiper-slide.footer-slide::before {
+        top: -100vh;
+        height: 100vh;
+        background: #2a2a2a;
+    }
+
+    /* Footer 改为竖排 */
+    .footer {
+        flex-direction: column;
+        flex-wrap: wrap;
+        height: auto;
+        padding: 20px 24px 16px;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .footer-logo {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    .footer-logo h1 {
+        font-size: 13px;
+    }
+
+    .footer-logo p {
+        font-size: 11px;
+        line-height: 1.5;
+        margin-top: 4px;
+    }
+
+    .footer-logo-img {
+        width: 100px;
+        margin-top: 6px;
+    }
+
+    /* 分栏并排，两列布局 */
+    .footer-section {
+        flex: 0 0 calc(50% - 8px);
+        max-width: calc(50% - 8px);
+        min-width: 0;
+        margin-bottom: 8px;
+    }
+
+    .footer-section h4 {
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+
+    .footer-section li {
+        font-size: 11px;
+        margin-bottom: 6px;
+    }
+
+    .footer-bottom {
+        font-size: 10px;
+        padding: 8px 16px;
+        text-align: center;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .footer-bottom::before {
+        left: 16px;
+        right: 16px;
+        height: 1px;
+    }
+}
+
+/* 超小屏幕 (< 480px) */
+@media (max-width: 480px) {
+    .swiper-slide.footer-slide {
+        height: auto;
+        min-height: 50vh;
+    }
+
+    .footer-scroll-buffer {
+        min-height: 50vh;
+    }
+
+    .swiper-slide.footer-slide::before {
+        top: -100vh;
+        height: 100vh;
+    }
+
+    .footer {
+        padding: 16px 16px 12px;
+        gap: 10px;
+    }
+
+    /* 超小屏幕：分栏单列 */
+    .footer-section {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .footer-section h4 {
+        font-size: 11px;
+    }
+
+    .footer-section li {
+        font-size: 10px;
+        margin-bottom: 4px;
     }
 }
