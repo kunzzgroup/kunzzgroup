@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -778,7 +778,7 @@ if (session_status() === PHP_SESSION_NONE) {
             });
         }
 
-        // 创建单个 Chip
+        // 创建单个 Chip（所有类型都显示计数）
         function createChip(type, value, label, icon) {
             const btn         = document.createElement('button');
             const isActive    = state[type] !== '' && state[type].toString() === value.toString();
@@ -787,14 +787,25 @@ if (session_status() === PHP_SESSION_NONE) {
 
             btn.className = `chip ${active ? 'active' : ''}`;
 
-            // 状态 chip 显示计数 + 加 data-chip-status 属性
-            let countHtml = '';
+            // 计算每个 chip 的数量
+            let cnt = 0;
             if (type === 'status') {
-                const cnt = isAllButton ? (statsData.total || 0) : (statsData[String(value)] || 0);
-                countHtml = `<span class="chip-count">${cnt}</span>`;
+                // 状态：来自 statsData（服务端统计，不受当前筛选影响）
+                cnt = isAllButton ? (statsData.total || 0) : (statsData[String(value)] || 0);
                 btn.setAttribute('data-chip-status', String(value));
+            } else if (type === 'company') {
+                // 公司：从 allData 客户端统计
+                cnt = isAllButton
+                    ? allData.length
+                    : allData.filter(r => r.company_name === value).length;
+            } else if (type === 'jobTitle') {
+                // 职位：从 allData 统计（受当前 company 筛选影响）
+                cnt = allData.filter(r => r.job_title === value).length;
             }
+
+            const countHtml = `<span class="chip-count">${cnt}</span>`;
             btn.innerHTML = `${icon ? `<span style="margin-right:2px">${icon}</span>` : ''}${label}${countHtml}`;
+
             btn.onclick = () => {
                 state[type] = (active && !isAllButton) ? '' : value;
                 if (type === 'company') state.jobTitle = '';
