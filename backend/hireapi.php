@@ -151,18 +151,17 @@ function handleGet(): void
         $countStmt->execute($params);
         $total = (int)$countStmt->fetchColumn();
 
-        // 分页数据
+        // 分页数据 — LIMIT/OFFSET 直接嵌入（已 int 强转，无注入风险）
         $sql  = "SELECT id, company_name, job_title, chinese_name, english_name,
                         gender, email, phone_code, phone_number, resume_file_url,
                         status, hr_remarks, created_at, updated_at
                  FROM job_applications
                  WHERE $whereStr
                  ORDER BY created_at DESC
-                 LIMIT ? OFFSET ?";
+                 LIMIT $pageSize OFFSET $offset";
 
-        $dataParams   = array_merge($params, [$pageSize, $offset]);
         $stmt         = $pdo->prepare($sql);
-        $stmt->execute($dataParams);
+        $stmt->execute($params);
         $applications = $stmt->fetchAll();
 
         sendResponse(200, "获取成功", [
