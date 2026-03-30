@@ -142,12 +142,13 @@ include '../public/header.php';
     <div id="formModal" class="modal">
         <div class="job-modal-content">
             <span class="close-btn" onclick="closeForm()">&times;</span>
-            <form class="job-form" id="jobApplicationForm" action="https://api.web3forms.com/submit" method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="access_key" value="a18bc4c6-2f16-4861-8d10-a3de747cab50">
-                <input type="hidden" name="redirect" value="https://kunzzgroup.com/frontend/success.html">
+            <form class="job-form" id="jobApplicationForm" enctype="multipart/form-data">
+                <!-- 隐藏字段：职位名称 & 申请公司 -->
+                <input type="hidden" id="formPosition" name="position">
+                <input type="hidden" id="formCompany" name="company_name">
                 <h2>申请职位</h2>
                 <label>职位名称：</label>
-                <input type="text" id="formPosition" name="position" readonly>
+                <input type="text" id="formPositionDisplay" readonly style="background:#f5f5f5;">
                 
                 <!-- 中文姓名和性别在同一行 -->
                 <div class="job-form-row">
@@ -183,7 +184,11 @@ include '../public/header.php';
                 </div>
                 <label>上传简历（PDF，≤3MB）：</label>
                 <input type="file" name="resume" id="resume" accept=".pdf" required>
-                <button type="submit" class="job-submit-btn">提交申请</button>
+
+                <!-- 提交结果提示 -->
+                <div id="formResultMsg" style="display:none; margin-top:12px; padding:10px 14px; border-radius:6px; font-size:14px;"></div>
+
+                <button type="submit" id="jobSubmitBtn" class="job-submit-btn">提交申请</button>
             </form>
         </div>
     </div>
@@ -1602,21 +1607,94 @@ function closeJobDetail() {
     document.getElementById('jobDetailModal').style.display = 'none';
 }
 
-// 从详情弹窗打开申请表单
+// 从详情弹窗打开申请表单（同时传入公司名）
 function openFormFromDetail() {
-    const jobTitle = document.getElementById('jobDetailTitle').textContent;
+    const jobTitle   = document.getElementById('jobDetailTitle').textContent;
+    const jobCompany = document.getElementById('jobDetailCompany').textContent;
     closeJobDetail();
-    openForm(jobTitle);
+    openForm(jobTitle, jobCompany);
 }
 
-function openForm(position) {
+function openForm(position, company) {
+    // 隐藏字段（提交用）
     document.getElementById('formPosition').value = position;
+    document.getElementById('formCompany').value  = company || '';
+    // 显示字段（只读展示用）
+    document.getElementById('formPositionDisplay').value = position;
+    // 重置表单结果提示
+    const msgEl = document.getElementById('formResultMsg');
+    msgEl.style.display = 'none';
+    msgEl.textContent   = '';
+    // 重置提交按钮状态
+    const btn = document.getElementById('jobSubmitBtn');
+    btn.disabled    = false;
+    btn.textContent = '提交申请';
     document.getElementById('formModal').style.display = 'flex';
 }
 
 function closeForm() {
     document.getElementById('formModal').style.display = 'none';
+    document.getElementById('jobApplicationForm').reset();
 }
+
+// ── AJAX 提交申请表单 ──────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+    const form    = document.getElementById('jobApplicationForm');
+    const submitBtn = document.getElementById('jobSubmitBtn');
+    const msgEl   = document.getElementById('formResultMsg');
+
+    if (!form) return;
+
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        // 防止重复提交
+        submitBtn.disabled    = true;
+        submitBtn.textContent = '提交中…';
+        msgEl.style.display   = 'none';
+
+        const formData = new FormData(form);
+
+        try {
+            const res  = await fetch('/backend/hireapi.php', {
+                method : 'POST',
+                body   : formData
+            });
+            const json = await res.json();
+
+            if (json.code === 200) {
+                // 成功
+                msgEl.style.background = '#d1fae5';
+                msgEl.style.color      = '#065f46';
+                msgEl.style.border     = '1px solid #6ee7b7';
+                msgEl.textContent      = '✅ ' + json.msg;
+                msgEl.style.display    = 'block';
+                form.reset();
+                submitBtn.textContent  = '已提交';
+                // 3 秒后自动关闭弹窗
+                setTimeout(() => closeForm(), 3000);
+            } else {
+                // 业务错误
+                msgEl.style.background = '#fee2e2';
+                msgEl.style.color      = '#991b1b';
+                msgEl.style.border     = '1px solid #fca5a5';
+                msgEl.textContent      = '⚠️ ' + (json.msg || '提交失败，请重试');
+                msgEl.style.display    = 'block';
+                submitBtn.disabled    = false;
+                submitBtn.textContent = '重新提交';
+            }
+        } catch (err) {
+            // 网络错误
+            msgEl.style.background = '#fee2e2';
+            msgEl.style.color      = '#991b1b';
+            msgEl.style.border     = '1px solid #fca5a5';
+            msgEl.textContent      = '⚠️ 网络错误，请检查连接后重试';
+            msgEl.style.display    = 'block';
+            submitBtn.disabled    = false;
+            submitBtn.textContent = '重新提交';
+        }
+    });
+});
 
 // 点击弹窗外部关闭
 window.onclick = function(event) {

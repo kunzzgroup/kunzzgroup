@@ -553,6 +553,11 @@ endif; ?>
                                 考核表单
                             </a>
                         </div>
+                        <div class="menu-item-wrapper">
+                            <a href="hire" class="informationmenu-item">
+                                招聘列表
+                            </a>
+                        </div>
                     <?php
     endif; ?>
                 </div>
