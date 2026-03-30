@@ -184,7 +184,7 @@ if (isset($_SESSION['user_id'])) {
         }
 
         .chip-list {
-            display: flex; flex-wrap: wrap; gap: 10px; flex: 1;
+            display: flex; flex-wrap: wrap; gap: 10px; flex: 1; overflow: visible; min-height: 34px;
         }
 
         .chip {
@@ -790,7 +790,7 @@ if (isset($_SESSION['user_id'])) {
         // ── API 拉取函数 ─────────────────────────────────────────────────────────
         async function loadRawData() {
             try {
-                const res  = await fetch('hireapi.php?action=list&page_size=500');
+                const res  = await fetch('hireapi.php?action=list&page_size=2000&allow_large=1');
                 const json = await res.json();
                 if (json.code === 200) rawData = json.data.list;
             } catch(e) { console.warn('loadRawData failed', e); }
@@ -1265,7 +1265,7 @@ if (isset($_SESSION['user_id'])) {
     </script>
 
     <!-- 待处理申请通知 Toast -->
-    <div id="pendingToast" style="position:relative;">
+    <div id="pendingToast">
         <div class="toast-icon">🔔</div>
         <div class="toast-body">
             <div class="toast-title">有待审批的招聘申请</div>

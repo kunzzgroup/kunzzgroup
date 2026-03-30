@@ -113,7 +113,9 @@ function handleGet(): void
 
     // ── 分页参数 ──────────────────────────────────────────────────────────
     $page = max(1, (int) ($_GET['page'] ?? 1));
-    $pageSize = max(1, min(100, (int) ($_GET['page_size'] ?? 20)));
+    $allowLarge = isset($_GET['allow_large']) && $_GET['allow_large'] === '1';
+    $maxSize    = $allowLarge ? 2000 : 100;
+    $pageSize = max(1, min($maxSize, (int) ($_GET['page_size'] ?? 20)));
     $offset = ($page - 1) * $pageSize;
 
     // ── 构建 SQL ──────────────────────────────────────────────────────────
