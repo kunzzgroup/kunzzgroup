@@ -161,8 +161,7 @@ body::-webkit-scrollbar {
   margin: 0 58px 0 0;
   padding: 0;
   color: #888888;
-  white-space: normal;
-  word-break: break-word;
+  white-space: nowrap;
 }
 
 /* ===========================================
@@ -216,16 +215,15 @@ body::-webkit-scrollbar {
 
 .vision-card {
   width: clamp(27.0000rem, 39.2857vw + 1.8571rem, 49.0000rem);
-  min-height: clamp(12.0000rem, 9.7222vw + 7.3333rem, 19.0000rem);
+  height: clamp(12.0000rem, 9.7222vw + 7.3333rem, 19.0000rem);
   background-color: #FFF3E6;
   border-radius: 20px;
-  padding: 0 clamp(0px, 1.2vw, 32px) clamp(16px, 1.5vw, 28px);
+  padding: 0 clamp(0px, 1.2vw, 32px);
   text-align: left;
   color: #888888;
   box-shadow:
     0px 4px 6px rgba(0, 0, 0, 0.1),
     0px 10px 20px rgba(0, 0, 0, 0.15);
-  overflow: visible;
 }
 
 .vision-label {
@@ -335,7 +333,7 @@ body::-webkit-scrollbar {
 
 .values-card {
   width: clamp(13.1250rem, 15.6250vw + 3.1250rem, 21.8750rem);
-  min-height: clamp(13.7500rem, 14.5089vw + 4.4643rem, 21.8750rem);
+  height: clamp(13.7500rem, 14.5089vw + 4.4643rem, 21.8750rem);
   background-color: #FFF1E5;
   padding: clamp(15px, 2vw, 24px) clamp(10px, 1.5vw, 16px);
   border-radius: 16px;
@@ -859,25 +857,30 @@ body::-webkit-scrollbar {
   min-width: 72px;
   flex-shrink: 0;
   position: relative;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-/* Connecting line between month dots */
-.timeline-month-sidebar::before {
-  content: '';
+.timeline-month-sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Dynamic connecting line between month dots (created by JS) */
+.sidebar-line {
   position: absolute;
-  left: 23px;
-  top: 25%;
-  bottom: 25%;
   width: 3px;
   background: rgba(255, 255, 255, 0.4);
   border-radius: 2px;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .month-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 14px;
+  padding: clamp(6px, 0.8vw, 12px) 14px;
   cursor: pointer;
   color: rgba(255, 255, 255, 0.75);
   font-size: clamp(14px, 1.1vw, 18px);
@@ -886,6 +889,7 @@ body::-webkit-scrollbar {
   position: relative;
   z-index: 1;
   user-select: none;
+  flex-shrink: 0;
 }
 
 .month-item:hover {
@@ -938,7 +942,7 @@ body::-webkit-scrollbar {
     gap: 4px;
   }
 
-  .timeline-month-sidebar::before {
+  .sidebar-line {
     display: none;
   }
 
@@ -1669,4 +1673,29 @@ img.image-3d-rotate:hover,
   opacity: 1;
   transform: translateY(0);
   transition-delay: 0.05s;
+}
+
+/* ===========================================
+   English-specific overrides
+   (English text is longer than Chinese, needs flexible heights)
+   =========================================== */
+
+/* Allow vision cards to expand for longer English text */
+.vision-card {
+  height: auto;
+  min-height: clamp(12.0000rem, 9.7222vw + 7.3333rem, 19.0000rem);
+  padding-bottom: clamp(16px, 1.5vw, 28px);
+  overflow: visible;
+}
+
+/* Allow values cards to expand for multi-line English titles */
+.values-card {
+  height: auto;
+  min-height: clamp(13.7500rem, 14.5089vw + 4.4643rem, 21.8750rem);
+}
+
+/* Allow intro text to wrap for longer English descriptions */
+.intro-content p {
+  white-space: normal;
+  word-break: break-word;
 }
