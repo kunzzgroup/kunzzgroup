@@ -564,11 +564,12 @@ endif; ?>
                                 <span>招聘列表</span>
                                 <?php
                                 // 当前不在 hire 页面才显示待处理角标
-                                $currentPage = basename($_SERVER['PHP_SELF'] ?? '', '.php');
-                                $isHirePage = ($currentPage === 'hire');
+                                $scriptName  = basename($_SERVER['SCRIPT_NAME'] ?? $_SERVER['PHP_SELF'] ?? '');
+                                $currentPage = strtolower(pathinfo($scriptName, PATHINFO_FILENAME));
+                                $isHirePage  = ($currentPage === 'hire');
                                 if (!$isHirePage && isset($pdo)) {
                                     try {
-                                        $pendingStmt = $pdo->query("SELECT COUNT(*) FROM job_applications WHERE status = 0 AND is_deleted = 0");
+                                        $pendingStmt = $pdo->query("SELECT COUNT(*) FROM job_applications WHERE status = 0");
                                         $pendingCount = (int)$pendingStmt->fetchColumn();
                                     } catch(Exception $e) { $pendingCount = 0; }
                                 } else {
