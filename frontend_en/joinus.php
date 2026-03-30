@@ -12,7 +12,7 @@ header("Expires: Wed, 11 Jan 1984 05:00:00 GMT");
 $pageTitle = 'KUNZZ HOLDINGS';
 $additionalCSS = ['css/joinus.css','../public_en/css/components/header.css','../public_en/css/components/social.css','../public_en/css/components/footer.css']; // footer.css 放最后，确保样式优先级
 $showPageIndicator = true;
-$totalSlides = 5;
+$totalSlides = 4;
 
 // 包含header
 include '../public_en/header.php';
@@ -189,104 +189,125 @@ include '../public_en/header.php';
     </div>
   </div>    
 
-  <!-- 意见表格 -->
+  <!-- Contact Us + Feedback Form Combined -->
   <div class="swiper-slide">
-  <div class="form-wrapper">
-  <h2 class="main-title">Kindly Provide Your Feedback</h2>
-  <section class="join-us-form"> 
-    <form id="jobApplicationForm" action="https://api.web3forms.com/submit" method="POST" enctype="multipart/form-data">
+  <div class="contact-form-section" id="map">
+    <div class="contact-form-container">
 
-      <!-- 中文姓名 + 性别 -->
-      <div class="form-group-row">
-        <div class="half-width">
-          <label for="chineseName">Chinese Name*</label>
-          <input type="hidden" name="access_key" value="a18bc4c6-2f16-4861-8d10-a3de747cab50">
-          <input type="hidden" name="redirect" value="https://kunzzgroup.com/frontend_en/success.html">
-          <input type="text" id="chineseName" name="chineseName" placeholder="Please enter your Chinese name" required pattern="[\u4e00-\u9fa5]{2,}" title="Please enter your Chinese name (at least two characters)">
+      <!-- Left: Map + Contact Info Card -->
+      <div class="contact-card">
+        <!-- Map (main body) -->
+        <div class="contact-map-embed">
+          <iframe
+            id="custom-map"
+            src="https://www.google.com/maps/d/embed?mid=1WGUSQUviVSNKcc7LNK-aSDA6j6S3EMc&ehbc=2E312F"
+            width="100%"
+            height="100%"
+          ></iframe>
         </div>
-
-        <div class="half-width">
-          <label>Gender*</label>
-          <div class="gender-options">
-            <label><input type="radio" name="gender" value="male" required> Male</label>
-            <label><input type="radio" name="gender" value="female" required> Female</label>
+        <!-- Contact Info (below map) -->
+        <div class="contact-info-bottom">
+          <div class="contact-card-header">
+            <span class="contact-subtitle">CONTACT US</span>
+            <h2 class="contact-title">Contact Us</h2>
+          </div>
+          <div class="contact-details">
+            <div class="contact-detail-item">
+              <div class="contact-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff5c00" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></div>
+              <div class="contact-detail-text">
+                <span class="contact-label">Address</span>
+                <a href="javascript:void(0);" onclick="goToLocation()" class="contact-link">25, Jln Tanjong 3, Taman Desa Cemerlang,<br>81800 Ulu Tiram, Johor Darul Ta'zim</a>
+              </div>
+            </div>
+            <div class="contact-detail-item">
+              <div class="contact-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff5c00" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></div>
+              <div class="contact-detail-text">
+                <span class="contact-label">Phone</span>
+                <span>+60 13-553 5355</span>
+              </div>
+            </div>
+            <div class="contact-detail-item">
+              <div class="contact-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff5c00" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></div>
+              <div class="contact-detail-text">
+                <span class="contact-label">Email</span>
+                <span>kunzzholdings@gmail.com</span>
+              </div>
+            </div>
+            <div class="contact-detail-item">
+              <div class="contact-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff5c00" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
+              <div class="contact-detail-text">
+                <span class="contact-label">Business Hours</span>
+                <span>Mon – Fri  9AM – 6PM</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- 英文姓名 + 职位类别 -->
-      <div class="form-group-row">
-        <div class="half-width">
-          <label for="englishName">English Name*</label>
-          <input type="text" id="englishName" name="englishName" placeholder="Please enter your English name" required pattern="[A-Za-z ]{2,}" title="Please enter your English name (letters only)">
-        </div>
+      <!-- Right: Feedback Form Card -->
+      <div class="feedback-card">
+        <h2 class="feedback-title">Kindly Provide Your Feedback</h2>
+        <p class="feedback-subtitle">We look forward to hearing from you and will get back to you shortly.</p>
+        <form id="feedbackForm" action="https://api.web3forms.com/submit" method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="access_key" value="a18bc4c6-2f16-4861-8d10-a3de747cab50">
+          <input type="hidden" name="redirect" value="https://kunzzgroup.com/frontend_en/success.html">
+
+          <!-- Chinese Name + Gender -->
+          <div class="fb-form-row">
+            <div class="fb-field fb-field-wide">
+              <label>Chinese Name *</label>
+              <input type="text" name="chineseName" placeholder="Please enter your Chinese name" required pattern="[\u4e00-\u9fa5]{2,}" title="Please enter your Chinese name (at least two characters)">
+            </div>
+            <div class="fb-field fb-field-narrow">
+              <label>Gender *</label>
+              <div class="fb-gender-options">
+                <label><input type="radio" name="gender" value="male" required> Male</label>
+                <label><input type="radio" name="gender" value="female" required> Female</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- English Name -->
+          <div class="fb-field">
+            <label>English Name *</label>
+            <input type="text" name="englishName" placeholder="Please enter your English name" required pattern="[A-Za-z ]{2,}" title="Please enter your English name (letters only)">
+          </div>
+
+          <!-- Phone Number -->
+          <div class="fb-field">
+            <label>Phone Number *</label>
+            <div class="fb-phone-row">
+              <select name="countryCode" required>
+                <option value="+60">Malaysia +60</option>
+                <option value="+65">Singapore +65</option>
+                <option value="+86">China +86</option>
+                <option value="+852">Hong Kong +852</option>
+                <option value="+81">Japan +81</option>
+              </select>
+              <input type="tel" name="phoneNumber" placeholder="Please enter your phone number" required pattern="\d{1,10}" maxlength="10" inputmode="numeric" title="Please enter a valid phone number">
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="fb-field">
+            <label>Email *</label>
+            <input type="email" name="email" placeholder="Please enter your email address" required pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$" title="Please enter a valid email address">
+          </div>
+
+          <!-- Message -->
+          <div class="fb-field">
+            <label>Message *</label>
+            <textarea name="message" rows="4" placeholder="Please enter your feedback or suggestions…" required></textarea>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="fb-submit-btn">Submit</button>
+        </form>
       </div>
 
-      <!-- 手机号码 -->
-      <div class="form-group">
-        <label for="phone">Phone Number*</label>
-        <div class="phone-input">
-          <select id="countryCode" name="countryCode" required>
-            <option value="+60">MY (+60)</option>
-            <option value="+65">SG (+65)</option>
-            <option value="+86">CN (+86)</option>
-            <option value="+852">HK (+852)</option>
-            <option value="+81">JP (+81)</option>
-            <!-- 可以加更多国家 -->
-          </select>
-          <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Please enter your Phone Number" required pattern="\d{1,10}" maxlength="10" inputmode="numeric" title="Please enter a phone number">
-        </div>
-      </div>
-
-      <!-- 电子邮箱 -->
-      <div class="form-group">
-        <label for="email">Email*</label>
-        <input type="email" id="email" name="email" placeholder="Please enter your Email" required pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$" title="Please enter your Email">
-      </div>
-
-      <!-- 信息 -->
-      <div class="form-group">
-        <label for="message">Information*</label>
-        <textarea id="message" name="message" rows="5" required></textarea>
-      </div>
-
-      <!-- 提交按钮 -->
-      <div class="form-group">
-        <button type="submit" class="submit-btn">Submit</button>
-      </div>
-    </form>
-</section>
-</div>
-</div>  
-
-<div class="swiper-slide">
-  <div class="contact-section-wrapper" id="map">
-  <section class="contact-container">
-  <div class="contact-info">
-    <h2>Contact Us</h2>
-    <p>Company Name：Kunzz Holdings Sdn. Bhd.</p>
-    <p>
-      Address：
-      <a href="javascript:void(0);" onclick="goToLocation()" class="no-style-link">
-        25, Jln Tanjong 3, Taman Desa Cemerlang, 81800 Ulu Tiram, Johor Darul Ta'zim
-      </a>
-    </p>
-    <p>Phone Number：+60 13-553 5355</p>
-    <p>Email Address：kunzzholdings@gmail.com</p>
-    <p>Business Hours：Monday to Friday 9AM-6PM</p>
+    </div>
   </div>
-
-  <div class="map-container">
-    <iframe
-      id="custom-map"
-      src="https://www.google.com/maps/d/embed?mid=1WGUSQUviVSNKcc7LNK-aSDA6j6S3EMc&ehbc=2E312F"
-      width="640"
-      height="480"
-    ></iframe>
   </div>
-</section>
-</div>
-</div>
 
 <?php include '../public_en/footer.php'; ?>
 
@@ -356,7 +377,7 @@ const aboutObserver = new IntersectionObserver((entries) => {
             } else if (target.classList.contains('jobs-grid')) {
                 // 为职位卡片网格添加动画类
                 target.classList.add('jobs-loaded');
-            } else if (target.classList.contains('contact-section-wrapper')) {
+            } else if (target.classList.contains('contact-form-section')) {
                 // 为联系我们区域添加动画类
                 target.classList.add('contact-loaded');
             }
@@ -379,7 +400,7 @@ const aboutObserver = new IntersectionObserver((entries) => {
             } else if (target.classList.contains('jobs-grid')) {
                 // 离开视窗时移除动画类
                 target.classList.remove('jobs-loaded');
-            } else if (target.classList.contains('contact-section-wrapper')) {
+            } else if (target.classList.contains('contact-form-section')) {
                 // 离开视窗时移除动画类
                 target.classList.remove('contact-loaded');
             }
@@ -485,7 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const footprintContainer = document.querySelector('#footprint-container'); // 修复：正确的ID
     const jobTableContainer = document.querySelector('.job-table-container');
     const jobsGrid = document.querySelector('.jobs-grid');
-    const contactWrapper = document.querySelector('.contact-section-wrapper');
+    const contactWrapper = document.querySelector('.contact-form-section');
     
     if (aboutBanner) {
         aboutObserver.observe(aboutBanner);
@@ -641,7 +662,7 @@ const swiper = new Swiper('.swiper', {
             // 在过渡结束后检查进度
             setTimeout(() => {
                 if (this.progress > 0.95) {
-                    updatePageIndicator(4); // 滑到最后一页（索引0-4，共5页）
+                    updatePageIndicator(3); // 滑到最后一页（索引0-3，共4页）
                 } else {
                     updatePageIndicator(this.activeIndex); // 从最后一页滑回来时用正常的activeIndex
                 }
