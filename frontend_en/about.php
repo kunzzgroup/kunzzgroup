@@ -621,6 +621,39 @@ if (slideParam !== null) {
                     <span>Month ${m.month}</span>
                 </div>`
             ).join('');
+
+            // 动态创建连接线，精确从第一个圆点中心到最后一个圆点中心
+            requestAnimationFrame(() => {
+                const existingLine = sidebar.querySelector('.sidebar-line');
+                if (existingLine) existingLine.remove();
+                
+                const dots = sidebar.querySelectorAll('.month-dot');
+                if (dots.length < 1) return;
+                
+                const sidebarRect = sidebar.getBoundingClientRect();
+                const firstDot = dots[0].getBoundingClientRect();
+                const lastDot = dots[dots.length - 1].getBoundingClientRect();
+                
+                let lineTop, lineHeight;
+                if (dots.length === 1) {
+                    // Only one month — show a short vertical line
+                    const dotCenter = firstDot.top + firstDot.height / 2 - sidebarRect.top + sidebar.scrollTop;
+                    lineTop = dotCenter - 50;
+                    lineHeight = 100;
+                } else {
+                    lineTop = firstDot.top + firstDot.height / 2 - sidebarRect.top + sidebar.scrollTop - 20;
+                    const lineBottom = lastDot.top + lastDot.height / 2 - sidebarRect.top + sidebar.scrollTop + 20;
+                    lineHeight = lineBottom - lineTop;
+                }
+                const lineLeft = firstDot.left + firstDot.width / 2 - sidebarRect.left - 1.5;
+                
+                const line = document.createElement('div');
+                line.className = 'sidebar-line';
+                line.style.top = lineTop + 'px';
+                line.style.height = lineHeight + 'px';
+                line.style.left = lineLeft + 'px';
+                sidebar.appendChild(line);
+            });
         }
 
         // 初始化：设置第一张为 active
