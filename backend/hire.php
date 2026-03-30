@@ -814,14 +814,19 @@ if (session_status() === PHP_SESSION_NONE) {
 
         // 仅更新状态 chip 的计数数字，不重建 DOM
         function updateChipCounts() {
+            // 状态计数基数：rawData 按当前公司/职位过滤（不受已选状态影响）
+            const statusBase = rawData.filter(r => {
+                if (state.company  && r.company_name !== state.company)  return false;
+                if (state.jobTitle && r.job_title    !== state.jobTitle)  return false;
+                return true;
+            });
             document.querySelectorAll('.chip[data-chip-status]').forEach(btn => {
                 const span = btn.querySelector('.chip-count');
                 if (!span) return;
                 const v = btn.getAttribute('data-chip-status');
-                // 状态用 allData（当前过滤结果）统计
                 span.textContent = v === ''
-                    ? allData.length
-                    : allData.filter(r => String(r.status) === v).length;
+                    ? statusBase.length
+                    : statusBase.filter(r => String(r.status) === v).length;
             });
         }
 
@@ -860,10 +865,16 @@ if (session_status() === PHP_SESSION_NONE) {
             // 计算每个 chip 的数量
             let cnt = 0;
             if (type === 'status') {
-                // 状态：用 allData（当前过滤结果）统计 → 放映当前公司/条件下的真实数据
+                // 状态计数基数：rawData 按当前公司/职位过滤
+                // 不受已选状态影响，移除后不会整行崩零
+                const statusBase = rawData.filter(r => {
+                    if (state.company  && r.company_name !== state.company)  return false;
+                    if (state.jobTitle && r.job_title    !== state.jobTitle)  return false;
+                    return true;
+                });
                 cnt = isAllButton
-                    ? allData.length
-                    : allData.filter(r => String(r.status) === String(value)).length;
+                    ? statusBase.length
+                    : statusBase.filter(r => String(r.status) === String(value)).length;
                 btn.setAttribute('data-chip-status', String(value));
             } else if (type === 'company') {
                 // 公司：用 rawData（全量）统计 → 无论当前选检哪个公司，其他公司计数不变
