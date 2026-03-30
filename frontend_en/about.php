@@ -165,7 +165,7 @@ $timelineItems = getTimelineItems('en');
                             <img src="<?php echo $item['image_url']; ?>" alt="<?php echo htmlspecialchars($year); ?> Development">
                         </div>
                         <div class="timeline-text">
-                            <div class="year-badge"><?php echo htmlspecialchars($year); ?><?php echo !empty($item['month']) ? ' &middot; Month ' . (int)$item['month'] : ''; ?></div>
+                            <div class="year-badge"><?php echo htmlspecialchars($year); ?><?php if (!empty($item['month'])) { $monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December']; echo ' &middot; ' . ($monthNames[(int)$item['month'] - 1] ?? 'Month ' . (int)$item['month']); } ?></div>
                             <h3><?php echo htmlspecialchars($item['title']); ?></h3>
                             <p><?php echo htmlspecialchars($item['description1']); ?></p>
                             <p><?php echo htmlspecialchars($item['description2']); ?></p>
@@ -610,6 +610,7 @@ if (slideParam !== null) {
         });
 
         // ===== 月份侧栏 =====
+        const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
         function updateMonthSidebar() {
             const currentYear = years[currentIndex];
             const months = (yearGroups[currentYear] || []).filter(m => m.month > 0);
@@ -618,7 +619,7 @@ if (slideParam !== null) {
             sidebar.innerHTML = months.map(m => 
                 `<div class="month-item ${m.index === currentIndex ? 'active' : ''}" onclick="selectCardIndex(${m.index})">
                     <div class="month-dot"></div>
-                    <span>Month ${m.month}</span>
+                    <span>${monthNames[(m.month - 1)] || 'Month ' + m.month}</span>
                 </div>`
             ).join('');
 

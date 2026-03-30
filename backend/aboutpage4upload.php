@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/permission_guard.php';
 require_once __DIR__ . '/heic_convert.php';
 requirePermission('visual');
@@ -562,7 +562,16 @@ if (file_exists($configFile) && is_readable($configFile)) {
                             </div>
                             <div class="form-group">
                                 <label><?php echo $isEnglish ? 'Month' : '月份'; ?></label>
-                                <input type="number" name="new_month" class="form-input" min="1" max="12" placeholder="<?php echo $isEnglish ? 'Enter month, 1-12' : '输入月份，1-12'; ?>" required>
+                                <?php if ($isEnglish): ?>
+                                <select name="new_month" class="form-input" required>
+                                    <option value="">Select month...</option>
+                                    <?php foreach(['January','February','March','April','May','June','July','August','September','October','November','December'] as $mi => $mn): ?>
+                                    <option value="<?php echo $mi+1; ?>"><?php echo $mn; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <?php else: ?>
+                                <input type="number" name="new_month" class="form-input" min="1" max="12" placeholder="输入月份，1-12" required>
+                                <?php endif; ?>
                             </div>
                             <div class="form-actions">
                                 <button type="submit" name="add_record" class="btn"><?php echo $isEnglish ? 'Add Record' : '新增记录'; ?></button>
@@ -591,7 +600,7 @@ if (file_exists($configFile) && is_readable($configFile)) {
                         <?php foreach ($yearItems as $idx => $data): $entryIndex = $idx + 1; $recordId = $data['id'] ?? ('rec_' . $year . '_' . $entryIndex); ?>
                     <div class="entry-container" data-record-id="<?php echo htmlspecialchars($recordId); ?>" style="border: 1px solid #dee2e6; border-radius: 10px; padding: 20px; margin-bottom: 20px; background: white;">
                         <div class="entry-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <h4 style="margin: 0; color: #555;"><?php echo $isEnglish ? 'Record' : '记录'; ?> #<?php echo $entryIndex; ?><?php echo $data['month'] ? ' · ' . ($isEnglish ? 'Month ' . (int)$data['month'] : (int)$data['month'] . '月') : ''; ?></h4>
+                            <h4 style="margin: 0; color: #555;"><?php echo $isEnglish ? 'Record' : '记录'; ?> #<?php echo $entryIndex; ?><?php if ($data['month']) { $enMonths = ['January','February','March','April','May','June','July','August','September','October','November','December']; echo ' · ' . ($isEnglish ? ($enMonths[(int)$data['month']-1] ?? 'Month '.(int)$data['month']) : (int)$data['month'].'月'); } ?></h4>
                             <button type="button" class="btn btn-danger" onclick="confirmDeleteRecord('<?php echo $recordId; ?>')" style="padding: 5px 10px; font-size: 12px;">
                                 <?php echo $isEnglish ? 'Delete' : '删除'; ?>
                             </button>
@@ -673,7 +682,18 @@ if (file_exists($configFile) && is_readable($configFile)) {
                                 </div>
                                 <div class="form-group">
                                     <label><?php echo $isEnglish ? 'Month' : '月份'; ?></label>
+                                    <?php 
+                                    $currentMonth = (int)($data['month'] ?? 0);
+                                    if ($isEnglish): ?>
+                                    <select name="month" class="form-input">
+                                        <option value="0">-- No specific month --</option>
+                                        <?php foreach(['January','February','March','April','May','June','July','August','September','October','November','December'] as $mi => $mn): ?>
+                                        <option value="<?php echo $mi+1; ?>" <?php echo $currentMonth === ($mi+1) ? 'selected' : ''; ?>><?php echo $mn; ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <?php else: ?>
                                     <input type="number" name="month" class="form-input" min="1" max="12" value="<?php echo htmlspecialchars((string)($data['month'] ?? '')); ?>">
+                                    <?php endif; ?>
                                 </div>
                                 
                                 <div class="form-group">
