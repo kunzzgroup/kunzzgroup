@@ -3155,7 +3155,7 @@
                   </div>
                   <div class="location-card-info">
                     <h3>${store.label || ''}</h3>
-                    <p>地址：<a href="${store.map_url || '#'}" target="_blank" rel="noopener noreferrer">${store.address || ''}</a></p>
+                    <p>地址：<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.address || '')}" target="_blank" rel="noopener noreferrer">${store.address || ''}</a></p>
                     <p>电话：<a href="tel:${(store.phone || '').replace(/\s+/g, '')}">${store.phone || ''}</a></p>
                   </div>`;
                   cardsEl.appendChild(card);
