@@ -63,7 +63,8 @@
      2️⃣ Navbar — 固定顶部，留出 padding
      ================================================= */
   body {
-    padding-top: 47px; /* 等于 navbar 高度 */
+    padding-top: 47px;        /* navbar 高度 */
+    padding-bottom: 56px;     /* 底部 CTA 高度 */
   }
 
   .header-navbar {
@@ -339,10 +340,8 @@
     border: 1.5px solid rgba(255, 255, 255, 0.4);
   }
 
-  /* body 留出底部 CTA 空间 */
-  body {
-    padding-bottom: 56px;
-  }
+  /* body padding 已在上方统一定义 */
+
 
   /* =================================================
      9️⃣ Social 侧边栏 — 手机端隐藏

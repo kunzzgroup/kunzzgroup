@@ -774,7 +774,6 @@
 /* 让 transform/opacity 动画更流畅 */
 .animate-on-scroll,
 .header-navbar,
-.header-nav-links,
 .header-nav-dropdown-menu,
 .header-login-dropdown-menu,
 .header-language-dropdown-menu,
@@ -783,3 +782,6 @@
   will-change: transform, opacity;
   transform: translateZ(0);
 }
+
+/* ★ header-nav-links 不能加 translateZ(0)，否则会覆盖移动端的 translateX(-100%) */
+
