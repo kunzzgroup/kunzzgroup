@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -385,7 +385,7 @@ if (session_status() === PHP_SESSION_NONE) {
                     <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
                     筛选条件
                 </button>
-                <button class="btn btn-primary btn-export text-14">
+                <button class="btn btn-primary btn-export text-14" onclick="exportToExcel()">
                     ⬇ 导出 Excel
                 </button>
             </div>
@@ -701,39 +701,32 @@ if (session_status() === PHP_SESSION_NONE) {
             });
         });
 
-        // ── API 拉取函数 ────────────────────────────────────────────────────────
+        // ── API 拉取函数 ─────────────────────────────────────────────────────────
         async function fetchStats() {
             try {
                 const res  = await fetch('hireapi.php?action=stats');
                 const json = await res.json();
-                if (json.code === 200) {
-                    statsData = json.data;
-                }
-            } catch(e) {
-                console.warn('统计加载失败', e);
-            }
+                if (json.code === 200) { statsData = json.data; }
+            } catch(e) { console.warn('统计加载失败', e); }
         }
 
         async function fetchData() {
-            // 显示加载中
             els.tableBody.innerHTML = `<tr><td colspan="8" class="empty-state">数据加载中…</td></tr>`;
-
             const params = new URLSearchParams({ action: 'list', page_size: 200 });
-            if (state.company)   params.set('company',    state.company);
-            if (state.jobTitle)  params.set('job_title',  state.jobTitle);
-            if (state.status !== '') params.set('status', state.status);
-            if (state.keyword)   params.set('keyword',    state.keyword);
-            if (state.dateStart) params.set('date_start', state.dateStart);
-            if (state.dateEnd)   params.set('date_end',   state.dateEnd);
-
+            if (state.company)       params.set('company',    state.company);
+            if (state.jobTitle)      params.set('job_title',  state.jobTitle);
+            if (state.status !== '') params.set('status',     state.status);
+            if (state.keyword)       params.set('keyword',    state.keyword);
+            if (state.dateStart)     params.set('date_start', state.dateStart);
+            if (state.dateEnd)       params.set('date_end',   state.dateEnd);
             try {
                 const res  = await fetch('hireapi.php?' + params.toString());
                 const json = await res.json();
                 if (json.code === 200) {
                     allData = json.data.list;
                     renderTable(allData);
-                    await fetchStats(); // 同时刷新统计，不阅塚 chip
-                    renderChips();
+                    await fetchStats();
+                    updateChipCounts();   // 只刷新计数，不重建 chip DOM，onclick 不丢失
                     renderActiveTags();
                 } else {
                     els.tableBody.innerHTML = `<tr><td colspan="8" class="empty-state">加载失败：${json.msg}</td></tr>`;
@@ -744,27 +737,37 @@ if (session_status() === PHP_SESSION_NONE) {
         }
 
         function applyState() {
-            renderChips();
+            renderChips();      // 重建 chips（active 状态正确 + 新 onclick）
             renderActiveTags();
-            fetchData();
+            fetchData();        // 拉数据，完成后只更新计数，不重建 chips
         }
-        
+
+        // 仅更新状态 chip 的计数数字，不重建 DOM
+        function updateChipCounts() {
+            document.querySelectorAll('.chip[data-chip-status]').forEach(btn => {
+                const span = btn.querySelector('.chip-count');
+                if (!span) return;
+                const v = btn.getAttribute('data-chip-status');
+                span.textContent = v === '' ? (statsData.total || 0) : (statsData[String(v)] || 0);
+            });
+        }
+
         function renderChips() {
-            // 1. 公司标签
+            // 1. 公司
             els.chipListCompany.innerHTML = '';
             els.chipListCompany.appendChild(createChip('company', '', '全部', '🏢'));
-            Object.keys(companyJobsMap).forEach(comp => {
-                els.chipListCompany.appendChild(createChip('company', comp, comp, ''));
+            Object.keys(companyJobsMap).forEach(c => {
+                els.chipListCompany.appendChild(createChip('company', c, c, ''));
             });
-
-            // 2. 职位标签 (联动公司，且去掉了“全部”选项)
+            // 2. 职位（联动公司）
             els.chipListJob.innerHTML = '';
-            const jobsToShow = state.company ? companyJobsMap[state.company] : [...new Set(Object.values(companyJobsMap).flat())];
-            jobsToShow.forEach(job => {
-                els.chipListJob.appendChild(createChip('jobTitle', job, job, ''));
+            const jobs = state.company
+                ? companyJobsMap[state.company]
+                : [...new Set(Object.values(companyJobsMap).flat())];
+            jobs.forEach(j => {
+                els.chipListJob.appendChild(createChip('jobTitle', j, j, ''));
             });
-
-            // 3. 状态标签
+            // 3. 状态
             els.chipListStatus.innerHTML = '';
             els.chipListStatus.appendChild(createChip('status', '', '全部', '📊'));
             statusConfig.forEach(cfg => {
@@ -772,35 +775,61 @@ if (session_status() === PHP_SESSION_NONE) {
             });
         }
 
-        // 创建单个 Chip，并包含反选（Toggle）逻辑
+        // 创建单个 Chip
         function createChip(type, value, label, icon) {
-            const btn = document.createElement('button');
-            const isActive = state[type] !== '' && state[type].toString() === value.toString();
+            const btn         = document.createElement('button');
+            const isActive    = state[type] !== '' && state[type].toString() === value.toString();
             const isAllButton = value === '';
-            const actuallyActive = isAllButton ? state[type] === '' : isActive;
+            const active      = isAllButton ? state[type] === '' : isActive;
 
-            btn.className = `chip ${actuallyActive ? 'active' : ''}`;
-            
-            let tempState = { ...state };
-            tempState[type] = value;
-            if (type === 'company' && value !== state.company) tempState.jobTitle = ''; 
-            const count = getFilteredCount(tempState);
+            btn.className = `chip ${active ? 'active' : ''}`;
 
-            btn.innerHTML = `${icon ? `<span style="margin-right:2px">${icon}</span>` : ''}${label} <span class="chip-count">${count}</span>`;
-            
+            // 状态 chip 显示计数 + 加 data-chip-status 属性
+            let countHtml = '';
+            if (type === 'status') {
+                const cnt = isAllButton ? (statsData.total || 0) : (statsData[String(value)] || 0);
+                countHtml = `<span class="chip-count">${cnt}</span>`;
+                btn.setAttribute('data-chip-status', String(value));
+            }
+            btn.innerHTML = `${icon ? `<span style="margin-right:2px">${icon}</span>` : ''}${label}${countHtml}`;
             btn.onclick = () => {
-                // 【核心】：如果是已经被选中的状态（且不是“全部”按钮），点击后反选（置空）
-                if (actuallyActive && !isAllButton) {
-                    state[type] = '';
-                } else {
-                    state[type] = value;
-                }
-                
-                if (type === 'company') state.jobTitle = ''; 
+                state[type] = (active && !isAllButton) ? '' : value;
+                if (type === 'company') state.jobTitle = '';
                 applyState();
             };
             return btn;
         }
+
+        // ── Export Excel (UTF-8 BOM CSV) ─────────────────────────────────────────
+        window.exportToExcel = function() {
+            if (!allData || allData.length === 0) { alert('没有可导出的数据'); return; }
+            var statusLabel = { 0: '待处理', 1: '沟通中', 2: '已录用', 3: '已淘汰' };
+            var headers = ['序号','中文姓名','英文姓名','性别','申请公司','申请职位',
+                           '邮箱','电话区号','电话号码','简历链接','状态','HR备注','申请时间'];
+            var rows = allData.map(function(r, i) {
+                return [
+                    i + 1, r.chinese_name||'', r.english_name||'', r.gender||'',
+                    r.company_name||'', r.job_title||'', r.email||'',
+                    r.phone_code||'', r.phone_number||'',
+                    r.resume_file_url ? (location.origin + '/' + r.resume_file_url) : '',
+                    statusLabel[r.status] !== undefined ? statusLabel[r.status] : String(r.status),
+                    r.hr_remarks||'', (r.created_at||'').replace('T',' ')
+                ];
+            });
+            function esc(v) {
+                var s = String(v).replace(/"/g, '""');
+                return (/[",\n\r]/.test(s)) ? ('"' + s + '"') : s;
+            }
+            var csv = [headers].concat(rows).map(function(row){ return row.map(esc).join(','); }).join('\r\n');
+            var blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            var url  = URL.createObjectURL(blob);
+            var a    = document.createElement('a');
+            var now  = new Date();
+            var ts   = '' + now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
+            a.href = url; a.download = '招聘申请列表_' + ts + '.csv';
+            document.body.appendChild(a); a.click();
+            document.body.removeChild(a); URL.revokeObjectURL(url);
+        };
 
         function renderActiveTags() {
             els.activeList.innerHTML = '';
