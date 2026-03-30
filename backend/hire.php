@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -367,13 +367,13 @@ if (isset($_SESSION['user_id'])) {
         .badge-green { background: #d1fae5; color: #059669; }
         .badge-gray { background: #f3f4f6; color: #4b5563; }
 
-        .status-popover {
-            visibility: hidden; opacity: 0; position: absolute; left: 50%; transform: translateX(-50%); top: 100%; margin-top: 2px;
-            background: white; border: 1px solid var(--border-color); border-radius: 6px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; min-width: 100px; padding: 4px; text-align: left;
-            transition: opacity 0.15s, visibility 0.15s;
+        /* 全局 status popover （portal 挂在 body，避免被表格 overflow 截断） */
+        #globalStatusPopover {
+            display: none; position: fixed; z-index: 9999;
+            background: white; border: 1px solid var(--border-color); border-radius: 6px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15); min-width: 110px; padding: 4px;
         }
-        .status-popover.show { visibility: visible; opacity: 1; }
+        #globalStatusPopover.show { display: block; }
         .status-option { 
             display: block; padding: 6px 8px; border-radius: 4px; font-size: 12px; 
             color: var(--text-main); cursor: pointer; text-decoration: none; transition: all 0.2s; 
@@ -659,12 +659,6 @@ if (isset($_SESSION['user_id'])) {
             <td class="status-cell">
                 <div class="status-wrapper">
                     <div class="badge js-status-badge" title="点击修改状态"></div>
-                    <div class="status-popover js-status-popover">
-                        <a href="#" data-val="0" class="status-option">🔴 待处理</a>
-                        <a href="#" data-val="1" class="status-option">🟡 沟通中</a>
-                        <a href="#" data-val="2" class="status-option">🟢 已录用</a>
-                        <a href="#" data-val="3" class="status-option">⚪ 已淘汰</a>
-                    </div>
                 </div>
             </td>
             <td class="text-center">
@@ -672,9 +666,77 @@ if (isset($_SESSION['user_id'])) {
             </td>
         </tr>
     </template>
+    <!-- 全局状态选择 Popover（fixed 定位，不受表格 overflow 限制） -->
+    <div id="globalStatusPopover">
+        <a href="#" data-val="0" class="status-option">🔴 待处理</a>
+        <a href="#" data-val="1" class="status-option">🟡 沟通中</a>
+        <a href="#" data-val="2" class="status-option">🟢 已录用</a>
+        <a href="#" data-val="3" class="status-option">⚪ 已淘汰</a>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/zh.js"></script>
+    <script>
+    // ── 全局 Status Popover ───────────────────────────────────────────────────
+    (function() {
+        const gPop     = document.getElementById('globalStatusPopover');
+        let   gAppId   = null;
+        let   gBadgeEl = null;
+
+        window.showGlobalPopover = function(badge, appId, currentStatus) {
+            // 如果已经是同一个 badge，则切换关闭
+            if (gBadgeEl === badge && gPop.classList.contains('show')) {
+                closeGlobalPopover(); return;
+            }
+            gAppId   = appId;
+            gBadgeEl = badge;
+
+            // 更新 active 状态
+            gPop.querySelectorAll('.status-option').forEach(opt => {
+                opt.classList.toggle('active', parseInt(opt.dataset.val) === parseInt(currentStatus));
+            });
+
+            // 定位：紧贴徽章下方
+            const rect = badge.getBoundingClientRect();
+            gPop.style.top  = (rect.bottom + 4) + 'px';
+            gPop.style.left = (rect.left + rect.width / 2 - 55) + 'px'; // 居中
+            gPop.classList.add('show');
+        };
+
+        window.closeGlobalPopover = function() {
+            gPop.classList.remove('show');
+            gBadgeEl = null; gAppId = null;
+        };
+
+        // 点选项目
+        gPop.addEventListener('click', async (e) => {
+            const opt = e.target.closest('.status-option');
+            if (!opt || gAppId === null) return;
+            e.preventDefault(); e.stopPropagation();
+            const newStatus = parseInt(opt.dataset.val);
+            closeGlobalPopover();
+            try {
+                const res  = await fetch('hireapi.php', {
+                    method : 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body   : JSON.stringify({ id: gAppId, status: newStatus })
+                });
+                const json = await res.json();
+                if (json.code === 200) {
+                    await fetchStats();
+                    renderChips();
+                    fetchData();
+                }
+            } catch(err) { console.warn('状态更新失败', err); }
+        });
+
+        // 点击外部或滚动关闭
+        document.addEventListener('click', (e) => {
+            if (!gPop.contains(e.target)) closeGlobalPopover();
+        });
+        document.addEventListener('scroll', closeGlobalPopover, true);
+    })();
+    </script>
 
     <script>
         // ── 静态配置 ───────────────────────────────────────────────────────────
@@ -1158,45 +1220,13 @@ if (isset($_SESSION['user_id'])) {
                     resumeBtn.style.pointerEvents = 'none';
                 }
 
-                // 状态徽章
-                const badge   = clone.querySelector('.js-status-badge');
-                const popover = clone.querySelector('.js-status-popover');
-                updateBadgeUI(badge, app.status, popover);
+                // 状态徽章 — 用全局 popover portal
+                const badge = clone.querySelector('.js-status-badge');
+                updateBadgeUI(badge, app.status);
 
                 badge.addEventListener('click', (e) => {
-                    e.stopPropagation(); 
-                    document.querySelectorAll('.js-status-popover.show').forEach(pop => {
-                        if (pop !== popover) pop.classList.remove('show');
-                    });
-                    popover.classList.toggle('show');
-                });
-
-                // 内联状态修改（直接调 PUT API）
-                popover.querySelectorAll('.status-option').forEach(opt => {
-                    opt.addEventListener('click', async (e) => {
-                        e.preventDefault(); e.stopPropagation();
-                        const newStatus = parseInt(opt.dataset.val);
-                        try {
-                            const res  = await fetch('hireapi.php', {
-                                method : 'PUT',
-                                headers: { 'Content-Type': 'application/json' },
-                                body   : JSON.stringify({ id: app.id, status: newStatus })
-                            });
-                            const json = await res.json();
-                            if (json.code === 200) {
-                                // 更新内存中的数据
-                                const idx = allData.findIndex(item => item.id === app.id);
-                                if (idx > -1) allData[idx].status = newStatus;
-                                app.status = newStatus;
-                                updateBadgeUI(badge, newStatus, popover);
-                                await fetchStats();
-                                renderChips();
-                            }
-                        } catch(err) {
-                            console.error('状态更新失败', err);
-                        }
-                        popover.classList.remove('show');
-                    });
+                    e.stopPropagation();
+                    showGlobalPopover(badge, app.id, app.status);
                 });
 
                 clone.querySelector('.btn-action-detail').addEventListener('click', () => openModal(app.id));
