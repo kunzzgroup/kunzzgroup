@@ -88,15 +88,9 @@ if (session_status() === PHP_SESSION_NONE) {
         /* ================= 头部区域 ================= */
         .header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 24px; border-bottom: 1px solid var(--border-color);
+            padding: 28px 32px 20px;
         }
-        .header-title { display: flex; align-items: center; gap: 12px; }
-        .logo-icon {
-            width: 32px; height: 32px; background: var(--primary-color);
-            color: white; font-weight: bold; border-radius: 6px;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .header h1 { font-size: 20px; font-weight: bold; color: #1f2937; }
+        .header h1 { font-size: 32px; font-weight: bold; color: #1f2937; margin: 0; }
 
         /* 按钮与链接 */
         .btn {
@@ -376,10 +370,7 @@ if (session_status() === PHP_SESSION_NONE) {
     <div class="layout-container">
         
         <header class="header">
-            <div class="header-title">
-                <span class="logo-icon">R</span>
-                <h1>招聘申请列表</h1>
-            </div>
+            <h1>招聘申请列表</h1>
             <div class="flex-row gap-10">
                 <button class="btn btn-default mobile-filter-btn" onclick="toggleDrawer(true)">
                     <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
