@@ -676,66 +676,6 @@ if (isset($_SESSION['user_id'])) {
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/zh.js"></script>
-    <script>
-    // ── 全局 Status Popover ───────────────────────────────────────────────────
-    (function() {
-        const gPop     = document.getElementById('globalStatusPopover');
-        let   gAppId   = null;
-        let   gBadgeEl = null;
-
-        window.showGlobalPopover = function(badge, appId, currentStatus) {
-            // 如果已经是同一个 badge，则切换关闭
-            if (gBadgeEl === badge && gPop.classList.contains('show')) {
-                closeGlobalPopover(); return;
-            }
-            gAppId   = appId;
-            gBadgeEl = badge;
-
-            // 更新 active 状态
-            gPop.querySelectorAll('.status-option').forEach(opt => {
-                opt.classList.toggle('active', parseInt(opt.dataset.val) === parseInt(currentStatus));
-            });
-
-            // 定位：紧贴徽章下方
-            const rect = badge.getBoundingClientRect();
-            gPop.style.top  = (rect.bottom + 4) + 'px';
-            gPop.style.left = (rect.left + rect.width / 2 - 55) + 'px'; // 居中
-            gPop.classList.add('show');
-        };
-
-        window.closeGlobalPopover = function() {
-            gPop.classList.remove('show');
-            gBadgeEl = null; gAppId = null;
-        };
-
-        // 点选项目
-        gPop.addEventListener('click', async (e) => {
-            const opt = e.target.closest('.status-option');
-            if (!opt || gAppId === null) return;
-            e.preventDefault(); e.stopPropagation();
-            const newStatus = parseInt(opt.dataset.val);
-            closeGlobalPopover();
-            try {
-                const res  = await fetch('hireapi.php', {
-                    method : 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body   : JSON.stringify({ id: gAppId, status: newStatus })
-                });
-                const json = await res.json();
-                if (json.code === 200) {
-                    await fetchStats();
-                    renderChips();
-                    fetchData();
-                }
-            } catch(err) { console.warn('状态更新失败', err); }
-        });
-
-        // 点击外部或滚动关闭
-        document.addEventListener('click', (e) => {
-            if (!gPop.contains(e.target)) closeGlobalPopover();
-        });
-        document.addEventListener('scroll', closeGlobalPopover, true);
-    })();
     </script>
 
     <script>
@@ -856,15 +796,53 @@ if (isset($_SESSION['user_id'])) {
             // 全局点击事件处理
             document.addEventListener('click', (e) => {
                 if(!els.quickMenu.contains(e.target) && e.target !== els.btnQuick) els.quickMenu.classList.remove('show');
-                if(!e.target.classList.contains('js-status-badge')) {
-                    document.querySelectorAll('.js-status-popover.show').forEach(pop => pop.classList.remove('show'));
-                }
                 if(!els.smartWrapper.contains(e.target) && !els.suggestions.contains(e.target)) {
                     els.suggestions.classList.remove('show');
                     if(els.smartInput.value.trim() === '') collapseSearch();
                 }
             });
         });
+
+        // ── 全局 Status Popover（在主 script 里，与 fetchData 同作用域）────────────
+        const _gPop = document.getElementById('globalStatusPopover');
+        let _gAppId = null, _gBadgeEl = null;
+
+        function showGlobalPopover(badge, appId, currentStatus) {
+            if (_gBadgeEl === badge && _gPop.classList.contains('show')) {
+                closeGlobalPopover(); return;
+            }
+            _gAppId = appId; _gBadgeEl = badge;
+            _gPop.querySelectorAll('.status-option').forEach(opt => {
+                opt.classList.toggle('active', parseInt(opt.dataset.val) === parseInt(currentStatus));
+            });
+            const rect = badge.getBoundingClientRect();
+            _gPop.style.top  = (rect.bottom + 4) + 'px';
+            _gPop.style.left = (rect.left + rect.width / 2 - 55) + 'px';
+            _gPop.classList.add('show');
+        }
+        function closeGlobalPopover() {
+            _gPop.classList.remove('show');
+            _gBadgeEl = null; _gAppId = null;
+        }
+
+        // 全局 popover 选项点击
+        _gPop.addEventListener('click', async (e) => {
+            const opt = e.target.closest('.status-option');
+            if (!opt || _gAppId === null) return;
+            e.preventDefault(); e.stopPropagation();
+            const id = _gAppId, newStatus = parseInt(opt.dataset.val);
+            closeGlobalPopover();
+            try {
+                const res  = await fetch('hireapi.php', {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, status: newStatus })
+                });
+                const json = await res.json();
+                if (json.code === 200) { await fetchStats(); renderChips(); fetchData(); }
+            } catch(err) { console.warn('状态更新失败', err); }
+        });
+        document.addEventListener('click',  (e) => { if (!_gPop.contains(e.target)) closeGlobalPopover(); });
+        document.addEventListener('scroll', closeGlobalPopover, true);
 
         // ── API 拉取函数 ─────────────────────────────────────────────────────────
         async function loadRawData() {
