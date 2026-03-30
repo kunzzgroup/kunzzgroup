@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -569,10 +569,10 @@ if (isset($_SESSION['user_id'])) {
 
         <footer class="pagination-bar">
             <span id="totalCountInfo" class="text-muted text-14">共计 0 条记录</span>
-            <div class="page-controls">
-                <button class="btn-page">上一页</button>
-                <span class="current-page">1</span>
-                <button class="btn-page">下一页</button>
+            <div class="page-controls" id="pageControls">
+                <button class="btn-page" id="btnPrevPage">上一页</button>
+                <span class="current-page" id="currentPageNum">1</span>
+                <button class="btn-page" id="btnNextPage">下一页</button>
             </div>
         </footer>
 
@@ -703,8 +703,12 @@ if (isset($_SESSION['user_id'])) {
             status: '',
             dateStart: '',
             dateEnd: '',
-            dateLabel: ''
+            dateLabel: '',
+            page: 1,
+            pageSize: 20
         };
+
+        let pagination = { total: 0, totalPages: 1 };  // 服务端分页信息
 
         let fpInstance = null; 
         let currentEditingId = null; let isSearchExpanded = false;
@@ -729,6 +733,10 @@ if (isset($_SESSION['user_id'])) {
             tableBody: document.getElementById('tableBody'),
             rowTemplate: document.getElementById('rowTemplate'),
             totalCountInfo: document.getElementById('totalCountInfo'),
+            pageControls: document.getElementById('pageControls'),
+            btnPrev: document.getElementById('btnPrevPage'),
+            btnNext: document.getElementById('btnNextPage'),
+            currentPageNum: document.getElementById('currentPageNum'),
             
             drawer: document.getElementById('filterContainer'),
             drawerOverlay: document.getElementById('drawerOverlay'),
@@ -742,9 +750,18 @@ if (isset($_SESSION['user_id'])) {
             initDatePicker();
             // 加载全量数据（用于 chip 计数）+ 芯片化 + 拉取当前过滤结果
             fetchStats().then(async () => {
-                await loadRawData();   // 这里获取全量 rawData
-                renderChips();         // chip DOM 建立（此时 rawData 已就位）
-                fetchData();           // 拉当前过滤结果
+                await loadRawData();
+                renderChips();
+                fetchData();
+            });
+
+            // 分页按钮
+            els.btnPrev.addEventListener('click', () => {
+                if (state.page > 1) { state.page--; fetchData(); }
+            });
+            els.btnNext.addEventListener('click', () => {
+                const totalPages = Math.ceil(pagination.total / state.pageSize);
+                if (state.page < totalPages) { state.page++; fetchData(); }
             });
             
             // 搜索框事件
@@ -805,8 +822,8 @@ if (isset($_SESSION['user_id'])) {
         }
 
         async function fetchData() {
-            els.tableBody.innerHTML = `<tr><td colspan="8" class="empty-state">数据加载中…</td></tr>`;
-            const params = new URLSearchParams({ action: 'list', page_size: 200 });
+            els.tableBody.innerHTML = `<tr><td colspan="8" class="empty-state">\u6570\u636e\u52a0\u8f7d\u4e2d\u2026</td></tr>`;
+            const params = new URLSearchParams({ action: 'list', page: state.page, page_size: state.pageSize });
             if (state.company)       params.set('company',    state.company);
             if (state.jobTitle)      params.set('job_title',  state.jobTitle);
             if (state.status !== '') params.set('status',     state.status);
@@ -817,28 +834,52 @@ if (isset($_SESSION['user_id'])) {
                 const res  = await fetch('hireapi.php?' + params.toString());
                 const json = await res.json();
                 if (json.code === 200) {
-                    const isInitialLoad = !state.company && !state.status && !state.keyword && !state.jobTitle;
+                    const isInitialLoad = !state.company && !state.status && !state.keyword && !state.jobTitle && state.page === 1;
                     allData = json.data.list;
+
+                    // \u66f4\u65b0\u5206\u9875\u4fe1\u606f
+                    const total      = json.data.total ?? allData.length;
+                    const totalPages = json.data.total_pages ?? 1;
+                    pagination.total      = total;
+                    pagination.totalPages = totalPages;
+
                     renderTable(allData);
+                    updatePaginationUI();
                     await fetchStats();
-                    renderChips();        // 数据到位后重建 chips，确保公司/职位计数正确
-                    updateChipCounts();   // 更新状态计数
+                    renderChips();
+                    updateChipCounts();
                     renderActiveTags();
-                    // 首次加载时触发 toast 通知
+                    // \u9996\u6b21\u52a0\u8f7d\u65f6\u89e6\u53d1 toast \u901a\u77e5
                     if (isInitialLoad) {
-                        const pendingCount = allData.filter(r => String(r.status) === '0').length;
+                        const pendingCount = rawData.filter(r => String(r.status) === '0').length;
                         document.dispatchEvent(new CustomEvent('hireDataLoaded', { detail: { pendingCount } }));
                     }
                 } else {
-                    els.tableBody.innerHTML = `<tr><td colspan="8" class="empty-state">加载失败：${json.msg}</td></tr>`;
+                    els.tableBody.innerHTML = `<tr><td colspan="8" class="empty-state">\u52a0\u8f7d\u5931\u8d25\uff1a${json.msg}</td></tr>`;
                 }
             } catch(e) {
-                els.tableBody.innerHTML = `<tr><td colspan="8" class="empty-state">网络错误，请刷新页面重试</td></tr>`;
+                els.tableBody.innerHTML = `<tr><td colspan="8" class="empty-state">\u7f51\u7edc\u9519\u8bef\uff0c\u8bf7\u5237\u65b0\u9875\u9762\u91cd\u8bd5</td></tr>`;
             }
         }
 
+        function updatePaginationUI() {
+            const { total, totalPages } = pagination;
+            // \u53ea\u6709 1 \u9875\u65f6\u9690\u85cf\u6574\u4e2a\u5206\u9875\u680f
+            els.pageControls.style.display = totalPages <= 1 ? 'none' : 'flex';
+            els.currentPageNum.textContent = state.page;
+            els.totalCountInfo.textContent = `\u5171\u8ba1 ${total} \u6761\u8bb0\u5f55`;
+            // \u7b2c 1 \u9875\u65f6\u7981\u7528\u4e0a\u4e00\u9875
+            els.btnPrev.disabled = state.page <= 1;
+            els.btnPrev.style.opacity = state.page <= 1 ? '0.4' : '1';
+            // \u6700\u540e\u4e00\u9875\u65f6\u7981\u7528\u4e0b\u4e00\u9875
+            els.btnNext.disabled = state.page >= totalPages;
+            els.btnNext.style.opacity = state.page >= totalPages ? '0.4' : '1';
+        }
+
+
         function applyState() {
-            renderChips();      // 重建 chips（active 状态正确 + 新 onclick）
+            state.page = 1;         // 切换过滤时回到第 1 页
+            renderChips();
             renderActiveTags();
             fetchData();        // 拉数据，完成后只更新计数，不重建 chips
         }

@@ -172,10 +172,11 @@ function handleGet(): void
         $applications = $stmt->fetchAll();
 
         sendResponse(200, "获取成功", [
-            "total" => $total,
-            "page" => $page,
-            "page_size" => $pageSize,
-            "list" => $applications
+            "total"       => $total,
+            "total_pages" => (int) ceil($total / $pageSize),
+            "page"        => $page,
+            "page_size"   => $pageSize,
+            "list"        => $applications
         ]);
     } catch (PDOException $e) {
         sendResponse(500, "查询失败：" . $e->getMessage());
