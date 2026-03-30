@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // 禁用页面缓存
 header("Cache-Control: max-age=0, no-cache, no-store, must-revalidate, proxy-revalidate");
 header("Pragma: no-cache");
@@ -8,12 +8,12 @@ include_once '../media_config.php';
 
 // 设置页面特定的变量
 $pageTitle = 'KUNZZ HOLDINGS';
-$additionalCSS = ['css/about.css','../public/css/components/header.css','../public/css/components/footer.css','../public/css/components/social.css'];
+$additionalCSS = ['css/about.css','../public_en/css/components/header.css','../public_en/css/components/footer.css','../public_en/css/components/social.css'];
 $showPageIndicator = true;
 $totalSlides = 5;
 
 // 包含header
-include '../public/header.php';
+include '../public_en/header.php';
 
 // 在header之后获取时间线数据（扁平记录，允许同一年多条）
 $timelineItems = getTimelineItems('en');
@@ -27,18 +27,18 @@ $timelineItems = getTimelineItems('en');
     <div class="aboutus-banner">
         <?php echo getMediaHtml('about_background'); ?>
       <div class="aboutus-content">
-        <h1>关于我们</h1>
-        <p>深入了解 Kunzz Holdings 的初心与成长轨迹</p>
+        <h1>About Us</h1>
+        <p>Discover the origins and growth journey of Kunzz Holdings</p>
       </div>
     </div>
 
     <div class="aboutus-intro">
       <div class="intro-content">
-        <h1>集团简介</h1>
+        <h1>About Kunzz Group</h1>
         <p>
-          Kunzz Holdings 是一家总部位于马来西亚的多元化控股集团，专注资源整合与效率提升，<br>
-          为旗下公司提供战略支持与运营协同。我们致力于用心打造品牌，<br>
-          激发团队潜力，助力企业在竞争中脱颖而出。
+          Kunzz Holdings is a diversified holding group headquartered in Malaysia, focused on resource integration and operational efficiency.<br>
+          We provide strategic support and operational synergy for our subsidiaries. We are committed to building brands with heart,<br>
+          unleashing team potential, and helping businesses stand out in a competitive landscape.
         </p>
       </div>
     </div>
@@ -48,35 +48,35 @@ $timelineItems = getTimelineItems('en');
     <div class="swiper-slide">
     <section id="vision" class="vision">
     <div class="vision-content animate-on-scroll vision-slide-down">
-      <h1>我们的信念与方向</h1>
+      <h1>Our Beliefs &amp; Direction</h1>
       <p>
-        我们相信，所有伟大的成就，都始于一份清晰的信念。<br>
-        使命、愿景、文化与价值观，是前进的灯塔，也是我们共同坚守的底线。<br>
-        在这样的理念指引下，我们持续成长、持续突破、持续成就彼此。
+        We believe every great achievement begins with a clear set of beliefs.<br>
+        Mission, vision, culture, and values are the guiding lights of our journey and the principles we uphold together.<br>
+        Guided by these ideals, we keep growing, keep breaking through, and keep inspiring one another.
       </p>
 
       <div class="vision-cards">
         <!-- Card 1 -->
         <div class="vision-card animate-on-scroll slide-in-left">
-          <div class="vision-label">我们的使命</div>
-          <h2>塑造积极向上和舒适的工作环境</h2>
+          <div class="vision-label">Our Mission</div>
+          <h2>Foster a Positive and Comfortable Work Environment</h2>
           <p>
-            在这里，我们相信好的工作环境，能孕育出更好的团队。
-            我们努力打造一个温暖、有温度、有归属感的空间，
-            让每位成员都能安心发挥，共同成长。
-            在这里，挑战不再冰冷，努力也值得被看见。
+            We believe that a great work environment nurtures a great team.
+            We strive to build a warm, inclusive, and belonging space
+            where every member can perform confidently and grow together.
+            Here, challenges are met with support, and every effort is seen and valued.
           </p>
         </div>
 
         <!-- Card 2 -->
         <div class="vision-card animate-on-scroll slide-in-right">
-          <div class="vision-label">我们的愿景</div>
-          <h2>打造高效的团队，创造行业未来</h2>
+          <div class="vision-label">Our Vision</div>
+          <h2>Build a High-Performance Team, Shape the Future of the Industry</h2>
           <p>
-            一个好团队，是企业价值持续创造的源头。
-            唯有高效与创新并行，团队才能突破边界、成就非凡。
-            我们正以坚实步伐，走在打造行业标杆的路上，
-            用成就说话，用信念前行。
+            A great team is the core engine of sustained value creation.
+            Only when efficiency and innovation go hand in hand can a team transcend limits and achieve the extraordinary.
+            We are steadily walking the path toward becoming an industry benchmark,
+            letting our achievements speak, and moving forward with conviction.
           </p>
         </div>
       </div>
@@ -87,34 +87,34 @@ $timelineItems = getTimelineItems('en');
   <div class="swiper-slide">
   <section id="values" class="values-section">
         <div class="values-top animate-on-scroll">
-            <h2 class="values-title animate-on-scroll values-scale-fade delay-3">我们的核心<span style="color: #FF5C00;">价值观</span></h2>
+            <h2 class="values-title animate-on-scroll values-scale-fade delay-3">Our Core <span style="color: #FF5C00;">Values</span></h2>
             <p class="values-description animate-on-scroll values-scale-fade delay-4">
-                核心价值观，贯穿在每一份努力、每一个团队协作之中。
-                它让我们在文化中凝聚一致，在挑战中保持信念，
-                在成长中维持不变的初心。
+                Our core values run through every effort and every collaboration within our team.
+                They unite us in culture, keep us grounded in challenges,
+                and maintain our original intention throughout our growth.
             </p>
         </div>
       
         <div class="values-bottom animate-on-scroll card-tilt-in-left">
             <div class="values-card">
                 <img src="../images/images/目标导向.png?v=<?php echo time(); ?>" alt="icon" class="values-icon">
-                <h3>目标导向</h3>
-                <p>以结果为导向，聚焦关键任务，明确每一步的方向与意义。</p>
+                <h3>Goal-Oriented</h3>
+                <p>Results-driven, focused on key tasks, with a clear sense of direction and purpose in every step.</p>
             </div>
             <div class="values-card">
                 <img src="../images/images/理念一致.png?v=<?php echo time(); ?>" alt="icon" class="values-icon">
-                <h3>理念一致</h3>
-                <p>保持高度共识，思想同频，目标一致，减少内耗。</p>
+                <h3>Aligned Values</h3>
+                <p>Maintain a high level of consensus, stay on the same wavelength, and align on goals to minimize internal friction.</p>
             </div>
             <div class="values-card">
                 <img src="../images/images/追求卓越.png?v=<?php echo time(); ?>" alt="icon" class="values-icon">
-                <h3>追求卓越</h3>
-                <p>不满足于完成任务，要追求干得更好，更高标准地完成目标，持续优化每项工作。</p>
+                <h3>Pursuit of Excellence</h3>
+                <p>Not satisfied with merely completing tasks — we strive to do better, achieve higher standards, and continuously optimize every aspect of our work.</p>
             </div>
             <div class="values-card">
                 <img src="../images/images/创新精神.png?v=<?php echo time(); ?>" alt="icon" class="values-icon">
-                <h3>创新精神</h3>
-                <p>拥抱变化、敢于尝试，突破既有框架，不断探索新方法、新工具与新角度，推动企业成长。</p>
+                <h3>Innovative Spirit</h3>
+                <p>Embrace change, dare to try, break existing frameworks, and continuously explore new methods, tools, and perspectives to drive business growth.</p>
             </div>
         </div>
     </section>
@@ -122,7 +122,7 @@ $timelineItems = getTimelineItems('en');
 
   <div class="swiper-slide">
   <section class="timeline-section" id="timeline-1">
-        <h1>— 我们的发展历史 —</h1>
+        <h1>— Our Development History —</h1>
         
         <!-- 横向时间线导航 -->
         <div class="timeline-nav">
@@ -162,10 +162,10 @@ $timelineItems = getTimelineItems('en');
                     <div class="timeline-content-item" data-year="<?php echo htmlspecialchars($year); ?>" data-index="<?php echo $index; ?>" data-month="<?php echo (int)($item['month'] ?? 0); ?>">
                     <div class="timeline-content">
                         <div class="timeline-image">
-                            <img src="<?php echo $item['image_url']; ?>" alt="<?php echo htmlspecialchars($year); ?>年发展">
+                            <img src="<?php echo $item['image_url']; ?>" alt="<?php echo htmlspecialchars($year); ?> Development">
                         </div>
                         <div class="timeline-text">
-                            <div class="year-badge"><?php echo htmlspecialchars($year); ?>年<?php echo !empty($item['month']) ? ' · ' . (int)$item['month'] . '月' : ''; ?></div>
+                            <div class="year-badge"><?php echo htmlspecialchars($year); ?><?php echo !empty($item['month']) ? ' &middot; Month ' . (int)$item['month'] : ''; ?></div>
                             <h3><?php echo htmlspecialchars($item['title']); ?></h3>
                             <p><?php echo htmlspecialchars($item['description1']); ?></p>
                             <p><?php echo htmlspecialchars($item['description2']); ?></p>
@@ -182,17 +182,17 @@ $timelineItems = getTimelineItems('en');
     </section>
   </div>
 
-  <?php include '../public/footer.php'; ?>
+  <?php include '../public_en/footer.php'; ?>
 
   </div> <!-- 关闭 swiper-wrapper -->
 </div> <!-- 关闭 swiper -->
-<?php include '../public/social.php'; ?>
+<?php include '../public_en/social.php'; ?>
   
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="../app.js?v=<?php echo time(); ?>"></script>
-<script src="../public/header.js?v=<?php echo time(); ?>"></script>
-<script src="../public/footer.js?v=<?php echo time(); ?>"></script>
-<script src="../public/social.js?v=<?php echo time(); ?>"></script>
+<script src="../public_en/header.js?v=<?php echo time(); ?>"></script>
+<script src="../public_en/footer.js?v=<?php echo time(); ?>"></script>
+<script src="../public_en/social.js?v=<?php echo time(); ?>"></script>
 <script>
         // 通用的 animate-on-scroll observer（保持原有逻辑）
         const observer = new IntersectionObserver((entries) => {
@@ -618,7 +618,7 @@ if (slideParam !== null) {
             sidebar.innerHTML = months.map(m => 
                 `<div class="month-item ${m.index === currentIndex ? 'active' : ''}" onclick="selectCardIndex(${m.index})">
                     <div class="month-dot"></div>
-                    <span>${m.month}月</span>
+                    <span>Month ${m.month}</span>
                 </div>`
             ).join('');
         }
