@@ -42,17 +42,15 @@ if (session_status() === PHP_SESSION_NONE) {
         /* 匹配 sidebar 的主内容区 */
         .main-content {
             flex: 1;
-            padding: 32px;
+            padding: 0 32px 32px;
             min-width: 0;
             overflow-x: auto;
         }
 
         /* ================= 布局与复用工具类 ================= */
         .layout-container {
-            max-width: 1400px; margin: 0 auto; background: var(--bg-white);
-            border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            border: 1px solid var(--border-color); overflow: visible; 
-            min-width: 1050px; 
+            width: 100%;
+            min-width: 0;
         }
         @media (max-width: 1024px) {
             .layout-container { min-width: auto; width: 100%; }
@@ -121,6 +119,10 @@ if (session_status() === PHP_SESSION_NONE) {
         .filter-bar-container {
             background-color: var(--bg-white);
             display: flex; flex-direction: column;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-top: 16px;
         }
         
         .filter-content {
