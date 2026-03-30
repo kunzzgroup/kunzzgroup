@@ -11,6 +11,9 @@
  * 响应格式：{"code": 200|400|500, "msg": "...", "data": ...}
  */
 
+// ─── 时区统一设置（马来西亚 UTC+8） ─────────────────────────────────────────
+date_default_timezone_set('Asia/Kuala_Lumpur');
+
 ob_start();
 
 // ─── CORS & Content-Type ────────────────────────────────────────────────────
@@ -40,6 +43,8 @@ try {
     );
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    // 强制 MySQL 会话时区 = UTC+8（马来西亚/新加坡标准时间）
+    $pdo->exec("SET time_zone = '+08:00'");
 } catch (PDOException $e) {
     ob_end_clean();
     http_response_code(500);
