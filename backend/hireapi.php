@@ -293,6 +293,103 @@ function handlePost(): void
         ]);
 
         $newId = $pdo->lastInsertId();
+        $submittedAt = date('Y-m-d H:i:s');
+
+        // ── 发送 HR 通知邮件 ───────────────────────────────────────────────
+        $hrEmail   = 'mingsoon249@gmail.com';
+        $fromEmail = 'no-reply@kunzzgroup.com';
+        $fromName  = 'KUNZZ Group 招聘系统';
+
+        $subject = "=?UTF-8?B?" . base64_encode("[新招聘申请] {$chineseName} 申请 {$companyName} · {$jobTitle}") . "?=";
+
+        $resumeLink = !empty($resumeUrl)
+            ? "https://kunzzgroup.com" . $resumeUrl
+            : '（未上传）';
+
+        $year = date('Y');
+        $htmlBody = <<<HTML
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:'Segoe UI',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:32px 0;">
+  <tr><td align="center">
+    <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.08);">
+      <!-- 顶部橙色 Banner -->
+      <tr>
+        <td style="background:linear-gradient(135deg,#ff7b00,#e66e00);padding:28px 36px;">
+          <p style="margin:0;font-size:13px;color:rgba(255,255,255,0.8);letter-spacing:1px;">KUNZZ GROUP · 招聘通知</p>
+          <h1 style="margin:8px 0 0;font-size:22px;color:#fff;font-weight:bold;">📋 新招聘申请通知</h1>
+        </td>
+      </tr>
+      <!-- 申请信息 -->
+      <tr>
+        <td style="padding:28px 36px;">
+          <p style="margin:0 0 20px;font-size:14px;color:#555;">以下申请人已于 <strong>{$submittedAt}</strong>（马来西亚时间）提交招聘申请，请及时处理。</p>
+
+          <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;font-size:14px;">
+            <tr style="background:#f9fafb;">
+              <td style="padding:12px 16px;color:#6b7280;width:130px;border-bottom:1px solid #e5e7eb;">申请公司</td>
+              <td style="padding:12px 16px;color:#111;font-weight:bold;border-bottom:1px solid #e5e7eb;">{$companyName}</td>
+            </tr>
+            <tr>
+              <td style="padding:12px 16px;color:#6b7280;border-bottom:1px solid #e5e7eb;">申请职位</td>
+              <td style="padding:12px 16px;color:#ff7b00;font-weight:bold;border-bottom:1px solid #e5e7eb;">{$jobTitle}</td>
+            </tr>
+            <tr style="background:#f9fafb;">
+              <td style="padding:12px 16px;color:#6b7280;border-bottom:1px solid #e5e7eb;">中文姓名</td>
+              <td style="padding:12px 16px;color:#111;border-bottom:1px solid #e5e7eb;">{$chineseName}</td>
+            </tr>
+            <tr>
+              <td style="padding:12px 16px;color:#6b7280;border-bottom:1px solid #e5e7eb;">英文姓名</td>
+              <td style="padding:12px 16px;color:#111;border-bottom:1px solid #e5e7eb;">{$englishName}</td>
+            </tr>
+            <tr style="background:#f9fafb;">
+              <td style="padding:12px 16px;color:#6b7280;border-bottom:1px solid #e5e7eb;">性别</td>
+              <td style="padding:12px 16px;color:#111;border-bottom:1px solid #e5e7eb;">{$gender}</td>
+            </tr>
+            <tr>
+              <td style="padding:12px 16px;color:#6b7280;border-bottom:1px solid #e5e7eb;">电子邮箱</td>
+              <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;"><a href="mailto:{$email}" style="color:#ff7b00;text-decoration:none;">{$email}</a></td>
+            </tr>
+            <tr style="background:#f9fafb;">
+              <td style="padding:12px 16px;color:#6b7280;border-bottom:1px solid #e5e7eb;">联系电话</td>
+              <td style="padding:12px 16px;color:#111;border-bottom:1px solid #e5e7eb;">{$phoneCode} {$phoneNumber}</td>
+            </tr>
+            <tr>
+              <td style="padding:12px 16px;color:#6b7280;">简历附件</td>
+              <td style="padding:12px 16px;"><a href="{$resumeLink}" style="color:#ff7b00;font-weight:bold;">📄 点击查看简历</a></td>
+            </tr>
+          </table>
+
+          <div style="margin-top:24px;text-align:center;">
+            <a href="https://kunzzgroup.com/backend/hire" style="display:inline-block;background:#ff7b00;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:14px;">
+              🚀 前往招聘管理系统处理
+            </a>
+          </div>
+        </td>
+      </tr>
+      <!-- 底部 -->
+      <tr>
+        <td style="background:#f9fafb;padding:16px 36px;border-top:1px solid #e5e7eb;text-align:center;">
+          <p style="margin:0;font-size:12px;color:#9ca3af;">此邮件由系统自动发送，请勿直接回复 · KUNZZ Group © {$year}</p>
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>
+HTML;
+
+        $headers  = "MIME-Version: 1.0\r\n";
+        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+        $headers .= "From: {$fromName} <{$fromEmail}>\r\n";
+        $headers .= "Reply-To: {$fromEmail}\r\n";
+        $headers .= "X-Mailer: PHP/" . phpversion();
+
+        @mail($hrEmail, $subject, $htmlBody, $headers);
+        // ── /HR 通知邮件 ───────────────────────────────────────────────────
 
         sendResponse(200, "申请提交成功！我们会尽快与您联系。", ["id" => (int)$newId]);
     } catch (PDOException $e) {
