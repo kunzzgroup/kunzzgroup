@@ -28,7 +28,49 @@ document.addEventListener('DOMContentLoaded', function() {
     // 点击汉堡切换菜单
     if (hamburger) {
         hamburger.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
+            const isOpen = navMenu.classList.contains('active');
+            if (isOpen) {
+                navMenu.classList.remove('active');
+                hamburger.textContent = '☰';
+                document.body.style.overflow = '';
+                var ov = document.getElementById('mobile-menu-overlay');
+                if (ov) ov.style.display = 'none';
+            } else {
+                navMenu.classList.add('active');
+                hamburger.textContent = '✕';
+                if (window.innerWidth <= 768) {
+                    document.body.style.overflow = 'hidden';
+                }
+                var ov = document.getElementById('mobile-menu-overlay');
+                if (ov) ov.style.display = 'block';
+            }
+        });
+    }
+
+    // 旗下品牌：手机端 tap 展开 accordion
+    var brandItem = document.querySelector('.header-nav-item.header-nav-dropdown');
+    var brandTrigger = brandItem && brandItem.querySelector('.header-nav-dropdown-trigger');
+    if (brandTrigger) {
+        brandTrigger.addEventListener('click', function(e) {
+            if (window.innerWidth > 768) return;
+            e.preventDefault();
+            e.stopPropagation();
+            brandItem.classList.toggle('mobile-open');
+        });
+    }
+
+    // 点击菜单内链接自动关闭菜单
+    if (navMenu) {
+        navMenu.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    navMenu.classList.remove('active');
+                    hamburger && (hamburger.textContent = '☰');
+                    document.body.style.overflow = '';
+                    var ov = document.getElementById('mobile-menu-overlay');
+                    if (ov) ov.style.display = 'none';
+                }
+            });
         });
     }
 

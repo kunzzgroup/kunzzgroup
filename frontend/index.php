@@ -58,7 +58,7 @@ include '../public/header.php';
     </div>
     <div class="comprofile-image animate-on-scroll rotate-3d-full">
       <!-- 你可以换成自己的图片 -->
-      <img src="../images/images/logo.png?v=<?php echo time(); ?>" alt="公司介绍图" />
+      <img src="../images/images/logo.png?v=<?php echo time(); ?>" alt="公司介绍图" loading="lazy" />
     </div>
   </div>
 
@@ -85,7 +85,7 @@ include '../public/header.php';
   <section id="culture" class="culture-section">
     <div class="culture-left animate-on-scroll card-tilt-in-left">
       <div class="culture-card">
-        <img src="../images/images/积极向上 (1).png?v=<?php echo time(); ?>" alt="icon" class="culture-icon">
+        <img src="../images/images/积极向上 (1).png?v=<?php echo time(); ?>" alt="icon" class="culture-icon" loading="lazy">
         <h3>积极向上</h3>
         <p>始终以正面心态面对挑战<br>在变化中寻找成长机会</p>
       </div>

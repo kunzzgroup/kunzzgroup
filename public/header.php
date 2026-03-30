@@ -63,6 +63,8 @@ function getLanguageSwitchUrl($targetLang) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- <style><?php include_once 'critical-css.php'; echo getCriticalCSS(); ?></style> -->
     <link rel="stylesheet" href="css/header.css" />
+    <!-- 手机端专属样式（覆盖 Swiper，启用自然滚动） -->
+    <link rel="stylesheet" href="../public/mobile.css" />
     <title><?php echo isset($pageTitle) ? $pageTitle : 'KUNZZ HOLDINGS'; ?></title>
     <?php if (isset($additionalCSS)): ?>
         <?php foreach ($additionalCSS as $css): ?>
@@ -71,6 +73,8 @@ function getLanguageSwitchUrl($targetLang) {
     <?php endif; ?>
     <?php echo loadNonCriticalCSS(); ?>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" defer></script>
+    <!-- 手机端 JS（Swiper 禁用、汉堡菜单、CTA 注入） -->
+    <script src="../public/mobile.js" defer></script>
 </head>
 <body>
     <?php echo getBgMusicHtml(); ?>
