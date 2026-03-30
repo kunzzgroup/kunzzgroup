@@ -372,6 +372,12 @@ if (!$canSeeBrand) {
 
 
 <link rel="stylesheet" href="css/sidebar.css?v=<?php echo time(); ?>">
+<style>
+@keyframes sidebar-badge-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.15); opacity: 0.85; }
+}
+</style>
 
 <!-- 侧边菜单 -->
 <div class="informationmenu">
@@ -554,8 +560,28 @@ endif; ?>
                             </a>
                         </div>
                         <div class="menu-item-wrapper">
-                            <a href="hire" class="informationmenu-item">
-                                招聘列表
+                            <a href="hire" class="informationmenu-item" style="display:flex;align-items:center;justify-content:space-between;">
+                                <span>招聘列表</span>
+                                <?php
+                                // 当前不在 hire 页面才显示待处理角标
+                                $currentPage = basename($_SERVER['PHP_SELF'] ?? '', '.php');
+                                $isHirePage = ($currentPage === 'hire');
+                                if (!$isHirePage && isset($pdo)) {
+                                    try {
+                                        $pendingStmt = $pdo->query("SELECT COUNT(*) FROM job_applications WHERE status = 0 AND is_deleted = 0");
+                                        $pendingCount = (int)$pendingStmt->fetchColumn();
+                                    } catch(Exception $e) { $pendingCount = 0; }
+                                } else {
+                                    $pendingCount = 0;
+                                }
+                                if ($pendingCount > 0):
+                                ?>
+                                <span style="
+                                    background:#ef4444;color:#fff;font-size:11px;font-weight:700;
+                                    padding:1px 7px;border-radius:20px;min-width:18px;text-align:center;
+                                    line-height:18px;display:inline-block;animation:sidebar-badge-pulse 1.5s ease-in-out infinite;
+                                "><?php echo $pendingCount; ?></span>
+                                <?php endif; ?>
                             </a>
                         </div>
                     <?php

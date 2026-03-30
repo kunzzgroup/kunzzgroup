@@ -383,6 +383,38 @@ if (session_status() === PHP_SESSION_NONE) {
         .modal-select { border-color: var(--primary-color); background-color: var(--primary-light); }
         .modal-link { color: var(--primary-color); text-decoration: none; }
         .btn-resume-modal { border: 1px solid var(--border-color); }
+
+        /* ==================== 待处理通知 Toast ==================== */
+        #pendingToast {
+            position: fixed; top: 24px; right: 24px; z-index: 9999;
+            background: #fff; border-radius: 12px;
+            border-left: 4px solid #ef4444;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            padding: 16px 20px; max-width: 360px; width: 100%;
+            display: flex; align-items: flex-start; gap: 14px;
+            transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+            opacity: 0;
+        }
+        #pendingToast.show { transform: translateX(0); opacity: 1; }
+        .toast-icon {
+            width: 36px; height: 36px; background: #fee2e2; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; flex-shrink: 0;
+        }
+        .toast-body { flex: 1; }
+        .toast-title { font-size: 14px; font-weight: 700; color: #111; margin-bottom: 4px; }
+        .toast-msg { font-size: 13px; color: #6b7280; line-height: 1.5; }
+        .toast-close {
+            background: none; border: none; font-size: 18px; color: #9ca3af;
+            cursor: pointer; line-height: 1; padding: 0; flex-shrink: 0;
+        }
+        .toast-close:hover { color: #374151; }
+        .toast-progress {
+            position: absolute; bottom: 0; left: 0; height: 3px;
+            background: #ef4444; border-radius: 0 0 0 12px;
+            animation: toast-progress-bar 6s linear forwards;
+        }
+        @keyframes toast-progress-bar { from { width: 100%; } to { width: 0%; } }
     </style>
 </head>
 <body>
@@ -754,12 +786,18 @@ if (session_status() === PHP_SESSION_NONE) {
                 const res  = await fetch('hireapi.php?' + params.toString());
                 const json = await res.json();
                 if (json.code === 200) {
+                    const isInitialLoad = !state.company && !state.status && !state.keyword && !state.jobTitle;
                     allData = json.data.list;
                     renderTable(allData);
                     await fetchStats();
                     renderChips();        // 数据到位后重建 chips，确保公司/职位计数正确
                     updateChipCounts();   // 更新状态计数
                     renderActiveTags();
+                    // 首次加载时触发 toast 通知
+                    if (isInitialLoad) {
+                        const pendingCount = allData.filter(r => String(r.status) === '0').length;
+                        document.dispatchEvent(new CustomEvent('hireDataLoaded', { detail: { pendingCount } }));
+                    }
                 } else {
                     els.tableBody.innerHTML = `<tr><td colspan="8" class="empty-state">加载失败：${json.msg}</td></tr>`;
                 }
@@ -1182,6 +1220,44 @@ if (session_status() === PHP_SESSION_NONE) {
                 alert('网络错误，保存失败');
             }
         }
+    </script>
+
+    <!-- 待处理申请通知 Toast -->
+    <div id="pendingToast" style="position:relative;">
+        <div class="toast-icon">🔔</div>
+        <div class="toast-body">
+            <div class="toast-title">有待审批的招聘申请</div>
+            <div class="toast-msg" id="toastMsg">正在加载...</div>
+        </div>
+        <button class="toast-close" onclick="dismissToast()" title="关闭">×</button>
+        <div class="toast-progress" id="toastProgress"></div>
+    </div>
+
+    <script>
+    let toastTimer = null;
+    function showPendingToast(count) {
+        if (count <= 0) return;
+        const toast = document.getElementById('pendingToast');
+        const msg   = document.getElementById('toastMsg');
+        const prog  = document.getElementById('toastProgress');
+        msg.textContent = `共有 ${count} 位申请人待处理，请及时审批。`;
+        // reset progress bar
+        prog.style.animation = 'none';
+        prog.offsetHeight;  // reflow
+        prog.style.animation = '';
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(dismissToast, 6000);
+    }
+    function dismissToast() {
+        clearTimeout(toastTimer);
+        const toast = document.getElementById('pendingToast');
+        toast.classList.remove('show');
+    }
+    // 在数据加载完毕后触发 toast（利用 fetchData 事件）
+    document.addEventListener('hireDataLoaded', (e) => {
+        showPendingToast(e.detail.pendingCount);
+    });
     </script>
     </div><!-- /.main-content -->
 </body>
