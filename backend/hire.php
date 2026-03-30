@@ -1079,7 +1079,7 @@ if (session_status() === PHP_SESSION_NONE) {
                 // 简历预览按鈕
                 const resumeBtn = clone.querySelector('.js-resume');
                 if (app.resume_file_url) {
-                    resumeBtn.onclick = () => window.open('/backend/' + app.resume_file_url, '_blank');
+                    resumeBtn.onclick = () => window.open('/backend/resume.php?id=' + app.id, '_blank');
                 } else {
                     resumeBtn.textContent = '无附件';
                     resumeBtn.style.opacity = '0.4';
@@ -1187,7 +1187,7 @@ if (session_status() === PHP_SESSION_NONE) {
             // 简历按鈕
             const resumeBtn = document.getElementById('modalResumeBtn');
             if (app.resume_file_url) {
-                resumeBtn.onclick = () => window.open('/backend/' + app.resume_file_url, '_blank');
+                resumeBtn.onclick = () => window.open('/backend/resume.php?id=' + app.id, '_blank');
                 resumeBtn.style.opacity = '1';
             } else {
                 resumeBtn.textContent = '无简历附件';

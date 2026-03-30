@@ -302,8 +302,11 @@ function handlePost(): void
 
         $subject = "=?UTF-8?B?" . base64_encode("[新招聘申请] {$chineseName} 申请 {$companyName} · {$jobTitle}") . "?=";
 
-        $resumeLink = !empty($resumeUrl)
-            ? "https://kunzzgroup.com/backend/" . $resumeUrl
+        // 生成简历查看 token（与 resume.php 的 RESUME_SIGN_KEY 一致）
+        $resumeSignKey = 'kunzz_resume_2024_xK9!mP#vL';
+        $resumeToken   = substr(hash_hmac('sha256', (string)$newId, $resumeSignKey), 0, 32);
+        $resumeLink    = !empty($resumeUrl)
+            ? "https://kunzzgroup.com/backend/resume.php?id={$newId}&token={$resumeToken}"
             : '（未上传）';
 
         $year = date('Y');
