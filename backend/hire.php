@@ -838,7 +838,12 @@ if (isset($_SESSION['user_id'])) {
                     body: JSON.stringify({ id, status: newStatus })
                 });
                 const json = await res.json();
-                if (json.code === 200) { await fetchStats(); renderChips(); fetchData(); }
+                if (json.code === 200) {
+                    // 同步更新 rawData，让 chip 计数立即反映新状态
+                    const r = rawData.find(x => x.id == id);
+                    if (r) r.status = String(newStatus);
+                    await fetchStats(); renderChips(); fetchData();
+                }
             } catch(err) { console.warn('状态更新失败', err); }
         });
         document.addEventListener('click',  (e) => { if (!_gPop.contains(e.target)) closeGlobalPopover(); });
