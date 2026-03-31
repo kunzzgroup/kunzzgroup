@@ -1,4 +1,4 @@
-
+﻿
 // API 配置
 const API_BASE_URL = 'costapi.php';
 
@@ -792,7 +792,7 @@ async function updateDateRangeFromPickers() {
     const endDateStr = `${endDateValue.year}-${String(endDateValue.month).padStart(2, '0')}-${String(endDateValue.day).padStart(2, '0')}`;
 
     if (new Date(startDateStr) > new Date(endDateStr)) {
-        alert('开始日期不能晚于结束日期');
+        showToast('开始日期不能晚于结束日期', 'warning');
         return;
     }
 

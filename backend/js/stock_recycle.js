@@ -1,4 +1,4 @@
-// js/stock_recycle.js
+﻿// js/stock_recycle.js
 
 let deletedData = [];
 
@@ -126,31 +126,4 @@ async function permanentDelete(id, system) {
     }
 }
 
-function showAlert(message, type = 'success') {
-    const container = document.getElementById('alert-container');
-    if (!container) return;
 
-    const alert = document.createElement('div');
-    alert.className = `alert alert-${type}`;
-    alert.style.padding = '12px 16px';
-    alert.style.borderRadius = '8px';
-    alert.style.marginBottom = '16px';
-    alert.style.display = 'flex';
-    alert.style.alignItems = 'center';
-    alert.style.gap = '12px';
-    
-    if (type === 'success') {
-        alert.style.backgroundColor = '#ecfdf5';
-        alert.style.color = '#065f46';
-        alert.style.border = '1px solid #10b981';
-        alert.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
-    } else {
-        alert.style.backgroundColor = '#fef2f2';
-        alert.style.color = '#991b1b';
-        alert.style.border = '1px solid #ef4444';
-        alert.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
-    }
-
-    container.appendChild(alert);
-    setTimeout(() => alert.remove(), 3000);
-}

@@ -1,4 +1,4 @@
-
+﻿
 // API 配置
 const API_BASE_URL = 'kpiapi.php';
 
@@ -882,7 +882,7 @@ async function updateDateRangeFromPickers() {
 
     // 验证日期有效性
     if (new Date(startDateStr) > new Date(endDateStr)) {
-        alert('开始日期不能晚于结束日期');
+        showToast('开始日期不能晚于结束日期', 'warning');
         return;
     }
 

@@ -25,13 +25,13 @@ fileInput.addEventListener('drop', (e) => {
         // 验证文件类型
         const allowedTypes = ['audio/mp3', 'audio/wav', 'audio/ogg', 'audio/m4a', 'audio/mpeg'];
         if (!allowedTypes.includes(file.type) && !file.name.match(/\.(mp3|wav|ogg|m4a)$/i)) {
-            alert('请选择有效的音频文件（MP3, WAV, OGG, M4A）');
+            showToast('请选择有效的音频文件（MP3, WAV, OGG, M4A）', 'error');
             return;
         }
 
         // 验证文件大小（10MB）
         if (file.size > 10 * 1024 * 1024) {
-            alert('文件大小不能超过 10MB');
+            showToast('文件大小不能超过 10MB', 'error');
             return;
         }
 
@@ -50,7 +50,7 @@ fileInputElement.addEventListener('change', function () {
 
         // 验证文件大小
         if (file.size > 10 * 1024 * 1024) {
-            alert('文件大小不能超过 10MB');
+            showToast('文件大小不能超过 10MB', 'error');
             this.value = '';
             return;
         }
@@ -68,6 +68,6 @@ function updateFileInputText(fileName) {
 document.querySelector('form').addEventListener('submit', function (e) {
     if (!fileInputElement.files.length) {
         e.preventDefault();
-        alert('请先选择要上传的音乐文件');
+        showToast('请先选择要上传的音乐文件', 'warning');
     }
 });

@@ -1,4 +1,4 @@
-
+﻿
 const sidebar = document.querySelector('.informationmenu');
 // 移除遮罩层逻辑
 const overlay = null;
@@ -133,7 +133,7 @@ document.querySelectorAll('.submenu-item:not(.expandable)').forEach(item => {
         // 没有真实链接的项目，阻止默认行为并显示提示
         e.preventDefault();
         const itemText = this.textContent.replace('→', '').trim();
-        alert('点击了子菜单项: ' + itemText);
+        // showToast('点击了子菜单项: ' + itemText, 'info');
     });
 });
 
@@ -181,7 +181,7 @@ document.querySelectorAll('.sub-option').forEach(option => {
         // 没有真实链接的项目
         e.preventDefault();
         const optionText = this.textContent.replace('·', '').trim();
-        alert('点击了子选项: ' + optionText);
+        // showToast('点击了子选项: ' + optionText, 'info');
     });
 });
 

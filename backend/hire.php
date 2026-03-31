@@ -1787,7 +1787,7 @@ if (isset($_SESSION['user_id'])) {
 
             // ── Export Excel (UTF-8 BOM CSV) ─────────────────────────────────────────
             window.exportToExcel = function () {
-                if (!allData || allData.length === 0) { alert('没有可导出的数据'); return; }
+                if (!allData || allData.length === 0) { showToast('没有可导出的数据', 'warning'); return; }
                 var statusLabel = { 0: '待处理', 1: '沟通中', 2: '已录用', 3: '已淘汰' };
                 var headers = ['序号', '中文姓名', '英文姓名', '性别', '申请公司', '申请职位',
                     '邮箱', '电话区号', '电话号码', '简历链接', '状态', 'HR备注', '申请时间'];
@@ -2106,10 +2106,10 @@ if (isset($_SESSION['user_id'])) {
                         renderChips();
                         closeModal();
                     } else {
-                        alert('保存失败：' + json.msg);
+                        showToast('保存失败：' + json.msg, 'error');
                     }
                 } catch (err) {
-                    alert('网络错误，保存失败');
+                    showToast('网络错误，保存失败', 'error');
                 }
             }
         </script>

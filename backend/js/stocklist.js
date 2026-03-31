@@ -1,4 +1,4 @@
-
+﻿
 // API 配置
 const API_BASE_URL = 'stocklistapi.php';
 
@@ -272,25 +272,6 @@ function exportData() {
     }
 }
 
-// 显示提示信息
-function showAlert(message, type = 'success') {
-    const alertContainer = document.getElementById('alert-container');
-    const alertClass = type === 'error' ? 'alert-error' : type === 'info' ? 'alert-info' : 'alert-success';
-    const iconClass = type === 'error' ? 'fa-exclamation-circle' : type === 'info' ? 'fa-info-circle' : 'fa-check-circle';
-
-    const alertElement = document.createElement('div');
-    alertElement.className = `alert ${alertClass}`;
-    alertElement.innerHTML = `
-                <i class="fas ${iconClass}"></i>
-                <span>${message}</span>
-            `;
-
-    alertContainer.appendChild(alertElement);
-
-    setTimeout(() => {
-        alertElement.remove();
-    }, 5000);
-}
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', initApp);

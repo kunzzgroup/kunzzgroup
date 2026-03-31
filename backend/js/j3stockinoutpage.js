@@ -1,4 +1,4 @@
-
+﻿
 // API 配置
 let API_BASE_URL = 'j3stockeditpageapi.php';
 let currentStockType = 'j3';
@@ -568,7 +568,7 @@ async function updateDateRangeFromPickers() {
 
     // 验证日期有效性
     if (new Date(startDateStr) > new Date(endDateStr)) {
-        alert('开始日期不能晚于结束日期');
+        showToast('开始日期不能晚于结束日期', 'warning');
         return;
     }
 
@@ -3299,77 +3299,11 @@ function exportData() {
     document.getElementById('export-modal').style.display = 'block';
 }
 
-// 完全替换现有的 showAlert 函数
-function showAlert(message, type = 'success') {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
 
-    // 先检查并限制通知数量（在添加新通知之前）
-    const existingToasts = container.querySelectorAll('.toast');
-    while (existingToasts.length >= 3) {
-        closeToast(existingToasts[0].id);
-        // 立即从DOM移除，不等待动画
-        if (existingToasts[0].parentNode) {
-            existingToasts[0].parentNode.removeChild(existingToasts[0]);
-        }
-        // 重新获取当前通知列表
-        existingToasts = container.querySelectorAll('.toast');
-    }
 
-    const toastId = 'toast-' + Date.now();
-    const iconClass = {
-        'success': 'fa-check-circle',
-        'error': 'fa-exclamation-circle',
-        'info': 'fa-info-circle',
-        'warning': 'fa-exclamation-triangle'
-    }[type] || 'fa-check-circle';
 
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.id = toastId;
-    toast.innerHTML = `
-                <i class="fas ${iconClass} toast-icon"></i>
-                <div class="toast-content">${message}</div>
-                <button class="toast-close" onclick="closeToast('${toastId}')">
-                    <i class="fas fa-times"></i>
-                </button>
-                <div class="toast-progress"></div>
-            `;
-
-    container.appendChild(toast);
-
-    // 显示动画
-    setTimeout(() => {
-        toast.classList.add('show');
-    }, 0);
-
-    // 自动关闭
-    setTimeout(() => {
-        closeToast(toastId);
-    }, 700);
-}
-
-// 添加关闭通知的函数
-function closeToast(toastId) {
-    const toast = document.getElementById(toastId);
-    if (toast) {
-        toast.classList.remove('show');
-        toast.classList.add('hide');
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.parentNode.removeChild(toast);
-            }
-        }, 300);
-    }
-}
 
 // 添加关闭所有通知的函数（可选）
-function closeAllToasts() {
-    const toasts = document.querySelectorAll('.toast');
-    toasts.forEach(toast => {
-        closeToast(toast.id);
-    });
-}
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', initApp);

@@ -1,4 +1,4 @@
-
+﻿
 const API_BASE_URL = 'stocksotapi.php';
 const PRODUCT_API_URL = 'stockapi.php';
 const PRICE_API_URL = 'stockeditapi.php';  // 价格API使用stockeditapi
@@ -1051,7 +1051,7 @@ function handlePriceChange(rowId) {
                 // 计算总价
                 calculateTotal(rowId);
             } else {
-                alert('请输入有效的价格');
+                showToast('请输入有效的价格', 'warning');
             }
         });
 
@@ -1635,63 +1635,9 @@ function updateTotalAnomalyValue() {
     }
 }
 
-// 显示通知
-function showAlert(message, type = 'success') {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
 
-    const existingToasts = container.querySelectorAll('.toast');
-    while (existingToasts.length >= 3) {
-        closeToast(existingToasts[0].id);
-        if (existingToasts[0].parentNode) {
-            existingToasts[0].parentNode.removeChild(existingToasts[0]);
-        }
-        existingToasts = container.querySelectorAll('.toast');
-    }
 
-    const toastId = 'toast-' + Date.now();
-    const iconClass = {
-        'success': 'fa-check-circle',
-        'error': 'fa-exclamation-circle',
-        'info': 'fa-info-circle',
-        'warning': 'fa-exclamation-triangle'
-    }[type] || 'fa-check-circle';
 
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.id = toastId;
-    toast.innerHTML = `
-                <i class="fas ${iconClass} toast-icon"></i>
-                <div class="toast-content">${message}</div>
-                <button class="toast-close" onclick="closeToast('${toastId}')">
-                    <i class="fas fa-times"></i>
-                </button>
-                <div class="toast-progress"></div>
-            `;
-
-    container.appendChild(toast);
-
-    setTimeout(() => {
-        toast.classList.add('show');
-    }, 0);
-
-    setTimeout(() => {
-        closeToast(toastId);
-    }, 4000);
-}
-
-function closeToast(toastId) {
-    const toast = document.getElementById(toastId);
-    if (toast) {
-        toast.classList.remove('show');
-        toast.classList.add('hide');
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.parentNode.removeChild(toast);
-            }
-        }, 300);
-    }
-}
 
 // 输入框和下拉选择框事件处理
 document.addEventListener('input', function (e) {

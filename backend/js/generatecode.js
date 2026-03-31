@@ -700,19 +700,6 @@ function showMessage(message, type = 'success') {
     setTimeout(() => closeToast(toastId), 800);
 }
 
-// 添加关闭通知的函数
-function closeToast(toastId) {
-    const toast = document.getElementById(toastId);
-    if (toast) {
-        toast.classList.remove('show');
-        toast.classList.add('hide');
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.parentNode.removeChild(toast);
-            }
-        }, 300);
-    }
-}
 
 // 刷新表格
 function refreshTable() {

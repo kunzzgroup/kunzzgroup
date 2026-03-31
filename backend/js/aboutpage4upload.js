@@ -1,4 +1,4 @@
-// 年份切换功能
+﻿// 年份切换功能
 function showYear(year) {
     // 隐藏所有内容
     document.querySelectorAll('.timeline-content').forEach(content => {
@@ -159,7 +159,7 @@ document.querySelectorAll('form').forEach(form => {
             e.preventDefault();
             const message = (typeof isEnglish !== 'undefined' && isEnglish) ?
                 'Please fill in all required fields' : '请填写所有必填字段';
-            alert(message);
+            showToast(message, 'error');
         }
     });
 });

@@ -1,4 +1,4 @@
-
+﻿
 // API 配置
 const API_BASE_URL = 'costapi.php';
 
@@ -461,72 +461,11 @@ function formatStockInput(input) {
     }
 }
 
-// 显示提示信息
-function showAlert(message, type = 'success') {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
 
-    let existingToasts = container.querySelectorAll('.toast');
-    while (existingToasts.length >= 3) {
-        closeToast(existingToasts[0].id);
-        if (existingToasts[0].parentNode) {
-            existingToasts[0].parentNode.removeChild(existingToasts[0]);
-        }
-        existingToasts = container.querySelectorAll('.toast');
-    }
 
-    const toastId = 'toast-' + Date.now();
-    const iconClass = {
-        'success': 'fa-check-circle',
-        'error': 'fa-exclamation-circle',
-        'info': 'fa-info-circle',
-        'warning': 'fa-exclamation-triangle'
-    }[type] || 'fa-check-circle';
 
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.id = toastId;
-    toast.innerHTML = `
-                <i class="fas ${iconClass} toast-icon"></i>
-                <div class="toast-content">${message}</div>
-                <button class="toast-close" onclick="closeToast('${toastId}')">
-                    <i class="fas fa-times"></i>
-                </button>
-                <div class="toast-progress"></div>
-            `;
-
-    container.appendChild(toast);
-
-    setTimeout(() => {
-        toast.classList.add('show');
-    }, 0);
-
-    setTimeout(() => {
-        closeToast(toastId);
-    }, 700);
-}
-
-// 关闭通知
-function closeToast(toastId) {
-    const toast = document.getElementById(toastId);
-    if (toast) {
-        toast.classList.remove('show');
-        toast.classList.add('hide');
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.parentNode.removeChild(toast);
-            }
-        }, 300);
-    }
-}
 
 // 关闭所有通知
-function closeAllToasts() {
-    const toasts = document.querySelectorAll('.toast');
-    toasts.forEach(toast => {
-        closeToast(toast.id);
-    });
-}
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', initApp);

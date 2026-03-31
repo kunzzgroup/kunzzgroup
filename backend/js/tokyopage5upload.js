@@ -1,4 +1,4 @@
-
+﻿
 let storeCounter = window.TOKYO_UPLOAD.storeCounter;
 
 
@@ -151,7 +151,7 @@ document.getElementById('mainForm').addEventListener('submit', function (e) {
 
     if (!sectionTitle.value.trim()) {
         e.preventDefault();
-        alert('请至少填写标题文字！');
+        showToast('请至少填写标题文字！', 'warning');
         sectionTitle.style.borderColor = '#dc3545';
         sectionTitle.scrollIntoView({ behavior: 'smooth' });
         sectionTitle.focus();

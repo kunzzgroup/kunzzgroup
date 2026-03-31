@@ -1,4 +1,4 @@
-
+﻿
 // 从PHP获取用户名和职位
 const currentUsername = '<?php echo isset($username) ? addslashes($username) : "User"; ?>';
 const currentPosition = '<?php echo isset($position) && !empty($position) ? addslashes($position) : "User"; ?>';
@@ -156,17 +156,6 @@ async function printTemplate() {
     }
 }
 
-// 显示提示信息
-function showAlert(message, type) {
-    const messageArea = document.getElementById('messageArea');
-    messageArea.className = `message ${type}`;
-    messageArea.textContent = message;
-    messageArea.style.display = 'block';
-
-    setTimeout(() => {
-        messageArea.style.display = 'none';
-    }, 5000);
-}
 
 // 生成PDF
 async function generatePDF() {

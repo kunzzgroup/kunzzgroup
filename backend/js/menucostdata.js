@@ -1,4 +1,4 @@
-
+﻿
 let dataList = [];
 let filteredDataList = [];
 let editingId = null;
@@ -10,26 +10,7 @@ window.addEventListener('DOMContentLoaded', function () {
     setupRealTimeSearch();
 });
 
-// 显示提示消息
-function showAlert(message, type = 'success') {
-    const alertContainer = document.getElementById('alert-container');
-    const alert = document.createElement('div');
-    alert.className = `alert alert-${type}`;
-    alert.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                <span>${message}</span>
-            `;
-    alertContainer.innerHTML = '';
-    alertContainer.appendChild(alert);
 
-    setTimeout(() => {
-        alert.style.opacity = '0';
-        alert.style.transition = 'opacity 0.3s';
-        setTimeout(() => {
-            alert.remove();
-        }, 300);
-    }, 3000);
-}
 
 // 加载数据
 async function loadData() {
