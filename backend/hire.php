@@ -1675,14 +1675,16 @@ if (isset($_SESSION['user_id'])) {
 
             function updatePaginationUI() {
                 const { total, totalPages } = pagination;
-                // \u53ea\u6709 1 \u9875\u65f6\u9690\u85cf\u6574\u4e2a\u5206\u9875\u680f
+                // 只有 1 页时隐藏整个分页栏
                 els.pageControls.style.display = totalPages <= 1 ? 'none' : 'flex';
                 els.currentPageNum.textContent = state.page;
-                els.totalCountInfo.textContent = `\u5171\u8ba1 ${total} \u6761\u8bb0\u5f55`;
-                // \u7b2c 1 \u9875\u65f6\u7981\u7528\u4e0a\u4e00\u9875
+                // 显示当前页条数（不是总数）
+                const pageCount = allData.length;
+                els.totalCountInfo.textContent = `共计 ${pageCount} 条记录`;
+                // 第 1 页时禁用上一页
                 els.btnPrev.disabled = state.page <= 1;
                 els.btnPrev.style.opacity = state.page <= 1 ? '0.4' : '1';
-                // \u6700\u540e\u4e00\u9875\u65f6\u7981\u7528\u4e0b\u4e00\u9875
+                // 最后一页时禁用下一页
                 els.btnNext.disabled = state.page >= totalPages;
                 els.btnNext.style.opacity = state.page >= totalPages ? '0.4' : '1';
             }
@@ -2009,7 +2011,7 @@ if (isset($_SESSION['user_id'])) {
                     clone.querySelector('.btn-action-detail').addEventListener('click', () => openModal(app.id));
                     els.tableBody.appendChild(clone);
                 });
-                els.totalCountInfo.textContent = `共计 ${list.length} 条记录`;
+                // totalCountInfo 由 updatePaginationUI 统一更新
             }
 
             function updateBadgeUI(badgeElement, statusVal, popoverElement) {
