@@ -3,6 +3,12 @@
  *
  * Architecture: Layout (header-search) ≠ Component (smartSearchWrapper)
  *
+ * Behavior (matches hire.php):
+ *   - Collapsed by default (icon only, 40px wide)
+ *   - Click wrapper → expand + focus input
+ *   - Click outside → collapse (only if input is empty)
+ *   - input event → debounced callback / table filter
+ *
  * Provides:
  *   debounce(fn, delay)
  *   initSmartSearch(inputId, callback, delay)
@@ -16,6 +22,22 @@ function debounce(fn, delay) {
         clearTimeout(timer);
         timer = setTimeout(() => fn.apply(this, args), delay);
     };
+}
+
+/* ── Expand / Collapse a single smartSearchWrapper ─────────── */
+function expandSmartSearch(wrapper) {
+    wrapper.classList.add('expanded');
+    wrapper.dataset.expanded = '1';
+    var input = wrapper.querySelector('.smartSearch-input');
+    if (input) setTimeout(() => input.focus(), 150);
+}
+
+function collapseSmartSearch(wrapper) {
+    var input = wrapper.querySelector('.smartSearch-input');
+    // Only collapse if input is empty (keep expanded when user typed something)
+    if (input && input.value.trim() !== '') return;
+    wrapper.classList.remove('expanded');
+    wrapper.dataset.expanded = '';
 }
 
 /* ── Core: wire a search input by ID ─────────────────────── */
@@ -75,19 +97,52 @@ function updateClearButton(inputEl) {
     }
 }
 
-/* ── Auto-init: data-table mode (zero-config table filtering) ─
+/* ── Auto-init: DOMContentLoaded wires all wrappers ─────────
  *
- * Usage in PHP:
+ * 1. Expand/collapse behavior (click-to-expand, outside-click-to-collapse)
+ * 2. data-table mode for zero-config table filtering
+ *
+ * Usage in PHP (zero-config table filter):
  *   <input class="smartSearch-input"
  *          data-table="my-table-id"
  *          data-cols="0,1,2"          (column indexes to search, optional)
  *          placeholder="搜索...">
- *
- * The script will filter visible <tr> rows in <tbody> of #{data-table}.
  * ─────────────────────────────────────────────────────────── */
 (function () {
     document.addEventListener('DOMContentLoaded', function () {
-        /* Auto-wire all smartSearch-input elements that have data-table */
+
+        /* ── 1. Expand/collapse behavior for every .smartSearchWrapper ── */
+        var wrappers = document.querySelectorAll('.smartSearchWrapper');
+
+        wrappers.forEach(function (wrapper) {
+            var input = wrapper.querySelector('.smartSearch-input');
+
+            /* Click on wrapper → expand */
+            wrapper.addEventListener('click', function (e) {
+                if (!wrapper.dataset.expanded) {
+                    e.stopPropagation();
+                    expandSmartSearch(wrapper);
+                }
+            });
+
+            if (input) {
+                /* input event: update clear button state */
+                input.addEventListener('input', function () {
+                    updateClearButton(input);
+                });
+            }
+        });
+
+        /* Click outside any expanded wrapper → collapse it */
+        document.addEventListener('click', function (e) {
+            wrappers.forEach(function (wrapper) {
+                if (wrapper.dataset.expanded && !wrapper.contains(e.target)) {
+                    collapseSmartSearch(wrapper);
+                }
+            });
+        });
+
+        /* ── 2. Auto-wire data-table inputs ───────────────────────────── */
         var autoInputs = document.querySelectorAll('.smartSearch-input[data-table]');
         autoInputs.forEach(function (input) {
             var tableId = input.getAttribute('data-table');
@@ -101,12 +156,11 @@ function updateClearButton(inputEl) {
             }, 250);
         });
 
-        /* Initialise has-value state and clear buttons for all wrappers on page */
+        /* ── 3. Init has-value state + clear buttons for all wrappers ─── */
         var allInputs = document.querySelectorAll('.smartSearch-input');
         allInputs.forEach(function (input) {
             updateClearButton(input);
 
-            /* Wire clear button if present and not already wired */
             var clearBtn = input.parentElement && input.parentElement.querySelector('.smartSearch-clear');
             if (clearBtn && !clearBtn._smartSearchWired) {
                 clearBtn._smartSearchWired = true;

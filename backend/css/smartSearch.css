@@ -1,64 +1,63 @@
 /* ==========================================================
    smartSearch.css  —  Global Smart Search Wrapper Component
    Design reference: hire.php smart-search-wrapper
-   Layout role  : .header-search (kept per page)
-   Component role: .smartSearchWrapper (this file)
+   Behavior: collapsed (icon only) → click → expanded (pill w/ input)
    ========================================================== */
 
-/* ── Wrapper (the visible "pill" border) ─────────────────── */
+/* ── Wrapper — COLLAPSED STATE (default, icon only) ─────── */
 .smartSearchWrapper {
     display: flex;
     align-items: center;
-    gap: 0;
     background: #ffffff;
     border: 1px solid #d1d5db;
-    border-radius: 20px;             /* pill shape — matches hire collapsed */
-    padding: 0;
+    border-radius: 20px;
     height: 38px;
-    transition: border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-                box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    width: 100%;
-    min-width: 120px;
-    position: relative;
+    width: 40px;                     /* collapsed: icon-only width */
     overflow: hidden;
+    cursor: pointer;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.25s ease,
+                border-radius 0.25s ease,
+                box-shadow 0.2s ease;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    cursor: text;
+    position: relative;
+    flex-shrink: 0;
 }
 
 .smartSearchWrapper:hover {
     border-color: #ff7b00;
 }
 
-/* Focus-within: amber/orange border — matches hire expanded state */
-.smartSearchWrapper:focus-within {
+/* ── EXPANDED STATE ──────────────────────────────────────── */
+.smartSearchWrapper.expanded {
+    width: 250px;                    /* expanded: full input visible */
     border-color: #ff7b00;
-    border-radius: 6px;              /* matches hire .expanded border-radius */
+    border-radius: 6px;
+    cursor: default;
     box-shadow: 0 0 0 2px rgba(255, 123, 0, 0.12);
-    animation: smartSearch-focus-in 0.18s ease forwards;
 }
 
 /* ── Icon ───────────────────────────────────────────────── */
 .smartSearch-icon {
-    width: 38px;
+    width: 40px;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: clamp(12px, 0.83vw, 15px);
-    color: #9ca3af;                  /* gray when idle — matches hire icon */
+    font-size: 15px;
+    color: #9ca3af;                  /* gray when idle */
     flex-shrink: 0;
     pointer-events: none;
     transition: color 0.25s ease;
     line-height: 1;
 }
 
-/* Icon turns orange on hover/focus — matches hire expanded state */
-.smartSearchWrapper:hover .smartSearch-icon,
-.smartSearchWrapper:focus-within .smartSearch-icon {
+/* Icon turns orange when expanded */
+.smartSearchWrapper.expanded .smartSearch-icon {
     color: #ff7b00;
 }
 
-/* ── Input ──────────────────────────────────────────────── */
+/* ── Input — hidden until expanded ──────────────────────── */
 .smartSearch-input {
     flex: 1;
     border: none;
@@ -66,19 +65,28 @@
     background: transparent;
     font-size: clamp(11px, 0.74vw, 14px);
     color: #111827;
-    padding: 0 12px 0 0;
+    padding: 0;
+    padding-right: 12px;
     min-width: 0;
     font-family: inherit;
     line-height: 1.4;
     height: 100%;
+    display: none;                   /* hidden by default */
+    width: 0;
+}
+
+/* Input reveals when wrapper is expanded */
+.smartSearchWrapper.expanded .smartSearch-input {
+    display: block;
+    width: auto;
 }
 
 .smartSearch-input::placeholder {
-    color: #9ca3af;                  /* matches hire --text-muted */
+    color: #9ca3af;
     font-size: clamp(11px, 0.74vw, 14px);
 }
 
-/* ── Clear button (optional: added via JS) ──────────────── */
+/* ── Clear button ───────────────────────────────────────── */
 .smartSearch-clear {
     display: none;
     background: none;
@@ -101,31 +109,25 @@
     align-items: center;
 }
 
-/* ── Focus animation (subtle pulse) ────────────────────── */
-@keyframes smartSearch-focus-in {
-    from { box-shadow: 0 0 0 0 rgba(255, 123, 0, 0.2); }
+/* ── Focus animation (pulse on expand) ─────────────────── */
+@keyframes smartSearch-expand-glow {
+    from { box-shadow: 0 0 0 0 rgba(255, 123, 0, 0.25); }
     to   { box-shadow: 0 0 0 2px rgba(255, 123, 0, 0.12); }
+}
+
+.smartSearchWrapper.expanded {
+    animation: smartSearch-expand-glow 0.2s ease forwards;
 }
 
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 768px) {
-    .smartSearchWrapper {
-        min-width: 90px;
-        height: 36px;
-    }
-
-    .smartSearch-input {
-        font-size: 13px;
-    }
-
-    .smartSearch-icon {
-        font-size: 13px;
+    .smartSearchWrapper.expanded {
+        width: 200px;
     }
 }
 
 @media (max-width: 480px) {
-    .smartSearchWrapper {
-        min-width: 70px;
-        width: 100%;
+    .smartSearchWrapper.expanded {
+        width: 160px;
     }
 }
