@@ -180,7 +180,7 @@ include '../public/header.php';
                         <option value="+852">香港 (+852)</option>
                         <option value="+81">日本 (+81)</option>
                     </select>
-                    <input type="tel" name="phone" required pattern="\d{1,10}" maxlength="10" title="请输入最多10位数字的电话号码">
+                    <input type="tel" name="phone" required pattern="\d{7,15}" maxlength="15" title="请输入正确的电话号码">
                 </div>
                 <label>上传简历（PDF，≤3MB）：</label>
                 <input type="file" name="resume" id="resume" accept=".pdf" required>
@@ -289,7 +289,7 @@ include '../public/header.php';
                 <option value="+852">香港 +852</option>
                 <option value="+81">日本 +81</option>
               </select>
-              <input type="tel" name="phoneNumber" placeholder="请输入电话号码" required pattern="\d{1,10}" maxlength="10" inputmode="numeric" title="请输入正确手机号">
+              <input type="tel" name="phoneNumber" placeholder="请输入电话号码" required pattern="\d{7,15}" maxlength="15" inputmode="numeric" title="请输入正确手机号">
             </div>
           </div>
 
@@ -1917,6 +1917,35 @@ if (typeof swiper !== 'undefined') {
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
     toggleBackToTopButton();
+});
+
+// 手机号验证：如果选择马来西亚(+60)，则手机号不能以0开头
+document.addEventListener('DOMContentLoaded', function () {
+    function setupPhoneValidation(selectSelector, inputSelector) {
+        const selectEl = document.querySelector(selectSelector);
+        const inputEl = document.querySelector(inputSelector);
+        
+        if (selectEl && inputEl) {
+            inputEl.addEventListener('input', function() {
+                if (selectEl.value === '+60') {
+                    if (this.value.startsWith('0')) {
+                        this.value = this.value.replace(/^0+/, '');
+                    }
+                }
+            });
+            
+            selectEl.addEventListener('change', function() {
+                if (this.value === '+60') {
+                    if (inputEl.value.startsWith('0')) {
+                        inputEl.value = inputEl.value.replace(/^0+/, '');
+                    }
+                }
+            });
+        }
+    }
+    
+    setupPhoneValidation('#jobApplicationForm select[name="country_code"]', '#jobApplicationForm input[name="phone"]');
+    setupPhoneValidation('#feedbackForm select[name="countryCode"]', '#feedbackForm input[name="phoneNumber"]');
 });
 </script>
 
