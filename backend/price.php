@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/permission_guard.php';
 requirePermission('resource', 'price_comparison');
 
@@ -59,18 +59,18 @@ require_once 'session_check.php';
         <div class="filter-section">
             <div class="filter-grid">
                 <div class="filter-left">
+                    <div class="filter-group" style="flex: 0 0 140px;">
+                    <label>类型</label>
+                    <select id="type-filter" class="filter-select">
+                        <option value="">全部类型</option>
+                    </select>
+                </div>
                     <div class="filter-group" style="flex: 0 0 180px;">
                     <label>搜索</label>
                         <div class="smartSearchWrapper">
                             <i class="fas fa-search smartSearch-icon"></i>
                             <input type="text" id="search-input" class="smartSearch-input" placeholder="输入货品名称" style="text-transform: uppercase;">
                         </div>
-                </div>
-                    <div class="filter-group" style="flex: 0 0 140px;">
-                    <label>类型</label>
-                    <select id="type-filter" class="filter-select">
-                        <option value="">全部类型</option>
-                    </select>
                 </div>
                 </div>
                 <div class="filter-right">
