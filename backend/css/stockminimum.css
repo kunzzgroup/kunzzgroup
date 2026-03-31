@@ -285,7 +285,7 @@ body {
 /* 最低库存 */
 .settings-table th:nth-child(5),
 .settings-table td:nth-child(5) {
-    width: 16%;
+    width: 8%;
 }
 
 /* 操作 */
