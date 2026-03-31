@@ -74,48 +74,39 @@ function getProductsForSystem($system)
 
     try {
         /*
-         * 完全对照 stocklistapi.php 的逻辑：
-         *   1. 按 (product_name, specification, price, code_number) 分组
-         *   2. 计算 current_stock = 入库 - 出库
-         *   3. HAVING current_stock != 0  ← 只保留有当前库存的货品
-         *   4. 在外层按 product_name 去重（唯一货品名） 
-         *   5. LEFT JOIN stock_minimum_settings 取最低库存设置
+         * 完全镜像 stocklistapi.php 的查询逻辑：
+         *   GROUP BY (product_name, specification, price, code_number)
+         *   HAVING current_stock != 0
+         * 结果行数与总库存页完全一致（序号对应）。
+         * minimum_quantity 按 product_name JOIN，同货品多规格共享同一设置值。
          */
         $sql = "
             SELECT
-                @row_num := @row_num + 1 AS no,
-                sub.product_name,
-                sub.product_code,
-                COALESCE(m.minimum_quantity, 0) AS minimum_quantity
-            FROM (
-                SELECT
-                    TRIM(REPLACE(product_name, '&amp;', '&')) AS product_name,
-                    -- 取该货品下第一个非空的货品编号
-                    MIN(CASE WHEN TRIM(code_number) != '' THEN TRIM(code_number) END) AS product_code
-                FROM (
-                    -- 第一层：按 stocklistapi 同样的分组逻辑计算当前库存
-                    SELECT
-                        TRIM(REPLACE(product_name, '&amp;', '&')) AS product_name,
-                        TRIM(code_number) AS code_number,
-                        (SUM(CASE WHEN in_quantity  > 0 THEN in_quantity  ELSE 0 END) -
-                         SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) AS current_stock
-                    FROM `$tableName`
-                    WHERE product_name IS NOT NULL
-                      AND TRIM(product_name) != ''
-                      AND deleted_at IS NULL
-                    GROUP BY
-                        TRIM(REPLACE(product_name, '&amp;', '&')),
-                        specification,
-                        price,
-                        TRIM(code_number)
-                    HAVING current_stock != 0
-                ) AS inner_stock
-                GROUP BY TRIM(REPLACE(product_name, '&amp;', '&'))
-            ) AS sub
+                @row_num := @row_num + 1                              AS no,
+                TRIM(REPLACE(t.product_name, '&amp;', '&'))           AS product_name,
+                COALESCE(NULLIF(TRIM(t.code_number), ''), '-')         AS product_code,
+                COALESCE(m.minimum_quantity, 0)                        AS minimum_quantity,
+                (
+                    SUM(CASE WHEN t.in_quantity  > 0 THEN t.in_quantity  ELSE 0 END) -
+                    SUM(CASE WHEN t.out_quantity > 0 THEN t.out_quantity ELSE 0 END)
+                ) AS current_stock
+            FROM `$tableName` t
             JOIN (SELECT @row_num := 0) AS init
             LEFT JOIN stock_minimum_settings m
-                ON TRIM(m.product_name) = sub.product_name
-            ORDER BY sub.product_name ASC
+                ON TRIM(m.product_name) = TRIM(REPLACE(t.product_name, '&amp;', '&'))
+            WHERE t.product_name IS NOT NULL
+              AND TRIM(t.product_name) != ''
+              AND t.deleted_at IS NULL
+            GROUP BY
+                TRIM(REPLACE(t.product_name, '&amp;', '&')),
+                t.specification,
+                t.price,
+                TRIM(t.code_number),
+                m.minimum_quantity
+            HAVING current_stock != 0
+            ORDER BY
+                TRIM(REPLACE(t.product_name, '&amp;', '&')) ASC,
+                TRIM(t.code_number) ASC
         ";
 
         $stmt = $pdo->prepare($sql);
@@ -127,7 +118,7 @@ function getProductsForSystem($system)
             $result[] = [
                 'no'               => intval($row['no']),
                 'product_name'     => $row['product_name'],
-                'product_code'     => $row['product_code'] ?: '-',
+                'product_code'     => $row['product_code'],
                 'minimum_quantity' => floatval($row['minimum_quantity']),
             ];
         }
