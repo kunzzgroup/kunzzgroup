@@ -30,7 +30,6 @@ $display_name = $system_names[$system];
     <title>最低库存设置 - 库存管理系统</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/backend/css/toast.css">
-    <link rel="stylesheet" href="/backend/css/smartSearch.css">
     <link rel="stylesheet" href="/backend/css/stockminimum.css?v=<?php echo time(); ?>">
 </head>
 <body>
@@ -42,12 +41,6 @@ $display_name = $system_names[$system];
                 <h1 id="page-title">最低库存设置 — <?php echo $display_name; ?></h1>
             </div>
             <div class="header-right-group">
-                <div class="header-search">
-                    <div class="smartSearchWrapper">
-                        <i class="fas fa-search smartSearch-icon"></i>
-                        <input type="text" id="unified-filter" class="smartSearch-input" placeholder="搜索货品名称或编号...">
-                    </div>
-                </div>
                 <button class="btn btn-warning" onclick="saveAllSettings()" id="saveAllBtn">
                     <i class="fas fa-save"></i> 批量保存
                 </button>

@@ -14,7 +14,6 @@ const SYSTEM_NAMES = {
 
 // ─── 初始化 ──────────────────────────────────────────────────────────────────
 function initApp() {
-    setupRealTimeSearch();
     loadProductsAndSettings(currentSystem);
 }
 
@@ -129,7 +128,7 @@ function renderSettingsTable() {
 
         html += `
             <tr>
-                <td><strong>${escapeHtml(product.product_name)}</strong></td>
+                <td class="product-name-cell" style="text-align: left; padding-left: 15px;">${escapeHtml(product.product_name)}</td>
                 <td class="code-cell">${escapeHtml(product.product_code || '-')}</td>
                 <td>
                     <input type="number"
@@ -165,27 +164,8 @@ function escapeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
-// ─── 实时搜索 ────────────────────────────────────────────────────────────────
-function setupRealTimeSearch() {
-    const input = document.getElementById('unified-filter');
-    if (!input) return;
-    let debounceTimer;
-    input.addEventListener('input', function () {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            const term = this.value.toLowerCase().trim();
-            if (!term) {
-                filteredProducts = [...allProducts];
-            } else {
-                filteredProducts = allProducts.filter(p =>
-                    (p.product_name && p.product_name.toLowerCase().includes(term)) ||
-                    (p.product_code && p.product_code.toLowerCase().includes(term))
-                );
-            }
-            renderSettingsTable();
-        }, 200);
-    });
-}
+// ─── 连接预留（搜索功能已移除）――――――――――――――――――――――――――――――
+// (如需自行在此添加)
 
 // ─── 更新显示计数 ─────────────────────────────────────────────────────────────
 function updateDisplayedCount() {
@@ -307,11 +287,6 @@ document.addEventListener('keydown', function (e) {
     if (e.ctrlKey && e.key === 's') {
         e.preventDefault();
         saveAllSettings();
-    }
-    if (e.ctrlKey && e.key === 'f') {
-        e.preventDefault();
-        const input = document.getElementById('unified-filter');
-        if (input) input.focus();
     }
 });
 
