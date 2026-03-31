@@ -1,4 +1,4 @@
-﻿
+
 // 全局变量
 let allProducts = [];
 let filteredProducts = [];
@@ -8,6 +8,7 @@ let pendingChanges = new Set();
 // 初始化
 function initApp() {
     loadProductsAndSettings();
+    setupRealTimeSearch();
 }
 
 // 加载货品和设置数据
@@ -92,7 +93,7 @@ function renderSettingsTable() {
                         </td>
                         <td>
                             <button class="btn btn-primary btn-sm" 
-                                    onclick="saveIndividualSetting('${product.product_name}')"
+                                    onclick="saveIndividualSetting('${product.product_name}', this)"
                                     style="padding: 4px 8px; font-size: clamp(8px, 0.63vw, 12px);">
                                 <i class="fas fa-save"></i>
                                 保存
@@ -132,11 +133,17 @@ function markAsChanged(productName, minQuantity) {
 }
 
 // 保存单个设置
-async function saveIndividualSetting(productName) {
+async function saveIndividualSetting(productName, btn) {
     // 确保产品名称去除空格，与数据处理逻辑一致
     const trimmedName = (productName || '').trim();
     const product = allProducts.find(p => p.product_name === trimmedName);
     if (!product) return;
+
+    if (btn) {
+        btn.disabled = true;
+        btn.dataset.originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中';
+    }
 
     try {
         const response = await fetch('stockminimumapi.php', {
@@ -155,21 +162,26 @@ async function saveIndividualSetting(productName) {
 
         if (result.success) {
             pendingChanges.delete(trimmedName);
-            showAlert(`${trimmedName} 设置保存成功`, 'success');
+            showToast(`${trimmedName} 设置保存成功`, 'success');
         } else {
-            showAlert('保存失败: ' + (result.message || '未知错误'), 'error');
+            showToast('保存失败: ' + (result.message || '未知错误'), 'error');
         }
 
     } catch (error) {
-        showAlert('保存失败，请检查网络连接', 'error');
+        showToast('保存失败，请检查网络连接', 'error');
         console.error('Error:', error);
+    } finally {
+        if (btn && btn.dataset.originalHTML) {
+            btn.innerHTML = btn.dataset.originalHTML;
+            btn.disabled = false;
+        }
     }
 }
 
 // 批量保存所有更改
 async function saveAllSettings() {
     if (pendingChanges.size === 0) {
-        showAlert('没有需要保存的更改', 'info');
+        showToast('没有需要保存的更改', 'info');
         return;
     }
 
@@ -182,6 +194,13 @@ async function saveAllSettings() {
             minimum_quantity: product ? product.minimum_quantity : 0
         };
     });
+
+    const btn = document.getElementById('saveAllBtn');
+    if (btn) {
+        btn.disabled = true;
+        btn.dataset.originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
+    }
 
     try {
         const response = await fetch('stockminimumapi.php', {
@@ -199,65 +218,42 @@ async function saveAllSettings() {
 
         if (result.success) {
             pendingChanges.clear();
-            showAlert(`成功保存 ${changedProducts.length} 个货品的设置`, 'success');
+            showToast(`成功保存 ${changedProducts.length} 个货品的设置`, 'success');
         } else {
-            showAlert('批量保存失败: ' + (result.message || '未知错误'), 'error');
+            showToast('批量保存失败: ' + (result.message || '未知错误'), 'error');
         }
 
     } catch (error) {
-        showAlert('保存失败，请检查网络连接', 'error');
+        showToast('保存失败，请检查网络连接', 'error');
         console.error('Error:', error);
-    }
-}
-
-// 搜索设置
-function searchSettings() {
-    const productFilter = document.getElementById('product-filter').value.toLowerCase();
-    const codeFilter = document.getElementById('code-filter').value.toLowerCase();
-    const statusFilter = document.getElementById('status-filter').value;
-
-    filteredProducts = allProducts.filter(product => {
-        const matchProduct = !productFilter || product.product_name.toLowerCase().includes(productFilter);
-        const matchCode = !codeFilter || (product.product_code && product.product_code.toLowerCase().includes(codeFilter));
-
-        let matchStatus = true;
-        if (statusFilter) {
-            switch (statusFilter) {
-                case 'active':
-                    matchStatus = product.minimum_quantity > 0;
-                    break;
-                case 'inactive':
-                    matchStatus = product.minimum_quantity <= 0;
-                    break;
-                case 'warning':
-                    // 这里可以根据实际库存数量来判断
-                    matchStatus = product.minimum_quantity > 0;
-                    break;
-            }
+    } finally {
+        if (btn && btn.dataset.originalHTML) {
+            btn.innerHTML = btn.dataset.originalHTML;
+            btn.disabled = false;
         }
-
-        return matchProduct && matchCode && matchStatus;
-    });
-
-    renderSettingsTable();
-
-    if (filteredProducts.length === 0) {
-        showAlert('未找到匹配的记录', 'info');
-    } else {
-        showAlert(`找到 ${filteredProducts.length} 条匹配记录`, 'success');
     }
 }
 
-// 重置过滤器
-function resetFilters() {
-    document.getElementById('product-filter').value = '';
-    document.getElementById('code-filter').value = '';
-    document.getElementById('status-filter').value = '';
-
-    filteredProducts = [...allProducts];
-    renderSettingsTable();
-
-    showAlert('搜索条件已重置', 'info');
+// 实时搜索功能
+function setupRealTimeSearch() {
+    const searchInput = document.getElementById('unified-filter');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            
+            if (!searchTerm) {
+                filteredProducts = [...allProducts];
+            } else {
+                filteredProducts = allProducts.filter(product => {
+                    const matchProduct = product.product_name && product.product_name.toLowerCase().includes(searchTerm);
+                    const matchCode = product.product_code && product.product_code.toLowerCase().includes(searchTerm);
+                    return matchProduct || matchCode;
+                });
+            }
+            
+            renderSettingsTable();
+        });
+    }
 }
 
 // 刷新数据
@@ -308,13 +304,8 @@ document.addEventListener('keydown', function (e) {
     // Ctrl+F 聚焦搜索框
     if (e.ctrlKey && e.key === 'f') {
         e.preventDefault();
-        document.getElementById('product-filter').focus();
-    }
-
-    // 添加Ctrl+G聚焦编号搜索框
-    if (e.ctrlKey && e.key === 'g') {
-        e.preventDefault();
-        document.getElementById('code-filter').focus();
+        const searchInput = document.getElementById('unified-filter');
+        if(searchInput) searchInput.focus();
     }
 });
 

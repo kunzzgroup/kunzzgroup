@@ -1,4 +1,4 @@
-﻿
+
 // 全局状态
 let currentSystem = 'central';
 let stockData = {
@@ -1569,7 +1569,7 @@ function closeLowStockModal() {
 
 // 跳转到最低库存设置页面
 function goToMinimumSettings() {
-    window.open('stockminimum.php', '_blank');
+    window.location.href = `stockminimum.php?system=${currentSystem}`;
 }
 
 // 点击弹窗外部关闭
