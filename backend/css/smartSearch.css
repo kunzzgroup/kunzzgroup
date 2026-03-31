@@ -48,9 +48,9 @@
 }
 
 .smartSearchWrapper.expanded .smartSearch-inner {
-    /* Float left of the icon slot — won't push siblings */
+    /* Expand rightward from the icon slot — stats on the left stay visible */
     position: absolute;
-    right: 0;                        /* stay anchored to the right edge */
+    left: 0;                         /* anchored to the LEFT edge → expands right */
     top: 50%;
     transform: translateY(-50%);
     width: 250px;                    /* expanded width */
