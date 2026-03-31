@@ -1,59 +1,36 @@
 /* ==========================================================
    smartSearch.css  —  Global Smart Search Wrapper Component
 
-   METHOD: Absolute Positioning (Overlay to the RIGHT)
-   As per best practice, the wrapper acts as a 40px fixed
-   placeholder. The inner expanded search box floats to the
-   RIGHT, covering the utility buttons (导出数据/设置) temporarily.
-   This strictly avoids:
-   1. Pushing/squishing layout items (remains 1 line)
-   2. Covering left-side statistical data (Sushi Bar etc.)
+   METHOD: Responsive Space Reclamation (The "i-Only" Trick) & Native Flex
    ========================================================== */
 
-/* ── Anchor container — always 40px, never pushes or squishes */
+/* ── Anchor container ───────────────────────────────────── */
 .smartSearchWrapper {
     position: relative;
-    width: 40px;
+    width: 40px;                     /* collapsed width */
     height: 38px;
     flex-shrink: 0;
-    display: block;   /* Important: block so absolute inner aligns perfectly */
-    z-index: 10;
-    cursor: pointer;
-}
-
-/* ── Inner — MUST ALWAYS BE ABSOLUTE TO ANIMATE PERFECTLY ─ */
-.smartSearch-inner {
-    position: absolute;
-    left: 0;                         /* 🔥 ALWAYS anchored to left edge (Expands rightwards!) */
-    top: 0;
-    width: 40px;                     /* collapsed width matches wrapper */
-    height: 38px;
     display: flex;
     align-items: center;
     background: #ffffff;
     border: 1px solid #d1d5db;
     border-radius: 20px;
     overflow: hidden;
+    cursor: pointer;
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
                 border-color 0.25s ease,
                 border-radius 0.25s ease,
                 box-shadow 0.2s ease;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    cursor: pointer;
 }
 
-.smartSearch-inner:hover {
+.smartSearchWrapper:hover {
     border-color: #ff7b00;
 }
 
-/* ── Inner — EXPANDED: overlay to the RIGHT  ────────────── */
+/* ── EXPANDED (Native width growth) ─────────────────────── */
 .smartSearchWrapper.expanded {
-    cursor: default;
-    z-index: 100;
-}
-
-.smartSearchWrapper.expanded .smartSearch-inner {
-    width: 250px;                    /* expanded width rightwards over buttons */
+    width: 250px;                    /* Native expansion pushing elements smoothly */
     border-color: #ff7b00;
     border-radius: 6px;
     cursor: default;
@@ -142,15 +119,32 @@
     }
 }
 
-/* ── Responsive ─────────────────────────────────────────── */
-@media (max-width: 768px) {
-    .smartSearchWrapper.expanded .smartSearch-inner {
-        width: 200px;
-    }
+/* ── DYNAMIC BUTTON COMPRESSION (THE MAGIC TRICK) ─────────
+   When native search box expands (250px), compress nearby
+   buttons to icons (font-size: 0) to instantly free up
+   ~160px of true physical space. NO OVERLAPS. NO SQUISHING!
+   ========================================================= */
+
+.header-right-section {
+    transition: gap 0.3s ease;
 }
 
-@media (max-width: 480px) {
-    .smartSearchWrapper.expanded .smartSearch-inner {
-        width: 160px;
-    }
+.header-right-section:has(.smartSearchWrapper.expanded) {
+    gap: clamp(4px, 0.5vw, 10px);           /* Squish gap to save even more space */
+}
+
+.header-right-section:has(.smartSearchWrapper.expanded) .btn {
+    font-size: 0;                           /* Hide text */
+    padding: clamp(4px, 0.4vw, 8px) clamp(8px, 0.8vw, 12px); 
+    white-space: nowrap;
+}
+
+.header-right-section:has(.smartSearchWrapper.expanded) .btn i {
+    font-size: 14px;                        /* Keep FA icon normal size */
+    margin: 0;                              /* Remove extra spacing next to text */
+}
+
+/* Graceful fallback for browsers */
+@media (max-width: 768px) {
+    .smartSearchWrapper.expanded { width: 180px; }
 }

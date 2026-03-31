@@ -17,18 +17,7 @@ function debounce(fn, delay) {
     };
 }
 
-/* ── DOM injection to support pure CSS Absolute positioning without messy HTML ── */
-function ensureInnerWrapper(wrapper) {
-    if (wrapper.querySelector('.smartSearch-inner')) return;
-
-    var inner = document.createElement('div');
-    inner.className = 'smartSearch-inner';
-
-    while (wrapper.firstChild) {
-        inner.appendChild(wrapper.firstChild);
-    }
-    wrapper.appendChild(inner);
-}
+/* ── DOM injection removed to use Native Box Model ── */
 
 /* ── Expand a single smartSearchWrapper ─────────────────────── */
 function expandSmartSearch(wrapper) {
@@ -105,11 +94,6 @@ function updateClearButton(inputEl) {
     document.addEventListener('DOMContentLoaded', function () {
 
         var wrappers = document.querySelectorAll('.smartSearchWrapper');
-
-        /* 1. inject inner wrapper for overlay positioning */
-        wrappers.forEach(function (wrapper) {
-            ensureInnerWrapper(wrapper);
-        });
 
         /* 2. expand / collapse behavior */
         wrappers.forEach(function (wrapper) {
