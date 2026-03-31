@@ -1567,30 +1567,50 @@ async function confirmBatchDelete() {
 // Toast通知
 function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    let toastList = Array.from(container.querySelectorAll('.toast'));
+    while (toastList.length >= 3) {
+        closeToast(toastList[0].id);
+        if (toastList[0].parentNode) toastList[0].parentNode.removeChild(toastList[0]);
+        toastList.shift();
+    }
+
+    const toastId = 'toast-' + Date.now();
+    const cfg = {
+        'success': { icon: '✅', title: '操作成功' },
+        'error':   { icon: '❌', title: '操作失败' },
+        'info':    { icon: 'ℹ️', title: '提示信息' },
+        'warning': { icon: '⚠️', title: '注意' }
+    }[type] || { icon: 'ℹ️', title: '提示信息' };
+
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
-
-    const icons = {
-        success: 'fa-check-circle',
-        error: 'fa-exclamation-circle',
-        warning: 'fa-exclamation-triangle',
-        info: 'fa-info-circle'
-    };
-
+    toast.id = toastId;
     toast.innerHTML = `
-                <i class="fas ${icons[type] || icons.info} toast-icon"></i>
-                <span class="toast-content">${message}</span>
-                <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
-            `;
+        <div class="toast-icon-wrap">${cfg.icon}</div>
+        <div class="toast-body">
+            <div class="toast-title">${cfg.title}</div>
+            <div class="toast-msg">${message}</div>
+        </div>
+        <button class="toast-close" onclick="closeToast('${toastId}')">&times;</button>
+        <div class="toast-progress"></div>
+    `;
 
     container.appendChild(toast);
-
     setTimeout(() => toast.classList.add('show'), 10);
 
-    setTimeout(() => {
+    // 自动关闭（保持原装 3000ms）
+    setTimeout(() => closeToast(toastId), 3000);
+}
+
+function closeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
         toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+        toast.classList.add('hide');
+        setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
+    }
 }
 
 // 搜索和过滤事件

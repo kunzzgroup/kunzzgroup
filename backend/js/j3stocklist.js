@@ -1,4 +1,4 @@
-
+﻿
 // 全局状态（仅保留 J3）
 let currentSystem = 'j3';
 let stockData = { j3: [] };
@@ -419,24 +419,401 @@ function showAlert(message, type = 'success') {
     }
 
     const toastId = 'toast-' + Date.now();
-    const iconClass = {
-        'success': 'fa-check-circle',
-        'error': 'fa-exclamation-circle',
-        'info': 'fa-info-circle',
-        'warning': 'fa-exclamation-triangle'
-    }[type] || 'fa-check-circle';
+    const cfg = {
+        'success': { icon: '✅', title: '操作成功' },
+        'error':   { icon: '❌', title: '操作失败' },
+        'info':    { icon: 'ℹ️', title: '提示信息' },
+        'warning': { icon: '⚠️', title: '注意' }
+    }[type] || { icon: '✅', title: '操作成功' };
 
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.id = toastId;
     toast.innerHTML = `
-                <i class="fas ${iconClass} toast-icon"></i>
-                <div class="toast-content">${message}</div>
-                <button class="toast-close" onclick="closeToast('${toastId}')">
-                    <i class="fas fa-times"></i>
-                </button>
-                <div class="toast-progress"></div>
-            `;
+        <div class="toast-icon-wrap">` + '
+
+    container.appendChild(toast);
+
+    // 显示动画
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 0);
+
+    // 自动关闭
+    setTimeout(() => {
+        closeToast(toastId);
+    }, 70000);
+}
+
+// 添加关闭通知的函数
+function closeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+}
+
+// 添加关闭所有通知的函数（可选）
+function closeAllToasts() {
+    const toasts = document.querySelectorAll('.toast');
+    toasts.forEach(toast => {
+        closeToast(toast.id);
+    });
+}
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', initApp);
+
+// 页面卸载时停止会话刷新
+window.addEventListener('beforeunload', function () {
+    stopSessionRefresh();
+});
+
+// 回到顶部功能
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+// 监听滚动事件，控制回到顶部按钮显示
+let scrollTimeout;
+window.addEventListener('scroll', function () {
+    // 使用防抖优化性能
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(function () {
+        const backToTopBtn = document.getElementById('back-to-top-btn');
+        const scrollThreshold = 150; // 滚动超过300px后显示按钮
+
+        if (window.pageYOffset > scrollThreshold) {
+            backToTopBtn.classList.add('show');
+        } else {
+            backToTopBtn.classList.remove('show');
+        }
+    }, 10);
+});
+
+// 键盘快捷键支持（仅 J3）
+document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey && e.key === 'f') {
+        e.preventDefault();
+        const filter = document.getElementById('j3-unified-filter');
+        if (filter) filter.focus();
+    }
+    if (e.key === 'Escape') {
+        resetFilters('j3');
+    }
+    if (e.ctrlKey && e.key === 'Home') {
+        e.preventDefault();
+        scrollToTop();
+    }
+});
+
+// 定时刷新数据（每5分钟）
+setInterval(() => {
+    if (!document.hidden) {
+        loadData('j3');
+    }
+}, 300000);
+
+// 已移除低库存预警弹窗相关逻辑
+ + `{cfg.icon}</div>
+        <div class="toast-body">
+            <div class="toast-title">` + '
+
+    container.appendChild(toast);
+
+    // 显示动画
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 0);
+
+    // 自动关闭
+    setTimeout(() => {
+        closeToast(toastId);
+    }, 70000);
+}
+
+// 添加关闭通知的函数
+function closeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+}
+
+// 添加关闭所有通知的函数（可选）
+function closeAllToasts() {
+    const toasts = document.querySelectorAll('.toast');
+    toasts.forEach(toast => {
+        closeToast(toast.id);
+    });
+}
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', initApp);
+
+// 页面卸载时停止会话刷新
+window.addEventListener('beforeunload', function () {
+    stopSessionRefresh();
+});
+
+// 回到顶部功能
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+// 监听滚动事件，控制回到顶部按钮显示
+let scrollTimeout;
+window.addEventListener('scroll', function () {
+    // 使用防抖优化性能
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(function () {
+        const backToTopBtn = document.getElementById('back-to-top-btn');
+        const scrollThreshold = 150; // 滚动超过300px后显示按钮
+
+        if (window.pageYOffset > scrollThreshold) {
+            backToTopBtn.classList.add('show');
+        } else {
+            backToTopBtn.classList.remove('show');
+        }
+    }, 10);
+});
+
+// 键盘快捷键支持（仅 J3）
+document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey && e.key === 'f') {
+        e.preventDefault();
+        const filter = document.getElementById('j3-unified-filter');
+        if (filter) filter.focus();
+    }
+    if (e.key === 'Escape') {
+        resetFilters('j3');
+    }
+    if (e.ctrlKey && e.key === 'Home') {
+        e.preventDefault();
+        scrollToTop();
+    }
+});
+
+// 定时刷新数据（每5分钟）
+setInterval(() => {
+    if (!document.hidden) {
+        loadData('j3');
+    }
+}, 300000);
+
+// 已移除低库存预警弹窗相关逻辑
+ + `{cfg.title}</div>
+            <div class="toast-msg">` + '
+
+    container.appendChild(toast);
+
+    // 显示动画
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 0);
+
+    // 自动关闭
+    setTimeout(() => {
+        closeToast(toastId);
+    }, 70000);
+}
+
+// 添加关闭通知的函数
+function closeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+}
+
+// 添加关闭所有通知的函数（可选）
+function closeAllToasts() {
+    const toasts = document.querySelectorAll('.toast');
+    toasts.forEach(toast => {
+        closeToast(toast.id);
+    });
+}
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', initApp);
+
+// 页面卸载时停止会话刷新
+window.addEventListener('beforeunload', function () {
+    stopSessionRefresh();
+});
+
+// 回到顶部功能
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+// 监听滚动事件，控制回到顶部按钮显示
+let scrollTimeout;
+window.addEventListener('scroll', function () {
+    // 使用防抖优化性能
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(function () {
+        const backToTopBtn = document.getElementById('back-to-top-btn');
+        const scrollThreshold = 150; // 滚动超过300px后显示按钮
+
+        if (window.pageYOffset > scrollThreshold) {
+            backToTopBtn.classList.add('show');
+        } else {
+            backToTopBtn.classList.remove('show');
+        }
+    }, 10);
+});
+
+// 键盘快捷键支持（仅 J3）
+document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey && e.key === 'f') {
+        e.preventDefault();
+        const filter = document.getElementById('j3-unified-filter');
+        if (filter) filter.focus();
+    }
+    if (e.key === 'Escape') {
+        resetFilters('j3');
+    }
+    if (e.ctrlKey && e.key === 'Home') {
+        e.preventDefault();
+        scrollToTop();
+    }
+});
+
+// 定时刷新数据（每5分钟）
+setInterval(() => {
+    if (!document.hidden) {
+        loadData('j3');
+    }
+}, 300000);
+
+// 已移除低库存预警弹窗相关逻辑
+ + `{message}</div>
+        </div>
+        <button class="toast-close" onclick="closeToast('` + '
+
+    container.appendChild(toast);
+
+    // 显示动画
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 0);
+
+    // 自动关闭
+    setTimeout(() => {
+        closeToast(toastId);
+    }, 70000);
+}
+
+// 添加关闭通知的函数
+function closeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+}
+
+// 添加关闭所有通知的函数（可选）
+function closeAllToasts() {
+    const toasts = document.querySelectorAll('.toast');
+    toasts.forEach(toast => {
+        closeToast(toast.id);
+    });
+}
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', initApp);
+
+// 页面卸载时停止会话刷新
+window.addEventListener('beforeunload', function () {
+    stopSessionRefresh();
+});
+
+// 回到顶部功能
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+// 监听滚动事件，控制回到顶部按钮显示
+let scrollTimeout;
+window.addEventListener('scroll', function () {
+    // 使用防抖优化性能
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(function () {
+        const backToTopBtn = document.getElementById('back-to-top-btn');
+        const scrollThreshold = 150; // 滚动超过300px后显示按钮
+
+        if (window.pageYOffset > scrollThreshold) {
+            backToTopBtn.classList.add('show');
+        } else {
+            backToTopBtn.classList.remove('show');
+        }
+    }, 10);
+});
+
+// 键盘快捷键支持（仅 J3）
+document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey && e.key === 'f') {
+        e.preventDefault();
+        const filter = document.getElementById('j3-unified-filter');
+        if (filter) filter.focus();
+    }
+    if (e.key === 'Escape') {
+        resetFilters('j3');
+    }
+    if (e.ctrlKey && e.key === 'Home') {
+        e.preventDefault();
+        scrollToTop();
+    }
+});
+
+// 定时刷新数据（每5分钟）
+setInterval(() => {
+    if (!document.hidden) {
+        loadData('j3');
+    }
+}, 300000);
+
+// 已移除低库存预警弹窗相关逻辑
+ + `{toastId}')">&times;</button>
+        <div class="toast-progress"></div>
+    `;
 
     container.appendChild(toast);
 

@@ -1,4 +1,4 @@
-
+﻿
 // API 配置
 let API_BASE_URL = 'stockeditapi.php';
 let currentStockType = 'j3';
@@ -3301,24 +3301,10077 @@ function showAlert(message, type = 'success') {
     }
 
     const toastId = 'toast-' + Date.now();
-    const iconClass = {
-        'success': 'fa-check-circle',
-        'error': 'fa-exclamation-circle',
-        'info': 'fa-info-circle',
-        'warning': 'fa-exclamation-triangle'
-    }[type] || 'fa-check-circle';
+    const cfg = {
+        'success': { icon: '✅', title: '操作成功' },
+        'error':   { icon: '❌', title: '操作失败' },
+        'info':    { icon: 'ℹ️', title: '提示信息' },
+        'warning': { icon: '⚠️', title: '注意' }
+    }[type] || { icon: '✅', title: '操作成功' };
 
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.id = toastId;
     toast.innerHTML = `
-                <i class="fas ${iconClass} toast-icon"></i>
-                <div class="toast-content">${message}</div>
-                <button class="toast-close" onclick="closeToast('${toastId}')">
-                    <i class="fas fa-times"></i>
-                </button>
-                <div class="toast-progress"></div>
+        <div class="toast-icon-wrap">` + '
+
+    container.appendChild(toast);
+
+    // 显示动画
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 0);
+
+    // 自动关闭
+    setTimeout(() => {
+        closeToast(toastId);
+    }, 700);
+}
+
+// 添加关闭通知的函数
+function closeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+}
+
+// 添加关闭所有通知的函数（可选）
+function closeAllToasts() {
+    const toasts = document.querySelectorAll('.toast');
+    toasts.forEach(toast => {
+        closeToast(toast.id);
+    });
+}
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', initApp);
+
+// 添加快速选择下拉菜单的关闭逻辑
+document.addEventListener('click', function (e) {
+    // 关闭快速选择下拉菜单
+    if (!e.target.closest('.dropdown')) {
+        document.getElementById('quick-select-dropdown').classList.remove('show');
+    }
+});
+
+
+
+// 创建 Combobox 组件
+function createCombobox(type, value = '', recordId = null, isNewRow = false) {
+    let options, placeholder, fieldName, displayField;
+
+    if (type === 'code') {
+        options = window.codeNumberOptions;
+        placeholder = '输入或选择编号...';
+        fieldName = 'code_number';
+        displayField = 'code_number';
+    } else if (type === 'product') {
+        options = window.productOptions;
+        placeholder = '输入或选择货品...';
+        fieldName = 'product_name';
+        displayField = 'product_name';
+    } else if (type === 'receiver') {
+        options = receiverOptions;
+        placeholder = '输入或选择收货人...';
+        fieldName = 'receiver';
+        displayField = 'receiver';
+    } else {
+        // 默认处理
+        options = window.productOptions;
+        placeholder = '输入或选择货品...';
+        fieldName = 'product_name';
+        displayField = 'product_name';
+    }
+
+    let containerId;
+    if (isNewRow === true) {
+        containerId = `new-${fieldName}`;
+    } else if (typeof isNewRow === 'string') {
+        containerId = `${isNewRow}-${fieldName}`;
+    } else {
+        containerId = `combo-${fieldName}-${recordId}`;
+    }
+    const inputId = `${containerId}-input`;
+    const dropdownId = `${containerId}-dropdown`;
+
+    return `
+                <div class="combobox-container" id="${containerId}">
+                    <input 
+                        type="text" 
+                        class="combobox-input" 
+                        id="${inputId}"
+                        value="${value || ''}" 
+                        placeholder="${placeholder}"
+                        autocomplete="off"
+                        ${recordId ? `data-record-id="${recordId}"` : ''}
+                        data-field="${fieldName}"
+                        data-type="${type}"
+                    />
+                    <i class="fas fa-chevron-down combobox-arrow"></i>
+                    <div class="combobox-dropdown" id="${dropdownId}">
+                        ${generateComboboxOptions(options, displayField || '')}
+                    </div>
+                </div>
             `;
+}
+
+// 生成下拉选项
+function generateComboboxOptions(options, displayField) {
+    if (!options || options.length === 0) {
+        return '<div class="no-results">暂无选项</div>';
+    }
+
+    // 如果是收货人选项，直接使用字符串数组
+    if (Array.isArray(options) && typeof options[0] === 'string') {
+        return options.map(option =>
+            `<div class="combobox-option" data-value="${option}">
+                        ${option}
+                    </div>`
+        ).join('');
+    }
+
+    // 其他情况，使用对象数组
+    return options.map(option =>
+        `<div class="combobox-option" data-value="${option[displayField]}">
+                    ${option[displayField]}
+                </div>`
+    ).join('');
+}
+
+// 计算下拉列表位置
+function calculateDropdownPosition(inputElement, dropdownElement) {
+    const inputRect = inputElement.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+
+    // 获取实际的下拉列表高度
+    // 先让下拉列表显示以获取真实高度，然后立即隐藏
+    const wasVisible = dropdownElement.style.display === 'block';
+    if (!wasVisible) {
+        dropdownElement.style.display = 'block';
+        dropdownElement.style.visibility = 'hidden';
+    }
+
+    // 计算选项数量和实际高度
+    const options = dropdownElement.querySelectorAll('.combobox-option, .no-results');
+    const optionCount = options.length;
+
+    // 获取实际内容高度
+    let dropdownHeight;
+    if (dropdownElement.scrollHeight > 0 && optionCount > 0) {
+        // 计算所有选项的实际总高度
+        let totalHeight = 0;
+        options.forEach(option => {
+            totalHeight += option.offsetHeight;
+        });
+
+        // 如果计算出了实际高度，使用它；否则使用scrollHeight
+        if (totalHeight > 0) {
+            // 添加4px用于边框（2px上 + 2px下）
+            dropdownHeight = Math.min(250, totalHeight + 4);
+        } else {
+            // 使用scrollHeight，添加少量边距
+            dropdownHeight = Math.min(250, dropdownElement.scrollHeight + 4);
+        }
+    } else {
+        // 估算下拉列表高度（假设每项37px = 10px padding上 + 10px padding下 + 14px字体 + 1.4行高 + 1px边框）
+        dropdownHeight = Math.min(250, 37 * Math.min(6, Math.max(1, optionCount)) + 4);
+    }
+
+    // 恢复原始状态
+    if (!wasVisible) {
+        dropdownElement.style.display = '';
+        dropdownElement.style.visibility = '';
+    }
+
+    // 获取表格容器信息
+    const tableContainer = document.querySelector('.table-scroll-container');
+    const containerRect = tableContainer ? tableContainer.getBoundingClientRect() : null;
+
+    let top = inputRect.bottom;
+    let left = inputRect.left;
+
+    // 计算可用空间
+    const spaceBelow = viewportHeight - inputRect.bottom;
+    const spaceAbove = inputRect.top;
+
+    // 对于最后几行，优先显示在上方
+    const isLastFewRows = inputRect.bottom > viewportHeight * 0.7;
+
+    // 检查是否会超出视口底部，或者对于最后几行优先显示在上方
+    if (top + dropdownHeight > viewportHeight || (isLastFewRows && spaceAbove > dropdownHeight)) {
+        // 显示在输入框上方
+        top = inputRect.top - dropdownHeight;
+
+        // 如果上方空间也不够，则调整高度
+        if (top < 0) {
+            top = 10;
+            dropdownHeight = Math.min(dropdownHeight, inputRect.top - 20);
+        }
+    }
+
+    // 确保不会超出视口左右边界
+    const dropdownWidth = Math.max(200, inputRect.width);
+    if (left + dropdownWidth > viewportWidth) {
+        left = viewportWidth - dropdownWidth - 10;
+    }
+    if (left < 10) {
+        left = 10;
+    }
+
+    // 如果表格容器存在，确保下拉列表在容器内可见
+    if (containerRect) {
+        const containerTop = containerRect.top;
+        const containerBottom = containerRect.bottom;
+
+        // 如果下拉列表超出容器顶部，调整位置
+        if (top < containerTop) {
+            top = containerTop + 5;
+        }
+
+        // 如果下拉列表超出容器底部，调整位置
+        if (top + dropdownHeight > containerBottom) {
+            top = containerBottom - dropdownHeight - 5;
+        }
+    }
+
+    return { top, left, width: dropdownWidth, height: dropdownHeight };
+}
+
+// 显示下拉列表
+function showComboboxDropdown(input) {
+    // 隐藏其他所有下拉列表
+    hideAllComboboxDropdowns();
+
+    const container = input.closest('.combobox-container');
+    const dropdown = container.querySelector('.combobox-dropdown');
+
+    if (dropdown) {
+        const position = calculateDropdownPosition(input, dropdown);
+        dropdown.style.top = position.top + 'px';
+        dropdown.style.left = position.left + 'px';
+        dropdown.style.width = position.width + 'px';
+        dropdown.style.maxHeight = position.height + 'px';
+        dropdown.classList.add('show');
+
+        // 重置高亮
+        dropdown.querySelectorAll('.combobox-option').forEach(option => {
+            option.classList.remove('highlighted');
+        });
+    }
+}
+
+// 隐藏所有下拉列表
+function hideAllComboboxDropdowns() {
+    document.querySelectorAll('.combobox-dropdown.show').forEach(dropdown => {
+        dropdown.classList.remove('show');
+    });
+}
+
+// 过滤下拉选项 - 修复版本
+function filterComboboxOptions(input) {
+    // 使用防抖来提高性能
+    clearTimeout(input._filterTimeout);
+    input._filterTimeout = setTimeout(() => {
+        const container = input.closest('.combobox-container');
+        const dropdown = container.querySelector('.combobox-dropdown');
+        const type = input.dataset.type;
+
+        if (!dropdown) return;
+
+        const searchTerm = input.value.toLowerCase();
+        let options, displayField, filteredOptions;
+
+        if (type === 'code') {
+            options = window.codeNumberOptions;
+            displayField = 'code_number';
+            if (!options) return;
+            filteredOptions = options.filter(option =>
+                option[displayField].toLowerCase().includes(searchTerm)
+            );
+        } else if (type === 'product') {
+            options = window.productOptions;
+            displayField = 'product_name';
+            if (!options) return;
+            filteredOptions = options.filter(option =>
+                option[displayField].toLowerCase().includes(searchTerm)
+            );
+        } else if (type === 'receiver') {
+            options = receiverOptions;
+            if (!options) return;
+            filteredOptions = options.filter(option =>
+                option.toLowerCase().includes(searchTerm)
+            );
+        } else {
+            return;
+        }
+
+        if (filteredOptions.length === 0) {
+            dropdown.innerHTML = '<div class="no-results">未找到匹配项</div>';
+        } else {
+            dropdown.innerHTML = generateComboboxOptions(filteredOptions, displayField || '');
+
+            // 重新绑定点击事件
+            dropdown.querySelectorAll('.combobox-option').forEach(option => {
+                option.addEventListener('click', () => selectComboboxOption(option, input));
+            });
+        }
+
+        // 使用 requestAnimationFrame 确保 DOM 更新后再计算位置
+        requestAnimationFrame(() => {
+            showComboboxDropdown(input);
+        });
+
+        // 如果是编辑模式，只更新数据，不重新渲染表格
+        const recordId = input.dataset.recordId;
+        const fieldName = input.dataset.field;
+        if (recordId && fieldName) {
+            const record = stockData.find(r => r.id === parseInt(recordId));
+            if (record) {
+                record[fieldName] = input.value;
+                // 不调用 updateField 避免重新渲染
+            }
+        }
+    }, 100); // 100ms 防抖延迟
+}
+
+// 选择下拉选项
+async function selectComboboxOption(optionElement, input) {
+    const value = optionElement.dataset.value;
+    const type = input.dataset.type;
+    const recordId = input.dataset.recordId;
+    const container = input.closest('tr') || input.closest('.form-container') || document;
+
+    // 只有选择货品编号或货品名称时才清空出货相关字段
+    if (type === 'code' || type === 'product') {
+        // 判断是否为编辑模式（检查是否在编辑中的行）
+        const isEditMode = recordId && editingRowIds.has(parseInt(recordId));
+
+        // 只在非编辑模式下清空出货相关字段
+        // 编辑模式下更换货品时，保留所有数量、价格等信息
+        if (!isEditMode) {
+            // 清空出货相关字段，但不清空规格和类型
+            // 规格和类型会在后面根据新选择的货品自动更新
+            const outQtyInput = container.querySelector('input[id*="-out-qty"], input[data-field="out_quantity"]');
+            if (outQtyInput) {
+                outQtyInput.value = '';
+                outQtyInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            const priceInput = container.querySelector('input[id*="-price"], input[data-field="price"]');
+            if (priceInput) {
+                priceInput.value = '';
+            }
+
+            const totalInput = container.querySelector('input[id*="-total"], input[data-field="total_value"]');
+            if (totalInput) {
+                totalInput.value = '';
+            }
+
+            const receiverInput = container.querySelector('input[id*="-receiver"], input[data-field="receiver"]');
+            if (receiverInput) {
+                if (currentStockType && currentStockType !== 'central') {
+                    receiverInput.value = currentStockType.toUpperCase();
+                } else {
+                    receiverInput.value = '';
+                }
+            }
+
+            const targetSelect = container.querySelector('select[id*="-target"], select[data-field="target_system"]');
+            if (targetSelect) {
+                targetSelect.value = '';
+                targetSelect.disabled = true;
+                targetSelect.required = false;
+            }
+
+            // 更新单价选项
+            updatePriceOptions(container, '');
+
+            // 如果是新增行，清空数据库中的相关字段
+            if (recordId) {
+                updateField(parseInt(recordId), 'out_quantity', '');
+                updateField(parseInt(recordId), 'price', '');
+                updateField(parseInt(recordId), 'receiver', '');
+                updateField(parseInt(recordId), 'target_system', '');
+                // 注意：不清空 specification 和 type，它们会自动更新
+            }
+        }
+    }
+
+    // 标记正在进行选择操作
+    input._isSelecting = true;
+
+    input.value = value;
+    hideAllComboboxDropdowns();
+
+    // 清除选择标记
+    setTimeout(() => {
+        input._isSelecting = false;
+    }, 200);
+
+    // 触发联动更新
+    if (type === 'code') {
+        const result = await getProductByCode(value);
+        if (result) {
+            const { product_name, specification, supplier, category } = result;
+            const containerId = input.closest('.combobox-container').id;
+            const isNewRow = containerId.includes('new-');
+
+            let relatedInputId;
+            if (isNewRow) {
+                // 对于新增行，提取行ID
+                const rowIdMatch = containerId.match(/^(new-\d+)-/);
+                if (rowIdMatch) {
+                    relatedInputId = `${rowIdMatch[1]}-product_name-input`;
+                } else {
+                    relatedInputId = 'new-product_name-input'; // 兼容旧格式
+                }
+            } else {
+                relatedInputId = `combo-product_name-${recordId}-input`;
+            }
+
+            const relatedInput = document.getElementById(relatedInputId);
+            if (relatedInput) {
+                relatedInput.value = product_name;
+                if (recordId) {
+                    updateField(parseInt(recordId), 'product_name', product_name);
+                    if (specification) {
+                        updateField(parseInt(recordId), 'specification', specification);
+                    }
+                    if (category) {
+                        updateField(parseInt(recordId), 'type', category);
+                    }
+                }
+            }
+
+            // 自动填充规格
+            if (specification) {
+                const row = input.closest('tr');
+                const specificationSelect = row ? row.querySelector('select[id$="-specification"], select[onchange*="specification"]') : null;
+                if (specificationSelect) {
+                    specificationSelect.value = specification;
+                    specificationSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+
+            // 自动填充类型
+            if (category) {
+                const row = input.closest('tr');
+                const typeSelect = row ? row.querySelector('select[id$="-type"]') : null;
+                if (typeSelect) {
+                    typeSelect.value = category;
+                    typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+
+            // 保存supplier到当前行，并在有进货数量时自动填充
+            const row = input.closest('tr');
+            if (row && supplier) {
+                row.dataset.supplier = supplier;
+                updateSupplierIfNeeded(row, recordId);
+            }
+
+            // 更新单价选项
+            updatePriceOptions(container, product_name);
+        }
+    } else if (type === 'product') {
+        const result = await getCodeByProduct(value);
+        if (result) {
+            const { product_code, specification, supplier, category } = result;
+            const containerId = input.closest('.combobox-container').id;
+            const isNewRow = containerId.includes('new-');
+
+            let relatedInputId;
+            if (isNewRow) {
+                // 对于新增行，提取行ID
+                const rowIdMatch = containerId.match(/^(new-\d+)-/);
+                if (rowIdMatch) {
+                    relatedInputId = `${rowIdMatch[1]}-code_number-input`;
+                } else {
+                    relatedInputId = 'new-code_number-input'; // 兼容旧格式
+                }
+            } else {
+                relatedInputId = `combo-code_number-${recordId}-input`;
+            }
+
+            const relatedInput = document.getElementById(relatedInputId);
+            if (relatedInput) {
+                relatedInput.value = product_code;
+                if (recordId) {
+                    updateField(parseInt(recordId), 'code_number', product_code);
+                    if (specification) {
+                        updateField(parseInt(recordId), 'specification', specification);
+                    }
+                    if (category) {
+                        updateField(parseInt(recordId), 'type', category);
+                    }
+                }
+            }
+
+            // 自动填充规格
+            if (specification) {
+                const row = input.closest('tr');
+                const specificationSelect = row ? row.querySelector('select[id$="-specification"], select[onchange*="specification"]') : null;
+                if (specificationSelect) {
+                    specificationSelect.value = specification;
+                    specificationSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+
+            // 自动填充类型
+            if (category) {
+                const row = input.closest('tr');
+                const typeSelect = row ? row.querySelector('select[id$="-type"]') : null;
+                if (typeSelect) {
+                    typeSelect.value = category;
+                    typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+
+            // 保存supplier到当前行，并在有进货数量时自动填充
+            const row = input.closest('tr');
+            if (row && supplier) {
+                row.dataset.supplier = supplier;
+                updateSupplierIfNeeded(row, recordId);
+            }
+
+            // 更新单价选项
+            updatePriceOptions(container, value);
+        }
+    } else if (type === 'receiver') {
+        // 收货人类型不需要特殊处理，直接更新字段
+        if (recordId) {
+            updateField(parseInt(recordId), 'receiver', value);
+        }
+    }
+
+    // 如果是编辑模式，更新字段（避免重复更新收货人）
+    if (recordId && type !== 'receiver') {
+        updateField(parseInt(recordId), input.dataset.field, value);
+    }
+
+    // 如果是编辑模式，确保数据已更新
+    if (recordId) {
+        const record = stockData.find(r => r.id === parseInt(recordId));
+        if (record) {
+            record[input.dataset.field] = value;
+        }
+    }
+}
+
+// 验证输入值是否在允许的选项中
+function validateComboboxInput(input) {
+    const type = input.dataset.type;
+    const value = input.value.trim();
+
+    if (!value) return true; // 空值允许
+
+    if (type === 'code' && window.codeNumberOptions) {
+        const validCodes = window.codeNumberOptions.map(c => c.code_number);
+        return validCodes.includes(value);
+    } else if (type === 'product') {
+        // 对于货品名称，允许输入任何值（包括包含符号的自定义货品名称）
+        return true;
+    } else if (type === 'receiver' && receiverOptions) {
+        return receiverOptions.includes(value);
+    }
+
+    return true;
+}
+
+// 处理键盘事件
+function handleComboboxKeydown(event, input) {
+    const container = input.closest('.combobox-container');
+    const dropdown = container.querySelector('.combobox-dropdown');
+
+    if (!dropdown.classList.contains('show')) {
+        if (event.key === 'ArrowDown' || event.key === 'Enter') {
+            showComboboxDropdown(input);
+            return;
+        }
+        return;
+    }
+
+    const options = dropdown.querySelectorAll('.combobox-option');
+    let highlighted = dropdown.querySelector('.combobox-option.highlighted');
+
+    switch (event.key) {
+        case 'ArrowDown':
+            event.preventDefault();
+            if (!highlighted) {
+                if (options.length > 0) {
+                    options[0].classList.add('highlighted');
+                }
+            } else {
+                highlighted.classList.remove('highlighted');
+                const next = highlighted.nextElementSibling;
+                if (next && next.classList.contains('combobox-option')) {
+                    next.classList.add('highlighted');
+                } else if (options.length > 0) {
+                    options[0].classList.add('highlighted');
+                }
+            }
+            break;
+
+        case 'ArrowUp':
+            event.preventDefault();
+            if (!highlighted) {
+                if (options.length > 0) {
+                    options[options.length - 1].classList.add('highlighted');
+                }
+            } else {
+                highlighted.classList.remove('highlighted');
+                const prev = highlighted.previousElementSibling;
+                if (prev && prev.classList.contains('combobox-option')) {
+                    prev.classList.add('highlighted');
+                } else if (options.length > 0) {
+                    options[options.length - 1].classList.add('highlighted');
+                }
+            }
+            break;
+
+        case 'Enter':
+            event.preventDefault();
+            if (highlighted) {
+                selectComboboxOption(highlighted, input);
+            }
+            break;
+
+        case 'Escape':
+            hideAllComboboxDropdowns();
+            break;
+    }
+}
+
+// 修改渲染后的事件绑定
+function bindComboboxEvents() {
+    // 为所有 combobox 输入框绑定事件
+    document.querySelectorAll('.combobox-input').forEach(input => {
+        // 只有在没有绑定过的情况下才绑定事件
+        if (!input._eventsbound) {
+            // 创建事件处理器
+            const focusHandler = () => showComboboxDropdown(input);
+            const inputHandler = () => filterComboboxOptions(input);
+            const keydownHandler = (e) => {
+                // 允许输入英文、数字、空格和常用符号
+                const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' '];
+                const isAlphaNumeric = /^[a-zA-Z0-9]$/.test(e.key);
+                const isSymbol = /^[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]$/.test(e.key);
+
+                if (!allowedKeys.includes(e.key) && !isAlphaNumeric && !isSymbol) {
+                    e.preventDefault();
+                    return;
+                }
+
+                handleComboboxKeydown(e, input);
+            };
+
+            // 添加 blur 事件处理器，确保编辑模式下数据被保存
+            const blurHandler = (e) => {
+                // 检查是否是点击下拉选项导致的blur
+                const container = input.closest('.combobox-container');
+                const dropdown = container.querySelector('.combobox-dropdown');
+
+                // 如果下拉列表显示中且点击的是下拉选项，则不执行验证
+                if (dropdown && dropdown.classList.contains('show')) {
+                    // 延迟执行验证，给点击事件时间完成
+                    setTimeout(() => {
+                        // 再次检查下拉列表是否还显示，如果隐藏了说明选择已完成
+                        if (!dropdown.classList.contains('show')) {
+                            performValidation();
+                        }
+                    }, 150);
+                    return;
+                }
+
+                performValidation();
+
+                function performValidation() {
+
+                    if (input._isSelecting) {
+                        return;
+                    }
+                    // 验证输入值
+                    if (input.value.trim() && !validateComboboxInput(input)) {
+                        const type = input.dataset.type;
+                        let fieldName = '字段';
+                        if (type === 'code') fieldName = '货品编号';
+                        else if (type === 'product') fieldName = '货品名称';
+                        else if (type === 'receiver') fieldName = '收货人';
+                        showAlert(`${fieldName}不存在，请从下拉列表中选择`, 'error');
+                        // 不要立即重新聚焦，给用户机会点击其他地方
+                        setTimeout(() => {
+                            if (document.activeElement !== input) {
+                                input.focus();
+                            }
+                        }, 100);
+                        return;
+                    }
+
+                    const recordId = input.dataset.recordId;
+                    const fieldName = input.dataset.field;
+                    if (recordId && fieldName) {
+                        const record = stockData.find(r => r.id === parseInt(recordId));
+                        if (record && record[fieldName] !== input.value) {
+                            record[fieldName] = input.value;
+                            // 如果是数值相关字段，需要重新计算
+                            if (fieldName === 'in_quantity' || fieldName === 'out_quantity' || fieldName === 'price') {
+                                renderStockTable();
+                            }
+                        }
+                    }
+                }
+            };
+
+            // 绑定事件监听器
+            input.addEventListener('focus', focusHandler);
+            input.addEventListener('input', inputHandler);
+            input.addEventListener('keydown', keydownHandler);
+            input.addEventListener('blur', blurHandler); // 这是新添加的一行
+
+            // 标记已绑定
+            input._eventsbound = true;
+        }
+    });
+
+    // 为所有 combobox 选项绑定点击事件
+    document.querySelectorAll('.combobox-option').forEach(option => {
+        if (!option._eventsbound) {
+            const clickHandler = () => {
+                const container = option.closest('.combobox-container');
+                const input = container.querySelector('.combobox-input');
+                selectComboboxOption(option, input);
+            };
+            option.addEventListener('click', clickHandler);
+            option._eventsbound = true;
+        }
+    });
+}
+
+// 全局点击事件（隐藏下拉列表）
+document.addEventListener('click', function (event) {
+    if (!event.target.closest('.combobox-container')) {
+        hideAllComboboxDropdowns();
+    }
+});
+
+// 窗口滚动和大小变化时重新计算位置
+window.addEventListener('scroll', hideAllComboboxDropdowns);
+window.addEventListener('resize', hideAllComboboxDropdowns);
+
+// 监听表格滚动，重新计算下拉列表位置
+const tableContainer = document.querySelector('.table-scroll-container');
+if (tableContainer) {
+    tableContainer.addEventListener('scroll', () => {
+        // 延迟执行，避免频繁计算
+        clearTimeout(tableContainer._scrollTimeout);
+        tableContainer._scrollTimeout = setTimeout(() => {
+            const visibleDropdowns = document.querySelectorAll('.combobox-dropdown.show');
+            visibleDropdowns.forEach(dropdown => {
+                const container = dropdown.closest('.combobox-container');
+                const input = container.querySelector('input');
+                if (input) {
+                    const position = calculateDropdownPosition(input, dropdown);
+                    dropdown.style.top = position.top + 'px';
+                    dropdown.style.left = position.left + 'px';
+                    dropdown.style.width = position.width + 'px';
+                    dropdown.style.maxHeight = position.height + 'px';
+                }
+            });
+        }, 50);
+    });
+}
+// 加载货品的所有进货价格选项
+async function loadProductPrices(productName, selectElementId, currentPrice = '') {
+    try {
+        // 使用带库存信息的API，设置required_qty为1以确保显示所有价格
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=1`);
+        const selectElement = document.getElementById(selectElementId);
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            // 始终保留手动输入价格选项
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+                const selected = price == currentPrice ? 'selected' : '';
+                // 显示所有价格选项，不管库存是否足够
+                const stockInfo = `(库存: ${availableStock})`;
+                options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
+            });
+            selectElement.innerHTML = options;
+        } else {
+            // 即使没有价格数据，也保留手动输入选项
+            selectElement.innerHTML = '<option value="">暂无历史价格</option><option value="manual">手动输入价格</option>';
+        }
+
+        // 如果选择了"手动输入价格"，显示输入框
+        selectElement.addEventListener('change', function () {
+            handlePriceSelectChange(this);
+        });
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById(selectElementId);
+        if (selectElement) {
+            // 即使出错也保留手动输入选项
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+async function createNewRowPriceSelectWithStock(rowId, productName, currentPrice = '', requiredQty = 0) {
+    const priceInput = document.getElementById(`${rowId}-price`);
+    const priceCell = priceInput.closest('.currency-display');
+
+    // 检查是否已经是下拉选项
+    if (priceCell.querySelector('.price-select')) {
+        return;
+    }
+
+    // 创建下拉选项
+    const selectElement = document.createElement('select');
+    selectElement.className = 'table-select price-select';
+    selectElement.id = `${rowId}-price-select`;
+    selectElement.innerHTML = '<option value="">正在加载...</option>';
+
+    // 隐藏输入框，显示下拉选项
+    priceInput.style.display = 'none';
+    priceCell.appendChild(selectElement);
+
+    // 加载价格选项（带库存检查）
+    await loadNewRowProductPricesWithStock(productName, selectElement.id, currentPrice, requiredQty);
+
+    // 绑定变化事件
+    selectElement.addEventListener('change', function () {
+        handleNewRowPriceSelectChange(this, rowId);
+    });
+}
+
+// 3. 新增函数：加载新行货品价格选项（带库存检查）
+async function loadNewRowProductPricesWithStock(productName, selectElementId, currentPrice = '', requiredQty = 0) {
+    try {
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=${requiredQty}`);
+        const selectElement = document.getElementById(selectElementId);
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+                const selected = price == currentPrice ? 'selected' : '';
+
+                // 只显示库存足够的价格选项
+                if (availableStock >= requiredQty) {
+                    options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} (库存: ${availableStock})</option>`;
+                }
+            });
+
+            selectElement.innerHTML = options;
+        } else {
+            selectElement.innerHTML = '<option value="">暂无足够库存的价格</option><option value="manual">手动输入价格</option>';
+        }
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById(selectElementId);
+        if (selectElement) {
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+async function loadAddFormProductPricesWithStock(productName, requiredQty = 0) {
+    try {
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=${requiredQty}`);
+        const selectElement = document.getElementById('add-price-select');
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+
+                // 只显示库存足够的价格选项
+                if (availableStock >= requiredQty) {
+                    options += `<option value="${price}">${parseFloat(price).toFixed(5)} (库存: ${availableStock})</option>`;
+                }
+            });
+            selectElement.innerHTML = options;
+        } else {
+            selectElement.innerHTML = '<option value="">暂无足够库存的价格</option><option value="manual">手动输入价格</option>';
+        }
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById('add-price-select');
+        if (selectElement) {
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+async function loadProductPricesWithStock(productName, selectElementId, currentPrice = '', requiredQty = 0) {
+    try {
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=${requiredQty}`);
+        const selectElement = document.getElementById(selectElementId);
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+                const selected = price == currentPrice ? 'selected' : '';
+
+                // 只显示库存足够的价格选项，但当前价格即使库存不足也要显示（已选中的选项）
+                if (availableStock >= requiredQty || price == currentPrice) {
+                    const stockInfo = availableStock >= requiredQty ? `(库存: ${availableStock})` : `(库存不足: ${availableStock})`;
+                    options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
+                }
+            });
+
+            selectElement.innerHTML = options;
+        } else {
+            selectElement.innerHTML = '<option value="">暂无足够库存的价格</option><option value="manual">手动输入价格</option>';
+        }
+
+        // 绑定变化事件
+        selectElement.addEventListener('change', function () {
+            handlePriceSelectChange(this);
+        });
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById(selectElementId);
+        if (selectElement) {
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+// 处理价格选择变化
+function handlePriceSelectChange(selectElement) {
+    const recordId = selectElement.id.replace('price-select-', '');
+    const container = selectElement.closest('.currency-display');
+
+    if (selectElement.value === 'manual') {
+        // 显示输入框
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.className = 'table-input currency-input-edit manual-price-input';
+        input.min = '0';
+        input.step = '0.00001';
+        input.placeholder = '输入价格';
+        input.style.marginLeft = '5px';
+        input.style.width = '80px';
+
+        input.addEventListener('change', function () {
+            updateField(parseInt(recordId), 'price', this.value);
+            // 更新下拉选择框的值
+            selectElement.value = this.value;
+        });
+
+        input.addEventListener('blur', function () {
+            if (!this.value) {
+                selectElement.value = '';
+                updateField(parseInt(recordId), 'price', '');
+            }
+        });
+
+        // 移除已存在的输入框
+        const existingInput = container.querySelector('.manual-price-input');
+        if (existingInput) {
+            existingInput.remove();
+        }
+
+        container.appendChild(input);
+        input.focus();
+    } else {
+        // 移除手动输入框
+        const existingInput = container.querySelector('.manual-price-input');
+        if (existingInput) {
+            existingInput.remove();
+        }
+
+        // 更新价格值
+        updateField(parseInt(recordId), 'price', selectElement.value);
+    }
+}
+
+// 处理新增表单中货品变化时加载价格选项
+function handleAddFormProductChange(selectElement, codeNumberElement) {
+    const productName = selectElement.value;
+
+    // 原有的货品变化处理
+    handleProductChange(selectElement, codeNumberElement);
+
+    // 根据出库数量决定是否加载价格选项
+    if (productName) {
+        handleAddFormOutQuantityChange();
+    } else {
+        const priceSelect = document.getElementById('add-price-select');
+        const priceInput = document.getElementById('add-price');
+        if (priceSelect) {
+            priceSelect.innerHTML = '<option value="">请先选择货品</option>';
+            priceSelect.style.display = 'none';
+        }
+        if (priceInput) {
+            priceInput.style.display = 'block';
+            priceInput.value = '';
+        }
+    }
+}
+
+// 加载新增表单的价格选项
+async function loadAddFormProductPrices(productName) {
+    try {
+        // 使用带库存信息的API，设置required_qty为1以确保显示所有价格
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=1`);
+        const selectElement = document.getElementById('add-price-select');
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            // 始终保留手动输入价格选项
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+                // 显示所有价格选项，不管库存是否足够
+                const stockInfo = `(库存: ${availableStock})`;
+                options += `<option value="${price}">${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
+            });
+            selectElement.innerHTML = options;
+            selectElement.style.display = 'block';
+            document.getElementById('add-price').style.display = 'none';
+        } else {
+            // 即使没有价格数据，也保留手动输入选项
+            selectElement.innerHTML = '<option value="">暂无历史价格</option><option value="manual">手动输入价格</option>';
+        }
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById('add-price-select');
+        if (selectElement) {
+            // 即使出错也保留手动输入选项
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+// 处理新增表单价格选择变化
+function handleAddFormPriceChange() {
+    const selectElement = document.getElementById('add-price-select');
+    const inputElement = document.getElementById('add-price');
+
+    if (selectElement.value === 'manual') {
+        selectElement.style.display = 'none';
+        inputElement.style.display = 'block';
+        inputElement.focus();
+    } else {
+        inputElement.value = selectElement.value;
+    }
+}
+
+// 处理新增表单出库数量变化
+function handleAddFormOutQuantityChange() {
+    const outQty = parseFloat(document.getElementById('add-out-qty').value) || 0;
+    const inQty = parseFloat(document.getElementById('add-in-qty').value) || 0;
+    const productName = document.getElementById('add-product-name').value;
+    const priceSelect = document.getElementById('add-price-select');
+    const priceInput = document.getElementById('add-price');
+
+    if (outQty > 0 && inQty === 0 && productName) {
+        // 纯出库且有货品名称，显示价格下拉选项（带库存检查）
+        priceSelect.style.display = 'block';
+        priceInput.style.display = 'none';
+        priceInput.value = '';
+        loadAddFormProductPricesWithStock(productName, outQty);
+    } else {
+        // 入库或出库为0，显示普通输入框
+        priceSelect.style.display = 'none';
+        priceInput.style.display = 'block';
+        if (outQty === 0 && inQty === 0) {
+            priceInput.value = '';
+        }
+    }
+
+    // 控制Target下拉框状态
+    const targetSelect = document.getElementById('add-target');
+    if (outQty > 0) {
+        targetSelect.disabled = false;
+        targetSelect.required = true;
+    } else {
+        targetSelect.disabled = true;
+        targetSelect.value = '';
+        targetSelect.required = false;
+    }
+
+    // 收货人字段保持始终可输入状态，不需要根据出货数量控制
+}
+
+// 加载新增表单的价格选项
+
+// 检查货品库存是否足够（按货品名称和价格分别计算）
+async function checkProductStock(productName, outQuantity, price = null) {
+    if (!productName || outQuantity <= 0) {
+        return { sufficient: true, availableStock: 0, currentStock: 0 };
+    }
+
+    try {
+        let apiUrl;
+        if (price !== null && price !== '' && price !== undefined) {
+            // 按货品名称和价格检查库存
+            apiUrl = `?action=product_stock_by_price&product_name=${encodeURIComponent(productName)}&price=${encodeURIComponent(price)}`;
+        } else {
+            // 按货品名称检查总库存
+            apiUrl = `?action=product_stock&product_name=${encodeURIComponent(productName)}`;
+        }
+
+        const result = await apiCall(apiUrl);
+
+        if (result.success && result.data) {
+            const availableStock = parseFloat(result.data.available_stock || 0);
+            const currentStock = parseFloat(result.data.current_stock || 0);
+
+            return {
+                sufficient: availableStock >= outQuantity,
+                availableStock: availableStock,
+                currentStock: currentStock,
+                requested: outQuantity
+            };
+        } else {
+            // 如果无法获取库存信息，默认允许（可能是新货品）
+            return { sufficient: true, availableStock: 0, currentStock: 0 };
+        }
+
+    } catch (error) {
+        console.error('检查库存失败:', error);
+        // 网络错误时默认允许保存
+        return { sufficient: true, availableStock: 0, currentStock: 0 };
+    }
+}
+
+// 为新行创建价格下拉选项
+function createNewRowPriceSelect(rowId, productName, currentPrice = '') {
+    const priceInput = document.getElementById(`${rowId}-price`);
+    const priceCell = priceInput.closest('.currency-display');
+
+    // 检查是否已经是下拉选项
+    if (priceCell.querySelector('.price-select')) {
+        return;
+    }
+
+    // 创建下拉选项
+    const selectElement = document.createElement('select');
+    selectElement.className = 'table-select price-select';
+    selectElement.id = `${rowId}-price-select`;
+    selectElement.innerHTML = '<option value="">正在加载...</option>';
+
+    // 隐藏输入框，显示下拉选项
+    priceInput.style.display = 'none';
+    priceCell.appendChild(selectElement);
+
+    // 加载价格选项
+    loadNewRowProductPrices(productName, selectElement.id, currentPrice);
+
+    // 绑定变化事件
+    selectElement.addEventListener('change', function () {
+        handleNewRowPriceSelectChange(this, rowId);
+    });
+}
+
+// 恢复新行价格输入框
+function restoreNewRowPriceInput(rowId) {
+    const priceInput = document.getElementById(`${rowId}-price`);
+    const priceCell = priceInput.closest('.currency-display');
+    const selectElement = priceCell.querySelector('.price-select');
+
+    if (selectElement) {
+        selectElement.remove();
+        priceInput.style.display = 'block';
+        priceInput.value = '';
+    }
+}
+
+// 加载新行货品价格选项
+async function loadNewRowProductPrices(productName, selectElementId, currentPrice = '') {
+    try {
+        // 使用带库存信息的API，设置required_qty为1以确保显示所有价格
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=1`);
+        const selectElement = document.getElementById(selectElementId);
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            // 始终保留手动输入价格选项
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+                const selected = price == currentPrice ? 'selected' : '';
+                // 显示所有价格选项，不管库存是否足够
+                const stockInfo = `(库存: ${availableStock})`;
+                options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
+            });
+            selectElement.innerHTML = options;
+        } else {
+            // 即使没有价格数据，也保留手动输入选项
+            selectElement.innerHTML = '<option value="">暂无历史价格</option><option value="manual">手动输入价格</option>';
+        }
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById(selectElementId);
+        if (selectElement) {
+            // 即使出错也保留手动输入选项
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+// 处理新行价格下拉选择变化
+function handleNewRowPriceSelectChange(selectElement, rowId) {
+    const priceInput = document.getElementById(`${rowId}-price`);
+    const container = selectElement.closest('.currency-display');
+
+    if (selectElement.value === 'manual') {
+        // 显示手动输入框
+        const manualInput = document.createElement('input');
+        manualInput.type = 'number';
+        manualInput.className = 'table-input currency-input-edit manual-price-input';
+        manualInput.min = '0';
+        manualInput.step = '0.00001';
+        manualInput.placeholder = '输入价格';
+        manualInput.style.marginLeft = '5px';
+        manualInput.style.width = '80px';
+
+        manualInput.addEventListener('input', function () {
+            priceInput.value = this.value;
+            updateNewRowTotal(priceInput);
+        });
+
+        manualInput.addEventListener('blur', function () {
+            if (!this.value) {
+                selectElement.value = '';
+                priceInput.value = '';
+                updateNewRowTotal(priceInput);
+            }
+        });
+
+        // 移除已存在的手动输入框
+        const existingInput = container.querySelector('.manual-price-input');
+        if (existingInput) {
+            existingInput.remove();
+        }
+
+        container.appendChild(manualInput);
+        manualInput.focus();
+    } else {
+        // 移除手动输入框
+        const existingInput = container.querySelector('.manual-price-input');
+        if (existingInput) {
+            existingInput.remove();
+        }
+
+        // 更新价格值
+        priceInput.value = selectElement.value;
+        updateNewRowTotal(priceInput);
+    }
+}
+
+// 关闭导出弹窗
+function closeExportModal() {
+    document.getElementById('export-modal').style.display = 'none';
+
+    // 重置导出按钮状态
+    const exportBtn = document.querySelector('.export-modal-actions .btn-success');
+    if (exportBtn) {
+        exportBtn.innerHTML = '<i class="fas fa-download"></i> 导出PDF发票';
+        exportBtn.disabled = false;
+    }
+
+    // 清空发票号码后缀输入框
+    document.getElementById('export-invoice-suffix').value = '';
+}
+
+// 确认导出
+async function confirmExport() {
+    const startDate = document.getElementById('export-start-date').value;
+    const endDate = document.getElementById('export-end-date').value;
+    const exportSystem = document.getElementById('export-system').value;
+    const invoiceDate = document.getElementById('export-invoice-date').value;
+    const invoiceSuffix = document.getElementById('export-invoice-suffix').value;
+
+    // 验证输入
+    if (!startDate || !endDate) {
+        showAlert('请选择开始和结束日期', 'error');
+        return;
+    }
+
+    if (!exportSystem) {
+        showAlert('请选择导出系统', 'error');
+        return;
+    }
+
+    if (!invoiceDate) {
+        showAlert('请选择发票日期', 'error');
+        return;
+    }
+
+    if (!invoiceSuffix || invoiceSuffix.length !== 3 || !/^\d{3}$/.test(invoiceSuffix)) {
+        showAlert('请输入三位数字的发票号码后缀（例如：001）', 'error');
+        return;
+    }
+
+    // 验证日期格式并转换为YYYY-MM-DD格式
+    const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+
+    const parseDate = (dateStr) => {
+        const match = dateStr.match(dateRegex);
+        if (!match) {
+            throw new Error('无效的日期格式');
+        }
+        const [, day, month, year] = match;
+        return new Date(year, month - 1, day);
+    };
+
+    let startDateObj, endDateObj, invoiceDateObj;
+    try {
+        startDateObj = parseDate(startDate);
+        endDateObj = parseDate(endDate);
+        invoiceDateObj = parseDate(invoiceDate);
+    } catch (error) {
+        showAlert('日期格式错误，请使用DD/MM/YYYY格式', 'error');
+        return;
+    }
+
+    // 转换发票日期为YYYY-MM-DD格式用于生成发票号码
+    const formatDateToYYYYMMDD = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    // 生成发票号码：格式为 J1-2510-001
+    const generatedInvoiceNumber = generateInvoiceNumber(exportSystem, formatDateToYYYYMMDD(invoiceDateObj), invoiceSuffix);
+
+    if (startDateObj > endDateObj) {
+        showAlert('开始日期不能晚于结束日期', 'error');
+        return;
+    }
+
+    // 显示加载状态
+    const exportBtn = document.querySelector('.export-modal-actions .btn-success');
+    const originalText = exportBtn.innerHTML;
+    exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 生成中...';
+    exportBtn.disabled = true;
+
+    try {
+
+        // 获取指定日期范围内的出库数据（转换为YYYY-MM-DD格式）
+        const params = new URLSearchParams({
+            action: 'list',
+            search_start_date: formatDateToYYYYMMDD(startDateObj),
+            search_end_date: formatDateToYYYYMMDD(endDateObj)
+        });
+
+        const result = await apiCall(`?${params}`);
+
+        if (!result.success) {
+            throw new Error('获取数据失败');
+        }
+
+        // 过滤出库数据 - 按日期范围、出库数量和收货单位筛选
+        const outData = (result.data || []).filter(record => {
+            const outQty = parseFloat(record.out_quantity);
+            if (outQty <= 0) return false;
+
+            // 检查收货单位是否匹配选择的店面
+            const targetSystem = record.target_system;
+            if (!targetSystem || targetSystem.toLowerCase() !== exportSystem.toLowerCase()) {
+                return false;
+            }
+
+            // 检查日期范围
+            const recordDate = record.date || record.out_date || record.created_at;
+            if (!recordDate) return false;
+
+            const recordDateObj = new Date(recordDate);
+            // startDateObj 和 endDateObj 已经在前面解析过了
+
+            // 设置时间为当天的开始和结束
+            startDateObj.setHours(0, 0, 0, 0);
+            endDateObj.setHours(23, 59, 59, 999);
+
+            return recordDateObj >= startDateObj && recordDateObj <= endDateObj;
+        });
+
+        if (outData.length === 0) {
+            showAlert('指定日期范围内没有出库数据', 'error');
+            return;
+        }
+
+        // 根据记录数量决定使用单页还是多页模板
+        const recordCount = outData.length;
+        const useMultiPage = (exportSystem === 'j1' && recordCount > 27) || (exportSystem === 'j2' && recordCount > 24) || (exportSystem === 'j3' && recordCount > 24);
+
+        if (useMultiPage) {
+            // 使用多页模板
+            const pageCount = Math.ceil(recordCount / (exportSystem === 'j1' ? 27 : 24));
+            showAlert(`记录数量较多(${recordCount}条)，将使用多页模板生成PDF (共${pageCount}页)`, 'info');
+            await generateMultiPageInvoicePDF(outData, formatDateToYYYYMMDD(startDateObj), formatDateToYYYYMMDD(endDateObj), exportSystem, generatedInvoiceNumber, formatDateToYYYYMMDD(invoiceDateObj));
+        } else {
+            // 使用单页模板
+            await generateInvoicePDF(outData, formatDateToYYYYMMDD(startDateObj), formatDateToYYYYMMDD(endDateObj), exportSystem, generatedInvoiceNumber, formatDateToYYYYMMDD(invoiceDateObj));
+        }
+
+        showAlert('PDF发票生成成功', 'success');
+        closeExportModal();
+
+    } catch (error) {
+        console.error('导出失败:', error);
+        showAlert('生成PDF发票失败，请重试', 'error');
+    } finally {
+        // 恢复按钮状态
+        const exportBtn = document.querySelector('.export-modal-actions .btn-success');
+        exportBtn.innerHTML = originalText;
+        exportBtn.disabled = false;
+    }
+}
+
+// 点击弹窗外部关闭
+window.addEventListener('click', function (event) {
+    const modal = document.getElementById('export-modal');
+    if (event.target === modal) {
+        closeExportModal();
+    }
+});
+
+// 回到顶部功能
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+// 监听滚动事件，控制回到顶部按钮显示
+let scrollTimeout;
+window.addEventListener('scroll', function () {
+    // 使用防抖优化性能
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(function () {
+        const backToTopBtn = document.getElementById('back-to-top-btn');
+        const scrollThreshold = 150; // 滚动超过150px后显示按钮
+
+        if (window.pageYOffset > scrollThreshold) {
+            backToTopBtn.classList.add('show');
+        } else {
+            backToTopBtn.classList.remove('show');
+        }
+    }, 10);
+});
+
+// 生成发票号码 - 格式：J1-2510-001（店面-年月-序号）
+function generateInvoiceNumber(exportSystem, invoiceDate, userSuffix) {
+    // 从发票日期提取年月（YYMM格式）
+    const date = new Date(invoiceDate);
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份补零
+    const year = date.getFullYear().toString().slice(-2); // 取后两位年份
+    const yearMonth = year + month;
+
+    // 确保用户输入的后缀是三位数
+    const suffix = String(userSuffix).padStart(3, '0');
+
+    // 生成发票号码：店面-年月-序号（店面代码大写）
+    const invoiceNumber = `${exportSystem.toUpperCase()}-${yearMonth}-${suffix}`;
+
+    console.log(`发票号码: ${invoiceNumber}`);
+    return invoiceNumber;
+}
+
+// 生成PDF发票
+async function generateInvoicePDF(outData, startDate, endDate, exportSystem, invoiceNumber = '', invoiceDate = '') {
+    try {
+
+        console.log('开始生成PDF发票:', {
+            exportSystem,
+            dataLength: outData ? outData.length : 0,
+            startDate,
+            endDate,
+            invoiceNumber
+        });
+
+        // 如果没有提供发票号码，自动生成一个
+        if (!invoiceNumber) {
+            invoiceNumber = generateInvoiceNumber(exportSystem);
+        }
+
+        // 下载现有的PDF模板
+        let templateFile;
+        if (exportSystem === 'j2') {
+            templateFile = `../invoice/invoice/j2invoice.pdf?ts=${Date.now()}`;
+        } else if (exportSystem === 'j3') {
+            templateFile = `../invoice/invoice/j3invoice.pdf?ts=${Date.now()}`;
+        } else {
+            templateFile = `../invoice/invoice/j1invoice.pdf?ts=${Date.now()}`;
+        }
+        const templateResponse = await fetch(templateFile);
+        if (!templateResponse.ok) {
+            throw new Error('无法加载PDF模板');
+        }
+
+        const templateBytes = await templateResponse.arrayBuffer();
+
+        // 使用PDF-lib库来编辑PDF
+        const { PDFDocument, rgb, StandardFonts } = PDFLib;
+        const pdfDoc = await PDFDocument.load(templateBytes);
+
+        // 获取第一页
+        const page = pdfDoc.getPage(0);
+        const { width, height } = page.getSize();
+
+        // 嵌入字体
+        const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+        const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        const monoFont = await pdfDoc.embedFont(StandardFonts.Courier);
+        const monoBoldFont = await pdfDoc.embedFont(StandardFonts.CourierBold);
+
+        // 设置字体大小和颜色
+        const fontSize = 11;
+        const smallFontSize = 9;
+        const textColor = rgb(0, 0, 0);
+        const whiteColor = rgb(1, 1, 1); // 白色
+
+        // 字体对齐辅助函数
+        function getRightAlignedX(text, maxX, charWidth = 6) {
+            return maxX - (text.length * charWidth);
+        }
+
+        function getCenterAlignedX(text, centerX, charWidth = 6) {
+            return centerX - (text.length * charWidth / 2);
+        }
+
+        // 按小数点对齐：anchorX 作为右边界（文本右端对齐），小数点位于固定偏移
+        // 规则：anchorX 代表整列的右边界；若包含小数点，将小数点对齐到 (anchorX - dotOffset)
+        // 这样无需改任何坐标，只通过计算 x 返回值实现对齐
+        function getDecimalAlignedX(text, anchorX, font, size, dotOffset = 0) {
+            const str = String(text ?? '');
+            const dotIndex = str.indexOf('.');
+            if (dotIndex >= 0) {
+                // 宽度= 整个字符串宽度；小数点左侧宽度用于将小数点放在 anchorX - dotOffset
+                const leftPart = str.substring(0, dotIndex);
+                const leftWidth = font.widthOfTextAtSize(leftPart, size);
+                return (anchorX - dotOffset) - leftWidth;
+            }
+            // 无小数点：按右边界对齐
+            const width = font.widthOfTextAtSize(str, size);
+            return anchorX - width;
+        }
+
+        // 填入日期 (右上角区域)
+        const currentDate = invoiceDate ?
+            new Date(invoiceDate).toLocaleDateString('en-GB') :
+            new Date().toLocaleDateString('en-GB');
+
+        if (exportSystem === 'j1') {
+            // J1模板的日期位置
+            page.drawText(` ${currentDate}`, {
+                x: 495.5, // J1模板DATE冒号后面的位置
+                y: height - 110.5,
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+
+            // J1模板的发票号码位置
+            if (invoiceNumber) {
+                page.drawText(invoiceNumber, {
+                    x: 500, // J1模板Invoice No位置
+                    y: height - 96.5, // 调整到Invoice No行
+                    size: fontSize,
+                    color: textColor,
+                    font: boldFont,
+                });
+            }
+        } else if (exportSystem === 'j2') {
+            // J2模板的日期位置
+            page.drawText(` ${currentDate}`, {
+                x: 495.5, // J2模板DATE冒号后面的位置 (可根据需要调整)
+                y: height - 110.5, // J2模板的Y坐标 (可根据需要调整)
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+
+            // J2模板的发票号码位置
+            if (invoiceNumber) {
+                page.drawText(invoiceNumber, {
+                    x: 500,
+                    y: height - 96.5, // 调整到Invoice No行
+                    size: fontSize,
+                    color: textColor,
+                    font: boldFont,
+                });
+            }
+        } else if (exportSystem === 'j3') {
+            // J3模板的日期位置
+            page.drawText(` ${currentDate}`, {
+                x: 495.5, // J3模板DATE冒号后面的位置
+                y: height - 110.5, // J3模板的Y坐标
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+
+            // J3模板的发票号码位置
+            if (invoiceNumber) {
+                page.drawText(invoiceNumber, {
+                    x: 500, // J3模板Invoice No位置
+                    y: height - 96.5, // 调整到Invoice No行
+                    size: fontSize,
+                    color: textColor,
+                    font: boldFont,
+                });
+            }
+        }
+
+        // 计算总金额
+        let grandTotal = 0;
+
+        // 填入数据行 (从第一个数据行开始)
+        let yPosition, lineHeight;
+        if (exportSystem === 'j1') {
+            yPosition = height - 162; // J1模板的起始Y坐标
+            lineHeight = 20; // J1模板的行高
+        } else if (exportSystem === 'j2') {
+            yPosition = height - 202; // J2模板的起始Y坐标
+            lineHeight = 20; // J2模板的行高
+        } else { // j3
+            yPosition = height - 202; // J3模板的起始Y坐标
+            lineHeight = 20; // J3模板的行高
+        }
+
+        // 清除缓存并强制刷新 - 版本 2.0
+        console.log('=== PDF生成调试信息 v2.0 ===');
+        console.log('outData类型:', typeof outData);
+        console.log('outData长度:', outData.length);
+        console.log('outData内容:', outData);
+
+        if (outData.length === 0) {
+            console.warn('警告：outData为空，将显示空白发票');
+        }
+
+        outData.forEach((record, index) => {
+            const itemNumber = index + 1;
+            const outQty = parseFloat(record.out_quantity) || 0;
+            const price = parseFloat(record.price) || 0;
+            const total = outQty * price;
+            grandTotal += total;
+
+            // NO (第一列) - 居中对齐
+            const itemText = itemNumber.toString();
+            page.drawText(itemText, {
+                x: getCenterAlignedX(itemText, exportSystem === 'j1' ? 42 : 42, 6),
+                y: yPosition,
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // Descriptions (第二列) - 左对齐，调整产品名称显示，处理长文本
+            const productName = record.product_name || '';
+            const maxProductNameLength = 25;
+            const displayProductName = productName.length > maxProductNameLength
+                ? productName.substring(0, maxProductNameLength) + '...'
+                : productName;
+
+            page.drawText(displayProductName.toUpperCase(), {
+                x: exportSystem === 'j1' ? 80 : 80,
+                y: yPosition,
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // Quantity (第三列) - 右对齐（显示三位小数）
+            const qtyText = formatNumber(outQty);
+            page.drawText(qtyText, {
+                x: getDecimalAlignedX(qtyText, exportSystem === 'j1' ? 373 : 373, monoBoldFont, smallFontSize, 0),
+                y: yPosition,
+                size: smallFontSize,
+                color: textColor,
+                font: monoBoldFont,
+            });
+
+            // UOM (第四列) - 左对齐
+            const uomText = record.specification || '';
+            page.drawText(uomText.toUpperCase(), {
+                x: exportSystem === 'j1' ? 406 : 406,
+                y: yPosition,
+                size: 8,
+                color: textColor,
+            });
+
+            // Price RM (第五列) - 右对齐
+            const priceText = formatCurrencyForPDF(price);
+            page.drawText(priceText, {
+                x: getDecimalAlignedX(priceText, exportSystem === 'j1' ? 488 : 488, monoBoldFont, smallFontSize, 0),
+                y: yPosition,
+                size: smallFontSize,
+                color: textColor,
+                font: monoBoldFont,
+            });
+
+            // Total RM (第六列) - 右对齐
+            const totalText = formatCurrencyForPDF(total);
+            page.drawText(totalText, {
+                x: getDecimalAlignedX(totalText, exportSystem === 'j1' ? 548 : 548, monoBoldFont, smallFontSize, 0),
+                y: yPosition,
+                size: smallFontSize,
+                color: textColor,
+                font: monoBoldFont,
+            });
+
+            yPosition -= lineHeight;
+        });
+
+        if (exportSystem === 'j2') {
+            // J2模板：计算subtotal, charge 15%, 和最终total
+            const subtotal = grandTotal;
+            const charge = subtotal * 0.15;
+            const finalTotal = subtotal + charge;
+
+            // 填入Subtotal
+            const subtotalText = formatCurrencyForPDF(subtotal);
+            page.drawText(subtotalText, {
+                x: getRightAlignedX(subtotalText, 588, 8),
+                y: height - 681, // 调整到Subtotal行
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // 填入Charge 15%
+            const chargeText = formatCurrencyForPDF(charge);
+            page.drawText(chargeText, {
+                x: getRightAlignedX(chargeText, 585.5, 8),
+                y: height - 692, // 调整到Charge行
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // 填入最终Total
+            const finalTotalText = formatCurrencyForPDF(finalTotal);
+            page.drawText(finalTotalText, {
+                x: getRightAlignedX(finalTotalText, 580, 8),
+                y: height - 708, // 调整到最终Total行
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+        } else if (exportSystem === 'j3') {
+            // J3模板：计算subtotal, charge 15%, 和最终total
+            const subtotal = grandTotal;
+            const charge = subtotal * 0.15;
+            const finalTotal = subtotal + charge;
+
+            // 填入Subtotal
+            const subtotalText = formatCurrencyForPDF(subtotal);
+            page.drawText(subtotalText, {
+                x: getRightAlignedX(subtotalText, 588, 8),
+                y: height - 681, // 调整到Subtotal行
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // 填入Charge 15%
+            const chargeText = formatCurrencyForPDF(charge);
+            page.drawText(chargeText, {
+                x: getRightAlignedX(chargeText, 585.5, 8),
+                y: height - 692, // 调整到Charge行
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // 填入最终Total
+            const finalTotalText = formatCurrencyForPDF(finalTotal);
+            page.drawText(finalTotalText, {
+                x: getRightAlignedX(finalTotalText, 580, 8),
+                y: height - 708, // 调整到最终Total行
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+        } else {
+            // J1模板：只显示总计
+            const totalText = formatCurrencyForPDF(grandTotal);
+            page.drawText(totalText, {
+                x: getRightAlignedX(totalText, 580, 8),
+                y: height - 705,
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+        }
+
+        // 生成并下载PDF
+        const pdfBytes = await pdfDoc.save();
+
+        // 创建下载链接
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `invoice_${exportSystem}_${startDate}_${endDate}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+    } catch (error) {
+        console.error('PDF生成失败:', error);
+        console.error('错误详情:', {
+            message: error.message,
+            stack: error.stack,
+            exportSystem: exportSystem,
+            dataLength: outData ? outData.length : 0
+        });
+        throw error;
+    }
+}
+
+// 生成多页PDF发票
+async function generateMultiPageInvoicePDF(outData, startDate, endDate, exportSystem, invoiceNumber = '', invoiceDate = '') {
+    try {
+        console.log('开始生成多页PDF发票:', {
+            exportSystem,
+            dataLength: outData ? outData.length : 0,
+            startDate,
+            endDate,
+            invoiceNumber
+        });
+
+        // 如果没有提供发票号码，自动生成一个
+        if (!invoiceNumber) {
+            invoiceNumber = generateInvoiceNumber(exportSystem);
+        }
+
+        // 计算每页可容纳的记录数
+        const recordsPerPage = exportSystem === 'j1' ? 27 : 24;
+        const totalPages = Math.ceil(outData.length / recordsPerPage);
+
+        console.log(`多页PDF: 总记录数 ${outData.length}, 每页 ${recordsPerPage} 条, 共 ${totalPages} 页`);
+
+        // 加载所需的模板文件
+        const templateFiles = [];
+        for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+            let templateFile;
+            if (pageIndex === 0) {
+                // 第一页使用 (1) 模板
+                if (exportSystem === 'j2') {
+                    templateFile = `../invoice/invoice/j2invoiceMulti(1).pdf?ts=${Date.now()}`;
+                } else if (exportSystem === 'j3') {
+                    templateFile = `../invoice/invoice/j3invoiceMulti(1).pdf?ts=${Date.now()}`;
+                } else {
+                    templateFile = `../invoice/invoice/j1invoiceMulti(1).pdf?ts=${Date.now()}`;
+                }
+            } else {
+                // 后续页使用 (2) 模板
+                if (exportSystem === 'j2') {
+                    templateFile = `../invoice/invoice/j2invoiceMulti(2).pdf?ts=${Date.now()}`;
+                } else if (exportSystem === 'j3') {
+                    templateFile = `../invoice/invoice/j3invoiceMulti(2).pdf?ts=${Date.now()}`;
+                } else {
+                    templateFile = `../invoice/invoice/j1invoiceMulti(2).pdf?ts=${Date.now()}`;
+                }
+            }
+            templateFiles.push(templateFile);
+        }
+
+        // 使用PDF-lib库来创建最终PDF
+        const { PDFDocument, rgb, StandardFonts } = PDFLib;
+        const finalPdfDoc = await PDFDocument.create();
+
+        // 嵌入字体
+        const boldFont = await finalPdfDoc.embedFont(StandardFonts.HelveticaBold);
+        const regularFont = await finalPdfDoc.embedFont(StandardFonts.Helvetica);
+        const monoFont = await finalPdfDoc.embedFont(StandardFonts.Courier);
+        const monoBoldFont = await finalPdfDoc.embedFont(StandardFonts.CourierBold);
+
+        // 设置字体大小和颜色
+        const fontSize = 11;
+        const smallFontSize = 9;
+        const textColor = rgb(0, 0, 0);
+        const whiteColor = rgb(1, 1, 1);
+
+        // 字体对齐辅助函数
+        function getRightAlignedX(text, maxX, charWidth = 6) {
+            return maxX - (text.length * charWidth);
+        }
+
+        function getCenterAlignedX(text, centerX, charWidth = 6) {
+            return centerX - (text.length * charWidth / 2);
+        }
+
+        // 按小数点对齐（等宽字体下更精确）
+        function getDecimalAlignedX(text, anchorX, font, size) {
+            const str = String(text ?? '');
+            const dotIndex = str.indexOf('.');
+            if (dotIndex >= 0) {
+                const leftPart = str.substring(0, dotIndex);
+                const leftWidth = font.widthOfTextAtSize(leftPart, size);
+                return anchorX - leftWidth;
+            }
+            const width = font.widthOfTextAtSize(str, size);
+            return anchorX - width;
+        }
+
+        let grandTotal = 0;
+
+        // 为每页加载模板并填入数据
+        for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+            try {
+                // 加载当前页的模板
+                const templateResponse = await fetch(templateFiles[pageIndex]);
+                if (!templateResponse.ok) {
+                    throw new Error(`无法加载模板文件: ${templateFiles[pageIndex]}`);
+                }
+
+                const templateBytes = await templateResponse.arrayBuffer();
+                const templateDoc = await PDFDocument.load(templateBytes);
+
+                // 复制模板页到最终文档
+                const [templatePage] = await finalPdfDoc.copyPages(templateDoc, [0]);
+                const page = finalPdfDoc.addPage(templatePage);
+                const { width, height } = page.getSize();
+
+                // 填入日期和发票号码（每一页都显示）
+                const currentDate = invoiceDate ?
+                    new Date(invoiceDate).toLocaleDateString('en-GB') :
+                    new Date().toLocaleDateString('en-GB');
+
+                if (exportSystem === 'j1') {
+                    // J1模板的日期位置
+                    page.drawText(` ${currentDate}`, {
+                        x: 495.5,
+                        y: height - 110.5,
+                        size: fontSize,
+                        color: textColor,
+                        font: boldFont,
+                    });
+
+                    // J1模板的发票号码位置
+                    if (invoiceNumber) {
+                        page.drawText(invoiceNumber, {
+                            x: 500,
+                            y: height - 96.5,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    }
+                } else if (exportSystem === 'j2') {
+                    // J2模板的日期位置
+                    page.drawText(` ${currentDate}`, {
+                        x: 495.5,
+                        y: height - 110.5,
+                        size: fontSize,
+                        color: textColor,
+                        font: boldFont,
+                    });
+
+                    // J2模板的发票号码位置
+                    if (invoiceNumber) {
+                        page.drawText(invoiceNumber, {
+                            x: 500,
+                            y: height - 96.5,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    }
+                } else if (exportSystem === 'j3') {
+                    // J3模板的日期位置
+                    page.drawText(` ${currentDate}`, {
+                        x: 495.5,
+                        y: height - 110.5,
+                        size: fontSize,
+                        color: textColor,
+                        font: boldFont,
+                    });
+
+                    // J3模板的发票号码位置
+                    if (invoiceNumber) {
+                        page.drawText(invoiceNumber, {
+                            x: 500,
+                            y: height - 96.5,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    }
+                }
+
+                // 计算当前页的数据范围
+                const startIndex = pageIndex * recordsPerPage;
+                const endIndex = Math.min(startIndex + recordsPerPage, outData.length);
+                const pageData = outData.slice(startIndex, endIndex);
+
+                // 填入数据行
+                let yPosition, lineHeight;
+                if (exportSystem === 'j1') {
+                    if (pageIndex === 0) {
+                        yPosition = height - 162; // J1第一页位置
+                    } else {
+                        yPosition = height - 162;  // J1第二页位置
+                    }
+                    lineHeight = 20;
+                } else if (exportSystem === 'j2') {
+                    if (pageIndex === 0) {
+                        yPosition = height - 202; // J2第一页位置（原来的位置）
+                    } else {
+                        yPosition = height - 202; // J2第二页位置（可调整这个数值）
+                    }
+                    lineHeight = 20;
+                } else { // j3
+                    if (pageIndex === 0) {
+                        yPosition = height - 202; // J3第一页位置
+                    } else {
+                        yPosition = height - 202; // J3第二页位置
+                    }
+                    lineHeight = 20;
+                }
+
+                pageData.forEach((record, index) => {
+                    const itemNumber = startIndex + index + 1;
+                    const outQty = parseFloat(record.out_quantity) || 0;
+                    const price = parseFloat(record.price) || 0;
+                    const total = outQty * price;
+                    grandTotal += total;
+
+                    // NO (第一列)
+                    const itemText = itemNumber.toString();
+                    page.drawText(itemText, {
+                        x: getCenterAlignedX(itemText, 42, 6),
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                    });
+
+                    // Descriptions (第二列)
+                    const productName = record.product_name || '';
+                    const maxProductNameLength = 25;
+                    const displayProductName = productName.length > maxProductNameLength
+                        ? productName.substring(0, maxProductNameLength) + '...'
+                        : productName;
+
+                    page.drawText(displayProductName.toUpperCase(), {
+                        x: 80,
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                    });
+
+                    // Quantity (第三列)（显示三位小数）
+                    const qtyText = formatNumber(outQty);
+                    page.drawText(qtyText, {
+                        x: getDecimalAlignedX(qtyText, 373, monoBoldFont, smallFontSize, 0),
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                        font: monoBoldFont,
+                    });
+
+                    // UOM (第四列)
+                    const uomText = record.specification || '';
+                    page.drawText(uomText.toUpperCase(), {
+                        x: 406,
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                    });
+
+                    // Price RM (第五列)
+                    const priceText = formatCurrencyForPDF(price);
+                    page.drawText(priceText, {
+                        x: getDecimalAlignedX(priceText, 488, monoBoldFont, smallFontSize, 0),
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                        font: monoBoldFont,
+                    });
+
+                    // Total RM (第六列)
+                    const totalText = formatCurrencyForPDF(total);
+                    page.drawText(totalText, {
+                        x: getDecimalAlignedX(totalText, 548, monoBoldFont, smallFontSize, 0),
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                        font: monoBoldFont,
+                    });
+
+                    yPosition -= lineHeight;
+                });
+
+                // 只在最后一页显示总计
+                if (pageIndex === totalPages - 1) {
+                    if (exportSystem === 'j2') {
+                        // J2模板：计算subtotal, charge 15%, 和最终total
+                        const subtotal = grandTotal;
+                        const charge = subtotal * 0.15;
+                        const finalTotal = subtotal + charge;
+
+                        // 填入Subtotal
+                        const subtotalText = formatCurrencyForPDF(subtotal);
+                        page.drawText(subtotalText, {
+                            x: getRightAlignedX(subtotalText, 588, 8),
+                            y: height - 681,
+                            size: smallFontSize,
+                            color: textColor,
+                        });
+
+                        // 填入Charge 15%
+                        const chargeText = formatCurrencyForPDF(charge);
+                        page.drawText(chargeText, {
+                            x: getRightAlignedX(chargeText, 585.5, 8),
+                            y: height - 692,
+                            size: smallFontSize,
+                            color: textColor,
+                        });
+
+                        // 填入最终Total
+                        const finalTotalText = formatCurrencyForPDF(finalTotal);
+                        page.drawText(finalTotalText, {
+                            x: getRightAlignedX(finalTotalText, 580, 8),
+                            y: height - 708,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    } else if (exportSystem === 'j3') {
+                        // J3模板：计算subtotal, charge 15%, 和最终total
+                        const subtotal = grandTotal;
+                        const charge = subtotal * 0.15;
+                        const finalTotal = subtotal + charge;
+
+                        // 填入Subtotal
+                        const subtotalText = formatCurrencyForPDF(subtotal);
+                        page.drawText(subtotalText, {
+                            x: getRightAlignedX(subtotalText, 588, 8),
+                            y: height - 681,
+                            size: smallFontSize,
+                            color: textColor,
+                        });
+
+                        // 填入Charge 15%
+                        const chargeText = formatCurrencyForPDF(charge);
+                        page.drawText(chargeText, {
+                            x: getRightAlignedX(chargeText, 585.5, 8),
+                            y: height - 692,
+                            size: smallFontSize,
+                            color: textColor,
+                        });
+
+                        // 填入最终Total
+                        const finalTotalText = formatCurrencyForPDF(finalTotal);
+                        page.drawText(finalTotalText, {
+                            x: getRightAlignedX(finalTotalText, 580, 8),
+                            y: height - 708,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    } else {
+                        // J1模板：只显示总计
+                        const totalText = formatCurrencyForPDF(grandTotal);
+                        page.drawText(totalText, {
+                            x: getRightAlignedX(totalText, 580, 8),
+                            y: height - 705,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    }
+                }
+
+            } catch (templateError) {
+                console.error(`加载模板 ${templateFiles[pageIndex]} 失败:`, templateError);
+                throw new Error(`无法加载模板文件: ${templateFiles[pageIndex]}`);
+            }
+        }
+
+        // 生成并下载PDF
+        const pdfBytes = await finalPdfDoc.save();
+
+        // 创建下载链接
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `invoice_${exportSystem}_multipage_${startDate}_${endDate}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+    } catch (error) {
+        console.error('多页PDF生成失败:', error);
+        console.error('错误详情:', {
+            message: error.message,
+            stack: error.stack,
+            exportSystem: exportSystem,
+            dataLength: outData ? outData.length : 0
+        });
+        throw error;
+    }
+}
+
+// 处理导出系统选择变化
+function handleExportSystemChange() {
+    // 发票号码现在完全自动生成，不需要处理界面变化
+    console.log('导出系统已选择:', document.getElementById('export-system').value);
+}
+
+// 切换批量删除模式
+function toggleBatchDelete() {
+    isBatchDeleteMode = true;
+    selectedRecords.clear();
+
+    // 显示/隐藏按钮
+    document.getElementById('batch-delete-btn').style.display = 'none';
+    document.getElementById('confirm-batch-delete-btn').style.display = 'inline-block';
+    document.getElementById('cancel-batch-delete-btn').style.display = 'inline-block';
+
+    // 更改表头
+    document.getElementById('action-header').textContent = '选择';
+
+    // 保存所有新创建的行
+    const newRows = saveNewRows();
+
+    // 重新渲染表格
+    renderStockTable();
+
+    // 恢复新创建的行
+    restoreNewRows(newRows);
+
+    showAlert('批量删除模式已启用，请勾选要删除的记录', 'info');
+}
+
+// 取消批量删除模式
+function cancelBatchDelete() {
+    isBatchDeleteMode = false;
+    selectedRecords.clear();
+
+    // 显示/隐藏按钮
+    document.getElementById('batch-delete-btn').style.display = 'inline-block';
+    document.getElementById('confirm-batch-delete-btn').style.display = 'none';
+    document.getElementById('cancel-batch-delete-btn').style.display = 'none';
+
+    // 恢复表头
+    document.getElementById('action-header').textContent = '操作';
+
+    // 保存所有新创建的行
+    const newRows = saveNewRows();
+
+    // 重新渲染表格
+    renderStockTable();
+
+    // 恢复新创建的行
+    restoreNewRows(newRows);
+}
+
+// 切换记录选择状态
+function toggleRecordSelection(recordId, isSelected) {
+    if (isSelected) {
+        selectedRecords.add(recordId);
+    } else {
+        selectedRecords.delete(recordId);
+    }
+
+    // 更新确认按钮状态
+    const confirmBtn = document.getElementById('confirm-batch-delete-btn');
+    if (selectedRecords.size > 0) {
+        confirmBtn.innerHTML = `<i class="fas fa-check"></i> 确认删除 (${selectedRecords.size})`;
+        confirmBtn.disabled = false;
+    } else {
+        confirmBtn.innerHTML = '<i class="fas fa-check"></i> 确认删除';
+        confirmBtn.disabled = true;
+    }
+}
+
+// 生成Type选项
+function generateTypeOptions(selectedValue = '') {
+    const typeOptions = ['Kitchen', 'Sushi Bar', 'Service Line', 'Sake'];
+    let options = '<option value="">请选择类型</option>';
+    typeOptions.forEach(type => {
+        const selected = (type === selectedValue || (type === 'Service Line' && selectedValue === 'Drinks')) ? 'selected' : '';
+        options += `<option value="${type}" ${selected}>${type}</option>`;
+    });
+    return options;
+}
+
+// 确认批量删除
+async function confirmBatchDelete() {
+    if (selectedRecords.size === 0) {
+        showAlert('请至少选择一条记录', 'error');
+        return;
+    }
+
+    if (!confirm(`确定要删除选中的 ${selectedRecords.size} 条记录吗？此操作不可恢复！`)) {
+        return;
+    }
+
+    const confirmBtn = document.getElementById('confirm-batch-delete-btn');
+    const originalText = confirmBtn.innerHTML;
+    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 删除中...';
+    confirmBtn.disabled = true;
+
+    try {
+        let successCount = 0;
+        let failCount = 0;
+
+        // 逐个删除选中的记录
+        for (const recordId of selectedRecords) {
+            try {
+                const result = await apiCall(`?id=${recordId}`, {
+                    method: 'DELETE'
+                });
+
+                if (result.success) {
+                    successCount++;
+                } else {
+                    failCount++;
+                }
+            } catch (error) {
+                failCount++;
+                console.error(`删除记录 ${recordId} 失败:`, error);
+            }
+        }
+
+        // 显示删除结果
+        if (successCount > 0) {
+            showAlert(`成功删除 ${successCount} 条记录${failCount > 0 ? `，${failCount} 条失败` : ''}`,
+                failCount > 0 ? 'warning' : 'success');
+        } else {
+            showAlert('删除失败', 'error');
+        }
+
+        // 退出批量删除模式并刷新数据
+        cancelBatchDelete();
+
+        // 保存所有新创建的行
+        const newRows = saveNewRows();
+
+        // 重新加载数据但保留新行
+        loadStockData().then(() => {
+            // 恢复新创建的行
+            restoreNewRows(newRows);
+        });
+
+    } catch (error) {
+        showAlert('批量删除时发生错误', 'error');
+        confirmBtn.innerHTML = originalText;
+        confirmBtn.disabled = false;
+    }
+}
+
+// 更新批量保存按钮的可见性
+function updateBatchSaveButtonVisibility() {
+    const newRows = document.querySelectorAll('.new-row');
+    const batchSaveBtn = document.getElementById('batch-save-btn');
+
+    if (newRows.length >= 2) {
+        batchSaveBtn.style.display = 'inline-block';
+    } else {
+        batchSaveBtn.style.display = 'none';
+    }
+}
+
+// 批量保存所有新记录
+async function batchSaveNewRows() {
+    const newRows = document.querySelectorAll('.new-row');
+
+    if (newRows.length === 0) {
+        showAlert('没有需要保存的新记录', 'info');
+        return;
+    }
+
+    const batchSaveBtn = document.getElementById('batch-save-btn');
+    const originalText = batchSaveBtn.innerHTML;
+    batchSaveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
+    batchSaveBtn.disabled = true;
+
+    let successCount = 0;
+    let failCount = 0;
+    const failedRows = []; // 记录失败的行
+    const errorMessages = []; // 记录错误信息
+
+    try {
+        // 将新行转换为数组以避免 NodeList 引用问题
+        const rowsArray = Array.from(newRows);
+
+        // 遍历所有新行并保存（传入 skipTableRefresh=true）
+        for (let i = 0; i < rowsArray.length; i++) {
+            const row = rowsArray[i];
+            try {
+                const saveBtn = row.querySelector('.save-new-btn');
+                if (saveBtn) {
+                    // 调用保存函数，跳过表格刷新
+                    await saveNewRowRecord(saveBtn, true);
+                    successCount++;
+                    // 等待一小段时间，避免请求过快
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            } catch (error) {
+                console.error('保存行时出错:', error);
+                failCount++;
+
+                // 克隆失败的行并保存数据
+                const clonedRow = row.cloneNode(true);
+                const rowData = extractRowData(row);
+                failedRows.push({
+                    element: clonedRow,
+                    data: rowData
+                });
+
+                // 获取行的货品名称用于错误提示
+                const rowId = row.querySelector('input').id.split('-')[0] + '-' + row.querySelector('input').id.split('-')[1];
+                const productInput = document.getElementById(`${rowId}-product_name-input`);
+                const productName = productInput ? productInput.value || `第 ${i + 1} 行` : `第 ${i + 1} 行`;
+
+                errorMessages.push(`${productName}: ${error.message}`);
+            }
+        }
+
+        // 批量保存完成后，一次性重新渲染表格
+        renderStockTable();
+        updateStats();
+
+        // 恢复失败的行
+        if (failedRows.length > 0) {
+            setTimeout(() => {
+                const tbody = document.getElementById('stock-tbody');
+                failedRows.forEach(({ element, data }) => {
+                    // 标记失败的行（添加视觉提示）
+                    element.style.backgroundColor = '#fee';
+                    element.classList.add('validation-failed');
+                    tbody.appendChild(element);
+
+                    // 恢复行数据
+                    if (data) {
+                        restoreRowData(element, data);
+                    }
+
+                    // 添加事件监听，当用户修改内容时清除失败标记
+                    const inputs = element.querySelectorAll('input, select');
+                    inputs.forEach(input => {
+                        input.addEventListener('input', function () {
+                            element.style.backgroundColor = '';
+                            element.classList.remove('validation-failed');
+                        }, { once: true });
+                    });
+                });
+                bindComboboxEvents();
+                updateBatchSaveButtonVisibility();
+            }, 100);
+        }
+
+        // 显示结果
+        if (failCount === 0) {
+            showAlert(`成功保存 ${successCount} 条记录`, 'success');
+        } else if (successCount === 0) {
+            showAlert(`保存失败，所有记录都有问题：\n${errorMessages.join('\n')}`, 'error');
+        } else {
+            showAlert(`保存完成：成功 ${successCount} 条，失败 ${failCount} 条\n失败原因：\n${errorMessages.slice(0, 3).join('\n')}${errorMessages.length > 3 ? '\n...' : ''}`, 'warning');
+        }
+
+        // 更新按钮可见性
+        if (failCount === 0) {
+            updateBatchSaveButtonVisibility();
+        }
+
+    } catch (error) {
+        showAlert('批量保存时发生错误', 'error');
+        console.error('批量保存错误:', error);
+    } finally {
+        batchSaveBtn.innerHTML = originalText;
+        batchSaveBtn.disabled = false;
+    }
+}
+ + `{cfg.icon}</div>
+        <div class="toast-body">
+            <div class="toast-title">` + '
+
+    container.appendChild(toast);
+
+    // 显示动画
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 0);
+
+    // 自动关闭
+    setTimeout(() => {
+        closeToast(toastId);
+    }, 700);
+}
+
+// 添加关闭通知的函数
+function closeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+}
+
+// 添加关闭所有通知的函数（可选）
+function closeAllToasts() {
+    const toasts = document.querySelectorAll('.toast');
+    toasts.forEach(toast => {
+        closeToast(toast.id);
+    });
+}
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', initApp);
+
+// 添加快速选择下拉菜单的关闭逻辑
+document.addEventListener('click', function (e) {
+    // 关闭快速选择下拉菜单
+    if (!e.target.closest('.dropdown')) {
+        document.getElementById('quick-select-dropdown').classList.remove('show');
+    }
+});
+
+
+
+// 创建 Combobox 组件
+function createCombobox(type, value = '', recordId = null, isNewRow = false) {
+    let options, placeholder, fieldName, displayField;
+
+    if (type === 'code') {
+        options = window.codeNumberOptions;
+        placeholder = '输入或选择编号...';
+        fieldName = 'code_number';
+        displayField = 'code_number';
+    } else if (type === 'product') {
+        options = window.productOptions;
+        placeholder = '输入或选择货品...';
+        fieldName = 'product_name';
+        displayField = 'product_name';
+    } else if (type === 'receiver') {
+        options = receiverOptions;
+        placeholder = '输入或选择收货人...';
+        fieldName = 'receiver';
+        displayField = 'receiver';
+    } else {
+        // 默认处理
+        options = window.productOptions;
+        placeholder = '输入或选择货品...';
+        fieldName = 'product_name';
+        displayField = 'product_name';
+    }
+
+    let containerId;
+    if (isNewRow === true) {
+        containerId = `new-${fieldName}`;
+    } else if (typeof isNewRow === 'string') {
+        containerId = `${isNewRow}-${fieldName}`;
+    } else {
+        containerId = `combo-${fieldName}-${recordId}`;
+    }
+    const inputId = `${containerId}-input`;
+    const dropdownId = `${containerId}-dropdown`;
+
+    return `
+                <div class="combobox-container" id="${containerId}">
+                    <input 
+                        type="text" 
+                        class="combobox-input" 
+                        id="${inputId}"
+                        value="${value || ''}" 
+                        placeholder="${placeholder}"
+                        autocomplete="off"
+                        ${recordId ? `data-record-id="${recordId}"` : ''}
+                        data-field="${fieldName}"
+                        data-type="${type}"
+                    />
+                    <i class="fas fa-chevron-down combobox-arrow"></i>
+                    <div class="combobox-dropdown" id="${dropdownId}">
+                        ${generateComboboxOptions(options, displayField || '')}
+                    </div>
+                </div>
+            `;
+}
+
+// 生成下拉选项
+function generateComboboxOptions(options, displayField) {
+    if (!options || options.length === 0) {
+        return '<div class="no-results">暂无选项</div>';
+    }
+
+    // 如果是收货人选项，直接使用字符串数组
+    if (Array.isArray(options) && typeof options[0] === 'string') {
+        return options.map(option =>
+            `<div class="combobox-option" data-value="${option}">
+                        ${option}
+                    </div>`
+        ).join('');
+    }
+
+    // 其他情况，使用对象数组
+    return options.map(option =>
+        `<div class="combobox-option" data-value="${option[displayField]}">
+                    ${option[displayField]}
+                </div>`
+    ).join('');
+}
+
+// 计算下拉列表位置
+function calculateDropdownPosition(inputElement, dropdownElement) {
+    const inputRect = inputElement.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+
+    // 获取实际的下拉列表高度
+    // 先让下拉列表显示以获取真实高度，然后立即隐藏
+    const wasVisible = dropdownElement.style.display === 'block';
+    if (!wasVisible) {
+        dropdownElement.style.display = 'block';
+        dropdownElement.style.visibility = 'hidden';
+    }
+
+    // 计算选项数量和实际高度
+    const options = dropdownElement.querySelectorAll('.combobox-option, .no-results');
+    const optionCount = options.length;
+
+    // 获取实际内容高度
+    let dropdownHeight;
+    if (dropdownElement.scrollHeight > 0 && optionCount > 0) {
+        // 计算所有选项的实际总高度
+        let totalHeight = 0;
+        options.forEach(option => {
+            totalHeight += option.offsetHeight;
+        });
+
+        // 如果计算出了实际高度，使用它；否则使用scrollHeight
+        if (totalHeight > 0) {
+            // 添加4px用于边框（2px上 + 2px下）
+            dropdownHeight = Math.min(250, totalHeight + 4);
+        } else {
+            // 使用scrollHeight，添加少量边距
+            dropdownHeight = Math.min(250, dropdownElement.scrollHeight + 4);
+        }
+    } else {
+        // 估算下拉列表高度（假设每项37px = 10px padding上 + 10px padding下 + 14px字体 + 1.4行高 + 1px边框）
+        dropdownHeight = Math.min(250, 37 * Math.min(6, Math.max(1, optionCount)) + 4);
+    }
+
+    // 恢复原始状态
+    if (!wasVisible) {
+        dropdownElement.style.display = '';
+        dropdownElement.style.visibility = '';
+    }
+
+    // 获取表格容器信息
+    const tableContainer = document.querySelector('.table-scroll-container');
+    const containerRect = tableContainer ? tableContainer.getBoundingClientRect() : null;
+
+    let top = inputRect.bottom;
+    let left = inputRect.left;
+
+    // 计算可用空间
+    const spaceBelow = viewportHeight - inputRect.bottom;
+    const spaceAbove = inputRect.top;
+
+    // 对于最后几行，优先显示在上方
+    const isLastFewRows = inputRect.bottom > viewportHeight * 0.7;
+
+    // 检查是否会超出视口底部，或者对于最后几行优先显示在上方
+    if (top + dropdownHeight > viewportHeight || (isLastFewRows && spaceAbove > dropdownHeight)) {
+        // 显示在输入框上方
+        top = inputRect.top - dropdownHeight;
+
+        // 如果上方空间也不够，则调整高度
+        if (top < 0) {
+            top = 10;
+            dropdownHeight = Math.min(dropdownHeight, inputRect.top - 20);
+        }
+    }
+
+    // 确保不会超出视口左右边界
+    const dropdownWidth = Math.max(200, inputRect.width);
+    if (left + dropdownWidth > viewportWidth) {
+        left = viewportWidth - dropdownWidth - 10;
+    }
+    if (left < 10) {
+        left = 10;
+    }
+
+    // 如果表格容器存在，确保下拉列表在容器内可见
+    if (containerRect) {
+        const containerTop = containerRect.top;
+        const containerBottom = containerRect.bottom;
+
+        // 如果下拉列表超出容器顶部，调整位置
+        if (top < containerTop) {
+            top = containerTop + 5;
+        }
+
+        // 如果下拉列表超出容器底部，调整位置
+        if (top + dropdownHeight > containerBottom) {
+            top = containerBottom - dropdownHeight - 5;
+        }
+    }
+
+    return { top, left, width: dropdownWidth, height: dropdownHeight };
+}
+
+// 显示下拉列表
+function showComboboxDropdown(input) {
+    // 隐藏其他所有下拉列表
+    hideAllComboboxDropdowns();
+
+    const container = input.closest('.combobox-container');
+    const dropdown = container.querySelector('.combobox-dropdown');
+
+    if (dropdown) {
+        const position = calculateDropdownPosition(input, dropdown);
+        dropdown.style.top = position.top + 'px';
+        dropdown.style.left = position.left + 'px';
+        dropdown.style.width = position.width + 'px';
+        dropdown.style.maxHeight = position.height + 'px';
+        dropdown.classList.add('show');
+
+        // 重置高亮
+        dropdown.querySelectorAll('.combobox-option').forEach(option => {
+            option.classList.remove('highlighted');
+        });
+    }
+}
+
+// 隐藏所有下拉列表
+function hideAllComboboxDropdowns() {
+    document.querySelectorAll('.combobox-dropdown.show').forEach(dropdown => {
+        dropdown.classList.remove('show');
+    });
+}
+
+// 过滤下拉选项 - 修复版本
+function filterComboboxOptions(input) {
+    // 使用防抖来提高性能
+    clearTimeout(input._filterTimeout);
+    input._filterTimeout = setTimeout(() => {
+        const container = input.closest('.combobox-container');
+        const dropdown = container.querySelector('.combobox-dropdown');
+        const type = input.dataset.type;
+
+        if (!dropdown) return;
+
+        const searchTerm = input.value.toLowerCase();
+        let options, displayField, filteredOptions;
+
+        if (type === 'code') {
+            options = window.codeNumberOptions;
+            displayField = 'code_number';
+            if (!options) return;
+            filteredOptions = options.filter(option =>
+                option[displayField].toLowerCase().includes(searchTerm)
+            );
+        } else if (type === 'product') {
+            options = window.productOptions;
+            displayField = 'product_name';
+            if (!options) return;
+            filteredOptions = options.filter(option =>
+                option[displayField].toLowerCase().includes(searchTerm)
+            );
+        } else if (type === 'receiver') {
+            options = receiverOptions;
+            if (!options) return;
+            filteredOptions = options.filter(option =>
+                option.toLowerCase().includes(searchTerm)
+            );
+        } else {
+            return;
+        }
+
+        if (filteredOptions.length === 0) {
+            dropdown.innerHTML = '<div class="no-results">未找到匹配项</div>';
+        } else {
+            dropdown.innerHTML = generateComboboxOptions(filteredOptions, displayField || '');
+
+            // 重新绑定点击事件
+            dropdown.querySelectorAll('.combobox-option').forEach(option => {
+                option.addEventListener('click', () => selectComboboxOption(option, input));
+            });
+        }
+
+        // 使用 requestAnimationFrame 确保 DOM 更新后再计算位置
+        requestAnimationFrame(() => {
+            showComboboxDropdown(input);
+        });
+
+        // 如果是编辑模式，只更新数据，不重新渲染表格
+        const recordId = input.dataset.recordId;
+        const fieldName = input.dataset.field;
+        if (recordId && fieldName) {
+            const record = stockData.find(r => r.id === parseInt(recordId));
+            if (record) {
+                record[fieldName] = input.value;
+                // 不调用 updateField 避免重新渲染
+            }
+        }
+    }, 100); // 100ms 防抖延迟
+}
+
+// 选择下拉选项
+async function selectComboboxOption(optionElement, input) {
+    const value = optionElement.dataset.value;
+    const type = input.dataset.type;
+    const recordId = input.dataset.recordId;
+    const container = input.closest('tr') || input.closest('.form-container') || document;
+
+    // 只有选择货品编号或货品名称时才清空出货相关字段
+    if (type === 'code' || type === 'product') {
+        // 判断是否为编辑模式（检查是否在编辑中的行）
+        const isEditMode = recordId && editingRowIds.has(parseInt(recordId));
+
+        // 只在非编辑模式下清空出货相关字段
+        // 编辑模式下更换货品时，保留所有数量、价格等信息
+        if (!isEditMode) {
+            // 清空出货相关字段，但不清空规格和类型
+            // 规格和类型会在后面根据新选择的货品自动更新
+            const outQtyInput = container.querySelector('input[id*="-out-qty"], input[data-field="out_quantity"]');
+            if (outQtyInput) {
+                outQtyInput.value = '';
+                outQtyInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            const priceInput = container.querySelector('input[id*="-price"], input[data-field="price"]');
+            if (priceInput) {
+                priceInput.value = '';
+            }
+
+            const totalInput = container.querySelector('input[id*="-total"], input[data-field="total_value"]');
+            if (totalInput) {
+                totalInput.value = '';
+            }
+
+            const receiverInput = container.querySelector('input[id*="-receiver"], input[data-field="receiver"]');
+            if (receiverInput) {
+                if (currentStockType && currentStockType !== 'central') {
+                    receiverInput.value = currentStockType.toUpperCase();
+                } else {
+                    receiverInput.value = '';
+                }
+            }
+
+            const targetSelect = container.querySelector('select[id*="-target"], select[data-field="target_system"]');
+            if (targetSelect) {
+                targetSelect.value = '';
+                targetSelect.disabled = true;
+                targetSelect.required = false;
+            }
+
+            // 更新单价选项
+            updatePriceOptions(container, '');
+
+            // 如果是新增行，清空数据库中的相关字段
+            if (recordId) {
+                updateField(parseInt(recordId), 'out_quantity', '');
+                updateField(parseInt(recordId), 'price', '');
+                updateField(parseInt(recordId), 'receiver', '');
+                updateField(parseInt(recordId), 'target_system', '');
+                // 注意：不清空 specification 和 type，它们会自动更新
+            }
+        }
+    }
+
+    // 标记正在进行选择操作
+    input._isSelecting = true;
+
+    input.value = value;
+    hideAllComboboxDropdowns();
+
+    // 清除选择标记
+    setTimeout(() => {
+        input._isSelecting = false;
+    }, 200);
+
+    // 触发联动更新
+    if (type === 'code') {
+        const result = await getProductByCode(value);
+        if (result) {
+            const { product_name, specification, supplier, category } = result;
+            const containerId = input.closest('.combobox-container').id;
+            const isNewRow = containerId.includes('new-');
+
+            let relatedInputId;
+            if (isNewRow) {
+                // 对于新增行，提取行ID
+                const rowIdMatch = containerId.match(/^(new-\d+)-/);
+                if (rowIdMatch) {
+                    relatedInputId = `${rowIdMatch[1]}-product_name-input`;
+                } else {
+                    relatedInputId = 'new-product_name-input'; // 兼容旧格式
+                }
+            } else {
+                relatedInputId = `combo-product_name-${recordId}-input`;
+            }
+
+            const relatedInput = document.getElementById(relatedInputId);
+            if (relatedInput) {
+                relatedInput.value = product_name;
+                if (recordId) {
+                    updateField(parseInt(recordId), 'product_name', product_name);
+                    if (specification) {
+                        updateField(parseInt(recordId), 'specification', specification);
+                    }
+                    if (category) {
+                        updateField(parseInt(recordId), 'type', category);
+                    }
+                }
+            }
+
+            // 自动填充规格
+            if (specification) {
+                const row = input.closest('tr');
+                const specificationSelect = row ? row.querySelector('select[id$="-specification"], select[onchange*="specification"]') : null;
+                if (specificationSelect) {
+                    specificationSelect.value = specification;
+                    specificationSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+
+            // 自动填充类型
+            if (category) {
+                const row = input.closest('tr');
+                const typeSelect = row ? row.querySelector('select[id$="-type"]') : null;
+                if (typeSelect) {
+                    typeSelect.value = category;
+                    typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+
+            // 保存supplier到当前行，并在有进货数量时自动填充
+            const row = input.closest('tr');
+            if (row && supplier) {
+                row.dataset.supplier = supplier;
+                updateSupplierIfNeeded(row, recordId);
+            }
+
+            // 更新单价选项
+            updatePriceOptions(container, product_name);
+        }
+    } else if (type === 'product') {
+        const result = await getCodeByProduct(value);
+        if (result) {
+            const { product_code, specification, supplier, category } = result;
+            const containerId = input.closest('.combobox-container').id;
+            const isNewRow = containerId.includes('new-');
+
+            let relatedInputId;
+            if (isNewRow) {
+                // 对于新增行，提取行ID
+                const rowIdMatch = containerId.match(/^(new-\d+)-/);
+                if (rowIdMatch) {
+                    relatedInputId = `${rowIdMatch[1]}-code_number-input`;
+                } else {
+                    relatedInputId = 'new-code_number-input'; // 兼容旧格式
+                }
+            } else {
+                relatedInputId = `combo-code_number-${recordId}-input`;
+            }
+
+            const relatedInput = document.getElementById(relatedInputId);
+            if (relatedInput) {
+                relatedInput.value = product_code;
+                if (recordId) {
+                    updateField(parseInt(recordId), 'code_number', product_code);
+                    if (specification) {
+                        updateField(parseInt(recordId), 'specification', specification);
+                    }
+                    if (category) {
+                        updateField(parseInt(recordId), 'type', category);
+                    }
+                }
+            }
+
+            // 自动填充规格
+            if (specification) {
+                const row = input.closest('tr');
+                const specificationSelect = row ? row.querySelector('select[id$="-specification"], select[onchange*="specification"]') : null;
+                if (specificationSelect) {
+                    specificationSelect.value = specification;
+                    specificationSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+
+            // 自动填充类型
+            if (category) {
+                const row = input.closest('tr');
+                const typeSelect = row ? row.querySelector('select[id$="-type"]') : null;
+                if (typeSelect) {
+                    typeSelect.value = category;
+                    typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+
+            // 保存supplier到当前行，并在有进货数量时自动填充
+            const row = input.closest('tr');
+            if (row && supplier) {
+                row.dataset.supplier = supplier;
+                updateSupplierIfNeeded(row, recordId);
+            }
+
+            // 更新单价选项
+            updatePriceOptions(container, value);
+        }
+    } else if (type === 'receiver') {
+        // 收货人类型不需要特殊处理，直接更新字段
+        if (recordId) {
+            updateField(parseInt(recordId), 'receiver', value);
+        }
+    }
+
+    // 如果是编辑模式，更新字段（避免重复更新收货人）
+    if (recordId && type !== 'receiver') {
+        updateField(parseInt(recordId), input.dataset.field, value);
+    }
+
+    // 如果是编辑模式，确保数据已更新
+    if (recordId) {
+        const record = stockData.find(r => r.id === parseInt(recordId));
+        if (record) {
+            record[input.dataset.field] = value;
+        }
+    }
+}
+
+// 验证输入值是否在允许的选项中
+function validateComboboxInput(input) {
+    const type = input.dataset.type;
+    const value = input.value.trim();
+
+    if (!value) return true; // 空值允许
+
+    if (type === 'code' && window.codeNumberOptions) {
+        const validCodes = window.codeNumberOptions.map(c => c.code_number);
+        return validCodes.includes(value);
+    } else if (type === 'product') {
+        // 对于货品名称，允许输入任何值（包括包含符号的自定义货品名称）
+        return true;
+    } else if (type === 'receiver' && receiverOptions) {
+        return receiverOptions.includes(value);
+    }
+
+    return true;
+}
+
+// 处理键盘事件
+function handleComboboxKeydown(event, input) {
+    const container = input.closest('.combobox-container');
+    const dropdown = container.querySelector('.combobox-dropdown');
+
+    if (!dropdown.classList.contains('show')) {
+        if (event.key === 'ArrowDown' || event.key === 'Enter') {
+            showComboboxDropdown(input);
+            return;
+        }
+        return;
+    }
+
+    const options = dropdown.querySelectorAll('.combobox-option');
+    let highlighted = dropdown.querySelector('.combobox-option.highlighted');
+
+    switch (event.key) {
+        case 'ArrowDown':
+            event.preventDefault();
+            if (!highlighted) {
+                if (options.length > 0) {
+                    options[0].classList.add('highlighted');
+                }
+            } else {
+                highlighted.classList.remove('highlighted');
+                const next = highlighted.nextElementSibling;
+                if (next && next.classList.contains('combobox-option')) {
+                    next.classList.add('highlighted');
+                } else if (options.length > 0) {
+                    options[0].classList.add('highlighted');
+                }
+            }
+            break;
+
+        case 'ArrowUp':
+            event.preventDefault();
+            if (!highlighted) {
+                if (options.length > 0) {
+                    options[options.length - 1].classList.add('highlighted');
+                }
+            } else {
+                highlighted.classList.remove('highlighted');
+                const prev = highlighted.previousElementSibling;
+                if (prev && prev.classList.contains('combobox-option')) {
+                    prev.classList.add('highlighted');
+                } else if (options.length > 0) {
+                    options[options.length - 1].classList.add('highlighted');
+                }
+            }
+            break;
+
+        case 'Enter':
+            event.preventDefault();
+            if (highlighted) {
+                selectComboboxOption(highlighted, input);
+            }
+            break;
+
+        case 'Escape':
+            hideAllComboboxDropdowns();
+            break;
+    }
+}
+
+// 修改渲染后的事件绑定
+function bindComboboxEvents() {
+    // 为所有 combobox 输入框绑定事件
+    document.querySelectorAll('.combobox-input').forEach(input => {
+        // 只有在没有绑定过的情况下才绑定事件
+        if (!input._eventsbound) {
+            // 创建事件处理器
+            const focusHandler = () => showComboboxDropdown(input);
+            const inputHandler = () => filterComboboxOptions(input);
+            const keydownHandler = (e) => {
+                // 允许输入英文、数字、空格和常用符号
+                const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' '];
+                const isAlphaNumeric = /^[a-zA-Z0-9]$/.test(e.key);
+                const isSymbol = /^[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]$/.test(e.key);
+
+                if (!allowedKeys.includes(e.key) && !isAlphaNumeric && !isSymbol) {
+                    e.preventDefault();
+                    return;
+                }
+
+                handleComboboxKeydown(e, input);
+            };
+
+            // 添加 blur 事件处理器，确保编辑模式下数据被保存
+            const blurHandler = (e) => {
+                // 检查是否是点击下拉选项导致的blur
+                const container = input.closest('.combobox-container');
+                const dropdown = container.querySelector('.combobox-dropdown');
+
+                // 如果下拉列表显示中且点击的是下拉选项，则不执行验证
+                if (dropdown && dropdown.classList.contains('show')) {
+                    // 延迟执行验证，给点击事件时间完成
+                    setTimeout(() => {
+                        // 再次检查下拉列表是否还显示，如果隐藏了说明选择已完成
+                        if (!dropdown.classList.contains('show')) {
+                            performValidation();
+                        }
+                    }, 150);
+                    return;
+                }
+
+                performValidation();
+
+                function performValidation() {
+
+                    if (input._isSelecting) {
+                        return;
+                    }
+                    // 验证输入值
+                    if (input.value.trim() && !validateComboboxInput(input)) {
+                        const type = input.dataset.type;
+                        let fieldName = '字段';
+                        if (type === 'code') fieldName = '货品编号';
+                        else if (type === 'product') fieldName = '货品名称';
+                        else if (type === 'receiver') fieldName = '收货人';
+                        showAlert(`${fieldName}不存在，请从下拉列表中选择`, 'error');
+                        // 不要立即重新聚焦，给用户机会点击其他地方
+                        setTimeout(() => {
+                            if (document.activeElement !== input) {
+                                input.focus();
+                            }
+                        }, 100);
+                        return;
+                    }
+
+                    const recordId = input.dataset.recordId;
+                    const fieldName = input.dataset.field;
+                    if (recordId && fieldName) {
+                        const record = stockData.find(r => r.id === parseInt(recordId));
+                        if (record && record[fieldName] !== input.value) {
+                            record[fieldName] = input.value;
+                            // 如果是数值相关字段，需要重新计算
+                            if (fieldName === 'in_quantity' || fieldName === 'out_quantity' || fieldName === 'price') {
+                                renderStockTable();
+                            }
+                        }
+                    }
+                }
+            };
+
+            // 绑定事件监听器
+            input.addEventListener('focus', focusHandler);
+            input.addEventListener('input', inputHandler);
+            input.addEventListener('keydown', keydownHandler);
+            input.addEventListener('blur', blurHandler); // 这是新添加的一行
+
+            // 标记已绑定
+            input._eventsbound = true;
+        }
+    });
+
+    // 为所有 combobox 选项绑定点击事件
+    document.querySelectorAll('.combobox-option').forEach(option => {
+        if (!option._eventsbound) {
+            const clickHandler = () => {
+                const container = option.closest('.combobox-container');
+                const input = container.querySelector('.combobox-input');
+                selectComboboxOption(option, input);
+            };
+            option.addEventListener('click', clickHandler);
+            option._eventsbound = true;
+        }
+    });
+}
+
+// 全局点击事件（隐藏下拉列表）
+document.addEventListener('click', function (event) {
+    if (!event.target.closest('.combobox-container')) {
+        hideAllComboboxDropdowns();
+    }
+});
+
+// 窗口滚动和大小变化时重新计算位置
+window.addEventListener('scroll', hideAllComboboxDropdowns);
+window.addEventListener('resize', hideAllComboboxDropdowns);
+
+// 监听表格滚动，重新计算下拉列表位置
+const tableContainer = document.querySelector('.table-scroll-container');
+if (tableContainer) {
+    tableContainer.addEventListener('scroll', () => {
+        // 延迟执行，避免频繁计算
+        clearTimeout(tableContainer._scrollTimeout);
+        tableContainer._scrollTimeout = setTimeout(() => {
+            const visibleDropdowns = document.querySelectorAll('.combobox-dropdown.show');
+            visibleDropdowns.forEach(dropdown => {
+                const container = dropdown.closest('.combobox-container');
+                const input = container.querySelector('input');
+                if (input) {
+                    const position = calculateDropdownPosition(input, dropdown);
+                    dropdown.style.top = position.top + 'px';
+                    dropdown.style.left = position.left + 'px';
+                    dropdown.style.width = position.width + 'px';
+                    dropdown.style.maxHeight = position.height + 'px';
+                }
+            });
+        }, 50);
+    });
+}
+// 加载货品的所有进货价格选项
+async function loadProductPrices(productName, selectElementId, currentPrice = '') {
+    try {
+        // 使用带库存信息的API，设置required_qty为1以确保显示所有价格
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=1`);
+        const selectElement = document.getElementById(selectElementId);
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            // 始终保留手动输入价格选项
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+                const selected = price == currentPrice ? 'selected' : '';
+                // 显示所有价格选项，不管库存是否足够
+                const stockInfo = `(库存: ${availableStock})`;
+                options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
+            });
+            selectElement.innerHTML = options;
+        } else {
+            // 即使没有价格数据，也保留手动输入选项
+            selectElement.innerHTML = '<option value="">暂无历史价格</option><option value="manual">手动输入价格</option>';
+        }
+
+        // 如果选择了"手动输入价格"，显示输入框
+        selectElement.addEventListener('change', function () {
+            handlePriceSelectChange(this);
+        });
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById(selectElementId);
+        if (selectElement) {
+            // 即使出错也保留手动输入选项
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+async function createNewRowPriceSelectWithStock(rowId, productName, currentPrice = '', requiredQty = 0) {
+    const priceInput = document.getElementById(`${rowId}-price`);
+    const priceCell = priceInput.closest('.currency-display');
+
+    // 检查是否已经是下拉选项
+    if (priceCell.querySelector('.price-select')) {
+        return;
+    }
+
+    // 创建下拉选项
+    const selectElement = document.createElement('select');
+    selectElement.className = 'table-select price-select';
+    selectElement.id = `${rowId}-price-select`;
+    selectElement.innerHTML = '<option value="">正在加载...</option>';
+
+    // 隐藏输入框，显示下拉选项
+    priceInput.style.display = 'none';
+    priceCell.appendChild(selectElement);
+
+    // 加载价格选项（带库存检查）
+    await loadNewRowProductPricesWithStock(productName, selectElement.id, currentPrice, requiredQty);
+
+    // 绑定变化事件
+    selectElement.addEventListener('change', function () {
+        handleNewRowPriceSelectChange(this, rowId);
+    });
+}
+
+// 3. 新增函数：加载新行货品价格选项（带库存检查）
+async function loadNewRowProductPricesWithStock(productName, selectElementId, currentPrice = '', requiredQty = 0) {
+    try {
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=${requiredQty}`);
+        const selectElement = document.getElementById(selectElementId);
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+                const selected = price == currentPrice ? 'selected' : '';
+
+                // 只显示库存足够的价格选项
+                if (availableStock >= requiredQty) {
+                    options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} (库存: ${availableStock})</option>`;
+                }
+            });
+
+            selectElement.innerHTML = options;
+        } else {
+            selectElement.innerHTML = '<option value="">暂无足够库存的价格</option><option value="manual">手动输入价格</option>';
+        }
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById(selectElementId);
+        if (selectElement) {
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+async function loadAddFormProductPricesWithStock(productName, requiredQty = 0) {
+    try {
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=${requiredQty}`);
+        const selectElement = document.getElementById('add-price-select');
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+
+                // 只显示库存足够的价格选项
+                if (availableStock >= requiredQty) {
+                    options += `<option value="${price}">${parseFloat(price).toFixed(5)} (库存: ${availableStock})</option>`;
+                }
+            });
+            selectElement.innerHTML = options;
+        } else {
+            selectElement.innerHTML = '<option value="">暂无足够库存的价格</option><option value="manual">手动输入价格</option>';
+        }
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById('add-price-select');
+        if (selectElement) {
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+async function loadProductPricesWithStock(productName, selectElementId, currentPrice = '', requiredQty = 0) {
+    try {
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=${requiredQty}`);
+        const selectElement = document.getElementById(selectElementId);
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+                const selected = price == currentPrice ? 'selected' : '';
+
+                // 只显示库存足够的价格选项，但当前价格即使库存不足也要显示（已选中的选项）
+                if (availableStock >= requiredQty || price == currentPrice) {
+                    const stockInfo = availableStock >= requiredQty ? `(库存: ${availableStock})` : `(库存不足: ${availableStock})`;
+                    options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
+                }
+            });
+
+            selectElement.innerHTML = options;
+        } else {
+            selectElement.innerHTML = '<option value="">暂无足够库存的价格</option><option value="manual">手动输入价格</option>';
+        }
+
+        // 绑定变化事件
+        selectElement.addEventListener('change', function () {
+            handlePriceSelectChange(this);
+        });
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById(selectElementId);
+        if (selectElement) {
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+// 处理价格选择变化
+function handlePriceSelectChange(selectElement) {
+    const recordId = selectElement.id.replace('price-select-', '');
+    const container = selectElement.closest('.currency-display');
+
+    if (selectElement.value === 'manual') {
+        // 显示输入框
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.className = 'table-input currency-input-edit manual-price-input';
+        input.min = '0';
+        input.step = '0.00001';
+        input.placeholder = '输入价格';
+        input.style.marginLeft = '5px';
+        input.style.width = '80px';
+
+        input.addEventListener('change', function () {
+            updateField(parseInt(recordId), 'price', this.value);
+            // 更新下拉选择框的值
+            selectElement.value = this.value;
+        });
+
+        input.addEventListener('blur', function () {
+            if (!this.value) {
+                selectElement.value = '';
+                updateField(parseInt(recordId), 'price', '');
+            }
+        });
+
+        // 移除已存在的输入框
+        const existingInput = container.querySelector('.manual-price-input');
+        if (existingInput) {
+            existingInput.remove();
+        }
+
+        container.appendChild(input);
+        input.focus();
+    } else {
+        // 移除手动输入框
+        const existingInput = container.querySelector('.manual-price-input');
+        if (existingInput) {
+            existingInput.remove();
+        }
+
+        // 更新价格值
+        updateField(parseInt(recordId), 'price', selectElement.value);
+    }
+}
+
+// 处理新增表单中货品变化时加载价格选项
+function handleAddFormProductChange(selectElement, codeNumberElement) {
+    const productName = selectElement.value;
+
+    // 原有的货品变化处理
+    handleProductChange(selectElement, codeNumberElement);
+
+    // 根据出库数量决定是否加载价格选项
+    if (productName) {
+        handleAddFormOutQuantityChange();
+    } else {
+        const priceSelect = document.getElementById('add-price-select');
+        const priceInput = document.getElementById('add-price');
+        if (priceSelect) {
+            priceSelect.innerHTML = '<option value="">请先选择货品</option>';
+            priceSelect.style.display = 'none';
+        }
+        if (priceInput) {
+            priceInput.style.display = 'block';
+            priceInput.value = '';
+        }
+    }
+}
+
+// 加载新增表单的价格选项
+async function loadAddFormProductPrices(productName) {
+    try {
+        // 使用带库存信息的API，设置required_qty为1以确保显示所有价格
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=1`);
+        const selectElement = document.getElementById('add-price-select');
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            // 始终保留手动输入价格选项
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+                // 显示所有价格选项，不管库存是否足够
+                const stockInfo = `(库存: ${availableStock})`;
+                options += `<option value="${price}">${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
+            });
+            selectElement.innerHTML = options;
+            selectElement.style.display = 'block';
+            document.getElementById('add-price').style.display = 'none';
+        } else {
+            // 即使没有价格数据，也保留手动输入选项
+            selectElement.innerHTML = '<option value="">暂无历史价格</option><option value="manual">手动输入价格</option>';
+        }
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById('add-price-select');
+        if (selectElement) {
+            // 即使出错也保留手动输入选项
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+// 处理新增表单价格选择变化
+function handleAddFormPriceChange() {
+    const selectElement = document.getElementById('add-price-select');
+    const inputElement = document.getElementById('add-price');
+
+    if (selectElement.value === 'manual') {
+        selectElement.style.display = 'none';
+        inputElement.style.display = 'block';
+        inputElement.focus();
+    } else {
+        inputElement.value = selectElement.value;
+    }
+}
+
+// 处理新增表单出库数量变化
+function handleAddFormOutQuantityChange() {
+    const outQty = parseFloat(document.getElementById('add-out-qty').value) || 0;
+    const inQty = parseFloat(document.getElementById('add-in-qty').value) || 0;
+    const productName = document.getElementById('add-product-name').value;
+    const priceSelect = document.getElementById('add-price-select');
+    const priceInput = document.getElementById('add-price');
+
+    if (outQty > 0 && inQty === 0 && productName) {
+        // 纯出库且有货品名称，显示价格下拉选项（带库存检查）
+        priceSelect.style.display = 'block';
+        priceInput.style.display = 'none';
+        priceInput.value = '';
+        loadAddFormProductPricesWithStock(productName, outQty);
+    } else {
+        // 入库或出库为0，显示普通输入框
+        priceSelect.style.display = 'none';
+        priceInput.style.display = 'block';
+        if (outQty === 0 && inQty === 0) {
+            priceInput.value = '';
+        }
+    }
+
+    // 控制Target下拉框状态
+    const targetSelect = document.getElementById('add-target');
+    if (outQty > 0) {
+        targetSelect.disabled = false;
+        targetSelect.required = true;
+    } else {
+        targetSelect.disabled = true;
+        targetSelect.value = '';
+        targetSelect.required = false;
+    }
+
+    // 收货人字段保持始终可输入状态，不需要根据出货数量控制
+}
+
+// 加载新增表单的价格选项
+
+// 检查货品库存是否足够（按货品名称和价格分别计算）
+async function checkProductStock(productName, outQuantity, price = null) {
+    if (!productName || outQuantity <= 0) {
+        return { sufficient: true, availableStock: 0, currentStock: 0 };
+    }
+
+    try {
+        let apiUrl;
+        if (price !== null && price !== '' && price !== undefined) {
+            // 按货品名称和价格检查库存
+            apiUrl = `?action=product_stock_by_price&product_name=${encodeURIComponent(productName)}&price=${encodeURIComponent(price)}`;
+        } else {
+            // 按货品名称检查总库存
+            apiUrl = `?action=product_stock&product_name=${encodeURIComponent(productName)}`;
+        }
+
+        const result = await apiCall(apiUrl);
+
+        if (result.success && result.data) {
+            const availableStock = parseFloat(result.data.available_stock || 0);
+            const currentStock = parseFloat(result.data.current_stock || 0);
+
+            return {
+                sufficient: availableStock >= outQuantity,
+                availableStock: availableStock,
+                currentStock: currentStock,
+                requested: outQuantity
+            };
+        } else {
+            // 如果无法获取库存信息，默认允许（可能是新货品）
+            return { sufficient: true, availableStock: 0, currentStock: 0 };
+        }
+
+    } catch (error) {
+        console.error('检查库存失败:', error);
+        // 网络错误时默认允许保存
+        return { sufficient: true, availableStock: 0, currentStock: 0 };
+    }
+}
+
+// 为新行创建价格下拉选项
+function createNewRowPriceSelect(rowId, productName, currentPrice = '') {
+    const priceInput = document.getElementById(`${rowId}-price`);
+    const priceCell = priceInput.closest('.currency-display');
+
+    // 检查是否已经是下拉选项
+    if (priceCell.querySelector('.price-select')) {
+        return;
+    }
+
+    // 创建下拉选项
+    const selectElement = document.createElement('select');
+    selectElement.className = 'table-select price-select';
+    selectElement.id = `${rowId}-price-select`;
+    selectElement.innerHTML = '<option value="">正在加载...</option>';
+
+    // 隐藏输入框，显示下拉选项
+    priceInput.style.display = 'none';
+    priceCell.appendChild(selectElement);
+
+    // 加载价格选项
+    loadNewRowProductPrices(productName, selectElement.id, currentPrice);
+
+    // 绑定变化事件
+    selectElement.addEventListener('change', function () {
+        handleNewRowPriceSelectChange(this, rowId);
+    });
+}
+
+// 恢复新行价格输入框
+function restoreNewRowPriceInput(rowId) {
+    const priceInput = document.getElementById(`${rowId}-price`);
+    const priceCell = priceInput.closest('.currency-display');
+    const selectElement = priceCell.querySelector('.price-select');
+
+    if (selectElement) {
+        selectElement.remove();
+        priceInput.style.display = 'block';
+        priceInput.value = '';
+    }
+}
+
+// 加载新行货品价格选项
+async function loadNewRowProductPrices(productName, selectElementId, currentPrice = '') {
+    try {
+        // 使用带库存信息的API，设置required_qty为1以确保显示所有价格
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=1`);
+        const selectElement = document.getElementById(selectElementId);
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            // 始终保留手动输入价格选项
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+                const selected = price == currentPrice ? 'selected' : '';
+                // 显示所有价格选项，不管库存是否足够
+                const stockInfo = `(库存: ${availableStock})`;
+                options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
+            });
+            selectElement.innerHTML = options;
+        } else {
+            // 即使没有价格数据，也保留手动输入选项
+            selectElement.innerHTML = '<option value="">暂无历史价格</option><option value="manual">手动输入价格</option>';
+        }
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById(selectElementId);
+        if (selectElement) {
+            // 即使出错也保留手动输入选项
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+// 处理新行价格下拉选择变化
+function handleNewRowPriceSelectChange(selectElement, rowId) {
+    const priceInput = document.getElementById(`${rowId}-price`);
+    const container = selectElement.closest('.currency-display');
+
+    if (selectElement.value === 'manual') {
+        // 显示手动输入框
+        const manualInput = document.createElement('input');
+        manualInput.type = 'number';
+        manualInput.className = 'table-input currency-input-edit manual-price-input';
+        manualInput.min = '0';
+        manualInput.step = '0.00001';
+        manualInput.placeholder = '输入价格';
+        manualInput.style.marginLeft = '5px';
+        manualInput.style.width = '80px';
+
+        manualInput.addEventListener('input', function () {
+            priceInput.value = this.value;
+            updateNewRowTotal(priceInput);
+        });
+
+        manualInput.addEventListener('blur', function () {
+            if (!this.value) {
+                selectElement.value = '';
+                priceInput.value = '';
+                updateNewRowTotal(priceInput);
+            }
+        });
+
+        // 移除已存在的手动输入框
+        const existingInput = container.querySelector('.manual-price-input');
+        if (existingInput) {
+            existingInput.remove();
+        }
+
+        container.appendChild(manualInput);
+        manualInput.focus();
+    } else {
+        // 移除手动输入框
+        const existingInput = container.querySelector('.manual-price-input');
+        if (existingInput) {
+            existingInput.remove();
+        }
+
+        // 更新价格值
+        priceInput.value = selectElement.value;
+        updateNewRowTotal(priceInput);
+    }
+}
+
+// 关闭导出弹窗
+function closeExportModal() {
+    document.getElementById('export-modal').style.display = 'none';
+
+    // 重置导出按钮状态
+    const exportBtn = document.querySelector('.export-modal-actions .btn-success');
+    if (exportBtn) {
+        exportBtn.innerHTML = '<i class="fas fa-download"></i> 导出PDF发票';
+        exportBtn.disabled = false;
+    }
+
+    // 清空发票号码后缀输入框
+    document.getElementById('export-invoice-suffix').value = '';
+}
+
+// 确认导出
+async function confirmExport() {
+    const startDate = document.getElementById('export-start-date').value;
+    const endDate = document.getElementById('export-end-date').value;
+    const exportSystem = document.getElementById('export-system').value;
+    const invoiceDate = document.getElementById('export-invoice-date').value;
+    const invoiceSuffix = document.getElementById('export-invoice-suffix').value;
+
+    // 验证输入
+    if (!startDate || !endDate) {
+        showAlert('请选择开始和结束日期', 'error');
+        return;
+    }
+
+    if (!exportSystem) {
+        showAlert('请选择导出系统', 'error');
+        return;
+    }
+
+    if (!invoiceDate) {
+        showAlert('请选择发票日期', 'error');
+        return;
+    }
+
+    if (!invoiceSuffix || invoiceSuffix.length !== 3 || !/^\d{3}$/.test(invoiceSuffix)) {
+        showAlert('请输入三位数字的发票号码后缀（例如：001）', 'error');
+        return;
+    }
+
+    // 验证日期格式并转换为YYYY-MM-DD格式
+    const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+
+    const parseDate = (dateStr) => {
+        const match = dateStr.match(dateRegex);
+        if (!match) {
+            throw new Error('无效的日期格式');
+        }
+        const [, day, month, year] = match;
+        return new Date(year, month - 1, day);
+    };
+
+    let startDateObj, endDateObj, invoiceDateObj;
+    try {
+        startDateObj = parseDate(startDate);
+        endDateObj = parseDate(endDate);
+        invoiceDateObj = parseDate(invoiceDate);
+    } catch (error) {
+        showAlert('日期格式错误，请使用DD/MM/YYYY格式', 'error');
+        return;
+    }
+
+    // 转换发票日期为YYYY-MM-DD格式用于生成发票号码
+    const formatDateToYYYYMMDD = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    // 生成发票号码：格式为 J1-2510-001
+    const generatedInvoiceNumber = generateInvoiceNumber(exportSystem, formatDateToYYYYMMDD(invoiceDateObj), invoiceSuffix);
+
+    if (startDateObj > endDateObj) {
+        showAlert('开始日期不能晚于结束日期', 'error');
+        return;
+    }
+
+    // 显示加载状态
+    const exportBtn = document.querySelector('.export-modal-actions .btn-success');
+    const originalText = exportBtn.innerHTML;
+    exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 生成中...';
+    exportBtn.disabled = true;
+
+    try {
+
+        // 获取指定日期范围内的出库数据（转换为YYYY-MM-DD格式）
+        const params = new URLSearchParams({
+            action: 'list',
+            search_start_date: formatDateToYYYYMMDD(startDateObj),
+            search_end_date: formatDateToYYYYMMDD(endDateObj)
+        });
+
+        const result = await apiCall(`?${params}`);
+
+        if (!result.success) {
+            throw new Error('获取数据失败');
+        }
+
+        // 过滤出库数据 - 按日期范围、出库数量和收货单位筛选
+        const outData = (result.data || []).filter(record => {
+            const outQty = parseFloat(record.out_quantity);
+            if (outQty <= 0) return false;
+
+            // 检查收货单位是否匹配选择的店面
+            const targetSystem = record.target_system;
+            if (!targetSystem || targetSystem.toLowerCase() !== exportSystem.toLowerCase()) {
+                return false;
+            }
+
+            // 检查日期范围
+            const recordDate = record.date || record.out_date || record.created_at;
+            if (!recordDate) return false;
+
+            const recordDateObj = new Date(recordDate);
+            // startDateObj 和 endDateObj 已经在前面解析过了
+
+            // 设置时间为当天的开始和结束
+            startDateObj.setHours(0, 0, 0, 0);
+            endDateObj.setHours(23, 59, 59, 999);
+
+            return recordDateObj >= startDateObj && recordDateObj <= endDateObj;
+        });
+
+        if (outData.length === 0) {
+            showAlert('指定日期范围内没有出库数据', 'error');
+            return;
+        }
+
+        // 根据记录数量决定使用单页还是多页模板
+        const recordCount = outData.length;
+        const useMultiPage = (exportSystem === 'j1' && recordCount > 27) || (exportSystem === 'j2' && recordCount > 24) || (exportSystem === 'j3' && recordCount > 24);
+
+        if (useMultiPage) {
+            // 使用多页模板
+            const pageCount = Math.ceil(recordCount / (exportSystem === 'j1' ? 27 : 24));
+            showAlert(`记录数量较多(${recordCount}条)，将使用多页模板生成PDF (共${pageCount}页)`, 'info');
+            await generateMultiPageInvoicePDF(outData, formatDateToYYYYMMDD(startDateObj), formatDateToYYYYMMDD(endDateObj), exportSystem, generatedInvoiceNumber, formatDateToYYYYMMDD(invoiceDateObj));
+        } else {
+            // 使用单页模板
+            await generateInvoicePDF(outData, formatDateToYYYYMMDD(startDateObj), formatDateToYYYYMMDD(endDateObj), exportSystem, generatedInvoiceNumber, formatDateToYYYYMMDD(invoiceDateObj));
+        }
+
+        showAlert('PDF发票生成成功', 'success');
+        closeExportModal();
+
+    } catch (error) {
+        console.error('导出失败:', error);
+        showAlert('生成PDF发票失败，请重试', 'error');
+    } finally {
+        // 恢复按钮状态
+        const exportBtn = document.querySelector('.export-modal-actions .btn-success');
+        exportBtn.innerHTML = originalText;
+        exportBtn.disabled = false;
+    }
+}
+
+// 点击弹窗外部关闭
+window.addEventListener('click', function (event) {
+    const modal = document.getElementById('export-modal');
+    if (event.target === modal) {
+        closeExportModal();
+    }
+});
+
+// 回到顶部功能
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+// 监听滚动事件，控制回到顶部按钮显示
+let scrollTimeout;
+window.addEventListener('scroll', function () {
+    // 使用防抖优化性能
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(function () {
+        const backToTopBtn = document.getElementById('back-to-top-btn');
+        const scrollThreshold = 150; // 滚动超过150px后显示按钮
+
+        if (window.pageYOffset > scrollThreshold) {
+            backToTopBtn.classList.add('show');
+        } else {
+            backToTopBtn.classList.remove('show');
+        }
+    }, 10);
+});
+
+// 生成发票号码 - 格式：J1-2510-001（店面-年月-序号）
+function generateInvoiceNumber(exportSystem, invoiceDate, userSuffix) {
+    // 从发票日期提取年月（YYMM格式）
+    const date = new Date(invoiceDate);
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份补零
+    const year = date.getFullYear().toString().slice(-2); // 取后两位年份
+    const yearMonth = year + month;
+
+    // 确保用户输入的后缀是三位数
+    const suffix = String(userSuffix).padStart(3, '0');
+
+    // 生成发票号码：店面-年月-序号（店面代码大写）
+    const invoiceNumber = `${exportSystem.toUpperCase()}-${yearMonth}-${suffix}`;
+
+    console.log(`发票号码: ${invoiceNumber}`);
+    return invoiceNumber;
+}
+
+// 生成PDF发票
+async function generateInvoicePDF(outData, startDate, endDate, exportSystem, invoiceNumber = '', invoiceDate = '') {
+    try {
+
+        console.log('开始生成PDF发票:', {
+            exportSystem,
+            dataLength: outData ? outData.length : 0,
+            startDate,
+            endDate,
+            invoiceNumber
+        });
+
+        // 如果没有提供发票号码，自动生成一个
+        if (!invoiceNumber) {
+            invoiceNumber = generateInvoiceNumber(exportSystem);
+        }
+
+        // 下载现有的PDF模板
+        let templateFile;
+        if (exportSystem === 'j2') {
+            templateFile = `../invoice/invoice/j2invoice.pdf?ts=${Date.now()}`;
+        } else if (exportSystem === 'j3') {
+            templateFile = `../invoice/invoice/j3invoice.pdf?ts=${Date.now()}`;
+        } else {
+            templateFile = `../invoice/invoice/j1invoice.pdf?ts=${Date.now()}`;
+        }
+        const templateResponse = await fetch(templateFile);
+        if (!templateResponse.ok) {
+            throw new Error('无法加载PDF模板');
+        }
+
+        const templateBytes = await templateResponse.arrayBuffer();
+
+        // 使用PDF-lib库来编辑PDF
+        const { PDFDocument, rgb, StandardFonts } = PDFLib;
+        const pdfDoc = await PDFDocument.load(templateBytes);
+
+        // 获取第一页
+        const page = pdfDoc.getPage(0);
+        const { width, height } = page.getSize();
+
+        // 嵌入字体
+        const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+        const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        const monoFont = await pdfDoc.embedFont(StandardFonts.Courier);
+        const monoBoldFont = await pdfDoc.embedFont(StandardFonts.CourierBold);
+
+        // 设置字体大小和颜色
+        const fontSize = 11;
+        const smallFontSize = 9;
+        const textColor = rgb(0, 0, 0);
+        const whiteColor = rgb(1, 1, 1); // 白色
+
+        // 字体对齐辅助函数
+        function getRightAlignedX(text, maxX, charWidth = 6) {
+            return maxX - (text.length * charWidth);
+        }
+
+        function getCenterAlignedX(text, centerX, charWidth = 6) {
+            return centerX - (text.length * charWidth / 2);
+        }
+
+        // 按小数点对齐：anchorX 作为右边界（文本右端对齐），小数点位于固定偏移
+        // 规则：anchorX 代表整列的右边界；若包含小数点，将小数点对齐到 (anchorX - dotOffset)
+        // 这样无需改任何坐标，只通过计算 x 返回值实现对齐
+        function getDecimalAlignedX(text, anchorX, font, size, dotOffset = 0) {
+            const str = String(text ?? '');
+            const dotIndex = str.indexOf('.');
+            if (dotIndex >= 0) {
+                // 宽度= 整个字符串宽度；小数点左侧宽度用于将小数点放在 anchorX - dotOffset
+                const leftPart = str.substring(0, dotIndex);
+                const leftWidth = font.widthOfTextAtSize(leftPart, size);
+                return (anchorX - dotOffset) - leftWidth;
+            }
+            // 无小数点：按右边界对齐
+            const width = font.widthOfTextAtSize(str, size);
+            return anchorX - width;
+        }
+
+        // 填入日期 (右上角区域)
+        const currentDate = invoiceDate ?
+            new Date(invoiceDate).toLocaleDateString('en-GB') :
+            new Date().toLocaleDateString('en-GB');
+
+        if (exportSystem === 'j1') {
+            // J1模板的日期位置
+            page.drawText(` ${currentDate}`, {
+                x: 495.5, // J1模板DATE冒号后面的位置
+                y: height - 110.5,
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+
+            // J1模板的发票号码位置
+            if (invoiceNumber) {
+                page.drawText(invoiceNumber, {
+                    x: 500, // J1模板Invoice No位置
+                    y: height - 96.5, // 调整到Invoice No行
+                    size: fontSize,
+                    color: textColor,
+                    font: boldFont,
+                });
+            }
+        } else if (exportSystem === 'j2') {
+            // J2模板的日期位置
+            page.drawText(` ${currentDate}`, {
+                x: 495.5, // J2模板DATE冒号后面的位置 (可根据需要调整)
+                y: height - 110.5, // J2模板的Y坐标 (可根据需要调整)
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+
+            // J2模板的发票号码位置
+            if (invoiceNumber) {
+                page.drawText(invoiceNumber, {
+                    x: 500,
+                    y: height - 96.5, // 调整到Invoice No行
+                    size: fontSize,
+                    color: textColor,
+                    font: boldFont,
+                });
+            }
+        } else if (exportSystem === 'j3') {
+            // J3模板的日期位置
+            page.drawText(` ${currentDate}`, {
+                x: 495.5, // J3模板DATE冒号后面的位置
+                y: height - 110.5, // J3模板的Y坐标
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+
+            // J3模板的发票号码位置
+            if (invoiceNumber) {
+                page.drawText(invoiceNumber, {
+                    x: 500, // J3模板Invoice No位置
+                    y: height - 96.5, // 调整到Invoice No行
+                    size: fontSize,
+                    color: textColor,
+                    font: boldFont,
+                });
+            }
+        }
+
+        // 计算总金额
+        let grandTotal = 0;
+
+        // 填入数据行 (从第一个数据行开始)
+        let yPosition, lineHeight;
+        if (exportSystem === 'j1') {
+            yPosition = height - 162; // J1模板的起始Y坐标
+            lineHeight = 20; // J1模板的行高
+        } else if (exportSystem === 'j2') {
+            yPosition = height - 202; // J2模板的起始Y坐标
+            lineHeight = 20; // J2模板的行高
+        } else { // j3
+            yPosition = height - 202; // J3模板的起始Y坐标
+            lineHeight = 20; // J3模板的行高
+        }
+
+        // 清除缓存并强制刷新 - 版本 2.0
+        console.log('=== PDF生成调试信息 v2.0 ===');
+        console.log('outData类型:', typeof outData);
+        console.log('outData长度:', outData.length);
+        console.log('outData内容:', outData);
+
+        if (outData.length === 0) {
+            console.warn('警告：outData为空，将显示空白发票');
+        }
+
+        outData.forEach((record, index) => {
+            const itemNumber = index + 1;
+            const outQty = parseFloat(record.out_quantity) || 0;
+            const price = parseFloat(record.price) || 0;
+            const total = outQty * price;
+            grandTotal += total;
+
+            // NO (第一列) - 居中对齐
+            const itemText = itemNumber.toString();
+            page.drawText(itemText, {
+                x: getCenterAlignedX(itemText, exportSystem === 'j1' ? 42 : 42, 6),
+                y: yPosition,
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // Descriptions (第二列) - 左对齐，调整产品名称显示，处理长文本
+            const productName = record.product_name || '';
+            const maxProductNameLength = 25;
+            const displayProductName = productName.length > maxProductNameLength
+                ? productName.substring(0, maxProductNameLength) + '...'
+                : productName;
+
+            page.drawText(displayProductName.toUpperCase(), {
+                x: exportSystem === 'j1' ? 80 : 80,
+                y: yPosition,
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // Quantity (第三列) - 右对齐（显示三位小数）
+            const qtyText = formatNumber(outQty);
+            page.drawText(qtyText, {
+                x: getDecimalAlignedX(qtyText, exportSystem === 'j1' ? 373 : 373, monoBoldFont, smallFontSize, 0),
+                y: yPosition,
+                size: smallFontSize,
+                color: textColor,
+                font: monoBoldFont,
+            });
+
+            // UOM (第四列) - 左对齐
+            const uomText = record.specification || '';
+            page.drawText(uomText.toUpperCase(), {
+                x: exportSystem === 'j1' ? 406 : 406,
+                y: yPosition,
+                size: 8,
+                color: textColor,
+            });
+
+            // Price RM (第五列) - 右对齐
+            const priceText = formatCurrencyForPDF(price);
+            page.drawText(priceText, {
+                x: getDecimalAlignedX(priceText, exportSystem === 'j1' ? 488 : 488, monoBoldFont, smallFontSize, 0),
+                y: yPosition,
+                size: smallFontSize,
+                color: textColor,
+                font: monoBoldFont,
+            });
+
+            // Total RM (第六列) - 右对齐
+            const totalText = formatCurrencyForPDF(total);
+            page.drawText(totalText, {
+                x: getDecimalAlignedX(totalText, exportSystem === 'j1' ? 548 : 548, monoBoldFont, smallFontSize, 0),
+                y: yPosition,
+                size: smallFontSize,
+                color: textColor,
+                font: monoBoldFont,
+            });
+
+            yPosition -= lineHeight;
+        });
+
+        if (exportSystem === 'j2') {
+            // J2模板：计算subtotal, charge 15%, 和最终total
+            const subtotal = grandTotal;
+            const charge = subtotal * 0.15;
+            const finalTotal = subtotal + charge;
+
+            // 填入Subtotal
+            const subtotalText = formatCurrencyForPDF(subtotal);
+            page.drawText(subtotalText, {
+                x: getRightAlignedX(subtotalText, 588, 8),
+                y: height - 681, // 调整到Subtotal行
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // 填入Charge 15%
+            const chargeText = formatCurrencyForPDF(charge);
+            page.drawText(chargeText, {
+                x: getRightAlignedX(chargeText, 585.5, 8),
+                y: height - 692, // 调整到Charge行
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // 填入最终Total
+            const finalTotalText = formatCurrencyForPDF(finalTotal);
+            page.drawText(finalTotalText, {
+                x: getRightAlignedX(finalTotalText, 580, 8),
+                y: height - 708, // 调整到最终Total行
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+        } else if (exportSystem === 'j3') {
+            // J3模板：计算subtotal, charge 15%, 和最终total
+            const subtotal = grandTotal;
+            const charge = subtotal * 0.15;
+            const finalTotal = subtotal + charge;
+
+            // 填入Subtotal
+            const subtotalText = formatCurrencyForPDF(subtotal);
+            page.drawText(subtotalText, {
+                x: getRightAlignedX(subtotalText, 588, 8),
+                y: height - 681, // 调整到Subtotal行
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // 填入Charge 15%
+            const chargeText = formatCurrencyForPDF(charge);
+            page.drawText(chargeText, {
+                x: getRightAlignedX(chargeText, 585.5, 8),
+                y: height - 692, // 调整到Charge行
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // 填入最终Total
+            const finalTotalText = formatCurrencyForPDF(finalTotal);
+            page.drawText(finalTotalText, {
+                x: getRightAlignedX(finalTotalText, 580, 8),
+                y: height - 708, // 调整到最终Total行
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+        } else {
+            // J1模板：只显示总计
+            const totalText = formatCurrencyForPDF(grandTotal);
+            page.drawText(totalText, {
+                x: getRightAlignedX(totalText, 580, 8),
+                y: height - 705,
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+        }
+
+        // 生成并下载PDF
+        const pdfBytes = await pdfDoc.save();
+
+        // 创建下载链接
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `invoice_${exportSystem}_${startDate}_${endDate}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+    } catch (error) {
+        console.error('PDF生成失败:', error);
+        console.error('错误详情:', {
+            message: error.message,
+            stack: error.stack,
+            exportSystem: exportSystem,
+            dataLength: outData ? outData.length : 0
+        });
+        throw error;
+    }
+}
+
+// 生成多页PDF发票
+async function generateMultiPageInvoicePDF(outData, startDate, endDate, exportSystem, invoiceNumber = '', invoiceDate = '') {
+    try {
+        console.log('开始生成多页PDF发票:', {
+            exportSystem,
+            dataLength: outData ? outData.length : 0,
+            startDate,
+            endDate,
+            invoiceNumber
+        });
+
+        // 如果没有提供发票号码，自动生成一个
+        if (!invoiceNumber) {
+            invoiceNumber = generateInvoiceNumber(exportSystem);
+        }
+
+        // 计算每页可容纳的记录数
+        const recordsPerPage = exportSystem === 'j1' ? 27 : 24;
+        const totalPages = Math.ceil(outData.length / recordsPerPage);
+
+        console.log(`多页PDF: 总记录数 ${outData.length}, 每页 ${recordsPerPage} 条, 共 ${totalPages} 页`);
+
+        // 加载所需的模板文件
+        const templateFiles = [];
+        for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+            let templateFile;
+            if (pageIndex === 0) {
+                // 第一页使用 (1) 模板
+                if (exportSystem === 'j2') {
+                    templateFile = `../invoice/invoice/j2invoiceMulti(1).pdf?ts=${Date.now()}`;
+                } else if (exportSystem === 'j3') {
+                    templateFile = `../invoice/invoice/j3invoiceMulti(1).pdf?ts=${Date.now()}`;
+                } else {
+                    templateFile = `../invoice/invoice/j1invoiceMulti(1).pdf?ts=${Date.now()}`;
+                }
+            } else {
+                // 后续页使用 (2) 模板
+                if (exportSystem === 'j2') {
+                    templateFile = `../invoice/invoice/j2invoiceMulti(2).pdf?ts=${Date.now()}`;
+                } else if (exportSystem === 'j3') {
+                    templateFile = `../invoice/invoice/j3invoiceMulti(2).pdf?ts=${Date.now()}`;
+                } else {
+                    templateFile = `../invoice/invoice/j1invoiceMulti(2).pdf?ts=${Date.now()}`;
+                }
+            }
+            templateFiles.push(templateFile);
+        }
+
+        // 使用PDF-lib库来创建最终PDF
+        const { PDFDocument, rgb, StandardFonts } = PDFLib;
+        const finalPdfDoc = await PDFDocument.create();
+
+        // 嵌入字体
+        const boldFont = await finalPdfDoc.embedFont(StandardFonts.HelveticaBold);
+        const regularFont = await finalPdfDoc.embedFont(StandardFonts.Helvetica);
+        const monoFont = await finalPdfDoc.embedFont(StandardFonts.Courier);
+        const monoBoldFont = await finalPdfDoc.embedFont(StandardFonts.CourierBold);
+
+        // 设置字体大小和颜色
+        const fontSize = 11;
+        const smallFontSize = 9;
+        const textColor = rgb(0, 0, 0);
+        const whiteColor = rgb(1, 1, 1);
+
+        // 字体对齐辅助函数
+        function getRightAlignedX(text, maxX, charWidth = 6) {
+            return maxX - (text.length * charWidth);
+        }
+
+        function getCenterAlignedX(text, centerX, charWidth = 6) {
+            return centerX - (text.length * charWidth / 2);
+        }
+
+        // 按小数点对齐（等宽字体下更精确）
+        function getDecimalAlignedX(text, anchorX, font, size) {
+            const str = String(text ?? '');
+            const dotIndex = str.indexOf('.');
+            if (dotIndex >= 0) {
+                const leftPart = str.substring(0, dotIndex);
+                const leftWidth = font.widthOfTextAtSize(leftPart, size);
+                return anchorX - leftWidth;
+            }
+            const width = font.widthOfTextAtSize(str, size);
+            return anchorX - width;
+        }
+
+        let grandTotal = 0;
+
+        // 为每页加载模板并填入数据
+        for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+            try {
+                // 加载当前页的模板
+                const templateResponse = await fetch(templateFiles[pageIndex]);
+                if (!templateResponse.ok) {
+                    throw new Error(`无法加载模板文件: ${templateFiles[pageIndex]}`);
+                }
+
+                const templateBytes = await templateResponse.arrayBuffer();
+                const templateDoc = await PDFDocument.load(templateBytes);
+
+                // 复制模板页到最终文档
+                const [templatePage] = await finalPdfDoc.copyPages(templateDoc, [0]);
+                const page = finalPdfDoc.addPage(templatePage);
+                const { width, height } = page.getSize();
+
+                // 填入日期和发票号码（每一页都显示）
+                const currentDate = invoiceDate ?
+                    new Date(invoiceDate).toLocaleDateString('en-GB') :
+                    new Date().toLocaleDateString('en-GB');
+
+                if (exportSystem === 'j1') {
+                    // J1模板的日期位置
+                    page.drawText(` ${currentDate}`, {
+                        x: 495.5,
+                        y: height - 110.5,
+                        size: fontSize,
+                        color: textColor,
+                        font: boldFont,
+                    });
+
+                    // J1模板的发票号码位置
+                    if (invoiceNumber) {
+                        page.drawText(invoiceNumber, {
+                            x: 500,
+                            y: height - 96.5,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    }
+                } else if (exportSystem === 'j2') {
+                    // J2模板的日期位置
+                    page.drawText(` ${currentDate}`, {
+                        x: 495.5,
+                        y: height - 110.5,
+                        size: fontSize,
+                        color: textColor,
+                        font: boldFont,
+                    });
+
+                    // J2模板的发票号码位置
+                    if (invoiceNumber) {
+                        page.drawText(invoiceNumber, {
+                            x: 500,
+                            y: height - 96.5,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    }
+                } else if (exportSystem === 'j3') {
+                    // J3模板的日期位置
+                    page.drawText(` ${currentDate}`, {
+                        x: 495.5,
+                        y: height - 110.5,
+                        size: fontSize,
+                        color: textColor,
+                        font: boldFont,
+                    });
+
+                    // J3模板的发票号码位置
+                    if (invoiceNumber) {
+                        page.drawText(invoiceNumber, {
+                            x: 500,
+                            y: height - 96.5,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    }
+                }
+
+                // 计算当前页的数据范围
+                const startIndex = pageIndex * recordsPerPage;
+                const endIndex = Math.min(startIndex + recordsPerPage, outData.length);
+                const pageData = outData.slice(startIndex, endIndex);
+
+                // 填入数据行
+                let yPosition, lineHeight;
+                if (exportSystem === 'j1') {
+                    if (pageIndex === 0) {
+                        yPosition = height - 162; // J1第一页位置
+                    } else {
+                        yPosition = height - 162;  // J1第二页位置
+                    }
+                    lineHeight = 20;
+                } else if (exportSystem === 'j2') {
+                    if (pageIndex === 0) {
+                        yPosition = height - 202; // J2第一页位置（原来的位置）
+                    } else {
+                        yPosition = height - 202; // J2第二页位置（可调整这个数值）
+                    }
+                    lineHeight = 20;
+                } else { // j3
+                    if (pageIndex === 0) {
+                        yPosition = height - 202; // J3第一页位置
+                    } else {
+                        yPosition = height - 202; // J3第二页位置
+                    }
+                    lineHeight = 20;
+                }
+
+                pageData.forEach((record, index) => {
+                    const itemNumber = startIndex + index + 1;
+                    const outQty = parseFloat(record.out_quantity) || 0;
+                    const price = parseFloat(record.price) || 0;
+                    const total = outQty * price;
+                    grandTotal += total;
+
+                    // NO (第一列)
+                    const itemText = itemNumber.toString();
+                    page.drawText(itemText, {
+                        x: getCenterAlignedX(itemText, 42, 6),
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                    });
+
+                    // Descriptions (第二列)
+                    const productName = record.product_name || '';
+                    const maxProductNameLength = 25;
+                    const displayProductName = productName.length > maxProductNameLength
+                        ? productName.substring(0, maxProductNameLength) + '...'
+                        : productName;
+
+                    page.drawText(displayProductName.toUpperCase(), {
+                        x: 80,
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                    });
+
+                    // Quantity (第三列)（显示三位小数）
+                    const qtyText = formatNumber(outQty);
+                    page.drawText(qtyText, {
+                        x: getDecimalAlignedX(qtyText, 373, monoBoldFont, smallFontSize, 0),
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                        font: monoBoldFont,
+                    });
+
+                    // UOM (第四列)
+                    const uomText = record.specification || '';
+                    page.drawText(uomText.toUpperCase(), {
+                        x: 406,
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                    });
+
+                    // Price RM (第五列)
+                    const priceText = formatCurrencyForPDF(price);
+                    page.drawText(priceText, {
+                        x: getDecimalAlignedX(priceText, 488, monoBoldFont, smallFontSize, 0),
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                        font: monoBoldFont,
+                    });
+
+                    // Total RM (第六列)
+                    const totalText = formatCurrencyForPDF(total);
+                    page.drawText(totalText, {
+                        x: getDecimalAlignedX(totalText, 548, monoBoldFont, smallFontSize, 0),
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                        font: monoBoldFont,
+                    });
+
+                    yPosition -= lineHeight;
+                });
+
+                // 只在最后一页显示总计
+                if (pageIndex === totalPages - 1) {
+                    if (exportSystem === 'j2') {
+                        // J2模板：计算subtotal, charge 15%, 和最终total
+                        const subtotal = grandTotal;
+                        const charge = subtotal * 0.15;
+                        const finalTotal = subtotal + charge;
+
+                        // 填入Subtotal
+                        const subtotalText = formatCurrencyForPDF(subtotal);
+                        page.drawText(subtotalText, {
+                            x: getRightAlignedX(subtotalText, 588, 8),
+                            y: height - 681,
+                            size: smallFontSize,
+                            color: textColor,
+                        });
+
+                        // 填入Charge 15%
+                        const chargeText = formatCurrencyForPDF(charge);
+                        page.drawText(chargeText, {
+                            x: getRightAlignedX(chargeText, 585.5, 8),
+                            y: height - 692,
+                            size: smallFontSize,
+                            color: textColor,
+                        });
+
+                        // 填入最终Total
+                        const finalTotalText = formatCurrencyForPDF(finalTotal);
+                        page.drawText(finalTotalText, {
+                            x: getRightAlignedX(finalTotalText, 580, 8),
+                            y: height - 708,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    } else if (exportSystem === 'j3') {
+                        // J3模板：计算subtotal, charge 15%, 和最终total
+                        const subtotal = grandTotal;
+                        const charge = subtotal * 0.15;
+                        const finalTotal = subtotal + charge;
+
+                        // 填入Subtotal
+                        const subtotalText = formatCurrencyForPDF(subtotal);
+                        page.drawText(subtotalText, {
+                            x: getRightAlignedX(subtotalText, 588, 8),
+                            y: height - 681,
+                            size: smallFontSize,
+                            color: textColor,
+                        });
+
+                        // 填入Charge 15%
+                        const chargeText = formatCurrencyForPDF(charge);
+                        page.drawText(chargeText, {
+                            x: getRightAlignedX(chargeText, 585.5, 8),
+                            y: height - 692,
+                            size: smallFontSize,
+                            color: textColor,
+                        });
+
+                        // 填入最终Total
+                        const finalTotalText = formatCurrencyForPDF(finalTotal);
+                        page.drawText(finalTotalText, {
+                            x: getRightAlignedX(finalTotalText, 580, 8),
+                            y: height - 708,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    } else {
+                        // J1模板：只显示总计
+                        const totalText = formatCurrencyForPDF(grandTotal);
+                        page.drawText(totalText, {
+                            x: getRightAlignedX(totalText, 580, 8),
+                            y: height - 705,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    }
+                }
+
+            } catch (templateError) {
+                console.error(`加载模板 ${templateFiles[pageIndex]} 失败:`, templateError);
+                throw new Error(`无法加载模板文件: ${templateFiles[pageIndex]}`);
+            }
+        }
+
+        // 生成并下载PDF
+        const pdfBytes = await finalPdfDoc.save();
+
+        // 创建下载链接
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `invoice_${exportSystem}_multipage_${startDate}_${endDate}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+    } catch (error) {
+        console.error('多页PDF生成失败:', error);
+        console.error('错误详情:', {
+            message: error.message,
+            stack: error.stack,
+            exportSystem: exportSystem,
+            dataLength: outData ? outData.length : 0
+        });
+        throw error;
+    }
+}
+
+// 处理导出系统选择变化
+function handleExportSystemChange() {
+    // 发票号码现在完全自动生成，不需要处理界面变化
+    console.log('导出系统已选择:', document.getElementById('export-system').value);
+}
+
+// 切换批量删除模式
+function toggleBatchDelete() {
+    isBatchDeleteMode = true;
+    selectedRecords.clear();
+
+    // 显示/隐藏按钮
+    document.getElementById('batch-delete-btn').style.display = 'none';
+    document.getElementById('confirm-batch-delete-btn').style.display = 'inline-block';
+    document.getElementById('cancel-batch-delete-btn').style.display = 'inline-block';
+
+    // 更改表头
+    document.getElementById('action-header').textContent = '选择';
+
+    // 保存所有新创建的行
+    const newRows = saveNewRows();
+
+    // 重新渲染表格
+    renderStockTable();
+
+    // 恢复新创建的行
+    restoreNewRows(newRows);
+
+    showAlert('批量删除模式已启用，请勾选要删除的记录', 'info');
+}
+
+// 取消批量删除模式
+function cancelBatchDelete() {
+    isBatchDeleteMode = false;
+    selectedRecords.clear();
+
+    // 显示/隐藏按钮
+    document.getElementById('batch-delete-btn').style.display = 'inline-block';
+    document.getElementById('confirm-batch-delete-btn').style.display = 'none';
+    document.getElementById('cancel-batch-delete-btn').style.display = 'none';
+
+    // 恢复表头
+    document.getElementById('action-header').textContent = '操作';
+
+    // 保存所有新创建的行
+    const newRows = saveNewRows();
+
+    // 重新渲染表格
+    renderStockTable();
+
+    // 恢复新创建的行
+    restoreNewRows(newRows);
+}
+
+// 切换记录选择状态
+function toggleRecordSelection(recordId, isSelected) {
+    if (isSelected) {
+        selectedRecords.add(recordId);
+    } else {
+        selectedRecords.delete(recordId);
+    }
+
+    // 更新确认按钮状态
+    const confirmBtn = document.getElementById('confirm-batch-delete-btn');
+    if (selectedRecords.size > 0) {
+        confirmBtn.innerHTML = `<i class="fas fa-check"></i> 确认删除 (${selectedRecords.size})`;
+        confirmBtn.disabled = false;
+    } else {
+        confirmBtn.innerHTML = '<i class="fas fa-check"></i> 确认删除';
+        confirmBtn.disabled = true;
+    }
+}
+
+// 生成Type选项
+function generateTypeOptions(selectedValue = '') {
+    const typeOptions = ['Kitchen', 'Sushi Bar', 'Service Line', 'Sake'];
+    let options = '<option value="">请选择类型</option>';
+    typeOptions.forEach(type => {
+        const selected = (type === selectedValue || (type === 'Service Line' && selectedValue === 'Drinks')) ? 'selected' : '';
+        options += `<option value="${type}" ${selected}>${type}</option>`;
+    });
+    return options;
+}
+
+// 确认批量删除
+async function confirmBatchDelete() {
+    if (selectedRecords.size === 0) {
+        showAlert('请至少选择一条记录', 'error');
+        return;
+    }
+
+    if (!confirm(`确定要删除选中的 ${selectedRecords.size} 条记录吗？此操作不可恢复！`)) {
+        return;
+    }
+
+    const confirmBtn = document.getElementById('confirm-batch-delete-btn');
+    const originalText = confirmBtn.innerHTML;
+    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 删除中...';
+    confirmBtn.disabled = true;
+
+    try {
+        let successCount = 0;
+        let failCount = 0;
+
+        // 逐个删除选中的记录
+        for (const recordId of selectedRecords) {
+            try {
+                const result = await apiCall(`?id=${recordId}`, {
+                    method: 'DELETE'
+                });
+
+                if (result.success) {
+                    successCount++;
+                } else {
+                    failCount++;
+                }
+            } catch (error) {
+                failCount++;
+                console.error(`删除记录 ${recordId} 失败:`, error);
+            }
+        }
+
+        // 显示删除结果
+        if (successCount > 0) {
+            showAlert(`成功删除 ${successCount} 条记录${failCount > 0 ? `，${failCount} 条失败` : ''}`,
+                failCount > 0 ? 'warning' : 'success');
+        } else {
+            showAlert('删除失败', 'error');
+        }
+
+        // 退出批量删除模式并刷新数据
+        cancelBatchDelete();
+
+        // 保存所有新创建的行
+        const newRows = saveNewRows();
+
+        // 重新加载数据但保留新行
+        loadStockData().then(() => {
+            // 恢复新创建的行
+            restoreNewRows(newRows);
+        });
+
+    } catch (error) {
+        showAlert('批量删除时发生错误', 'error');
+        confirmBtn.innerHTML = originalText;
+        confirmBtn.disabled = false;
+    }
+}
+
+// 更新批量保存按钮的可见性
+function updateBatchSaveButtonVisibility() {
+    const newRows = document.querySelectorAll('.new-row');
+    const batchSaveBtn = document.getElementById('batch-save-btn');
+
+    if (newRows.length >= 2) {
+        batchSaveBtn.style.display = 'inline-block';
+    } else {
+        batchSaveBtn.style.display = 'none';
+    }
+}
+
+// 批量保存所有新记录
+async function batchSaveNewRows() {
+    const newRows = document.querySelectorAll('.new-row');
+
+    if (newRows.length === 0) {
+        showAlert('没有需要保存的新记录', 'info');
+        return;
+    }
+
+    const batchSaveBtn = document.getElementById('batch-save-btn');
+    const originalText = batchSaveBtn.innerHTML;
+    batchSaveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
+    batchSaveBtn.disabled = true;
+
+    let successCount = 0;
+    let failCount = 0;
+    const failedRows = []; // 记录失败的行
+    const errorMessages = []; // 记录错误信息
+
+    try {
+        // 将新行转换为数组以避免 NodeList 引用问题
+        const rowsArray = Array.from(newRows);
+
+        // 遍历所有新行并保存（传入 skipTableRefresh=true）
+        for (let i = 0; i < rowsArray.length; i++) {
+            const row = rowsArray[i];
+            try {
+                const saveBtn = row.querySelector('.save-new-btn');
+                if (saveBtn) {
+                    // 调用保存函数，跳过表格刷新
+                    await saveNewRowRecord(saveBtn, true);
+                    successCount++;
+                    // 等待一小段时间，避免请求过快
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            } catch (error) {
+                console.error('保存行时出错:', error);
+                failCount++;
+
+                // 克隆失败的行并保存数据
+                const clonedRow = row.cloneNode(true);
+                const rowData = extractRowData(row);
+                failedRows.push({
+                    element: clonedRow,
+                    data: rowData
+                });
+
+                // 获取行的货品名称用于错误提示
+                const rowId = row.querySelector('input').id.split('-')[0] + '-' + row.querySelector('input').id.split('-')[1];
+                const productInput = document.getElementById(`${rowId}-product_name-input`);
+                const productName = productInput ? productInput.value || `第 ${i + 1} 行` : `第 ${i + 1} 行`;
+
+                errorMessages.push(`${productName}: ${error.message}`);
+            }
+        }
+
+        // 批量保存完成后，一次性重新渲染表格
+        renderStockTable();
+        updateStats();
+
+        // 恢复失败的行
+        if (failedRows.length > 0) {
+            setTimeout(() => {
+                const tbody = document.getElementById('stock-tbody');
+                failedRows.forEach(({ element, data }) => {
+                    // 标记失败的行（添加视觉提示）
+                    element.style.backgroundColor = '#fee';
+                    element.classList.add('validation-failed');
+                    tbody.appendChild(element);
+
+                    // 恢复行数据
+                    if (data) {
+                        restoreRowData(element, data);
+                    }
+
+                    // 添加事件监听，当用户修改内容时清除失败标记
+                    const inputs = element.querySelectorAll('input, select');
+                    inputs.forEach(input => {
+                        input.addEventListener('input', function () {
+                            element.style.backgroundColor = '';
+                            element.classList.remove('validation-failed');
+                        }, { once: true });
+                    });
+                });
+                bindComboboxEvents();
+                updateBatchSaveButtonVisibility();
+            }, 100);
+        }
+
+        // 显示结果
+        if (failCount === 0) {
+            showAlert(`成功保存 ${successCount} 条记录`, 'success');
+        } else if (successCount === 0) {
+            showAlert(`保存失败，所有记录都有问题：\n${errorMessages.join('\n')}`, 'error');
+        } else {
+            showAlert(`保存完成：成功 ${successCount} 条，失败 ${failCount} 条\n失败原因：\n${errorMessages.slice(0, 3).join('\n')}${errorMessages.length > 3 ? '\n...' : ''}`, 'warning');
+        }
+
+        // 更新按钮可见性
+        if (failCount === 0) {
+            updateBatchSaveButtonVisibility();
+        }
+
+    } catch (error) {
+        showAlert('批量保存时发生错误', 'error');
+        console.error('批量保存错误:', error);
+    } finally {
+        batchSaveBtn.innerHTML = originalText;
+        batchSaveBtn.disabled = false;
+    }
+}
+ + `{cfg.title}</div>
+            <div class="toast-msg">` + '
+
+    container.appendChild(toast);
+
+    // 显示动画
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 0);
+
+    // 自动关闭
+    setTimeout(() => {
+        closeToast(toastId);
+    }, 700);
+}
+
+// 添加关闭通知的函数
+function closeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+}
+
+// 添加关闭所有通知的函数（可选）
+function closeAllToasts() {
+    const toasts = document.querySelectorAll('.toast');
+    toasts.forEach(toast => {
+        closeToast(toast.id);
+    });
+}
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', initApp);
+
+// 添加快速选择下拉菜单的关闭逻辑
+document.addEventListener('click', function (e) {
+    // 关闭快速选择下拉菜单
+    if (!e.target.closest('.dropdown')) {
+        document.getElementById('quick-select-dropdown').classList.remove('show');
+    }
+});
+
+
+
+// 创建 Combobox 组件
+function createCombobox(type, value = '', recordId = null, isNewRow = false) {
+    let options, placeholder, fieldName, displayField;
+
+    if (type === 'code') {
+        options = window.codeNumberOptions;
+        placeholder = '输入或选择编号...';
+        fieldName = 'code_number';
+        displayField = 'code_number';
+    } else if (type === 'product') {
+        options = window.productOptions;
+        placeholder = '输入或选择货品...';
+        fieldName = 'product_name';
+        displayField = 'product_name';
+    } else if (type === 'receiver') {
+        options = receiverOptions;
+        placeholder = '输入或选择收货人...';
+        fieldName = 'receiver';
+        displayField = 'receiver';
+    } else {
+        // 默认处理
+        options = window.productOptions;
+        placeholder = '输入或选择货品...';
+        fieldName = 'product_name';
+        displayField = 'product_name';
+    }
+
+    let containerId;
+    if (isNewRow === true) {
+        containerId = `new-${fieldName}`;
+    } else if (typeof isNewRow === 'string') {
+        containerId = `${isNewRow}-${fieldName}`;
+    } else {
+        containerId = `combo-${fieldName}-${recordId}`;
+    }
+    const inputId = `${containerId}-input`;
+    const dropdownId = `${containerId}-dropdown`;
+
+    return `
+                <div class="combobox-container" id="${containerId}">
+                    <input 
+                        type="text" 
+                        class="combobox-input" 
+                        id="${inputId}"
+                        value="${value || ''}" 
+                        placeholder="${placeholder}"
+                        autocomplete="off"
+                        ${recordId ? `data-record-id="${recordId}"` : ''}
+                        data-field="${fieldName}"
+                        data-type="${type}"
+                    />
+                    <i class="fas fa-chevron-down combobox-arrow"></i>
+                    <div class="combobox-dropdown" id="${dropdownId}">
+                        ${generateComboboxOptions(options, displayField || '')}
+                    </div>
+                </div>
+            `;
+}
+
+// 生成下拉选项
+function generateComboboxOptions(options, displayField) {
+    if (!options || options.length === 0) {
+        return '<div class="no-results">暂无选项</div>';
+    }
+
+    // 如果是收货人选项，直接使用字符串数组
+    if (Array.isArray(options) && typeof options[0] === 'string') {
+        return options.map(option =>
+            `<div class="combobox-option" data-value="${option}">
+                        ${option}
+                    </div>`
+        ).join('');
+    }
+
+    // 其他情况，使用对象数组
+    return options.map(option =>
+        `<div class="combobox-option" data-value="${option[displayField]}">
+                    ${option[displayField]}
+                </div>`
+    ).join('');
+}
+
+// 计算下拉列表位置
+function calculateDropdownPosition(inputElement, dropdownElement) {
+    const inputRect = inputElement.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+
+    // 获取实际的下拉列表高度
+    // 先让下拉列表显示以获取真实高度，然后立即隐藏
+    const wasVisible = dropdownElement.style.display === 'block';
+    if (!wasVisible) {
+        dropdownElement.style.display = 'block';
+        dropdownElement.style.visibility = 'hidden';
+    }
+
+    // 计算选项数量和实际高度
+    const options = dropdownElement.querySelectorAll('.combobox-option, .no-results');
+    const optionCount = options.length;
+
+    // 获取实际内容高度
+    let dropdownHeight;
+    if (dropdownElement.scrollHeight > 0 && optionCount > 0) {
+        // 计算所有选项的实际总高度
+        let totalHeight = 0;
+        options.forEach(option => {
+            totalHeight += option.offsetHeight;
+        });
+
+        // 如果计算出了实际高度，使用它；否则使用scrollHeight
+        if (totalHeight > 0) {
+            // 添加4px用于边框（2px上 + 2px下）
+            dropdownHeight = Math.min(250, totalHeight + 4);
+        } else {
+            // 使用scrollHeight，添加少量边距
+            dropdownHeight = Math.min(250, dropdownElement.scrollHeight + 4);
+        }
+    } else {
+        // 估算下拉列表高度（假设每项37px = 10px padding上 + 10px padding下 + 14px字体 + 1.4行高 + 1px边框）
+        dropdownHeight = Math.min(250, 37 * Math.min(6, Math.max(1, optionCount)) + 4);
+    }
+
+    // 恢复原始状态
+    if (!wasVisible) {
+        dropdownElement.style.display = '';
+        dropdownElement.style.visibility = '';
+    }
+
+    // 获取表格容器信息
+    const tableContainer = document.querySelector('.table-scroll-container');
+    const containerRect = tableContainer ? tableContainer.getBoundingClientRect() : null;
+
+    let top = inputRect.bottom;
+    let left = inputRect.left;
+
+    // 计算可用空间
+    const spaceBelow = viewportHeight - inputRect.bottom;
+    const spaceAbove = inputRect.top;
+
+    // 对于最后几行，优先显示在上方
+    const isLastFewRows = inputRect.bottom > viewportHeight * 0.7;
+
+    // 检查是否会超出视口底部，或者对于最后几行优先显示在上方
+    if (top + dropdownHeight > viewportHeight || (isLastFewRows && spaceAbove > dropdownHeight)) {
+        // 显示在输入框上方
+        top = inputRect.top - dropdownHeight;
+
+        // 如果上方空间也不够，则调整高度
+        if (top < 0) {
+            top = 10;
+            dropdownHeight = Math.min(dropdownHeight, inputRect.top - 20);
+        }
+    }
+
+    // 确保不会超出视口左右边界
+    const dropdownWidth = Math.max(200, inputRect.width);
+    if (left + dropdownWidth > viewportWidth) {
+        left = viewportWidth - dropdownWidth - 10;
+    }
+    if (left < 10) {
+        left = 10;
+    }
+
+    // 如果表格容器存在，确保下拉列表在容器内可见
+    if (containerRect) {
+        const containerTop = containerRect.top;
+        const containerBottom = containerRect.bottom;
+
+        // 如果下拉列表超出容器顶部，调整位置
+        if (top < containerTop) {
+            top = containerTop + 5;
+        }
+
+        // 如果下拉列表超出容器底部，调整位置
+        if (top + dropdownHeight > containerBottom) {
+            top = containerBottom - dropdownHeight - 5;
+        }
+    }
+
+    return { top, left, width: dropdownWidth, height: dropdownHeight };
+}
+
+// 显示下拉列表
+function showComboboxDropdown(input) {
+    // 隐藏其他所有下拉列表
+    hideAllComboboxDropdowns();
+
+    const container = input.closest('.combobox-container');
+    const dropdown = container.querySelector('.combobox-dropdown');
+
+    if (dropdown) {
+        const position = calculateDropdownPosition(input, dropdown);
+        dropdown.style.top = position.top + 'px';
+        dropdown.style.left = position.left + 'px';
+        dropdown.style.width = position.width + 'px';
+        dropdown.style.maxHeight = position.height + 'px';
+        dropdown.classList.add('show');
+
+        // 重置高亮
+        dropdown.querySelectorAll('.combobox-option').forEach(option => {
+            option.classList.remove('highlighted');
+        });
+    }
+}
+
+// 隐藏所有下拉列表
+function hideAllComboboxDropdowns() {
+    document.querySelectorAll('.combobox-dropdown.show').forEach(dropdown => {
+        dropdown.classList.remove('show');
+    });
+}
+
+// 过滤下拉选项 - 修复版本
+function filterComboboxOptions(input) {
+    // 使用防抖来提高性能
+    clearTimeout(input._filterTimeout);
+    input._filterTimeout = setTimeout(() => {
+        const container = input.closest('.combobox-container');
+        const dropdown = container.querySelector('.combobox-dropdown');
+        const type = input.dataset.type;
+
+        if (!dropdown) return;
+
+        const searchTerm = input.value.toLowerCase();
+        let options, displayField, filteredOptions;
+
+        if (type === 'code') {
+            options = window.codeNumberOptions;
+            displayField = 'code_number';
+            if (!options) return;
+            filteredOptions = options.filter(option =>
+                option[displayField].toLowerCase().includes(searchTerm)
+            );
+        } else if (type === 'product') {
+            options = window.productOptions;
+            displayField = 'product_name';
+            if (!options) return;
+            filteredOptions = options.filter(option =>
+                option[displayField].toLowerCase().includes(searchTerm)
+            );
+        } else if (type === 'receiver') {
+            options = receiverOptions;
+            if (!options) return;
+            filteredOptions = options.filter(option =>
+                option.toLowerCase().includes(searchTerm)
+            );
+        } else {
+            return;
+        }
+
+        if (filteredOptions.length === 0) {
+            dropdown.innerHTML = '<div class="no-results">未找到匹配项</div>';
+        } else {
+            dropdown.innerHTML = generateComboboxOptions(filteredOptions, displayField || '');
+
+            // 重新绑定点击事件
+            dropdown.querySelectorAll('.combobox-option').forEach(option => {
+                option.addEventListener('click', () => selectComboboxOption(option, input));
+            });
+        }
+
+        // 使用 requestAnimationFrame 确保 DOM 更新后再计算位置
+        requestAnimationFrame(() => {
+            showComboboxDropdown(input);
+        });
+
+        // 如果是编辑模式，只更新数据，不重新渲染表格
+        const recordId = input.dataset.recordId;
+        const fieldName = input.dataset.field;
+        if (recordId && fieldName) {
+            const record = stockData.find(r => r.id === parseInt(recordId));
+            if (record) {
+                record[fieldName] = input.value;
+                // 不调用 updateField 避免重新渲染
+            }
+        }
+    }, 100); // 100ms 防抖延迟
+}
+
+// 选择下拉选项
+async function selectComboboxOption(optionElement, input) {
+    const value = optionElement.dataset.value;
+    const type = input.dataset.type;
+    const recordId = input.dataset.recordId;
+    const container = input.closest('tr') || input.closest('.form-container') || document;
+
+    // 只有选择货品编号或货品名称时才清空出货相关字段
+    if (type === 'code' || type === 'product') {
+        // 判断是否为编辑模式（检查是否在编辑中的行）
+        const isEditMode = recordId && editingRowIds.has(parseInt(recordId));
+
+        // 只在非编辑模式下清空出货相关字段
+        // 编辑模式下更换货品时，保留所有数量、价格等信息
+        if (!isEditMode) {
+            // 清空出货相关字段，但不清空规格和类型
+            // 规格和类型会在后面根据新选择的货品自动更新
+            const outQtyInput = container.querySelector('input[id*="-out-qty"], input[data-field="out_quantity"]');
+            if (outQtyInput) {
+                outQtyInput.value = '';
+                outQtyInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            const priceInput = container.querySelector('input[id*="-price"], input[data-field="price"]');
+            if (priceInput) {
+                priceInput.value = '';
+            }
+
+            const totalInput = container.querySelector('input[id*="-total"], input[data-field="total_value"]');
+            if (totalInput) {
+                totalInput.value = '';
+            }
+
+            const receiverInput = container.querySelector('input[id*="-receiver"], input[data-field="receiver"]');
+            if (receiverInput) {
+                if (currentStockType && currentStockType !== 'central') {
+                    receiverInput.value = currentStockType.toUpperCase();
+                } else {
+                    receiverInput.value = '';
+                }
+            }
+
+            const targetSelect = container.querySelector('select[id*="-target"], select[data-field="target_system"]');
+            if (targetSelect) {
+                targetSelect.value = '';
+                targetSelect.disabled = true;
+                targetSelect.required = false;
+            }
+
+            // 更新单价选项
+            updatePriceOptions(container, '');
+
+            // 如果是新增行，清空数据库中的相关字段
+            if (recordId) {
+                updateField(parseInt(recordId), 'out_quantity', '');
+                updateField(parseInt(recordId), 'price', '');
+                updateField(parseInt(recordId), 'receiver', '');
+                updateField(parseInt(recordId), 'target_system', '');
+                // 注意：不清空 specification 和 type，它们会自动更新
+            }
+        }
+    }
+
+    // 标记正在进行选择操作
+    input._isSelecting = true;
+
+    input.value = value;
+    hideAllComboboxDropdowns();
+
+    // 清除选择标记
+    setTimeout(() => {
+        input._isSelecting = false;
+    }, 200);
+
+    // 触发联动更新
+    if (type === 'code') {
+        const result = await getProductByCode(value);
+        if (result) {
+            const { product_name, specification, supplier, category } = result;
+            const containerId = input.closest('.combobox-container').id;
+            const isNewRow = containerId.includes('new-');
+
+            let relatedInputId;
+            if (isNewRow) {
+                // 对于新增行，提取行ID
+                const rowIdMatch = containerId.match(/^(new-\d+)-/);
+                if (rowIdMatch) {
+                    relatedInputId = `${rowIdMatch[1]}-product_name-input`;
+                } else {
+                    relatedInputId = 'new-product_name-input'; // 兼容旧格式
+                }
+            } else {
+                relatedInputId = `combo-product_name-${recordId}-input`;
+            }
+
+            const relatedInput = document.getElementById(relatedInputId);
+            if (relatedInput) {
+                relatedInput.value = product_name;
+                if (recordId) {
+                    updateField(parseInt(recordId), 'product_name', product_name);
+                    if (specification) {
+                        updateField(parseInt(recordId), 'specification', specification);
+                    }
+                    if (category) {
+                        updateField(parseInt(recordId), 'type', category);
+                    }
+                }
+            }
+
+            // 自动填充规格
+            if (specification) {
+                const row = input.closest('tr');
+                const specificationSelect = row ? row.querySelector('select[id$="-specification"], select[onchange*="specification"]') : null;
+                if (specificationSelect) {
+                    specificationSelect.value = specification;
+                    specificationSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+
+            // 自动填充类型
+            if (category) {
+                const row = input.closest('tr');
+                const typeSelect = row ? row.querySelector('select[id$="-type"]') : null;
+                if (typeSelect) {
+                    typeSelect.value = category;
+                    typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+
+            // 保存supplier到当前行，并在有进货数量时自动填充
+            const row = input.closest('tr');
+            if (row && supplier) {
+                row.dataset.supplier = supplier;
+                updateSupplierIfNeeded(row, recordId);
+            }
+
+            // 更新单价选项
+            updatePriceOptions(container, product_name);
+        }
+    } else if (type === 'product') {
+        const result = await getCodeByProduct(value);
+        if (result) {
+            const { product_code, specification, supplier, category } = result;
+            const containerId = input.closest('.combobox-container').id;
+            const isNewRow = containerId.includes('new-');
+
+            let relatedInputId;
+            if (isNewRow) {
+                // 对于新增行，提取行ID
+                const rowIdMatch = containerId.match(/^(new-\d+)-/);
+                if (rowIdMatch) {
+                    relatedInputId = `${rowIdMatch[1]}-code_number-input`;
+                } else {
+                    relatedInputId = 'new-code_number-input'; // 兼容旧格式
+                }
+            } else {
+                relatedInputId = `combo-code_number-${recordId}-input`;
+            }
+
+            const relatedInput = document.getElementById(relatedInputId);
+            if (relatedInput) {
+                relatedInput.value = product_code;
+                if (recordId) {
+                    updateField(parseInt(recordId), 'code_number', product_code);
+                    if (specification) {
+                        updateField(parseInt(recordId), 'specification', specification);
+                    }
+                    if (category) {
+                        updateField(parseInt(recordId), 'type', category);
+                    }
+                }
+            }
+
+            // 自动填充规格
+            if (specification) {
+                const row = input.closest('tr');
+                const specificationSelect = row ? row.querySelector('select[id$="-specification"], select[onchange*="specification"]') : null;
+                if (specificationSelect) {
+                    specificationSelect.value = specification;
+                    specificationSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+
+            // 自动填充类型
+            if (category) {
+                const row = input.closest('tr');
+                const typeSelect = row ? row.querySelector('select[id$="-type"]') : null;
+                if (typeSelect) {
+                    typeSelect.value = category;
+                    typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+
+            // 保存supplier到当前行，并在有进货数量时自动填充
+            const row = input.closest('tr');
+            if (row && supplier) {
+                row.dataset.supplier = supplier;
+                updateSupplierIfNeeded(row, recordId);
+            }
+
+            // 更新单价选项
+            updatePriceOptions(container, value);
+        }
+    } else if (type === 'receiver') {
+        // 收货人类型不需要特殊处理，直接更新字段
+        if (recordId) {
+            updateField(parseInt(recordId), 'receiver', value);
+        }
+    }
+
+    // 如果是编辑模式，更新字段（避免重复更新收货人）
+    if (recordId && type !== 'receiver') {
+        updateField(parseInt(recordId), input.dataset.field, value);
+    }
+
+    // 如果是编辑模式，确保数据已更新
+    if (recordId) {
+        const record = stockData.find(r => r.id === parseInt(recordId));
+        if (record) {
+            record[input.dataset.field] = value;
+        }
+    }
+}
+
+// 验证输入值是否在允许的选项中
+function validateComboboxInput(input) {
+    const type = input.dataset.type;
+    const value = input.value.trim();
+
+    if (!value) return true; // 空值允许
+
+    if (type === 'code' && window.codeNumberOptions) {
+        const validCodes = window.codeNumberOptions.map(c => c.code_number);
+        return validCodes.includes(value);
+    } else if (type === 'product') {
+        // 对于货品名称，允许输入任何值（包括包含符号的自定义货品名称）
+        return true;
+    } else if (type === 'receiver' && receiverOptions) {
+        return receiverOptions.includes(value);
+    }
+
+    return true;
+}
+
+// 处理键盘事件
+function handleComboboxKeydown(event, input) {
+    const container = input.closest('.combobox-container');
+    const dropdown = container.querySelector('.combobox-dropdown');
+
+    if (!dropdown.classList.contains('show')) {
+        if (event.key === 'ArrowDown' || event.key === 'Enter') {
+            showComboboxDropdown(input);
+            return;
+        }
+        return;
+    }
+
+    const options = dropdown.querySelectorAll('.combobox-option');
+    let highlighted = dropdown.querySelector('.combobox-option.highlighted');
+
+    switch (event.key) {
+        case 'ArrowDown':
+            event.preventDefault();
+            if (!highlighted) {
+                if (options.length > 0) {
+                    options[0].classList.add('highlighted');
+                }
+            } else {
+                highlighted.classList.remove('highlighted');
+                const next = highlighted.nextElementSibling;
+                if (next && next.classList.contains('combobox-option')) {
+                    next.classList.add('highlighted');
+                } else if (options.length > 0) {
+                    options[0].classList.add('highlighted');
+                }
+            }
+            break;
+
+        case 'ArrowUp':
+            event.preventDefault();
+            if (!highlighted) {
+                if (options.length > 0) {
+                    options[options.length - 1].classList.add('highlighted');
+                }
+            } else {
+                highlighted.classList.remove('highlighted');
+                const prev = highlighted.previousElementSibling;
+                if (prev && prev.classList.contains('combobox-option')) {
+                    prev.classList.add('highlighted');
+                } else if (options.length > 0) {
+                    options[options.length - 1].classList.add('highlighted');
+                }
+            }
+            break;
+
+        case 'Enter':
+            event.preventDefault();
+            if (highlighted) {
+                selectComboboxOption(highlighted, input);
+            }
+            break;
+
+        case 'Escape':
+            hideAllComboboxDropdowns();
+            break;
+    }
+}
+
+// 修改渲染后的事件绑定
+function bindComboboxEvents() {
+    // 为所有 combobox 输入框绑定事件
+    document.querySelectorAll('.combobox-input').forEach(input => {
+        // 只有在没有绑定过的情况下才绑定事件
+        if (!input._eventsbound) {
+            // 创建事件处理器
+            const focusHandler = () => showComboboxDropdown(input);
+            const inputHandler = () => filterComboboxOptions(input);
+            const keydownHandler = (e) => {
+                // 允许输入英文、数字、空格和常用符号
+                const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' '];
+                const isAlphaNumeric = /^[a-zA-Z0-9]$/.test(e.key);
+                const isSymbol = /^[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]$/.test(e.key);
+
+                if (!allowedKeys.includes(e.key) && !isAlphaNumeric && !isSymbol) {
+                    e.preventDefault();
+                    return;
+                }
+
+                handleComboboxKeydown(e, input);
+            };
+
+            // 添加 blur 事件处理器，确保编辑模式下数据被保存
+            const blurHandler = (e) => {
+                // 检查是否是点击下拉选项导致的blur
+                const container = input.closest('.combobox-container');
+                const dropdown = container.querySelector('.combobox-dropdown');
+
+                // 如果下拉列表显示中且点击的是下拉选项，则不执行验证
+                if (dropdown && dropdown.classList.contains('show')) {
+                    // 延迟执行验证，给点击事件时间完成
+                    setTimeout(() => {
+                        // 再次检查下拉列表是否还显示，如果隐藏了说明选择已完成
+                        if (!dropdown.classList.contains('show')) {
+                            performValidation();
+                        }
+                    }, 150);
+                    return;
+                }
+
+                performValidation();
+
+                function performValidation() {
+
+                    if (input._isSelecting) {
+                        return;
+                    }
+                    // 验证输入值
+                    if (input.value.trim() && !validateComboboxInput(input)) {
+                        const type = input.dataset.type;
+                        let fieldName = '字段';
+                        if (type === 'code') fieldName = '货品编号';
+                        else if (type === 'product') fieldName = '货品名称';
+                        else if (type === 'receiver') fieldName = '收货人';
+                        showAlert(`${fieldName}不存在，请从下拉列表中选择`, 'error');
+                        // 不要立即重新聚焦，给用户机会点击其他地方
+                        setTimeout(() => {
+                            if (document.activeElement !== input) {
+                                input.focus();
+                            }
+                        }, 100);
+                        return;
+                    }
+
+                    const recordId = input.dataset.recordId;
+                    const fieldName = input.dataset.field;
+                    if (recordId && fieldName) {
+                        const record = stockData.find(r => r.id === parseInt(recordId));
+                        if (record && record[fieldName] !== input.value) {
+                            record[fieldName] = input.value;
+                            // 如果是数值相关字段，需要重新计算
+                            if (fieldName === 'in_quantity' || fieldName === 'out_quantity' || fieldName === 'price') {
+                                renderStockTable();
+                            }
+                        }
+                    }
+                }
+            };
+
+            // 绑定事件监听器
+            input.addEventListener('focus', focusHandler);
+            input.addEventListener('input', inputHandler);
+            input.addEventListener('keydown', keydownHandler);
+            input.addEventListener('blur', blurHandler); // 这是新添加的一行
+
+            // 标记已绑定
+            input._eventsbound = true;
+        }
+    });
+
+    // 为所有 combobox 选项绑定点击事件
+    document.querySelectorAll('.combobox-option').forEach(option => {
+        if (!option._eventsbound) {
+            const clickHandler = () => {
+                const container = option.closest('.combobox-container');
+                const input = container.querySelector('.combobox-input');
+                selectComboboxOption(option, input);
+            };
+            option.addEventListener('click', clickHandler);
+            option._eventsbound = true;
+        }
+    });
+}
+
+// 全局点击事件（隐藏下拉列表）
+document.addEventListener('click', function (event) {
+    if (!event.target.closest('.combobox-container')) {
+        hideAllComboboxDropdowns();
+    }
+});
+
+// 窗口滚动和大小变化时重新计算位置
+window.addEventListener('scroll', hideAllComboboxDropdowns);
+window.addEventListener('resize', hideAllComboboxDropdowns);
+
+// 监听表格滚动，重新计算下拉列表位置
+const tableContainer = document.querySelector('.table-scroll-container');
+if (tableContainer) {
+    tableContainer.addEventListener('scroll', () => {
+        // 延迟执行，避免频繁计算
+        clearTimeout(tableContainer._scrollTimeout);
+        tableContainer._scrollTimeout = setTimeout(() => {
+            const visibleDropdowns = document.querySelectorAll('.combobox-dropdown.show');
+            visibleDropdowns.forEach(dropdown => {
+                const container = dropdown.closest('.combobox-container');
+                const input = container.querySelector('input');
+                if (input) {
+                    const position = calculateDropdownPosition(input, dropdown);
+                    dropdown.style.top = position.top + 'px';
+                    dropdown.style.left = position.left + 'px';
+                    dropdown.style.width = position.width + 'px';
+                    dropdown.style.maxHeight = position.height + 'px';
+                }
+            });
+        }, 50);
+    });
+}
+// 加载货品的所有进货价格选项
+async function loadProductPrices(productName, selectElementId, currentPrice = '') {
+    try {
+        // 使用带库存信息的API，设置required_qty为1以确保显示所有价格
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=1`);
+        const selectElement = document.getElementById(selectElementId);
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            // 始终保留手动输入价格选项
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+                const selected = price == currentPrice ? 'selected' : '';
+                // 显示所有价格选项，不管库存是否足够
+                const stockInfo = `(库存: ${availableStock})`;
+                options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
+            });
+            selectElement.innerHTML = options;
+        } else {
+            // 即使没有价格数据，也保留手动输入选项
+            selectElement.innerHTML = '<option value="">暂无历史价格</option><option value="manual">手动输入价格</option>';
+        }
+
+        // 如果选择了"手动输入价格"，显示输入框
+        selectElement.addEventListener('change', function () {
+            handlePriceSelectChange(this);
+        });
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById(selectElementId);
+        if (selectElement) {
+            // 即使出错也保留手动输入选项
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+async function createNewRowPriceSelectWithStock(rowId, productName, currentPrice = '', requiredQty = 0) {
+    const priceInput = document.getElementById(`${rowId}-price`);
+    const priceCell = priceInput.closest('.currency-display');
+
+    // 检查是否已经是下拉选项
+    if (priceCell.querySelector('.price-select')) {
+        return;
+    }
+
+    // 创建下拉选项
+    const selectElement = document.createElement('select');
+    selectElement.className = 'table-select price-select';
+    selectElement.id = `${rowId}-price-select`;
+    selectElement.innerHTML = '<option value="">正在加载...</option>';
+
+    // 隐藏输入框，显示下拉选项
+    priceInput.style.display = 'none';
+    priceCell.appendChild(selectElement);
+
+    // 加载价格选项（带库存检查）
+    await loadNewRowProductPricesWithStock(productName, selectElement.id, currentPrice, requiredQty);
+
+    // 绑定变化事件
+    selectElement.addEventListener('change', function () {
+        handleNewRowPriceSelectChange(this, rowId);
+    });
+}
+
+// 3. 新增函数：加载新行货品价格选项（带库存检查）
+async function loadNewRowProductPricesWithStock(productName, selectElementId, currentPrice = '', requiredQty = 0) {
+    try {
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=${requiredQty}`);
+        const selectElement = document.getElementById(selectElementId);
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+                const selected = price == currentPrice ? 'selected' : '';
+
+                // 只显示库存足够的价格选项
+                if (availableStock >= requiredQty) {
+                    options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} (库存: ${availableStock})</option>`;
+                }
+            });
+
+            selectElement.innerHTML = options;
+        } else {
+            selectElement.innerHTML = '<option value="">暂无足够库存的价格</option><option value="manual">手动输入价格</option>';
+        }
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById(selectElementId);
+        if (selectElement) {
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+async function loadAddFormProductPricesWithStock(productName, requiredQty = 0) {
+    try {
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=${requiredQty}`);
+        const selectElement = document.getElementById('add-price-select');
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+
+                // 只显示库存足够的价格选项
+                if (availableStock >= requiredQty) {
+                    options += `<option value="${price}">${parseFloat(price).toFixed(5)} (库存: ${availableStock})</option>`;
+                }
+            });
+            selectElement.innerHTML = options;
+        } else {
+            selectElement.innerHTML = '<option value="">暂无足够库存的价格</option><option value="manual">手动输入价格</option>';
+        }
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById('add-price-select');
+        if (selectElement) {
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+async function loadProductPricesWithStock(productName, selectElementId, currentPrice = '', requiredQty = 0) {
+    try {
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=${requiredQty}`);
+        const selectElement = document.getElementById(selectElementId);
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+                const selected = price == currentPrice ? 'selected' : '';
+
+                // 只显示库存足够的价格选项，但当前价格即使库存不足也要显示（已选中的选项）
+                if (availableStock >= requiredQty || price == currentPrice) {
+                    const stockInfo = availableStock >= requiredQty ? `(库存: ${availableStock})` : `(库存不足: ${availableStock})`;
+                    options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
+                }
+            });
+
+            selectElement.innerHTML = options;
+        } else {
+            selectElement.innerHTML = '<option value="">暂无足够库存的价格</option><option value="manual">手动输入价格</option>';
+        }
+
+        // 绑定变化事件
+        selectElement.addEventListener('change', function () {
+            handlePriceSelectChange(this);
+        });
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById(selectElementId);
+        if (selectElement) {
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+// 处理价格选择变化
+function handlePriceSelectChange(selectElement) {
+    const recordId = selectElement.id.replace('price-select-', '');
+    const container = selectElement.closest('.currency-display');
+
+    if (selectElement.value === 'manual') {
+        // 显示输入框
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.className = 'table-input currency-input-edit manual-price-input';
+        input.min = '0';
+        input.step = '0.00001';
+        input.placeholder = '输入价格';
+        input.style.marginLeft = '5px';
+        input.style.width = '80px';
+
+        input.addEventListener('change', function () {
+            updateField(parseInt(recordId), 'price', this.value);
+            // 更新下拉选择框的值
+            selectElement.value = this.value;
+        });
+
+        input.addEventListener('blur', function () {
+            if (!this.value) {
+                selectElement.value = '';
+                updateField(parseInt(recordId), 'price', '');
+            }
+        });
+
+        // 移除已存在的输入框
+        const existingInput = container.querySelector('.manual-price-input');
+        if (existingInput) {
+            existingInput.remove();
+        }
+
+        container.appendChild(input);
+        input.focus();
+    } else {
+        // 移除手动输入框
+        const existingInput = container.querySelector('.manual-price-input');
+        if (existingInput) {
+            existingInput.remove();
+        }
+
+        // 更新价格值
+        updateField(parseInt(recordId), 'price', selectElement.value);
+    }
+}
+
+// 处理新增表单中货品变化时加载价格选项
+function handleAddFormProductChange(selectElement, codeNumberElement) {
+    const productName = selectElement.value;
+
+    // 原有的货品变化处理
+    handleProductChange(selectElement, codeNumberElement);
+
+    // 根据出库数量决定是否加载价格选项
+    if (productName) {
+        handleAddFormOutQuantityChange();
+    } else {
+        const priceSelect = document.getElementById('add-price-select');
+        const priceInput = document.getElementById('add-price');
+        if (priceSelect) {
+            priceSelect.innerHTML = '<option value="">请先选择货品</option>';
+            priceSelect.style.display = 'none';
+        }
+        if (priceInput) {
+            priceInput.style.display = 'block';
+            priceInput.value = '';
+        }
+    }
+}
+
+// 加载新增表单的价格选项
+async function loadAddFormProductPrices(productName) {
+    try {
+        // 使用带库存信息的API，设置required_qty为1以确保显示所有价格
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=1`);
+        const selectElement = document.getElementById('add-price-select');
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            // 始终保留手动输入价格选项
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+                // 显示所有价格选项，不管库存是否足够
+                const stockInfo = `(库存: ${availableStock})`;
+                options += `<option value="${price}">${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
+            });
+            selectElement.innerHTML = options;
+            selectElement.style.display = 'block';
+            document.getElementById('add-price').style.display = 'none';
+        } else {
+            // 即使没有价格数据，也保留手动输入选项
+            selectElement.innerHTML = '<option value="">暂无历史价格</option><option value="manual">手动输入价格</option>';
+        }
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById('add-price-select');
+        if (selectElement) {
+            // 即使出错也保留手动输入选项
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+// 处理新增表单价格选择变化
+function handleAddFormPriceChange() {
+    const selectElement = document.getElementById('add-price-select');
+    const inputElement = document.getElementById('add-price');
+
+    if (selectElement.value === 'manual') {
+        selectElement.style.display = 'none';
+        inputElement.style.display = 'block';
+        inputElement.focus();
+    } else {
+        inputElement.value = selectElement.value;
+    }
+}
+
+// 处理新增表单出库数量变化
+function handleAddFormOutQuantityChange() {
+    const outQty = parseFloat(document.getElementById('add-out-qty').value) || 0;
+    const inQty = parseFloat(document.getElementById('add-in-qty').value) || 0;
+    const productName = document.getElementById('add-product-name').value;
+    const priceSelect = document.getElementById('add-price-select');
+    const priceInput = document.getElementById('add-price');
+
+    if (outQty > 0 && inQty === 0 && productName) {
+        // 纯出库且有货品名称，显示价格下拉选项（带库存检查）
+        priceSelect.style.display = 'block';
+        priceInput.style.display = 'none';
+        priceInput.value = '';
+        loadAddFormProductPricesWithStock(productName, outQty);
+    } else {
+        // 入库或出库为0，显示普通输入框
+        priceSelect.style.display = 'none';
+        priceInput.style.display = 'block';
+        if (outQty === 0 && inQty === 0) {
+            priceInput.value = '';
+        }
+    }
+
+    // 控制Target下拉框状态
+    const targetSelect = document.getElementById('add-target');
+    if (outQty > 0) {
+        targetSelect.disabled = false;
+        targetSelect.required = true;
+    } else {
+        targetSelect.disabled = true;
+        targetSelect.value = '';
+        targetSelect.required = false;
+    }
+
+    // 收货人字段保持始终可输入状态，不需要根据出货数量控制
+}
+
+// 加载新增表单的价格选项
+
+// 检查货品库存是否足够（按货品名称和价格分别计算）
+async function checkProductStock(productName, outQuantity, price = null) {
+    if (!productName || outQuantity <= 0) {
+        return { sufficient: true, availableStock: 0, currentStock: 0 };
+    }
+
+    try {
+        let apiUrl;
+        if (price !== null && price !== '' && price !== undefined) {
+            // 按货品名称和价格检查库存
+            apiUrl = `?action=product_stock_by_price&product_name=${encodeURIComponent(productName)}&price=${encodeURIComponent(price)}`;
+        } else {
+            // 按货品名称检查总库存
+            apiUrl = `?action=product_stock&product_name=${encodeURIComponent(productName)}`;
+        }
+
+        const result = await apiCall(apiUrl);
+
+        if (result.success && result.data) {
+            const availableStock = parseFloat(result.data.available_stock || 0);
+            const currentStock = parseFloat(result.data.current_stock || 0);
+
+            return {
+                sufficient: availableStock >= outQuantity,
+                availableStock: availableStock,
+                currentStock: currentStock,
+                requested: outQuantity
+            };
+        } else {
+            // 如果无法获取库存信息，默认允许（可能是新货品）
+            return { sufficient: true, availableStock: 0, currentStock: 0 };
+        }
+
+    } catch (error) {
+        console.error('检查库存失败:', error);
+        // 网络错误时默认允许保存
+        return { sufficient: true, availableStock: 0, currentStock: 0 };
+    }
+}
+
+// 为新行创建价格下拉选项
+function createNewRowPriceSelect(rowId, productName, currentPrice = '') {
+    const priceInput = document.getElementById(`${rowId}-price`);
+    const priceCell = priceInput.closest('.currency-display');
+
+    // 检查是否已经是下拉选项
+    if (priceCell.querySelector('.price-select')) {
+        return;
+    }
+
+    // 创建下拉选项
+    const selectElement = document.createElement('select');
+    selectElement.className = 'table-select price-select';
+    selectElement.id = `${rowId}-price-select`;
+    selectElement.innerHTML = '<option value="">正在加载...</option>';
+
+    // 隐藏输入框，显示下拉选项
+    priceInput.style.display = 'none';
+    priceCell.appendChild(selectElement);
+
+    // 加载价格选项
+    loadNewRowProductPrices(productName, selectElement.id, currentPrice);
+
+    // 绑定变化事件
+    selectElement.addEventListener('change', function () {
+        handleNewRowPriceSelectChange(this, rowId);
+    });
+}
+
+// 恢复新行价格输入框
+function restoreNewRowPriceInput(rowId) {
+    const priceInput = document.getElementById(`${rowId}-price`);
+    const priceCell = priceInput.closest('.currency-display');
+    const selectElement = priceCell.querySelector('.price-select');
+
+    if (selectElement) {
+        selectElement.remove();
+        priceInput.style.display = 'block';
+        priceInput.value = '';
+    }
+}
+
+// 加载新行货品价格选项
+async function loadNewRowProductPrices(productName, selectElementId, currentPrice = '') {
+    try {
+        // 使用带库存信息的API，设置required_qty为1以确保显示所有价格
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=1`);
+        const selectElement = document.getElementById(selectElementId);
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            // 始终保留手动输入价格选项
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+                const selected = price == currentPrice ? 'selected' : '';
+                // 显示所有价格选项，不管库存是否足够
+                const stockInfo = `(库存: ${availableStock})`;
+                options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
+            });
+            selectElement.innerHTML = options;
+        } else {
+            // 即使没有价格数据，也保留手动输入选项
+            selectElement.innerHTML = '<option value="">暂无历史价格</option><option value="manual">手动输入价格</option>';
+        }
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById(selectElementId);
+        if (selectElement) {
+            // 即使出错也保留手动输入选项
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+// 处理新行价格下拉选择变化
+function handleNewRowPriceSelectChange(selectElement, rowId) {
+    const priceInput = document.getElementById(`${rowId}-price`);
+    const container = selectElement.closest('.currency-display');
+
+    if (selectElement.value === 'manual') {
+        // 显示手动输入框
+        const manualInput = document.createElement('input');
+        manualInput.type = 'number';
+        manualInput.className = 'table-input currency-input-edit manual-price-input';
+        manualInput.min = '0';
+        manualInput.step = '0.00001';
+        manualInput.placeholder = '输入价格';
+        manualInput.style.marginLeft = '5px';
+        manualInput.style.width = '80px';
+
+        manualInput.addEventListener('input', function () {
+            priceInput.value = this.value;
+            updateNewRowTotal(priceInput);
+        });
+
+        manualInput.addEventListener('blur', function () {
+            if (!this.value) {
+                selectElement.value = '';
+                priceInput.value = '';
+                updateNewRowTotal(priceInput);
+            }
+        });
+
+        // 移除已存在的手动输入框
+        const existingInput = container.querySelector('.manual-price-input');
+        if (existingInput) {
+            existingInput.remove();
+        }
+
+        container.appendChild(manualInput);
+        manualInput.focus();
+    } else {
+        // 移除手动输入框
+        const existingInput = container.querySelector('.manual-price-input');
+        if (existingInput) {
+            existingInput.remove();
+        }
+
+        // 更新价格值
+        priceInput.value = selectElement.value;
+        updateNewRowTotal(priceInput);
+    }
+}
+
+// 关闭导出弹窗
+function closeExportModal() {
+    document.getElementById('export-modal').style.display = 'none';
+
+    // 重置导出按钮状态
+    const exportBtn = document.querySelector('.export-modal-actions .btn-success');
+    if (exportBtn) {
+        exportBtn.innerHTML = '<i class="fas fa-download"></i> 导出PDF发票';
+        exportBtn.disabled = false;
+    }
+
+    // 清空发票号码后缀输入框
+    document.getElementById('export-invoice-suffix').value = '';
+}
+
+// 确认导出
+async function confirmExport() {
+    const startDate = document.getElementById('export-start-date').value;
+    const endDate = document.getElementById('export-end-date').value;
+    const exportSystem = document.getElementById('export-system').value;
+    const invoiceDate = document.getElementById('export-invoice-date').value;
+    const invoiceSuffix = document.getElementById('export-invoice-suffix').value;
+
+    // 验证输入
+    if (!startDate || !endDate) {
+        showAlert('请选择开始和结束日期', 'error');
+        return;
+    }
+
+    if (!exportSystem) {
+        showAlert('请选择导出系统', 'error');
+        return;
+    }
+
+    if (!invoiceDate) {
+        showAlert('请选择发票日期', 'error');
+        return;
+    }
+
+    if (!invoiceSuffix || invoiceSuffix.length !== 3 || !/^\d{3}$/.test(invoiceSuffix)) {
+        showAlert('请输入三位数字的发票号码后缀（例如：001）', 'error');
+        return;
+    }
+
+    // 验证日期格式并转换为YYYY-MM-DD格式
+    const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+
+    const parseDate = (dateStr) => {
+        const match = dateStr.match(dateRegex);
+        if (!match) {
+            throw new Error('无效的日期格式');
+        }
+        const [, day, month, year] = match;
+        return new Date(year, month - 1, day);
+    };
+
+    let startDateObj, endDateObj, invoiceDateObj;
+    try {
+        startDateObj = parseDate(startDate);
+        endDateObj = parseDate(endDate);
+        invoiceDateObj = parseDate(invoiceDate);
+    } catch (error) {
+        showAlert('日期格式错误，请使用DD/MM/YYYY格式', 'error');
+        return;
+    }
+
+    // 转换发票日期为YYYY-MM-DD格式用于生成发票号码
+    const formatDateToYYYYMMDD = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    // 生成发票号码：格式为 J1-2510-001
+    const generatedInvoiceNumber = generateInvoiceNumber(exportSystem, formatDateToYYYYMMDD(invoiceDateObj), invoiceSuffix);
+
+    if (startDateObj > endDateObj) {
+        showAlert('开始日期不能晚于结束日期', 'error');
+        return;
+    }
+
+    // 显示加载状态
+    const exportBtn = document.querySelector('.export-modal-actions .btn-success');
+    const originalText = exportBtn.innerHTML;
+    exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 生成中...';
+    exportBtn.disabled = true;
+
+    try {
+
+        // 获取指定日期范围内的出库数据（转换为YYYY-MM-DD格式）
+        const params = new URLSearchParams({
+            action: 'list',
+            search_start_date: formatDateToYYYYMMDD(startDateObj),
+            search_end_date: formatDateToYYYYMMDD(endDateObj)
+        });
+
+        const result = await apiCall(`?${params}`);
+
+        if (!result.success) {
+            throw new Error('获取数据失败');
+        }
+
+        // 过滤出库数据 - 按日期范围、出库数量和收货单位筛选
+        const outData = (result.data || []).filter(record => {
+            const outQty = parseFloat(record.out_quantity);
+            if (outQty <= 0) return false;
+
+            // 检查收货单位是否匹配选择的店面
+            const targetSystem = record.target_system;
+            if (!targetSystem || targetSystem.toLowerCase() !== exportSystem.toLowerCase()) {
+                return false;
+            }
+
+            // 检查日期范围
+            const recordDate = record.date || record.out_date || record.created_at;
+            if (!recordDate) return false;
+
+            const recordDateObj = new Date(recordDate);
+            // startDateObj 和 endDateObj 已经在前面解析过了
+
+            // 设置时间为当天的开始和结束
+            startDateObj.setHours(0, 0, 0, 0);
+            endDateObj.setHours(23, 59, 59, 999);
+
+            return recordDateObj >= startDateObj && recordDateObj <= endDateObj;
+        });
+
+        if (outData.length === 0) {
+            showAlert('指定日期范围内没有出库数据', 'error');
+            return;
+        }
+
+        // 根据记录数量决定使用单页还是多页模板
+        const recordCount = outData.length;
+        const useMultiPage = (exportSystem === 'j1' && recordCount > 27) || (exportSystem === 'j2' && recordCount > 24) || (exportSystem === 'j3' && recordCount > 24);
+
+        if (useMultiPage) {
+            // 使用多页模板
+            const pageCount = Math.ceil(recordCount / (exportSystem === 'j1' ? 27 : 24));
+            showAlert(`记录数量较多(${recordCount}条)，将使用多页模板生成PDF (共${pageCount}页)`, 'info');
+            await generateMultiPageInvoicePDF(outData, formatDateToYYYYMMDD(startDateObj), formatDateToYYYYMMDD(endDateObj), exportSystem, generatedInvoiceNumber, formatDateToYYYYMMDD(invoiceDateObj));
+        } else {
+            // 使用单页模板
+            await generateInvoicePDF(outData, formatDateToYYYYMMDD(startDateObj), formatDateToYYYYMMDD(endDateObj), exportSystem, generatedInvoiceNumber, formatDateToYYYYMMDD(invoiceDateObj));
+        }
+
+        showAlert('PDF发票生成成功', 'success');
+        closeExportModal();
+
+    } catch (error) {
+        console.error('导出失败:', error);
+        showAlert('生成PDF发票失败，请重试', 'error');
+    } finally {
+        // 恢复按钮状态
+        const exportBtn = document.querySelector('.export-modal-actions .btn-success');
+        exportBtn.innerHTML = originalText;
+        exportBtn.disabled = false;
+    }
+}
+
+// 点击弹窗外部关闭
+window.addEventListener('click', function (event) {
+    const modal = document.getElementById('export-modal');
+    if (event.target === modal) {
+        closeExportModal();
+    }
+});
+
+// 回到顶部功能
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+// 监听滚动事件，控制回到顶部按钮显示
+let scrollTimeout;
+window.addEventListener('scroll', function () {
+    // 使用防抖优化性能
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(function () {
+        const backToTopBtn = document.getElementById('back-to-top-btn');
+        const scrollThreshold = 150; // 滚动超过150px后显示按钮
+
+        if (window.pageYOffset > scrollThreshold) {
+            backToTopBtn.classList.add('show');
+        } else {
+            backToTopBtn.classList.remove('show');
+        }
+    }, 10);
+});
+
+// 生成发票号码 - 格式：J1-2510-001（店面-年月-序号）
+function generateInvoiceNumber(exportSystem, invoiceDate, userSuffix) {
+    // 从发票日期提取年月（YYMM格式）
+    const date = new Date(invoiceDate);
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份补零
+    const year = date.getFullYear().toString().slice(-2); // 取后两位年份
+    const yearMonth = year + month;
+
+    // 确保用户输入的后缀是三位数
+    const suffix = String(userSuffix).padStart(3, '0');
+
+    // 生成发票号码：店面-年月-序号（店面代码大写）
+    const invoiceNumber = `${exportSystem.toUpperCase()}-${yearMonth}-${suffix}`;
+
+    console.log(`发票号码: ${invoiceNumber}`);
+    return invoiceNumber;
+}
+
+// 生成PDF发票
+async function generateInvoicePDF(outData, startDate, endDate, exportSystem, invoiceNumber = '', invoiceDate = '') {
+    try {
+
+        console.log('开始生成PDF发票:', {
+            exportSystem,
+            dataLength: outData ? outData.length : 0,
+            startDate,
+            endDate,
+            invoiceNumber
+        });
+
+        // 如果没有提供发票号码，自动生成一个
+        if (!invoiceNumber) {
+            invoiceNumber = generateInvoiceNumber(exportSystem);
+        }
+
+        // 下载现有的PDF模板
+        let templateFile;
+        if (exportSystem === 'j2') {
+            templateFile = `../invoice/invoice/j2invoice.pdf?ts=${Date.now()}`;
+        } else if (exportSystem === 'j3') {
+            templateFile = `../invoice/invoice/j3invoice.pdf?ts=${Date.now()}`;
+        } else {
+            templateFile = `../invoice/invoice/j1invoice.pdf?ts=${Date.now()}`;
+        }
+        const templateResponse = await fetch(templateFile);
+        if (!templateResponse.ok) {
+            throw new Error('无法加载PDF模板');
+        }
+
+        const templateBytes = await templateResponse.arrayBuffer();
+
+        // 使用PDF-lib库来编辑PDF
+        const { PDFDocument, rgb, StandardFonts } = PDFLib;
+        const pdfDoc = await PDFDocument.load(templateBytes);
+
+        // 获取第一页
+        const page = pdfDoc.getPage(0);
+        const { width, height } = page.getSize();
+
+        // 嵌入字体
+        const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+        const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        const monoFont = await pdfDoc.embedFont(StandardFonts.Courier);
+        const monoBoldFont = await pdfDoc.embedFont(StandardFonts.CourierBold);
+
+        // 设置字体大小和颜色
+        const fontSize = 11;
+        const smallFontSize = 9;
+        const textColor = rgb(0, 0, 0);
+        const whiteColor = rgb(1, 1, 1); // 白色
+
+        // 字体对齐辅助函数
+        function getRightAlignedX(text, maxX, charWidth = 6) {
+            return maxX - (text.length * charWidth);
+        }
+
+        function getCenterAlignedX(text, centerX, charWidth = 6) {
+            return centerX - (text.length * charWidth / 2);
+        }
+
+        // 按小数点对齐：anchorX 作为右边界（文本右端对齐），小数点位于固定偏移
+        // 规则：anchorX 代表整列的右边界；若包含小数点，将小数点对齐到 (anchorX - dotOffset)
+        // 这样无需改任何坐标，只通过计算 x 返回值实现对齐
+        function getDecimalAlignedX(text, anchorX, font, size, dotOffset = 0) {
+            const str = String(text ?? '');
+            const dotIndex = str.indexOf('.');
+            if (dotIndex >= 0) {
+                // 宽度= 整个字符串宽度；小数点左侧宽度用于将小数点放在 anchorX - dotOffset
+                const leftPart = str.substring(0, dotIndex);
+                const leftWidth = font.widthOfTextAtSize(leftPart, size);
+                return (anchorX - dotOffset) - leftWidth;
+            }
+            // 无小数点：按右边界对齐
+            const width = font.widthOfTextAtSize(str, size);
+            return anchorX - width;
+        }
+
+        // 填入日期 (右上角区域)
+        const currentDate = invoiceDate ?
+            new Date(invoiceDate).toLocaleDateString('en-GB') :
+            new Date().toLocaleDateString('en-GB');
+
+        if (exportSystem === 'j1') {
+            // J1模板的日期位置
+            page.drawText(` ${currentDate}`, {
+                x: 495.5, // J1模板DATE冒号后面的位置
+                y: height - 110.5,
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+
+            // J1模板的发票号码位置
+            if (invoiceNumber) {
+                page.drawText(invoiceNumber, {
+                    x: 500, // J1模板Invoice No位置
+                    y: height - 96.5, // 调整到Invoice No行
+                    size: fontSize,
+                    color: textColor,
+                    font: boldFont,
+                });
+            }
+        } else if (exportSystem === 'j2') {
+            // J2模板的日期位置
+            page.drawText(` ${currentDate}`, {
+                x: 495.5, // J2模板DATE冒号后面的位置 (可根据需要调整)
+                y: height - 110.5, // J2模板的Y坐标 (可根据需要调整)
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+
+            // J2模板的发票号码位置
+            if (invoiceNumber) {
+                page.drawText(invoiceNumber, {
+                    x: 500,
+                    y: height - 96.5, // 调整到Invoice No行
+                    size: fontSize,
+                    color: textColor,
+                    font: boldFont,
+                });
+            }
+        } else if (exportSystem === 'j3') {
+            // J3模板的日期位置
+            page.drawText(` ${currentDate}`, {
+                x: 495.5, // J3模板DATE冒号后面的位置
+                y: height - 110.5, // J3模板的Y坐标
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+
+            // J3模板的发票号码位置
+            if (invoiceNumber) {
+                page.drawText(invoiceNumber, {
+                    x: 500, // J3模板Invoice No位置
+                    y: height - 96.5, // 调整到Invoice No行
+                    size: fontSize,
+                    color: textColor,
+                    font: boldFont,
+                });
+            }
+        }
+
+        // 计算总金额
+        let grandTotal = 0;
+
+        // 填入数据行 (从第一个数据行开始)
+        let yPosition, lineHeight;
+        if (exportSystem === 'j1') {
+            yPosition = height - 162; // J1模板的起始Y坐标
+            lineHeight = 20; // J1模板的行高
+        } else if (exportSystem === 'j2') {
+            yPosition = height - 202; // J2模板的起始Y坐标
+            lineHeight = 20; // J2模板的行高
+        } else { // j3
+            yPosition = height - 202; // J3模板的起始Y坐标
+            lineHeight = 20; // J3模板的行高
+        }
+
+        // 清除缓存并强制刷新 - 版本 2.0
+        console.log('=== PDF生成调试信息 v2.0 ===');
+        console.log('outData类型:', typeof outData);
+        console.log('outData长度:', outData.length);
+        console.log('outData内容:', outData);
+
+        if (outData.length === 0) {
+            console.warn('警告：outData为空，将显示空白发票');
+        }
+
+        outData.forEach((record, index) => {
+            const itemNumber = index + 1;
+            const outQty = parseFloat(record.out_quantity) || 0;
+            const price = parseFloat(record.price) || 0;
+            const total = outQty * price;
+            grandTotal += total;
+
+            // NO (第一列) - 居中对齐
+            const itemText = itemNumber.toString();
+            page.drawText(itemText, {
+                x: getCenterAlignedX(itemText, exportSystem === 'j1' ? 42 : 42, 6),
+                y: yPosition,
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // Descriptions (第二列) - 左对齐，调整产品名称显示，处理长文本
+            const productName = record.product_name || '';
+            const maxProductNameLength = 25;
+            const displayProductName = productName.length > maxProductNameLength
+                ? productName.substring(0, maxProductNameLength) + '...'
+                : productName;
+
+            page.drawText(displayProductName.toUpperCase(), {
+                x: exportSystem === 'j1' ? 80 : 80,
+                y: yPosition,
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // Quantity (第三列) - 右对齐（显示三位小数）
+            const qtyText = formatNumber(outQty);
+            page.drawText(qtyText, {
+                x: getDecimalAlignedX(qtyText, exportSystem === 'j1' ? 373 : 373, monoBoldFont, smallFontSize, 0),
+                y: yPosition,
+                size: smallFontSize,
+                color: textColor,
+                font: monoBoldFont,
+            });
+
+            // UOM (第四列) - 左对齐
+            const uomText = record.specification || '';
+            page.drawText(uomText.toUpperCase(), {
+                x: exportSystem === 'j1' ? 406 : 406,
+                y: yPosition,
+                size: 8,
+                color: textColor,
+            });
+
+            // Price RM (第五列) - 右对齐
+            const priceText = formatCurrencyForPDF(price);
+            page.drawText(priceText, {
+                x: getDecimalAlignedX(priceText, exportSystem === 'j1' ? 488 : 488, monoBoldFont, smallFontSize, 0),
+                y: yPosition,
+                size: smallFontSize,
+                color: textColor,
+                font: monoBoldFont,
+            });
+
+            // Total RM (第六列) - 右对齐
+            const totalText = formatCurrencyForPDF(total);
+            page.drawText(totalText, {
+                x: getDecimalAlignedX(totalText, exportSystem === 'j1' ? 548 : 548, monoBoldFont, smallFontSize, 0),
+                y: yPosition,
+                size: smallFontSize,
+                color: textColor,
+                font: monoBoldFont,
+            });
+
+            yPosition -= lineHeight;
+        });
+
+        if (exportSystem === 'j2') {
+            // J2模板：计算subtotal, charge 15%, 和最终total
+            const subtotal = grandTotal;
+            const charge = subtotal * 0.15;
+            const finalTotal = subtotal + charge;
+
+            // 填入Subtotal
+            const subtotalText = formatCurrencyForPDF(subtotal);
+            page.drawText(subtotalText, {
+                x: getRightAlignedX(subtotalText, 588, 8),
+                y: height - 681, // 调整到Subtotal行
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // 填入Charge 15%
+            const chargeText = formatCurrencyForPDF(charge);
+            page.drawText(chargeText, {
+                x: getRightAlignedX(chargeText, 585.5, 8),
+                y: height - 692, // 调整到Charge行
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // 填入最终Total
+            const finalTotalText = formatCurrencyForPDF(finalTotal);
+            page.drawText(finalTotalText, {
+                x: getRightAlignedX(finalTotalText, 580, 8),
+                y: height - 708, // 调整到最终Total行
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+        } else if (exportSystem === 'j3') {
+            // J3模板：计算subtotal, charge 15%, 和最终total
+            const subtotal = grandTotal;
+            const charge = subtotal * 0.15;
+            const finalTotal = subtotal + charge;
+
+            // 填入Subtotal
+            const subtotalText = formatCurrencyForPDF(subtotal);
+            page.drawText(subtotalText, {
+                x: getRightAlignedX(subtotalText, 588, 8),
+                y: height - 681, // 调整到Subtotal行
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // 填入Charge 15%
+            const chargeText = formatCurrencyForPDF(charge);
+            page.drawText(chargeText, {
+                x: getRightAlignedX(chargeText, 585.5, 8),
+                y: height - 692, // 调整到Charge行
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // 填入最终Total
+            const finalTotalText = formatCurrencyForPDF(finalTotal);
+            page.drawText(finalTotalText, {
+                x: getRightAlignedX(finalTotalText, 580, 8),
+                y: height - 708, // 调整到最终Total行
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+        } else {
+            // J1模板：只显示总计
+            const totalText = formatCurrencyForPDF(grandTotal);
+            page.drawText(totalText, {
+                x: getRightAlignedX(totalText, 580, 8),
+                y: height - 705,
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+        }
+
+        // 生成并下载PDF
+        const pdfBytes = await pdfDoc.save();
+
+        // 创建下载链接
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `invoice_${exportSystem}_${startDate}_${endDate}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+    } catch (error) {
+        console.error('PDF生成失败:', error);
+        console.error('错误详情:', {
+            message: error.message,
+            stack: error.stack,
+            exportSystem: exportSystem,
+            dataLength: outData ? outData.length : 0
+        });
+        throw error;
+    }
+}
+
+// 生成多页PDF发票
+async function generateMultiPageInvoicePDF(outData, startDate, endDate, exportSystem, invoiceNumber = '', invoiceDate = '') {
+    try {
+        console.log('开始生成多页PDF发票:', {
+            exportSystem,
+            dataLength: outData ? outData.length : 0,
+            startDate,
+            endDate,
+            invoiceNumber
+        });
+
+        // 如果没有提供发票号码，自动生成一个
+        if (!invoiceNumber) {
+            invoiceNumber = generateInvoiceNumber(exportSystem);
+        }
+
+        // 计算每页可容纳的记录数
+        const recordsPerPage = exportSystem === 'j1' ? 27 : 24;
+        const totalPages = Math.ceil(outData.length / recordsPerPage);
+
+        console.log(`多页PDF: 总记录数 ${outData.length}, 每页 ${recordsPerPage} 条, 共 ${totalPages} 页`);
+
+        // 加载所需的模板文件
+        const templateFiles = [];
+        for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+            let templateFile;
+            if (pageIndex === 0) {
+                // 第一页使用 (1) 模板
+                if (exportSystem === 'j2') {
+                    templateFile = `../invoice/invoice/j2invoiceMulti(1).pdf?ts=${Date.now()}`;
+                } else if (exportSystem === 'j3') {
+                    templateFile = `../invoice/invoice/j3invoiceMulti(1).pdf?ts=${Date.now()}`;
+                } else {
+                    templateFile = `../invoice/invoice/j1invoiceMulti(1).pdf?ts=${Date.now()}`;
+                }
+            } else {
+                // 后续页使用 (2) 模板
+                if (exportSystem === 'j2') {
+                    templateFile = `../invoice/invoice/j2invoiceMulti(2).pdf?ts=${Date.now()}`;
+                } else if (exportSystem === 'j3') {
+                    templateFile = `../invoice/invoice/j3invoiceMulti(2).pdf?ts=${Date.now()}`;
+                } else {
+                    templateFile = `../invoice/invoice/j1invoiceMulti(2).pdf?ts=${Date.now()}`;
+                }
+            }
+            templateFiles.push(templateFile);
+        }
+
+        // 使用PDF-lib库来创建最终PDF
+        const { PDFDocument, rgb, StandardFonts } = PDFLib;
+        const finalPdfDoc = await PDFDocument.create();
+
+        // 嵌入字体
+        const boldFont = await finalPdfDoc.embedFont(StandardFonts.HelveticaBold);
+        const regularFont = await finalPdfDoc.embedFont(StandardFonts.Helvetica);
+        const monoFont = await finalPdfDoc.embedFont(StandardFonts.Courier);
+        const monoBoldFont = await finalPdfDoc.embedFont(StandardFonts.CourierBold);
+
+        // 设置字体大小和颜色
+        const fontSize = 11;
+        const smallFontSize = 9;
+        const textColor = rgb(0, 0, 0);
+        const whiteColor = rgb(1, 1, 1);
+
+        // 字体对齐辅助函数
+        function getRightAlignedX(text, maxX, charWidth = 6) {
+            return maxX - (text.length * charWidth);
+        }
+
+        function getCenterAlignedX(text, centerX, charWidth = 6) {
+            return centerX - (text.length * charWidth / 2);
+        }
+
+        // 按小数点对齐（等宽字体下更精确）
+        function getDecimalAlignedX(text, anchorX, font, size) {
+            const str = String(text ?? '');
+            const dotIndex = str.indexOf('.');
+            if (dotIndex >= 0) {
+                const leftPart = str.substring(0, dotIndex);
+                const leftWidth = font.widthOfTextAtSize(leftPart, size);
+                return anchorX - leftWidth;
+            }
+            const width = font.widthOfTextAtSize(str, size);
+            return anchorX - width;
+        }
+
+        let grandTotal = 0;
+
+        // 为每页加载模板并填入数据
+        for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+            try {
+                // 加载当前页的模板
+                const templateResponse = await fetch(templateFiles[pageIndex]);
+                if (!templateResponse.ok) {
+                    throw new Error(`无法加载模板文件: ${templateFiles[pageIndex]}`);
+                }
+
+                const templateBytes = await templateResponse.arrayBuffer();
+                const templateDoc = await PDFDocument.load(templateBytes);
+
+                // 复制模板页到最终文档
+                const [templatePage] = await finalPdfDoc.copyPages(templateDoc, [0]);
+                const page = finalPdfDoc.addPage(templatePage);
+                const { width, height } = page.getSize();
+
+                // 填入日期和发票号码（每一页都显示）
+                const currentDate = invoiceDate ?
+                    new Date(invoiceDate).toLocaleDateString('en-GB') :
+                    new Date().toLocaleDateString('en-GB');
+
+                if (exportSystem === 'j1') {
+                    // J1模板的日期位置
+                    page.drawText(` ${currentDate}`, {
+                        x: 495.5,
+                        y: height - 110.5,
+                        size: fontSize,
+                        color: textColor,
+                        font: boldFont,
+                    });
+
+                    // J1模板的发票号码位置
+                    if (invoiceNumber) {
+                        page.drawText(invoiceNumber, {
+                            x: 500,
+                            y: height - 96.5,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    }
+                } else if (exportSystem === 'j2') {
+                    // J2模板的日期位置
+                    page.drawText(` ${currentDate}`, {
+                        x: 495.5,
+                        y: height - 110.5,
+                        size: fontSize,
+                        color: textColor,
+                        font: boldFont,
+                    });
+
+                    // J2模板的发票号码位置
+                    if (invoiceNumber) {
+                        page.drawText(invoiceNumber, {
+                            x: 500,
+                            y: height - 96.5,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    }
+                } else if (exportSystem === 'j3') {
+                    // J3模板的日期位置
+                    page.drawText(` ${currentDate}`, {
+                        x: 495.5,
+                        y: height - 110.5,
+                        size: fontSize,
+                        color: textColor,
+                        font: boldFont,
+                    });
+
+                    // J3模板的发票号码位置
+                    if (invoiceNumber) {
+                        page.drawText(invoiceNumber, {
+                            x: 500,
+                            y: height - 96.5,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    }
+                }
+
+                // 计算当前页的数据范围
+                const startIndex = pageIndex * recordsPerPage;
+                const endIndex = Math.min(startIndex + recordsPerPage, outData.length);
+                const pageData = outData.slice(startIndex, endIndex);
+
+                // 填入数据行
+                let yPosition, lineHeight;
+                if (exportSystem === 'j1') {
+                    if (pageIndex === 0) {
+                        yPosition = height - 162; // J1第一页位置
+                    } else {
+                        yPosition = height - 162;  // J1第二页位置
+                    }
+                    lineHeight = 20;
+                } else if (exportSystem === 'j2') {
+                    if (pageIndex === 0) {
+                        yPosition = height - 202; // J2第一页位置（原来的位置）
+                    } else {
+                        yPosition = height - 202; // J2第二页位置（可调整这个数值）
+                    }
+                    lineHeight = 20;
+                } else { // j3
+                    if (pageIndex === 0) {
+                        yPosition = height - 202; // J3第一页位置
+                    } else {
+                        yPosition = height - 202; // J3第二页位置
+                    }
+                    lineHeight = 20;
+                }
+
+                pageData.forEach((record, index) => {
+                    const itemNumber = startIndex + index + 1;
+                    const outQty = parseFloat(record.out_quantity) || 0;
+                    const price = parseFloat(record.price) || 0;
+                    const total = outQty * price;
+                    grandTotal += total;
+
+                    // NO (第一列)
+                    const itemText = itemNumber.toString();
+                    page.drawText(itemText, {
+                        x: getCenterAlignedX(itemText, 42, 6),
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                    });
+
+                    // Descriptions (第二列)
+                    const productName = record.product_name || '';
+                    const maxProductNameLength = 25;
+                    const displayProductName = productName.length > maxProductNameLength
+                        ? productName.substring(0, maxProductNameLength) + '...'
+                        : productName;
+
+                    page.drawText(displayProductName.toUpperCase(), {
+                        x: 80,
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                    });
+
+                    // Quantity (第三列)（显示三位小数）
+                    const qtyText = formatNumber(outQty);
+                    page.drawText(qtyText, {
+                        x: getDecimalAlignedX(qtyText, 373, monoBoldFont, smallFontSize, 0),
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                        font: monoBoldFont,
+                    });
+
+                    // UOM (第四列)
+                    const uomText = record.specification || '';
+                    page.drawText(uomText.toUpperCase(), {
+                        x: 406,
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                    });
+
+                    // Price RM (第五列)
+                    const priceText = formatCurrencyForPDF(price);
+                    page.drawText(priceText, {
+                        x: getDecimalAlignedX(priceText, 488, monoBoldFont, smallFontSize, 0),
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                        font: monoBoldFont,
+                    });
+
+                    // Total RM (第六列)
+                    const totalText = formatCurrencyForPDF(total);
+                    page.drawText(totalText, {
+                        x: getDecimalAlignedX(totalText, 548, monoBoldFont, smallFontSize, 0),
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                        font: monoBoldFont,
+                    });
+
+                    yPosition -= lineHeight;
+                });
+
+                // 只在最后一页显示总计
+                if (pageIndex === totalPages - 1) {
+                    if (exportSystem === 'j2') {
+                        // J2模板：计算subtotal, charge 15%, 和最终total
+                        const subtotal = grandTotal;
+                        const charge = subtotal * 0.15;
+                        const finalTotal = subtotal + charge;
+
+                        // 填入Subtotal
+                        const subtotalText = formatCurrencyForPDF(subtotal);
+                        page.drawText(subtotalText, {
+                            x: getRightAlignedX(subtotalText, 588, 8),
+                            y: height - 681,
+                            size: smallFontSize,
+                            color: textColor,
+                        });
+
+                        // 填入Charge 15%
+                        const chargeText = formatCurrencyForPDF(charge);
+                        page.drawText(chargeText, {
+                            x: getRightAlignedX(chargeText, 585.5, 8),
+                            y: height - 692,
+                            size: smallFontSize,
+                            color: textColor,
+                        });
+
+                        // 填入最终Total
+                        const finalTotalText = formatCurrencyForPDF(finalTotal);
+                        page.drawText(finalTotalText, {
+                            x: getRightAlignedX(finalTotalText, 580, 8),
+                            y: height - 708,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    } else if (exportSystem === 'j3') {
+                        // J3模板：计算subtotal, charge 15%, 和最终total
+                        const subtotal = grandTotal;
+                        const charge = subtotal * 0.15;
+                        const finalTotal = subtotal + charge;
+
+                        // 填入Subtotal
+                        const subtotalText = formatCurrencyForPDF(subtotal);
+                        page.drawText(subtotalText, {
+                            x: getRightAlignedX(subtotalText, 588, 8),
+                            y: height - 681,
+                            size: smallFontSize,
+                            color: textColor,
+                        });
+
+                        // 填入Charge 15%
+                        const chargeText = formatCurrencyForPDF(charge);
+                        page.drawText(chargeText, {
+                            x: getRightAlignedX(chargeText, 585.5, 8),
+                            y: height - 692,
+                            size: smallFontSize,
+                            color: textColor,
+                        });
+
+                        // 填入最终Total
+                        const finalTotalText = formatCurrencyForPDF(finalTotal);
+                        page.drawText(finalTotalText, {
+                            x: getRightAlignedX(finalTotalText, 580, 8),
+                            y: height - 708,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    } else {
+                        // J1模板：只显示总计
+                        const totalText = formatCurrencyForPDF(grandTotal);
+                        page.drawText(totalText, {
+                            x: getRightAlignedX(totalText, 580, 8),
+                            y: height - 705,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    }
+                }
+
+            } catch (templateError) {
+                console.error(`加载模板 ${templateFiles[pageIndex]} 失败:`, templateError);
+                throw new Error(`无法加载模板文件: ${templateFiles[pageIndex]}`);
+            }
+        }
+
+        // 生成并下载PDF
+        const pdfBytes = await finalPdfDoc.save();
+
+        // 创建下载链接
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `invoice_${exportSystem}_multipage_${startDate}_${endDate}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+    } catch (error) {
+        console.error('多页PDF生成失败:', error);
+        console.error('错误详情:', {
+            message: error.message,
+            stack: error.stack,
+            exportSystem: exportSystem,
+            dataLength: outData ? outData.length : 0
+        });
+        throw error;
+    }
+}
+
+// 处理导出系统选择变化
+function handleExportSystemChange() {
+    // 发票号码现在完全自动生成，不需要处理界面变化
+    console.log('导出系统已选择:', document.getElementById('export-system').value);
+}
+
+// 切换批量删除模式
+function toggleBatchDelete() {
+    isBatchDeleteMode = true;
+    selectedRecords.clear();
+
+    // 显示/隐藏按钮
+    document.getElementById('batch-delete-btn').style.display = 'none';
+    document.getElementById('confirm-batch-delete-btn').style.display = 'inline-block';
+    document.getElementById('cancel-batch-delete-btn').style.display = 'inline-block';
+
+    // 更改表头
+    document.getElementById('action-header').textContent = '选择';
+
+    // 保存所有新创建的行
+    const newRows = saveNewRows();
+
+    // 重新渲染表格
+    renderStockTable();
+
+    // 恢复新创建的行
+    restoreNewRows(newRows);
+
+    showAlert('批量删除模式已启用，请勾选要删除的记录', 'info');
+}
+
+// 取消批量删除模式
+function cancelBatchDelete() {
+    isBatchDeleteMode = false;
+    selectedRecords.clear();
+
+    // 显示/隐藏按钮
+    document.getElementById('batch-delete-btn').style.display = 'inline-block';
+    document.getElementById('confirm-batch-delete-btn').style.display = 'none';
+    document.getElementById('cancel-batch-delete-btn').style.display = 'none';
+
+    // 恢复表头
+    document.getElementById('action-header').textContent = '操作';
+
+    // 保存所有新创建的行
+    const newRows = saveNewRows();
+
+    // 重新渲染表格
+    renderStockTable();
+
+    // 恢复新创建的行
+    restoreNewRows(newRows);
+}
+
+// 切换记录选择状态
+function toggleRecordSelection(recordId, isSelected) {
+    if (isSelected) {
+        selectedRecords.add(recordId);
+    } else {
+        selectedRecords.delete(recordId);
+    }
+
+    // 更新确认按钮状态
+    const confirmBtn = document.getElementById('confirm-batch-delete-btn');
+    if (selectedRecords.size > 0) {
+        confirmBtn.innerHTML = `<i class="fas fa-check"></i> 确认删除 (${selectedRecords.size})`;
+        confirmBtn.disabled = false;
+    } else {
+        confirmBtn.innerHTML = '<i class="fas fa-check"></i> 确认删除';
+        confirmBtn.disabled = true;
+    }
+}
+
+// 生成Type选项
+function generateTypeOptions(selectedValue = '') {
+    const typeOptions = ['Kitchen', 'Sushi Bar', 'Service Line', 'Sake'];
+    let options = '<option value="">请选择类型</option>';
+    typeOptions.forEach(type => {
+        const selected = (type === selectedValue || (type === 'Service Line' && selectedValue === 'Drinks')) ? 'selected' : '';
+        options += `<option value="${type}" ${selected}>${type}</option>`;
+    });
+    return options;
+}
+
+// 确认批量删除
+async function confirmBatchDelete() {
+    if (selectedRecords.size === 0) {
+        showAlert('请至少选择一条记录', 'error');
+        return;
+    }
+
+    if (!confirm(`确定要删除选中的 ${selectedRecords.size} 条记录吗？此操作不可恢复！`)) {
+        return;
+    }
+
+    const confirmBtn = document.getElementById('confirm-batch-delete-btn');
+    const originalText = confirmBtn.innerHTML;
+    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 删除中...';
+    confirmBtn.disabled = true;
+
+    try {
+        let successCount = 0;
+        let failCount = 0;
+
+        // 逐个删除选中的记录
+        for (const recordId of selectedRecords) {
+            try {
+                const result = await apiCall(`?id=${recordId}`, {
+                    method: 'DELETE'
+                });
+
+                if (result.success) {
+                    successCount++;
+                } else {
+                    failCount++;
+                }
+            } catch (error) {
+                failCount++;
+                console.error(`删除记录 ${recordId} 失败:`, error);
+            }
+        }
+
+        // 显示删除结果
+        if (successCount > 0) {
+            showAlert(`成功删除 ${successCount} 条记录${failCount > 0 ? `，${failCount} 条失败` : ''}`,
+                failCount > 0 ? 'warning' : 'success');
+        } else {
+            showAlert('删除失败', 'error');
+        }
+
+        // 退出批量删除模式并刷新数据
+        cancelBatchDelete();
+
+        // 保存所有新创建的行
+        const newRows = saveNewRows();
+
+        // 重新加载数据但保留新行
+        loadStockData().then(() => {
+            // 恢复新创建的行
+            restoreNewRows(newRows);
+        });
+
+    } catch (error) {
+        showAlert('批量删除时发生错误', 'error');
+        confirmBtn.innerHTML = originalText;
+        confirmBtn.disabled = false;
+    }
+}
+
+// 更新批量保存按钮的可见性
+function updateBatchSaveButtonVisibility() {
+    const newRows = document.querySelectorAll('.new-row');
+    const batchSaveBtn = document.getElementById('batch-save-btn');
+
+    if (newRows.length >= 2) {
+        batchSaveBtn.style.display = 'inline-block';
+    } else {
+        batchSaveBtn.style.display = 'none';
+    }
+}
+
+// 批量保存所有新记录
+async function batchSaveNewRows() {
+    const newRows = document.querySelectorAll('.new-row');
+
+    if (newRows.length === 0) {
+        showAlert('没有需要保存的新记录', 'info');
+        return;
+    }
+
+    const batchSaveBtn = document.getElementById('batch-save-btn');
+    const originalText = batchSaveBtn.innerHTML;
+    batchSaveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
+    batchSaveBtn.disabled = true;
+
+    let successCount = 0;
+    let failCount = 0;
+    const failedRows = []; // 记录失败的行
+    const errorMessages = []; // 记录错误信息
+
+    try {
+        // 将新行转换为数组以避免 NodeList 引用问题
+        const rowsArray = Array.from(newRows);
+
+        // 遍历所有新行并保存（传入 skipTableRefresh=true）
+        for (let i = 0; i < rowsArray.length; i++) {
+            const row = rowsArray[i];
+            try {
+                const saveBtn = row.querySelector('.save-new-btn');
+                if (saveBtn) {
+                    // 调用保存函数，跳过表格刷新
+                    await saveNewRowRecord(saveBtn, true);
+                    successCount++;
+                    // 等待一小段时间，避免请求过快
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            } catch (error) {
+                console.error('保存行时出错:', error);
+                failCount++;
+
+                // 克隆失败的行并保存数据
+                const clonedRow = row.cloneNode(true);
+                const rowData = extractRowData(row);
+                failedRows.push({
+                    element: clonedRow,
+                    data: rowData
+                });
+
+                // 获取行的货品名称用于错误提示
+                const rowId = row.querySelector('input').id.split('-')[0] + '-' + row.querySelector('input').id.split('-')[1];
+                const productInput = document.getElementById(`${rowId}-product_name-input`);
+                const productName = productInput ? productInput.value || `第 ${i + 1} 行` : `第 ${i + 1} 行`;
+
+                errorMessages.push(`${productName}: ${error.message}`);
+            }
+        }
+
+        // 批量保存完成后，一次性重新渲染表格
+        renderStockTable();
+        updateStats();
+
+        // 恢复失败的行
+        if (failedRows.length > 0) {
+            setTimeout(() => {
+                const tbody = document.getElementById('stock-tbody');
+                failedRows.forEach(({ element, data }) => {
+                    // 标记失败的行（添加视觉提示）
+                    element.style.backgroundColor = '#fee';
+                    element.classList.add('validation-failed');
+                    tbody.appendChild(element);
+
+                    // 恢复行数据
+                    if (data) {
+                        restoreRowData(element, data);
+                    }
+
+                    // 添加事件监听，当用户修改内容时清除失败标记
+                    const inputs = element.querySelectorAll('input, select');
+                    inputs.forEach(input => {
+                        input.addEventListener('input', function () {
+                            element.style.backgroundColor = '';
+                            element.classList.remove('validation-failed');
+                        }, { once: true });
+                    });
+                });
+                bindComboboxEvents();
+                updateBatchSaveButtonVisibility();
+            }, 100);
+        }
+
+        // 显示结果
+        if (failCount === 0) {
+            showAlert(`成功保存 ${successCount} 条记录`, 'success');
+        } else if (successCount === 0) {
+            showAlert(`保存失败，所有记录都有问题：\n${errorMessages.join('\n')}`, 'error');
+        } else {
+            showAlert(`保存完成：成功 ${successCount} 条，失败 ${failCount} 条\n失败原因：\n${errorMessages.slice(0, 3).join('\n')}${errorMessages.length > 3 ? '\n...' : ''}`, 'warning');
+        }
+
+        // 更新按钮可见性
+        if (failCount === 0) {
+            updateBatchSaveButtonVisibility();
+        }
+
+    } catch (error) {
+        showAlert('批量保存时发生错误', 'error');
+        console.error('批量保存错误:', error);
+    } finally {
+        batchSaveBtn.innerHTML = originalText;
+        batchSaveBtn.disabled = false;
+    }
+}
+ + `{message}</div>
+        </div>
+        <button class="toast-close" onclick="closeToast('` + '
+
+    container.appendChild(toast);
+
+    // 显示动画
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 0);
+
+    // 自动关闭
+    setTimeout(() => {
+        closeToast(toastId);
+    }, 700);
+}
+
+// 添加关闭通知的函数
+function closeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+}
+
+// 添加关闭所有通知的函数（可选）
+function closeAllToasts() {
+    const toasts = document.querySelectorAll('.toast');
+    toasts.forEach(toast => {
+        closeToast(toast.id);
+    });
+}
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', initApp);
+
+// 添加快速选择下拉菜单的关闭逻辑
+document.addEventListener('click', function (e) {
+    // 关闭快速选择下拉菜单
+    if (!e.target.closest('.dropdown')) {
+        document.getElementById('quick-select-dropdown').classList.remove('show');
+    }
+});
+
+
+
+// 创建 Combobox 组件
+function createCombobox(type, value = '', recordId = null, isNewRow = false) {
+    let options, placeholder, fieldName, displayField;
+
+    if (type === 'code') {
+        options = window.codeNumberOptions;
+        placeholder = '输入或选择编号...';
+        fieldName = 'code_number';
+        displayField = 'code_number';
+    } else if (type === 'product') {
+        options = window.productOptions;
+        placeholder = '输入或选择货品...';
+        fieldName = 'product_name';
+        displayField = 'product_name';
+    } else if (type === 'receiver') {
+        options = receiverOptions;
+        placeholder = '输入或选择收货人...';
+        fieldName = 'receiver';
+        displayField = 'receiver';
+    } else {
+        // 默认处理
+        options = window.productOptions;
+        placeholder = '输入或选择货品...';
+        fieldName = 'product_name';
+        displayField = 'product_name';
+    }
+
+    let containerId;
+    if (isNewRow === true) {
+        containerId = `new-${fieldName}`;
+    } else if (typeof isNewRow === 'string') {
+        containerId = `${isNewRow}-${fieldName}`;
+    } else {
+        containerId = `combo-${fieldName}-${recordId}`;
+    }
+    const inputId = `${containerId}-input`;
+    const dropdownId = `${containerId}-dropdown`;
+
+    return `
+                <div class="combobox-container" id="${containerId}">
+                    <input 
+                        type="text" 
+                        class="combobox-input" 
+                        id="${inputId}"
+                        value="${value || ''}" 
+                        placeholder="${placeholder}"
+                        autocomplete="off"
+                        ${recordId ? `data-record-id="${recordId}"` : ''}
+                        data-field="${fieldName}"
+                        data-type="${type}"
+                    />
+                    <i class="fas fa-chevron-down combobox-arrow"></i>
+                    <div class="combobox-dropdown" id="${dropdownId}">
+                        ${generateComboboxOptions(options, displayField || '')}
+                    </div>
+                </div>
+            `;
+}
+
+// 生成下拉选项
+function generateComboboxOptions(options, displayField) {
+    if (!options || options.length === 0) {
+        return '<div class="no-results">暂无选项</div>';
+    }
+
+    // 如果是收货人选项，直接使用字符串数组
+    if (Array.isArray(options) && typeof options[0] === 'string') {
+        return options.map(option =>
+            `<div class="combobox-option" data-value="${option}">
+                        ${option}
+                    </div>`
+        ).join('');
+    }
+
+    // 其他情况，使用对象数组
+    return options.map(option =>
+        `<div class="combobox-option" data-value="${option[displayField]}">
+                    ${option[displayField]}
+                </div>`
+    ).join('');
+}
+
+// 计算下拉列表位置
+function calculateDropdownPosition(inputElement, dropdownElement) {
+    const inputRect = inputElement.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+
+    // 获取实际的下拉列表高度
+    // 先让下拉列表显示以获取真实高度，然后立即隐藏
+    const wasVisible = dropdownElement.style.display === 'block';
+    if (!wasVisible) {
+        dropdownElement.style.display = 'block';
+        dropdownElement.style.visibility = 'hidden';
+    }
+
+    // 计算选项数量和实际高度
+    const options = dropdownElement.querySelectorAll('.combobox-option, .no-results');
+    const optionCount = options.length;
+
+    // 获取实际内容高度
+    let dropdownHeight;
+    if (dropdownElement.scrollHeight > 0 && optionCount > 0) {
+        // 计算所有选项的实际总高度
+        let totalHeight = 0;
+        options.forEach(option => {
+            totalHeight += option.offsetHeight;
+        });
+
+        // 如果计算出了实际高度，使用它；否则使用scrollHeight
+        if (totalHeight > 0) {
+            // 添加4px用于边框（2px上 + 2px下）
+            dropdownHeight = Math.min(250, totalHeight + 4);
+        } else {
+            // 使用scrollHeight，添加少量边距
+            dropdownHeight = Math.min(250, dropdownElement.scrollHeight + 4);
+        }
+    } else {
+        // 估算下拉列表高度（假设每项37px = 10px padding上 + 10px padding下 + 14px字体 + 1.4行高 + 1px边框）
+        dropdownHeight = Math.min(250, 37 * Math.min(6, Math.max(1, optionCount)) + 4);
+    }
+
+    // 恢复原始状态
+    if (!wasVisible) {
+        dropdownElement.style.display = '';
+        dropdownElement.style.visibility = '';
+    }
+
+    // 获取表格容器信息
+    const tableContainer = document.querySelector('.table-scroll-container');
+    const containerRect = tableContainer ? tableContainer.getBoundingClientRect() : null;
+
+    let top = inputRect.bottom;
+    let left = inputRect.left;
+
+    // 计算可用空间
+    const spaceBelow = viewportHeight - inputRect.bottom;
+    const spaceAbove = inputRect.top;
+
+    // 对于最后几行，优先显示在上方
+    const isLastFewRows = inputRect.bottom > viewportHeight * 0.7;
+
+    // 检查是否会超出视口底部，或者对于最后几行优先显示在上方
+    if (top + dropdownHeight > viewportHeight || (isLastFewRows && spaceAbove > dropdownHeight)) {
+        // 显示在输入框上方
+        top = inputRect.top - dropdownHeight;
+
+        // 如果上方空间也不够，则调整高度
+        if (top < 0) {
+            top = 10;
+            dropdownHeight = Math.min(dropdownHeight, inputRect.top - 20);
+        }
+    }
+
+    // 确保不会超出视口左右边界
+    const dropdownWidth = Math.max(200, inputRect.width);
+    if (left + dropdownWidth > viewportWidth) {
+        left = viewportWidth - dropdownWidth - 10;
+    }
+    if (left < 10) {
+        left = 10;
+    }
+
+    // 如果表格容器存在，确保下拉列表在容器内可见
+    if (containerRect) {
+        const containerTop = containerRect.top;
+        const containerBottom = containerRect.bottom;
+
+        // 如果下拉列表超出容器顶部，调整位置
+        if (top < containerTop) {
+            top = containerTop + 5;
+        }
+
+        // 如果下拉列表超出容器底部，调整位置
+        if (top + dropdownHeight > containerBottom) {
+            top = containerBottom - dropdownHeight - 5;
+        }
+    }
+
+    return { top, left, width: dropdownWidth, height: dropdownHeight };
+}
+
+// 显示下拉列表
+function showComboboxDropdown(input) {
+    // 隐藏其他所有下拉列表
+    hideAllComboboxDropdowns();
+
+    const container = input.closest('.combobox-container');
+    const dropdown = container.querySelector('.combobox-dropdown');
+
+    if (dropdown) {
+        const position = calculateDropdownPosition(input, dropdown);
+        dropdown.style.top = position.top + 'px';
+        dropdown.style.left = position.left + 'px';
+        dropdown.style.width = position.width + 'px';
+        dropdown.style.maxHeight = position.height + 'px';
+        dropdown.classList.add('show');
+
+        // 重置高亮
+        dropdown.querySelectorAll('.combobox-option').forEach(option => {
+            option.classList.remove('highlighted');
+        });
+    }
+}
+
+// 隐藏所有下拉列表
+function hideAllComboboxDropdowns() {
+    document.querySelectorAll('.combobox-dropdown.show').forEach(dropdown => {
+        dropdown.classList.remove('show');
+    });
+}
+
+// 过滤下拉选项 - 修复版本
+function filterComboboxOptions(input) {
+    // 使用防抖来提高性能
+    clearTimeout(input._filterTimeout);
+    input._filterTimeout = setTimeout(() => {
+        const container = input.closest('.combobox-container');
+        const dropdown = container.querySelector('.combobox-dropdown');
+        const type = input.dataset.type;
+
+        if (!dropdown) return;
+
+        const searchTerm = input.value.toLowerCase();
+        let options, displayField, filteredOptions;
+
+        if (type === 'code') {
+            options = window.codeNumberOptions;
+            displayField = 'code_number';
+            if (!options) return;
+            filteredOptions = options.filter(option =>
+                option[displayField].toLowerCase().includes(searchTerm)
+            );
+        } else if (type === 'product') {
+            options = window.productOptions;
+            displayField = 'product_name';
+            if (!options) return;
+            filteredOptions = options.filter(option =>
+                option[displayField].toLowerCase().includes(searchTerm)
+            );
+        } else if (type === 'receiver') {
+            options = receiverOptions;
+            if (!options) return;
+            filteredOptions = options.filter(option =>
+                option.toLowerCase().includes(searchTerm)
+            );
+        } else {
+            return;
+        }
+
+        if (filteredOptions.length === 0) {
+            dropdown.innerHTML = '<div class="no-results">未找到匹配项</div>';
+        } else {
+            dropdown.innerHTML = generateComboboxOptions(filteredOptions, displayField || '');
+
+            // 重新绑定点击事件
+            dropdown.querySelectorAll('.combobox-option').forEach(option => {
+                option.addEventListener('click', () => selectComboboxOption(option, input));
+            });
+        }
+
+        // 使用 requestAnimationFrame 确保 DOM 更新后再计算位置
+        requestAnimationFrame(() => {
+            showComboboxDropdown(input);
+        });
+
+        // 如果是编辑模式，只更新数据，不重新渲染表格
+        const recordId = input.dataset.recordId;
+        const fieldName = input.dataset.field;
+        if (recordId && fieldName) {
+            const record = stockData.find(r => r.id === parseInt(recordId));
+            if (record) {
+                record[fieldName] = input.value;
+                // 不调用 updateField 避免重新渲染
+            }
+        }
+    }, 100); // 100ms 防抖延迟
+}
+
+// 选择下拉选项
+async function selectComboboxOption(optionElement, input) {
+    const value = optionElement.dataset.value;
+    const type = input.dataset.type;
+    const recordId = input.dataset.recordId;
+    const container = input.closest('tr') || input.closest('.form-container') || document;
+
+    // 只有选择货品编号或货品名称时才清空出货相关字段
+    if (type === 'code' || type === 'product') {
+        // 判断是否为编辑模式（检查是否在编辑中的行）
+        const isEditMode = recordId && editingRowIds.has(parseInt(recordId));
+
+        // 只在非编辑模式下清空出货相关字段
+        // 编辑模式下更换货品时，保留所有数量、价格等信息
+        if (!isEditMode) {
+            // 清空出货相关字段，但不清空规格和类型
+            // 规格和类型会在后面根据新选择的货品自动更新
+            const outQtyInput = container.querySelector('input[id*="-out-qty"], input[data-field="out_quantity"]');
+            if (outQtyInput) {
+                outQtyInput.value = '';
+                outQtyInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            const priceInput = container.querySelector('input[id*="-price"], input[data-field="price"]');
+            if (priceInput) {
+                priceInput.value = '';
+            }
+
+            const totalInput = container.querySelector('input[id*="-total"], input[data-field="total_value"]');
+            if (totalInput) {
+                totalInput.value = '';
+            }
+
+            const receiverInput = container.querySelector('input[id*="-receiver"], input[data-field="receiver"]');
+            if (receiverInput) {
+                if (currentStockType && currentStockType !== 'central') {
+                    receiverInput.value = currentStockType.toUpperCase();
+                } else {
+                    receiverInput.value = '';
+                }
+            }
+
+            const targetSelect = container.querySelector('select[id*="-target"], select[data-field="target_system"]');
+            if (targetSelect) {
+                targetSelect.value = '';
+                targetSelect.disabled = true;
+                targetSelect.required = false;
+            }
+
+            // 更新单价选项
+            updatePriceOptions(container, '');
+
+            // 如果是新增行，清空数据库中的相关字段
+            if (recordId) {
+                updateField(parseInt(recordId), 'out_quantity', '');
+                updateField(parseInt(recordId), 'price', '');
+                updateField(parseInt(recordId), 'receiver', '');
+                updateField(parseInt(recordId), 'target_system', '');
+                // 注意：不清空 specification 和 type，它们会自动更新
+            }
+        }
+    }
+
+    // 标记正在进行选择操作
+    input._isSelecting = true;
+
+    input.value = value;
+    hideAllComboboxDropdowns();
+
+    // 清除选择标记
+    setTimeout(() => {
+        input._isSelecting = false;
+    }, 200);
+
+    // 触发联动更新
+    if (type === 'code') {
+        const result = await getProductByCode(value);
+        if (result) {
+            const { product_name, specification, supplier, category } = result;
+            const containerId = input.closest('.combobox-container').id;
+            const isNewRow = containerId.includes('new-');
+
+            let relatedInputId;
+            if (isNewRow) {
+                // 对于新增行，提取行ID
+                const rowIdMatch = containerId.match(/^(new-\d+)-/);
+                if (rowIdMatch) {
+                    relatedInputId = `${rowIdMatch[1]}-product_name-input`;
+                } else {
+                    relatedInputId = 'new-product_name-input'; // 兼容旧格式
+                }
+            } else {
+                relatedInputId = `combo-product_name-${recordId}-input`;
+            }
+
+            const relatedInput = document.getElementById(relatedInputId);
+            if (relatedInput) {
+                relatedInput.value = product_name;
+                if (recordId) {
+                    updateField(parseInt(recordId), 'product_name', product_name);
+                    if (specification) {
+                        updateField(parseInt(recordId), 'specification', specification);
+                    }
+                    if (category) {
+                        updateField(parseInt(recordId), 'type', category);
+                    }
+                }
+            }
+
+            // 自动填充规格
+            if (specification) {
+                const row = input.closest('tr');
+                const specificationSelect = row ? row.querySelector('select[id$="-specification"], select[onchange*="specification"]') : null;
+                if (specificationSelect) {
+                    specificationSelect.value = specification;
+                    specificationSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+
+            // 自动填充类型
+            if (category) {
+                const row = input.closest('tr');
+                const typeSelect = row ? row.querySelector('select[id$="-type"]') : null;
+                if (typeSelect) {
+                    typeSelect.value = category;
+                    typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+
+            // 保存supplier到当前行，并在有进货数量时自动填充
+            const row = input.closest('tr');
+            if (row && supplier) {
+                row.dataset.supplier = supplier;
+                updateSupplierIfNeeded(row, recordId);
+            }
+
+            // 更新单价选项
+            updatePriceOptions(container, product_name);
+        }
+    } else if (type === 'product') {
+        const result = await getCodeByProduct(value);
+        if (result) {
+            const { product_code, specification, supplier, category } = result;
+            const containerId = input.closest('.combobox-container').id;
+            const isNewRow = containerId.includes('new-');
+
+            let relatedInputId;
+            if (isNewRow) {
+                // 对于新增行，提取行ID
+                const rowIdMatch = containerId.match(/^(new-\d+)-/);
+                if (rowIdMatch) {
+                    relatedInputId = `${rowIdMatch[1]}-code_number-input`;
+                } else {
+                    relatedInputId = 'new-code_number-input'; // 兼容旧格式
+                }
+            } else {
+                relatedInputId = `combo-code_number-${recordId}-input`;
+            }
+
+            const relatedInput = document.getElementById(relatedInputId);
+            if (relatedInput) {
+                relatedInput.value = product_code;
+                if (recordId) {
+                    updateField(parseInt(recordId), 'code_number', product_code);
+                    if (specification) {
+                        updateField(parseInt(recordId), 'specification', specification);
+                    }
+                    if (category) {
+                        updateField(parseInt(recordId), 'type', category);
+                    }
+                }
+            }
+
+            // 自动填充规格
+            if (specification) {
+                const row = input.closest('tr');
+                const specificationSelect = row ? row.querySelector('select[id$="-specification"], select[onchange*="specification"]') : null;
+                if (specificationSelect) {
+                    specificationSelect.value = specification;
+                    specificationSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+
+            // 自动填充类型
+            if (category) {
+                const row = input.closest('tr');
+                const typeSelect = row ? row.querySelector('select[id$="-type"]') : null;
+                if (typeSelect) {
+                    typeSelect.value = category;
+                    typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+
+            // 保存supplier到当前行，并在有进货数量时自动填充
+            const row = input.closest('tr');
+            if (row && supplier) {
+                row.dataset.supplier = supplier;
+                updateSupplierIfNeeded(row, recordId);
+            }
+
+            // 更新单价选项
+            updatePriceOptions(container, value);
+        }
+    } else if (type === 'receiver') {
+        // 收货人类型不需要特殊处理，直接更新字段
+        if (recordId) {
+            updateField(parseInt(recordId), 'receiver', value);
+        }
+    }
+
+    // 如果是编辑模式，更新字段（避免重复更新收货人）
+    if (recordId && type !== 'receiver') {
+        updateField(parseInt(recordId), input.dataset.field, value);
+    }
+
+    // 如果是编辑模式，确保数据已更新
+    if (recordId) {
+        const record = stockData.find(r => r.id === parseInt(recordId));
+        if (record) {
+            record[input.dataset.field] = value;
+        }
+    }
+}
+
+// 验证输入值是否在允许的选项中
+function validateComboboxInput(input) {
+    const type = input.dataset.type;
+    const value = input.value.trim();
+
+    if (!value) return true; // 空值允许
+
+    if (type === 'code' && window.codeNumberOptions) {
+        const validCodes = window.codeNumberOptions.map(c => c.code_number);
+        return validCodes.includes(value);
+    } else if (type === 'product') {
+        // 对于货品名称，允许输入任何值（包括包含符号的自定义货品名称）
+        return true;
+    } else if (type === 'receiver' && receiverOptions) {
+        return receiverOptions.includes(value);
+    }
+
+    return true;
+}
+
+// 处理键盘事件
+function handleComboboxKeydown(event, input) {
+    const container = input.closest('.combobox-container');
+    const dropdown = container.querySelector('.combobox-dropdown');
+
+    if (!dropdown.classList.contains('show')) {
+        if (event.key === 'ArrowDown' || event.key === 'Enter') {
+            showComboboxDropdown(input);
+            return;
+        }
+        return;
+    }
+
+    const options = dropdown.querySelectorAll('.combobox-option');
+    let highlighted = dropdown.querySelector('.combobox-option.highlighted');
+
+    switch (event.key) {
+        case 'ArrowDown':
+            event.preventDefault();
+            if (!highlighted) {
+                if (options.length > 0) {
+                    options[0].classList.add('highlighted');
+                }
+            } else {
+                highlighted.classList.remove('highlighted');
+                const next = highlighted.nextElementSibling;
+                if (next && next.classList.contains('combobox-option')) {
+                    next.classList.add('highlighted');
+                } else if (options.length > 0) {
+                    options[0].classList.add('highlighted');
+                }
+            }
+            break;
+
+        case 'ArrowUp':
+            event.preventDefault();
+            if (!highlighted) {
+                if (options.length > 0) {
+                    options[options.length - 1].classList.add('highlighted');
+                }
+            } else {
+                highlighted.classList.remove('highlighted');
+                const prev = highlighted.previousElementSibling;
+                if (prev && prev.classList.contains('combobox-option')) {
+                    prev.classList.add('highlighted');
+                } else if (options.length > 0) {
+                    options[options.length - 1].classList.add('highlighted');
+                }
+            }
+            break;
+
+        case 'Enter':
+            event.preventDefault();
+            if (highlighted) {
+                selectComboboxOption(highlighted, input);
+            }
+            break;
+
+        case 'Escape':
+            hideAllComboboxDropdowns();
+            break;
+    }
+}
+
+// 修改渲染后的事件绑定
+function bindComboboxEvents() {
+    // 为所有 combobox 输入框绑定事件
+    document.querySelectorAll('.combobox-input').forEach(input => {
+        // 只有在没有绑定过的情况下才绑定事件
+        if (!input._eventsbound) {
+            // 创建事件处理器
+            const focusHandler = () => showComboboxDropdown(input);
+            const inputHandler = () => filterComboboxOptions(input);
+            const keydownHandler = (e) => {
+                // 允许输入英文、数字、空格和常用符号
+                const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' '];
+                const isAlphaNumeric = /^[a-zA-Z0-9]$/.test(e.key);
+                const isSymbol = /^[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]$/.test(e.key);
+
+                if (!allowedKeys.includes(e.key) && !isAlphaNumeric && !isSymbol) {
+                    e.preventDefault();
+                    return;
+                }
+
+                handleComboboxKeydown(e, input);
+            };
+
+            // 添加 blur 事件处理器，确保编辑模式下数据被保存
+            const blurHandler = (e) => {
+                // 检查是否是点击下拉选项导致的blur
+                const container = input.closest('.combobox-container');
+                const dropdown = container.querySelector('.combobox-dropdown');
+
+                // 如果下拉列表显示中且点击的是下拉选项，则不执行验证
+                if (dropdown && dropdown.classList.contains('show')) {
+                    // 延迟执行验证，给点击事件时间完成
+                    setTimeout(() => {
+                        // 再次检查下拉列表是否还显示，如果隐藏了说明选择已完成
+                        if (!dropdown.classList.contains('show')) {
+                            performValidation();
+                        }
+                    }, 150);
+                    return;
+                }
+
+                performValidation();
+
+                function performValidation() {
+
+                    if (input._isSelecting) {
+                        return;
+                    }
+                    // 验证输入值
+                    if (input.value.trim() && !validateComboboxInput(input)) {
+                        const type = input.dataset.type;
+                        let fieldName = '字段';
+                        if (type === 'code') fieldName = '货品编号';
+                        else if (type === 'product') fieldName = '货品名称';
+                        else if (type === 'receiver') fieldName = '收货人';
+                        showAlert(`${fieldName}不存在，请从下拉列表中选择`, 'error');
+                        // 不要立即重新聚焦，给用户机会点击其他地方
+                        setTimeout(() => {
+                            if (document.activeElement !== input) {
+                                input.focus();
+                            }
+                        }, 100);
+                        return;
+                    }
+
+                    const recordId = input.dataset.recordId;
+                    const fieldName = input.dataset.field;
+                    if (recordId && fieldName) {
+                        const record = stockData.find(r => r.id === parseInt(recordId));
+                        if (record && record[fieldName] !== input.value) {
+                            record[fieldName] = input.value;
+                            // 如果是数值相关字段，需要重新计算
+                            if (fieldName === 'in_quantity' || fieldName === 'out_quantity' || fieldName === 'price') {
+                                renderStockTable();
+                            }
+                        }
+                    }
+                }
+            };
+
+            // 绑定事件监听器
+            input.addEventListener('focus', focusHandler);
+            input.addEventListener('input', inputHandler);
+            input.addEventListener('keydown', keydownHandler);
+            input.addEventListener('blur', blurHandler); // 这是新添加的一行
+
+            // 标记已绑定
+            input._eventsbound = true;
+        }
+    });
+
+    // 为所有 combobox 选项绑定点击事件
+    document.querySelectorAll('.combobox-option').forEach(option => {
+        if (!option._eventsbound) {
+            const clickHandler = () => {
+                const container = option.closest('.combobox-container');
+                const input = container.querySelector('.combobox-input');
+                selectComboboxOption(option, input);
+            };
+            option.addEventListener('click', clickHandler);
+            option._eventsbound = true;
+        }
+    });
+}
+
+// 全局点击事件（隐藏下拉列表）
+document.addEventListener('click', function (event) {
+    if (!event.target.closest('.combobox-container')) {
+        hideAllComboboxDropdowns();
+    }
+});
+
+// 窗口滚动和大小变化时重新计算位置
+window.addEventListener('scroll', hideAllComboboxDropdowns);
+window.addEventListener('resize', hideAllComboboxDropdowns);
+
+// 监听表格滚动，重新计算下拉列表位置
+const tableContainer = document.querySelector('.table-scroll-container');
+if (tableContainer) {
+    tableContainer.addEventListener('scroll', () => {
+        // 延迟执行，避免频繁计算
+        clearTimeout(tableContainer._scrollTimeout);
+        tableContainer._scrollTimeout = setTimeout(() => {
+            const visibleDropdowns = document.querySelectorAll('.combobox-dropdown.show');
+            visibleDropdowns.forEach(dropdown => {
+                const container = dropdown.closest('.combobox-container');
+                const input = container.querySelector('input');
+                if (input) {
+                    const position = calculateDropdownPosition(input, dropdown);
+                    dropdown.style.top = position.top + 'px';
+                    dropdown.style.left = position.left + 'px';
+                    dropdown.style.width = position.width + 'px';
+                    dropdown.style.maxHeight = position.height + 'px';
+                }
+            });
+        }, 50);
+    });
+}
+// 加载货品的所有进货价格选项
+async function loadProductPrices(productName, selectElementId, currentPrice = '') {
+    try {
+        // 使用带库存信息的API，设置required_qty为1以确保显示所有价格
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=1`);
+        const selectElement = document.getElementById(selectElementId);
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            // 始终保留手动输入价格选项
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+                const selected = price == currentPrice ? 'selected' : '';
+                // 显示所有价格选项，不管库存是否足够
+                const stockInfo = `(库存: ${availableStock})`;
+                options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
+            });
+            selectElement.innerHTML = options;
+        } else {
+            // 即使没有价格数据，也保留手动输入选项
+            selectElement.innerHTML = '<option value="">暂无历史价格</option><option value="manual">手动输入价格</option>';
+        }
+
+        // 如果选择了"手动输入价格"，显示输入框
+        selectElement.addEventListener('change', function () {
+            handlePriceSelectChange(this);
+        });
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById(selectElementId);
+        if (selectElement) {
+            // 即使出错也保留手动输入选项
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+async function createNewRowPriceSelectWithStock(rowId, productName, currentPrice = '', requiredQty = 0) {
+    const priceInput = document.getElementById(`${rowId}-price`);
+    const priceCell = priceInput.closest('.currency-display');
+
+    // 检查是否已经是下拉选项
+    if (priceCell.querySelector('.price-select')) {
+        return;
+    }
+
+    // 创建下拉选项
+    const selectElement = document.createElement('select');
+    selectElement.className = 'table-select price-select';
+    selectElement.id = `${rowId}-price-select`;
+    selectElement.innerHTML = '<option value="">正在加载...</option>';
+
+    // 隐藏输入框，显示下拉选项
+    priceInput.style.display = 'none';
+    priceCell.appendChild(selectElement);
+
+    // 加载价格选项（带库存检查）
+    await loadNewRowProductPricesWithStock(productName, selectElement.id, currentPrice, requiredQty);
+
+    // 绑定变化事件
+    selectElement.addEventListener('change', function () {
+        handleNewRowPriceSelectChange(this, rowId);
+    });
+}
+
+// 3. 新增函数：加载新行货品价格选项（带库存检查）
+async function loadNewRowProductPricesWithStock(productName, selectElementId, currentPrice = '', requiredQty = 0) {
+    try {
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=${requiredQty}`);
+        const selectElement = document.getElementById(selectElementId);
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+                const selected = price == currentPrice ? 'selected' : '';
+
+                // 只显示库存足够的价格选项
+                if (availableStock >= requiredQty) {
+                    options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} (库存: ${availableStock})</option>`;
+                }
+            });
+
+            selectElement.innerHTML = options;
+        } else {
+            selectElement.innerHTML = '<option value="">暂无足够库存的价格</option><option value="manual">手动输入价格</option>';
+        }
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById(selectElementId);
+        if (selectElement) {
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+async function loadAddFormProductPricesWithStock(productName, requiredQty = 0) {
+    try {
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=${requiredQty}`);
+        const selectElement = document.getElementById('add-price-select');
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+
+                // 只显示库存足够的价格选项
+                if (availableStock >= requiredQty) {
+                    options += `<option value="${price}">${parseFloat(price).toFixed(5)} (库存: ${availableStock})</option>`;
+                }
+            });
+            selectElement.innerHTML = options;
+        } else {
+            selectElement.innerHTML = '<option value="">暂无足够库存的价格</option><option value="manual">手动输入价格</option>';
+        }
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById('add-price-select');
+        if (selectElement) {
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+async function loadProductPricesWithStock(productName, selectElementId, currentPrice = '', requiredQty = 0) {
+    try {
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=${requiredQty}`);
+        const selectElement = document.getElementById(selectElementId);
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+                const selected = price == currentPrice ? 'selected' : '';
+
+                // 只显示库存足够的价格选项，但当前价格即使库存不足也要显示（已选中的选项）
+                if (availableStock >= requiredQty || price == currentPrice) {
+                    const stockInfo = availableStock >= requiredQty ? `(库存: ${availableStock})` : `(库存不足: ${availableStock})`;
+                    options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
+                }
+            });
+
+            selectElement.innerHTML = options;
+        } else {
+            selectElement.innerHTML = '<option value="">暂无足够库存的价格</option><option value="manual">手动输入价格</option>';
+        }
+
+        // 绑定变化事件
+        selectElement.addEventListener('change', function () {
+            handlePriceSelectChange(this);
+        });
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById(selectElementId);
+        if (selectElement) {
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+// 处理价格选择变化
+function handlePriceSelectChange(selectElement) {
+    const recordId = selectElement.id.replace('price-select-', '');
+    const container = selectElement.closest('.currency-display');
+
+    if (selectElement.value === 'manual') {
+        // 显示输入框
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.className = 'table-input currency-input-edit manual-price-input';
+        input.min = '0';
+        input.step = '0.00001';
+        input.placeholder = '输入价格';
+        input.style.marginLeft = '5px';
+        input.style.width = '80px';
+
+        input.addEventListener('change', function () {
+            updateField(parseInt(recordId), 'price', this.value);
+            // 更新下拉选择框的值
+            selectElement.value = this.value;
+        });
+
+        input.addEventListener('blur', function () {
+            if (!this.value) {
+                selectElement.value = '';
+                updateField(parseInt(recordId), 'price', '');
+            }
+        });
+
+        // 移除已存在的输入框
+        const existingInput = container.querySelector('.manual-price-input');
+        if (existingInput) {
+            existingInput.remove();
+        }
+
+        container.appendChild(input);
+        input.focus();
+    } else {
+        // 移除手动输入框
+        const existingInput = container.querySelector('.manual-price-input');
+        if (existingInput) {
+            existingInput.remove();
+        }
+
+        // 更新价格值
+        updateField(parseInt(recordId), 'price', selectElement.value);
+    }
+}
+
+// 处理新增表单中货品变化时加载价格选项
+function handleAddFormProductChange(selectElement, codeNumberElement) {
+    const productName = selectElement.value;
+
+    // 原有的货品变化处理
+    handleProductChange(selectElement, codeNumberElement);
+
+    // 根据出库数量决定是否加载价格选项
+    if (productName) {
+        handleAddFormOutQuantityChange();
+    } else {
+        const priceSelect = document.getElementById('add-price-select');
+        const priceInput = document.getElementById('add-price');
+        if (priceSelect) {
+            priceSelect.innerHTML = '<option value="">请先选择货品</option>';
+            priceSelect.style.display = 'none';
+        }
+        if (priceInput) {
+            priceInput.style.display = 'block';
+            priceInput.value = '';
+        }
+    }
+}
+
+// 加载新增表单的价格选项
+async function loadAddFormProductPrices(productName) {
+    try {
+        // 使用带库存信息的API，设置required_qty为1以确保显示所有价格
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=1`);
+        const selectElement = document.getElementById('add-price-select');
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            // 始终保留手动输入价格选项
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+                // 显示所有价格选项，不管库存是否足够
+                const stockInfo = `(库存: ${availableStock})`;
+                options += `<option value="${price}">${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
+            });
+            selectElement.innerHTML = options;
+            selectElement.style.display = 'block';
+            document.getElementById('add-price').style.display = 'none';
+        } else {
+            // 即使没有价格数据，也保留手动输入选项
+            selectElement.innerHTML = '<option value="">暂无历史价格</option><option value="manual">手动输入价格</option>';
+        }
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById('add-price-select');
+        if (selectElement) {
+            // 即使出错也保留手动输入选项
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+// 处理新增表单价格选择变化
+function handleAddFormPriceChange() {
+    const selectElement = document.getElementById('add-price-select');
+    const inputElement = document.getElementById('add-price');
+
+    if (selectElement.value === 'manual') {
+        selectElement.style.display = 'none';
+        inputElement.style.display = 'block';
+        inputElement.focus();
+    } else {
+        inputElement.value = selectElement.value;
+    }
+}
+
+// 处理新增表单出库数量变化
+function handleAddFormOutQuantityChange() {
+    const outQty = parseFloat(document.getElementById('add-out-qty').value) || 0;
+    const inQty = parseFloat(document.getElementById('add-in-qty').value) || 0;
+    const productName = document.getElementById('add-product-name').value;
+    const priceSelect = document.getElementById('add-price-select');
+    const priceInput = document.getElementById('add-price');
+
+    if (outQty > 0 && inQty === 0 && productName) {
+        // 纯出库且有货品名称，显示价格下拉选项（带库存检查）
+        priceSelect.style.display = 'block';
+        priceInput.style.display = 'none';
+        priceInput.value = '';
+        loadAddFormProductPricesWithStock(productName, outQty);
+    } else {
+        // 入库或出库为0，显示普通输入框
+        priceSelect.style.display = 'none';
+        priceInput.style.display = 'block';
+        if (outQty === 0 && inQty === 0) {
+            priceInput.value = '';
+        }
+    }
+
+    // 控制Target下拉框状态
+    const targetSelect = document.getElementById('add-target');
+    if (outQty > 0) {
+        targetSelect.disabled = false;
+        targetSelect.required = true;
+    } else {
+        targetSelect.disabled = true;
+        targetSelect.value = '';
+        targetSelect.required = false;
+    }
+
+    // 收货人字段保持始终可输入状态，不需要根据出货数量控制
+}
+
+// 加载新增表单的价格选项
+
+// 检查货品库存是否足够（按货品名称和价格分别计算）
+async function checkProductStock(productName, outQuantity, price = null) {
+    if (!productName || outQuantity <= 0) {
+        return { sufficient: true, availableStock: 0, currentStock: 0 };
+    }
+
+    try {
+        let apiUrl;
+        if (price !== null && price !== '' && price !== undefined) {
+            // 按货品名称和价格检查库存
+            apiUrl = `?action=product_stock_by_price&product_name=${encodeURIComponent(productName)}&price=${encodeURIComponent(price)}`;
+        } else {
+            // 按货品名称检查总库存
+            apiUrl = `?action=product_stock&product_name=${encodeURIComponent(productName)}`;
+        }
+
+        const result = await apiCall(apiUrl);
+
+        if (result.success && result.data) {
+            const availableStock = parseFloat(result.data.available_stock || 0);
+            const currentStock = parseFloat(result.data.current_stock || 0);
+
+            return {
+                sufficient: availableStock >= outQuantity,
+                availableStock: availableStock,
+                currentStock: currentStock,
+                requested: outQuantity
+            };
+        } else {
+            // 如果无法获取库存信息，默认允许（可能是新货品）
+            return { sufficient: true, availableStock: 0, currentStock: 0 };
+        }
+
+    } catch (error) {
+        console.error('检查库存失败:', error);
+        // 网络错误时默认允许保存
+        return { sufficient: true, availableStock: 0, currentStock: 0 };
+    }
+}
+
+// 为新行创建价格下拉选项
+function createNewRowPriceSelect(rowId, productName, currentPrice = '') {
+    const priceInput = document.getElementById(`${rowId}-price`);
+    const priceCell = priceInput.closest('.currency-display');
+
+    // 检查是否已经是下拉选项
+    if (priceCell.querySelector('.price-select')) {
+        return;
+    }
+
+    // 创建下拉选项
+    const selectElement = document.createElement('select');
+    selectElement.className = 'table-select price-select';
+    selectElement.id = `${rowId}-price-select`;
+    selectElement.innerHTML = '<option value="">正在加载...</option>';
+
+    // 隐藏输入框，显示下拉选项
+    priceInput.style.display = 'none';
+    priceCell.appendChild(selectElement);
+
+    // 加载价格选项
+    loadNewRowProductPrices(productName, selectElement.id, currentPrice);
+
+    // 绑定变化事件
+    selectElement.addEventListener('change', function () {
+        handleNewRowPriceSelectChange(this, rowId);
+    });
+}
+
+// 恢复新行价格输入框
+function restoreNewRowPriceInput(rowId) {
+    const priceInput = document.getElementById(`${rowId}-price`);
+    const priceCell = priceInput.closest('.currency-display');
+    const selectElement = priceCell.querySelector('.price-select');
+
+    if (selectElement) {
+        selectElement.remove();
+        priceInput.style.display = 'block';
+        priceInput.value = '';
+    }
+}
+
+// 加载新行货品价格选项
+async function loadNewRowProductPrices(productName, selectElementId, currentPrice = '') {
+    try {
+        // 使用带库存信息的API，设置required_qty为1以确保显示所有价格
+        const result = await apiCall(`?action=product_prices_with_stock&product_name=${encodeURIComponent(productName)}&required_qty=1`);
+        const selectElement = document.getElementById(selectElementId);
+
+        if (!selectElement) return;
+
+        if (result.success && result.data && result.data.length > 0) {
+            let options = '<option value="">请选择价格</option>';
+            // 始终保留手动输入价格选项
+            options += '<option value="manual">手动输入价格</option>';
+
+            result.data.forEach(item => {
+                const price = item.price;
+                const availableStock = item.available_stock;
+                const selected = price == currentPrice ? 'selected' : '';
+                // 显示所有价格选项，不管库存是否足够
+                const stockInfo = `(库存: ${availableStock})`;
+                options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
+            });
+            selectElement.innerHTML = options;
+        } else {
+            // 即使没有价格数据，也保留手动输入选项
+            selectElement.innerHTML = '<option value="">暂无历史价格</option><option value="manual">手动输入价格</option>';
+        }
+
+    } catch (error) {
+        console.error('加载货品价格失败:', error);
+        const selectElement = document.getElementById(selectElementId);
+        if (selectElement) {
+            // 即使出错也保留手动输入选项
+            selectElement.innerHTML = '<option value="">加载失败</option><option value="manual">手动输入价格</option>';
+        }
+    }
+}
+
+// 处理新行价格下拉选择变化
+function handleNewRowPriceSelectChange(selectElement, rowId) {
+    const priceInput = document.getElementById(`${rowId}-price`);
+    const container = selectElement.closest('.currency-display');
+
+    if (selectElement.value === 'manual') {
+        // 显示手动输入框
+        const manualInput = document.createElement('input');
+        manualInput.type = 'number';
+        manualInput.className = 'table-input currency-input-edit manual-price-input';
+        manualInput.min = '0';
+        manualInput.step = '0.00001';
+        manualInput.placeholder = '输入价格';
+        manualInput.style.marginLeft = '5px';
+        manualInput.style.width = '80px';
+
+        manualInput.addEventListener('input', function () {
+            priceInput.value = this.value;
+            updateNewRowTotal(priceInput);
+        });
+
+        manualInput.addEventListener('blur', function () {
+            if (!this.value) {
+                selectElement.value = '';
+                priceInput.value = '';
+                updateNewRowTotal(priceInput);
+            }
+        });
+
+        // 移除已存在的手动输入框
+        const existingInput = container.querySelector('.manual-price-input');
+        if (existingInput) {
+            existingInput.remove();
+        }
+
+        container.appendChild(manualInput);
+        manualInput.focus();
+    } else {
+        // 移除手动输入框
+        const existingInput = container.querySelector('.manual-price-input');
+        if (existingInput) {
+            existingInput.remove();
+        }
+
+        // 更新价格值
+        priceInput.value = selectElement.value;
+        updateNewRowTotal(priceInput);
+    }
+}
+
+// 关闭导出弹窗
+function closeExportModal() {
+    document.getElementById('export-modal').style.display = 'none';
+
+    // 重置导出按钮状态
+    const exportBtn = document.querySelector('.export-modal-actions .btn-success');
+    if (exportBtn) {
+        exportBtn.innerHTML = '<i class="fas fa-download"></i> 导出PDF发票';
+        exportBtn.disabled = false;
+    }
+
+    // 清空发票号码后缀输入框
+    document.getElementById('export-invoice-suffix').value = '';
+}
+
+// 确认导出
+async function confirmExport() {
+    const startDate = document.getElementById('export-start-date').value;
+    const endDate = document.getElementById('export-end-date').value;
+    const exportSystem = document.getElementById('export-system').value;
+    const invoiceDate = document.getElementById('export-invoice-date').value;
+    const invoiceSuffix = document.getElementById('export-invoice-suffix').value;
+
+    // 验证输入
+    if (!startDate || !endDate) {
+        showAlert('请选择开始和结束日期', 'error');
+        return;
+    }
+
+    if (!exportSystem) {
+        showAlert('请选择导出系统', 'error');
+        return;
+    }
+
+    if (!invoiceDate) {
+        showAlert('请选择发票日期', 'error');
+        return;
+    }
+
+    if (!invoiceSuffix || invoiceSuffix.length !== 3 || !/^\d{3}$/.test(invoiceSuffix)) {
+        showAlert('请输入三位数字的发票号码后缀（例如：001）', 'error');
+        return;
+    }
+
+    // 验证日期格式并转换为YYYY-MM-DD格式
+    const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+
+    const parseDate = (dateStr) => {
+        const match = dateStr.match(dateRegex);
+        if (!match) {
+            throw new Error('无效的日期格式');
+        }
+        const [, day, month, year] = match;
+        return new Date(year, month - 1, day);
+    };
+
+    let startDateObj, endDateObj, invoiceDateObj;
+    try {
+        startDateObj = parseDate(startDate);
+        endDateObj = parseDate(endDate);
+        invoiceDateObj = parseDate(invoiceDate);
+    } catch (error) {
+        showAlert('日期格式错误，请使用DD/MM/YYYY格式', 'error');
+        return;
+    }
+
+    // 转换发票日期为YYYY-MM-DD格式用于生成发票号码
+    const formatDateToYYYYMMDD = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    // 生成发票号码：格式为 J1-2510-001
+    const generatedInvoiceNumber = generateInvoiceNumber(exportSystem, formatDateToYYYYMMDD(invoiceDateObj), invoiceSuffix);
+
+    if (startDateObj > endDateObj) {
+        showAlert('开始日期不能晚于结束日期', 'error');
+        return;
+    }
+
+    // 显示加载状态
+    const exportBtn = document.querySelector('.export-modal-actions .btn-success');
+    const originalText = exportBtn.innerHTML;
+    exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 生成中...';
+    exportBtn.disabled = true;
+
+    try {
+
+        // 获取指定日期范围内的出库数据（转换为YYYY-MM-DD格式）
+        const params = new URLSearchParams({
+            action: 'list',
+            search_start_date: formatDateToYYYYMMDD(startDateObj),
+            search_end_date: formatDateToYYYYMMDD(endDateObj)
+        });
+
+        const result = await apiCall(`?${params}`);
+
+        if (!result.success) {
+            throw new Error('获取数据失败');
+        }
+
+        // 过滤出库数据 - 按日期范围、出库数量和收货单位筛选
+        const outData = (result.data || []).filter(record => {
+            const outQty = parseFloat(record.out_quantity);
+            if (outQty <= 0) return false;
+
+            // 检查收货单位是否匹配选择的店面
+            const targetSystem = record.target_system;
+            if (!targetSystem || targetSystem.toLowerCase() !== exportSystem.toLowerCase()) {
+                return false;
+            }
+
+            // 检查日期范围
+            const recordDate = record.date || record.out_date || record.created_at;
+            if (!recordDate) return false;
+
+            const recordDateObj = new Date(recordDate);
+            // startDateObj 和 endDateObj 已经在前面解析过了
+
+            // 设置时间为当天的开始和结束
+            startDateObj.setHours(0, 0, 0, 0);
+            endDateObj.setHours(23, 59, 59, 999);
+
+            return recordDateObj >= startDateObj && recordDateObj <= endDateObj;
+        });
+
+        if (outData.length === 0) {
+            showAlert('指定日期范围内没有出库数据', 'error');
+            return;
+        }
+
+        // 根据记录数量决定使用单页还是多页模板
+        const recordCount = outData.length;
+        const useMultiPage = (exportSystem === 'j1' && recordCount > 27) || (exportSystem === 'j2' && recordCount > 24) || (exportSystem === 'j3' && recordCount > 24);
+
+        if (useMultiPage) {
+            // 使用多页模板
+            const pageCount = Math.ceil(recordCount / (exportSystem === 'j1' ? 27 : 24));
+            showAlert(`记录数量较多(${recordCount}条)，将使用多页模板生成PDF (共${pageCount}页)`, 'info');
+            await generateMultiPageInvoicePDF(outData, formatDateToYYYYMMDD(startDateObj), formatDateToYYYYMMDD(endDateObj), exportSystem, generatedInvoiceNumber, formatDateToYYYYMMDD(invoiceDateObj));
+        } else {
+            // 使用单页模板
+            await generateInvoicePDF(outData, formatDateToYYYYMMDD(startDateObj), formatDateToYYYYMMDD(endDateObj), exportSystem, generatedInvoiceNumber, formatDateToYYYYMMDD(invoiceDateObj));
+        }
+
+        showAlert('PDF发票生成成功', 'success');
+        closeExportModal();
+
+    } catch (error) {
+        console.error('导出失败:', error);
+        showAlert('生成PDF发票失败，请重试', 'error');
+    } finally {
+        // 恢复按钮状态
+        const exportBtn = document.querySelector('.export-modal-actions .btn-success');
+        exportBtn.innerHTML = originalText;
+        exportBtn.disabled = false;
+    }
+}
+
+// 点击弹窗外部关闭
+window.addEventListener('click', function (event) {
+    const modal = document.getElementById('export-modal');
+    if (event.target === modal) {
+        closeExportModal();
+    }
+});
+
+// 回到顶部功能
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+// 监听滚动事件，控制回到顶部按钮显示
+let scrollTimeout;
+window.addEventListener('scroll', function () {
+    // 使用防抖优化性能
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(function () {
+        const backToTopBtn = document.getElementById('back-to-top-btn');
+        const scrollThreshold = 150; // 滚动超过150px后显示按钮
+
+        if (window.pageYOffset > scrollThreshold) {
+            backToTopBtn.classList.add('show');
+        } else {
+            backToTopBtn.classList.remove('show');
+        }
+    }, 10);
+});
+
+// 生成发票号码 - 格式：J1-2510-001（店面-年月-序号）
+function generateInvoiceNumber(exportSystem, invoiceDate, userSuffix) {
+    // 从发票日期提取年月（YYMM格式）
+    const date = new Date(invoiceDate);
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份补零
+    const year = date.getFullYear().toString().slice(-2); // 取后两位年份
+    const yearMonth = year + month;
+
+    // 确保用户输入的后缀是三位数
+    const suffix = String(userSuffix).padStart(3, '0');
+
+    // 生成发票号码：店面-年月-序号（店面代码大写）
+    const invoiceNumber = `${exportSystem.toUpperCase()}-${yearMonth}-${suffix}`;
+
+    console.log(`发票号码: ${invoiceNumber}`);
+    return invoiceNumber;
+}
+
+// 生成PDF发票
+async function generateInvoicePDF(outData, startDate, endDate, exportSystem, invoiceNumber = '', invoiceDate = '') {
+    try {
+
+        console.log('开始生成PDF发票:', {
+            exportSystem,
+            dataLength: outData ? outData.length : 0,
+            startDate,
+            endDate,
+            invoiceNumber
+        });
+
+        // 如果没有提供发票号码，自动生成一个
+        if (!invoiceNumber) {
+            invoiceNumber = generateInvoiceNumber(exportSystem);
+        }
+
+        // 下载现有的PDF模板
+        let templateFile;
+        if (exportSystem === 'j2') {
+            templateFile = `../invoice/invoice/j2invoice.pdf?ts=${Date.now()}`;
+        } else if (exportSystem === 'j3') {
+            templateFile = `../invoice/invoice/j3invoice.pdf?ts=${Date.now()}`;
+        } else {
+            templateFile = `../invoice/invoice/j1invoice.pdf?ts=${Date.now()}`;
+        }
+        const templateResponse = await fetch(templateFile);
+        if (!templateResponse.ok) {
+            throw new Error('无法加载PDF模板');
+        }
+
+        const templateBytes = await templateResponse.arrayBuffer();
+
+        // 使用PDF-lib库来编辑PDF
+        const { PDFDocument, rgb, StandardFonts } = PDFLib;
+        const pdfDoc = await PDFDocument.load(templateBytes);
+
+        // 获取第一页
+        const page = pdfDoc.getPage(0);
+        const { width, height } = page.getSize();
+
+        // 嵌入字体
+        const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+        const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        const monoFont = await pdfDoc.embedFont(StandardFonts.Courier);
+        const monoBoldFont = await pdfDoc.embedFont(StandardFonts.CourierBold);
+
+        // 设置字体大小和颜色
+        const fontSize = 11;
+        const smallFontSize = 9;
+        const textColor = rgb(0, 0, 0);
+        const whiteColor = rgb(1, 1, 1); // 白色
+
+        // 字体对齐辅助函数
+        function getRightAlignedX(text, maxX, charWidth = 6) {
+            return maxX - (text.length * charWidth);
+        }
+
+        function getCenterAlignedX(text, centerX, charWidth = 6) {
+            return centerX - (text.length * charWidth / 2);
+        }
+
+        // 按小数点对齐：anchorX 作为右边界（文本右端对齐），小数点位于固定偏移
+        // 规则：anchorX 代表整列的右边界；若包含小数点，将小数点对齐到 (anchorX - dotOffset)
+        // 这样无需改任何坐标，只通过计算 x 返回值实现对齐
+        function getDecimalAlignedX(text, anchorX, font, size, dotOffset = 0) {
+            const str = String(text ?? '');
+            const dotIndex = str.indexOf('.');
+            if (dotIndex >= 0) {
+                // 宽度= 整个字符串宽度；小数点左侧宽度用于将小数点放在 anchorX - dotOffset
+                const leftPart = str.substring(0, dotIndex);
+                const leftWidth = font.widthOfTextAtSize(leftPart, size);
+                return (anchorX - dotOffset) - leftWidth;
+            }
+            // 无小数点：按右边界对齐
+            const width = font.widthOfTextAtSize(str, size);
+            return anchorX - width;
+        }
+
+        // 填入日期 (右上角区域)
+        const currentDate = invoiceDate ?
+            new Date(invoiceDate).toLocaleDateString('en-GB') :
+            new Date().toLocaleDateString('en-GB');
+
+        if (exportSystem === 'j1') {
+            // J1模板的日期位置
+            page.drawText(` ${currentDate}`, {
+                x: 495.5, // J1模板DATE冒号后面的位置
+                y: height - 110.5,
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+
+            // J1模板的发票号码位置
+            if (invoiceNumber) {
+                page.drawText(invoiceNumber, {
+                    x: 500, // J1模板Invoice No位置
+                    y: height - 96.5, // 调整到Invoice No行
+                    size: fontSize,
+                    color: textColor,
+                    font: boldFont,
+                });
+            }
+        } else if (exportSystem === 'j2') {
+            // J2模板的日期位置
+            page.drawText(` ${currentDate}`, {
+                x: 495.5, // J2模板DATE冒号后面的位置 (可根据需要调整)
+                y: height - 110.5, // J2模板的Y坐标 (可根据需要调整)
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+
+            // J2模板的发票号码位置
+            if (invoiceNumber) {
+                page.drawText(invoiceNumber, {
+                    x: 500,
+                    y: height - 96.5, // 调整到Invoice No行
+                    size: fontSize,
+                    color: textColor,
+                    font: boldFont,
+                });
+            }
+        } else if (exportSystem === 'j3') {
+            // J3模板的日期位置
+            page.drawText(` ${currentDate}`, {
+                x: 495.5, // J3模板DATE冒号后面的位置
+                y: height - 110.5, // J3模板的Y坐标
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+
+            // J3模板的发票号码位置
+            if (invoiceNumber) {
+                page.drawText(invoiceNumber, {
+                    x: 500, // J3模板Invoice No位置
+                    y: height - 96.5, // 调整到Invoice No行
+                    size: fontSize,
+                    color: textColor,
+                    font: boldFont,
+                });
+            }
+        }
+
+        // 计算总金额
+        let grandTotal = 0;
+
+        // 填入数据行 (从第一个数据行开始)
+        let yPosition, lineHeight;
+        if (exportSystem === 'j1') {
+            yPosition = height - 162; // J1模板的起始Y坐标
+            lineHeight = 20; // J1模板的行高
+        } else if (exportSystem === 'j2') {
+            yPosition = height - 202; // J2模板的起始Y坐标
+            lineHeight = 20; // J2模板的行高
+        } else { // j3
+            yPosition = height - 202; // J3模板的起始Y坐标
+            lineHeight = 20; // J3模板的行高
+        }
+
+        // 清除缓存并强制刷新 - 版本 2.0
+        console.log('=== PDF生成调试信息 v2.0 ===');
+        console.log('outData类型:', typeof outData);
+        console.log('outData长度:', outData.length);
+        console.log('outData内容:', outData);
+
+        if (outData.length === 0) {
+            console.warn('警告：outData为空，将显示空白发票');
+        }
+
+        outData.forEach((record, index) => {
+            const itemNumber = index + 1;
+            const outQty = parseFloat(record.out_quantity) || 0;
+            const price = parseFloat(record.price) || 0;
+            const total = outQty * price;
+            grandTotal += total;
+
+            // NO (第一列) - 居中对齐
+            const itemText = itemNumber.toString();
+            page.drawText(itemText, {
+                x: getCenterAlignedX(itemText, exportSystem === 'j1' ? 42 : 42, 6),
+                y: yPosition,
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // Descriptions (第二列) - 左对齐，调整产品名称显示，处理长文本
+            const productName = record.product_name || '';
+            const maxProductNameLength = 25;
+            const displayProductName = productName.length > maxProductNameLength
+                ? productName.substring(0, maxProductNameLength) + '...'
+                : productName;
+
+            page.drawText(displayProductName.toUpperCase(), {
+                x: exportSystem === 'j1' ? 80 : 80,
+                y: yPosition,
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // Quantity (第三列) - 右对齐（显示三位小数）
+            const qtyText = formatNumber(outQty);
+            page.drawText(qtyText, {
+                x: getDecimalAlignedX(qtyText, exportSystem === 'j1' ? 373 : 373, monoBoldFont, smallFontSize, 0),
+                y: yPosition,
+                size: smallFontSize,
+                color: textColor,
+                font: monoBoldFont,
+            });
+
+            // UOM (第四列) - 左对齐
+            const uomText = record.specification || '';
+            page.drawText(uomText.toUpperCase(), {
+                x: exportSystem === 'j1' ? 406 : 406,
+                y: yPosition,
+                size: 8,
+                color: textColor,
+            });
+
+            // Price RM (第五列) - 右对齐
+            const priceText = formatCurrencyForPDF(price);
+            page.drawText(priceText, {
+                x: getDecimalAlignedX(priceText, exportSystem === 'j1' ? 488 : 488, monoBoldFont, smallFontSize, 0),
+                y: yPosition,
+                size: smallFontSize,
+                color: textColor,
+                font: monoBoldFont,
+            });
+
+            // Total RM (第六列) - 右对齐
+            const totalText = formatCurrencyForPDF(total);
+            page.drawText(totalText, {
+                x: getDecimalAlignedX(totalText, exportSystem === 'j1' ? 548 : 548, monoBoldFont, smallFontSize, 0),
+                y: yPosition,
+                size: smallFontSize,
+                color: textColor,
+                font: monoBoldFont,
+            });
+
+            yPosition -= lineHeight;
+        });
+
+        if (exportSystem === 'j2') {
+            // J2模板：计算subtotal, charge 15%, 和最终total
+            const subtotal = grandTotal;
+            const charge = subtotal * 0.15;
+            const finalTotal = subtotal + charge;
+
+            // 填入Subtotal
+            const subtotalText = formatCurrencyForPDF(subtotal);
+            page.drawText(subtotalText, {
+                x: getRightAlignedX(subtotalText, 588, 8),
+                y: height - 681, // 调整到Subtotal行
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // 填入Charge 15%
+            const chargeText = formatCurrencyForPDF(charge);
+            page.drawText(chargeText, {
+                x: getRightAlignedX(chargeText, 585.5, 8),
+                y: height - 692, // 调整到Charge行
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // 填入最终Total
+            const finalTotalText = formatCurrencyForPDF(finalTotal);
+            page.drawText(finalTotalText, {
+                x: getRightAlignedX(finalTotalText, 580, 8),
+                y: height - 708, // 调整到最终Total行
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+        } else if (exportSystem === 'j3') {
+            // J3模板：计算subtotal, charge 15%, 和最终total
+            const subtotal = grandTotal;
+            const charge = subtotal * 0.15;
+            const finalTotal = subtotal + charge;
+
+            // 填入Subtotal
+            const subtotalText = formatCurrencyForPDF(subtotal);
+            page.drawText(subtotalText, {
+                x: getRightAlignedX(subtotalText, 588, 8),
+                y: height - 681, // 调整到Subtotal行
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // 填入Charge 15%
+            const chargeText = formatCurrencyForPDF(charge);
+            page.drawText(chargeText, {
+                x: getRightAlignedX(chargeText, 585.5, 8),
+                y: height - 692, // 调整到Charge行
+                size: smallFontSize,
+                color: textColor,
+            });
+
+            // 填入最终Total
+            const finalTotalText = formatCurrencyForPDF(finalTotal);
+            page.drawText(finalTotalText, {
+                x: getRightAlignedX(finalTotalText, 580, 8),
+                y: height - 708, // 调整到最终Total行
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+        } else {
+            // J1模板：只显示总计
+            const totalText = formatCurrencyForPDF(grandTotal);
+            page.drawText(totalText, {
+                x: getRightAlignedX(totalText, 580, 8),
+                y: height - 705,
+                size: fontSize,
+                color: textColor,
+                font: boldFont,
+            });
+        }
+
+        // 生成并下载PDF
+        const pdfBytes = await pdfDoc.save();
+
+        // 创建下载链接
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `invoice_${exportSystem}_${startDate}_${endDate}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+    } catch (error) {
+        console.error('PDF生成失败:', error);
+        console.error('错误详情:', {
+            message: error.message,
+            stack: error.stack,
+            exportSystem: exportSystem,
+            dataLength: outData ? outData.length : 0
+        });
+        throw error;
+    }
+}
+
+// 生成多页PDF发票
+async function generateMultiPageInvoicePDF(outData, startDate, endDate, exportSystem, invoiceNumber = '', invoiceDate = '') {
+    try {
+        console.log('开始生成多页PDF发票:', {
+            exportSystem,
+            dataLength: outData ? outData.length : 0,
+            startDate,
+            endDate,
+            invoiceNumber
+        });
+
+        // 如果没有提供发票号码，自动生成一个
+        if (!invoiceNumber) {
+            invoiceNumber = generateInvoiceNumber(exportSystem);
+        }
+
+        // 计算每页可容纳的记录数
+        const recordsPerPage = exportSystem === 'j1' ? 27 : 24;
+        const totalPages = Math.ceil(outData.length / recordsPerPage);
+
+        console.log(`多页PDF: 总记录数 ${outData.length}, 每页 ${recordsPerPage} 条, 共 ${totalPages} 页`);
+
+        // 加载所需的模板文件
+        const templateFiles = [];
+        for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+            let templateFile;
+            if (pageIndex === 0) {
+                // 第一页使用 (1) 模板
+                if (exportSystem === 'j2') {
+                    templateFile = `../invoice/invoice/j2invoiceMulti(1).pdf?ts=${Date.now()}`;
+                } else if (exportSystem === 'j3') {
+                    templateFile = `../invoice/invoice/j3invoiceMulti(1).pdf?ts=${Date.now()}`;
+                } else {
+                    templateFile = `../invoice/invoice/j1invoiceMulti(1).pdf?ts=${Date.now()}`;
+                }
+            } else {
+                // 后续页使用 (2) 模板
+                if (exportSystem === 'j2') {
+                    templateFile = `../invoice/invoice/j2invoiceMulti(2).pdf?ts=${Date.now()}`;
+                } else if (exportSystem === 'j3') {
+                    templateFile = `../invoice/invoice/j3invoiceMulti(2).pdf?ts=${Date.now()}`;
+                } else {
+                    templateFile = `../invoice/invoice/j1invoiceMulti(2).pdf?ts=${Date.now()}`;
+                }
+            }
+            templateFiles.push(templateFile);
+        }
+
+        // 使用PDF-lib库来创建最终PDF
+        const { PDFDocument, rgb, StandardFonts } = PDFLib;
+        const finalPdfDoc = await PDFDocument.create();
+
+        // 嵌入字体
+        const boldFont = await finalPdfDoc.embedFont(StandardFonts.HelveticaBold);
+        const regularFont = await finalPdfDoc.embedFont(StandardFonts.Helvetica);
+        const monoFont = await finalPdfDoc.embedFont(StandardFonts.Courier);
+        const monoBoldFont = await finalPdfDoc.embedFont(StandardFonts.CourierBold);
+
+        // 设置字体大小和颜色
+        const fontSize = 11;
+        const smallFontSize = 9;
+        const textColor = rgb(0, 0, 0);
+        const whiteColor = rgb(1, 1, 1);
+
+        // 字体对齐辅助函数
+        function getRightAlignedX(text, maxX, charWidth = 6) {
+            return maxX - (text.length * charWidth);
+        }
+
+        function getCenterAlignedX(text, centerX, charWidth = 6) {
+            return centerX - (text.length * charWidth / 2);
+        }
+
+        // 按小数点对齐（等宽字体下更精确）
+        function getDecimalAlignedX(text, anchorX, font, size) {
+            const str = String(text ?? '');
+            const dotIndex = str.indexOf('.');
+            if (dotIndex >= 0) {
+                const leftPart = str.substring(0, dotIndex);
+                const leftWidth = font.widthOfTextAtSize(leftPart, size);
+                return anchorX - leftWidth;
+            }
+            const width = font.widthOfTextAtSize(str, size);
+            return anchorX - width;
+        }
+
+        let grandTotal = 0;
+
+        // 为每页加载模板并填入数据
+        for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+            try {
+                // 加载当前页的模板
+                const templateResponse = await fetch(templateFiles[pageIndex]);
+                if (!templateResponse.ok) {
+                    throw new Error(`无法加载模板文件: ${templateFiles[pageIndex]}`);
+                }
+
+                const templateBytes = await templateResponse.arrayBuffer();
+                const templateDoc = await PDFDocument.load(templateBytes);
+
+                // 复制模板页到最终文档
+                const [templatePage] = await finalPdfDoc.copyPages(templateDoc, [0]);
+                const page = finalPdfDoc.addPage(templatePage);
+                const { width, height } = page.getSize();
+
+                // 填入日期和发票号码（每一页都显示）
+                const currentDate = invoiceDate ?
+                    new Date(invoiceDate).toLocaleDateString('en-GB') :
+                    new Date().toLocaleDateString('en-GB');
+
+                if (exportSystem === 'j1') {
+                    // J1模板的日期位置
+                    page.drawText(` ${currentDate}`, {
+                        x: 495.5,
+                        y: height - 110.5,
+                        size: fontSize,
+                        color: textColor,
+                        font: boldFont,
+                    });
+
+                    // J1模板的发票号码位置
+                    if (invoiceNumber) {
+                        page.drawText(invoiceNumber, {
+                            x: 500,
+                            y: height - 96.5,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    }
+                } else if (exportSystem === 'j2') {
+                    // J2模板的日期位置
+                    page.drawText(` ${currentDate}`, {
+                        x: 495.5,
+                        y: height - 110.5,
+                        size: fontSize,
+                        color: textColor,
+                        font: boldFont,
+                    });
+
+                    // J2模板的发票号码位置
+                    if (invoiceNumber) {
+                        page.drawText(invoiceNumber, {
+                            x: 500,
+                            y: height - 96.5,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    }
+                } else if (exportSystem === 'j3') {
+                    // J3模板的日期位置
+                    page.drawText(` ${currentDate}`, {
+                        x: 495.5,
+                        y: height - 110.5,
+                        size: fontSize,
+                        color: textColor,
+                        font: boldFont,
+                    });
+
+                    // J3模板的发票号码位置
+                    if (invoiceNumber) {
+                        page.drawText(invoiceNumber, {
+                            x: 500,
+                            y: height - 96.5,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    }
+                }
+
+                // 计算当前页的数据范围
+                const startIndex = pageIndex * recordsPerPage;
+                const endIndex = Math.min(startIndex + recordsPerPage, outData.length);
+                const pageData = outData.slice(startIndex, endIndex);
+
+                // 填入数据行
+                let yPosition, lineHeight;
+                if (exportSystem === 'j1') {
+                    if (pageIndex === 0) {
+                        yPosition = height - 162; // J1第一页位置
+                    } else {
+                        yPosition = height - 162;  // J1第二页位置
+                    }
+                    lineHeight = 20;
+                } else if (exportSystem === 'j2') {
+                    if (pageIndex === 0) {
+                        yPosition = height - 202; // J2第一页位置（原来的位置）
+                    } else {
+                        yPosition = height - 202; // J2第二页位置（可调整这个数值）
+                    }
+                    lineHeight = 20;
+                } else { // j3
+                    if (pageIndex === 0) {
+                        yPosition = height - 202; // J3第一页位置
+                    } else {
+                        yPosition = height - 202; // J3第二页位置
+                    }
+                    lineHeight = 20;
+                }
+
+                pageData.forEach((record, index) => {
+                    const itemNumber = startIndex + index + 1;
+                    const outQty = parseFloat(record.out_quantity) || 0;
+                    const price = parseFloat(record.price) || 0;
+                    const total = outQty * price;
+                    grandTotal += total;
+
+                    // NO (第一列)
+                    const itemText = itemNumber.toString();
+                    page.drawText(itemText, {
+                        x: getCenterAlignedX(itemText, 42, 6),
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                    });
+
+                    // Descriptions (第二列)
+                    const productName = record.product_name || '';
+                    const maxProductNameLength = 25;
+                    const displayProductName = productName.length > maxProductNameLength
+                        ? productName.substring(0, maxProductNameLength) + '...'
+                        : productName;
+
+                    page.drawText(displayProductName.toUpperCase(), {
+                        x: 80,
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                    });
+
+                    // Quantity (第三列)（显示三位小数）
+                    const qtyText = formatNumber(outQty);
+                    page.drawText(qtyText, {
+                        x: getDecimalAlignedX(qtyText, 373, monoBoldFont, smallFontSize, 0),
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                        font: monoBoldFont,
+                    });
+
+                    // UOM (第四列)
+                    const uomText = record.specification || '';
+                    page.drawText(uomText.toUpperCase(), {
+                        x: 406,
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                    });
+
+                    // Price RM (第五列)
+                    const priceText = formatCurrencyForPDF(price);
+                    page.drawText(priceText, {
+                        x: getDecimalAlignedX(priceText, 488, monoBoldFont, smallFontSize, 0),
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                        font: monoBoldFont,
+                    });
+
+                    // Total RM (第六列)
+                    const totalText = formatCurrencyForPDF(total);
+                    page.drawText(totalText, {
+                        x: getDecimalAlignedX(totalText, 548, monoBoldFont, smallFontSize, 0),
+                        y: yPosition,
+                        size: smallFontSize,
+                        color: textColor,
+                        font: monoBoldFont,
+                    });
+
+                    yPosition -= lineHeight;
+                });
+
+                // 只在最后一页显示总计
+                if (pageIndex === totalPages - 1) {
+                    if (exportSystem === 'j2') {
+                        // J2模板：计算subtotal, charge 15%, 和最终total
+                        const subtotal = grandTotal;
+                        const charge = subtotal * 0.15;
+                        const finalTotal = subtotal + charge;
+
+                        // 填入Subtotal
+                        const subtotalText = formatCurrencyForPDF(subtotal);
+                        page.drawText(subtotalText, {
+                            x: getRightAlignedX(subtotalText, 588, 8),
+                            y: height - 681,
+                            size: smallFontSize,
+                            color: textColor,
+                        });
+
+                        // 填入Charge 15%
+                        const chargeText = formatCurrencyForPDF(charge);
+                        page.drawText(chargeText, {
+                            x: getRightAlignedX(chargeText, 585.5, 8),
+                            y: height - 692,
+                            size: smallFontSize,
+                            color: textColor,
+                        });
+
+                        // 填入最终Total
+                        const finalTotalText = formatCurrencyForPDF(finalTotal);
+                        page.drawText(finalTotalText, {
+                            x: getRightAlignedX(finalTotalText, 580, 8),
+                            y: height - 708,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    } else if (exportSystem === 'j3') {
+                        // J3模板：计算subtotal, charge 15%, 和最终total
+                        const subtotal = grandTotal;
+                        const charge = subtotal * 0.15;
+                        const finalTotal = subtotal + charge;
+
+                        // 填入Subtotal
+                        const subtotalText = formatCurrencyForPDF(subtotal);
+                        page.drawText(subtotalText, {
+                            x: getRightAlignedX(subtotalText, 588, 8),
+                            y: height - 681,
+                            size: smallFontSize,
+                            color: textColor,
+                        });
+
+                        // 填入Charge 15%
+                        const chargeText = formatCurrencyForPDF(charge);
+                        page.drawText(chargeText, {
+                            x: getRightAlignedX(chargeText, 585.5, 8),
+                            y: height - 692,
+                            size: smallFontSize,
+                            color: textColor,
+                        });
+
+                        // 填入最终Total
+                        const finalTotalText = formatCurrencyForPDF(finalTotal);
+                        page.drawText(finalTotalText, {
+                            x: getRightAlignedX(finalTotalText, 580, 8),
+                            y: height - 708,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    } else {
+                        // J1模板：只显示总计
+                        const totalText = formatCurrencyForPDF(grandTotal);
+                        page.drawText(totalText, {
+                            x: getRightAlignedX(totalText, 580, 8),
+                            y: height - 705,
+                            size: fontSize,
+                            color: textColor,
+                            font: boldFont,
+                        });
+                    }
+                }
+
+            } catch (templateError) {
+                console.error(`加载模板 ${templateFiles[pageIndex]} 失败:`, templateError);
+                throw new Error(`无法加载模板文件: ${templateFiles[pageIndex]}`);
+            }
+        }
+
+        // 生成并下载PDF
+        const pdfBytes = await finalPdfDoc.save();
+
+        // 创建下载链接
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `invoice_${exportSystem}_multipage_${startDate}_${endDate}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+    } catch (error) {
+        console.error('多页PDF生成失败:', error);
+        console.error('错误详情:', {
+            message: error.message,
+            stack: error.stack,
+            exportSystem: exportSystem,
+            dataLength: outData ? outData.length : 0
+        });
+        throw error;
+    }
+}
+
+// 处理导出系统选择变化
+function handleExportSystemChange() {
+    // 发票号码现在完全自动生成，不需要处理界面变化
+    console.log('导出系统已选择:', document.getElementById('export-system').value);
+}
+
+// 切换批量删除模式
+function toggleBatchDelete() {
+    isBatchDeleteMode = true;
+    selectedRecords.clear();
+
+    // 显示/隐藏按钮
+    document.getElementById('batch-delete-btn').style.display = 'none';
+    document.getElementById('confirm-batch-delete-btn').style.display = 'inline-block';
+    document.getElementById('cancel-batch-delete-btn').style.display = 'inline-block';
+
+    // 更改表头
+    document.getElementById('action-header').textContent = '选择';
+
+    // 保存所有新创建的行
+    const newRows = saveNewRows();
+
+    // 重新渲染表格
+    renderStockTable();
+
+    // 恢复新创建的行
+    restoreNewRows(newRows);
+
+    showAlert('批量删除模式已启用，请勾选要删除的记录', 'info');
+}
+
+// 取消批量删除模式
+function cancelBatchDelete() {
+    isBatchDeleteMode = false;
+    selectedRecords.clear();
+
+    // 显示/隐藏按钮
+    document.getElementById('batch-delete-btn').style.display = 'inline-block';
+    document.getElementById('confirm-batch-delete-btn').style.display = 'none';
+    document.getElementById('cancel-batch-delete-btn').style.display = 'none';
+
+    // 恢复表头
+    document.getElementById('action-header').textContent = '操作';
+
+    // 保存所有新创建的行
+    const newRows = saveNewRows();
+
+    // 重新渲染表格
+    renderStockTable();
+
+    // 恢复新创建的行
+    restoreNewRows(newRows);
+}
+
+// 切换记录选择状态
+function toggleRecordSelection(recordId, isSelected) {
+    if (isSelected) {
+        selectedRecords.add(recordId);
+    } else {
+        selectedRecords.delete(recordId);
+    }
+
+    // 更新确认按钮状态
+    const confirmBtn = document.getElementById('confirm-batch-delete-btn');
+    if (selectedRecords.size > 0) {
+        confirmBtn.innerHTML = `<i class="fas fa-check"></i> 确认删除 (${selectedRecords.size})`;
+        confirmBtn.disabled = false;
+    } else {
+        confirmBtn.innerHTML = '<i class="fas fa-check"></i> 确认删除';
+        confirmBtn.disabled = true;
+    }
+}
+
+// 生成Type选项
+function generateTypeOptions(selectedValue = '') {
+    const typeOptions = ['Kitchen', 'Sushi Bar', 'Service Line', 'Sake'];
+    let options = '<option value="">请选择类型</option>';
+    typeOptions.forEach(type => {
+        const selected = (type === selectedValue || (type === 'Service Line' && selectedValue === 'Drinks')) ? 'selected' : '';
+        options += `<option value="${type}" ${selected}>${type}</option>`;
+    });
+    return options;
+}
+
+// 确认批量删除
+async function confirmBatchDelete() {
+    if (selectedRecords.size === 0) {
+        showAlert('请至少选择一条记录', 'error');
+        return;
+    }
+
+    if (!confirm(`确定要删除选中的 ${selectedRecords.size} 条记录吗？此操作不可恢复！`)) {
+        return;
+    }
+
+    const confirmBtn = document.getElementById('confirm-batch-delete-btn');
+    const originalText = confirmBtn.innerHTML;
+    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 删除中...';
+    confirmBtn.disabled = true;
+
+    try {
+        let successCount = 0;
+        let failCount = 0;
+
+        // 逐个删除选中的记录
+        for (const recordId of selectedRecords) {
+            try {
+                const result = await apiCall(`?id=${recordId}`, {
+                    method: 'DELETE'
+                });
+
+                if (result.success) {
+                    successCount++;
+                } else {
+                    failCount++;
+                }
+            } catch (error) {
+                failCount++;
+                console.error(`删除记录 ${recordId} 失败:`, error);
+            }
+        }
+
+        // 显示删除结果
+        if (successCount > 0) {
+            showAlert(`成功删除 ${successCount} 条记录${failCount > 0 ? `，${failCount} 条失败` : ''}`,
+                failCount > 0 ? 'warning' : 'success');
+        } else {
+            showAlert('删除失败', 'error');
+        }
+
+        // 退出批量删除模式并刷新数据
+        cancelBatchDelete();
+
+        // 保存所有新创建的行
+        const newRows = saveNewRows();
+
+        // 重新加载数据但保留新行
+        loadStockData().then(() => {
+            // 恢复新创建的行
+            restoreNewRows(newRows);
+        });
+
+    } catch (error) {
+        showAlert('批量删除时发生错误', 'error');
+        confirmBtn.innerHTML = originalText;
+        confirmBtn.disabled = false;
+    }
+}
+
+// 更新批量保存按钮的可见性
+function updateBatchSaveButtonVisibility() {
+    const newRows = document.querySelectorAll('.new-row');
+    const batchSaveBtn = document.getElementById('batch-save-btn');
+
+    if (newRows.length >= 2) {
+        batchSaveBtn.style.display = 'inline-block';
+    } else {
+        batchSaveBtn.style.display = 'none';
+    }
+}
+
+// 批量保存所有新记录
+async function batchSaveNewRows() {
+    const newRows = document.querySelectorAll('.new-row');
+
+    if (newRows.length === 0) {
+        showAlert('没有需要保存的新记录', 'info');
+        return;
+    }
+
+    const batchSaveBtn = document.getElementById('batch-save-btn');
+    const originalText = batchSaveBtn.innerHTML;
+    batchSaveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
+    batchSaveBtn.disabled = true;
+
+    let successCount = 0;
+    let failCount = 0;
+    const failedRows = []; // 记录失败的行
+    const errorMessages = []; // 记录错误信息
+
+    try {
+        // 将新行转换为数组以避免 NodeList 引用问题
+        const rowsArray = Array.from(newRows);
+
+        // 遍历所有新行并保存（传入 skipTableRefresh=true）
+        for (let i = 0; i < rowsArray.length; i++) {
+            const row = rowsArray[i];
+            try {
+                const saveBtn = row.querySelector('.save-new-btn');
+                if (saveBtn) {
+                    // 调用保存函数，跳过表格刷新
+                    await saveNewRowRecord(saveBtn, true);
+                    successCount++;
+                    // 等待一小段时间，避免请求过快
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            } catch (error) {
+                console.error('保存行时出错:', error);
+                failCount++;
+
+                // 克隆失败的行并保存数据
+                const clonedRow = row.cloneNode(true);
+                const rowData = extractRowData(row);
+                failedRows.push({
+                    element: clonedRow,
+                    data: rowData
+                });
+
+                // 获取行的货品名称用于错误提示
+                const rowId = row.querySelector('input').id.split('-')[0] + '-' + row.querySelector('input').id.split('-')[1];
+                const productInput = document.getElementById(`${rowId}-product_name-input`);
+                const productName = productInput ? productInput.value || `第 ${i + 1} 行` : `第 ${i + 1} 行`;
+
+                errorMessages.push(`${productName}: ${error.message}`);
+            }
+        }
+
+        // 批量保存完成后，一次性重新渲染表格
+        renderStockTable();
+        updateStats();
+
+        // 恢复失败的行
+        if (failedRows.length > 0) {
+            setTimeout(() => {
+                const tbody = document.getElementById('stock-tbody');
+                failedRows.forEach(({ element, data }) => {
+                    // 标记失败的行（添加视觉提示）
+                    element.style.backgroundColor = '#fee';
+                    element.classList.add('validation-failed');
+                    tbody.appendChild(element);
+
+                    // 恢复行数据
+                    if (data) {
+                        restoreRowData(element, data);
+                    }
+
+                    // 添加事件监听，当用户修改内容时清除失败标记
+                    const inputs = element.querySelectorAll('input, select');
+                    inputs.forEach(input => {
+                        input.addEventListener('input', function () {
+                            element.style.backgroundColor = '';
+                            element.classList.remove('validation-failed');
+                        }, { once: true });
+                    });
+                });
+                bindComboboxEvents();
+                updateBatchSaveButtonVisibility();
+            }, 100);
+        }
+
+        // 显示结果
+        if (failCount === 0) {
+            showAlert(`成功保存 ${successCount} 条记录`, 'success');
+        } else if (successCount === 0) {
+            showAlert(`保存失败，所有记录都有问题：\n${errorMessages.join('\n')}`, 'error');
+        } else {
+            showAlert(`保存完成：成功 ${successCount} 条，失败 ${failCount} 条\n失败原因：\n${errorMessages.slice(0, 3).join('\n')}${errorMessages.length > 3 ? '\n...' : ''}`, 'warning');
+        }
+
+        // 更新按钮可见性
+        if (failCount === 0) {
+            updateBatchSaveButtonVisibility();
+        }
+
+    } catch (error) {
+        showAlert('批量保存时发生错误', 'error');
+        console.error('批量保存错误:', error);
+    } finally {
+        batchSaveBtn.innerHTML = originalText;
+        batchSaveBtn.disabled = false;
+    }
+}
+ + `{toastId}')">&times;</button>
+        <div class="toast-progress"></div>
+    `;
 
     container.appendChild(toast);
 

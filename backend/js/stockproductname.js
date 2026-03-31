@@ -1,4 +1,4 @@
-
+﻿
 const CURRENT_USER_APPLICANT = document.body?.dataset?.user || null;
 
 if (!CURRENT_USER_APPLICANT) {
@@ -1313,24 +1313,2405 @@ function showAlert(message, type = 'success') {
     }
 
     const toastId = 'toast-' + Date.now();
-    const iconClass = {
-        'success': 'fa-check-circle',
-        'error': 'fa-exclamation-circle',
-        'info': 'fa-info-circle',
-        'warning': 'fa-exclamation-triangle'
-    }[type] || 'fa-check-circle';
+    const cfg = {
+        'success': { icon: '✅', title: '操作成功' },
+        'error':   { icon: '❌', title: '操作失败' },
+        'info':    { icon: 'ℹ️', title: '提示信息' },
+        'warning': { icon: '⚠️', title: '注意' }
+    }[type] || { icon: '✅', title: '操作成功' };
 
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.id = toastId;
     toast.innerHTML = `
-                <i class="fas ${iconClass} toast-icon"></i>
-                <div class="toast-content">${message}</div>
-                <button class="toast-close" onclick="closeToast('${toastId}')">
-                    <i class="fas fa-times"></i>
-                </button>
-                <div class="toast-progress"></div>
-            `;
+        <div class="toast-icon-wrap">` + '
+
+    container.appendChild(toast);
+
+    // 显示动画
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 0);
+
+    // 自动关闭
+    setTimeout(() => {
+        closeToast(toastId);
+    }, 700);
+}
+
+// 添加关闭通知的函数
+function closeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+}
+
+// 添加关闭所有通知的函数（可选）
+function closeAllToasts() {
+    const toasts = document.querySelectorAll('.toast');
+    toasts.forEach(toast => {
+        closeToast(toast.id);
+    });
+}
+
+// 输入框和下拉选择框事件处理
+document.addEventListener('input', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        const field = e.target.dataset.field;
+        const value = e.target.value;
+        const row = e.target.closest('tr');
+
+        resetInputFirstClick(e.target);
+        updateStats();
+    }
+});
+
+// 下拉选择框事件处理
+document.addEventListener('change', function (e) {
+    if (e.target.classList.contains('excel-select')) {
+        const field = e.target.dataset.field;
+        const value = e.target.value;
+        const row = e.target.closest('tr');
+
+        updateStats();
+    }
+});
+
+
+// 键盘快捷键支持
+document.addEventListener('keydown', function (e) {
+    // Ctrl+S 保存数据
+    if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        saveAllData();
+    }
+
+    // Ctrl+N 添加新行
+    if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        addNewRow();
+    }
+
+    // Tab键在输入框和下拉选择框间移动
+    if (e.key === 'Tab') {
+        const inputs = Array.from(document.querySelectorAll('.excel-input:not([readonly])'));
+        const selects = Array.from(document.querySelectorAll('.excel-select:not([disabled])'));
+        const allElements = [...inputs, ...selects].sort((a, b) => {
+            const aRow = a.closest('tr');
+            const bRow = b.closest('tr');
+            if (aRow === bRow) {
+                return Array.from(aRow.children).indexOf(a.closest('td')) - Array.from(bRow.children).indexOf(b.closest('td'));
+            }
+            return Array.from(document.querySelectorAll('#excel-tbody tr')).indexOf(aRow) - Array.from(document.querySelectorAll('#excel-tbody tr')).indexOf(bRow);
+        });
+
+        const currentIndex = allElements.indexOf(document.activeElement);
+
+        if (currentIndex !== -1) {
+            e.preventDefault();
+            const nextIndex = e.shiftKey ?
+                (currentIndex - 1 + allElements.length) % allElements.length :
+                (currentIndex + 1) % allElements.length;
+            allElements[nextIndex].focus();
+        }
+    }
+
+    // Enter键移动到下一行同一列  
+    if (e.key === 'Enter' && (document.activeElement.classList.contains('excel-input') || document.activeElement.classList.contains('excel-select')) && !document.activeElement.readOnly && !document.activeElement.disabled) {
+        e.preventDefault();
+        const currentElement = document.activeElement;
+        const field = currentElement.dataset.field;
+
+        const currentRow = currentElement.closest('tr');
+        const nextRow = currentRow.nextElementSibling;
+
+        if (nextRow) {
+            const nextElement = nextRow.querySelector(`input[data-field="${field}"]:not([readonly]), select[data-field="${field}"]:not([disabled])`);
+            if (nextElement) {
+                nextElement.focus();
+            }
+        } else {
+            // 如果是最后一行，添加新行并聚焦
+            addNewRow();
+            setTimeout(() => {
+                const newRow = document.querySelector('#excel-tbody tr:last-child');
+                const newElement = newRow.querySelector(`input[data-field="${field}"]:not([readonly]), select[data-field="${field}"]:not([disabled])`);
+                if (newElement) {
+                    newElement.focus();
+                }
+            }, 100);
+        }
+    }
+});
+
+// 为所有输入框添加focus事件监听
+document.addEventListener('focus', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        handleInputFocus(e.target, false);
+    }
+}, true);
+
+// 为所有输入框添加click事件监听
+document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        handleInputFocus(e.target, true);
+    }
+});
+
+// 点击其他地方关闭下拉菜单
+document.addEventListener('click', function (event) {
+    const selector = event.target.closest('.selector-button');
+    const dropdown = event.target.closest('.selector-dropdown');
+    const dropdownItem = event.target.closest('.dropdown-item');
+
+    // 如果点击的是下拉选项，立即隐藏对应的下拉菜单
+    if (dropdownItem) {
+        const parentDropdown = dropdownItem.closest('.selector-dropdown');
+        if (parentDropdown) {
+            parentDropdown.classList.remove('show');
+        }
+        return;
+    }
+
+    // 如果点击的不是选择器按钮或下拉菜单，隐藏所有下拉菜单
+    if (!selector && !dropdown) {
+        document.getElementById('view-selector-dropdown')?.classList.remove('show');
+        document.getElementById('system-selector-dropdown')?.classList.remove('show');
+    }
+
+    // 关闭多选下拉框（如果点击的不是多选组件内部）
+    const multiSelectTrigger = event.target.closest('.multiselect-trigger');
+    const multiSelectDropdown = event.target.closest('.multiselect-dropdown');
+
+    if (!multiSelectTrigger && !multiSelectDropdown) {
+        document.querySelectorAll('.multiselect-dropdown.show').forEach(dd => {
+            dd.classList.remove('show');
+        });
+    }
+});
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', initApp);
+
+// 批准记录
+async function approveRecord(rowId) {
+    if (!userCanApprove) {
+        showAlert('您没有权限执行此操作', 'error');
+        return;
+    }
+
+    if (!confirm('确定要批准这条记录吗？')) {
+        return;
+    }
+
+    const approveBtn = document.querySelector(`button[onclick="approveRecord('${rowId}')"]`);
+    const originalText = approveBtn.innerHTML;
+    approveBtn.innerHTML = '<div class="loading"></div> 批准中...';
+    approveBtn.disabled = true;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}?action=approve`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id: rowId
+            })
+        });
+
+        const responseText = await response.text();
+        console.log('批准响应:', responseText);
+        const result = JSON.parse(responseText);
+
+        if (result.success) {
+            // 更新界面
+            const row = approveBtn.closest('tr');
+            const approverCell = approveBtn.closest('td');
+
+            // 更新批准状态列
+            approverCell.innerHTML = `
+                        <span style="color: #065f46; font-weight: 600;">已批准</span>
+                    `;
+
+            // 更新行样式
+            row.classList.remove('status-pending');
+            row.classList.add('status-approved');
+
+            updateStats();
+            showAlert('记录已批准', 'success');
+
+        } else {
+            throw new Error(result.message || '批准失败');
+        }
+
+    } catch (error) {
+        console.error('批准失败:', error);
+        showAlert('批准失败: ' + error.message, 'error');
+        approveBtn.innerHTML = originalText;
+        approveBtn.disabled = false;
+    }
+}
+
+// 切换编辑模式
+function toggleEdit(rowId) {
+    const editBtn = document.getElementById(`edit-btn-${rowId}`);
+    if (!editBtn) {
+        console.error(`找不到编辑按钮: edit-btn-${rowId}`);
+        return;
+    }
+
+    const isEditing = editBtn.classList.contains('save-mode');
+
+    if (isEditing) {
+        // 保存模式 - 保存这一行
+        saveSingleRowData(rowId);
+    } else {
+        // 切换到编辑模式
+        setRowReadonly(rowId, false);
+
+        editBtn.classList.add('save-mode');
+        editBtn.innerHTML = '<i class="fas fa-save"></i>';
+        editBtn.title = '保存记录';
+    }
+}
+
+// 设置行的只读状态
+function setRowReadonly(rowId, readonly) {
+    const row = document.querySelector(`input[data-row="${rowId}"]`)?.closest('tr') ||
+        document.querySelector(`div[data-row="${rowId}"]`)?.closest('tr');
+
+    if (!row) {
+        console.error(`找不到行: ${rowId}`);
+        return;
+    }
+
+    if (currentSystem === 'overview') {
+        // 总览页面的编辑规则
+        // 处理输入框 - 在总览页面，所有输入框始终保持只读
+        const inputs = row.querySelectorAll(`input[data-row="${rowId}"]`);
+        inputs.forEach(input => {
+            // 跳过多选框中的checkbox
+            if (input.type === 'checkbox') return;
+
+            // 在总览页面，所有输入框始终保持只读（不能编辑）
+            input.classList.add('readonly');
+            input.setAttribute('readonly', 'readonly');
+            input.setAttribute('disabled', 'disabled');
+        });
+
+        // 处理下拉选择框（保持其他select为只读）
+        const selects = row.querySelectorAll(`select[data-row="${rowId}"]`);
+        selects.forEach(select => {
+            select.classList.add('readonly');
+            select.setAttribute('disabled', 'disabled');
+        });
+
+        // 处理多选系统分配组件 - 在总览页面可编辑
+        const multiSelectWrapper = row.querySelector(`div[data-field="system_assign"][data-row="${rowId}"]`);
+        if (multiSelectWrapper) {
+            const trigger = multiSelectWrapper.querySelector('.multiselect-trigger');
+            const checkboxes = multiSelectWrapper.querySelectorAll('input[type="checkbox"]');
+
+            if (readonly) {
+                // 只读模式：禁用系统分配
+                trigger.classList.add('readonly');
+                trigger.removeAttribute('onclick');
+                checkboxes.forEach(cb => cb.setAttribute('disabled', 'disabled'));
+            } else {
+                // 编辑模式：只有系统分配可以编辑
+                trigger.classList.remove('readonly');
+                trigger.setAttribute('onclick', `toggleMultiSelect('${rowId}', event)`);
+                checkboxes.forEach(cb => cb.removeAttribute('disabled'));
+            }
+        }
+
+        // 处理多选冰箱分类组件 - 在总览页面可编辑
+        const freezerWrapper = row.querySelector(`div[data-field="freezer_category"][data-row="${rowId}"]`);
+        if (freezerWrapper) {
+            const trigger = freezerWrapper.querySelector('.multiselect-trigger');
+            const checkboxes = freezerWrapper.querySelectorAll('input[type="checkbox"]');
+            if (readonly) {
+                trigger.classList.add('readonly');
+                trigger.removeAttribute('onclick');
+                checkboxes.forEach(cb => cb.setAttribute('disabled', 'disabled'));
+            } else {
+                trigger.classList.remove('readonly');
+                trigger.setAttribute('onclick', `toggleMultiSelectFreezer('${rowId}', event)`);
+                checkboxes.forEach(cb => cb.removeAttribute('disabled'));
+            }
+        }
+    } else {
+        // 系统页面的编辑规则
+        // 处理输入框
+        const inputs = row.querySelectorAll(`input[data-row="${rowId}"]`);
+        inputs.forEach(input => {
+            // 申请人始终由系统自动填写，不允许编辑
+            if (input.dataset.field === 'applicant') {
+                input.classList.add('readonly');
+                input.setAttribute('readonly', 'readonly');
+                input.setAttribute('disabled', 'disabled');
+                return;
+            }
+            if (readonly) {
+                input.classList.add('readonly');
+                input.setAttribute('readonly', 'readonly');
+                input.setAttribute('disabled', 'disabled');
+            } else {
+                input.classList.remove('readonly');
+                input.removeAttribute('readonly');
+                input.removeAttribute('disabled');
+            }
+        });
+
+        // 处理下拉选择框
+        const selects = row.querySelectorAll(`select[data-row="${rowId}"]`);
+        selects.forEach(select => {
+            // 系统分配字段始终保持只读，不允许编辑
+            if (select.dataset.field === 'system_assign') {
+                select.classList.add('readonly');
+                select.setAttribute('disabled', 'disabled');
+                return; // 跳过系统分配字段的处理
+            }
+
+            if (readonly) {
+                select.classList.add('readonly');
+                select.setAttribute('disabled', 'disabled');
+            } else {
+                select.classList.remove('readonly');
+                select.removeAttribute('disabled');
+            }
+        });
+
+        // 处理多选冰箱分类组件（系统页面可编辑）
+        const freezerWrapper = row.querySelector(`div[data-field="freezer_category"][data-row="${rowId}"]`);
+        if (freezerWrapper) {
+            const trigger = freezerWrapper.querySelector('.multiselect-trigger');
+            const checkboxes = freezerWrapper.querySelectorAll('input[type="checkbox"]');
+            if (readonly) {
+                trigger.classList.add('readonly');
+                trigger.removeAttribute('onclick');
+                checkboxes.forEach(cb => cb.setAttribute('disabled', 'disabled'));
+            } else {
+                trigger.classList.remove('readonly');
+                trigger.setAttribute('onclick', `toggleMultiSelectFreezer('${rowId}', event)`);
+                checkboxes.forEach(cb => cb.removeAttribute('disabled'));
+            }
+        }
+    }
+
+    // 切换行的编辑样式
+    if (readonly) {
+        row.classList.remove('editing-row');
+    } else {
+        row.classList.add('editing-row');
+    }
+}
+
+// 保存单行数据
+async function saveSingleRowData(rowId) {
+    const editBtn = document.getElementById(`edit-btn-${rowId}`);
+    if (!editBtn) {
+        console.error(`找不到编辑按钮: edit-btn-${rowId}`);
+        return;
+    }
+
+    const originalHTML = editBtn.innerHTML;
+    editBtn.innerHTML = '<div class="loading"></div>';
+    editBtn.disabled = true;
+
+    try {
+        const row = document.querySelector(`input[data-row="${rowId}"]`)?.closest('tr');
+        if (!row) {
+            throw new Error('找不到对应的行');
+        }
+
+        const rowData = extractRowData(row);
+        console.log('提取的行数据:', rowData);
+
+        // 验证必填字段（只对新记录进行严格验证）
+        const isNewRecord = rowId.toString().startsWith('new-');
+
+        if (isNewRecord) {
+            // 新记录必须填写所有必填字段
+            if (!rowData.product_code || !rowData.product_name || !rowData.specification ||
+                !rowData.category || !rowData.supplier || !rowData.applicant) {
+                throw new Error('请填写所有必填字段');
+            }
+        } else {
+            // 现有记录允许部分字段为空，但至少要有货品编号或货品名称
+            if (!rowData.product_code && !rowData.product_name) {
+                throw new Error('货品编号和货品名称至少需要填写一个');
+            }
+        }
+
+        let result;
+
+        // 如果是编辑现有记录，根据页面类型处理批准状态
+        if (!isNewRecord) {
+            if (currentSystem === 'overview') {
+                // 总览页面：保持原有的批准状态
+                const originalRecord = stockData.find(item => item.id == rowId);
+                if (originalRecord && originalRecord.approver) {
+                    rowData.approver = originalRecord.approver;
+                }
+            } else {
+                // 系统页面：清除批准状态，需要重新批准
+                rowData.approver = '';
+            }
+        }
+
+        if (isNewRecord) {
+            // 新记录
+            const response = await fetch(API_BASE_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(rowData)
+            });
+            const responseText = await response.text();
+            console.log('POST响应:', responseText);
+            result = JSON.parse(responseText);
+
+            if (result.success && result.data && result.data.id) {
+                // 更新行ID和相关元素
+                const newId = result.data.id;
+                updateRowIdComplete(row, rowId, newId);
+                // 更新当前使用的rowId变量
+                rowId = newId;
+            }
+        } else {
+            // 更新现有记录
+            rowData.id = rowId;
+            const response = await fetch(API_BASE_URL, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(rowData)
+            });
+            const responseText = await response.text();
+            console.log('PUT响应:', responseText);
+            result = JSON.parse(responseText);
+        }
+
+        if (result.success) {
+            // 保存后申请人已更新为当前用户，同步更新该行显示及内存数据
+            const row = document.querySelector(`input[data-row="${rowId}"]`)?.closest('tr');
+            if (row) {
+                const applicantInput = row.querySelector('input[data-field="applicant"]');
+                if (applicantInput) {
+                    applicantInput.value = CURRENT_USER_APPLICANT || '';
+                }
+            }
+            const dataIdx = stockData.findIndex(item => item.id == rowId);
+            if (dataIdx >= 0) {
+                stockData[dataIdx].applicant = CURRENT_USER_APPLICANT || '';
+            }
+
+            // 根据页面类型显示不同的提示信息
+            if (currentSystem === 'overview') {
+                showAlert('记录保存成功', 'success');
+            } else if (!isNewRecord) {
+                showAlert('记录保存成功，需要在总览页面重新批准', 'success');
+
+                // 系统页面：如果是编辑现有记录，更新状态列显示为"待批准"
+                if (row) {
+                    const statusCell = row.querySelector('td:nth-child(9)');
+                    if (statusCell) {
+                        statusCell.innerHTML = '<span style="color: #92400e; font-weight: 600;">待批准</span>';
+                    }
+                    // 更新行样式
+                    row.classList.remove('status-approved');
+                    row.classList.add('status-pending');
+                }
+            } else {
+                showAlert('记录保存成功', 'success');
+            }
+
+            // 切换回只读模式
+            setRowReadonly(rowId, true);
+
+            // 更新编辑按钮状态
+            const currentEditBtn = document.getElementById(`edit-btn-${rowId}`);
+            if (currentEditBtn) {
+                currentEditBtn.classList.remove('save-mode');
+                currentEditBtn.innerHTML = '<i class="fas fa-edit"></i>';
+                currentEditBtn.title = '编辑记录';
+                currentEditBtn.disabled = false;
+            }
+
+            updateStats();
+        } else {
+            throw new Error(result.message || '保存失败');
+        }
+
+    } catch (error) {
+        console.error('保存数据失败:', error);
+        showAlert('保存失败: ' + error.message, 'error');
+
+        // 恢复按钮状态
+        editBtn.innerHTML = originalHTML;
+        editBtn.disabled = false;
+    }
+}
+
+// 完整更新行ID（修复版本）
+function updateRowIdComplete(row, oldId, newId) {
+    console.log(`更新行ID: ${oldId} -> ${newId}`);
+
+    // 更新所有input的data-row属性
+    const inputs = row.querySelectorAll('input');
+    inputs.forEach(input => {
+        if (input.dataset.row === oldId) {
+            input.dataset.row = newId;
+        }
+    });
+
+    // 更新所有select的data-row属性
+    const selects = row.querySelectorAll('select');
+    selects.forEach(select => {
+        if (select.dataset.row === oldId) {
+            select.dataset.row = newId;
+        }
+    });
+
+    // 更新编辑按钮的ID和事件
+    const editBtn = row.querySelector(`#edit-btn-${oldId}`);
+    if (editBtn) {
+        editBtn.id = `edit-btn-${newId}`;
+        editBtn.setAttribute('onclick', `toggleEdit('${newId}')`);
+    }
+
+    // 更新删除按钮的事件
+    const deleteBtn = row.querySelector('.delete-row-btn');
+    if (deleteBtn) {
+        deleteBtn.setAttribute('onclick', `deleteRow('${newId}')`);
+    }
+
+    // 更新批准按钮的事件（如果存在）
+    const approveBtn = row.querySelector(`button[onclick*="approveRecord('${oldId}')"]`);
+    if (approveBtn) {
+        approveBtn.setAttribute('onclick', `approveRecord('${newId}')`);
+    }
+
+    // 移除新行样式
+    row.classList.remove('new-row');
+
+    const recordIndex = stockData.findIndex(item => item.id == oldId || (typeof item.id === 'undefined' && oldId.toString().startsWith('new-')));
+    if (recordIndex === -1) {
+        // 如果是新记录，添加到stockData中
+        const rowData = extractRowData(row);
+        rowData.id = newId;
+        stockData.push(rowData);
+    } else {
+        // 更新现有记录的ID
+        stockData[recordIndex].id = newId;
+    }
+
+    console.log(`行ID更新完成: ${oldId} -> ${newId}`);
+}
+ + `{cfg.icon}</div>
+        <div class="toast-body">
+            <div class="toast-title">` + '
+
+    container.appendChild(toast);
+
+    // 显示动画
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 0);
+
+    // 自动关闭
+    setTimeout(() => {
+        closeToast(toastId);
+    }, 700);
+}
+
+// 添加关闭通知的函数
+function closeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+}
+
+// 添加关闭所有通知的函数（可选）
+function closeAllToasts() {
+    const toasts = document.querySelectorAll('.toast');
+    toasts.forEach(toast => {
+        closeToast(toast.id);
+    });
+}
+
+// 输入框和下拉选择框事件处理
+document.addEventListener('input', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        const field = e.target.dataset.field;
+        const value = e.target.value;
+        const row = e.target.closest('tr');
+
+        resetInputFirstClick(e.target);
+        updateStats();
+    }
+});
+
+// 下拉选择框事件处理
+document.addEventListener('change', function (e) {
+    if (e.target.classList.contains('excel-select')) {
+        const field = e.target.dataset.field;
+        const value = e.target.value;
+        const row = e.target.closest('tr');
+
+        updateStats();
+    }
+});
+
+
+// 键盘快捷键支持
+document.addEventListener('keydown', function (e) {
+    // Ctrl+S 保存数据
+    if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        saveAllData();
+    }
+
+    // Ctrl+N 添加新行
+    if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        addNewRow();
+    }
+
+    // Tab键在输入框和下拉选择框间移动
+    if (e.key === 'Tab') {
+        const inputs = Array.from(document.querySelectorAll('.excel-input:not([readonly])'));
+        const selects = Array.from(document.querySelectorAll('.excel-select:not([disabled])'));
+        const allElements = [...inputs, ...selects].sort((a, b) => {
+            const aRow = a.closest('tr');
+            const bRow = b.closest('tr');
+            if (aRow === bRow) {
+                return Array.from(aRow.children).indexOf(a.closest('td')) - Array.from(bRow.children).indexOf(b.closest('td'));
+            }
+            return Array.from(document.querySelectorAll('#excel-tbody tr')).indexOf(aRow) - Array.from(document.querySelectorAll('#excel-tbody tr')).indexOf(bRow);
+        });
+
+        const currentIndex = allElements.indexOf(document.activeElement);
+
+        if (currentIndex !== -1) {
+            e.preventDefault();
+            const nextIndex = e.shiftKey ?
+                (currentIndex - 1 + allElements.length) % allElements.length :
+                (currentIndex + 1) % allElements.length;
+            allElements[nextIndex].focus();
+        }
+    }
+
+    // Enter键移动到下一行同一列  
+    if (e.key === 'Enter' && (document.activeElement.classList.contains('excel-input') || document.activeElement.classList.contains('excel-select')) && !document.activeElement.readOnly && !document.activeElement.disabled) {
+        e.preventDefault();
+        const currentElement = document.activeElement;
+        const field = currentElement.dataset.field;
+
+        const currentRow = currentElement.closest('tr');
+        const nextRow = currentRow.nextElementSibling;
+
+        if (nextRow) {
+            const nextElement = nextRow.querySelector(`input[data-field="${field}"]:not([readonly]), select[data-field="${field}"]:not([disabled])`);
+            if (nextElement) {
+                nextElement.focus();
+            }
+        } else {
+            // 如果是最后一行，添加新行并聚焦
+            addNewRow();
+            setTimeout(() => {
+                const newRow = document.querySelector('#excel-tbody tr:last-child');
+                const newElement = newRow.querySelector(`input[data-field="${field}"]:not([readonly]), select[data-field="${field}"]:not([disabled])`);
+                if (newElement) {
+                    newElement.focus();
+                }
+            }, 100);
+        }
+    }
+});
+
+// 为所有输入框添加focus事件监听
+document.addEventListener('focus', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        handleInputFocus(e.target, false);
+    }
+}, true);
+
+// 为所有输入框添加click事件监听
+document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        handleInputFocus(e.target, true);
+    }
+});
+
+// 点击其他地方关闭下拉菜单
+document.addEventListener('click', function (event) {
+    const selector = event.target.closest('.selector-button');
+    const dropdown = event.target.closest('.selector-dropdown');
+    const dropdownItem = event.target.closest('.dropdown-item');
+
+    // 如果点击的是下拉选项，立即隐藏对应的下拉菜单
+    if (dropdownItem) {
+        const parentDropdown = dropdownItem.closest('.selector-dropdown');
+        if (parentDropdown) {
+            parentDropdown.classList.remove('show');
+        }
+        return;
+    }
+
+    // 如果点击的不是选择器按钮或下拉菜单，隐藏所有下拉菜单
+    if (!selector && !dropdown) {
+        document.getElementById('view-selector-dropdown')?.classList.remove('show');
+        document.getElementById('system-selector-dropdown')?.classList.remove('show');
+    }
+
+    // 关闭多选下拉框（如果点击的不是多选组件内部）
+    const multiSelectTrigger = event.target.closest('.multiselect-trigger');
+    const multiSelectDropdown = event.target.closest('.multiselect-dropdown');
+
+    if (!multiSelectTrigger && !multiSelectDropdown) {
+        document.querySelectorAll('.multiselect-dropdown.show').forEach(dd => {
+            dd.classList.remove('show');
+        });
+    }
+});
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', initApp);
+
+// 批准记录
+async function approveRecord(rowId) {
+    if (!userCanApprove) {
+        showAlert('您没有权限执行此操作', 'error');
+        return;
+    }
+
+    if (!confirm('确定要批准这条记录吗？')) {
+        return;
+    }
+
+    const approveBtn = document.querySelector(`button[onclick="approveRecord('${rowId}')"]`);
+    const originalText = approveBtn.innerHTML;
+    approveBtn.innerHTML = '<div class="loading"></div> 批准中...';
+    approveBtn.disabled = true;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}?action=approve`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id: rowId
+            })
+        });
+
+        const responseText = await response.text();
+        console.log('批准响应:', responseText);
+        const result = JSON.parse(responseText);
+
+        if (result.success) {
+            // 更新界面
+            const row = approveBtn.closest('tr');
+            const approverCell = approveBtn.closest('td');
+
+            // 更新批准状态列
+            approverCell.innerHTML = `
+                        <span style="color: #065f46; font-weight: 600;">已批准</span>
+                    `;
+
+            // 更新行样式
+            row.classList.remove('status-pending');
+            row.classList.add('status-approved');
+
+            updateStats();
+            showAlert('记录已批准', 'success');
+
+        } else {
+            throw new Error(result.message || '批准失败');
+        }
+
+    } catch (error) {
+        console.error('批准失败:', error);
+        showAlert('批准失败: ' + error.message, 'error');
+        approveBtn.innerHTML = originalText;
+        approveBtn.disabled = false;
+    }
+}
+
+// 切换编辑模式
+function toggleEdit(rowId) {
+    const editBtn = document.getElementById(`edit-btn-${rowId}`);
+    if (!editBtn) {
+        console.error(`找不到编辑按钮: edit-btn-${rowId}`);
+        return;
+    }
+
+    const isEditing = editBtn.classList.contains('save-mode');
+
+    if (isEditing) {
+        // 保存模式 - 保存这一行
+        saveSingleRowData(rowId);
+    } else {
+        // 切换到编辑模式
+        setRowReadonly(rowId, false);
+
+        editBtn.classList.add('save-mode');
+        editBtn.innerHTML = '<i class="fas fa-save"></i>';
+        editBtn.title = '保存记录';
+    }
+}
+
+// 设置行的只读状态
+function setRowReadonly(rowId, readonly) {
+    const row = document.querySelector(`input[data-row="${rowId}"]`)?.closest('tr') ||
+        document.querySelector(`div[data-row="${rowId}"]`)?.closest('tr');
+
+    if (!row) {
+        console.error(`找不到行: ${rowId}`);
+        return;
+    }
+
+    if (currentSystem === 'overview') {
+        // 总览页面的编辑规则
+        // 处理输入框 - 在总览页面，所有输入框始终保持只读
+        const inputs = row.querySelectorAll(`input[data-row="${rowId}"]`);
+        inputs.forEach(input => {
+            // 跳过多选框中的checkbox
+            if (input.type === 'checkbox') return;
+
+            // 在总览页面，所有输入框始终保持只读（不能编辑）
+            input.classList.add('readonly');
+            input.setAttribute('readonly', 'readonly');
+            input.setAttribute('disabled', 'disabled');
+        });
+
+        // 处理下拉选择框（保持其他select为只读）
+        const selects = row.querySelectorAll(`select[data-row="${rowId}"]`);
+        selects.forEach(select => {
+            select.classList.add('readonly');
+            select.setAttribute('disabled', 'disabled');
+        });
+
+        // 处理多选系统分配组件 - 在总览页面可编辑
+        const multiSelectWrapper = row.querySelector(`div[data-field="system_assign"][data-row="${rowId}"]`);
+        if (multiSelectWrapper) {
+            const trigger = multiSelectWrapper.querySelector('.multiselect-trigger');
+            const checkboxes = multiSelectWrapper.querySelectorAll('input[type="checkbox"]');
+
+            if (readonly) {
+                // 只读模式：禁用系统分配
+                trigger.classList.add('readonly');
+                trigger.removeAttribute('onclick');
+                checkboxes.forEach(cb => cb.setAttribute('disabled', 'disabled'));
+            } else {
+                // 编辑模式：只有系统分配可以编辑
+                trigger.classList.remove('readonly');
+                trigger.setAttribute('onclick', `toggleMultiSelect('${rowId}', event)`);
+                checkboxes.forEach(cb => cb.removeAttribute('disabled'));
+            }
+        }
+
+        // 处理多选冰箱分类组件 - 在总览页面可编辑
+        const freezerWrapper = row.querySelector(`div[data-field="freezer_category"][data-row="${rowId}"]`);
+        if (freezerWrapper) {
+            const trigger = freezerWrapper.querySelector('.multiselect-trigger');
+            const checkboxes = freezerWrapper.querySelectorAll('input[type="checkbox"]');
+            if (readonly) {
+                trigger.classList.add('readonly');
+                trigger.removeAttribute('onclick');
+                checkboxes.forEach(cb => cb.setAttribute('disabled', 'disabled'));
+            } else {
+                trigger.classList.remove('readonly');
+                trigger.setAttribute('onclick', `toggleMultiSelectFreezer('${rowId}', event)`);
+                checkboxes.forEach(cb => cb.removeAttribute('disabled'));
+            }
+        }
+    } else {
+        // 系统页面的编辑规则
+        // 处理输入框
+        const inputs = row.querySelectorAll(`input[data-row="${rowId}"]`);
+        inputs.forEach(input => {
+            // 申请人始终由系统自动填写，不允许编辑
+            if (input.dataset.field === 'applicant') {
+                input.classList.add('readonly');
+                input.setAttribute('readonly', 'readonly');
+                input.setAttribute('disabled', 'disabled');
+                return;
+            }
+            if (readonly) {
+                input.classList.add('readonly');
+                input.setAttribute('readonly', 'readonly');
+                input.setAttribute('disabled', 'disabled');
+            } else {
+                input.classList.remove('readonly');
+                input.removeAttribute('readonly');
+                input.removeAttribute('disabled');
+            }
+        });
+
+        // 处理下拉选择框
+        const selects = row.querySelectorAll(`select[data-row="${rowId}"]`);
+        selects.forEach(select => {
+            // 系统分配字段始终保持只读，不允许编辑
+            if (select.dataset.field === 'system_assign') {
+                select.classList.add('readonly');
+                select.setAttribute('disabled', 'disabled');
+                return; // 跳过系统分配字段的处理
+            }
+
+            if (readonly) {
+                select.classList.add('readonly');
+                select.setAttribute('disabled', 'disabled');
+            } else {
+                select.classList.remove('readonly');
+                select.removeAttribute('disabled');
+            }
+        });
+
+        // 处理多选冰箱分类组件（系统页面可编辑）
+        const freezerWrapper = row.querySelector(`div[data-field="freezer_category"][data-row="${rowId}"]`);
+        if (freezerWrapper) {
+            const trigger = freezerWrapper.querySelector('.multiselect-trigger');
+            const checkboxes = freezerWrapper.querySelectorAll('input[type="checkbox"]');
+            if (readonly) {
+                trigger.classList.add('readonly');
+                trigger.removeAttribute('onclick');
+                checkboxes.forEach(cb => cb.setAttribute('disabled', 'disabled'));
+            } else {
+                trigger.classList.remove('readonly');
+                trigger.setAttribute('onclick', `toggleMultiSelectFreezer('${rowId}', event)`);
+                checkboxes.forEach(cb => cb.removeAttribute('disabled'));
+            }
+        }
+    }
+
+    // 切换行的编辑样式
+    if (readonly) {
+        row.classList.remove('editing-row');
+    } else {
+        row.classList.add('editing-row');
+    }
+}
+
+// 保存单行数据
+async function saveSingleRowData(rowId) {
+    const editBtn = document.getElementById(`edit-btn-${rowId}`);
+    if (!editBtn) {
+        console.error(`找不到编辑按钮: edit-btn-${rowId}`);
+        return;
+    }
+
+    const originalHTML = editBtn.innerHTML;
+    editBtn.innerHTML = '<div class="loading"></div>';
+    editBtn.disabled = true;
+
+    try {
+        const row = document.querySelector(`input[data-row="${rowId}"]`)?.closest('tr');
+        if (!row) {
+            throw new Error('找不到对应的行');
+        }
+
+        const rowData = extractRowData(row);
+        console.log('提取的行数据:', rowData);
+
+        // 验证必填字段（只对新记录进行严格验证）
+        const isNewRecord = rowId.toString().startsWith('new-');
+
+        if (isNewRecord) {
+            // 新记录必须填写所有必填字段
+            if (!rowData.product_code || !rowData.product_name || !rowData.specification ||
+                !rowData.category || !rowData.supplier || !rowData.applicant) {
+                throw new Error('请填写所有必填字段');
+            }
+        } else {
+            // 现有记录允许部分字段为空，但至少要有货品编号或货品名称
+            if (!rowData.product_code && !rowData.product_name) {
+                throw new Error('货品编号和货品名称至少需要填写一个');
+            }
+        }
+
+        let result;
+
+        // 如果是编辑现有记录，根据页面类型处理批准状态
+        if (!isNewRecord) {
+            if (currentSystem === 'overview') {
+                // 总览页面：保持原有的批准状态
+                const originalRecord = stockData.find(item => item.id == rowId);
+                if (originalRecord && originalRecord.approver) {
+                    rowData.approver = originalRecord.approver;
+                }
+            } else {
+                // 系统页面：清除批准状态，需要重新批准
+                rowData.approver = '';
+            }
+        }
+
+        if (isNewRecord) {
+            // 新记录
+            const response = await fetch(API_BASE_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(rowData)
+            });
+            const responseText = await response.text();
+            console.log('POST响应:', responseText);
+            result = JSON.parse(responseText);
+
+            if (result.success && result.data && result.data.id) {
+                // 更新行ID和相关元素
+                const newId = result.data.id;
+                updateRowIdComplete(row, rowId, newId);
+                // 更新当前使用的rowId变量
+                rowId = newId;
+            }
+        } else {
+            // 更新现有记录
+            rowData.id = rowId;
+            const response = await fetch(API_BASE_URL, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(rowData)
+            });
+            const responseText = await response.text();
+            console.log('PUT响应:', responseText);
+            result = JSON.parse(responseText);
+        }
+
+        if (result.success) {
+            // 保存后申请人已更新为当前用户，同步更新该行显示及内存数据
+            const row = document.querySelector(`input[data-row="${rowId}"]`)?.closest('tr');
+            if (row) {
+                const applicantInput = row.querySelector('input[data-field="applicant"]');
+                if (applicantInput) {
+                    applicantInput.value = CURRENT_USER_APPLICANT || '';
+                }
+            }
+            const dataIdx = stockData.findIndex(item => item.id == rowId);
+            if (dataIdx >= 0) {
+                stockData[dataIdx].applicant = CURRENT_USER_APPLICANT || '';
+            }
+
+            // 根据页面类型显示不同的提示信息
+            if (currentSystem === 'overview') {
+                showAlert('记录保存成功', 'success');
+            } else if (!isNewRecord) {
+                showAlert('记录保存成功，需要在总览页面重新批准', 'success');
+
+                // 系统页面：如果是编辑现有记录，更新状态列显示为"待批准"
+                if (row) {
+                    const statusCell = row.querySelector('td:nth-child(9)');
+                    if (statusCell) {
+                        statusCell.innerHTML = '<span style="color: #92400e; font-weight: 600;">待批准</span>';
+                    }
+                    // 更新行样式
+                    row.classList.remove('status-approved');
+                    row.classList.add('status-pending');
+                }
+            } else {
+                showAlert('记录保存成功', 'success');
+            }
+
+            // 切换回只读模式
+            setRowReadonly(rowId, true);
+
+            // 更新编辑按钮状态
+            const currentEditBtn = document.getElementById(`edit-btn-${rowId}`);
+            if (currentEditBtn) {
+                currentEditBtn.classList.remove('save-mode');
+                currentEditBtn.innerHTML = '<i class="fas fa-edit"></i>';
+                currentEditBtn.title = '编辑记录';
+                currentEditBtn.disabled = false;
+            }
+
+            updateStats();
+        } else {
+            throw new Error(result.message || '保存失败');
+        }
+
+    } catch (error) {
+        console.error('保存数据失败:', error);
+        showAlert('保存失败: ' + error.message, 'error');
+
+        // 恢复按钮状态
+        editBtn.innerHTML = originalHTML;
+        editBtn.disabled = false;
+    }
+}
+
+// 完整更新行ID（修复版本）
+function updateRowIdComplete(row, oldId, newId) {
+    console.log(`更新行ID: ${oldId} -> ${newId}`);
+
+    // 更新所有input的data-row属性
+    const inputs = row.querySelectorAll('input');
+    inputs.forEach(input => {
+        if (input.dataset.row === oldId) {
+            input.dataset.row = newId;
+        }
+    });
+
+    // 更新所有select的data-row属性
+    const selects = row.querySelectorAll('select');
+    selects.forEach(select => {
+        if (select.dataset.row === oldId) {
+            select.dataset.row = newId;
+        }
+    });
+
+    // 更新编辑按钮的ID和事件
+    const editBtn = row.querySelector(`#edit-btn-${oldId}`);
+    if (editBtn) {
+        editBtn.id = `edit-btn-${newId}`;
+        editBtn.setAttribute('onclick', `toggleEdit('${newId}')`);
+    }
+
+    // 更新删除按钮的事件
+    const deleteBtn = row.querySelector('.delete-row-btn');
+    if (deleteBtn) {
+        deleteBtn.setAttribute('onclick', `deleteRow('${newId}')`);
+    }
+
+    // 更新批准按钮的事件（如果存在）
+    const approveBtn = row.querySelector(`button[onclick*="approveRecord('${oldId}')"]`);
+    if (approveBtn) {
+        approveBtn.setAttribute('onclick', `approveRecord('${newId}')`);
+    }
+
+    // 移除新行样式
+    row.classList.remove('new-row');
+
+    const recordIndex = stockData.findIndex(item => item.id == oldId || (typeof item.id === 'undefined' && oldId.toString().startsWith('new-')));
+    if (recordIndex === -1) {
+        // 如果是新记录，添加到stockData中
+        const rowData = extractRowData(row);
+        rowData.id = newId;
+        stockData.push(rowData);
+    } else {
+        // 更新现有记录的ID
+        stockData[recordIndex].id = newId;
+    }
+
+    console.log(`行ID更新完成: ${oldId} -> ${newId}`);
+}
+ + `{cfg.title}</div>
+            <div class="toast-msg">` + '
+
+    container.appendChild(toast);
+
+    // 显示动画
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 0);
+
+    // 自动关闭
+    setTimeout(() => {
+        closeToast(toastId);
+    }, 700);
+}
+
+// 添加关闭通知的函数
+function closeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+}
+
+// 添加关闭所有通知的函数（可选）
+function closeAllToasts() {
+    const toasts = document.querySelectorAll('.toast');
+    toasts.forEach(toast => {
+        closeToast(toast.id);
+    });
+}
+
+// 输入框和下拉选择框事件处理
+document.addEventListener('input', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        const field = e.target.dataset.field;
+        const value = e.target.value;
+        const row = e.target.closest('tr');
+
+        resetInputFirstClick(e.target);
+        updateStats();
+    }
+});
+
+// 下拉选择框事件处理
+document.addEventListener('change', function (e) {
+    if (e.target.classList.contains('excel-select')) {
+        const field = e.target.dataset.field;
+        const value = e.target.value;
+        const row = e.target.closest('tr');
+
+        updateStats();
+    }
+});
+
+
+// 键盘快捷键支持
+document.addEventListener('keydown', function (e) {
+    // Ctrl+S 保存数据
+    if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        saveAllData();
+    }
+
+    // Ctrl+N 添加新行
+    if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        addNewRow();
+    }
+
+    // Tab键在输入框和下拉选择框间移动
+    if (e.key === 'Tab') {
+        const inputs = Array.from(document.querySelectorAll('.excel-input:not([readonly])'));
+        const selects = Array.from(document.querySelectorAll('.excel-select:not([disabled])'));
+        const allElements = [...inputs, ...selects].sort((a, b) => {
+            const aRow = a.closest('tr');
+            const bRow = b.closest('tr');
+            if (aRow === bRow) {
+                return Array.from(aRow.children).indexOf(a.closest('td')) - Array.from(bRow.children).indexOf(b.closest('td'));
+            }
+            return Array.from(document.querySelectorAll('#excel-tbody tr')).indexOf(aRow) - Array.from(document.querySelectorAll('#excel-tbody tr')).indexOf(bRow);
+        });
+
+        const currentIndex = allElements.indexOf(document.activeElement);
+
+        if (currentIndex !== -1) {
+            e.preventDefault();
+            const nextIndex = e.shiftKey ?
+                (currentIndex - 1 + allElements.length) % allElements.length :
+                (currentIndex + 1) % allElements.length;
+            allElements[nextIndex].focus();
+        }
+    }
+
+    // Enter键移动到下一行同一列  
+    if (e.key === 'Enter' && (document.activeElement.classList.contains('excel-input') || document.activeElement.classList.contains('excel-select')) && !document.activeElement.readOnly && !document.activeElement.disabled) {
+        e.preventDefault();
+        const currentElement = document.activeElement;
+        const field = currentElement.dataset.field;
+
+        const currentRow = currentElement.closest('tr');
+        const nextRow = currentRow.nextElementSibling;
+
+        if (nextRow) {
+            const nextElement = nextRow.querySelector(`input[data-field="${field}"]:not([readonly]), select[data-field="${field}"]:not([disabled])`);
+            if (nextElement) {
+                nextElement.focus();
+            }
+        } else {
+            // 如果是最后一行，添加新行并聚焦
+            addNewRow();
+            setTimeout(() => {
+                const newRow = document.querySelector('#excel-tbody tr:last-child');
+                const newElement = newRow.querySelector(`input[data-field="${field}"]:not([readonly]), select[data-field="${field}"]:not([disabled])`);
+                if (newElement) {
+                    newElement.focus();
+                }
+            }, 100);
+        }
+    }
+});
+
+// 为所有输入框添加focus事件监听
+document.addEventListener('focus', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        handleInputFocus(e.target, false);
+    }
+}, true);
+
+// 为所有输入框添加click事件监听
+document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        handleInputFocus(e.target, true);
+    }
+});
+
+// 点击其他地方关闭下拉菜单
+document.addEventListener('click', function (event) {
+    const selector = event.target.closest('.selector-button');
+    const dropdown = event.target.closest('.selector-dropdown');
+    const dropdownItem = event.target.closest('.dropdown-item');
+
+    // 如果点击的是下拉选项，立即隐藏对应的下拉菜单
+    if (dropdownItem) {
+        const parentDropdown = dropdownItem.closest('.selector-dropdown');
+        if (parentDropdown) {
+            parentDropdown.classList.remove('show');
+        }
+        return;
+    }
+
+    // 如果点击的不是选择器按钮或下拉菜单，隐藏所有下拉菜单
+    if (!selector && !dropdown) {
+        document.getElementById('view-selector-dropdown')?.classList.remove('show');
+        document.getElementById('system-selector-dropdown')?.classList.remove('show');
+    }
+
+    // 关闭多选下拉框（如果点击的不是多选组件内部）
+    const multiSelectTrigger = event.target.closest('.multiselect-trigger');
+    const multiSelectDropdown = event.target.closest('.multiselect-dropdown');
+
+    if (!multiSelectTrigger && !multiSelectDropdown) {
+        document.querySelectorAll('.multiselect-dropdown.show').forEach(dd => {
+            dd.classList.remove('show');
+        });
+    }
+});
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', initApp);
+
+// 批准记录
+async function approveRecord(rowId) {
+    if (!userCanApprove) {
+        showAlert('您没有权限执行此操作', 'error');
+        return;
+    }
+
+    if (!confirm('确定要批准这条记录吗？')) {
+        return;
+    }
+
+    const approveBtn = document.querySelector(`button[onclick="approveRecord('${rowId}')"]`);
+    const originalText = approveBtn.innerHTML;
+    approveBtn.innerHTML = '<div class="loading"></div> 批准中...';
+    approveBtn.disabled = true;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}?action=approve`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id: rowId
+            })
+        });
+
+        const responseText = await response.text();
+        console.log('批准响应:', responseText);
+        const result = JSON.parse(responseText);
+
+        if (result.success) {
+            // 更新界面
+            const row = approveBtn.closest('tr');
+            const approverCell = approveBtn.closest('td');
+
+            // 更新批准状态列
+            approverCell.innerHTML = `
+                        <span style="color: #065f46; font-weight: 600;">已批准</span>
+                    `;
+
+            // 更新行样式
+            row.classList.remove('status-pending');
+            row.classList.add('status-approved');
+
+            updateStats();
+            showAlert('记录已批准', 'success');
+
+        } else {
+            throw new Error(result.message || '批准失败');
+        }
+
+    } catch (error) {
+        console.error('批准失败:', error);
+        showAlert('批准失败: ' + error.message, 'error');
+        approveBtn.innerHTML = originalText;
+        approveBtn.disabled = false;
+    }
+}
+
+// 切换编辑模式
+function toggleEdit(rowId) {
+    const editBtn = document.getElementById(`edit-btn-${rowId}`);
+    if (!editBtn) {
+        console.error(`找不到编辑按钮: edit-btn-${rowId}`);
+        return;
+    }
+
+    const isEditing = editBtn.classList.contains('save-mode');
+
+    if (isEditing) {
+        // 保存模式 - 保存这一行
+        saveSingleRowData(rowId);
+    } else {
+        // 切换到编辑模式
+        setRowReadonly(rowId, false);
+
+        editBtn.classList.add('save-mode');
+        editBtn.innerHTML = '<i class="fas fa-save"></i>';
+        editBtn.title = '保存记录';
+    }
+}
+
+// 设置行的只读状态
+function setRowReadonly(rowId, readonly) {
+    const row = document.querySelector(`input[data-row="${rowId}"]`)?.closest('tr') ||
+        document.querySelector(`div[data-row="${rowId}"]`)?.closest('tr');
+
+    if (!row) {
+        console.error(`找不到行: ${rowId}`);
+        return;
+    }
+
+    if (currentSystem === 'overview') {
+        // 总览页面的编辑规则
+        // 处理输入框 - 在总览页面，所有输入框始终保持只读
+        const inputs = row.querySelectorAll(`input[data-row="${rowId}"]`);
+        inputs.forEach(input => {
+            // 跳过多选框中的checkbox
+            if (input.type === 'checkbox') return;
+
+            // 在总览页面，所有输入框始终保持只读（不能编辑）
+            input.classList.add('readonly');
+            input.setAttribute('readonly', 'readonly');
+            input.setAttribute('disabled', 'disabled');
+        });
+
+        // 处理下拉选择框（保持其他select为只读）
+        const selects = row.querySelectorAll(`select[data-row="${rowId}"]`);
+        selects.forEach(select => {
+            select.classList.add('readonly');
+            select.setAttribute('disabled', 'disabled');
+        });
+
+        // 处理多选系统分配组件 - 在总览页面可编辑
+        const multiSelectWrapper = row.querySelector(`div[data-field="system_assign"][data-row="${rowId}"]`);
+        if (multiSelectWrapper) {
+            const trigger = multiSelectWrapper.querySelector('.multiselect-trigger');
+            const checkboxes = multiSelectWrapper.querySelectorAll('input[type="checkbox"]');
+
+            if (readonly) {
+                // 只读模式：禁用系统分配
+                trigger.classList.add('readonly');
+                trigger.removeAttribute('onclick');
+                checkboxes.forEach(cb => cb.setAttribute('disabled', 'disabled'));
+            } else {
+                // 编辑模式：只有系统分配可以编辑
+                trigger.classList.remove('readonly');
+                trigger.setAttribute('onclick', `toggleMultiSelect('${rowId}', event)`);
+                checkboxes.forEach(cb => cb.removeAttribute('disabled'));
+            }
+        }
+
+        // 处理多选冰箱分类组件 - 在总览页面可编辑
+        const freezerWrapper = row.querySelector(`div[data-field="freezer_category"][data-row="${rowId}"]`);
+        if (freezerWrapper) {
+            const trigger = freezerWrapper.querySelector('.multiselect-trigger');
+            const checkboxes = freezerWrapper.querySelectorAll('input[type="checkbox"]');
+            if (readonly) {
+                trigger.classList.add('readonly');
+                trigger.removeAttribute('onclick');
+                checkboxes.forEach(cb => cb.setAttribute('disabled', 'disabled'));
+            } else {
+                trigger.classList.remove('readonly');
+                trigger.setAttribute('onclick', `toggleMultiSelectFreezer('${rowId}', event)`);
+                checkboxes.forEach(cb => cb.removeAttribute('disabled'));
+            }
+        }
+    } else {
+        // 系统页面的编辑规则
+        // 处理输入框
+        const inputs = row.querySelectorAll(`input[data-row="${rowId}"]`);
+        inputs.forEach(input => {
+            // 申请人始终由系统自动填写，不允许编辑
+            if (input.dataset.field === 'applicant') {
+                input.classList.add('readonly');
+                input.setAttribute('readonly', 'readonly');
+                input.setAttribute('disabled', 'disabled');
+                return;
+            }
+            if (readonly) {
+                input.classList.add('readonly');
+                input.setAttribute('readonly', 'readonly');
+                input.setAttribute('disabled', 'disabled');
+            } else {
+                input.classList.remove('readonly');
+                input.removeAttribute('readonly');
+                input.removeAttribute('disabled');
+            }
+        });
+
+        // 处理下拉选择框
+        const selects = row.querySelectorAll(`select[data-row="${rowId}"]`);
+        selects.forEach(select => {
+            // 系统分配字段始终保持只读，不允许编辑
+            if (select.dataset.field === 'system_assign') {
+                select.classList.add('readonly');
+                select.setAttribute('disabled', 'disabled');
+                return; // 跳过系统分配字段的处理
+            }
+
+            if (readonly) {
+                select.classList.add('readonly');
+                select.setAttribute('disabled', 'disabled');
+            } else {
+                select.classList.remove('readonly');
+                select.removeAttribute('disabled');
+            }
+        });
+
+        // 处理多选冰箱分类组件（系统页面可编辑）
+        const freezerWrapper = row.querySelector(`div[data-field="freezer_category"][data-row="${rowId}"]`);
+        if (freezerWrapper) {
+            const trigger = freezerWrapper.querySelector('.multiselect-trigger');
+            const checkboxes = freezerWrapper.querySelectorAll('input[type="checkbox"]');
+            if (readonly) {
+                trigger.classList.add('readonly');
+                trigger.removeAttribute('onclick');
+                checkboxes.forEach(cb => cb.setAttribute('disabled', 'disabled'));
+            } else {
+                trigger.classList.remove('readonly');
+                trigger.setAttribute('onclick', `toggleMultiSelectFreezer('${rowId}', event)`);
+                checkboxes.forEach(cb => cb.removeAttribute('disabled'));
+            }
+        }
+    }
+
+    // 切换行的编辑样式
+    if (readonly) {
+        row.classList.remove('editing-row');
+    } else {
+        row.classList.add('editing-row');
+    }
+}
+
+// 保存单行数据
+async function saveSingleRowData(rowId) {
+    const editBtn = document.getElementById(`edit-btn-${rowId}`);
+    if (!editBtn) {
+        console.error(`找不到编辑按钮: edit-btn-${rowId}`);
+        return;
+    }
+
+    const originalHTML = editBtn.innerHTML;
+    editBtn.innerHTML = '<div class="loading"></div>';
+    editBtn.disabled = true;
+
+    try {
+        const row = document.querySelector(`input[data-row="${rowId}"]`)?.closest('tr');
+        if (!row) {
+            throw new Error('找不到对应的行');
+        }
+
+        const rowData = extractRowData(row);
+        console.log('提取的行数据:', rowData);
+
+        // 验证必填字段（只对新记录进行严格验证）
+        const isNewRecord = rowId.toString().startsWith('new-');
+
+        if (isNewRecord) {
+            // 新记录必须填写所有必填字段
+            if (!rowData.product_code || !rowData.product_name || !rowData.specification ||
+                !rowData.category || !rowData.supplier || !rowData.applicant) {
+                throw new Error('请填写所有必填字段');
+            }
+        } else {
+            // 现有记录允许部分字段为空，但至少要有货品编号或货品名称
+            if (!rowData.product_code && !rowData.product_name) {
+                throw new Error('货品编号和货品名称至少需要填写一个');
+            }
+        }
+
+        let result;
+
+        // 如果是编辑现有记录，根据页面类型处理批准状态
+        if (!isNewRecord) {
+            if (currentSystem === 'overview') {
+                // 总览页面：保持原有的批准状态
+                const originalRecord = stockData.find(item => item.id == rowId);
+                if (originalRecord && originalRecord.approver) {
+                    rowData.approver = originalRecord.approver;
+                }
+            } else {
+                // 系统页面：清除批准状态，需要重新批准
+                rowData.approver = '';
+            }
+        }
+
+        if (isNewRecord) {
+            // 新记录
+            const response = await fetch(API_BASE_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(rowData)
+            });
+            const responseText = await response.text();
+            console.log('POST响应:', responseText);
+            result = JSON.parse(responseText);
+
+            if (result.success && result.data && result.data.id) {
+                // 更新行ID和相关元素
+                const newId = result.data.id;
+                updateRowIdComplete(row, rowId, newId);
+                // 更新当前使用的rowId变量
+                rowId = newId;
+            }
+        } else {
+            // 更新现有记录
+            rowData.id = rowId;
+            const response = await fetch(API_BASE_URL, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(rowData)
+            });
+            const responseText = await response.text();
+            console.log('PUT响应:', responseText);
+            result = JSON.parse(responseText);
+        }
+
+        if (result.success) {
+            // 保存后申请人已更新为当前用户，同步更新该行显示及内存数据
+            const row = document.querySelector(`input[data-row="${rowId}"]`)?.closest('tr');
+            if (row) {
+                const applicantInput = row.querySelector('input[data-field="applicant"]');
+                if (applicantInput) {
+                    applicantInput.value = CURRENT_USER_APPLICANT || '';
+                }
+            }
+            const dataIdx = stockData.findIndex(item => item.id == rowId);
+            if (dataIdx >= 0) {
+                stockData[dataIdx].applicant = CURRENT_USER_APPLICANT || '';
+            }
+
+            // 根据页面类型显示不同的提示信息
+            if (currentSystem === 'overview') {
+                showAlert('记录保存成功', 'success');
+            } else if (!isNewRecord) {
+                showAlert('记录保存成功，需要在总览页面重新批准', 'success');
+
+                // 系统页面：如果是编辑现有记录，更新状态列显示为"待批准"
+                if (row) {
+                    const statusCell = row.querySelector('td:nth-child(9)');
+                    if (statusCell) {
+                        statusCell.innerHTML = '<span style="color: #92400e; font-weight: 600;">待批准</span>';
+                    }
+                    // 更新行样式
+                    row.classList.remove('status-approved');
+                    row.classList.add('status-pending');
+                }
+            } else {
+                showAlert('记录保存成功', 'success');
+            }
+
+            // 切换回只读模式
+            setRowReadonly(rowId, true);
+
+            // 更新编辑按钮状态
+            const currentEditBtn = document.getElementById(`edit-btn-${rowId}`);
+            if (currentEditBtn) {
+                currentEditBtn.classList.remove('save-mode');
+                currentEditBtn.innerHTML = '<i class="fas fa-edit"></i>';
+                currentEditBtn.title = '编辑记录';
+                currentEditBtn.disabled = false;
+            }
+
+            updateStats();
+        } else {
+            throw new Error(result.message || '保存失败');
+        }
+
+    } catch (error) {
+        console.error('保存数据失败:', error);
+        showAlert('保存失败: ' + error.message, 'error');
+
+        // 恢复按钮状态
+        editBtn.innerHTML = originalHTML;
+        editBtn.disabled = false;
+    }
+}
+
+// 完整更新行ID（修复版本）
+function updateRowIdComplete(row, oldId, newId) {
+    console.log(`更新行ID: ${oldId} -> ${newId}`);
+
+    // 更新所有input的data-row属性
+    const inputs = row.querySelectorAll('input');
+    inputs.forEach(input => {
+        if (input.dataset.row === oldId) {
+            input.dataset.row = newId;
+        }
+    });
+
+    // 更新所有select的data-row属性
+    const selects = row.querySelectorAll('select');
+    selects.forEach(select => {
+        if (select.dataset.row === oldId) {
+            select.dataset.row = newId;
+        }
+    });
+
+    // 更新编辑按钮的ID和事件
+    const editBtn = row.querySelector(`#edit-btn-${oldId}`);
+    if (editBtn) {
+        editBtn.id = `edit-btn-${newId}`;
+        editBtn.setAttribute('onclick', `toggleEdit('${newId}')`);
+    }
+
+    // 更新删除按钮的事件
+    const deleteBtn = row.querySelector('.delete-row-btn');
+    if (deleteBtn) {
+        deleteBtn.setAttribute('onclick', `deleteRow('${newId}')`);
+    }
+
+    // 更新批准按钮的事件（如果存在）
+    const approveBtn = row.querySelector(`button[onclick*="approveRecord('${oldId}')"]`);
+    if (approveBtn) {
+        approveBtn.setAttribute('onclick', `approveRecord('${newId}')`);
+    }
+
+    // 移除新行样式
+    row.classList.remove('new-row');
+
+    const recordIndex = stockData.findIndex(item => item.id == oldId || (typeof item.id === 'undefined' && oldId.toString().startsWith('new-')));
+    if (recordIndex === -1) {
+        // 如果是新记录，添加到stockData中
+        const rowData = extractRowData(row);
+        rowData.id = newId;
+        stockData.push(rowData);
+    } else {
+        // 更新现有记录的ID
+        stockData[recordIndex].id = newId;
+    }
+
+    console.log(`行ID更新完成: ${oldId} -> ${newId}`);
+}
+ + `{message}</div>
+        </div>
+        <button class="toast-close" onclick="closeToast('` + '
+
+    container.appendChild(toast);
+
+    // 显示动画
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 0);
+
+    // 自动关闭
+    setTimeout(() => {
+        closeToast(toastId);
+    }, 700);
+}
+
+// 添加关闭通知的函数
+function closeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+}
+
+// 添加关闭所有通知的函数（可选）
+function closeAllToasts() {
+    const toasts = document.querySelectorAll('.toast');
+    toasts.forEach(toast => {
+        closeToast(toast.id);
+    });
+}
+
+// 输入框和下拉选择框事件处理
+document.addEventListener('input', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        const field = e.target.dataset.field;
+        const value = e.target.value;
+        const row = e.target.closest('tr');
+
+        resetInputFirstClick(e.target);
+        updateStats();
+    }
+});
+
+// 下拉选择框事件处理
+document.addEventListener('change', function (e) {
+    if (e.target.classList.contains('excel-select')) {
+        const field = e.target.dataset.field;
+        const value = e.target.value;
+        const row = e.target.closest('tr');
+
+        updateStats();
+    }
+});
+
+
+// 键盘快捷键支持
+document.addEventListener('keydown', function (e) {
+    // Ctrl+S 保存数据
+    if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        saveAllData();
+    }
+
+    // Ctrl+N 添加新行
+    if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        addNewRow();
+    }
+
+    // Tab键在输入框和下拉选择框间移动
+    if (e.key === 'Tab') {
+        const inputs = Array.from(document.querySelectorAll('.excel-input:not([readonly])'));
+        const selects = Array.from(document.querySelectorAll('.excel-select:not([disabled])'));
+        const allElements = [...inputs, ...selects].sort((a, b) => {
+            const aRow = a.closest('tr');
+            const bRow = b.closest('tr');
+            if (aRow === bRow) {
+                return Array.from(aRow.children).indexOf(a.closest('td')) - Array.from(bRow.children).indexOf(b.closest('td'));
+            }
+            return Array.from(document.querySelectorAll('#excel-tbody tr')).indexOf(aRow) - Array.from(document.querySelectorAll('#excel-tbody tr')).indexOf(bRow);
+        });
+
+        const currentIndex = allElements.indexOf(document.activeElement);
+
+        if (currentIndex !== -1) {
+            e.preventDefault();
+            const nextIndex = e.shiftKey ?
+                (currentIndex - 1 + allElements.length) % allElements.length :
+                (currentIndex + 1) % allElements.length;
+            allElements[nextIndex].focus();
+        }
+    }
+
+    // Enter键移动到下一行同一列  
+    if (e.key === 'Enter' && (document.activeElement.classList.contains('excel-input') || document.activeElement.classList.contains('excel-select')) && !document.activeElement.readOnly && !document.activeElement.disabled) {
+        e.preventDefault();
+        const currentElement = document.activeElement;
+        const field = currentElement.dataset.field;
+
+        const currentRow = currentElement.closest('tr');
+        const nextRow = currentRow.nextElementSibling;
+
+        if (nextRow) {
+            const nextElement = nextRow.querySelector(`input[data-field="${field}"]:not([readonly]), select[data-field="${field}"]:not([disabled])`);
+            if (nextElement) {
+                nextElement.focus();
+            }
+        } else {
+            // 如果是最后一行，添加新行并聚焦
+            addNewRow();
+            setTimeout(() => {
+                const newRow = document.querySelector('#excel-tbody tr:last-child');
+                const newElement = newRow.querySelector(`input[data-field="${field}"]:not([readonly]), select[data-field="${field}"]:not([disabled])`);
+                if (newElement) {
+                    newElement.focus();
+                }
+            }, 100);
+        }
+    }
+});
+
+// 为所有输入框添加focus事件监听
+document.addEventListener('focus', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        handleInputFocus(e.target, false);
+    }
+}, true);
+
+// 为所有输入框添加click事件监听
+document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        handleInputFocus(e.target, true);
+    }
+});
+
+// 点击其他地方关闭下拉菜单
+document.addEventListener('click', function (event) {
+    const selector = event.target.closest('.selector-button');
+    const dropdown = event.target.closest('.selector-dropdown');
+    const dropdownItem = event.target.closest('.dropdown-item');
+
+    // 如果点击的是下拉选项，立即隐藏对应的下拉菜单
+    if (dropdownItem) {
+        const parentDropdown = dropdownItem.closest('.selector-dropdown');
+        if (parentDropdown) {
+            parentDropdown.classList.remove('show');
+        }
+        return;
+    }
+
+    // 如果点击的不是选择器按钮或下拉菜单，隐藏所有下拉菜单
+    if (!selector && !dropdown) {
+        document.getElementById('view-selector-dropdown')?.classList.remove('show');
+        document.getElementById('system-selector-dropdown')?.classList.remove('show');
+    }
+
+    // 关闭多选下拉框（如果点击的不是多选组件内部）
+    const multiSelectTrigger = event.target.closest('.multiselect-trigger');
+    const multiSelectDropdown = event.target.closest('.multiselect-dropdown');
+
+    if (!multiSelectTrigger && !multiSelectDropdown) {
+        document.querySelectorAll('.multiselect-dropdown.show').forEach(dd => {
+            dd.classList.remove('show');
+        });
+    }
+});
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', initApp);
+
+// 批准记录
+async function approveRecord(rowId) {
+    if (!userCanApprove) {
+        showAlert('您没有权限执行此操作', 'error');
+        return;
+    }
+
+    if (!confirm('确定要批准这条记录吗？')) {
+        return;
+    }
+
+    const approveBtn = document.querySelector(`button[onclick="approveRecord('${rowId}')"]`);
+    const originalText = approveBtn.innerHTML;
+    approveBtn.innerHTML = '<div class="loading"></div> 批准中...';
+    approveBtn.disabled = true;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}?action=approve`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id: rowId
+            })
+        });
+
+        const responseText = await response.text();
+        console.log('批准响应:', responseText);
+        const result = JSON.parse(responseText);
+
+        if (result.success) {
+            // 更新界面
+            const row = approveBtn.closest('tr');
+            const approverCell = approveBtn.closest('td');
+
+            // 更新批准状态列
+            approverCell.innerHTML = `
+                        <span style="color: #065f46; font-weight: 600;">已批准</span>
+                    `;
+
+            // 更新行样式
+            row.classList.remove('status-pending');
+            row.classList.add('status-approved');
+
+            updateStats();
+            showAlert('记录已批准', 'success');
+
+        } else {
+            throw new Error(result.message || '批准失败');
+        }
+
+    } catch (error) {
+        console.error('批准失败:', error);
+        showAlert('批准失败: ' + error.message, 'error');
+        approveBtn.innerHTML = originalText;
+        approveBtn.disabled = false;
+    }
+}
+
+// 切换编辑模式
+function toggleEdit(rowId) {
+    const editBtn = document.getElementById(`edit-btn-${rowId}`);
+    if (!editBtn) {
+        console.error(`找不到编辑按钮: edit-btn-${rowId}`);
+        return;
+    }
+
+    const isEditing = editBtn.classList.contains('save-mode');
+
+    if (isEditing) {
+        // 保存模式 - 保存这一行
+        saveSingleRowData(rowId);
+    } else {
+        // 切换到编辑模式
+        setRowReadonly(rowId, false);
+
+        editBtn.classList.add('save-mode');
+        editBtn.innerHTML = '<i class="fas fa-save"></i>';
+        editBtn.title = '保存记录';
+    }
+}
+
+// 设置行的只读状态
+function setRowReadonly(rowId, readonly) {
+    const row = document.querySelector(`input[data-row="${rowId}"]`)?.closest('tr') ||
+        document.querySelector(`div[data-row="${rowId}"]`)?.closest('tr');
+
+    if (!row) {
+        console.error(`找不到行: ${rowId}`);
+        return;
+    }
+
+    if (currentSystem === 'overview') {
+        // 总览页面的编辑规则
+        // 处理输入框 - 在总览页面，所有输入框始终保持只读
+        const inputs = row.querySelectorAll(`input[data-row="${rowId}"]`);
+        inputs.forEach(input => {
+            // 跳过多选框中的checkbox
+            if (input.type === 'checkbox') return;
+
+            // 在总览页面，所有输入框始终保持只读（不能编辑）
+            input.classList.add('readonly');
+            input.setAttribute('readonly', 'readonly');
+            input.setAttribute('disabled', 'disabled');
+        });
+
+        // 处理下拉选择框（保持其他select为只读）
+        const selects = row.querySelectorAll(`select[data-row="${rowId}"]`);
+        selects.forEach(select => {
+            select.classList.add('readonly');
+            select.setAttribute('disabled', 'disabled');
+        });
+
+        // 处理多选系统分配组件 - 在总览页面可编辑
+        const multiSelectWrapper = row.querySelector(`div[data-field="system_assign"][data-row="${rowId}"]`);
+        if (multiSelectWrapper) {
+            const trigger = multiSelectWrapper.querySelector('.multiselect-trigger');
+            const checkboxes = multiSelectWrapper.querySelectorAll('input[type="checkbox"]');
+
+            if (readonly) {
+                // 只读模式：禁用系统分配
+                trigger.classList.add('readonly');
+                trigger.removeAttribute('onclick');
+                checkboxes.forEach(cb => cb.setAttribute('disabled', 'disabled'));
+            } else {
+                // 编辑模式：只有系统分配可以编辑
+                trigger.classList.remove('readonly');
+                trigger.setAttribute('onclick', `toggleMultiSelect('${rowId}', event)`);
+                checkboxes.forEach(cb => cb.removeAttribute('disabled'));
+            }
+        }
+
+        // 处理多选冰箱分类组件 - 在总览页面可编辑
+        const freezerWrapper = row.querySelector(`div[data-field="freezer_category"][data-row="${rowId}"]`);
+        if (freezerWrapper) {
+            const trigger = freezerWrapper.querySelector('.multiselect-trigger');
+            const checkboxes = freezerWrapper.querySelectorAll('input[type="checkbox"]');
+            if (readonly) {
+                trigger.classList.add('readonly');
+                trigger.removeAttribute('onclick');
+                checkboxes.forEach(cb => cb.setAttribute('disabled', 'disabled'));
+            } else {
+                trigger.classList.remove('readonly');
+                trigger.setAttribute('onclick', `toggleMultiSelectFreezer('${rowId}', event)`);
+                checkboxes.forEach(cb => cb.removeAttribute('disabled'));
+            }
+        }
+    } else {
+        // 系统页面的编辑规则
+        // 处理输入框
+        const inputs = row.querySelectorAll(`input[data-row="${rowId}"]`);
+        inputs.forEach(input => {
+            // 申请人始终由系统自动填写，不允许编辑
+            if (input.dataset.field === 'applicant') {
+                input.classList.add('readonly');
+                input.setAttribute('readonly', 'readonly');
+                input.setAttribute('disabled', 'disabled');
+                return;
+            }
+            if (readonly) {
+                input.classList.add('readonly');
+                input.setAttribute('readonly', 'readonly');
+                input.setAttribute('disabled', 'disabled');
+            } else {
+                input.classList.remove('readonly');
+                input.removeAttribute('readonly');
+                input.removeAttribute('disabled');
+            }
+        });
+
+        // 处理下拉选择框
+        const selects = row.querySelectorAll(`select[data-row="${rowId}"]`);
+        selects.forEach(select => {
+            // 系统分配字段始终保持只读，不允许编辑
+            if (select.dataset.field === 'system_assign') {
+                select.classList.add('readonly');
+                select.setAttribute('disabled', 'disabled');
+                return; // 跳过系统分配字段的处理
+            }
+
+            if (readonly) {
+                select.classList.add('readonly');
+                select.setAttribute('disabled', 'disabled');
+            } else {
+                select.classList.remove('readonly');
+                select.removeAttribute('disabled');
+            }
+        });
+
+        // 处理多选冰箱分类组件（系统页面可编辑）
+        const freezerWrapper = row.querySelector(`div[data-field="freezer_category"][data-row="${rowId}"]`);
+        if (freezerWrapper) {
+            const trigger = freezerWrapper.querySelector('.multiselect-trigger');
+            const checkboxes = freezerWrapper.querySelectorAll('input[type="checkbox"]');
+            if (readonly) {
+                trigger.classList.add('readonly');
+                trigger.removeAttribute('onclick');
+                checkboxes.forEach(cb => cb.setAttribute('disabled', 'disabled'));
+            } else {
+                trigger.classList.remove('readonly');
+                trigger.setAttribute('onclick', `toggleMultiSelectFreezer('${rowId}', event)`);
+                checkboxes.forEach(cb => cb.removeAttribute('disabled'));
+            }
+        }
+    }
+
+    // 切换行的编辑样式
+    if (readonly) {
+        row.classList.remove('editing-row');
+    } else {
+        row.classList.add('editing-row');
+    }
+}
+
+// 保存单行数据
+async function saveSingleRowData(rowId) {
+    const editBtn = document.getElementById(`edit-btn-${rowId}`);
+    if (!editBtn) {
+        console.error(`找不到编辑按钮: edit-btn-${rowId}`);
+        return;
+    }
+
+    const originalHTML = editBtn.innerHTML;
+    editBtn.innerHTML = '<div class="loading"></div>';
+    editBtn.disabled = true;
+
+    try {
+        const row = document.querySelector(`input[data-row="${rowId}"]`)?.closest('tr');
+        if (!row) {
+            throw new Error('找不到对应的行');
+        }
+
+        const rowData = extractRowData(row);
+        console.log('提取的行数据:', rowData);
+
+        // 验证必填字段（只对新记录进行严格验证）
+        const isNewRecord = rowId.toString().startsWith('new-');
+
+        if (isNewRecord) {
+            // 新记录必须填写所有必填字段
+            if (!rowData.product_code || !rowData.product_name || !rowData.specification ||
+                !rowData.category || !rowData.supplier || !rowData.applicant) {
+                throw new Error('请填写所有必填字段');
+            }
+        } else {
+            // 现有记录允许部分字段为空，但至少要有货品编号或货品名称
+            if (!rowData.product_code && !rowData.product_name) {
+                throw new Error('货品编号和货品名称至少需要填写一个');
+            }
+        }
+
+        let result;
+
+        // 如果是编辑现有记录，根据页面类型处理批准状态
+        if (!isNewRecord) {
+            if (currentSystem === 'overview') {
+                // 总览页面：保持原有的批准状态
+                const originalRecord = stockData.find(item => item.id == rowId);
+                if (originalRecord && originalRecord.approver) {
+                    rowData.approver = originalRecord.approver;
+                }
+            } else {
+                // 系统页面：清除批准状态，需要重新批准
+                rowData.approver = '';
+            }
+        }
+
+        if (isNewRecord) {
+            // 新记录
+            const response = await fetch(API_BASE_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(rowData)
+            });
+            const responseText = await response.text();
+            console.log('POST响应:', responseText);
+            result = JSON.parse(responseText);
+
+            if (result.success && result.data && result.data.id) {
+                // 更新行ID和相关元素
+                const newId = result.data.id;
+                updateRowIdComplete(row, rowId, newId);
+                // 更新当前使用的rowId变量
+                rowId = newId;
+            }
+        } else {
+            // 更新现有记录
+            rowData.id = rowId;
+            const response = await fetch(API_BASE_URL, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(rowData)
+            });
+            const responseText = await response.text();
+            console.log('PUT响应:', responseText);
+            result = JSON.parse(responseText);
+        }
+
+        if (result.success) {
+            // 保存后申请人已更新为当前用户，同步更新该行显示及内存数据
+            const row = document.querySelector(`input[data-row="${rowId}"]`)?.closest('tr');
+            if (row) {
+                const applicantInput = row.querySelector('input[data-field="applicant"]');
+                if (applicantInput) {
+                    applicantInput.value = CURRENT_USER_APPLICANT || '';
+                }
+            }
+            const dataIdx = stockData.findIndex(item => item.id == rowId);
+            if (dataIdx >= 0) {
+                stockData[dataIdx].applicant = CURRENT_USER_APPLICANT || '';
+            }
+
+            // 根据页面类型显示不同的提示信息
+            if (currentSystem === 'overview') {
+                showAlert('记录保存成功', 'success');
+            } else if (!isNewRecord) {
+                showAlert('记录保存成功，需要在总览页面重新批准', 'success');
+
+                // 系统页面：如果是编辑现有记录，更新状态列显示为"待批准"
+                if (row) {
+                    const statusCell = row.querySelector('td:nth-child(9)');
+                    if (statusCell) {
+                        statusCell.innerHTML = '<span style="color: #92400e; font-weight: 600;">待批准</span>';
+                    }
+                    // 更新行样式
+                    row.classList.remove('status-approved');
+                    row.classList.add('status-pending');
+                }
+            } else {
+                showAlert('记录保存成功', 'success');
+            }
+
+            // 切换回只读模式
+            setRowReadonly(rowId, true);
+
+            // 更新编辑按钮状态
+            const currentEditBtn = document.getElementById(`edit-btn-${rowId}`);
+            if (currentEditBtn) {
+                currentEditBtn.classList.remove('save-mode');
+                currentEditBtn.innerHTML = '<i class="fas fa-edit"></i>';
+                currentEditBtn.title = '编辑记录';
+                currentEditBtn.disabled = false;
+            }
+
+            updateStats();
+        } else {
+            throw new Error(result.message || '保存失败');
+        }
+
+    } catch (error) {
+        console.error('保存数据失败:', error);
+        showAlert('保存失败: ' + error.message, 'error');
+
+        // 恢复按钮状态
+        editBtn.innerHTML = originalHTML;
+        editBtn.disabled = false;
+    }
+}
+
+// 完整更新行ID（修复版本）
+function updateRowIdComplete(row, oldId, newId) {
+    console.log(`更新行ID: ${oldId} -> ${newId}`);
+
+    // 更新所有input的data-row属性
+    const inputs = row.querySelectorAll('input');
+    inputs.forEach(input => {
+        if (input.dataset.row === oldId) {
+            input.dataset.row = newId;
+        }
+    });
+
+    // 更新所有select的data-row属性
+    const selects = row.querySelectorAll('select');
+    selects.forEach(select => {
+        if (select.dataset.row === oldId) {
+            select.dataset.row = newId;
+        }
+    });
+
+    // 更新编辑按钮的ID和事件
+    const editBtn = row.querySelector(`#edit-btn-${oldId}`);
+    if (editBtn) {
+        editBtn.id = `edit-btn-${newId}`;
+        editBtn.setAttribute('onclick', `toggleEdit('${newId}')`);
+    }
+
+    // 更新删除按钮的事件
+    const deleteBtn = row.querySelector('.delete-row-btn');
+    if (deleteBtn) {
+        deleteBtn.setAttribute('onclick', `deleteRow('${newId}')`);
+    }
+
+    // 更新批准按钮的事件（如果存在）
+    const approveBtn = row.querySelector(`button[onclick*="approveRecord('${oldId}')"]`);
+    if (approveBtn) {
+        approveBtn.setAttribute('onclick', `approveRecord('${newId}')`);
+    }
+
+    // 移除新行样式
+    row.classList.remove('new-row');
+
+    const recordIndex = stockData.findIndex(item => item.id == oldId || (typeof item.id === 'undefined' && oldId.toString().startsWith('new-')));
+    if (recordIndex === -1) {
+        // 如果是新记录，添加到stockData中
+        const rowData = extractRowData(row);
+        rowData.id = newId;
+        stockData.push(rowData);
+    } else {
+        // 更新现有记录的ID
+        stockData[recordIndex].id = newId;
+    }
+
+    console.log(`行ID更新完成: ${oldId} -> ${newId}`);
+}
+ + `{toastId}')">&times;</button>
+        <div class="toast-progress"></div>
+    `;
 
     container.appendChild(toast);
 

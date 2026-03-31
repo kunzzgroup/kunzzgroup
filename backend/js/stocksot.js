@@ -1,4 +1,4 @@
-
+﻿
 const API_BASE_URL = 'stocksotapi.php';
 const PRODUCT_API_URL = 'stockapi.php';
 const PRICE_API_URL = 'stockeditapi.php';  // 价格API使用stockeditapi
@@ -1650,24 +1650,2329 @@ function showAlert(message, type = 'success') {
     }
 
     const toastId = 'toast-' + Date.now();
-    const iconClass = {
-        'success': 'fa-check-circle',
-        'error': 'fa-exclamation-circle',
-        'info': 'fa-info-circle',
-        'warning': 'fa-exclamation-triangle'
-    }[type] || 'fa-check-circle';
+    const cfg = {
+        'success': { icon: '✅', title: '操作成功' },
+        'error':   { icon: '❌', title: '操作失败' },
+        'info':    { icon: 'ℹ️', title: '提示信息' },
+        'warning': { icon: '⚠️', title: '注意' }
+    }[type] || { icon: '✅', title: '操作成功' };
 
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.id = toastId;
     toast.innerHTML = `
-                <i class="fas ${iconClass} toast-icon"></i>
-                <div class="toast-content">${message}</div>
-                <button class="toast-close" onclick="closeToast('${toastId}')">
-                    <i class="fas fa-times"></i>
-                </button>
-                <div class="toast-progress"></div>
-            `;
+        <div class="toast-icon-wrap">` + '
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 0);
+
+    setTimeout(() => {
+        closeToast(toastId);
+    }, 4000);
+}
+
+function closeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+}
+
+// 输入框和下拉选择框事件处理
+document.addEventListener('input', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        resetInputFirstClick(e.target);
+    }
+});
+
+// 键盘快捷键支持
+document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        saveAllData();
+    }
+
+    if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        addNewRow();
+    }
+});
+
+// 为所有输入框添加focus事件监听
+document.addEventListener('focus', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        handleInputFocus(e.target, false);
+    }
+}, true);
+
+// 为所有输入框添加click事件监听
+document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        handleInputFocus(e.target, true);
+    }
+});
+
+// 切换日历显示
+function toggleCalendar() {
+    const popup = document.getElementById('calendar-popup');
+    const picker = document.getElementById('date-range-picker');
+
+    if (popup.style.display === 'none') {
+        const rect = picker.getBoundingClientRect();
+        popup.style.top = (rect.bottom + 8) + 'px';
+        popup.style.left = rect.left + 'px';
+        popup.style.display = 'block';
+        initCalendar();
+        renderCalendar();
+    } else {
+        popup.style.display = 'none';
+    }
+}
+
+// 初始化日历
+function initCalendar() {
+    const today = new Date();
+    calendarCurrentDate = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    if (!calendarStartDate) {
+        calendarStartDate = new Date(today);
+        calendarStartDate.setHours(0, 0, 0, 0);
+    }
+    if (!calendarEndDate) {
+        calendarEndDate = new Date(today);
+        calendarEndDate.setHours(0, 0, 0, 0);
+    }
+
+    // 初始化年份选择器
+    const yearSelect = document.getElementById('calendar-year-select');
+    yearSelect.innerHTML = '';
+    const currentYear = today.getFullYear();
+    for (let year = 2022; year <= currentYear + 1; year++) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year + '年';
+        if (year === calendarCurrentDate.getFullYear()) {
+            option.selected = true;
+        }
+        yearSelect.appendChild(option);
+    }
+
+    document.getElementById('calendar-month-select').value = calendarCurrentDate.getMonth();
+    updateDateRangeDisplay();
+}
+
+// 切换月份
+function changeMonth(delta) {
+    calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + delta);
+    document.getElementById('calendar-month-select').value = calendarCurrentDate.getMonth();
+    document.getElementById('calendar-year-select').value = calendarCurrentDate.getFullYear();
+    renderCalendar();
+}
+
+// 渲染日历
+function renderCalendar() {
+    const year = parseInt(document.getElementById('calendar-year-select').value);
+    const month = parseInt(document.getElementById('calendar-month-select').value);
+
+    calendarCurrentDate = new Date(year, month, 1);
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const prevLastDay = new Date(year, month, 0);
+
+    const firstDayWeek = firstDay.getDay();
+    const lastDate = lastDay.getDate();
+    const prevLastDate = prevLastDay.getDate();
+
+    const daysContainer = document.getElementById('calendar-days');
+    daysContainer.innerHTML = '';
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // 上个月的日期
+    for (let i = firstDayWeek - 1; i >= 0; i--) {
+        const day = prevLastDate - i;
+        const dayElement = createDayElement(day, year, month - 1, true);
+        daysContainer.appendChild(dayElement);
+    }
+
+    // 当前月的日期
+    for (let day = 1; day <= lastDate; day++) {
+        const dayElement = createDayElement(day, year, month, false);
+        daysContainer.appendChild(dayElement);
+    }
+
+    // 下个月的日期
+    const totalCells = daysContainer.children.length;
+    const remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+    for (let day = 1; day <= remainingCells; day++) {
+        const dayElement = createDayElement(day, year, month + 1, true);
+        daysContainer.appendChild(dayElement);
+    }
+}
+
+// 创建日期元素
+function createDayElement(day, year, month, isOtherMonth) {
+    const dayElement = document.createElement('div');
+    dayElement.className = 'calendar-day';
+    dayElement.textContent = day;
+
+    const date = new Date(year, month, day);
+    date.setHours(0, 0, 0, 0);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (isOtherMonth) {
+        dayElement.classList.add('other-month');
+    }
+
+    if (date.getTime() === today.getTime() && !isOtherMonth) {
+        dayElement.classList.add('today');
+    }
+
+    if (calendarStartDate) {
+        const startTime = calendarStartDate.getTime();
+        const currentTime = date.getTime();
+
+        if (calendarEndDate) {
+            const endTime = calendarEndDate.getTime();
+
+            if (currentTime === startTime && currentTime === endTime) {
+                dayElement.classList.add('selected', 'start-date', 'end-date');
+            } else if (currentTime === startTime) {
+                dayElement.classList.add('start-date');
+            } else if (currentTime === endTime) {
+                dayElement.classList.add('end-date');
+            } else if (currentTime > startTime && currentTime < endTime) {
+                dayElement.classList.add('in-range');
+            }
+        } else {
+            if (currentTime === startTime) {
+                dayElement.classList.add('start-date', 'selecting');
+            }
+        }
+    }
+
+    dayElement.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectDate(date);
+    });
+
+    return dayElement;
+}
+
+// 选择日期
+function selectDate(date) {
+    if (!calendarStartDate || (calendarStartDate && calendarEndDate)) {
+        calendarStartDate = new Date(date);
+        calendarEndDate = null;
+        isSelectingRange = true;
+    } else {
+        if (date < calendarStartDate) {
+            calendarEndDate = calendarStartDate;
+            calendarStartDate = new Date(date);
+        } else {
+            calendarEndDate = new Date(date);
+        }
+        isSelectingRange = false;
+
+        updateDateRange();
+        document.getElementById('calendar-popup').style.display = 'none';
+    }
+
+    renderCalendar();
+    updateDateRangeDisplay();
+}
+
+// 更新日期范围显示
+function updateDateRangeDisplay() {
+    const display = document.getElementById('date-range-display');
+    if (calendarStartDate && calendarEndDate) {
+        const start = formatDateDisplay(calendarStartDate);
+        const end = formatDateDisplay(calendarEndDate);
+        display.textContent = `${start} - ${end}`;
+    } else if (calendarStartDate) {
+        const start = formatDateDisplay(calendarStartDate);
+        display.textContent = `${start} - 选择结束日期`;
+    } else {
+        display.textContent = '选择日期范围';
+    }
+}
+
+// 格式化日期显示
+function formatDateDisplay(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}年${month}月${day}日`;
+}
+
+// 更新dateRange对象
+function updateDateRange() {
+    if (calendarStartDate && calendarEndDate) {
+        dateRange.startDate = formatDateToYYYYMMDD(calendarStartDate);
+        dateRange.endDate = formatDateToYYYYMMDD(calendarEndDate);
+        console.log('日历选择器更新日期范围:', dateRange.startDate, '到', dateRange.endDate);
+        loadStockData();
+    }
+}
+
+// 格式化日期为 YYYY-MM-DD
+function formatDateToYYYYMMDD(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+// 快速选择下拉菜单控制
+function toggleQuickSelectDropdown() {
+    const dropdown = document.getElementById('quick-select-dropdown');
+    dropdown.classList.toggle('show');
+}
+
+// 快速选择时间范围
+function selectQuickRange(range) {
+    const today = new Date();
+    let startDate, endDate;
+
+    switch (range) {
+        case 'today':
+            startDate = new Date(today);
+            endDate = new Date(today);
+            break;
+
+        case 'yesterday':
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            startDate = yesterday;
+            endDate = yesterday;
+            break;
+
+        case 'thisWeek':
+            const thisWeekStart = new Date(today);
+            const dayOfWeek = thisWeekStart.getDay();
+            const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            thisWeekStart.setDate(thisWeekStart.getDate() - daysToMonday);
+            startDate = thisWeekStart;
+            endDate = new Date(today);
+            break;
+
+        case 'lastWeek':
+            const lastWeekEnd = new Date(today);
+            const lastWeekDayOfWeek = lastWeekEnd.getDay();
+            const daysToLastSunday = lastWeekDayOfWeek === 0 ? 0 : lastWeekDayOfWeek;
+            lastWeekEnd.setDate(lastWeekEnd.getDate() - daysToLastSunday - 1);
+            const lastWeekStart = new Date(lastWeekEnd);
+            lastWeekStart.setDate(lastWeekStart.getDate() - 6);
+            startDate = lastWeekStart;
+            endDate = lastWeekEnd;
+            break;
+
+        case 'thisMonth':
+            startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+            endDate = new Date(today);
+            break;
+
+        case 'lastMonth':
+            const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
+            startDate = lastMonth;
+            endDate = lastMonthEnd;
+            break;
+
+        case 'thisYear':
+            startDate = new Date(today.getFullYear(), 0, 1);
+            endDate = new Date(today);
+            break;
+
+        case 'lastYear':
+            startDate = new Date(today.getFullYear() - 1, 0, 1);
+            endDate = new Date(today.getFullYear() - 1, 11, 31);
+            break;
+
+        default:
+            return;
+    }
+
+    const formatDate = (date) => {
+        return date.getFullYear() + '-' +
+            String(date.getMonth() + 1).padStart(2, '0') + '-' +
+            String(date.getDate()).padStart(2, '0');
+    };
+
+    dateRange = {
+        startDate: formatDate(startDate),
+        endDate: formatDate(endDate)
+    };
+
+    calendarStartDate = new Date(startDate);
+    calendarStartDate.setHours(0, 0, 0, 0);
+    calendarEndDate = new Date(endDate);
+    calendarEndDate.setHours(0, 0, 0, 0);
+    updateDateRangeDisplay();
+
+    const quickSelectText = document.getElementById('quick-select-text');
+    const rangeTexts = {
+        'today': '今天',
+        'yesterday': '昨天',
+        'thisWeek': '本周',
+        'lastWeek': '上周',
+        'thisMonth': '这个月',
+        'lastMonth': '上个月',
+        'thisYear': '今年',
+        'lastYear': '去年'
+    };
+    quickSelectText.textContent = rangeTexts[range] || '选择时间段';
+
+    document.getElementById('quick-select-dropdown').classList.remove('show');
+    loadStockData();
+}
+
+// 点击外部关闭日历和下拉菜单
+document.addEventListener('click', function (e) {
+    const calendar = document.getElementById('date-range-picker');
+    const popup = document.getElementById('calendar-popup');
+    if (calendar && popup && !calendar.contains(e.target) && !popup.contains(e.target)) {
+        popup.style.display = 'none';
+    }
+
+    // 关闭快速选择下拉菜单
+    if (!e.target.closest('.dropdown')) {
+        const quickSelectDropdown = document.getElementById('quick-select-dropdown');
+        if (quickSelectDropdown) {
+            quickSelectDropdown.classList.remove('show');
+        }
+    }
+});
+
+// 全局点击事件（隐藏 combobox 下拉列表）
+document.addEventListener('click', function (event) {
+    if (!event.target.closest('.combobox-container')) {
+        hideAllComboboxDropdowns();
+    }
+});
+
+// 窗口滚动和大小变化时重新计算位置
+window.addEventListener('scroll', hideAllComboboxDropdowns);
+window.addEventListener('resize', hideAllComboboxDropdowns);
+
+// 监听表格滚动，重新计算下拉列表位置
+const tableContainer = document.querySelector('.table-scroll-container');
+if (tableContainer) {
+    tableContainer.addEventListener('scroll', () => {
+        clearTimeout(tableContainer._scrollTimeout);
+        tableContainer._scrollTimeout = setTimeout(() => {
+            document.querySelectorAll('.combobox-dropdown.show').forEach(dropdown => {
+                const container = dropdown.closest('.combobox-container');
+                const input = container.querySelector('input');
+                if (input) {
+                    const position = calculateDropdownPosition(input, dropdown);
+                    dropdown.style.top = position.top + 'px';
+                    dropdown.style.left = position.left + 'px';
+                    dropdown.style.width = position.width + 'px';
+                    dropdown.style.maxHeight = position.height + 'px';
+                }
+            });
+        }, 50);
+    });
+}
+
+// 点击其他地方关闭下拉菜单
+document.addEventListener('click', function (event) {
+    const selector = event.target.closest('.selector-button');
+    const dropdown = event.target.closest('.selector-dropdown');
+    const dropdownItem = event.target.closest('.dropdown-item');
+
+    if (dropdownItem) {
+        const parentDropdown = dropdownItem.closest('.selector-dropdown');
+        if (parentDropdown) {
+            parentDropdown.classList.remove('show');
+        }
+        return;
+    }
+
+    if (!selector && !dropdown) {
+        document.getElementById('view-selector-dropdown')?.classList.remove('show');
+    }
+});
+
+// 切换批量删除模式
+function toggleBatchDelete() {
+    isBatchDeleteMode = true;
+    selectedRecords.clear();
+
+    // 显示/隐藏按钮
+    document.getElementById('batch-delete-btn').style.display = 'none';
+    const confirmBtn = document.getElementById('confirm-batch-delete-btn');
+    confirmBtn.style.display = 'inline-block';
+    confirmBtn.disabled = true; // 初始禁用
+    confirmBtn.innerHTML = '<i class="fas fa-check"></i> 确认删除';
+    document.getElementById('cancel-batch-delete-btn').style.display = 'inline-block';
+
+    // 更改表头
+    document.getElementById('action-header').textContent = '选择';
+
+    // 重新渲染表格
+    generateStockTable();
+
+    showAlert('批量删除模式已启用，请勾选要删除的记录', 'info');
+}
+
+// 取消批量删除模式
+function cancelBatchDelete() {
+    isBatchDeleteMode = false;
+    selectedRecords.clear();
+
+    // 显示/隐藏按钮
+    document.getElementById('batch-delete-btn').style.display = 'inline-block';
+    document.getElementById('confirm-batch-delete-btn').style.display = 'none';
+    document.getElementById('cancel-batch-delete-btn').style.display = 'none';
+
+    // 恢复表头
+    document.getElementById('action-header').textContent = '操作';
+
+    // 重新渲染表格
+    generateStockTable();
+}
+
+// 切换记录选择状态
+function toggleRecordSelection(recordId, isSelected) {
+    // 确保 recordId 为字符串，以保持一致性
+    recordId = String(recordId);
+
+    if (isSelected) {
+        selectedRecords.add(recordId);
+    } else {
+        selectedRecords.delete(recordId);
+    }
+
+    console.log('当前选中记录:', Array.from(selectedRecords));
+
+    // 更新确认按钮状态
+    const confirmBtn = document.getElementById('confirm-batch-delete-btn');
+    if (selectedRecords.size > 0) {
+        confirmBtn.innerHTML = `<i class="fas fa-check"></i> 确认删除 (${selectedRecords.size})`;
+        confirmBtn.disabled = false;
+    } else {
+        confirmBtn.innerHTML = '<i class="fas fa-check"></i> 确认删除';
+        confirmBtn.disabled = true;
+    }
+}
+
+// 确认批量删除
+async function confirmBatchDelete() {
+    if (selectedRecords.size === 0) {
+        showAlert('请至少选择一条记录', 'error');
+        return;
+    }
+
+    if (!confirm(`确定要删除选中的 ${selectedRecords.size} 条记录吗？删除后，相关库存会恢复！`)) {
+        return;
+    }
+
+    const confirmBtn = document.getElementById('confirm-batch-delete-btn');
+    const originalText = confirmBtn.innerHTML;
+    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 删除中...';
+    confirmBtn.disabled = true;
+
+    try {
+        let successCount = 0;
+        let failCount = 0;
+
+        // 逐个删除选中的记录
+        for (const recordId of selectedRecords) {
+            try {
+                const response = await fetch(`${API_BASE_URL}?id=${recordId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const responseText = await response.text();
+                const result = JSON.parse(responseText);
+
+                if (result.success) {
+                    successCount++;
+                } else {
+                    failCount++;
+                }
+            } catch (error) {
+                failCount++;
+                console.error(`删除记录 ${recordId} 失败:`, error);
+            }
+        }
+
+        // 显示删除结果
+        if (successCount > 0) {
+            showAlert(`成功删除 ${successCount} 条记录，相关库存已恢复${failCount > 0 ? `，${failCount} 条失败` : ''}`,
+                failCount > 0 ? 'warning' : 'success');
+        } else {
+            showAlert('删除失败', 'error');
+        }
+
+        // 退出批量删除模式并刷新数据
+        cancelBatchDelete();
+
+        // 重新加载数据
+        loadStockData();
+
+    } catch (error) {
+        showAlert('批量删除时发生错误', 'error');
+        confirmBtn.innerHTML = originalText;
+        confirmBtn.disabled = false;
+    }
+}
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', initApp);
+ + `{cfg.icon}</div>
+        <div class="toast-body">
+            <div class="toast-title">` + '
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 0);
+
+    setTimeout(() => {
+        closeToast(toastId);
+    }, 4000);
+}
+
+function closeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+}
+
+// 输入框和下拉选择框事件处理
+document.addEventListener('input', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        resetInputFirstClick(e.target);
+    }
+});
+
+// 键盘快捷键支持
+document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        saveAllData();
+    }
+
+    if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        addNewRow();
+    }
+});
+
+// 为所有输入框添加focus事件监听
+document.addEventListener('focus', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        handleInputFocus(e.target, false);
+    }
+}, true);
+
+// 为所有输入框添加click事件监听
+document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        handleInputFocus(e.target, true);
+    }
+});
+
+// 切换日历显示
+function toggleCalendar() {
+    const popup = document.getElementById('calendar-popup');
+    const picker = document.getElementById('date-range-picker');
+
+    if (popup.style.display === 'none') {
+        const rect = picker.getBoundingClientRect();
+        popup.style.top = (rect.bottom + 8) + 'px';
+        popup.style.left = rect.left + 'px';
+        popup.style.display = 'block';
+        initCalendar();
+        renderCalendar();
+    } else {
+        popup.style.display = 'none';
+    }
+}
+
+// 初始化日历
+function initCalendar() {
+    const today = new Date();
+    calendarCurrentDate = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    if (!calendarStartDate) {
+        calendarStartDate = new Date(today);
+        calendarStartDate.setHours(0, 0, 0, 0);
+    }
+    if (!calendarEndDate) {
+        calendarEndDate = new Date(today);
+        calendarEndDate.setHours(0, 0, 0, 0);
+    }
+
+    // 初始化年份选择器
+    const yearSelect = document.getElementById('calendar-year-select');
+    yearSelect.innerHTML = '';
+    const currentYear = today.getFullYear();
+    for (let year = 2022; year <= currentYear + 1; year++) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year + '年';
+        if (year === calendarCurrentDate.getFullYear()) {
+            option.selected = true;
+        }
+        yearSelect.appendChild(option);
+    }
+
+    document.getElementById('calendar-month-select').value = calendarCurrentDate.getMonth();
+    updateDateRangeDisplay();
+}
+
+// 切换月份
+function changeMonth(delta) {
+    calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + delta);
+    document.getElementById('calendar-month-select').value = calendarCurrentDate.getMonth();
+    document.getElementById('calendar-year-select').value = calendarCurrentDate.getFullYear();
+    renderCalendar();
+}
+
+// 渲染日历
+function renderCalendar() {
+    const year = parseInt(document.getElementById('calendar-year-select').value);
+    const month = parseInt(document.getElementById('calendar-month-select').value);
+
+    calendarCurrentDate = new Date(year, month, 1);
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const prevLastDay = new Date(year, month, 0);
+
+    const firstDayWeek = firstDay.getDay();
+    const lastDate = lastDay.getDate();
+    const prevLastDate = prevLastDay.getDate();
+
+    const daysContainer = document.getElementById('calendar-days');
+    daysContainer.innerHTML = '';
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // 上个月的日期
+    for (let i = firstDayWeek - 1; i >= 0; i--) {
+        const day = prevLastDate - i;
+        const dayElement = createDayElement(day, year, month - 1, true);
+        daysContainer.appendChild(dayElement);
+    }
+
+    // 当前月的日期
+    for (let day = 1; day <= lastDate; day++) {
+        const dayElement = createDayElement(day, year, month, false);
+        daysContainer.appendChild(dayElement);
+    }
+
+    // 下个月的日期
+    const totalCells = daysContainer.children.length;
+    const remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+    for (let day = 1; day <= remainingCells; day++) {
+        const dayElement = createDayElement(day, year, month + 1, true);
+        daysContainer.appendChild(dayElement);
+    }
+}
+
+// 创建日期元素
+function createDayElement(day, year, month, isOtherMonth) {
+    const dayElement = document.createElement('div');
+    dayElement.className = 'calendar-day';
+    dayElement.textContent = day;
+
+    const date = new Date(year, month, day);
+    date.setHours(0, 0, 0, 0);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (isOtherMonth) {
+        dayElement.classList.add('other-month');
+    }
+
+    if (date.getTime() === today.getTime() && !isOtherMonth) {
+        dayElement.classList.add('today');
+    }
+
+    if (calendarStartDate) {
+        const startTime = calendarStartDate.getTime();
+        const currentTime = date.getTime();
+
+        if (calendarEndDate) {
+            const endTime = calendarEndDate.getTime();
+
+            if (currentTime === startTime && currentTime === endTime) {
+                dayElement.classList.add('selected', 'start-date', 'end-date');
+            } else if (currentTime === startTime) {
+                dayElement.classList.add('start-date');
+            } else if (currentTime === endTime) {
+                dayElement.classList.add('end-date');
+            } else if (currentTime > startTime && currentTime < endTime) {
+                dayElement.classList.add('in-range');
+            }
+        } else {
+            if (currentTime === startTime) {
+                dayElement.classList.add('start-date', 'selecting');
+            }
+        }
+    }
+
+    dayElement.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectDate(date);
+    });
+
+    return dayElement;
+}
+
+// 选择日期
+function selectDate(date) {
+    if (!calendarStartDate || (calendarStartDate && calendarEndDate)) {
+        calendarStartDate = new Date(date);
+        calendarEndDate = null;
+        isSelectingRange = true;
+    } else {
+        if (date < calendarStartDate) {
+            calendarEndDate = calendarStartDate;
+            calendarStartDate = new Date(date);
+        } else {
+            calendarEndDate = new Date(date);
+        }
+        isSelectingRange = false;
+
+        updateDateRange();
+        document.getElementById('calendar-popup').style.display = 'none';
+    }
+
+    renderCalendar();
+    updateDateRangeDisplay();
+}
+
+// 更新日期范围显示
+function updateDateRangeDisplay() {
+    const display = document.getElementById('date-range-display');
+    if (calendarStartDate && calendarEndDate) {
+        const start = formatDateDisplay(calendarStartDate);
+        const end = formatDateDisplay(calendarEndDate);
+        display.textContent = `${start} - ${end}`;
+    } else if (calendarStartDate) {
+        const start = formatDateDisplay(calendarStartDate);
+        display.textContent = `${start} - 选择结束日期`;
+    } else {
+        display.textContent = '选择日期范围';
+    }
+}
+
+// 格式化日期显示
+function formatDateDisplay(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}年${month}月${day}日`;
+}
+
+// 更新dateRange对象
+function updateDateRange() {
+    if (calendarStartDate && calendarEndDate) {
+        dateRange.startDate = formatDateToYYYYMMDD(calendarStartDate);
+        dateRange.endDate = formatDateToYYYYMMDD(calendarEndDate);
+        console.log('日历选择器更新日期范围:', dateRange.startDate, '到', dateRange.endDate);
+        loadStockData();
+    }
+}
+
+// 格式化日期为 YYYY-MM-DD
+function formatDateToYYYYMMDD(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+// 快速选择下拉菜单控制
+function toggleQuickSelectDropdown() {
+    const dropdown = document.getElementById('quick-select-dropdown');
+    dropdown.classList.toggle('show');
+}
+
+// 快速选择时间范围
+function selectQuickRange(range) {
+    const today = new Date();
+    let startDate, endDate;
+
+    switch (range) {
+        case 'today':
+            startDate = new Date(today);
+            endDate = new Date(today);
+            break;
+
+        case 'yesterday':
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            startDate = yesterday;
+            endDate = yesterday;
+            break;
+
+        case 'thisWeek':
+            const thisWeekStart = new Date(today);
+            const dayOfWeek = thisWeekStart.getDay();
+            const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            thisWeekStart.setDate(thisWeekStart.getDate() - daysToMonday);
+            startDate = thisWeekStart;
+            endDate = new Date(today);
+            break;
+
+        case 'lastWeek':
+            const lastWeekEnd = new Date(today);
+            const lastWeekDayOfWeek = lastWeekEnd.getDay();
+            const daysToLastSunday = lastWeekDayOfWeek === 0 ? 0 : lastWeekDayOfWeek;
+            lastWeekEnd.setDate(lastWeekEnd.getDate() - daysToLastSunday - 1);
+            const lastWeekStart = new Date(lastWeekEnd);
+            lastWeekStart.setDate(lastWeekStart.getDate() - 6);
+            startDate = lastWeekStart;
+            endDate = lastWeekEnd;
+            break;
+
+        case 'thisMonth':
+            startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+            endDate = new Date(today);
+            break;
+
+        case 'lastMonth':
+            const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
+            startDate = lastMonth;
+            endDate = lastMonthEnd;
+            break;
+
+        case 'thisYear':
+            startDate = new Date(today.getFullYear(), 0, 1);
+            endDate = new Date(today);
+            break;
+
+        case 'lastYear':
+            startDate = new Date(today.getFullYear() - 1, 0, 1);
+            endDate = new Date(today.getFullYear() - 1, 11, 31);
+            break;
+
+        default:
+            return;
+    }
+
+    const formatDate = (date) => {
+        return date.getFullYear() + '-' +
+            String(date.getMonth() + 1).padStart(2, '0') + '-' +
+            String(date.getDate()).padStart(2, '0');
+    };
+
+    dateRange = {
+        startDate: formatDate(startDate),
+        endDate: formatDate(endDate)
+    };
+
+    calendarStartDate = new Date(startDate);
+    calendarStartDate.setHours(0, 0, 0, 0);
+    calendarEndDate = new Date(endDate);
+    calendarEndDate.setHours(0, 0, 0, 0);
+    updateDateRangeDisplay();
+
+    const quickSelectText = document.getElementById('quick-select-text');
+    const rangeTexts = {
+        'today': '今天',
+        'yesterday': '昨天',
+        'thisWeek': '本周',
+        'lastWeek': '上周',
+        'thisMonth': '这个月',
+        'lastMonth': '上个月',
+        'thisYear': '今年',
+        'lastYear': '去年'
+    };
+    quickSelectText.textContent = rangeTexts[range] || '选择时间段';
+
+    document.getElementById('quick-select-dropdown').classList.remove('show');
+    loadStockData();
+}
+
+// 点击外部关闭日历和下拉菜单
+document.addEventListener('click', function (e) {
+    const calendar = document.getElementById('date-range-picker');
+    const popup = document.getElementById('calendar-popup');
+    if (calendar && popup && !calendar.contains(e.target) && !popup.contains(e.target)) {
+        popup.style.display = 'none';
+    }
+
+    // 关闭快速选择下拉菜单
+    if (!e.target.closest('.dropdown')) {
+        const quickSelectDropdown = document.getElementById('quick-select-dropdown');
+        if (quickSelectDropdown) {
+            quickSelectDropdown.classList.remove('show');
+        }
+    }
+});
+
+// 全局点击事件（隐藏 combobox 下拉列表）
+document.addEventListener('click', function (event) {
+    if (!event.target.closest('.combobox-container')) {
+        hideAllComboboxDropdowns();
+    }
+});
+
+// 窗口滚动和大小变化时重新计算位置
+window.addEventListener('scroll', hideAllComboboxDropdowns);
+window.addEventListener('resize', hideAllComboboxDropdowns);
+
+// 监听表格滚动，重新计算下拉列表位置
+const tableContainer = document.querySelector('.table-scroll-container');
+if (tableContainer) {
+    tableContainer.addEventListener('scroll', () => {
+        clearTimeout(tableContainer._scrollTimeout);
+        tableContainer._scrollTimeout = setTimeout(() => {
+            document.querySelectorAll('.combobox-dropdown.show').forEach(dropdown => {
+                const container = dropdown.closest('.combobox-container');
+                const input = container.querySelector('input');
+                if (input) {
+                    const position = calculateDropdownPosition(input, dropdown);
+                    dropdown.style.top = position.top + 'px';
+                    dropdown.style.left = position.left + 'px';
+                    dropdown.style.width = position.width + 'px';
+                    dropdown.style.maxHeight = position.height + 'px';
+                }
+            });
+        }, 50);
+    });
+}
+
+// 点击其他地方关闭下拉菜单
+document.addEventListener('click', function (event) {
+    const selector = event.target.closest('.selector-button');
+    const dropdown = event.target.closest('.selector-dropdown');
+    const dropdownItem = event.target.closest('.dropdown-item');
+
+    if (dropdownItem) {
+        const parentDropdown = dropdownItem.closest('.selector-dropdown');
+        if (parentDropdown) {
+            parentDropdown.classList.remove('show');
+        }
+        return;
+    }
+
+    if (!selector && !dropdown) {
+        document.getElementById('view-selector-dropdown')?.classList.remove('show');
+    }
+});
+
+// 切换批量删除模式
+function toggleBatchDelete() {
+    isBatchDeleteMode = true;
+    selectedRecords.clear();
+
+    // 显示/隐藏按钮
+    document.getElementById('batch-delete-btn').style.display = 'none';
+    const confirmBtn = document.getElementById('confirm-batch-delete-btn');
+    confirmBtn.style.display = 'inline-block';
+    confirmBtn.disabled = true; // 初始禁用
+    confirmBtn.innerHTML = '<i class="fas fa-check"></i> 确认删除';
+    document.getElementById('cancel-batch-delete-btn').style.display = 'inline-block';
+
+    // 更改表头
+    document.getElementById('action-header').textContent = '选择';
+
+    // 重新渲染表格
+    generateStockTable();
+
+    showAlert('批量删除模式已启用，请勾选要删除的记录', 'info');
+}
+
+// 取消批量删除模式
+function cancelBatchDelete() {
+    isBatchDeleteMode = false;
+    selectedRecords.clear();
+
+    // 显示/隐藏按钮
+    document.getElementById('batch-delete-btn').style.display = 'inline-block';
+    document.getElementById('confirm-batch-delete-btn').style.display = 'none';
+    document.getElementById('cancel-batch-delete-btn').style.display = 'none';
+
+    // 恢复表头
+    document.getElementById('action-header').textContent = '操作';
+
+    // 重新渲染表格
+    generateStockTable();
+}
+
+// 切换记录选择状态
+function toggleRecordSelection(recordId, isSelected) {
+    // 确保 recordId 为字符串，以保持一致性
+    recordId = String(recordId);
+
+    if (isSelected) {
+        selectedRecords.add(recordId);
+    } else {
+        selectedRecords.delete(recordId);
+    }
+
+    console.log('当前选中记录:', Array.from(selectedRecords));
+
+    // 更新确认按钮状态
+    const confirmBtn = document.getElementById('confirm-batch-delete-btn');
+    if (selectedRecords.size > 0) {
+        confirmBtn.innerHTML = `<i class="fas fa-check"></i> 确认删除 (${selectedRecords.size})`;
+        confirmBtn.disabled = false;
+    } else {
+        confirmBtn.innerHTML = '<i class="fas fa-check"></i> 确认删除';
+        confirmBtn.disabled = true;
+    }
+}
+
+// 确认批量删除
+async function confirmBatchDelete() {
+    if (selectedRecords.size === 0) {
+        showAlert('请至少选择一条记录', 'error');
+        return;
+    }
+
+    if (!confirm(`确定要删除选中的 ${selectedRecords.size} 条记录吗？删除后，相关库存会恢复！`)) {
+        return;
+    }
+
+    const confirmBtn = document.getElementById('confirm-batch-delete-btn');
+    const originalText = confirmBtn.innerHTML;
+    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 删除中...';
+    confirmBtn.disabled = true;
+
+    try {
+        let successCount = 0;
+        let failCount = 0;
+
+        // 逐个删除选中的记录
+        for (const recordId of selectedRecords) {
+            try {
+                const response = await fetch(`${API_BASE_URL}?id=${recordId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const responseText = await response.text();
+                const result = JSON.parse(responseText);
+
+                if (result.success) {
+                    successCount++;
+                } else {
+                    failCount++;
+                }
+            } catch (error) {
+                failCount++;
+                console.error(`删除记录 ${recordId} 失败:`, error);
+            }
+        }
+
+        // 显示删除结果
+        if (successCount > 0) {
+            showAlert(`成功删除 ${successCount} 条记录，相关库存已恢复${failCount > 0 ? `，${failCount} 条失败` : ''}`,
+                failCount > 0 ? 'warning' : 'success');
+        } else {
+            showAlert('删除失败', 'error');
+        }
+
+        // 退出批量删除模式并刷新数据
+        cancelBatchDelete();
+
+        // 重新加载数据
+        loadStockData();
+
+    } catch (error) {
+        showAlert('批量删除时发生错误', 'error');
+        confirmBtn.innerHTML = originalText;
+        confirmBtn.disabled = false;
+    }
+}
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', initApp);
+ + `{cfg.title}</div>
+            <div class="toast-msg">` + '
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 0);
+
+    setTimeout(() => {
+        closeToast(toastId);
+    }, 4000);
+}
+
+function closeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+}
+
+// 输入框和下拉选择框事件处理
+document.addEventListener('input', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        resetInputFirstClick(e.target);
+    }
+});
+
+// 键盘快捷键支持
+document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        saveAllData();
+    }
+
+    if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        addNewRow();
+    }
+});
+
+// 为所有输入框添加focus事件监听
+document.addEventListener('focus', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        handleInputFocus(e.target, false);
+    }
+}, true);
+
+// 为所有输入框添加click事件监听
+document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        handleInputFocus(e.target, true);
+    }
+});
+
+// 切换日历显示
+function toggleCalendar() {
+    const popup = document.getElementById('calendar-popup');
+    const picker = document.getElementById('date-range-picker');
+
+    if (popup.style.display === 'none') {
+        const rect = picker.getBoundingClientRect();
+        popup.style.top = (rect.bottom + 8) + 'px';
+        popup.style.left = rect.left + 'px';
+        popup.style.display = 'block';
+        initCalendar();
+        renderCalendar();
+    } else {
+        popup.style.display = 'none';
+    }
+}
+
+// 初始化日历
+function initCalendar() {
+    const today = new Date();
+    calendarCurrentDate = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    if (!calendarStartDate) {
+        calendarStartDate = new Date(today);
+        calendarStartDate.setHours(0, 0, 0, 0);
+    }
+    if (!calendarEndDate) {
+        calendarEndDate = new Date(today);
+        calendarEndDate.setHours(0, 0, 0, 0);
+    }
+
+    // 初始化年份选择器
+    const yearSelect = document.getElementById('calendar-year-select');
+    yearSelect.innerHTML = '';
+    const currentYear = today.getFullYear();
+    for (let year = 2022; year <= currentYear + 1; year++) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year + '年';
+        if (year === calendarCurrentDate.getFullYear()) {
+            option.selected = true;
+        }
+        yearSelect.appendChild(option);
+    }
+
+    document.getElementById('calendar-month-select').value = calendarCurrentDate.getMonth();
+    updateDateRangeDisplay();
+}
+
+// 切换月份
+function changeMonth(delta) {
+    calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + delta);
+    document.getElementById('calendar-month-select').value = calendarCurrentDate.getMonth();
+    document.getElementById('calendar-year-select').value = calendarCurrentDate.getFullYear();
+    renderCalendar();
+}
+
+// 渲染日历
+function renderCalendar() {
+    const year = parseInt(document.getElementById('calendar-year-select').value);
+    const month = parseInt(document.getElementById('calendar-month-select').value);
+
+    calendarCurrentDate = new Date(year, month, 1);
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const prevLastDay = new Date(year, month, 0);
+
+    const firstDayWeek = firstDay.getDay();
+    const lastDate = lastDay.getDate();
+    const prevLastDate = prevLastDay.getDate();
+
+    const daysContainer = document.getElementById('calendar-days');
+    daysContainer.innerHTML = '';
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // 上个月的日期
+    for (let i = firstDayWeek - 1; i >= 0; i--) {
+        const day = prevLastDate - i;
+        const dayElement = createDayElement(day, year, month - 1, true);
+        daysContainer.appendChild(dayElement);
+    }
+
+    // 当前月的日期
+    for (let day = 1; day <= lastDate; day++) {
+        const dayElement = createDayElement(day, year, month, false);
+        daysContainer.appendChild(dayElement);
+    }
+
+    // 下个月的日期
+    const totalCells = daysContainer.children.length;
+    const remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+    for (let day = 1; day <= remainingCells; day++) {
+        const dayElement = createDayElement(day, year, month + 1, true);
+        daysContainer.appendChild(dayElement);
+    }
+}
+
+// 创建日期元素
+function createDayElement(day, year, month, isOtherMonth) {
+    const dayElement = document.createElement('div');
+    dayElement.className = 'calendar-day';
+    dayElement.textContent = day;
+
+    const date = new Date(year, month, day);
+    date.setHours(0, 0, 0, 0);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (isOtherMonth) {
+        dayElement.classList.add('other-month');
+    }
+
+    if (date.getTime() === today.getTime() && !isOtherMonth) {
+        dayElement.classList.add('today');
+    }
+
+    if (calendarStartDate) {
+        const startTime = calendarStartDate.getTime();
+        const currentTime = date.getTime();
+
+        if (calendarEndDate) {
+            const endTime = calendarEndDate.getTime();
+
+            if (currentTime === startTime && currentTime === endTime) {
+                dayElement.classList.add('selected', 'start-date', 'end-date');
+            } else if (currentTime === startTime) {
+                dayElement.classList.add('start-date');
+            } else if (currentTime === endTime) {
+                dayElement.classList.add('end-date');
+            } else if (currentTime > startTime && currentTime < endTime) {
+                dayElement.classList.add('in-range');
+            }
+        } else {
+            if (currentTime === startTime) {
+                dayElement.classList.add('start-date', 'selecting');
+            }
+        }
+    }
+
+    dayElement.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectDate(date);
+    });
+
+    return dayElement;
+}
+
+// 选择日期
+function selectDate(date) {
+    if (!calendarStartDate || (calendarStartDate && calendarEndDate)) {
+        calendarStartDate = new Date(date);
+        calendarEndDate = null;
+        isSelectingRange = true;
+    } else {
+        if (date < calendarStartDate) {
+            calendarEndDate = calendarStartDate;
+            calendarStartDate = new Date(date);
+        } else {
+            calendarEndDate = new Date(date);
+        }
+        isSelectingRange = false;
+
+        updateDateRange();
+        document.getElementById('calendar-popup').style.display = 'none';
+    }
+
+    renderCalendar();
+    updateDateRangeDisplay();
+}
+
+// 更新日期范围显示
+function updateDateRangeDisplay() {
+    const display = document.getElementById('date-range-display');
+    if (calendarStartDate && calendarEndDate) {
+        const start = formatDateDisplay(calendarStartDate);
+        const end = formatDateDisplay(calendarEndDate);
+        display.textContent = `${start} - ${end}`;
+    } else if (calendarStartDate) {
+        const start = formatDateDisplay(calendarStartDate);
+        display.textContent = `${start} - 选择结束日期`;
+    } else {
+        display.textContent = '选择日期范围';
+    }
+}
+
+// 格式化日期显示
+function formatDateDisplay(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}年${month}月${day}日`;
+}
+
+// 更新dateRange对象
+function updateDateRange() {
+    if (calendarStartDate && calendarEndDate) {
+        dateRange.startDate = formatDateToYYYYMMDD(calendarStartDate);
+        dateRange.endDate = formatDateToYYYYMMDD(calendarEndDate);
+        console.log('日历选择器更新日期范围:', dateRange.startDate, '到', dateRange.endDate);
+        loadStockData();
+    }
+}
+
+// 格式化日期为 YYYY-MM-DD
+function formatDateToYYYYMMDD(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+// 快速选择下拉菜单控制
+function toggleQuickSelectDropdown() {
+    const dropdown = document.getElementById('quick-select-dropdown');
+    dropdown.classList.toggle('show');
+}
+
+// 快速选择时间范围
+function selectQuickRange(range) {
+    const today = new Date();
+    let startDate, endDate;
+
+    switch (range) {
+        case 'today':
+            startDate = new Date(today);
+            endDate = new Date(today);
+            break;
+
+        case 'yesterday':
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            startDate = yesterday;
+            endDate = yesterday;
+            break;
+
+        case 'thisWeek':
+            const thisWeekStart = new Date(today);
+            const dayOfWeek = thisWeekStart.getDay();
+            const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            thisWeekStart.setDate(thisWeekStart.getDate() - daysToMonday);
+            startDate = thisWeekStart;
+            endDate = new Date(today);
+            break;
+
+        case 'lastWeek':
+            const lastWeekEnd = new Date(today);
+            const lastWeekDayOfWeek = lastWeekEnd.getDay();
+            const daysToLastSunday = lastWeekDayOfWeek === 0 ? 0 : lastWeekDayOfWeek;
+            lastWeekEnd.setDate(lastWeekEnd.getDate() - daysToLastSunday - 1);
+            const lastWeekStart = new Date(lastWeekEnd);
+            lastWeekStart.setDate(lastWeekStart.getDate() - 6);
+            startDate = lastWeekStart;
+            endDate = lastWeekEnd;
+            break;
+
+        case 'thisMonth':
+            startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+            endDate = new Date(today);
+            break;
+
+        case 'lastMonth':
+            const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
+            startDate = lastMonth;
+            endDate = lastMonthEnd;
+            break;
+
+        case 'thisYear':
+            startDate = new Date(today.getFullYear(), 0, 1);
+            endDate = new Date(today);
+            break;
+
+        case 'lastYear':
+            startDate = new Date(today.getFullYear() - 1, 0, 1);
+            endDate = new Date(today.getFullYear() - 1, 11, 31);
+            break;
+
+        default:
+            return;
+    }
+
+    const formatDate = (date) => {
+        return date.getFullYear() + '-' +
+            String(date.getMonth() + 1).padStart(2, '0') + '-' +
+            String(date.getDate()).padStart(2, '0');
+    };
+
+    dateRange = {
+        startDate: formatDate(startDate),
+        endDate: formatDate(endDate)
+    };
+
+    calendarStartDate = new Date(startDate);
+    calendarStartDate.setHours(0, 0, 0, 0);
+    calendarEndDate = new Date(endDate);
+    calendarEndDate.setHours(0, 0, 0, 0);
+    updateDateRangeDisplay();
+
+    const quickSelectText = document.getElementById('quick-select-text');
+    const rangeTexts = {
+        'today': '今天',
+        'yesterday': '昨天',
+        'thisWeek': '本周',
+        'lastWeek': '上周',
+        'thisMonth': '这个月',
+        'lastMonth': '上个月',
+        'thisYear': '今年',
+        'lastYear': '去年'
+    };
+    quickSelectText.textContent = rangeTexts[range] || '选择时间段';
+
+    document.getElementById('quick-select-dropdown').classList.remove('show');
+    loadStockData();
+}
+
+// 点击外部关闭日历和下拉菜单
+document.addEventListener('click', function (e) {
+    const calendar = document.getElementById('date-range-picker');
+    const popup = document.getElementById('calendar-popup');
+    if (calendar && popup && !calendar.contains(e.target) && !popup.contains(e.target)) {
+        popup.style.display = 'none';
+    }
+
+    // 关闭快速选择下拉菜单
+    if (!e.target.closest('.dropdown')) {
+        const quickSelectDropdown = document.getElementById('quick-select-dropdown');
+        if (quickSelectDropdown) {
+            quickSelectDropdown.classList.remove('show');
+        }
+    }
+});
+
+// 全局点击事件（隐藏 combobox 下拉列表）
+document.addEventListener('click', function (event) {
+    if (!event.target.closest('.combobox-container')) {
+        hideAllComboboxDropdowns();
+    }
+});
+
+// 窗口滚动和大小变化时重新计算位置
+window.addEventListener('scroll', hideAllComboboxDropdowns);
+window.addEventListener('resize', hideAllComboboxDropdowns);
+
+// 监听表格滚动，重新计算下拉列表位置
+const tableContainer = document.querySelector('.table-scroll-container');
+if (tableContainer) {
+    tableContainer.addEventListener('scroll', () => {
+        clearTimeout(tableContainer._scrollTimeout);
+        tableContainer._scrollTimeout = setTimeout(() => {
+            document.querySelectorAll('.combobox-dropdown.show').forEach(dropdown => {
+                const container = dropdown.closest('.combobox-container');
+                const input = container.querySelector('input');
+                if (input) {
+                    const position = calculateDropdownPosition(input, dropdown);
+                    dropdown.style.top = position.top + 'px';
+                    dropdown.style.left = position.left + 'px';
+                    dropdown.style.width = position.width + 'px';
+                    dropdown.style.maxHeight = position.height + 'px';
+                }
+            });
+        }, 50);
+    });
+}
+
+// 点击其他地方关闭下拉菜单
+document.addEventListener('click', function (event) {
+    const selector = event.target.closest('.selector-button');
+    const dropdown = event.target.closest('.selector-dropdown');
+    const dropdownItem = event.target.closest('.dropdown-item');
+
+    if (dropdownItem) {
+        const parentDropdown = dropdownItem.closest('.selector-dropdown');
+        if (parentDropdown) {
+            parentDropdown.classList.remove('show');
+        }
+        return;
+    }
+
+    if (!selector && !dropdown) {
+        document.getElementById('view-selector-dropdown')?.classList.remove('show');
+    }
+});
+
+// 切换批量删除模式
+function toggleBatchDelete() {
+    isBatchDeleteMode = true;
+    selectedRecords.clear();
+
+    // 显示/隐藏按钮
+    document.getElementById('batch-delete-btn').style.display = 'none';
+    const confirmBtn = document.getElementById('confirm-batch-delete-btn');
+    confirmBtn.style.display = 'inline-block';
+    confirmBtn.disabled = true; // 初始禁用
+    confirmBtn.innerHTML = '<i class="fas fa-check"></i> 确认删除';
+    document.getElementById('cancel-batch-delete-btn').style.display = 'inline-block';
+
+    // 更改表头
+    document.getElementById('action-header').textContent = '选择';
+
+    // 重新渲染表格
+    generateStockTable();
+
+    showAlert('批量删除模式已启用，请勾选要删除的记录', 'info');
+}
+
+// 取消批量删除模式
+function cancelBatchDelete() {
+    isBatchDeleteMode = false;
+    selectedRecords.clear();
+
+    // 显示/隐藏按钮
+    document.getElementById('batch-delete-btn').style.display = 'inline-block';
+    document.getElementById('confirm-batch-delete-btn').style.display = 'none';
+    document.getElementById('cancel-batch-delete-btn').style.display = 'none';
+
+    // 恢复表头
+    document.getElementById('action-header').textContent = '操作';
+
+    // 重新渲染表格
+    generateStockTable();
+}
+
+// 切换记录选择状态
+function toggleRecordSelection(recordId, isSelected) {
+    // 确保 recordId 为字符串，以保持一致性
+    recordId = String(recordId);
+
+    if (isSelected) {
+        selectedRecords.add(recordId);
+    } else {
+        selectedRecords.delete(recordId);
+    }
+
+    console.log('当前选中记录:', Array.from(selectedRecords));
+
+    // 更新确认按钮状态
+    const confirmBtn = document.getElementById('confirm-batch-delete-btn');
+    if (selectedRecords.size > 0) {
+        confirmBtn.innerHTML = `<i class="fas fa-check"></i> 确认删除 (${selectedRecords.size})`;
+        confirmBtn.disabled = false;
+    } else {
+        confirmBtn.innerHTML = '<i class="fas fa-check"></i> 确认删除';
+        confirmBtn.disabled = true;
+    }
+}
+
+// 确认批量删除
+async function confirmBatchDelete() {
+    if (selectedRecords.size === 0) {
+        showAlert('请至少选择一条记录', 'error');
+        return;
+    }
+
+    if (!confirm(`确定要删除选中的 ${selectedRecords.size} 条记录吗？删除后，相关库存会恢复！`)) {
+        return;
+    }
+
+    const confirmBtn = document.getElementById('confirm-batch-delete-btn');
+    const originalText = confirmBtn.innerHTML;
+    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 删除中...';
+    confirmBtn.disabled = true;
+
+    try {
+        let successCount = 0;
+        let failCount = 0;
+
+        // 逐个删除选中的记录
+        for (const recordId of selectedRecords) {
+            try {
+                const response = await fetch(`${API_BASE_URL}?id=${recordId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const responseText = await response.text();
+                const result = JSON.parse(responseText);
+
+                if (result.success) {
+                    successCount++;
+                } else {
+                    failCount++;
+                }
+            } catch (error) {
+                failCount++;
+                console.error(`删除记录 ${recordId} 失败:`, error);
+            }
+        }
+
+        // 显示删除结果
+        if (successCount > 0) {
+            showAlert(`成功删除 ${successCount} 条记录，相关库存已恢复${failCount > 0 ? `，${failCount} 条失败` : ''}`,
+                failCount > 0 ? 'warning' : 'success');
+        } else {
+            showAlert('删除失败', 'error');
+        }
+
+        // 退出批量删除模式并刷新数据
+        cancelBatchDelete();
+
+        // 重新加载数据
+        loadStockData();
+
+    } catch (error) {
+        showAlert('批量删除时发生错误', 'error');
+        confirmBtn.innerHTML = originalText;
+        confirmBtn.disabled = false;
+    }
+}
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', initApp);
+ + `{message}</div>
+        </div>
+        <button class="toast-close" onclick="closeToast('` + '
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 0);
+
+    setTimeout(() => {
+        closeToast(toastId);
+    }, 4000);
+}
+
+function closeToast(toastId) {
+    const toast = document.getElementById(toastId);
+    if (toast) {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+}
+
+// 输入框和下拉选择框事件处理
+document.addEventListener('input', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        resetInputFirstClick(e.target);
+    }
+});
+
+// 键盘快捷键支持
+document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        saveAllData();
+    }
+
+    if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        addNewRow();
+    }
+});
+
+// 为所有输入框添加focus事件监听
+document.addEventListener('focus', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        handleInputFocus(e.target, false);
+    }
+}, true);
+
+// 为所有输入框添加click事件监听
+document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('excel-input')) {
+        handleInputFocus(e.target, true);
+    }
+});
+
+// 切换日历显示
+function toggleCalendar() {
+    const popup = document.getElementById('calendar-popup');
+    const picker = document.getElementById('date-range-picker');
+
+    if (popup.style.display === 'none') {
+        const rect = picker.getBoundingClientRect();
+        popup.style.top = (rect.bottom + 8) + 'px';
+        popup.style.left = rect.left + 'px';
+        popup.style.display = 'block';
+        initCalendar();
+        renderCalendar();
+    } else {
+        popup.style.display = 'none';
+    }
+}
+
+// 初始化日历
+function initCalendar() {
+    const today = new Date();
+    calendarCurrentDate = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    if (!calendarStartDate) {
+        calendarStartDate = new Date(today);
+        calendarStartDate.setHours(0, 0, 0, 0);
+    }
+    if (!calendarEndDate) {
+        calendarEndDate = new Date(today);
+        calendarEndDate.setHours(0, 0, 0, 0);
+    }
+
+    // 初始化年份选择器
+    const yearSelect = document.getElementById('calendar-year-select');
+    yearSelect.innerHTML = '';
+    const currentYear = today.getFullYear();
+    for (let year = 2022; year <= currentYear + 1; year++) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year + '年';
+        if (year === calendarCurrentDate.getFullYear()) {
+            option.selected = true;
+        }
+        yearSelect.appendChild(option);
+    }
+
+    document.getElementById('calendar-month-select').value = calendarCurrentDate.getMonth();
+    updateDateRangeDisplay();
+}
+
+// 切换月份
+function changeMonth(delta) {
+    calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + delta);
+    document.getElementById('calendar-month-select').value = calendarCurrentDate.getMonth();
+    document.getElementById('calendar-year-select').value = calendarCurrentDate.getFullYear();
+    renderCalendar();
+}
+
+// 渲染日历
+function renderCalendar() {
+    const year = parseInt(document.getElementById('calendar-year-select').value);
+    const month = parseInt(document.getElementById('calendar-month-select').value);
+
+    calendarCurrentDate = new Date(year, month, 1);
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const prevLastDay = new Date(year, month, 0);
+
+    const firstDayWeek = firstDay.getDay();
+    const lastDate = lastDay.getDate();
+    const prevLastDate = prevLastDay.getDate();
+
+    const daysContainer = document.getElementById('calendar-days');
+    daysContainer.innerHTML = '';
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // 上个月的日期
+    for (let i = firstDayWeek - 1; i >= 0; i--) {
+        const day = prevLastDate - i;
+        const dayElement = createDayElement(day, year, month - 1, true);
+        daysContainer.appendChild(dayElement);
+    }
+
+    // 当前月的日期
+    for (let day = 1; day <= lastDate; day++) {
+        const dayElement = createDayElement(day, year, month, false);
+        daysContainer.appendChild(dayElement);
+    }
+
+    // 下个月的日期
+    const totalCells = daysContainer.children.length;
+    const remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+    for (let day = 1; day <= remainingCells; day++) {
+        const dayElement = createDayElement(day, year, month + 1, true);
+        daysContainer.appendChild(dayElement);
+    }
+}
+
+// 创建日期元素
+function createDayElement(day, year, month, isOtherMonth) {
+    const dayElement = document.createElement('div');
+    dayElement.className = 'calendar-day';
+    dayElement.textContent = day;
+
+    const date = new Date(year, month, day);
+    date.setHours(0, 0, 0, 0);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (isOtherMonth) {
+        dayElement.classList.add('other-month');
+    }
+
+    if (date.getTime() === today.getTime() && !isOtherMonth) {
+        dayElement.classList.add('today');
+    }
+
+    if (calendarStartDate) {
+        const startTime = calendarStartDate.getTime();
+        const currentTime = date.getTime();
+
+        if (calendarEndDate) {
+            const endTime = calendarEndDate.getTime();
+
+            if (currentTime === startTime && currentTime === endTime) {
+                dayElement.classList.add('selected', 'start-date', 'end-date');
+            } else if (currentTime === startTime) {
+                dayElement.classList.add('start-date');
+            } else if (currentTime === endTime) {
+                dayElement.classList.add('end-date');
+            } else if (currentTime > startTime && currentTime < endTime) {
+                dayElement.classList.add('in-range');
+            }
+        } else {
+            if (currentTime === startTime) {
+                dayElement.classList.add('start-date', 'selecting');
+            }
+        }
+    }
+
+    dayElement.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectDate(date);
+    });
+
+    return dayElement;
+}
+
+// 选择日期
+function selectDate(date) {
+    if (!calendarStartDate || (calendarStartDate && calendarEndDate)) {
+        calendarStartDate = new Date(date);
+        calendarEndDate = null;
+        isSelectingRange = true;
+    } else {
+        if (date < calendarStartDate) {
+            calendarEndDate = calendarStartDate;
+            calendarStartDate = new Date(date);
+        } else {
+            calendarEndDate = new Date(date);
+        }
+        isSelectingRange = false;
+
+        updateDateRange();
+        document.getElementById('calendar-popup').style.display = 'none';
+    }
+
+    renderCalendar();
+    updateDateRangeDisplay();
+}
+
+// 更新日期范围显示
+function updateDateRangeDisplay() {
+    const display = document.getElementById('date-range-display');
+    if (calendarStartDate && calendarEndDate) {
+        const start = formatDateDisplay(calendarStartDate);
+        const end = formatDateDisplay(calendarEndDate);
+        display.textContent = `${start} - ${end}`;
+    } else if (calendarStartDate) {
+        const start = formatDateDisplay(calendarStartDate);
+        display.textContent = `${start} - 选择结束日期`;
+    } else {
+        display.textContent = '选择日期范围';
+    }
+}
+
+// 格式化日期显示
+function formatDateDisplay(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}年${month}月${day}日`;
+}
+
+// 更新dateRange对象
+function updateDateRange() {
+    if (calendarStartDate && calendarEndDate) {
+        dateRange.startDate = formatDateToYYYYMMDD(calendarStartDate);
+        dateRange.endDate = formatDateToYYYYMMDD(calendarEndDate);
+        console.log('日历选择器更新日期范围:', dateRange.startDate, '到', dateRange.endDate);
+        loadStockData();
+    }
+}
+
+// 格式化日期为 YYYY-MM-DD
+function formatDateToYYYYMMDD(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+// 快速选择下拉菜单控制
+function toggleQuickSelectDropdown() {
+    const dropdown = document.getElementById('quick-select-dropdown');
+    dropdown.classList.toggle('show');
+}
+
+// 快速选择时间范围
+function selectQuickRange(range) {
+    const today = new Date();
+    let startDate, endDate;
+
+    switch (range) {
+        case 'today':
+            startDate = new Date(today);
+            endDate = new Date(today);
+            break;
+
+        case 'yesterday':
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            startDate = yesterday;
+            endDate = yesterday;
+            break;
+
+        case 'thisWeek':
+            const thisWeekStart = new Date(today);
+            const dayOfWeek = thisWeekStart.getDay();
+            const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            thisWeekStart.setDate(thisWeekStart.getDate() - daysToMonday);
+            startDate = thisWeekStart;
+            endDate = new Date(today);
+            break;
+
+        case 'lastWeek':
+            const lastWeekEnd = new Date(today);
+            const lastWeekDayOfWeek = lastWeekEnd.getDay();
+            const daysToLastSunday = lastWeekDayOfWeek === 0 ? 0 : lastWeekDayOfWeek;
+            lastWeekEnd.setDate(lastWeekEnd.getDate() - daysToLastSunday - 1);
+            const lastWeekStart = new Date(lastWeekEnd);
+            lastWeekStart.setDate(lastWeekStart.getDate() - 6);
+            startDate = lastWeekStart;
+            endDate = lastWeekEnd;
+            break;
+
+        case 'thisMonth':
+            startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+            endDate = new Date(today);
+            break;
+
+        case 'lastMonth':
+            const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
+            startDate = lastMonth;
+            endDate = lastMonthEnd;
+            break;
+
+        case 'thisYear':
+            startDate = new Date(today.getFullYear(), 0, 1);
+            endDate = new Date(today);
+            break;
+
+        case 'lastYear':
+            startDate = new Date(today.getFullYear() - 1, 0, 1);
+            endDate = new Date(today.getFullYear() - 1, 11, 31);
+            break;
+
+        default:
+            return;
+    }
+
+    const formatDate = (date) => {
+        return date.getFullYear() + '-' +
+            String(date.getMonth() + 1).padStart(2, '0') + '-' +
+            String(date.getDate()).padStart(2, '0');
+    };
+
+    dateRange = {
+        startDate: formatDate(startDate),
+        endDate: formatDate(endDate)
+    };
+
+    calendarStartDate = new Date(startDate);
+    calendarStartDate.setHours(0, 0, 0, 0);
+    calendarEndDate = new Date(endDate);
+    calendarEndDate.setHours(0, 0, 0, 0);
+    updateDateRangeDisplay();
+
+    const quickSelectText = document.getElementById('quick-select-text');
+    const rangeTexts = {
+        'today': '今天',
+        'yesterday': '昨天',
+        'thisWeek': '本周',
+        'lastWeek': '上周',
+        'thisMonth': '这个月',
+        'lastMonth': '上个月',
+        'thisYear': '今年',
+        'lastYear': '去年'
+    };
+    quickSelectText.textContent = rangeTexts[range] || '选择时间段';
+
+    document.getElementById('quick-select-dropdown').classList.remove('show');
+    loadStockData();
+}
+
+// 点击外部关闭日历和下拉菜单
+document.addEventListener('click', function (e) {
+    const calendar = document.getElementById('date-range-picker');
+    const popup = document.getElementById('calendar-popup');
+    if (calendar && popup && !calendar.contains(e.target) && !popup.contains(e.target)) {
+        popup.style.display = 'none';
+    }
+
+    // 关闭快速选择下拉菜单
+    if (!e.target.closest('.dropdown')) {
+        const quickSelectDropdown = document.getElementById('quick-select-dropdown');
+        if (quickSelectDropdown) {
+            quickSelectDropdown.classList.remove('show');
+        }
+    }
+});
+
+// 全局点击事件（隐藏 combobox 下拉列表）
+document.addEventListener('click', function (event) {
+    if (!event.target.closest('.combobox-container')) {
+        hideAllComboboxDropdowns();
+    }
+});
+
+// 窗口滚动和大小变化时重新计算位置
+window.addEventListener('scroll', hideAllComboboxDropdowns);
+window.addEventListener('resize', hideAllComboboxDropdowns);
+
+// 监听表格滚动，重新计算下拉列表位置
+const tableContainer = document.querySelector('.table-scroll-container');
+if (tableContainer) {
+    tableContainer.addEventListener('scroll', () => {
+        clearTimeout(tableContainer._scrollTimeout);
+        tableContainer._scrollTimeout = setTimeout(() => {
+            document.querySelectorAll('.combobox-dropdown.show').forEach(dropdown => {
+                const container = dropdown.closest('.combobox-container');
+                const input = container.querySelector('input');
+                if (input) {
+                    const position = calculateDropdownPosition(input, dropdown);
+                    dropdown.style.top = position.top + 'px';
+                    dropdown.style.left = position.left + 'px';
+                    dropdown.style.width = position.width + 'px';
+                    dropdown.style.maxHeight = position.height + 'px';
+                }
+            });
+        }, 50);
+    });
+}
+
+// 点击其他地方关闭下拉菜单
+document.addEventListener('click', function (event) {
+    const selector = event.target.closest('.selector-button');
+    const dropdown = event.target.closest('.selector-dropdown');
+    const dropdownItem = event.target.closest('.dropdown-item');
+
+    if (dropdownItem) {
+        const parentDropdown = dropdownItem.closest('.selector-dropdown');
+        if (parentDropdown) {
+            parentDropdown.classList.remove('show');
+        }
+        return;
+    }
+
+    if (!selector && !dropdown) {
+        document.getElementById('view-selector-dropdown')?.classList.remove('show');
+    }
+});
+
+// 切换批量删除模式
+function toggleBatchDelete() {
+    isBatchDeleteMode = true;
+    selectedRecords.clear();
+
+    // 显示/隐藏按钮
+    document.getElementById('batch-delete-btn').style.display = 'none';
+    const confirmBtn = document.getElementById('confirm-batch-delete-btn');
+    confirmBtn.style.display = 'inline-block';
+    confirmBtn.disabled = true; // 初始禁用
+    confirmBtn.innerHTML = '<i class="fas fa-check"></i> 确认删除';
+    document.getElementById('cancel-batch-delete-btn').style.display = 'inline-block';
+
+    // 更改表头
+    document.getElementById('action-header').textContent = '选择';
+
+    // 重新渲染表格
+    generateStockTable();
+
+    showAlert('批量删除模式已启用，请勾选要删除的记录', 'info');
+}
+
+// 取消批量删除模式
+function cancelBatchDelete() {
+    isBatchDeleteMode = false;
+    selectedRecords.clear();
+
+    // 显示/隐藏按钮
+    document.getElementById('batch-delete-btn').style.display = 'inline-block';
+    document.getElementById('confirm-batch-delete-btn').style.display = 'none';
+    document.getElementById('cancel-batch-delete-btn').style.display = 'none';
+
+    // 恢复表头
+    document.getElementById('action-header').textContent = '操作';
+
+    // 重新渲染表格
+    generateStockTable();
+}
+
+// 切换记录选择状态
+function toggleRecordSelection(recordId, isSelected) {
+    // 确保 recordId 为字符串，以保持一致性
+    recordId = String(recordId);
+
+    if (isSelected) {
+        selectedRecords.add(recordId);
+    } else {
+        selectedRecords.delete(recordId);
+    }
+
+    console.log('当前选中记录:', Array.from(selectedRecords));
+
+    // 更新确认按钮状态
+    const confirmBtn = document.getElementById('confirm-batch-delete-btn');
+    if (selectedRecords.size > 0) {
+        confirmBtn.innerHTML = `<i class="fas fa-check"></i> 确认删除 (${selectedRecords.size})`;
+        confirmBtn.disabled = false;
+    } else {
+        confirmBtn.innerHTML = '<i class="fas fa-check"></i> 确认删除';
+        confirmBtn.disabled = true;
+    }
+}
+
+// 确认批量删除
+async function confirmBatchDelete() {
+    if (selectedRecords.size === 0) {
+        showAlert('请至少选择一条记录', 'error');
+        return;
+    }
+
+    if (!confirm(`确定要删除选中的 ${selectedRecords.size} 条记录吗？删除后，相关库存会恢复！`)) {
+        return;
+    }
+
+    const confirmBtn = document.getElementById('confirm-batch-delete-btn');
+    const originalText = confirmBtn.innerHTML;
+    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 删除中...';
+    confirmBtn.disabled = true;
+
+    try {
+        let successCount = 0;
+        let failCount = 0;
+
+        // 逐个删除选中的记录
+        for (const recordId of selectedRecords) {
+            try {
+                const response = await fetch(`${API_BASE_URL}?id=${recordId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const responseText = await response.text();
+                const result = JSON.parse(responseText);
+
+                if (result.success) {
+                    successCount++;
+                } else {
+                    failCount++;
+                }
+            } catch (error) {
+                failCount++;
+                console.error(`删除记录 ${recordId} 失败:`, error);
+            }
+        }
+
+        // 显示删除结果
+        if (successCount > 0) {
+            showAlert(`成功删除 ${successCount} 条记录，相关库存已恢复${failCount > 0 ? `，${failCount} 条失败` : ''}`,
+                failCount > 0 ? 'warning' : 'success');
+        } else {
+            showAlert('删除失败', 'error');
+        }
+
+        // 退出批量删除模式并刷新数据
+        cancelBatchDelete();
+
+        // 重新加载数据
+        loadStockData();
+
+    } catch (error) {
+        showAlert('批量删除时发生错误', 'error');
+        confirmBtn.innerHTML = originalText;
+        confirmBtn.disabled = false;
+    }
+}
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', initApp);
+ + `{toastId}')">&times;</button>
+        <div class="toast-progress"></div>
+    `;
 
     container.appendChild(toast);
 
