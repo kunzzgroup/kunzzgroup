@@ -1,22 +1,13 @@
 /**
  * smartSearch.js  —  Global Smart Search Wrapper Utilities
  *
- * Architecture: Layout (header-search) ≠ Component (smartSearchWrapper)
- *
  * Behavior (matches hire.php):
  *   - Collapsed by default (icon only, 40px wide)
- *   - Click wrapper → expand as OVERLAY (position:absolute) to the left
- *     → the 40px slot in the flex row NEVER grows → siblings unaffected
+ *   - Click wrapper → expand natively to 250px
+ *   - Because parent .header-right-section has margin-left: auto,
+ *     the extra width PUSHES INTO THE LEFT FREE SPACE naturally.
  *   - Click outside → collapse (only if input is empty)
  *   - input event → debounced callback / table filter
- *
- * Key technique: JS auto-injects .smartSearch-inner around icon+input
- *   so the CSS can use position:absolute on that inner div for overlay.
- *
- * Provides:
- *   debounce(fn, delay)
- *   initSmartSearch(inputId, callback, delay)
- *   Auto-init: optional data-table attribute for zero-config table filtering
  */
 
 /* ── Debounce ──────────────────────────────────────────────── */
@@ -30,31 +21,13 @@ function debounce(fn, delay) {
     };
 }
 
-/* ── Inject .smartSearch-inner wrapper (once per wrapper) ──── *
- * Wraps the icon + input inside a .smartSearch-inner div so that
- * CSS can use position:absolute on it for overlay expansion.
- * Idempotent — safe to call multiple times.
- */
-function ensureInnerWrapper(wrapper) {
-    if (wrapper.querySelector('.smartSearch-inner')) return; /* already done */
-
-    var inner = document.createElement('div');
-    inner.className = 'smartSearch-inner';
-
-    /* Move all direct children into inner */
-    while (wrapper.firstChild) {
-        inner.appendChild(wrapper.firstChild);
-    }
-    wrapper.appendChild(inner);
-}
-
 /* ── Expand a single smartSearchWrapper ─────────────────────── */
 function expandSmartSearch(wrapper) {
     wrapper.classList.add('expanded');
     wrapper.dataset.expanded = '1';
     var input = wrapper.querySelector('.smartSearch-input');
     if (input) {
-        setTimeout(function () { input.focus(); }, 50);
+        setTimeout(function () { input.focus(); }, 100);
     }
 }
 
@@ -68,14 +41,6 @@ function collapseSmartSearch(wrapper) {
 }
 
 /* ── Core: wire a search input by ID ─────────────────────── */
-/**
- * Initialise a smart search input with debounced callback.
- *
- * @param {string}   inputId   - ID of the .smartSearch-input element
- * @param {Function} callback  - called with (value:string) on each debounced input
- * @param {number}   [delay]   - debounce ms, default 300
- * @returns {{ destroy: Function }}
- */
 function initSmartSearch(inputId, callback, delay) {
     delay = (delay === undefined) ? 300 : delay;
 
@@ -95,11 +60,7 @@ function initSmartSearch(inputId, callback, delay) {
 
     /* clear-button wiring */
     updateClearButton(el);
-
     var clearBtn = el.parentElement && el.parentElement.querySelector('.smartSearch-clear');
-    if (!clearBtn && el.parentElement && el.parentElement.parentElement) {
-        clearBtn = el.parentElement.parentElement.querySelector('.smartSearch-clear');
-    }
     if (clearBtn) {
         clearBtn.addEventListener('click', function () {
             el.value = '';
@@ -119,10 +80,7 @@ function initSmartSearch(inputId, callback, delay) {
 /* ── Helper: toggle has-value class for clear button ───────── */
 function updateClearButton(inputEl) {
     var wrapper = inputEl.closest ? inputEl.closest('.smartSearchWrapper')
-                                  : null;
-    if (!wrapper && inputEl.parentElement) {
-        wrapper = inputEl.parentElement.parentElement; /* inner → wrapper */
-    }
+                                  : inputEl.parentElement;
     if (!wrapper) return;
     if (inputEl.value && inputEl.value.length > 0) {
         wrapper.classList.add('has-value');
@@ -133,21 +91,15 @@ function updateClearButton(inputEl) {
 
 /* ── Auto-init: DOMContentLoaded ─────────────────────────────
  *
- * 1. Injects .smartSearch-inner inside every .smartSearchWrapper
- * 2. Wires expand (click) / collapse (outside click) behavior
- * 3. Auto data-table filtering
+ * 1. Wires expand (click) / collapse (outside click) behavior
+ * 2. Auto data-table filtering
  * ─────────────────────────────────────────────────────────── */
 (function () {
     document.addEventListener('DOMContentLoaded', function () {
 
         var wrappers = document.querySelectorAll('.smartSearchWrapper');
 
-        /* ── Step 1: inject inner wrapper for overlay positioning ── */
-        wrappers.forEach(function (wrapper) {
-            ensureInnerWrapper(wrapper);
-        });
-
-        /* ── Step 2: expand / collapse behavior ─────────────────── */
+        /* ── Step 1: expand / collapse behavior ─────────────────── */
         wrappers.forEach(function (wrapper) {
             var input = wrapper.querySelector('.smartSearch-input');
 
@@ -175,7 +127,7 @@ function updateClearButton(inputEl) {
             });
         });
 
-        /* ── Step 3: auto-wire data-table inputs ────────────────── */
+        /* ── Step 2: auto-wire data-table inputs ────────────────── */
         var autoInputs = document.querySelectorAll('.smartSearch-input[data-table]');
         autoInputs.forEach(function (input) {
             var tableId = input.getAttribute('data-table');
@@ -191,13 +143,13 @@ function updateClearButton(inputEl) {
             }
         });
 
-        /* ── Step 4: init has-value + wire clear buttons ─────────── */
+        /* ── Step 3: init has-value + wire clear buttons ─────────── */
         var allInputs = document.querySelectorAll('.smartSearch-input');
         allInputs.forEach(function (input) {
             updateClearButton(input);
 
             var wrapper = input.closest ? input.closest('.smartSearchWrapper')
-                                        : null;
+                                        : input.parentElement;
             if (!wrapper) return;
 
             var clearBtn = wrapper.querySelector('.smartSearch-clear');
@@ -215,13 +167,6 @@ function updateClearButton(inputEl) {
 })();
 
 /* ── Table filter helper ─────────────────────────────────── */
-/**
- * Filter <tbody> rows of a table by a search string.
- *
- * @param {string}        tableId  - element ID of the <table>
- * @param {string}        val      - search term
- * @param {number[]|null} cols     - column indexes to check (null = all)
- */
 function filterTable(tableId, val, cols) {
     var table = document.getElementById(tableId);
     if (!table) return;
