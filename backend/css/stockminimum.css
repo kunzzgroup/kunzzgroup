@@ -271,7 +271,8 @@ body {
 /* 货品名称 */
 .settings-table th:nth-child(3),
 .settings-table td:nth-child(3) {
-    width: 38%;
+    width: 20%;
+    text-align: center;
 }
 
 /* 规格 */
@@ -290,7 +291,7 @@ body {
 /* 操作 */
 .settings-table th:nth-child(6),
 .settings-table td:nth-child(6) {
-    width: 16%;
+    width: 10%;
     text-align: center;
 }
 
