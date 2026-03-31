@@ -1299,7 +1299,7 @@ body {
     margin-bottom: clamp(14px, 1.25vw, 24px);
     border: 2px solid #000000ff;
     box-shadow: 0 2px 8px rgba(88, 62, 4, 0.1);
-    flex-wrap: wrap;                 /* 方案 2: 空间不够时允许换行，绝不挤压按钮 */
+    flex-wrap: nowrap;
     justify-content: space-between;
     /* 添加这行，让内容两端对齐 */
 }
@@ -1365,7 +1365,6 @@ body {
     align-items: center;
     gap: clamp(8px, 1.04vw, 20px);
     margin-left: auto;
-    flex-shrink: 0;                  /* 防止整个右侧操作区被缩水，保持按钮硬挺 */
 }
 
 .header-stats .stat-value {
