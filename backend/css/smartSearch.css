@@ -1,75 +1,49 @@
 /* ==========================================================
    smartSearch.css  —  Global Smart Search Wrapper Component
-
-   METHOD: Absolute Positioning (Overlay to the left)
-   As per best practice, the wrapper acts as a 40px fixed
-   placeholder. The inner expanded search box floats to the
-   LEFT, covering empty space (or stats), ensuring that right-
-   side buttons are never squished or pushed out of place.
    ========================================================== */
 
-/* ── Anchor container — always 40px, never pushes or squishes */
+/* ── Wrapper ────────────────────────────────────────────── */
 .smartSearchWrapper {
-    position: relative;
-    width: 40px;
-    height: 38px;
-    flex-shrink: 0;
-    display: block;   /* Important: block so absolute inner aligns perfectly */
-    z-index: 10;
-    cursor: pointer;
-}
-
-/* ── Inner — MUST ALWAYS BE ABSOLUTE TO ANIMATE PERFECTLY ─ */
-.smartSearch-inner {
-    position: absolute;
-    right: 0;                        /* ALWAYS anchored to right edge */
-    top: 0;
-    width: 40px;                     /* collapsed width matches wrapper */
-    height: 38px;
     display: flex;
     align-items: center;
     background: #ffffff;
     border: 1px solid #d1d5db;
     border-radius: 20px;
+    height: 38px;
+    width: 40px;                     /* collapsed width */
     overflow: hidden;
+    cursor: pointer;
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
                 border-color 0.25s ease,
                 border-radius 0.25s ease,
                 box-shadow 0.2s ease;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    cursor: pointer;
+    flex-shrink: 0;
 }
 
-.smartSearch-inner:hover {
+.smartSearchWrapper:hover {
     border-color: #ff7b00;
 }
 
-/* ── Inner — EXPANDED: overlay to the left  ─────────────── */
+/* ── EXPANDED STATE ─────────────────────────────────────── */
 .smartSearchWrapper.expanded {
-    cursor: default;
-    z-index: 100;
-}
-
-.smartSearchWrapper.expanded .smartSearch-inner {
-    width: 250px;                    /* expanded width */
+    /* Set to 200px (Solution 1) so it takes up less space horizontally */
+    width: 200px;                    
     border-color: #ff7b00;
     border-radius: 6px;
     cursor: default;
-    animation: smartSearch-expand-glow 0.25s ease forwards;
-    box-shadow: 0 0 0 2px rgba(255, 123, 0, 0.12),
-                0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 0 0 2px rgba(255, 123, 0, 0.12);
 }
 
 /* ── Icon ───────────────────────────────────────────────── */
 .smartSearch-icon {
     width: 40px;
-    min-width: 40px;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 15px;
-    color: #9ca3af;
+    color: #9ca3af;                  
     flex-shrink: 0;
     pointer-events: none;
     transition: color 0.25s ease;
@@ -94,7 +68,7 @@
     font-family: inherit;
     line-height: 1.4;
     height: 100%;
-    display: none;
+    display: none;                   
 }
 
 .smartSearchWrapper.expanded .smartSearch-input {
@@ -129,26 +103,21 @@
     align-items: center;
 }
 
-/* ── Expand glow animation ──────────────────────────────── */
+/* ── Focus animation (pulse on expand) ─────────────────── */
 @keyframes smartSearch-expand-glow {
-    from {
-        box-shadow: 0 0 0 0 rgba(255, 123, 0, 0.25);
-    }
-    to {
-        box-shadow: 0 0 0 2px rgba(255, 123, 0, 0.12),
-                    0 4px 12px rgba(0, 0, 0, 0.08);
-    }
+    from { box-shadow: 0 0 0 0 rgba(255, 123, 0, 0.25); }
+    to   { box-shadow: 0 0 0 2px rgba(255, 123, 0, 0.12); }
+}
+
+.smartSearchWrapper.expanded {
+    animation: smartSearch-expand-glow 0.2s ease forwards;
 }
 
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 768px) {
-    .smartSearchWrapper.expanded .smartSearch-inner {
-        width: 200px;
-    }
+    .smartSearchWrapper.expanded { width: 180px; }
 }
 
 @media (max-width: 480px) {
-    .smartSearchWrapper.expanded .smartSearch-inner {
-        width: 160px;
-    }
+    .smartSearchWrapper.expanded { width: 140px; }
 }

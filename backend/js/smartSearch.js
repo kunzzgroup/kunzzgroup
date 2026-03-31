@@ -17,19 +17,7 @@ function debounce(fn, delay) {
     };
 }
 
-/* ── Inject .smartSearch-inner wrapper (once per wrapper) ──── */
-function ensureInnerWrapper(wrapper) {
-    if (wrapper.querySelector('.smartSearch-inner')) return;
-
-    var inner = document.createElement('div');
-    inner.className = 'smartSearch-inner';
-
-    // Move all direct children into inner
-    while (wrapper.firstChild) {
-        inner.appendChild(wrapper.firstChild);
-    }
-    wrapper.appendChild(inner);
-}
+/* ── DOM injection removed because we reverted to native flex scaling ── */
 
 /* ── Expand a single smartSearchWrapper ─────────────────────── */
 function expandSmartSearch(wrapper) {
@@ -106,11 +94,6 @@ function updateClearButton(inputEl) {
     document.addEventListener('DOMContentLoaded', function () {
 
         var wrappers = document.querySelectorAll('.smartSearchWrapper');
-
-        /* 1. inject inner wrapper for overlay positioning */
-        wrappers.forEach(function (wrapper) {
-            ensureInnerWrapper(wrapper);
-        });
 
         /* 2. expand / collapse behavior */
         wrappers.forEach(function (wrapper) {
