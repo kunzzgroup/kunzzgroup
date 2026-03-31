@@ -1,13 +1,9 @@
 /**
  * smartSearch.js  —  Global Smart Search Wrapper Utilities
  *
- * Behavior (matches hire.php):
- *   - Collapsed by default (icon only, 40px wide)
- *   - Click wrapper → expand natively to 250px
- *   - Because parent .header-right-section has margin-left: auto,
- *     the extra width PUSHES INTO THE LEFT FREE SPACE naturally.
- *   - Click outside → collapse (only if input is empty)
- *   - input event → debounced callback / table filter
+ * Method 1: Absolute Overlay (As requested)
+ * Wraps content in .smartSearch-inner so it can float over
+ * without squishing adjacent buttons.
  */
 
 /* ── Debounce ──────────────────────────────────────────────── */
@@ -21,20 +17,33 @@ function debounce(fn, delay) {
     };
 }
 
+/* ── Inject .smartSearch-inner wrapper (once per wrapper) ──── */
+function ensureInnerWrapper(wrapper) {
+    if (wrapper.querySelector('.smartSearch-inner')) return;
+
+    var inner = document.createElement('div');
+    inner.className = 'smartSearch-inner';
+
+    // Move all direct children into inner
+    while (wrapper.firstChild) {
+        inner.appendChild(wrapper.firstChild);
+    }
+    wrapper.appendChild(inner);
+}
+
 /* ── Expand a single smartSearchWrapper ─────────────────────── */
 function expandSmartSearch(wrapper) {
     wrapper.classList.add('expanded');
     wrapper.dataset.expanded = '1';
     var input = wrapper.querySelector('.smartSearch-input');
     if (input) {
-        setTimeout(function () { input.focus(); }, 100);
+        setTimeout(function () { input.focus(); }, 50);
     }
 }
 
 /* ── Collapse a single smartSearchWrapper ───────────────────── */
 function collapseSmartSearch(wrapper) {
     var input = wrapper.querySelector('.smartSearch-input');
-    /* Only collapse if input is empty */
     if (input && input.value.trim() !== '') return;
     wrapper.classList.remove('expanded');
     wrapper.dataset.expanded = '';
@@ -58,16 +67,19 @@ function initSmartSearch(inputId, callback, delay) {
 
     el.addEventListener('input', debouncedCb);
 
-    /* clear-button wiring */
     updateClearButton(el);
-    var clearBtn = el.parentElement && el.parentElement.querySelector('.smartSearch-clear');
-    if (clearBtn) {
-        clearBtn.addEventListener('click', function () {
-            el.value = '';
-            updateClearButton(el);
-            el.dispatchEvent(new Event('input', { bubbles: true }));
-            el.focus();
-        });
+
+    var wrapper = el.closest ? el.closest('.smartSearchWrapper') : el.parentElement.parentElement;
+    if (wrapper) {
+        var clearBtn = wrapper.querySelector('.smartSearch-clear');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function () {
+                el.value = '';
+                updateClearButton(el);
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.focus();
+            });
+        }
     }
 
     return {
@@ -80,7 +92,7 @@ function initSmartSearch(inputId, callback, delay) {
 /* ── Helper: toggle has-value class for clear button ───────── */
 function updateClearButton(inputEl) {
     var wrapper = inputEl.closest ? inputEl.closest('.smartSearchWrapper')
-                                  : inputEl.parentElement;
+                                  : inputEl.parentElement.parentElement;
     if (!wrapper) return;
     if (inputEl.value && inputEl.value.length > 0) {
         wrapper.classList.add('has-value');
@@ -89,21 +101,21 @@ function updateClearButton(inputEl) {
     }
 }
 
-/* ── Auto-init: DOMContentLoaded ─────────────────────────────
- *
- * 1. Wires expand (click) / collapse (outside click) behavior
- * 2. Auto data-table filtering
- * ─────────────────────────────────────────────────────────── */
+/* ── Auto-init: DOMContentLoaded ───────────────────────────── */
 (function () {
     document.addEventListener('DOMContentLoaded', function () {
 
         var wrappers = document.querySelectorAll('.smartSearchWrapper');
 
-        /* ── Step 1: expand / collapse behavior ─────────────────── */
+        /* 1. inject inner wrapper for overlay positioning */
+        wrappers.forEach(function (wrapper) {
+            ensureInnerWrapper(wrapper);
+        });
+
+        /* 2. expand / collapse behavior */
         wrappers.forEach(function (wrapper) {
             var input = wrapper.querySelector('.smartSearch-input');
 
-            /* Click on wrapper → expand */
             wrapper.addEventListener('click', function (e) {
                 if (!wrapper.dataset.expanded) {
                     e.stopPropagation();
@@ -127,7 +139,7 @@ function updateClearButton(inputEl) {
             });
         });
 
-        /* ── Step 2: auto-wire data-table inputs ────────────────── */
+        /* 3. auto-wire data-table inputs */
         var autoInputs = document.querySelectorAll('.smartSearch-input[data-table]');
         autoInputs.forEach(function (input) {
             var tableId = input.getAttribute('data-table');
@@ -143,19 +155,20 @@ function updateClearButton(inputEl) {
             }
         });
 
-        /* ── Step 3: init has-value + wire clear buttons ─────────── */
+        /* 4. wire unwired clear buttons */
         var allInputs = document.querySelectorAll('.smartSearch-input');
         allInputs.forEach(function (input) {
             updateClearButton(input);
 
             var wrapper = input.closest ? input.closest('.smartSearchWrapper')
-                                        : input.parentElement;
+                                        : input.parentElement.parentElement;
             if (!wrapper) return;
 
             var clearBtn = wrapper.querySelector('.smartSearch-clear');
             if (clearBtn && !clearBtn._smartSearchWired) {
                 clearBtn._smartSearchWired = true;
-                clearBtn.addEventListener('click', function () {
+                clearBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
                     input.value = '';
                     updateClearButton(input);
                     input.dispatchEvent(new Event('input', { bubbles: true }));
