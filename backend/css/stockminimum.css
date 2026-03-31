@@ -147,6 +147,7 @@ body {
     background: #f99300;
     color: white;
 }
+
 .btn-primary:hover {
     background: #e08500;
     transform: translateY(-1px);
@@ -156,6 +157,7 @@ body {
     background: #6b7280;
     color: white;
 }
+
 .btn-secondary:hover {
     background: #4b5563;
     transform: translateY(-1px);
@@ -165,6 +167,7 @@ body {
     background: #f99e00;
     color: white;
 }
+
 .btn-warning:hover {
     background: #e08900;
     transform: translateY(-1px);
@@ -248,19 +251,36 @@ body {
 
 /* No. column */
 .settings-table th:nth-child(1),
-.settings-table td:nth-child(1) { width: 6%; text-align: center; color: #6b7280; }
+.settings-table td:nth-child(1) {
+    width: 6%;
+    text-align: center;
+    color: #ffffff;
+}
+
 /* Product name */
 .settings-table th:nth-child(2),
-.settings-table td:nth-child(2) { width: 38%; }
+.settings-table td:nth-child(2) {
+    width: 38%;
+}
+
 /* Code */
 .settings-table th:nth-child(3),
-.settings-table td:nth-child(3) { width: 20%; }
+.settings-table td:nth-child(3) {
+    width: 20%;
+}
+
 /* Min qty */
 .settings-table th:nth-child(4),
-.settings-table td:nth-child(4) { width: 18%; }
+.settings-table td:nth-child(4) {
+    width: 18%;
+}
+
 /* Action */
 .settings-table th:nth-child(5),
-.settings-table td:nth-child(5) { width: 18%; text-align: center; }
+.settings-table td:nth-child(5) {
+    width: 18%;
+    text-align: center;
+}
 
 .settings-table tbody tr:hover {
     background: #e5ebf8ff;
@@ -318,8 +338,13 @@ body {
 }
 
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* ─── No Data ────────────────────────────────────────────────────────────── */
@@ -339,13 +364,31 @@ body {
 
 /* ─── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-    .container { padding: 12px; }
+    .container {
+        padding: 12px;
+    }
 
-    .header { flex-direction: column; align-items: stretch; }
-    .header-right-group { flex-direction: column; align-items: stretch; }
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+    }
 
-    .system-tabs { width: auto; flex-wrap: wrap; }
-    .tab-btn { flex: 1; justify-content: center; }
+    .header-right-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
 
-    .table-container { max-height: 60vh; }
+    .system-tabs {
+        width: auto;
+        flex-wrap: wrap;
+    }
+
+    .tab-btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .table-container {
+        max-height: 60vh;
+    }
 }
