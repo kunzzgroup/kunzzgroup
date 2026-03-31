@@ -710,25 +710,24 @@ function showAlert(message, type = 'success') {
     }
 
     const toastId = 'toast-' + Date.now();
-        const cfg = {
-        'success': { icon: '✅', title: '操作成功' },
-        'error':   { icon: '❌', title: '操作失败' },
-        'info':    { icon: 'ℹ️', title: '提示信息' },
-        'warning': { icon: '⚠️', title: '注意' }
-    }[type] || { icon: '✅', title: '操作成功' };
+    const iconClass = {
+        'success': 'fa-check-circle',
+        'error': 'fa-exclamation-circle',
+        'info': 'fa-info-circle',
+        'warning': 'fa-exclamation-triangle'
+    }[type] || 'fa-check-circle';
 
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.id = toastId;
-        toast.innerHTML = `
-        <div class="toast-icon-wrap">${cfg.icon}</div>
-        <div class="toast-body">
-            <div class="toast-title">${cfg.title}</div>
-            <div class="toast-msg">${message}</div>
-        </div>
-        <button class="toast-close" onclick="closeToast('${toastId}')">&times;</button>
-        <div class="toast-progress"></div>
-    `;
+    toast.innerHTML = `
+                <i class="fas ${iconClass} toast-icon"></i>
+                <div class="toast-content">${message}</div>
+                <button class="toast-close" onclick="closeToast('${toastId}')">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="toast-progress"></div>
+            `;
 
     container.appendChild(toast);
 

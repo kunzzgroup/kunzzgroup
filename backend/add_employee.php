@@ -279,7 +279,7 @@ body { background: #f3f4f6; }
         font-size: 15px;
     }
     #toast-container {
-        top: 16px;
+        bottom: 110px;
         left: 50%;
         right: auto;
         transform: translateX(-50%);
@@ -414,66 +414,38 @@ body { background: #f3f4f6; }
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Toast 通知（统一设计） ── */
+/* ── Toast 通知 ── */
 #toast-container {
     position: fixed;
-    top: 24px;
-    right: 24px;
+    bottom: 80px;
+    right: 32px;
     z-index: 99999;
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    gap: 8px;
     pointer-events: none;
-    max-width: 360px;
-    width: 100%;
+    max-width: 340px;
 }
 .toast {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 600;
+    box-shadow: 0 6px 24px rgba(0,0,0,.16);
+    pointer-events: all;
+    animation: toastIn .3s cubic-bezier(.21,1.02,.73,1) forwards;
     width: 100%;
-    max-width: 360px;
-    padding: 16px 20px;
-    border-radius: 12px;
-    background: #fff;
-    border-left: 4px solid #ef4444;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    font-size: 14px;
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    pointer-events: auto;
-    transform: translateX(120%);
-    opacity: 0;
-    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s;
-    position: relative;
-    overflow: hidden;
 }
-.toast.show { transform: translateX(0); opacity: 1; }
-.toast.toast-out { transform: translateX(120%); opacity: 0; }
-.toast-success { border-left-color: #10b981; }
-.toast-error   { border-left-color: #ef4444; }
-.toast-warning { border-left-color: #f59e0b; }
-.toast-icon-wrap {
-    width: 36px; height: 36px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; flex-shrink: 0;
-}
-.toast-success .toast-icon-wrap { background: #d1fae5; }
-.toast-error   .toast-icon-wrap { background: #fee2e2; }
-.toast-warning .toast-icon-wrap { background: #fef3c7; }
-.toast-body  { flex: 1; }
-.toast-title { font-size: 14px; font-weight: 700; color: #111; margin-bottom: 4px; }
-.toast-msg   { font-size: 13px; color: #6b7280; line-height: 1.5; }
-.toast-close {
-    background: none; border: none; font-size: 18px; color: #9ca3af;
-    cursor: pointer; line-height: 1; padding: 0; flex-shrink: 0;
-}
-.toast-close:hover { color: #374151; }
-.toast-progress {
-    position: absolute; bottom: 0; left: 0; height: 3px; border-radius: 0 0 0 12px;
-}
-.toast-success .toast-progress { background: #10b981; }
-.toast-error   .toast-progress { background: #ef4444; }
-.toast-warning .toast-progress { background: #f59e0b; }
-@keyframes toastIn  { from{opacity:0;transform:translateX(120%)} to{opacity:1;transform:translateX(0)} }
+.toast.toast-error   { background:#fff1f2; color:#9f1239; border:1.5px solid #fca5a5; }
+.toast.toast-success { background:#f0fdf4; color:#166534; border:1.5px solid #86efac; }
+.toast.toast-warning { background:#fffbeb; color:#92400e; border:1.5px solid #fcd34d; }
+.toast.toast-out     { animation: toastOut .25s ease forwards; }
+@keyframes toastIn  { from{opacity:0;transform:translateY(16px) scale(.96)} to{opacity:1;transform:translateY(0) scale(1)} }
+@keyframes toastOut { from{opacity:1;transform:translateY(0) scale(1)}      to{opacity:0;transform:translateY(10px) scale(.96)} }
 
 .required-mark {
     color: #ef4444;
@@ -1076,37 +1048,26 @@ body { background: #f3f4f6; }
         function showInlineMessage(msg, type = 'error') {
             const container = document.getElementById('toast-container');
             if (!container) return;
-
+            
             // 清除之前的 toast，限制最多只显示一个
             container.innerHTML = '';
-
-            const cfg = {
-                'success': { icon: '✅', title: '操作成功' },
-                'warning': { icon: '⚠️', title: '注意' },
-                'error':   { icon: '❌', title: '操作失败' }
-            }[type] || { icon: '❌', title: '操作失败' };
-
-            const toastId = 'toast-' + Date.now();
+            
+            const icon = type === 'success' ? 'fa-check-circle'
+                       : type === 'warning' ? 'fa-exclamation-triangle'
+                       : 'fa-times-circle';
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
-            toast.id = toastId;
-            toast.innerHTML = `
-                <div class="toast-icon-wrap">${cfg.icon}</div>
-                <div class="toast-body">
-                    <div class="toast-title">${cfg.title}</div>
-                    <div class="toast-msg">${escapeHTML(msg)}</div>
-                </div>
-                <button class="toast-close" onclick="this.closest('.toast').remove()">&times;</button>
-                <div class="toast-progress"></div>
-            `;
+            toast.innerHTML = `<i class="fas ${icon}"></i><span>${escapeHTML(msg)}</span>`;
             container.appendChild(toast);
-            setTimeout(() => toast.classList.add('show'), 50);
-
+            
             const delay = type === 'success' ? 3000 : 4500;
             setTimeout(() => {
-                toast.classList.remove('show');
-                toast.classList.add('toast-out');
-                setTimeout(() => { if (toast.parentNode) toast.remove(); }, 400);
+                if (toast.parentNode === container) {
+                    toast.classList.add('toast-out');
+                    setTimeout(() => {
+                        if (toast.parentNode === container) toast.remove();
+                    }, 320);
+                }
             }, delay);
         }
 

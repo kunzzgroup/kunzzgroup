@@ -6049,40 +6049,49 @@ function showAlert(message, type = 'success') {
     const container = document.getElementById('toast-container');
     if (!container) return;
 
+    // 先检查并限制通知数量（在添加新通知之前）
     let existingToasts = container.querySelectorAll('.toast');
     while (existingToasts.length >= 3) {
         closeToast(existingToasts[0].id);
-        if (existingToasts[0].parentNode) existingToasts[0].parentNode.removeChild(existingToasts[0]);
+        // 立即从DOM移除，不等待动画
+        if (existingToasts[0].parentNode) {
+            existingToasts[0].parentNode.removeChild(existingToasts[0]);
+        }
+        // 重新获取当前通知列表
         existingToasts = container.querySelectorAll('.toast');
     }
 
     const toastId = 'toast-' + Date.now();
-    const cfg = {
-        'success': { icon: '✅', title: '操作成功' },
-        'error':   { icon: '❌', title: '操作失败' },
-        'info':    { icon: 'ℹ️', title: '提示信息' },
-        'warning': { icon: '⚠️', title: '注意' }
-    }[type] || { icon: '✅', title: '操作成功' };
+    const iconClass = {
+        'success': 'fa-check-circle',
+        'error': 'fa-exclamation-circle',
+        'info': 'fa-info-circle',
+        'warning': 'fa-exclamation-triangle'
+    }[type] || 'fa-check-circle';
 
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.id = toastId;
     toast.innerHTML = `
-        <div class="toast-icon-wrap">${cfg.icon}</div>
-        <div class="toast-body">
-            <div class="toast-title">${cfg.title}</div>
-            <div class="toast-msg">${message}</div>
-        </div>
-        <button class="toast-close" onclick="closeToast('${toastId}')">&times;</button>
-        <div class="toast-progress"></div>
-    `;
+                <i class="fas ${iconClass} toast-icon"></i>
+                <div class="toast-content">${message}</div>
+                <button class="toast-close" onclick="closeToast('${toastId}')">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="toast-progress"></div>
+            `;
 
     container.appendChild(toast);
 
-    setTimeout(() => toast.classList.add('show'), 0);
+    // 显示动画
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 0);
 
-    // 自动关闭（保持原装 700ms）
-    setTimeout(() => closeToast(toastId), 700);
+    // 自动关闭
+    setTimeout(() => {
+        closeToast(toastId);
+    }, 700);
 }
 
 // 添加关闭通知的函数
