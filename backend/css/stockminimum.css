@@ -187,39 +187,39 @@ body {
 
 /* ─── Hover Expand Button ────────────────────────────────────────────────── */
 .btn-expand {
-    /* 初始状态：固定为正方形，只显示图标 */
-    width: clamp(28px, 2.5vw, 36px);
+    /* 初始：max-width 限制为正方形（只显图标），用 max-width 驱动过渡 */
+    max-width: clamp(28px, 2.5vw, 36px);
+    width: max-content;          /* 让内容决定真实宽度，max-width 来裁剪 */
     padding: clamp(5px, 0.42vw, 8px);
     overflow: hidden;
-    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-                box-shadow 0.25s ease,
-                background 0.2s ease;
+    justify-content: center;
+    transition: max-width  0.42s cubic-bezier(0.34, 1.10, 0.64, 1),
+                padding    0.42s cubic-bezier(0.34, 1.10, 0.64, 1),
+                box-shadow 0.25s ease;
 }
 
 .btn-expand .btn-expand-text {
-    /* 文字隐藏：宽度为0 + 透明 */
     display: inline-block;
     max-width: 0;
     opacity: 0;
     overflow: hidden;
     white-space: nowrap;
-    transition: max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-                opacity 0.25s ease 0.08s,
-                margin-left 0.35s ease;
+    /* 文字稍微滞后，先让按钮撑开再淡入 */
+    transition: max-width 0.40s cubic-bezier(0.34, 1.10, 0.64, 1),
+                opacity    0.22s ease 0.18s,
+                margin-left 0.40s cubic-bezier(0.34, 1.10, 0.64, 1);
     margin-left: 0;
-    vertical-align: middle;
 }
 
 .btn-expand:hover {
-    /* 展开后自动适应内容宽度 */
-    width: auto;
-    min-width: clamp(100px, 9vw, 145px);
+    max-width: 180px;            /* 足够大，让内容自然撑满 */
     padding: clamp(5px, 0.42vw, 8px) clamp(10px, 0.83vw, 16px);
-    box-shadow: 0 4px 12px rgba(249, 158, 0, 0.35);
+    box-shadow: 0 4px 14px rgba(249, 158, 0, 0.38);
+    justify-content: flex-start;
 }
 
 .btn-expand:hover .btn-expand-text {
-    max-width: 160px;
+    max-width: 140px;
     opacity: 1;
     margin-left: 6px;
 }
