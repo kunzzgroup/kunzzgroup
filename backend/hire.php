@@ -1645,7 +1645,8 @@ if (isset($_SESSION['user_id'])) {
                     const res = await fetch('hireapi.php?' + params.toString());
                     const json = await res.json();
                     if (json.code === 200) {
-                        const isInitialLoad = !state.company && !state.status && !state.keyword && !state.jobTitle && state.page === 1;
+                        const isInitialLoad = !window._firstLoadDone;
+                        window._firstLoadDone = true;
                         allData = json.data.list;
 
                         // \u66f4\u65b0\u5206\u9875\u4fe1\u606f
@@ -1853,7 +1854,7 @@ if (isset($_SESSION['user_id'])) {
             }
 
             window.resetAllFilters = function () {
-                state = { keyword: '', company: '', jobTitle: '', status: '', dateStart: '', dateEnd: '', dateLabel: '' };
+                state = { keyword: '', company: '', jobTitle: '', status: '', dateStart: '', dateEnd: '', dateLabel: '', page: 1, pageSize: 20 };
                 els.smartInput.value = ''; collapseSearch(); fpInstance.clear();
                 applyState();
             }
