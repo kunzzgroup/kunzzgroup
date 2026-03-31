@@ -268,7 +268,6 @@ body {
     background-color: #f99e00;
     color: white;
     padding: clamp(4px, 0.42vw, 8px) clamp(6px, 0.63vw, 12px);
-    margin-left: 30px;
     border-radius: clamp(4px, 0.42vw, 8px);
     border: none;
     cursor: pointer;
@@ -1341,7 +1340,8 @@ body {
 }
 
 .header-search {
-    flex: none;                      /* 不拉伸，让 smartSearchWrapper 保持折叠宽度 */
+    flex: none;
+    /* 不拉伸，让 smartSearchWrapper 保持折叠宽度 */
     display: flex;
     align-items: center;
     gap: clamp(6px, 0.63vw, 12px);
