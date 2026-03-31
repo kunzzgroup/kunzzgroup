@@ -185,6 +185,45 @@ body {
     font-size: clamp(8px, 0.68vw, 13px);
 }
 
+/* ─── Hover Expand Button ────────────────────────────────────────────────── */
+.btn-expand {
+    /* 初始状态：固定为正方形，只显示图标 */
+    width: clamp(28px, 2.5vw, 36px);
+    padding: clamp(5px, 0.42vw, 8px);
+    overflow: hidden;
+    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.25s ease,
+                background 0.2s ease;
+}
+
+.btn-expand .btn-expand-text {
+    /* 文字隐藏：宽度为0 + 透明 */
+    display: inline-block;
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.25s ease 0.08s,
+                margin-left 0.35s ease;
+    margin-left: 0;
+    vertical-align: middle;
+}
+
+.btn-expand:hover {
+    /* 展开后自动适应内容宽度 */
+    width: auto;
+    min-width: clamp(100px, 9vw, 145px);
+    padding: clamp(5px, 0.42vw, 8px) clamp(10px, 0.83vw, 16px);
+    box-shadow: 0 4px 12px rgba(249, 158, 0, 0.35);
+}
+
+.btn-expand:hover .btn-expand-text {
+    max-width: 160px;
+    opacity: 1;
+    margin-left: 6px;
+}
+
 /* ─── Table Container ──────────────────────────────────────────────────────── */
 .table-container {
     background: white;

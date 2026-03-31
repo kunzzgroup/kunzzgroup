@@ -303,6 +303,35 @@ async function saveAllSettings() {
     }
 }
 
+// ─── 导出数据 (CSV) ────────────────────────────────────────────────────────────
+function exportData() {
+    if (allProducts.length === 0) {
+        showToast('暂无数据可导出', 'info');
+        return;
+    }
+    const systemLabel = SYSTEM_NAMES[currentSystem] || currentSystem.toUpperCase();
+    const headers = ['序号', '货品编号', '货品名称', '规格', '最低库存数量'];
+    const rows = allProducts.map(p => [
+        p.no || '',
+        p.product_code || '',
+        p.product_name || '',
+        p.specification || '',
+        p.minimum_quantity ?? ''
+    ]);
+    const csvContent = [headers, ...rows]
+        .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+        .join('\n');
+    const BOM = '\uFEFF'; // UTF-8 BOM for Excel compatibility
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `最低库存设置_${systemLabel}_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`已导出 ${allProducts.length} 条数据`, 'success');
+}
+
 // ─── 返回库存管理 ──────────────────────────────────────────────────────────────
 function goBack() {
     if (pendingChanges.size > 0) {
