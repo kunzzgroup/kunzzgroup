@@ -1,4 +1,4 @@
-* {
+﻿* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -1994,17 +1994,7 @@ tr[data-type="set"]:not(:first-child) {
     flex-shrink: 0;
 }
 
-/* 在 header-right-section 内，搜索图标保持折叠 40px */
-.header-right-section .header-search .smartSearchWrapper {
-    width: 40px;
-    flex-shrink: 0;
-    cursor: pointer;
-}
 
-/* 展开时恢复宽度 */
-.header-right-section .header-search .smartSearchWrapper.expanded {
-    width: 250px;
-}
 
 .category-filter {
     display: flex;
