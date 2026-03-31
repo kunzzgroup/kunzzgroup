@@ -2,6 +2,7 @@
 require_once __DIR__ . '/permission_guard.php';
 requirePermission('resource', 'stock_inventory');
 
+
 if (!headers_sent()) {
     header("Cache-Control: max-age=0, no-cache, no-store, must-revalidate, proxy-revalidate");
     header("Pragma: no-cache");
@@ -9,7 +10,14 @@ if (!headers_sent()) {
 }
 ?>
 <?php
-session_start();
+$system = isset($_GET['system']) ? $_GET['system'] : 'central';
+$system_names = [
+    'central' => '中央',
+    'j1' => 'J1',
+    'j2' => 'J2',
+    'j3' => 'J3'
+];
+$display_name = isset($system_names[$system]) ? $system_names[$system] : '中央';
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -19,69 +27,36 @@ session_start();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>最低库存设置 - 库存管理系统</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/backend/css/toast.css">
+    <link rel="stylesheet" href="/backend/css/smartSearch.css">
     <link rel="stylesheet" href="/backend/css/stockminimum.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>
-                最低库存设置
-            </h1>
-            <button class="btn btn-secondary" onclick="goBack()">
-                <i class="fas fa-arrow-left"></i>
-                返回库存管理
-            </button>
+            <div>
+                <h1>
+                    最低库存设置 - <?php echo $display_name; ?>
+                </h1>
+            </div>
+            <div class="header-right-group">
+                <div class="header-search">
+                    <div class="smartSearchWrapper">
+                        <i class="fas fa-search smartSearch-icon"></i>
+                        <input type="text" id="unified-filter" class="smartSearch-input" placeholder="搜索货品名称或编号...">
+                    </div>
+                </div>
+                <button class="btn btn-warning" onclick="saveAllSettings()" id="saveAllBtn">
+                    <i class="fas fa-save"></i> 批量保存
+                </button>
+                <button class="btn btn-secondary" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i> 返回库存管理
+                </button>
+            </div>
         </div>
 
         <!-- Alert Messages -->
         <div id="alert-container"></div>
-
-        <!-- Filter Section -->
-        <div class="filter-section">
-            <div class="filter-grid">
-                <div class="filter-group">
-                    <label for="product-filter">货品名称</label>
-                    <div class="smartSearchWrapper">
-                        <i class="fas fa-search smartSearch-icon"></i>
-                        <input type="text" id="product-filter" class="smartSearch-input" placeholder="搜索货品名称...">
-                    </div>
-                </div>
-                <div class="filter-group">
-                    <label for="code-filter">货品编号</label>
-                    <div class="smartSearchWrapper">
-                        <i class="fas fa-search smartSearch-icon"></i>
-                        <input type="text" id="code-filter" class="smartSearch-input" placeholder="搜索货品编号...">
-                    </div>
-                </div>
-                <div class="filter-group">
-                    <label for="status-filter">预警状态</label>
-                    <select id="status-filter" class="filter-input">
-                        <option value="">全部状态</option>
-                        <option value="active">已启用</option>
-                        <option value="inactive">未启用</option>
-                        <option value="warning">库存不足</option>
-                    </select>
-                </div>
-            </div>
-            <div class="filter-actions">
-                <button class="btn btn-primary" onclick="searchSettings()">
-                    <i class="fas fa-search"></i>
-                    搜索
-                </button>
-                <button class="btn btn-secondary" onclick="resetFilters()">
-                    <i class="fas fa-refresh"></i>
-                    重置
-                </button>
-                <button class="btn btn-success" onclick="refreshData()">
-                    <i class="fas fa-sync-alt"></i>
-                    刷新数据
-                </button>
-                <button class="btn btn-warning" onclick="saveAllSettings()">
-                    <i class="fas fa-save"></i>
-                    批量保存
-                </button>
-            </div>
-        </div>
 
         <!-- Table Container -->
         <div class="table-container">
@@ -110,10 +85,7 @@ session_start();
         </div>
     </div>
 
-    <div class="toast-container" id="toast-container">
-    <!-- 动态通知内容 -->
-    </div>
-
+    <script src="/backend/js/toast.js"></script>
     <script src="js/stockminimum.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

@@ -87,39 +87,16 @@
            background-color: #f98500ff;
        }
 
-       .filter-section {
-           background: white;
-           padding: 20px;
-           border-radius: 12px;
-           box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-           margin-bottom: clamp(16px, 1.25vw, 24px);
-       }
-
-       .filter-grid {
-           display: grid;
-           grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-           gap: clamp(10px, 0.83vw, 16px);
-           margin-bottom: clamp(14px, 1.04vw, 20px);
-       }
-
-       .filter-group {
+       .header-right-group {
            display: flex;
-           flex-direction: column;
-       }
-
-       .filter-group label {
-           font-size: clamp(8px, 0.74vw, 14px);
-           font-weight: 600;
-           color: #374151;
-           margin-bottom: 6px;
-       }
-
-       /* .filter-input and .filter-input:focus removed — now handled globally by smartSearch.css */
-
-       .filter-actions {
-           display: flex;
+           align-items: center;
            gap: 12px;
            flex-wrap: wrap;
+           justify-content: flex-end;
+       }
+
+       .header-search {
+           width: 300px;
        }
 
        .stats-section {
@@ -314,118 +291,6 @@
            color: #d1d5db;
        }
 
-       /* 通知容器 */
-       .toast-container {
-           position: fixed;
-           bottom: 20px;
-           right: 20px;
-           z-index: 10000;
-           display: flex;
-           flex-direction: column;
-           gap: 8px;
-           pointer-events: none;
-       }
-
-       /* 通知基础样式 */
-       .toast {
-           min-width: 300px;
-           max-width: 400px;
-           padding: 16px 20px;
-           border-radius: 8px;
-           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-           backdrop-filter: blur(8px);
-           border: 1px solid rgba(255, 255, 255, 0.18);
-           font-size: 14px;
-           display: flex;
-           align-items: center;
-           gap: 12px;
-           pointer-events: auto;
-           transform: translateX(100%);
-           opacity: 0;
-           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-           position: relative;
-           overflow: hidden;
-       }
-
-       .toast.show {
-           transform: translateX(0);
-           opacity: 1;
-       }
-
-       .toast.hide {
-           transform: translateX(100%);
-           opacity: 0;
-       }
-
-       /* 通知类型样式 */
-       .toast-success {
-           background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9));
-           color: white;
-           border-color: rgba(16, 185, 129, 0.3);
-       }
-
-       .toast-error {
-           background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(220, 38, 38, 0.9));
-           color: white;
-           border-color: rgba(239, 68, 68, 0.3);
-       }
-
-       .toast-info {
-           background: linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(37, 99, 235, 0.9));
-           color: white;
-           border-color: rgba(59, 130, 246, 0.3);
-       }
-
-       .toast-warning {
-           background: linear-gradient(135deg, rgba(245, 158, 11, 0.9), rgba(217, 119, 6, 0.9));
-           color: white;
-           border-color: rgba(245, 158, 11, 0.3);
-       }
-
-       /* 通知图标 */
-       .toast-icon {
-           font-size: 18px;
-           flex-shrink: 0;
-       }
-
-       /* 通知内容 */
-       .toast-content {
-           flex: 1;
-           font-weight: 500;
-           line-height: 1.4;
-       }
-
-       /* 关闭按钮 */
-       .toast-close {
-           background: none;
-           border: none;
-           color: inherit;
-           font-size: 16px;
-           cursor: pointer;
-           padding: 4px;
-           border-radius: 4px;
-           opacity: 0.8;
-           transition: opacity 0.2s;
-           flex-shrink: 0;
-       }
-
-       .toast-close:hover {
-           opacity: 1;
-           background: rgba(255, 255, 255, 0.1);
-       }
-
-       /* 进度条 */
-       .toast-progress {
-           position: absolute;
-           bottom: 0;
-           left: 0;
-           height: 3px;
-           background: rgba(255, 255, 255, 0.3);
-           border-radius: 0 0 8px 8px;
-           transform-origin: left;
-           animation: toastProgress 4s linear forwards;
-       }
-
        @media (max-width: 768px) {
            .container {
                padding: 12px;
@@ -435,14 +300,16 @@
                flex-direction: column;
                gap: 16px;
                text-align: center;
+               align-items: stretch;
            }
 
-           .filter-grid {
-               grid-template-columns: 1fr;
+           .header-right-group {
+               flex-direction: column;
+               align-items: stretch;
            }
 
-           .filter-actions {
-               justify-content: center;
+           .header-search {
+               width: 100%;
            }
 
            .stats-section {
