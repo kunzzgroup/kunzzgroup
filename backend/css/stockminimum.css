@@ -303,10 +303,11 @@ body {
 
 /* Code cell */
 .code-cell {
-    color: #6b7280;
+    color: #374151;
     font-family: 'Courier New', monospace;
-    font-size: clamp(8px, 0.68vw, 13px);
-    letter-spacing: 0.02em;
+    font-size: clamp(9px, 0.74vw, 14px);
+    font-weight: 500;
+    letter-spacing: 0.04em;
 }
 
 /* ─── Quantity Input ─────────────────────────────────────────────────────── */

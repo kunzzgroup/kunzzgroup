@@ -82,16 +82,19 @@ function getProductsForSystem($system)
          */
         $sql = "
             SELECT
-                @row_num := @row_num + 1                              AS no,
-                TRIM(REPLACE(t.product_name, '&amp;', '&'))           AS product_name,
-                COALESCE(NULLIF(TRIM(t.code_number), ''), '-')         AS product_code,
-                COALESCE(m.minimum_quantity, 0)                        AS minimum_quantity,
+                ROW_NUMBER() OVER (
+                    ORDER BY
+                        TRIM(REPLACE(t.product_name, '&amp;', '&')) ASC,
+                        t.price ASC
+                )                                                          AS no,
+                TRIM(REPLACE(t.product_name, '&amp;', '&'))               AS product_name,
+                COALESCE(NULLIF(TRIM(t.code_number), ''), '-')             AS product_code,
+                COALESCE(m.minimum_quantity, 0)                            AS minimum_quantity,
                 (
                     SUM(CASE WHEN t.in_quantity  > 0 THEN t.in_quantity  ELSE 0 END) -
                     SUM(CASE WHEN t.out_quantity > 0 THEN t.out_quantity ELSE 0 END)
                 ) AS current_stock
             FROM `$tableName` t
-            JOIN (SELECT @row_num := 0) AS init
             LEFT JOIN stock_minimum_settings m
                 ON TRIM(m.product_name) = TRIM(REPLACE(t.product_name, '&amp;', '&'))
             WHERE t.product_name IS NOT NULL
@@ -106,7 +109,7 @@ function getProductsForSystem($system)
             HAVING current_stock != 0
             ORDER BY
                 TRIM(REPLACE(t.product_name, '&amp;', '&')) ASC,
-                TRIM(t.code_number) ASC
+                t.price ASC
         ";
 
         $stmt = $pdo->prepare($sql);
