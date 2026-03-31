@@ -89,6 +89,7 @@ function getProductsForSystem($system)
                 )                                                          AS no,
                 TRIM(REPLACE(t.product_name, '&amp;', '&'))               AS product_name,
                 COALESCE(NULLIF(TRIM(t.code_number), ''), '-')             AS product_code,
+                COALESCE(NULLIF(TRIM(t.specification), ''), '-')           AS specification,
                 COALESCE(m.minimum_quantity, 0)                            AS minimum_quantity,
                 (
                     SUM(CASE WHEN t.in_quantity  > 0 THEN t.in_quantity  ELSE 0 END) -
@@ -122,6 +123,7 @@ function getProductsForSystem($system)
                 'no'               => intval($row['no']),
                 'product_name'     => $row['product_name'],
                 'product_code'     => $row['product_code'],
+                'specification'    => $row['specification'],
                 'minimum_quantity' => floatval($row['minimum_quantity']),
             ];
         }

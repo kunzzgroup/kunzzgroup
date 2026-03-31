@@ -136,9 +136,10 @@ function renderSettingsTable() {
 
         html += `
             <tr>
-                <td style="text-align:center; color:#9ca3af; font-size:clamp(8px,0.63vw,12px);">${product.no || ''}</td>
-                <td class="product-name-cell">${escapeHtml(product.product_name)}</td>
-                <td class="code-cell">${escapeHtml(product.product_code || '-')}</td>
+                <td class="text-center" style="color:#9ca3af; font-size:clamp(8px,0.63vw,12px);">${product.no || ''}</td>
+                <td class="code-cell text-center">${escapeHtml(product.product_code || '-')}</td>
+                <td class="product-name-cell"><strong>${escapeHtml(product.product_name)}</strong></td>
+                <td class="text-center" style="color:#6b7280;">${escapeHtml(product.specification || '-')}</td>
                 <td>
                     <input type="number"
                         class="quantity-input"
@@ -149,7 +150,7 @@ function renderSettingsTable() {
                         onchange="markAsChanged('${safeName}', this.value)"
                         placeholder="0">
                 </td>
-                <td>
+                <td class="text-center">
                     <button class="btn btn-primary btn-sm"
                             onclick="saveIndividualSetting('${safeName}', this)">
                         <i class="fas fa-save"></i> 保存

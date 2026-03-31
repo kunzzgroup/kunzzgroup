@@ -180,6 +180,11 @@ body {
     transform: none !important;
 }
 
+.btn-sm {
+    padding: clamp(3px, 0.31vw, 6px) clamp(8px, 0.63vw, 12px);
+    font-size: clamp(8px, 0.68vw, 13px);
+}
+
 /* ─── Table Container ──────────────────────────────────────────────────────── */
 .table-container {
     background: white;
@@ -249,36 +254,43 @@ body {
     vertical-align: middle;
 }
 
-/* No. column */
+/* No (序号) */
 .settings-table th:nth-child(1),
 .settings-table td:nth-child(1) {
-    width: 6%;
+    width: 5%;
     text-align: center;
-    color: #ffffff;
 }
 
-/* Product name */
+/* 货品编号 */
 .settings-table th:nth-child(2),
 .settings-table td:nth-child(2) {
+    width: 13%;
+    text-align: center;
+}
+
+/* 货品名称 */
+.settings-table th:nth-child(3),
+.settings-table td:nth-child(3) {
     width: 38%;
 }
 
-/* Code */
-.settings-table th:nth-child(3),
-.settings-table td:nth-child(3) {
-    width: 20%;
-}
-
-/* Min qty */
+/* 规格 */
 .settings-table th:nth-child(4),
 .settings-table td:nth-child(4) {
-    width: 18%;
+    width: 12%;
+    text-align: center;
 }
 
-/* Action */
+/* 最低库存 */
 .settings-table th:nth-child(5),
 .settings-table td:nth-child(5) {
-    width: 18%;
+    width: 16%;
+}
+
+/* 操作 */
+.settings-table th:nth-child(6),
+.settings-table td:nth-child(6) {
+    width: 16%;
     text-align: center;
 }
 
@@ -294,21 +306,29 @@ body {
     background: #e5ebf8ff;
 }
 
-/* Product name */
+/* Product name cell — match stocklistall bold style */
 .product-name-cell {
     color: #111827;
-    font-weight: 500;
     font-size: clamp(9px, 0.74vw, 14px);
 }
 
-/* Code cell */
+.product-name-cell strong {
+    font-weight: 600;
+    color: #111827;
+}
+
+/* Code cell — center, monospace, dark */
 .code-cell {
     color: #374151;
     font-family: 'Courier New', monospace;
     font-size: clamp(9px, 0.74vw, 14px);
     font-weight: 500;
     letter-spacing: 0.04em;
+    text-align: center;
 }
+
+/* Utility */
+.text-center { text-align: center; }
 
 /* ─── Quantity Input ─────────────────────────────────────────────────────── */
 .quantity-input {

@@ -123,8 +123,9 @@ $display_name = $system_names[$system];
                     <thead>
                         <tr>
                             <th>序号</th>
-                            <th>货品名称</th>
                             <th>货品编号</th>
+                            <th>货品名称</th>
+                            <th>规格</th>
                             <th>最低库存数量</th>
                             <th>操作</th>
                         </tr>
