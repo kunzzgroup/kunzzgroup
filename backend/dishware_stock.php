@@ -86,14 +86,7 @@ if (isset($_SESSION['user_id'])) {
          <!-- 统一顶部行 -->
          <div class="unified-header-row">
              <div class="header-center-section">
-                <div class="header-search">
-                    <div class="smartSearchWrapper">
-                        <i class="fas fa-search smartSearch-icon"></i>
-                        <input type="text" id="unified-filter" class="smartSearch-input"
-                            placeholder="搜索碗碟名称、编号或分类...">
-                    </div>
-                </div>
-                
+
                 <!-- 破损记录页：月份选择 + 快速选择（仅 j1/j2/j3 时显示） -->
                 <div id="break-date-filter" class="break-date-filter" style="display: none;">
                     <div class="break-month-picker">
@@ -179,6 +172,14 @@ if (isset($_SESSION['user_id'])) {
             </div>
             
             <div class="header-right-section">
+                <div class="header-search">
+                    <div class="smartSearchWrapper">
+                        <i class="fas fa-search smartSearch-icon"></i>
+                        <input type="text" id="unified-filter" class="smartSearch-input"
+                            placeholder="搜索碗碟名称、编号或分类...">
+                    </div>
+                </div>
+
                 <button class="btn btn-info" onclick="openRestaurantModal()" id="manage-restaurants-btn" style="background-color: #17a2b8; border-color: #17a2b8; color: white;">
                     <i class="fas fa-store" style="color: white;"></i>
                     管理餐厅店面

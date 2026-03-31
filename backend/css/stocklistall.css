@@ -1341,13 +1341,22 @@ body {
 }
 
 .header-search {
-    flex: 1;
-    min-width: 50px;
+    flex: none;                      /* 不拉伸，让 smartSearchWrapper 保持折叠宽度 */
     display: flex;
     align-items: center;
-    /* 改为水平对齐 */
     gap: clamp(6px, 0.63vw, 12px);
-    /* 添加间距 */
+}
+
+/* 在 header-search 内，wrapper 不能被 flex 撑到全宽 */
+.header-search .smartSearchWrapper {
+    width: 40px;                     /* 折叠态：仅图标 */
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+/* 展开时恢复正常宽度 */
+.header-search .smartSearchWrapper.expanded {
+    width: 250px;
 }
 
 .header-stats {
