@@ -1,4 +1,0 @@
-<?php
-$pdo = new PDO('mysql:host=localhost;dbname=u690174784_kunzz;charset=utf8mb4', 'u690174784_kunzz', 'Kunzz1688');
-$stmt = $pdo->query('SHOW COLUMNS FROM stock_minimum_settings');
-print_r($stmt->fetchAll(PDO::FETCH_ASSOC));

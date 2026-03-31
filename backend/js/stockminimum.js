@@ -1,30 +1,73 @@
-
-// 全局变量
-let allProducts = [];
-let filteredProducts = [];
-let isLoading = false;
+// ─── 全局状态 ────────────────────────────────────────────────────────────────
+let currentSystem = (typeof INITIAL_SYSTEM !== 'undefined') ? INITIAL_SYSTEM : 'central';
+let allProducts = [];        // 当前系统的货品完整列表
+let filteredProducts = [];   // 搜索过滤后的列表
 let pendingChanges = new Set();
+let isLoading = false;
 
-// 初始化
+const SYSTEM_NAMES = {
+    central: '中央',
+    j1: 'J1',
+    j2: 'J2',
+    j3: 'J3'
+};
+
+// ─── 初始化 ──────────────────────────────────────────────────────────────────
 function initApp() {
-    loadProductsAndSettings();
     setupRealTimeSearch();
+    loadProductsAndSettings(currentSystem);
 }
 
-// 加载货品和设置数据
-async function loadProductsAndSettings() {
-    if (isLoading) return;
+// ─── 切换系统 (Tab) ──────────────────────────────────────────────────────────
+function switchSystem(system) {
+    if (system === currentSystem) return;
 
+    currentSystem = system;
+
+    // 更新 URL 不跳转
+    const url = new URL(window.location);
+    url.searchParams.set('system', system);
+    window.history.replaceState({}, '', url);
+
+    // 更新 Tab 高亮
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    const activeTab = document.querySelector(`.tab-btn[data-system="${system}"]`);
+    if (activeTab) activeTab.classList.add('active');
+
+    // 更新标题
+    const systemLabel = SYSTEM_NAMES[system] || system.toUpperCase();
+    const pageTitle = document.getElementById('page-title');
+    const tableTitle = document.getElementById('table-title');
+    if (pageTitle) pageTitle.textContent = `最低库存设置 — ${systemLabel}`;
+    if (tableTitle) tableTitle.textContent = `最低库存设置 — ${systemLabel}`;
+
+    // 清空搜索框
+    const filterInput = document.getElementById('unified-filter');
+    if (filterInput) filterInput.value = '';
+
+    // 清空未保存的变更
+    pendingChanges.clear();
+
+    // 重新加载该系统的货品数据
+    loadProductsAndSettings(system);
+}
+
+// ─── 加载货品和设置数据 ──────────────────────────────────────────────────────
+async function loadProductsAndSettings(system) {
+    if (isLoading) return;
     isLoading = true;
     setLoadingState(true);
 
     try {
-        // 这里需要创建对应的API接口
-        const response = await fetch('stockminimumapi.php?action=list');
-        const result = await response.json();
+        const res = await fetch(`stockminimumapi.php?action=list&system=${system}&_t=${Date.now()}`, {
+            cache: 'no-cache',
+            headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+        });
+        const result = await res.json();
 
         if (result.success) {
-            // 统一数据处理：去除产品名称首尾空格，确保与stocklistall.php一致
             allProducts = (result.data || []).map(item => ({
                 ...item,
                 product_name: (item.product_name || '').trim(),
@@ -33,136 +76,161 @@ async function loadProductsAndSettings() {
             }));
             filteredProducts = [...allProducts];
             renderSettingsTable();
-            updateStats();
+            updateDisplayedCount();
+        } else {
+            showToast('加载数据失败: ' + (result.message || '未知错误'), 'error');
         }
 
     } catch (error) {
         console.error('Error:', error);
-        // 静默处理，不显示错误提示
+        showToast('网络错误，请检查连接', 'error');
     } finally {
         isLoading = false;
         setLoadingState(false);
     }
 }
 
-// 设置加载状态
+// ─── 加载状态 ────────────────────────────────────────────────────────────────
 function setLoadingState(loading) {
     const tbody = document.getElementById('settings-tbody');
+    if (!tbody) return;
     if (loading) {
         tbody.innerHTML = `
-                    <tr>
-                        <td colspan="4" style="padding: 40px; text-align: center;">
-                            <div class="loading"></div>
-                            <div style="margin-top: 16px; color: #6b7280;">正在加载数据...</div>
-                        </td>
-                    </tr>
-                `;
+            <tr>
+                <td colspan="4" style="padding: 40px; text-align: center;">
+                    <div class="loading"></div>
+                    <div style="margin-top: 16px; color: #6b7280;">正在加载 ${SYSTEM_NAMES[currentSystem]} 货品数据...</div>
+                </td>
+            </tr>`;
     }
 }
 
-// 渲染设置表格
+// ─── 渲染表格 ────────────────────────────────────────────────────────────────
 function renderSettingsTable() {
     const tbody = document.getElementById('settings-tbody');
+    if (!tbody) return;
 
     if (filteredProducts.length === 0) {
         tbody.innerHTML = `
-                    <tr>
-                        <td colspan="4" class="no-data">
-                            <i class="fas fa-inbox"></i>
-                            <div>暂无货品数据</div>
-                        </td>
-                    </tr>
-                `;
+            <tr>
+                <td colspan="4" class="no-data">
+                    <i class="fas fa-inbox"></i>
+                    <div>暂无货品数据</div>
+                </td>
+            </tr>`;
+        updateDisplayedCount();
         return;
     }
 
     let html = '';
     filteredProducts.forEach(product => {
+        // Escape single quotes in product name for inline onclick
+        const safeName = (product.product_name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
         html += `
-                    <tr>
-                        <td><strong>${product.product_name}</strong></td>
-                        <td>${product.product_code || '-'}</td>
-                        <td>
-                            <input type="number" 
-                                class="quantity-input"
-                                value="${product.minimum_quantity}"
-                                min="0"
-                                step="0.01"
-                                onchange="markAsChanged('${product.product_name}', this.value)"
-                                placeholder="设置最低数量">
-                        </td>
-                        <td>
-                            <button class="btn btn-primary btn-sm" 
-                                    onclick="saveIndividualSetting('${product.product_name}', this)"
-                                    style="padding: 4px 8px; font-size: clamp(8px, 0.63vw, 12px);">
-                                <i class="fas fa-save"></i>
-                                保存
-                            </button>
-                        </td>
-                    </tr>
-                `;
+            <tr>
+                <td><strong>${escapeHtml(product.product_name)}</strong></td>
+                <td class="code-cell">${escapeHtml(product.product_code || '-')}</td>
+                <td>
+                    <input type="number"
+                        class="quantity-input"
+                        value="${product.minimum_quantity}"
+                        min="0"
+                        step="0.01"
+                        data-product="${safeName}"
+                        onchange="markAsChanged('${safeName}', this.value)"
+                        placeholder="0">
+                </td>
+                <td>
+                    <button class="btn btn-primary btn-sm"
+                            onclick="saveIndividualSetting('${safeName}', this)">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                </td>
+            </tr>`;
     });
 
     tbody.innerHTML = html;
-    document.getElementById('displayed-count').textContent = filteredProducts.length;
+    updateDisplayedCount();
 }
 
-// 更新统计
-function updateStats() {
-    const totalProducts = allProducts.length;
-    const configuredAlerts = allProducts.filter(p => p.minimum_quantity > 0).length;
-    const unconfiguredAlerts = totalProducts - configuredAlerts;
-
-    document.getElementById('total-products').textContent = totalProducts;
-    document.getElementById('configured-alerts').textContent = configuredAlerts;
-    document.getElementById('unconfigured-alerts').textContent = unconfiguredAlerts;
+// ─── HTML 转义 ───────────────────────────────────────────────────────────────
+function escapeHtml(str) {
+    if (!str) return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
-// 标记为已更改
-function markAsChanged(productName, minQuantity) {
-    // 确保产品名称去除空格，与数据处理逻辑一致
+// ─── 实时搜索 ────────────────────────────────────────────────────────────────
+function setupRealTimeSearch() {
+    const input = document.getElementById('unified-filter');
+    if (!input) return;
+    let debounceTimer;
+    input.addEventListener('input', function () {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            const term = this.value.toLowerCase().trim();
+            if (!term) {
+                filteredProducts = [...allProducts];
+            } else {
+                filteredProducts = allProducts.filter(p =>
+                    (p.product_name && p.product_name.toLowerCase().includes(term)) ||
+                    (p.product_code && p.product_code.toLowerCase().includes(term))
+                );
+            }
+            renderSettingsTable();
+        }, 200);
+    });
+}
+
+// ─── 更新显示计数 ─────────────────────────────────────────────────────────────
+function updateDisplayedCount() {
+    const el = document.getElementById('displayed-count');
+    if (el) el.textContent = filteredProducts.length;
+}
+
+// ─── 标记已更改 ───────────────────────────────────────────────────────────────
+function markAsChanged(productName, value) {
     const trimmedName = (productName || '').trim();
     const product = allProducts.find(p => p.product_name === trimmedName);
     if (product) {
-        product.minimum_quantity = parseFloat(minQuantity) || 0;
+        product.minimum_quantity = parseFloat(value) || 0;
         pendingChanges.add(trimmedName);
-
-        // 重新渲染表格以更新状态
-        updateStats();
     }
 }
 
-// 保存单个设置
+// ─── 保存单个设置 ─────────────────────────────────────────────────────────────
 async function saveIndividualSetting(productName, btn) {
-    // 确保产品名称去除空格，与数据处理逻辑一致
     const trimmedName = (productName || '').trim();
     const product = allProducts.find(p => p.product_name === trimmedName);
     if (!product) return;
 
+    // 按钮加载动画
     if (btn) {
         btn.disabled = true;
         btn.dataset.originalHTML = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     }
 
     try {
-        const response = await fetch('stockminimumapi.php', {
+        const res = await fetch('stockminimumapi.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 action: 'save_single',
                 product_name: trimmedName,
                 minimum_quantity: product.minimum_quantity
             })
         });
-
-        const result = await response.json();
+        const result = await res.json();
 
         if (result.success) {
             pendingChanges.delete(trimmedName);
-            showToast(`${trimmedName} 设置保存成功`, 'success');
+            showToast(`已保存：${trimmedName}`, 'success');
         } else {
             showToast('保存失败: ' + (result.message || '未知错误'), 'error');
         }
@@ -178,19 +246,17 @@ async function saveIndividualSetting(productName, btn) {
     }
 }
 
-// 批量保存所有更改
+// ─── 批量保存 ─────────────────────────────────────────────────────────────────
 async function saveAllSettings() {
     if (pendingChanges.size === 0) {
-        showToast('没有需要保存的更改', 'info');
+        showToast('没有未保存的更改', 'info');
         return;
     }
 
-    const changedProducts = Array.from(pendingChanges).map(productName => {
-        // 确保产品名称去除空格
-        const trimmedName = (productName || '').trim();
-        const product = allProducts.find(p => p.product_name === trimmedName);
+    const changedProducts = Array.from(pendingChanges).map(name => {
+        const product = allProducts.find(p => p.product_name === name.trim());
         return {
-            product_name: trimmedName,
+            product_name: name.trim(),
             minimum_quantity: product ? product.minimum_quantity : 0
         };
     });
@@ -203,22 +269,16 @@ async function saveAllSettings() {
     }
 
     try {
-        const response = await fetch('stockminimumapi.php', {
+        const res = await fetch('stockminimumapi.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                action: 'save_batch',
-                products: changedProducts
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'save_batch', products: changedProducts })
         });
-
-        const result = await response.json();
+        const result = await res.json();
 
         if (result.success) {
             pendingChanges.clear();
-            showToast(`成功保存 ${changedProducts.length} 个货品的设置`, 'success');
+            showToast(`成功保存 ${changedProducts.length} 个货品设置`, 'success');
         } else {
             showToast('批量保存失败: ' + (result.message || '未知错误'), 'error');
         }
@@ -234,85 +294,34 @@ async function saveAllSettings() {
     }
 }
 
-// 实时搜索功能
-function setupRealTimeSearch() {
-    const searchInput = document.getElementById('unified-filter');
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase().trim();
-            
-            if (!searchTerm) {
-                filteredProducts = [...allProducts];
-            } else {
-                filteredProducts = allProducts.filter(product => {
-                    const matchProduct = product.product_name && product.product_name.toLowerCase().includes(searchTerm);
-                    const matchCode = product.product_code && product.product_code.toLowerCase().includes(searchTerm);
-                    return matchProduct || matchCode;
-                });
-            }
-            
-            renderSettingsTable();
-        });
-    }
-}
-
-// 刷新数据
-function refreshData() {
-    if (pendingChanges.size > 0) {
-        if (!confirm('有未保存的更改，刷新将丢失这些更改。确定要继续吗？')) {
-            return;
-        }
-        pendingChanges.clear();
-    }
-
-    loadProductsAndSettings();
-}
-
-// 检查URL参数中的system
-const urlParams = new URLSearchParams(window.location.search);
-const currentSystem = urlParams.get('system') || 'central';
-
-// 返回库存管理
+// ─── 返回库存管理 ──────────────────────────────────────────────────────────────
 function goBack() {
     if (pendingChanges.size > 0) {
-        if (!confirm('有未保存的更改，离开将丢失这些更改。确定要离开吗？')) {
-            return;
-        }
+        if (!confirm('有未保存的更改，离开将丢失这些更改。确定要离开吗？')) return;
     }
-
-    const systemParam = `?system=${currentSystem}`;
-    window.location.href = `stocklistall${systemParam}`;
+    window.location.href = `stocklistall?system=${currentSystem}`;
 }
 
-
-
-
-
-// 添加关闭所有通知的函数（可选）
-
-// 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', initApp);
-
-// 键盘快捷键
+// ─── 键盘快捷键 ───────────────────────────────────────────────────────────────
 document.addEventListener('keydown', function (e) {
-    // Ctrl+S 保存
     if (e.ctrlKey && e.key === 's') {
         e.preventDefault();
         saveAllSettings();
     }
-
-    // Ctrl+F 聚焦搜索框
     if (e.ctrlKey && e.key === 'f') {
         e.preventDefault();
-        const searchInput = document.getElementById('unified-filter');
-        if(searchInput) searchInput.focus();
+        const input = document.getElementById('unified-filter');
+        if (input) input.focus();
     }
 });
 
-// 离开页面前检查未保存更改
+// ─── 离开前提醒 ───────────────────────────────────────────────────────────────
 window.addEventListener('beforeunload', function (e) {
     if (pendingChanges.size > 0) {
         e.preventDefault();
         e.returnValue = '有未保存的更改，确定要离开吗？';
     }
 });
+
+// ─── 启动 ────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', initApp);

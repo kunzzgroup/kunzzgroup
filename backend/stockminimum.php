@@ -2,7 +2,6 @@
 require_once __DIR__ . '/permission_guard.php';
 requirePermission('resource', 'stock_inventory');
 
-
 if (!headers_sent()) {
     header("Cache-Control: max-age=0, no-cache, no-store, must-revalidate, proxy-revalidate");
     header("Pragma: no-cache");
@@ -11,13 +10,16 @@ if (!headers_sent()) {
 ?>
 <?php
 $system = isset($_GET['system']) ? $_GET['system'] : 'central';
+$valid_systems = ['central', 'j1', 'j2', 'j3'];
+if (!in_array($system, $valid_systems)) $system = 'central';
+
 $system_names = [
     'central' => '中央',
     'j1' => 'J1',
     'j2' => 'J2',
     'j3' => 'J3'
 ];
-$display_name = isset($system_names[$system]) ? $system_names[$system] : '中央';
+$display_name = $system_names[$system];
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -33,11 +35,11 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
 </head>
 <body>
     <div class="container">
+
+        <!-- Header -->
         <div class="header">
-            <div>
-                <h1>
-                    最低库存设置 - <?php echo $display_name; ?>
-                </h1>
+            <div class="header-left">
+                <h1 id="page-title">最低库存设置 — <?php echo $display_name; ?></h1>
             </div>
             <div class="header-right-group">
                 <div class="header-search">
@@ -55,18 +57,31 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
             </div>
         </div>
 
-        <!-- Alert Messages -->
-        <div id="alert-container"></div>
+        <!-- System Tabs -->
+        <div class="system-tabs">
+            <button class="tab-btn <?php echo $system === 'central' ? 'active' : ''; ?>" data-system="central" onclick="switchSystem('central')">
+                <i class="fas fa-warehouse"></i> 中央
+            </button>
+            <button class="tab-btn <?php echo $system === 'j1' ? 'active' : ''; ?>" data-system="j1" onclick="switchSystem('j1')">
+                <i class="fas fa-store"></i> J1
+            </button>
+            <button class="tab-btn <?php echo $system === 'j2' ? 'active' : ''; ?>" data-system="j2" onclick="switchSystem('j2')">
+                <i class="fas fa-store"></i> J2
+            </button>
+            <button class="tab-btn <?php echo $system === 'j3' ? 'active' : ''; ?>" data-system="j3" onclick="switchSystem('j3')">
+                <i class="fas fa-store"></i> J3
+            </button>
+        </div>
 
         <!-- Table Container -->
         <div class="table-container">
             <div class="table-header">
-                <h3>最低库存设置</h3>
+                <h3 id="table-title">最低库存设置 — <?php echo $display_name; ?></h3>
                 <div id="table-stats">
                     显示 <span id="displayed-count">0</span> 个货品
                 </div>
             </div>
-            
+
             <div class="table-scroll-container">
                 <table class="settings-table" id="settings-table">
                     <thead>
@@ -86,6 +101,10 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
     </div>
 
     <script src="/backend/js/toast.js"></script>
+    <script>
+        // Pass PHP system to JS
+        const INITIAL_SYSTEM = '<?php echo $system; ?>';
+    </script>
     <script src="js/stockminimum.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>
