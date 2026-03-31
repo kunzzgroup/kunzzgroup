@@ -64,15 +64,24 @@ require_once 'session_check.php';
                 <!-- 在这里添加新的产品编号搜索栏 -->
                 <div class="filter-group">
                     <label for="code-filter">产品编号</label>
-                    <input type="text" id="code-filter" class="filter-input" placeholder="搜索产品编号...">
+                    <div class="smartSearchWrapper">
+                        <i class="fas fa-search smartSearch-icon"></i>
+                        <input type="text" id="code-filter" class="smartSearch-input" placeholder="搜索产品编号...">
+                    </div>
                 </div>
                 <div class="filter-group">
                     <label for="product-filter">产品名称</label>
-                    <input type="text" id="product-filter" class="filter-input" placeholder="搜索产品名称...">
+                    <div class="smartSearchWrapper">
+                        <i class="fas fa-search smartSearch-icon"></i>
+                        <input type="text" id="product-filter" class="smartSearch-input" placeholder="搜索产品名称...">
+                    </div>
                 </div>
                 <div class="filter-group">
                     <label for="receiver-filter">收货人</label>
-                    <input type="text" id="receiver-filter" class="filter-input" placeholder="搜索收货人...">
+                    <div class="smartSearchWrapper">
+                        <i class="fas fa-search smartSearch-icon"></i>
+                        <input type="text" id="receiver-filter" class="smartSearch-input" placeholder="搜索收货人...">
+                    </div>
                 </div>
             </div>
             <div class="filter-actions">

@@ -373,6 +373,7 @@ if (!$canSeeBrand) {
 
 <link rel="stylesheet" href="css/sidebar.css?v=<?php echo time(); ?>">
 <link rel="stylesheet" href="css/toast.css?v=<?php echo time(); ?>">
+<link rel="stylesheet" href="css/smartSearch.css?v=<?php echo time(); ?>">
 <style>
 @keyframes sidebar-badge-pulse {
     0%, 100% { transform: scale(1); opacity: 1; }
@@ -757,4 +758,5 @@ endif; ?>
 <div id="global-toast-container"></div>
 
 <script src="js/toast.js?v=<?php echo time(); ?>"></script>
+<script src="js/smartSearch.js?v=<?php echo time(); ?>"></script>
 <script src="js/sidebar.js?v=<?php echo time(); ?>"></script>

@@ -88,7 +88,10 @@ require_once 'session_check.php';
             </div>
             <div class="controls">
                 <div class="header-search">
-                    <input type="text" id="recycle-search" class="unified-search-input" placeholder="在已删除记录中搜索...">
+                    <div class="smartSearchWrapper">
+                        <i class="fas fa-search smartSearch-icon"></i>
+                        <input type="text" id="recycle-search" class="smartSearch-input" placeholder="在已删除记录中搜索...">
+                    </div>
                 </div>
             </div>
         </div>

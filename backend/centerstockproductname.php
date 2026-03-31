@@ -97,7 +97,10 @@ if (isset($_SESSION['user_id'])) {
             <div class="filter-group">
                 <div class="filter-item">
                     <label>搜索产品</label>
-                    <input type="text" class="filter-input" id="product-search-filter" placeholder="搜索产品编号或产品名字">
+                    <div class="smartSearchWrapper">
+                        <i class="fas fa-search smartSearch-icon"></i>
+                        <input type="text" class="smartSearch-input" id="product-search-filter" placeholder="搜索产品编号或产品名字">
+                    </div>
                 </div>
                 <div class="filter-item">
                     <label>批准状态</label>

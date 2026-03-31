@@ -61,7 +61,10 @@ require_once 'session_check.php';
                 <div class="filter-left">
                     <div class="filter-group" style="flex: 0 0 180px;">
                     <label>搜索</label>
-                        <input type="text" id="search-input" class="filter-input" placeholder="输入货品名称" style="text-transform: uppercase;">
+                        <div class="smartSearchWrapper">
+                            <i class="fas fa-search smartSearch-icon"></i>
+                            <input type="text" id="search-input" class="smartSearch-input" placeholder="输入货品名称" style="text-transform: uppercase;">
+                        </div>
                 </div>
                     <div class="filter-group" style="flex: 0 0 140px;">
                     <label>类型</label>

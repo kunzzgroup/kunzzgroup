@@ -41,11 +41,17 @@ session_start();
             <div class="filter-grid">
                 <div class="filter-group">
                     <label for="product-filter">货品名称</label>
-                    <input type="text" id="product-filter" class="filter-input" placeholder="搜索货品名称...">
+                    <div class="smartSearchWrapper">
+                        <i class="fas fa-search smartSearch-icon"></i>
+                        <input type="text" id="product-filter" class="smartSearch-input" placeholder="搜索货品名称...">
+                    </div>
                 </div>
                 <div class="filter-group">
                     <label for="code-filter">货品编号</label>
-                    <input type="text" id="code-filter" class="filter-input" placeholder="搜索货品编号...">
+                    <div class="smartSearchWrapper">
+                        <i class="fas fa-search smartSearch-icon"></i>
+                        <input type="text" id="code-filter" class="smartSearch-input" placeholder="搜索货品编号...">
+                    </div>
                 </div>
                 <div class="filter-group">
                     <label for="status-filter">预警状态</label>

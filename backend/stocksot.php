@@ -109,9 +109,11 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
 
             <div class="header-right-group">
                 <div class="header-search">
-                    <span style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #000000ff; white-space: nowrap;">搜索</span>
-                    <input type="text" id="product-search-filter" class="unified-search-input" 
-                        placeholder="输入关键字搜索...">
+                    <div class="smartSearchWrapper">
+                        <i class="fas fa-search smartSearch-icon"></i>
+                        <input type="text" id="product-search-filter" class="smartSearch-input"
+                            placeholder="输入关键字搜索...">
+                    </div>
                 </div>
                 
                 <button class="btn btn-success" onclick="addNewRow()">

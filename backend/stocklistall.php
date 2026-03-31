@@ -157,9 +157,11 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
 
                 <div class="header-right-section">
                 <div class="header-search">
-                    <span style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #000000ff; white-space: nowrap;">搜索</span>
-                    <input type="text" id="central-unified-filter" class="unified-search-input" 
-                        placeholder="输入关键字搜索...">
+                    <div class="smartSearchWrapper">
+                        <i class="fas fa-search smartSearch-icon"></i>
+                        <input type="text" id="central-unified-filter" class="smartSearch-input"
+                            placeholder="输入关键字搜索...">
+                    </div>
                 </div>
                 
                 <button class="btn btn-warning" onclick="exportData('central')">
@@ -234,9 +236,11 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
                 
                 <div class="header-right-section">
                 <div class="header-search">
-                    <span style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #583e04; white-space: nowrap;">搜索</span>
-                    <input type="text" id="j1-unified-filter" class="unified-search-input" 
-                        placeholder="搜索序号、货品编号、货品、库存数量、规格、单价、总价...">
+                    <div class="smartSearchWrapper">
+                        <i class="fas fa-search smartSearch-icon"></i>
+                        <input type="text" id="j1-unified-filter" class="smartSearch-input"
+                            placeholder="搜索序号、货品编号、货品、库存数量、规格、单价、总价...">
+                    </div>
                 </div>
                 
                 <button class="btn btn-warning" onclick="exportData('j1')">
@@ -311,9 +315,11 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
                 
                 <div class="header-right-section">
                 <div class="header-search">
-                    <span style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #583e04; white-space: nowrap;">搜索</span>
-                    <input type="text" id="j2-unified-filter" class="unified-search-input" 
-                        placeholder="搜索货品名称、编号或规格单位...">
+                    <div class="smartSearchWrapper">
+                        <i class="fas fa-search smartSearch-icon"></i>
+                        <input type="text" id="j2-unified-filter" class="smartSearch-input"
+                            placeholder="搜索货品名称、编号或规格单位...">
+                    </div>
                 </div>
                 
                 <button class="btn btn-warning" onclick="exportData('j2')">
@@ -388,9 +394,11 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
                 
                 <div class="header-right-section">
                 <div class="header-search">
-                    <span style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #583e04; white-space: nowrap;">搜索</span>
-                    <input type="text" id="j3-unified-filter" class="unified-search-input" 
-                        placeholder="搜索货品名称、编号或规格单位...">
+                    <div class="smartSearchWrapper">
+                        <i class="fas fa-search smartSearch-icon"></i>
+                        <input type="text" id="j3-unified-filter" class="smartSearch-input"
+                            placeholder="搜索货品名称、编号或规格单位...">
+                    </div>
                 </div>
                 
                 <button class="btn btn-warning" onclick="exportData('j3')">
@@ -441,8 +449,11 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
                     <div class="search-group">
                         <label for="central-unified-filter">搜索货品</label>
                         <label for="central-unified-filter" class="search-label">搜索</label>
-                        <input type="text" id="central-unified-filter" class="unified-search-input" 
-                            placeholder="搜索货品名称、编号或规格单位...">
+                        <div class="smartSearchWrapper">
+                            <i class="fas fa-search smartSearch-icon"></i>
+                            <input type="text" id="central-unified-filter" class="smartSearch-input"
+                                placeholder="搜索货品名称、编号或规格单位...">
+                        </div>
                     </div>
                     <button class="btn btn-warning" onclick="exportData('central')">
                         <i class="fas fa-download"></i>

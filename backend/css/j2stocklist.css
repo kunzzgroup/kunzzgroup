@@ -115,7 +115,7 @@ body {
     color: #583e04;
 }
 
-.filter-input,
+/* .filter-input removed — now handled globally by smartSearch.css */
 .filter-select {
     padding: 10px 12px;
     border: 1px solid #d1d5db;
@@ -125,7 +125,6 @@ body {
     color: #583e04;
 }
 
-.filter-input:focus,
 .filter-select:focus {
     outline: none;
     border-color: #583e04;

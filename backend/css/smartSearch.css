@@ -1,0 +1,124 @@
+/* ==========================================================
+   smartSearch.css  —  Global Smart Search Wrapper Component
+   Layout role  : .header-search (kept per page)
+   Component role: .smartSearchWrapper (this file)
+   ========================================================== */
+
+/* ── Wrapper (the visible "pill" border) ─────────────────── */
+.smartSearchWrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #ffffff;
+    border: 1.5px solid #d1d5db;
+    border-radius: 999px;            /* pill shape */
+    padding: clamp(4px, 0.42vw, 7px) clamp(10px, 0.83vw, 14px);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    width: 100%;
+    min-width: 120px;
+    position: relative;
+    overflow: hidden;
+}
+
+.smartSearchWrapper:hover {
+    border-color: #f99300;
+    box-shadow: 0 2px 8px rgba(249, 147, 0, 0.15);
+}
+
+/* Focus-within: when the input inside is focused */
+.smartSearchWrapper:focus-within {
+    border-color: #583e04;
+    box-shadow: 0 0 0 3px rgba(88, 62, 4, 0.12), 0 2px 8px rgba(249, 147, 0, 0.2);
+    outline: none;
+}
+
+/* ── Icon ───────────────────────────────────────────────── */
+.smartSearch-icon {
+    font-size: clamp(10px, 0.78vw, 14px);
+    color: #9ca3af;
+    flex-shrink: 0;
+    pointer-events: none;
+    transition: color 0.2s ease;
+    line-height: 1;
+}
+
+.smartSearchWrapper:hover .smartSearch-icon,
+.smartSearchWrapper:focus-within .smartSearch-icon {
+    color: #583e04;
+}
+
+/* ── Input ──────────────────────────────────────────────── */
+.smartSearch-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: clamp(8px, 0.74vw, 13px);
+    color: #111827;
+    padding: 0;
+    min-width: 0;
+    font-family: inherit;
+    line-height: 1.4;
+}
+
+.smartSearch-input::placeholder {
+    color: #b0b8c4;
+    font-size: clamp(8px, 0.72vw, 12px);
+}
+
+/* ── Clear button (optional: add ✕ via JS) ──────────────── */
+.smartSearch-clear {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9ca3af;
+    font-size: 12px;
+    padding: 0;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: color 0.15s ease;
+}
+
+.smartSearch-clear:hover {
+    color: #583e04;
+}
+
+.smartSearchWrapper.has-value .smartSearch-clear {
+    display: flex;
+    align-items: center;
+}
+
+/* ── Micro-pulse shimmer on focus (subtle premium feel) ─── */
+@keyframes smartSearch-focus-in {
+    from { box-shadow: 0 0 0 0 rgba(249, 147, 0, 0.25); }
+    to   { box-shadow: 0 0 0 3px rgba(88, 62, 4, 0.12), 0 2px 8px rgba(249, 147, 0, 0.2); }
+}
+
+.smartSearchWrapper:focus-within {
+    animation: smartSearch-focus-in 0.18s ease forwards;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .smartSearchWrapper {
+        min-width: 90px;
+        padding: 5px 10px;
+        border-radius: 8px;   /* flatten on mobile */
+    }
+
+    .smartSearch-input {
+        font-size: 13px;
+    }
+
+    .smartSearch-icon {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .smartSearchWrapper {
+        min-width: 70px;
+        width: 100%;
+    }
+}

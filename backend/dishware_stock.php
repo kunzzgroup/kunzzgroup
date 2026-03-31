@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/permission_guard.php';
 requirePermission('resource', 'dishware');
 
@@ -87,9 +87,11 @@ if (isset($_SESSION['user_id'])) {
          <div class="unified-header-row">
              <div class="header-center-section">
                 <div class="header-search">
-                    <span style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #000000ff; white-space: nowrap;">搜索</span>
-                    <input type="text" id="unified-filter" class="unified-search-input" 
-                        placeholder="搜索碗碟名称、编号或分类...">
+                    <div class="smartSearchWrapper">
+                        <i class="fas fa-search smartSearch-icon"></i>
+                        <input type="text" id="unified-filter" class="smartSearch-input"
+                            placeholder="搜索碗碟名称、编号或分类...">
+                    </div>
                 </div>
                 
                 <!-- 破损记录页：月份选择 + 快速选择（仅 j1/j2/j3 时显示） -->

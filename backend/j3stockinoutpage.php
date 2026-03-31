@@ -230,9 +230,11 @@ require_once 'session_check.php';
             
             <div class="header-right-group">
                 <div class="header-search">
-                    <span style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #000000ff; white-space: nowrap;">搜索</span>
-                    <input type="text" id="unified-filter" class="unified-search-input" 
-                        placeholder="输入关键字搜索...">
+                    <div class="smartSearchWrapper">
+                        <i class="fas fa-search smartSearch-icon"></i>
+                        <input type="text" id="unified-filter" class="smartSearch-input"
+                            placeholder="输入关键字搜索...">
+                    </div>
                 </div>
                 
                 <button class="btn btn-success" onclick="showDateRowsModal()">

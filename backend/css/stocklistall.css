@@ -1279,24 +1279,7 @@ body {
     margin-bottom: 5px;
 }
 
-.unified-search-input {
-    padding: clamp(4px, 0.42vw, 8px) 12px;
-    border: 1px solid #d1d5db;
-    border-radius: clamp(4px, 0.42vw, 8px);
-    font-size: clamp(8px, 0.74vw, 14px);
-    background-color: #ffffff;
-    transition: all 0.2s ease;
-}
-
-.unified-search-input:focus {
-    outline: none;
-    border-color: #000000ff;
-    box-shadow: 0 0 10px rgba(31, 14, 0, 0.8);
-}
-
-.unified-search-input::placeholder {
-    color: #9ca3af;
-}
+/* .unified-search-input and .unified-search-input:focus removed — now handled globally by smartSearch.css */
 
 @media (max-width: 768px) {
     .search-row {

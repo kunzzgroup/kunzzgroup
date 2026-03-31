@@ -119,7 +119,10 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '总览
             <div class="filter-group">
                 <div class="filter-item">
                     <label>搜索货品</label>
-                    <input type="text" class="filter-input" id="product-search-filter" placeholder="输入关键字搜索...">
+                    <div class="smartSearchWrapper">
+                        <i class="fas fa-search smartSearch-icon"></i>
+                        <input type="text" class="smartSearch-input" id="product-search-filter" placeholder="输入关键字搜索...">
+                    </div>
                 </div>
             </div>
             
