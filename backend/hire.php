@@ -1076,7 +1076,7 @@ if (isset($_SESSION['user_id'])) {
 
         .modal-select {
             border-color: var(--primary-color);
-            background-color: var(--primary-light);
+            background-color: #fff;
         }
 
         .modal-link {
@@ -1166,6 +1166,13 @@ if (isset($_SESSION['user_id'])) {
             background: #ef4444;
             border-radius: 0 0 0 12px;
             animation: toast-progress-bar 6s linear forwards;
+        }
+
+        /* flatpickr 日历：强制 fixed 定位，脱离所有容器约束 */
+        .flatpickr-calendar {
+            position: fixed !important;
+            z-index: 99999 !important;
+            margin: 0 !important;
         }
 
         @keyframes toast-progress-bar {
@@ -1886,18 +1893,44 @@ if (isset($_SESSION['user_id'])) {
             function initDatePicker() {
                 fpInstance = flatpickr(els.datePicker, {
                     mode: "range", locale: "zh", dateFormat: "Y年m月d日",
-                    appendTo: document.body,   // 挂到 body，避免被 overflow:hidden 裁截
+                    appendTo: document.body,
                     static: false,
+                    onOpen: function (_, __, instance) {
+                        // 下一帧等 flatpickr 渲染完后再定位
+                        requestAnimationFrame(() => positionCalendar(instance));
+                    },
                     onChange: function (selectedDates) {
                         if (selectedDates.length === 2) {
-                            state.dateStart = formatDate(selectedDates[0]); state.dateEnd = formatDate(selectedDates[1]);
+                            state.dateStart = formatDate(selectedDates[0]);
+                            state.dateEnd = formatDate(selectedDates[1]);
                             state.dateLabel = `${state.dateStart} 至 ${state.dateEnd}`;
                             applyState();
                         } else if (selectedDates.length === 0) {
-                            state.dateStart = ''; state.dateEnd = ''; state.dateLabel = ''; applyState();
+                            state.dateStart = ''; state.dateEnd = ''; state.dateLabel = '';
+                            applyState();
                         }
                     }
                 });
+
+                // 滚动 / 缩放时重新定位
+                const reposition = () => {
+                    if (fpInstance && fpInstance.isOpen) positionCalendar(fpInstance);
+                };
+                window.addEventListener('scroll', reposition, true);
+                window.addEventListener('resize', reposition);
+            }
+
+            function positionCalendar(instance) {
+                const cal = instance.calendarContainer;
+                const input = els.datePicker;
+                const rect = input.getBoundingClientRect();
+                // position: fixed 相对于 viewport，直接用 getBoundingClientRect 的坐标
+                cal.style.position = 'fixed';
+                cal.style.top = (rect.bottom + 4) + 'px';
+                cal.style.left = rect.left + 'px';
+                cal.style.width = rect.width + 'px';
+                cal.style.zIndex = '99999';
+                cal.style.margin = '0';
             }
 
             function formatDate(date) {
