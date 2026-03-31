@@ -1378,7 +1378,7 @@ if (isset($_SESSION['user_id'])) {
                         </div>
                         <div>
                             <label class="modal-field-label mt-24">内部备注 (仅 HR 可见)：</label>
-                            <textarea id="modalRemarks" class="form-control" rows="7" style="height: auto;"
+                            <textarea id="modalRemarks" class="form-control" rows="7" style="width: 400px; min-width: 400px; max-width: 400px; resize: vertical; height: auto;"
                                 placeholder="在此记录面试情况、期望薪资、背景调查结果等..."></textarea>
                         </div>
                     </div>
