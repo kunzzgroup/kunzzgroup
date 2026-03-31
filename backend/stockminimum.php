@@ -41,29 +41,37 @@ $display_name = $system_names[$system];
                 <h1 id="page-title">最低库存设置 — <?php echo $display_name; ?></h1>
             </div>
             <div class="header-right-group">
-                <button class="btn btn-warning" onclick="saveAllSettings()" id="saveAllBtn">
-                    <i class="fas fa-save"></i> 批量保存
-                </button>
                 <button class="btn btn-secondary" onclick="goBack()">
                     <i class="fas fa-arrow-left"></i> 返回库存管理
                 </button>
             </div>
         </div>
 
-        <!-- System Tabs -->
-        <div class="system-tabs">
-            <button class="tab-btn <?php echo $system === 'central' ? 'active' : ''; ?>" data-system="central" onclick="switchSystem('central')">
-                <i class="fas fa-warehouse"></i> 中央
-            </button>
-            <button class="tab-btn <?php echo $system === 'j1' ? 'active' : ''; ?>" data-system="j1" onclick="switchSystem('j1')">
-                <i class="fas fa-store"></i> J1
-            </button>
-            <button class="tab-btn <?php echo $system === 'j2' ? 'active' : ''; ?>" data-system="j2" onclick="switchSystem('j2')">
-                <i class="fas fa-store"></i> J2
-            </button>
-            <button class="tab-btn <?php echo $system === 'j3' ? 'active' : ''; ?>" data-system="j3" onclick="switchSystem('j3')">
-                <i class="fas fa-store"></i> J3
-            </button>
+        <!-- Controls Bar: Tabs + Search + Batch Save -->
+        <div class="controls-bar">
+            <div class="system-tabs">
+                <button class="tab-btn <?php echo $system === 'central' ? 'active' : ''; ?>" data-system="central" onclick="switchSystem('central')">
+                    <i class="fas fa-warehouse"></i> 中央
+                </button>
+                <button class="tab-btn <?php echo $system === 'j1' ? 'active' : ''; ?>" data-system="j1" onclick="switchSystem('j1')">
+                    <i class="fas fa-store"></i> J1
+                </button>
+                <button class="tab-btn <?php echo $system === 'j2' ? 'active' : ''; ?>" data-system="j2" onclick="switchSystem('j2')">
+                    <i class="fas fa-store"></i> J2
+                </button>
+                <button class="tab-btn <?php echo $system === 'j3' ? 'active' : ''; ?>" data-system="j3" onclick="switchSystem('j3')">
+                    <i class="fas fa-store"></i> J3
+                </button>
+            </div>
+            <div class="controls-right">
+                <div class="search-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="unified-filter" class="search-input" placeholder="搜索货品名称或编号...">
+                </div>
+                <button class="btn btn-warning" onclick="saveAllSettings()" id="saveAllBtn">
+                    <i class="fas fa-save"></i> 批量保存
+                </button>
+            </div>
         </div>
 
         <!-- Table Container -->
@@ -79,6 +87,7 @@ $display_name = $system_names[$system];
                 <table class="settings-table" id="settings-table">
                     <thead>
                         <tr>
+                            <th>序号</th>
                             <th>货品名称</th>
                             <th>货品编号</th>
                             <th>最低库存数量</th>

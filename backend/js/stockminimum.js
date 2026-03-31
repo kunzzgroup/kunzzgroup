@@ -12,8 +12,9 @@ const SYSTEM_NAMES = {
     j3: 'J3'
 };
 
-// ─── 初始化 ──────────────────────────────────────────────────────────────────
+// ─── 初始化 ──────────────────────────────────────────────────────────────────────────────────────────────
 function initApp() {
+    setupRealTimeSearch();
     loadProductsAndSettings(currentSystem);
 }
 
@@ -128,7 +129,8 @@ function renderSettingsTable() {
 
         html += `
             <tr>
-                <td class="product-name-cell" style="text-align: left; padding-left: 15px;">${escapeHtml(product.product_name)}</td>
+                <td style="text-align:center; color:#9ca3af; font-size:clamp(8px,0.63vw,12px);">${product.no || ''}</td>
+                <td class="product-name-cell">${escapeHtml(product.product_name)}</td>
                 <td class="code-cell">${escapeHtml(product.product_code || '-')}</td>
                 <td>
                     <input type="number"
@@ -164,8 +166,27 @@ function escapeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
-// ─── 连接预留（搜索功能已移除）――――――――――――――――――――――――――――――
-// (如需自行在此添加)
+// ─── 实时搜索 ─────────────────────────────────────────────────────────────────────────────────────────────
+function setupRealTimeSearch() {
+    const input = document.getElementById('unified-filter');
+    if (!input) return;
+    let debounceTimer;
+    input.addEventListener('input', function () {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            const term = this.value.toLowerCase().trim();
+            if (!term) {
+                filteredProducts = [...allProducts];
+            } else {
+                filteredProducts = allProducts.filter(p =>
+                    (p.product_name && p.product_name.toLowerCase().includes(term)) ||
+                    (p.product_code && p.product_code !== '-' && p.product_code.toLowerCase().includes(term))
+                );
+            }
+            renderSettingsTable();
+        }, 200);
+    });
+}
 
 // ─── 更新显示计数 ─────────────────────────────────────────────────────────────
 function updateDisplayedCount() {

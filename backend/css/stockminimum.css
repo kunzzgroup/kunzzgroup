@@ -40,17 +40,65 @@ body {
     flex-wrap: wrap;
 }
 
-/* ─── System Tabs ──────────────────────────────────────────────────────────── */
-.system-tabs {
+/* ─── Controls Bar (Tabs + Search + Save) ───────────────────────── */
+.controls-bar {
     display: flex;
-    gap: 4px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     margin-bottom: clamp(10px, 0.83vw, 16px);
     background: white;
-    padding: 5px;
+    padding: 6px 8px;
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(88, 62, 4, 0.1);
     border: 2px solid #e5e0d8;
-    width: fit-content;
+    flex-wrap: wrap;
+}
+
+.system-tabs {
+    display: flex;
+    gap: 3px;
+    flex-wrap: wrap;
+}
+
+.controls-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ─── Search Input ──────────────────────────────────── */
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 9px;
+    color: #9ca3af;
+    font-size: clamp(9px, 0.73vw, 13px);
+    pointer-events: none;
+}
+
+.search-input {
+    padding: clamp(5px, 0.42vw, 8px) clamp(8px, 0.63vw, 12px) clamp(5px, 0.42vw, 8px) clamp(24px, 1.77vw, 32px);
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    font-size: clamp(9px, 0.74vw, 14px);
+    width: clamp(160px, 14vw, 240px);
+    background: #faf7f2;
+    color: #374151;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #f99e00;
+    box-shadow: 0 0 0 2px rgba(249, 158, 0, 0.18);
+    background: #fff;
 }
 
 .tab-btn {
@@ -198,15 +246,21 @@ body {
     vertical-align: middle;
 }
 
-/* Column widths */
+/* No. column */
 .settings-table th:nth-child(1),
-.settings-table td:nth-child(1) { width: 45%; }
+.settings-table td:nth-child(1) { width: 6%; text-align: center; color: #6b7280; }
+/* Product name */
 .settings-table th:nth-child(2),
-.settings-table td:nth-child(2) { width: 20%; }
+.settings-table td:nth-child(2) { width: 38%; }
+/* Code */
 .settings-table th:nth-child(3),
-.settings-table td:nth-child(3) { width: 18%; }
+.settings-table td:nth-child(3) { width: 20%; }
+/* Min qty */
 .settings-table th:nth-child(4),
-.settings-table td:nth-child(4) { width: 17%; text-align: center; }
+.settings-table td:nth-child(4) { width: 18%; }
+/* Action */
+.settings-table th:nth-child(5),
+.settings-table td:nth-child(5) { width: 18%; text-align: center; }
 
 .settings-table tbody tr:hover {
     background: #e5ebf8ff;
