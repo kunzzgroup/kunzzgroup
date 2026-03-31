@@ -14,18 +14,20 @@
     width: 40px;
     height: 38px;
     flex-shrink: 0;
-    display: flex;
-    align-items: center;
+    display: block;   /* Important: block so absolute inner aligns perfectly */
     z-index: 10;
     cursor: pointer;
 }
 
-/* ── Inner — normal flow when collapsed ─────────────────── */
+/* ── Inner — MUST ALWAYS BE ABSOLUTE TO ANIMATE PERFECTLY ─ */
 .smartSearch-inner {
+    position: absolute;
+    right: 0;                        /* ALWAYS anchored to right edge */
+    top: 0;
+    width: 40px;                     /* collapsed width matches wrapper */
+    height: 38px;
     display: flex;
     align-items: center;
-    width: 100%;
-    height: 100%;
     background: #ffffff;
     border: 1px solid #d1d5db;
     border-radius: 20px;
@@ -42,21 +44,14 @@
     border-color: #ff7b00;
 }
 
-/* ── Inner — EXPANDED: overlay to the left, slot stays 40px  */
+/* ── Inner — EXPANDED: overlay to the left  ─────────────── */
 .smartSearchWrapper.expanded {
     cursor: default;
     z-index: 100;
 }
 
 .smartSearchWrapper.expanded .smartSearch-inner {
-    /* Float to the left over empty space — buttons remain rock solid */
-    position: absolute;
-    right: 0;                        /* anchored to the RIGHT edge → expands left */
-    top: 50%;
-    transform: translateY(-50%);
     width: 250px;                    /* expanded width */
-    height: 38px;
-    overflow: hidden;
     border-color: #ff7b00;
     border-radius: 6px;
     cursor: default;
