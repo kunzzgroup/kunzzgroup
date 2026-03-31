@@ -114,7 +114,7 @@ function handleGet(): void
     // ── 分页参数 ──────────────────────────────────────────────────────────
     $page = max(1, (int) ($_GET['page'] ?? 1));
     $allowLarge = isset($_GET['allow_large']) && $_GET['allow_large'] === '1';
-    $maxSize    = $allowLarge ? 2000 : 100;
+    $maxSize = $allowLarge ? 2000 : 100;
     $pageSize = max(1, min($maxSize, (int) ($_GET['page_size'] ?? 20)));
     $offset = ($page - 1) * $pageSize;
 
@@ -172,11 +172,11 @@ function handleGet(): void
         $applications = $stmt->fetchAll();
 
         sendResponse(200, "获取成功", [
-            "total"       => $total,
+            "total" => $total,
             "total_pages" => (int) ceil($total / $pageSize),
-            "page"        => $page,
-            "page_size"   => $pageSize,
-            "list"        => $applications
+            "page" => $page,
+            "page_size" => $pageSize,
+            "list" => $applications
         ]);
     } catch (PDOException $e) {
         sendResponse(500, "查询失败：" . $e->getMessage());
@@ -299,7 +299,7 @@ function handlePost(): void
         $submittedAt = date('Y-m-d H:i:s');
 
         // ── 发送 HR 通知邮件 ───────────────────────────────────────────────
-        $hrEmail = 'kunzzholdings@gmail.com';
+        //$hrEmail = 'kunzzholdings@gmail.com';
         $fromEmail = 'no-reply@kunzzgroup.com';
         $fromName = 'KUNZZ Group 招聘系统';
 
@@ -307,8 +307,8 @@ function handlePost(): void
 
         // 生成简历查看 token（与 resume.php 的 RESUME_SIGN_KEY 一致）
         $resumeSignKey = 'kunzz_resume_2024_xK9!mP#vL';
-        $resumeToken   = substr(hash_hmac('sha256', (string)$newId, $resumeSignKey), 0, 32);
-        $resumeLink    = !empty($resumeUrl)
+        $resumeToken = substr(hash_hmac('sha256', (string) $newId, $resumeSignKey), 0, 32);
+        $resumeLink = !empty($resumeUrl)
             ? "https://kunzzgroup.com/backend/resume.php?id={$newId}&token={$resumeToken}"
             : '（未上传）';
 

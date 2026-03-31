@@ -130,6 +130,7 @@ if (isset($_SESSION['user_id'])) {
         }
         .header h1 {
             font-size: clamp(24px, 2.6vw, 40px); font-weight: bold; color: #000; margin: 0;
+            flex: 1;
         }
         .header h1::after {
             content: ""; display: block; height: 3px; width: 100%; margin-top: 12px;
