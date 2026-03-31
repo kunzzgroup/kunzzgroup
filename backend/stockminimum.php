@@ -13,6 +13,33 @@ $system = isset($_GET['system']) ? $_GET['system'] : 'central';
 $valid_systems = ['central', 'j1', 'j2', 'j3'];
 if (!in_array($system, $valid_systems)) $system = 'central';
 
+// 权限检查：如果用户没有该系统权限，跳转到最优先的授权系统
+if (!hasStockSystemPermission($system)) {
+    // 找到用户有权限的第一个系统
+    $fallback = null;
+    foreach ($valid_systems as $s) {
+        if (hasStockSystemPermission($s)) {
+            $fallback = $s;
+            break;
+        }
+    }
+    if ($fallback) {
+        header('Location: stockminimum.php?system=' . $fallback);
+        exit;
+    } else {
+        // 全部系统都无权限
+        requirePermission('resource', '__none__'); // 触发 403
+    }
+}
+
+// 构建当前用户可访问的系统列表
+$allowed_systems = [];
+foreach ($valid_systems as $s) {
+    if (hasStockSystemPermission($s)) {
+        $allowed_systems[] = $s;
+    }
+}
+
 $system_names = [
     'central' => '中央',
     'j1' => 'J1',
@@ -50,18 +77,26 @@ $display_name = $system_names[$system];
         <!-- Controls Bar: Tabs + Search + Batch Save -->
         <div class="controls-bar">
             <div class="system-tabs">
+                <?php if (in_array('central', $allowed_systems)): ?>
                 <button class="tab-btn <?php echo $system === 'central' ? 'active' : ''; ?>" data-system="central" onclick="switchSystem('central')">
                     <i class="fas fa-warehouse"></i> 中央
                 </button>
+                <?php endif; ?>
+                <?php if (in_array('j1', $allowed_systems)): ?>
                 <button class="tab-btn <?php echo $system === 'j1' ? 'active' : ''; ?>" data-system="j1" onclick="switchSystem('j1')">
                     <i class="fas fa-store"></i> J1
                 </button>
+                <?php endif; ?>
+                <?php if (in_array('j2', $allowed_systems)): ?>
                 <button class="tab-btn <?php echo $system === 'j2' ? 'active' : ''; ?>" data-system="j2" onclick="switchSystem('j2')">
                     <i class="fas fa-store"></i> J2
                 </button>
+                <?php endif; ?>
+                <?php if (in_array('j3', $allowed_systems)): ?>
                 <button class="tab-btn <?php echo $system === 'j3' ? 'active' : ''; ?>" data-system="j3" onclick="switchSystem('j3')">
                     <i class="fas fa-store"></i> J3
                 </button>
+                <?php endif; ?>
             </div>
             <div class="controls-right">
                 <div class="search-wrapper">
@@ -104,8 +139,9 @@ $display_name = $system_names[$system];
 
     <script src="/backend/js/toast.js"></script>
     <script>
-        // Pass PHP system to JS
         const INITIAL_SYSTEM = '<?php echo $system; ?>';
+        // 传递当前用户允许的系统列表到 JS，防止前端绕过权限
+        const ALLOWED_SYSTEMS = <?php echo json_encode($allowed_systems); ?>;
     </script>
     <script src="js/stockminimum.js?v=<?php echo time(); ?>"></script>
 </body>

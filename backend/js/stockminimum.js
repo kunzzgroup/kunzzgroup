@@ -22,6 +22,13 @@ function initApp() {
 function switchSystem(system) {
     if (system === currentSystem) return;
 
+    // ── 前端权限拦截：防止通过控制台绕过 ───────────────────────────
+    if (typeof ALLOWED_SYSTEMS !== 'undefined' && !ALLOWED_SYSTEMS.includes(system)) {
+        showToast('您没有权限访问 ' + system.toUpperCase() + ' 系统', 'error');
+        return;
+    }
+    // ──────────────────────────────────────────────────────────────
+
     currentSystem = system;
 
     // 更新 URL 不跳转

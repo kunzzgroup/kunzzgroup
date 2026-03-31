@@ -206,6 +206,18 @@ if ($method === 'GET') {
         case 'list':
             try {
                 $system = $_GET['system'] ?? 'central';
+                // ── 系统权限拦截 ──────────────────────────────────────────────
+                if (!hasStockSystemPermission($system)) {
+                    ob_end_clean();
+                    http_response_code(403);
+                    echo json_encode([
+                        'success' => false,
+                        'message' => '无权限访问 ' . strtoupper($system) . ' 系统数据',
+                        'code'    => 'FORBIDDEN'
+                    ]);
+                    exit;
+                }
+                // ─────────────────────────────────────────────────────────────
                 $result = getProductsForSystem($system);
                 sendResponse(true, "货品设置数据获取成功", $result);
             } catch (Exception $e) {
