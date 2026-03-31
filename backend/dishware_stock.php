@@ -171,7 +171,7 @@ if (isset($_SESSION['user_id'])) {
                 </div>
             </div>
             
-            <div class="header-right-section">
+            <div class="header-right-group">
                 <div class="header-search">
                     <div class="smartSearchWrapper">
                         <i class="fas fa-search smartSearch-icon"></i>
