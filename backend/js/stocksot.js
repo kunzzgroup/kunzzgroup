@@ -1640,7 +1640,7 @@ function showAlert(message, type = 'success') {
     const container = document.getElementById('toast-container');
     if (!container) return;
 
-    const existingToasts = container.querySelectorAll('.toast');
+    let existingToasts = container.querySelectorAll('.toast');
     while (existingToasts.length >= 3) {
         closeToast(existingToasts[0].id);
         if (existingToasts[0].parentNode) {
