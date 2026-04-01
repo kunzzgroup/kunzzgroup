@@ -2569,7 +2569,7 @@ function addNewBreakRow(shopType) {
                            id="${rowId}-quantity" 
                            placeholder="0" 
                            value="" 
-                           onblur="calculateBreakRowTotal('${rowId}')" 
+                           oninput="calculateBreakRowTotal('${rowId}')" 
                            style="width: 100%; padding: 4px 8px; border: none; background: transparent; text-align: center; outline: none;">
                 </td>
                 <td class="text-center">
@@ -2579,7 +2579,7 @@ function addNewBreakRow(shopType) {
                                class="break-price-input" 
                                id="${rowId}-price" 
                                value="" 
-                               onblur="calculateBreakRowTotal('${rowId}')" 
+                               oninput="calculateBreakRowTotal('${rowId}')" 
                                style="width: 80px; border: none; background: transparent; text-align: center; outline: none;">
                     </div>
                 </td>
@@ -2836,6 +2836,83 @@ function calculateBreakRowTotal(rowId) {
     totalSpan.textContent = total.toFixed(2);
     if (priceInput) {
         priceInput.value = raw.toFixed(2);
+    }
+}
+
+// 计算正在编辑的破损记录行的总价
+function calculateEditBreakRowTotal(recordId, shopId, codeRowId) {
+    const row = document.querySelector(`tr[data-id="${recordId}"][data-shop="${shopId}"]`);
+    if (!row) return;
+    const quantitySpan = document.getElementById(`edit-${recordId}-qty`) || row.querySelector('.editable-quantity');
+    const codeInput = document.getElementById(`${codeRowId}-code`);
+    if (!quantitySpan || !codeInput) return;
+    const quantity = parseFloat(quantitySpan.textContent.trim()) || 0;
+    const productId = codeInput.dataset.productId || codeInput.getAttribute('data-product-id');
+    const allSingles = typeof getAllSingleDishwareForBreak === 'function' ? getAllSingleDishwareForBreak() : [];
+    const product = productId ? (allSingles.find(item => item.id == productId) || ((typeof stockData !== 'undefined' && stockData) || []).find(item => item.id == productId)) : null;
+    let raw = 0;
+    if (product) {
+        raw = parseFloat(product.unit_price) || 0;
+    } else {
+        const records = typeof breakRecordsData !== 'undefined' ? (breakRecordsData[shopId] || []) : [];
+        const record = records.find(r => r.id == recordId);
+        raw = record ? (parseFloat(record.unit_price) || 0) : 0;
+    }
+    const chargeable = quantity; // Already bypassed logic
+    const totalPrice = chargeable * raw;
+    const cells = row.querySelectorAll('td');
+    if (cells.length >= 5) {
+        const totalCell = cells[4];
+        totalCell.innerHTML = `
+            <div class="currency-display">
+                <span class="currency-symbol">RM</span>
+                <span class="currency-amount">${totalPrice.toFixed(2)}</span>
+            </div>
+        `;
+    }
+}
+
+// 计算正在编辑的破损记录行的总价
+function calculateEditBreakRowTotal(recordId, shopId, codeRowId) {
+    const row = document.querySelector(`tr[data-id="${recordId}"][data-shop="${shopId}"]`);
+    if (!row) return;
+    const quantitySpan = document.getElementById(`edit-${recordId}-qty`) || row.querySelector('.editable-quantity');
+    const codeInput = document.getElementById(`${codeRowId}-code`);
+    if (!quantitySpan || !codeInput) return;
+    
+    let quantityText = quantitySpan.textContent || '0';
+    // 移除可能存在的非数字字符，只保留数字和点（以防替换发生在前）
+    quantityText = quantityText.replace(/[^0-9.]/g, '');
+    const quantity = parseFloat(quantityText) || 0;
+    
+    const productId = codeInput.dataset.productId || codeInput.getAttribute('data-product-id');
+    const allSingles = typeof getAllSingleDishwareForBreak === 'function' ? getAllSingleDishwareForBreak() : [];
+    const product = productId ? (allSingles.find(item => item.id == productId) || ((typeof stockData !== 'undefined' && stockData) || []).find(item => item.id == productId)) : null;
+    
+    let raw = 0;
+    const priceSpan = row.querySelector('.currency-amount');
+    
+    if (product) {
+        raw = parseFloat(product.unit_price) || 0;
+    } else {
+        const records = typeof breakRecordsData !== 'undefined' ? (breakRecordsData[shopId] || []) : [];
+        const record = records.find(r => r.id == recordId);
+        raw = record ? (parseFloat(record.unit_price) || 0) : 0;
+    }
+    
+    // We bypassed getChargeableQuantityForBreak, so chargeable is always the typed quantity
+    const chargeable = quantity; 
+    const totalPrice = chargeable * raw;
+    
+    const cells = row.querySelectorAll('td');
+    if (cells.length >= 5) {
+        const totalCell = cells[4];
+        totalCell.innerHTML = `
+            <div class="currency-display">
+                <span class="currency-symbol">RM</span>
+                <span class="currency-amount">${totalPrice.toFixed(2)}</span>
+            </div>
+        `;
     }
 }
 
