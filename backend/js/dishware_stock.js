@@ -155,18 +155,48 @@ function sortByCodeNumber(data) {
 
 // 初始化应用
 async function initApp() {
+    // 读取 URL 参数以确定初始页面
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    if (tabParam && ['stock', 'j1', 'j2', 'j3', 'transfer'].includes(tabParam)) {
+        currentPage = tabParam;
+    }
+
     await loadRestaurants(); // 先加载餐厅店面列表
-    loadStockData();
+    
+    // 如果初始页面不是总库存，不需要在这里加载全部库存数据
+    if (currentPage === 'stock') {
+        loadStockData();
+    }
+    
     setupEventListeners();
     setupRealTimeSearch();
     setupPageSwitcher();
     setupSetFormSubmit();
 
-    // 初始化总库存页面的视图切换按钮，并更新页面头部（标题、类型筛选显示等）
-    updatePageHeader(currentPage);
+    // 根据初始页面执行相应的展示逻辑
     if (currentPage === 'stock') {
+        updatePageHeader(currentPage);
         switchStockView(stockViewType);
+    } else {
+        switchPage(currentPage, true);
     }
+
+    // 处理浏览器的前进/后退按钮
+    window.addEventListener('popstate', function(e) {
+        if (e.state && e.state.tab) {
+            switchPage(e.state.tab, true);
+        } else {
+            // 如果 state 没有 tab，比如回退到入口页，尝试从 url 获取或默认 stock
+            const urlParams = new URLSearchParams(window.location.search);
+            const tabParam = urlParams.get('tab');
+            if (tabParam && ['stock', 'j1', 'j2', 'j3', 'transfer'].includes(tabParam)) {
+                switchPage(tabParam, true);
+            } else {
+                switchPage('stock', true);
+            }
+        }
+    });
 
     // 测试模态框关闭功能
     console.log('应用初始化完成，测试模态框功能...');
@@ -899,7 +929,12 @@ function setupPageSwitcher() {
     const dropdownItems = document.querySelectorAll('.dropdown-item');
     dropdownItems.forEach(item => {
         item.classList.remove('active');
-        if (item.onclick.toString().includes("'stock'")) {
+        const onclickFn = item.onclick ? item.onclick.toString() : (item.getAttribute('onclick') || '');
+        let matchStr = "'" + currentPage + "'";
+        if (currentPage === 'j2' || currentPage === 'j3') {
+            matchStr = "'j1'";
+        }
+        if (onclickFn.includes(matchStr)) {
             item.classList.add('active');
         }
     });
@@ -911,7 +946,15 @@ function toggleViewSelector() {
 }
 
 // 页面切换函数
-function switchPage(pageType) {
+function switchPage(pageType, isInit = false) {
+    if (!isInit && pageType !== currentPage) {
+        // 更新 URL 参数
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('tab', pageType === 'j2' || pageType === 'j3' ? 'j1' : pageType);
+        const newUrl = window.location.pathname + '?' + urlParams.toString();
+        window.history.pushState({ tab: pageType }, '', newUrl);
+    }
+
     currentPage = pageType;
 
     // 更新下拉按钮文本
