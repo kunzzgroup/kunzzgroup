@@ -1199,12 +1199,18 @@ function confirmExport() {
     performExport(systemToExport, startDate, endDate);
 }
 
-// 执行实际的导出操作（始终使用页面已加载数据，确保与页面显示完全一致）
+// 执行实际的导出操作
 async function performExport(system, startDate, endDate) {
     showAlert('正在准备导出数据...', 'info');
 
     try {
         let dataToExport;
+
+        // 判断是否应使用页面数据：选"全部"或结束日期=今天且无开始日期
+        const today = formatDateForInput(new Date());
+        const usePageData = (!startDate && !endDate) || 
+                            (!startDate && endDate === today) || 
+                            (startDate === today && endDate === today);
 
         if (system === 'remark') {
             // 价格分析：使用已加载的数据
@@ -1219,35 +1225,46 @@ async function performExport(system, startDate, endDate) {
                     return;
                 }
             }
-        } else {
-            // 库存汇总：始终使用页面当前显示的数据（filteredData），日期范围仅用于PDF标注
-            // filteredData 反映了用户搜索过滤后的结果，确保导出与页面显示完全一致
+        } else if (usePageData) {
+            // 今天/全部：使用页面当前显示的数据，确保与页面一致
             const sourceData = filteredData[system] && filteredData[system].length > 0
                 ? filteredData[system]
                 : stockData[system];
 
             if (sourceData && sourceData.length > 0) {
                 dataToExport = [...sourceData];
-                console.log('使用页面当前显示数据导出，确保与页面显示完全一致');
+                console.log('使用页面当前显示数据导出');
             } else {
                 showAlert('没有数据可导出，请先刷新页面', 'error');
                 return;
             }
+        } else {
+            // 历史日期：从API获取截至end_date的库存余额
+            // 注意：start_date不参与SQL查询，仅用于PDF标注
+            showAlert('正在获取历史库存数据...', 'info');
+            const result = await apiCall(system, `?action=summary&end_date=${endDate}`);
 
-            // J2系统过滤掉Sake类型的数据
-            if (system === 'j2') {
-                dataToExport = dataToExport.filter(item => item.type !== 'Sake');
+            if (result.success) {
+                dataToExport = result.data.summary || [];
+            } else {
+                showAlert('获取数据失败: ' + (result.message || '未知错误'), 'error');
+                return;
             }
         }
 
+        // J2系统过滤掉Sake类型的数据
+        if (system === 'j2' && system !== 'remark') {
+            dataToExport = dataToExport.filter(item => item.type !== 'Sake');
+        }
+
         if (!dataToExport || dataToExport.length === 0) {
-            showAlert('没有数据可导出', 'error');
+            showAlert('所选日期范围没有数据可导出', 'error');
             return;
         }
 
         console.log('Data to export:', dataToExport.length, 'records');
 
-        // 执行PDF生成（日期范围仅用于PDF标注）
+        // 执行PDF生成
         generatePDF(system, dataToExport, startDate, endDate);
 
     } catch (error) {
@@ -1255,6 +1272,7 @@ async function performExport(system, startDate, endDate) {
         showAlert('导出失败: ' + error.message, 'error');
     }
 }
+
 
 // 生成PDF文件
 function generatePDF(system, dataToExport, startDate, endDate) {
