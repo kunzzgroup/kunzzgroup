@@ -794,8 +794,32 @@ function getBreakRecords() {
         $restaurant = $restaurant_stmt->fetch(PDO::FETCH_ASSOC);
         $restaurant_id = $restaurant ? $restaurant['id'] : null;
         
-        $sql = "SELECT dbr.*, di.product_name, di.code_number, di.category, di.size, di.photo_path, di.unit_price
-                FROM dishware_break_records dbr
+        // 判断归档表是否存在
+        $has_archive = false;
+        try {
+            $pdo->query("SELECT 1 FROM dishware_break_records_archive LIMIT 1");
+            $has_archive = true;
+        } catch (PDOException $e) {
+            $has_archive = false;
+        }
+        
+        if ($has_archive) {
+            $base_sql = "
+                SELECT id, dishware_id, shop_type, break_quantity, chargeable_quantity, unit_price, total_price, break_date, recorded_by, created_at, updated_at, NULL as archive_ym
+                FROM dishware_break_records
+                UNION ALL
+                SELECT id, dishware_id, shop_type, break_quantity, chargeable_quantity, unit_price, total_price, break_date, recorded_by, created_at, updated_at, archive_ym
+                FROM dishware_break_records_archive
+            ";
+        } else {
+            $base_sql = "
+                SELECT id, dishware_id, shop_type, break_quantity, chargeable_quantity, unit_price, total_price, break_date, recorded_by, created_at, updated_at, NULL as archive_ym
+                FROM dishware_break_records
+            ";
+        }
+
+        $sql = "SELECT dbr.*, di.product_name, di.code_number, di.category, di.size, di.photo_path, di.unit_price as current_unit_price
+                FROM ($base_sql) AS dbr
                 LEFT JOIN dishware_info di ON dbr.dishware_id = di.id
                 WHERE dbr.shop_type = ?";
         $params = [$shop_type];
@@ -834,14 +858,19 @@ function getBreakRecords() {
                 }
             }
             
-            if (empty($result['unit_price'])) {
-                $result['unit_price'] = $result['unit_price'] ?? 0;
+            // 降级处理：仅在数据库储存为空时，回退到原本（现有）商品价格
+            if (empty($result['unit_price']) && $result['unit_price'] !== '0.00' && $result['unit_price'] !== 0) {
+                $result['unit_price'] = $result['current_unit_price'] ?? 0;
             }
-            $chargeable = isset($result['chargeable_quantity']) && $result['chargeable_quantity'] !== null
-                ? (int) $result['chargeable_quantity'] : null;
-            $result['total_price'] = $chargeable !== null
-                ? $result['unit_price'] * $chargeable
-                : $result['unit_price'] * $result['break_quantity'];
+
+            // 仅当原本的 total_price 真的是空时，才被动执行计算。否则无脑使用当初破损时记录存下来的总价！
+            if (empty($result['total_price']) && $result['total_price'] !== '0.00' && $result['total_price'] !== 0) {
+                $chargeable = isset($result['chargeable_quantity']) && $result['chargeable_quantity'] !== null
+                    ? (int) $result['chargeable_quantity'] : null;
+                $result['total_price'] = $chargeable !== null
+                    ? $result['unit_price'] * $chargeable
+                    : $result['unit_price'] * $result['break_quantity'];
+            }
         }
         
         sendResponse(true, "获取破损记录成功", $results);
@@ -925,9 +954,32 @@ function monthlyResetBreakCheck() {
             $pdo->exec("CREATE TABLE IF NOT EXISTS dishware_set_break_records_archive (
                 archive_id  INT        NOT NULL AUTO_INCREMENT,
                 archive_ym  VARCHAR(7) NOT NULL,
+                id          INT        NOT NULL COMMENT '原记录 ID',
+                set_id      INT,
+                shop_type   VARCHAR(100),
+                break_quantity INT,
+                unit_price  DECIMAL(10,2),
+                total_price DECIMAL(10,2),
+                break_date  DATE,
+                recorded_by VARCHAR(255),
+                created_at  TIMESTAMP  NULL DEFAULT NULL,
+                updated_at  TIMESTAMP  NULL DEFAULT NULL,
                 PRIMARY KEY (archive_id),
-                INDEX idx_archive_ym (archive_ym)
+                INDEX idx_archive_ym (archive_ym),
+                INDEX idx_set_id (set_id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+            
+            $pdo->prepare("
+                INSERT INTO dishware_set_break_records_archive
+                    (archive_ym, id, set_id, shop_type, 
+                     break_quantity, unit_price, total_price, 
+                     break_date, recorded_by, created_at, updated_at)
+                SELECT ?, id, set_id, shop_type, 
+                       break_quantity, unit_price, total_price,
+                       break_date, recorded_by, created_at, updated_at
+                FROM dishware_set_break_records
+            ")->execute([$archiveYm]);
+
             $pdo->exec("DELETE FROM dishware_set_break_records");
         }
 
@@ -1743,8 +1795,31 @@ function getSetBreakRecords() {
     }
     
     try {
+        $has_set_archive = false;
+        try {
+            $pdo->query("SELECT 1 FROM dishware_set_break_records_archive LIMIT 1");
+            $has_set_archive = true;
+        } catch (PDOException $e) {
+            $has_set_archive = false;
+        }
+
+        if ($has_set_archive) {
+            $base_sql = "
+                SELECT id, set_id, shop_type, break_quantity, unit_price, total_price, break_date, recorded_by, created_at, updated_at, NULL as archive_ym
+                FROM dishware_set_break_records
+                UNION ALL
+                SELECT id, set_id, shop_type, break_quantity, unit_price, total_price, break_date, recorded_by, created_at, updated_at, archive_ym
+                FROM dishware_set_break_records_archive
+            ";
+        } else {
+            $base_sql = "
+                SELECT id, set_id, shop_type, break_quantity, unit_price, total_price, break_date, recorded_by, created_at, updated_at, NULL as archive_ym
+                FROM dishware_set_break_records
+            ";
+        }
+
         $sql = "SELECT dsbr.*, ds.set_name, ds.set_code
-                FROM dishware_set_break_records dsbr
+                FROM ($base_sql) AS dsbr
                 LEFT JOIN dishware_sets ds ON dsbr.set_id = ds.id
                 WHERE dsbr.shop_type = ? AND ds.is_active = 1
                 ORDER BY dsbr.break_date DESC, dsbr.created_at DESC";
@@ -1765,12 +1840,15 @@ function getSetBreakRecords() {
             $result['current_stock'] = $stock[$stock_field] ?? 0;
             
             // 如果没有存储的单价，使用套装单价
-            if (empty($result['unit_price'])) {
+            // 如果历史存储单价是空，使用套装实时单价
+            if (empty($result['unit_price']) && $result['unit_price'] !== '0.00' && $result['unit_price'] !== 0) {
                 $result['unit_price'] = $result['set_price'] ?? 0;
             }
             
-            // 计算总价
-            $result['total_price'] = $result['unit_price'] * $result['break_quantity'];
+            // 如果历史 total_price 是空才进行计算，否则相信当初存下来的数据
+            if (empty($result['total_price']) && $result['total_price'] !== '0.00' && $result['total_price'] !== 0) {
+                $result['total_price'] = $result['unit_price'] * $result['break_quantity'];
+            }
         }
         
         sendResponse(true, "获取套装破损记录成功", $results);
