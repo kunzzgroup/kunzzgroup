@@ -1370,6 +1370,7 @@ body {
 .header-stats .stat-value {
     font-weight: bold;
     color: #000000ff;
+    font-size: 24px;
 }
 
 /* 田字格容器 */
@@ -1419,13 +1420,15 @@ body {
 
 /* ─── Hover Expand Button (仿 smartSearch 架构) ───────────────────── */
 .btn-expand {
-    width: clamp(32px, 3vw, 46px);       /* 收起：正方形，与其他按钮等高 */
+    width: clamp(32px, 3vw, 46px);
+    /* 收起：正方形，与其他按钮等高 */
     overflow: hidden;
     gap: 0;
-    padding: clamp(4px, 0.42vw, 8px) 0;  /* 保留垂直内边距，水平由子元素控制 */
+    padding: clamp(4px, 0.42vw, 8px) 0;
+    /* 保留垂直内边距，水平由子元素控制 */
     flex-shrink: 0;
     transition: width 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-                box-shadow 0.25s ease;
+        box-shadow 0.25s ease;
 }
 
 /* 图标容器：固定宽度、永远居中，不受容器宽度影响 */
@@ -1447,9 +1450,9 @@ body {
     overflow: hidden;
     white-space: nowrap;
     padding-right: 0;
-    transition: max-width    0.30s cubic-bezier(0.4, 0, 0.2, 1),
-                opacity      0.18s ease 0.14s,
-                padding-right 0.30s ease;
+    transition: max-width 0.30s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.18s ease 0.14s,
+        padding-right 0.30s ease;
 }
 
 .btn-expand:hover {
@@ -1467,11 +1470,14 @@ body {
    smartSearch.css 展开搜索框时会压缩所有 .btn（font-size:0 + 改 padding）
    .btn-expand 已有自己的图标专用布局，需完全免疫这条规则              */
 .header-right-section:has(.smartSearchWrapper.expanded) .btn.btn-expand {
-    font-size: inherit;                          /* 不继承 font-size:0 */
-    padding: clamp(4px, 0.42vw, 8px) 0;         /* 保持垂直内边距，水平由子元素控制 */
+    font-size: inherit;
+    /* 不继承 font-size:0 */
+    padding: clamp(4px, 0.42vw, 8px) 0;
+    /* 保持垂直内边距，水平由子元素控制 */
 }
 
 .header-right-section:has(.smartSearchWrapper.expanded) .btn.btn-expand i {
-    font-size: clamp(10px, 0.94vw, 15px);        /* 恢复图标正常大小 */
+    font-size: clamp(10px, 0.94vw, 15px);
+    /* 恢复图标正常大小 */
     margin: 0;
 }

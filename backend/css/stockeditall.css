@@ -756,7 +756,7 @@
  }
 
  .stat-value {
-     font-size: 24px;
+     font-size: clamp(10px, 0.84vw, 16px);
      font-weight: bold;
      color: #000000ff;
  }
