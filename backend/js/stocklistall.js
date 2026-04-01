@@ -1220,10 +1220,15 @@ async function performExport(system, startDate, endDate) {
                 }
             }
         } else {
-            // 库存汇总：始终使用页面已加载的数据，日期范围仅用于PDF标注
-            if (stockData[system] && stockData[system].length > 0) {
-                dataToExport = [...stockData[system]];
-                console.log('使用页面已加载数据导出，确保与页面显示完全一致');
+            // 库存汇总：始终使用页面当前显示的数据（filteredData），日期范围仅用于PDF标注
+            // filteredData 反映了用户搜索过滤后的结果，确保导出与页面显示完全一致
+            const sourceData = filteredData[system] && filteredData[system].length > 0
+                ? filteredData[system]
+                : stockData[system];
+
+            if (sourceData && sourceData.length > 0) {
+                dataToExport = [...sourceData];
+                console.log('使用页面当前显示数据导出，确保与页面显示完全一致');
             } else {
                 showAlert('没有数据可导出，请先刷新页面', 'error');
                 return;
