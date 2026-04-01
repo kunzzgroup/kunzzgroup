@@ -756,7 +756,7 @@
  }
 
  .stat-value {
-     font-size: clamp(10px, 0.84vw, 16px);
+     font-size: 24px;
      font-weight: bold;
      color: #000000ff;
  }
@@ -2268,7 +2268,6 @@
  .header-stats .stat-value {
      font-weight: bold;
      color: #000000ff;
-     font-size: 24px;
  }
 
  /* 批量操作按钮组 */
