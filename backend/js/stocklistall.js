@@ -1149,37 +1149,51 @@ function confirmExport() {
 // 执行实际的导出操作
 async function performExport(system, endDate) {
     // 显示加载提示
-    showAlert('正在根据日期获取数据...', 'info');
+    showAlert('正在准备导出数据...', 'info');
 
     try {
-        // 根据日期重新获取数据
-        let result;
         let dataToExport;
 
+        // 判断选择的日期是否为今天
+        const today = formatDateForInput(new Date());
+        const isToday = (endDate === today);
+
         if (system === 'remark') {
-            result = await apiCall(system, '?action=analysis');
-            if (result.success) {
-                dataToExport = result.data.products || [];
+            // 价格分析：如果是今天且已有数据，使用已加载的数据
+            if (isToday && stockData.remark && stockData.remark.length > 0) {
+                dataToExport = [...stockData.remark];
             } else {
-                showAlert('获取数据失败: ' + (result.message || '未知错误'), 'error');
-                return;
+                const result = await apiCall(system, '?action=analysis');
+                if (result.success) {
+                    dataToExport = result.data.products || [];
+                } else {
+                    showAlert('获取数据失败: ' + (result.message || '未知错误'), 'error');
+                    return;
+                }
             }
         } else {
-            // 使用 apiCall 重新获取指定日期的库存数据，系统参数会自动添加
-            result = await apiCall(system, `?action=summary&end_date=${endDate}`);
-
-            if (result.success) {
-                dataToExport = result.data.summary || [];
-
-                // J2系统过滤掉Sake类型的数据
-                if (system === 'j2') {
-                    dataToExport = dataToExport.filter(item => {
-                        return item.type !== 'Sake';
-                    });
-                }
+            // 库存汇总：如果是今天，直接使用页面已加载的数据，确保导出与页面显示完全一致
+            if (isToday && stockData[system] && stockData[system].length > 0) {
+                dataToExport = [...stockData[system]];
+                console.log('使用页面已加载数据导出，确保与页面显示一致');
             } else {
-                showAlert('获取数据失败: ' + (result.message || '未知错误'), 'error');
-                return;
+                // 历史日期：重新从API获取指定日期的数据
+                showAlert('正在根据日期获取数据...', 'info');
+                const result = await apiCall(system, `?action=summary&end_date=${endDate}`);
+
+                if (result.success) {
+                    dataToExport = result.data.summary || [];
+
+                    // J2系统过滤掉Sake类型的数据
+                    if (system === 'j2') {
+                        dataToExport = dataToExport.filter(item => {
+                            return item.type !== 'Sake';
+                        });
+                    }
+                } else {
+                    showAlert('获取数据失败: ' + (result.message || '未知错误'), 'error');
+                    return;
+                }
             }
         }
 
@@ -1300,7 +1314,7 @@ function generatePDF(system, dataToExport, endDate) {
                     item.product_name || '-',
                     item.code_number || '-',
                     minimumStockDisplay,
-                    item.formatted_stock || item.total_stock || '0.00',
+                    item.formatted_stock || formatStockQuantity(item),
                     item.specification || '-',
                     item.formatted_price || item.price || '0.00',
                     item.formatted_total_price || item.total_price || '0.00'

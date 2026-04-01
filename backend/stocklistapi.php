@@ -123,15 +123,19 @@ function getStockSummary($system = 'central', $startDate = null, $endDate = null
 
             $totalValue += $totalPrice;
 
+            // 根据规格决定库存数量的小数位数：kilo 显示3位，其他显示2位
+            $specification = trim($row['specification'] ?? '');
+            $stockDecimals = (strtolower($specification) === 'kilo') ? 3 : 2;
+
             $item = [
                 'no' => $counter++,
                 'product_name' => $row['product_name'],
                 'code_number' => $row['code_number'] ?? '',
                 'total_stock' => $currentStock,
-                'specification' => $row['specification'] ?? '',
+                'specification' => $specification,
                 'price' => $price,
                 'total_price' => $totalPrice,
-                'formatted_stock' => number_format($currentStock, 2),
+                'formatted_stock' => number_format($currentStock, $stockDecimals),
                 'formatted_price' => number_format($price, 2),
                 'formatted_total_price' => number_format($totalPrice, 2)
             ];
@@ -212,7 +216,8 @@ function getLowStockAlerts($system = 'central')
                         (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
                          SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) as current_stock,
                         FORMAT((SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) - 
-                               SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)), 2) as formatted_stock
+                               SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)), 
+                               CASE WHEN LOWER(TRIM(specification)) = 'kilo' THEN 3 ELSE 2 END) as formatted_stock
                     FROM $tableName 
                     WHERE product_name IS NOT NULL AND product_name != ''
                     AND deleted_at IS NULL
