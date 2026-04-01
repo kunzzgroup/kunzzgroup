@@ -89,10 +89,8 @@ function getStockSummary($system = 'central', $startDate = null, $endDate = null
                 AND deleted_at IS NULL";
 
         $queryParams = [];
-        if ($startDate) {
-            $sql .= " AND date >= ?";
-            $queryParams[] = $startDate;
-        }
+        // 库存汇总只使用 end_date 进行累计计算（截至某日的库存余额）
+        // start_date 不参与SQL查询，仅用于PDF标注日期范围
         if ($endDate) {
             $sql .= " AND date <= ?";
             $queryParams[] = $endDate;
