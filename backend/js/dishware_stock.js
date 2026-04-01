@@ -2833,7 +2833,7 @@ function calculateBreakRowTotal(rowId) {
     const total = chargeable * raw;
     totalSpan.textContent = total.toFixed(2);
     if (priceInput) {
-        priceInput.value = chargeable > 0 ? raw.toFixed(2) : '0.00';
+        priceInput.value = raw.toFixed(2);
     }
 }
 
