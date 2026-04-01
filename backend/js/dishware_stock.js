@@ -1623,7 +1623,7 @@ function getAllSingleDishwareForBreak() {
     if (raw.length > 0) {
         list = raw.filter(item => {
             const c = (item.code_number || '').trim().toUpperCase();
-            return c && !c.startsWith('SET');
+            return c.length > 0;
         });
     } else {
         (stockData || []).filter(item => item.item_type === 'individual').forEach(item => list.push(item));
@@ -5378,8 +5378,8 @@ async function updateSelectedSetMembersDisplay() {
             }
         }
 
-        // 如果code_number是空的或看起来像套装编号（SET开头），通过API获取正确的数据
-        if (!item || !item.code_number || item.code_number.toUpperCase().startsWith('SET')) {
+        // 如果code_number是空的，通过API获取正确的数据
+        if (!item || !item.code_number) {
             try {
                 const response = await fetch(`${API_BASE_URL}?action=detail&id=${id}`);
                 const result = await response.json();
@@ -5413,10 +5413,6 @@ async function updateSelectedSetMembersDisplay() {
         const isCurrent = member.id == currentEditId;
         // 只显示碗碟的code_number，不显示中文名字
         let displayCode = (member.code_number || '').trim();
-        // 如果code_number是套装编号格式（SET开头），不显示
-        if (displayCode.toUpperCase().startsWith('SET')) {
-            displayCode = '';
-        }
         html += `
                     <span style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: ${isCurrent ? '#fef3c7' : '#e0e7ff'}; border-radius: 4px; font-size: 12px;">
                         ${displayCode || '未知编号'}${isCurrent ? ' <span style="color: #f59e0b; font-weight: 600;">(当前)</span>' : ''}
