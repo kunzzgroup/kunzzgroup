@@ -305,13 +305,14 @@ function getStockList() {
         
         // 获取碗碟基本信息
         $sql = "SELECT di.id, di.product_name, di.code_number, di.category, di.size, di.unit_price, di.photo_path,
-                       CASE 
-                           WHEN dsi.dishware_id IS NOT NULL THEN 1 
+                       MAX(CASE 
+                           WHEN dsets.id IS NOT NULL THEN 1 
                            ELSE 0 
-                       END as is_in_set
+                       END) as is_in_set
                 FROM dishware_info di
                 LEFT JOIN dishware_set_items dsi ON di.id = dsi.dishware_id
                 LEFT JOIN dishware_sets dsets ON dsi.set_id = dsets.id AND dsets.is_active = 1
+                GROUP BY di.id, di.product_name, di.code_number, di.category, di.size, di.unit_price, di.photo_path
                 ORDER BY di.product_name";
         
         $stmt = $pdo->prepare($sql);
