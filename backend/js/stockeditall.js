@@ -1875,16 +1875,7 @@ function handleNewRowOutQuantityChange(rowId, value) {
 }
 
 // 需要自动勾选货品备注的货品列表
-const autoRemarkProducts = [
-    'SALMON',
-    'SALMON BELLY 10PCS',
-    'SALMON HEAD 10PCS',
-    'SALMON BELLY 10PCS (P)',
-    'SALMON HEAD 10PCS (P)',
-    'HAMACHI FILLET MIKA',
-    'A5 AWAGYU',
-    'MAGURO BLUE FIN'
-];
+const autoRemarkProducts = [];
 
 // 处理货品名称变化
 async function handleProductChange(selectElement, codeNumberElement) {
@@ -3234,10 +3225,10 @@ function getFormRemarkNumber() {
 }
 
 // ====== 备注编号自动生成与校验工具 ======
-// 计算货品名称前缀
+// 计算货品名称前缀（最多取前两个单词的首字母）
 function computePrefix(productName) {
-    return (productName || '').trim().toUpperCase()
-        .split(/\s+/).map(w => w[0] || '').join('');
+    const words = (productName || '').trim().toUpperCase().split(/\s+/).filter(Boolean).slice(0, 2);
+    return words.map(w => w[0] || '').join('');
 }
 
 // 查询该货品在库的备注编码列表（用于出货校验）
@@ -3289,15 +3280,33 @@ function toggleNewRowRemarkNumber(rowId) {
             const productName  = productInput ? productInput.value.trim() : '';
             if (productName) {
                 const prefix = computePrefix(productName);
-                prefixInput.value    = prefix;
-                suffixInput.value    = '...';         // 占位符
-                suffixInput.disabled = true;          // 后缀只读
-                suffixInput.style.color = '#9ca3af'; // 灰色提示
-                // 标记行为自动生码
-                const row = checkbox.closest('tr');
-                if (row) {
-                    row.dataset.autoCode = 'true';
-                    row.dataset.prefix   = prefix;
+                prefixInput.value = prefix;
+                
+                // 判断是进货还是出货
+                const inQty = parseFloat(document.getElementById(`${rowId}-in-qty`)?.value || 0);
+                const outQty = parseFloat(document.getElementById(`${rowId}-out-qty`)?.value || 0);
+                
+                // 如果是进货 (或者刚开始都没填也被当作准备进货锁定，由后端生成，出货才开放)
+                // 用户要求：出库时能自己输入
+                if (outQty > 0) {
+                    suffixInput.value = '';
+                    suffixInput.disabled = false;
+                    suffixInput.style.color = '';
+                    const row = checkbox.closest('tr');
+                    if (row) {
+                        delete row.dataset.autoCode;
+                        delete row.dataset.prefix;
+                    }
+                } else {
+                    suffixInput.value    = '...';         // 占位符
+                    suffixInput.disabled = true;          // 后缀只读
+                    suffixInput.style.color = '#9ca3af'; // 灰色提示
+                    // 标记行为自动生码
+                    const row = checkbox.closest('tr');
+                    if (row) {
+                        row.dataset.autoCode = 'true';
+                        row.dataset.prefix   = prefix;
+                    }
                 }
             }
 

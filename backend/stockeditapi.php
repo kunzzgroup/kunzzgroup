@@ -1197,11 +1197,12 @@ function generateRemarkCode(PDO $pdo, string $prefix, array &$alreadyAssigned): 
 }
 
 /**
- * 计算货品名称前缀（单词首字母）
+ * 计算货品名称前缀（最多取前两个单词的首字母）
  */
 function computePrefix(string $productName): string {
     $words = preg_split('/\s+/', strtoupper(trim($productName)));
-    return implode('', array_map(fn($w) => $w[0] ?? '', array_filter($words)));
+    $words = array_slice(array_filter($words), 0, 2); // 只取前两个有效单词
+    return implode('', array_map(fn($w) => $w[0] ?? '', $words));
 }
 
 // 处理 POST 请求 - 添加新记录（修改版支持双重保存）
