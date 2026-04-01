@@ -90,6 +90,7 @@ function getMultiPriceAnalysis($system = 'central')
     $tableName = $tableMap[$system] ?? 'stockinout_data';
 
     try {
+        // ── 查询一：抓取有备注编号的进出货记录 ──
         $sql = "SELECT 
                     product_name,
                     specification,
@@ -153,6 +154,30 @@ function getMultiPriceAnalysis($system = 'central')
             }
         }
 
+        // ── 查询二：抓取同一货品中 没有备注编号 的出货量（untracked out）──
+        // 这些出货记录在出货时没有填写备注编号，导致 remark 侧不知道有货已出
+        $untrackedOutMap = [];
+        if (!empty($productGroups)) {
+            $productNames   = array_keys($productGroups);
+            $placeholders   = implode(',', array_fill(0, count($productNames), '?'));
+            $untrackedSql   = "SELECT
+                                   product_name,
+                                   SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) AS untracked_out
+                               FROM $tableName
+                               WHERE product_name IN ($placeholders)
+                               AND out_quantity > 0
+                               AND deleted_at IS NULL
+                               AND (product_remark_checked != 1
+                                    OR remark_number IS NULL
+                                    OR remark_number = '')
+                               GROUP BY product_name";
+            $stmtU = $pdo->prepare($untrackedSql);
+            $stmtU->execute($productNames);
+            foreach ($stmtU->fetchAll(PDO::FETCH_ASSOC) as $uRow) {
+                $untrackedOutMap[$uRow['product_name']] = floatval($uRow['untracked_out']);
+            }
+        }
+
         // 转换为最终格式
         $remarkProducts = [];
         foreach ($productGroups as $group) {
@@ -175,11 +200,54 @@ function getMultiPriceAnalysis($system = 'central')
                 }
             }
 
+            // ── 自然排序：备注编号 ASC（SH-304 → SH-329）──
+            usort($variants, function ($a, $b) {
+                $rA = $a['remark_number'] ?? '';
+                $rB = $b['remark_number'] ?? '';
+                $partsA = preg_split('/(\d+)/', $rA, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+                $partsB = preg_split('/(\d+)/', $rB, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+                $len = max(count($partsA), count($partsB));
+                for ($i = 0; $i < $len; $i++) {
+                    $pA = $partsA[$i] ?? '';
+                    $pB = $partsB[$i] ?? '';
+                    if (ctype_digit($pA) && ctype_digit($pB)) {
+                        $diff = (int)$pA - (int)$pB;
+                        if ($diff !== 0) return $diff;
+                    } else {
+                        $diff = strcmp($pA, $pB);
+                        if ($diff !== 0) return $diff;
+                    }
+                }
+                return 0;
+            });
+
+            // ── LIFO 扣减：没有备注编号的出货量，从最大备注号往前扣减 ──
+            // 例如：26个备注，出货1包无备注 → 移除 SH-329（最后进入的那个）
+            $untrackedOut = $untrackedOutMap[$group['product_name']] ?? 0;
+            if ($untrackedOut > 0 && !empty($variants)) {
+                // 从末尾（最大备注号）开始扣减
+                $i = count($variants) - 1;
+                while ($untrackedOut > 0 && $i >= 0) {
+                    $stock = $variants[$i]['current_stock'];
+                    if ($untrackedOut >= $stock) {
+                        // 整个 variant 被消耗掉，移除
+                        array_splice($variants, $i, 1);
+                        $untrackedOut -= $stock;
+                    } else {
+                        // 部分消耗
+                        $variants[$i]['current_stock']      -= $untrackedOut;
+                        $variants[$i]['formatted_quantity']  = formatQuantity($variants[$i]['current_stock']);
+                        $untrackedOut = 0;
+                    }
+                    $i--;
+                }
+            }
+
             if (!empty($variants)) {
                 $totalQuantity  = array_sum(array_column($variants, 'current_stock'));
                 $remarkProducts[] = [
                     'product_name'   => $group['product_name'],
-                    'variants'       => $variants,
+                    'variants'       => array_values($variants),
                     'total_quantity' => formatQuantity($totalQuantity)
                 ];
             }
