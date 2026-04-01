@@ -3287,8 +3287,15 @@ function toggleNewRowRemarkNumber(rowId) {
             const productInput = document.getElementById(`${rowId}-product_name-input`);
             const productName  = productInput ? productInput.value.trim() : '';
             if (productName) {
-                const prefix = computePrefix(productName);
-                prefixInput.value = prefix;
+                const calculatedPrefix = computePrefix(productName);
+                const oldProductName = prefixInput.dataset.productName;
+                // 只有前缀为空、等于自动生成的旧值、或者货品名称发生了改变时，才重置为主导前缀
+                // 这样能保留用户手动修改过的自定义前缀（例如将 A 改为 AW）
+                if (!prefixInput.value || prefixInput.value === prefixInput.dataset.lastAutoPrefix || oldProductName !== productName) {
+                    prefixInput.value = calculatedPrefix;
+                    prefixInput.dataset.lastAutoPrefix = calculatedPrefix;
+                }
+                prefixInput.dataset.productName = productName;
                 
                 // 判断是进货还是出货
                 const inQty = parseFloat(document.getElementById(`${rowId}-in-qty`)?.value || 0);
@@ -3315,7 +3322,7 @@ function toggleNewRowRemarkNumber(rowId) {
                     const row = checkbox.closest('tr');
                     if (row) {
                         row.dataset.autoCode = 'true';
-                        row.dataset.prefix   = prefix;
+                        row.dataset.prefix   = calculatedPrefix;
                     }
                 }
             }
@@ -3605,7 +3612,13 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
     const isIncoming = formData.in_quantity > 0;
     if (isIncoming && row.dataset.autoCode === 'true') {
         formData.needGenerateCode = true;
-        formData.prefix = row.dataset.prefix || computePrefix(formData.product_name);
+        
+        // 抓取用户在界面上可能手动修改过的前缀框内容
+        const prefixInput = document.getElementById(`${rowId}-remark-prefix`);
+        const manualPrefix = prefixInput ? prefixInput.value.trim().toUpperCase() : '';
+        
+        // 优先使用界面输入的，再使用dataset存的，最后用实时计算的
+        formData.prefix = manualPrefix || row.dataset.prefix || computePrefix(formData.product_name);
         formData.remark_number = ''; // 交给后端生成
     }
 
@@ -7956,7 +7969,13 @@ async function batchSaveNewRows() {
             const isIncoming = data.in_quantity > 0;
             if (isIncoming && row.dataset.autoCode === 'true') {
                 data.needGenerateCode = true;
-                data.prefix = row.dataset.prefix || computePrefix(data.product_name);
+                
+                // 抓取用户在界面上可能手动修改过的前缀框内容
+                const prefixInput = document.getElementById(`${rowId}-remark-prefix`);
+                const manualPrefix = prefixInput ? prefixInput.value.trim().toUpperCase() : '';
+                
+                // 优先使用界面输入的，再使用dataset存的，最后用实时计算的
+                data.prefix = manualPrefix || row.dataset.prefix || computePrefix(data.product_name);
                 data.remark_number = ''; // 交给后端
             }
 
