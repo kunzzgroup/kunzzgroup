@@ -46,6 +46,7 @@ if (isset($_SESSION['user_id'])) {
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <link rel="icon" type="image/png" href="images/images/logo.png">
     <meta charset="UTF-8">
@@ -53,8 +54,9 @@ if (isset($_SESSION['user_id'])) {
     <title>碗碟库存管理 - 库存管理系统</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/backend/css/dishware_stock.css?v=<?php echo time(); ?>">
-   
+
 </head>
+
 <body>
     <?php include 'sidebar.php'; ?>
     <div class="container">
@@ -76,66 +78,91 @@ if (isset($_SESSION['user_id'])) {
                 </div>
             </div>
         </div>
-        
+
         <!-- Toast Notifications -->
         <div class="toast-container" id="toast-container">
             <!-- 动态通知内容 -->
         </div>
-        
-        
-         <!-- 统一顶部行 -->
-         <div class="unified-header-row">
-             <div class="header-center-section">
+
+
+        <!-- 统一顶部行 -->
+        <div class="unified-header-row">
+            <div class="header-center-section">
 
                 <!-- 破损记录页：月份选择 + 快速选择（仅 j1/j2/j3 时显示） -->
                 <div id="break-date-filter" class="break-date-filter" style="display: none;">
                     <div class="break-month-picker">
-                        <span style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #000000ff; white-space: nowrap;"><i class="fas fa-calendar" style="margin-right: 4px;"></i>选择年份和月份</span>
+                        <span
+                            style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #000000ff; white-space: nowrap;"><i
+                                class="fas fa-calendar" style="margin-right: 4px;"></i>选择年份和月份</span>
                         <div class="break-month-picker-inner" style="position: relative;">
-                            <button type="button" id="break-month-picker-trigger" class="break-month-picker-trigger" aria-haspopup="true" aria-expanded="false">
+                            <button type="button" id="break-month-picker-trigger" class="break-month-picker-trigger"
+                                aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-calendar" style="margin-right: 6px;"></i>
                                 <span id="break-month-picker-text">选择年份和月份</span>
                                 <i class="fas fa-chevron-down" style="margin-left: 6px;"></i>
                             </button>
-                            <div id="break-month-picker-popup" class="break-month-picker-popup" style="display: none;" role="dialog" aria-label="选择年份和月份">
+                            <div id="break-month-picker-popup" class="break-month-picker-popup" style="display: none;"
+                                role="dialog" aria-label="选择年份和月份">
                                 <div class="break-picker-year-row">
-                                    <button type="button" class="break-picker-year-btn" id="break-picker-year-prev" aria-label="上一年"><i class="fas fa-chevron-up"></i></button>
+                                    <button type="button" class="break-picker-year-btn" id="break-picker-year-prev"
+                                        aria-label="上一年"><i class="fas fa-chevron-up"></i></button>
                                     <span id="break-picker-year-display">2026</span>
-                                    <button type="button" class="break-picker-year-btn" id="break-picker-year-next" aria-label="下一年"><i class="fas fa-chevron-down"></i></button>
+                                    <button type="button" class="break-picker-year-btn" id="break-picker-year-next"
+                                        aria-label="下一年"><i class="fas fa-chevron-down"></i></button>
                                 </div>
                                 <div class="break-picker-month-grid" id="break-picker-month-grid"></div>
-                                <div class="break-picker-footer"><button type="button" id="break-picker-clear" class="break-picker-clear-btn">无</button></div>
+                                <div class="break-picker-footer"><button type="button" id="break-picker-clear"
+                                        class="break-picker-clear-btn">无</button></div>
                             </div>
                         </div>
                     </div>
                     <div class="break-quick-select">
-                        <span style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #000000ff; white-space: nowrap;"><i class="fas fa-clock" style="margin-right: 4px;"></i>快速选择</span>
+                        <span
+                            style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #000000ff; white-space: nowrap;"><i
+                                class="fas fa-clock" style="margin-right: 4px;"></i>快速选择</span>
                         <div class="dropdown" style="position: relative;">
-                            <button type="button" class="btn btn-warning break-quick-select-btn" id="break-quick-select-btn" onclick="toggleBreakQuickSelectDropdown()" style="padding: clamp(4px, 0.42vw, 8px) clamp(10px, 0.83vw, 16px); font-size: clamp(8px, 0.74vw, 14px);">
+                            <button type="button" class="btn btn-warning break-quick-select-btn"
+                                id="break-quick-select-btn" onclick="toggleBreakQuickSelectDropdown()"
+                                style="padding: clamp(4px, 0.42vw, 8px) clamp(10px, 0.83vw, 16px); font-size: clamp(8px, 0.74vw, 14px);">
                                 <i class="fas fa-calendar-alt"></i>
                                 <span id="break-quick-select-text">时段</span>
                                 <i class="fas fa-chevron-down"></i>
                             </button>
-                            <div class="dropdown-menu break-quick-select-dropdown" id="break-quick-select-dropdown" style="display: none; position: absolute; top: 100%; left: 0; z-index: 1000; min-width: 120px; background: #fff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-top: 4px;">
-                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month1')">1月</button>
-                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month2')">2月</button>
-                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month3')">3月</button>
-                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month4')">4月</button>
-                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month5')">5月</button>
-                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month6')">6月</button>
-                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month7')">7月</button>
-                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month8')">8月</button>
-                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month9')">9月</button>
-                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month10')">10月</button>
-                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month11')">11月</button>
-                                <button type="button" class="dropdown-item" onclick="selectBreakQuickRange('month12')">12月</button>
+                            <div class="dropdown-menu break-quick-select-dropdown" id="break-quick-select-dropdown"
+                                style="display: none; position: absolute; top: 100%; left: 0; z-index: 1000; min-width: 120px; background: #fff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-top: 4px;">
+                                <button type="button" class="dropdown-item"
+                                    onclick="selectBreakQuickRange('month1')">1月</button>
+                                <button type="button" class="dropdown-item"
+                                    onclick="selectBreakQuickRange('month2')">2月</button>
+                                <button type="button" class="dropdown-item"
+                                    onclick="selectBreakQuickRange('month3')">3月</button>
+                                <button type="button" class="dropdown-item"
+                                    onclick="selectBreakQuickRange('month4')">4月</button>
+                                <button type="button" class="dropdown-item"
+                                    onclick="selectBreakQuickRange('month5')">5月</button>
+                                <button type="button" class="dropdown-item"
+                                    onclick="selectBreakQuickRange('month6')">6月</button>
+                                <button type="button" class="dropdown-item"
+                                    onclick="selectBreakQuickRange('month7')">7月</button>
+                                <button type="button" class="dropdown-item"
+                                    onclick="selectBreakQuickRange('month8')">8月</button>
+                                <button type="button" class="dropdown-item"
+                                    onclick="selectBreakQuickRange('month9')">9月</button>
+                                <button type="button" class="dropdown-item"
+                                    onclick="selectBreakQuickRange('month10')">10月</button>
+                                <button type="button" class="dropdown-item"
+                                    onclick="selectBreakQuickRange('month11')">11月</button>
+                                <button type="button" class="dropdown-item"
+                                    onclick="selectBreakQuickRange('month12')">12月</button>
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="category-filter">
-                    <span style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #000000ff; white-space: nowrap;">分类</span>
+                    <span
+                        style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #000000ff; white-space: nowrap;">分类</span>
                     <select id="category-filter" class="unified-search-input">
                         <option value="">全部分类</option>
                         <option value="AG">AG</option>
@@ -162,7 +189,8 @@ if (isset($_SESSION['user_id'])) {
                     </select>
                 </div>
                 <div class="item-type-filter" id="item-type-filter-wrap" style="display: none;">
-                    <span style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #000000ff; white-space: nowrap;">类型</span>
+                    <span
+                        style="font-size: clamp(8px, 0.74vw, 14px); font-weight: 600; color: #000000ff; white-space: nowrap;">类型</span>
                     <select id="item-type-filter" class="unified-search-input">
                         <option value="all">全部</option>
                         <option value="single">单品</option>
@@ -170,38 +198,38 @@ if (isset($_SESSION['user_id'])) {
                     </select>
                 </div>
             </div>
-            
-            <div class="header-right-group">
+
+            <div class="header-right-section">
                 <div class="header-search">
                     <div class="smartSearchWrapper">
                         <i class="fas fa-search smartSearch-icon"></i>
-                        <input type="text" id="unified-filter" class="smartSearch-input"
-                            placeholder="搜索碗碟名称、编号或分类...">
+                        <input type="text" id="unified-filter" class="smartSearch-input" placeholder="搜索碗碟名称、编号或分类...">
                     </div>
                 </div>
 
-                <button class="btn btn-info" onclick="openRestaurantModal()" id="manage-restaurants-btn" style="background-color: #17a2b8; border-color: #17a2b8; color: white;">
+                <button class="btn btn-info" onclick="openRestaurantModal()" id="manage-restaurants-btn"
+                    style="background-color: #17a2b8; border-color: #17a2b8; color: white;">
                     <i class="fas fa-store" style="color: white;"></i>
                     管理餐厅店面
                 </button>
-                
+
                 <button class="btn btn-success" onclick="openAddModal()" id="add-dishware-btn">
                     <i class="fas fa-plus"></i>
                     添加碗碟
                 </button>
-                
+
                 <button class="btn btn-warning" onclick="exportData()">
                     <i class="fas fa-download"></i>
                     导出数据
                 </button>
-                
+
                 <div class="header-stats">
                     <span>显示记录: <span class="stat-value" id="displayed-records">0</span></span>
                     <span>总记录: <span class="stat-value" id="total-count">0</span></span>
                 </div>
             </div>
         </div>
-        
+
 
         <!-- 页面内容区域 -->
         <div id="page-content">
@@ -216,7 +244,7 @@ if (isset($_SESSION['user_id'])) {
                         套装
                     </button>
                 </div> -->
-                
+
                 <!-- 碗碟视图 -->
                 <div id="dishware-view">
                     <!-- 单个分类或搜索结果的表格容器 -->
@@ -247,13 +275,13 @@ if (isset($_SESSION['user_id'])) {
                             </table>
                         </div>
                     </div>
-                    
+
                     <!-- 全部分类的容器（按分类分组显示） -->
                     <div id="categories-container" class="categories-container">
                         <!-- 动态生成分类容器 -->
                     </div>
                 </div>
-                
+
                 <!-- 套装视图 -->
                 <div id="sets-view" style="display: none;">
                     <div class="table-container">
@@ -292,7 +320,7 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                 </div>
             </div>
-            
+
             <!-- J2和J3页面指向同一个合并页面 -->
             <div id="j2-page" class="page-content" style="display: none;">
                 <div class="table-scroll-container" style="overflow-x: auto; overflow-y: visible; width: 100%;">
@@ -301,7 +329,7 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                 </div>
             </div>
-            
+
             <div id="j3-page" class="page-content" style="display: none;">
                 <div class="table-scroll-container" style="overflow-x: auto; overflow-y: visible; width: 100%;">
                     <div id="break-records-container-j3" class="break-records-container">
@@ -371,7 +399,8 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                     <div class="form-group">
                         <label>单价 (RM)</label>
-                        <input type="number" id="add-unit-price" name="unit_price" step="0.01" min="0" placeholder="0.00">
+                        <input type="number" id="add-unit-price" name="unit_price" step="0.01" min="0"
+                            placeholder="0.00">
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>照片上传</label>
@@ -447,7 +476,8 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                     <div class="form-group">
                         <label class="required">单价 (RM)</label>
-                        <input type="number" id="edit-unit-price" name="unit_price" step="0.01" min="0" required placeholder="0.00">
+                        <input type="number" id="edit-unit-price" name="unit_price" step="0.01" min="0" required
+                            placeholder="0.00">
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>库存数量</label>
@@ -471,18 +501,23 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>套装设置</label>
-                        <div id="set-settings-container" style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; background: #f9fafb;">
+                        <div id="set-settings-container"
+                            style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; background: #f9fafb;">
                             <div style="margin-bottom: 12px;">
-                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+                                <div
+                                    style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
                                     <span style="font-weight: 600; white-space: nowrap; flex-shrink: 0;">当前套装成员：</span>
                                     <span id="current-set-members" style="color: #666;">暂无</span>
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                                    <label style="font-weight: 600; margin: 0; white-space: nowrap; flex-shrink: 0;">添加套装成员：</label>
-                                    <select id="set-member-select" style="flex: 1; min-width: 180px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    <label
+                                        style="font-weight: 600; margin: 0; white-space: nowrap; flex-shrink: 0;">添加套装成员：</label>
+                                    <select id="set-member-select"
+                                        style="flex: 1; min-width: 180px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                                         <option value="">请选择要加入套装的碗碟</option>
                                     </select>
-                                    <button type="button" onclick="addSetMember()" class="btn btn-primary" style="padding: 8px 16px; white-space: nowrap; flex-shrink: 0;">
+                                    <button type="button" onclick="addSetMember()" class="btn btn-primary"
+                                        style="padding: 8px 16px; white-space: nowrap; flex-shrink: 0;">
                                         <i class="fas fa-plus"></i> 添加
                                     </button>
                                 </div>
@@ -491,7 +526,8 @@ if (isset($_SESSION['user_id'])) {
                                 <!-- 动态显示已选择的套装成员 -->
                             </div>
                             <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #ddd;">
-                                <button type="button" onclick="removeFromSet()" class="btn btn-secondary" style="padding: 8px 16px;">
+                                <button type="button" onclick="removeFromSet()" class="btn btn-secondary"
+                                    style="padding: 8px 16px;">
                                     <i class="fas fa-unlink"></i> 从套装中移除
                                 </button>
                             </div>
@@ -531,22 +567,26 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                     <div class="form-group">
                         <label class="required">产品名称</label>
-                        <select id="damage-product-select" name="product_name" required onchange="handleDamageProductChange(this)">
+                        <select id="damage-product-select" name="product_name" required
+                            onchange="handleDamageProductChange(this)">
                             <option value="">请选择产品</option>
                             <!-- 动态填充选项 -->
                         </select>
                     </div>
                     <div class="form-group">
                         <label class="required">破损数量</label>
-                        <input type="number" id="damage-quantity" name="break_quantity" min="1" required onchange="calculateDamageTotal()">
+                        <input type="number" id="damage-quantity" name="break_quantity" min="1" required
+                            onchange="calculateDamageTotal()">
                     </div>
                     <div class="form-group">
                         <label>单价 (RM)</label>
-                        <input type="number" id="damage-unit-price" name="unit_price" step="0.01" min="0" readonly style="background: #f3f4f6;" placeholder="0.00">
+                        <input type="number" id="damage-unit-price" name="unit_price" step="0.01" min="0" readonly
+                            style="background: #f3f4f6;" placeholder="0.00">
                     </div>
                     <div class="form-group">
                         <label>总价 (RM)</label>
-                        <input type="number" id="damage-total-price" name="total_price" step="0.01" readonly style="background: #f3f4f6;" placeholder="0.00">
+                        <input type="number" id="damage-total-price" name="total_price" step="0.01" readonly
+                            style="background: #f3f4f6;" placeholder="0.00">
                     </div>
                 </div>
                 <div class="modal-actions">
@@ -565,12 +605,15 @@ if (isset($_SESSION['user_id'])) {
         <div class="modal-content" style="max-width: 400px;">
             <div class="modal-header">
                 <h3 class="modal-title">新增破损记录</h3>
-                <button class="modal-close" onclick="closeBreakRowsModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                <button class="modal-close" onclick="closeBreakRowsModal()"
+                    style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="break-rows-count" style="display: block; margin-bottom: 8px; font-weight: 600;">要创建的行数 *</label>
-                    <input type="number" id="break-rows-count" class="form-input" min="1" max="50" value="1" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <label for="break-rows-count" style="display: block; margin-bottom: 8px; font-weight: 600;">要创建的行数
+                        *</label>
+                    <input type="number" id="break-rows-count" class="form-input" min="1" max="50" value="1" required
+                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                 </div>
             </div>
             <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
@@ -651,12 +694,15 @@ if (isset($_SESSION['user_id'])) {
         <div class="modal-content" style="max-width: 400px;">
             <div class="modal-header">
                 <h3 class="modal-title">新增转卖记录</h3>
-                <button class="modal-close" onclick="closeTransferRowsModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                <button class="modal-close" onclick="closeTransferRowsModal()"
+                    style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="transfer-rows-count" style="display: block; margin-bottom: 8px; font-weight: 600;">要创建的行数 *</label>
-                    <input type="number" id="transfer-rows-count" class="form-input" min="1" max="50" value="1" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <label for="transfer-rows-count"
+                        style="display: block; margin-bottom: 8px; font-weight: 600;">要创建的行数 *</label>
+                    <input type="number" id="transfer-rows-count" class="form-input" min="1" max="50" value="1" required
+                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                 </div>
             </div>
             <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
@@ -712,4 +758,5 @@ if (isset($_SESSION['user_id'])) {
     </div>
     <script src="js/dishware_stock.js?v=<?php echo time(); ?>"></script>
 </body>
+
 </html>
