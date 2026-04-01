@@ -1200,9 +1200,16 @@ function generateRemarkCode(PDO $pdo, string $prefix, array &$alreadyAssigned): 
  * 计算货品名称前缀（最多取前两个单词的首字母）
  */
 function computePrefix(string $productName): string {
-    $words = preg_split('/\s+/', strtoupper(trim($productName)));
-    $words = array_slice(array_filter($words), 0, 2); // 只取前两个有效单词
-    return implode('', array_map(fn($w) => $w[0] ?? '', $words));
+    $clean_name = strtoupper(trim($productName));
+    $words = preg_split('/\s+/', $clean_name, -1, PREG_SPLIT_NO_EMPTY);
+    
+    if (empty($words)) return '';
+    
+    if (count($words) == 1) {
+        return mb_substr($words[0], 0, 2);
+    } else {
+        return mb_substr($words[0], 0, 1) . mb_substr($words[1], 0, 1);
+    }
 }
 
 // 处理 POST 请求 - 添加新记录（修改版支持双重保存）

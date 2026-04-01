@@ -3235,8 +3235,13 @@ function getFormRemarkNumber() {
 // ====== 备注编号自动生成与校验工具 ======
 // 计算货品名称前缀（最多取前两个单词的首字母）
 function computePrefix(productName) {
-    const words = (productName || '').trim().toUpperCase().split(/\s+/).filter(Boolean).slice(0, 2);
-    return words.map(w => w[0] || '').join('');
+    const words = (productName || '').trim().toUpperCase().split(/\s+/).filter(Boolean);
+    if (words.length === 0) return '';
+    if (words.length === 1) {
+        return words[0].substring(0, 2);
+    } else {
+        return (words[0][0] || '') + (words[1][0] || '');
+    }
 }
 
 // 查询该货品在库的备注编码列表（用于出货校验）
