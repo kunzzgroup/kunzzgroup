@@ -961,6 +961,69 @@ body {
     box-shadow: 0 0 0 3px rgba(249, 147, 0, 0.1);
 }
 
+/* 日期范围行布局 */
+.date-range-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.date-range-row .date-selector-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.date-range-separator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 4px;
+    color: #9ca3af;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+/* 快速日期按钮 */
+.date-quick-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-quick-date {
+    flex: 1;
+    min-width: 60px;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+    color: #583e04;
+    font-size: clamp(11px, 0.94vw, 14px);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.btn-quick-date:hover {
+    background: #f99300;
+    color: white;
+    border-color: #f99300;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(249, 147, 0, 0.3);
+}
+
+.btn-quick-date:active {
+    transform: translateY(0);
+}
+
+.btn-quick-date.active {
+    background: #583e04;
+    color: white;
+    border-color: #583e04;
+}
+
 .low-stock-table {
     width: 100%;
     border-collapse: collapse;

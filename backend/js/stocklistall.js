@@ -1082,17 +1082,67 @@ function exportData(system) {
 // 显示导出日期选择模态框
 function showExportDateModal() {
     const modal = document.getElementById('export-date-modal');
+    const startDateInput = document.getElementById('export-start-date');
     const endDateInput = document.getElementById('export-end-date');
 
-    // 设置默认日期为今天
+    // 默认选择本月范围
     const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    startDateInput.value = formatDateForInput(firstDayOfMonth);
     endDateInput.value = formatDateForInput(today);
 
     // 设置最大日期为今天
     const todayStr = formatDateForInput(today);
+    startDateInput.max = todayStr;
     endDateInput.max = todayStr;
 
+    // 高亮"本月"按钮
+    updateQuickButtonActive('this_month');
+
     modal.style.display = 'block';
+}
+
+// 快速日期范围设置
+function setDateRange(type) {
+    const startDateInput = document.getElementById('export-start-date');
+    const endDateInput = document.getElementById('export-end-date');
+    const today = new Date();
+
+    switch (type) {
+        case 'today':
+            startDateInput.value = formatDateForInput(today);
+            endDateInput.value = formatDateForInput(today);
+            break;
+        case 'this_month':
+            startDateInput.value = formatDateForInput(new Date(today.getFullYear(), today.getMonth(), 1));
+            endDateInput.value = formatDateForInput(today);
+            break;
+        case 'last_month':
+            const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
+            startDateInput.value = formatDateForInput(lastMonthStart);
+            endDateInput.value = formatDateForInput(lastMonthEnd);
+            break;
+        case 'all':
+            startDateInput.value = '';
+            endDateInput.value = formatDateForInput(today);
+            break;
+    }
+
+    updateQuickButtonActive(type);
+}
+
+// 更新快速日期按钮高亮状态
+function updateQuickButtonActive(activeType) {
+    document.querySelectorAll('.btn-quick-date').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    const buttons = document.querySelectorAll('.btn-quick-date');
+    const typeMap = { 'today': 0, 'this_month': 1, 'last_month': 2, 'all': 3 };
+    if (typeMap[activeType] !== undefined && buttons[typeMap[activeType]]) {
+        buttons[typeMap[activeType]].classList.add('active');
+    }
 }
 
 // 关闭导出日期选择模态框
@@ -1117,18 +1167,21 @@ function formatDateForInput(date) {
 
 // 确认导出
 function confirmExport() {
+    const startDateInput = document.getElementById('export-start-date');
     const endDateInput = document.getElementById('export-end-date');
+    const startDate = startDateInput.value; // 可以为空（表示"全部"）
     const endDate = endDateInput.value;
 
     if (!endDate) {
-        showAlert('请选择日期', 'error');
+        showAlert('请选择结束日期', 'error');
         return;
     }
 
-    // 调试：检查当前系统
-    console.log('confirmExport - currentExportSystem:', currentExportSystem);
-    console.log('confirmExport - filteredData:', filteredData);
-    console.log('confirmExport - stockData:', stockData);
+    // 验证日期范围
+    if (startDate && startDate > endDate) {
+        showAlert('开始日期不能晚于结束日期', 'error');
+        return;
+    }
 
     if (!currentExportSystem) {
         console.error('currentExportSystem is null!');
@@ -1143,24 +1196,23 @@ function confirmExport() {
     closeExportDateModalComplete();
 
     // 执行导出
-    performExport(systemToExport, endDate);
+    performExport(systemToExport, startDate, endDate);
 }
 
 // 执行实际的导出操作
-async function performExport(system, endDate) {
+async function performExport(system, startDate, endDate) {
     // 显示加载提示
     showAlert('正在准备导出数据...', 'info');
 
     try {
         let dataToExport;
 
-        // 判断选择的日期是否为今天
+        // 判断是否为"全部"模式（无开始日期，结束日期为今天）
         const today = formatDateForInput(new Date());
-        const isToday = (endDate === today);
+        const isAllData = (!startDate && endDate === today);
 
         if (system === 'remark') {
-            // 价格分析：如果是今天且已有数据，使用已加载的数据
-            if (isToday && stockData.remark && stockData.remark.length > 0) {
+            if (isAllData && stockData.remark && stockData.remark.length > 0) {
                 dataToExport = [...stockData.remark];
             } else {
                 const result = await apiCall(system, '?action=analysis');
@@ -1172,14 +1224,18 @@ async function performExport(system, endDate) {
                 }
             }
         } else {
-            // 库存汇总：如果是今天，直接使用页面已加载的数据，确保导出与页面显示完全一致
-            if (isToday && stockData[system] && stockData[system].length > 0) {
+            // 如果没有日期筛选且结束日期是今天，使用页面已加载数据
+            if (isAllData && stockData[system] && stockData[system].length > 0) {
                 dataToExport = [...stockData[system]];
                 console.log('使用页面已加载数据导出，确保与页面显示一致');
             } else {
-                // 历史日期：重新从API获取指定日期的数据
-                showAlert('正在根据日期获取数据...', 'info');
-                const result = await apiCall(system, `?action=summary&end_date=${endDate}`);
+                // 有日期范围筛选：重新从API获取
+                showAlert('正在根据日期范围获取数据...', 'info');
+                let queryParams = `?action=summary&end_date=${endDate}`;
+                if (startDate) {
+                    queryParams += `&start_date=${startDate}`;
+                }
+                const result = await apiCall(system, queryParams);
 
                 if (result.success) {
                     dataToExport = result.data.summary || [];
@@ -1198,14 +1254,14 @@ async function performExport(system, endDate) {
         }
 
         if (!dataToExport || dataToExport.length === 0) {
-            showAlert('所选日期没有数据可导出', 'error');
+            showAlert('所选日期范围没有数据可导出', 'error');
             return;
         }
 
         console.log('Data to export:', dataToExport.length, 'records');
 
         // 执行PDF生成
-        generatePDF(system, dataToExport, endDate);
+        generatePDF(system, dataToExport, startDate, endDate);
 
     } catch (error) {
         console.error('获取数据失败:', error);
@@ -1214,7 +1270,7 @@ async function performExport(system, endDate) {
 }
 
 // 生成PDF文件
-function generatePDF(system, dataToExport, endDate) {
+function generatePDF(system, dataToExport, startDate, endDate) {
     try {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('landscape', 'mm', 'a4');
@@ -1236,6 +1292,7 @@ function generatePDF(system, dataToExport, endDate) {
 
         // 格式化日期显示
         const formatDateForDisplay = (dateStr) => {
+            if (!dateStr) return 'All';
             const date = new Date(dateStr);
             return date.toLocaleDateString('en-US', {
                 year: 'numeric',
@@ -1255,7 +1312,13 @@ function generatePDF(system, dataToExport, endDate) {
             minute: '2-digit'
         });
         doc.text(`Export Time: ${exportTimeStr}`, 14, 22);
-        doc.text(`As of Date: ${formatDateForDisplay(endDate)}`, 14, 28);
+
+        // 显示日期范围
+        if (startDate) {
+            doc.text(`Date Range: ${formatDateForDisplay(startDate)} - ${formatDateForDisplay(endDate)}`, 14, 28);
+        } else {
+            doc.text(`As of Date: ${formatDateForDisplay(endDate)}`, 14, 28);
+        }
         doc.text(`Records: ${dataToExport.length}`, 200, 22);
 
         // 准备表格数据
@@ -1379,13 +1442,18 @@ function generatePDF(system, dataToExport, endDate) {
             }
         });
 
-        // 保存PDF（文件名包含日期）
+        // 保存PDF（文件名包含日期范围）
         const formatDateForFileName = (dateStr) => {
-            return dateStr.replace(/-/g, '');
+            return dateStr ? dateStr.replace(/-/g, '') : '';
         };
-        const fileName = system === 'remark'
-            ? `stock_price_analysis_${formatDateForFileName(endDate)}.pdf`
-            : `${system}_stock_summary_${formatDateForFileName(endDate)}.pdf`;
+        let fileName;
+        if (system === 'remark') {
+            fileName = `stock_price_analysis_${formatDateForFileName(endDate)}.pdf`;
+        } else if (startDate) {
+            fileName = `${system}_stock_summary_${formatDateForFileName(startDate)}_to_${formatDateForFileName(endDate)}.pdf`;
+        } else {
+            fileName = `${system}_stock_summary_${formatDateForFileName(endDate)}.pdf`;
+        }
 
         doc.save(fileName);
         showAlert('PDF导出成功', 'success');

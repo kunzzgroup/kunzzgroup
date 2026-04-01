@@ -89,6 +89,10 @@ function getStockSummary($system = 'central', $startDate = null, $endDate = null
                 AND deleted_at IS NULL";
 
         $queryParams = [];
+        if ($startDate) {
+            $sql .= " AND date >= ?";
+            $queryParams[] = $startDate;
+        }
         if ($endDate) {
             $sql .= " AND date <= ?";
             $queryParams[] = $endDate;
@@ -291,8 +295,9 @@ if ($method === 'GET') {
         case 'summary':
             try {
                 $system = $_GET['system'] ?? 'central';
+                $startDate = $_GET['start_date'] ?? null;
                 $endDate = $_GET['end_date'] ?? null;
-                $result = getStockSummary($system, null, $endDate);
+                $result = getStockSummary($system, $startDate, $endDate);
                 sendResponse(true, ucfirst($system) . "库存汇总数据获取成功", $result);
             }
             catch (Exception $e) {

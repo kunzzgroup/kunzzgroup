@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/permission_guard.php';
 requireStockView('list');
 
@@ -67,16 +67,31 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
             <div class="export-date-modal-header">
                 <h2>
                     <i class="fas fa-calendar-alt"></i>
-                    选择导出日期
+                    选择导出日期范围
                 </h2>
                 <button class="close-modal" onclick="closeExportDateModalComplete()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="export-date-modal-body">
-                <div class="date-selector-group">
-                    <label for="export-end-date">选择日期</label>
-                    <input type="date" id="export-end-date" required>
+                <div class="date-range-row">
+                    <div class="date-selector-group">
+                        <label for="export-start-date">开始日期</label>
+                        <input type="date" id="export-start-date" required>
+                    </div>
+                    <div class="date-range-separator">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                    <div class="date-selector-group">
+                        <label for="export-end-date">结束日期</label>
+                        <input type="date" id="export-end-date" required>
+                    </div>
+                </div>
+                <div class="date-quick-buttons">
+                    <button class="btn btn-quick-date" onclick="setDateRange('today')">今天</button>
+                    <button class="btn btn-quick-date" onclick="setDateRange('this_month')">本月</button>
+                    <button class="btn btn-quick-date" onclick="setDateRange('last_month')">上月</button>
+                    <button class="btn btn-quick-date" onclick="setDateRange('all')">全部</button>
                 </div>
             </div>
             <div class="modal-footer">
