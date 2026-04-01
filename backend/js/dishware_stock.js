@@ -1,4 +1,4 @@
-﻿
+
 // API 配置
 const API_BASE_URL = 'dishware_api.php';
 
@@ -190,31 +190,29 @@ async function loadRestaurants() {
         if (result.success) {
             restaurants = result.data || [];
             console.log('餐厅店面加载成功:', restaurants);
-            // 更新表格头部
-            updateTableHeaders();
-            // 更新编辑模态框的输入框
-            updateEditModalRestaurantInputs();
         } else {
             console.error('加载餐厅店面失败:', result.message);
             // 如果加载失败，使用默认的餐厅店面
             restaurants = [
-                { id: 1, name: '文化楼', code: 'wenhua', display_order: 1 },
-                { id: 2, name: '中央', code: 'central', display_order: 2 },
-                { id: 3, name: 'J1', code: 'j1', display_order: 3 },
-                { id: 4, name: 'J2', code: 'j2', display_order: 4 },
-                { id: 5, name: 'J3', code: 'j3', display_order: 5 }
+                { id: 17, name: '文化楼', display_order: 1 },
+                { id: 2, name: '中央', display_order: 2 },
+                { id: 3, name: 'J1', display_order: 3 },
+                { id: 4, name: 'J2', display_order: 4 },
+                { id: 5, name: 'J3', display_order: 5 }
             ];
         }
     } catch (error) {
         console.error('加载餐厅店面时发生错误:', error);
-        // 使用默认的餐厅店面
-        restaurants = [
-            { id: 1, name: '文化楼', code: 'wenhua', display_order: 1 },
-            { id: 2, name: '中央', code: 'central', display_order: 2 },
-            { id: 3, name: 'J1', code: 'j1', display_order: 3 },
-            { id: 4, name: 'J2', code: 'j2', display_order: 4 },
-            { id: 5, name: 'J3', code: 'j3', display_order: 5 }
-        ];
+        // API 调用失败时才使用默认值（不覆盖已成功获取的 restaurants）
+        if (!restaurants || restaurants.length === 0) {
+            restaurants = [
+                { id: 17, name: '文化楼', display_order: 1 },
+                { id: 2, name: '中央', display_order: 2 },
+                { id: 3, name: 'J1', display_order: 3 },
+                { id: 4, name: 'J2', display_order: 4 },
+                { id: 5, name: 'J3', display_order: 5 }
+            ];
+        }
     }
 }
 

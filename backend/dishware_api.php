@@ -851,32 +851,102 @@ function getBreakRecords() {
     }
 }
 
-// 每月1号自动清空破损记录：当天首次访问破损记录页时执行重置，之后当月不再重置
+// 每月1号自动归档破损记录：把上月记录移入归档表后清空主表，当月仅执行一次
 function monthlyResetBreakCheck() {
     global $pdo;
     $file = __DIR__ . '/last_break_reset_ym.txt';
     $now = new DateTime('now', new DateTimeZone('Asia/Kuala_Lumpur'));
-    $ym = $now->format('Y-m');
+    $ym  = $now->format('Y-m');
     $day = (int) $now->format('d');
+
+    // 非1号直接返回
     if ($day !== 1) {
-        sendResponse(true, "非每月1号，无需重置", ['reset_done' => false]);
+        sendResponse(true, "非每月1号，无需归档", ['reset_done' => false]);
         return;
     }
+
+    // 本月已归档过则跳过
     $last = @file_get_contents($file);
     $last = $last ? trim($last) : '';
     if ($last === $ym) {
-        sendResponse(true, "本月已重置", ['reset_done' => false]);
+        sendResponse(true, "本月已归档", ['reset_done' => false]);
         return;
     }
+
+    // 归档目标月份 = 上个月（例如在4月1号归档3月数据）
+    $prevDate  = new DateTime('first day of last month', new DateTimeZone('Asia/Kuala_Lumpur'));
+    $archiveYm = $prevDate->format('Y-m');
+
     try {
+        $pdo->beginTransaction();
+
+        // ── 创建破损记录归档表（如不存在）──────────────────────────────
+        $pdo->exec("CREATE TABLE IF NOT EXISTS dishware_break_records_archive (
+            archive_id      INT          NOT NULL AUTO_INCREMENT,
+            archive_ym      VARCHAR(7)   NOT NULL COMMENT '归档年月, 如 2026-03',
+            id              INT          NOT NULL COMMENT '原记录 ID',
+            dishware_id     INT,
+            shop_type       VARCHAR(100),
+            break_quantity  INT,
+            chargeable_quantity INT,
+            unit_price      DECIMAL(10,2),
+            total_price     DECIMAL(10,2),
+            break_date      DATE,
+            recorded_by     VARCHAR(255),
+            created_at      TIMESTAMP    NULL DEFAULT NULL,
+            updated_at      TIMESTAMP    NULL DEFAULT NULL,
+            PRIMARY KEY (archive_id),
+            INDEX idx_archive_ym  (archive_ym),
+            INDEX idx_dishware_id (dishware_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='破损记录月度归档'");
+
+        // ── 把主表当前所有记录复制进归档表 ────────────────────────────
+        $pdo->prepare("
+            INSERT INTO dishware_break_records_archive
+                (archive_ym, id, dishware_id, shop_type,
+                 break_quantity, chargeable_quantity,
+                 unit_price, total_price,
+                 break_date, recorded_by, created_at, updated_at)
+            SELECT ?, id, dishware_id, shop_type,
+                   break_quantity, chargeable_quantity,
+                   unit_price, total_price,
+                   break_date, recorded_by, created_at, updated_at
+            FROM dishware_break_records
+        ")->execute([$archiveYm]);
+
+        $archivedCount = $pdo->query("SELECT ROW_COUNT()")->fetchColumn();
+
+        // ── 清空主表 ────────────────────────────────────────────────────
         $pdo->exec("DELETE FROM dishware_break_records");
-        $pdo->exec("DELETE FROM dishware_set_break_records");
-        if (@file_put_contents($file, $ym) === false) {
-            error_log("monthlyResetBreakCheck: 无法写入 " . $file);
+
+        // ── 同样处理 set 破损记录表（若有数据） ────────────────────────
+        $setCount = (int) $pdo->query("SELECT COUNT(*) FROM dishware_set_break_records")->fetchColumn();
+        if ($setCount > 0) {
+            $pdo->exec("CREATE TABLE IF NOT EXISTS dishware_set_break_records_archive (
+                archive_id  INT        NOT NULL AUTO_INCREMENT,
+                archive_ym  VARCHAR(7) NOT NULL,
+                PRIMARY KEY (archive_id),
+                INDEX idx_archive_ym (archive_ym)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+            $pdo->exec("DELETE FROM dishware_set_break_records");
         }
-        sendResponse(true, "每月1号已清空破损记录", ['reset_done' => true]);
-    } catch (PDOException $e) {
-        sendResponse(false, "清空破损记录失败：" . $e->getMessage());
+
+        // ── 写入标记文件，确保本月不再重复归档 ─────────────────────────
+        if (@file_put_contents($file, $ym) === false) {
+            error_log("monthlyResetBreakCheck: 无法写入标记文件 " . $file);
+        }
+
+        $pdo->commit();
+
+        sendResponse(true, "已将 {$archiveYm} 破损记录归档（共 {$archivedCount} 条），主表已清空", [
+            'reset_done'    => true,
+            'archive_ym'    => $archiveYm,
+            'archived_count'=> (int) $archivedCount,
+        ]);
+
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        sendResponse(false, "归档破损记录失败：" . $e->getMessage());
     }
 }
 
