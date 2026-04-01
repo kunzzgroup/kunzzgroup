@@ -15,7 +15,6 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
-// 处理预检请求
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     ob_end_clean();
     http_response_code(200);
@@ -25,8 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// 数据库配置
-$host = 'localhost';
+$host   = 'localhost';
 $dbname = 'u690174784_kunzz';
 $dbuser = 'u690174784_kunzz';
 $dbpass = 'Kunzz1688';
@@ -34,8 +32,7 @@ $dbpass = 'Kunzz1688';
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-}
-catch (PDOException $e) {
+} catch (PDOException $e) {
     ob_end_clean();
     http_response_code(500);
     echo json_encode(["success" => false, "message" => "数据库连接失败：" . $e->getMessage()]);
@@ -45,42 +42,56 @@ catch (PDOException $e) {
 function sendResponse($success, $message = "", $data = null)
 {
     ob_end_clean();
-    echo json_encode([
-        "success" => $success,
-        "message" => $message,
-        "data"    => $data
-    ]);
+    echo json_encode(["success" => $success, "message" => $message, "data" => $data]);
     exit;
 }
 
-// 智能格式化数量函数
+// 智能格式化数量
 function formatQuantity($number)
 {
     $num = floatval($number);
-
-    if (floor($num) == $num) {
-        return number_format($num, 0);
-    }
-
-    $decimalPart = $num - floor($num);
-
-    if (round($decimalPart, 1) == round($decimalPart, 3)) {
-        return number_format($num, 1);
-    }
-    elseif (round($decimalPart, 2) == round($decimalPart, 3)) {
-        return number_format($num, 2);
-    }
-    else {
-        return number_format($num, 3);
-    }
+    if (floor($num) == $num) return number_format($num, 0);
+    $d = $num - floor($num);
+    if (round($d, 1) == round($d, 3)) return number_format($num, 1);
+    if (round($d, 2) == round($d, 3)) return number_format($num, 2);
+    return number_format($num, 3);
 }
 
-// 获取货品备注数据（支持 system 参数，与 stocklistapi.php 保持一致）
+// 自然排序比较函数（备注编号 ASC）
+function naturalCompareRemark($a, $b)
+{
+    $rA = $a['remark_number'] ?? '';
+    $rB = $b['remark_number'] ?? '';
+    $partsA = preg_split('/(\d+)/', $rA, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+    $partsB = preg_split('/(\d+)/', $rB, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+    $len = max(count($partsA), count($partsB));
+    for ($i = 0; $i < $len; $i++) {
+        $pA = $partsA[$i] ?? '';
+        $pB = $partsB[$i] ?? '';
+        if (ctype_digit($pA) && ctype_digit($pB)) {
+            $diff = (int)$pA - (int)$pB;
+            if ($diff !== 0) return $diff;
+        } else {
+            $diff = strcmp($pA, $pB);
+            if ($diff !== 0) return $diff;
+        }
+    }
+    return 0;
+}
+
+/**
+ * 获取货品备注数据
+ *
+ * 逻辑说明：
+ * 1. 查询一：抓取 product_remark_checked=1 且有 remark_number 的进出货记录，按备注编号分组计算净库存
+ * 2. 查询二：获取每个货品的真实净库存（与 stocklistall 相同逻辑，所有进出货汇总）
+ * 3. 若 remark 合计 > 真实净库存，用 LIFO 从最大备注号往前扣减差额
+ *    （只扣超出部分，不影响数据已对齐的货品如 Salmon 等日常消耗品）
+ */
 function getMultiPriceAnalysis($system = 'central')
 {
     global $pdo;
 
-    // 根据 system 切换数据库表
     $tableMap = [
         'central' => 'stockinout_data',
         'j1'      => 'j1stockedit_data',
@@ -91,49 +102,42 @@ function getMultiPriceAnalysis($system = 'central')
 
     try {
         // ── 查询一：抓取有备注编号的进出货记录 ──
-        $sql = "SELECT 
+        $sql = "SELECT
                     product_name,
                     specification,
                     price,
                     code_number,
                     remark_number,
                     in_quantity,
-                    out_quantity,
-                    date,
-                    time,
-                    receiver
-                FROM $tableName 
-                WHERE product_remark_checked = 1 
-                AND product_name IS NOT NULL 
+                    out_quantity
+                FROM $tableName
+                WHERE product_remark_checked = 1
+                AND product_name IS NOT NULL
                 AND product_name != ''
-                AND remark_number IS NOT NULL 
+                AND remark_number IS NOT NULL
                 AND remark_number != ''
                 AND deleted_at IS NULL
-                ORDER BY product_name ASC, remark_number ASC, date DESC";
+                ORDER BY product_name ASC, remark_number ASC";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
         $remarkData = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // 按产品名称分组
+        // 按货品名称 + 备注编号分组，累计进出量
         $productGroups = [];
-
         foreach ($remarkData as $row) {
             $productName  = $row['product_name'];
             $remarkNumber = $row['remark_number'];
-            $groupKey     = $productName;
 
-            if (!isset($productGroups[$groupKey])) {
-                $productGroups[$groupKey] = [
+            if (!isset($productGroups[$productName])) {
+                $productGroups[$productName] = [
                     'product_name' => $productName,
                     'variants'     => []
                 ];
             }
 
-            $remarkKey = $remarkNumber;
-
-            if (!isset($productGroups[$groupKey]['variants'][$remarkKey])) {
-                $productGroups[$groupKey]['variants'][$remarkKey] = [
+            if (!isset($productGroups[$productName]['variants'][$remarkNumber])) {
+                $productGroups[$productName]['variants'][$remarkNumber] = [
                     'code_number'   => $row['code_number'] ?? '',
                     'specification' => $row['specification'] ?? '',
                     'remark_number' => $remarkNumber,
@@ -145,46 +149,41 @@ function getMultiPriceAnalysis($system = 'central')
 
             $inQty  = floatval($row['in_quantity']);
             $outQty = floatval($row['out_quantity']);
-
-            if ($inQty > 0) {
-                $productGroups[$groupKey]['variants'][$remarkKey]['in_quantity'] += $inQty;
-            }
-            if ($outQty > 0) {
-                $productGroups[$groupKey]['variants'][$remarkKey]['out_quantity'] += $outQty;
-            }
+            if ($inQty  > 0) $productGroups[$productName]['variants'][$remarkNumber]['in_quantity']  += $inQty;
+            if ($outQty > 0) $productGroups[$productName]['variants'][$remarkNumber]['out_quantity'] += $outQty;
         }
 
-        // ── 查询二：抓取同一货品中 没有备注编号 的出货量（untracked out）──
-        // 这些出货记录在出货时没有填写备注编号，导致 remark 侧不知道有货已出
-        $untrackedOutMap = [];
-        if (!empty($productGroups)) {
-            $productNames   = array_keys($productGroups);
-            $placeholders   = implode(',', array_fill(0, count($productNames), '?'));
-            $untrackedSql   = "SELECT
-                                   product_name,
-                                   SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) AS untracked_out
-                               FROM $tableName
-                               WHERE product_name IN ($placeholders)
-                               AND out_quantity > 0
-                               AND deleted_at IS NULL
-                               AND (product_remark_checked != 1
-                                    OR remark_number IS NULL
-                                    OR remark_number = '')
-                               GROUP BY product_name";
-            $stmtU = $pdo->prepare($untrackedSql);
-            $stmtU->execute($productNames);
-            foreach ($stmtU->fetchAll(PDO::FETCH_ASSOC) as $uRow) {
-                $untrackedOutMap[$uRow['product_name']] = floatval($uRow['untracked_out']);
-            }
+        if (empty($productGroups)) {
+            return ['products' => []];
         }
 
-        // 转换为最终格式
+        // ── 查询二：获取每个货品的真实净库存（与 stocklistall 完全相同的逻辑）──
+        // 只比对 remark 合计 vs 真实净库存的差值，仅扣减超出部分
+        $productNames = array_keys($productGroups);
+        $placeholders = implode(',', array_fill(0, count($productNames), '?'));
+        $realStockSql = "SELECT
+                             product_name,
+                             (SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) -
+                              SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END)) AS real_stock
+                         FROM $tableName
+                         WHERE product_name IN ($placeholders)
+                         AND deleted_at IS NULL
+                         GROUP BY product_name";
+        $stmtR = $pdo->prepare($realStockSql);
+        $stmtR->execute($productNames);
+        $realStockMap = [];
+        foreach ($stmtR->fetchAll(PDO::FETCH_ASSOC) as $rRow) {
+            $realStockMap[$rRow['product_name']] = floatval($rRow['real_stock']);
+        }
+
+        // ── 转换为最终格式 ──
         $remarkProducts = [];
         foreach ($productGroups as $group) {
+
+            // 构建有库存的变种列表
             $variants = [];
             foreach ($group['variants'] as $variant) {
                 $currentStock = $variant['in_quantity'] - $variant['out_quantity'];
-
                 if (round($currentStock, 3) > 0) {
                     $variants[] = [
                         'code_number'        => $variant['code_number'],
@@ -200,51 +199,38 @@ function getMultiPriceAnalysis($system = 'central')
                 }
             }
 
-            // ── 自然排序：备注编号 ASC（SH-304 → SH-329）──
-            usort($variants, function ($a, $b) {
-                $rA = $a['remark_number'] ?? '';
-                $rB = $b['remark_number'] ?? '';
-                $partsA = preg_split('/(\d+)/', $rA, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
-                $partsB = preg_split('/(\d+)/', $rB, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
-                $len = max(count($partsA), count($partsB));
-                for ($i = 0; $i < $len; $i++) {
-                    $pA = $partsA[$i] ?? '';
-                    $pB = $partsB[$i] ?? '';
-                    if (ctype_digit($pA) && ctype_digit($pB)) {
-                        $diff = (int)$pA - (int)$pB;
-                        if ($diff !== 0) return $diff;
-                    } else {
-                        $diff = strcmp($pA, $pB);
-                        if ($diff !== 0) return $diff;
-                    }
-                }
-                return 0;
-            });
+            if (empty($variants)) continue;
 
-            // ── LIFO 扣减：没有备注编号的出货量，从最大备注号往前扣减 ──
-            // 例如：26个备注，出货1包无备注 → 移除 SH-329（最后进入的那个）
-            $untrackedOut = $untrackedOutMap[$group['product_name']] ?? 0;
-            if ($untrackedOut > 0 && !empty($variants)) {
-                // 从末尾（最大备注号）开始扣减
-                $i = count($variants) - 1;
-                while ($untrackedOut > 0 && $i >= 0) {
-                    $stock = $variants[$i]['current_stock'];
-                    if ($untrackedOut >= $stock) {
-                        // 整个 variant 被消耗掉，移除
-                        array_splice($variants, $i, 1);
-                        $untrackedOut -= $stock;
+            // 自然排序 ASC（SH-304 → SH-329）
+            usort($variants, 'naturalCompareRemark');
+
+            // ── LIFO 扣减：仅扣 remark 合计超出真实库存的部分 ──
+            // 若 Salmon 的 remark 总量 = 真实库存，excess = 0，不做任何扣减
+            // 若 Salmon Head 的 remark 总量(26) > 真实库存(25)，excess = 1，移除最后 1 个备注
+            $remarkTotal = array_sum(array_column($variants, 'current_stock'));
+            $realStock   = $realStockMap[$group['product_name']] ?? $remarkTotal;
+            $excess      = $remarkTotal - $realStock;
+
+            if ($excess > 0.001) {
+                $idx = count($variants) - 1;
+                while ($excess > 0.001 && $idx >= 0) {
+                    $stock = $variants[$idx]['current_stock'];
+                    if ($excess >= $stock - 0.001) {
+                        // 整个 variant 已消耗，移除
+                        array_splice($variants, $idx, 1);
+                        $excess -= $stock;
                     } else {
                         // 部分消耗
-                        $variants[$i]['current_stock']      -= $untrackedOut;
-                        $variants[$i]['formatted_quantity']  = formatQuantity($variants[$i]['current_stock']);
-                        $untrackedOut = 0;
+                        $variants[$idx]['current_stock']      -= $excess;
+                        $variants[$idx]['formatted_quantity']  = formatQuantity($variants[$idx]['current_stock']);
+                        $excess = 0;
                     }
-                    $i--;
+                    $idx--;
                 }
             }
 
             if (!empty($variants)) {
-                $totalQuantity  = array_sum(array_column($variants, 'current_stock'));
+                $totalQuantity = array_sum(array_column($variants, 'current_stock'));
                 $remarkProducts[] = [
                     'product_name'   => $group['product_name'],
                     'variants'       => array_values($variants),
@@ -255,8 +241,7 @@ function getMultiPriceAnalysis($system = 'central')
 
         return ['products' => $remarkProducts];
 
-    }
-    catch (PDOException $e) {
+    } catch (PDOException $e) {
         throw new Exception("查询货品备注数据失败：" . $e->getMessage());
     }
 }
@@ -275,7 +260,7 @@ function getProductDetails($productName, $system = 'central')
     $tableName = $tableMap[$system] ?? 'stockinout_data';
 
     try {
-        $sql = "SELECT 
+        $sql = "SELECT
                     product_name,
                     specification,
                     price,
@@ -284,7 +269,7 @@ function getProductDetails($productName, $system = 'central')
                     out_quantity,
                     SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
                     SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out
-                FROM $tableName 
+                FROM $tableName
                 WHERE product_name = :product_name
                 AND deleted_at IS NULL
                 GROUP BY product_name, specification, price, code_number
@@ -296,30 +281,27 @@ function getProductDetails($productName, $system = 'central')
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    }
-    catch (PDOException $e) {
+    } catch (PDOException $e) {
         throw new Exception("查询产品详细信息失败：" . $e->getMessage());
     }
 }
 
-// 导出CSV数据
+// 导出CSV
 function exportMultiPriceData($system = 'central')
 {
     try {
         $result = getMultiPriceAnalysis($system);
 
         header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="multi_price_analysis_' . date('Y-m-d') . '.csv"');
-
+        header('Content-Disposition: attachment; filename="remark_analysis_' . date('Y-m-d') . '.csv"');
         ob_end_clean();
 
         $output = fopen('php://output', 'w');
         fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
-
         fputcsv($output, ['Product Name', 'Remark Number', 'Code Number', 'Stock Quantity', 'Unit Price (RM)']);
 
         foreach ($result['products'] as $product) {
-            foreach ($product['variants'] as $index => $variant) {
+            foreach ($product['variants'] as $variant) {
                 fputcsv($output, [
                     $product['product_name'],
                     $variant['remark_number'],
@@ -333,14 +315,13 @@ function exportMultiPriceData($system = 'central')
         fclose($output);
         exit;
 
-    }
-    catch (Exception $e) {
+    } catch (Exception $e) {
         ob_end_clean();
         sendResponse(false, "导出失败：" . $e->getMessage());
     }
 }
 
-// 主要路由处理
+// ── 路由 ──
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
@@ -351,9 +332,8 @@ if ($method === 'GET') {
         case 'analysis':
             try {
                 $result = getMultiPriceAnalysis($system);
-                sendResponse(true, ucfirst($system) . "货品备注数据获取成功", $result);
-            }
-            catch (Exception $e) {
+                sendResponse(true, ucfirst($system) . " 货品备注数据获取成功", $result);
+            } catch (Exception $e) {
                 sendResponse(false, $e->getMessage());
             }
             break;
@@ -363,12 +343,10 @@ if ($method === 'GET') {
             if (empty($productName)) {
                 sendResponse(false, "产品名称不能为空");
             }
-
             try {
                 $result = getProductDetails($productName, $system);
                 sendResponse(true, "产品详细信息获取成功", $result);
-            }
-            catch (Exception $e) {
+            } catch (Exception $e) {
                 sendResponse(false, $e->getMessage());
             }
             break;
@@ -380,8 +358,7 @@ if ($method === 'GET') {
         default:
             sendResponse(false, "无效的操作");
     }
-}
-else {
+} else {
     sendResponse(false, "不支持的请求方法");
 }
 ?>
