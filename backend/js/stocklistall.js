@@ -1206,11 +1206,12 @@ async function performExport(system, startDate, endDate) {
     try {
         let dataToExport;
 
-        // 判断是否应使用页面数据：选"全部"或结束日期=今天且无开始日期
+        // 判断是否应使用页面缓存数据：
+        // 只有当没有指定任何日期范围时（即"全部"且结束日期到今天），才使用页面数据
+        // 其他所有情况都从API获取，确保日期范围严格准确
         const today = formatDateForInput(new Date());
         const usePageData = (!startDate && !endDate) || 
-                            (!startDate && endDate === today) || 
-                            (startDate === today && endDate === today);
+                            (!startDate && endDate === today);
 
         if (system === 'remark') {
             // 价格分析：使用已加载的数据
@@ -1226,7 +1227,7 @@ async function performExport(system, startDate, endDate) {
                 }
             }
         } else if (usePageData) {
-            // 今天/全部：使用页面当前显示的数据，确保与页面一致
+            // 全部（无日期限制）：使用页面当前显示的数据，确保与页面一致
             const sourceData = filteredData[system] && filteredData[system].length > 0
                 ? filteredData[system]
                 : stockData[system];
@@ -1239,10 +1240,14 @@ async function performExport(system, startDate, endDate) {
                 return;
             }
         } else {
-            // 历史日期：从API获取截至end_date的库存余额
-            // 注意：start_date不参与SQL查询，仅用于PDF标注
-            showAlert('正在获取历史库存数据...', 'info');
-            const result = await apiCall(system, `?action=summary&end_date=${endDate}`);
+            // 指定日期范围：从API获取数据，start_date和end_date都参与SQL过滤
+            // 例如：3月1日~3月31日 → 绝对不会包含4月1日的数据
+            showAlert('正在获取指定日期范围库存数据...', 'info');
+            let apiUrl = `?action=summary&end_date=${endDate}`;
+            if (startDate) {
+                apiUrl += `&start_date=${startDate}`;
+            }
+            const result = await apiCall(system, apiUrl);
 
             if (result.success) {
                 dataToExport = result.data.summary || [];
