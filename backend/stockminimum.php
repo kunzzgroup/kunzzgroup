@@ -68,16 +68,10 @@ $display_name = $system_names[$system];
                 <h1 id="page-title">最低库存设置 — <?php echo $display_name; ?></h1>
             </div>
             <div class="header-right-group">
-                <button class="btn btn-primary btn-expand" onclick="exportData()" id="exportBtn" title="导出数据">
-                    <i class="fas fa-download"></i>
-                    <span class="btn-expand-text">导出数据</span>
-                </button>
-                <button class="btn btn-warning btn-expand" onclick="goBack()" id="settingsBtn" title="设置最低库存">
-                    <i class="fas fa-cog"></i>
-                    <span class="btn-expand-text">设置最低库存</span>
+                <button class="btn btn-secondary" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i> 返回库存管理
                 </button>
             </div>
-
         </div>
 
         <!-- Controls Bar: Tabs + Search + Batch Save -->
