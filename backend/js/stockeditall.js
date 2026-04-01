@@ -3235,12 +3235,18 @@ function getFormRemarkNumber() {
 // ====== 备注编号自动生成与校验工具 ======
 // 计算货品名称前缀（最多取前两个单词的首字母）
 function computePrefix(productName) {
-    const words = (productName || '').trim().toUpperCase().split(/\s+/).filter(Boolean);
+    const cleanName = (productName || '').trim().toUpperCase();
+    const words = cleanName.split(/\s+/).filter(Boolean);
     if (words.length === 0) return '';
+    
     if (words.length === 1) {
-        return words[0].substring(0, 2);
+        // 过滤掉符号，只留字母和数字（支持多国语言），提取前两个字符
+        const lettersOnly = words[0].replace(/[^\p{L}\p{N}]/gu, '');
+        return lettersOnly.substring(0, 2);
     } else {
-        return (words[0][0] || '') + (words[1][0] || '');
+        const firstLetter = words[0].replace(/[^\p{L}\p{N}]/gu, '')[0] || '';
+        const secondLetter = words[1].replace(/[^\p{L}\p{N}]/gu, '')[0] || '';
+        return firstLetter + secondLetter;
     }
 }
 

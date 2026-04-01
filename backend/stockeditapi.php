@@ -1206,9 +1206,12 @@ function computePrefix(string $productName): string {
     if (empty($words)) return '';
     
     if (count($words) == 1) {
-        return mb_substr($words[0], 0, 2);
+        $lettersOnly = preg_replace('/[^\p{L}\p{N}]/u', '', $words[0]);
+        return mb_substr($lettersOnly, 0, 2);
     } else {
-        return mb_substr($words[0], 0, 1) . mb_substr($words[1], 0, 1);
+        $firstLetter = mb_substr(preg_replace('/[^\p{L}\p{N}]/u', '', $words[0]), 0, 1);
+        $secondLetter = mb_substr(preg_replace('/[^\p{L}\p{N}]/u', '', $words[1]), 0, 1);
+        return $firstLetter . $secondLetter;
     }
 }
 
