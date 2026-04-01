@@ -1462,3 +1462,16 @@ body {
     opacity: 1;
     padding-right: clamp(8px, 0.73vw, 14px);
 }
+
+/* ─── 排除 smartSearch 展开时对 btn-expand 的干扰 ─────────────────────
+   smartSearch.css 展开搜索框时会压缩所有 .btn（font-size:0 + 改 padding）
+   .btn-expand 已有自己的图标专用布局，需完全免疫这条规则              */
+.header-right-section:has(.smartSearchWrapper.expanded) .btn.btn-expand {
+    font-size: inherit;                          /* 不继承 font-size:0 */
+    padding: clamp(4px, 0.42vw, 8px) 0;         /* 保持垂直内边距，水平由子元素控制 */
+}
+
+.header-right-section:has(.smartSearchWrapper.expanded) .btn.btn-expand i {
+    font-size: clamp(10px, 0.94vw, 15px);        /* 恢复图标正常大小 */
+    margin: 0;
+}
