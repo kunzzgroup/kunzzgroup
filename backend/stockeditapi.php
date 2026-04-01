@@ -1144,7 +1144,8 @@ function handleGet()
             break;
 
         case 'product_batches_for_hifo':
-            // HIFO 拆行专用：按 price + remark_number 分组返回可用批次（价格降序）
+            // HIFO 拆行专用：按 PRICE 分组返回可用批次（价格降序）
+            // remark_number 仅作为附加信息，用于自动填充拆分行的备注编号
             $productName = $_GET['product_name'] ?? null;
             $codeNumber  = $_GET['code_number']  ?? null;
 
@@ -1153,11 +1154,10 @@ function handleGet()
             }
 
             try {
+                // 第一步：按 price+remark_number 细粒度查询
                 $sql = "SELECT
                             price,
                             remark_number,
-                            COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) AS total_in,
-                            COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0) AS total_out,
                             (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) -
                              COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) AS available_stock
                         FROM stockinout_data
@@ -1179,14 +1179,43 @@ function handleGet()
                 $stmt->execute($params);
                 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-                $result = [];
+                // 第二步：按 PRICE 聚合（HIFO 按价格拆分，不按 remark_number 拆分）
+                $priceMap = [];
                 foreach ($rows as $row) {
+                    $price = $row['price'];
+                    $stock = floatval($row['available_stock']);
+                    $remark = $row['remark_number'] ?? '';
+
+                    if (!isset($priceMap[$price])) {
+                        $priceMap[$price] = [
+                            'price'           => $price,
+                            'available_stock'  => 0,
+                            'remark_number'    => '',
+                            '_best_remark_stock' => 0
+                        ];
+                    }
+                    // 累加该价格的总库存
+                    $priceMap[$price]['available_stock'] += $stock;
+
+                    // 选取该价格下库存最大的非空 remark_number 作为代表
+                    if (!empty($remark) && $stock > $priceMap[$price]['_best_remark_stock']) {
+                        $priceMap[$price]['remark_number'] = $remark;
+                        $priceMap[$price]['_best_remark_stock'] = $stock;
+                    }
+                }
+
+                // 按价格降序排列
+                usort($priceMap, function($a, $b) {
+                    return floatval($b['price']) <=> floatval($a['price']);
+                });
+
+                // 移除内部字段，构建返回结果
+                $result = [];
+                foreach ($priceMap as $item) {
                     $result[] = [
-                        'price'           => $row['price'],
-                        'available_stock'  => floatval($row['available_stock']),
-                        'remark_number'    => $row['remark_number'] ?? '',
-                        'total_in'         => floatval($row['total_in']),
-                        'total_out'        => floatval($row['total_out'])
+                        'price'           => $item['price'],
+                        'available_stock'  => round($item['available_stock'], 3),
+                        'remark_number'    => $item['remark_number']
                     ];
                 }
 
