@@ -1,4 +1,4 @@
-﻿
+
 // HTML 反转义函数
 function decodeHtml(html) {
     if (!html) return '';
@@ -3233,6 +3233,23 @@ function getFormRemarkNumber() {
     return (prefix || suffix) ? `${prefix}-${suffix}` : '';
 }
 
+// ====== 备注编号自动生成与校验工具 ======
+// 计算货品名称前缀
+function computePrefix(productName) {
+    return (productName || '').trim().toUpperCase()
+        .split(/\s+/).map(w => w[0] || '').join('');
+}
+
+// 查询该货品在库的备注编码列表（用于出货校验）
+async function fetchProductRemarkCodes(productName) {
+    if (!productName) return [];
+    try {
+        const res = await fetch(`${API_BASE_URL}?action=product_remark_codes&product_name=${encodeURIComponent(productName)}`);
+        const json = await res.json();
+        return json.success ? (json.data || []) : [];
+    } catch { return []; }
+}
+
 // 控制新增表单中备注编号的启用状态
 function toggleRemarkNumber() {
     const checkbox = document.getElementById('add-product-remark');
@@ -3267,6 +3284,23 @@ function toggleNewRowRemarkNumber(rowId) {
             prefixInput.disabled = false;
             suffixInput.disabled = false;
 
+            // 自动计算前缀并填入
+            const productInput = document.getElementById(`${rowId}-product_name-input`);
+            const productName  = productInput ? productInput.value.trim() : '';
+            if (productName) {
+                const prefix = computePrefix(productName);
+                prefixInput.value    = prefix;
+                suffixInput.value    = '...';         // 占位符
+                suffixInput.disabled = true;          // 后缀只读
+                suffixInput.style.color = '#9ca3af'; // 灰色提示
+                // 标记行为自动生码
+                const row = checkbox.closest('tr');
+                if (row) {
+                    row.dataset.autoCode = 'true';
+                    row.dataset.prefix   = prefix;
+                }
+            }
+
             // 绑定输入事件
             prefixInput.oninput = suffixInput.oninput = () => {
                 prefixInput.value = (prefixInput.value || '').toUpperCase();
@@ -3280,7 +3314,14 @@ function toggleNewRowRemarkNumber(rowId) {
             suffixInput.disabled = true;
             prefixInput.value = '';
             suffixInput.value = '';
+            suffixInput.style.color = ''; // 恢复颜色
             updateNewRowRemarkNumber(rowId);
+            
+            const row = checkbox.closest('tr');
+            if (row) { 
+                delete row.dataset.autoCode; 
+                delete row.dataset.prefix; 
+            }
         }
     }
 }
@@ -3541,14 +3582,31 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
         throw new Error(errorMsg);
     }
 
-    // 当勾选货品备注时，必须填写备注编号
-    if (formData.product_remark_checked && !formData.remark_number) {
-        const errorMsg = '货品备注已勾选时，请填写备注编号';
-        if (!skipTableRefresh) {
-            showAlert(errorMsg, 'error');
-        }
-        throw new Error(errorMsg);
+    // ====== 进货生成 / 出货校验 逻辑 ======
+    const isIncoming = formData.in_quantity > 0;
+    if (isIncoming && row.dataset.autoCode === 'true') {
+        formData.needGenerateCode = true;
+        formData.prefix = row.dataset.prefix || computePrefix(formData.product_name);
+        formData.remark_number = ''; // 交给后端生成
     }
+
+    const isOutgoing = formData.out_quantity > 0;
+    if (isOutgoing) {
+        const inStockCodes = await fetchProductRemarkCodes(formData.product_name);
+        if (inStockCodes.length > 0) {
+            if (!formData.remark_number) {
+                const errorMsg = `货品 [${formData.product_name}] 有备注编码在库，出货时请填写备注编号`;
+                if (!skipTableRefresh) showAlert(errorMsg, 'error');
+                throw new Error(errorMsg);
+            }
+            if (!inStockCodes.includes(formData.remark_number)) {
+                const errorMsg = `备注编号 [${formData.remark_number}] 不在库中，有效编号：${inStockCodes.slice(0, 5).join(', ')}`;
+                if (!skipTableRefresh) showAlert(errorMsg, 'error');
+                throw new Error(errorMsg);
+            }
+        }
+    }
+    // ====== 进货生成 / 出货校验 逻辑 结束 ======
 
     // 添加target处理
     if (currentStockType !== 'central') {
@@ -7874,6 +7932,28 @@ async function batchSaveNewRows() {
             if (data.in_quantity <= 0 && data.out_quantity <= 0) {
                 throw new Error('每行记录必须至少填入一项进货或出货数量');
             }
+
+            // ====== 进货生码/出货校验 逻辑 ======
+            const isIncoming = data.in_quantity > 0;
+            if (isIncoming && row.dataset.autoCode === 'true') {
+                data.needGenerateCode = true;
+                data.prefix = row.dataset.prefix || computePrefix(data.product_name);
+                data.remark_number = ''; // 交给后端
+            }
+
+            const isOutgoing = data.out_quantity > 0;
+            if (isOutgoing) {
+                const inStockCodes = await fetchProductRemarkCodes(data.product_name);
+                if (inStockCodes.length > 0) {
+                    if (!data.remark_number) {
+                        throw new Error(`货品 [${data.product_name}] 有备注编码在库，出货时请填写备注编号`);
+                    }
+                    if (!inStockCodes.includes(data.remark_number)) {
+                        throw new Error(`备注编号 [${data.remark_number}] 不在库中，有效编号：${inStockCodes.slice(0, 5).join(', ')}`);
+                    }
+                }
+            }
+            // ====== 进货生码/出货校验 逻辑 结束 ======
 
             rowsData.push(data);
         }

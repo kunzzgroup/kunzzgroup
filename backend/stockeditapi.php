@@ -1010,6 +1010,31 @@ function handleGet()
             sendResponse(true, "备注编号列表获取成功", $remarkNumbers);
             break;
 
+        case 'product_remark_codes':
+            // 获取指定产品在库的备注编号列表
+            $productName = $_GET['product_name'] ?? '';
+            if (!$productName) {
+                sendResponse(false, '缺少产品名称参数');
+            }
+            
+            $stmt = $pdo->prepare("
+                SELECT remark_number
+                FROM stockinout_data
+                WHERE product_name = ?
+                  AND product_remark_checked = 1
+                  AND remark_number IS NOT NULL
+                  AND remark_number != ''
+                  AND deleted_at IS NULL
+                GROUP BY remark_number
+                HAVING (SUM(in_quantity) - SUM(out_quantity)) > 0
+                ORDER BY remark_number ASC
+            ");
+            $stmt->execute([$productName]);
+            $codes = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            
+            sendResponse(true, '在库备注编号列表获取成功', $codes);
+            break;
+
         case 'deleted':
             // 获取回收站数据 (已删除记录)
             try {
@@ -1121,6 +1146,62 @@ function handleGet()
         default:
             sendResponse(false, "无效的操作");
     }
+}
+
+/**
+ * 为单个前缀分配下一个可用备注编号
+ * @param PDO    $pdo
+ * @param string $prefix   如 'SH'
+ * @param array  $alreadyAssigned 本次事务内已占用的数字（避免同批次重复）
+ * @return string  如 'SH-015'
+ */
+function generateRemarkCode(PDO $pdo, string $prefix, array &$alreadyAssigned): string {
+    // 一次查询：历史编号 MAX + 在库冲突集合
+    $stmt = $pdo->prepare("
+        SELECT remark_number,
+               SUM(in_quantity)  AS total_in,
+               SUM(out_quantity) AS total_out
+        FROM stockinout_data
+        WHERE remark_number LIKE ? AND deleted_at IS NULL
+        GROUP BY remark_number
+    ");
+    $stmt->execute([$prefix . '-%']);
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $lastVal    = 0;
+    $inStockSet = [];
+    $pattern    = '/^' . preg_quote($prefix, '/') . '-(\d{1,3})$/';
+
+    foreach ($rows as $h) {
+        if (preg_match($pattern, $h['remark_number'], $m)) {
+            $num     = intval($m[1]);
+            $lastVal = max($lastVal, $num);
+            $net     = floatval($h['total_in']) - floatval($h['total_out']);
+            if ($net > 0) $inStockSet[$num] = true;
+        }
+    }
+
+    // 999 循环递增 + 避让在库 + 避让本批次已占用
+    $current = $lastVal;
+    $tries   = 0;
+    do {
+        $current = ($current % 999) + 1;
+        $tries++;
+        if ($tries > 999) {
+            throw new Exception("前缀[$prefix]无可用编号（所有999个编号均在库中）");
+        }
+    } while (isset($inStockSet[$current]) || in_array($current, $alreadyAssigned[$prefix] ?? []));
+
+    $alreadyAssigned[$prefix][] = $current;
+    return $prefix . '-' . str_pad($current, 3, '0', STR_PAD_LEFT);
+}
+
+/**
+ * 计算货品名称前缀（单词首字母）
+ */
+function computePrefix(string $productName): string {
+    $words = preg_split('/\s+/', strtoupper(trim($productName)));
+    return implode('', array_map(fn($w) => $w[0] ?? '', array_filter($words)));
 }
 
 // 处理 POST 请求 - 添加新记录（修改版支持双重保存）
@@ -1289,6 +1370,45 @@ function handlePost()
             }
         }
         // ========== 库存校验结束 ==========
+
+        // ====== 进货自动生码 / 出货备注校验 ======
+        $isIncoming = floatval($data['in_quantity'] ?? 0) > 0;
+        $isOutgoing = floatval($data['out_quantity'] ?? 0) > 0;
+        
+        if ($isIncoming && !empty($data['needGenerateCode'])) {
+            $prefix = strtoupper(trim($data['prefix'] ?? computePrefix($data['product_name'])));
+            if (!$prefix) throw new Exception('无法计算前缀，请确认货品名称不为空');
+            $alreadyAssigned = [];
+            $data['remark_number'] = generateRemarkCode($pdo, $prefix, $alreadyAssigned);
+            $data['product_remark_checked'] = 1;
+        }
+        
+        if ($isOutgoing) {
+            $rmStmt = $pdo->prepare("
+                SELECT remark_number FROM stockinout_data
+                WHERE product_name = ? AND product_remark_checked = 1
+                  AND remark_number IS NOT NULL AND remark_number != ''
+                  AND deleted_at IS NULL
+                GROUP BY remark_number
+                HAVING (SUM(in_quantity) - SUM(out_quantity)) > 0 LIMIT 1
+            ");
+            $rmStmt->execute([$data['product_name']]);
+            if ($rmStmt->fetchColumn() !== false) {
+                $outRemark = trim($data['remark_number'] ?? '');
+                if (!$outRemark) {
+                    throw new Exception("货品 [{$data['product_name']}] 有备注编码在库，出货时必须填写备注编号");
+                }
+                $validStmt = $pdo->prepare("
+                    SELECT 1 FROM stockinout_data
+                    WHERE product_name = ? AND remark_number = ? AND product_remark_checked = 1 AND deleted_at IS NULL
+                    GROUP BY remark_number HAVING (SUM(in_quantity) - SUM(out_quantity)) > 0
+                ");
+                $validStmt->execute([$data['product_name'], $outRemark]);
+                if (!$validStmt->fetchColumn()) {
+                    throw new Exception("备注编号 [{$outRemark}] 不在库中");
+                }
+            }
+        }
 
         $sql = "INSERT INTO stockinout_data 
                 (date, time, product_name, receiver, in_quantity, out_quantity, 
@@ -1486,6 +1606,50 @@ function handleBatchSave()
             }
         }
         // ========== 库存校验结束 ==========
+
+        // ====== 进货自动生码 ======
+        $alreadyAssigned = [];
+        foreach ($rows as $idx => &$row) {
+            $isIncoming  = floatval($row['in_quantity'] ?? 0) > 0;
+            if ($isIncoming && !empty($row['needGenerateCode'])) {
+                $prefix = strtoupper(trim($row['prefix'] ?? computePrefix($row['product_name'])));
+                if (!$prefix) throw new Exception("第".($idx+1)."行无法计算前缀");
+                $row['remark_number'] = generateRemarkCode($pdo, $prefix, $alreadyAssigned);
+                $row['product_remark_checked'] = 1;
+            }
+        }
+        unset($row);
+
+        // ====== 出货备注编号校验 ======
+        foreach ($rows as $idx => $row) {
+            $isOutgoing = floatval($row['out_quantity'] ?? 0) > 0;
+            if (!$isOutgoing) continue;
+
+            $rmStmt = $pdo->prepare("
+                SELECT remark_number FROM stockinout_data
+                WHERE product_name = ? AND product_remark_checked = 1
+                  AND remark_number IS NOT NULL AND remark_number != ''
+                  AND deleted_at IS NULL
+                GROUP BY remark_number
+                HAVING (SUM(in_quantity) - SUM(out_quantity)) > 0 LIMIT 1
+            ");
+            $rmStmt->execute([$row['product_name']]);
+            if ($rmStmt->fetchColumn() !== false) {
+                $outRemark = trim($row['remark_number'] ?? '');
+                if (!$outRemark) {
+                    throw new Exception("第".($idx+1)."行：货品 [{$row['product_name']}] 有备注编码在库，出货时必须填写备注编号");
+                }
+                $validStmt = $pdo->prepare("
+                    SELECT 1 FROM stockinout_data
+                    WHERE product_name = ? AND remark_number = ? AND product_remark_checked = 1 AND deleted_at IS NULL
+                    GROUP BY remark_number HAVING (SUM(in_quantity) - SUM(out_quantity)) > 0
+                ");
+                $validStmt->execute([$row['product_name'], $outRemark]);
+                if (!$validStmt->fetchColumn()) {
+                    throw new Exception("第".($idx+1)."行：备注编号 [{$outRemark}] 不在库中");
+                }
+            }
+        }
 
         $sql = "INSERT INTO stockinout_data 
                 (date, time, product_name, receiver, in_quantity, out_quantity, 
