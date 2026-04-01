@@ -1419,11 +1419,10 @@ body {
 
 /* ─── Hover Expand Button (仿 smartSearch 架构) ───────────────────── */
 .btn-expand {
-    /* 图标占满全宽（收起状态），两端均是具体 px，浏览器可上滑插值 */
-    width: clamp(28px, 2.5vw, 36px);
+    width: clamp(32px, 3vw, 46px);       /* 收起：正方形，与其他按钮等高 */
     overflow: hidden;
     gap: 0;
-    padding: 0;                /* 由子元素自控内边距 */
+    padding: clamp(4px, 0.42vw, 8px) 0;  /* 保留垂直内边距，水平由子元素控制 */
     flex-shrink: 0;
     transition: width 0.32s cubic-bezier(0.4, 0, 0.2, 1),
                 box-shadow 0.25s ease;
@@ -1431,9 +1430,8 @@ body {
 
 /* 图标容器：固定宽度、永远居中，不受容器宽度影响 */
 .btn-expand .btn-expand-icon {
-    width: clamp(28px, 2.5vw, 36px);
-    min-width: clamp(28px, 2.5vw, 36px);
-    height: 100%;
+    width: clamp(32px, 3vw, 46px);
+    min-width: clamp(32px, 3vw, 46px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1441,7 +1439,7 @@ body {
     pointer-events: none;
 }
 
-/* 文字容器：收起时不占孽，展开时淡入 */
+/* 文字容器：收起时不占位，展开时淡入 */
 .btn-expand .btn-expand-text {
     display: inline-block;
     max-width: 0;
@@ -1449,18 +1447,18 @@ body {
     overflow: hidden;
     white-space: nowrap;
     padding-right: 0;
-    transition: max-width  0.30s cubic-bezier(0.4, 0, 0.2, 1),
-                opacity    0.18s ease 0.14s,
+    transition: max-width    0.30s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity      0.18s ease 0.14s,
                 padding-right 0.30s ease;
 }
 
 .btn-expand:hover {
-    width: clamp(100px, 9vw, 130px);
+    width: clamp(110px, 10vw, 150px);
     box-shadow: 0 4px 14px rgba(249, 158, 0, 0.38);
 }
 
 .btn-expand:hover .btn-expand-text {
     max-width: 120px;
     opacity: 1;
-    padding-right: clamp(8px, 0.63vw, 12px);
+    padding-right: clamp(8px, 0.73vw, 14px);
 }
