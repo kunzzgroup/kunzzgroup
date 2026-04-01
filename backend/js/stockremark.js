@@ -258,7 +258,7 @@ async function loadStockRemarks() {
     setLoadingState(true);
 
     try {
-        const result = await apiCall(`?action=analysis&system=${currentSystem}`);
+        const result = await apiCall('?action=analysis');
 
         if (result.success) {
             stockData = sortProducts(result.data.products || []);
