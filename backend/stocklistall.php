@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/permission_guard.php';
 requireStockView('list');
 
@@ -164,15 +164,9 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
                     </div>
                 </div>
                 
-                <button class="btn btn-warning" onclick="exportData('central')">
-                    <i class="fas fa-download"></i>
-                    导出数据
-                </button>
+                <button class="btn btn-warning btn-expand" onclick="exportData('central')" title="导出数据"><i class="fas fa-download"></i><span class="btn-expand-text">导出数据</span></button>
                 
-                <button class="btn btn-primary" onclick="goToMinimumSettings()">
-                    <i class="fas fa-cog"></i>
-                    设置最低库存
-                </button>
+                <button class="btn btn-primary btn-expand" onclick="goToMinimumSettings()" title="设置最低库存"><i class="fas fa-cog"></i><span class="btn-expand-text">设置最低库存</span></button>
                 
                 <div class="header-stats">
                     <span>显示记录: <span class="stat-value" id="central-displayed-records">0</span></span>
@@ -243,15 +237,9 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
                     </div>
                 </div>
                 
-                <button class="btn btn-warning" onclick="exportData('j1')">
-                    <i class="fas fa-download"></i>
-                    导出数据
-                </button>
+                <button class="btn btn-warning btn-expand" onclick="exportData('j1')" title="导出数据"><i class="fas fa-download"></i><span class="btn-expand-text">导出数据</span></button>
                 
-                <button class="btn btn-primary" onclick="goToMinimumSettings()">
-                    <i class="fas fa-cog"></i>
-                    设置最低库存
-                </button>
+                <button class="btn btn-primary btn-expand" onclick="goToMinimumSettings()" title="设置最低库存"><i class="fas fa-cog"></i><span class="btn-expand-text">设置最低库存</span></button>
                 
                 <div class="header-stats">
                     <span>显示记录: <span class="stat-value" id="j1-displayed-records">0</span></span>
@@ -322,15 +310,9 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
                     </div>
                 </div>
                 
-                <button class="btn btn-warning" onclick="exportData('j2')">
-                    <i class="fas fa-download"></i>
-                    导出数据
-                </button>
+                <button class="btn btn-warning btn-expand" onclick="exportData('j2')" title="导出数据"><i class="fas fa-download"></i><span class="btn-expand-text">导出数据</span></button>
                 
-                <button class="btn btn-primary" onclick="goToMinimumSettings()">
-                    <i class="fas fa-cog"></i>
-                    设置最低库存
-                </button>
+                <button class="btn btn-primary btn-expand" onclick="goToMinimumSettings()" title="设置最低库存"><i class="fas fa-cog"></i><span class="btn-expand-text">设置最低库存</span></button>
                 
                 <div class="header-stats">
                     <span>显示记录: <span class="stat-value" id="j2-displayed-records">0</span></span>
@@ -401,15 +383,9 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
                     </div>
                 </div>
                 
-                <button class="btn btn-warning" onclick="exportData('j3')">
-                    <i class="fas fa-download"></i>
-                    导出数据
-                </button>
+                <button class="btn btn-warning btn-expand" onclick="exportData('j3')" title="导出数据"><i class="fas fa-download"></i><span class="btn-expand-text">导出数据</span></button>
                 
-                <button class="btn btn-primary" onclick="goToMinimumSettings()">
-                    <i class="fas fa-cog"></i>
-                    设置最低库存
-                </button>
+                <button class="btn btn-primary btn-expand" onclick="goToMinimumSettings()" title="设置最低库存"><i class="fas fa-cog"></i><span class="btn-expand-text">设置最低库存</span></button>
                 
                 <div class="header-stats">
                     <span>显示记录: <span class="stat-value" id="j3-displayed-records">0</span></span>
@@ -455,10 +431,7 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
                                 placeholder="搜索货品名称、编号或规格单位...">
                         </div>
                     </div>
-                    <button class="btn btn-warning" onclick="exportData('central')">
-                        <i class="fas fa-download"></i>
-                        导出数据
-                    </button>
+                    <button class="btn btn-warning btn-expand" onclick="exportData('central')" title="导出数据"><i class="fas fa-download"></i><span class="btn-expand-text">导出数据</span></button>
                 </div>
             </div>
 
@@ -481,3 +454,4 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
     <script src="js/stocklistall.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>
+
