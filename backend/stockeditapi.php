@@ -1143,6 +1143,60 @@ function handleGet()
             }
             break;
 
+        case 'product_batches_for_hifo':
+            // HIFO 拆行专用：按 price + remark_number 分组返回可用批次（价格降序）
+            $productName = $_GET['product_name'] ?? null;
+            $codeNumber  = $_GET['code_number']  ?? null;
+
+            if (!$productName) {
+                sendResponse(false, "缺少产品名称参数");
+            }
+
+            try {
+                $sql = "SELECT
+                            price,
+                            remark_number,
+                            COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) AS total_in,
+                            COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0) AS total_out,
+                            (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) -
+                             COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) AS available_stock
+                        FROM stockinout_data
+                        WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&'))
+                          AND deleted_at IS NULL
+                          AND (target_system IS NULL OR target_system != 'SOT')";
+                $params = [$productName, $productName];
+
+                if (!empty($codeNumber)) {
+                    $sql .= " AND code_number = ?";
+                    $params[] = $codeNumber;
+                }
+
+                $sql .= " GROUP BY price, remark_number
+                          HAVING available_stock > 0
+                          ORDER BY price DESC, available_stock DESC";
+
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute($params);
+                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                $result = [];
+                foreach ($rows as $row) {
+                    $result[] = [
+                        'price'           => $row['price'],
+                        'available_stock'  => floatval($row['available_stock']),
+                        'remark_number'    => $row['remark_number'] ?? '',
+                        'total_in'         => floatval($row['total_in']),
+                        'total_out'        => floatval($row['total_out'])
+                    ];
+                }
+
+                sendResponse(true, "HIFO批次数据获取成功", $result);
+
+            } catch (PDOException $e) {
+                sendResponse(false, "查询HIFO批次数据失败：" . $e->getMessage());
+            }
+            break;
+
         default:
             sendResponse(false, "无效的操作");
     }
