@@ -48,7 +48,7 @@ function sendResponse($success, $message = "", $data = null)
     echo json_encode([
         "success" => $success,
         "message" => $message,
-        "data" => $data
+        "data"    => $data
     ]);
     exit;
 }
@@ -56,38 +56,40 @@ function sendResponse($success, $message = "", $data = null)
 // 智能格式化数量函数
 function formatQuantity($number)
 {
-    // 转换为浮点数
     $num = floatval($number);
 
-    // 如果是整数，不显示小数点
     if (floor($num) == $num) {
         return number_format($num, 0);
     }
 
-    // 检查原始精度，最多3位小数
     $decimalPart = $num - floor($num);
 
     if (round($decimalPart, 1) == round($decimalPart, 3)) {
-        // 只有1位有效小数
         return number_format($num, 1);
     }
     elseif (round($decimalPart, 2) == round($decimalPart, 3)) {
-        // 有2位有效小数
         return number_format($num, 2);
     }
     else {
-        // 有3位有效小数
         return number_format($num, 3);
     }
 }
 
-// 获取多价格产品分析数据
-function getMultiPriceAnalysis()
+// 获取货品备注数据（支持 system 参数，与 stocklistapi.php 保持一致）
+function getMultiPriceAnalysis($system = 'central')
 {
     global $pdo;
 
+    // 根据 system 切换数据库表
+    $tableMap = [
+        'central' => 'stockinout_data',
+        'j1'      => 'j1stockedit_data',
+        'j2'      => 'j2stockedit_data',
+        'j3'      => 'j3stockedit_data'
+    ];
+    $tableName = $tableMap[$system] ?? 'stockinout_data';
+
     try {
-        // 获取所有product_remark_checked=1的记录
         $sql = "SELECT 
                     product_name,
                     specification,
@@ -99,7 +101,7 @@ function getMultiPriceAnalysis()
                     date,
                     time,
                     receiver
-                FROM stockinout_data 
+                FROM $tableName 
                 WHERE product_remark_checked = 1 
                 AND product_name IS NOT NULL 
                 AND product_name != ''
@@ -116,35 +118,31 @@ function getMultiPriceAnalysis()
         $productGroups = [];
 
         foreach ($remarkData as $row) {
-            $productName = $row['product_name'];
+            $productName  = $row['product_name'];
             $remarkNumber = $row['remark_number'];
-
-            // 只使用产品名称作为分组标识
-            $groupKey = $productName;
+            $groupKey     = $productName;
 
             if (!isset($productGroups[$groupKey])) {
                 $productGroups[$groupKey] = [
                     'product_name' => $productName,
-                    'variants' => []
+                    'variants'     => []
                 ];
             }
 
-            // 创建备注编号的唯一标识
             $remarkKey = $remarkNumber;
 
             if (!isset($productGroups[$groupKey]['variants'][$remarkKey])) {
                 $productGroups[$groupKey]['variants'][$remarkKey] = [
-                    'code_number' => $row['code_number'] ?? '',
+                    'code_number'   => $row['code_number'] ?? '',
                     'specification' => $row['specification'] ?? '',
                     'remark_number' => $remarkNumber,
-                    'in_quantity' => 0,
-                    'out_quantity' => 0, // 添加出货数量字段
-                    'price' => floatval($row['price'])
+                    'in_quantity'   => 0,
+                    'out_quantity'  => 0,
+                    'price'         => floatval($row['price'])
                 ];
             }
 
-            // 累计进货和出货数量
-            $inQty = floatval($row['in_quantity']);
+            $inQty  = floatval($row['in_quantity']);
             $outQty = floatval($row['out_quantity']);
 
             if ($inQty > 0) {
@@ -162,38 +160,32 @@ function getMultiPriceAnalysis()
             foreach ($group['variants'] as $variant) {
                 $currentStock = $variant['in_quantity'] - $variant['out_quantity'];
 
-                // 只有库存大于0的才添加到结果中（使用更严格的比较来处理浮点数精度问题）
                 if (round($currentStock, 3) > 0) {
                     $variants[] = [
-                        'code_number' => $variant['code_number'],
-                        'specification' => $variant['specification'],
-                        'in_quantity' => $variant['in_quantity'],
-                        'out_quantity' => $variant['out_quantity'],
-                        'current_stock' => $currentStock,
+                        'code_number'        => $variant['code_number'],
+                        'specification'      => $variant['specification'],
+                        'in_quantity'        => $variant['in_quantity'],
+                        'out_quantity'       => $variant['out_quantity'],
+                        'current_stock'      => $currentStock,
                         'formatted_quantity' => formatQuantity($currentStock),
-                        'price' => $variant['price'],
-                        'formatted_price' => number_format($variant['price'], 2),
-                        'remark_number' => $variant['remark_number']
+                        'price'              => $variant['price'],
+                        'formatted_price'    => number_format($variant['price'], 2),
+                        'remark_number'      => $variant['remark_number']
                     ];
                 }
             }
 
-            // 只有当该产品还有库存变种时才添加到结果中
             if (!empty($variants)) {
-                // 计算总数量
-                $totalQuantity = array_sum(array_column($variants, 'current_stock'));
-
+                $totalQuantity  = array_sum(array_column($variants, 'current_stock'));
                 $remarkProducts[] = [
-                    'product_name' => $group['product_name'],
-                    'variants' => $variants,
+                    'product_name'   => $group['product_name'],
+                    'variants'       => $variants,
                     'total_quantity' => formatQuantity($totalQuantity)
                 ];
             }
         }
 
-        return [
-            'products' => $remarkProducts
-        ];
+        return ['products' => $remarkProducts];
 
     }
     catch (PDOException $e) {
@@ -201,10 +193,18 @@ function getMultiPriceAnalysis()
     }
 }
 
-// 获取产品详细信息（可选功能）
-function getProductDetails($productName)
+// 获取产品详细信息
+function getProductDetails($productName, $system = 'central')
 {
     global $pdo;
+
+    $tableMap = [
+        'central' => 'stockinout_data',
+        'j1'      => 'j1stockedit_data',
+        'j2'      => 'j2stockedit_data',
+        'j3'      => 'j3stockedit_data'
+    ];
+    $tableName = $tableMap[$system] ?? 'stockinout_data';
 
     try {
         $sql = "SELECT 
@@ -214,14 +214,13 @@ function getProductDetails($productName)
                     code_number,
                     in_quantity,
                     out_quantity,
-                    date_created,
                     SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END) as total_in,
                     SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END) as total_out
-                FROM stockinout_data 
+                FROM $tableName 
                 WHERE product_name = :product_name
                 AND deleted_at IS NULL
                 GROUP BY product_name, specification, price, code_number
-                ORDER BY price DESC, date_created DESC";
+                ORDER BY price DESC";
 
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':product_name', $productName, PDO::PARAM_STR);
@@ -236,43 +235,28 @@ function getProductDetails($productName)
 }
 
 // 导出CSV数据
-function exportMultiPriceData()
+function exportMultiPriceData($system = 'central')
 {
     try {
-        $result = getMultiPriceAnalysis();
+        $result = getMultiPriceAnalysis($system);
 
-        // 设置CSV头信息
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="multi_price_analysis_' . date('Y-m-d') . '.csv"');
 
         ob_end_clean();
 
-        // 创建CSV输出
         $output = fopen('php://output', 'w');
-
-        // 写入BOM以支持中文
         fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-        // 写入表头
-        fputcsv($output, [
-            'Product Name',
-            'Rank',
-            'Code Number',
-            'Stock Quantity',
-            'Unit Price (RM)'
-        ]);
+        fputcsv($output, ['Product Name', 'Remark Number', 'Code Number', 'Stock Quantity', 'Unit Price (RM)']);
 
-        // 写入数据
         foreach ($result['products'] as $product) {
             foreach ($product['variants'] as $index => $variant) {
-                $priceDiff = $product['max_price'] - $variant['price'];
-                $priceRank = $index + 1;
-
                 fputcsv($output, [
                     $product['product_name'],
-                    $priceRank,
+                    $variant['remark_number'],
                     $variant['code_number'],
-                    $variant['formatted_stock'],
+                    $variant['formatted_quantity'],
                     $variant['formatted_price']
                 ]);
             }
@@ -293,12 +277,13 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
     $action = $_GET['action'] ?? 'analysis';
+    $system = $_GET['system'] ?? 'central';
 
     switch ($action) {
         case 'analysis':
             try {
-                $result = getMultiPriceAnalysis();
-                sendResponse(true, "多价格产品分析数据获取成功", $result);
+                $result = getMultiPriceAnalysis($system);
+                sendResponse(true, ucfirst($system) . "货品备注数据获取成功", $result);
             }
             catch (Exception $e) {
                 sendResponse(false, $e->getMessage());
@@ -312,7 +297,7 @@ if ($method === 'GET') {
             }
 
             try {
-                $result = getProductDetails($productName);
+                $result = getProductDetails($productName, $system);
                 sendResponse(true, "产品详细信息获取成功", $result);
             }
             catch (Exception $e) {
@@ -321,7 +306,7 @@ if ($method === 'GET') {
             break;
 
         case 'export':
-            exportMultiPriceData();
+            exportMultiPriceData($system);
             break;
 
         default:

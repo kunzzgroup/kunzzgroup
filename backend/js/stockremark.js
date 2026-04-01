@@ -1,4 +1,4 @@
-﻿// API 配置
+// API 配置
 let API_BASE_URL = 'stockremarkapi.php';
 const STOCK_VIEW_OPTIONS = [
     { value: 'list', label: '总库存' },
@@ -258,7 +258,7 @@ async function loadStockRemarks() {
     setLoadingState(true);
 
     try {
-        const result = await apiCall('?action=analysis');
+        const result = await apiCall(`?action=analysis&system=${currentSystem}`);
 
         if (result.success) {
             stockData = sortProducts(result.data.products || []);
