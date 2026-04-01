@@ -3171,6 +3171,14 @@ function updateNewRowTotal(element) {
             currencyDisplay.classList.remove('negative-value', 'negative-parentheses');
         }
     }
+
+    // 新增：重新评估备注编号锁定状态（数量变化可能导致出库数量>0，从而解锁手动输入）
+    const remarkCheckbox = document.getElementById(`${rowId}-product-remark`);
+    if (remarkCheckbox && remarkCheckbox.checked) {
+        if (typeof toggleNewRowRemarkNumber === 'function') {
+            toggleNewRowRemarkNumber(rowId);
+        }
+    }
 }
 
 // 更新货品备注勾选状态
@@ -3289,7 +3297,9 @@ function toggleNewRowRemarkNumber(rowId) {
                 // 如果是进货 (或者刚开始都没填也被当作准备进货锁定，由后端生成，出货才开放)
                 // 用户要求：出库时能自己输入
                 if (outQty > 0) {
-                    suffixInput.value = '';
+                    if (suffixInput.disabled || suffixInput.value === '...') {
+                        suffixInput.value = '';
+                    }
                     suffixInput.disabled = false;
                     suffixInput.style.color = '';
                     const row = checkbox.closest('tr');
@@ -3712,7 +3722,7 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
 
             // 添加新记录到 stockData 数组
             const newRecord = {
-                id: result.data.id || Date.now(),
+                id: (result.data && result.data.id) ? result.data.id : Date.now(),
                 date: formData.date,
                 time: formData.time,
                 code_number: formData.code_number,
@@ -3724,8 +3734,8 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
                 price: formData.price,
                 receiver: formData.receiver,
                 remark: formData.remark,
-                product_remark_checked: formData.product_remark_checked,
-                remark_number: formData.remark_number,
+                product_remark_checked: (result.data && result.data.product_remark_checked !== undefined) ? !!result.data.product_remark_checked : formData.product_remark_checked,
+                remark_number: (result.data && result.data.remark_number !== undefined) ? result.data.remark_number : formData.remark_number,
                 type: (result.data && result.data.type !== undefined) ? result.data.type : (formData.type || ''),
                 // 立即从服务端响应获取 created_by（已解析为 nickname）和 created_at
                 created_by: (result.data && result.data.created_by) ? result.data.created_by : '-',
