@@ -1658,6 +1658,7 @@ function getMemberQuantityForShop(member, shopType) {
 function getEffectiveUnitPriceForBreak(item, shopType) {
     if (!item) return 0;
     const raw = parseFloat(item.unit_price) || 0;
+    return raw;
     const id = item.id;
     const code = (item.code_number || '').trim();
     const sets = (stockData || []).filter(x => x.item_type === 'set');
@@ -1686,7 +1687,8 @@ function getEffectiveUnitPriceForBreak(item, shopType) {
  * @returns {number} 计费数量
  */
 function getChargeableQuantityForBreak(item, shopType, breakQuantity, quantityBeforeBreak, minQuantityOverrides) {
-    if (!item || breakQuantity <= 0) return 0;
+    // 强制同步计费数量 = 破损数量，不再提供多余配件免单优惠
+    return breakQuantity > 0 ? breakQuantity : 0;
     const q = quantityBeforeBreak;
     const id = item.id;
     const code = (item.code_number || '').trim();
