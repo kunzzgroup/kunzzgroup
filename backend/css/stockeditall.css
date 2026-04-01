@@ -2206,7 +2206,8 @@
  }
 
  .header-search {
-     flex: none;                      /* 不拉伸，让 smartSearchWrapper 保持折叠宽度 */
+     flex: none;
+     /* 不拉伸，让 smartSearchWrapper 保持折叠宽度 */
      display: flex;
      align-items: center;
      gap: clamp(6px, 0.63vw, 12px);
@@ -2214,7 +2215,8 @@
 
  /* 在 header-search 内，wrapper 不能被 flex 撑到全宽 */
  .header-search .smartSearchWrapper {
-     width: 40px;                     /* 折叠态：仅图标 */
+     width: 40px;
+     /* 折叠态：仅图标 */
      flex-shrink: 0;
      cursor: pointer;
  }
@@ -2266,6 +2268,7 @@
  .header-stats .stat-value {
      font-weight: bold;
      color: #000000ff;
+     font-size: 24px;
  }
 
  /* 批量操作按钮组 */
