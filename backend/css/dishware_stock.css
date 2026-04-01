@@ -3356,7 +3356,7 @@ input[type='number'] {
     width: 250px;
 }
 
-.header-right-section {
+.header-right-group {
     display: flex;
     align-items: flex-end;
     gap: clamp(2px, 0.32vw, 8px);
