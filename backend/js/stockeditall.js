@@ -1,4 +1,4 @@
-
+﻿
 // HTML 反转义函数
 function decodeHtml(html) {
     if (!html) return '';
@@ -1871,316 +1871,8 @@ function handleNewRowOutQuantityChange(rowId, value) {
         }
 
         // 收货人字段保持始终可输入状态，不需要根据出货数量控制
-
-        // ★ HIFO 自动拆行：当出货数量 > 0 且在中央模式时触发
-        if (outQty > 0 && currentStockType === 'central') {
-            const productInput = document.getElementById(`${rowId}-product_name-input`);
-            const productName = productInput ? productInput.value.trim() : '';
-            if (productName && !row.dataset.hifoSplit) {
-                hifoAutoSplit(rowId);
-            }
-        }
     }
 }
-
-// ====== HIFO 自动拆行功能 ======
-// 防抖标记，避免重复触发
-let _hifoSplitting = false;
-
-// 1. 获取 HIFO 批次数据（按价格降序，含 remark_number）
-async function fetchHifoBatches(productName, codeNumber) {
-    try {
-        let endpoint = `?action=product_batches_for_hifo&product_name=${encodeURIComponent(productName)}`;
-        if (codeNumber) {
-            endpoint += `&code_number=${encodeURIComponent(codeNumber)}`;
-        }
-        const result = await apiCall(endpoint);
-        if (result.success && result.data && result.data.length > 0) {
-            console.log('[HIFO] 批次数据:', result.data);
-            return result.data;
-        }
-        return [];
-    } catch (error) {
-        console.error('[HIFO] 获取批次数据失败:', error);
-        return [];
-    }
-}
-
-// 2. HIFO 核心拆行函数
-async function hifoAutoSplit(rowId) {
-    // 防止重复触发
-    if (_hifoSplitting) return;
-
-    // 仅在 central 模式下启用
-    if (currentStockType !== 'central') return;
-
-    const outQtyInput = document.getElementById(`${rowId}-out-qty`);
-    const productInput = document.getElementById(`${rowId}-product_name-input`);
-    const codeInput = document.getElementById(`${rowId}-code_number-input`);
-    const row = outQtyInput?.closest('tr');
-
-    if (!row || !productInput) return;
-
-    const productName = productInput.value.trim();
-    const outQty = parseFloat(outQtyInput.value) || 0;
-    const codeNumber = codeInput ? codeInput.value.trim() : '';
-
-    // 必须有货品名称和出货数量 > 0
-    if (!productName || outQty <= 0) return;
-
-    // 如果当前行已被标记为拆分行，不再触发拆行
-    if (row.dataset.hifoSplit === 'true') return;
-
-    // 先删除此行下方已有的拆分行（重新拆分时清除旧行）
-    let nextRow = row.nextElementSibling;
-    while (nextRow && nextRow.dataset.hifoSplit === 'true') {
-        const toRemove = nextRow;
-        nextRow = nextRow.nextElementSibling;
-        toRemove.remove();
-    }
-
-    _hifoSplitting = true;
-
-    try {
-        // 获取批次列表
-        const batches = await fetchHifoBatches(productName, codeNumber);
-        if (!batches || batches.length === 0) {
-            console.log('[HIFO] 无可用批次，跳过拆行');
-            _hifoSplitting = false;
-            return;
-        }
-
-        // 计算总库存
-        const totalStock = batches.reduce((sum, b) => sum + b.available_stock, 0);
-        const totalStock_rounded = Math.round(totalStock * 1000) / 1000;
-
-        console.log(`[HIFO] 请求出货: ${outQty}, 总库存: ${totalStock_rounded}`);
-
-        // 总库存不足
-        if (outQty > totalStock_rounded) {
-            showToast(`总库存不足！需要 ${outQty}，可用 ${totalStock_rounded}`, 'error');
-            outQtyInput.value = 0;
-            _hifoSplitting = false;
-            return;
-        }
-
-        // 如果只有一个批次且库存足够，无需拆行，只需设置价格
-        if (batches.length === 1 || batches[0].available_stock >= outQty) {
-            console.log('[HIFO] 首批次库存充足，无需拆行');
-            // 设置当前行价格
-            setHifoPriceForRow(rowId, batches[0].price);
-            _hifoSplitting = false;
-            return;
-        }
-
-        // HIFO 拆分循环
-        let remainingQty = outQty;
-        const newRowsToInsert = [];
-
-        for (let i = 0; i < batches.length && remainingQty > 0; i++) {
-            const batch = batches[i];
-            const deductQty = Math.min(remainingQty, batch.available_stock);
-
-            if (i === 0) {
-                // 第一个批次 → 更新当前行
-                outQtyInput.value = deductQty;
-                setHifoPriceForRow(rowId, batch.price);
-                // ★ 备注编号：保留用户手动输入，绝不覆盖
-                console.log(`[HIFO] 首行: outQty=${deductQty}, price=${batch.price}, remark=保留用户手动`);
-            } else {
-                // 后续批次 → 记录等待插入
-                newRowsToInsert.push({
-                    deductQty: deductQty,
-                    price: batch.price,
-                    remarkCode: batch.remark_number || ''
-                });
-                console.log(`[HIFO] 拆分行${i}: outQty=${deductQty}, price=${batch.price}, remark=${batch.remark_number}`);
-            }
-
-            remainingQty -= deductQty;
-            remainingQty = Math.round(remainingQty * 1000) / 1000; // 浮点防御
-        }
-
-        // 插入拆分行
-        if (newRowsToInsert.length > 0) {
-            insertSplitRows(rowId, newRowsToInsert);
-            showToast(`已自动拆分为 ${newRowsToInsert.length + 1} 行（HIFO 最高价先出）`, 'success');
-        }
-
-        // 触发首行的总价更新
-        updateNewRowTotal(outQtyInput);
-
-    } catch (error) {
-        console.error('[HIFO] 拆行失败:', error);
-    } finally {
-        _hifoSplitting = false;
-    }
-}
-
-// 3. 设置行的价格（操作隐藏input和下拉select）
-function setHifoPriceForRow(rowId, price) {
-    const priceInput = document.getElementById(`${rowId}-price`);
-    const priceSelect = document.getElementById(`${rowId}-price-select`);
-
-    if (priceInput) {
-        priceInput.value = price;
-    }
-    if (priceSelect) {
-        // 尝试选中匹配的选项
-        const options = priceSelect.options;
-        let found = false;
-        for (let i = 0; i < options.length; i++) {
-            if (options[i].value == price) {
-                priceSelect.value = price;
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            // 添加该价格选项
-            const option = document.createElement('option');
-            option.value = price;
-            option.textContent = `${parseFloat(price).toFixed(3)} (HIFO)`;
-            option.selected = true;
-            priceSelect.appendChild(option);
-        }
-    }
-}
-
-// 4. 插入拆分行到源行下方
-function insertSplitRows(sourceRowId, splitDataArray) {
-    const sourceRow = document.getElementById(`${sourceRowId}-out-qty`)?.closest('tr');
-    if (!sourceRow) return;
-
-    // 从源行提取共享数据
-    const dateInput = document.getElementById(`${sourceRowId}-date`);
-    const codeInput = document.getElementById(`${sourceRowId}-code_number-input`);
-    const productInput = document.getElementById(`${sourceRowId}-product_name-input`);
-    const specSelect = document.getElementById(`${sourceRowId}-specification`);
-    const typeSelect = document.getElementById(`${sourceRowId}-type`);
-    const receiverInput = document.getElementById(`${sourceRowId}-receiver-input`);
-    const remarkInput = document.getElementById(`${sourceRowId}-remark`);
-    const targetInput = document.getElementById(`${sourceRowId}-target`);
-
-    const sharedDate = dateInput ? dateInput.value : '';
-    const sharedCode = codeInput ? codeInput.value : '';
-    const sharedProduct = productInput ? productInput.value : '';
-    const sharedSpec = specSelect ? specSelect.value : '';
-    const sharedType = typeSelect ? typeSelect.value : '';
-    const sharedReceiver = receiverInput ? receiverInput.value : '';
-    const sharedRemark = remarkInput ? remarkInput.value : '';
-    const sharedTarget = targetInput ? targetInput.value : '';
-
-    let insertAfterElement = sourceRow;
-
-    splitDataArray.forEach((splitData, index) => {
-        const newRowId = 'new-' + Date.now() + '-' + (newRowCounter++);
-        const newRow = document.createElement('tr');
-        newRow.className = 'new-row';
-        newRow.dataset.hifoSplit = 'true'; // 标记为拆分行
-
-        // 拆分备注编号
-        let remarkPrefix = '';
-        let remarkSuffix = '';
-        if (splitData.remarkCode && splitData.remarkCode.includes('-')) {
-            const parts = splitData.remarkCode.split('-');
-            remarkPrefix = parts[0] || '';
-            remarkSuffix = parts.slice(1).join('-') || '';
-        }
-
-        const netQty = -splitData.deductQty; // 出库为负
-        const totalValue = Math.abs(netQty * parseFloat(splitData.price));
-
-        newRow.innerHTML = `
-                <td><input type="date" class="table-input" value="${sharedDate}" id="${newRowId}-date"></td>
-                <td>${createCombobox('code', sharedCode, null, newRowId)}</td>
-                <td>${createCombobox('product', sharedProduct, null, newRowId)}</td>
-                <td><input type="number" class="table-input" min="0" step="0.001" placeholder="0" id="${newRowId}-in-qty" oninput="updateNewRowTotal(this)"></td>
-                <td><input type="number" class="table-input" min="0" step="0.001" placeholder="0" id="${newRowId}-out-qty" value="${splitData.deductQty}" oninput="updateNewRowTotal(this)" onchange="handleNewRowOutQuantityChange('${newRowId}', this.value)"></td>
-                <td>
-                    ${currentStockType !== 'central' ?
-                `<span>${currentStockType.toUpperCase()}</span>
-                        <input type="hidden" id="${newRowId}-target" value="${currentStockType}">` :
-                `<select class="table-select" id="${newRowId}-target" ${splitData.deductQty > 0 ? '' : 'disabled'}>
-                            <option value="">请选择</option>
-                            ${generateTargetOptions(sharedTarget)}
-                        </select>`
-            }
-                </td>
-                <td>
-                    <select class="table-select" id="${newRowId}-specification">
-                        <option value="">请选择规格</option>
-                        ${specifications.map(spec => `<option value="${spec}" ${spec === sharedSpec ? 'selected' : ''}>${spec}</option>`).join('')}
-                    </select>
-                </td>
-                <td>
-                    <div class="currency-display"><span class="currency-symbol">RM</span><input type="number" class="currency-input-edit" min="0" step="0.00001" placeholder="0.00" id="${newRowId}-price" value="${splitData.price}" oninput="updateNewRowTotal(this)"></div>
-                </td>
-                <td class="calculated-cell">
-                    <div class="currency-display negative-value negative-parentheses"><span class="currency-symbol">RM</span><span class="currency-amount">${formatCurrency(totalValue)}</span></div>
-                </td>
-                <td>
-                    <select class="table-select" id="${newRowId}-type" ${currentStockType === 'central' ? 'disabled' : ''}>
-                        <option value="">请选择类型</option>
-                        <option value="Kitchen" ${sharedType === 'Kitchen' ? 'selected' : ''}>Kitchen</option>
-                        <option value="Sushi Bar" ${sharedType === 'Sushi Bar' ? 'selected' : ''}>Sushi Bar</option>
-                        <option value="Service Line" ${sharedType === 'Service Line' ? 'selected' : ''}>Service Line</option>
-                        <option value="Sake" ${sharedType === 'Sake' ? 'selected' : ''}>Sake</option>
-                    </select>
-                </td>
-                <td style="text-align: center;">
-                    <input type="checkbox" class="remark-checkbox" id="${newRowId}-product-remark" ${splitData.remarkCode ? 'checked' : ''} onchange="toggleNewRowRemarkNumber('${newRowId}')">
-                </td>
-                <td>
-                    <div class="remark-number-input-wrapper" style="display: flex; align-items: center; border: 1px solid #d1d5db; border-radius: 4px; background: white; padding: 0; ${splitData.remarkCode ? 'opacity: 1;' : ''}" id="${newRowId}-remark-wrapper" ${splitData.remarkCode ? '' : 'data-disabled="true"'}>
-                        <input type="text" class="table-input remark-prefix" placeholder=""
-                            style="border: none; border-radius: 4px 0 0 4px; width: clamp(14px, 1.56vw, 30px); text-align: center; background: transparent; padding: 0px;"
-                            id="${newRowId}-remark-prefix" value="${remarkPrefix}" ${splitData.remarkCode ? '' : 'disabled'}>
-                        <span style="padding: 0px; color: #6b7280; font-weight: bold;">-</span>
-                        <input type="text" class="table-input remark-suffix" placeholder=""
-                            style="border: none; border-radius: 0 4px 4px 0; width: clamp(16px, 1.56vw, 30px); text-align: center; background: transparent; padding: 0px;"
-                            id="${newRowId}-remark-suffix" value="${remarkSuffix}" ${splitData.remarkCode ? '' : 'disabled'}>
-                    </div>
-                    <input type="hidden" id="${newRowId}-remark-number" value="${splitData.remarkCode}">
-                </td>
-                <td>${createCombobox('receiver', sharedReceiver, null, newRowId)}</td>
-                <td><input type="text" class="table-input" placeholder="输入备注..." id="${newRowId}-remark" value="${sharedRemark}"></td>
-                <td><span class="created-user" data-user="-" data-time="-">-</span></td>
-                <td>
-                    <span class="action-cell">
-                        <button class="action-btn save-new-btn" onclick="saveNewRowRecord(this)" title="保存">
-                            <i class="fas fa-save"></i>
-                        </button>
-                        <button class="action-btn cancel-new-btn" onclick="cancelNewRow(this)" title="取消">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </span>
-                </td>
-            `;
-
-        // 插入到前一行的下方
-        insertAfterElement.after(newRow);
-        insertAfterElement = newRow;
-
-        // 设置 target select 的值（如果是 central 模式）
-        if (currentStockType === 'central' && sharedTarget) {
-            const targetSel = document.getElementById(`${newRowId}-target`);
-            if (targetSel) {
-                targetSel.value = sharedTarget;
-                if (splitData.deductQty > 0) {
-                    targetSel.disabled = false;
-                }
-            }
-        }
-    });
-
-    // 绑定 combobox 事件
-    setTimeout(() => {
-        bindComboboxEvents();
-        updateBatchSaveButtonVisibility();
-    }, 100);
-}
-// ====== HIFO 自动拆行功能结束 ======
 
 // 需要自动勾选货品备注的货品列表
 const autoRemarkProducts = [];
@@ -3546,7 +3238,7 @@ function computePrefix(productName) {
     const cleanName = (productName || '').trim().toUpperCase();
     const words = cleanName.split(/\s+/).filter(Boolean);
     if (words.length === 0) return '';
-    
+
     if (words.length === 1) {
         // 过滤掉符号，只留字母和数字（支持多国语言），提取前两个字符
         const lettersOnly = words[0].replace(/[^\p{L}\p{N}]/gu, '');
@@ -3604,7 +3296,7 @@ function toggleNewRowRemarkNumber(rowId) {
 
             // 自动计算前缀并填入
             const productInput = document.getElementById(`${rowId}-product_name-input`);
-            const productName  = productInput ? productInput.value.trim() : '';
+            const productName = productInput ? productInput.value.trim() : '';
             if (productName) {
                 const calculatedPrefix = computePrefix(productName);
                 const oldProductName = prefixInput.dataset.productName;
@@ -3615,11 +3307,11 @@ function toggleNewRowRemarkNumber(rowId) {
                     prefixInput.dataset.lastAutoPrefix = calculatedPrefix;
                 }
                 prefixInput.dataset.productName = productName;
-                
+
                 // 判断是进货还是出货
                 const inQty = parseFloat(document.getElementById(`${rowId}-in-qty`)?.value || 0);
                 const outQty = parseFloat(document.getElementById(`${rowId}-out-qty`)?.value || 0);
-                
+
                 // 如果是进货 (或者刚开始都没填也被当作准备进货锁定，由后端生成，出货才开放)
                 // 用户要求：出库时能自己输入
                 if (outQty > 0) {
@@ -3634,14 +3326,14 @@ function toggleNewRowRemarkNumber(rowId) {
                         delete row.dataset.prefix;
                     }
                 } else {
-                    suffixInput.value    = '...';         // 占位符
+                    suffixInput.value = '...';         // 占位符
                     suffixInput.disabled = true;          // 后缀只读
                     suffixInput.style.color = '#9ca3af'; // 灰色提示
                     // 标记行为自动生码
                     const row = checkbox.closest('tr');
                     if (row) {
                         row.dataset.autoCode = 'true';
-                        row.dataset.prefix   = calculatedPrefix;
+                        row.dataset.prefix = calculatedPrefix;
                     }
                 }
             }
@@ -3661,11 +3353,11 @@ function toggleNewRowRemarkNumber(rowId) {
             suffixInput.value = '';
             suffixInput.style.color = ''; // 恢复颜色
             updateNewRowRemarkNumber(rowId);
-            
+
             const row = checkbox.closest('tr');
-            if (row) { 
-                delete row.dataset.autoCode; 
-                delete row.dataset.prefix; 
+            if (row) {
+                delete row.dataset.autoCode;
+                delete row.dataset.prefix;
             }
         }
     }
@@ -3931,11 +3623,11 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
     const isIncoming = formData.in_quantity > 0;
     if (isIncoming && row.dataset.autoCode === 'true') {
         formData.needGenerateCode = true;
-        
+
         // 抓取用户在界面上可能手动修改过的前缀框内容
         const prefixInput = document.getElementById(`${rowId}-remark-prefix`);
         const manualPrefix = prefixInput ? prefixInput.value.trim().toUpperCase() : '';
-        
+
         // 优先使用界面输入的，再使用dataset存的，最后用实时计算的
         formData.prefix = manualPrefix || row.dataset.prefix || computePrefix(formData.product_name);
         formData.remark_number = ''; // 交给后端生成
@@ -8288,11 +7980,11 @@ async function batchSaveNewRows() {
             const isIncoming = data.in_quantity > 0;
             if (isIncoming && row.dataset.autoCode === 'true') {
                 data.needGenerateCode = true;
-                
+
                 // 抓取用户在界面上可能手动修改过的前缀框内容
                 const prefixInput = document.getElementById(`${rowId}-remark-prefix`);
                 const manualPrefix = prefixInput ? prefixInput.value.trim().toUpperCase() : '';
-                
+
                 // 优先使用界面输入的，再使用dataset存的，最后用实时计算的
                 data.prefix = manualPrefix || row.dataset.prefix || computePrefix(data.product_name);
                 data.remark_number = ''; // 交给后端
