@@ -232,7 +232,7 @@ body {
 
 /* 卡片头部：橙色渐变（顶部） */
 .product-header {
-    background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
+    background: linear-gradient(135deg, #ff7800 0%, #F59E0B 100%);
     color: white;
     padding: 24px 28px;
     font-size: clamp(15px, 1.04vw, 20px);
@@ -254,7 +254,7 @@ body {
 }
 
 /* 卡片头部内的产品名 */
-.product-header .product-info-item > div:first-child {
+.product-header .product-info-item>div:first-child {
     font-size: 22px;
     font-weight: 800;
     letter-spacing: 0.8px;
