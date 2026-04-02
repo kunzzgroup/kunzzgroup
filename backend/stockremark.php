@@ -28,7 +28,7 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
     <link rel="icon" type="image/png" href="../images/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>货品备注 - 库存管理系统</title>
+    <title>库存价格分析 - 库存管理系统</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/stockremark.css?v=<?php echo time(); ?>">
 </head>
@@ -36,11 +36,13 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
     <?php include 'sidebar.php'; ?>
     <div class="container">
         <div class="header">
-            <h1>货品备注</h1>
+            <div>
+                <h1>货品备注</h1>
+            </div>
             <div class="controls">
                 <div class="view-selector">
                     <button class="selector-button" onclick="toggleViewSelector()">
-                        <span id="current-view">备注</span>
+                        <span id="current-view">货品备注</span>
                         <i class="fas fa-chevron-down"></i>
                     </button>
                     <div class="selector-dropdown" id="view-selector-dropdown">
@@ -51,8 +53,8 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
                         <div class="dropdown-item" onclick="switchView('sot')">货品异常</div>
                     </div>
                 </div>
-                <button class="selector-button filled" style="justify-content: center;">
-                    <span id="current-stock-type"><?php echo $display_name; ?></span> 📍
+                <button class="selector-button" style="justify-content: center;">
+                    <span id="current-stock-type"><?php echo $display_name; ?></span>
                 </button>
             </div>
         </div>
@@ -60,10 +62,17 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
         <!-- Alert Messages -->
         <div id="alert-container"></div>
         
-        <!-- 现代搜索栏 -->
-        <div class="search-container">
-            <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-            <input type="text" id="product-filter" placeholder="输入编号或品名搜索...">
+        <!-- 搜索和过滤区域 -->
+        <div class="filter-section">
+            <div style="display: flex; align-items: end; gap: 26px; margin-bottom: clamp(10px, 0.83vw, 16px);">
+                <div class="filter-group" style="flex: 1;">
+                    <label for="product-filter">搜索货品</label>
+                    <div class="smartSearchWrapper">
+                        <i class="fas fa-search smartSearch-icon"></i>
+                        <input type="text" id="product-filter" class="smartSearch-input" placeholder="输入关键字搜索...">
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- 货品列表 -->
