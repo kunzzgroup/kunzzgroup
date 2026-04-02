@@ -580,22 +580,15 @@ document.addEventListener('click', function (event) {
 });
 
 // 页面加载完成后初始化
-// 卡片任意位置滚动表格：将wheel事件转发到table-wrapper
+// 卡片任意位置滚动表格：鼠标在卡片上时始终拦截页面滚动
 document.addEventListener('wheel', function (e) {
     const card = e.target.closest('.product-group');
     if (!card) return;
     const wrapper = card.querySelector('.table-wrapper');
     if (!wrapper) return;
 
-    // 检查是否还有滚动空间
-    const atTop = wrapper.scrollTop === 0 && e.deltaY < 0;
-    const atBottom = wrapper.scrollTop + wrapper.clientHeight >= wrapper.scrollHeight && e.deltaY > 0;
-
-    // 只在表格还能滚的时候拦截页面滚动
-    if (!atTop && !atBottom) {
-        e.preventDefault();
-        wrapper.scrollTop += e.deltaY;
-    }
+    e.preventDefault();
+    wrapper.scrollTop += e.deltaY;
 }, { passive: false });
 
 document.addEventListener('DOMContentLoaded', initApp);
