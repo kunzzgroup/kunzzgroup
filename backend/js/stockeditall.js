@@ -1,4 +1,4 @@
-﻿
+
 // HTML 反转义函数
 function decodeHtml(html) {
     if (!html) return '';
@@ -1871,8 +1871,265 @@ function handleNewRowOutQuantityChange(rowId, value) {
         }
 
         // 收货人字段保持始终可输入状态，不需要根据出货数量控制
+
+        // ★ HIFO 自动拆行：当出货数量 > 0 且在中央模式时触发
+        if (outQty > 0 && currentStockType === 'central') {
+            const productInput = document.getElementById(`${rowId}-product_name-input`);
+            const productName = productInput ? productInput.value.trim() : '';
+            if (productName && !row.dataset.hifoSplit) {
+                hifoAutoSplit(rowId);
+            }
+        }
     }
 }
+
+// ====== HIFO 自动拆行功能 ======
+let _hifoSplitting = false;
+
+// 1. 获取 HIFO 批次数据（按价格降序，按 PRICE 分组）
+async function fetchHifoBatches(productName, codeNumber) {
+    try {
+        let endpoint = `?action=product_batches_for_hifo&product_name=${encodeURIComponent(productName)}`;
+        if (codeNumber) {
+            endpoint += `&code_number=${encodeURIComponent(codeNumber)}`;
+        }
+        const result = await apiCall(endpoint);
+        if (result.success && result.data && result.data.length > 0) {
+            console.log('[HIFO] 批次数据:', result.data);
+            return result.data;
+        }
+        return [];
+    } catch (error) {
+        console.error('[HIFO] 获取批次数据失败:', error);
+        return [];
+    }
+}
+
+// 2. HIFO 核心拆行函数
+async function hifoAutoSplit(rowId) {
+    if (_hifoSplitting) return;
+    if (currentStockType !== 'central') return;
+
+    const outQtyInput = document.getElementById(`${rowId}-out-qty`);
+    const productInput = document.getElementById(`${rowId}-product_name-input`);
+    const codeInput = document.getElementById(`${rowId}-code_number-input`);
+    const row = outQtyInput?.closest('tr');
+
+    if (!row || !productInput) return;
+
+    const productName = productInput.value.trim();
+    const outQty = parseFloat(outQtyInput.value) || 0;
+    const codeNumber = codeInput ? codeInput.value.trim() : '';
+
+    if (!productName || outQty <= 0) return;
+    if (row.dataset.hifoSplit === 'true') return;
+
+    // 清除此行下方已有的拆分行（重新拆分时清除旧行）
+    let nextRow = row.nextElementSibling;
+    while (nextRow && nextRow.dataset.hifoSplit === 'true') {
+        const toRemove = nextRow;
+        nextRow = nextRow.nextElementSibling;
+        toRemove.remove();
+    }
+
+    _hifoSplitting = true;
+
+    try {
+        const batches = await fetchHifoBatches(productName, codeNumber);
+        if (!batches || batches.length === 0) {
+            console.log('[HIFO] 无可用批次，跳过拆行');
+            _hifoSplitting = false;
+            return;
+        }
+
+        const totalStock = batches.reduce((sum, b) => sum + b.available_stock, 0);
+        const totalStockRounded = Math.round(totalStock * 1000) / 1000;
+
+        console.log(`[HIFO] 请求出货: ${outQty}, 总库存: ${totalStockRounded}`);
+
+        if (outQty > totalStockRounded) {
+            showAlert(`总库存不足！需要 ${outQty}，可用 ${totalStockRounded}`, 'error');
+            _hifoSplitting = false;
+            return;
+        }
+
+        // 首批次库存足够 → 只设置价格，无需拆行
+        if (batches[0].available_stock >= outQty) {
+            console.log('[HIFO] 首批次库存充足，无需拆行');
+            setHifoPriceForRow(rowId, batches[0].price);
+            updateNewRowTotal(outQtyInput);
+            _hifoSplitting = false;
+            return;
+        }
+
+        // HIFO 拆分循环
+        let remainingQty = outQty;
+        const splitRows = [];
+
+        for (let i = 0; i < batches.length && remainingQty > 0; i++) {
+            const batch = batches[i];
+            const deductQty = Math.round(Math.min(remainingQty, batch.available_stock) * 1000) / 1000;
+
+            if (i === 0) {
+                // 首行：调整出货数量和价格
+                outQtyInput.value = deductQty;
+                setHifoPriceForRow(rowId, batch.price);
+                console.log(`[HIFO] 首行: qty=${deductQty}, price=${batch.price}`);
+            } else {
+                // 后续批次 → 记录待插入
+                splitRows.push({ deductQty, price: batch.price });
+                console.log(`[HIFO] 拆分行${i}: qty=${deductQty}, price=${batch.price}`);
+            }
+
+            remainingQty -= deductQty;
+            remainingQty = Math.round(remainingQty * 1000) / 1000;
+        }
+
+        // 插入拆分行
+        if (splitRows.length > 0) {
+            insertHifoSplitRows(rowId, splitRows);
+            showAlert(`已自动拆分为 ${splitRows.length + 1} 行（HIFO 最高价先出）`, 'success');
+        }
+
+        // 触发首行总价更新
+        updateNewRowTotal(outQtyInput);
+
+    } catch (error) {
+        console.error('[HIFO] 拆行失败:', error);
+    } finally {
+        _hifoSplitting = false;
+    }
+}
+
+// 3. 设置行的价格
+function setHifoPriceForRow(rowId, price) {
+    const priceInput = document.getElementById(`${rowId}-price`);
+    const priceSelect = document.getElementById(`${rowId}-price-select`);
+
+    if (priceInput) priceInput.value = price;
+    if (priceSelect) {
+        let found = false;
+        for (let i = 0; i < priceSelect.options.length; i++) {
+            if (priceSelect.options[i].value == price) {
+                priceSelect.value = price;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            const opt = document.createElement('option');
+            opt.value = price;
+            opt.textContent = parseFloat(price).toFixed(3);
+            opt.selected = true;
+            priceSelect.appendChild(opt);
+        }
+    }
+}
+
+// 4. 插入拆分行到源行下方
+function insertHifoSplitRows(sourceRowId, splitDataArray) {
+    const sourceRow = document.getElementById(`${sourceRowId}-out-qty`)?.closest('tr');
+    if (!sourceRow) return;
+
+    // 从源行提取共享数据
+    const sharedDate = document.getElementById(`${sourceRowId}-date`)?.value || '';
+    const sharedCode = document.getElementById(`${sourceRowId}-code_number-input`)?.value || '';
+    const sharedProduct = document.getElementById(`${sourceRowId}-product_name-input`)?.value || '';
+    const sharedSpec = document.getElementById(`${sourceRowId}-specification`)?.value || '';
+    const sharedType = document.getElementById(`${sourceRowId}-type`)?.value || '';
+    const sharedReceiver = document.getElementById(`${sourceRowId}-receiver-input`)?.value || '';
+    const sharedRemark = document.getElementById(`${sourceRowId}-remark`)?.value || '';
+    const sharedTarget = document.getElementById(`${sourceRowId}-target`)?.value || '';
+
+    let insertAfterElement = sourceRow;
+
+    splitDataArray.forEach((splitData) => {
+        const newRowId = 'new-' + Date.now() + '-' + (newRowCounter++);
+        const newRow = document.createElement('tr');
+        newRow.className = 'new-row';
+        newRow.dataset.hifoSplit = 'true';
+
+        const netQty = -splitData.deductQty;
+        const totalValue = Math.abs(netQty * parseFloat(splitData.price));
+
+        newRow.innerHTML = `
+                <td><input type="date" class="table-input" value="${sharedDate}" id="${newRowId}-date"></td>
+                <td>${createCombobox('code', sharedCode, null, newRowId)}</td>
+                <td>${createCombobox('product', sharedProduct, null, newRowId)}</td>
+                <td><input type="number" class="table-input" min="0" step="0.001" placeholder="0" id="${newRowId}-in-qty" oninput="updateNewRowTotal(this)"></td>
+                <td><input type="number" class="table-input" min="0" step="0.001" placeholder="0" id="${newRowId}-out-qty" value="${splitData.deductQty}" oninput="updateNewRowTotal(this)" onchange="handleNewRowOutQuantityChange('${newRowId}', this.value)"></td>
+                <td>
+                    ${currentStockType !== 'central' ?
+                `<span>${currentStockType.toUpperCase()}</span>
+                        <input type="hidden" id="${newRowId}-target" value="${currentStockType}">` :
+                `<select class="table-select" id="${newRowId}-target" ${splitData.deductQty > 0 ? '' : 'disabled'}>
+                            <option value="">请选择</option>
+                            ${generateTargetOptions(sharedTarget)}
+                        </select>`
+            }
+                </td>
+                <td>
+                    <select class="table-select" id="${newRowId}-specification">
+                        <option value="">请选择规格</option>
+                        ${specifications.map(spec => `<option value="${spec}" ${spec === sharedSpec ? 'selected' : ''}>${spec}</option>`).join('')}
+                    </select>
+                </td>
+                <td>
+                    <div class="currency-display"><span class="currency-symbol">RM</span><input type="number" class="currency-input-edit" min="0" step="0.00001" placeholder="0.00" id="${newRowId}-price" value="${splitData.price}" oninput="updateNewRowTotal(this)"></div>
+                </td>
+                <td class="calculated-cell">
+                    <div class="currency-display negative-value negative-parentheses"><span class="currency-symbol">RM</span><span class="currency-amount">${formatCurrency(totalValue)}</span></div>
+                </td>
+                <td>
+                    <select class="table-select" id="${newRowId}-type" ${currentStockType === 'central' ? 'disabled' : ''}>
+                        <option value="">请选择类型</option>
+                        <option value="Kitchen" ${sharedType === 'Kitchen' ? 'selected' : ''}>Kitchen</option>
+                        <option value="Sushi Bar" ${sharedType === 'Sushi Bar' ? 'selected' : ''}>Sushi Bar</option>
+                        <option value="Service Line" ${sharedType === 'Service Line' ? 'selected' : ''}>Service Line</option>
+                        <option value="Sake" ${sharedType === 'Sake' ? 'selected' : ''}>Sake</option>
+                    </select>
+                </td>
+                <td style="text-align: center;">
+                    <input type="checkbox" class="remark-checkbox" id="${newRowId}-product-remark" onchange="toggleNewRowRemarkNumber('${newRowId}')">
+                </td>
+                <td>
+                    ${createNewRowRemarkNumberInput(newRowId)}
+                </td>
+                <td>${createCombobox('receiver', sharedReceiver, null, newRowId)}</td>
+                <td><input type="text" class="table-input" placeholder="输入备注..." id="${newRowId}-remark" value="${sharedRemark}"></td>
+                <td><span class="created-user" data-user="-" data-time="-">-</span></td>
+                <td>
+                    <span class="action-cell">
+                        <button class="action-btn save-new-btn" onclick="saveNewRowRecord(this)" title="保存">
+                            <i class="fas fa-save"></i>
+                        </button>
+                        <button class="action-btn cancel-new-btn" onclick="cancelNewRow(this)" title="取消">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </span>
+                </td>
+            `;
+
+        insertAfterElement.after(newRow);
+        insertAfterElement = newRow;
+
+        // 设置 target select 的值
+        if (currentStockType === 'central' && sharedTarget) {
+            const targetSel = document.getElementById(`${newRowId}-target`);
+            if (targetSel) {
+                targetSel.value = sharedTarget;
+                if (splitData.deductQty > 0) targetSel.disabled = false;
+            }
+        }
+    });
+
+    // 绑定 combobox 事件
+    setTimeout(() => {
+        bindComboboxEvents();
+        updateBatchSaveButtonVisibility();
+    }, 100);
+}
+// ====== HIFO 自动拆行功能结束 ======
 
 // 需要自动勾选货品备注的货品列表
 const autoRemarkProducts = [];
