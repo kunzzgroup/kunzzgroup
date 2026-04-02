@@ -355,27 +355,25 @@ function renderProducts() {
         // 计算行数（variants的数量）
         const rowCount = product.variants.length;
 
-        // 构建总量和总数显示
-        let totalDisplay = '';
+        // 构建统计显示（card-stats风格）
+        let statsHtml = '';
         const normalizedName = (product.product_name || '').toLowerCase().trim();
         const needsPiecesTotal = normalizedName === 'salmon belly 10pcs' || normalizedName === 'salmon head 10pcs';
 
         if (hasKilo) {
-            // 如果是kilo单位，显示总量和总数
-            totalDisplay = `<div style="display: flex; flex-direction: column; gap: 4px; margin-top: 6px; align-items: flex-start;">
-                        <span style="color:rgb(0, 0, 0); font-weight: 800; padding: 2px 0px; border-radius: 4px; font-size: clamp(13px, 0.94vw, 18px);">总数: ${rowCount}</span>
-                        <span style="color:rgb(0, 0, 0); font-weight: 800; padding: 2px 0px; border-radius: 4px; font-size: clamp(13px, 0.94vw, 18px);">总量: ${product.total_quantity}</span>
+            statsHtml = `<div class="card-stats">
+                        <span><span class="card-stats-icon">#</span> 总数: ${rowCount}</span>
+                        <span><span class="card-stats-icon">⚖️</span> 总量: ${product.total_quantity}</span>
                     </div>`;
         } else if (needsPiecesTotal) {
             const totalPieces = rowCount * 10;
-            totalDisplay = `<div style="display: flex; flex-direction: column; gap: 4px; margin-top: 6px; align-items: flex-start;">
-                        <span style="color:rgb(0, 0, 0); font-weight: 800; padding: 2px 0px; border-radius: 4px; font-size: clamp(13px, 0.94vw, 18px);">总数: ${rowCount}</span>
-                        <span style="color:rgb(0, 0, 0); font-weight: 800; padding: 2px 0px; border-radius: 4px; font-size: clamp(13px, 0.94vw, 18px);">总量: ${totalPieces}</span>
+            statsHtml = `<div class="card-stats">
+                        <span><span class="card-stats-icon">#</span> 总数: ${rowCount}</span>
+                        <span><span class="card-stats-icon">📦</span> 总量: ${totalPieces}</span>
                     </div>`;
         } else {
-            // 如果不是kilo单位，只显示总数
-            totalDisplay = `<div style="margin-top: 6px;">
-                        <span style="color:rgb(0, 0, 0); font-weight: 800; padding: 2px 0px; border-radius: 4px; font-size: clamp(13px, 0.94vw, 18px);">总数: ${rowCount}</span>
+            statsHtml = `<div class="card-stats">
+                        <span><span class="card-stats-icon">#</span> 总数: ${rowCount}</span>
                     </div>`;
         }
 
@@ -383,8 +381,8 @@ function renderProducts() {
                         <div class="product-group">
                             <div class="product-header">
                                 <div class="product-info-item">
-                                    <div style="font-weight: 800;">${product.product_name}</div>
-                                    ${totalDisplay}
+                                    <div>${product.product_name}</div>
+                                    ${statsHtml}
                                 </div>
                             </div>
                             <div class="product-table-container">
