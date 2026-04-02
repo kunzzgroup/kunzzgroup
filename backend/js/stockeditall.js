@@ -1886,7 +1886,7 @@ function handleNewRowOutQuantityChange(rowId, value) {
 // ====== HIFO 自动拆行功能 ======
 let _hifoSplitting = false;
 
-// 1. 获取 HIFO 批次数据（按价格降序，按 PRICE 分组）
+// 1. 获取 HIFO 批次数据（两阶段：价格批次 + 备注详情）
 async function fetchHifoBatches(productName, codeNumber) {
     try {
         let endpoint = `?action=product_batches_for_hifo&product_name=${encodeURIComponent(productName)}`;
@@ -1894,18 +1894,34 @@ async function fetchHifoBatches(productName, codeNumber) {
             endpoint += `&code_number=${encodeURIComponent(codeNumber)}`;
         }
         const result = await apiCall(endpoint);
-        if (result.success && result.data && result.data.length > 0) {
-            console.log('[HIFO] 批次数据:', result.data);
-            return result.data;
+        if (result.success && result.data) {
+            console.log('[HIFO] 价格批次:', result.data.price_batches);
+            console.log('[HIFO] 备注详情:', result.data.remark_details);
+            return result.data; // { price_batches: [...], remark_details: [...] }
         }
-        return [];
+        return null;
     } catch (error) {
         console.error('[HIFO] 获取批次数据失败:', error);
-        return [];
+        return null;
     }
 }
 
-// 2. HIFO 核心拆行函数
+// 2. 从备注详情中，为指定价格找到第一个有库存的 remark_number
+function findRemarkForPrice(remarkDetails, price) {
+    if (!remarkDetails || remarkDetails.length === 0) return '';
+    const targetPrice = parseFloat(price);
+    for (const detail of remarkDetails) {
+        const detailPrice = parseFloat(detail.price);
+        // 价格匹配（容差 0.001）且有库存
+        if (Math.abs(detailPrice - targetPrice) < 0.001 && detail.remark_number && detail.available_stock > 0) {
+            console.log(`[HIFO] 为价格 ${price} 选择编码: ${detail.remark_number} (库存: ${detail.available_stock})`);
+            return detail.remark_number;
+        }
+    }
+    return '';
+}
+
+// 3. HIFO 核心拆行函数
 async function hifoAutoSplit(rowId) {
     if (_hifoSplitting) return;
     if (currentStockType !== 'central') return;
@@ -1935,12 +1951,15 @@ async function hifoAutoSplit(rowId) {
     _hifoSplitting = true;
 
     try {
-        const batches = await fetchHifoBatches(productName, codeNumber);
-        if (!batches || batches.length === 0) {
+        const hifoData = await fetchHifoBatches(productName, codeNumber);
+        if (!hifoData || !hifoData.price_batches || hifoData.price_batches.length === 0) {
             console.log('[HIFO] 无可用批次，跳过拆行');
             _hifoSplitting = false;
             return;
         }
+
+        const batches = hifoData.price_batches;
+        const remarkDetails = hifoData.remark_details || [];
 
         const totalStock = batches.reduce((sum, b) => sum + b.available_stock, 0);
         const totalStockRounded = Math.round(totalStock * 1000) / 1000;
@@ -1957,40 +1976,36 @@ async function hifoAutoSplit(rowId) {
         if (batches[0].available_stock >= outQty) {
             console.log('[HIFO] 首批次库存充足，无需拆行');
             setHifoPriceForRow(rowId, batches[0].price);
-            // 自动设置首行的 remark_number
-            if (batches[0].remark_number) {
-                setHifoRemarkForRow(rowId, batches[0].remark_number);
-            }
+            const remark = findRemarkForPrice(remarkDetails, batches[0].price);
+            if (remark) setHifoRemarkForRow(rowId, remark);
             updateNewRowTotal(outQtyInput);
             _hifoSplitting = false;
             return;
         }
 
-        // HIFO 拆分循环
+        // HIFO 拆分循环（按价格级别）
         let remainingQty = outQty;
         const splitRows = [];
 
         for (let i = 0; i < batches.length && remainingQty > 0; i++) {
             const batch = batches[i];
             const deductQty = Math.round(Math.min(remainingQty, batch.available_stock) * 1000) / 1000;
+            const remark = findRemarkForPrice(remarkDetails, batch.price);
 
             if (i === 0) {
                 // 首行：调整出货数量和价格，自动设置 remark
                 outQtyInput.value = deductQty;
                 setHifoPriceForRow(rowId, batch.price);
-                if (batch.remark_number) {
-                    setHifoRemarkForRow(rowId, batch.remark_number);
-                }
-                console.log(`[HIFO] 首行: qty=${deductQty}, price=${batch.price}, remark=${batch.remark_number || '无'}`);
+                if (remark) setHifoRemarkForRow(rowId, remark);
+                console.log(`[HIFO] 首行: qty=${deductQty}, price=${batch.price}, remark=${remark || '无'}`);
             } else {
-                // 后续批次 → 记录待插入（含 remark_number）
+                // 后续批次 → 记录待插入
                 splitRows.push({
                     deductQty,
                     price: batch.price,
-                    remark_number: batch.remark_number || '',
-                    product_remark_checked: batch.product_remark_checked || 0
+                    remark_number: remark
                 });
-                console.log(`[HIFO] 拆分行${i}: qty=${deductQty}, price=${batch.price}, remark=${batch.remark_number || '无'}`);
+                console.log(`[HIFO] 拆分行${i}: qty=${deductQty}, price=${batch.price}, remark=${remark || '无'}`);
             }
 
             remainingQty -= deductQty;
@@ -3782,7 +3797,15 @@ function extractRowData(row) {
         remark: document.getElementById(`${rowId}-remark`) ? document.getElementById(`${rowId}-remark`).value : '',
         target: document.getElementById(`${rowId}-target`) ? document.getElementById(`${rowId}-target`).value : '',
         productRemarkChecked: document.getElementById(`${rowId}-product-remark`) ? document.getElementById(`${rowId}-product-remark`).checked : false,
-        remarkNumber: document.getElementById(`${rowId}-remark-number`) ? document.getElementById(`${rowId}-remark-number`).value : '',
+        remarkNumber: (() => {
+            const hidden = document.getElementById(`${rowId}-remark-number`);
+            if (hidden && hidden.value) return hidden.value;
+            const prefix = document.getElementById(`${rowId}-remark-prefix`);
+            const suffix = document.getElementById(`${rowId}-remark-suffix`);
+            const p = prefix ? prefix.value.trim().toUpperCase() : '';
+            const s = suffix ? suffix.value.trim().toUpperCase() : '';
+            return (p || s) ? `${p}-${s}` : '';
+        })(),
         type: document.getElementById(`${rowId}-type`) ? document.getElementById(`${rowId}-type`).value : ''
     };
 }
@@ -3896,7 +3919,13 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
         code_number: codeInput ? codeInput.value : '',
         remark: document.getElementById(`${rowId}-remark`) ? document.getElementById(`${rowId}-remark`).value : '',
         product_remark_checked: document.getElementById(`${rowId}-product-remark`) ? document.getElementById(`${rowId}-product-remark`).checked : false,
-        remark_number: document.getElementById(`${rowId}-remark-number`) ? document.getElementById(`${rowId}-remark-number`).value.trim().toUpperCase() : '',
+        remark_number: (() => {
+            const prefix = document.getElementById(`${rowId}-remark-prefix`);
+            const suffix = document.getElementById(`${rowId}-remark-suffix`);
+            const p = prefix ? prefix.value.trim().toUpperCase() : '';
+            const s = suffix ? suffix.value.trim().toUpperCase() : '';
+            return (p || s) ? `${p}-${s}` : '';
+        })(),
         type: document.getElementById(`${rowId}-type`) ? document.getElementById(`${rowId}-type`).value : ''
     };
 
@@ -8258,7 +8287,13 @@ async function batchSaveNewRows() {
                 code_number: codeInput ? codeInput.value : '',
                 remark: document.getElementById(`${rowId}-remark`) ? document.getElementById(`${rowId}-remark`).value : '',
                 product_remark_checked: document.getElementById(`${rowId}-product-remark`) ? document.getElementById(`${rowId}-product-remark`).checked : false,
-                remark_number: document.getElementById(`${rowId}-remark-number`) ? document.getElementById(`${rowId}-remark-number`).value.trim().toUpperCase() : '',
+                remark_number: (() => {
+                    const prefix = document.getElementById(`${rowId}-remark-prefix`);
+                    const suffix = document.getElementById(`${rowId}-remark-suffix`);
+                    const p = prefix ? prefix.value.trim().toUpperCase() : '';
+                    const s = suffix ? suffix.value.trim().toUpperCase() : '';
+                    return (p || s) ? `${p}-${s}` : '';
+                })(),
                 target_system: document.getElementById(`${rowId}-target`) ? document.getElementById(`${rowId}-target`).value : '',
                 type: document.getElementById(`${rowId}-type`) ? document.getElementById(`${rowId}-type`).value : ''
             };

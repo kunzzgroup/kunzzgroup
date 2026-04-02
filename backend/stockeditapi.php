@@ -1131,7 +1131,9 @@ function handleGet()
             break;
 
         case 'product_batches_for_hifo':
-            // HIFO 拆行专用：按 remark_number + price 分组返回可用批次（价格降序）
+            // HIFO 拆行专用：两阶段查询
+            // Phase 1: 按 PRICE 分组（与库存汇总一致）→ 用于拆行计算
+            // Phase 2: 按 remark_number 分组 → 用于自动填充备注编号
             $productName = $_GET['product_name'] ?? null;
             $codeNumber  = $_GET['code_number']  ?? null;
 
@@ -1140,43 +1142,66 @@ function handleGet()
             }
 
             try {
-                // 查询带有 remark_number 的批次（按 remark_number 级别分组）
-                $sql = "SELECT
-                            price,
-                            remark_number,
-                            product_remark_checked,
-                            (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) -
-                             COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) AS available_stock
-                        FROM stockinout_data
-                        WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&'))
-                          AND deleted_at IS NULL
-                          AND (target_system IS NULL OR target_system != 'SOT')";
-                $params = [$productName, $productName];
+                $baseWhere = "(product_name = ? OR product_name = REPLACE(?, '&amp;', '&'))
+                              AND deleted_at IS NULL";
+                $baseParams = [$productName, $productName];
 
                 if (!empty($codeNumber)) {
-                    $sql .= " AND code_number = ?";
-                    $params[] = $codeNumber;
+                    $baseWhere .= " AND code_number = ?";
+                    $baseParams[] = $codeNumber;
                 }
 
-                $sql .= " GROUP BY price, remark_number, product_remark_checked
-                          HAVING available_stock > 0
-                          ORDER BY price DESC, remark_number ASC";
+                // Phase 1: 按价格分组的可用库存（与价格下拉框一致）
+                $sql1 = "SELECT
+                            price,
+                            (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) -
+                             COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) AS available_stock
+                         FROM stockinout_data
+                         WHERE $baseWhere
+                         GROUP BY price
+                         HAVING available_stock > 0
+                         ORDER BY price DESC";
 
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute($params);
-                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                $result = [];
-                foreach ($rows as $row) {
-                    $result[] = [
-                        'price'                  => $row['price'],
-                        'remark_number'          => $row['remark_number'] ?? '',
-                        'product_remark_checked' => intval($row['product_remark_checked'] ?? 0),
-                        'available_stock'        => round(floatval($row['available_stock']), 3)
+                $stmt1 = $pdo->prepare($sql1);
+                $stmt1->execute($baseParams);
+                $priceBatches = [];
+                foreach ($stmt1->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                    $priceBatches[] = [
+                        'price'           => $row['price'],
+                        'available_stock' => round(floatval($row['available_stock']), 3)
                     ];
                 }
 
-                sendResponse(true, "HIFO批次数据获取成功", $result);
+                // Phase 2: 按价格+备注编号分组（仅限有备注编号的记录）
+                $sql2 = "SELECT
+                            price,
+                            remark_number,
+                            (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) -
+                             COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) AS available_stock
+                         FROM stockinout_data
+                         WHERE $baseWhere
+                           AND product_remark_checked = 1
+                           AND remark_number IS NOT NULL
+                           AND remark_number != ''
+                         GROUP BY price, remark_number
+                         HAVING available_stock > 0
+                         ORDER BY price DESC, remark_number ASC";
+
+                $stmt2 = $pdo->prepare($sql2);
+                $stmt2->execute($baseParams);
+                $remarkDetails = [];
+                foreach ($stmt2->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                    $remarkDetails[] = [
+                        'price'           => $row['price'],
+                        'remark_number'   => $row['remark_number'],
+                        'available_stock' => round(floatval($row['available_stock']), 3)
+                    ];
+                }
+
+                sendResponse(true, "HIFO批次数据获取成功", [
+                    'price_batches'  => $priceBatches,
+                    'remark_details' => $remarkDetails
+                ]);
 
             } catch (PDOException $e) {
                 sendResponse(false, "查询HIFO批次数据失败：" . $e->getMessage());
