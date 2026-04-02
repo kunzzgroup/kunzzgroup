@@ -1172,7 +1172,7 @@ function handleGet()
                     ];
                 }
 
-                // Phase 2: 按价格+备注编号分组（仅限有备注编号的记录）
+                // Phase 2: 按价格+备注编号分组（仅限有备注编号且总体库存为正的记录）
                 $sql2 = "SELECT
                             price,
                             remark_number,
@@ -1183,12 +1183,23 @@ function handleGet()
                            AND product_remark_checked = 1
                            AND remark_number IS NOT NULL
                            AND remark_number != ''
+                           AND remark_number IN (
+                               SELECT rn.remark_number FROM stockinout_data rn
+                               WHERE (rn.product_name = ? OR rn.product_name = REPLACE(?, '&amp;', '&'))
+                                 AND rn.product_remark_checked = 1
+                                 AND rn.remark_number IS NOT NULL AND rn.remark_number != ''
+                                 AND rn.deleted_at IS NULL
+                               GROUP BY rn.remark_number
+                               HAVING (SUM(rn.in_quantity) - SUM(rn.out_quantity)) > 0
+                           )
                          GROUP BY price, remark_number
                          HAVING available_stock > 0
                          ORDER BY price DESC, remark_number ASC";
 
                 $stmt2 = $pdo->prepare($sql2);
-                $stmt2->execute($baseParams);
+                // baseParams + 子查询需要的额外 productName 参数
+                $phase2Params = array_merge($baseParams, [$productName, $productName]);
+                $stmt2->execute($phase2Params);
                 $remarkDetails = [];
                 foreach ($stmt2->fetchAll(PDO::FETCH_ASSOC) as $row) {
                     $remarkDetails[] = [
