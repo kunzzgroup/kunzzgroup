@@ -523,13 +523,6 @@ async function loadData(system) {
             } else {
                 stockData[system] = result.data.summary || [];
 
-                // J2系统过滤掉Sake类型的数据
-                if (system === 'j2') {
-                    stockData[system] = stockData[system].filter(item => {
-                        return item.type !== 'Sake';
-                    });
-                }
-
                 updateSummaryCards(system, result.data);
                 if (system === 'central') {
                     // 同步更新中央页面右侧的 J1/J2/J3 供应统计
