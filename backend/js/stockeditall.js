@@ -1957,6 +1957,10 @@ async function hifoAutoSplit(rowId) {
         if (batches[0].available_stock >= outQty) {
             console.log('[HIFO] 首批次库存充足，无需拆行');
             setHifoPriceForRow(rowId, batches[0].price);
+            // 自动设置首行的 remark_number
+            if (batches[0].remark_number) {
+                setHifoRemarkForRow(rowId, batches[0].remark_number);
+            }
             updateNewRowTotal(outQtyInput);
             _hifoSplitting = false;
             return;
@@ -1971,14 +1975,22 @@ async function hifoAutoSplit(rowId) {
             const deductQty = Math.round(Math.min(remainingQty, batch.available_stock) * 1000) / 1000;
 
             if (i === 0) {
-                // 首行：调整出货数量和价格
+                // 首行：调整出货数量和价格，自动设置 remark
                 outQtyInput.value = deductQty;
                 setHifoPriceForRow(rowId, batch.price);
-                console.log(`[HIFO] 首行: qty=${deductQty}, price=${batch.price}`);
+                if (batch.remark_number) {
+                    setHifoRemarkForRow(rowId, batch.remark_number);
+                }
+                console.log(`[HIFO] 首行: qty=${deductQty}, price=${batch.price}, remark=${batch.remark_number || '无'}`);
             } else {
-                // 后续批次 → 记录待插入
-                splitRows.push({ deductQty, price: batch.price });
-                console.log(`[HIFO] 拆分行${i}: qty=${deductQty}, price=${batch.price}`);
+                // 后续批次 → 记录待插入（含 remark_number）
+                splitRows.push({
+                    deductQty,
+                    price: batch.price,
+                    remark_number: batch.remark_number || '',
+                    product_remark_checked: batch.product_remark_checked || 0
+                });
+                console.log(`[HIFO] 拆分行${i}: qty=${deductQty}, price=${batch.price}, remark=${batch.remark_number || '无'}`);
             }
 
             remainingQty -= deductQty;
@@ -2024,6 +2036,45 @@ function setHifoPriceForRow(rowId, price) {
             priceSelect.appendChild(opt);
         }
     }
+}
+
+// 3b. 自动设置行的 remark_number 和勾选货品备注
+function setHifoRemarkForRow(rowId, remarkNumber) {
+    if (!remarkNumber) return;
+
+    // 勾选货品备注 checkbox
+    const remarkCheckbox = document.getElementById(`${rowId}-product-remark`);
+    if (remarkCheckbox && !remarkCheckbox.checked) {
+        remarkCheckbox.checked = true;
+        // 触发 toggleNewRowRemarkNumber 以启用输入框
+        if (typeof toggleNewRowRemarkNumber === 'function') {
+            toggleNewRowRemarkNumber(rowId);
+        }
+    }
+
+    // 解析 remark_number（如 "S-785" → prefix="S", suffix="785"）
+    const parts = remarkNumber.split('-');
+    const prefix = parts[0] || '';
+    const suffix = parts.slice(1).join('-') || '';
+
+    // 设置前缀和后缀值
+    setTimeout(() => {
+        const prefixInput = document.getElementById(`${rowId}-remark-prefix`);
+        const suffixInput = document.getElementById(`${rowId}-remark-suffix`);
+        const wrapper = document.getElementById(`${rowId}-remark-wrapper`);
+
+        if (prefixInput) {
+            prefixInput.value = prefix;
+            prefixInput.disabled = false;
+        }
+        if (suffixInput) {
+            suffixInput.value = suffix;
+            suffixInput.disabled = false;
+        }
+        if (wrapper) {
+            wrapper.dataset.disabled = 'false';
+        }
+    }, 50);
 }
 
 // 4. 插入拆分行到源行下方
@@ -2121,13 +2172,21 @@ function insertHifoSplitRows(sourceRowId, splitDataArray) {
                 if (splitData.deductQty > 0) targetSel.disabled = false;
             }
         }
+
+        // 自动设置拆分行的 remark_number
+        if (splitData.remark_number) {
+            // 延迟执行以确保 DOM 已渲染
+            const _newRowId = newRowId;
+            const _remarkNumber = splitData.remark_number;
+            setTimeout(() => setHifoRemarkForRow(_newRowId, _remarkNumber), 80);
+        }
     });
 
     // 绑定 combobox 事件
     setTimeout(() => {
         bindComboboxEvents();
         updateBatchSaveButtonVisibility();
-    }, 100);
+    }, 150);
 }
 // ====== HIFO 自动拆行功能结束 ======
 

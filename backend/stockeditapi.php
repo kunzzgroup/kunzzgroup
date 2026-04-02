@@ -1131,7 +1131,7 @@ function handleGet()
             break;
 
         case 'product_batches_for_hifo':
-            // HIFO 拆行专用：按 PRICE 分组返回可用批次（价格降序）
+            // HIFO 拆行专用：按 remark_number + price 分组返回可用批次（价格降序）
             $productName = $_GET['product_name'] ?? null;
             $codeNumber  = $_GET['code_number']  ?? null;
 
@@ -1140,8 +1140,11 @@ function handleGet()
             }
 
             try {
+                // 查询带有 remark_number 的批次（按 remark_number 级别分组）
                 $sql = "SELECT
                             price,
+                            remark_number,
+                            product_remark_checked,
                             (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) -
                              COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) AS available_stock
                         FROM stockinout_data
@@ -1155,9 +1158,9 @@ function handleGet()
                     $params[] = $codeNumber;
                 }
 
-                $sql .= " GROUP BY price
+                $sql .= " GROUP BY price, remark_number, product_remark_checked
                           HAVING available_stock > 0
-                          ORDER BY price DESC";
+                          ORDER BY price DESC, remark_number ASC";
 
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
@@ -1166,8 +1169,10 @@ function handleGet()
                 $result = [];
                 foreach ($rows as $row) {
                     $result[] = [
-                        'price'           => $row['price'],
-                        'available_stock'  => round(floatval($row['available_stock']), 3)
+                        'price'                  => $row['price'],
+                        'remark_number'          => $row['remark_number'] ?? '',
+                        'product_remark_checked' => intval($row['product_remark_checked'] ?? 0),
+                        'available_stock'        => round(floatval($row['available_stock']), 3)
                     ];
                 }
 
