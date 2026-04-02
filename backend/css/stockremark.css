@@ -30,7 +30,7 @@ body {
 .header h1 {
     font-size: clamp(20px, 2.6vw, 50px);
     font-weight: bold;
-    color: #000000ff;
+    color: #2c2014;
 }
 
 .header .controls {
@@ -103,8 +103,8 @@ body {
     border-radius: 12px;
     padding: clamp(10px, 1.15vw, 22px) clamp(18px, 1.25vw, 24px);
     margin-bottom: clamp(14px, 1.25vw, 24px);
-    border: 2px solid #000000ff;
-    box-shadow: 0 2px 8px rgba(88, 62, 4, 0.1);
+    border: 1px solid #e0d5c4;
+    box-shadow: 0 1px 4px rgba(88, 62, 4, 0.06);
 }
 
 .filter-grid {
@@ -123,7 +123,7 @@ body {
 .filter-group label {
     font-size: clamp(8px, 0.74vw, 14px);
     font-weight: 600;
-    color: #000000ff;
+    color: #5c4a2e;
 }
 
 /* .filter-input removed — now handled globally by smartSearch.css */
@@ -139,8 +139,8 @@ body {
 
 .filter-select:focus {
     outline: none;
-    border-color: #000000ff;
-    box-shadow: 0 0 0 3px rgba(39, 27, 0, 0.1);
+    border-color: #c9a55a;
+    box-shadow: 0 0 0 3px rgba(201, 165, 90, 0.12);
 }
 
 .filter-actions {
@@ -164,12 +164,12 @@ body {
 }
 
 .btn-primary {
-    background-color: #f99e00;
+    background-color: #d4892a;
     color: white;
 }
 
 .btn-primary:hover {
-    background-color: #f98500ff;
+    background-color: #c07a22;
     transform: translateY(-1px);
 }
 
@@ -194,12 +194,12 @@ body {
 }
 
 .btn-warning {
-    background-color: #f59e0b;
+    background-color: #d4892a;
     color: white;
 }
 
 .btn-warning:hover {
-    background-color: #d97706;
+    background-color: #c07a22;
     transform: translateY(-1px);
 }
 
@@ -210,24 +210,28 @@ body {
     gap: clamp(14px, 1.25vw, 24px);
     margin-bottom: clamp(14px, 1.25vw, 24px);
     min-width: 0;
-    /* 允许内容缩小 */
 }
 
 /* 货品组显示 */
 .product-group {
     background: white;
     border-radius: 12px;
-    border: 2px solid #000000ff;
-    box-shadow: 0 2px 8px rgba(88, 62, 4, 0.1);
+    border: 1px solid #ddd3c2;
+    box-shadow: 0 2px 8px rgba(88, 62, 4, 0.06);
     overflow: hidden;
     display: flex;
     min-width: 0;
-    /* 允许内容缩小 */
     height: clamp(220px, 19.17vw, 368px);
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.product-group:hover {
+    box-shadow: 0 6px 20px rgba(88, 62, 4, 0.12);
+    transform: translateY(-2px);
 }
 
 .product-header {
-    background: linear-gradient(to bottom, #fda100, #ffbe4f, #ffe5b9);
+    background: linear-gradient(165deg, #8b6d3f, #a68650, #c4a56e);
     color: white;
     padding: 2px;
     padding-left: clamp(6px, 0.625vw, 12px);
@@ -261,26 +265,25 @@ body {
     overflow-y: auto;
     overflow-x: hidden;
     max-height: calc(10 * clamp(32px, 2.6vw, 50px) + clamp(32px, 2.6vw, 50px));
-    /* 10行数据 + 1行表头 */
     scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 #f1f5f9;
+    scrollbar-color: #ccc5b5 #f5f0e8;
 }
 
 .table-wrapper::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
 }
 
 .table-wrapper::-webkit-scrollbar-track {
-    background: #f1f5f9;
+    background: #f5f0e8;
 }
 
 .table-wrapper::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
+    background: #ccc5b5;
+    border-radius: 3px;
 }
 
 .table-wrapper::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: #a89e8e;
 }
 
 .product-info-item {
@@ -303,22 +306,22 @@ body {
     position: sticky;
     top: 0;
     z-index: 10;
-    background: #f8f5eb;
+    background: #f5f0e8;
 }
 
 .price-variants-table th {
-    background: #f8f5eb;
-    color: #000000ff;
+    background: #f5f0e8;
+    color: #5c4a2e;
     font-size: clamp(8px, 0.625vw, 12px);
     text-align: center;
-    font-weight: 600;
-    border-bottom: 2px solid #887d66ff;
+    font-weight: 700;
+    border-bottom: 1.5px solid #c4b899;
 }
 
 .price-variants-table td {
     font-size: clamp(7px, 0.625vw, 12px);
     padding: 8px;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid #eee8dc;
     text-align: center;
     vertical-align: middle;
 }
@@ -326,7 +329,7 @@ body {
 .price-variants-table th,
 .price-variants-table td {
     padding: clamp(4px, 0.42vw, 8px) clamp(6px, 0.63vw, 12px);
-    border-bottom: 1px solid #dbdbdb;
+    border-bottom: 1px solid #eee8dc;
     text-align: center;
     vertical-align: middle;
 }
@@ -355,8 +358,12 @@ body {
     font-weight: 700;
 }
 
+.price-variants-table tbody tr:nth-child(even) {
+    background-color: #faf8f3;
+}
+
 .price-variants-table tr:hover {
-    background-color: #f9fafb;
+    background-color: #f0ebe0;
 }
 
 /* 价格差异高亮 */
@@ -400,8 +407,8 @@ body {
     border-radius: 12px;
     padding: 24px;
     margin-bottom: 24px;
-    border: 2px solid #583e04;
-    box-shadow: 0 2px 8px rgba(88, 62, 4, 0.1);
+    border: 1px solid #ddd3c2;
+    box-shadow: 0 2px 8px rgba(88, 62, 4, 0.06);
 }
 
 .stats-grid {
@@ -436,7 +443,7 @@ body {
     width: 20px;
     height: 20px;
     border: 3px solid #f3f3f3;
-    border-top: 3px solid #583e04;
+    border-top: 3px solid #a68650;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -471,7 +478,7 @@ body {
 }
 
 .selector-button {
-    background-color: #f99e00;
+    background-color: #8b6d3f;
     color: white;
     font-weight: 500;
     padding: clamp(6px, 0.52vw, 10px) clamp(16px, 1.04vw, 20px);
@@ -482,17 +489,16 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: all 0.2s;
+    transition: all 0.25s ease;
     width: clamp(90px, 6.77vw, 130px);
     justify-content: space-between;
     position: relative;
-    /* 添加这个，因为下拉菜单需要 */
 }
 
 .selector-button:hover {
-    background-color: #f98500ff;
+    background-color: #7a5f35;
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(88, 62, 4, 0.2);
+    box-shadow: 0 4px 12px rgba(88, 62, 4, 0.18);
 }
 
 .selector-dropdown {
@@ -500,9 +506,9 @@ body {
     top: 96%;
     right: 0;
     background: white;
-    border: 2px solid #000000ff;
+    border: 1px solid #ddd3c2;
     border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(88, 62, 4, 0.2);
+    box-shadow: 0 8px 24px rgba(88, 62, 4, 0.15);
     width: 100%;
     z-index: 10000;
     display: none;
@@ -516,9 +522,9 @@ body {
 .selector-dropdown .dropdown-item {
     padding: clamp(6px, 0.42vw, 8px) clamp(10px, 0.83vw, 16px);
     cursor: pointer;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid #eee8dc;
     transition: all 0.2s;
-    color: #000000ff;
+    color: #3d3020;
     font-size: clamp(8px, 0.74vw, 14px);
     font-weight: 500;
     text-decoration: none;
@@ -530,12 +536,12 @@ body {
 }
 
 .selector-dropdown .dropdown-item:hover {
-    background-color: #f8f5eb;
+    background-color: #f5f0e8;
     border-radius: 8px;
 }
 
 .selector-dropdown .dropdown-item.active {
-    background-color: #f99e00 !important;
+    background-color: #8b6d3f !important;
     color: white !important;
 }
 
@@ -545,15 +551,10 @@ body {
     margin-right: 16px;
 }
 
-/* .view-selector .selector-button {
-            background-color: #583e04;
-            min-width: 120px;
-        } */
-
 .view-selector .selector-button:hover {
-    background-color: #f98500ff;
+    background-color: #7a5f35;
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(88, 62, 4, 0.2);
+    box-shadow: 0 4px 12px rgba(88, 62, 4, 0.18);
 }
 
 .view-selector .selector-dropdown {
@@ -602,7 +603,6 @@ body {
         word-wrap: break-word;
         overflow-wrap: break-word;
         white-space: nowrap;
-        /* 防止换行 */
     }
 }
 
@@ -644,7 +644,7 @@ body {
     right: clamp(12px, 1.04vw, 20px);
     width: clamp(36px, 2.6vw, 50px);
     height: clamp(36px, 2.6vw, 50px);
-    background-color: #f99e00;
+    background-color: #8b6d3f;
     color: white;
     border: none;
     border-radius: 50%;
@@ -653,7 +653,7 @@ body {
     align-items: center;
     justify-content: center;
     font-size: clamp(12px, 0.94vw, 18px);
-    box-shadow: 0 4px 12px rgba(88, 62, 4, 0.3);
+    box-shadow: 0 4px 12px rgba(88, 62, 4, 0.2);
     transition: all 0.3s ease;
     opacity: 0;
     visibility: hidden;
@@ -668,9 +668,9 @@ body {
 }
 
 .back-to-top:hover {
-    background-color: #f98500ff;
+    background-color: #7a5f35;
     transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgba(88, 62, 4, 0.4);
+    box-shadow: 0 6px 16px rgba(88, 62, 4, 0.3);
 }
 
 .back-to-top:active {
