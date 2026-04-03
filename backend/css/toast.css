@@ -1,17 +1,17 @@
 /* =============================================================
    Global Toast Notification System
-   Position: top-right, white-background with colored left-border
+   Position: bottom-right, white-background with colored left-border
    Used across all backend pages via sidebar.php
    ============================================================= */
 
 /* Container */
 #global-toast-container {
     position: fixed;
-    top: 20px;
+    bottom: 20px;
     right: 20px;
     z-index: 99999;
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
     gap: 10px;
     pointer-events: none;
     max-width: clamp(260px, 22vw, 380px);
@@ -144,7 +144,7 @@
 /* Responsive */
 @media (max-width: 600px) {
     #global-toast-container {
-        top: 12px;
+        bottom: 12px;
         right: 12px;
         left: 12px;
         max-width: 100%;
