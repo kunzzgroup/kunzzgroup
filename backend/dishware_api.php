@@ -607,24 +607,46 @@ function updateStock() {
     try {
         $pdo->beginTransaction();
         
-        // 获取所有活跃的餐厅店面
-        $restaurants_sql = "SELECT id FROM dishware_restaurant_locations WHERE is_active = 1";
+        // 获取所有活跃的餐厅店面（包含名称，用于破损记录的 shop_type）
+        $restaurants_sql = "SELECT id, name FROM dishware_restaurant_locations WHERE is_active = 1";
         $restaurants_stmt = $pdo->prepare($restaurants_sql);
         $restaurants_stmt->execute();
         $restaurants = $restaurants_stmt->fetchAll(PDO::FETCH_ASSOC);
         
         // 更新每个餐厅店面的库存
-        // 获取所有餐厅店面，按显示顺序
-        $restaurants_list = $pdo->query("SELECT id FROM dishware_restaurant_locations WHERE is_active = 1 ORDER BY display_order")->fetchAll(PDO::FETCH_ASSOC);
+        // 获取所有餐厅店面，按显示顺序（包含名称）
+        $restaurants_list = $pdo->query("SELECT id, name FROM dishware_restaurant_locations WHERE is_active = 1 ORDER BY display_order")->fetchAll(PDO::FETCH_ASSOC);
         
         error_log("updateStock - restaurants_list count: " . count($restaurants_list));
         error_log("updateStock - restaurant_quantities: " . (isset($data['restaurant_quantities']) ? json_encode($data['restaurant_quantities']) : 'not set'));
         
+        // ── 读取旧库存（用于比较差异，自动生成破损记录）──────────────
+        $old_quantities = [];
+        foreach ($restaurants_list as $restaurant) {
+            $old_sql = "SELECT quantity FROM dishware_stock_by_restaurant WHERE dishware_id = ? AND restaurant_id = ?";
+            $old_stmt = $pdo->prepare($old_sql);
+            $old_stmt->execute([$dishware_id, $restaurant['id']]);
+            $old_row = $old_stmt->fetch(PDO::FETCH_ASSOC);
+            $old_quantities[$restaurant['id']] = $old_row ? (int)$old_row['quantity'] : 0;
+        }
+        
+        // 获取碗碟单价（用于自动破损记录的金额计算）
+        $price_sql = "SELECT unit_price FROM dishware_info WHERE id = ?";
+        $price_stmt = $pdo->prepare($price_sql);
+        $price_stmt->execute([$dishware_id]);
+        $price_row = $price_stmt->fetch(PDO::FETCH_ASSOC);
+        $unit_price = $price_row ? (float)$price_row['unit_price'] : 0;
+        
+        // 当前日期（马来西亚时区）
+        $today = (new DateTime('now', new DateTimeZone('Asia/Kuala_Lumpur')))->format('Y-m-d');
+        
         // 如果提供了按顺序的数组
         if (isset($data['restaurant_quantities']) && is_array($data['restaurant_quantities'])) {
             $update_count = 0;
+            $break_records_created = 0;
             foreach ($restaurants_list as $index => $restaurant) {
                 $quantity = isset($data['restaurant_quantities'][$index]) ? (int)$data['restaurant_quantities'][$index] : 0;
+                $old_qty = $old_quantities[$restaurant['id']] ?? 0;
                 
                 $sql = "INSERT INTO dishware_stock_by_restaurant (dishware_id, restaurant_id, quantity) 
                         VALUES (?, ?, ?)
@@ -639,14 +661,40 @@ function updateStock() {
                     $update_count++;
                 }
                 
+                // ── 自动破损记录：数量减少时自动插入 ──────────────────
+                $diff = $old_qty - $quantity;
+                if ($diff > 0) {
+                    $shop_type = strtolower($restaurant['name']);
+                    $total_price = $unit_price * $diff;
+                    
+                    $break_sql = "INSERT INTO dishware_break_records 
+                                  (dishware_id, shop_type, break_quantity, chargeable_quantity, unit_price, total_price, break_date, recorded_by) 
+                                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                    $break_stmt = $pdo->prepare($break_sql);
+                    $break_stmt->execute([
+                        $dishware_id,
+                        $shop_type,
+                        $diff,
+                        $diff,
+                        $unit_price,
+                        $total_price,
+                        $today,
+                        'auto'
+                    ]);
+                    $break_records_created++;
+                    error_log("updateStock - 自动创建破损记录: dishware_id=$dishware_id, shop=$shop_type, 旧数量=$old_qty, 新数量=$quantity, 差额=$diff");
+                }
+                
                 error_log("updateStock - dishware_id=$dishware_id, restaurant_id={$restaurant['id']}, index=$index, quantity=$quantity, result=" . ($result ? 'success' : 'failed'));
             }
-            error_log("updateStock - 总共更新了 $update_count / " . count($restaurants_list) . " 个餐厅的库存");
+            error_log("updateStock - 总共更新了 $update_count / " . count($restaurants_list) . " 个餐厅的库存, 自动创建 $break_records_created 条破损记录");
         } else {
             // 向后兼容：支持按餐厅ID的格式
             foreach ($restaurants_list as $restaurant) {
                 $restaurant_id = $restaurant['id'];
                 $quantity = $data['restaurant_' . $restaurant_id . '_quantity'] ?? $_POST['restaurant_' . $restaurant_id . '_quantity'] ?? 0;
+                $quantity = (int)$quantity;
+                $old_qty = $old_quantities[$restaurant_id] ?? 0;
                 
                 $sql = "INSERT INTO dishware_stock_by_restaurant (dishware_id, restaurant_id, quantity) 
                         VALUES (?, ?, ?)
@@ -656,6 +704,29 @@ function updateStock() {
                 
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([$dishware_id, $restaurant_id, $quantity]);
+                
+                // ── 自动破损记录：数量减少时自动插入 ──────────────────
+                $diff = $old_qty - $quantity;
+                if ($diff > 0) {
+                    $shop_type = strtolower($restaurant['name']);
+                    $total_price = $unit_price * $diff;
+                    
+                    $break_sql = "INSERT INTO dishware_break_records 
+                                  (dishware_id, shop_type, break_quantity, chargeable_quantity, unit_price, total_price, break_date, recorded_by) 
+                                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                    $break_stmt = $pdo->prepare($break_sql);
+                    $break_stmt->execute([
+                        $dishware_id,
+                        $shop_type,
+                        $diff,
+                        $diff,
+                        $unit_price,
+                        $total_price,
+                        $today,
+                        'auto'
+                    ]);
+                    error_log("updateStock - 自动创建破损记录(兼容模式): dishware_id=$dishware_id, shop=$shop_type, 差额=$diff");
+                }
             }
         }
         
