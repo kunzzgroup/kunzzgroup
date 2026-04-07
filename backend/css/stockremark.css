@@ -203,10 +203,10 @@ body {
     transform: translateY(-1px);
 }
 
-/* 货品组容器 - 自适应列数 */
+/* 货品组容器 - 固定3列 */
 .products-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: clamp(20px, 1.67vw, 32px);
     margin-bottom: clamp(14px, 1.25vw, 24px);
     min-width: 0;
