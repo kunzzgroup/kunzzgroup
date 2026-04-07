@@ -430,106 +430,119 @@ if (isset($_SESSION['user_id'])) {
     <div id="editModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">编辑碗碟信息</h2>
+                <h2 class="modal-title"><i class="fas fa-edit" style="margin-right: 8px; opacity: 0.7;"></i>编辑碗碟信息</h2>
                 <span class="close" onclick="closeModal()">&times;</span>
             </div>
             <form id="edit-form" enctype="multipart/form-data">
-                <div class="modal-form" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-                    <div class="form-group">
-                        <label class="required">碗碟名称</label>
-                        <input type="text" id="edit-product-name" name="product_name" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="required">分类</label>
-                        <select id="edit-category" name="category" required>
-                            <option value="">请选择分类</option>
-                            <option value="AG">AG</option>
-                            <option value="CU">CU</option>
-                            <option value="DN">DN</option>
-                            <option value="DR">DR</option>
-                            <option value="IP">IP</option>
-                            <option value="MA">MA</option>
-                            <option value="ME">ME</option>
-                            <option value="MU">MU</option>
-                            <option value="OM">OM</option>
-                            <option value="OT">OT</option>
-                            <option value="SA">SA</option>
-                            <option value="SK">SK</option>
-                            <option value="SU">SU</option>
-                            <option value="SAR">SAR</option>
-                            <option value="SER">SER</option>
-                            <option value="SET">SET</option>
-                            <option value="TA">TA</option>
-                            <option value="TE">TE</option>
-                            <option value="WAN">WAN</option>
-                            <option value="YA">YA</option>
-                            <option value="用具">用具</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>产品编号</label>
-                        <input type="text" id="edit-code-number" name="code_number" placeholder="001" maxlength="10">
-                    </div>
-                    <div class="form-group">
-                        <label>尺寸规格</label>
-                        <input type="text" id="edit-size" name="size" placeholder="例如：直径15cm">
-                    </div>
-                    <div class="form-group">
-                        <label class="required">单价 (RM)</label>
-                        <input type="number" id="edit-unit-price" name="unit_price" step="0.01" min="0" required
-                            placeholder="0.00">
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>库存数量</label>
-                        <div class="quantity-row" id="edit-restaurant-quantities">
-                            <!-- 动态生成餐厅店面输入框 -->
-                        </div>
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>照片上传</label>
+                <div class="edit-modal-body">
+                    <!-- 左侧：照片 -->
+                    <div class="edit-modal-photo-panel">
                         <div class="photo-upload-area" onclick="document.getElementById('edit-photo').click()">
                             <div class="photo-upload-icon">
                                 <i class="fas fa-cloud-upload-alt"></i>
                             </div>
-                            <div class="photo-upload-text">点击上传新照片或拖拽照片到此处</div>
-                            <div class="photo-upload-hint">支持 JPG, PNG, GIF 格式（HEIC 自动转换），最大 5MB</div>
+                            <div class="photo-upload-text">点击上传照片</div>
+                            <div class="photo-upload-hint">JPG, PNG, GIF, HEIC · 最大 5MB</div>
                             <img id="edit-photo-preview" class="photo-preview" style="display: none;">
                         </div>
                         <input type="file" id="edit-photo" name="photo" class="file-input" accept="image/*">
                         <input type="hidden" id="delete-photo-flag" name="delete_photo" value="0">
                         <input type="hidden" id="edit-current-photo-path" name="current_photo_path" value="">
                     </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>套装设置</label>
-                        <div id="set-settings-container"
-                            style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; background: #f9fafb;">
-                            <div style="margin-bottom: 12px;">
-                                <div
-                                    style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
-                                    <span style="font-weight: 600; white-space: nowrap; flex-shrink: 0;">当前套装成员：</span>
-                                    <span id="current-set-members" style="color: #666;">暂无</span>
+
+                    <!-- 右侧：表单 -->
+                    <div class="edit-modal-form-panel">
+                        <!-- 基本信息区 -->
+                        <div class="edit-section">
+                            <div class="edit-section-title"><i class="fas fa-info-circle"></i> 基本信息</div>
+                            <div class="edit-fields-grid">
+                                <div class="form-group edit-field-full">
+                                    <label class="required">碗碟名称</label>
+                                    <input type="text" id="edit-product-name" name="product_name" required>
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                                    <label
-                                        style="font-weight: 600; margin: 0; white-space: nowrap; flex-shrink: 0;">添加套装成员：</label>
-                                    <select id="set-member-select"
-                                        style="flex: 1; min-width: 180px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                                        <option value="">请选择要加入套装的碗碟</option>
+                                <div class="form-group">
+                                    <label class="required">分类</label>
+                                    <select id="edit-category" name="category" required>
+                                        <option value="">请选择</option>
+                                        <option value="AG">AG</option>
+                                        <option value="CU">CU</option>
+                                        <option value="DN">DN</option>
+                                        <option value="DR">DR</option>
+                                        <option value="IP">IP</option>
+                                        <option value="MA">MA</option>
+                                        <option value="ME">ME</option>
+                                        <option value="MU">MU</option>
+                                        <option value="OM">OM</option>
+                                        <option value="OT">OT</option>
+                                        <option value="SA">SA</option>
+                                        <option value="SK">SK</option>
+                                        <option value="SU">SU</option>
+                                        <option value="SAR">SAR</option>
+                                        <option value="SER">SER</option>
+                                        <option value="SET">SET</option>
+                                        <option value="TA">TA</option>
+                                        <option value="TE">TE</option>
+                                        <option value="WAN">WAN</option>
+                                        <option value="YA">YA</option>
+                                        <option value="用具">用具</option>
                                     </select>
-                                    <button type="button" onclick="addSetMember()" class="btn btn-primary"
-                                        style="padding: 8px 16px; white-space: nowrap; flex-shrink: 0;">
-                                        <i class="fas fa-plus"></i> 添加
+                                </div>
+                                <div class="form-group">
+                                    <label>编号</label>
+                                    <input type="text" id="edit-code-number" name="code_number" placeholder="001" maxlength="10">
+                                </div>
+                                <div class="form-group">
+                                    <label>尺寸</label>
+                                    <input type="text" id="edit-size" name="size" placeholder="直径15cm">
+                                </div>
+                                <div class="form-group">
+                                    <label class="required">单价 (RM)</label>
+                                    <input type="number" id="edit-unit-price" name="unit_price" step="0.01" min="0" required placeholder="0.00">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 库存数量区 -->
+                        <div class="edit-section">
+                            <div class="edit-section-title"><i class="fas fa-cubes"></i> 库存数量</div>
+                            <div class="quantity-row" id="edit-restaurant-quantities">
+                                <!-- 动态生成餐厅店面输入框 -->
+                            </div>
+                        </div>
+
+                        <!-- 套装设置区 -->
+                        <div class="edit-section">
+                            <div class="edit-section-title"><i class="fas fa-layer-group"></i> 套装设置</div>
+                            <div id="set-settings-container"
+                                style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; background: #f9fafb;">
+                                <div style="margin-bottom: 12px;">
+                                    <div
+                                        style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+                                        <span style="font-weight: 600; white-space: nowrap; flex-shrink: 0;">当前套装成员：</span>
+                                        <span id="current-set-members" style="color: #666;">暂无</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                        <label
+                                            style="font-weight: 600; margin: 0; white-space: nowrap; flex-shrink: 0;">添加套装成员：</label>
+                                        <select id="set-member-select"
+                                            style="flex: 1; min-width: 180px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                            <option value="">请选择要加入套装的碗碟</option>
+                                        </select>
+                                        <button type="button" onclick="addSetMember()" class="btn btn-primary"
+                                            style="padding: 8px 16px; white-space: nowrap; flex-shrink: 0;">
+                                            <i class="fas fa-plus"></i> 添加
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="selected-set-members" style="margin-top: 12px;">
+                                    <!-- 动态显示已选择的套装成员 -->
+                                </div>
+                                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #ddd;">
+                                    <button type="button" onclick="removeFromSet()" class="btn btn-secondary"
+                                        style="padding: 8px 16px;">
+                                        <i class="fas fa-unlink"></i> 从套装中移除
                                     </button>
                                 </div>
-                            </div>
-                            <div id="selected-set-members" style="margin-top: 12px;">
-                                <!-- 动态显示已选择的套装成员 -->
-                            </div>
-                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #ddd;">
-                                <button type="button" onclick="removeFromSet()" class="btn btn-secondary"
-                                    style="padding: 8px 16px;">
-                                    <i class="fas fa-unlink"></i> 从套装中移除
-                                </button>
                             </div>
                         </div>
                     </div>

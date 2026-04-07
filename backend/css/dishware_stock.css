@@ -1,4 +1,4 @@
-﻿* {
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -1496,12 +1496,250 @@ tr[data-type="set"]:not(:first-child) {
 
 /* 编辑模态框响应式样式 */
 #editModal .modal-content {
-    max-width: clamp(400px, 41.67vw, 800px);
-    max-height: clamp(500px, 52.08vw, 90vh);
-    padding: clamp(12px, 1.25vw, 24px);
-    border-radius: clamp(6px, 0.63vw, 12px);
+    max-width: clamp(600px, 52vw, 920px);
+    max-height: 92vh;
+    padding: 0;
+    border-radius: clamp(8px, 0.83vw, 16px);
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+}
+
+#editModal .modal-header {
+    margin: 0;
+    padding: clamp(14px, 1.25vw, 22px) clamp(18px, 1.5vw, 28px);
+    border-bottom: 1px solid #e5e7eb;
+    background: linear-gradient(135deg, #583e04 0%, #8b6914 100%);
+    border-radius: 0;
+}
+
+#editModal .modal-title {
+    color: #fff;
+    font-size: clamp(15px, 1.1vw, 20px);
+}
+
+#editModal .close {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: clamp(22px, 1.5vw, 30px);
+}
+
+#editModal .close:hover {
+    color: #fff;
+}
+
+/* 编辑弹窗主体：左右两栏 */
+.edit-modal-body {
+    display: flex;
+    gap: 0;
     overflow-y: auto;
-    overflow-x: hidden;
+    max-height: calc(92vh - 140px);
+}
+
+/* 左侧照片面板 */
+.edit-modal-photo-panel {
+    width: clamp(180px, 14.5vw, 260px);
+    min-width: clamp(180px, 14.5vw, 260px);
+    background: #f8f6f1;
+    padding: clamp(14px, 1.25vw, 24px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-right: 1px solid #e5e7eb;
+}
+
+.edit-modal-photo-panel .photo-upload-area {
+    width: 100%;
+    aspect-ratio: 1;
+    min-height: unset;
+    max-height: unset;
+    border-radius: clamp(8px, 0.63vw, 12px);
+    border: 2px dashed #ccc;
+    background: #fff;
+    padding: clamp(8px, 0.83vw, 16px);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.edit-modal-photo-panel .photo-upload-area:hover {
+    border-color: #f99e00;
+    background: #fef9ef;
+}
+
+.edit-modal-photo-panel .photo-upload-icon {
+    font-size: clamp(24px, 2vw, 36px);
+    color: #c4a35a;
+    margin-bottom: clamp(6px, 0.5vw, 10px);
+}
+
+.edit-modal-photo-panel .photo-upload-text {
+    font-size: clamp(11px, 0.68vw, 13px);
+    color: #8b7355;
+    margin-bottom: 4px;
+}
+
+.edit-modal-photo-panel .photo-upload-hint {
+    font-size: clamp(9px, 0.52vw, 11px);
+    color: #b0a08a;
+}
+
+/* 右侧表单面板 */
+.edit-modal-form-panel {
+    flex: 1;
+    padding: clamp(16px, 1.25vw, 24px);
+    overflow-y: auto;
+    min-width: 0;
+}
+
+/* 编辑区块 */
+.edit-section {
+    margin-bottom: clamp(16px, 1.25vw, 22px);
+}
+
+.edit-section:last-child {
+    margin-bottom: 0;
+}
+
+.edit-section-title {
+    font-size: clamp(12px, 0.78vw, 15px);
+    font-weight: 700;
+    color: #583e04;
+    margin-bottom: clamp(10px, 0.83vw, 14px);
+    padding-bottom: clamp(6px, 0.42vw, 8px);
+    border-bottom: 2px solid #f0e6d2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.edit-section-title i {
+    color: #c4a35a;
+    font-size: clamp(12px, 0.73vw, 14px);
+}
+
+/* 表单字段网格 */
+.edit-fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(10px, 0.83vw, 14px);
+}
+
+.edit-field-full {
+    grid-column: 1 / -1;
+}
+
+.edit-fields-grid .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(3px, 0.26vw, 5px);
+}
+
+.edit-fields-grid .form-group label {
+    font-size: clamp(11px, 0.68vw, 13px);
+    font-weight: 600;
+    color: #6b5a3e;
+}
+
+.edit-fields-grid .form-group input,
+.edit-fields-grid .form-group select {
+    padding: clamp(7px, 0.52vw, 10px) clamp(10px, 0.73vw, 14px);
+    border: 1px solid #d9d0c4;
+    border-radius: clamp(5px, 0.36vw, 7px);
+    font-size: clamp(12px, 0.73vw, 14px);
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.edit-fields-grid .form-group input:focus,
+.edit-fields-grid .form-group select:focus {
+    outline: none;
+    border-color: #f99e00;
+    box-shadow: 0 0 0 3px rgba(249, 158, 0, 0.12);
+}
+
+/* 库存数量区的量-行覆盖 */
+.edit-section .quantity-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(clamp(80px, 6.8vw, 120px), 1fr));
+    gap: clamp(8px, 0.63vw, 12px);
+}
+
+.edit-section .quantity-field {
+    background: #fff;
+    border: 1px solid #e5e0d5;
+    border-radius: clamp(6px, 0.42vw, 8px);
+    padding: clamp(8px, 0.63vw, 12px);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(3px, 0.26vw, 5px);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.edit-section .quantity-field:hover {
+    border-color: #f99e00;
+}
+
+.edit-section .quantity-field:focus-within {
+    border-color: #f99e00;
+    box-shadow: 0 0 0 3px rgba(249, 158, 0, 0.1);
+}
+
+.edit-section .quantity-field label {
+    font-size: clamp(10px, 0.57vw, 11px) !important;
+    font-weight: 600 !important;
+    color: #8b7355 !important;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.edit-section .quantity-field input {
+    padding: clamp(5px, 0.36vw, 8px);
+    border: none;
+    background: transparent;
+    font-size: clamp(14px, 0.94vw, 18px);
+    font-weight: 700;
+    color: #583e04;
+    text-align: center;
+}
+
+.edit-section .quantity-field input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* 编辑弹窗底部按钮 */
+#editModal .modal-actions {
+    margin: 0;
+    padding: clamp(12px, 1vw, 18px) clamp(18px, 1.5vw, 28px);
+    border-top: 1px solid #e5e7eb;
+    background: #faf8f5;
+}
+
+/* 响应式：窄屏时改为单列 */
+@media (max-width: 680px) {
+    .edit-modal-body {
+        flex-direction: column;
+    }
+
+    .edit-modal-photo-panel {
+        width: 100%;
+        min-width: unset;
+        border-right: none;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 16px;
+    }
+
+    .edit-modal-photo-panel .photo-upload-area {
+        aspect-ratio: 16/9;
+        max-height: 180px;
+    }
+
+    .edit-fields-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* 套装设置区域响应式样式 */
