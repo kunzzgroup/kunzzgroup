@@ -437,6 +437,7 @@ if (isset($_SESSION['user_id'])) {
                 <div class="edit-modal-body">
                     <!-- 左侧：照片 -->
                     <div class="edit-modal-photo-panel">
+                        <div class="photo-panel-label"><i class="fas fa-camera"></i> 产品照片</div>
                         <div class="photo-upload-area" onclick="document.getElementById('edit-photo').click()">
                             <div class="photo-upload-icon">
                                 <i class="fas fa-cloud-upload-alt"></i>
@@ -448,6 +449,17 @@ if (isset($_SESSION['user_id'])) {
                         <input type="file" id="edit-photo" name="photo" class="file-input" accept="image/*">
                         <input type="hidden" id="delete-photo-flag" name="delete_photo" value="0">
                         <input type="hidden" id="edit-current-photo-path" name="current_photo_path" value="">
+                        <!-- 照片面板下方的快捷信息 -->
+                        <div class="photo-panel-info" id="edit-photo-panel-info">
+                            <div class="photo-info-item">
+                                <span class="photo-info-label">编号</span>
+                                <span class="photo-info-value" id="edit-info-code">--</span>
+                            </div>
+                            <div class="photo-info-item">
+                                <span class="photo-info-label">单价</span>
+                                <span class="photo-info-value" id="edit-info-price">--</span>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- 右侧：表单 -->
@@ -504,59 +516,69 @@ if (isset($_SESSION['user_id'])) {
 
                         <!-- 库存数量区 -->
                         <div class="edit-section">
-                            <div class="edit-section-title"><i class="fas fa-cubes"></i> 库存数量</div>
+                            <div class="edit-section-title">
+                                <span><i class="fas fa-cubes"></i> 库存数量</span>
+                                <span class="edit-stock-total-badge" id="edit-stock-total-badge">总计: <strong id="edit-stock-total-num">0</strong></span>
+                            </div>
                             <div class="quantity-row" id="edit-restaurant-quantities">
                                 <!-- 动态生成餐厅店面输入框 -->
                             </div>
                         </div>
 
-                        <!-- 套装设置区 -->
-                        <div class="edit-section">
-                            <div class="edit-section-title"><i class="fas fa-layer-group"></i> 套装设置</div>
-                            <div id="set-settings-container"
-                                style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; background: #f9fafb;">
-                                <div style="margin-bottom: 12px;">
-                                    <div
-                                        style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
-                                        <span style="font-weight: 600; white-space: nowrap; flex-shrink: 0;">当前套装成员：</span>
-                                        <span id="current-set-members" style="color: #666;">暂无</span>
+                        <!-- 套装设置区（可折叠） -->
+                        <div class="edit-section edit-section-collapsible">
+                            <div class="edit-section-title edit-section-toggle" onclick="toggleEditSection(this)">
+                                <span><i class="fas fa-layer-group"></i> 套装设置</span>
+                                <i class="fas fa-chevron-down edit-section-arrow"></i>
+                            </div>
+                            <div class="edit-section-body" style="display: none;">
+                                <div id="set-settings-container"
+                                    style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; background: #f9fafb;">
+                                    <div style="margin-bottom: 12px;">
+                                        <div
+                                            style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+                                            <span style="font-weight: 600; white-space: nowrap; flex-shrink: 0;">当前套装成员：</span>
+                                            <span id="current-set-members" style="color: #666;">暂无</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                            <label
+                                                style="font-weight: 600; margin: 0; white-space: nowrap; flex-shrink: 0;">添加套装成员：</label>
+                                            <select id="set-member-select"
+                                                style="flex: 1; min-width: 180px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                                <option value="">请选择要加入套装的碗碟</option>
+                                            </select>
+                                            <button type="button" onclick="addSetMember()" class="btn btn-primary"
+                                                style="padding: 8px 16px; white-space: nowrap; flex-shrink: 0;">
+                                                <i class="fas fa-plus"></i> 添加
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                                        <label
-                                            style="font-weight: 600; margin: 0; white-space: nowrap; flex-shrink: 0;">添加套装成员：</label>
-                                        <select id="set-member-select"
-                                            style="flex: 1; min-width: 180px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                                            <option value="">请选择要加入套装的碗碟</option>
-                                        </select>
-                                        <button type="button" onclick="addSetMember()" class="btn btn-primary"
-                                            style="padding: 8px 16px; white-space: nowrap; flex-shrink: 0;">
-                                            <i class="fas fa-plus"></i> 添加
+                                    <div id="selected-set-members" style="margin-top: 12px;">
+                                        <!-- 动态显示已选择的套装成员 -->
+                                    </div>
+                                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #ddd;">
+                                        <button type="button" onclick="removeFromSet()" class="btn btn-secondary"
+                                            style="padding: 8px 16px;">
+                                            <i class="fas fa-unlink"></i> 从套装中移除
                                         </button>
                                     </div>
-                                </div>
-                                <div id="selected-set-members" style="margin-top: 12px;">
-                                    <!-- 动态显示已选择的套装成员 -->
-                                </div>
-                                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #ddd;">
-                                    <button type="button" onclick="removeFromSet()" class="btn btn-secondary"
-                                        style="padding: 8px 16px;">
-                                        <i class="fas fa-unlink"></i> 从套装中移除
-                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
-                    <button type="submit" class="btn btn-primary" id="edit-submit-btn">
-                        <i class="fas fa-save"></i>
-                        保存更改
+                <div class="modal-actions edit-modal-actions">
+                    <button type="button" class="btn edit-btn-cancel" onclick="closeModal()">
+                        <i class="fas fa-times"></i> 取消
+                    </button>
+                    <button type="submit" class="btn edit-btn-save" id="edit-submit-btn">
+                        <i class="fas fa-check"></i> 保存更改
                     </button>
                 </div>
             </form>
         </div>
     </div>
+
 
     <!-- 添加破损记录模态框 -->
     <div id="damageModal" class="modal">

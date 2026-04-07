@@ -1718,6 +1718,182 @@ tr[data-type="set"]:not(:first-child) {
     background: #faf8f5;
 }
 
+/* 照片面板标签 */
+.photo-panel-label {
+    font-size: clamp(11px, 0.68vw, 13px);
+    font-weight: 700;
+    color: #8b7355;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: clamp(10px, 0.83vw, 14px);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
+
+.photo-panel-label i {
+    color: #c4a35a;
+}
+
+/* 照片面板下方的快捷信息 */
+.photo-panel-info {
+    width: 100%;
+    margin-top: clamp(12px, 1vw, 18px);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(6px, 0.42vw, 8px);
+}
+
+.photo-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: clamp(6px, 0.42vw, 8px) clamp(8px, 0.63vw, 12px);
+    background: #fff;
+    border-radius: clamp(4px, 0.31vw, 6px);
+    border: 1px solid #e5e0d5;
+}
+
+.photo-info-label {
+    font-size: clamp(10px, 0.57vw, 11px);
+    font-weight: 600;
+    color: #8b7355;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.photo-info-value {
+    font-size: clamp(12px, 0.73vw, 14px);
+    font-weight: 700;
+    color: #583e04;
+}
+
+/* 库存总计徽章 */
+.edit-stock-total-badge {
+    margin-left: auto;
+    font-size: clamp(11px, 0.68vw, 13px);
+    font-weight: 500;
+    color: #fff;
+    background: linear-gradient(135deg, #f99e00, #e68a00);
+    padding: clamp(2px, 0.21vw, 4px) clamp(10px, 0.73vw, 14px);
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.edit-stock-total-badge strong {
+    font-weight: 800;
+    font-size: clamp(12px, 0.78vw, 15px);
+}
+
+/* 可折叠区块 */
+.edit-section-collapsible .edit-section-title {
+    cursor: pointer;
+    user-select: none;
+    justify-content: space-between;
+}
+
+.edit-section-collapsible .edit-section-title:hover {
+    color: #f99e00;
+}
+
+.edit-section-arrow {
+    font-size: clamp(10px, 0.63vw, 12px);
+    color: #b0a08a;
+    transition: transform 0.3s ease;
+}
+
+.edit-section-arrow.expanded {
+    transform: rotate(180deg);
+}
+
+.edit-section-body {
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    margin-top: clamp(8px, 0.63vw, 12px);
+}
+
+/* 编辑弹窗底部按钮改进 */
+.edit-modal-actions {
+    display: flex;
+    gap: clamp(10px, 0.83vw, 14px);
+    justify-content: flex-end;
+    margin: 0 !important;
+    padding: clamp(14px, 1.1vw, 20px) clamp(18px, 1.5vw, 28px) !important;
+    border-top: 1px solid #e5e7eb !important;
+    background: #faf8f5 !important;
+}
+
+.edit-btn-cancel {
+    background: #fff !important;
+    color: #6b7280 !important;
+    border: 1.5px solid #d1d5db !important;
+    padding: clamp(8px, 0.63vw, 12px) clamp(18px, 1.25vw, 24px) !important;
+    border-radius: clamp(6px, 0.42vw, 8px) !important;
+    font-weight: 600 !important;
+    transition: all 0.2s !important;
+}
+
+.edit-btn-cancel:hover {
+    background: #f3f4f6 !important;
+    border-color: #9ca3af !important;
+    color: #374151 !important;
+}
+
+.edit-btn-save {
+    background: linear-gradient(135deg, #f99e00, #e68a00) !important;
+    color: #fff !important;
+    border: none !important;
+    padding: clamp(8px, 0.63vw, 12px) clamp(22px, 1.56vw, 30px) !important;
+    border-radius: clamp(6px, 0.42vw, 8px) !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 8px rgba(249, 158, 0, 0.3) !important;
+    transition: all 0.2s !important;
+}
+
+.edit-btn-save:hover {
+    background: linear-gradient(135deg, #e68a00, #cc7a00) !important;
+    box-shadow: 0 4px 14px rgba(249, 158, 0, 0.4) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* 弹窗打开动画 */
+#editModal .modal-content {
+    animation: editModalSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes editModalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* 库存数量变化高亮 */
+.edit-section .quantity-field.qty-changed {
+    border-color: #ef4444;
+    background: #fef2f2;
+}
+
+.edit-section .quantity-field.qty-changed label {
+    color: #dc2626 !important;
+}
+
+.edit-section .quantity-field.qty-increased {
+    border-color: #10b981;
+    background: #ecfdf5;
+}
+
+.edit-section .quantity-field.qty-increased label {
+    color: #059669 !important;
+}
+
 /* 响应式：窄屏时改为单列 */
 @media (max-width: 680px) {
     .edit-modal-body {
@@ -1735,6 +1911,14 @@ tr[data-type="set"]:not(:first-child) {
     .edit-modal-photo-panel .photo-upload-area {
         aspect-ratio: 16/9;
         max-height: 180px;
+    }
+
+    .photo-panel-info {
+        flex-direction: row;
+    }
+
+    .photo-info-item {
+        flex: 1;
     }
 
     .edit-fields-grid {

@@ -5307,8 +5307,128 @@ async function openEditModal(id, editBtn) {
 
     document.getElementById('editModal').style.display = 'block';
 
+    // ── 人性化增强 ─────────────────────────────────────
+    // 1) 照片面板显示快捷信息（编号 + 单价）
+    const infoCode = document.getElementById('edit-info-code');
+    const infoPrice = document.getElementById('edit-info-price');
+    if (infoCode) {
+        const cat = document.getElementById('edit-category')?.value || '';
+        const num = document.getElementById('edit-code-number')?.value || '';
+        infoCode.textContent = (cat + num) || '--';
+    }
+    if (infoPrice) {
+        const price = document.getElementById('edit-unit-price')?.value;
+        infoPrice.textContent = price ? `RM ${parseFloat(price).toFixed(2)}` : '--';
+    }
+
+    // 2) 计算并显示库存总计
+    updateEditStockTotal();
+
+    // 3) 保存原始数量（用于变化高亮）
+    saveOriginalQuantities();
+
+    // 4) 给数量输入框添加实时监听
+    attachQuantityListeners();
+
+    // 5) 给编号和单价输入框添加联动监听（更新侧边栏信息）
+    const catSelect = document.getElementById('edit-category');
+    const codeInput = document.getElementById('edit-code-number');
+    const priceInput = document.getElementById('edit-unit-price');
+    const updateSideInfo = () => {
+        if (infoCode) {
+            infoCode.textContent = ((catSelect?.value || '') + (codeInput?.value || '')) || '--';
+        }
+        if (infoPrice) {
+            const p = priceInput?.value;
+            infoPrice.textContent = p ? `RM ${parseFloat(p).toFixed(2)}` : '--';
+        }
+    };
+    catSelect?.addEventListener('change', updateSideInfo);
+    codeInput?.addEventListener('input', updateSideInfo);
+    priceInput?.addEventListener('input', updateSideInfo);
+
+    // 6) 套装折叠区默认关闭（如有成员则自动展开）
+    const setBody = document.querySelector('#editModal .edit-section-body');
+    const setArrow = document.querySelector('#editModal .edit-section-arrow');
+    if (setBody) setBody.style.display = 'none';
+    if (setArrow) setArrow.classList.remove('expanded');
+
     // 加载套装信息
     loadDishwareSetInfo(id);
+}
+
+// ── 编辑弹窗人性化增强函数 ─────────────────────────────
+
+// 原始数量存储（用于变化高亮）
+let _editOriginalQtys = {};
+
+function saveOriginalQuantities() {
+    _editOriginalQtys = {};
+    const qtyRow = document.getElementById('edit-restaurant-quantities');
+    if (!qtyRow) return;
+    const inputs = qtyRow.querySelectorAll('input[type="number"]');
+    inputs.forEach((input, idx) => {
+        _editOriginalQtys[idx] = parseInt(input.value) || 0;
+    });
+}
+
+// 计算并更新库存总数
+function updateEditStockTotal() {
+    const qtyRow = document.getElementById('edit-restaurant-quantities');
+    const totalEl = document.getElementById('edit-stock-total-num');
+    if (!qtyRow || !totalEl) return;
+    const inputs = qtyRow.querySelectorAll('input[type="number"]');
+    let total = 0;
+    inputs.forEach(input => {
+        total += parseInt(input.value) || 0;
+    });
+    totalEl.textContent = total;
+}
+
+// 高亮变化的数量字段
+function highlightChangedQuantities() {
+    const qtyRow = document.getElementById('edit-restaurant-quantities');
+    if (!qtyRow) return;
+    const fields = qtyRow.querySelectorAll('.quantity-field');
+    fields.forEach((field, idx) => {
+        const input = field.querySelector('input[type="number"]');
+        if (!input) return;
+        const current = parseInt(input.value) || 0;
+        const original = _editOriginalQtys[idx] ?? current;
+        field.classList.remove('qty-changed', 'qty-increased');
+        if (current < original) {
+            field.classList.add('qty-changed');
+        } else if (current > original) {
+            field.classList.add('qty-increased');
+        }
+    });
+}
+
+// 给数量输入框加监听
+function attachQuantityListeners() {
+    const qtyRow = document.getElementById('edit-restaurant-quantities');
+    if (!qtyRow) return;
+    const inputs = qtyRow.querySelectorAll('input[type="number"]');
+    inputs.forEach(input => {
+        input.addEventListener('input', () => {
+            updateEditStockTotal();
+            highlightChangedQuantities();
+        });
+    });
+}
+
+// 折叠/展开区块
+function toggleEditSection(titleEl) {
+    const section = titleEl.closest('.edit-section-collapsible');
+    if (!section) return;
+    const body = section.querySelector('.edit-section-body');
+    const arrow = section.querySelector('.edit-section-arrow');
+    if (!body) return;
+    const isHidden = body.style.display === 'none';
+    body.style.display = isHidden ? '' : 'none';
+    if (arrow) {
+        arrow.classList.toggle('expanded', isHidden);
+    }
 }
 
 // 加载碗碟的套装信息
@@ -5341,6 +5461,14 @@ async function loadDishwareSetInfo(dishwareId) {
             // 保存当前套装ID和成员ID
             window.currentSetId = result.data.set_id;
             window.currentSetMembers = members.map(m => parseInt(m.id));
+
+            // 如有套装成员，自动展开套装设置区
+            if (members.length > 0) {
+                const setBody = document.querySelector('#editModal .edit-section-body');
+                const setArrow = document.querySelector('#editModal .edit-section-arrow');
+                if (setBody) setBody.style.display = '';
+                if (setArrow) setArrow.classList.add('expanded');
+            }
         } else {
             const currentSetMembersEl = document.getElementById('current-set-members');
             if (currentSetMembersEl) {
