@@ -1185,6 +1185,23 @@ function loadPageData(pageType) {
         case 'j1':
         case 'j2':
         case 'j3':
+            // 切换到破损记录页时，若尚未选月份，自动默认为当前月
+            // 防止不同月份的记录（如3月日期的记录在4月录入）混在一起显示
+            if (!breakDateRange) {
+                const nowDate = new Date();
+                const yr = nowDate.getFullYear();
+                const mo = nowDate.getMonth() + 1;
+                const pad = (n) => String(n).padStart(2, '0');
+                const firstDay = `${yr}-${pad(mo)}-01`;
+                const lastDay = new Date(yr, mo, 0).getDate();
+                breakDateRange = { startDate: firstDay, endDate: `${yr}-${pad(mo)}-${pad(lastDay)}` };
+                breakMonthValue = { year: yr, month: mo };
+                // 同步更新月份选择器显示文字
+                const pickerText = document.getElementById('break-month-picker-text');
+                if (pickerText) pickerText.textContent = `${yr}年${mo}月`;
+                const quickText = document.getElementById('break-quick-select-text');
+                if (quickText) quickText.textContent = `${mo}月`;
+            }
             loadAllBreakRecords();
             break;
         case 'transfer':
