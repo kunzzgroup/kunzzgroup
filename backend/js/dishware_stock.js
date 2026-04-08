@@ -2471,6 +2471,24 @@ document.addEventListener('click', function (event) {
 });
 
 // 创建多行破损记录
+/**
+ * 获取新增破损记录时应保存的 break_date：
+ * - 若用户当前选了某年月（breakMonthValue），则用该月最后一天作为日期
+ * - 若没有选月份，则用本地今天日期
+ */
+function getBreakDateForSave() {
+    const pad = (n) => String(n).padStart(2, '0');
+    if (breakMonthValue && breakMonthValue.year && breakMonthValue.month) {
+        const yr = breakMonthValue.year;
+        const mo = breakMonthValue.month;
+        const lastDay = new Date(yr, mo, 0).getDate(); // 该月最后一天
+        return `${yr}-${pad(mo)}-${pad(lastDay)}`;
+    }
+    // 未选月份 → 今天（本地时间，避免时差偏移）
+    const now = new Date();
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+
 function createMultipleBreakRows() {
     const rowsCount = parseInt(document.getElementById('break-rows-count').value);
 
@@ -2964,9 +2982,8 @@ async function batchSaveBreakRows(shopType) {
         return;
     }
     const allSingles = getAllSingleDishwareForBreak();
-    // 使用本地时间，避免UTC时差导致日期偏移
-    const _now1 = new Date();
-    const today = `${_now1.getFullYear()}-${String(_now1.getMonth() + 1).padStart(2, '0')}-${String(_now1.getDate()).padStart(2, '0')}`;
+    // 使用所选月份的最后一天（或今天），确保记录归档到正确月份
+    const today = getBreakDateForSave();
     const rowsToRemove = [];
 
     // 1. 先保存所有编辑行
@@ -3282,9 +3299,8 @@ async function saveNewBreakRow(rowId, shopType) {
     const chargeable = product ? getChargeableQuantityForBreak(product, shopType, quantity, qtyBefore) : quantity;
 
     try {
-        // 使用本地时间，避免UTC时差导致日期偏移
-        const _now3 = new Date();
-        const today = `${_now3.getFullYear()}-${String(_now3.getMonth() + 1).padStart(2, '0')}-${String(_now3.getDate()).padStart(2, '0')}`;
+        // 使用所选月份的最后一天（或今天），确保记录归档到正确月份
+        const today = getBreakDateForSave();
         const result = await apiCall('', {
             method: 'POST',
             headers: {
