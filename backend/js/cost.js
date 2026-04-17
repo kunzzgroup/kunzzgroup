@@ -1,4 +1,4 @@
-﻿
+
 // API 配置
 const API_BASE_URL = 'costapi.php';
 
@@ -1106,13 +1106,19 @@ function convertToCostFormat(data) {
         const cGrab = parseFloat(item.c_grab) || 0;
         const cFoodpanda = parseFloat(item.c_foodpanda) || 0;
         const cShopee = parseFloat(item.c_shopee) || 0;
-        const cTotal = cBeverage + cKitchen + cGrab + cFoodpanda + cShopee;
-        const grossTotal = sales - cTotal;
-        const costPercent = sales > 0 ? (cTotal / sales) * 100 : 0;
+        
+        // 外卖不再计入总成本
+        const cTotal = cBeverage + cKitchen;
+        
+        // 外卖作为赚到的钱，加在实际总销售额里
+        const finalSales = sales + cGrab + cFoodpanda + cShopee;
+        
+        const grossTotal = finalSales - cTotal;
+        const costPercent = finalSales > 0 ? (cTotal / finalSales) * 100 : 0;
 
         return {
             date: item.date,
-            sales: sales,
+            sales: finalSales,
             cBeverage: cBeverage,
             cKitchen: cKitchen,
             cGrab: cGrab,

@@ -1,4 +1,4 @@
-﻿
+
 // API 配置
 const API_BASE_URL = 'costapi.php';
 
@@ -615,12 +615,15 @@ function updateCalculations(day) {
     const cFoodpanda = parseFloat(getInputValue('c_foodpanda', day)) || 0;
     const cShopee = parseFloat(getInputValue('c_shopee', day)) || 0;
 
-    // 总成本 = 饮料成本 + 厨房成本 + Grab + Foodpanda + Shopee
-    const cTotal = cBeverage + cKitchen + cGrab + cFoodpanda + cShopee;
+    // 总成本 = 饮料成本 + 厨房成本 (外卖已不再计入成本)
+    const cTotal = cBeverage + cKitchen;
     document.getElementById(`c-total-${day}`).textContent = `RM ${cTotal.toFixed(2)}`;
 
-    // 毛利润 = 销售额 - 总成本
-    const grossTotal = sales - cTotal;
+    // 销售额加上外卖作为真实总收入
+    const finalSales = sales + cGrab + cFoodpanda + cShopee;
+
+    // 毛利润 = (销售额 + 外卖) - 总成本
+    const grossTotal = finalSales - cTotal;
     const grossTotalCell = document.getElementById(`gross-total-${day}`);
     grossTotalCell.textContent = `RM ${grossTotal.toFixed(2)}`;
 
@@ -631,8 +634,8 @@ function updateCalculations(day) {
         grossTotalCell.classList.remove('negative');
     }
 
-    // 成本率 = (总成本 / 销售额) * 100%
-    const costPercent = sales > 0 ? (cTotal / sales) * 100 : 0;
+    // 成本率 = (总成本 / 实际销售额) * 100%
+    const costPercent = finalSales > 0 ? (cTotal / finalSales) * 100 : 0;
     document.getElementById(`cost-percent-${day}`).textContent = `${costPercent.toFixed(2)}%`;
 
     updateMonthStats();
@@ -705,10 +708,15 @@ function updateMonthStats() {
             filledDays++;
         }
 
-        const cTotal = cBeverage + cKitchen + cGrab + cFoodpanda + cShopee;
-        const grossTotal = sales - cTotal;
+        // 外卖已不再计入成本
+        const cTotal = cBeverage + cKitchen;
+        
+        // 外卖作为赚到的钱，加在实际总销售额里
+        const finalSales = sales + cGrab + cFoodpanda + cShopee;
+        
+        const grossTotal = finalSales - cTotal;
 
-        totalSales += sales;
+        totalSales += finalSales;
         totalCost += cTotal;
         totalProfit += grossTotal;
     }
@@ -1011,7 +1019,7 @@ async function saveAllData() {
                     c_grab: parseFloat(getInputValue('c_grab', day)) || 0,
                     c_foodpanda: parseFloat(getInputValue('c_foodpanda', day)) || 0,
                     c_shopee: parseFloat(getInputValue('c_shopee', day)) || 0,
-                    c_total: cBeverage + cKitchen + (parseFloat(getInputValue('c_grab', day)) || 0) + (parseFloat(getInputValue('c_foodpanda', day)) || 0) + (parseFloat(getInputValue('c_shopee', day)) || 0),
+                    c_total: cBeverage + cKitchen,
                     restaurant: currentRestaurant
                 };
 
@@ -1495,7 +1503,7 @@ async function saveSingleRowData(day) {
                 c_grab: cGrab,
                 c_foodpanda: cFoodpanda,
                 c_shopee: cShopee,
-                c_total: cBeverage + cKitchen + cGrab + cFoodpanda + cShopee,
+                c_total: cBeverage + cKitchen,
                 restaurant: currentRestaurant
             };
 

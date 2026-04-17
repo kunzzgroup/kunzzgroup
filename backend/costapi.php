@@ -415,7 +415,12 @@ function handleGet() {
                     }
                     
                     if ($costSummary) {
-                        $totalCost = floatval($costSummary['total_cost'] ?? 0);
+                        // 重新计算真正的总成本和总销售额（外卖不计入成本，计入销售额）
+                        $trueTotalCost = floatval($costSummary['total_beverage_cost'] ?? 0) + floatval($costSummary['total_kitchen_cost'] ?? 0);
+                        $platformSales = floatval($costSummary['total_grab_cost'] ?? 0) + floatval($costSummary['total_foodpanda_cost'] ?? 0) + floatval($costSummary['total_shopee_cost'] ?? 0);
+                        
+                        $totalSales = $totalSales + $platformSales;
+                        $totalCost = $trueTotalCost;
                         $totalProfit = $totalSales - $totalCost;
                         
                         $summary['total_days'] += intval($costSummary['total_days'] ?? 0);
@@ -481,7 +486,12 @@ function handleGet() {
                 }
                 
                 // 合并数据并计算
-                $totalCost = floatval($costSummary['total_cost'] ?? 0);
+                // 合并数据并计算（外卖不计入成本，计入销售额）
+                $trueTotalCost = floatval($costSummary['total_beverage_cost'] ?? 0) + floatval($costSummary['total_kitchen_cost'] ?? 0);
+                $platformSales = floatval($costSummary['total_grab_cost'] ?? 0) + floatval($costSummary['total_foodpanda_cost'] ?? 0) + floatval($costSummary['total_shopee_cost'] ?? 0);
+                
+                $totalSales = $totalSales + $platformSales;
+                $totalCost = $trueTotalCost;
                 $totalProfit = $totalSales - $totalCost;
                 $avgCostPercent = $totalSales > 0 ? ($totalCost / $totalSales) * 100 : 0;
                 
