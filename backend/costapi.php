@@ -415,11 +415,11 @@ function handleGet() {
                     }
                     
                     if ($costSummary) {
-                        // 重新计算真正的总成本和总销售额（外卖不计入成本，计入销售额）
+                        // 重新计算真正的总成本和总销售额（外卖折半计入销售额）
                         $trueTotalCost = floatval($costSummary['total_beverage_cost'] ?? 0) + floatval($costSummary['total_kitchen_cost'] ?? 0);
                         $platformSales = floatval($costSummary['total_grab_cost'] ?? 0) + floatval($costSummary['total_foodpanda_cost'] ?? 0) + floatval($costSummary['total_shopee_cost'] ?? 0);
                         
-                        $totalSales = $totalSales + $platformSales;
+                        $totalSales = $totalSales + ($platformSales / 2);
                         $totalCost = $trueTotalCost;
                         $totalProfit = $totalSales - $totalCost;
                         
@@ -486,11 +486,11 @@ function handleGet() {
                 }
                 
                 // 合并数据并计算
-                // 合并数据并计算（外卖不计入成本，计入销售额）
+                // 合并数据并计算（外卖折半计入销售额）
                 $trueTotalCost = floatval($costSummary['total_beverage_cost'] ?? 0) + floatval($costSummary['total_kitchen_cost'] ?? 0);
                 $platformSales = floatval($costSummary['total_grab_cost'] ?? 0) + floatval($costSummary['total_foodpanda_cost'] ?? 0) + floatval($costSummary['total_shopee_cost'] ?? 0);
                 
-                $totalSales = $totalSales + $platformSales;
+                $totalSales = $totalSales + ($platformSales / 2);
                 $totalCost = $trueTotalCost;
                 $totalProfit = $totalSales - $totalCost;
                 $avgCostPercent = $totalSales > 0 ? ($totalCost / $totalSales) * 100 : 0;

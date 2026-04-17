@@ -619,8 +619,8 @@ function updateCalculations(day) {
     const cTotal = cBeverage + cKitchen;
     document.getElementById(`c-total-${day}`).textContent = `RM ${cTotal.toFixed(2)}`;
 
-    // 销售额加上外卖作为真实总收入
-    const finalSales = sales + cGrab + cFoodpanda + cShopee;
+    // 销售额加上外卖（折半）作为真实总收入
+    const finalSales = sales + (cGrab + cFoodpanda + cShopee) / 2;
 
     // 毛利润 = (销售额 + 外卖) - 总成本
     const grossTotal = finalSales - cTotal;
@@ -711,8 +711,8 @@ function updateMonthStats() {
         // 外卖已不再计入成本
         const cTotal = cBeverage + cKitchen;
         
-        // 外卖作为赚到的钱，加在实际总销售额里
-        const finalSales = sales + cGrab + cFoodpanda + cShopee;
+        // 外卖作为赚到的钱，折半加在实际总销售额里
+        const finalSales = sales + (cGrab + cFoodpanda + cShopee) / 2;
         
         const grossTotal = finalSales - cTotal;
 

@@ -1110,8 +1110,8 @@ function convertToCostFormat(data) {
         // 外卖不再计入总成本
         const cTotal = cBeverage + cKitchen;
         
-        // 外卖作为赚到的钱，加在实际总销售额里
-        const finalSales = sales + cGrab + cFoodpanda + cShopee;
+        // 外卖作为赚到的钱，折半后加在实际总销售额里
+        const finalSales = sales + (cGrab + cFoodpanda + cShopee) / 2;
         
         const grossTotal = finalSales - cTotal;
         const costPercent = finalSales > 0 ? (cTotal / finalSales) * 100 : 0;
