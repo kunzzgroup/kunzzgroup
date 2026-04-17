@@ -1007,7 +1007,7 @@ async function saveAllData() {
             const cFoodpanda = parseFloat(getInputValue('c_foodpanda', day)) || 0;
             const cShopee = parseFloat(getInputValue('c_shopee', day)) || 0;
 
-            const hasData = cBeverage > 0 || cKitchen > 0 || cGrab > 0 || cFoodpanda > 0 || cShopee > 0;
+            const hasData = cBeverage > 0 || cKitchen > 0 || cGrab > 0 || cFoodpanda > 0 || cShopee > 0 || (monthData[day] && monthData[day].id);
 
             if (hasData) {
                 const dateStr = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
@@ -1491,7 +1491,7 @@ async function saveSingleRowData(day) {
         const cFoodpanda = parseFloat(getInputValue('c_foodpanda', day)) || 0;
         const cShopee = parseFloat(getInputValue('c_shopee', day)) || 0;
 
-        const hasData = cBeverage > 0 || cKitchen > 0 || cGrab > 0 || cFoodpanda > 0 || cShopee > 0;
+        const hasData = cBeverage > 0 || cKitchen > 0 || cGrab > 0 || cFoodpanda > 0 || cShopee > 0 || (monthData[day] && monthData[day].id);
 
         if (hasData) {
             const dateStr = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
