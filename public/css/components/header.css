@@ -207,6 +207,17 @@
   text-decoration: none;
   /* 移除下划线 */
   line-height: 26px;
+  /* 去掉浏览器默认的焦点虚线框 / 点击高亮（「中文」外圈粉虚线多由此产生） */
+  outline: none;
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.header-language-switch .header-lang:focus,
+.header-language-switch .header-lang:focus-visible,
+.header-language-switch .header-lang:active {
+  outline: none;
+  box-shadow: none;
 }
 
 .header-language-switch .header-lang:hover {
@@ -592,7 +603,7 @@
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
-    padding: 0 0 16px;
+    padding: 0 0 20px;
     box-sizing: border-box;
     gap: 0;
     z-index: 1000;
@@ -626,18 +637,55 @@
   .header-nav-links > .header-login-dropdown {
     width: 100%;
     margin-top: 0;
-    padding: 10px 16px 6px;
+    padding: 10px 16px 16px;
     border-top: 1px solid rgba(255, 255, 255, 0.12);
     box-sizing: border-box;
     background: rgba(0, 0, 0, 0.2);
+    overflow: visible;
   }
 
+  /* 抽屉内禁止滚动时，绝对定位下拉会被裁切；改为内嵌静态展开，员工登入始终可见 */
   .header-nav-links .header-login-dropdown-menu {
-    left: 0;
-    right: auto;
+    position: static !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    margin: 10px 0 0 0;
+    padding: 10px 0 0;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
     width: 100%;
     max-width: none;
     box-sizing: border-box;
+    box-shadow: none;
+    border-radius: 0;
+    background: transparent;
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    overflow: visible;
+  }
+
+  .header-nav-links .header-login-dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 12px 16px !important;
+    margin: 0;
+    font-size: 0.9375rem !important;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.95) !important;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .header-nav-links .header-login-dropdown-item:hover {
+    background: rgba(255, 92, 0, 0.25);
+    color: #fff !important;
   }
 
   /* right-section 宽度自适应，内容靠右排列 */
