@@ -10,7 +10,7 @@ header("Expires: Wed, 11 Jan 1984 05:00:00 GMT");
 
 // 设置页面特定的变量
 $pageTitle = 'KUNZZ HOLDINGS';
-$additionalCSS = ['css/joinus.css','../public_en/css/components/header.css','../public_en/css/components/social.css','../public_en/css/components/footer.css']; // footer.css 放最后，确保样式优先级
+$additionalCSS = ['css/joinus.css','../public_en/css/components/social.css','../public_en/css/components/footer.css']; // footer.css 放最后，确保样式优先级
 $showPageIndicator = true;
 $totalSlides = 4;
 
@@ -639,7 +639,7 @@ const swiper = new Swiper('.swiper', {
     direction: 'vertical',
     mousewheel: true,
     speed: 800,
-    simulateTouch: false,
+    simulateTouch: true,
     pagination: {
         el: '.swiper-pagination',
         clickable: true,

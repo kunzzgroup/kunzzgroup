@@ -65,7 +65,7 @@ function getLanguageSwitchUrl($targetLang)
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- <style><?php include_once 'critical-css.php';
     echo getCriticalCSS(); ?></style> -->
-    <link rel="stylesheet" href="css/header.css" />
+    <link rel="stylesheet" href="../public/css/components/header.css" />
     <title><?php echo isset($pageTitle) ? $pageTitle : 'KUNZZ HOLDINGS'; ?></title>
     <?php if (isset($additionalCSS)): ?>
         <?php foreach ($additionalCSS as $css): ?>
