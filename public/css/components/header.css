@@ -196,6 +196,7 @@
   background-color: transparent;
   color: white;
   border: 1px solid #ff5c00;
+  border-style: solid;
   border-radius: 25px;
   padding: 1px 25px;
   font-size: clamp(12px, 0.7vw + 0.5rem, 16px);
@@ -208,16 +209,35 @@
   /* 移除下划线 */
   line-height: 26px;
   /* 去掉浏览器默认的焦点虚线框 / 点击高亮（「中文」外圈粉虚线多由此产生） */
-  outline: none;
+  outline: none !important;
+  outline-offset: 0;
   box-shadow: none;
   -webkit-tap-highlight-color: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Firefox 按钮内层虚线框 */
+.header-language-switch .header-lang::-moz-focus-inner {
+  border: 0;
+  padding: 0;
 }
 
 .header-language-switch .header-lang:focus,
 .header-language-switch .header-lang:focus-visible,
-.header-language-switch .header-lang:active {
-  outline: none;
-  box-shadow: none;
+.header-language-switch .header-lang:active,
+.header-language-switch .header-lang.active {
+  outline: none !important;
+  outline-style: none !important;
+  box-shadow: none !important;
+}
+
+#languageBtn:focus,
+#languageBtn:focus-visible,
+#languageBtn:active,
+#languageBtn.active {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .header-language-switch .header-lang:hover {
