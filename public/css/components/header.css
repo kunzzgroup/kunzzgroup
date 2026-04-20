@@ -664,14 +664,19 @@
     overflow: visible;
   }
 
-  /* 抽屉内禁止滚动时，绝对定位下拉会被裁切；改为内嵌静态展开，员工登入始终可见 */
+  /* 登入：抽屉内静态层叠，默认收起，.show 展开（由 JS 点击切换） */
   .header-nav-links .header-login-dropdown-menu {
     position: static !important;
-    opacity: 1 !important;
-    visibility: visible !important;
+    display: block;
+    max-height: 0;
+    opacity: 0;
+    visibility: hidden;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    border: none;
     transform: none !important;
-    margin: 10px 0 0 0;
-    padding: 10px 0 0;
+    transition: max-height 0.32s ease, opacity 0.22s ease, padding 0.22s ease, margin 0.22s ease;
     left: auto !important;
     right: auto !important;
     top: auto !important;
@@ -681,7 +686,14 @@
     box-shadow: none;
     border-radius: 0;
     background: transparent;
-    border: none;
+  }
+
+  .header-nav-links .header-login-dropdown-menu.show {
+    max-height: 140px;
+    opacity: 1 !important;
+    visibility: visible !important;
+    margin-top: 10px;
+    padding-top: 10px;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     overflow: visible;
   }
@@ -801,7 +813,8 @@
     height: auto;
     min-height: 0;
     justify-content: flex-start;
-    padding: 12px 18px;
+    position: relative;
+    padding: 12px 2.25rem 12px 18px;
     font-size: 1.0625rem;
     font-weight: 500;
     letter-spacing: 0.02em;
@@ -809,20 +822,44 @@
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
     border-bottom: none;
+    cursor: pointer;
   }
 
   .header-nav-links .header-nav-dropdown-trigger:hover {
-    padding: 12px 18px;
+    padding: 12px 2.25rem 12px 18px;
     background-color: rgba(255, 92, 0, 0.14);
+  }
+
+  .header-nav-links .header-nav-dropdown-trigger::after {
+    content: '';
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    border-right: 2px solid rgba(255, 255, 255, 0.55);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.55);
+    transform: translateY(-65%) rotate(45deg);
+    transition: transform 0.25s ease;
+    pointer-events: none;
+  }
+
+  .header-nav-item.header-nav-dropdown.is-open .header-nav-dropdown-trigger::after {
+    transform: translateY(-35%) rotate(225deg);
   }
 
   .header-nav-links .header-nav-dropdown-menu {
     position: static !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: none !important;
+    display: block;
+    max-height: 0;
+    opacity: 0;
+    visibility: hidden;
+    overflow: hidden;
     margin: 0;
-    padding: 4px 0 10px;
+    padding: 0;
+    border: none;
+    transform: none !important;
+    transition: max-height 0.32s ease, opacity 0.22s ease, padding 0.22s ease;
     min-width: 0 !important;
     width: 100%;
     left: auto;
@@ -830,8 +867,15 @@
     box-shadow: none;
     border-radius: 0;
     background: rgba(0, 0, 0, 0.22);
-    border: none;
+  }
+
+  .header-nav-links .header-nav-dropdown-menu.show {
+    max-height: 240px;
+    opacity: 1 !important;
+    visibility: visible !important;
+    padding: 8px 0 10px;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
+    overflow: visible;
   }
 
   .header-nav-links .header-nav-dropdown-item {
@@ -854,13 +898,14 @@
     color: #fff !important;
   }
 
-  /* 登入：全宽主按钮 */
+  /* 登入：全宽主按钮（抽屉内带下拉箭头） */
   .header-nav-links .header-login-btn {
     width: 100%;
     max-width: none;
     height: auto;
     min-height: 44px;
-    padding: 12px 20px;
+    position: relative;
+    padding: 12px 2.25rem 12px 20px;
     font-size: 1rem;
     font-weight: 600;
     margin: 0;
@@ -871,9 +916,27 @@
     box-shadow: 0 4px 14px rgba(255, 92, 0, 0.35);
   }
 
+  .header-nav-links .header-login-btn::after {
+    content: '';
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    border-right: 2px solid rgba(255, 255, 255, 0.9);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.9);
+    transform: translateY(-65%) rotate(45deg);
+    transition: transform 0.25s ease;
+    pointer-events: none;
+  }
+
+  .header-nav-links .header-login-dropdown.is-open .header-login-btn::after {
+    transform: translateY(-35%) rotate(225deg);
+  }
+
   .header-nav-links .header-login-btn:hover {
     background-color: #e65500;
-    padding: 12px 20px;
+    padding: 12px 2.25rem 12px 20px;
     line-height: 1.25;
   }
 

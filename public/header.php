@@ -91,7 +91,8 @@ function getLanguageSwitchUrl($targetLang)
             <div class="header-nav-item"><a href="index.php">首页</a></div>
             <div class="header-nav-item"><a href="about.php">关于我们</a></div>
             <div class="header-nav-item header-nav-dropdown">
-                <span class="header-nav-dropdown-trigger">旗下品牌</span>
+                <span class="header-nav-dropdown-trigger" role="button" tabindex="0" aria-expanded="false"
+                    aria-controls="brandsNavDropdownMenu">旗下品牌</span>
                 <div class="header-nav-dropdown-menu" id="brandsNavDropdownMenu">
                     <a href="https://tokyo.kunzzgroup.com/tokyo" class="header-nav-dropdown-item">Tokyo Japanese
                         Cuisine</a>
@@ -105,7 +106,8 @@ function getLanguageSwitchUrl($targetLang)
         <div class="header-right-section">
             <!-- 移动端隐藏 login，仅大屏显示 -->
             <div class="header-login-dropdown">
-                <button class="header-login-btn" id="loginBtn">登入</button>
+                <button type="button" class="header-login-btn" id="loginBtn" aria-expanded="false"
+                    aria-controls="loginDropdownMenu">登入</button>
                 <div class="header-login-dropdown-menu" id="loginDropdownMenu">
                     <a href="/frontend/login.html" class="header-login-dropdown-item">员工登入</a>
                 </div>
@@ -113,7 +115,7 @@ function getLanguageSwitchUrl($targetLang)
 
             <!-- 翻译按钮始终显示 -->
             <div class="header-language-switch">
-                <button class="header-lang" id="languageBtn">中文</button>
+                <button type="button" class="header-lang" id="languageBtn">中文</button>
                 <div class="header-language-dropdown-menu" id="languageDropdownMenu">
                     <a href="<?php echo getLanguageSwitchUrl('cn'); ?>" class="header-language-dropdown-item"
                         data-lang="cn">中文</a>
@@ -123,7 +125,7 @@ function getLanguageSwitchUrl($targetLang)
             </div>
 
             <!-- hamburger 仅在小屏显示 -->
-            <button class="header-hamburger" id="hamburger">&#9776;</button>
+            <button type="button" class="header-hamburger" id="hamburger">&#9776;</button>
         </div>
     </header>
 

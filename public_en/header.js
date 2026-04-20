@@ -3,13 +3,37 @@ document.addEventListener('DOMContentLoaded', function () {
     const hamburger = document.getElementById('hamburger');
     const navMenu = document.getElementById('navMenu');
     const loginBtn = document.getElementById('loginBtn');
-
-    // 登录下拉菜单元素
     const loginDropdownMenu = document.getElementById('loginDropdownMenu');
-
-    // 语言切换下拉菜单元素
     const languageBtn = document.getElementById('languageBtn');
     const languageDropdownMenu = document.getElementById('languageDropdownMenu');
+    const navBrandsDropdown = document.querySelector('.header-nav-item.header-nav-dropdown');
+    const navBrandsDropdownMenu = document.getElementById('brandsNavDropdownMenu');
+
+    function isMobileNav() {
+        return window.innerWidth <= 768;
+    }
+
+    function closeMobileBrandsMenu() {
+        if (!navBrandsDropdownMenu || !navBrandsDropdown) return;
+        navBrandsDropdownMenu.classList.remove('show');
+        navBrandsDropdown.classList.remove('is-open');
+        const trig = navBrandsDropdown.querySelector('.header-nav-dropdown-trigger');
+        if (trig) trig.setAttribute('aria-expanded', 'false');
+    }
+
+    function closeMobileLoginMenu() {
+        if (!loginDropdownMenu || !loginBtn) return;
+        loginDropdownMenu.classList.remove('show');
+        loginBtn.classList.remove('active');
+        loginBtn.setAttribute('aria-expanded', 'false');
+        const wrap = loginBtn.closest('.header-login-dropdown');
+        if (wrap) wrap.classList.remove('is-open');
+    }
+
+    function closeAllNavSubmenus() {
+        closeMobileBrandsMenu();
+        closeMobileLoginMenu();
+    }
 
     function setMobileMenuOpen(isOpen) {
         if (!navMenu) return;
@@ -18,6 +42,9 @@ document.addEventListener('DOMContentLoaded', function () {
         document.documentElement.classList.toggle('header-mobile-menu-open', isOpen);
         if (hamburger) {
             hamburger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        }
+        if (!isOpen) {
+            closeAllNavSubmenus();
         }
     }
 
@@ -35,7 +62,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // 点击汉堡切换菜单
     if (hamburger && navMenu) {
         hamburger.setAttribute('aria-controls', 'navMenu');
         hamburger.setAttribute('aria-expanded', 'false');
@@ -46,7 +72,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 点击导航内链接后收起抽屉（手机）
     if (navMenu) {
         navMenu.querySelectorAll('a[href]').forEach(function (a) {
             a.addEventListener('click', function () {
@@ -57,108 +82,98 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ========== 登录下拉菜单功能 ==========
     let loginHoverTimeout;
 
-    // 鼠标进入登录按钮区域时显示下拉菜单
     if (loginBtn && loginDropdownMenu) {
         loginBtn.addEventListener('mouseenter', function () {
-            // 清除可能存在的隐藏延时
+            if (isMobileNav() && navMenu && navMenu.contains(loginBtn)) return;
             clearTimeout(loginHoverTimeout);
-
-            // 显示菜单
             loginDropdownMenu.classList.add('show');
             loginBtn.classList.add('active');
         });
 
-        // 鼠标离开登录按钮区域时延迟隐藏下拉菜单
         loginBtn.addEventListener('mouseleave', function () {
-            // 设置延时隐藏，给用户时间移动到下拉菜单
+            if (isMobileNav() && navMenu && navMenu.contains(loginBtn)) return;
             loginHoverTimeout = setTimeout(() => {
                 loginDropdownMenu.classList.remove('show');
                 loginBtn.classList.remove('active');
-            }, 100); // 100ms延迟
+            }, 100);
+        });
+
+        loginBtn.addEventListener('click', function (e) {
+            if (!isMobileNav() || !navMenu || !navMenu.contains(loginBtn)) return;
+            e.preventDefault();
+            e.stopPropagation();
+            closeMobileBrandsMenu();
+            const nextOpen = !loginDropdownMenu.classList.contains('show');
+            loginDropdownMenu.classList.toggle('show', nextOpen);
+            loginBtn.classList.toggle('active', nextOpen);
+            loginBtn.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
+            const wrap = loginBtn.closest('.header-login-dropdown');
+            if (wrap) wrap.classList.toggle('is-open', nextOpen);
         });
     }
 
-    // 鼠标进入登录下拉菜单时保持显示
     if (loginDropdownMenu && loginBtn) {
         loginDropdownMenu.addEventListener('mouseenter', function () {
-            // 清除隐藏延时
+            if (isMobileNav() && navMenu && navMenu.contains(loginBtn)) return;
             clearTimeout(loginHoverTimeout);
-
-            // 确保菜单保持显示
             loginDropdownMenu.classList.add('show');
             loginBtn.classList.add('active');
         });
 
-        // 鼠标离开登录下拉菜单时隐藏
         loginDropdownMenu.addEventListener('mouseleave', function () {
+            if (isMobileNav() && navMenu && navMenu.contains(loginBtn)) return;
             loginDropdownMenu.classList.remove('show');
             loginBtn.classList.remove('active');
         });
 
-        // 点击登录下拉菜单项时的处理
         const loginDropdownItems = document.querySelectorAll('.header-login-dropdown-item');
         loginDropdownItems.forEach(item => {
             item.addEventListener('click', function () {
-                // 关闭下拉菜单
                 loginDropdownMenu.classList.remove('show');
                 loginBtn.classList.remove('active');
+                loginBtn.setAttribute('aria-expanded', 'false');
+                const wrap = loginBtn.closest('.header-login-dropdown');
+                if (wrap) wrap.classList.remove('is-open');
             });
         });
     }
 
-    // ========== 语言切换下拉菜单功能 ==========
     let languageHoverTimeout;
 
-    // 鼠标进入语言按钮区域时显示下拉菜单
     if (languageBtn && languageDropdownMenu) {
         languageBtn.addEventListener('mouseenter', function () {
-            // 清除可能存在的隐藏延时
             clearTimeout(languageHoverTimeout);
-
-            // 显示菜单
             languageDropdownMenu.classList.add('show');
             languageBtn.classList.add('active');
         });
 
-        // 鼠标离开语言按钮区域时延迟隐藏下拉菜单
         languageBtn.addEventListener('mouseleave', function () {
-            // 设置延时隐藏，给用户时间移动到下拉菜单
             languageHoverTimeout = setTimeout(() => {
                 languageDropdownMenu.classList.remove('show');
                 languageBtn.classList.remove('active');
-            }, 200); // 200ms延迟
+            }, 200);
         });
     }
 
-    // 鼠标进入语言下拉菜单时保持显示
     if (languageDropdownMenu && languageBtn) {
         languageDropdownMenu.addEventListener('mouseenter', function () {
-            // 清除隐藏延时
             clearTimeout(languageHoverTimeout);
-
-            // 确保菜单保持显示
             languageDropdownMenu.classList.add('show');
             languageBtn.classList.add('active');
         });
 
-        // 鼠标离开语言下拉菜单时隐藏
         languageDropdownMenu.addEventListener('mouseleave', function () {
             languageDropdownMenu.classList.remove('show');
             languageBtn.classList.remove('active');
         });
 
-        // 点击语言下拉菜单项时的处理
         const languageDropdownItems = document.querySelectorAll('.header-language-dropdown-item');
         languageDropdownItems.forEach(item => {
             item.addEventListener('click', function () {
-                // 关闭下拉菜单（这仍然可以保留）
                 languageDropdownMenu.classList.remove('show');
                 languageBtn.classList.remove('active');
-
-                // 更新语言按钮显示
                 const selectedLang = this.getAttribute('data-lang');
                 if (selectedLang === 'en') {
                     languageBtn.textContent = 'English';
@@ -167,18 +182,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     languageBtn.textContent = '中文';
                 }
-
-                // 关闭下拉菜单
                 languageDropdownMenu.classList.remove('show');
                 languageBtn.classList.remove('active');
             });
         });
     }
 
-    // ESC键关闭所有下拉菜单与手机导航
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             setMobileMenuOpen(false);
+            closeAllNavSubmenus();
             if (loginDropdownMenu && loginBtn) {
                 loginDropdownMenu.classList.remove('show');
                 loginBtn.classList.remove('active');
@@ -190,7 +203,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // 点击页面其他地方关闭下拉菜单；小屏点击导航外区域关闭抽屉
     document.addEventListener('click', function (e) {
         if (window.innerWidth <= 768 && navMenu && navMenu.classList.contains('active')) {
             const onBurger = hamburger && hamburger.contains(e.target);
@@ -199,41 +211,69 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        // 如果点击的不是登录相关元素，关闭登录下拉菜单
+        if (window.innerWidth <= 768 && navBrandsDropdown && navBrandsDropdownMenu) {
+            if (!navBrandsDropdown.contains(e.target)) {
+                navBrandsDropdownMenu.classList.remove('show');
+                navBrandsDropdown.classList.remove('is-open');
+                const trig = navBrandsDropdown.querySelector('.header-nav-dropdown-trigger');
+                if (trig) trig.setAttribute('aria-expanded', 'false');
+            }
+        }
+
         if (loginBtn && loginDropdownMenu && !loginBtn.contains(e.target) && !loginDropdownMenu.contains(e.target)) {
             loginDropdownMenu.classList.remove('show');
             loginBtn.classList.remove('active');
+            loginBtn.setAttribute('aria-expanded', 'false');
+            const wrap = loginBtn.closest('.header-login-dropdown');
+            if (wrap) wrap.classList.remove('is-open');
         }
 
-        // 如果点击的不是语言相关元素，关闭语言下拉菜单
         if (languageBtn && languageDropdownMenu && !languageBtn.contains(e.target) && !languageDropdownMenu.contains(e.target)) {
             languageDropdownMenu.classList.remove('show');
             languageBtn.classList.remove('active');
         }
     });
 
-    // 页面加载时处理
     moveMobileNavBlocks();
 
-    // 窗口大小改变时也处理，防止resize后布局错乱；回到桌面宽度时强制收起抽屉
     window.addEventListener('resize', function () {
         moveMobileNavBlocks();
         if (window.innerWidth > 768) {
             setMobileMenuOpen(false);
+            closeAllNavSubmenus();
         }
     });
 
-    // 导航栏旗下品牌下拉菜单控制
-    const navBrandsDropdown = document.querySelector('.header-nav-dropdown');
-    const navBrandsDropdownMenu = document.getElementById('brandsNavDropdownMenu');
-
     if (navBrandsDropdown && navBrandsDropdownMenu) {
         navBrandsDropdown.addEventListener('mouseenter', function () {
+            if (isMobileNav()) return;
             navBrandsDropdownMenu.classList.add('show');
         });
 
         navBrandsDropdown.addEventListener('mouseleave', function () {
+            if (isMobileNav()) return;
             navBrandsDropdownMenu.classList.remove('show');
         });
+
+        const brandsTrigger = navBrandsDropdown.querySelector('.header-nav-dropdown-trigger');
+        if (brandsTrigger) {
+            brandsTrigger.addEventListener('click', function (e) {
+                if (!isMobileNav()) return;
+                e.preventDefault();
+                e.stopPropagation();
+                closeMobileLoginMenu();
+                const nextOpen = !navBrandsDropdownMenu.classList.contains('show');
+                navBrandsDropdownMenu.classList.toggle('show', nextOpen);
+                navBrandsDropdown.classList.toggle('is-open', nextOpen);
+                brandsTrigger.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
+            });
+            brandsTrigger.addEventListener('keydown', function (e) {
+                if (!isMobileNav()) return;
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    brandsTrigger.click();
+                }
+            });
+        }
     }
 });

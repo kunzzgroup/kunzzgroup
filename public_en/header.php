@@ -87,7 +87,8 @@ function getLanguageSwitchUrl($targetLang) {
             <div class="header-nav-item"><a href="index.php">Home</a></div>
             <div class="header-nav-item"><a href="about.php">About Us</a></div>
             <div class="header-nav-item header-nav-dropdown">
-                <span class="header-nav-dropdown-trigger">Our Brands</span>
+                <span class="header-nav-dropdown-trigger" role="button" tabindex="0" aria-expanded="false"
+                    aria-controls="brandsNavDropdownMenu">Our Brands</span>
                 <div class="header-nav-dropdown-menu" id="brandsNavDropdownMenu">
                     <a href="tokyo-japanese-cuisine.html" class="header-nav-dropdown-item">Tokyo Japanese Cuisine</a>
                     <a href="tokyo-izakaya.html" class="header-nav-dropdown-item">Tokyo Izakaya Japanese Cuisine</a>
@@ -100,7 +101,8 @@ function getLanguageSwitchUrl($targetLang) {
         <div class="header-right-section">
             <!-- 移动端隐藏 login，仅大屏显示 -->
             <div class="header-login-dropdown">
-                <button class="header-login-btn" id="loginBtn">LOGIN</button>
+                <button type="button" class="header-login-btn" id="loginBtn" aria-expanded="false"
+                    aria-controls="loginDropdownMenu">LOGIN</button>
                 <div class="header-login-dropdown-menu" id="loginDropdownMenu">
                     <a href="/frontend_en/login.html" class="header-login-dropdown-item">Staff Login</a>
                 </div>
@@ -108,7 +110,7 @@ function getLanguageSwitchUrl($targetLang) {
 
             <!-- 翻译按钮始终显示 -->
             <div class="header-language-switch">
-                <button class="header-lang" id="languageBtn">English</button>
+                <button type="button" class="header-lang" id="languageBtn">English</button>
                 <div class="header-language-dropdown-menu" id="languageDropdownMenu">
                     <a href="<?php echo getLanguageSwitchUrl('cn'); ?>" class="header-language-dropdown-item" data-lang="cn">中文</a>
                     <a href="<?php echo getLanguageSwitchUrl('en'); ?>" class="header-language-dropdown-item" data-lang="en">English</a>
@@ -116,7 +118,7 @@ function getLanguageSwitchUrl($targetLang) {
             </div>
 
             <!-- hamburger 仅在小屏显示 -->
-            <button class="header-hamburger" id="hamburger">&#9776;</button>
+            <button type="button" class="header-hamburger" id="hamburger">&#9776;</button>
         </div>
     </header>
 
