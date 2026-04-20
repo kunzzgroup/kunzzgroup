@@ -561,6 +561,14 @@
     pointer-events: auto;
   }
 
+  /* 菜单打开：禁止背后页面滚动（与 Swiper 等不叠加纵向滚动条） */
+  html.header-mobile-menu-open,
+  body.header-mobile-menu-open {
+    overflow: hidden !important;
+    height: 100%;
+    overscroll-behavior: none;
+  }
+
   /* 导航抽屉：层次清晰、左对齐、子品牌内嵌展示 */
   .header-nav-links {
     display: flex;
@@ -571,7 +579,8 @@
     margin: 0;
     width: 100%;
     max-width: 100%;
-    max-height: min(82vh, 620px);
+    max-height: calc(100dvh - 56px);
+    max-height: calc(100vh - 56px);
     height: auto;
     background: linear-gradient(168deg, #3a3a3a 0%, #2e2e2e 45%, #262626 100%);
     flex-direction: column;
@@ -581,8 +590,8 @@
     box-sizing: border-box;
     gap: 0;
     z-index: 1000;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow: hidden;
+    overscroll-behavior: none;
     border-radius: 0 0 20px 20px;
     border: 1px solid rgba(255, 255, 255, 0.07);
     border-top: none;
@@ -611,7 +620,7 @@
   .header-nav-links > .header-login-dropdown {
     width: 100%;
     margin-top: 0;
-    padding: 14px 16px 8px;
+    padding: 10px 16px 6px;
     border-top: 1px solid rgba(255, 255, 255, 0.12);
     box-sizing: border-box;
     background: rgba(0, 0, 0, 0.2);
@@ -665,11 +674,17 @@
     box-sizing: border-box;
   }
 
+  /* 覆盖 1280 段 right:-40px，避免顶栏出现横向滚动/怪异留白 */
+  .header-right-section .header-language-dropdown-menu {
+    right: 0;
+    left: auto;
+  }
+
   .header-nav-links a {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    padding: 15px 18px;
+    padding: 12px 18px;
     font-size: 1.0625rem;
     font-weight: 500;
     letter-spacing: 0.02em;
@@ -686,7 +701,7 @@
   .header-nav-links a.active {
     background-color: rgba(255, 92, 0, 0.14);
     color: #fff;
-    padding: 15px 18px;
+    padding: 12px 18px;
   }
 
   /* 最后一项主链与下方登入区只保留一条分隔，避免双线 */
@@ -704,7 +719,7 @@
     height: auto;
     min-height: 0;
     justify-content: flex-start;
-    padding: 15px 18px;
+    padding: 12px 18px;
     font-size: 1.0625rem;
     font-weight: 500;
     letter-spacing: 0.02em;
@@ -715,7 +730,7 @@
   }
 
   .header-nav-links .header-nav-dropdown-trigger:hover {
-    padding: 15px 18px;
+    padding: 12px 18px;
     background-color: rgba(255, 92, 0, 0.14);
   }
 
@@ -762,8 +777,8 @@
     width: 100%;
     max-width: none;
     height: auto;
-    min-height: 48px;
-    padding: 14px 20px;
+    min-height: 44px;
+    padding: 12px 20px;
     font-size: 1rem;
     font-weight: 600;
     margin: 0;
@@ -776,7 +791,7 @@
 
   .header-nav-links .header-login-btn:hover {
     background-color: #e65500;
-    padding: 14px 20px;
+    padding: 12px 20px;
     line-height: 1.25;
   }
 

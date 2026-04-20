@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!navMenu) return;
         navMenu.classList.toggle('active', isOpen);
         document.body.classList.toggle('header-mobile-menu-open', isOpen);
+        document.documentElement.classList.toggle('header-mobile-menu-open', isOpen);
         if (hamburger) {
             hamburger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         }
