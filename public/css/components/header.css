@@ -624,18 +624,36 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: clamp(0.6rem, 1.5vw, 0.8rem);
+    /* 明显间距：语言与汉堡分开（覆盖 1280 段的 gap:0） */
+    gap: 12px;
+    column-gap: 12px;
+  }
+
+  /* 取消 1280 段落在小屏上的负 margin，避免「中文」与汉堡重叠 */
+  .header-language-switch .header-lang {
+    margin-left: 0;
+    margin-right: 0;
+    line-height: 1.25;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   /* hamburger 靠右边显示 */
   .header-hamburger {
-    display: block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     font-size: clamp(1rem, 2.5vw, 1.25rem);
     background: none;
     border: none;
     color: white;
     cursor: pointer;
-    padding: clamp(0.25rem, 0.5vw, 0.375rem) 0;
+    padding: clamp(0.35rem, 1vw, 0.5rem) 0.35rem;
+    margin-left: 2px;
+    min-width: 44px;
+    min-height: 44px;
+    box-sizing: border-box;
   }
 
   .header-nav-links a {
