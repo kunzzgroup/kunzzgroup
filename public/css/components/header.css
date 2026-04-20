@@ -350,14 +350,20 @@
   }
 
   .header-language-switch .header-lang {
-    width: 60px;
-    height: 18px;
+    width: auto;
+    min-width: 58px;
+    height: 26px;
     border-radius: 17px;
-    padding: 0px 12px;
-    font-size: 10px;
-    line-height: 1px;
+    padding: 0 12px;
+    font-size: 11px;
+    line-height: normal;
     margin-left: 30px;
     margin-right: -20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
   }
 
   .header-language-switch .header-icon {
@@ -647,14 +653,22 @@
     column-gap: 12px;
   }
 
-  /* 取消 1280 段落在小屏上的负 margin，避免「中文」与汉堡重叠 */
+  /* 取消 1280 段落在小屏上的负 margin；完整覆盖尺寸，避免 60×18 + line-height:1px 把文字挤花 */
   .header-language-switch .header-lang {
     margin-left: 0;
     margin-right: 0;
+    width: auto;
+    min-width: 3.75rem;
+    height: auto;
+    min-height: 36px;
+    padding: 8px 16px;
+    font-size: 0.875rem;
     line-height: 1.25;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
   }
 
   /* hamburger 靠右边显示 */
