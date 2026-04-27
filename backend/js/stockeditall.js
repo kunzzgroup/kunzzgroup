@@ -522,6 +522,61 @@ function formatDateToYYYYMMDD(date) {
     return `${year}-${month}-${day}`;
 }
 
+function parseLocalDate(dateValue) {
+    if (!dateValue) return null;
+    if (dateValue instanceof Date) {
+        if (isNaN(dateValue.getTime())) return null;
+        return new Date(dateValue.getFullYear(), dateValue.getMonth(), dateValue.getDate());
+    }
+
+    const value = String(dateValue).trim();
+    let match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+        return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+    }
+
+    match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (match) {
+        return new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
+    }
+
+    const parsed = new Date(value);
+    if (isNaN(parsed.getTime())) return null;
+    return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+}
+
+function normalizeDateString(dateValue) {
+    if (!dateValue) return '';
+    if (dateValue instanceof Date) {
+        const localDate = parseLocalDate(dateValue);
+        return localDate ? formatDateToYYYYMMDD(localDate) : '';
+    }
+
+    const value = String(dateValue).trim();
+    const isoMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoMatch) return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
+
+    const localDate = parseLocalDate(value);
+    return localDate ? formatDateToYYYYMMDD(localDate) : '';
+}
+
+function isDateInSelectedRange(dateValue) {
+    const normalizedDate = normalizeDateString(dateValue);
+    if (!normalizedDate) return false;
+    if (dateRange.startDate && normalizedDate < dateRange.startDate) return false;
+    if (dateRange.endDate && normalizedDate > dateRange.endDate) return false;
+    return true;
+}
+
+function formatDateToDDMMYYYY(dateValue) {
+    const date = parseLocalDate(dateValue);
+    if (!date) return '';
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+}
+
 // 点击外部关闭日历
 document.addEventListener('click', function (e) {
     const calendar = document.getElementById('date-range-picker');
@@ -769,7 +824,7 @@ async function updateDateRangeFromPickers() {
     const endDateStr = `${endDateValue.year}-${String(endDateValue.month).padStart(2, '0')}-${String(endDateValue.day).padStart(2, '0')}`;
 
     // 验证日期有效性
-    if (new Date(startDateStr) > new Date(endDateStr)) {
+    if (startDateStr > endDateStr) {
         showToast('开始日期不能晚于结束日期', 'warning');
         return;
     }
@@ -3000,7 +3055,8 @@ function renderStockTable() {
 
 // 格式化日期
 function formatDate(dateString) {
-    const date = new Date(dateString);
+    const date = parseLocalDate(dateString);
+    if (!date) return dateString || '-';
     const day = date.getDate().toString().padStart(2, '0');
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const month = months[date.getMonth()];
@@ -4054,31 +4110,6 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
             // 移除当前保存的行
             row.remove();
 
-            // 添加新记录到 stockData 数组
-            const newRecord = {
-                id: (result.data && result.data.id) ? result.data.id : Date.now(),
-                date: formData.date,
-                time: formData.time,
-                code_number: formData.code_number,
-                product_name: formData.product_name,
-                in_quantity: formData.in_quantity,
-                out_quantity: formData.out_quantity,
-                target_system: formData.target_system,
-                specification: formData.specification,
-                price: formData.price,
-                receiver: formData.receiver,
-                remark: formData.remark,
-                product_remark_checked: (result.data && result.data.product_remark_checked !== undefined) ? !!result.data.product_remark_checked : formData.product_remark_checked,
-                remark_number: (result.data && result.data.remark_number !== undefined) ? result.data.remark_number : formData.remark_number,
-                type: (result.data && result.data.type !== undefined) ? result.data.type : (formData.type || ''),
-                // 立即从服务端响应获取 created_by（已解析为 nickname）和 created_at
-                created_by: (result.data && result.data.created_by) ? result.data.created_by : '-',
-                created_at: (result.data && result.data.created_at) ? result.data.created_at : new Date().toISOString()
-            };
-
-            stockData.push(newRecord); // 添加到数组末尾
-
-            // 只在非批量保存模式下重新渲染表格
             if (!skipTableRefresh) {
                 // 保存其他新增行
                 const otherNewRows = Array.from(document.querySelectorAll('.new-row'));
@@ -4087,8 +4118,8 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
                     data: extractRowData(r)
                 }));
 
-                // 重新渲染表格
-                renderStockTable();
+                // 保存后以服务器和当前日期筛选为准，避免其他日期的新记录留在当前列表。
+                await searchData();
 
                 // 恢复其他新增行
                 setTimeout(() => {
@@ -4109,6 +4140,8 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
 
                 // 更新统计
                 updateStats();
+            } else if (isDateInSelectedRange(formData.date) && result.data) {
+                stockData.push(result.data);
             }
         } else {
             showAlert('添加失败: ' + (result.message || '未知错误'), 'error');
@@ -4238,32 +4271,8 @@ async function saveNewRecord() {
             showAlert('记录添加成功', 'success');
             toggleAddForm();
 
-            // 添加新记录到 stockData 数组的开头并立即显示
-            const newRecord = {
-                id: result.data.id || Date.now(),
-                date: formData.date,
-                time: formData.time,
-                code_number: formData.code_number,
-                product_name: formData.product_name,
-                in_quantity: formData.in_quantity,
-                out_quantity: formData.out_quantity,
-                target_system: formData.target_system,
-                specification: formData.specification,
-                price: formData.price,
-                receiver: formData.receiver,
-                applicant: formData.applicant,
-                remark: formData.remark,
-                product_remark_checked: formData.product_remark_checked,
-                remark_number: formData.remark_number,
-                type: (result.data && result.data.type !== undefined) ? result.data.type : (formData.type || ''),
-                // 立即从服务端响应获取 created_by（已解析为 nickname）和 created_at
-                created_by: (result.data && result.data.created_by) ? result.data.created_by : '-',
-                created_at: (result.data && result.data.created_at) ? result.data.created_at : new Date().toISOString()
-            };
-
-            stockData.push(newRecord); // 添加到数组末尾
-            renderStockTable();
-            updateStats();
+            // 保存后重新按当前日期范围拉取，避免非当前筛选日期的记录临时显示在列表中。
+            await searchData();
         } else {
             showAlert('添加失败: ' + (result.message || '未知错误'), 'error');
         }
@@ -6874,10 +6883,14 @@ async function confirmExport() {
                 return false;
             }
 
-            const recordDateObj = new Date(recordDate);
+            const recordDateObj = parseLocalDate(recordDate);
+            if (!recordDateObj) {
+                console.log('记录date字段格式无效，跳过:', record.id, 'date:', recordDate);
+                return false;
+            }
             // 创建日期对象的副本用于比较，避免修改原始对象
-            const startDateForCompare = new Date(startDateObj);
-            const endDateForCompare = new Date(endDateObj);
+            const startDateForCompare = parseLocalDate(startDateObj);
+            const endDateForCompare = parseLocalDate(endDateObj);
 
             // 设置时间为当天的开始和结束
             startDateForCompare.setHours(0, 0, 0, 0);
@@ -6920,8 +6933,8 @@ async function confirmExport() {
                 const recordDate = record.date;
                 if (!recordDate) return;
 
-                const dateObj = new Date(recordDate);
-                const dateKey = formatDateToYYYYMMDD(dateObj);
+                const dateKey = normalizeDateString(recordDate);
+                if (!dateKey) return;
 
                 if (!groupedByDate[dateKey]) {
                     groupedByDate[dateKey] = {
@@ -6944,11 +6957,7 @@ async function confirmExport() {
                 .sort()
                 .map((dateKey, index) => {
                     const group = groupedByDate[dateKey];
-                    const dateObj = new Date(dateKey);
-                    const day = String(dateObj.getDate()).padStart(2, '0');
-                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-                    const year = dateObj.getFullYear();
-                    const dateDisplay = `${day}/${month}/${year}`;
+                    const dateDisplay = formatDateToDDMMYYYY(dateKey);
 
                     return {
                         item_number: index + 1,
@@ -7059,7 +7068,7 @@ window.addEventListener('scroll', function () {
 // 生成发票号码 - 格式：J1-2510-001（店面-年月-序号）
 function generateInvoiceNumber(exportSystem, invoiceDate, userSuffix) {
     // 从发票日期提取年月（YYMM格式）
-    const date = new Date(invoiceDate);
+    const date = parseLocalDate(invoiceDate) || new Date();
     const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份补零
     const year = date.getFullYear().toString().slice(-2); // 取后两位年份
     const yearMonth = year + month;
@@ -7155,7 +7164,7 @@ async function generateInvoicePDF(outData, startDate, endDate, exportSystem, inv
 
         // 填入日期 (右上角区域)
         const currentDate = invoiceDate ?
-            new Date(invoiceDate).toLocaleDateString('en-GB') :
+            formatDateToDDMMYYYY(invoiceDate) :
             new Date().toLocaleDateString('en-GB');
 
         if (exportSystem === 'j1') {
@@ -7657,7 +7666,7 @@ async function generateMultiPageInvoicePDF(outData, startDate, endDate, exportSy
 
                 // 填入日期和发票号码（每一页都显示）
                 const currentDate = invoiceDate ?
-                    new Date(invoiceDate).toLocaleDateString('en-GB') :
+                    formatDateToDDMMYYYY(invoiceDate) :
                     new Date().toLocaleDateString('en-GB');
 
                 if (exportSystem === 'j1') {

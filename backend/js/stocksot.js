@@ -758,9 +758,12 @@ function generateStockTable() {
 
     // 按日期降序排序
     const sortedData = [...stockData].sort((a, b) => {
-        const dateA = new Date(a.date);
-        const dateB = new Date(b.date);
-        return dateB - dateA;
+        const dateA = a.date || '';
+        const dateB = b.date || '';
+        if (dateA !== dateB) {
+            return dateB.localeCompare(dateA);
+        }
+        return (b.id || 0) - (a.id || 0);
     });
 
     sortedData.forEach((item, index) => {

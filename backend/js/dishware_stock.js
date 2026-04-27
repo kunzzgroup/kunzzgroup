@@ -6261,7 +6261,13 @@ function formatCurrency(value) {
 // 格式化日期
 function formatDate(dateString) {
     if (!dateString) return '-';
+    const match = String(dateString).trim().match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+        return `${match[1]}/${match[2]}/${match[3]}`;
+    }
+
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
     return date.toLocaleDateString('zh-CN', {
         year: 'numeric',
         month: '2-digit',

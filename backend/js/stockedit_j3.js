@@ -320,6 +320,38 @@ function formatDateToYYYYMMDD(date) {
     return `${year}-${month}-${day}`;
 }
 
+function parseLocalDate(dateValue) {
+    if (!dateValue) return null;
+    if (dateValue instanceof Date) {
+        if (isNaN(dateValue.getTime())) return null;
+        return new Date(dateValue.getFullYear(), dateValue.getMonth(), dateValue.getDate());
+    }
+
+    const value = String(dateValue).trim();
+    let match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+        return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+    }
+
+    match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (match) {
+        return new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
+    }
+
+    const parsed = new Date(value);
+    if (isNaN(parsed.getTime())) return null;
+    return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+}
+
+function formatDateToDDMMYYYY(dateValue) {
+    const date = parseLocalDate(dateValue);
+    if (!date) return '';
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+}
+
 // 点击外部关闭日历
 document.addEventListener('click', function (e) {
     const calendar = document.getElementById('date-range-picker');
@@ -567,7 +599,7 @@ async function updateDateRangeFromPickers() {
     const endDateStr = `${endDateValue.year}-${String(endDateValue.month).padStart(2, '0')}-${String(endDateValue.day).padStart(2, '0')}`;
 
     // 验证日期有效性
-    if (new Date(startDateStr) > new Date(endDateStr)) {
+    if (startDateStr > endDateStr) {
         showToast('开始日期不能晚于结束日期', 'warning');
         return;
     }
@@ -1939,7 +1971,8 @@ function renderStockTable() {
 
 // 格式化日期
 function formatDate(dateString) {
-    const date = new Date(dateString);
+    const date = parseLocalDate(dateString);
+    if (!date) return dateString || '-';
     const day = date.getDate().toString().padStart(2, '0');
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const month = months[date.getMonth()];
@@ -4664,14 +4697,16 @@ async function confirmExport() {
             const recordDate = record.date || record.out_date || record.created_at;
             if (!recordDate) return false;
 
-            const recordDateObj = new Date(recordDate);
-            // startDateObj 和 endDateObj 已经在前面解析过了
+            const recordDateObj = parseLocalDate(recordDate);
+            if (!recordDateObj) return false;
+            const startDateForCompare = parseLocalDate(startDateObj);
+            const endDateForCompare = parseLocalDate(endDateObj);
 
             // 设置时间为当天的开始和结束
-            startDateObj.setHours(0, 0, 0, 0);
-            endDateObj.setHours(23, 59, 59, 999);
+            startDateForCompare.setHours(0, 0, 0, 0);
+            endDateForCompare.setHours(23, 59, 59, 999);
 
-            return recordDateObj >= startDateObj && recordDateObj <= endDateObj;
+            return recordDateObj >= startDateForCompare && recordDateObj <= endDateForCompare;
         });
 
         if (outData.length === 0) {
@@ -4743,7 +4778,7 @@ window.addEventListener('scroll', function () {
 // 生成发票号码 - 格式：J1-2510-001（店面-年月-序号）
 function generateInvoiceNumber(exportSystem, invoiceDate, userSuffix) {
     // 从发票日期提取年月（YYMM格式）
-    const date = new Date(invoiceDate);
+    const date = parseLocalDate(invoiceDate) || new Date();
     const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份补零
     const year = date.getFullYear().toString().slice(-2); // 取后两位年份
     const yearMonth = year + month;
@@ -4839,7 +4874,7 @@ async function generateInvoicePDF(outData, startDate, endDate, exportSystem, inv
 
         // 填入日期 (右上角区域)
         const currentDate = invoiceDate ?
-            new Date(invoiceDate).toLocaleDateString('en-GB') :
+            formatDateToDDMMYYYY(invoiceDate) :
             new Date().toLocaleDateString('en-GB');
 
         if (exportSystem === 'j1') {
@@ -5213,7 +5248,7 @@ async function generateMultiPageInvoicePDF(outData, startDate, endDate, exportSy
 
                 // 填入日期和发票号码（每一页都显示）
                 const currentDate = invoiceDate ?
-                    new Date(invoiceDate).toLocaleDateString('en-GB') :
+                    formatDateToDDMMYYYY(invoiceDate) :
                     new Date().toLocaleDateString('en-GB');
 
                 if (exportSystem === 'j1') {

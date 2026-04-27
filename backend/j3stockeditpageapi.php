@@ -1,4 +1,6 @@
 <?php
+date_default_timezone_set('Asia/Kuala_Lumpur');
+
 require_once __DIR__ . '/permission_guard.php';
 requirePermissionApi('resource', 'stock_inventory');
 
@@ -137,6 +139,20 @@ function sendResponse($success, $message = "", $data = null)
     exit;
 }
 
+function normalizeStockDate($value)
+{
+    if (!is_string($value)) return null;
+    $value = trim($value);
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) return null;
+
+    $date = DateTime::createFromFormat('!Y-m-d', $value, new DateTimeZone('Asia/Kuala_Lumpur'));
+    $errors = DateTime::getLastErrors();
+    $hasErrors = is_array($errors) && ($errors['warning_count'] > 0 || $errors['error_count'] > 0);
+
+    if (!$date || $hasErrors || $date->format('Y-m-d') !== $value) return null;
+    return $value;
+}
+
 // 路由处理
 switch ($method) {
     case 'GET':
@@ -176,6 +192,19 @@ function handleGet()
             $receiver = $_GET['receiver'] ?? null;
             $productCode = $_GET['product_code'] ?? null; // 这行已存在，保持不变
             $productName = $_GET['product_name'] ?? null;
+
+            if ($searchDate !== null && $searchDate !== '') {
+                $searchDate = normalizeStockDate($searchDate);
+                if ($searchDate === null) sendResponse(false, "日期格式无效，请使用 YYYY-MM-DD");
+            }
+            if ($startDate !== null && $startDate !== '') {
+                $startDate = normalizeStockDate($startDate);
+                if ($startDate === null) sendResponse(false, "开始日期格式无效，请使用 YYYY-MM-DD");
+            }
+            if ($endDate !== null && $endDate !== '') {
+                $endDate = normalizeStockDate($endDate);
+                if ($endDate === null) sendResponse(false, "结束日期格式无效，请使用 YYYY-MM-DD");
+            }
 
             // 如果没有提供日期范围，默认使用当月
             if (!$startDate && !$endDate && !$searchDate) {
@@ -596,6 +625,10 @@ function handlePost()
         }
     }
 
+    $normalizedDate = normalizeStockDate($data['date']);
+    if ($normalizedDate === null) sendResponse(false, "日期格式无效，请使用 YYYY-MM-DD");
+    $data['date'] = $normalizedDate;
+
 
 
     // 验证 target_system 枚举值
@@ -839,6 +872,10 @@ function handlePut()
             sendResponse(false, "缺少必填字段：$field");
         }
     }
+
+    $normalizedDate = normalizeStockDate($data['date']);
+    if ($normalizedDate === null) sendResponse(false, "日期格式无效，请使用 YYYY-MM-DD");
+    $data['date'] = $normalizedDate;
 
 
 
@@ -1118,7 +1155,11 @@ function handleBatchSave()
                 $type = 'Service Line';
             }
 
-            $rowDate = $row['date'];
+            $rowDate = normalizeStockDate($row['date']);
+            if ($rowDate === null) {
+                throw new Exception("第 {$rowNum} 行日期格式无效，请使用 YYYY-MM-DD");
+            }
+            $row['date'] = $rowDate;
 
             // 写入 J3 数据库表
             $stmt->execute([

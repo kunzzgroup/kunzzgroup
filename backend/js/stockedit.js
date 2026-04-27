@@ -460,9 +460,22 @@ function renderStockTable() {
     }, 200);
 }
 
+function parseLocalDate(dateValue) {
+    if (!dateValue) return null;
+    const match = String(dateValue).trim().match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+        return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+    }
+
+    const parsed = new Date(dateValue);
+    if (isNaN(parsed.getTime())) return null;
+    return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+}
+
 // 格式化日期
 function formatDate(dateString) {
-    const date = new Date(dateString);
+    const date = parseLocalDate(dateString);
+    if (!date) return dateString || '-';
     const day = date.getDate().toString().padStart(2, '0');
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const month = months[date.getMonth()];
@@ -2194,7 +2207,7 @@ async function confirmExport() {
         return;
     }
 
-    if (new Date(startDate) > new Date(endDate)) {
+    if (startDate > endDate) {
         showAlert('开始日期不能晚于结束日期', 'error');
         return;
     }

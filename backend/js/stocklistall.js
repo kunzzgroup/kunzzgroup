@@ -1296,12 +1296,16 @@ function generatePDF(system, dataToExport, startDate, endDate) {
         // 格式化日期显示
         const formatDateForDisplay = (dateStr) => {
             if (!dateStr) return 'All';
+            const match = String(dateStr).trim().match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (match) {
+                return `${match[2]}/${match[3]}/${match[1]}`;
+            }
+
             const date = new Date(dateStr);
-            return date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
-            });
+            if (isNaN(date.getTime())) return dateStr;
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${month}/${day}/${date.getFullYear()}`;
         };
 
         // 添加日期信息
