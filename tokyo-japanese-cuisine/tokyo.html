@@ -1056,15 +1056,24 @@
 
     .salmon-mascot-peek {
       position: absolute;
-      right: clamp(-210px, -9vw, -120px);
-      top: 49%;
-      width: clamp(260px, 26vw, 430px);
-      transform: translateY(-50%) rotate(-10deg);
-      transform-origin: 85% 50%;
+      top: 54%;
+      width: clamp(420px, 34vw, 620px);
       z-index: 1;
       pointer-events: none;
-      opacity: 0.96;
-      filter: drop-shadow(-18px 24px 30px rgba(84, 60, 34, 0.2));
+      opacity: 0.9;
+      filter: drop-shadow(0 24px 34px rgba(84, 60, 34, 0.2));
+    }
+
+    .salmon-mascot-peek.left {
+      left: clamp(-330px, -18vw, -210px);
+      transform: translateY(-50%) rotate(9deg);
+      transform-origin: 15% 55%;
+    }
+
+    .salmon-mascot-peek.right {
+      right: clamp(-330px, -18vw, -210px);
+      transform: translateY(-50%) rotate(-9deg);
+      transform-origin: 85% 55%;
     }
 
     .salmon-mascot-frame {
@@ -1083,6 +1092,14 @@
       transform: translateY(-12.6%);
       user-select: none;
       pointer-events: none;
+    }
+
+    .salmon-mascot-peek.left .salmon-mascot {
+      transform: translate(18%, -12.6%);
+    }
+
+    .salmon-mascot-peek.right .salmon-mascot {
+      transform: translate(-38%, -12.6%);
     }
 
     @keyframes salmonPeekFloat {
@@ -1345,9 +1362,17 @@
       }
 
       .salmon-mascot-peek {
-        right: -170px;
-        width: clamp(230px, 30vw, 340px);
-        opacity: 0.82;
+        top: 58%;
+        width: clamp(330px, 38vw, 470px);
+        opacity: 0.74;
+      }
+
+      .salmon-mascot-peek.left {
+        left: -270px;
+      }
+
+      .salmon-mascot-peek.right {
+        right: -270px;
       }
     }
 
@@ -1406,11 +1431,19 @@
       }
 
       .salmon-mascot-peek {
-        right: -112px;
-        top: 16%;
-        width: 210px;
-        opacity: 0.42;
-        transform: translateY(-50%) rotate(-14deg);
+        top: 14%;
+        width: 220px;
+        opacity: 0.36;
+      }
+
+      .salmon-mascot-peek.left {
+        left: -150px;
+        transform: translateY(-50%) rotate(12deg);
+      }
+
+      .salmon-mascot-peek.right {
+        right: -150px;
+        transform: translateY(-50%) rotate(-12deg);
       }
     }
 
@@ -2851,7 +2884,14 @@
 
       <!-- SLIDE 3: Culture Carousel -->
       <section id="mission-vision" data-hash="mission-vision" class="culture-carousel-section swiper-slide">
-        <div class="salmon-mascot-peek" aria-hidden="true">
+        <div class="salmon-mascot-peek left" aria-hidden="true">
+          <span class="salmon-mascot-frame">
+            <object class="salmon-mascot" data="image/salmon-mascot.svg" type="image/svg+xml" tabindex="-1">
+              鲑仔仔动画
+            </object>
+          </span>
+        </div>
+        <div class="salmon-mascot-peek right" aria-hidden="true">
           <span class="salmon-mascot-frame">
             <object class="salmon-mascot" data="image/salmon-mascot.svg" type="image/svg+xml" tabindex="-1">
               鲑仔仔动画
