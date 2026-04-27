@@ -1043,6 +1043,57 @@
       align-items: center;
       justify-content: center;
       height: 100vh;
+      position: relative;
+    }
+
+    .culture-carousel-section .cc-slide-title,
+    .culture-carousel-section .cc-carousel-outer,
+    .culture-carousel-section .cc-description,
+    .culture-carousel-section .cc-dots {
+      position: relative;
+      z-index: 2;
+    }
+
+    .salmon-mascot-peek {
+      position: absolute;
+      right: clamp(-210px, -9vw, -120px);
+      top: 49%;
+      width: clamp(260px, 26vw, 430px);
+      transform: translateY(-50%) rotate(-10deg);
+      transform-origin: 85% 50%;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.96;
+      filter: drop-shadow(-18px 24px 30px rgba(84, 60, 34, 0.2));
+    }
+
+    .salmon-mascot-frame {
+      position: relative;
+      display: block;
+      aspect-ratio: 1750 / 1380;
+      overflow: hidden;
+      animation: salmonPeekFloat 5.4s ease-in-out infinite;
+    }
+
+    .salmon-mascot {
+      display: block;
+      width: 171.5%;
+      height: auto;
+      border: 0;
+      transform: translateY(-12.6%);
+      user-select: none;
+      pointer-events: none;
+    }
+
+    @keyframes salmonPeekFloat {
+      0%,
+      100% {
+        transform: translate3d(0, 0, 0) rotate(0deg);
+      }
+
+      50% {
+        transform: translate3d(-10px, -12px, 0) rotate(2.5deg);
+      }
     }
 
     .cc-eyebrow {
@@ -1292,6 +1343,12 @@
       .cc-nav {
         display: none !important;
       }
+
+      .salmon-mascot-peek {
+        right: -170px;
+        width: clamp(230px, 30vw, 340px);
+        opacity: 0.82;
+      }
     }
 
     @media (max-width: 940px) {
@@ -1346,6 +1403,14 @@
         height: auto;
         min-height: 100vh;
         padding: 50px 0 60px;
+      }
+
+      .salmon-mascot-peek {
+        right: -112px;
+        top: 16%;
+        width: 210px;
+        opacity: 0.42;
+        transform: translateY(-50%) rotate(-14deg);
       }
     }
 
@@ -2786,6 +2851,13 @@
 
       <!-- SLIDE 3: Culture Carousel -->
       <section id="mission-vision" data-hash="mission-vision" class="culture-carousel-section swiper-slide">
+        <div class="salmon-mascot-peek" aria-hidden="true">
+          <span class="salmon-mascot-frame">
+            <object class="salmon-mascot" data="image/salmon-mascot.svg" type="image/svg+xml" tabindex="-1">
+              鲑仔仔动画
+            </object>
+          </span>
+        </div>
 
         <h3 class="cc-slide-title" id="cc-title"></h3>
 
