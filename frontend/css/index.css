@@ -1010,14 +1010,14 @@ body::-webkit-scrollbar {
     height: auto;
     min-height: 100vh;
     min-height: 100dvh;
-    padding: 60px 16px 30px;
-    gap: 24px;
+    padding: 56px 16px 28px;
+    gap: 20px;
     overflow: visible;
   }
 
   .culture-left {
     grid-template-columns: repeat(2, 1fr);
-    grid-gap: 12px;
+    grid-gap: 10px;
     margin: 0;
     width: 100%;
   }
