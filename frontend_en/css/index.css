@@ -1048,7 +1048,7 @@ body::-webkit-scrollbar {
     .about-section {
         padding: 48px 0 0;
         height: auto;
-        min-height: calc(100vh - 56px);
+        min-height: calc(100svh - 56px);
         min-height: calc(100dvh - 56px);
         overflow-y: visible;
         justify-content: flex-start;
@@ -1113,7 +1113,7 @@ body::-webkit-scrollbar {
     .comprofile-image {
         width: 100%;
         max-width: min(260px, 72vw);
-        margin: 0 auto;
+        margin: 50px auto;
         aspect-ratio: auto;
     }
 
@@ -1130,6 +1130,7 @@ body::-webkit-scrollbar {
         align-self: stretch;
         width: 100%;
         height: auto;
+        min-height: clamp(220px, 34svh, 340px);
         flex-direction: column;
         flex-wrap: nowrap;
         align-items: center;

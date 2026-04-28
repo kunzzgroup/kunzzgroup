@@ -881,8 +881,8 @@ body::-webkit-scrollbar {
 
   .about-section {
     height: auto;
-    /* 手机第二屏至少占满可视区，避免 stats 下方露出 swiper 深色底 */
-    min-height: calc(100vh - 56px);
+    /* 手机第二屏至少占满可视区（含 iOS/Android 动态工具栏场景） */
+    min-height: calc(100svh - 56px);
     min-height: calc(100dvh - 56px);
     /* 底部勿留 padding：否则夹在 stats（橙底）之下的会是父级浅色底，看起来像「白条」 */
     padding: 48px 0 0;
@@ -946,7 +946,7 @@ body::-webkit-scrollbar {
   .comprofile-image {
     width: 100%;
     max-width: min(260px, 72vw);
-    margin: 0 auto;
+    margin: 50px auto;
     aspect-ratio: auto;
     flex: 0 0 auto;
   }
@@ -968,7 +968,7 @@ body::-webkit-scrollbar {
     row-gap: 14px;
     column-gap: 0;
     height: auto;
-    min-height: unset;
+    min-height: clamp(220px, 34svh, 340px);
     width: 100%;
     padding: 14px 20px calc(22px + env(safe-area-inset-bottom, 0));
     margin: 0;
