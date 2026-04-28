@@ -162,8 +162,8 @@ function getMediaHtml($mediaType, $attributes = []) {
         $filePath = '../' . $filePath;
     }
     
-    // 添加时间戳防止缓存
-    $timestamp = file_exists($filePath) ? '?v=' . filemtime($filePath) : '?v=' . time();
+    // 只在能读取本地文件时使用版本号，避免每次请求都强制重新下载远程/缺失资源。
+    $timestamp = file_exists($filePath) ? '?v=' . filemtime($filePath) : '';
     $fileUrl = $filePath . $timestamp;
     
     if ($media['type'] === 'video') {
@@ -172,7 +172,8 @@ function getMediaHtml($mediaType, $attributes = []) {
             'autoplay' => '',
             'muted' => '',
             'loop' => '',
-            'playsinline' => ''
+            'playsinline' => '',
+            'preload' => 'metadata'
         ];
         $attrs = array_merge($defaultAttrs, $attributes);
         
@@ -204,6 +205,8 @@ function getMediaHtml($mediaType, $attributes = []) {
     } else {
         $defaultAttrs = [
             'class' => 'background-image',
+            'decoding' => 'async',
+            'fetchpriority' => 'high',
             'style' => 'width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;'
         ];
         $attrs = array_merge($defaultAttrs, $attributes);
@@ -1306,14 +1309,14 @@ function getBgMusicHtml($attributes = []) {
         $filePath = '../' . $filePath;
     }
     
-    // 添加时间戳防止缓存
-    $timestamp = file_exists($filePath) ? '?v=' . filemtime($filePath) : '?v=' . time();
+    // 只在能读取本地文件时使用版本号，避免每次请求都强制重新下载远程/缺失资源。
+    $timestamp = file_exists($filePath) ? '?v=' . filemtime($filePath) : '';
     $fileUrl = $filePath . $timestamp;
     
     $defaultAttrs = [
         'id' => 'bgMusic',
         'loop' => '',
-        'preload' => 'auto'
+        'preload' => 'metadata'
     ];
     $attrs = array_merge($defaultAttrs, $attributes);
     

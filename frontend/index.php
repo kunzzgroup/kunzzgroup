@@ -22,6 +22,14 @@ $additionalCSS = ['css/index.css','../public/css/components/footer.css','../publ
 $showPageIndicator = true;
 $totalSlides = 4;
 
+if (!function_exists('assetUrl')) {
+    function assetUrl($path) {
+        $absolutePath = realpath(__DIR__ . '/' . $path);
+        $version = $absolutePath && file_exists($absolutePath) ? filemtime($absolutePath) : '1';
+        return $path . '?v=' . $version;
+    }
+}
+
 // 包含header
 include '../public/header.php';
 ?>
@@ -58,7 +66,7 @@ include '../public/header.php';
     </div>
     <div class="comprofile-image animate-on-scroll rotate-3d-full">
       <!-- 你可以换成自己的图片 -->
-      <img src="../images/images/logo.png?v=<?php echo time(); ?>" alt="公司介绍图" loading="lazy" />
+      <img src="<?php echo assetUrl('../images/images/logo.png'); ?>" alt="公司介绍图" loading="lazy" decoding="async" />
     </div>
   </div>
 
@@ -85,22 +93,22 @@ include '../public/header.php';
   <section id="culture" class="culture-section">
     <div class="culture-left animate-on-scroll card-tilt-in-left">
       <div class="culture-card">
-        <img src="../images/images/积极向上 (1).png?v=<?php echo time(); ?>" alt="icon" class="culture-icon" loading="lazy">
+        <img src="<?php echo assetUrl('../images/images/积极向上 (1).png'); ?>" alt="icon" class="culture-icon" loading="lazy" decoding="async">
         <h3>积极向上</h3>
         <p>始终以正面心态面对挑战<br>在变化中寻找成长机会</p>
       </div>
       <div class="culture-card">
-        <img src="../images/images/高效执行 (1).png?v=<?php echo time(); ?>" alt="icon" class="culture-icon">
+        <img src="<?php echo assetUrl('../images/images/高效执行 (1).png'); ?>" alt="icon" class="culture-icon" loading="lazy" decoding="async">
         <h3>高效执行</h3>
         <p>说到做到，快速响应<br>追求结果导向与行动力</p>
       </div>
       <div class="culture-card">
-        <img src="../images/images/灵活应变 (1).png?v=<?php echo time(); ?>" alt="icon" class="culture-icon">
+        <img src="<?php echo assetUrl('../images/images/灵活应变 (1).png'); ?>" alt="icon" class="culture-icon" loading="lazy" decoding="async">
         <h3>灵活应变</h3>
         <p>面对市场变化和问题<br>保持开放思维，快速调整策略</p>
       </div>
       <div class="culture-card">
-        <img src="../images/images/诚信待人 (1).png?v=<?php echo time(); ?>" alt="icon" class="culture-icon">
+        <img src="<?php echo assetUrl('../images/images/诚信待人 (1).png'); ?>" alt="icon" class="culture-icon" loading="lazy" decoding="async">
         <h3>诚信待人</h3>
         <p>以真诚与责任建立合作与信任<br>是我们最基本的做人原则</p>
       </div>
@@ -123,10 +131,9 @@ include '../public/header.php';
 </div> <!-- 关闭 swiper -->
 <?php include '../public/social.php'; ?>
   
-<script src="../app.js?v=<?php echo time(); ?>" defer></script>
-<script src="../public/header.js?v=<?php echo time(); ?>" defer></script>
-<script src="../public/footer.js?v=<?php echo time(); ?>" defer></script>
-<script src="../public/social.js?v=<?php echo time(); ?>" defer></script>
+<script src="<?php echo assetUrl('../public/header.js'); ?>" defer></script>
+<script src="<?php echo assetUrl('../public/footer.js'); ?>" defer></script>
+<script src="<?php echo assetUrl('../public/social.js'); ?>" defer></script>
 <script>
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -134,25 +141,10 @@ include '../public/header.php';
 
       if (entry.isIntersecting) {
         container.classList.add('visible');
-
         container.querySelectorAll('.scale-fade-in').forEach(el => {
-          el.style.animation = 'none'; // 重置动画
-          el.offsetHeight; // 触发重绘
-          el.style.animation = ''; // 重新应用 CSS 动画
           el.style.animationPlayState = 'running';
         });
-
-      } else {
-        container.classList.remove('visible');
-
-        container.querySelectorAll('.scale-fade-in').forEach(el => {
-          el.style.animation = 'none'; // 停止当前动画
-          el.style.opacity = '0'; // 恢复初始状态
-          el.style.transform = 'translateY(20px)';
-          el.offsetHeight; // 强制回流
-          el.style.animation = '';
-          el.style.animationPlayState = 'paused';
-        });
+        observer.unobserve(container);
       }
     });
   }, {

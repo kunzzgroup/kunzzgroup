@@ -19,6 +19,14 @@ $additionalCSS = ['css/index.css','../public_en/css/components/footer.css','../p
 $showPageIndicator = true;
 $totalSlides = 4;
 
+if (!function_exists('assetUrl')) {
+    function assetUrl($path) {
+        $absolutePath = realpath(__DIR__ . '/' . $path);
+        $version = $absolutePath && file_exists($absolutePath) ? filemtime($absolutePath) : '1';
+        return $path . '?v=' . $version;
+    }
+}
+
 // 包含header
 include '../public_en/header.php';
 ?>
@@ -55,7 +63,7 @@ include '../public_en/header.php';
     </div>
     <div class="comprofile-image animate-on-scroll rotate-3d-full">
       <!-- 你可以换成自己的图片 -->
-      <img src="../images/images/logo.png?v=<?php echo time(); ?>" alt="公司介绍图" />
+      <img src="<?php echo assetUrl('../images/images/logo.png'); ?>" alt="公司介绍图" loading="lazy" decoding="async" />
     </div>
   </div>
 
@@ -82,22 +90,22 @@ include '../public_en/header.php';
   <section id="culture" class="culture-section">
     <div class="culture-left animate-on-scroll card-tilt-in-left">
       <div class="culture-card">
-        <img src="../images/images/积极向上 (1).png?v=<?php echo time(); ?>" alt="icon" class="culture-icon">
+        <img src="<?php echo assetUrl('../images/images/积极向上 (1).png'); ?>" alt="icon" class="culture-icon" loading="lazy" decoding="async">
         <h3>Positive</h3>
         <p>Stay Positive in Challenges<br>Embrace Change to Grow</p>
       </div>
       <div class="culture-card">
-        <img src="../images/images/高效执行 (1).png?v=<?php echo time(); ?>" alt="icon" class="culture-icon">
+        <img src="<?php echo assetUrl('../images/images/高效执行 (1).png'); ?>" alt="icon" class="culture-icon" loading="lazy" decoding="async">
         <h3>Efficient</h3>
         <p>Say it, do it. Respond fast.<br>Result-Driven & Action-Oriented</p>
       </div>
       <div class="culture-card">
-        <img src="../images/images/灵活应变 (1).png?v=<?php echo time(); ?>" alt="icon" class="culture-icon">
+        <img src="<?php echo assetUrl('../images/images/灵活应变 (1).png'); ?>" alt="icon" class="culture-icon" loading="lazy" decoding="async">
         <h3>Flexible</h3>
         <p>Face Change and Challenges<br>Stay Open and Adjust Fast</p>
       </div>
       <div class="culture-card">
-        <img src="../images/images/诚信待人 (1).png?v=<?php echo time(); ?>" alt="icon" class="culture-icon">
+        <img src="<?php echo assetUrl('../images/images/诚信待人 (1).png'); ?>" alt="icon" class="culture-icon" loading="lazy" decoding="async">
         <h3>Honesty</h3>
         <p>Build Trust with Sincerity<br>is Our Core Principle</p>
       </div>
@@ -120,10 +128,9 @@ include '../public_en/header.php';
 </div> <!-- 关闭 swiper -->
 <?php include '../public_en/social.php'; ?>
   
-<script src="../app.js?v=<?php echo time(); ?>" defer></script>
-<script src="../public_en/header.js?v=<?php echo time(); ?>" defer></script>
-<script src="../public_en/footer.js?v=<?php echo time(); ?>" defer></script>
-<script src="../public_en/social.js?v=<?php echo time(); ?>" defer></script>
+<script src="<?php echo assetUrl('../public_en/header.js'); ?>" defer></script>
+<script src="<?php echo assetUrl('../public_en/footer.js'); ?>" defer></script>
+<script src="<?php echo assetUrl('../public_en/social.js'); ?>" defer></script>
 <script>
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -131,25 +138,10 @@ include '../public_en/header.php';
 
       if (entry.isIntersecting) {
         container.classList.add('visible');
-
         container.querySelectorAll('.scale-fade-in').forEach(el => {
-          el.style.animation = 'none'; // 重置动画
-          el.offsetHeight; // 触发重绘
-          el.style.animation = ''; // 重新应用 CSS 动画
           el.style.animationPlayState = 'running';
         });
-
-      } else {
-        container.classList.remove('visible');
-
-        container.querySelectorAll('.scale-fade-in').forEach(el => {
-          el.style.animation = 'none'; // 停止当前动画
-          el.style.opacity = '0'; // 恢复初始状态
-          el.style.transform = 'translateY(20px)';
-          el.offsetHeight; // 强制回流
-          el.style.animation = '';
-          el.style.animationPlayState = 'paused';
-        });
+        observer.unobserve(container);
       }
     });
   }, {
