@@ -972,7 +972,7 @@ body::-webkit-scrollbar {
     width: 100%;
     padding: 14px 20px calc(22px + env(safe-area-inset-bottom, 0));
     margin: 0;
-    margin-top: clamp(4px, 2vw, 12px);
+    margin-top: auto;
     margin-bottom: 0;
     /* 底色兜底，避免大图未载完露白缝 */
     background-color: #c55a06;

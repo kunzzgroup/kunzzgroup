@@ -1137,7 +1137,7 @@ body::-webkit-scrollbar {
         row-gap: 14px;
         column-gap: 0;
         margin: 0;
-        margin-top: clamp(4px, 2vw, 12px);
+        margin-top: auto;
         padding: 14px 20px calc(22px + env(safe-area-inset-bottom, 0));
         margin-bottom: 0;
         background-color: #c55a06;
