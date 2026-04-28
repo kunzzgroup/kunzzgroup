@@ -739,6 +739,18 @@
     box-sizing: border-box;
   }
 
+
+  /* 手机上：顶栏右侧不显示 LOGIN，LOGIN 仅保留在汉堡抽屉里 */
+  .header-right-section > .header-login-dropdown {
+    display: none !important;
+    border-right: none;
+    margin-right: 0;
+    padding-right: 0;
+  }
+
+  .header-nav-links > .header-login-dropdown {
+    display: block;
+  }
   .header-nav-links > .header-login-dropdown {
     width: 100%;
     margin-top: 0;

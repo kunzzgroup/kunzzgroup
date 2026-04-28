@@ -977,8 +977,8 @@ body::-webkit-scrollbar {
     margin-top: auto;
     margin-bottom: 0;
     /* 底色兜底，避免大图未载完露白缝 */
-    background-color: #c55a06;
-    background-image: url('../../images/images/背景4.webp');
+    background-color: #ff7a00;
+    background-image: none;
     background-repeat: no-repeat;
     background-position: center center;
     background-size: cover;

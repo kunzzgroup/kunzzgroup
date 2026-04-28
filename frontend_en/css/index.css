@@ -890,8 +890,8 @@ body::-webkit-scrollbar {
         margin-top: auto;
         padding: 14px 20px calc(22px + env(safe-area-inset-bottom, 0));
         margin-bottom: 0;
-        background-color: #c55a06;
-        background-image: url('../../images/images/背景4.webp');
+        background-color: #ff7a00;
+        background-image: none;
         background-repeat: no-repeat;
         background-position: center center;
         background-size: cover;
