@@ -345,23 +345,23 @@
     }
 }
 
-/* Phone footer: compact, readable multi-column layout */
+/* Phone footer: compact two-column layout */
 @media (max-width: 768px) {
     .swiper-slide.footer-slide {
         height: auto;
-        min-height: 34vh;
+        min-height: 38vh;
     }
 
     .footer-scroll-buffer {
-        min-height: 34vh;
+        min-height: 38vh;
     }
 
     .footer {
         height: auto;
-        padding: 16px 14px 8px;
+        padding: 16px 62px 10px 14px;
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 10px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px 14px;
         align-items: start;
         justify-content: stretch;
     }
@@ -373,14 +373,14 @@
     }
 
     .footer-section h4 {
-        font-size: 0.78rem;
+        font-size: 0.82rem;
         margin-bottom: 6px;
         line-height: 1.25;
     }
 
     .footer-section li {
-        font-size: 0.72rem;
-        margin-bottom: 6px;
+        font-size: 0.76rem;
+        margin-bottom: 5px;
         line-height: 1.25;
         word-break: break-word;
     }
@@ -392,6 +392,6 @@
 
     .footer-bottom::before {
         left: 12px;
-        right: 12px;
+        right: 62px;
     }
 }

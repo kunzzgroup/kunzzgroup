@@ -352,11 +352,11 @@
     /* footer-slide 高度自适应，允许内容撑开 */
     .swiper-slide.footer-slide {
         height: auto;
-        min-height: 44vh;
+        min-height: 38vh;
     }
 
     .footer-scroll-buffer {
-        min-height: 44vh;
+        min-height: 38vh;
     }
 
     /* 遮罩覆盖上方整个区域，防止白底 */
@@ -368,12 +368,13 @@
 
     /* Footer 改为竖排 */
     .footer {
-        flex-direction: column;
-        flex-wrap: wrap;
         height: auto;
-        padding: 20px 24px 16px;
-        gap: 12px;
-        align-items: flex-start;
+        padding: 16px 62px 10px 14px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px 14px;
+        align-items: start;
+        justify-content: stretch;
     }
 
     .footer-logo {
@@ -396,22 +397,23 @@
         margin-top: 6px;
     }
 
-    /* 分栏并排，两列布局 */
     .footer-section {
-        flex: 0 0 calc(50% - 8px);
-        max-width: calc(50% - 8px);
+        max-width: none;
         min-width: 0;
-        margin-bottom: 8px;
+        margin-bottom: 0;
     }
 
     .footer-section h4 {
-        font-size: 12px;
-        margin-bottom: 4px;
+        font-size: 0.82rem;
+        margin-bottom: 6px;
+        line-height: 1.25;
     }
 
     .footer-section li {
-        font-size: 11px;
-        margin-bottom: 6px;
+        font-size: 0.76rem;
+        margin-bottom: 5px;
+        line-height: 1.25;
+        word-break: break-word;
     }
 
     .footer-bottom {
@@ -424,7 +426,7 @@
 
     .footer-bottom::before {
         left: 16px;
-        right: 16px;
+        right: 62px;
         height: 1px;
     }
 }
@@ -433,11 +435,11 @@
 @media (max-width: 480px) {
     .swiper-slide.footer-slide {
         height: auto;
-        min-height: 50vh;
+        min-height: 42vh;
     }
 
     .footer-scroll-buffer {
-        min-height: 50vh;
+        min-height: 42vh;
     }
 
     .swiper-slide.footer-slide::before {
@@ -446,14 +448,8 @@
     }
 
     .footer {
-        padding: 16px 16px 12px;
-        gap: 10px;
-    }
-
-    /* 超小屏幕：分栏单列 */
-    .footer-section {
-        flex: 0 0 100%;
-        max-width: 100%;
+        padding: 14px 58px 10px 12px;
+        gap: 10px 12px;
     }
 
     .footer-section h4 {
