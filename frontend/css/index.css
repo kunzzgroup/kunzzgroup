@@ -1011,6 +1011,8 @@ body::-webkit-scrollbar {
     padding: 56px 16px 28px;
     gap: 20px;
     overflow: visible;
+    /* 与上一屏橙色区无缝衔接，避免 1px 拼接线 */
+    margin-top: -1px;
   }
 
   .culture-left {

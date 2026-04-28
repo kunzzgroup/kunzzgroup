@@ -933,6 +933,7 @@ body::-webkit-scrollbar {
         padding: 56px 16px 28px;
         gap: 20px;
         overflow: visible;
+        margin-top: -1px;
     }
 
     .culture-left {
