@@ -1056,24 +1056,24 @@
 
     .salmon-mascot-peek {
       position: absolute;
-      top: 58%;
-      width: clamp(150px, 15vw, 220px);
-      height: clamp(190px, 19vw, 280px);
+      top: 57%;
+      width: clamp(230px, 22vw, 320px);
+      height: clamp(230px, 22vw, 320px);
       z-index: 3;
       pointer-events: none;
-      opacity: 0.94;
+      opacity: 1;
       filter: drop-shadow(0 24px 34px rgba(84, 60, 34, 0.2));
     }
 
     .salmon-mascot-peek.left {
-      left: clamp(12px, 4vw, 72px);
-      transform: translateY(-50%) rotate(-7deg);
+      left: clamp(-58px, -3vw, -24px);
+      transform: translateY(-50%) rotate(4deg);
       transform-origin: 15% 55%;
     }
 
     .salmon-mascot-peek.right {
-      right: clamp(12px, 4vw, 72px);
-      transform: translateY(-50%) rotate(7deg);
+      right: clamp(-58px, -3vw, -24px);
+      transform: translateY(-50%) rotate(-4deg);
       transform-origin: 85% 55%;
     }
 
@@ -1082,22 +1082,20 @@
       display: block;
       width: 100%;
       height: 100%;
-      overflow: hidden;
+      overflow: visible;
       background-image: url("image/salmon-mascot.svg");
       background-repeat: no-repeat;
-      background-size: auto 118%;
+      background-size: auto 100%;
       background-position-y: center;
       animation: salmonPeekFloat 5.4s ease-in-out infinite;
     }
 
     .salmon-mascot-peek.left .salmon-mascot-frame {
       background-position-x: right;
-      border-radius: 0 999px 999px 0;
     }
 
     .salmon-mascot-peek.right .salmon-mascot-frame {
       background-position-x: left;
-      border-radius: 999px 0 0 999px;
     }
 
     @keyframes salmonPeekFloat {
@@ -1361,17 +1359,17 @@
 
       .salmon-mascot-peek {
         top: 64%;
-        width: 140px;
-        height: 190px;
-        opacity: 0.86;
+        width: 200px;
+        height: 200px;
+        opacity: 0.92;
       }
 
       .salmon-mascot-peek.left {
-        left: 6px;
+        left: -52px;
       }
 
       .salmon-mascot-peek.right {
-        right: 6px;
+        right: -52px;
       }
     }
 
@@ -1432,19 +1430,19 @@
       .salmon-mascot-peek {
         top: auto;
         bottom: 72px;
-        width: 108px;
-        height: 148px;
-        opacity: 0.52;
+        width: 150px;
+        height: 150px;
+        opacity: 0.48;
       }
 
       .salmon-mascot-peek.left {
-        left: 0;
-        transform: rotate(-8deg);
+        left: -42px;
+        transform: rotate(5deg);
       }
 
       .salmon-mascot-peek.right {
-        right: 0;
-        transform: rotate(8deg);
+        right: -42px;
+        transform: rotate(-5deg);
       }
     }
 
