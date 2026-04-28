@@ -114,14 +114,10 @@ function getLanguageSwitchUrl($targetLang)
             </div>
 
             <!-- 翻译按钮始终显示 -->
-            <div class="header-language-switch">
-                <button type="button" class="header-lang" id="languageBtn">中文</button>
-                <div class="header-language-dropdown-menu" id="languageDropdownMenu">
-                    <a href="<?php echo getLanguageSwitchUrl('cn'); ?>" class="header-language-dropdown-item"
-                        data-lang="cn">中文</a>
-                    <a href="<?php echo getLanguageSwitchUrl('en'); ?>" class="header-language-dropdown-item"
-                        data-lang="en">English</a>
-                </div>
+            <div class="header-language-switch" aria-label="选择语言">
+                <a href="<?php echo getLanguageSwitchUrl('cn'); ?>" class="header-language-option active"
+                    aria-current="true">中文</a>
+                <a href="<?php echo getLanguageSwitchUrl('en'); ?>" class="header-language-option">EN</a>
             </div>
 
             <!-- hamburger 仅在小屏显示 -->
