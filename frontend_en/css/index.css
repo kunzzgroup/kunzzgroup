@@ -1048,7 +1048,8 @@ body::-webkit-scrollbar {
     .about-section {
         padding: 48px 0 0;
         height: auto;
-        min-height: 0;
+        min-height: calc(100vh - 56px);
+        min-height: calc(100dvh - 56px);
         overflow-y: visible;
         justify-content: flex-start;
         gap: 0;

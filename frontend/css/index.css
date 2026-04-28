@@ -881,8 +881,9 @@ body::-webkit-scrollbar {
 
   .about-section {
     height: auto;
-    /* 勿强制满屏：否则内容上不满时，统计数据下方会整块浅色留白 */
-    min-height: 0;
+    /* 手机第二屏至少占满可视区，避免 stats 下方露出 swiper 深色底 */
+    min-height: calc(100vh - 56px);
+    min-height: calc(100dvh - 56px);
     /* 底部勿留 padding：否则夹在 stats（橙底）之下的会是父级浅色底，看起来像「白条」 */
     padding: 48px 0 0;
     overflow-y: visible;
