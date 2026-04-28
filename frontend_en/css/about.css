@@ -2054,10 +2054,10 @@ img.image-3d-rotate:hover,
 
   /* second section: beliefs and direction (mobile unified style) */
   .vision {
-    min-height: clamp(620px, 90dvh, 860px) !important;
-    padding: 44px 14px 92px !important;
+    min-height: auto !important;
+    padding: calc(68px + env(safe-area-inset-top, 0px)) 14px 28px !important;
     align-items: flex-start !important;
-    justify-content: center !important;
+    justify-content: flex-start !important;
   }
 
   .vision-content {
