@@ -2052,6 +2052,68 @@ img.image-3d-rotate:hover,
     word-break: break-word !important;
   }
 
+  /* second section: beliefs and direction (mobile unified style) */
+  .vision {
+    min-height: 100dvh !important;
+    padding: 64px 14px 22px !important;
+    align-items: flex-start !important;
+  }
+
+  .vision-content {
+    width: 100% !important;
+    max-width: 26rem !important;
+    margin: 0 auto !important;
+  }
+
+  .vision-content h1 {
+    margin: 0 0 10px !important;
+    font-size: clamp(1.9rem, 7.2vw, 2.55rem) !important;
+    line-height: 1.18 !important;
+  }
+
+  .vision-content > p {
+    margin: 0 0 14px !important;
+    font-size: clamp(0.9rem, 3.45vw, 1.02rem) !important;
+    line-height: 1.6 !important;
+    white-space: normal !important;
+  }
+
+  .vision-cards {
+    width: 100% !important;
+    padding: 0 !important;
+    gap: 12px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .vision-card {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 14px 14px 16px !important;
+    border-radius: 16px !important;
+    box-sizing: border-box !important;
+  }
+
+  .vision-label {
+    margin: 0 0 10px !important;
+    font-size: clamp(0.95rem, 3.8vw, 1.08rem) !important;
+    padding: 6px 14px !important;
+  }
+
+  .vision-card h2 {
+    width: auto !important;
+    margin: 0 0 8px !important;
+    font-size: clamp(1.35rem, 5.2vw, 1.8rem) !important;
+    line-height: 1.3 !important;
+  }
+
+  .vision-card p {
+    margin: 0 !important;
+    font-size: clamp(0.9rem, 3.35vw, 1rem) !important;
+    line-height: 1.6 !important;
+  }
+
   .vision,
   .values-section,
   .timeline-section {
