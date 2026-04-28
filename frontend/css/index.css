@@ -883,8 +883,12 @@ body::-webkit-scrollbar {
     height: auto;
     min-height: calc(100vh - 0px);
     min-height: calc(100dvh - 0px);
-    padding: 64px 0 24px;
+    padding: 56px 0 20px;
     overflow-y: visible;
+    /* 略压暗底纹，正文更易读 */
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.96) 100%),
+      url('../../images/images/背景3.jpg') no-repeat center center/cover;
   }
 
   .comprofile-section {
@@ -892,25 +896,57 @@ body::-webkit-scrollbar {
     width: 100%;
     max-width: 100%;
     height: auto;
-    padding: 16px 16px 0;
-    gap: 20px;
+    padding: 12px 18px 8px;
+    gap: clamp(12px, 3vw, 18px);
     box-sizing: border-box;
+    align-items: center;
+  }
+
+  .comprofile-text {
+    width: 100%;
+    max-width: min(100%, 26rem);
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .comprofile-subtitle {
+    justify-content: center;
+    margin-bottom: 4px;
+    font-size: clamp(0.8125rem, 3.2vw, 0.9375rem);
+  }
+
+  .comprofile-title {
+    font-size: clamp(1.25rem, 5.5vw, 1.75rem);
+    line-height: 1.2;
+    letter-spacing: 0.02em;
   }
 
   .comprofile-description {
     height: auto;
     max-width: 100%;
+    margin-left: 0;
+    font-size: clamp(0.8125rem, 3.35vw, 0.9375rem);
+    line-height: 1.65;
+    color: #555;
+    text-align: left;
+    text-align-last: left;
   }
 
   .comprofile-image {
     width: 100%;
-    max-width: 100%;
-    padding: 8px 0;
+    max-width: min(260px, 72vw);
+    margin: 0 auto;
+    padding: 0 0 4px;
+    aspect-ratio: auto;
+    flex: 0 0 auto;
   }
 
   .comprofile-image img {
-    width: min(280px, 70vw);
+    width: min(168px, 44vw);
+    max-width: 100%;
     height: auto;
+    max-height: min(200px, 28vh);
+    object-fit: contain;
   }
 
   .stats-section {
