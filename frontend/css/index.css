@@ -460,9 +460,8 @@ body::-webkit-scrollbar {
   align-items: center;
   justify-content: center;
   color: white;
-  background:
-    radial-gradient(circle at 50% 18%, rgba(255, 92, 0, 0.12), transparent 34%),
-    linear-gradient(180deg, #314a4d 0%, #233638 48%, #151f20 100%);
+  /* 不设背景图：否则在多数浏览器里会盖在 z-index 为负的子元素（视频）之上，导致影片「消失」 */
+  background-color: #1a2223;
 }
 
 /* 视频全屏背景 */
@@ -473,14 +472,15 @@ body::-webkit-scrollbar {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  z-index: -1;
+  z-index: 0;
 }
 
 .home-content {
   text-align: center;
   height: auto;
   /* 允许高度自适应 */
-  z-index: 1;
+  position: relative;
+  z-index: 2;
 }
 
 .home h1 {
@@ -811,7 +811,7 @@ body::-webkit-scrollbar {
   content: '';
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: 1;
   pointer-events: none;
   background: linear-gradient(
     180deg,
@@ -823,7 +823,7 @@ body::-webkit-scrollbar {
 
 .home-content {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   max-width: min(92vw, 1100px);
   margin-left: auto;
   margin-right: auto;
