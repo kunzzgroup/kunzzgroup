@@ -251,24 +251,27 @@ document.addEventListener('DOMContentLoaded', () => {
   function loadBackgroundVideo() {
     if (!video || video.dataset.loaded === 'true') return;
     const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    const shouldSkipVideo = window.matchMedia('(max-width: 768px)').matches || connection?.saveData;
-    if (shouldSkipVideo) return;
+    if (connection && connection.saveData) return;
 
     video.querySelectorAll('source[data-src]').forEach(source => {
       source.src = source.dataset.src;
       source.removeAttribute('data-src');
     });
     video.dataset.loaded = 'true';
+    video.muted = true;
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
     video.load();
     video.play().catch(() => {});
   }
 
   triggerAnimations();
 
+  const isNarrow = window.matchMedia('(max-width: 768px)').matches;
   if ('requestIdleCallback' in window) {
-    requestIdleCallback(loadBackgroundVideo, { timeout: 1800 });
+    requestIdleCallback(loadBackgroundVideo, { timeout: isNarrow ? 500 : 1800 });
   } else {
-    setTimeout(loadBackgroundVideo, 900);
+    setTimeout(loadBackgroundVideo, isNarrow ? 300 : 900);
   }
 });
 </script>
