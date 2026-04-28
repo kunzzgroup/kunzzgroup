@@ -1056,23 +1056,23 @@
 
     .salmon-mascot-peek {
       position: absolute;
-      top: 54%;
-      width: clamp(420px, 34vw, 620px);
+      bottom: clamp(-96px, -7vw, -58px);
+      width: clamp(320px, 28vw, 500px);
       z-index: 1;
       pointer-events: none;
-      opacity: 0.9;
+      opacity: 0.88;
       filter: drop-shadow(0 24px 34px rgba(84, 60, 34, 0.2));
     }
 
     .salmon-mascot-peek.left {
-      left: clamp(-330px, -18vw, -210px);
-      transform: translateY(-50%) rotate(9deg);
+      left: clamp(-260px, -15vw, -170px);
+      transform: rotate(8deg);
       transform-origin: 15% 55%;
     }
 
     .salmon-mascot-peek.right {
-      right: clamp(-330px, -18vw, -210px);
-      transform: translateY(-50%) rotate(-9deg);
+      right: clamp(-260px, -15vw, -170px);
+      transform: rotate(-8deg);
       transform-origin: 85% 55%;
     }
 
@@ -1361,17 +1361,17 @@
       }
 
       .salmon-mascot-peek {
-        top: 58%;
-        width: clamp(330px, 38vw, 470px);
-        opacity: 0.74;
+        bottom: -72px;
+        width: clamp(280px, 34vw, 400px);
+        opacity: 0.68;
       }
 
       .salmon-mascot-peek.left {
-        left: -270px;
+        left: -220px;
       }
 
       .salmon-mascot-peek.right {
-        right: -270px;
+        right: -220px;
       }
     }
 
@@ -1430,19 +1430,19 @@
       }
 
       .salmon-mascot-peek {
-        top: 14%;
+        bottom: 4px;
         width: 220px;
-        opacity: 0.36;
+        opacity: 0.28;
       }
 
       .salmon-mascot-peek.left {
         left: -150px;
-        transform: translateY(-50%) rotate(12deg);
+        transform: rotate(12deg);
       }
 
       .salmon-mascot-peek.right {
         right: -150px;
-        transform: translateY(-50%) rotate(-12deg);
+        transform: rotate(-12deg);
       }
     }
 
@@ -2885,16 +2885,12 @@
       <section id="mission-vision" data-hash="mission-vision" class="culture-carousel-section swiper-slide">
         <div class="salmon-mascot-peek left" aria-hidden="true">
           <span class="salmon-mascot-frame">
-            <object class="salmon-mascot" data="image/salmon-mascot.svg" type="image/svg+xml" tabindex="-1">
-              鲑仔仔动画
-            </object>
+            <img class="salmon-mascot" src="image/salmon-mascot.svg" alt="" loading="lazy">
           </span>
         </div>
         <div class="salmon-mascot-peek right" aria-hidden="true">
           <span class="salmon-mascot-frame">
-            <object class="salmon-mascot" data="image/salmon-mascot.svg" type="image/svg+xml" tabindex="-1">
-              鲑仔仔动画
-            </object>
+            <img class="salmon-mascot" src="image/salmon-mascot.svg" alt="" loading="lazy">
           </span>
         </div>
 
