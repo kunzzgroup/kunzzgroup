@@ -1968,6 +1968,10 @@ img.image-3d-rotate:hover,
    Keep this at file end to override legacy duplicate rules
    ========================================================== */
 @media (max-width: 768px) {
+  .swiper-slide {
+    background-color: #ff7a00 !important;
+  }
+
   .aboutus-section {
     height: calc(100dvh - 56px) !important;
     min-height: calc(100dvh - 56px) !important;
@@ -2043,5 +2047,11 @@ img.image-3d-rotate:hover,
     letter-spacing: 0 !important;
     white-space: normal !important;
     word-break: break-word !important;
+  }
+
+  .vision,
+  .values-section,
+  .timeline-section {
+    margin-top: -2px !important;
   }
 }

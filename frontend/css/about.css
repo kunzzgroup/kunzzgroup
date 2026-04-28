@@ -1943,6 +1943,11 @@ img.image-3d-rotate:hover,
    Keep this at file end to override legacy duplicate rules
    ========================================================== */
 @media (max-width: 768px) {
+  /* 与首页同策略：滑块底色兜底，避免 section 交接时露出深灰 */
+  .swiper-slide {
+    background-color: #ff7a00 !important;
+  }
+
   .aboutus-section {
     height: calc(100dvh - 56px) !important;
     min-height: calc(100dvh - 56px) !important;
@@ -2018,5 +2023,12 @@ img.image-3d-rotate:hover,
     letter-spacing: 0 !important;
     white-space: normal !important;
     word-break: break-word !important;
+  }
+
+  /* section 交接去缝，和首页一致 */
+  .vision,
+  .values-section,
+  .timeline-section {
+    margin-top: -2px !important;
   }
 }
