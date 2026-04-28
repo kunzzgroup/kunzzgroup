@@ -176,6 +176,10 @@ function getMediaHtml($mediaType, $attributes = []) {
             'preload' => 'metadata'
         ];
         $attrs = array_merge($defaultAttrs, $attributes);
+        $lazyVideo = isset($attrs['data-lazy-video']) && $attrs['data-lazy-video'] === 'true';
+        if ($lazyVideo) {
+            $attrs['preload'] = 'none';
+        }
         
         $attrString = '';
         foreach ($attrs as $key => $value) {
@@ -201,7 +205,8 @@ function getMediaHtml($mediaType, $attributes = []) {
                 break;
         }
         
-        return "<video{$attrString}><source src=\"{$fileUrl}\" type=\"{$mimeType}\" /></video>";
+        $sourceAttr = $lazyVideo ? 'data-src' : 'src';
+        return "<video{$attrString}><source {$sourceAttr}=\"{$fileUrl}\" type=\"{$mimeType}\" /></video>";
     } else {
         $defaultAttrs = [
             'class' => 'background-image',
@@ -1316,7 +1321,7 @@ function getBgMusicHtml($attributes = []) {
     $defaultAttrs = [
         'id' => 'bgMusic',
         'loop' => '',
-        'preload' => 'metadata'
+        'preload' => 'none'
     ];
     $attrs = array_merge($defaultAttrs, $attributes);
     

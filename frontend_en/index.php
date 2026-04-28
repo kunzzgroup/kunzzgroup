@@ -35,7 +35,7 @@ include '../public_en/header.php';
 
   <div class="swiper-slide">
   <section class="home">
-  <?php echo getMediaHtml('home_background'); ?>
+  <?php echo getMediaHtml('home_background', ['data-lazy-video' => 'true']); ?>
 
   <div class="home-content hidden animate-on-scroll">
     <h1 class="scale-fade-in">Make The Space Warm <span style="font-size: 1.5em;">.</span> Let The Team Shine</h1>
@@ -233,50 +233,43 @@ if (slideParam !== null) {
 }
     </script>
 <script>
-window.addEventListener('load', () => {
-  const video = document.querySelector('.background-video');
-  const bgImage = document.querySelector('.background-image');
-  
-  // 触发动画的通用函数
+document.addEventListener('DOMContentLoaded', () => {
+  const home = document.querySelector('.home');
+  const homeContent = document.querySelector('.home-content');
+  const video = document.querySelector('.background-video[data-lazy-video="true"]');
+
   function triggerAnimations() {
-    document.querySelector('.home').classList.add('gradient-loaded');
-    document.querySelector('.home-content').classList.remove('hidden');
-
-    // 强制触发重绘，重新开始动画
-    void document.querySelector('.home-content').offsetWidth;
-
-    // 添加动画类
-    document.querySelector('.home-content h1').classList.add('scale-fade-in');
-    document.querySelector('.home-content p').classList.add('scale-fade-in');
-
-  }
-  
-  // 处理视频背景
-  if (video) {
-    // 监听视频是否可以播放（有足够的数据开始播放）
-    video.addEventListener('canplay', function() {
-      triggerAnimations();
+    if (!home || !homeContent || home.classList.contains('gradient-loaded')) return;
+    home.classList.add('gradient-loaded');
+    homeContent.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      homeContent.querySelector('h1')?.classList.add('scale-fade-in');
+      homeContent.querySelector('p')?.classList.add('scale-fade-in');
     });
   }
-  
-  // 处理图片背景
-  if (bgImage) {
-    bgImage.addEventListener('load', function() {
-      triggerAnimations();
+
+  function loadBackgroundVideo() {
+    if (!video || video.dataset.loaded === 'true') return;
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    const shouldSkipVideo = window.matchMedia('(max-width: 768px)').matches || connection?.saveData;
+    if (shouldSkipVideo) return;
+
+    video.querySelectorAll('source[data-src]').forEach(source => {
+      source.src = source.dataset.src;
+      source.removeAttribute('data-src');
     });
-    
-    // 如果图片已经加载完成
-    if (bgImage.complete) {
-      bgImage.dispatchEvent(new Event('load'));
-    }
+    video.dataset.loaded = 'true';
+    video.load();
+    video.play().catch(() => {});
   }
 
-  // 备用方案：如果视频/图片加载失败或很慢，设置一个最大等待时间
-  setTimeout(() => {
-    if (!document.querySelector('.home').classList.contains('gradient-loaded')) {
-      triggerAnimations();
-    }
-  }, 500);
+  triggerAnimations();
+
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(loadBackgroundVideo, { timeout: 1800 });
+  } else {
+    setTimeout(loadBackgroundVideo, 900);
+  }
 });
 </script>
 <script>

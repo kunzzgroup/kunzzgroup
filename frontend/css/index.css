@@ -460,6 +460,9 @@ body::-webkit-scrollbar {
   align-items: center;
   justify-content: center;
   color: white;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 92, 0, 0.12), transparent 34%),
+    linear-gradient(180deg, #314a4d 0%, #233638 48%, #151f20 100%);
 }
 
 /* 视频全屏背景 */
