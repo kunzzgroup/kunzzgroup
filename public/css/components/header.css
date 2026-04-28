@@ -822,15 +822,17 @@
   .header-language-switch {
     margin-left: 0;
     margin-right: 0;
-    padding: 3px;
-    gap: 3px;
+    padding: 2px;
+    gap: 2px;
   }
 
   .header-language-option {
-    min-width: 42px;
-    height: 30px;
-    padding: 0 9px;
-    font-size: 0.78rem;
+    min-width: 36px;
+    height: 26px;
+    padding: 0 8px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
   }
 
   /* 取消 1280 段落在小屏上的负 margin；完整覆盖尺寸，避免 60×18 + line-height:1px 把文字挤花 */

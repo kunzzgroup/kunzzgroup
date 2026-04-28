@@ -881,10 +881,10 @@ body::-webkit-scrollbar {
 
   .about-section {
     height: auto;
-    min-height: calc(100vh - 0px);
-    min-height: calc(100dvh - 0px);
+    /* 勿强制满屏：否则内容上不满时，统计数据下方会整块浅色留白 */
+    min-height: 0;
     /* 底部勿留 padding：否则夹在 stats（橙底）之下的会是父级浅色底，看起来像「白条」 */
-    padding: 56px 0 0;
+    padding: 48px 0 0;
     overflow-y: visible;
     justify-content: flex-start;
     gap: 0;
@@ -951,23 +951,25 @@ body::-webkit-scrollbar {
   }
 
   .comprofile-image img {
-    width: min(168px, 44vw);
+    width: min(120px, 34vw);
     max-width: 100%;
     height: auto;
-    max-height: min(200px, 28vh);
+    max-height: min(132px, 20vh);
     object-fit: contain;
   }
 
   .stats-section {
     align-self: stretch;
-    flex-wrap: wrap;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
     justify-content: center;
-    row-gap: 16px;
-    column-gap: 12px;
+    row-gap: 14px;
+    column-gap: 0;
     height: auto;
     min-height: unset;
     width: 100%;
-    padding: 20px 12px calc(28px + env(safe-area-inset-bottom, 0));
+    padding: 14px 20px calc(22px + env(safe-area-inset-bottom, 0));
     margin: 0;
     margin-top: clamp(4px, 2vw, 12px);
     margin-bottom: 0;
@@ -987,8 +989,17 @@ body::-webkit-scrollbar {
   }
 
   .stat-box {
-    flex: 1 1 45%;
-    min-width: 42%;
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 16rem;
+    min-width: 0;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .stat-box:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
   }
 
   .culture-section {
