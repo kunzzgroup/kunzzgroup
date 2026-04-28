@@ -359,11 +359,9 @@
         min-height: 38vh;
     }
 
-    /* 遮罩覆盖上方整个区域，防止白底 */
+    /* 手机端不使用向上遮罩，避免刷新时盖到上一屏 */
     .swiper-slide.footer-slide::before {
-        top: -100vh;
-        height: 100vh;
-        background: #2a2a2a;
+        display: none;
     }
 
     /* Footer 改为竖排 */
@@ -443,8 +441,7 @@
     }
 
     .swiper-slide.footer-slide::before {
-        top: -100vh;
-        height: 100vh;
+        display: none;
     }
 
     .footer {

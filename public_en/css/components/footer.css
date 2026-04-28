@@ -347,6 +347,10 @@
 
 /* Phone footer: compact two-column layout */
 @media (max-width: 768px) {
+    .swiper-slide.footer-slide::before {
+        display: none;
+    }
+
     .swiper-slide.footer-slide {
         height: auto;
         min-height: 38vh;
