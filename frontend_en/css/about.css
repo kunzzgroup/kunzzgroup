@@ -1973,8 +1973,11 @@ img.image-3d-rotate:hover,
   }
 
   .aboutus-section {
-    height: calc(100dvh - 56px) !important;
-    min-height: calc(100dvh - 56px) !important;
+    /* 电话版首屏拉满，保留设计背景长度 */
+    height: 100svh !important;
+    min-height: 100svh !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
