@@ -891,7 +891,7 @@ body::-webkit-scrollbar {
         padding: 14px 20px calc(22px + env(safe-area-inset-bottom, 0));
         margin-bottom: 0;
         background-color: #ff7a00;
-        background-image: none;
+        background-image: url('../../images/images/背景4.webp');
         background-repeat: no-repeat;
         background-position: center center;
         background-size: cover;
@@ -933,7 +933,7 @@ body::-webkit-scrollbar {
         padding: 56px 16px 28px;
         gap: 20px;
         overflow: visible;
-        margin-top: -1px;
+        margin-top: -2px;
     }
 
     .culture-left {

@@ -978,7 +978,7 @@ body::-webkit-scrollbar {
     margin-bottom: 0;
     /* 底色兜底，避免大图未载完露白缝 */
     background-color: #ff7a00;
-    background-image: none;
+    background-image: url('../../images/images/背景4.webp');
     background-repeat: no-repeat;
     background-position: center center;
     background-size: cover;
@@ -1012,7 +1012,7 @@ body::-webkit-scrollbar {
     gap: 20px;
     overflow: visible;
     /* 与上一屏橙色区无缝衔接，避免 1px 拼接线 */
-    margin-top: -1px;
+    margin-top: -2px;
   }
 
   .culture-left {
