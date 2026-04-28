@@ -1773,7 +1773,9 @@
       color: #f5ebe0;
       padding: clamp(40px, 6vw, 60px) 20px 0;
       height: auto !important;
-      min-height: max-content;
+      min-height: 0 !important;
+      flex-shrink: 0;
+      justify-content: flex-start !important;
     }
 
     .footer-container {
@@ -3279,6 +3281,11 @@
           const target = document.querySelector(hash);
           if (!target) return;
           e.preventDefault();
+          if (hash === '#footer' && typeof swiper !== 'undefined' && swiper.enabled) {
+            scrollToFooterEdge();
+            closeSidebar();
+            return;
+          }
           if (target.classList.contains('swiper-slide')) {
             const slides = Array.from(document.querySelectorAll('.swiper-slide'));
             const idx = slides.indexOf(target);
@@ -3348,6 +3355,15 @@
         lastSlideIndex = index;
       }
 
+      function scrollToFooterEdge() {
+        swiper.update();
+        swiper.setTranslate(swiper.maxTranslate());
+        swiper.updateActiveIndex();
+        swiper.updateSlidesClasses();
+        updateNav(swiper.activeIndex);
+        history.replaceState(null, '', '#footer');
+      }
+
       const swiper = new Swiper('.swiper', {
         direction: 'vertical',
         mousewheel: { enabled: true, releaseOnEdges: true },
@@ -3383,11 +3399,21 @@
         } else {
           if (!swiper.enabled) swiper.enable();
           if (nav) nav.classList.remove('nav-mobile-hidden'); // clean up mobile hide
-          updateNav(swiper.activeIndex); // re-apply correct state for current breakpoint
+          if (window.location.hash === '#footer') {
+            scrollToFooterEdge();
+          } else {
+            updateNav(swiper.activeIndex); // re-apply correct state for current breakpoint
+          }
         }
       }
       window.addEventListener('resize', handleResize);
       handleResize();
+
+      if (window.location.hash === '#footer' && swiper.enabled) {
+        requestAnimationFrame(() => {
+          scrollToFooterEdge();
+        });
+      }
 
       /* ─── Mobile Scroll behavior for Nav ─── */
       let lastScrollY = window.scrollY || 0;
