@@ -786,6 +786,10 @@ body::-webkit-scrollbar {
         overflow-x: hidden;
     }
 
+    .swiper-slide {
+        background-color: #ff7a00;
+    }
+
     /* 水平布局：左文右图 */
     .comprofile-section {
         flex-direction: row;

@@ -877,6 +877,8 @@ body::-webkit-scrollbar {
   .swiper-slide {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    /* 手机端兜底色：避免滑块之间露出深灰/黑条 */
+    background-color: #ff7a00;
   }
 
   .about-section {
