@@ -344,3 +344,54 @@
         top: -74vh;
     }
 }
+
+/* Phone footer: compact, readable multi-column layout */
+@media (max-width: 768px) {
+    .swiper-slide.footer-slide {
+        height: auto;
+        min-height: 34vh;
+    }
+
+    .footer-scroll-buffer {
+        min-height: 34vh;
+    }
+
+    .footer {
+        height: auto;
+        padding: 16px 14px 8px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        align-items: start;
+        justify-content: stretch;
+    }
+
+    .footer-section {
+        max-width: none;
+        min-width: 0;
+        margin-bottom: 0;
+    }
+
+    .footer-section h4 {
+        font-size: 0.78rem;
+        margin-bottom: 6px;
+        line-height: 1.25;
+    }
+
+    .footer-section li {
+        font-size: 0.72rem;
+        margin-bottom: 6px;
+        line-height: 1.25;
+        word-break: break-word;
+    }
+
+    .footer-bottom {
+        font-size: 0.68rem;
+        padding: 8px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .footer-bottom::before {
+        left: 12px;
+        right: 12px;
+    }
+}
