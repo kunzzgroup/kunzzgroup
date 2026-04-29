@@ -696,12 +696,8 @@ const swiper = new Swiper('.swiper', {
         el: '.swiper-pagination',
         clickable: true,
     },
-    slidesPerView: 1,
-    breakpoints: {
-        769: {
-            slidesPerView: 'auto',
-        },
-    },
+    // 添加这个配置来处理不同高度的slide
+    slidesPerView: 'auto',
     spaceBetween: 0,
     on: {
         slideChange: function() {
@@ -821,12 +817,6 @@ if (slideParam !== null) {
         swiper.slideTo(Math.min(Math.max(0, slideIndex), maxIdx), 0);
     }
 }
-
-requestAnimationFrame(function () {
-    if (typeof swiper !== 'undefined') {
-        swiper.update();
-    }
-});
     </script>
 <script>
     </script>
