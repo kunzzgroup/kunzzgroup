@@ -881,6 +881,11 @@ body::-webkit-scrollbar {
     background-color: #ff7a00;
   }
 
+  .swiper-slide:not(.footer-slide) {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
   .about-section {
     height: auto;
     /* 手机第二屏至少占满可视区（含 iOS/Android 动态工具栏场景） */

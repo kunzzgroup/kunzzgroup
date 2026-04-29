@@ -697,6 +697,8 @@ const swiper = new Swiper('.swiper', {
     mousewheel: true,
     speed: 800,
     simulateTouch: true,
+    /* 触摸落在深层子元素上时仍能驱动整页纵向滑动（Swiper 11 默认多为 wrapper） */
+    touchEventsTarget: 'container',
     pagination: {
         el: '.swiper-pagination',
         clickable: true,

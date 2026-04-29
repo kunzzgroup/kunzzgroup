@@ -3193,16 +3193,12 @@ img.image-3d-rotate:hover,
     .swiper-slide.swiper-slide--joinus-feedback-only {
         overflow: hidden !important;
         align-items: stretch;
-        /* 占满动态视口，减少下一滑（页脚）从底部「露边」叠在提交按钮上 */
-        min-height: 100vh;
-        min-height: 100dvh;
-        position: relative;
-        z-index: 0;
     }
 
-    /* 当前活动滑块在上层，避免相邻 footer（内部 z-index:2）叠压意见表底部 */
-    .swiper-slide.swiper-slide-active {
-        z-index: 5;
+    /* slidesPerView:auto 时避免滑块矮于视口导致下一滑露边、触摸像「没反应」 */
+    .swiper-slide:not(.footer-slide) {
+        min-height: 100vh;
+        min-height: 100dvh;
     }
 
     /* ===== 联系我们 + 意见表单（手机端：统一节奏、网格联系行、触控友好） ===== */

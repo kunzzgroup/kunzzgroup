@@ -166,6 +166,7 @@ const swiper = new Swiper('.swiper', {
     mousewheel: true,
     speed: 800,
     simulateTouch: true,
+    touchEventsTarget: 'container',
     pagination: {
         el: '.swiper-pagination',
         clickable: true,

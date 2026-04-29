@@ -793,6 +793,11 @@ body::-webkit-scrollbar {
         background-color: #ff7a00;
     }
 
+    .swiper-slide:not(.footer-slide) {
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
+
     /* ===== 公司简介 ===== */
     .about-section {
         padding: 48px 0 0;

@@ -3596,14 +3596,11 @@ img.image-3d-rotate:hover,
     .swiper-slide.swiper-slide--joinus-feedback-only {
         overflow: hidden !important;
         align-items: stretch;
-        min-height: 100vh;
-        min-height: 100dvh;
-        position: relative;
-        z-index: 0;
     }
 
-    .swiper-slide.swiper-slide-active {
-        z-index: 5;
+    .swiper-slide:not(.footer-slide) {
+        min-height: 100vh;
+        min-height: 100dvh;
     }
 
     /* ===== Contact-Form Section（合并：地图+联系+意见）===== */

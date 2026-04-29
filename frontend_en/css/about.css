@@ -1994,6 +1994,11 @@ img.image-3d-rotate:hover,
     background-color: #ff7a00 !important;
   }
 
+  .swiper-slide:not(.footer-slide) {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
   .aboutus-section {
     /* 电话版首屏拉满，保留设计背景长度 */
     height: 100svh !important;
