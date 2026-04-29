@@ -3207,7 +3207,12 @@ img.image-3d-rotate:hover,
     }
 
     .contact-info-bottom {
-        padding: 12px 14px 16px;
+        padding: 18px 18px 20px;
+        box-sizing: border-box;
+    }
+
+    .contact-info-bottom .contact-card-header {
+        text-align: center;
     }
 
     .contact-info-bottom .contact-details {
@@ -3241,7 +3246,10 @@ img.image-3d-rotate:hover,
     }
 
     .contact-info-bottom .contact-detail-text {
+        flex: 1;
+        min-width: 0;
         overflow: visible;
+        text-align: left;
     }
 
     .contact-info-bottom .contact-detail-text span:not(.contact-label),
@@ -3255,7 +3263,35 @@ img.image-3d-rotate:hover,
     .feedback-card {
         flex: none !important;
         width: 100%;
-        padding: 16px 16px 24px;
+        padding: 20px 20px 28px;
+        box-sizing: border-box;
+    }
+
+    .feedback-card .feedback-title,
+    .feedback-card .feedback-subtitle {
+        text-align: center;
+    }
+
+    .feedback-card #feedbackForm {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .feedback-card .fb-field {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .feedback-card .fb-field input[type="text"],
+    .feedback-card .fb-field input[type="email"],
+    .feedback-card .fb-field input[type="tel"],
+    .feedback-card .fb-field select,
+    .feedback-card .fb-field textarea {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     .fb-form-row {
@@ -3273,6 +3309,7 @@ img.image-3d-rotate:hover,
         height: auto;
         min-height: 40px;
         flex-wrap: wrap;
+        justify-content: center;
     }
 
     .fb-phone-row {
