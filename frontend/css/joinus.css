@@ -2999,8 +2999,8 @@ img.image-3d-rotate:hover,
     .benefits-wrapper {
         height: auto;
         min-height: auto;
-        /* 右侧为固定社交按钮留出空间，避免压住双列福利文案 */
-        padding: 48px max(56px, calc(16px + env(safe-area-inset-right, 0px))) 40px max(16px, env(safe-area-inset-left, 0px));
+        /* 右侧 + 底部：为固定社交条留出空间（避免压住末格文案与图标） */
+        padding: 48px max(64px, calc(16px + env(safe-area-inset-right, 0px))) max(112px, calc(40px + env(safe-area-inset-bottom, 0px))) max(16px, env(safe-area-inset-left, 0px));
     }
 
     /* 小屏跳过「未进入视口则透明」的福利动画，避免空白或闪烁 */
@@ -3018,24 +3018,31 @@ img.image-3d-rotate:hover,
     }
 
     .benefits-wrapper .benefits-grid {
-        gap: 14px 10px;
-        row-gap: 18px;
-        flex-wrap: wrap;
-        max-width: 100%;
-        justify-content: center;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 12px;
+        row-gap: 20px;
+        max-width: 420px;
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .benefits-wrapper .benefit-item {
-        width: clamp(70px, 24vw, 110px);
+        width: 100%;
+        max-width: none;
+        min-width: 0;
     }
 
     .benefits-wrapper .benefit-item img {
-        width: clamp(36px, 12vw, 60px);
+        width: clamp(40px, 14vw, 64px);
     }
 
     .benefits-wrapper .benefit-item p {
-        font-size: clamp(10px, 3vw, 13px);
-        margin-bottom: 16px;
+        font-size: clamp(11px, 3.2vw, 14px);
+        line-height: 1.35;
+        margin-bottom: 12px;
     }
 
     /* ===== Comphoto ===== */
@@ -3122,8 +3129,13 @@ img.image-3d-rotate:hover,
         font-size: clamp(22px, 7vw, 36px);
     }
 
+    .benefits-wrapper .benefits-grid {
+        max-width: 100%;
+        column-gap: 10px;
+    }
+
     .benefits-wrapper .benefit-item {
-        width: clamp(60px, 22vw, 90px);
+        width: 100%;
     }
 
     .company-job-container {
