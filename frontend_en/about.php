@@ -485,9 +485,19 @@ if (slideParam !== null) {
             isAnimating = true;
             currentIndex = index;
 
-            // 更新卡片显示
-            contentItems.forEach(item => item.classList.remove('active'));
-            contentItems[index].classList.add('active');
+            const layoutClasses = ['active', 'prev', 'next', 'hidden', 'stack-hidden'];
+            contentItems.forEach((item, i) => {
+                item.classList.remove(...layoutClasses);
+                if (i === index) {
+                    item.classList.add('active');
+                } else if (i === index - 1) {
+                    item.classList.add('prev');
+                } else if (i === index + 1) {
+                    item.classList.add('next');
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
 
             // 同步年份导航 + 月份侧栏
             updateTimelineNav();
@@ -657,10 +667,10 @@ if (slideParam !== null) {
             });
         }
 
-        // 初始化：设置第一张为 active
-        contentItems.forEach(item => item.classList.remove('active'));
-        if (contentItems.length > 0) contentItems[0].classList.add('active');
-        updateTimelineNav();
+        // 初始化：第一张居中，其余隐藏（避免多张叠在同位置产生重影）
+        if (contentItems.length > 0) {
+            switchToCard(0);
+        }
 
         // 窗口大小改变时重新计算
         window.addEventListener('resize', () => {

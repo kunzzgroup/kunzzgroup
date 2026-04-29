@@ -819,11 +819,13 @@ body::-webkit-scrollbar {
     min-height: clamp(250px, 55vw, 380px);
   }
 
+  /* 窄屏只显示当前年卡片；侧卡与主卡同位置叠放会产生文字重影 */
   .timeline-content-item.prev,
   .timeline-content-item.next {
-    opacity: 0.3;
-    transform: translateX(0) scale(0.85);
-    pointer-events: none;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateX(0) scale(0.9) !important;
   }
 
   .timeline-nav {
