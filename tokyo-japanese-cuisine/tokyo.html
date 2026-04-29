@@ -818,10 +818,10 @@
     .zen-about {
       background-color: #f2d6b4;
       background-image:
-        linear-gradient(90deg, rgba(246, 244, 241, 0.78) 0%, rgba(246, 244, 241, 0.52) 48%, rgba(242, 214, 180, 0.18) 100%),
+        linear-gradient(110deg, rgba(246, 244, 241, 0.9) 0%, rgba(246, 244, 241, 0.68) 46%, rgba(242, 214, 180, 0.2) 100%),
         url("image/about-culture-bg-1920.jpg");
       background-image:
-        linear-gradient(90deg, rgba(246, 244, 241, 0.78) 0%, rgba(246, 244, 241, 0.52) 48%, rgba(242, 214, 180, 0.18) 100%),
+        linear-gradient(110deg, rgba(246, 244, 241, 0.9) 0%, rgba(246, 244, 241, 0.68) 46%, rgba(242, 214, 180, 0.2) 100%),
         image-set(
           url("image/about-culture-bg-1920.jpg") 1x,
           url("image/about-culture-bg-4k.jpg") 2x
@@ -835,6 +835,18 @@
       height: 100vh;
       position: relative;
       overflow: hidden;
+    }
+
+    .zen-about::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      background: linear-gradient(180deg,
+          rgba(245, 240, 232, 0.55) 0%,
+          rgba(245, 240, 232, 0.28) 42%,
+          rgba(245, 240, 232, 0.08) 100%);
     }
 
     .section-decoration {
