@@ -3471,6 +3471,17 @@ img.image-3d-rotate:hover,
         margin-top: 4px;
         border-radius: 12px;
     }
+
+    /*
+     * slidesPerView:1 时 Swiper 会给滑块写死整屏高度，盖过 footer.css 的 height:auto，
+     * 页脚内容矮 → 版权下方大块留白。强制按内容高度 + 内容贴底。
+     */
+    .swiper .swiper-slide.footer-slide {
+        height: auto !important;
+        max-height: none !important;
+        min-height: 38vh;
+        justify-content: flex-end !important;
+    }
 }
 
 /* 桌面合并「联系+意见」时：隐藏意见箱单独圆点（与 JS joinus-desktop-merge-contact 一致） */

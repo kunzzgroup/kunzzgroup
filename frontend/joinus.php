@@ -830,6 +830,13 @@ if (slideParam !== null) {
         swiper.slideTo(Math.min(Math.max(0, slideIndex), maxIdx), 0);
     }
 }
+
+// 手机页脚滑块 height:auto 需在布局后再算一次高度，避免 slidesPerView:1 留白错位
+requestAnimationFrame(function () {
+    if (typeof swiper !== 'undefined') {
+        swiper.update();
+    }
+});
     </script>
 <script>
     </script>

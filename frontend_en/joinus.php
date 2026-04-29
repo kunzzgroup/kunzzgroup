@@ -821,6 +821,12 @@ if (slideParam !== null) {
         swiper.slideTo(Math.min(Math.max(0, slideIndex), maxIdx), 0);
     }
 }
+
+requestAnimationFrame(function () {
+    if (typeof swiper !== 'undefined') {
+        swiper.update();
+    }
+});
     </script>
 <script>
     </script>
