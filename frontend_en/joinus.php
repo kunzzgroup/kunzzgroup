@@ -696,8 +696,12 @@ const swiper = new Swiper('.swiper', {
         el: '.swiper-pagination',
         clickable: true,
     },
-    // 添加这个配置来处理不同高度的slide
-    slidesPerView: 'auto',
+    slidesPerView: 1,
+    breakpoints: {
+        769: {
+            slidesPerView: 'auto',
+        },
+    },
     spaceBetween: 0,
     on: {
         slideChange: function() {

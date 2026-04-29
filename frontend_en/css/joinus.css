@@ -3363,6 +3363,11 @@ img.image-3d-rotate:hover,
    =========================================== */
 @media (max-width: 768px) {
 
+    .swiper .swiper-slide:not(.swiper-slide--joinus-feedback-only) {
+        overflow-y: auto !important;
+        overflow-x: hidden;
+    }
+
     /* ===== Join Us Banner ===== */
     .joinus-section {
         height: auto;
