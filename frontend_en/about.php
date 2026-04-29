@@ -404,78 +404,58 @@ $timelineItems = getTimelineItems('en');
     </script>
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
-        // 恢复到你原来的配置，只添加最小的修改
+function updatePageIndicator(activeIndex) {
+    document.querySelectorAll('.header-page-dot').forEach((dot, index) => {
+        dot.classList.toggle('active', index === activeIndex);
+    });
+}
+
 const swiper = new Swiper('.swiper', {
     direction: 'vertical',
     mousewheel: true,
     speed: 800,
     simulateTouch: true,
     touchEventsTarget: 'container',
-    pagination: {
-        el: '.swiper-pagination',
-        clickable: true,
-    },
-    // 添加这个配置来处理不同高度的slide
+    pagination: false,
     slidesPerView: 'auto',
     spaceBetween: 0,
     on: {
         slideChange: function() {
-            // 更新页面指示器
             updatePageIndicator(this.activeIndex);
         },
-        // 添加这个事件来处理最后一页的特殊情况
         reachEnd: function() {
-            // 确保最后一页正确显示
             this.allowTouchMove = true;
         },
-        // 添加进度监听来处理最后一页的双向滑动
         setTransition: function(duration) {
-            // 在过渡结束后检查进度
             setTimeout(() => {
                 if (this.progress > 0.95) {
-                    updatePageIndicator(4); // 滑到最后一页
+                    updatePageIndicator(this.slides.length - 1);
                 } else {
-                    updatePageIndicator(this.activeIndex); // 从最后一页滑回来时用正常的activeIndex
+                    updatePageIndicator(this.activeIndex);
                 }
             }, duration + 50);
         }
     }
 });
 
-// 页面指示器功能（与 header 中的指示器类名保持一致）
-const pageDots = document.querySelectorAll('.header-page-dot');
-
-// 点击圆点跳转到对应页面
-pageDots.forEach((dot, index) => {
+document.querySelectorAll('.header-page-dot').forEach((dot, index) => {
     dot.addEventListener('click', () => {
         swiper.slideTo(index);
     });
 });
 
-// 更新页面指示器状态
-function updatePageIndicator(activeIndex) {
-    pageDots.forEach((dot, index) => {
-        if (index === activeIndex) {
-            dot.classList.add('active');
-        } else {
-            dot.classList.remove('active');
-        }
-    });
-}
+updatePageIndicator(swiper.activeIndex);
 
-// 初始化页面指示器
-updatePageIndicator(0);
-
-// 检查URL参数中是否有slide参数，自动导航到对应的slide
 const urlParams = new URLSearchParams(window.location.search);
 const slideParam = urlParams.get('slide');
 
 if (slideParam !== null) {
     const slideIndex = parseInt(slideParam, 10);
     if (!isNaN(slideIndex)) {
-        swiper.slideTo(slideIndex, 0); // 第二个参数0表示不使用动画效果，立即跳转
+        swiper.slideTo(slideIndex, 0);
     }
 }
+updatePageIndicator(swiper.activeIndex);
     </script>
 <script>
     </script>

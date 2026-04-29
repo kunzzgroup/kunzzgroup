@@ -686,38 +686,43 @@ function isElementInViewport(el) {
 </script>
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
-        // 恢复到你原来的配置，只添加最小的修改
+function updatePageIndicator(activeIndex) {
+    const dots = document.querySelectorAll('.header-page-dot');
+    if (!dots.length) {
+        return;
+    }
+    const merge = document.body.classList.contains('joinus-desktop-merge-contact');
+    let dotIndex = activeIndex;
+    if (merge && activeIndex >= 4) {
+        dotIndex = activeIndex + 1;
+    }
+    dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === dotIndex);
+    });
+}
+
 const swiper = new Swiper('.swiper', {
     direction: 'vertical',
     mousewheel: true,
     speed: 800,
     simulateTouch: true,
     touchEventsTarget: 'container',
-    pagination: {
-        el: '.swiper-pagination',
-        clickable: true,
-    },
-    // 添加这个配置来处理不同高度的slide
+    pagination: false,
     slidesPerView: 'auto',
     spaceBetween: 0,
     on: {
         slideChange: function() {
-            // 更新页面指示器
             updatePageIndicator(this.activeIndex);
         },
-        // 添加这个事件来处理最后一页的特殊情况
         reachEnd: function() {
-            // 确保最后一页正确显示
             this.allowTouchMove = true;
         },
-        // 添加进度监听来处理最后一页的双向滑动
         setTransition: function(duration) {
-            // 在过渡结束后检查进度
             setTimeout(() => {
                 if (this.progress > 0.95) {
                     updatePageIndicator(this.slides.length - 1);
                 } else {
-                    updatePageIndicator(this.activeIndex); // 从最后一页滑回来时用正常的activeIndex
+                    updatePageIndicator(this.activeIndex);
                 }
             }, duration + 50);
         }
@@ -768,9 +773,7 @@ const swiper = new Swiper('.swiper', {
     sync();
 })();
 
-const pageDots = document.querySelectorAll('.header-page-dot');
-
-pageDots.forEach((dot) => {
+document.querySelectorAll('.header-page-dot').forEach((dot) => {
     dot.addEventListener('click', () => {
         const i = parseInt(dot.getAttribute('data-slide'), 10);
         if (Number.isNaN(i)) {
@@ -789,25 +792,8 @@ pageDots.forEach((dot) => {
     });
 });
 
-function updatePageIndicator(activeIndex) {
-    const merge = document.body.classList.contains('joinus-desktop-merge-contact');
-    let dotIndex = activeIndex;
-    if (merge && activeIndex >= 4) {
-        dotIndex = activeIndex + 1;
-    }
-    pageDots.forEach((dot, index) => {
-        if (index === dotIndex) {
-            dot.classList.add('active');
-        } else {
-            dot.classList.remove('active');
-        }
-    });
-}
+updatePageIndicator(swiper.activeIndex);
 
-// 初始化页面指示器
-updatePageIndicator(0);
-
-// 检查URL参数中是否有slide参数，自动导航到对应的slide
 const urlParams = new URLSearchParams(window.location.search);
 const slideParam = urlParams.get('slide');
 
@@ -818,6 +804,7 @@ if (slideParam !== null) {
         swiper.slideTo(Math.min(Math.max(0, slideIndex), maxIdx), 0);
     }
 }
+updatePageIndicator(swiper.activeIndex);
     </script>
 <script>
     </script>

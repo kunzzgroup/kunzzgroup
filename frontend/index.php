@@ -163,17 +163,20 @@ include '../public/header.php';
 </script>
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
-// Initialize Swiper (same as other pages)
+/* 圆点在 DOM 中即可查询；勿依赖 Swiper 之后的 const，否则 init 阶段同步触发 slideChange 会 TDZ 报错，指示器永远不更新 */
+function updatePageIndicator(activeIndex) {
+    document.querySelectorAll('.header-page-dot').forEach((dot, index) => {
+        dot.classList.toggle('active', index === activeIndex);
+    });
+}
+
 const swiper = new Swiper('.swiper', {
     direction: 'vertical',
     mousewheel: true,
     speed: 800,
     simulateTouch: true,
     touchEventsTarget: 'container',
-    pagination: {
-        el: '.swiper-pagination',
-        clickable: true,
-    },
+    pagination: false,
     slidesPerView: 'auto',
     spaceBetween: 0,
     on: {
@@ -186,7 +189,7 @@ const swiper = new Swiper('.swiper', {
         setTransition: function(duration) {
             setTimeout(() => {
                 if (this.progress > 0.95) {
-                    updatePageIndicator(3); // Last slide for index.php (0-3, total 4 slides)
+                    updatePageIndicator(this.slides.length - 1);
                 } else {
                     updatePageIndicator(this.activeIndex);
                 }
@@ -195,29 +198,14 @@ const swiper = new Swiper('.swiper', {
     }
 });
 
-// Page indicator functionality
-const pageDots = document.querySelectorAll('.header-page-dot');
-
-pageDots.forEach((dot, index) => {
+document.querySelectorAll('.header-page-dot').forEach((dot, index) => {
     dot.addEventListener('click', () => {
         swiper.slideTo(index);
     });
 });
 
-function updatePageIndicator(activeIndex) {
-    pageDots.forEach((dot, index) => {
-        if (index === activeIndex) {
-            dot.classList.add('active');
-        } else {
-            dot.classList.remove('active');
-        }
-    });
-}
+updatePageIndicator(swiper.activeIndex);
 
-// Initialize page indicator
-updatePageIndicator(0);
-
-// Check URL parameter for slide navigation
 const urlParams = new URLSearchParams(window.location.search);
 const slideParam = urlParams.get('slide');
 
@@ -227,6 +215,7 @@ if (slideParam !== null) {
         swiper.slideTo(slideIndex, 0);
     }
 }
+updatePageIndicator(swiper.activeIndex);
 </script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
