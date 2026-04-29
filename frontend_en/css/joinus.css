@@ -3492,36 +3492,78 @@ img.image-3d-rotate:hover,
 
     /* ===== Job Section ===== */
     .job-section {
-        padding: 60px 12px 30px;
+        min-height: auto;
+        --joinus-inline: max(64px, calc(16px + max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px))));
+        padding: 32px var(--joinus-inline) max(100px, calc(28px + env(safe-area-inset-bottom, 0px))) var(--joinus-inline);
     }
 
     .job-table-title {
         font-size: clamp(20px, 6vw, 32px);
         margin: 0 auto 12px;
+        max-width: min(400px, 100%);
+        padding: 0 4px;
+        box-sizing: border-box;
     }
 
     .jobs-wrapper {
         --scale: 1;
+        width: 100%;
+        max-width: 400px;
+        margin-inline: auto;
+        box-sizing: border-box;
     }
 
     .jobs-container {
         flex-direction: column;
-        align-items: center;
-        gap: 16px;
-        padding: 0 8px;
+        align-items: stretch;
+        gap: 12px;
+        padding: 0;
+        width: 100%;
+        max-width: 400px;
+        margin-inline: auto;
+        box-sizing: border-box;
     }
 
     .company-job-container {
-        width: 90vw;
-        max-width: 360px;
+        width: 100%;
+        max-width: none;
+        padding: 10px 10px;
+        box-sizing: border-box;
     }
 
     .company-title {
-        font-size: clamp(14px, 4vw, 18px);
+        font-size: clamp(13px, 3.8vw, 17px);
+        white-space: normal;
+        line-height: 1.25;
+        overflow: visible;
+        text-overflow: clip;
+        word-break: break-word;
+    }
+
+    .department-title {
+        font-size: clamp(0.8125rem, 3.5vw, 1.0625rem);
+        padding: 0.3rem 0.45rem;
+        margin-bottom: 4px;
+    }
+
+    .company-jobs-list {
+        gap: 6px;
+    }
+
+    .department-section {
+        margin-bottom: 4px;
+    }
+
+    .department-jobs {
+        gap: 6px 8px;
     }
 
     .job-item {
-        font-size: clamp(11px, 3.5vw, 14px);
+        font-size: clamp(11px, 3.2vw, 14px);
+        white-space: normal;
+        padding: 0.42rem 0.5rem;
+        line-height: 1.3;
+        margin-bottom: 0;
     }
 
     /* ===== Job Modal ===== */
@@ -3629,7 +3671,7 @@ img.image-3d-rotate:hover,
     }
 
     .company-job-container {
-        width: 95vw;
+        width: 100%;
     }
 
     .comphoto-title {
@@ -3638,7 +3680,7 @@ img.image-3d-rotate:hover,
     }
 
     .jobs-container {
-        padding: 0 4px;
+        padding: 0;
     }
 
     .contact-map-embed {
