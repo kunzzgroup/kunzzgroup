@@ -2228,6 +2228,10 @@ img.image-3d-rotate:hover,
     font-size: clamp(1.08rem, 5.2vw, 1.42rem) !important;
     line-height: 1.28 !important;
     letter-spacing: 0.04em !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .timeline-nav {
@@ -2236,6 +2240,23 @@ img.image-3d-rotate:hover,
     padding-right: 4px !important;
     box-sizing: border-box !important;
     max-width: 100% !important;
+  }
+
+  .timeline-item:not(.active) {
+    opacity: 0.88 !important;
+  }
+
+  .timeline-item:not(.active) .timeline-bullet {
+    background: rgba(255, 255, 255, 0.62) !important;
+    color: #383838 !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .timeline-nav .nav-arrow {
+    background: rgba(255, 255, 255, 0.42) !important;
+    border: 1px solid rgba(255, 255, 255, 0.78) !important;
+    backdrop-filter: blur(8px);
   }
 
   .month-item.active .month-dot {
