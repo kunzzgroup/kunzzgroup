@@ -3172,25 +3172,38 @@ img.image-3d-rotate:hover,
         height: 280px;
     }
 
-    /* ===== 联系我们 + 意见表单（合并区块）手机端：单列 + 联系信息纵向排列 ===== */
+    /* 含「联系+表单」的 Swiper 页：本页内容可纵向滚动（一节一页 + 页内滚动） */
+    .swiper-slide:has(.contact-form-section) {
+        overflow-y: auto !important;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        align-items: stretch;
+        justify-content: flex-start;
+    }
+
+    /* ===== 联系我们 + 意见表单（手机端：统一节奏、网格联系行、触控友好） ===== */
     .contact-form-section {
-        --joinus-inline: max(64px, calc(16px + max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px))));
+        --contact-inline: max(56px, calc(12px + max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px))));
+        --contact-card-pad: 20px;
         height: auto;
         min-height: 0;
         overflow: visible;
         align-items: stretch;
         justify-content: center;
-        padding: 24px var(--joinus-inline) max(100px, calc(28px + env(safe-area-inset-bottom, 0px))) var(--joinus-inline);
+        box-sizing: border-box;
+        padding: max(68px, env(safe-area-inset-top, 0px)) var(--contact-inline) max(104px, calc(32px + env(safe-area-inset-bottom, 0px))) var(--contact-inline);
     }
 
     .contact-form-container {
+        --contact-card-pad: 20px;
         flex-direction: column;
         height: auto;
         max-height: none;
         min-height: 0;
-        gap: 16px;
-        width: min(100%, 480px);
-        max-width: 480px;
+        gap: 18px;
+        width: min(100%, 440px);
+        max-width: 440px;
         margin-inline: auto;
         flex: 0 1 auto;
         align-items: stretch;
@@ -3199,40 +3212,57 @@ img.image-3d-rotate:hover,
     .contact-card {
         flex: none !important;
         width: 100%;
+        border-radius: 16px;
+        box-shadow: 0 10px 36px rgba(0, 0, 0, 0.12);
     }
 
     .contact-map-embed {
         flex: none;
-        min-height: 200px;
-        height: 220px;
+        aspect-ratio: 16 / 10;
+        height: auto;
+        min-height: 176px;
+        max-height: 240px;
+        width: 100%;
     }
 
     .contact-info-bottom {
-        padding: 18px 18px 20px;
+        padding: 14px var(--contact-card-pad) 18px var(--contact-card-pad);
         box-sizing: border-box;
     }
 
     .contact-info-bottom .contact-card-header {
         text-align: center;
+        margin-bottom: 12px;
+    }
+
+    .contact-info-bottom .contact-title {
+        font-size: clamp(1.25rem, 4.2vw, 1.5rem);
+    }
+
+    .contact-info-bottom .contact-subtitle {
+        font-size: 0.65rem;
+        letter-spacing: 0.2em;
     }
 
     .contact-info-bottom .contact-details {
+        display: flex;
         flex-direction: column;
-        flex-wrap: nowrap;
         gap: 0;
         align-items: stretch;
+        width: 100%;
     }
 
     .contact-info-bottom .contact-detail-item {
-        flex: none !important;
+        display: grid !important;
+        grid-template-columns: 44px minmax(0, 1fr);
+        column-gap: 14px;
+        row-gap: 4px;
+        align-items: start;
         width: 100%;
         min-width: 0;
-        padding: 10px 0;
+        padding: 14px 0;
         border-right: none;
-        border-bottom: 1px solid #eee;
-        align-items: flex-start;
-        justify-content: center;
-        gap: 10px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
         box-sizing: border-box;
     }
 
@@ -3240,24 +3270,48 @@ img.image-3d-rotate:hover,
     .contact-info-bottom .contact-detail-item:nth-child(2),
     .contact-info-bottom .contact-detail-item:nth-child(3),
     .contact-info-bottom .contact-detail-item:nth-child(4) {
-        flex: none !important;
+        flex: unset !important;
+        display: grid !important;
         width: 100%;
     }
 
     .contact-info-bottom .contact-detail-item:last-child {
         border-bottom: none;
+        padding-bottom: 4px;
+    }
+
+    .contact-info-bottom .contact-icon {
+        width: 40px;
+        height: 40px;
+        margin-top: 2px;
+    }
+
+    .contact-info-bottom .contact-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .contact-info-bottom .contact-label {
+        font-size: 0.68rem;
+        letter-spacing: 0.06em;
     }
 
     .contact-info-bottom .contact-detail-text {
-        flex: 0 1 auto;
+        flex: unset;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
         min-width: 0;
-        max-width: calc(100% - 48px);
+        width: 100%;
+        max-width: none;
         overflow: visible;
         text-align: left;
     }
 
     .contact-info-bottom .contact-detail-text span:not(.contact-label),
     .contact-info-bottom .contact-detail-text a {
+        font-size: clamp(0.8125rem, 3.4vw, 0.9375rem);
+        line-height: 1.45;
         overflow: visible;
         text-overflow: clip;
         white-space: normal;
@@ -3267,13 +3321,22 @@ img.image-3d-rotate:hover,
     .feedback-card {
         flex: none !important;
         width: 100%;
-        padding: 20px 20px 28px;
+        border-radius: 16px;
+        box-shadow: 0 10px 36px rgba(0, 0, 0, 0.12);
+        padding: 20px var(--contact-card-pad) 28px var(--contact-card-pad);
         box-sizing: border-box;
     }
 
-    .feedback-card .feedback-title,
-    .feedback-card .feedback-subtitle {
+    .feedback-card .feedback-title {
+        font-size: clamp(1.05rem, 3.6vw, 1.25rem);
         text-align: center;
+    }
+
+    .feedback-card .feedback-subtitle {
+        font-size: 0.75rem;
+        line-height: 1.45;
+        text-align: center;
+        margin-bottom: 14px;
     }
 
     .feedback-card #feedbackForm {
@@ -3285,7 +3348,13 @@ img.image-3d-rotate:hover,
     .feedback-card .fb-field {
         width: 100%;
         max-width: 100%;
+        margin-bottom: 12px;
         box-sizing: border-box;
+    }
+
+    .feedback-card .fb-field label {
+        font-size: 0.8125rem;
+        margin-bottom: 6px;
     }
 
     .feedback-card .fb-field input[type="text"],
@@ -3295,12 +3364,22 @@ img.image-3d-rotate:hover,
     .feedback-card .fb-field textarea {
         width: 100%;
         max-width: 100%;
+        min-height: 44px;
+        padding: 10px 12px;
+        font-size: 16px;
+        border-radius: 10px;
         box-sizing: border-box;
+    }
+
+    .feedback-card .fb-field textarea {
+        min-height: 100px;
+        resize: vertical;
     }
 
     .fb-form-row {
         flex-direction: column;
-        gap: 10px;
+        gap: 12px;
+        margin-bottom: 4px;
     }
 
     .fb-field-wide,
@@ -3311,9 +3390,10 @@ img.image-3d-rotate:hover,
 
     .fb-gender-options {
         height: auto;
-        min-height: 40px;
+        min-height: 44px;
         flex-wrap: wrap;
         justify-content: flex-start;
+        gap: 16px;
     }
 
     .fb-phone-row {
@@ -3331,6 +3411,14 @@ img.image-3d-rotate:hover,
     .fb-phone-row input {
         flex: none !important;
         width: 100%;
+    }
+
+    .feedback-card .fb-submit-btn {
+        min-height: 48px;
+        font-size: 0.9375rem;
+        letter-spacing: 0.15em;
+        margin-top: 4px;
+        border-radius: 12px;
     }
 }
 
@@ -3365,7 +3453,8 @@ img.image-3d-rotate:hover,
     }
 
     .contact-map-embed {
-        min-height: 180px;
-        height: 200px;
+        min-height: 156px;
+        max-height: 200px;
+        height: auto;
     }
 }
