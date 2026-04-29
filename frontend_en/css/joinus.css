@@ -3647,7 +3647,9 @@ img.image-3d-rotate:hover,
         border-right: none;
         border-bottom: 1px solid #eee;
         align-items: flex-start;
+        justify-content: center;
         gap: 10px;
+        box-sizing: border-box;
     }
 
     .contact-info-bottom .contact-detail-item:nth-child(1),
@@ -3663,8 +3665,9 @@ img.image-3d-rotate:hover,
     }
 
     .contact-info-bottom .contact-detail-text {
-        flex: 1;
+        flex: 0 1 auto;
         min-width: 0;
+        max-width: calc(100% - 48px);
         overflow: visible;
         text-align: left;
     }
