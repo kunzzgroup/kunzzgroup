@@ -2240,6 +2240,36 @@ img.image-3d-rotate:hover,
     backdrop-filter: blur(8px);
   }
 
+  /*
+   * 小屏年份轨：桌面用 clamp(10px,4.2vw,80px) 在窄屏会变成十几 px 高，
+   * 子级 height:100% 会把圆点拉成竖条、白线穿心。这里固定轨区高度并对齐桌面观感。
+   */
+  .timeline-scroll-container {
+    height: 58px !important;
+    min-height: 58px !important;
+    max-height: none !important;
+    mask: none !important;
+    -webkit-mask: none !important;
+  }
+
+  .timeline-nav {
+    height: auto !important;
+    min-height: 58px !important;
+    align-items: center !important;
+  }
+
+  .timeline-items-container {
+    height: 100% !important;
+    align-items: center !important;
+  }
+
+  .timeline-item {
+    flex-shrink: 0 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 92px !important;
+  }
+
   /* 橙底上：选中月份白芯 + 橙环，未选中加强白描边 */
   .month-item.active .month-dot {
     background: #ffffff !important;
@@ -2337,13 +2367,23 @@ img.image-3d-rotate:hover,
     pointer-events: auto !important;
   }
 
-  .timeline-item {
-    min-width: 100px;
+  .timeline-bullet {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    aspect-ratio: 1 / 1 !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
+    border-radius: 50% !important;
+    font-size: clamp(11px, 2.9vw, 14px) !important;
+    padding: 0 !important;
   }
 
-  .timeline-bullet {
-    min-width: 40px;
-    min-height: 40px;
-    font-size: clamp(11px, 2.8vw, 14px);
+  .timeline-item.active .timeline-bullet {
+    transform: scale(1.12) !important;
+    color: #e65100 !important;
   }
 }
