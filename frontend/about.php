@@ -506,7 +506,11 @@ if (slideParam !== null) {
 
             const visibleItems = Array.from(allNavItems).filter(item => !item.classList.contains('year-duplicate'));
             const containerWidth = container.parentElement.offsetWidth;
-            const itemWidth = 120;
+            const firstVisible = visibleItems[0];
+            /* 桌面端保持固定 120px 居中逻辑；仅电话/小屏用实测宽度 */
+            const itemWidth = (window.matchMedia('(max-width: 768px)').matches && firstVisible)
+                ? firstVisible.getBoundingClientRect().width
+                : 120;
             
             const activeVisibleIndex = visibleItems.findIndex(item => item.classList.contains('active'));
             const centerPosition = containerWidth / 2;

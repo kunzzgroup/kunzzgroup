@@ -506,7 +506,11 @@ if (slideParam !== null) {
 
             const visibleItems = Array.from(allNavItems).filter(item => !item.classList.contains('year-duplicate'));
             const containerWidth = container.parentElement.offsetWidth;
-            const itemWidth = 120;
+            const firstVisible = visibleItems[0];
+            /* Desktop: keep fixed 120px centering; mobile only uses measured width */
+            const itemWidth = (window.matchMedia('(max-width: 768px)').matches && firstVisible)
+                ? firstVisible.getBoundingClientRect().width
+                : 120;
             
             const activeVisibleIndex = visibleItems.findIndex(item => item.classList.contains('active'));
             const centerPosition = containerWidth / 2;

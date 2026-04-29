@@ -784,7 +784,7 @@ body::-webkit-scrollbar {
   cursor: pointer;
 }
 
-/* ===== Timeline Mobile Responsive ===== */
+/* ===== Timeline Mobile Responsive（仅 max-width:768px，不影响桌面）===== */
 @media (max-width: 768px) {
   .timeline-section {
     padding: 30px 10px;
@@ -830,8 +830,30 @@ body::-webkit-scrollbar {
     height: 50px;
   }
 
+  /* 年份轨：减弱两侧裁切，避免相邻年份被「吃掉」 */
+  .timeline-scroll-container {
+    width: calc(100% - 96px);
+    mask: linear-gradient(90deg, transparent 0%, black 5%, black 95%, transparent 100%);
+    -webkit-mask: linear-gradient(90deg, transparent 0%, black 5%, black 95%, transparent 100%);
+  }
+
+  /* 恢复箭头并加大触控区（原先 display:none 无法换年） */
   .nav-arrow {
-    display: none;
+    display: flex;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    left: auto;
+    right: auto;
+  }
+
+  .nav-arrow.prev {
+    left: 0;
+  }
+
+  .nav-arrow.next {
+    right: 0;
   }
 }
 
@@ -2156,5 +2178,93 @@ img.image-3d-rotate:hover,
   .values-section,
   .timeline-section {
     margin-top: -2px !important;
+  }
+
+  /* ===== 发展历史（时间线）电话版：与本 @media 外样式隔离，不作用于桌面 ===== */
+  .timeline-section {
+    height: auto !important;
+    min-height: calc(100dvh - 56px) !important;
+    max-height: none !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    padding: calc(10px + env(safe-area-inset-top, 0px)) 12px calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.06) !important;
+  }
+
+  .timeline-section h1 {
+    margin-top: 4px !important;
+    margin-bottom: 8px !important;
+    font-size: clamp(1.05rem, 5vw, 1.35rem) !important;
+    line-height: 1.25 !important;
+  }
+
+  .timeline-nav {
+    margin-bottom: 8px !important;
+  }
+
+  .timeline-body {
+    width: 100% !important;
+    flex: 0 1 auto !important;
+  }
+
+  .timeline-month-sidebar {
+    padding-bottom: 10px !important;
+  }
+
+  .month-item {
+    padding: 10px 12px !important;
+    min-height: 44px !important;
+    box-sizing: border-box !important;
+    font-size: clamp(0.8rem, 3.2vw, 0.95rem) !important;
+  }
+
+  .month-dot {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  .timeline-content {
+    padding: 14px 14px 16px !important;
+    gap: 12px !important;
+  }
+
+  .timeline-image img {
+    min-height: 140px !important;
+    height: clamp(140px, 38vw, 220px) !important;
+  }
+
+  .timeline-text h3 {
+    font-size: clamp(1rem, 4.2vw, 1.2rem) !important;
+    line-height: 1.35 !important;
+    margin-top: 6px !important;
+  }
+
+  .timeline-text p {
+    color: #333 !important;
+    font-size: clamp(0.86rem, 3.15vw, 0.98rem) !important;
+    line-height: 1.65 !important;
+  }
+
+  .timeline-text .year-badge {
+    font-size: clamp(0.78rem, 2.9vw, 0.9rem) !important;
+  }
+
+  /* 仅显示当前卡片，避免底层卡片透出造成「重影字」 */
+  .timeline-cards-wrapper .timeline-content-item:not(.active) {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  .timeline-item {
+    min-width: 100px;
+  }
+
+  .timeline-bullet {
+    min-width: 40px;
+    min-height: 40px;
+    font-size: clamp(11px, 2.8vw, 14px);
   }
 }
