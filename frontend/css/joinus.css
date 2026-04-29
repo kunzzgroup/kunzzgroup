@@ -3179,7 +3179,7 @@ img.image-3d-rotate:hover,
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain;
         align-items: stretch;
-        justify-content: flex-start;
+        justify-content: center;
         /* 避免 slide 默认 #2F2F2F 在内容未撑满一屏时露出深灰横条 */
         background-color: #ff5c00;
     }
@@ -3204,7 +3204,8 @@ img.image-3d-rotate:hover,
         height: auto;
         min-height: 100%;
         overflow: visible;
-        align-items: stretch;
+        /* 与桌面一致：在可视区内垂直居中联系卡片，避免贴顶大片留白 */
+        align-items: center;
         justify-content: center;
         box-sizing: border-box;
         padding: max(68px, env(safe-area-inset-top, 0px)) var(--contact-inline) max(104px, calc(32px + env(safe-area-inset-bottom, 0px))) var(--contact-inline);
