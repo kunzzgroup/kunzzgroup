@@ -3193,6 +3193,16 @@ img.image-3d-rotate:hover,
     .swiper-slide.swiper-slide--joinus-feedback-only {
         overflow: hidden !important;
         align-items: stretch;
+        /* 占满动态视口，减少下一滑（页脚）从底部「露边」叠在提交按钮上 */
+        min-height: 100vh;
+        min-height: 100dvh;
+        position: relative;
+        z-index: 0;
+    }
+
+    /* 当前活动滑块在上层，避免相邻 footer（内部 z-index:2）叠压意见表底部 */
+    .swiper-slide.swiper-slide-active {
+        z-index: 5;
     }
 
     /* ===== 联系我们 + 意见表单（手机端：统一节奏、网格联系行、触控友好） ===== */
@@ -3235,7 +3245,8 @@ img.image-3d-rotate:hover,
         overscroll-behavior: contain;
         justify-content: flex-start;
         align-items: center;
-        padding-bottom: max(150px, calc(100px + env(safe-area-inset-bottom, 0px)));
+        /* 预留：安全区 + 浮动社交 + 相邻 footer 滑块露边，保证「提交」可滚到可视区 */
+        padding-bottom: max(200px, calc(140px + env(safe-area-inset-bottom, 0px)));
     }
 
     .contact-form-section--feedback-only .contact-form-container--feedback-only {
@@ -3362,6 +3373,7 @@ img.image-3d-rotate:hover,
         box-shadow: 0 10px 36px rgba(0, 0, 0, 0.12);
         padding: 20px var(--contact-card-pad) 28px var(--contact-card-pad);
         box-sizing: border-box;
+        overflow: visible;
     }
 
     .feedback-card .feedback-title {
@@ -3456,6 +3468,7 @@ img.image-3d-rotate:hover,
         font-size: 0.9375rem;
         letter-spacing: 0.15em;
         margin-top: 4px;
+        margin-bottom: 12px;
         border-radius: 12px;
     }
 }
