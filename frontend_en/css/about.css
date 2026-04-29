@@ -2217,7 +2217,7 @@ img.image-3d-rotate:hover,
     max-height: none !important;
     justify-content: flex-start !important;
     align-items: center !important;
-    padding: calc(22px + env(safe-area-inset-top, 0px)) 8px calc(52px + env(safe-area-inset-bottom, 0px)) !important;
+    padding: calc(100px + env(safe-area-inset-top, 0px)) 8px calc(52px + env(safe-area-inset-bottom, 0px)) !important;
     overflow-y: visible !important;
     box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.06) !important;
   }

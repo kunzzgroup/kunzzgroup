@@ -2195,8 +2195,8 @@ img.image-3d-rotate:hover,
     max-height: none !important;
     justify-content: flex-start !important;
     align-items: center !important;
-    /* 左右略收紧，让白卡片更「满屏」；顶部多留一点与顶栏的呼吸感 */
-    padding: calc(22px + env(safe-area-inset-top, 0px)) 8px calc(52px + env(safe-area-inset-bottom, 0px)) !important;
+    /* 左右略收紧；顶部加大避让固定顶栏 + 安全区 */
+    padding: calc(100px + env(safe-area-inset-top, 0px)) 8px calc(52px + env(safe-area-inset-bottom, 0px)) !important;
     overflow-y: visible !important;
     box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.06) !important;
   }
