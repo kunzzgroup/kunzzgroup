@@ -695,15 +695,6 @@ function getTimelineItems($language = 'zh') {
             return $hasContent;
         }));
     }
-    // 统一月份字段（兼容后台或其它来源使用 Month 键）
-    foreach ($items as &$it) {
-        $m = isset($it['month']) ? (int)$it['month'] : 0;
-        if (($m < 1 || $m > 12) && isset($it['Month']) && (int)$it['Month'] >= 1 && (int)$it['Month'] <= 12) {
-            $m = (int)$it['Month'];
-        }
-        $it['month'] = ($m >= 1 && $m <= 12) ? $m : 0;
-    }
-    unset($it);
     // 排序
     usort($items, function($a,$b){ $ay=(int)($a['year']??0); $by=(int)($b['year']??0); if($ay===$by){return (int)($a['month']??0)-(int)($b['month']??0);} return $ay-$by; });
     // 处理图片URL

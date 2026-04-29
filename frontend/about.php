@@ -485,19 +485,9 @@ if (slideParam !== null) {
             isAnimating = true;
             currentIndex = index;
 
-            const layoutClasses = ['active', 'prev', 'next', 'hidden', 'stack-hidden'];
-            contentItems.forEach((item, i) => {
-                item.classList.remove(...layoutClasses);
-                if (i === index) {
-                    item.classList.add('active');
-                } else if (i === index - 1) {
-                    item.classList.add('prev');
-                } else if (i === index + 1) {
-                    item.classList.add('next');
-                } else {
-                    item.classList.add('hidden');
-                }
-            });
+            // 更新卡片显示
+            contentItems.forEach(item => item.classList.remove('active'));
+            contentItems[index].classList.add('active');
 
             // 同步年份导航 + 月份侧栏
             updateTimelineNav();
@@ -508,10 +498,10 @@ if (slideParam !== null) {
         // ===== 年份导航更新 =====
         function updateTimelineNav() {
             const allNavItems = document.querySelectorAll('.timeline-item');
-            const currentYear = String(years[currentIndex]);
+            const currentYear = years[currentIndex];
             
             allNavItems.forEach((item) => {
-                item.classList.toggle('active', String(item.getAttribute('data-year')) === currentYear);
+                item.classList.toggle('active', item.getAttribute('data-year') === currentYear);
             });
 
             const visibleItems = Array.from(allNavItems).filter(item => !item.classList.contains('year-duplicate'));
@@ -590,12 +580,11 @@ if (slideParam !== null) {
         document.addEventListener('touchend', handleDragEnd);
 
         // ===== 初始化 =====
-        // 构建年份-月份分组（键一律用字符串，避免 JSON 数字年份与 PHP 字符串年份对不上）
+        // 构建年份-月份分组
         let yearGroups = {};
         timelineData.forEach((item, index) => {
-            const y = String(item.year);
-            if (!yearGroups[y]) yearGroups[y] = [];
-            yearGroups[y].push({ index, month: Number(item.month) || 0 });
+            if (!yearGroups[item.year]) yearGroups[item.year] = [];
+            yearGroups[item.year].push({ index, month: item.month });
         });
 
         // 隐藏重复年份导航项
@@ -621,24 +610,9 @@ if (slideParam !== null) {
         });
 
         // ===== 月份侧栏 =====
-        function monthsForCurrentYear() {
-            const cy = String(years[currentIndex]);
-            let arr = (yearGroups[cy] || []).filter(m => m.month > 0);
-            if (arr.length) return arr;
-            const fromDom = [];
-            contentItems.forEach((el) => {
-                if (String(el.getAttribute('data-year')) !== cy) return;
-                const m = parseInt(String(el.getAttribute('data-month') || '0'), 10);
-                if (m <= 0) return;
-                const idx = parseInt(String(el.getAttribute('data-index') || '0'), 10);
-                fromDom.push({ index: idx, month: m });
-            });
-            fromDom.sort((a, b) => a.month - b.month || a.index - b.index);
-            return fromDom;
-        }
-
         function updateMonthSidebar() {
-            const months = monthsForCurrentYear();
+            const currentYear = years[currentIndex];
+            const months = (yearGroups[currentYear] || []).filter(m => m.month > 0);
             const sidebar = document.getElementById('monthSidebar');
             
             sidebar.innerHTML = months.map(m => 
@@ -682,10 +656,10 @@ if (slideParam !== null) {
             });
         }
 
-        // 初始化：第一张居中，其余隐藏（避免多张叠在同位置产生重影）
-        if (contentItems.length > 0) {
-            switchToCard(0);
-        }
+        // 初始化：设置第一张为 active
+        contentItems.forEach(item => item.classList.remove('active'));
+        if (contentItems.length > 0) contentItems[0].classList.add('active');
+        updateTimelineNav();
 
         // 窗口大小改变时重新计算
         window.addEventListener('resize', () => {
