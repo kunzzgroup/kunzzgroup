@@ -358,14 +358,16 @@
 
     .footer-scroll-buffer {
         min-height: 38vh;
+        --footer-inline: max(58px, calc(14px + max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px))));
     }
 
     .footer {
         height: auto;
-        padding: 16px 62px 10px 14px;
+        padding: 16px var(--footer-inline) 12px var(--footer-inline);
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px 14px;
+        column-gap: 16px;
+        row-gap: 12px;
         align-items: start;
         justify-content: stretch;
     }
@@ -391,11 +393,11 @@
 
     .footer-bottom {
         font-size: 0.68rem;
-        padding: 8px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+        padding: 8px var(--footer-inline) calc(10px + env(safe-area-inset-bottom, 0px)) var(--footer-inline);
     }
 
     .footer-bottom::before {
-        left: 12px;
-        right: 62px;
+        left: var(--footer-inline);
+        right: var(--footer-inline);
     }
 }

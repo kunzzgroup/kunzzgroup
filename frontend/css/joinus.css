@@ -3178,8 +3178,8 @@ img.image-3d-rotate:hover,
         height: auto;
         min-height: 0;
         overflow: visible;
-        align-items: flex-start;
-        justify-content: flex-start;
+        align-items: stretch;
+        justify-content: center;
         padding: 24px var(--joinus-inline) max(100px, calc(28px + env(safe-area-inset-bottom, 0px))) var(--joinus-inline);
     }
 
@@ -3189,9 +3189,10 @@ img.image-3d-rotate:hover,
         max-height: none;
         min-height: 0;
         gap: 16px;
-        width: 100%;
+        width: min(100%, 480px);
         max-width: 480px;
         margin-inline: auto;
+        flex: 0 1 auto;
         align-items: stretch;
     }
 
@@ -3309,7 +3310,7 @@ img.image-3d-rotate:hover,
         height: auto;
         min-height: 40px;
         flex-wrap: wrap;
-        justify-content: center;
+        justify-content: flex-start;
     }
 
     .fb-phone-row {
