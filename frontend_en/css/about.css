@@ -2232,6 +2232,22 @@ img.image-3d-rotate:hover,
 
   .timeline-nav {
     margin-bottom: 14px !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+  }
+
+  .month-item.active .month-dot {
+    background: #ffffff !important;
+    border-color: #ffffff !important;
+    box-shadow: 0 0 0 2px #ff5c00, 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+  }
+
+  .month-item:not(.active) .month-dot {
+    border-width: 2px !important;
+    border-color: rgba(255, 255, 255, 0.92) !important;
+    background: transparent !important;
   }
 
   .timeline-body {

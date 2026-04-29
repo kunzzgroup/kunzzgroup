@@ -280,6 +280,17 @@ $timelineItems = getTimelineItems('en');
             const items = timelineSection.querySelectorAll('.timeline-item');
             const arrows = timelineSection.querySelectorAll('.nav-arrow');
 
+            const clearInlineAnimProps = (el) => {
+                if (!el) return;
+                el.style.opacity = '';
+                el.style.transform = '';
+            };
+            clearInlineAnimProps(title);
+            clearInlineAnimProps(track);
+            clearInlineAnimProps(container);
+            items.forEach(clearInlineAnimProps);
+            arrows.forEach(clearInlineAnimProps);
+
             // 重置所有元素的动画
             [title, track, container, ...items, ...arrows].forEach(el => {
                 if (el) {

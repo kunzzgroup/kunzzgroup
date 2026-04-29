@@ -280,6 +280,18 @@ $timelineItems = getTimelineItems('zh');
             const items = timelineSection.querySelectorAll('.timeline-item');
             const arrows = timelineSection.querySelectorAll('.nav-arrow');
 
+            // 清除 resetTimelineAnimation 留下的内联样式，否则会压住 CSS 关键帧（DevTools 里会看到 opacity:0 一直挂着）
+            const clearInlineAnimProps = (el) => {
+                if (!el) return;
+                el.style.opacity = '';
+                el.style.transform = '';
+            };
+            clearInlineAnimProps(title);
+            clearInlineAnimProps(track);
+            clearInlineAnimProps(container);
+            items.forEach(clearInlineAnimProps);
+            arrows.forEach(clearInlineAnimProps);
+
             // 重置所有元素的动画
             [title, track, container, ...items, ...arrows].forEach(el => {
                 if (el) {
