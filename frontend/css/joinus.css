@@ -3189,6 +3189,12 @@ img.image-3d-rotate:hover,
         display: none !important;
     }
 
+    /* 意见箱独占滑：滚动发生在橙色内层，避免整页 flex 裁切导致看不到「提交」 */
+    .swiper-slide.swiper-slide--joinus-feedback-only {
+        overflow: hidden !important;
+        align-items: stretch;
+    }
+
     /* ===== 联系我们 + 意见表单（手机端：统一节奏、网格联系行、触控友好） ===== */
     .contact-form-section {
         --contact-inline: max(56px, calc(12px + max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px))));
@@ -3218,10 +3224,17 @@ img.image-3d-rotate:hover,
         align-items: stretch;
     }
 
-    /* 手机：意见箱独占一滑 — 白卡相对视口水平居中 */
+    /* 手机：意见箱独占一滑 — 内层纵向滚动 + 底部留白（安全区 / 浮动社交） */
     .contact-form-section--feedback-only {
-        justify-content: center;
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        justify-content: flex-start;
         align-items: center;
+        padding-bottom: max(150px, calc(100px + env(safe-area-inset-bottom, 0px)));
     }
 
     .contact-form-section--feedback-only .contact-form-container--feedback-only {

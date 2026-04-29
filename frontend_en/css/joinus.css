@@ -3593,6 +3593,11 @@ img.image-3d-rotate:hover,
         display: none !important;
     }
 
+    .swiper-slide.swiper-slide--joinus-feedback-only {
+        overflow: hidden !important;
+        align-items: stretch;
+    }
+
     /* ===== Contact-Form Section（合并：地图+联系+意见）===== */
     .contact-form-section {
         --contact-inline: max(56px, calc(12px + max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px))));
@@ -3632,8 +3637,15 @@ img.image-3d-rotate:hover,
     }
 
     .contact-form-section--feedback-only {
-        justify-content: center;
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        justify-content: flex-start;
         align-items: center;
+        padding-bottom: max(150px, calc(100px + env(safe-area-inset-bottom, 0px)));
     }
 
     .contact-form-section--feedback-only .contact-form-container--feedback-only {
