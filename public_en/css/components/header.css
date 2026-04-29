@@ -816,12 +816,14 @@
   }
 
   .header-language-option {
-    min-width: 36px;
-    height: 26px;
-    padding: 0 8px;
-    font-size: 0.7rem;
+    min-width: 44px;
+    min-height: 36px;
+    height: auto;
+    padding: 8px 12px;
+    font-size: 0.8125rem;
     font-weight: 600;
     letter-spacing: 0.02em;
+    box-sizing: border-box;
   }
 
   .header-language-switch .header-lang {

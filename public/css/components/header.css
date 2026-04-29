@@ -839,12 +839,14 @@
   }
 
   .header-language-option {
-    min-width: 36px;
-    height: 26px;
-    padding: 0 8px;
-    font-size: 0.7rem;
+    min-width: 44px;
+    min-height: 36px;
+    height: auto;
+    padding: 8px 12px;
+    font-size: 0.8125rem;
     font-weight: 600;
     letter-spacing: 0.02em;
+    box-sizing: border-box;
   }
 
   /* 取消 1280 段落在小屏上的负 margin；完整覆盖尺寸，避免 60×18 + line-height:1px 把文字挤花 */
