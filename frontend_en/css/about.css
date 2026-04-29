@@ -2217,20 +2217,21 @@ img.image-3d-rotate:hover,
     max-height: none !important;
     justify-content: flex-start !important;
     align-items: center !important;
-    padding: calc(10px + env(safe-area-inset-top, 0px)) 12px calc(48px + env(safe-area-inset-bottom, 0px)) !important;
+    padding: calc(22px + env(safe-area-inset-top, 0px)) 8px calc(52px + env(safe-area-inset-bottom, 0px)) !important;
     overflow-y: visible !important;
     box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.06) !important;
   }
 
   .timeline-section h1 {
-    margin-top: 4px !important;
-    margin-bottom: 8px !important;
-    font-size: clamp(1.05rem, 5vw, 1.35rem) !important;
-    line-height: 1.25 !important;
+    margin-top: 6px !important;
+    margin-bottom: 12px !important;
+    font-size: clamp(1.08rem, 5.2vw, 1.42rem) !important;
+    line-height: 1.28 !important;
+    letter-spacing: 0.04em !important;
   }
 
   .timeline-nav {
-    margin-bottom: 8px !important;
+    margin-bottom: 14px !important;
   }
 
   .timeline-body {
@@ -2239,7 +2240,7 @@ img.image-3d-rotate:hover,
   }
 
   .timeline-month-sidebar {
-    padding-bottom: 10px !important;
+    padding-bottom: 14px !important;
   }
 
   .month-item {
@@ -2255,25 +2256,27 @@ img.image-3d-rotate:hover,
   }
 
   .timeline-content {
-    padding: 14px 14px 16px !important;
-    gap: 12px !important;
+    padding: 16px 16px 18px !important;
+    gap: 14px !important;
+    border-radius: 18px !important;
   }
 
   .timeline-image img {
-    min-height: 140px !important;
-    height: clamp(140px, 38vw, 220px) !important;
+    min-height: 152px !important;
+    height: clamp(152px, 42vw, 232px) !important;
   }
 
   .timeline-text h3 {
-    font-size: clamp(1rem, 4.2vw, 1.2rem) !important;
-    line-height: 1.35 !important;
-    margin-top: 6px !important;
+    font-size: clamp(1.05rem, 4.4vw, 1.28rem) !important;
+    line-height: 1.38 !important;
+    margin-top: 8px !important;
+    margin-bottom: 2px !important;
   }
 
   .timeline-text p {
-    color: #333 !important;
-    font-size: clamp(0.86rem, 3.15vw, 0.98rem) !important;
-    line-height: 1.65 !important;
+    color: #2e2e2e !important;
+    font-size: clamp(0.88rem, 3.25vw, 1.02rem) !important;
+    line-height: 1.68 !important;
   }
 
   .timeline-text .year-badge {
@@ -2294,7 +2297,9 @@ img.image-3d-rotate:hover,
 
   .timeline-content-item {
     position: relative !important;
-    width: min(92vw, 26rem) !important;
+    width: min(96vw, 28rem) !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
     height: auto !important;
     min-height: 0 !important;
     margin-left: auto !important;
