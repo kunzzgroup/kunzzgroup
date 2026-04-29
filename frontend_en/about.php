@@ -508,10 +508,10 @@ if (slideParam !== null) {
         // ===== 年份导航更新 =====
         function updateTimelineNav() {
             const allNavItems = document.querySelectorAll('.timeline-item');
-            const currentYear = years[currentIndex];
+            const currentYear = String(years[currentIndex]);
             
             allNavItems.forEach((item) => {
-                item.classList.toggle('active', item.getAttribute('data-year') === currentYear);
+                item.classList.toggle('active', String(item.getAttribute('data-year')) === currentYear);
             });
 
             const visibleItems = Array.from(allNavItems).filter(item => !item.classList.contains('year-duplicate'));
@@ -590,11 +590,12 @@ if (slideParam !== null) {
         document.addEventListener('touchend', handleDragEnd);
 
         // ===== 初始化 =====
-        // 构建年份-月份分组
+        // 构建年份-月份分组（键一律用字符串，避免 JSON 数字年份与 PHP 字符串年份对不上）
         let yearGroups = {};
         timelineData.forEach((item, index) => {
-            if (!yearGroups[item.year]) yearGroups[item.year] = [];
-            yearGroups[item.year].push({ index, month: item.month });
+            const y = String(item.year);
+            if (!yearGroups[y]) yearGroups[y] = [];
+            yearGroups[y].push({ index, month: Number(item.month) || 0 });
         });
 
         // 隐藏重复年份导航项
@@ -621,9 +622,24 @@ if (slideParam !== null) {
 
         // ===== 月份侧栏 =====
         const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        function monthsForCurrentYear() {
+            const cy = String(years[currentIndex]);
+            let arr = (yearGroups[cy] || []).filter(m => m.month > 0);
+            if (arr.length) return arr;
+            const fromDom = [];
+            contentItems.forEach((el) => {
+                if (String(el.getAttribute('data-year')) !== cy) return;
+                const m = parseInt(String(el.getAttribute('data-month') || '0'), 10);
+                if (m <= 0) return;
+                const idx = parseInt(String(el.getAttribute('data-index') || '0'), 10);
+                fromDom.push({ index: idx, month: m });
+            });
+            fromDom.sort((a, b) => a.month - b.month || a.index - b.index);
+            return fromDom;
+        }
+
         function updateMonthSidebar() {
-            const currentYear = years[currentIndex];
-            const months = (yearGroups[currentYear] || []).filter(m => m.month > 0);
+            const months = monthsForCurrentYear();
             const sidebar = document.getElementById('monthSidebar');
             
             sidebar.innerHTML = months.map(m => 
