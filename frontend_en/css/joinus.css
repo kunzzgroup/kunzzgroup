@@ -3427,7 +3427,9 @@ img.image-3d-rotate:hover,
     .benefits-wrapper {
         height: auto;
         min-height: auto;
-        padding: 48px max(64px, calc(16px + env(safe-area-inset-right, 0px))) max(112px, calc(40px + env(safe-area-inset-bottom, 0px))) max(16px, env(safe-area-inset-left, 0px));
+        --benefits-inline: max(64px, calc(16px + max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px))));
+        padding: 48px var(--benefits-inline) max(112px, calc(40px + env(safe-area-inset-bottom, 0px))) var(--benefits-inline);
+        align-items: center;
     }
 
     .benefits-wrapper:not(.benefits-loaded) h2,
@@ -3441,6 +3443,12 @@ img.image-3d-rotate:hover,
 
     .benefits-wrapper h2 {
         font-size: clamp(18px, 5vw, 28px);
+        width: 100%;
+        max-width: 420px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        box-sizing: border-box;
     }
 
     .benefits-wrapper .benefits-grid {
@@ -3449,9 +3457,10 @@ img.image-3d-rotate:hover,
         column-gap: 12px;
         row-gap: 20px;
         max-width: 420px;
+        width: min(100%, 420px);
         margin-left: auto;
         margin-right: auto;
-        width: 100%;
+        margin-inline: auto;
         box-sizing: border-box;
     }
 
