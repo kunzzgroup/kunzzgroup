@@ -884,7 +884,8 @@ body::-webkit-scrollbar {
   gap: 10px;
   padding: clamp(6px, 0.8vw, 12px) 14px;
   cursor: pointer;
-  color: rgba(255, 255, 255, 0.75);
+  /* 非当前月也要清晰可读，避免像「没有数据」 */
+  color: rgba(255, 255, 255, 0.92);
   font-size: clamp(14px, 1.1vw, 18px);
   font-weight: 600;
   transition: color 0.3s ease;
@@ -895,7 +896,7 @@ body::-webkit-scrollbar {
 }
 
 .month-item:hover {
-  color: rgba(255, 255, 255, 0.85);
+  color: #fff;
 }
 
 .month-item.active {
@@ -907,7 +908,7 @@ body::-webkit-scrollbar {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  border: 2.5px solid rgba(255, 255, 255, 0.45);
+  border: 2.5px solid rgba(255, 255, 255, 0.7);
   background: transparent;
   flex-shrink: 0;
   transition: all 0.3s ease;
