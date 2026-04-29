@@ -3182,6 +3182,11 @@ img.image-3d-rotate:hover,
         justify-content: flex-start;
     }
 
+    /* 手机：联系页内不显示内联意见箱（下一滑为 .joinus-feedback--stacked） */
+    .joinus-feedback--inline {
+        display: none !important;
+    }
+
     /* ===== 联系我们 + 意见表单（手机端：统一节奏、网格联系行、触控友好） ===== */
     .contact-form-section {
         --contact-inline: max(56px, calc(12px + max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px))));
@@ -3207,6 +3212,20 @@ img.image-3d-rotate:hover,
         margin-inline: auto;
         flex: 0 1 auto;
         align-items: stretch;
+    }
+
+    /* 手机：意见箱独占一滑 — 白卡相对视口水平居中 */
+    .contact-form-section--feedback-only {
+        justify-content: center;
+        align-items: center;
+    }
+
+    .contact-form-section--feedback-only .contact-form-container--feedback-only {
+        flex: 0 1 auto;
+        width: min(100%, 440px);
+        max-width: 440px;
+        margin-inline: auto;
+        align-self: center;
     }
 
     .contact-card {
@@ -3339,7 +3358,8 @@ img.image-3d-rotate:hover,
         margin-bottom: 14px;
     }
 
-    .feedback-card #feedbackForm {
+    .feedback-card #feedbackForm,
+    .feedback-card #feedbackFormMobile {
         width: 100%;
         max-width: 100%;
         box-sizing: border-box;
@@ -3419,6 +3439,14 @@ img.image-3d-rotate:hover,
         letter-spacing: 0.15em;
         margin-top: 4px;
         border-radius: 12px;
+    }
+}
+
+/* 桌面合并「联系+意见」时：隐藏意见箱单独圆点（与 JS joinus-desktop-merge-contact 一致） */
+@media (min-width: 769px) {
+    body.joinus-desktop-merge-contact .header-page-dot[data-slide="4"] {
+        display: none !important;
+        pointer-events: none;
     }
 }
 

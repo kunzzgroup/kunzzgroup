@@ -32,7 +32,7 @@
             <li><a href="joinus.php?slide=0" onclick="return footerNavigate(this, 'joinus.php', 0);">公司福利</a></li>
             <li><a href="joinus.php?slide=1" onclick="return footerNavigate(this, 'joinus.php', 1);">我们的足迹</a></li>
             <li><a href="joinus.php?slide=2" onclick="return footerNavigate(this, 'joinus.php', 2);">招聘的职位</a></li>
-            <li><a href="joinus.php?slide=4" onclick="return footerNavigate(this, 'joinus.php', 4);">联系我们</a></li>
+            <li><a href="joinus.php?slide=3" onclick="return footerNavigate(this, 'joinus.php', 3);">联系我们</a></li>
           </ul>
         </div>
       </footer>

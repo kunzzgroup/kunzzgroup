@@ -12,7 +12,7 @@ header("Expires: Wed, 11 Jan 1984 05:00:00 GMT");
 $pageTitle = 'KUNZZ HOLDINGS';
 $additionalCSS = ['css/joinus.css','../public_en/css/components/social.css','../public_en/css/components/footer.css']; // footer.css 放最后，确保样式优先级
 $showPageIndicator = true;
-$totalSlides = 4;
+$totalSlides = 6;
 
 // 包含header
 include '../public_en/header.php';
@@ -244,8 +244,8 @@ include '../public_en/header.php';
         </div>
       </div>
 
-      <!-- Right: Feedback Form Card -->
-      <div class="feedback-card">
+      <!-- Right: feedback (inline on desktop; separate slide on phone) -->
+      <div class="feedback-card joinus-feedback joinus-feedback--inline">
         <h2 class="feedback-title">Kindly Provide Your Feedback</h2>
         <p class="feedback-subtitle">We look forward to hearing from you and will get back to you shortly.</p>
         <form id="feedbackForm" action="https://api.web3forms.com/submit" method="POST" enctype="multipart/form-data">
@@ -307,6 +307,60 @@ include '../public_en/header.php';
 
     </div>
   </div>
+  </div>
+
+  <div class="swiper-slide swiper-slide--joinus-feedback-only" id="joinus-feedback-slide">
+    <div class="contact-form-section contact-form-section--feedback-only">
+      <div class="contact-form-container contact-form-container--feedback-only">
+        <div class="feedback-card joinus-feedback joinus-feedback--stacked">
+          <h2 class="feedback-title">Kindly Provide Your Feedback</h2>
+          <p class="feedback-subtitle">We look forward to hearing from you and will get back to you shortly.</p>
+          <form id="feedbackFormMobile" action="https://api.web3forms.com/submit" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="access_key" value="a18bc4c6-2f16-4861-8d10-a3de747cab50">
+            <input type="hidden" name="redirect" value="https://kunzzgroup.com/frontend_en/success.html">
+            <div class="fb-form-row">
+              <div class="fb-field fb-field-wide">
+                <label>Chinese Name *</label>
+                <input type="text" name="chineseName" placeholder="Please enter your Chinese name" required pattern="[\u4e00-\u9fa5]{2,}" title="Please enter your Chinese name (at least two characters)">
+              </div>
+              <div class="fb-field fb-field-narrow">
+                <label>Gender *</label>
+                <div class="fb-gender-options">
+                  <label><input type="radio" name="gender" value="male" required> Male</label>
+                  <label><input type="radio" name="gender" value="female" required> Female</label>
+                </div>
+              </div>
+            </div>
+            <div class="fb-field">
+              <label>English Name *</label>
+              <input type="text" name="englishName" placeholder="Please enter your English name" required pattern="[A-Za-z ]{2,}" title="Please enter your English name (letters only)">
+            </div>
+            <div class="fb-field">
+              <label>Phone Number *</label>
+              <div class="fb-phone-row">
+                <select name="countryCode" required>
+                  <option value="+60">Malaysia +60</option>
+                  <option value="+65">Singapore +65</option>
+                  <option value="+86">China +86</option>
+                  <option value="+852">Hong Kong +852</option>
+                  <option value="+81">Japan +81</option>
+                </select>
+                <input type="tel" name="phoneNumber" placeholder="Please enter your phone number" required pattern="\d{1,10}" maxlength="10" inputmode="numeric" title="Please enter a valid phone number">
+              </div>
+            </div>
+            <div class="fb-field">
+              <label>Email *</label>
+              <input type="email" name="email" placeholder="Please enter your email address" required pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$" title="Please enter a valid email address">
+            </div>
+            <div class="fb-field">
+              <label>Message *</label>
+              <textarea name="message" rows="4" placeholder="Please enter your feedback or suggestions…" required></textarea>
+            </div>
+            <button type="submit" class="fb-submit-btn">Submit</button>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 
 <?php include '../public_en/footer.php'; ?>
@@ -506,7 +560,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const footprintContainer = document.querySelector('#footprint-container'); // 修复：正确的ID
     const jobTableContainer = document.querySelector('.job-table-container');
     const jobsGrid = document.querySelector('.jobs-grid');
-    const contactWrapper = document.querySelector('.contact-form-section');
+    document.querySelectorAll('.contact-form-section').forEach(section => {
+        aboutObserver.observe(section);
+    });
     
     if (aboutBanner) {
         aboutObserver.observe(aboutBanner);
@@ -540,10 +596,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 添加联系我们区域的观察器
-    if (contactWrapper) {
-        aboutObserver.observe(contactWrapper);
-    }
-
     // 初始化时间线观察器
     const timelineSection = document.querySelector('.timeline-section');
     if (timelineSection) {
@@ -662,7 +714,7 @@ const swiper = new Swiper('.swiper', {
             // 在过渡结束后检查进度
             setTimeout(() => {
                 if (this.progress > 0.95) {
-                    updatePageIndicator(3); // 滑到最后一页（索引0-3，共4页）
+                    updatePageIndicator(this.slides.length - 1);
                 } else {
                     updatePageIndicator(this.activeIndex); // 从最后一页滑回来时用正常的activeIndex
                 }
@@ -671,20 +723,79 @@ const swiper = new Swiper('.swiper', {
     }
 });
 
-// 页面指示器功能（与 header 中的指示器类名保持一致）
+(function joinusResponsiveFeedbackSlide() {
+    const mq = window.matchMedia('(max-width: 768px)');
+    const wrapper = document.querySelector('.swiper .swiper-wrapper');
+    const fbSlide = document.querySelector('.swiper-slide--joinus-feedback-only');
+    if (!wrapper || !fbSlide || typeof swiper === 'undefined') {
+        return;
+    }
+    let detached = null;
+
+    function sync() {
+        const footerSlide = wrapper.querySelector('.swiper-slide.footer-slide');
+        const mergeDesktop = !mq.matches;
+        document.body.classList.toggle('joinus-desktop-merge-contact', mergeDesktop);
+
+        if (mq.matches) {
+            if (detached && footerSlide) {
+                wrapper.insertBefore(detached, footerSlide);
+                detached = null;
+                swiper.update();
+            }
+        } else if (!detached) {
+            const live = wrapper.querySelector('.swiper-slide--joinus-feedback-only');
+            if (live && live.parentNode === wrapper) {
+                const idx = Array.prototype.indexOf.call(wrapper.children, live);
+                const wasOnFeedback = swiper.activeIndex === idx;
+                detached = live;
+                live.remove();
+                swiper.update();
+                if (swiper.activeIndex >= swiper.slides.length) {
+                    swiper.slideTo(swiper.slides.length - 1, 0);
+                } else if (wasOnFeedback) {
+                    swiper.slideTo(Math.max(0, idx - 1), 0);
+                }
+            }
+        }
+        if (typeof updatePageIndicator === 'function') {
+            updatePageIndicator(swiper.activeIndex);
+        }
+    }
+
+    mq.addEventListener('change', sync);
+    sync();
+})();
+
 const pageDots = document.querySelectorAll('.header-page-dot');
 
-// 点击圆点跳转到对应页面
-pageDots.forEach((dot, index) => {
+pageDots.forEach((dot) => {
     dot.addEventListener('click', () => {
-        swiper.slideTo(index);
+        const i = parseInt(dot.getAttribute('data-slide'), 10);
+        if (Number.isNaN(i)) {
+            return;
+        }
+        let target = i;
+        if (document.body.classList.contains('joinus-desktop-merge-contact')) {
+            if (i === 4) {
+                return;
+            }
+            if (i >= 5) {
+                target = i - 1;
+            }
+        }
+        swiper.slideTo(Math.min(target, swiper.slides.length - 1));
     });
 });
 
-// 更新页面指示器状态
 function updatePageIndicator(activeIndex) {
+    const merge = document.body.classList.contains('joinus-desktop-merge-contact');
+    let dotIndex = activeIndex;
+    if (merge && activeIndex >= 4) {
+        dotIndex = activeIndex + 1;
+    }
     pageDots.forEach((dot, index) => {
-        if (index === activeIndex) {
+        if (index === dotIndex) {
             dot.classList.add('active');
         } else {
             dot.classList.remove('active');
@@ -702,7 +813,8 @@ const slideParam = urlParams.get('slide');
 if (slideParam !== null) {
     const slideIndex = parseInt(slideParam, 10);
     if (!isNaN(slideIndex)) {
-        swiper.slideTo(slideIndex, 0);
+        const maxIdx = Math.max(0, swiper.slides.length - 1);
+        swiper.slideTo(Math.min(Math.max(0, slideIndex), maxIdx), 0);
     }
 }
     </script>
@@ -1790,7 +1902,7 @@ function goToJob() {
 
 function goToMap() {
   if (typeof swiper !== 'undefined') {
-    swiper.slideTo(4); // 跳转到第3个slide（公司文化）
+    swiper.slideTo(3);
   }
 }
 

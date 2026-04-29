@@ -32,7 +32,7 @@
             <li><a href="joinus.php?slide=0" onclick="return footerNavigate(this, 'joinus.php', 0);">Benefits</a></li>
             <li><a href="joinus.php?slide=1" onclick="return footerNavigate(this, 'joinus.php', 1);">Our Journey</a></li>
             <li><a href="joinus.php?slide=2" onclick="return footerNavigate(this, 'joinus.php', 2);">Open Positions</a></li>
-            <li><a href="joinus.php?slide=4" onclick="return footerNavigate(this, 'joinus.php', 4);">Contact Us</a></li>
+            <li><a href="joinus.php?slide=3" onclick="return footerNavigate(this, 'joinus.php', 3);">Contact Us</a></li>
           </ul>
         </div>
       </footer>
