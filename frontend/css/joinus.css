@@ -3153,7 +3153,7 @@ img.image-3d-rotate:hover,
         grid-template-columns: 1fr;
     }
 
-    /* ===== Contact Section ===== */
+    /* ===== Contact Section（旧版布局，兼容其他分支）===== */
     .contact-section-wrapper {
         flex-direction: column;
         height: auto;
@@ -3170,6 +3170,126 @@ img.image-3d-rotate:hover,
     .map-container {
         width: 100%;
         height: 280px;
+    }
+
+    /* ===== 联系我们 + 意见表单（合并区块）手机端：单列 + 联系信息纵向排列 ===== */
+    .contact-form-section {
+        --joinus-inline: max(64px, calc(16px + max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px))));
+        height: auto;
+        min-height: 0;
+        overflow: visible;
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 24px var(--joinus-inline) max(100px, calc(28px + env(safe-area-inset-bottom, 0px))) var(--joinus-inline);
+    }
+
+    .contact-form-container {
+        flex-direction: column;
+        height: auto;
+        max-height: none;
+        min-height: 0;
+        gap: 16px;
+        width: 100%;
+        max-width: 480px;
+        margin-inline: auto;
+        align-items: stretch;
+    }
+
+    .contact-card {
+        flex: none !important;
+        width: 100%;
+    }
+
+    .contact-map-embed {
+        flex: none;
+        min-height: 200px;
+        height: 220px;
+    }
+
+    .contact-info-bottom {
+        padding: 12px 14px 16px;
+    }
+
+    .contact-info-bottom .contact-details {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: 0;
+        align-items: stretch;
+    }
+
+    .contact-info-bottom .contact-detail-item {
+        flex: none !important;
+        width: 100%;
+        min-width: 0;
+        padding: 10px 0;
+        border-right: none;
+        border-bottom: 1px solid #eee;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .contact-info-bottom .contact-detail-item:nth-child(1),
+    .contact-info-bottom .contact-detail-item:nth-child(2),
+    .contact-info-bottom .contact-detail-item:nth-child(3),
+    .contact-info-bottom .contact-detail-item:nth-child(4) {
+        flex: none !important;
+        width: 100%;
+    }
+
+    .contact-info-bottom .contact-detail-item:last-child {
+        border-bottom: none;
+    }
+
+    .contact-info-bottom .contact-detail-text {
+        overflow: visible;
+    }
+
+    .contact-info-bottom .contact-detail-text span:not(.contact-label),
+    .contact-info-bottom .contact-detail-text a {
+        overflow: visible;
+        text-overflow: clip;
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    .feedback-card {
+        flex: none !important;
+        width: 100%;
+        padding: 16px 16px 24px;
+    }
+
+    .fb-form-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .fb-field-wide,
+    .fb-field-narrow {
+        flex: none !important;
+        width: 100%;
+    }
+
+    .fb-gender-options {
+        height: auto;
+        min-height: 40px;
+        flex-wrap: wrap;
+    }
+
+    .fb-phone-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .fb-phone-row select {
+        flex: none !important;
+        width: 100%;
+        max-width: none;
+    }
+
+    .fb-phone-row input {
+        flex: none !important;
+        width: 100%;
     }
 }
 
@@ -3201,5 +3321,10 @@ img.image-3d-rotate:hover,
 
     .jobs-container {
         padding: 0;
+    }
+
+    .contact-map-embed {
+        min-height: 180px;
+        height: 200px;
     }
 }
