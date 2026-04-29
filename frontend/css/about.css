@@ -2317,9 +2317,16 @@ img.image-3d-rotate:hover,
 
   .timeline-text h3 {
     font-size: clamp(1.05rem, 4.4vw, 1.28rem) !important;
-    line-height: 1.38 !important;
+    line-height: 1.42 !important;
     margin-top: 8px !important;
-    margin-bottom: 2px !important;
+    /* 原 2px + ::after 的 bottom:-8px 会压到正文；用 padding 包住装饰线 */
+    margin-bottom: 12px !important;
+    padding-bottom: 10px !important;
+  }
+
+  .timeline-text h3::after {
+    bottom: 2px !important;
+    left: 0 !important;
   }
 
   .timeline-text p {
