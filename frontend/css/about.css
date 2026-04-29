@@ -832,18 +832,18 @@ body::-webkit-scrollbar {
 
   /* 年份轨：减弱两侧裁切，避免相邻年份被「吃掉」 */
   .timeline-scroll-container {
-    width: calc(100% - 96px);
+    width: calc(100% - 92px);
     mask: linear-gradient(90deg, transparent 0%, black 5%, black 95%, transparent 100%);
     -webkit-mask: linear-gradient(90deg, transparent 0%, black 5%, black 95%, transparent 100%);
   }
 
-  /* 恢复箭头并加大触控区（原先 display:none 无法换年） */
+  /* 年份切换箭头：略小于 44px，减少压住卡片；仍接近推荐触控尺寸 */
   .nav-arrow {
     display: flex;
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    min-height: 44px;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
     left: auto;
     right: auto;
   }
@@ -2181,15 +2181,22 @@ img.image-3d-rotate:hover,
   }
 
   /* ===== 发展历史（时间线）电话版：与本 @media 外样式隔离，不作用于桌面 ===== */
+  /* 时间线这一页高度随内容，避免卡片下方一大块空橙底；Swiper 已 slidesPerView:auto */
+  .swiper-slide:has(#timeline-1) {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
   .timeline-section {
     height: auto !important;
-    min-height: calc(100dvh - 56px) !important;
+    min-height: 0 !important;
     max-height: none !important;
     justify-content: flex-start !important;
     align-items: center !important;
-    padding: calc(10px + env(safe-area-inset-top, 0px)) 12px calc(96px + env(safe-area-inset-bottom, 0px)) !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
+    padding: calc(10px + env(safe-area-inset-top, 0px)) 12px calc(48px + env(safe-area-inset-bottom, 0px)) !important;
+    overflow-y: visible !important;
     box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.06) !important;
   }
 
@@ -2251,11 +2258,37 @@ img.image-3d-rotate:hover,
     font-size: clamp(0.78rem, 2.9vw, 0.9rem) !important;
   }
 
-  /* 仅显示当前卡片，避免底层卡片透出造成「重影字」 */
-  .timeline-cards-wrapper .timeline-content-item:not(.active) {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
+  /* 绝对定位卡片在父级高度塌陷时会与年份条重叠；小屏改为文档流 + 只渲染当前张 */
+  .timeline-content-container {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+  }
+
+  .timeline-cards-wrapper {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  .timeline-content-item {
+    position: relative !important;
+    width: min(92vw, 26rem) !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    inset: auto !important;
+  }
+
+  .timeline-content-item:not(.active) {
+    display: none !important;
+  }
+
+  .timeline-content-item.active {
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
   }
 
   .timeline-item {
