@@ -3180,6 +3180,8 @@ img.image-3d-rotate:hover,
         overscroll-behavior: contain;
         align-items: stretch;
         justify-content: flex-start;
+        /* 避免 slide 默认 #2F2F2F 在内容未撑满一屏时露出深灰横条 */
+        background-color: #ff5c00;
     }
 
     /* 手机：联系页内不显示内联意见箱（下一滑为 .joinus-feedback--stacked） */
@@ -3191,8 +3193,10 @@ img.image-3d-rotate:hover,
     .contact-form-section {
         --contact-inline: max(56px, calc(12px + max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px))));
         --contact-card-pad: 20px;
+        flex: 1 1 auto;
+        width: 100%;
         height: auto;
-        min-height: 0;
+        min-height: 100%;
         overflow: visible;
         align-items: stretch;
         justify-content: center;

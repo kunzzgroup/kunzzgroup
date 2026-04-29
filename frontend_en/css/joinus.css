@@ -3585,6 +3585,7 @@ img.image-3d-rotate:hover,
         overscroll-behavior: contain;
         align-items: stretch;
         justify-content: flex-start;
+        background-color: #ff5c00;
     }
 
     /* Mobile: hide inline feedback on contact slide (dedicated slide uses .joinus-feedback--stacked) */
@@ -3597,8 +3598,10 @@ img.image-3d-rotate:hover,
         --contact-inline: max(56px, calc(12px + max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px))));
         --contact-card-pad: 20px;
         padding: max(68px, env(safe-area-inset-top, 0px)) var(--contact-inline) max(104px, calc(32px + env(safe-area-inset-bottom, 0px))) var(--contact-inline);
+        flex: 1 1 auto;
+        width: 100%;
         height: auto;
-        min-height: 0;
+        min-height: 100%;
         overflow: visible;
         align-items: stretch;
         justify-content: center;
