@@ -694,6 +694,36 @@ function handleDelete() {
     }
 }
 
+/**
+ * 查找进货记录中该价格层实际使用的 specification，确保出货写入同一库存桶。
+ */
+function resolveInboundSpecForPrice($pdo, $tableName, $productName, $codeNumber, $price) {
+    $codeFilter = '';
+    $params = [$productName, $productName, $price];
+    if ($codeNumber !== null && $codeNumber !== '') {
+        $codeFilter = ' AND code_number = ?';
+        $params[] = $codeNumber;
+    }
+
+    $sql = "SELECT specification,
+                   (SUM(in_quantity) - SUM(out_quantity)) AS available
+            FROM {$tableName}
+            WHERE (product_name = ? OR TRIM(REPLACE(product_name, '&amp;', '&')) = TRIM(REPLACE(?, '&amp;', '&')))
+            AND CAST(COALESCE(price, 0) AS DECIMAL(15,6)) = CAST(? AS DECIMAL(15,6))
+            AND deleted_at IS NULL
+            {$codeFilter}
+            GROUP BY specification
+            HAVING available > 0
+            ORDER BY available DESC
+            LIMIT 1";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $row !== false ? ($row['specification'] ?? null) : null;
+}
+
 // 同步数据到 j3stockedit_data 表（智能按价格从高到低分层扣货）
 function syncToJ3StockEditData($pdo, $data, $operation = 'insert') {
     try {
@@ -753,6 +783,31 @@ function syncToJ3StockEditData($pdo, $data, $operation = 'insert') {
                 $inQty, 0,
                 $matchInfo['specification'] ?? $data['specification'] ?? null, $price,
                 $type, $mobileRefId,
+            ]);
+            return $pdo->lastInsertId();
+        }
+
+        // 出库且前端已指定价格（batch_save 分层结果）：直接写入，避免二次扣货因 spec 过滤错位
+        if (array_key_exists('price', $data) && $data['price'] !== null && $data['price'] !== '') {
+            $directPrice = floatval($data['price']);
+            $directSpec = resolveInboundSpecForPrice($pdo, 'j3stockedit_data', $productName, $codeNumber, $directPrice);
+            if ($directSpec === null) {
+                $directSpec = $data['specification'] ?? $matchInfo['specification'] ?? null;
+            }
+
+            $stmt = $pdo->prepare(
+                "INSERT INTO j3stockedit_data
+                 (date, time, code_number, product_name, in_quantity, out_quantity,
+                  specification, price, receiver, remark, target_system, type, mobile_ref_id)
+                 VALUES (?,?,?,?,0,?,?,?,'Mobile',NULL,'j3',?,?)"
+            );
+            $stmt->execute([
+                $data['date'], $data['time'], $codeNumber, $productName,
+                $outQty,
+                $directSpec,
+                $directPrice,
+                $type,
+                $mobileRefId,
             ]);
             return $pdo->lastInsertId();
         }
