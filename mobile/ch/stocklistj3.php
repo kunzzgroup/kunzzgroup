@@ -132,6 +132,7 @@ require_once 'branch_check.php';
         let selectedProductCategory = '';
         let editingRowIds = new Set();
         let isSaveInProgress = false;
+        let summaryTotalRecords = 0;
 
         const WORK_DATE_KEY = 'j3_stock_edit_date';
         const workDateManager = StockDateUtils.createWorkDateManager(WORK_DATE_KEY);
@@ -142,6 +143,8 @@ require_once 'branch_check.php';
         // API配置 - J3 数据库（指向backend目录下的stockapi.php）
         const API_BASE_URL = '../../backend/stockapi.php';
         const SYSTEM_TYPE = 'J3';
+        const STOCK_LIST_API = '../../backend/stocklistapi.php';
+        const STOCK_LIST_SYSTEM = 'j3';
         const STOCK_EDIT_API = '../../j3/j3stockeditmobile_api.php';
         
         // 初始化
@@ -223,9 +226,23 @@ require_once 'branch_check.php';
             workDateManager.setDefaultWorkDate(dateStr);
         }
         
+        async function loadSummaryTotalRecords() {
+            try {
+                const resp = await fetch(`${STOCK_LIST_API}?action=summary&system=${STOCK_LIST_SYSTEM}`);
+                const result = await resp.json();
+                if (result.success && result.data && Array.isArray(result.data.summary)) {
+                    summaryTotalRecords = result.data.summary.length;
+                }
+            } catch (e) {
+                console.warn('加载总记录数失败:', e);
+            }
+        }
+
         // 从API获取产品列表
         async function loadProductList() {
             try {
+                await loadSummaryTotalRecords();
+
                 const params = new URLSearchParams();
                 params.append('action', 'list');
                 params.append('system_assign', SYSTEM_TYPE);
@@ -548,8 +565,10 @@ require_once 'branch_check.php';
         }
 
         function updateStats(displayedCount) {
-            const totalRecords = getVisibleStockData().length;
-            const displayedRecords = displayedCount !== undefined ? displayedCount : totalRecords;
+            const displayedRecords = displayedCount !== undefined ? displayedCount : 0;
+            const totalRecords = summaryTotalRecords > 0
+                ? summaryTotalRecords
+                : getVisibleStockData().length;
             const displayedEl = document.getElementById('displayed-records');
             const totalEl = document.getElementById('total-records');
             if (displayedEl) displayedEl.textContent = displayedRecords;
@@ -856,6 +875,7 @@ require_once 'branch_check.php';
                 if (result.success) {
                     editingRowIds.delete(id);
                     await reloadStockTotals(editingRowIds);
+                    await loadSummaryTotalRecords();
                     const updatedRecord = stockData.find(r => r.id === id);
                     if (updatedRecord) updatedRecord.qty = updatedRecord.original_qty;
                     generateTable();
