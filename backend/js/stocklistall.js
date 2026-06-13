@@ -26,6 +26,12 @@ let currentView = 'list';
 
 let lowStockSettings = {};
 
+let selectedTypeFilters = {
+    j1: new Set(),
+    j2: new Set(),
+    j3: new Set()
+};
+
 const VIEW_NAMES = {
     list: '总库存',
     records: '进出货',
@@ -186,6 +192,9 @@ async function initApp() {
     // 添加实时搜索监听器
     setupRealTimeSearch();
 
+    // 分类卡片多选筛选
+    setupTypeFilterCards();
+
     // 点击外部关闭下拉菜单
     document.addEventListener('click', function (e) {
         if (!e.target.closest('.system-selector')) {
@@ -195,6 +204,97 @@ async function initApp() {
             document.getElementById('view-selector-dropdown').classList.remove('show');
         }
     });
+}
+
+// 设置分类卡片多选筛选
+function setupTypeFilterCards() {
+    ['j1', 'j2', 'j3'].forEach(system => {
+        const page = document.getElementById(`${system}-page`);
+        if (!page) return;
+
+        page.querySelectorAll('.type-grid-item[data-type]').forEach(card => {
+            const type = card.dataset.type;
+            const toggle = () => toggleTypeFilter(system, type, card);
+
+            card.addEventListener('click', toggle);
+            card.addEventListener('keydown', e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggle();
+                }
+            });
+        });
+    });
+}
+
+function normalizeItemType(type) {
+    if (!type) return '';
+    if (type === 'Drinks' || type === 'drinks') return 'Service Line';
+    return type;
+}
+
+function toggleTypeFilter(system, type, cardEl) {
+    const selected = selectedTypeFilters[system];
+    if (!selected) return;
+
+    if (selected.has(type)) {
+        selected.delete(type);
+        cardEl.classList.remove('is-active');
+        cardEl.setAttribute('aria-pressed', 'false');
+    } else {
+        selected.add(type);
+        cardEl.classList.add('is-active');
+        cardEl.setAttribute('aria-pressed', 'true');
+    }
+
+    applyFilters(system);
+}
+
+function clearTypeFilters(system) {
+    const selected = selectedTypeFilters[system];
+    if (!selected) return;
+
+    selected.clear();
+    const page = document.getElementById(`${system}-page`);
+    page?.querySelectorAll('.type-grid-item.is-active').forEach(el => {
+        el.classList.remove('is-active');
+        el.setAttribute('aria-pressed', 'false');
+    });
+}
+
+function applyFilters(system) {
+    if (system === 'remark') return;
+
+    const searchTerm = document.getElementById(`${system}-unified-filter`)?.value.toLowerCase() || '';
+    const selectedTypes = selectedTypeFilters[system];
+
+    filteredData[system] = stockData[system].filter(item => {
+        const itemType = normalizeItemType(item.type);
+
+        if (selectedTypes && selectedTypes.size > 0 && !selectedTypes.has(itemType)) {
+            return false;
+        }
+
+        if (!searchTerm) return true;
+
+        const minimumQuantity = lowStockSettings[item.product_name] || 0;
+        const minimumStockStr = minimumQuantity > 0 ? minimumQuantity.toString() : '';
+
+        return (
+            (item.no && item.no.toString().includes(searchTerm)) ||
+            (item.product_name && item.product_name.toLowerCase().includes(searchTerm)) ||
+            (item.code_number && item.code_number.toLowerCase().includes(searchTerm)) ||
+            (minimumStockStr && minimumStockStr.includes(searchTerm)) ||
+            (item.total_stock && item.total_stock.toString().includes(searchTerm)) ||
+            (item.specification && item.specification.toLowerCase().includes(searchTerm)) ||
+            (item.price && item.price.toString().includes(searchTerm)) ||
+            (item.total_price && item.total_price.toString().includes(searchTerm)) ||
+            (item.formatted_total_price && item.formatted_total_price.includes(searchTerm))
+        );
+    });
+
+    renderStockTable(system);
+    updateStats(system);
 }
 
 // 设置实时搜索
@@ -535,8 +635,7 @@ async function loadData(system) {
             if (system === 'remark') {
                 renderRemarkProducts();
             } else {
-                renderStockTable(system);
-                updateStats(system);
+                applyFilters(system);
             }
 
             if (stockData[system].length === 0) {
@@ -639,29 +738,7 @@ function searchData(system) {
         return;
     }
 
-    const searchTerm = document.getElementById(`${system}-unified-filter`).value.toLowerCase();
-
-    filteredData[system] = stockData[system].filter(item => {
-        // 获取最低库存值用于搜索
-        const minimumQuantity = lowStockSettings[item.product_name] || 0;
-        const minimumStockStr = minimumQuantity > 0 ? minimumQuantity.toString() : '';
-
-        // 搜索所有字段，包括序号、货品编号、货品名称、最低库存、库存数量、规格、单价、总价
-        return (
-            (item.no && item.no.toString().includes(searchTerm)) ||
-            (item.product_name && item.product_name.toLowerCase().includes(searchTerm)) ||
-            (item.code_number && item.code_number.toLowerCase().includes(searchTerm)) ||
-            (minimumStockStr && minimumStockStr.includes(searchTerm)) ||
-            (item.total_stock && item.total_stock.toString().includes(searchTerm)) ||
-            (item.specification && item.specification.toLowerCase().includes(searchTerm)) ||
-            (item.price && item.price.toString().includes(searchTerm)) ||
-            (item.total_price && item.total_price.toString().includes(searchTerm)) ||
-            (item.formatted_total_price && item.formatted_total_price.includes(searchTerm))
-        );
-    });
-
-    renderStockTable(system);
-    updateStats(system);
+    applyFilters(system);
 }
 
 // 搜索价格分析数据
@@ -727,12 +804,9 @@ function resetFilters(system) {
         sortRemarkData('name_asc');
         renderRemarkProducts();
     } else {
-        // 修改这部分
         document.getElementById(`${system}-unified-filter`).value = '';
-
-        filteredData[system] = [...stockData[system]];
-        renderStockTable(system);
-        updateStats(system);
+        clearTypeFilters(system);
+        applyFilters(system);
     }
 
     showAlert('搜索条件已重置', 'info');
