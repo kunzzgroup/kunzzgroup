@@ -315,7 +315,7 @@ body {
     overflow-y: auto;
     overflow-x: hidden;
     flex-grow: 1;
-    padding: 0 28px;
+    padding: 0 28px 12px;
 }
 
 /* 自定义精简滚动条 */
@@ -687,7 +687,8 @@ body {
 .back-to-top {
     position: fixed;
     bottom: clamp(16px, 1.56vw, 30px);
-    right: clamp(12px, 1.04vw, 20px);
+    left: calc(clamp(140px, 13.02vw, 250px) + clamp(16px, 1.25vw, 24px));
+    right: auto;
     width: clamp(36px, 2.6vw, 50px);
     height: clamp(36px, 2.6vw, 50px);
     background-color: #f99e00;
@@ -705,6 +706,14 @@ body {
     visibility: hidden;
     transform: translateY(20px);
     z-index: 1000;
+}
+
+body.sidebar-collapsed .back-to-top {
+    left: calc(clamp(50px, 3.65vw, 70px) + clamp(16px, 1.25vw, 24px));
+}
+
+#products-container {
+    padding-bottom: clamp(60px, 5vw, 80px);
 }
 
 .back-to-top.show {
