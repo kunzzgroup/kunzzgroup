@@ -1639,6 +1639,10 @@ function scrollToRecordById(id) {
     });
 }
 
+function hasPendingNewRows() {
+    return document.querySelectorAll('#stock-tbody .new-row').length > 0;
+}
+
 function initVirtualScrollListener() {
     if (virtualScrollInitialized) return;
     const container = document.querySelector('.table-scroll-container');
@@ -1646,6 +1650,8 @@ function initVirtualScrollListener() {
 
     container.addEventListener('scroll', () => {
         if (stockData.length <= VIRTUAL_SCROLL_THRESHOLD) return;
+        // 有未保存的新增行时改用完整渲染，不再触发虚拟滚动重绘
+        if (hasPendingNewRows()) return;
         if (virtualScrollRafId) cancelAnimationFrame(virtualScrollRafId);
         virtualScrollRafId = requestAnimationFrame(() => {
             virtualScrollRafId = null;
@@ -3166,7 +3172,7 @@ function renderStockTable(preserveScroll) {
         return;
     }
 
-    const useVirtualScroll = stockData.length > VIRTUAL_SCROLL_THRESHOLD;
+    const useVirtualScroll = stockData.length > VIRTUAL_SCROLL_THRESHOLD && pendingNewRows.length === 0;
     let html = '';
 
     if (useVirtualScroll) {
@@ -3203,7 +3209,6 @@ function renderStockTable(preserveScroll) {
     loadEditingRowPrices();
     if (pendingNewRows.length > 0) {
         updateBatchSaveButtonVisibility();
-        scrollToNewRows();
     }
 }
 
@@ -3410,7 +3415,8 @@ function createMultipleRows() {
         addNewRowWithDate(selectedDate, remarkValue);
     }
 
-    // 滚动到表格底部（延迟到虚拟滚动重绘后，确保新增行可见）
+    // 有未保存行时切换为完整渲染，避免虚拟滚动与新增行冲突
+    renderStockTable(true);
     scrollToNewRows();
 
     showAlert(`成功创建 ${rowsCount} 行记录`, 'success');
@@ -3513,9 +3519,6 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
             productInput.focus();
         }
 
-        // 滚动到表格底部，确保新记录行可见
-        scrollToNewRows();
-
         // 更新批量保存按钮的可见性
         updateBatchSaveButtonVisibility();
     }, 100);
@@ -3527,6 +3530,8 @@ function addNewRow() {
     const now = new Date();
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     addNewRowWithDate(today);
+    renderStockTable(true);
+    scrollToNewRows();
 }
 
 // 自动填充supplier到receiver字段（只在有进货数量时）
@@ -4304,6 +4309,11 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
                     });
                     bindComboboxEvents();
 
+                    // 恢复未保存行后切换为完整渲染
+                    if (savedRows.length > 0) {
+                        renderStockTable(true);
+                    }
+
                     // 更新批量保存按钮的可见性
                     updateBatchSaveButtonVisibility();
                 }, 100);
@@ -4328,6 +4338,11 @@ function cancelNewRow(buttonElement) {
 
     // 更新批量保存按钮的可见性
     updateBatchSaveButtonVisibility();
+
+    // 所有新增行取消后恢复虚拟滚动
+    if (!hasPendingNewRows() && stockData.length > VIRTUAL_SCROLL_THRESHOLD) {
+        renderStockTable(true);
+    }
 }
 
 // 保存新记录
