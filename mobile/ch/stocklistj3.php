@@ -115,6 +115,7 @@ require_once 'branch_check.php';
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script src="js/stock-date-utils.js?v=<?php echo time(); ?>"></script>
     <script>
 
 
@@ -126,7 +127,9 @@ require_once 'branch_check.php';
         let selectedProductCategory = '';
         let editingRowIds = new Set();
         let isSaveInProgress = false;
-        let currentWorkDate = null; // 本页本次选择的日期（不刷新时保留，刷新后清空为今天）
+
+        const WORK_DATE_KEY = 'j3_stock_edit_date';
+        const workDateManager = StockDateUtils.createWorkDateManager(WORK_DATE_KEY);
         
         // 当前登录用户名（从PHP传递）
         const CURRENT_USERNAME = <?php echo json_encode($currentUsername, JSON_UNESCAPED_UNICODE); ?>;
@@ -169,6 +172,7 @@ require_once 'branch_check.php';
                 closeCalendarModal();
             });
             
+            workDateManager.restoreWorkDateFromStorage();
             updateCalendarDateDisplay();
             // 加载产品列表
             loadProductList();
@@ -202,26 +206,16 @@ require_once 'branch_check.php';
             overlay.setAttribute('aria-hidden', 'true');
         }
         
-        // 获取今天的日期字符串 (YYYY-MM-DD)
         function getTodayDateString() {
-            const today = new Date();
-            return today.toISOString().split('T')[0];
+            return workDateManager.getTodayDateString();
         }
-        
-        // 出货记录使用的日期：本次会话内选的日期（不刷新则保留），刷新页面则默认今天
+
         function getDefaultWorkDate() {
-            if (currentWorkDate && /^\d{4}-\d{2}-\d{2}$/.test(currentWorkDate)) return currentWorkDate;
-            return getTodayDateString();
+            return workDateManager.getDefaultWorkDate();
         }
-        // 选择日期确定时：记入内存并写入 storage，供编辑页记录使用
+
         function setDefaultWorkDate(dateStr) {
-            if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return;
-            currentWorkDate = dateStr;
-            const key = 'j3_stock_edit_date';
-            try {
-                localStorage.setItem(key, dateStr);
-                sessionStorage.setItem(key, dateStr);
-            } catch (e) {}
+            workDateManager.setDefaultWorkDate(dateStr);
         }
         
         // 从API获取产品列表
@@ -775,6 +769,9 @@ require_once 'branch_check.php';
 
                 // 5️⃣ 按价格从高到低依次扣除（priceStocks 已按 price DESC 排序）
                 const workDate = getDefaultWorkDate();
+                if (!workDateManager.confirmWorkDateBeforeSave(workDate)) {
+                    return;
+                }
                 const now = new Date();
                 const baseTimeStr = now.toTimeString().slice(0, 8);
                 const outboundRows = [];

@@ -1026,6 +1026,36 @@ function updateStocklistTotal($productName, $codeNumber, $inQty, $outQty, $isAdd
 }
 
 /**
+ * 检测几分钟内是否已提交相同出库行（防止重复保存）
+ */
+function hasRecentDuplicateMobileBatchRow(PDO $pdo, string $table, string $documentDate, array $row, int $windowMinutes = 3): bool
+{
+    $outQty = floatval($row['out_quantity'] ?? 0);
+    if ($outQty <= 0.0001) {
+        return false;
+    }
+
+    $sql = "SELECT 1 FROM {$table}
+            WHERE date = ? AND product_name = ? AND deleted_at IS NULL
+            AND ABS(out_quantity - ?) < 0.001
+            AND receiver = ?
+            AND created_at >= DATE_SUB(NOW(), INTERVAL ? MINUTE)
+            AND (code_number <=> ?)
+            LIMIT 1";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        $documentDate,
+        $row['product_name'],
+        $outQty,
+        $row['receiver'] ?? 'Mobile',
+        $windowMinutes,
+        $row['code_number'] ?? null,
+    ]);
+
+    return (bool) $stmt->fetchColumn();
+}
+
+/**
  * 处理移动端批量保存请求 (J1)
  * 预期负载结构: { "action": "batch_save", "document_date": "YYYY-MM-DD", "rows": [...] }
  */
@@ -1053,6 +1083,10 @@ function handleBatchSave() {
         foreach ($rows as $index => $row) {
             if (empty($row['time']) || empty($row['product_name'])) {
                 throw new Exception("第 " . ($index + 1) . " 行缺少必填字段");
+            }
+
+            if (hasRecentDuplicateMobileBatchRow($pdo, 'j1stockeditmobile_data', $documentDate, $row)) {
+                throw new Exception("第 " . ($index + 1) . " 行：相同货单在几分钟内已保存，请勿重复提交");
             }
 
             // 1. 插入到移动端流水表

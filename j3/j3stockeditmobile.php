@@ -2272,6 +2272,7 @@ require_once '../backend/session_check.php';
         <i class="fas fa-chevron-up"></i>
     </button>
 
+    <script src="../mobile/ch/js/stock-date-utils.js?v=<?php echo time(); ?>"></script>
     <script>
         // API 配置
         let API_BASE_URL = 'j3stockeditmobile_api.php';
@@ -2299,13 +2300,16 @@ require_once '../backend/session_check.php';
             endDate: null
         };
 
+        const WORK_DATE_KEY = 'j3_stock_edit_date';
+        const workDateManager = StockDateUtils.createWorkDateManager(WORK_DATE_KEY);
+
         // 从库存列表日历选择的日期（localStorage），用于出货记录的默认日期
         function getDefaultWorkDate() {
-            try {
-                const saved = localStorage.getItem('j3_stock_edit_date');
-                if (saved && /^\d{4}-\d{2}-\d{2}$/.test(saved)) return saved;
-            } catch (e) {}
-            return new Date().toISOString().split('T')[0];
+            return workDateManager.getDefaultWorkDate();
+        }
+
+        function getLocalTodayString() {
+            return workDateManager.getTodayDateString();
         }
 
         // 新的日历选择器变量
@@ -3024,7 +3028,7 @@ require_once '../backend/session_check.php';
         // 初始化应用
         function initApp() {
             // 进入页面时日期显示默认今天（记录保存时仍用 getDefaultWorkDate）
-            document.getElementById('add-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('add-date').value = getLocalTodayString();
             document.getElementById('add-time').value = new Date().toTimeString().slice(0, 5);
             
             // 初始化增强型日期选择器
@@ -4029,7 +4033,7 @@ require_once '../backend/session_check.php';
             const dateInput = document.getElementById('selected-date');
             
             // 弹窗打开时默认显示今天
-            dateInput.value = new Date().toISOString().split('T')[0];
+            dateInput.value = getLocalTodayString();
             
             // 显示弹窗
             modal.classList.add('show');
@@ -4493,6 +4497,18 @@ require_once '../backend/session_check.php';
                 }
             }
 
+            if (!formData.date) {
+                const errorMsg = '请选择日期';
+                if (!skipTableRefresh) {
+                    showAlert(errorMsg, 'error');
+                }
+                throw new Error(errorMsg);
+            }
+
+            if (!skipTableRefresh && !workDateManager.confirmWorkDateBeforeSave(formData.date)) {
+                throw new Error('已取消保存');
+            }
+
             try {
                 const result = await apiCall('', {
                     method: 'POST',
@@ -4643,6 +4659,10 @@ require_once '../backend/session_check.php';
                     showAlert(`库存不足！当前可用库存: ${stockCheck.availableStock}，请求出库: ${formData.out_quantity}`, 'error');
                     return;
                 }
+            }
+
+            if (!workDateManager.confirmWorkDateBeforeSave(formData.date)) {
+                return;
             }
 
             try {
@@ -7540,7 +7560,15 @@ require_once '../backend/session_check.php';
                 showAlert('没有需要保存的新记录', 'info');
                 return;
             }
-            
+
+            const batchWorkDate = (() => {
+                const dateEl = newRows[0].querySelector('input[type="date"]');
+                return (dateEl && dateEl.value) ? dateEl.value : getDefaultWorkDate();
+            })();
+            if (!workDateManager.confirmWorkDateBeforeSave(batchWorkDate)) {
+                return;
+            }
+
             const batchSaveBtn = document.getElementById('batch-save-btn');
             const originalText = batchSaveBtn.innerHTML;
             batchSaveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
