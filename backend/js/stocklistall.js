@@ -226,7 +226,7 @@ function setupTypeFilterCards() {
         const page = document.getElementById(`${system}-page`);
         if (!page) return;
 
-        page.querySelectorAll('.type-grid-item[data-type]').forEach(card => {
+        page.querySelectorAll('.type-grid-item.is-filterable[data-type]').forEach(card => {
             const type = card.dataset.type;
             const toggle = () => toggleTypeFilter(system, type, card);
 
@@ -270,7 +270,7 @@ function clearTypeFilters(system) {
 
     selected.clear();
     const page = document.getElementById(`${system}-page`);
-    page?.querySelectorAll('.type-grid-item.is-active').forEach(el => {
+    page?.querySelectorAll('.type-grid-item.is-filterable.is-active').forEach(el => {
         el.classList.remove('is-active');
         el.setAttribute('aria-pressed', 'false');
     });

@@ -1457,26 +1457,29 @@ body {
     background: #ffffffff;
     border-radius: 8px;
     border: 1px solid #d1d5db;
+}
+
+.type-grid-item.is-filterable {
     cursor: pointer;
     transition: background-color 0.2s, border-color 0.2s, color 0.2s;
     user-select: none;
 }
 
-.type-grid-item:hover {
+.type-grid-item.is-filterable:hover {
     border-color: #f99300;
 }
 
-.type-grid-item.is-active {
+.type-grid-item.is-filterable.is-active {
     background-color: #f99300;
     border-color: #f99300;
 }
 
-.type-grid-item.is-active .grid-title,
-.type-grid-item.is-active .grid-value {
+.type-grid-item.is-filterable.is-active .grid-title,
+.type-grid-item.is-filterable.is-active .grid-value {
     color: #fff;
 }
 
-.type-grid-item.is-active .grid-value.negative {
+.type-grid-item.is-filterable.is-active .grid-value.negative {
     color: #fecaca;
 }
 

@@ -225,19 +225,19 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
                 </div>
                 
                 <div class="type-grid-container">
-                    <div class="type-grid-item" data-type="Service Line" role="button" tabindex="0" aria-pressed="false">
+                    <div class="type-grid-item is-filterable" data-type="Service Line" role="button" tabindex="0" aria-pressed="false">
                         <div class="grid-title">Service Line</div>
                         <div class="grid-value" id="j1-service-line-value">0.00</div>
                     </div>
-                    <div class="type-grid-item" data-type="Sake" role="button" tabindex="0" aria-pressed="false">
+                    <div class="type-grid-item is-filterable" data-type="Sake" role="button" tabindex="0" aria-pressed="false">
                         <div class="grid-title">Sake</div>
                         <div class="grid-value" id="j1-sake-value">0.00</div>
                     </div>
-                    <div class="type-grid-item" data-type="Kitchen" role="button" tabindex="0" aria-pressed="false">
+                    <div class="type-grid-item is-filterable" data-type="Kitchen" role="button" tabindex="0" aria-pressed="false">
                         <div class="grid-title">Kitchen</div>
                         <div class="grid-value" id="j1-kitchen-value">0.00</div>
                     </div>
-                    <div class="type-grid-item" data-type="Sushi Bar" role="button" tabindex="0" aria-pressed="false">
+                    <div class="type-grid-item is-filterable" data-type="Sushi Bar" role="button" tabindex="0" aria-pressed="false">
                         <div class="grid-title">Sushi Bar</div>
                         <div class="grid-value" id="j1-sushi-bar-value">0.00</div>
                     </div>
@@ -298,19 +298,19 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
                 </div>
                 
                 <div class="type-grid-container">
-                    <div class="type-grid-item" data-type="Service Line" role="button" tabindex="0" aria-pressed="false">
+                    <div class="type-grid-item is-filterable" data-type="Service Line" role="button" tabindex="0" aria-pressed="false">
                         <div class="grid-title">Service Line</div>
                         <div class="grid-value" id="j2-service-line-value">0.00</div>
                     </div>
-                    <div class="type-grid-item" style="display: none;" data-type="Sake" role="button" tabindex="0" aria-pressed="false">
+                    <div class="type-grid-item is-filterable" style="display: none;" data-type="Sake" role="button" tabindex="0" aria-pressed="false">
                         <div class="grid-title">Sake</div>
                         <div class="grid-value" id="j2-sake-value">0.00</div>
                     </div>
-                    <div class="type-grid-item" data-type="Kitchen" role="button" tabindex="0" aria-pressed="false">
+                    <div class="type-grid-item is-filterable" data-type="Kitchen" role="button" tabindex="0" aria-pressed="false">
                         <div class="grid-title">Kitchen</div>
                         <div class="grid-value" id="j2-kitchen-value">0.00</div>
                     </div>
-                    <div class="type-grid-item" data-type="Sushi Bar" role="button" tabindex="0" aria-pressed="false">
+                    <div class="type-grid-item is-filterable" data-type="Sushi Bar" role="button" tabindex="0" aria-pressed="false">
                         <div class="grid-title">Sushi Bar</div>
                         <div class="grid-value" id="j2-sushi-bar-value">0.00</div>
                     </div>
@@ -371,19 +371,19 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
                 </div>
                 
                 <div class="type-grid-container">
-                    <div class="type-grid-item" data-type="Service Line" role="button" tabindex="0" aria-pressed="false">
+                    <div class="type-grid-item is-filterable" data-type="Service Line" role="button" tabindex="0" aria-pressed="false">
                         <div class="grid-title">Service Line</div>
                         <div class="grid-value" id="j3-service-line-value">0.00</div>
                     </div>
-                    <div class="type-grid-item" data-type="Sake" role="button" tabindex="0" aria-pressed="false">
+                    <div class="type-grid-item is-filterable" data-type="Sake" role="button" tabindex="0" aria-pressed="false">
                         <div class="grid-title">Sake</div>
                         <div class="grid-value" id="j3-sake-value">0.00</div>
                     </div>
-                    <div class="type-grid-item" data-type="Kitchen" role="button" tabindex="0" aria-pressed="false">
+                    <div class="type-grid-item is-filterable" data-type="Kitchen" role="button" tabindex="0" aria-pressed="false">
                         <div class="grid-title">Kitchen</div>
                         <div class="grid-value" id="j3-kitchen-value">0.00</div>
                     </div>
-                    <div class="type-grid-item" data-type="Sushi Bar" role="button" tabindex="0" aria-pressed="false">
+                    <div class="type-grid-item is-filterable" data-type="Sushi Bar" role="button" tabindex="0" aria-pressed="false">
                         <div class="grid-title">Sushi Bar</div>
                         <div class="grid-value" id="j3-sushi-bar-value">0.00</div>
                     </div>
