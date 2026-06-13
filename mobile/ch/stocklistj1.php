@@ -126,6 +126,7 @@ require_once 'branch_check.php';
         let selectedFreezerCategory = '';
         let selectedProductCategory = '';
         let editingRowIds = new Set();
+        let isSaveInProgress = false;
         let currentWorkDate = null; // 本页本次选择的日期（不刷新时保留，刷新后清空为今天）
         
         // 当前登录用户名（从PHP传递）
@@ -618,7 +619,7 @@ require_once 'branch_check.php';
                     </td>
                     <td class="actions" style="width: 35px !important; min-width: 35px !important; max-width: 35px !important; padding: 8px 2px !important;">
                         ${isEditing ? 
-                            `<button class="edit-button" onclick="saveRecord('${item.id}')" title="保存" style="background: #2aa745;">
+                            `<button type="button" class="edit-button edit-button-save" onclick="saveRecord('${item.id}')" title="保存" style="background: #2aa745;${isSaveInProgress ? ' opacity:0.5; pointer-events:none;' : ''}" ${isSaveInProgress ? 'disabled' : ''}>
                                 <img src="../images/icons/edit.svg" alt="" aria-hidden="true" style="filter: brightness(0) invert(1);">
                             </button>` :
                             `<button class="edit-button" onclick="editRecord('${item.id}')" title="编辑">
@@ -633,6 +634,7 @@ require_once 'branch_check.php';
         
         // 编辑记录
         function editRecord(id) {
+            if (isSaveInProgress) return;
             if (editingRowIds.has(id)) {
                 return;
             }
@@ -641,6 +643,14 @@ require_once 'branch_check.php';
             generateTable();
         }
         
+        function setSaveInProgress(active) {
+            isSaveInProgress = active;
+            document.querySelectorAll('.edit-button-save').forEach(btn => {
+                btn.disabled = active;
+                btn.style.opacity = active ? '0.5' : '';
+                btn.style.pointerEvents = active ? 'none' : '';
+            });
+        }
         
         // 更新数量（不允许负数）
         function updateQty(id, newQty) {
@@ -716,9 +726,12 @@ require_once 'branch_check.php';
         
         // 保存单个记录（按价格从高到低依次扣除，原子化提交）
         async function saveRecord(id) {
+            if (isSaveInProgress) return;
+
             const record = stockData.find(r => r.id === id);
             if (!record) return;
 
+            setSaveInProgress(true);
             try {
                 // 从 DOM 读取最新输入值
                 const domInput = document.querySelector(`input[data-id="${id}"]`);
@@ -834,6 +847,8 @@ require_once 'branch_check.php';
             } catch (error) {
                 console.error('保存失败:', error);
                 alert('保存失败: ' + error.message);
+            } finally {
+                setSaveInProgress(false);
             }
         }
         
