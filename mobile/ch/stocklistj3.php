@@ -33,7 +33,7 @@ require_once 'branch_check.php';
                         <label for="product-category" class="sr-only">货品类型</label>
                         <div class="select-wrapper">
                             <select id="product-category" name="product-category">
-                                <option value="" disabled selected>部门</option>
+                                <option value="" disabled selected>库存分类</option>
                                 <option value="">全部</option>
                             </select>
                             <span class="select-icon" aria-hidden="true"></span>
@@ -454,7 +454,7 @@ require_once 'branch_check.php';
             const currentValue = categorySelect.value;
             
             // 清空选项（保留"全部"选项）
-            categorySelect.innerHTML = '<option value="" disabled selected>部门</option><option value="">全部</option>';
+            categorySelect.innerHTML = '<option value="" disabled selected>库存分类</option><option value="">全部</option>';
             
             // 添加所有货品类型选项
             categories.forEach(category => {
