@@ -39,7 +39,13 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
             <div>
                 <h1>货品备注</h1>
             </div>
-            <div class="controls">
+            <div class="controls header-right-section">
+                <div class="header-search">
+                    <div class="smartSearchWrapper">
+                        <i class="fas fa-search smartSearch-icon"></i>
+                        <input type="text" id="product-filter" class="smartSearch-input" placeholder="输入关键字搜索...">
+                    </div>
+                </div>
                 <div class="view-selector">
                     <button class="selector-button" onclick="toggleViewSelector()">
                         <span id="current-view">货品备注</span>
@@ -61,19 +67,6 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
         
         <!-- Alert Messages -->
         <div id="alert-container"></div>
-        
-        <!-- 搜索和过滤区域 -->
-        <div class="filter-section">
-            <div style="display: flex; align-items: end; gap: 26px; margin-bottom: clamp(10px, 0.83vw, 16px);">
-                <div class="filter-group" style="flex: 1;">
-                    <label for="product-filter">搜索货品</label>
-                    <div class="smartSearchWrapper">
-                        <i class="fas fa-search smartSearch-icon"></i>
-                        <input type="text" id="product-filter" class="smartSearch-input" placeholder="输入关键字搜索...">
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- 货品列表 -->
         <div id="products-container">
