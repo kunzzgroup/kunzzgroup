@@ -726,6 +726,63 @@ function resolveInboundSpecForPrice($pdo, $tableName, $productName, $codeNumber,
     return $row !== false ? ($row['specification'] ?? null) : null;
 }
 
+/**
+ * batch_save 出库前按价格层校验库存（与前端 HIFO 一致，不按 spec 过滤）。
+ */
+function validateBatchOutboundPriceTiers($pdo, $tableName, $rows) {
+    $outSummary = [];
+    foreach ($rows as $row) {
+        $outQty = floatval($row['out_quantity'] ?? 0);
+        if ($outQty <= 0) {
+            continue;
+        }
+        if (!array_key_exists('price', $row) || $row['price'] === null || $row['price'] === '') {
+            continue;
+        }
+
+        $price = floatval($row['price']);
+        $key = ($row['product_name'] ?? '') . '||' . ($row['code_number'] ?? '') . '||' . $price;
+        if (!isset($outSummary[$key])) {
+            $outSummary[$key] = [
+                'product_name' => $row['product_name'],
+                'code_number' => $row['code_number'] ?? null,
+                'price' => $price,
+                'total_out' => 0,
+            ];
+        }
+        $outSummary[$key]['total_out'] += $outQty;
+    }
+
+    foreach ($outSummary as $item) {
+        $codeFilter = '';
+        $params = [$item['product_name'], $item['product_name'], $item['price']];
+        if ($item['code_number'] !== null && $item['code_number'] !== '') {
+            $codeFilter = ' AND code_number = ?';
+            $params[] = $item['code_number'];
+        }
+
+        $stockSql = "SELECT
+                        (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) -
+                         COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) AS available_stock
+                     FROM {$tableName}
+                     WHERE (product_name = ? OR TRIM(REPLACE(product_name, '&amp;', '&')) = TRIM(REPLACE(?, '&amp;', '&')))
+                     AND CAST(COALESCE(price, 0) AS DECIMAL(15,6)) = CAST(? AS DECIMAL(15,6))
+                     AND deleted_at IS NULL
+                     {$codeFilter}";
+
+        $stockStmt = $pdo->prepare($stockSql);
+        $stockStmt->execute($params);
+        $stockRow = $stockStmt->fetch(PDO::FETCH_ASSOC);
+        $availableStock = floatval($stockRow['available_stock'] ?? 0);
+
+        if ($item['total_out'] > $availableStock + 0.0001) {
+            throw new Exception(
+                "产品 [{$item['product_name']}] (价格 RM{$item['price']}) 库存不足！可用: {$availableStock}，请求出库: {$item['total_out']}"
+            );
+        }
+    }
+}
+
 // 同步数据到 j1stockedit_data 表（智能按价格从高到低分层扣货）
 function syncToJ1StockEditData($pdo, $data, $operation = 'insert') {
     try {
@@ -988,6 +1045,9 @@ function handleBatchSave() {
     
     try {
         $pdo->beginTransaction();
+
+        // 按前端 HIFO 分层结果校验各价格层库存（不按 spec 过滤，避免读写不一致）
+        validateBatchOutboundPriceTiers($pdo, 'j1stockedit_data', $rows);
         
         $successCount = 0;
         foreach ($rows as $index => $row) {
@@ -1017,11 +1077,14 @@ function handleBatchSave() {
             // 2. 更新库存总数
             updateStocklistTotal($row['product_name'], $row['code_number'] ?? null, floatval($row['in_quantity'] ?? 0), floatval($row['out_quantity'] ?? 0), true, $row['specification'] ?? null);
             
-            // 3. 同步到桌面端主表
+            // 3. 同步到桌面端主表（batch_save 行含 price 时直接按该价格写入，不再二次 spec 扣货）
             $syncData = $row;
             $syncData['date'] = $documentDate;
             $syncData['mobile_ref_id'] = $newMobileId;
-            syncToJ1StockEditData($pdo, $syncData, 'insert');
+            $syncOk = syncToJ1StockEditData($pdo, $syncData, 'insert');
+            if ($syncOk === false) {
+                throw new Exception("第 " . ($index + 1) . " 行同步到进出货表失败");
+            }
             
             $successCount++;
         }
