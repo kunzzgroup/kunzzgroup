@@ -637,7 +637,7 @@ require_once 'branch_check.php';
                         <span class="product-meta">${escapeHtml(item.product_code || '')}${item.specification ? ` · ${escapeHtml(item.specification)}` : ''}</span>
                         <span class="footer-sep" aria-hidden="true">|</span>
                         <span class="qty-group">
-                            <span class="qty-label">数量</span>
+                            <span class="qty-label">数量：</span>
                             <input 
                                 type="number" 
                                 class="qty-input ${isEditing ? 'editing' : ''}" 
