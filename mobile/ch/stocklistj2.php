@@ -7,7 +7,7 @@ require_once 'branch_check.php';
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>库存列表 J2 - KUNZZ HOLDINGS</title>
     <link rel="stylesheet" href="css/stocklist.css?v=<?php echo time(); ?>">
 </head>
@@ -92,15 +92,15 @@ require_once 'branch_check.php';
                     <table>
                         <thead>
                             <tr>
-                                <th scope="col" class="product-code-column" style="width: 60px !important; min-width: 60px !important; max-width: 60px !important; text-align: left !important; padding: 10px 10px !important;">货品编号</th>
-                                <th scope="col" style="text-align: left !important; width: 130px !important; min-width: 130px !important; max-width: 130px !important; padding: 10px 12px !important;">名字</th>
-                                <th scope="col" style="width: 50px !important; min-width: 50px !important; max-width: 50px !important; padding: 10px 10px !important; text-align: right !important;">数量</th>
-                                <th scope="col" class="actions-column" style="width: 35px !important; min-width: 35px !important; max-width: 35px !important; padding: 10px 4px !important;" aria-label="操作"></th>
+                                <th scope="col" class="product-code-column">货品编号</th>
+                                <th scope="col">名字</th>
+                                <th scope="col">数量</th>
+                                <th scope="col" class="actions-column" aria-label="操作"></th>
                             </tr>
                         </thead>
                         <tbody id="stock-tbody">
-                            <tr>
-                                <td colspan="4" style="text-align: center; padding: 40px; color: #6b7280;">加载中...</td>
+                            <tr class="table-message-row">
+                                <td colspan="4" class="table-message">加载中...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -390,8 +390,8 @@ require_once 'branch_check.php';
                 console.error('加载产品列表失败:', error);
                 updateStats(0);
                 document.getElementById('stock-tbody').innerHTML = `
-                    <tr>
-                        <td colspan="4" style="text-align: center; padding: 40px; color: #ef4444;">
+                    <tr class="table-message-row">
+                        <td colspan="4" class="table-message is-error">
                             加载失败: ${error.message}
                         </td>
                     </tr>
@@ -582,8 +582,8 @@ require_once 'branch_check.php';
             if (stockData.length === 0) {
                 updateStats(0);
                 tbody.innerHTML = `
-                    <tr>
-                        <td colspan="4" style="text-align: center; padding: 40px; color: #6b7280;">
+                    <tr class="table-message-row">
+                        <td colspan="4" class="table-message">
                             没有找到产品
                         </td>
                     </tr>
@@ -632,12 +632,11 @@ require_once 'branch_check.php';
                 const isEditing = editingRowIds.has(item.id);
                 return `
                 <tr>
-                    <td class="product-code-cell" style="width: 60px !important; min-width: 60px !important; max-width: 60px !important; padding: 8px 4px !important;">${escapeHtml(item.product_code || '')}</td>
-                    <td style="width: 130px !important; min-width: 130px !important; max-width: 130px !important; padding: 8px 6px !important; word-wrap: break-word; overflow-wrap: break-word;">
-                        ${escapeHtml(item.product_name || '')}
-                        ${item.specification ? `<br><small style="color: #666; font-size: 11px;">(${escapeHtml(item.specification)})</small>` : ''}
+                    <td class="product-code-cell">${escapeHtml(item.product_code || '')}${item.specification ? `<span class="product-spec"> · ${escapeHtml(item.specification)}</span>` : ''}</td>
+                    <td class="product-name-cell">
+                        <span class="product-name">${escapeHtml(item.product_name || '')}</span>
                     </td>
-                    <td class="qty" style="width: 50px !important; min-width: 50px !important; max-width: 50px !important; padding: 8px 4px !important; text-align: right !important;">
+                    <td class="qty">
                         <input 
                             type="number" 
                             class="qty-input ${isEditing ? 'editing' : ''}" 
@@ -650,13 +649,12 @@ require_once 'branch_check.php';
                             onchange="updateQty('${item.id}', this.value)"
                             onfocus="this.select()"
                             ${isEditing ? '' : 'readonly'}
-                            style="border: none; background: transparent; font-size: 13px; padding: 2px 4px; width: 100%; max-width: 42px; text-align: right; pointer-events: ${isEditing ? 'auto' : 'none'}; ${isEditing ? 'background: #fff; border: 1px solid #583e04; border-radius: 4px;' : ''}"
                         >
                     </td>
-                    <td class="actions" style="width: 35px !important; min-width: 35px !important; max-width: 35px !important; padding: 8px 2px !important;">
+                    <td class="actions">
                         ${isEditing ? 
-                            `<button type="button" class="edit-button edit-button-save" onclick="saveRecord('${item.id}')" title="保存" style="background: #2aa745;${isSaveInProgress ? ' opacity:0.5; pointer-events:none;' : ''}" ${isSaveInProgress ? 'disabled' : ''}>
-                                <img src="../images/icons/edit.svg" alt="" aria-hidden="true" style="filter: brightness(0) invert(1);">
+                            `<button type="button" class="edit-button edit-button-save" onclick="saveRecord('${item.id}')" title="保存"${isSaveInProgress ? ' disabled' : ''}>
+                                <img src="../images/icons/edit.svg" alt="" aria-hidden="true">
                             </button>` :
                             `<button class="edit-button" onclick="editRecord('${item.id}')" title="编辑">
                                 <img src="../images/icons/edit.svg" alt="" aria-hidden="true">
