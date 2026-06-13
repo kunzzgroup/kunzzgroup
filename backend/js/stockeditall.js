@@ -1621,12 +1621,22 @@ function scrollToRecordById(id) {
     if (index < 0) return;
 
     const container = document.querySelector('.table-scroll-container');
-    if (!container || stockData.length <= VIRTUAL_SCROLL_THRESHOLD) return;
+    if (!container) return;
 
-    const rowHeight = getVirtualRowHeight();
-    const targetTop = index * rowHeight;
-    const maxScroll = Math.max(0, stockData.length * rowHeight - container.clientHeight);
-    container.scrollTop = Math.min(targetTop, maxScroll);
+    if (stockData.length > VIRTUAL_SCROLL_THRESHOLD) {
+        const rowHeight = getVirtualRowHeight();
+        const targetTop = index * rowHeight;
+        const maxScroll = Math.max(0, stockData.length * rowHeight - container.clientHeight);
+        container.scrollTop = Math.min(targetTop, maxScroll);
+        renderStockTable(true);
+    }
+
+    requestAnimationFrame(() => {
+        const row = document.querySelector(`tr[data-record-id="${id}"]`);
+        if (row) {
+            row.scrollIntoView({ block: 'nearest', behavior: 'auto' });
+        }
+    });
 }
 
 function initVirtualScrollListener() {
@@ -2722,7 +2732,7 @@ async function handleCodeNumberChange(selectElement, productNameElement) {
 }
 
 // 实时搜索数据
-async function searchData() {
+async function searchData(options = {}) {
     if (isLoading) return Promise.resolve();
 
     isLoading = true;
@@ -2779,8 +2789,13 @@ async function searchData() {
             showAlert('搜索失败: ' + (result.message || '未知错误'), 'error');
         }
 
-        resetTableScroll();
-        renderStockTable();
+        if (options.scrollToId) {
+            renderStockTable();
+            scrollToRecordById(options.scrollToId);
+        } else {
+            resetTableScroll();
+            renderStockTable();
+        }
         updateStats();
 
     } catch (error) {
@@ -3188,6 +3203,7 @@ function renderStockTable(preserveScroll) {
     loadEditingRowPrices();
     if (pendingNewRows.length > 0) {
         updateBatchSaveButtonVisibility();
+        scrollToNewRows();
     }
 }
 
@@ -3403,6 +3419,11 @@ function createMultipleRows() {
 function scrollToNewRows() {
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
+            const newRow = document.querySelector('#stock-tbody .new-row:last-of-type');
+            if (newRow) {
+                newRow.scrollIntoView({ block: 'nearest', behavior: 'auto' });
+                return;
+            }
             const tableContainer = document.querySelector('.table-scroll-container');
             if (tableContainer) {
                 tableContainer.scrollTop = tableContainer.scrollHeight;
@@ -4266,8 +4287,9 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
                     data: extractRowData(r)
                 }));
 
-                // 保存后以服务器和当前日期筛选为准，避免其他日期的新记录留在当前列表。
-                await searchData();
+                // 保存后以服务器和当前日期筛选为准，并滚动到刚保存的记录（新记录在列表末尾）
+                const savedRecordId = result.data && result.data.id;
+                await searchData(savedRecordId ? { scrollToId: savedRecordId } : {});
 
                 // 恢复其他新增行
                 setTimeout(() => {
@@ -4419,8 +4441,9 @@ async function saveNewRecord() {
             showAlert('记录添加成功', 'success');
             toggleAddForm();
 
-            // 保存后重新按当前日期范围拉取，避免非当前筛选日期的记录临时显示在列表中。
-            await searchData();
+            // 保存后重新按当前日期范围拉取，并滚动到刚保存的记录
+            const savedRecordId = result.data && result.data.id;
+            await searchData(savedRecordId ? { scrollToId: savedRecordId } : {});
         } else {
             showAlert('添加失败: ' + (result.message || '未知错误'), 'error');
         }
