@@ -108,6 +108,48 @@ function getStockSummary($system = 'central', $startDate = null, $endDate = null
         $stmt->execute($queryParams);
         $stockData = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        // 同一货品（名称+编号+规格+显示单价）合并为一行
+        $merged = [];
+        foreach ($stockData as $row) {
+            $productName = trim($row['product_name'] ?? '');
+            $codeNumber = trim($row['code_number'] ?? '');
+            $specification = trim($row['specification'] ?? '');
+            $price = floatval($row['price']);
+            $formattedPrice = number_format($price, 2);
+            $key = $productName . '|' . $codeNumber . '|' . $specification . '|' . $formattedPrice;
+
+            $currentStock = floatval($row['current_stock']);
+            $rowTotalPrice = $currentStock * $price;
+
+            if (!isset($merged[$key])) {
+                $merged[$key] = [
+                    'product_name' => $productName,
+                    'code_number' => $codeNumber,
+                    'specification' => $specification,
+                    'formatted_price' => $formattedPrice,
+                    'price' => floatval($formattedPrice),
+                    'stock' => 0,
+                    'total_price' => 0,
+                    'type' => ''
+                ];
+                if ($isBranch) {
+                    $type = $row['type'] ?? '';
+                    if ($type === 'Drinks')
+                        $type = 'Service Line';
+                    $merged[$key]['type'] = $type;
+                }
+            }
+            $merged[$key]['stock'] += $currentStock;
+            $merged[$key]['total_price'] += $rowTotalPrice;
+        }
+
+        uasort($merged, function ($a, $b) {
+            $cmp = strcasecmp($a['product_name'], $b['product_name']);
+            if ($cmp !== 0)
+                return $cmp;
+            return $a['price'] <=> $b['price'];
+        });
+
         $totalValue = 0;
         $summaryData = [];
         $counter = 1;
@@ -120,34 +162,32 @@ function getStockSummary($system = 'central', $startDate = null, $endDate = null
             'Sake' => 0
         ] : null;
 
-        foreach ($stockData as $row) {
-            $currentStock = floatval($row['current_stock']);
-            $price = floatval($row['price']);
-            $totalPrice = $currentStock * $price;
+        foreach ($merged as $v) {
+            $currentStock = $v['stock'];
+            if ($currentStock == 0)
+                continue;
 
-            $totalValue += $totalPrice;
-
-            // 根据规格决定库存数量的小数位数：kilo 显示3位，其他显示2位
-            $specification = trim($row['specification'] ?? '');
+            $specification = $v['specification'];
             $stockDecimals = (strtolower($specification) === 'kilo') ? 3 : 2;
+            $price = $v['price'];
+            $totalPrice = $v['total_price'];
+            $totalValue += $totalPrice;
 
             $item = [
                 'no' => $counter++,
-                'product_name' => $row['product_name'],
-                'code_number' => $row['code_number'] ?? '',
+                'product_name' => $v['product_name'],
+                'code_number' => $v['code_number'],
                 'total_stock' => $currentStock,
                 'specification' => $specification,
                 'price' => $price,
                 'total_price' => $totalPrice,
                 'formatted_stock' => number_format($currentStock, $stockDecimals),
-                'formatted_price' => number_format($price, 2),
+                'formatted_price' => $v['formatted_price'],
                 'formatted_total_price' => number_format($totalPrice, 2)
             ];
 
             if ($isBranch) {
-                $type = $row['type'] ?? '';
-                if ($type === 'Drinks')
-                    $type = 'Service Line';
+                $type = $v['type'];
                 $item['type'] = $type;
 
                 if (!empty($type) && isset($typeStats[$type])) {

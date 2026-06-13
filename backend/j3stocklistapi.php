@@ -103,48 +103,79 @@ function getJ3StockSummary($startDate = null, $endDate = null) {
             $stmt->execute();
         }
         $stockData = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        // 计算总价值和按类型统计 - 使用原始数值计算，只在显示时格式化
+
+        // 同一货品（名称+编号+规格+显示单价）合并为一行
+        $merged = [];
+        foreach ($stockData as $row) {
+            $productName = trim($row['product_name'] ?? '');
+            $codeNumber = trim($row['code_number'] ?? '');
+            $specification = trim($row['specification'] ?? '');
+            $price = floatval($row['price']);
+            $formattedPrice = number_format($price, 2);
+            $key = $productName . '|' . $codeNumber . '|' . $specification . '|' . $formattedPrice;
+
+            $currentStock = floatval($row['current_stock']);
+            $rowTotalPrice = $currentStock * $price;
+
+            if (!isset($merged[$key])) {
+                $type = $row['type'] ?? '';
+                if ($type === 'Drinks') $type = 'Service Line';
+                $merged[$key] = [
+                    'product_name' => $productName,
+                    'code_number' => $codeNumber,
+                    'specification' => $specification,
+                    'formatted_price' => $formattedPrice,
+                    'price' => floatval($formattedPrice),
+                    'stock' => 0,
+                    'total_price' => 0,
+                    'type' => $type
+                ];
+            }
+            $merged[$key]['stock'] += $currentStock;
+            $merged[$key]['total_price'] += $rowTotalPrice;
+        }
+
+        uasort($merged, function ($a, $b) {
+            $cmp = strcasecmp($a['product_name'], $b['product_name']);
+            if ($cmp !== 0) return $cmp;
+            return $a['price'] <=> $b['price'];
+        });
+
         $totalValue = 0;
         $summaryData = [];
         $counter = 1;
-        
-        // 初始化类型统计
+
         $typeStats = [
             'Kitchen' => 0,
             'Sushi Bar' => 0,
             'Service Line' => 0,
             'Sake' => 0
         ];
-        
-        foreach ($stockData as $row) {
-            $currentStock = floatval($row['current_stock']);
-            $price = floatval($row['price']);
-            $totalPrice = $currentStock * $price;
-            $type = $row['type'] ?? '';
-            // Drinks 与 Service Line 合并统计
-            if ($type === 'Drinks') $type = 'Service Line';
-            
-            // 使用原始数值累加，不进行四舍五入
+
+        foreach ($merged as $v) {
+            $currentStock = $v['stock'];
+            if ($currentStock == 0) continue;
+
+            $totalPrice = $v['total_price'];
             $totalValue += $totalPrice;
-            
-            // 按类型累计库存价值
+
+            $type = $v['type'];
             if (!empty($type) && isset($typeStats[$type])) {
                 $typeStats[$type] += $totalPrice;
             }
-            
+
             $summaryData[] = [
                 'no' => $counter++,
-                'product_name' => $row['product_name'],
-                'code_number' => $row['code_number'] ?? '',
+                'product_name' => $v['product_name'],
+                'code_number' => $v['code_number'],
                 'total_stock' => $currentStock,
-                'specification' => $row['specification'] ?? '',
-                'price' => $price,
-                'total_price' => $totalPrice, // 使用原始计算值
+                'specification' => $v['specification'],
+                'price' => $v['price'],
+                'total_price' => $totalPrice,
                 'type' => $type,
                 'formatted_stock' => number_format($currentStock, 2),
-                'formatted_price' => number_format($price, 2),
-                'formatted_total_price' => number_format($totalPrice, 2) // 显示时格式化为两位小数
+                'formatted_price' => $v['formatted_price'],
+                'formatted_total_price' => number_format($totalPrice, 2)
             ];
         }
         

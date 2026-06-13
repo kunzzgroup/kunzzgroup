@@ -66,36 +66,48 @@ function getJ2StockSummary() {
         $stmt->execute();
         $stockData = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // 同一货品（名称+编号+规格）合并为一行：库存相加减，单价用加权平均
+        // 同一货品（名称+编号+规格+显示单价）合并为一行
         $merged = [];
         foreach ($stockData as $row) {
-            $key = ($row['product_name'] ?? '') . '|' . ($row['code_number'] ?? '') . '|' . ($row['specification'] ?? '');
-            $currentStock = floatval($row['current_stock']);
+            $productName = trim($row['product_name'] ?? '');
+            $codeNumber = trim($row['code_number'] ?? '');
+            $specification = trim($row['specification'] ?? '');
             $price = floatval($row['price']);
+            $formattedPrice = number_format($price, 2);
+            $key = $productName . '|' . $codeNumber . '|' . $specification . '|' . $formattedPrice;
+
+            $currentStock = floatval($row['current_stock']);
+            $rowTotalPrice = $currentStock * $price;
+
             if (!isset($merged[$key])) {
                 $merged[$key] = [
-                    'product_name' => $row['product_name'],
-                    'code_number' => $row['code_number'] ?? '',
-                    'specification' => $row['specification'] ?? '',
+                    'product_name' => $productName,
+                    'code_number' => $codeNumber,
+                    'specification' => $specification,
+                    'formatted_price' => $formattedPrice,
+                    'price' => floatval($formattedPrice),
                     'stock' => 0,
-                    'value_sum' => 0
+                    'total_price' => 0
                 ];
             }
             $merged[$key]['stock'] += $currentStock;
-            $merged[$key]['value_sum'] += $price * $currentStock;
+            $merged[$key]['total_price'] += $rowTotalPrice;
         }
-        
+
+        uasort($merged, function ($a, $b) {
+            $cmp = strcasecmp($a['product_name'], $b['product_name']);
+            if ($cmp !== 0) return $cmp;
+            return $a['price'] <=> $b['price'];
+        });
+
         $totalValue = 0;
         $summaryData = [];
         $counter = 1;
-        foreach ($merged as $k => $v) {
+        foreach ($merged as $v) {
             $currentStock = $v['stock'];
             if ($currentStock == 0) continue;
-            
-            
-            // 使用原始数值累加，不进行四舍五入
-            $price = $currentStock != 0 ? $v['value_sum'] / $currentStock : 0;
-            $totalPrice = $currentStock * $price;
+
+            $totalPrice = $v['total_price'];
             $totalValue += $totalPrice;
             $summaryData[] = [
                 'no' => $counter++,
@@ -103,10 +115,10 @@ function getJ2StockSummary() {
                 'code_number' => $v['code_number'],
                 'total_stock' => $currentStock,
                 'specification' => $v['specification'],
-                'price' => $price,
+                'price' => $v['price'],
                 'total_price' => $totalPrice,
                 'formatted_stock' => number_format($currentStock, 2),
-                'formatted_price' => number_format($price, 2),
+                'formatted_price' => $v['formatted_price'],
                 'formatted_total_price' => number_format($totalPrice, 2)
             ];
         }
