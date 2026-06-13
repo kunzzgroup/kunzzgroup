@@ -39,7 +39,7 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
             <div>
                 <h1>货品备注</h1>
             </div>
-            <div class="controls header-right-section">
+            <div class="controls">
                 <div class="header-search">
                     <div class="smartSearchWrapper">
                         <i class="fas fa-search smartSearch-icon"></i>
