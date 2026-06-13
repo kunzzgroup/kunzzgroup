@@ -1331,6 +1331,18 @@
      position: relative;
  }
 
+ /* 虚拟滚动占位行 */
+ .virtual-spacer td {
+     padding: 0 !important;
+     border: none !important;
+     background: transparent !important;
+     pointer-events: none;
+ }
+
+ .virtual-spacer:hover {
+     background: transparent !important;
+ }
+
  .price-select {
      min-width: 60px;
      background-color: white;

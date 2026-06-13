@@ -560,12 +560,21 @@ function handleGet()
 
             $sql .= " ORDER BY date ASC, id ASC";
 
-            // 从请求参数中获取limit，如果没有则默认使用10000
-            $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10000;
-            $sql .= " LIMIT " . $limit;
+            $countSql = preg_replace('/^SELECT \* FROM/', 'SELECT COUNT(*) as cnt FROM', $sql);
+            $countSql = preg_replace('/ ORDER BY .+$/', '', $countSql);
 
-            $stmt = $pdo->prepare($sql);
+            $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 0;
+            $dataSql = $sql;
+            if ($limit > 0) {
+                $dataSql .= " LIMIT " . $limit;
+            }
+
+            $stmt = $pdo->prepare($dataSql);
             try {
+                $countStmt = $pdo->prepare($countSql);
+                $countStmt->execute($params);
+                $totalCount = (int)$countStmt->fetchColumn();
+
                 $stmt->execute($params);
                 $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -588,7 +597,10 @@ function handleGet()
                     $record['price'] = $price;
                 }
 
-                sendResponse(true, "进出库数据获取成功，共找到 " . count($records) . " 条记录", resolveCreatedByNicknames($pdo, $records));
+                sendResponse(true, "进出库数据获取成功，共找到 " . $totalCount . " 条记录", [
+                    'records' => resolveCreatedByNicknames($pdo, $records),
+                    'total_count' => $totalCount
+                ]);
             } catch (PDOException $e) {
                 sendResponse(false, "查询数据失败：" . $e->getMessage());
             }

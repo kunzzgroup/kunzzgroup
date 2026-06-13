@@ -98,6 +98,15 @@ let isSelectingRange = false;
 // 全局计数器，确保新行具有唯一 ID
 let newRowCounter = 0;
 
+// 虚拟滚动与总记录数
+let totalRecordCount = 0;
+const VIRTUAL_ROW_HEIGHT = 44;
+const VIRTUAL_OVERSCAN = 12;
+const VIRTUAL_SCROLL_THRESHOLD = 80;
+let cachedVirtualRowHeight = 0;
+let virtualScrollRafId = null;
+let virtualScrollInitialized = false;
+
 // 全局键盘快捷键 (CTRL+S 保存) - 使用 Capture 模式确保最高优先级
 window.addEventListener('keydown', function (e) {
     // A. 撤销删除 (Ctrl+Shift+Z)
@@ -1055,6 +1064,9 @@ async function initApp() {
     // 初始化增强型日期选择器
     initEnhancedDatePickers();
 
+    // 虚拟滚动：监听表格容器滚动
+    initVirtualScrollListener();
+
     // 应用页面权限，自动切换到第一个允许的系统
     const systemSwitched = await applyPagePermissions();
 
@@ -1546,6 +1558,109 @@ async function apiCall(endpoint, options = {}) {
     }
 }
 
+// 解析列表 API 响应（兼容旧数组格式与新 { records, total_count } 格式）
+function parseListResponse(result) {
+    const data = result && result.data;
+    if (!data) return { records: [], totalCount: 0 };
+    if (Array.isArray(data)) return { records: data, totalCount: data.length };
+    const records = Array.isArray(data.records) ? data.records : [];
+    const totalCount = typeof data.total_count === 'number' ? data.total_count : records.length;
+    return { records, totalCount };
+}
+
+function mapStockRecords(records) {
+    return (records || []).map(record => {
+        const decodedRecord = { ...record };
+        ['product_name', 'code_number', 'receiver', 'remark', 'category', 'specification', 'applicant', 'approver', 'type'].forEach(field => {
+            if (decodedRecord[field]) {
+                decodedRecord[field] = decodeHtml(decodedRecord[field]);
+            }
+        });
+        return decodedRecord;
+    });
+}
+
+function resetTableScroll() {
+    const container = document.querySelector('.table-scroll-container');
+    if (container) container.scrollTop = 0;
+    cachedVirtualRowHeight = 0;
+}
+
+function getVirtualRowHeight() {
+    if (cachedVirtualRowHeight > 0) return cachedVirtualRowHeight;
+    const row = document.querySelector('#stock-tbody tr[data-virtual-row]');
+    if (row && row.offsetHeight > 0) {
+        cachedVirtualRowHeight = row.offsetHeight;
+        return cachedVirtualRowHeight;
+    }
+    return VIRTUAL_ROW_HEIGHT;
+}
+
+function getVirtualVisibleRange() {
+    const container = document.querySelector('.table-scroll-container');
+    const rowHeight = getVirtualRowHeight();
+    const total = stockData.length;
+
+    if (!container || total === 0) {
+        return { startIndex: 0, endIndex: total, rowHeight };
+    }
+
+    const scrollTop = container.scrollTop;
+    const viewportHeight = container.clientHeight || 600;
+    let startIndex = Math.floor(scrollTop / rowHeight) - VIRTUAL_OVERSCAN;
+    let endIndex = Math.ceil((scrollTop + viewportHeight) / rowHeight) + VIRTUAL_OVERSCAN;
+
+    startIndex = Math.max(0, startIndex);
+    endIndex = Math.min(total, endIndex);
+
+    return { startIndex, endIndex, rowHeight };
+}
+
+function scrollToRecordById(id) {
+    const index = stockData.findIndex(r => r.id === id);
+    if (index < 0) return;
+
+    const container = document.querySelector('.table-scroll-container');
+    if (!container || stockData.length <= VIRTUAL_SCROLL_THRESHOLD) return;
+
+    const rowHeight = getVirtualRowHeight();
+    const targetTop = index * rowHeight;
+    const maxScroll = Math.max(0, stockData.length * rowHeight - container.clientHeight);
+    container.scrollTop = Math.min(targetTop, maxScroll);
+}
+
+function initVirtualScrollListener() {
+    if (virtualScrollInitialized) return;
+    const container = document.querySelector('.table-scroll-container');
+    if (!container) return;
+
+    container.addEventListener('scroll', () => {
+        if (stockData.length <= VIRTUAL_SCROLL_THRESHOLD) return;
+        if (virtualScrollRafId) cancelAnimationFrame(virtualScrollRafId);
+        virtualScrollRafId = requestAnimationFrame(() => {
+            virtualScrollRafId = null;
+            renderStockTable(true);
+        });
+    }, { passive: true });
+
+    virtualScrollInitialized = true;
+}
+
+function loadEditingRowPrices() {
+    setTimeout(() => {
+        stockData.forEach(record => {
+            if (editingRowIds.has(record.id) && record.product_name) {
+                const outQty = parseFloat(record.out_quantity || 0);
+                const inQty = parseFloat(record.in_quantity || 0);
+                if (outQty > 0 && inQty === 0) {
+                    const codeNum = record.code_number ? String(record.code_number).trim() : '';
+                    loadProductPricesWithStock(record.product_name, `price-select-${record.id}`, (record.price_raw ?? record.price), outQty, codeNum);
+                }
+            }
+        });
+    }, 200);
+}
+
 // 加载库存数据
 async function loadStockData() {
     if (isLoading) return;
@@ -1554,7 +1669,7 @@ async function loadStockData() {
 
     try {
         // 构建API URL，使用日期范围参数
-        let apiUrl = '?action=list&limit=10000';
+        let apiUrl = '?action=list';
 
         // 如果设置了日期范围，添加日期参数
         if (dateRange.startDate && dateRange.endDate) {
@@ -1567,20 +1682,16 @@ async function loadStockData() {
         const result = await apiCall(apiUrl);
 
         if (result.success) {
-            stockData = (result.data || []).map(record => {
-                const decodedRecord = { ...record };
-                ['product_name', 'code_number', 'receiver', 'remark', 'category', 'specification', 'applicant', 'approver', 'type'].forEach(field => {
-                    if (decodedRecord[field]) {
-                        decodedRecord[field] = decodeHtml(decodedRecord[field]);
-                    }
-                });
-                return decodedRecord;
-            });
+            const { records, totalCount } = parseListResponse(result);
+            stockData = mapStockRecords(records);
+            totalRecordCount = totalCount;
         } else {
             stockData = [];
+            totalRecordCount = 0;
             showAlert('获取数据失败: ' + (result.message || '未知错误'), 'error');
         }
 
+        resetTableScroll();
         renderStockTable();
         updateStats();
 
@@ -2631,7 +2742,8 @@ async function searchData() {
         const result = await apiCall(`?${params}`);
 
         if (result.success) {
-            let data = result.data || [];
+            const { records, totalCount } = parseListResponse(result);
+            let data = mapStockRecords(records);
 
             if (unifiedSearch) {
                 data = data.filter(record => {
@@ -2660,11 +2772,14 @@ async function searchData() {
             }
 
             stockData = data;
+            totalRecordCount = unifiedSearch ? data.length : totalCount;
         } else {
             stockData = [];
+            totalRecordCount = 0;
             showAlert('搜索失败: ' + (result.message || '未知错误'), 'error');
         }
 
+        resetTableScroll();
         renderStockTable();
         updateStats();
 
@@ -2875,133 +2990,116 @@ function restoreEditingRowsInputValues(editingValues) {
 }
 
 // 渲染库存表格
-function renderStockTable() {
-    const tbody = document.getElementById('stock-tbody');
-    tbody.innerHTML = '';
+function buildStockRowHtml(record) {
+    const isEditing = editingRowIds.has(record.id);
+    const inQty = parseFloat(record.in_quantity) || 0;
+    const outQty = parseFloat(record.out_quantity) || 0;
+    const price = parseFloat(record.price_raw ?? record.price) || 0;
+    const netQty = inQty - outQty;
+    const total = netQty * price;
+    const rowClass = isEditing ? ' class="editing-row"' : '';
 
-    if (stockData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="15" style="padding: 20px; color: #6b7280;">暂无数据</td></tr>';
-        return;
-    }
-
-    stockData.forEach(record => {
-        const row = document.createElement('tr');
-        const isEditing = editingRowIds.has(record.id);
-
-        if (isEditing) {
-            row.classList.add('editing-row');
-        }
-
-        // 计算总价
-        const inQty = parseFloat(record.in_quantity) || 0;
-        const outQty = parseFloat(record.out_quantity) || 0;
-        const price = parseFloat(record.price_raw ?? record.price) || 0;
-        const netQty = inQty - outQty;
-        const total = netQty * price;
-
-        row.innerHTML = `
+    return `<tr data-record-id="${record.id}" data-virtual-row="1"${rowClass}>
                     <td class="date-cell">
                         ${isEditing ?
-                `<input type="date" class="table-input" value="${record.date}" onchange="updateField(${record.id}, 'date', this.value)">` :
-                formatDate(record.date)
-            }
+            `<input type="date" class="table-input" value="${record.date}" onchange="updateField(${record.id}, 'date', this.value)">` :
+            formatDate(record.date)
+        }
                     </td>
                     <td>
                         ${isEditing ?
-                createCombobox('code', record.code_number, record.id) :
-                `<span>${record.code_number || '-'}</span>`
-            }
+            createCombobox('code', record.code_number, record.id) :
+            `<span>${record.code_number || '-'}</span>`
+        }
                     </td>
                     <td>
                         ${isEditing ?
-                createCombobox('product', record.product_name, record.id) :
-                `<span>${record.product_name}</span>`
-            }
+            createCombobox('product', record.product_name, record.id) :
+            `<span>${record.product_name}</span>`
+        }
                     </td>
                     <td>
                         ${isEditing ?
-                `<input type="number" class="table-input" id="edit-in-${record.id}" value="${(parseFloat(record.in_quantity) || 0) === 0 ? '' : (record.in_quantity || '')}" min="0" step="0.001" placeholder="0" onchange="updateField(${record.id}, 'in_quantity', this.value)" oninput="enforceQuantityMutex(this, document.getElementById('edit-out-${record.id}'))" ${(parseFloat(record.out_quantity) || 0) > 0 ? 'disabled' : ''}>` :
-                `<span>${formatNumber(record.in_quantity)}</span>`
-            }
+            `<input type="number" class="table-input" id="edit-in-${record.id}" value="${(parseFloat(record.in_quantity) || 0) === 0 ? '' : (record.in_quantity || '')}" min="0" step="0.001" placeholder="0" onchange="updateField(${record.id}, 'in_quantity', this.value)" oninput="enforceQuantityMutex(this, document.getElementById('edit-out-${record.id}'))" ${(parseFloat(record.out_quantity) || 0) > 0 ? 'disabled' : ''}>` :
+            `<span>${formatNumber(record.in_quantity)}</span>`
+        }
                     </td>
                     <td>
                         ${isEditing ?
-                `<input type="number" class="table-input" id="edit-out-${record.id}" value="${(parseFloat(record.out_quantity) || 0) === 0 ? '' : (record.out_quantity || '')}" min="0" step="0.001" placeholder="0" onchange="handleEditOutQuantityChange(${record.id}, this.value)" oninput="enforceQuantityMutex(document.getElementById('edit-in-${record.id}'), this)" ${(parseFloat(record.in_quantity) || 0) > 0 ? 'disabled' : ''}>` :
-                `<span class="${outQty > 0 ? 'negative-value' : ''}">${formatNumber(record.out_quantity)}</span>`
-            }
+            `<input type="number" class="table-input" id="edit-out-${record.id}" value="${(parseFloat(record.out_quantity) || 0) === 0 ? '' : (record.out_quantity || '')}" min="0" step="0.001" placeholder="0" onchange="handleEditOutQuantityChange(${record.id}, this.value)" oninput="enforceQuantityMutex(document.getElementById('edit-in-${record.id}'), this)" ${(parseFloat(record.in_quantity) || 0) > 0 ? 'disabled' : ''}>` :
+            `<span class="${outQty > 0 ? 'negative-value' : ''}">${formatNumber(record.out_quantity)}</span>`
+        }
                     </td>
                     <td>
                         ${currentStockType !== 'central' ?
-                // 非central：始终只读显示当前系统，不显示 select
-                `<span>${currentStockType.toUpperCase()}</span>` :
-                // central：编辑時显示 select，否則显示值
-                (isEditing ?
-                    `<select class="table-select" id="target-select-${record.id}" onchange="updateField(${record.id}, 'target_system', this.value)" ${(parseFloat(record.out_quantity || 0) === 0) ? 'disabled' : ''}>
+            `<span>${currentStockType.toUpperCase()}</span>` :
+            (isEditing ?
+                `<select class="table-select" id="target-select-${record.id}" onchange="updateField(${record.id}, 'target_system', this.value)" ${(parseFloat(record.out_quantity || 0) === 0) ? 'disabled' : ''}>
                             <option value="">请选择</option>
                             ${generateTargetOptions(record.target_system)}
                         </select>` :
-                    `<span>${record.target_system ? record.target_system.toUpperCase() : '-'}</span>`)
-            }
+                `<span>${record.target_system ? record.target_system.toUpperCase() : '-'}</span>`)
+        }
                     </td>
                     <td>
                         ${isEditing ?
-                `<select class="table-select" onchange="updateField(${record.id}, 'specification', this.value)">
+            `<select class="table-select" onchange="updateField(${record.id}, 'specification', this.value)">
                                 ${specifications.map(spec =>
-                    `<option value="${spec}" ${record.specification === spec ? 'selected' : ''}>${spec}</option>`
-                ).join('')}
+                `<option value="${spec}" ${record.specification === spec ? 'selected' : ''}>${spec}</option>`
+            ).join('')}
                             </select>` :
-                `<span>${record.specification || '-'}</span>`
-            }
+            `<span>${record.specification || '-'}</span>`
+        }
                     </td>
                     <td>
                         ${isEditing ?
-                (parseFloat(record.out_quantity || 0) > 0 && parseFloat(record.in_quantity || 0) === 0 ?
-                    `<div class="currency-display"><span class="currency-symbol">RM</span><select class="table-select price-select" id="price-select-${record.id}" onchange="updateField(${record.id}, 'price', this.value)" data-product-name="${record.product_name}" data-current-price="${record.price_raw ?? record.price}"><option value="">请选择价格</option>${(record.price_raw ?? record.price) !== '' && (record.price_raw ?? record.price) !== null ? `<option value="${record.price_raw ?? record.price}" selected>${parseFloat(record.price_raw ?? record.price).toFixed(3)}</option>` : ''}</select></div>` :
-                    `<div class="currency-display"><span class="currency-symbol">RM</span><input type="number" class="currency-input-edit" value="${parseFloat(record.price_raw ?? (record.price || 0)) === 0 ? '' : formatCurrencyEdit(record.price_raw ?? record.price)}" min="0" step="0.00001" placeholder="0.00" onchange="updateField(${record.id}, 'price', this.value)"></div>`
-                ) :
-                `<div class="currency-display"><span class="currency-symbol">RM</span><span class="currency-amount">${formatCurrency(record.price)}</span></div>`
-            }
+            (parseFloat(record.out_quantity || 0) > 0 && parseFloat(record.in_quantity || 0) === 0 ?
+                `<div class="currency-display"><span class="currency-symbol">RM</span><select class="table-select price-select" id="price-select-${record.id}" onchange="updateField(${record.id}, 'price', this.value)" data-product-name="${record.product_name}" data-current-price="${record.price_raw ?? record.price}"><option value="">请选择价格</option>${(record.price_raw ?? record.price) !== '' && (record.price_raw ?? record.price) !== null ? `<option value="${record.price_raw ?? record.price}" selected>${parseFloat(record.price_raw ?? record.price).toFixed(3)}</option>` : ''}</select></div>` :
+                `<div class="currency-display"><span class="currency-symbol">RM</span><input type="number" class="currency-input-edit" value="${parseFloat(record.price_raw ?? (record.price || 0)) === 0 ? '' : formatCurrencyEdit(record.price_raw ?? record.price)}" min="0" step="0.00001" placeholder="0.00" onchange="updateField(${record.id}, 'price', this.value)"></div>`
+            ) :
+            `<div class="currency-display"><span class="currency-symbol">RM</span><span class="currency-amount">${formatCurrency(record.price)}</span></div>`
+        }
                     </td>
                     <td class="calculated-cell ${total < 0 ? 'negative-value negative-parentheses' : ''}">
                         <div class="currency-display ${total < 0 ? 'negative-value negative-parentheses' : ''}"><span class="currency-symbol">RM</span><span class="currency-amount">${formatCurrency(Math.abs(total))}</span></div>
                     </td>
                     <td>
                         ${isEditing ?
-                (currentStockType !== 'central' ?
-                    `<select class="table-select" onchange="updateField(${record.id}, 'type', this.value)">
+            (currentStockType !== 'central' ?
+                `<select class="table-select" onchange="updateField(${record.id}, 'type', this.value)">
                                     ${generateTypeOptions(record.type)}
                                 </select>` :
-                    `<select class="table-select" disabled>
+                `<select class="table-select" disabled>
                                     ${generateTypeOptions(record.type)}
                                 </select>`
-                ) :
-                `<span>${(record.type === 'Drinks' ? 'Service Line' : record.type) || '-'}</span>`
-            }
+            ) :
+            `<span>${(record.type === 'Drinks' ? 'Service Line' : record.type) || '-'}</span>`
+        }
                     </td>
                     <td style="text-align: center;">
                         ${isEditing ?
-                `<input type="checkbox" class="remark-checkbox" ${record.product_remark_checked ? 'checked' : ''} 
+            `<input type="checkbox" class="remark-checkbox" ${record.product_remark_checked ? 'checked' : ''} 
                             onchange="updateRemarkCheck(${record.id}, this.checked)">` :
-                `<input type="checkbox" class="remark-checkbox" ${record.product_remark_checked ? 'checked' : ''} disabled>`
-            }
+            `<input type="checkbox" class="remark-checkbox" ${record.product_remark_checked ? 'checked' : ''} disabled>`
+        }
                     </td>
                     <td>
                         ${isEditing ?
-                createRemarkNumberInput(record.remark_number || '', record.id, !record.product_remark_checked) :
-                `<span>${record.remark_number || '-'}</span>`
-            }
+            createRemarkNumberInput(record.remark_number || '', record.id, !record.product_remark_checked) :
+            `<span>${record.remark_number || '-'}</span>`
+        }
                     </td>
                     <td>
                         ${isEditing ?
-                createCombobox('receiver', record.receiver || '', record.id, false, inQty > 0) :
-                `<span>${record.receiver || '-'}</span>`
-            }
+            createCombobox('receiver', record.receiver || '', record.id, false, inQty > 0) :
+            `<span>${record.receiver || '-'}</span>`
+        }
                     </td>
                     <td>
                         ${isEditing ?
-                `<input type="text" class="table-input" value="${record.remark || ''}" onchange="updateField(${record.id}, 'remark', this.value)">` :
-                `<span>${record.remark || '-'}</span>`
-            }
+            `<input type="text" class="table-input" value="${record.remark || ''}" onchange="updateField(${record.id}, 'remark', this.value)">` :
+            `<span>${record.remark || '-'}</span>`
+        }
                     </td>
                     <td>
                         <span class="created-user" data-user="${record.created_by || '-'}" data-time="${formatCreatedAt(record.created_at)}">${record.created_by || '-'}</span>
@@ -3009,48 +3107,73 @@ function renderStockTable() {
                     <td>
                         <span class="action-cell">
                             ${isBatchDeleteMode ?
-                `<input type="checkbox" class="batch-select-checkbox" 
+            `<input type="checkbox" class="batch-select-checkbox" 
                                         data-record-id="${record.id}" 
                                         onchange="toggleRecordSelection(${record.id}, this.checked)"
                                         ${selectedRecords.has(record.id) ? 'checked' : ''}>` :
-                (isEditing ?
-                    `<button class="action-btn edit-btn save-mode" onclick="saveRecord(${record.id})" title="保存">
+            (isEditing ?
+                `<button class="action-btn edit-btn save-mode" onclick="saveRecord(${record.id})" title="保存">
                                         <i class="fas fa-save"></i>
                                     </button>
                                     <button class="action-btn" onclick="cancelEdit(${record.id})" title="取消" style="background: #6b7280;">
                                         <i class="fas fa-times"></i>
                                     </button>` :
-                    `<button class="action-btn edit-btn" onclick="editRecord(${record.id})" title="编辑">
+                `<button class="action-btn edit-btn" onclick="editRecord(${record.id})" title="编辑">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button class="action-btn delete-btn" onclick="deleteRecord(${record.id})" title="删除">
                                         <i class="fas fa-trash"></i>
                                     </button>`
-                )
-            }
+            )
+        }
                         </span>
                     </td>
-                `;
+                </tr>`;
+}
 
-        tbody.appendChild(row);
-    });
+function renderStockTable(preserveScroll) {
+    const tbody = document.getElementById('stock-tbody');
+    if (!tbody) return;
+
+    if (stockData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="16" style="padding: 20px; color: #6b7280;">暂无数据</td></tr>';
+        return;
+    }
+
+    const useVirtualScroll = stockData.length > VIRTUAL_SCROLL_THRESHOLD;
+    let html = '';
+
+    if (useVirtualScroll) {
+        const { startIndex, endIndex, rowHeight } = getVirtualVisibleRange();
+        const topSpacerHeight = startIndex * rowHeight;
+        const bottomSpacerHeight = (stockData.length - endIndex) * rowHeight;
+
+        if (topSpacerHeight > 0) {
+            html += `<tr class="virtual-spacer virtual-spacer-top" aria-hidden="true"><td colspan="16" style="height:${topSpacerHeight}px;padding:0;border:none;line-height:0;"></td></tr>`;
+        }
+
+        for (let i = startIndex; i < endIndex; i++) {
+            html += buildStockRowHtml(stockData[i]);
+        }
+
+        if (bottomSpacerHeight > 0) {
+            html += `<tr class="virtual-spacer virtual-spacer-bottom" aria-hidden="true"><td colspan="16" style="height:${bottomSpacerHeight}px;padding:0;border:none;line-height:0;"></td></tr>`;
+        }
+    } else {
+        html = stockData.map(record => buildStockRowHtml(record)).join('');
+    }
+
+    tbody.innerHTML = html;
+
+    if (!preserveScroll && useVirtualScroll) {
+        const sampleRow = tbody.querySelector('tr[data-virtual-row]');
+        if (sampleRow && sampleRow.offsetHeight > 0) {
+            cachedVirtualRowHeight = sampleRow.offsetHeight;
+        }
+    }
 
     setTimeout(bindComboboxEvents, 0);
-
-    // 加载所有编辑中记录的价格选项
-    setTimeout(() => {
-        stockData.forEach(record => {
-            if (editingRowIds.has(record.id) && record.product_name) {
-                const outQty = parseFloat(record.out_quantity || 0);
-                const inQty = parseFloat(record.in_quantity || 0);
-                // 只有纯出库时才加载价格选项（带库存检查）
-                if (outQty > 0 && inQty === 0) {
-                    const codeNum = record.code_number ? String(record.code_number).trim() : '';
-                    loadProductPricesWithStock(record.product_name, `price-select-${record.id}`, (record.price_raw ?? record.price), outQty, codeNum);
-                }
-            }
-        });
-    }, 200);
+    loadEditingRowPrices();
 }
 
 // 格式化日期
@@ -3180,8 +3303,15 @@ function formatCurrencyForPDF(value) {
 // 更新统计信息
 function updateStats() {
     const totalRecords = stockData.length;
-
-    document.getElementById('total-records').textContent = totalRecords;
+    const totalEl = document.getElementById('total-records');
+    if (totalEl) {
+        totalEl.textContent = totalRecords;
+        if (totalRecordCount > totalRecords) {
+            totalEl.title = `已加载 ${totalRecords} 条，数据库共 ${totalRecordCount} 条`;
+        } else {
+            totalEl.title = '';
+        }
+    }
 }
 
 // 显示日期和行数选择弹窗
@@ -4327,6 +4457,7 @@ function editRecord(id) {
 
     // 延迟重新渲染，让过渡效果更自然
     setTimeout(() => {
+        scrollToRecordById(id);
         // 重新渲染表格
         renderStockTable();
 
@@ -6858,11 +6989,11 @@ async function confirmExport() {
             throw new Error('获取数据失败');
         }
 
-        console.log('API返回的数据总数:', (result.data || []).length);
+        console.log('API返回的数据总数:', parseListResponse(result).records.length);
         console.log('查询日期范围:', formatDateToYYYYMMDD(startDateObj), '到', formatDateToYYYYMMDD(endDateObj));
 
         // 过滤出库数据 - 按日期范围、出库数量和收货单位筛选
-        const outData = (result.data || []).filter(record => {
+        const outData = parseListResponse(result).records.filter(record => {
             const outQty = parseFloat(record.out_quantity);
             if (outQty <= 0) {
                 console.log('记录出库数量为0或负数，跳过:', record.id, 'out_quantity:', record.out_quantity);
