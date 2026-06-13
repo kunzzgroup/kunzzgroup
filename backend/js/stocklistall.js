@@ -32,6 +32,20 @@ let selectedTypeFilters = {
     j3: new Set()
 };
 
+const TYPE_FILTER_OPTIONS = {
+    j1: ['Service Line', 'Sake', 'Kitchen', 'Sushi Bar'],
+    j2: ['Service Line', 'Kitchen', 'Sushi Bar'],
+    j3: ['Service Line', 'Sake', 'Kitchen', 'Sushi Bar']
+};
+
+function isTypeFilterActive(system, selectedTypes) {
+    if (!selectedTypes || selectedTypes.size === 0) return false;
+    const allTypes = TYPE_FILTER_OPTIONS[system];
+    if (!allTypes) return selectedTypes.size > 0;
+    // 全选等同于未筛选，需显示含空 type 在内的全部记录
+    return !(selectedTypes.size >= allTypes.length && allTypes.every(t => selectedTypes.has(t)));
+}
+
 const VIEW_NAMES = {
     list: '总库存',
     records: '进出货',
@@ -271,7 +285,7 @@ function applyFilters(system) {
     filteredData[system] = stockData[system].filter(item => {
         const itemType = normalizeItemType(item.type);
 
-        if (selectedTypes && selectedTypes.size > 0 && !selectedTypes.has(itemType)) {
+        if (isTypeFilterActive(system, selectedTypes) && !selectedTypes.has(itemType)) {
             return false;
         }
 
