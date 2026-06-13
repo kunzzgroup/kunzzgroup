@@ -3135,8 +3135,19 @@ function renderStockTable(preserveScroll) {
     const tbody = document.getElementById('stock-tbody');
     if (!tbody) return;
 
+    // 虚拟滚动重绘会清空 tbody，需保留尚未保存的新增行
+    const pendingNewRows = Array.from(tbody.querySelectorAll('.new-row'));
+    pendingNewRows.forEach(row => row.remove());
+
     if (stockData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="16" style="padding: 20px; color: #6b7280;">暂无数据</td></tr>';
+        if (pendingNewRows.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="16" style="padding: 20px; color: #6b7280;">暂无数据</td></tr>';
+        } else {
+            tbody.innerHTML = '';
+            pendingNewRows.forEach(row => tbody.appendChild(row));
+            setTimeout(bindComboboxEvents, 0);
+            updateBatchSaveButtonVisibility();
+        }
         return;
     }
 
@@ -3164,6 +3175,7 @@ function renderStockTable(preserveScroll) {
     }
 
     tbody.innerHTML = html;
+    pendingNewRows.forEach(row => tbody.appendChild(row));
 
     if (!preserveScroll && useVirtualScroll) {
         const sampleRow = tbody.querySelector('tr[data-virtual-row]');
@@ -3174,6 +3186,9 @@ function renderStockTable(preserveScroll) {
 
     setTimeout(bindComboboxEvents, 0);
     loadEditingRowPrices();
+    if (pendingNewRows.length > 0) {
+        updateBatchSaveButtonVisibility();
+    }
 }
 
 // 格式化日期
@@ -3379,15 +3394,21 @@ function createMultipleRows() {
         addNewRowWithDate(selectedDate, remarkValue);
     }
 
-    // 滚动到表格底部
-    setTimeout(() => {
-        const tableContainer = document.querySelector('.table-scroll-container');
-        if (tableContainer) {
-            tableContainer.scrollTop = tableContainer.scrollHeight;
-        }
-    }, 100);
+    // 滚动到表格底部（延迟到虚拟滚动重绘后，确保新增行可见）
+    scrollToNewRows();
 
     showAlert(`成功创建 ${rowsCount} 行记录`, 'success');
+}
+
+function scrollToNewRows() {
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            const tableContainer = document.querySelector('.table-scroll-container');
+            if (tableContainer) {
+                tableContainer.scrollTop = tableContainer.scrollHeight;
+            }
+        });
+    });
 }
 
 // 添加新行到表格（带指定日期）
@@ -3472,10 +3493,7 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
         }
 
         // 滚动到表格底部，确保新记录行可见
-        const tableContainer = document.querySelector('.table-scroll-container');
-        if (tableContainer) {
-            tableContainer.scrollTop = tableContainer.scrollHeight;
-        }
+        scrollToNewRows();
 
         // 更新批量保存按钮的可见性
         updateBatchSaveButtonVisibility();
