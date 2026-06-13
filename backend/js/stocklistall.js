@@ -970,7 +970,7 @@ function renderStockTable(system) {
 
         tableRows += `
                     <tr class="${rowClass}">
-                        <td class="text-center">${item.no}</td>
+                        <td class="text-center">${index + 1}</td>
                         <td class="text-center">${item.code_number || '-'}</td>
                         <td><strong>${item.product_name}</strong></td>
                         <td class="stock-cell">
