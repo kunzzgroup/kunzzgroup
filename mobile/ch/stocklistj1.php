@@ -81,6 +81,11 @@ require_once 'branch_check.php';
                 </div>
             </section>
 
+            <div class="stats-info" aria-live="polite">
+                <span>显示记录: <span class="stat-value" id="displayed-records">0</span></span>
+                <span>总记录: <span class="stat-value" id="total-records">0</span></span>
+            </div>
+
             <section class="table-section" aria-labelledby="stock-table-title">
                 <h2 id="stock-table-title" class="sr-only">库存明细</h2>
                 <div class="table-wrapper">
@@ -365,6 +370,7 @@ require_once 'branch_check.php';
                 
             } catch (error) {
                 console.error('加载产品列表失败:', error);
+                updateStats(0);
                 document.getElementById('stock-tbody').innerHTML = `
                     <tr>
                         <td colspan="4" style="text-align: center; padding: 40px; color: #ef4444;">
@@ -537,10 +543,24 @@ require_once 'branch_check.php';
         }
         
         // 生成表格
+        function getVisibleStockData() {
+            return stockData.filter(item => parseFloat(item.qty) > 0);
+        }
+
+        function updateStats(displayedCount) {
+            const totalRecords = getVisibleStockData().length;
+            const displayedRecords = displayedCount !== undefined ? displayedCount : totalRecords;
+            const displayedEl = document.getElementById('displayed-records');
+            const totalEl = document.getElementById('total-records');
+            if (displayedEl) displayedEl.textContent = displayedRecords;
+            if (totalEl) totalEl.textContent = totalRecords;
+        }
+
         function generateTable() {
             const tbody = document.getElementById('stock-tbody');
             
             if (stockData.length === 0) {
+                updateStats(0);
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="4" style="text-align: center; padding: 40px; color: #6b7280;">
@@ -586,6 +606,8 @@ require_once 'branch_check.php';
                 return nameA.localeCompare(nameB);
             });
             
+            updateStats(filteredData.length);
+
             tbody.innerHTML = filteredData.map((item, index) => {
                 const isEditing = editingRowIds.has(item.id);
                 return `
