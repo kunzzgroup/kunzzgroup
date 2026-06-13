@@ -631,9 +631,9 @@ require_once 'branch_check.php';
                 const isEditing = editingRowIds.has(item.id);
                 return `
                 <tr>
-                    <td class="product-code-cell">${escapeHtml(item.product_code || '')}${item.specification ? `<span class="product-spec"> · ${escapeHtml(item.specification)}</span>` : ''}</td>
+                    <td class="product-code-cell">${escapeHtml(item.product_code || '')}</td>
                     <td class="product-name-cell">
-                        <span class="product-name">${escapeHtml(item.product_name || '')}</span>
+                        ${escapeHtml(item.product_name || '')}${item.specification ? `<span class="product-spec">(${escapeHtml(item.specification)})</span>` : ''}
                     </td>
                     <td class="qty">
                         <input 
