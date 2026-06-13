@@ -1131,18 +1131,10 @@ async function initApp() {
     // 应用页面权限，自动切换到第一个允许的系统
     const systemSwitched = await applyPagePermissions();
 
-    // 如果系统已切换，switchStock 会处理数据加载，这里不需要重复加载
-    // 只有在系统未切换时才需要加载数据
+    // 如果系统已切换，applyPagePermissions 会处理数据加载，这里不需要重复加载
     if (!systemSwitched) {
-        if (requestedStockType && requestedStockType !== 'central') {
-            switchStock(requestedStockType);
-        } else {
-            // 加载数据
-            loadStockData();
-            loadCodeNumbers();
-            loadProducts();
-            loadShippers();  // 动态加载出货人列表
-        }
+        applyStockSystemUI(currentStockType);
+        reloadStockSystemData();
     }
 
     // 添加实时搜索监听器
@@ -1222,33 +1214,9 @@ function toggleStockSelector() {
     dropdown.classList.toggle('show');
 }
 
-function switchStock(stockType, event = null) {
-    if (cachedStockAllowedSystems && cachedStockAllowedSystems.size > 0 && !cachedStockAllowedSystems.has(stockType)) {
-        const firstAllowed = Array.from(cachedStockAllowedSystems)[0];
-        if (firstAllowed) {
-            stockType = firstAllowed;
-        } else {
-            return;
-        }
-    }
-
-    if (stockType === currentStockType) {
-        const dropdown = document.getElementById('stock-dropdown');
-        if (dropdown) dropdown.classList.remove('show');
-        if (event) {
-            event.stopPropagation();
-            event.preventDefault();
-        }
-        return;
-    }
-
-    // 切换系统前暂存当前系统未保存的新增行
-    stashPendingNewRowsForSystem(currentStockType);
-
-    currentStockType = stockType;
+function applyStockSystemUI(stockType) {
     updateNewRecordRemarkPlaceholder();
 
-    // 更新API地址
     switch (stockType) {
         case 'central':
             API_BASE_URL = 'stockeditapi.php';
@@ -1291,12 +1259,10 @@ function switchStock(stockType, event = null) {
         mobileSelectorJ2.style.display = stockType === 'j2' ? 'inline-flex' : 'none';
     }
 
-    // 修改Type列的控制 - 不要隐藏，而是控制禁用状态
     const typeHeader = document.getElementById('type-header');
     const typeFormGroup = document.getElementById('type-form-group');
 
     if (stockType === 'central') {
-        // 中央页面：显示Type列但禁用表单字段
         if (typeHeader) typeHeader.style.display = 'table-cell';
         if (typeFormGroup) {
             typeFormGroup.style.display = 'block';
@@ -1307,7 +1273,6 @@ function switchStock(stockType, event = null) {
             }
         }
     } else {
-        // J1/J2/J3页面：显示Type列并启用
         if (typeHeader) typeHeader.style.display = 'table-cell';
         if (typeFormGroup) {
             typeFormGroup.style.display = 'block';
@@ -1318,7 +1283,6 @@ function switchStock(stockType, event = null) {
         }
     }
 
-    // 更新active状态
     document.querySelectorAll('#stock-dropdown .dropdown-item').forEach(item => {
         item.classList.remove('active');
     });
@@ -1326,6 +1290,48 @@ function switchStock(stockType, event = null) {
     if (activeItem) {
         activeItem.classList.add('active');
     }
+}
+
+function reloadStockSystemData() {
+    stockData = [];
+    editingRowIds.clear();
+    if (originalEditData) {
+        originalEditData.clear();
+    }
+
+    loadStockData().then(() => {
+        restorePendingNewRowsForSystem(currentStockType);
+    });
+    loadCodeNumbers();
+    loadProducts();
+    loadShippers();
+}
+
+function switchStock(stockType, event = null) {
+    if (cachedStockAllowedSystems && cachedStockAllowedSystems.size > 0 && !cachedStockAllowedSystems.has(stockType)) {
+        const firstAllowed = Array.from(cachedStockAllowedSystems)[0];
+        if (firstAllowed) {
+            stockType = firstAllowed;
+        } else {
+            return;
+        }
+    }
+
+    if (stockType === currentStockType) {
+        const dropdown = document.getElementById('stock-dropdown');
+        if (dropdown) dropdown.classList.remove('show');
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+        return;
+    }
+
+    // 切换系统前暂存当前系统未保存的新增行
+    stashPendingNewRowsForSystem(currentStockType);
+
+    currentStockType = stockType;
+    applyStockSystemUI(stockType);
 
     // 立即隐藏下拉菜单
     const dropdown = document.getElementById('stock-dropdown');
@@ -1339,20 +1345,7 @@ function switchStock(stockType, event = null) {
         event.preventDefault();
     }
 
-    // 清空当前数据并重新加载
-    stockData = [];
-    editingRowIds.clear();
-    if (originalEditData) {
-        originalEditData.clear();
-    }
-
-    // 重新加载数据
-    loadStockData().then(() => {
-        restorePendingNewRowsForSystem(currentStockType);
-    });
-    loadCodeNumbers();
-    loadProducts();
-    loadShippers();  // 动态加载出货人列表
+    reloadStockSystemData();
 
     // 更新 URL 参数以保持持久性
     const newParams = new URLSearchParams(window.location.search);
