@@ -97,6 +97,67 @@ let isSelectingRange = false;
 
 // 全局计数器，确保新行具有唯一 ID
 let newRowCounter = 0;
+// 按系统暂存未保存的新增行，避免 Central/J1/J2/J3 之间互相串行
+let pendingNewRowsBySystem = new Map();
+
+function getNewRowSystem(row) {
+    return row.dataset.stockSystem || currentStockType;
+}
+
+function tagNewRowWithSystem(row) {
+    row.dataset.stockSystem = currentStockType;
+}
+
+function stashPendingNewRowsForSystem(system) {
+    const rows = Array.from(document.querySelectorAll('#stock-tbody .new-row'))
+        .filter(row => getNewRowSystem(row) === system);
+    rows.forEach(row => row.remove());
+    if (rows.length > 0) {
+        pendingNewRowsBySystem.set(system, rows);
+    }
+}
+
+function restorePendingNewRowsForSystem(system) {
+    const rows = pendingNewRowsBySystem.get(system);
+    if (!rows || rows.length === 0) return;
+
+    const tbody = document.getElementById('stock-tbody');
+    if (!tbody) return;
+
+    rows.forEach(row => {
+        if (!row.isConnected) {
+            tbody.appendChild(row);
+        }
+    });
+
+    if (stockData.length > VIRTUAL_SCROLL_THRESHOLD) {
+        renderStockTable(true);
+    }
+    updateBatchSaveButtonVisibility();
+}
+
+function syncPendingNewRowsCache(system = currentStockType) {
+    const rows = Array.from(document.querySelectorAll('#stock-tbody .new-row'))
+        .filter(row => getNewRowSystem(row) === system);
+    if (rows.length > 0) {
+        pendingNewRowsBySystem.set(system, rows);
+    } else {
+        pendingNewRowsBySystem.delete(system);
+    }
+}
+
+function detachForeignPendingNewRows(tbody) {
+    Array.from(tbody.querySelectorAll('.new-row')).forEach(row => {
+        if (getNewRowSystem(row) === currentStockType) return;
+        const foreignSystem = getNewRowSystem(row);
+        row.remove();
+        const stored = pendingNewRowsBySystem.get(foreignSystem) || [];
+        if (!stored.includes(row)) {
+            stored.push(row);
+            pendingNewRowsBySystem.set(foreignSystem, stored);
+        }
+    });
+}
 
 // 虚拟滚动与总记录数
 let totalRecordCount = 0;
@@ -1170,6 +1231,20 @@ function switchStock(stockType, event = null) {
             return;
         }
     }
+
+    if (stockType === currentStockType) {
+        const dropdown = document.getElementById('stock-dropdown');
+        if (dropdown) dropdown.classList.remove('show');
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+        return;
+    }
+
+    // 切换系统前暂存当前系统未保存的新增行
+    stashPendingNewRowsForSystem(currentStockType);
+
     currentStockType = stockType;
     updateNewRecordRemarkPlaceholder();
 
@@ -1272,7 +1347,9 @@ function switchStock(stockType, event = null) {
     }
 
     // 重新加载数据
-    loadStockData();
+    loadStockData().then(() => {
+        restorePendingNewRowsForSystem(currentStockType);
+    });
     loadCodeNumbers();
     loadProducts();
     loadShippers();  // 动态加载出货人列表
@@ -1380,6 +1457,9 @@ async function applyPagePermissions() {
             if (!allowedSystems.has(currentStockType) || (!urlSystem && allowedSystems.size > 0)) {
                 const firstAllowed = Array.from(allowedSystems)[0];
                 if (firstAllowed) {
+                    // 权限切换系统前暂存未保存的新增行
+                    stashPendingNewRowsForSystem(currentStockType);
+
                     // 更新当前系统变量
                     currentStockType = firstAllowed;
 
@@ -1446,7 +1526,9 @@ async function applyPagePermissions() {
                     }
 
                     // 重新加载数据
-                    loadStockData();
+                    loadStockData().then(() => {
+                        restorePendingNewRowsForSystem(currentStockType);
+                    });
                     loadCodeNumbers();
                     loadProducts();
 
@@ -1640,7 +1722,8 @@ function scrollToRecordById(id) {
 }
 
 function hasPendingNewRows() {
-    return document.querySelectorAll('#stock-tbody .new-row').length > 0;
+    return Array.from(document.querySelectorAll('#stock-tbody .new-row'))
+        .some(row => getNewRowSystem(row) === currentStockType);
 }
 
 function initVirtualScrollListener() {
@@ -1679,7 +1762,7 @@ function loadEditingRowPrices() {
 
 // 加载库存数据
 async function loadStockData() {
-    if (isLoading) return;
+    if (isLoading) return Promise.resolve();
 
     isLoading = true;
 
@@ -2269,6 +2352,7 @@ function insertHifoSplitRows(sourceRowId, splitDataArray) {
         const newRow = document.createElement('tr');
         newRow.className = 'new-row';
         newRow.dataset.hifoSplit = 'true';
+        tagNewRowWithSystem(newRow);
 
         const netQty = -splitData.deductQty;
         const totalValue = Math.abs(netQty * parseFloat(splitData.price));
@@ -3156,8 +3240,12 @@ function renderStockTable(preserveScroll) {
     const tbody = document.getElementById('stock-tbody');
     if (!tbody) return;
 
+    // 不属于当前系统的新增行暂存起来，避免在中央/J1/J2/J3 之间串行
+    detachForeignPendingNewRows(tbody);
+
     // 虚拟滚动重绘会清空 tbody，需保留尚未保存的新增行
-    const pendingNewRows = Array.from(tbody.querySelectorAll('.new-row'));
+    const pendingNewRows = Array.from(tbody.querySelectorAll('.new-row'))
+        .filter(row => getNewRowSystem(row) === currentStockType);
     pendingNewRows.forEach(row => row.remove());
 
     if (stockData.length === 0) {
@@ -3209,6 +3297,7 @@ function renderStockTable(preserveScroll) {
     loadEditingRowPrices();
     if (pendingNewRows.length > 0) {
         updateBatchSaveButtonVisibility();
+        syncPendingNewRowsCache(currentStockType);
     }
 }
 
@@ -3415,6 +3504,8 @@ function createMultipleRows() {
         addNewRowWithDate(selectedDate, remarkValue);
     }
 
+    syncPendingNewRowsCache(currentStockType);
+
     // 有未保存行时切换为完整渲染，避免虚拟滚动与新增行冲突
     renderStockTable(true);
     scrollToNewRows();
@@ -3443,6 +3534,7 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
     const tbody = document.getElementById('stock-tbody');
     const row = document.createElement('tr');
     row.className = 'new-row';
+    tagNewRowWithSystem(row);
 
     const rowId = 'new-' + Date.now() + '-' + (newRowCounter++); // 使用时间戳+计数器确保绝对唯一
 
@@ -4283,6 +4375,7 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
 
             // 移除当前保存的行
             row.remove();
+            syncPendingNewRowsCache(getNewRowSystem(row));
 
             if (!skipTableRefresh) {
                 // 保存其他新增行
@@ -4335,6 +4428,8 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
 function cancelNewRow(buttonElement) {
     const row = buttonElement.closest('tr');
     row.remove();
+
+    syncPendingNewRowsCache(getNewRowSystem(row));
 
     // 更新批量保存按钮的可见性
     updateBatchSaveButtonVisibility();
