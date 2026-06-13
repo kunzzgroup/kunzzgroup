@@ -632,24 +632,26 @@ require_once 'branch_check.php';
                 const isEditing = editingRowIds.has(item.id);
                 return `
                 <tr>
-                    <td class="product-code-cell">${escapeHtml(item.product_code || '')}</td>
-                    <td class="product-name-cell">
-                        ${escapeHtml(item.product_name || '')}${item.specification ? `<span class="product-spec">(${escapeHtml(item.specification)})</span>` : ''}
-                    </td>
-                    <td class="qty">
-                        <input 
-                            type="number" 
-                            class="qty-input ${isEditing ? 'editing' : ''}" 
-                            value="${item.qty}" 
-                            min="0"
-                            step="0.01"
-                            data-id="${item.id}"
-                            data-original="${item.original_qty}"
-                            oninput="updateQty('${item.id}', this.value)"
-                            onchange="updateQty('${item.id}', this.value)"
-                            onfocus="this.select()"
-                            ${isEditing ? '' : 'readonly'}
-                        >
+                    <td class="product-name-cell">${escapeHtml(item.product_name || '')}</td>
+                    <td class="product-footer">
+                        <span class="product-meta">${escapeHtml(item.product_code || '')}${item.specification ? ` · ${escapeHtml(item.specification)}` : ''}</span>
+                        <span class="footer-sep" aria-hidden="true">|</span>
+                        <span class="qty-group">
+                            <span class="qty-label">数量</span>
+                            <input 
+                                type="number" 
+                                class="qty-input ${isEditing ? 'editing' : ''}" 
+                                value="${item.qty}" 
+                                min="0"
+                                step="0.01"
+                                data-id="${item.id}"
+                                data-original="${item.original_qty}"
+                                oninput="updateQty('${item.id}', this.value)"
+                                onchange="updateQty('${item.id}', this.value)"
+                                onfocus="this.select()"
+                                ${isEditing ? '' : 'readonly'}
+                            >
+                        </span>
                     </td>
                     <td class="actions">
                         ${isEditing ? 
