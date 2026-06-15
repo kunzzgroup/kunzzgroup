@@ -2028,38 +2028,25 @@ form select:focus {
 
 /* 手机号码行 */
 .fb-phone-row {
-  flex-direction: row;
-  align-items: stretch;
-  gap: 8px;
-}
-
-.fb-phone-row select {
-  flex: 0 0 110px !important;
-  width: 30% !important;
-  max-width: 60px;
-  min-width: 0;
-}
-
-.fb-phone-row input {
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  width: 70% !important;
-}
-
-/* backup */
-/* .fb-phone-row {
     display: flex;
+    align-items: stretch;
     gap: clamp(8px, 0.6vw, 12px);
+    width: 100%;
 }
 
 .fb-phone-row select {
-    flex: 0 0 clamp(110px, 9vw, 145px);
+    flex: 0 0 clamp(88px, 7vw, 110px);
+    width: auto;
+    max-width: none;
+    min-width: 0;
     font-size: clamp(11px, 0.7vw, 13px);
 }
 
 .fb-phone-row input {
-    flex: 1;
-} */
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+}
 
 /* 提交按钮 */
 .fb-submit-btn {
