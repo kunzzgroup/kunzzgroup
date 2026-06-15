@@ -13,21 +13,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 require_once __DIR__ . '/../backend/xss_protect.php';
+require_once __DIR__ . '/../config.php';
 ob_start();
 session_start();
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// 数据库连接信息
-$host = 'localhost';
-$dbname = 'u690174784_kunzz';
-$dbuser = 'u690174784_kunzz';
-$dbpass = 'Kunzz1688';
-
-// 创建连接
-$conn = new mysqli($host, $dbuser, $dbpass, $dbname);
-if ($conn->connect_error) {
-    die("连接失败: " . $conn->connect_error);
+try {
+    $conn = get_mysqli_connection();
+} catch (RuntimeException $e) {
+    die('连接失败: ' . $e->getMessage());
 }
 
 // 获取提交数据
@@ -38,6 +33,11 @@ $remember = isset($_POST['remember']); // true/false
 // 查询用户
 $sql = "SELECT * FROM users WHERE email = ?";
 $stmt = $conn->prepare($sql);
+if (!$stmt) {
+    error_log('Login prepare failed: ' . $conn->error);
+    echo "<script>alert('登录服务暂时不可用，请联系管理员'); window.location.href='/frontend/login.html';</script>";
+    exit();
+}
 $stmt->bind_param("s", $email);
 $stmt->execute();
 $result = $stmt->get_result();

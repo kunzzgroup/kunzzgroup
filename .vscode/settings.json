@@ -8,5 +8,6 @@
     },
     "intelephense.environment.includePaths": [
         "vendor"
-    ]
+    ],
+    "php.validate.executablePath": ""
 }
