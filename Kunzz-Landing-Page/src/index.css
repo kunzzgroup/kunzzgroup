@@ -149,6 +149,20 @@ body {
     min-height: 100dvh;
     overflow: hidden !important;
     background-color: #ff5c00;
-    align-items: stretch;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Join Us 联系/表单屏：随内容高度，在 slide 内垂直居中 */
+  .vertical-swiper-shell:has(.join-swiper) .contact-form-section:not(.contact-form-section--feedback-only),
+  .vertical-swiper-shell:has(.join-swiper) .contact-form-section--feedback-only {
+    height: 100% !important;
+    min-height: 0 !important;
+    flex: 0 1 auto;
+  }
+
+  .vertical-swiper-shell:has(.join-swiper) .swiper-slide:has(.contact-form-section:not(.contact-form-section--feedback-only)) {
+    align-items: center;
+    justify-content: center;
   }
 }
