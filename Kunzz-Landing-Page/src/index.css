@@ -89,6 +89,10 @@ body {
 
 /* Home page mobile: allow slides to grow with stacked content */
 @media (max-width: 768px) {
+  .vertical-swiper-shell .swiper-slide.footer-slide .footer-scroll-buffer {
+    justify-content: flex-start;
+  }
+
   .vertical-swiper-shell .swiper-slide:not(.footer-slide) {
     height: auto;
     min-height: 100dvh;
@@ -112,7 +116,7 @@ body {
 
   .vertical-swiper-shell .swiper-slide.footer-slide {
     height: auto;
-    min-height: clamp(18rem, 29vh, 32rem);
+    min-height: 38vh;
     overflow: visible;
   }
 

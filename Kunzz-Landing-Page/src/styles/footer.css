@@ -359,6 +359,10 @@
         min-height: 38vh;
         /* 供 .footer 与兄弟 .footer-bottom 共用，保证分隔线与版心左右对称 */
         --footer-inline: max(58px, calc(14px + max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px))));
+        --footer-top: 24px;
+        padding-top: var(--footer-top);
+        justify-content: flex-start;
+        box-sizing: border-box;
     }
 
     /* 手机端不使用向上遮罩，避免刷新时盖到上一屏 */
@@ -369,7 +373,8 @@
     /* Footer 两栏：左右留白对称（浮动社交仍叠在右侧留白上，避免版心偏左） */
     .footer {
         height: auto;
-        padding: 16px var(--footer-inline) 12px var(--footer-inline);
+        padding: 0 var(--footer-inline) 12px var(--footer-inline);
+        margin-top: 0;
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         column-gap: 16px;
@@ -442,6 +447,8 @@
     .footer-scroll-buffer {
         min-height: 42vh;
         --footer-inline: max(52px, calc(12px + max(env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px))));
+        --footer-top: 20px;
+        padding-top: var(--footer-top);
     }
 
     .swiper-slide.footer-slide::before {
@@ -449,7 +456,7 @@
     }
 
     .footer {
-        padding: 14px var(--footer-inline) 10px var(--footer-inline);
+        padding: 0 var(--footer-inline) 10px var(--footer-inline);
         column-gap: 14px;
         row-gap: 10px;
     }

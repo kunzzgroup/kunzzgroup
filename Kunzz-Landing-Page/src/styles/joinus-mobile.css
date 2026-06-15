@@ -48,10 +48,14 @@
   }
 
   .vertical-swiper-shell:has(.join-swiper) .swiper-slide.footer-slide {
-    height: clamp(18rem, 29vh, 32rem) !important;
-    min-height: clamp(18rem, 29vh, 32rem) !important;
-    max-height: clamp(18rem, 29vh, 32rem) !important;
-    overflow: hidden !important;
+    height: auto !important;
+    min-height: 38vh !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .vertical-swiper-shell:has(.join-swiper) .swiper-slide.footer-slide .footer-scroll-buffer {
+    min-height: 38vh;
   }
 
   .vertical-swiper-shell:has(.join-swiper) .comphoto-section,
@@ -511,7 +515,7 @@
     -webkit-box-orient: vertical;
   }
 
-  /* ── Feedback-only slide：提交按钮在卡片外，永不被裁切 ── */
+  /* ── Feedback-only slide：提交按钮在白色卡片内底部 ── */
   .contact-form-section--feedback-only {
     --contact-inline: var(--join-slide-inline);
     --contact-card-pad: 14px;
@@ -542,7 +546,6 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    gap: 10px;
   }
 
   .contact-form-section--feedback-only .feedback-card--mobile-scroll {
@@ -550,16 +553,23 @@
     width: 100%;
     min-height: 0 !important;
     max-height: 100% !important;
-    height: auto !important;
+    height: 100% !important;
     border-radius: 16px;
     box-shadow: 0 10px 36px rgba(0, 0, 0, 0.12);
     padding: 10px var(--contact-card-pad) 12px;
     box-sizing: border-box;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
+    overflow: hidden !important;
     display: flex;
     flex-direction: column;
+  }
+
+  .contact-form-section--feedback-only .feedback-card-fields {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 2px;
   }
 
   .contact-form-section--feedback-only .feedback-title {
@@ -681,7 +691,7 @@
     max-width: none;
   }
 
-  .contact-form-section--feedback-only .fb-submit-btn--outside {
+  .contact-form-section--feedback-only .fb-submit-btn--in-card {
     flex: 0 0 auto;
     width: 100%;
     min-height: 46px;
@@ -691,15 +701,15 @@
     line-height: 1.2;
     color: #fff !important;
     -webkit-text-fill-color: #fff;
-    margin: 0;
+    margin: 8px 0 0;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     padding: 12px 10px;
     box-sizing: border-box;
     display: block;
     cursor: pointer;
     background: linear-gradient(135deg, #ff5c00 0%, #ff8c00 50%, #ff5c00 100%);
-    box-shadow: 0 4px 14px rgba(255, 92, 0, 0.45);
+    box-shadow: 0 4px 14px rgba(255, 92, 0, 0.35);
   }
 
   .job-modal-content {

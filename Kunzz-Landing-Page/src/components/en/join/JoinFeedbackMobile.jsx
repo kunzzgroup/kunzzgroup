@@ -9,11 +9,13 @@ export default function JoinFeedbackMobile() {
           <p className="feedback-subtitle">
             We look forward to hearing from you and will get back to you shortly.
           </p>
-          <FeedbackForm formId="feedbackFormMobile" compact hideSubmit />
+          <div className="feedback-card-fields">
+            <FeedbackForm formId="feedbackFormMobile" compact hideSubmit />
+          </div>
+          <button type="submit" form="feedbackFormMobile" className="fb-submit-btn fb-submit-btn--in-card">
+            SUBMIT
+          </button>
         </div>
-        <button type="submit" form="feedbackFormMobile" className="fb-submit-btn fb-submit-btn--outside">
-          SUBMIT
-        </button>
       </div>
     </div>
   );

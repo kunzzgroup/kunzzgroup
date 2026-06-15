@@ -7,11 +7,13 @@ export default function JoinFeedbackMobile() {
         <div className="feedback-card joinus-feedback joinus-feedback--stacked feedback-card--mobile-scroll">
           <h2 className="feedback-title">请提供您宝贵的意见</h2>
           <p className="feedback-subtitle">我们期待您的反馈，将尽快与您联系。</p>
-          <FeedbackForm formId="feedbackFormMobile" compact hideSubmit />
+          <div className="feedback-card-fields">
+            <FeedbackForm formId="feedbackFormMobile" compact hideSubmit />
+          </div>
+          <button type="submit" form="feedbackFormMobile" className="fb-submit-btn fb-submit-btn--in-card">
+            提 交
+          </button>
         </div>
-        <button type="submit" form="feedbackFormMobile" className="fb-submit-btn fb-submit-btn--outside">
-          提 交
-        </button>
       </div>
     </div>
   );
