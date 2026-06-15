@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAnimateOnScroll } from '../../hooks/useAnimateOnScroll.js';
+import { mediaUrl } from '../../utils/media.js';
 
 export default function HomeHero() {
   const animRef = useAnimateOnScroll();
@@ -18,7 +19,7 @@ export default function HomeHero() {
   return (
     <section className={`home${loaded ? ' gradient-loaded' : ''}`}>
       <video className="background-video" autoPlay muted loop playsInline preload="metadata">
-        <source src="/media/home_background.webm" type="video/webm" />
+        <source src={mediaUrl('home_background')} type="video/webm" />
       </video>
 
       <div

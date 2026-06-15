@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { mediaUrl } from '../../../utils/media.js';
 
 export default function AboutIntro() {
   const bannerRef = useRef(null);
@@ -37,10 +38,9 @@ export default function AboutIntro() {
     <section className="aboutus-section">
       <div ref={bannerRef} className="aboutus-banner">
         <img
-          src="/images/关于我们bg8.jpg"
+          src={mediaUrl('about_background')}
           alt=""
           className="background-image"
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: -1 }}
         />
         <div className="aboutus-content">
           <h1>About Us</h1>

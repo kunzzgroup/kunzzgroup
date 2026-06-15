@@ -127,11 +127,11 @@ function getMediaConfig($mediaType) {
             'type' => 'video'
         ],
         'about_background' => [
-            'file' => 'images/images/关于我们bg8.jpg',
+            'file' => 'images/images/about_background.jpg',
             'type' => 'image'
         ],
         'joinus_background' => [
-            'file' => 'images/images/加入我们bg2.jpg',
+            'file' => 'images/images/joinus_background.jpg',
             'type' => 'image'
         ]
     ];

@@ -1,4 +1,5 @@
 import { useJoinSlideAnimation } from '../../../hooks/useJoinSlideAnimation.js';
+import { mediaUrl } from '../../../utils/media.js';
 
 const benefits = [
   { icon: '/images/带薪假期.webp', label: 'Annual Leave' },
@@ -17,18 +18,9 @@ export default function JoinHeroBenefits() {
     <section className="joinus-section">
       <div ref={bannerRef} className="joinus-banner">
         <img
-          src="/images/加入我们bg2.jpg"
+          src={mediaUrl('joinus_background')}
           alt=""
           className="background-image"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            zIndex: -1,
-          }}
         />
         <div className="joinus-content">
           <h1>Join Us</h1>
