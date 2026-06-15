@@ -1,4 +1,5 @@
 import { useJoinSlideAnimation } from '../../../hooks/useJoinSlideAnimation.js';
+import { useIsMobile } from '../../../hooks/useIsMobile.js';
 
 export function FeedbackForm({ formId, compact = false, hideSubmit = false }) {
   return (
@@ -110,6 +111,7 @@ export function FeedbackForm({ formId, compact = false, hideSubmit = false }) {
 }
 
 export default function JoinContactFeedback() {
+  const isMobile = useIsMobile();
   const sectionRef = useJoinSlideAnimation('contact-form-section', 'contact-loaded');
 
   const goToLocation = () => {
@@ -202,11 +204,13 @@ export default function JoinContactFeedback() {
           </div>
         </div>
 
-        <div className="feedback-card joinus-feedback joinus-feedback--inline">
-          <h2 className="feedback-title">Kindly Provide Your Feedback</h2>
-          <p className="feedback-subtitle">We look forward to hearing from you and will get back to you shortly. </p>
-          <FeedbackForm formId="feedbackForm" />
-        </div>
+        {!isMobile ? (
+          <div className="feedback-card joinus-feedback joinus-feedback--inline">
+            <h2 className="feedback-title">Kindly Provide Your Feedback</h2>
+            <p className="feedback-subtitle">We look forward to hearing from you and will get back to you shortly. </p>
+            <FeedbackForm formId="feedbackForm" />
+          </div>
+        ) : null}
       </div>
     </div>
   );

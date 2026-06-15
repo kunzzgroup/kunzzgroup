@@ -358,6 +358,10 @@
     display: none !important;
   }
 
+  .vertical-swiper-shell:has(.join-swiper) .join-slide-card-center .joinus-feedback--inline {
+    display: none !important;
+  }
+
   .vertical-swiper-shell:has(.join-swiper) .swiper-slide:has(.join-slide-card-center) {
     display: grid !important;
     place-items: center;
@@ -398,12 +402,12 @@
     padding: 0 !important;
     overflow: visible !important;
     flex: none !important;
-    flex-direction: unset !important;
+    flex-direction: column !important;
     gap: 0 !important;
   }
 
   .join-slide-card-center .contact-card,
-  .join-slide-card-center .feedback-card {
+  .join-slide-card-center .feedback-card:not(.joinus-feedback--inline) {
     flex: none !important;
     width: 100% !important;
     height: auto !important;
