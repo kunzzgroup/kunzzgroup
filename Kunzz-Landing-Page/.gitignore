@@ -8,10 +8,12 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
 dist-ssr
 *.local
 .env
+
+# Keep production build in git for shared hosting deploys
+# dist/
 
 # Editor directories and files
 .vscode/*

@@ -1,9 +1,9 @@
-/** Base URL for PHP pages not yet migrated to React (XAMPP). */
+/** Base URL for PHP pages not yet migrated to React. */
 export const PHP_BASE =
-  import.meta.env.VITE_PHP_BASE || 'http://localhost/kunzzgroup-main/j1/frontend';
+  import.meta.env.VITE_PHP_BASE || '/frontend';
 
 export const LOGIN_URL =
-  import.meta.env.VITE_LOGIN_URL || 'http://localhost/kunzzgroup-main/frontend/login.html';
+  import.meta.env.VITE_LOGIN_URL || '/frontend/login.html';
 
 export const EN_SITE_URL =
-  import.meta.env.VITE_EN_SITE_URL || 'http://localhost:5173/Home_en';
+  import.meta.env.VITE_EN_SITE_URL || '/Home_en';
