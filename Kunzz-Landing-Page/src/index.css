@@ -123,7 +123,7 @@ body {
   /* Join Us: these sections use absolute children — must not collapse */
   .vertical-swiper-shell .comphoto-section,
   .vertical-swiper-shell .job-section,
-  .vertical-swiper-shell .contact-form-section:not(.contact-form-section--feedback-only),
+  .vertical-swiper-shell .contact-form-section:not(.contact-form-section--feedback-only):not(.join-slide-card-center),
   .vertical-swiper-shell .joinus-section {
     width: 100%;
     height: auto;
@@ -154,15 +154,10 @@ body {
   }
 
   /* Join Us 联系/表单屏：随内容高度，在 slide 内垂直居中 */
-  .vertical-swiper-shell:has(.join-swiper) .contact-form-section:not(.contact-form-section--feedback-only),
-  .vertical-swiper-shell:has(.join-swiper) .contact-form-section--feedback-only {
-    height: 100% !important;
+  .vertical-swiper-shell:has(.join-swiper) .join-slide-card-center {
+    height: auto !important;
     min-height: 0 !important;
-    flex: 0 1 auto;
-  }
-
-  .vertical-swiper-shell:has(.join-swiper) .swiper-slide:has(.contact-form-section:not(.contact-form-section--feedback-only)) {
-    align-items: center;
-    justify-content: center;
+    max-height: calc(100dvh - var(--join-slide-top, 66px) - var(--join-slide-bottom, 68px)) !important;
+    flex: none !important;
   }
 }

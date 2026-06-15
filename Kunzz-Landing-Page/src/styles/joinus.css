@@ -3018,3 +3018,27 @@ img.image-3d-rotate:hover,
     transition: all 0.3s ease-out;
     transition-delay: 0s;
 }
+
+/* 手机端联系/表单屏：取消桌面固定高度，卡片随内容 */
+@media (max-width: 768px) {
+    .join-slide-card-center.contact-form-section {
+        display: block !important;
+        height: auto !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        background: transparent !important;
+    }
+
+    .join-slide-card-center .contact-form-container {
+        height: auto !important;
+        max-height: none !important;
+        min-height: 0 !important;
+        flex-direction: column !important;
+    }
+
+    .join-slide-card-center .contact-card,
+    .join-slide-card-center .feedback-card {
+        flex: none !important;
+        height: auto !important;
+    }
+}
