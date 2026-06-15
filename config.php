@@ -18,6 +18,38 @@ if (file_exists(__DIR__ . '/config.local.php')) {
     }
 }
 
+if (!function_exists('app_url')) {
+    function app_url(string $path = ''): string
+    {
+        static $basePath = null;
+
+        if ($basePath === null) {
+            $docRoot = rtrim(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT'] ?? ''), '/');
+            $projectRoot = rtrim(str_replace('\\', '/', realpath(__DIR__) ?: __DIR__), '/');
+            $basePath = '';
+
+            if ($docRoot !== '' && str_starts_with($projectRoot, $docRoot)) {
+                $basePath = rtrim(substr($projectRoot, strlen($docRoot)), '/');
+            }
+        }
+
+        $path = ltrim($path, '/');
+        if ($path === '') {
+            return $basePath === '' ? '/' : $basePath . '/';
+        }
+
+        return ($basePath === '' ? '' : $basePath) . '/' . $path;
+    }
+}
+
+if (!function_exists('is_production_host')) {
+    function is_production_host(): bool
+    {
+        $httpHost = $_SERVER['HTTP_HOST'] ?? '';
+        return str_contains($httpHost, 'kunzzgroup.com');
+    }
+}
+
 if (!function_exists('get_mysqli_connection')) {
     function get_mysqli_connection(): mysqli
     {

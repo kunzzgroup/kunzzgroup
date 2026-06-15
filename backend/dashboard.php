@@ -7,6 +7,9 @@ if (!headers_sent()) {
 ?>
 <?php
 session_start();
+require_once __DIR__ . '/../config.php';
+
+$loginPage = app_url('frontend/login.html');
 
 // 超时时间（秒）
 define('SESSION_TIMEOUT', 300); // 未勾选「记住我」时 5 分钟无活动则登出
@@ -31,7 +34,7 @@ if (isset($_SESSION['user_id'])) {
         setcookie('remember_token', '', time() - 60, "/");
 
         // 跳转登录页
-        header("Location: /frontend/login.html");
+        header('Location: ' . $loginPage);
         exit();
     }
 
@@ -51,7 +54,7 @@ if (isset($_SESSION['user_id'])) {
     $_SESSION['last_activity'] = time();
 } else {
     // 没有 session，也没有有效 cookie
-    header("Location: /frontend/login.html");
+    header('Location: ' . $loginPage);
     exit();
 }
 
