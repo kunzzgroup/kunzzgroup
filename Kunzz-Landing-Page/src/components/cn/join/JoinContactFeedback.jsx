@@ -1,6 +1,6 @@
 import { useJoinSlideAnimation } from '../../../hooks/useJoinSlideAnimation.js';
 
-export function FeedbackForm({ formId, compact = false }) {
+export function FeedbackForm({ formId, compact = false, hideSubmit = false }) {
   return (
     <form
       id={formId}
@@ -100,9 +100,11 @@ export function FeedbackForm({ formId, compact = false }) {
         />
       </div>
 
-      <button type="submit" className="fb-submit-btn">
-        提 交
-      </button>
+      {hideSubmit ? null : (
+        <button type="submit" className="fb-submit-btn">
+          提 交
+        </button>
+      )}
     </form>
   );
 }

@@ -76,19 +76,16 @@
     height: 100dvh !important;
     min-height: 100dvh !important;
     max-height: 100dvh !important;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
+    overflow: hidden !important;
     background-color: #ff5c00;
   }
 
   .vertical-swiper-shell:has(.join-swiper) .swiper-slide > .contact-form-section--feedback-only,
   .vertical-swiper-shell:has(.join-swiper) .contact-form-section--feedback-only {
-    height: auto !important;
-    min-height: min(100%, auto) !important;
-    max-height: none !important;
-    overflow: visible !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
   }
 
   /* ── Hero-only slide ── */
@@ -514,49 +511,53 @@
     -webkit-box-orient: vertical;
   }
 
-  /* ── Feedback-only slide ── */
+  /* ── Feedback-only slide：提交按钮在卡片外，永不被裁切 ── */
   .contact-form-section--feedback-only {
     --contact-inline: var(--join-slide-inline);
     --contact-card-pad: 14px;
     --feedback-top: calc(56px + 6px + env(safe-area-inset-top, 0px));
+    --feedback-bottom: max(72px, calc(12px + env(safe-area-inset-bottom, 0px)));
     flex: 1 1 auto;
     flex-direction: column;
     width: 100%;
-    height: auto !important;
-    min-height: 100% !important;
-    max-height: none !important;
-    overflow: visible;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
     justify-content: flex-start;
     align-items: center;
     box-sizing: border-box;
-    padding: var(--feedback-top) var(--contact-inline) max(100px, calc(80px + env(safe-area-inset-bottom, 0px)))
-      var(--contact-inline) !important;
+    padding: var(--feedback-top) var(--contact-inline) var(--feedback-bottom) var(--contact-inline) !important;
   }
 
   .contact-form-section--feedback-only .contact-form-container--feedback-only {
-    flex: 0 1 auto;
+    flex: 1 1 auto;
     width: min(100%, 440px);
     max-width: 440px;
-    height: auto;
-    max-height: none;
+    height: 100%;
     min-height: 0;
+    max-height: 100%;
     margin-inline: auto;
     align-self: center;
     display: flex;
     flex-direction: column;
-    overflow: visible;
+    overflow: hidden;
+    gap: 10px;
   }
 
-  .contact-form-section--feedback-only .feedback-card {
-    flex: 0 1 auto !important;
+  .contact-form-section--feedback-only .feedback-card--mobile-scroll {
+    flex: 1 1 auto !important;
     width: 100%;
-    min-height: 0;
-    max-height: none;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    height: auto !important;
     border-radius: 16px;
     box-shadow: 0 10px 36px rgba(0, 0, 0, 0.12);
-    padding: 10px var(--contact-card-pad) 16px;
+    padding: 10px var(--contact-card-pad) 12px;
     box-sizing: border-box;
-    overflow: visible;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
     display: flex;
     flex-direction: column;
   }
@@ -587,7 +588,6 @@
     box-sizing: border-box;
   }
 
-  /* 中文姓名 + 性别：同一行，节省纵向空间 */
   .contact-form-section--feedback-only .fb-form-row {
     flex-direction: row;
     align-items: flex-end;
@@ -659,7 +659,6 @@
     white-space: nowrap;
   }
 
-  /* 手机号：区号 + 号码横排 */
   .contact-form-section--feedback-only .fb-phone-row {
     flex-direction: row;
     align-items: stretch;
@@ -682,26 +681,25 @@
     max-width: none;
   }
 
-  .contact-form-section--feedback-only .fb-submit-btn {
-    position: sticky;
-    bottom: max(8px, env(safe-area-inset-bottom, 0px));
-    z-index: 5;
-    flex-shrink: 0;
+  .contact-form-section--feedback-only .fb-submit-btn--outside {
+    flex: 0 0 auto;
     width: 100%;
-    min-height: 44px;
+    min-height: 46px;
     font-size: 0.9375rem;
     font-weight: 700;
     letter-spacing: 0.15em;
     line-height: 1.2;
     color: #fff !important;
     -webkit-text-fill-color: #fff;
-    margin-top: 8px;
-    margin-bottom: 4px;
-    border-radius: 10px;
-    padding: 11px 10px;
+    margin: 0;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 10px;
     box-sizing: border-box;
     display: block;
-    box-shadow: 0 4px 14px rgba(255, 92, 0, 0.4);
+    cursor: pointer;
+    background: linear-gradient(135deg, #ff5c00 0%, #ff8c00 50%, #ff5c00 100%);
+    box-shadow: 0 4px 14px rgba(255, 92, 0, 0.45);
   }
 
   .job-modal-content {

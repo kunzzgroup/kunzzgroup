@@ -104,7 +104,8 @@ body {
 
   .vertical-swiper-shell .home,
   .vertical-swiper-shell .culture-section,
-  .vertical-swiper-shell .about-section {
+  .vertical-swiper-shell .about-section,
+  .vertical-swiper-shell .contact-form-section--feedback-only {
     height: auto;
     min-height: 0;
   }
@@ -118,7 +119,8 @@ body {
   /* Join Us: these sections use absolute children — must not collapse */
   .vertical-swiper-shell .comphoto-section,
   .vertical-swiper-shell .job-section,
-  .vertical-swiper-shell .contact-form-section {
+  .vertical-swiper-shell .contact-form-section:not(.contact-form-section--feedback-only),
+  .vertical-swiper-shell .joinus-section {
     width: 100%;
     height: auto;
     min-height: 100dvh;
@@ -141,9 +143,7 @@ body {
   .vertical-swiper-shell .swiper-slide.swiper-slide--joinus-feedback-only {
     height: 100dvh;
     min-height: 100dvh;
-    overflow-x: hidden;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
+    overflow: hidden !important;
     background-color: #ff5c00;
     align-items: stretch;
   }
