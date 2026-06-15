@@ -1,5 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { PHP_BASE } from '../../config.js';
+import { useIsMobile } from '../../hooks/useIsMobile.js';
+import { getJoinSectionSlide } from '../../utils/joinSlides.js';
 
 /**
  * Footer content only — must sit inside SwiperSlide.footer-slide (see Home.jsx).
@@ -10,6 +12,8 @@ export default function Footer({ onSlideTo, page = 'home_en' }) {
   const navigate = useNavigate();
   const isAbout = page === 'about_en' || location.pathname === '/about_en';
   const isJoin = page === 'join_en' || location.pathname === '/join_en';
+  const isMobile = useIsMobile();
+  const joinSlide = (section) => getJoinSectionSlide(section, isMobile);
 
   const goToHomeSlide = (e, slide) => {
     e.preventDefault();
@@ -105,22 +109,34 @@ export default function Footer({ onSlideTo, page = 'home_en' }) {
           </h4>
           <ul>
             <li>
-              <a href="/join_en?slide=0" onClick={(e) => goToJoinSlide(e, 0)}>
+              <a
+                href={`/join_en?slide=${joinSlide('benefits')}`}
+                onClick={(e) => goToJoinSlide(e, joinSlide('benefits'))}
+              >
                 Benefits
               </a>
             </li>
             <li>
-              <a href="/join_en?slide=1" onClick={(e) => goToJoinSlide(e, 1)}>
+              <a
+                href={`/join_en?slide=${joinSlide('comphoto')}`}
+                onClick={(e) => goToJoinSlide(e, joinSlide('comphoto'))}
+              >
                 Our Journey
               </a>
             </li>
             <li>
-              <a href="/join_en?slide=2" onClick={(e) => goToJoinSlide(e, 2)}>
+              <a
+                href={`/join_en?slide=${joinSlide('jobs')}`}
+                onClick={(e) => goToJoinSlide(e, joinSlide('jobs'))}
+              >
                 Open Positions
               </a>
             </li>
             <li>
-              <a href="/join_en?slide=3" onClick={(e) => goToJoinSlide(e, 3)}>
+              <a
+                href={`/join_en?slide=${joinSlide('contact')}`}
+                onClick={(e) => goToJoinSlide(e, joinSlide('contact'))}
+              >
                 Contact Us
               </a>
             </li>

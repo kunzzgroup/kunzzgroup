@@ -1,5 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { PHP_BASE } from '../../config.js';
+import { useIsMobile } from '../../hooks/useIsMobile.js';
+import { getJoinSectionSlide } from '../../utils/joinSlides.js';
 
 /**
  * Footer content only — must sit inside SwiperSlide.footer-slide (see Home.jsx).
@@ -10,6 +12,8 @@ export default function Footer({ onSlideTo, page = 'home' }) {
   const navigate = useNavigate();
   const isAbout = page === 'about' || location.pathname === '/about';
   const isJoin = page === 'join' || location.pathname === '/joinus';
+  const isMobile = useIsMobile();
+  const joinSlide = (section) => getJoinSectionSlide(section, isMobile);
 
   const goToHomeSlide = (e, slide) => {
     e.preventDefault();
@@ -105,22 +109,34 @@ export default function Footer({ onSlideTo, page = 'home' }) {
           </h4>
           <ul>
             <li>
-              <a href="/joinus?slide=0" onClick={(e) => goToJoinSlide(e, 0)}>
+              <a
+                href={`/joinus?slide=${joinSlide('benefits')}`}
+                onClick={(e) => goToJoinSlide(e, joinSlide('benefits'))}
+              >
                 公司福利
               </a>
             </li>
             <li>
-              <a href="/joinus?slide=1" onClick={(e) => goToJoinSlide(e, 1)}>
+              <a
+                href={`/joinus?slide=${joinSlide('comphoto')}`}
+                onClick={(e) => goToJoinSlide(e, joinSlide('comphoto'))}
+              >
                 我们的足迹
               </a>
             </li>
             <li>
-              <a href="/joinus?slide=2" onClick={(e) => goToJoinSlide(e, 2)}>
+              <a
+                href={`/joinus?slide=${joinSlide('jobs')}`}
+                onClick={(e) => goToJoinSlide(e, joinSlide('jobs'))}
+              >
                 招聘的职位
               </a>
             </li>
             <li>
-              <a href="/joinus?slide=3" onClick={(e) => goToJoinSlide(e, 3)}>
+              <a
+                href={`/joinus?slide=${joinSlide('contact')}`}
+                onClick={(e) => goToJoinSlide(e, joinSlide('contact'))}
+              >
                 联系我们
               </a>
             </li>

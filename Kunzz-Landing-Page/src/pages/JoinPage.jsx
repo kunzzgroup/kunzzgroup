@@ -5,12 +5,14 @@ import SocialSidebar from '../components/SocialSidebar.jsx';
 import { useIsMobile } from '../hooks/useIsMobile.js';
 import Join from './Join.jsx';
 
-const JOIN_HEADER_DOTS = 6;
+const JOIN_HEADER_DOTS_DESKTOP = 6;
+const JOIN_HEADER_DOTS_MOBILE = 7;
 
 export default function JoinPage() {
   const [activeSlide, setActiveSlide] = useState(0);
   const swiperRef = useRef(null);
   const isMobile = useIsMobile();
+  const totalSlides = isMobile ? JOIN_HEADER_DOTS_MOBILE : JOIN_HEADER_DOTS_DESKTOP;
 
   const mapSwiperIndexToDot = (swiperIndex) => {
     if (isMobile) return swiperIndex;
@@ -39,7 +41,7 @@ export default function JoinPage() {
       <Header
         activeSlide={activeSlide}
         onSlideTo={handleSlideTo}
-        totalSlides={JOIN_HEADER_DOTS}
+        totalSlides={totalSlides}
       />
       <Join onSlideChange={handleSlideChange} swiperRef={swiperRef} />
       <SocialSidebar />

@@ -2023,17 +2023,29 @@ form select:focus {
 }
 
 .fb-field .fb-phone-row select {
-    flex: 0 0 clamp(88px, 7vw, 110px);
-    width: auto !important;
-    max-width: none;
+    flex: 0 0 76px;
+    width: 76px !important;
+    max-width: 76px;
     min-width: 0;
+    padding: clamp(6px, 0.5vw, 8px) 22px clamp(6px, 0.5vw, 8px) clamp(8px, 0.6vw, 10px);
     font-size: clamp(11px, 0.7vw, 13px);
+    line-height: 1.2;
+    min-height: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 7px center;
+    background-size: 10px;
 }
 
 .fb-field .fb-phone-row input[type="tel"] {
     flex: 1 1 0;
     min-width: 0;
     width: auto !important;
+    padding: clamp(6px, 0.5vw, 8px) clamp(9px, 0.7vw, 13px);
+    line-height: 1.2;
 }
 
 /* 提交按钮 */
@@ -3280,17 +3292,29 @@ img.image-3d-rotate:hover,
 }
 
 .fb-field .fb-phone-row select {
-    flex: 0 0 clamp(88px, 7vw, 110px);
-    width: auto !important;
-    max-width: none;
+    flex: 0 0 76px;
+    width: 76px !important;
+    max-width: 76px;
     min-width: 0;
+    padding: clamp(6px, 0.5vw, 8px) 22px clamp(6px, 0.5vw, 8px) clamp(8px, 0.6vw, 10px);
     font-size: clamp(11px, 0.7vw, 13px);
+    line-height: 1.2;
+    min-height: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 7px center;
+    background-size: 10px;
 }
 
 .fb-field .fb-phone-row input[type="tel"] {
     flex: 1 1 0;
     min-width: 0;
     width: auto !important;
+    padding: clamp(6px, 0.5vw, 8px) clamp(9px, 0.7vw, 13px);
+    line-height: 1.2;
 }
 
 /* Submit button */
@@ -3872,9 +3896,20 @@ img.image-3d-rotate:hover,
     }
 
     .fb-field .fb-phone-row select {
-        flex: 0 0 clamp(88px, 22vw, 110px) !important;
-        width: auto !important;
-        max-width: none;
+        flex: 0 0 78px !important;
+        width: 78px !important;
+        max-width: 78px !important;
+        min-height: 44px;
+        height: 44px;
+        padding: 0 22px 0 10px !important;
+        line-height: 1.2;
+        -webkit-appearance: none;
+        appearance: none;
+        background-color: #fff;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        background-size: 10px;
     }
 
     .fb-field .fb-phone-row input[type="tel"] {
@@ -3882,6 +3917,10 @@ img.image-3d-rotate:hover,
         min-width: 0 !important;
         width: auto !important;
         max-width: none;
+        min-height: 44px;
+        height: 44px;
+        padding: 0 12px !important;
+        line-height: 1.2;
     }
 
     .feedback-card .fb-submit-btn {

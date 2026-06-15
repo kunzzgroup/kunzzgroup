@@ -22,7 +22,7 @@ export default function Join({ onSlideChange, swiperRef }) {
   const [applyPosition, setApplyPosition] = useState('');
   const isMobile = useIsMobile();
   const { jobsMap } = useJobs('zh');
-  const slideCount = isMobile ? 6 : 5;
+  const slideCount = isMobile ? 7 : 5;
 
   useEffect(() => {
     document.body.classList.toggle('joinus-desktop-merge-contact', !isMobile);
@@ -61,8 +61,14 @@ export default function Join({ onSlideChange, swiperRef }) {
         onSlideChange={onSlideChange}
       >
         <SwiperSlide>
-          <JoinHeroBenefits />
+          <JoinHeroBenefits layout={isMobile ? 'hero' : 'combined'} />
         </SwiperSlide>
+
+        {isMobile ? (
+          <SwiperSlide>
+            <JoinHeroBenefits layout="benefits" />
+          </SwiperSlide>
+        ) : null}
 
         <SwiperSlide>
           <JoinComphoto />
