@@ -55,7 +55,7 @@ export default function JoinJobs({ onJobClick }) {
   return (
     <div className="job-section">
       <div ref={tableRef} className="job-table-container">
-        <h2 className="job-table-title">Career Oputunities</h2>
+        <h2 className="job-table-title">Career Opportunities</h2>
       </div>
 
       <div className="jobs-wrapper">
