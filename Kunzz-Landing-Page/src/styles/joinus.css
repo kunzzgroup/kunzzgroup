@@ -3029,16 +3029,21 @@ img.image-3d-rotate:hover,
         background: transparent !important;
     }
 
-    .join-slide-card-center .contact-form-container {
+    .join-slide-card-center .contact-form-container,
+    .join-slide-card-center .contact-form-container--contact-only,
+    .join-slide-card-center .contact-form-container--feedback-only {
         height: auto !important;
         max-height: none !important;
         min-height: 0 !important;
         flex-direction: column !important;
+        flex-basis: auto !important;
     }
 
     .join-slide-card-center .contact-card,
+    .join-slide-card-center .contact-card--mobile,
     .join-slide-card-center .feedback-card {
         flex: none !important;
+        flex-basis: auto !important;
         height: auto !important;
     }
 }

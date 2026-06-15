@@ -389,9 +389,24 @@
     -webkit-overflow-scrolling: touch;
     background: transparent !important;
     box-sizing: border-box;
+    align-self: center;
+    justify-self: center;
+  }
+
+  .join-slide-card-center.contact-form-section--contact-only,
+  .join-slide-card-center.contact-form-section--feedback-only {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - var(--join-slide-top) - var(--join-slide-bottom)) !important;
+    padding: 0 !important;
+    background: transparent !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
   }
 
   .join-slide-card-center .contact-form-container,
+  .join-slide-card-center .contact-form-container--contact-only,
   .join-slide-card-center .contact-form-container--feedback-only {
     display: block !important;
     width: 100% !important;
@@ -402,13 +417,19 @@
     padding: 0 !important;
     overflow: visible !important;
     flex: none !important;
+    flex-basis: auto !important;
     flex-direction: column !important;
     gap: 0 !important;
+    align-items: stretch !important;
   }
 
-  .join-slide-card-center .contact-card,
+  .join-slide-card-center .contact-card--mobile,
+  .join-slide-card-center .contact-card.contact-card--mobile,
   .join-slide-card-center .feedback-card:not(.joinus-feedback--inline) {
     flex: none !important;
+    flex-basis: auto !important;
+    flex-grow: 0 !important;
+    flex-shrink: 0 !important;
     width: 100% !important;
     height: auto !important;
     min-height: 0 !important;
@@ -418,33 +439,48 @@
     display: flex !important;
     flex-direction: column !important;
     justify-content: flex-start !important;
-    overflow: visible !important;
-    padding: 0;
+    overflow: hidden !important;
     box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.97);
+  }
+
+  .join-slide-card-center .contact-card--mobile {
+    padding: 0;
   }
 
   .join-slide-card-center .feedback-card {
     padding: 10px var(--contact-card-pad) 12px;
-    background: rgba(255, 255, 255, 0.97);
   }
 
   .join-slide-card-center .contact-map-embed {
     flex: none !important;
-    aspect-ratio: 16 / 9;
+    flex-basis: auto !important;
+    flex-grow: 0 !important;
+    width: 100%;
     height: auto !important;
     min-height: 0 !important;
-    max-height: min(38vh, 240px);
-    width: 100%;
+    max-height: min(34vh, 200px);
+    aspect-ratio: 16 / 10;
     overflow: hidden;
     background: #eee;
   }
 
+  .join-slide-card-center .contact-map-embed iframe {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border: none;
+  }
+
   .join-slide-card-center .contact-info-bottom {
     flex: none !important;
+    flex-basis: auto !important;
+    flex-grow: 0 !important;
     min-height: 0;
     overflow: visible;
     padding: 10px var(--contact-card-pad) 12px;
     box-sizing: border-box;
+    border-top: 1px solid #f0f0f0;
   }
 
   .contact-info-bottom .contact-card-header {
@@ -886,11 +922,7 @@
     letter-spacing: 0.1em;
   }
 
-  .contact-form-section:not(.contact-form-section--feedback-only) .contact-map-embed {
-    max-height: 32vh;
-  }
-
   .join-slide-card-center .contact-map-embed {
-    max-height: min(32vh, 220px);
+    max-height: min(30vh, 180px);
   }
 }

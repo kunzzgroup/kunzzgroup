@@ -123,9 +123,9 @@ export default function JoinContactFeedback() {
   };
 
   return (
-    <div ref={sectionRef} className="contact-form-section join-slide-card-center" id="map">
-      <div className="contact-form-container">
-        <div className="contact-card">
+    <div ref={sectionRef} className="contact-form-section contact-form-section--contact-only join-slide-card-center" id="map">
+      <div className="contact-form-container contact-form-container--contact-only">
+        <div className="contact-card contact-card--mobile">
           <div className="contact-map-embed">
             <iframe
               id="custom-map"
