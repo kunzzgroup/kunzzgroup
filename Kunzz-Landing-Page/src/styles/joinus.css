@@ -2027,25 +2027,25 @@ form select:focus {
 }
 
 /* 手机号码行 */
-.fb-phone-row {
+.fb-field .fb-phone-row {
     display: flex;
     align-items: stretch;
     gap: clamp(8px, 0.6vw, 12px);
     width: 100%;
 }
 
-.fb-phone-row select {
+.fb-field .fb-phone-row select {
     flex: 0 0 clamp(88px, 7vw, 110px);
-    width: auto;
+    width: auto !important;
     max-width: none;
     min-width: 0;
     font-size: clamp(11px, 0.7vw, 13px);
 }
 
-.fb-phone-row input {
-    flex: 1 1 auto;
+.fb-field .fb-phone-row input[type="tel"] {
+    flex: 1 1 0;
     min-width: 0;
-    width: auto;
+    width: auto !important;
 }
 
 /* 提交按钮 */

@@ -516,16 +516,23 @@
     gap: 16px;
   }
 
-  .fb-phone-row {
-    flex-direction: column;
+  .fb-field .fb-phone-row {
+    flex-direction: row;
     align-items: stretch;
     gap: 10px;
+    width: 100%;
   }
 
-  .fb-phone-row select,
-  .fb-phone-row input {
-    flex: none !important;
-    width: 100%;
+  .fb-field .fb-phone-row select {
+    flex: 0 0 clamp(88px, 22vw, 110px) !important;
+    width: auto !important;
+    max-width: none;
+  }
+
+  .fb-field .fb-phone-row input[type="tel"] {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    width: auto !important;
     max-width: none;
   }
 

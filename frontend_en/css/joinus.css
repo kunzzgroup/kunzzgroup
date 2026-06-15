@@ -2015,18 +2015,25 @@ form select:focus {
 }
 
 /* 手机号码行 */
-.fb-phone-row {
+.fb-field .fb-phone-row {
     display: flex;
+    align-items: stretch;
     gap: clamp(8px, 0.6vw, 12px);
+    width: 100%;
 }
 
-.fb-phone-row select {
-    flex: 0 0 clamp(110px, 9vw, 145px);
+.fb-field .fb-phone-row select {
+    flex: 0 0 clamp(88px, 7vw, 110px);
+    width: auto !important;
+    max-width: none;
+    min-width: 0;
     font-size: clamp(11px, 0.7vw, 13px);
 }
 
-.fb-phone-row input {
-    flex: 1;
+.fb-field .fb-phone-row input[type="tel"] {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto !important;
 }
 
 /* 提交按钮 */
@@ -3265,18 +3272,25 @@ img.image-3d-rotate:hover,
 }
 
 /* Phone row */
-.fb-phone-row {
+.fb-field .fb-phone-row {
     display: flex;
+    align-items: stretch;
     gap: clamp(8px, 0.6vw, 12px);
+    width: 100%;
 }
 
-.fb-phone-row select {
-    flex: 0 0 clamp(110px, 9vw, 145px);
+.fb-field .fb-phone-row select {
+    flex: 0 0 clamp(88px, 7vw, 110px);
+    width: auto !important;
+    max-width: none;
+    min-width: 0;
     font-size: clamp(11px, 0.7vw, 13px);
 }
 
-.fb-phone-row input {
-    flex: 1;
+.fb-field .fb-phone-row input[type="tel"] {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto !important;
 }
 
 /* Submit button */
@@ -3850,21 +3864,24 @@ img.image-3d-rotate:hover,
         gap: 16px;
     }
 
-    .fb-phone-row {
-        flex-direction: column;
+    .fb-field .fb-phone-row {
+        flex-direction: row;
         align-items: stretch;
         gap: 10px;
+        width: 100%;
     }
 
-    .fb-phone-row select {
-        flex: none !important;
-        width: 100%;
+    .fb-field .fb-phone-row select {
+        flex: 0 0 clamp(88px, 22vw, 110px) !important;
+        width: auto !important;
         max-width: none;
     }
 
-    .fb-phone-row input {
-        flex: none !important;
-        width: 100%;
+    .fb-field .fb-phone-row input[type="tel"] {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        width: auto !important;
+        max-width: none;
     }
 
     .feedback-card .fb-submit-btn {
