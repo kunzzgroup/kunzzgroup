@@ -139,9 +139,11 @@ body {
   }
 
   .vertical-swiper-shell .swiper-slide.swiper-slide--joinus-feedback-only {
-    height: auto;
-    min-height: 0;
+    height: 100dvh;
+    min-height: 100dvh;
+    overflow-x: hidden;
     overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
     background-color: #ff5c00;
     align-items: stretch;
   }

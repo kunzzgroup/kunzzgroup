@@ -1,6 +1,6 @@
 import { useJoinSlideAnimation } from '../../../hooks/useJoinSlideAnimation.js';
 
-export function FeedbackForm({ formId }) {
+export function FeedbackForm({ formId, compact = false }) {
   return (
     <form
       id={formId}
@@ -94,7 +94,7 @@ export function FeedbackForm({ formId }) {
         <textarea
           id={`${formId}-message`}
           name="message"
-          rows={4}
+          rows={compact ? 2 : 4}
           placeholder="Please enter your feedback or suggestion..."
           required
         />

@@ -7,7 +7,7 @@ export default function JoinFeedbackMobile() {
         <div className="feedback-card joinus-feedback joinus-feedback--stacked">
           <h2 className="feedback-title">请提供您宝贵的意见</h2>
           <p className="feedback-subtitle">我们期待您的反馈，将尽快与您联系。</p>
-          <FeedbackForm formId="feedbackFormMobile" />
+          <FeedbackForm formId="feedbackFormMobile" compact />
         </div>
       </div>
     </div>

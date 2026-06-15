@@ -29,7 +29,7 @@
   }
 
   /* ── Pure swiper: lock Join page slides to one viewport (override index.css scroll mode) ── */
-  .vertical-swiper-shell:has(.join-swiper) .swiper-slide:not(.footer-slide) {
+  .vertical-swiper-shell:has(.join-swiper) .swiper-slide:not(.footer-slide):not(.swiper-slide--joinus-feedback-only) {
     height: 100dvh !important;
     min-height: 100dvh !important;
     max-height: 100dvh !important;
@@ -38,7 +38,7 @@
 
   .vertical-swiper-shell:has(.join-swiper) .swiper-slide > section,
   .vertical-swiper-shell:has(.join-swiper) .swiper-slide > .benefits-wrapper--full-slide,
-  .vertical-swiper-shell:has(.join-swiper) .swiper-slide > .contact-form-section,
+  .vertical-swiper-shell:has(.join-swiper) .swiper-slide > .contact-form-section:not(.contact-form-section--feedback-only),
   .vertical-swiper-shell:has(.join-swiper) .swiper-slide > .job-section {
     height: 100% !important;
     min-height: 100% !important;
@@ -56,7 +56,7 @@
 
   .vertical-swiper-shell:has(.join-swiper) .comphoto-section,
   .vertical-swiper-shell:has(.join-swiper) .job-section,
-  .vertical-swiper-shell:has(.join-swiper) .contact-form-section,
+  .vertical-swiper-shell:has(.join-swiper) .contact-form-section:not(.contact-form-section--feedback-only),
   .vertical-swiper-shell:has(.join-swiper) .joinus-section {
     width: 100%;
     height: 100% !important;
@@ -76,16 +76,17 @@
     height: 100dvh !important;
     min-height: 100dvh !important;
     max-height: 100dvh !important;
+    overflow-x: hidden !important;
     overflow-y: auto !important;
-    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     background-color: #ff5c00;
   }
 
-  .vertical-swiper-shell:has(.join-swiper) .swiper-slide > .contact-form-section--feedback-only {
+  .vertical-swiper-shell:has(.join-swiper) .swiper-slide > .contact-form-section--feedback-only,
+  .vertical-swiper-shell:has(.join-swiper) .contact-form-section--feedback-only {
     height: auto !important;
-    min-height: 100% !important;
+    min-height: min(100%, auto) !important;
     max-height: none !important;
     overflow: visible !important;
   }
@@ -528,7 +529,8 @@
     justify-content: flex-start;
     align-items: center;
     box-sizing: border-box;
-    padding: var(--feedback-top) var(--contact-inline) var(--join-slide-bottom) var(--contact-inline) !important;
+    padding: var(--feedback-top) var(--contact-inline) max(100px, calc(80px + env(safe-area-inset-bottom, 0px)))
+      var(--contact-inline) !important;
   }
 
   .contact-form-section--feedback-only .contact-form-container--feedback-only {
@@ -681,16 +683,25 @@
   }
 
   .contact-form-section--feedback-only .fb-submit-btn {
+    position: sticky;
+    bottom: max(8px, env(safe-area-inset-bottom, 0px));
+    z-index: 5;
     flex-shrink: 0;
     width: 100%;
-    min-height: 42px;
-    font-size: 0.875rem;
-    letter-spacing: 0.1em;
-    margin-top: 6px;
+    min-height: 44px;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    line-height: 1.2;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff;
+    margin-top: 8px;
     margin-bottom: 4px;
     border-radius: 10px;
-    padding: 10px;
+    padding: 11px 10px;
     box-sizing: border-box;
+    display: block;
+    box-shadow: 0 4px 14px rgba(255, 92, 0, 0.4);
   }
 
   .job-modal-content {
