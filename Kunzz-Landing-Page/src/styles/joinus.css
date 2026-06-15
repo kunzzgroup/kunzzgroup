@@ -3023,10 +3023,13 @@ img.image-3d-rotate:hover,
 @media (max-width: 768px) {
     .join-slide-card-center.contact-form-section {
         display: block !important;
+        width: min(100%, 440px) !important;
+        max-width: 440px !important;
         height: auto !important;
         min-height: 0 !important;
         padding: 0 !important;
         background: transparent !important;
+        margin-inline: auto !important;
     }
 
     .join-slide-card-center .contact-form-container,

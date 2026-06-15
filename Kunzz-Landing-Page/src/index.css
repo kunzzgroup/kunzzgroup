@@ -145,13 +145,16 @@ body {
     align-items: stretch;
   }
 
+  .vertical-swiper-shell .swiper-slide.swiper-slide--joinus-contact-only,
   .vertical-swiper-shell .swiper-slide.swiper-slide--joinus-feedback-only {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
     height: 100dvh;
     min-height: 100dvh;
     overflow: hidden !important;
     background-color: #ff5c00;
-    align-items: center;
-    justify-content: center;
   }
 
   /* Join Us 联系/表单屏：随内容高度，在 slide 内垂直居中 */

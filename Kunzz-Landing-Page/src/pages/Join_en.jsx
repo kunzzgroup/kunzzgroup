@@ -78,7 +78,7 @@ export default function Join({ onSlideChange, swiperRef }) {
           <JoinJobs onJobClick={setSelectedJobId} />
         </SwiperSlide>
 
-        <SwiperSlide>
+        <SwiperSlide className="swiper-slide--joinus-contact-only">
           <JoinContactFeedback />
         </SwiperSlide>
 
