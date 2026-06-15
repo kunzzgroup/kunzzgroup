@@ -19,6 +19,15 @@
 }
 
 @media (max-width: 768px) {
+  /* Shared spacing: 56px header + 10px gap below nav */
+  .vertical-swiper-shell:has(.join-swiper) {
+    --join-header-h: 56px;
+    --join-slide-gap: 10px;
+    --join-slide-top: calc(var(--join-header-h) + var(--join-slide-gap) + env(safe-area-inset-top, 0px));
+    --join-slide-bottom: max(68px, calc(12px + env(safe-area-inset-bottom, 0px)));
+    --join-slide-inline: max(16px, env(safe-area-inset-left, 0px));
+  }
+
   /* ── Pure swiper: lock Join page slides to one viewport (override index.css scroll mode) ── */
   .vertical-swiper-shell:has(.join-swiper) .swiper-slide:not(.footer-slide) {
     height: 100dvh !important;
@@ -81,7 +90,7 @@
   .joinus-section--hero-only .joinus-banner--full {
     flex: 1 1 auto;
     min-height: 0;
-    padding: max(52px, env(safe-area-inset-top, 0px)) 16px 24px;
+    padding: var(--join-slide-top) 16px 24px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -145,8 +154,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: max(64px, calc(48px + env(safe-area-inset-top, 0px))) 20px
-      max(48px, env(safe-area-inset-bottom, 0px));
+    padding: var(--join-slide-top) 20px var(--join-slide-bottom);
     text-align: center;
     box-sizing: border-box;
     overflow: hidden;
@@ -223,13 +231,12 @@
 
   /* ── Jobs: tabbed single company ── */
   .job-section--mobile-pure {
-    --joinus-inline: max(16px, env(safe-area-inset-left, 0px));
+    --joinus-inline: var(--join-slide-inline);
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
-    padding: max(60px, calc(48px + env(safe-area-inset-top, 0px))) var(--joinus-inline)
-      max(72px, calc(24px + env(safe-area-inset-bottom, 0px))) var(--joinus-inline);
+    padding: var(--join-slide-top) var(--joinus-inline) var(--join-slide-bottom) var(--joinus-inline);
     overflow: hidden;
     box-sizing: border-box;
   }
@@ -356,19 +363,19 @@
   }
 
   .contact-form-section:not(.contact-form-section--feedback-only) {
-    --contact-inline: max(16px, env(safe-area-inset-left, 0px));
+    --contact-inline: var(--join-slide-inline);
     --contact-card-pad: 14px;
     flex: 1 1 auto;
+    flex-direction: column;
     width: 100%;
     height: 100% !important;
     min-height: 100% !important;
     max-height: 100% !important;
     overflow: hidden;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     box-sizing: border-box;
-    padding: max(60px, calc(48px + env(safe-area-inset-top, 0px))) var(--contact-inline)
-      max(72px, calc(20px + env(safe-area-inset-bottom, 0px))) var(--contact-inline);
+    padding: var(--join-slide-top) var(--contact-inline) var(--join-slide-bottom) var(--contact-inline);
   }
 
   .contact-form-section:not(.contact-form-section--feedback-only) .contact-form-container {
@@ -498,27 +505,28 @@
 
   /* ── Feedback-only slide ── */
   .contact-form-section--feedback-only {
-    --contact-inline: max(16px, env(safe-area-inset-left, 0px));
-    --contact-card-pad: 16px;
+    --contact-inline: var(--join-slide-inline);
+    --contact-card-pad: 14px;
     flex: 1 1 auto;
+    flex-direction: column;
     width: 100%;
     height: 100% !important;
     min-height: 100% !important;
     max-height: 100% !important;
     overflow: hidden;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     box-sizing: border-box;
-    padding: max(60px, calc(48px + env(safe-area-inset-top, 0px))) var(--contact-inline)
-      max(72px, calc(20px + env(safe-area-inset-bottom, 0px))) var(--contact-inline);
+    /* Override desktop joinus.css clamp(90px…) top padding */
+    padding: var(--join-slide-top) var(--contact-inline) var(--join-slide-bottom) var(--contact-inline) !important;
   }
 
   .contact-form-section--feedback-only .contact-form-container--feedback-only {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     width: min(100%, 440px);
     max-width: 440px;
-    height: 100%;
-    max-height: 100%;
+    height: auto;
+    max-height: calc(100dvh - var(--join-slide-top) - var(--join-slide-bottom));
     min-height: 0;
     margin-inline: auto;
     align-self: center;
@@ -528,13 +536,13 @@
   }
 
   .contact-form-section--feedback-only .feedback-card {
-    flex: 1 1 auto !important;
+    flex: 0 1 auto !important;
     width: 100%;
     min-height: 0;
-    max-height: 100%;
+    max-height: calc(100dvh - var(--join-slide-top) - var(--join-slide-bottom));
     border-radius: 16px;
     box-shadow: 0 10px 36px rgba(0, 0, 0, 0.12);
-    padding: 16px var(--contact-card-pad) 18px;
+    padding: 12px var(--contact-card-pad) 14px;
     box-sizing: border-box;
     overflow: hidden;
     display: flex;
@@ -545,20 +553,20 @@
     font-size: clamp(1rem, 3.4vw, 1.2rem);
     text-align: center;
     flex-shrink: 0;
-    margin-bottom: 2px;
+    margin: 0 0 4px;
   }
 
   .contact-form-section--feedback-only .feedback-subtitle {
     font-size: 0.7rem;
     line-height: 1.35;
     text-align: center;
-    margin-bottom: 10px;
+    margin: 0 0 8px;
     flex-shrink: 0;
   }
 
   .contact-form-section--feedback-only #feedbackForm,
   .contact-form-section--feedback-only #feedbackFormMobile {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-height: 0;
     display: flex;
     flex-direction: column;
@@ -576,7 +584,7 @@
 
   .contact-form-section--feedback-only .fb-field {
     width: 100%;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     flex-shrink: 0;
     box-sizing: border-box;
   }
@@ -589,7 +597,7 @@
 
   .contact-form-section--feedback-only .fb-field label {
     font-size: 0.75rem;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
   }
 
   .contact-form-section--feedback-only .fb-field input[type='text'],
@@ -637,7 +645,7 @@
     min-height: 44px;
     font-size: 0.875rem;
     letter-spacing: 0.12em;
-    margin-top: auto;
+    margin-top: 8px;
     margin-bottom: 0;
     border-radius: 10px;
     padding: 10px;
@@ -650,8 +658,191 @@
     margin-top: 1rem;
   }
 
-  .job-detail-meta {
+  /* ── Job detail modal (职位详情弹窗) ── */
+  #jobDetailModal {
+    align-items: center;
+    justify-content: center;
+    padding: calc(56px + 10px + env(safe-area-inset-top, 0px)) 16px
+      max(16px, env(safe-area-inset-bottom, 0px));
+    box-sizing: border-box;
+  }
+
+  #jobDetailModal .job-detail-modal {
+    width: 100%;
+    max-width: min(420px, 100%);
+    height: auto;
+    max-height: calc(
+      100dvh - 56px - 26px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
+    );
+    min-height: 0;
+    margin-top: 0;
+    padding: 14px 16px 18px;
+    border-radius: 14px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable;
+  }
+
+  #jobDetailModal .close-btn {
+    top: 8px;
+    right: 8px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    line-height: 1;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  #jobDetailModal .job-detail-content h2 {
+    font-size: 1.125rem;
+    margin: 2px 36px 12px;
+    padding: 0 2px;
+    line-height: 1.3;
+  }
+
+  #jobDetailModal .job-detail-meta {
     grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  #jobDetailModal .job-detail-item {
+    padding: 10px 12px;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+    min-height: 42px;
+    box-sizing: border-box;
+  }
+
+  #jobDetailModal .job-detail-item:hover {
+    transform: none;
+  }
+
+  #jobDetailModal .job-detail-label,
+  #jobDetailModal .job-detail-item span {
+    font-size: 0.8125rem;
+    line-height: 1.35;
+  }
+
+  #jobDetailModal .job-detail-item span:last-child {
+    color: #333;
+    font-weight: 600;
+  }
+
+  #jobDetailModal .job-detail-description,
+  #jobDetailModal .job-detail-address {
+    margin-bottom: 12px;
+  }
+
+  #jobDetailModal .job-detail-description h3,
+  #jobDetailModal .job-detail-address h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin: 0 0 6px;
+    line-height: 1.3;
+  }
+
+  #jobDetailModal .job-detail-description p,
+  #jobDetailModal .job-detail-address p {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    padding: 10px 12px 10px 14px;
+    margin: 0;
+    border-radius: 8px;
+    box-sizing: border-box;
+    word-break: break-word;
+  }
+
+  #jobDetailModal .apply-btn-container {
+    margin-top: 12px;
+    padding-top: 2px;
+  }
+
+  #jobDetailModal .apply-btn {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 0.9375rem;
+    border-radius: 12px;
+    box-sizing: border-box;
+  }
+
+  /* ── Job apply modal (申请职位弹窗) ── */
+  #formModal {
+    align-items: center;
+    justify-content: center;
+    padding: calc(56px + 10px + env(safe-area-inset-top, 0px)) 16px
+      max(16px, env(safe-area-inset-bottom, 0px));
+    box-sizing: border-box;
+  }
+
+  #formModal .job-modal-content {
+    width: 100%;
+    max-width: min(420px, 100%);
+    max-height: calc(
+      100dvh - 56px - 26px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
+    );
+    margin-top: 0;
+    padding: 14px 16px 18px;
+    border-radius: 14px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable;
+  }
+
+  #formModal .close-btn {
+    top: 8px;
+    right: 8px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  #formModal .job-form h2 {
+    font-size: 1.05rem;
+    margin: 2px 36px 12px;
+    padding: 0 2px;
+  }
+
+  #formModal .job-form label {
+    font-size: 0.8125rem;
+    margin-top: 6px;
+    margin-bottom: 4px;
+  }
+
+  #formModal .job-form-row {
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 0;
+  }
+
+  #formModal .job-phone-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  #formModal .job-phone-group select,
+  #formModal .job-phone-group input {
+    flex: none;
+    width: 100%;
+    min-width: 0;
+  }
+
+  #formModal .job-submit-btn {
+    margin-top: 14px;
+    min-height: 44px;
+    font-size: 0.9375rem;
+    border-radius: 12px;
   }
 }
 
