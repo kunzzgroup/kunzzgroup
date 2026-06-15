@@ -65,7 +65,7 @@ body {
 .vertical-swiper-shell .joinus-section,
 .vertical-swiper-shell .comphoto-section,
 .vertical-swiper-shell .job-section,
-.vertical-swiper-shell .contact-form-section {
+.vertical-swiper-shell .contact-form-section:not(.contact-form-section--feedback-only) {
   height: 100%;
   min-height: 100%;
 }
