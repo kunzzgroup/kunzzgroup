@@ -53,9 +53,7 @@ export default function AboutIntro() {
           <h1>集团简介</h1>
           <p>
             Kunzz Holdings 是一家总部位于马来西亚的多元化控股集团，专注资源整合与效率提升，
-            <br />
             为旗下公司提供战略支持与运营协同。我们致力于用心打造品牌，
-            <br />
             激发团队潜力，助力企业在竞争中脱颖而出。
           </p>
         </div>

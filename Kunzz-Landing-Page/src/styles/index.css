@@ -484,28 +484,39 @@ body::-webkit-scrollbar {
    =========================================== */
 .about-section {
     background: url('/images/背景3.webp') no-repeat center center/cover;
-    height: 100%;
+    height: auto;
     min-height: 100%;
     scroll-snap-align: start;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
     box-sizing: border-box;
-    padding: 80px 0; /* 预留 navbar 高度 */
+    padding: 80px 0 0;
     background-color: white;
 }
 
+.vertical-swiper-shell .swiper-slide:has(#comprofile) {
+    height: auto !important;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
 .comprofile-section {
-    height: 80%;
+    height: auto;
+    min-height: 0;
+    flex: 1 1 auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: clamp(40px, 6vw, 80px) clamp(46px, 4.17vw, 80px) 0; /* 上左右内边距响应 */
+    padding: clamp(40px, 6vw, 80px) clamp(46px, 4.17vw, 80px) 0;
     box-sizing: border-box;
-    width: clamp(880px, 87.5vw, 1680px);
+    width: min(100%, 1680px);
+    max-width: 100%;
     margin: 0 auto;
     flex-wrap: nowrap;
-    gap: clamp(60px, 8vw, 160px); /* 子元素间距响应 */
+    gap: clamp(60px, 8vw, 160px);
 }
 
 .comprofile-text {
@@ -541,8 +552,9 @@ body::-webkit-scrollbar {
 .comprofile-description {
     width: 100%;
     max-width: 780px;
-    height: clamp(80px, 8vw, 170px); /* 高度响应 */
-    font-size: clamp(10px, 1.04vw, 20px); /* 字号响应 */
+    height: auto;
+    min-height: 0;
+    font-size: clamp(10px, 1.04vw, 20px);
     font-weight: normal;
     font-family: 'Source Sans Pro', sans-serif;
     color: #888888;
@@ -571,16 +583,19 @@ body::-webkit-scrollbar {
 }
 
 .stats-section {
-    height: 20%;
+    flex: 0 0 auto;
+    height: auto;
+    min-height: clamp(132px, 18vh, 220px);
     background: url('/images/背景4.webp') no-repeat center center/cover;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: clamp(20px, 5vw, 60px);
+    gap: clamp(16px, 4vw, 60px);
     color: white;
-    padding: 0 clamp(20px, 10vw, 257px);
-    flex-wrap: nowrap;
-    margin-bottom: -80px;
+    padding: clamp(16px, 2.5vh, 28px) clamp(20px, 6vw, 80px);
+    flex-wrap: wrap;
+    margin-bottom: 0;
+    box-sizing: border-box;
 }
 
 .stat-box {
@@ -589,8 +604,9 @@ body::-webkit-scrollbar {
     align-items: center;
     justify-content: center;
     text-align: center;
-    flex: 1 1 auto;
-    min-width: 100px;
+    flex: 1 1 120px;
+    min-width: 96px;
+    max-width: 220px;
 }
 
 .stat-number {
@@ -942,6 +958,18 @@ body::-webkit-scrollbar {
         padding-bottom: 0;
     }
 
+    .stat-number {
+        font-size: clamp(1.75rem, 8vw, 2.5rem);
+        white-space: normal;
+        line-height: 1.15;
+    }
+
+    .stat-label {
+        font-size: clamp(0.8125rem, 3.2vw, 1rem);
+        white-space: normal;
+        margin-top: 4px;
+    }
+
     .culture-section {
         flex-direction: column;
         height: auto;
@@ -1033,6 +1061,34 @@ body::-webkit-scrollbar {
 
     .culture-card {
         height: clamp(110px, 38vw, 160px);
+    }
+}
+
+@media (max-width: 1100px) and (min-width: 769px) {
+    .comprofile-section {
+        width: 100%;
+        max-width: 100%;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding-inline: clamp(20px, 4vw, 48px);
+    }
+
+    .comprofile-image {
+        max-width: min(360px, 42vw);
+    }
+
+    .stats-section {
+        width: 100%;
+        padding-inline: clamp(16px, 4vw, 48px);
+    }
+
+    .stat-box {
+        flex: 1 1 calc(33.333% - 24px);
+    }
+
+    .stat-number,
+    .stat-label {
+        white-space: normal;
     }
 }
 

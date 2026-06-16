@@ -103,7 +103,8 @@ export default function JoinJobs({ onJobClick }) {
   return (
     <div className={`job-section${isMobile ? ' job-section--mobile-pure' : ''}`}>
       <div ref={tableRef} className="job-table-container">
-        <h2 className="job-table-title">Career Opportunities</h2>
+        <h2 className="job-table-title">Open Opportunities</h2>
+        <p className="job-table-subtitle">Explore roles across our group companies</p>
       </div>
 
       {loading ? <div className="no-jobs">Loading…</div> : null}

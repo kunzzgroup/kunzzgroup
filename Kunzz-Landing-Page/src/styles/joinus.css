@@ -470,10 +470,12 @@ body::-webkit-scrollbar {
 
 
 .job-section {
-    padding: clamp(3.75rem, 8vw, 6.25rem);
-    background: url('/images/背景3.webp') no-repeat center center/cover;
+    padding: clamp(3.75rem, 8vw, 6.25rem) clamp(1rem, 3vw, 2rem);
+    background:
+        linear-gradient(180deg, rgba(255, 248, 242, 0.92) 0%, rgba(255, 255, 255, 0.88) 100%),
+        url('/images/背景3.webp') no-repeat center center/cover;
     backdrop-filter: blur(clamp(1.25rem, 2vw, 1.25rem));
-    box-shadow: 0 clamp(1.25rem, 2vw, 1.25rem) clamp(3.75rem, 6vw, 3.75rem) rgba(0, 0, 0, 0.1);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
     min-height: 100vh;
     width: 100%;
     display: flex;
@@ -485,18 +487,45 @@ body::-webkit-scrollbar {
     text-align: center;
 }
 
+.job-table-container {
+    width: min(100%, 920px);
+    margin: 0 auto clamp(0.75rem, 2vw, 1.5rem);
+    padding: 0 clamp(0.5rem, 2vw, 1rem);
+    box-sizing: border-box;
+}
+
 .job-table-title {
     text-align: center;
     font-size: clamp(2.2500rem, 3.7946vw - 0.1786rem, 4.3750rem);
     font-weight: 700;
-    margin: clamp(0rem, 2vw, 2.5rem) auto clamp(0.5rem, 2vw, 2.5rem);
-    background: #ff5c00;
-    background-size: 300% 300%;
+    margin: clamp(0rem, 2vw, 2.5rem) auto 0.35rem;
+    background: linear-gradient(135deg, #ff5c00 0%, #ff8a3d 55%, #ff5c00 100%);
+    background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     text-shadow: none;
-    filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.6));
+    filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.18));
+    letter-spacing: 0.02em;
+}
+
+.job-table-subtitle {
+    margin: 0 auto 0.25rem;
+    max-width: 34rem;
+    font-size: clamp(0.875rem, 1.35vw, 1.125rem);
+    line-height: 1.55;
+    color: rgba(68, 68, 68, 0.88);
+    font-weight: 500;
+}
+
+.job-table-container::after {
+    content: '';
+    display: block;
+    width: 72px;
+    height: 4px;
+    margin: 14px auto 0;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #ff5c00, #ffb07a);
 }
 
 @keyframes gradientShift {
@@ -537,20 +566,24 @@ body::-webkit-scrollbar {
 
 
 .company-job-container {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.97);
     backdrop-filter: blur(20px);
-    border-radius: 12px;
-    padding: 12px;
+    border-radius: 16px;
+    padding: clamp(0.75rem, 1.2vw, 1rem);
     width: clamp(16.0000rem, 10.7143vw + 9.1429rem, 22.0000rem);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(255, 92, 0, 0.1);
-    border: 1px solid rgba(255, 92, 0, 0.3);
+    box-shadow:
+        0 10px 28px rgba(255, 92, 0, 0.1),
+        0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(255, 92, 0, 0.22);
     transition: all 0.3s ease;
     flex: 1;
 }
 
 .company-job-container:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    transform: translateY(-6px);
+    box-shadow:
+        0 18px 40px rgba(255, 92, 0, 0.16),
+        0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .company-title {
@@ -581,18 +614,18 @@ body::-webkit-scrollbar {
 .job-item {
     background: linear-gradient(135deg, #FF5C00 0%, #ff7a33 100%);
     color: white;
-    border-radius: clamp(0.3rem, 0.6vw, 0.6rem);
-    padding: 0.5rem 0rem;
+    border-radius: clamp(0.45rem, 0.7vw, 0.75rem);
+    padding: clamp(0.55rem, 0.8vw, 0.75rem) clamp(0.65rem, 1vw, 0.9rem);
     font-size: clamp(0.8rem, 1vw, 1rem);
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 1px 5px rgba(255, 92, 0, 0.3);
+    box-shadow: 0 2px 8px rgba(255, 92, 0, 0.28);
     text-align: center;
-    margin-bottom: clamp(0.125rem, 0.25vw, 0.25rem);
-    white-space: nowrap;
+    margin-bottom: clamp(0.25rem, 0.35vw, 0.4rem);
+    white-space: normal;
+    line-height: 1.35;
     overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .job-item:hover {

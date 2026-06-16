@@ -267,8 +267,20 @@
 
   .job-section--mobile-pure .job-table-title {
     font-size: clamp(18px, 5.5vw, 28px);
-    margin: 0 auto 10px;
+    margin: 0 auto 8px;
     flex-shrink: 0;
+  }
+
+  .job-section--mobile-pure .job-table-subtitle {
+    font-size: clamp(0.75rem, 3vw, 0.875rem);
+    margin: 0 auto 12px;
+    padding: 0 8px;
+    line-height: 1.5;
+    color: rgba(68, 68, 68, 0.88);
+  }
+
+  .job-section--mobile-pure .job-table-container::after {
+    margin-bottom: 12px;
   }
 
   .jobs-company-tabs {

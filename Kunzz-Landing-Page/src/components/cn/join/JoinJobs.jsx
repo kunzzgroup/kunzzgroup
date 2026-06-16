@@ -104,6 +104,7 @@ export default function JoinJobs({ onJobClick }) {
     <div className={`job-section${isMobile ? ' job-section--mobile-pure' : ''}`}>
       <div ref={tableRef} className="job-table-container">
         <h2 className="job-table-title">目前在招聘的职位</h2>
+        <p className="job-table-subtitle">欢迎加入 KUNZZ 集团旗下各品牌</p>
       </div>
 
       {loading ? <div className="no-jobs">加载职位中…</div> : null}

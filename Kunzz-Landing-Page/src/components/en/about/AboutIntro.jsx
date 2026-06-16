@@ -52,11 +52,11 @@ export default function AboutIntro() {
         <div className="intro-content">
           <h1>About Kunzz Group</h1>
           <p>
-            Kunzz Holdings is a diversified holding group headquartered in Malaysia, focused on resource integration and operational efficiency.
-            <br />
-            We provide strategic support and operational synergy for our subsidiaries. We are committed to building brands with heart, 
-            <br />
-            unleashing team potential, and helping businesses stand out in a competitive landscape.
+            Kunzz Holdings is a diversified holding group headquartered in Malaysia, focused on
+            resource integration and operational efficiency. We provide strategic support and
+            operational synergy for our subsidiaries. We are committed to building brands with
+            heart, unleashing team potential, and helping businesses stand out in a competitive
+            landscape.
           </p>
         </div>
       </div>
