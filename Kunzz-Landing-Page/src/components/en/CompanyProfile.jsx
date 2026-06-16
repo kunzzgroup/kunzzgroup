@@ -22,20 +22,20 @@ export default function CompanyProfile() {
         </AnimateOnScroll>
       </div>
 
-      <AnimateOnScroll className="stats-section">
+      <AnimateOnScroll className="stats-section stats-section--en">
         <div className="stat-box">
           <div className="stat-number">2023</div>
-          <div className="stat-label">Years of Establishment</div>
+          <div className="stat-label">Year Founded</div>
         </div>
         <div className="divider" />
         <div className="stat-box">
           <div className="stat-number">3</div>
-          <div className="stat-label">Number of Subsidiaries</div>
+          <div className="stat-label">Subsidiaries</div>
         </div>
         <div className="divider" />
         <div className="stat-box">
           <div className="stat-number">70+</div>
-          <div className="stat-label">Number of Employees</div>
+          <div className="stat-label">Employees</div>
         </div>
       </AnimateOnScroll>
     </section>

@@ -995,9 +995,31 @@ body::-webkit-scrollbar {
     .stat-label {
         font-size: clamp(0.6875rem, 2.8vw, 0.8125rem);
         font-family: 'Inter', sans-serif;
-        white-space: nowrap;
+        white-space: normal;
+        overflow-wrap: break-word;
         margin-top: 4px;
+        line-height: 1.25;
+        max-width: 100%;
+        padding: 0 2px;
+    }
+
+    .stats-section--en {
+        min-height: clamp(84px, 14vh, 112px);
+        padding-inline: clamp(12px, 3.5vw, 20px) clamp(48px, 11vw, 56px);
+    }
+
+    .stats-section--en .stat-label {
+        font-size: clamp(0.5625rem, 2.15vw, 0.6875rem);
         line-height: 1.2;
+        letter-spacing: 0.01em;
+    }
+
+    .stats-section--en .stat-number {
+        font-size: clamp(1.25rem, 5vw, 1.625rem);
+    }
+
+    .stats-section--en .divider {
+        height: clamp(40px, 10vw, 52px);
     }
 
     .culture-section {
