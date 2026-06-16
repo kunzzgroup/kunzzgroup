@@ -846,7 +846,7 @@ body::-webkit-scrollbar {
         min-height: calc(100dvh - 56px);
         padding: 48px 0 0;
         overflow-y: visible;
-        justify-content: flex-start;
+        justify-content: center;
         gap: 0;
         background:
             linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.96) 100%),
@@ -858,10 +858,13 @@ body::-webkit-scrollbar {
         width: 100%;
         max-width: 100%;
         height: auto;
-        padding: 8px 18px 8px;
+        flex: 1 1 auto;
+        padding: 8px 20px 12px;
         gap: clamp(10px, 2.5vw, 16px);
         box-sizing: border-box;
         align-items: center;
+        justify-content: center;
+        text-align: center;
     }
 
     .comprofile-section .comprofile-image {
@@ -897,7 +900,7 @@ body::-webkit-scrollbar {
 
     .comprofile-description {
         height: auto;
-        max-width: 100%;
+        max-width: min(100%, 22rem);
         margin-left: auto;
         margin-right: auto;
         font-size: clamp(0.8125rem, 3.35vw, 0.9375rem);
@@ -935,16 +938,16 @@ body::-webkit-scrollbar {
         flex-direction: row;
         flex-wrap: nowrap;
         align-items: center;
-        justify-content: space-evenly;
+        justify-content: center;
         row-gap: 0;
-        column-gap: clamp(4px, 1.5vw, 12px);
+        column-gap: clamp(8px, 2vw, 16px);
         height: auto;
         min-height: 0;
         width: 100%;
-        padding: 12px clamp(48px, 14vw, 56px) 12px clamp(8px, 2.5vw, 16px);
-        padding-bottom: calc(14px + env(safe-area-inset-bottom, 0));
+        max-width: 100%;
+        padding: 14px 48px calc(16px + env(safe-area-inset-bottom, 0));
         margin: 0;
-        margin-top: 0;
+        margin-top: auto;
         margin-bottom: 0;
         background-color: #ff7a00;
         background-image: url('/images/背景4.webp');
@@ -952,6 +955,11 @@ body::-webkit-scrollbar {
         background-position: center center;
         background-size: cover;
         box-sizing: border-box;
+    }
+
+    .stats-section .stat-box,
+    .stats-section .divider {
+        flex: 0 1 auto;
     }
 
     .divider {

@@ -1769,11 +1769,7 @@ img.image-3d-rotate:hover,
   }
 
   .timeline-month-sidebar {
-    flex-direction: row;
-    justify-content: center;
-    min-width: auto;
-    padding: 0 10px 14px;
-    gap: 4px;
+    display: none !important;
   }
 
   .timeline-month-sidebar::before {

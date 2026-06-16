@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTimeline } from '../../../hooks/useTimeline.js';
+import { useIsMobile } from '../../../hooks/useIsMobile.js';
 
 const MONTH_NAMES_EN = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -37,6 +38,7 @@ const COPY = {
 
 export default function AboutTimeline({ lang = 'zh' }) {
   const copy = COPY[lang === 'en' ? 'en' : 'zh'];
+  const isMobile = useIsMobile();
   const { items, years, yearGroups, firstIndexByYear, loading, error } = useTimeline(lang);
   const [currentIndex, setCurrentIndex] = useState(0);
   const isAnimatingRef = useRef(false);
@@ -260,7 +262,7 @@ export default function AboutTimeline({ lang = 'zh' }) {
       </div>
 
       <div className="timeline-body">
-        {monthsInYear.length > 0 ? (
+        {!isMobile && monthsInYear.length > 0 ? (
         <div className="timeline-month-sidebar" id="monthSidebar">
           {monthsInYear.map((m) => (
             <div
@@ -299,7 +301,7 @@ export default function AboutTimeline({ lang = 'zh' }) {
                     </div>
                     <div className="timeline-text">
                       <div className="year-badge">
-                        {copy.formatYearBadge(year, month)}
+                        {copy.formatYearBadge(year, isMobile ? 0 : month)}
                       </div>
                       <h3>{item.title}</h3>
                       {item.description1 ? <p>{item.description1}</p> : null}

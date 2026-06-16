@@ -174,11 +174,14 @@ body {
 
   .vertical-swiper-shell .about-section .comprofile-section {
     flex: 1 1 auto;
+    justify-content: center;
+    align-items: center;
   }
 
   .vertical-swiper-shell .about-section .stats-section {
     flex: 0 0 auto;
     margin-top: auto;
+    justify-content: center;
   }
 
   .vertical-swiper-shell .about-swiper .swiper-slide:has(#timeline-1) {
