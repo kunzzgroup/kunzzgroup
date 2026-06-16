@@ -63,6 +63,20 @@ body::-webkit-scrollbar {
   min-height: 100%;
 }
 
+/* Timeline slide: grow with card content (mobile + desktop scroll) */
+.swiper-slide:has(#timeline-1) {
+  overflow-x: hidden;
+  overflow-y: auto;
+  justify-content: flex-start;
+  align-items: stretch;
+  height: auto;
+}
+
+.swiper-slide:has(#timeline-1) .timeline-section {
+  width: 100%;
+  flex: 0 0 auto;
+}
+
 .hidden {
   display: none;
 }
@@ -1614,11 +1628,10 @@ img.image-3d-rotate:hover,
      ================== */
   .about-swiper .swiper-slide:has(#timeline-1) {
     height: auto !important;
-    min-height: 100dvh !important;
+    min-height: 0 !important;
     max-height: none !important;
     overflow-x: hidden !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
+    overflow-y: visible !important;
     align-items: stretch !important;
   }
 
@@ -1628,9 +1641,21 @@ img.image-3d-rotate:hover,
     max-height: none !important;
     justify-content: flex-start !important;
     align-items: center !important;
-    padding: calc(100px + env(safe-area-inset-top, 0px)) 8px calc(52px + env(safe-area-inset-bottom, 0px)) !important;
+    padding: calc(88px + env(safe-area-inset-top, 0px)) 12px calc(88px + env(safe-area-inset-bottom, 0px)) !important;
     overflow-y: visible !important;
     box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.06) !important;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .timeline-body {
+    width: 100% !important;
+    max-width: min(100%, 28rem) !important;
+    flex: 0 1 auto !important;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 4px;
+    box-sizing: border-box;
   }
 
   .timeline-section h1 {
@@ -1743,13 +1768,6 @@ img.image-3d-rotate:hover,
     background: transparent !important;
   }
 
-  .timeline-body {
-    width: 100% !important;
-    flex: 0 1 auto !important;
-    flex-direction: column;
-    align-items: center;
-  }
-
   .timeline-month-sidebar {
     flex-direction: row;
     justify-content: center;
@@ -1775,16 +1793,17 @@ img.image-3d-rotate:hover,
   }
 
   .timeline-content {
-    padding: 16px 16px 18px !important;
-    gap: 14px !important;
+    padding: 14px 14px 16px !important;
+    gap: 12px !important;
     border-radius: 18px !important;
     flex-direction: column;
     max-height: none !important;
+    min-height: 0 !important;
     overflow-y: visible !important;
   }
 
   .timeline-text {
-    padding-right: 44px;
+    padding-right: 0;
     box-sizing: border-box;
     width: 100%;
   }
@@ -1796,9 +1815,17 @@ img.image-3d-rotate:hover,
   }
 
   .timeline-image img {
-    min-height: 152px !important;
-    height: clamp(152px, 42vw, 232px) !important;
+    min-height: 0 !important;
+    height: clamp(108px, 30vw, 168px) !important;
     border-radius: 12px;
+    object-fit: cover;
+  }
+
+  .timeline-content-container {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   .timeline-text h3 {
@@ -1824,11 +1851,6 @@ img.image-3d-rotate:hover,
 
   .timeline-text .year-badge {
     font-size: clamp(0.78rem, 2.9vw, 0.9rem) !important;
-  }
-
-  .timeline-content-container {
-    flex: 0 0 auto !important;
-    min-height: 0 !important;
   }
 
   .timeline-cards-wrapper {

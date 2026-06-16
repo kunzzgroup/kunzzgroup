@@ -226,7 +226,8 @@
 /* 电话端缩小侧边图标，避免盖住内容与占位过重 */
 @media (max-width: 768px) {
     .social-sidebar {
-        right: 10px;
+        left: 10px;
+        right: auto;
         bottom: calc(12px + env(safe-area-inset-bottom, 0px));
         gap: 8px;
     }

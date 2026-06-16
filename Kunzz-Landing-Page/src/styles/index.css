@@ -875,29 +875,36 @@ body::-webkit-scrollbar {
         max-width: min(100%, 26rem);
         margin: 0 auto;
         text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
     .comprofile-subtitle {
         justify-content: center;
         margin-bottom: 4px;
         font-size: clamp(0.8125rem, 3.2vw, 0.9375rem);
+        width: 100%;
     }
 
     .comprofile-title {
         font-size: clamp(1.25rem, 5.5vw, 1.75rem);
         line-height: 1.2;
         letter-spacing: 0.02em;
+        text-align: center;
+        width: 100%;
     }
 
     .comprofile-description {
         height: auto;
         max-width: 100%;
-        margin-left: 0;
+        margin-left: auto;
+        margin-right: auto;
         font-size: clamp(0.8125rem, 3.35vw, 0.9375rem);
         line-height: 1.65;
         color: #555;
-        text-align: left;
-        text-align-last: left;
+        text-align: center;
+        text-align-last: center;
     }
 
     .comprofile-image {
@@ -907,9 +914,14 @@ body::-webkit-scrollbar {
         aspect-ratio: auto;
         flex: 0 0 auto;
         padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .comprofile-image img {
+        display: block;
+        margin: 0 auto;
         width: min(100px, 28vw);
         max-width: 100%;
         height: auto;
@@ -929,7 +941,8 @@ body::-webkit-scrollbar {
         height: auto;
         min-height: 0;
         width: 100%;
-        padding: 12px clamp(8px, 2.5vw, 16px) calc(14px + env(safe-area-inset-bottom, 0));
+        padding: 12px clamp(48px, 14vw, 56px) 12px clamp(8px, 2.5vw, 16px);
+        padding-bottom: calc(14px + env(safe-area-inset-bottom, 0));
         margin: 0;
         margin-top: 0;
         margin-bottom: 0;
