@@ -694,6 +694,7 @@ body::-webkit-scrollbar {
 }
 
 .culture-title {
+    font-family: 'Source Sans Pro', sans-serif;
     font-size: clamp(20px, 2.5vw, 70px); /* 标题字体响应式缩小 */
     color: white;
     font-weight: bold;
