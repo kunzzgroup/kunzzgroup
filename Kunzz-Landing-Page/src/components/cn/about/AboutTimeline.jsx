@@ -186,7 +186,7 @@ export default function AboutTimeline({ lang = 'zh' }) {
   }, []);
 
   const currentYear = years[currentIndex];
-  const monthsInYear = yearGroups[currentYear] || [];
+  const monthsInYear = (yearGroups[currentYear] || []).filter((m) => m.month > 0);
 
   if (loading) {
     return (
@@ -260,6 +260,7 @@ export default function AboutTimeline({ lang = 'zh' }) {
       </div>
 
       <div className="timeline-body">
+        {monthsInYear.length > 0 ? (
         <div className="timeline-month-sidebar" id="monthSidebar">
           {monthsInYear.map((m) => (
             <div
@@ -275,6 +276,7 @@ export default function AboutTimeline({ lang = 'zh' }) {
             </div>
           ))}
         </div>
+        ) : null}
 
         <div className="timeline-content-container">
           <div className="timeline-cards-wrapper">
