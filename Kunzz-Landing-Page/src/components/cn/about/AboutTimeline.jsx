@@ -1,8 +1,43 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTimeline } from '../../../hooks/useTimeline.js';
 
-export default function AboutTimeline() {
-  const { items, years, yearGroups, firstIndexByYear, loading, error } = useTimeline('zh');
+const MONTH_NAMES_EN = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+const COPY = {
+  zh: {
+    title: '— 我们的发展历史 —',
+    loading: '加载中…',
+    error: '无法加载时间线数据',
+    empty: '暂无发展历史数据',
+    prev: '上一项',
+    next: '下一项',
+    formatMonth: (month) => `${month}月`,
+    formatYearBadge: (year, month) => `${year}年${month ? ` · ${month}月` : ''}`,
+    formatImageAlt: (year) => `${year}年发展`,
+  },
+  en: {
+    title: '— Our Development History —',
+    loading: 'Loading…',
+    error: 'Unable to load timeline data',
+    empty: 'No timeline data available',
+    prev: 'Previous',
+    next: 'Next',
+    formatMonth: (month) => MONTH_NAMES_EN[month - 1] || `Month ${month}`,
+    formatYearBadge: (year, month) => {
+      if (!month) return String(year);
+      const monthLabel = MONTH_NAMES_EN[month - 1] || `Month ${month}`;
+      return `${year} · ${monthLabel}`;
+    },
+    formatImageAlt: (year) => `Development in ${year}`,
+  },
+};
+
+export default function AboutTimeline({ lang = 'zh' }) {
+  const copy = COPY[lang === 'en' ? 'en' : 'zh'];
+  const { items, years, yearGroups, firstIndexByYear, loading, error } = useTimeline(lang);
   const [currentIndex, setCurrentIndex] = useState(0);
   const isAnimatingRef = useRef(false);
   const containerRef = useRef(null);
@@ -156,8 +191,8 @@ export default function AboutTimeline() {
   if (loading) {
     return (
       <section className="timeline-section" ref={sectionRef}>
-        <h1>— 我们的发展历史 —</h1>
-        <p style={{ color: '#fff', textAlign: 'center' }}>加载中…</p>
+        <h1>{copy.title}</h1>
+        <p style={{ color: '#fff', textAlign: 'center' }}>{copy.loading}</p>
       </section>
     );
   }
@@ -165,8 +200,8 @@ export default function AboutTimeline() {
   if (error) {
     return (
       <section className="timeline-section" ref={sectionRef}>
-        <h1>— 我们的发展历史 —</h1>
-        <p style={{ color: '#fff', textAlign: 'center' }}>无法加载时间线数据（请确认 XAMPP 已启动）</p>
+        <h1>{copy.title}</h1>
+        <p style={{ color: '#fff', textAlign: 'center' }}>{copy.error}</p>
       </section>
     );
   }
@@ -174,22 +209,22 @@ export default function AboutTimeline() {
   if (items.length === 0) {
     return (
       <section className="timeline-section" ref={sectionRef}>
-        <h1>— 我们的发展历史 —</h1>
-        <p style={{ color: '#fff', textAlign: 'center' }}>暂无发展历史数据</p>
+        <h1>{copy.title}</h1>
+        <p style={{ color: '#fff', textAlign: 'center' }}>{copy.empty}</p>
       </section>
     );
   }
 
   return (
     <section className="timeline-section" id="timeline-1" ref={sectionRef}>
-      <h1>— 我们的发展历史 —</h1>
+      <h1>{copy.title}</h1>
 
       <div className="timeline-nav">
         <button
           type="button"
           className="nav-arrow prev"
           onClick={() => navigateTimeline('prev')}
-          aria-label="上一项"
+          aria-label={copy.prev}
         >
           ‹
         </button>
@@ -197,7 +232,7 @@ export default function AboutTimeline() {
           type="button"
           className="nav-arrow next"
           onClick={() => navigateTimeline('next')}
-          aria-label="下一项"
+          aria-label={copy.next}
         >
           ›
         </button>
@@ -236,7 +271,7 @@ export default function AboutTimeline() {
               tabIndex={0}
             >
               <div className="month-dot" />
-              <span>{m.month}月</span>
+              <span>{copy.formatMonth(m.month)}</span>
             </div>
           ))}
         </div>
@@ -257,12 +292,12 @@ export default function AboutTimeline() {
                   <div className="timeline-content">
                     <div className="timeline-image">
                       {item.image_url ? (
-                        <img src={item.image_url} alt={`${year}年发展`} />
+                        <img src={item.image_url} alt={copy.formatImageAlt(year)} />
                       ) : null}
                     </div>
                     <div className="timeline-text">
                       <div className="year-badge">
-                        {year}年{month ? ` · ${month}月` : ''}
+                        {copy.formatYearBadge(year, month)}
                       </div>
                       <h3>{item.title}</h3>
                       {item.description1 ? <p>{item.description1}</p> : null}

@@ -50,7 +50,7 @@ export default function About({ onSlideChange, swiperRef }) {
       </SwiperSlide>
 
       <SwiperSlide>
-        <AboutTimeline />
+        <AboutTimeline lang="en" />
       </SwiperSlide>
 
       <SwiperSlide className="footer-slide">
