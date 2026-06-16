@@ -1847,6 +1847,8 @@ img.image-3d-rotate:hover,
 
   .timeline-text .year-badge {
     font-size: clamp(0.78rem, 2.9vw, 0.9rem) !important;
+    display: inline-block !important;
+    visibility: visible !important;
   }
 
   .timeline-cards-wrapper {

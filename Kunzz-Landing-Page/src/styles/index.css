@@ -938,14 +938,13 @@ body::-webkit-scrollbar {
         flex-direction: row;
         flex-wrap: nowrap;
         align-items: center;
-        justify-content: center;
-        row-gap: 0;
-        column-gap: clamp(8px, 2vw, 16px);
+        justify-content: space-evenly;
+        gap: 0;
         height: auto;
-        min-height: 0;
+        min-height: clamp(76px, 13vh, 104px);
         width: 100%;
         max-width: 100%;
-        padding: 14px 48px calc(16px + env(safe-area-inset-bottom, 0));
+        padding: clamp(14px, 2.5vh, 20px) clamp(52px, 12vw, 64px) calc(16px + env(safe-area-inset-bottom, 0));
         margin: 0;
         margin-top: auto;
         margin-bottom: 0;
@@ -957,17 +956,13 @@ body::-webkit-scrollbar {
         box-sizing: border-box;
     }
 
-    .stats-section .stat-box,
-    .stats-section .divider {
-        flex: 0 1 auto;
-    }
-
     .divider {
         display: block;
-        width: 1px;
-        height: clamp(36px, 10vw, 52px);
-        background-color: rgba(255, 255, 255, 0.35);
+        width: 2px;
+        height: clamp(44px, 11vw, 58px);
+        background-color: rgba(255, 255, 255, 0.85);
         flex-shrink: 0;
+        align-self: center;
     }
 
     .stat-box {
@@ -975,25 +970,33 @@ body::-webkit-scrollbar {
         width: auto;
         max-width: none;
         min-width: 0;
-        padding: 4px 2px;
+        padding: 0 4px;
         border-bottom: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
     }
 
     .stat-box:last-child {
         border-bottom: none;
-        padding-bottom: 4px;
+        padding-bottom: 0;
     }
 
     .stat-number {
-        font-size: clamp(1.125rem, 5vw, 1.625rem);
-        white-space: normal;
+        font-size: clamp(1.375rem, 5.5vw, 1.875rem);
+        font-weight: bold;
+        font-family: 'Inter', sans-serif;
+        white-space: nowrap;
         line-height: 1.15;
     }
 
     .stat-label {
-        font-size: clamp(0.625rem, 2.6vw, 0.8125rem);
-        white-space: normal;
-        margin-top: 2px;
+        font-size: clamp(0.6875rem, 2.8vw, 0.8125rem);
+        font-family: 'Inter', sans-serif;
+        white-space: nowrap;
+        margin-top: 4px;
         line-height: 1.2;
     }
 
