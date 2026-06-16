@@ -1614,9 +1614,12 @@ img.image-3d-rotate:hover,
      ================== */
   .about-swiper .swiper-slide:has(#timeline-1) {
     height: auto !important;
-    min-height: 0 !important;
+    min-height: 100dvh !important;
     max-height: none !important;
-    overflow: visible !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    align-items: stretch !important;
   }
 
   .timeline-section {
@@ -1666,6 +1669,12 @@ img.image-3d-rotate:hover,
 
   .timeline-nav .nav-arrow {
     display: flex !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    left: auto !important;
+    right: auto !important;
     background: rgba(255, 255, 255, 0.42) !important;
     border: 1px solid rgba(255, 255, 255, 0.78) !important;
     backdrop-filter: blur(8px);
@@ -1673,12 +1682,21 @@ img.image-3d-rotate:hover,
     font-size: clamp(18px, 5vw, 24px) !important;
   }
 
+  .timeline-nav .nav-arrow.prev {
+    left: 0 !important;
+  }
+
+  .timeline-nav .nav-arrow.next {
+    right: 0 !important;
+  }
+
   .timeline-scroll-container {
+    width: calc(100% - 92px) !important;
     height: 58px !important;
     min-height: 58px !important;
     max-height: none !important;
-    mask: none !important;
-    -webkit-mask: none !important;
+    mask: linear-gradient(90deg, transparent 0%, black 5%, black 95%, transparent 100%) !important;
+    -webkit-mask: linear-gradient(90deg, transparent 0%, black 5%, black 95%, transparent 100%) !important;
   }
 
   .timeline-items-container {
@@ -1709,7 +1727,7 @@ img.image-3d-rotate:hover,
   }
 
   .timeline-item.active .timeline-bullet {
-    transform: scale(1.12) !important;
+    transform: scale(1.08) !important;
     color: #e65100 !important;
   }
 
@@ -1761,6 +1779,14 @@ img.image-3d-rotate:hover,
     gap: 14px !important;
     border-radius: 18px !important;
     flex-direction: column;
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+
+  .timeline-text {
+    padding-right: 44px;
+    box-sizing: border-box;
+    width: 100%;
   }
 
   .timeline-image {
@@ -1792,6 +1818,8 @@ img.image-3d-rotate:hover,
     color: #2e2e2e !important;
     font-size: clamp(0.88rem, 3.25vw, 1.02rem) !important;
     line-height: 1.68 !important;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .timeline-text .year-badge {
@@ -1811,11 +1839,12 @@ img.image-3d-rotate:hover,
 
   .timeline-content-item {
     position: relative !important;
-    width: min(96vw, 28rem) !important;
+    width: min(calc(100vw - 24px), 28rem) !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
     height: auto !important;
     min-height: 0 !important;
+    max-height: none !important;
     margin-left: auto !important;
     margin-right: auto !important;
     inset: auto !important;

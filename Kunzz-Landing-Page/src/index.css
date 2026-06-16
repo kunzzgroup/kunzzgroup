@@ -158,6 +158,39 @@ body {
   }
 
   /* Join Us 联系/表单屏：随内容高度，在 slide 内垂直居中 */
+  .vertical-swiper-shell .swiper-slide:has(#comprofile) {
+    height: auto !important;
+    min-height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .vertical-swiper-shell .about-section {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+  }
+
+  .vertical-swiper-shell .about-section .comprofile-section {
+    flex: 1 1 auto;
+  }
+
+  .vertical-swiper-shell .about-section .stats-section {
+    flex: 0 0 auto;
+    margin-top: auto;
+  }
+
+  .vertical-swiper-shell .about-swiper .swiper-slide:has(#timeline-1) {
+    height: auto !important;
+    min-height: 100dvh;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    align-items: stretch !important;
+  }
+
+  /* Join Us 联系/表单屏：随内容高度，在 slide 内垂直居中 */
   .vertical-swiper-shell:has(.join-swiper) .join-slide-card-center {
     height: auto !important;
     min-height: 0 !important;

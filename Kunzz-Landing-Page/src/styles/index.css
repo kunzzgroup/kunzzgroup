@@ -903,34 +903,35 @@ body::-webkit-scrollbar {
     .comprofile-image {
         width: 100%;
         max-width: min(260px, 72vw);
-        margin: 50px auto;
+        margin: 12px auto 6px;
         aspect-ratio: auto;
         flex: 0 0 auto;
         padding: 0;
     }
 
     .comprofile-image img {
-        width: min(120px, 34vw);
+        width: min(100px, 28vw);
         max-width: 100%;
         height: auto;
-        max-height: min(132px, 20vh);
+        max-height: min(108px, 16vh);
         object-fit: contain;
     }
 
     .stats-section {
         align-self: stretch;
-        flex-direction: column;
+        flex: 0 0 auto;
+        flex-direction: row;
         flex-wrap: nowrap;
         align-items: center;
-        justify-content: center;
-        row-gap: 14px;
-        column-gap: 0;
+        justify-content: space-evenly;
+        row-gap: 0;
+        column-gap: clamp(4px, 1.5vw, 12px);
         height: auto;
-        min-height: clamp(220px, 34svh, 340px);
+        min-height: 0;
         width: 100%;
-        padding: 14px 20px calc(22px + env(safe-area-inset-bottom, 0));
+        padding: 12px clamp(8px, 2.5vw, 16px) calc(14px + env(safe-area-inset-bottom, 0));
         margin: 0;
-        margin-top: auto;
+        margin-top: 0;
         margin-bottom: 0;
         background-color: #ff7a00;
         background-image: url('/images/背景4.webp');
@@ -941,33 +942,38 @@ body::-webkit-scrollbar {
     }
 
     .divider {
-        display: none;
+        display: block;
+        width: 1px;
+        height: clamp(36px, 10vw, 52px);
+        background-color: rgba(255, 255, 255, 0.35);
+        flex-shrink: 0;
     }
 
     .stat-box {
-        flex: 0 0 auto;
-        width: 100%;
-        max-width: 16rem;
+        flex: 1 1 0;
+        width: auto;
+        max-width: none;
         min-width: 0;
-        padding: 10px 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 4px 2px;
+        border-bottom: none;
     }
 
     .stat-box:last-child {
         border-bottom: none;
-        padding-bottom: 0;
+        padding-bottom: 4px;
     }
 
     .stat-number {
-        font-size: clamp(1.75rem, 8vw, 2.5rem);
+        font-size: clamp(1.125rem, 5vw, 1.625rem);
         white-space: normal;
         line-height: 1.15;
     }
 
     .stat-label {
-        font-size: clamp(0.8125rem, 3.2vw, 1rem);
+        font-size: clamp(0.625rem, 2.6vw, 0.8125rem);
         white-space: normal;
-        margin-top: 4px;
+        margin-top: 2px;
+        line-height: 1.2;
     }
 
     .culture-section {
