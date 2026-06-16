@@ -138,7 +138,6 @@ export default function JoinContactFeedback() {
 
           <div className="contact-info-bottom">
             <div className="contact-card-header">
-              <span className="contact-subtitle">CONTACT US</span>
               <h2 className="contact-title">Contact Us</h2>
             </div>
             <div className="contact-details">
