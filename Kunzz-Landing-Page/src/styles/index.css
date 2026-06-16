@@ -1045,7 +1045,7 @@ body::-webkit-scrollbar {
     .culture-card {
         width: 100%;
         max-width: 100%;
-        height: clamp(130px, 40vw, 180px);
+        height: clamp(130px, 40vw, 130px);
         min-height: 0;
         padding: 12px 8px;
         background-color: #fff;
