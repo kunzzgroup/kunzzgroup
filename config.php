@@ -4,16 +4,16 @@ $httpHost = $_SERVER['HTTP_HOST'] ?? '';
 $isProduction = str_contains($httpHost, 'kunzzgroup.com');
 
 // config.local.php is for local dev only — never load it on production.
-if (!$isProduction && file_exists(__DIR__ . '/config.local.php')) {
-    require __DIR__ . '/config.local.php';
-} elseif ($isProduction) {
+if ($isProduction) {
     $dbname = 'u690174784_kunzz';
     $dbuser = 'u690174784_kunzz';
     $dbpass = 'Kunzz1688';
-}
-$configLocal = __DIR__ . '/config.local.php';
-if (is_readable($configLocal)) {
-    require $configLocal;
+} elseif (is_readable(__DIR__ . '/config.local.php')) {
+    require __DIR__ . '/config.local.php';
+} else {
+    $dbname = 'kunzz';
+    $dbuser = 'root';
+    $dbpass = '';
 }
 
 if (!function_exists('app_url')) {
