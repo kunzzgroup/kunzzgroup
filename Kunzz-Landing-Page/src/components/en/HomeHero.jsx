@@ -2,6 +2,34 @@ import { useEffect, useState } from 'react';
 import { useAnimateOnScroll } from '../../hooks/useAnimateOnScroll.js';
 import { mediaUrl } from '../../utils/media.js';
 
+function HeroBackground({ videoType = 'video/mp4' }) {
+  const [videoFailed, setVideoFailed] = useState(false);
+
+  if (videoFailed) {
+    return (
+      <div
+        className="background-video background-image-fallback"
+        style={{ backgroundImage: "url('/images/背景4.webp')" }}
+        aria-hidden="true"
+      />
+    );
+  }
+
+  return (
+    <video
+      className="background-video"
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="metadata"
+      onError={() => setVideoFailed(true)}
+    >
+      <source src={mediaUrl('home_background')} type={videoType} />
+    </video>
+  );
+}
+
 export default function HomeHero() {
   const animRef = useAnimateOnScroll();
   const [loaded, setLoaded] = useState(false);
@@ -17,25 +45,23 @@ export default function HomeHero() {
   }, []);
 
   return (
-    <section class={`home${loaded ? ' gradient-loaded' : ''}`}>
-      <video class="background-video" autoPlay muted loop playsInline preload="metadata">
-        <source src={mediaUrl('home_background')} type="video/mp4" />
-      </video>
+    <section className={`home${loaded ? ' gradient-loaded' : ''}`}>
+      <HeroBackground videoType="video/mp4" />
 
       <div
         ref={animRef}
-        class={`home-content animate-on-scroll${loaded ? ' visible' : ' hidden'}`}
+        className={`home-content animate-on-scroll${loaded ? ' visible' : ' hidden'}`}
       >
         <h1 className="scale-fade-in">
           Make The Space Warm. Let <span style={{ fontSize: '1.5em' }}></span> The Team Shine.
         </h1>
         <div className="decor-line scale-fade-in" />
-        <p class="scale-fade-in">
+        <p className="scale-fade-in">
           We build comfortable atmospheres with attention to detail, nurturing passion and focus within a positive culture.
           <br />
           We believe that efficiency comes from trust and innovation comes from freedom. A team with warmth,
           <br />
-          can create sustained value and steadily forward in the direction of industry benchmarks. 
+          can create sustained value and steadily forward in the direction of industry benchmarks.
         </p>
       </div>
     </section>

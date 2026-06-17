@@ -29,9 +29,7 @@
         <input type="text" name="username" placeholder="邮箱、用户名或用户 ID" required>
         <label for="password" class="input-label">密码</label>
         <div class="password-container">
-          <input type="password" id="password" name="password" placeholder="密码"
-            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])(?!.*[\u4e00-\u9fa5]).{8,}$"
-            title="密码至少包含一个大写字母、一个小写字母、一个数字和一个特殊符号，且不少于8个字符，且不能包含中文字符" required>
+          <input type="password" id="password" name="password" placeholder="密码" required>
           <img src="../images/images/眼睛.png?v=<?php echo time(); ?>" id="toggle-password" alt="显示密码" class="eye-icon">
         </div>
 

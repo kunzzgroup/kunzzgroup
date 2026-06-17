@@ -5,17 +5,19 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
+      // CMS media (video/images) — use production files in local dev when not on disk
+      '/media': {
+        target: 'https://kunzzgroup.com',
+        changeOrigin: true,
+        secure: true,
+      },
       '/api': {
-        target: 'http://localhost/kunzzgroup-main',
+        target: 'http://localhost/kunzzgroup-1',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
-      '/media': {
-        target: 'http://localhost/kunzzgroup-main',
-        changeOrigin: true,
-      },
       '/frontend': {
-        target: 'http://localhost/kunzzgroup-main',
+        target: 'http://localhost/kunzzgroup-1',
         changeOrigin: true,
       },
     },

@@ -8,7 +8,7 @@
  * 2. In phpMyAdmin, import your production SQL dump as database u690174784_kunzz
  * 3. Log in at http://localhost/kunzzgroup-1/frontend/login.html
  */
-$host = 'localhost';
+$host = '127.0.0.1';
 $dbname = 'kunzz';
 $dbuser = 'root';
 $dbpass = '';

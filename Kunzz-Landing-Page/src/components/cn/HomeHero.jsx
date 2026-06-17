@@ -2,6 +2,34 @@ import { useEffect, useState } from 'react';
 import { useAnimateOnScroll } from '../../hooks/useAnimateOnScroll.js';
 import { mediaUrl } from '../../utils/media.js';
 
+function HeroBackground({ videoType = 'video/webm' }) {
+  const [videoFailed, setVideoFailed] = useState(false);
+
+  if (videoFailed) {
+    return (
+      <div
+        className="background-video background-image-fallback"
+        style={{ backgroundImage: "url('/images/背景4.webp')" }}
+        aria-hidden="true"
+      />
+    );
+  }
+
+  return (
+    <video
+      className="background-video"
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="metadata"
+      onError={() => setVideoFailed(true)}
+    >
+      <source src={mediaUrl('home_background')} type={videoType} />
+    </video>
+  );
+}
+
 export default function HomeHero() {
   const animRef = useAnimateOnScroll();
   const [loaded, setLoaded] = useState(false);
@@ -18,9 +46,7 @@ export default function HomeHero() {
 
   return (
     <section className={`home${loaded ? ' gradient-loaded' : ''}`}>
-      <video className="background-video" autoPlay muted loop playsInline preload="metadata">
-        <source src={mediaUrl('home_background')} type="video/webm" />
-      </video>
+      <HeroBackground videoType="video/webm" />
 
       <div
         ref={animRef}
