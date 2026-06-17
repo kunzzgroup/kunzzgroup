@@ -218,13 +218,10 @@ window.addEventListener('keydown', function (e) {
             const now = new Date();
             const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
             if (typeof addNewRowWithDate === 'function') {
-                addNewRowWithDate(today, '');
-                setTimeout(() => {
-                    const tableContainer = document.querySelector('.table-scroll-container');
-                    if (tableContainer) {
-                        tableContainer.scrollTop = tableContainer.scrollHeight;
-                    }
-                }, 100);
+                addNewRowWithDate(today, '', { autoFocus: false });
+                renderStockTable(true);
+                scrollToNewRows();
+                focusLastNewRowProductAfterRender();
             }
             return;
         }
@@ -3499,7 +3496,7 @@ function createMultipleRows() {
 
     // 创建指定数量的行
     for (let i = 0; i < rowsCount; i++) {
-        addNewRowWithDate(selectedDate, remarkValue);
+        addNewRowWithDate(selectedDate, remarkValue, { autoFocus: false });
     }
 
     syncPendingNewRowsCache(currentStockType);
@@ -3507,6 +3504,7 @@ function createMultipleRows() {
     // 有未保存行时切换为完整渲染，避免虚拟滚动与新增行冲突
     renderStockTable(true);
     scrollToNewRows();
+    focusLastNewRowProductAfterRender();
 
     showAlert(`成功创建 ${rowsCount} 行记录`, 'success');
 }
@@ -3527,8 +3525,30 @@ function scrollToNewRows() {
     });
 }
 
+// 聚焦最后一行新增记录的货品输入框（会触发下拉选择栏）
+function focusLastNewRowProduct() {
+    const newRow = document.querySelector('#stock-tbody .new-row:last-of-type');
+    if (!newRow) return;
+
+    const productInput = newRow.querySelector('.combobox-input[data-type="product"]');
+    if (!productInput || productInput.disabled) return;
+
+    productInput.focus({ preventScroll: true });
+}
+
+// 创建多行后统一聚焦（等表格渲染与滚动完成）
+function focusLastNewRowProductAfterRender() {
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            bindComboboxEvents();
+            focusLastNewRowProduct();
+        });
+    });
+}
+
 // 添加新行到表格（带指定日期）
-function addNewRowWithDate(selectedDate, remarkValue = '') {
+function addNewRowWithDate(selectedDate, remarkValue = '', options = {}) {
+    const { autoFocus = true } = options;
     const tbody = document.getElementById('stock-tbody');
     const row = document.createElement('tr');
     row.className = 'new-row';
@@ -3603,13 +3623,13 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
     setTimeout(() => {
         bindComboboxEvents();
 
-        // 自动聚焦到当前行的货品名称输入框
-        const productInput = document.getElementById(`${rowId}-product_name-input`);
-        if (productInput) {
-            productInput.focus();
+        if (autoFocus) {
+            const productInput = document.getElementById(`${rowId}-product_name-input`);
+            if (productInput) {
+                productInput.focus({ preventScroll: true });
+            }
         }
 
-        // 更新批量保存按钮的可见性
         updateBatchSaveButtonVisibility();
     }, 100);
 }
@@ -3619,9 +3639,10 @@ function addNewRow() {
     // 使用本地时间，避免UTC时差导致日期偏移
     const now = new Date();
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    addNewRowWithDate(today);
+    addNewRowWithDate(today, '', { autoFocus: false });
     renderStockTable(true);
     scrollToNewRows();
+    focusLastNewRowProductAfterRender();
 }
 
 // 自动填充supplier到receiver字段（只在有进货数量时）
