@@ -11,6 +11,10 @@ if (!$isProduction && file_exists(__DIR__ . '/config.local.php')) {
     $dbuser = 'u690174784_kunzz';
     $dbpass = 'Kunzz1688';
 }
+$configLocal = __DIR__ . '/config.local.php';
+if (is_readable($configLocal)) {
+    require $configLocal;
+}
 
 if (!function_exists('app_url')) {
     function app_url(string $path = ''): string
