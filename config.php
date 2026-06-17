@@ -10,11 +10,6 @@ if (!$isProduction && file_exists(__DIR__ . '/config.local.php')) {
     $dbname = 'u690174784_kunzz';
     $dbuser = 'u690174784_kunzz';
     $dbpass = 'Kunzz1688';
-} else {
-    // Local: use the same database name as production (import dump in phpMyAdmin).
-    $dbname = 'kunzz';
-    $dbuser = 'root';
-    $dbpass = '';
 }
 
 if (!function_exists('app_url')) {
