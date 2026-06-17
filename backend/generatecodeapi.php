@@ -7,6 +7,7 @@ if (!headers_sent()) {
 ?>
 <?php
 // 引入全局防护脚本
+require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/xss_protect.php';
 require_once __DIR__ . '/mailer_config.php';
 require_once __DIR__ . '/../vendor/autoload.php';
