@@ -1,7 +1,7 @@
 /** React routes served at site root (not a deploy folder name). */
 const ROOT_ROUTES = new Set(['Home_en', 'about', 'joinus']);
 
-/** e.g. /kunzzgroup-main when the app is served from a subdirectory on Apache. */
+/** e.g. /kunzzgroup when the app is served from a subdirectory on Apache. */
 function getDeployBasePath() {
   if (typeof window === 'undefined') return '';
   const segments = window.location.pathname.split('/').filter(Boolean);
@@ -21,7 +21,7 @@ function joinPath(base, path) {
 /** Base URL for PHP pages not yet migrated to React. */
 export function getPhpBase() {
   if (import.meta.env.VITE_PHP_BASE) return import.meta.env.VITE_PHP_BASE;
-  if (import.meta.env.DEV) return 'http://localhost/kunzzgroup-main/frontend';
+  if (import.meta.env.DEV) return 'http://localhost/kunzzgroup/frontend';
   const deployBase = getDeployBasePath();
   return deployBase ? `${deployBase}/frontend` : '/frontend';
 }
