@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/permission_guard.php';
 requireStockView('product');
 
@@ -21,16 +22,8 @@ if (!isset($_SESSION['user_id'])) {
 $canApprove = false;
 $currentApplicant = '';
 if (isset($_SESSION['user_id'])) {
-    // 这里需要连接数据库检查用户的注册码
-    $host = 'localhost';
-    $dbname = 'u690174784_kunzz';
-    $dbuser = 'u690174784_kunzz';
-    $dbpass = 'Kunzz1688';
-
     try {
-        $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
+        $pdo = get_pdo_connection();
         $allowedCodes = ['SUPPORT88', 'IT4567', 'QX0EQP', 'HR2025', 'AZGQOY', 'IT7890'];
         $userId = $_SESSION['user_id'];
 

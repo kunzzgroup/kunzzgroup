@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/permission_guard.php';
 requirePermission('analytics', 'kpi_upload');
 
@@ -32,11 +33,6 @@ if (!isset($_SESSION)) {
 $hasNewPermissions = false;
 
 if (isset($_SESSION['user_id'])) {
-    $host = 'localhost';
-    $dbname = 'u690174784_kunzz';
-    $dbuser = 'u690174784_kunzz';
-    $dbpass = 'Kunzz1688';
-
     try {
         $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass, [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,

@@ -1,10 +1,8 @@
 <?php
-require dirname(__DIR__) . '/backend/xss_protect.php';
+require_once dirname(__DIR__) . '/config.php';
+require_once dirname(__DIR__) . '/backend/xss_protect.php';
 
-$conn = new mysqli('localhost', 'root', '', 'kunzz');
-if ($conn->connect_error) {
-    die('connect failed');
-}
+$conn = get_mysqli_connection();
 
 $email = 'admin@kunzzgroup.com';
 $password = 'Admin@12345';

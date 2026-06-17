@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/permission_guard.php';
 requirePermissionApi('resource', 'price_comparison');
 
@@ -21,15 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// 数据库连接配置
-$host = 'localhost';
-$dbname = 'u690174784_kunzz';
-$username = 'u690174784_kunzz';
-$password = 'Kunzz1688';
-
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo = get_pdo_connection();
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     echo json_encode([

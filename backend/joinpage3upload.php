@@ -23,15 +23,8 @@ include_once '../media_config.php';
 $language = isset($_GET['lang']) ? $_GET['lang'] : 'zh';
 $isEnglish = ($language === 'en');
 
-// 数据库配置
-$host = 'localhost';
-$dbname = 'u690174784_kunzz';
-$dbuser = 'u690174784_kunzz';
-$dbpass = 'Kunzz1688';
-
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo = get_pdo_connection();
 } catch (PDOException $e) {
     die("数据库连接失败：" . $e->getMessage());
 }

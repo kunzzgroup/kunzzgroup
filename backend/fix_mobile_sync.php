@@ -1,15 +1,9 @@
 <?php
+require_once __DIR__ . '/../config.php';
 // 诊断脚本：查看J3手机记录和对应的桌面记录状态
 require_once __DIR__ . '/session_check.php';
 
-$host   = 'localhost';
-$dbname = 'u690174784_kunzz';
-$dbuser = 'u690174784_kunzz';
-$dbpass = 'Kunzz1688';
-
-$pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
+$pdo = get_pdo_connection();
 $action = $_GET['action'] ?? 'diagnose';
 
 if ($action === 'fix') {

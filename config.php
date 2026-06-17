@@ -12,7 +12,8 @@ if (file_exists(__DIR__ . '/config.local.php')) {
         $dbuser = 'u690174784_kunzz';
         $dbpass = 'Kunzz1688';
     } else {
-        $dbname = 'kunzz';
+        // Local: use the same database name as production (import dump in phpMyAdmin).
+        $dbname = 'u690174784_kunzz';
         $dbuser = 'root';
         $dbpass = '';
     }
@@ -62,6 +63,29 @@ if (!function_exists('get_mysqli_connection')) {
 
         $conn->set_charset('utf8mb4');
         return $conn;
+    }
+}
+
+if (!function_exists('get_pdo_connection')) {
+    function get_pdo_connection(): PDO
+    {
+        global $pdo, $host, $dbname, $dbuser, $dbpass;
+
+        if ($pdo instanceof PDO) {
+            return $pdo;
+        }
+
+        $pdo = new PDO(
+            "mysql:host=$host;dbname=$dbname;charset=utf8mb4;connect_timeout=5",
+            $dbuser,
+            $dbpass,
+            [PDO::ATTR_TIMEOUT => 5]
+        );
+
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo->exec("SET time_zone = '+08:00'");
+
+        return $pdo;
     }
 }
 

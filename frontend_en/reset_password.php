@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../config.php';
 if (!headers_sent()) {
     header("Cache-Control: max-age=0, no-cache, no-store, must-revalidate, proxy-revalidate");
     header("Pragma: no-cache");
@@ -18,20 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 // POST request: handle password reset API
 header("Content-Type: application/json");
 
-// 1. Database connection
-$host = 'localhost';
-$dbname = 'u690174784_kunzz';
-$dbuser = 'u690174784_kunzz';
-$dbpass = 'Kunzz1688';
-
 // 2. Connect
-$conn = new mysqli($host, $dbuser, $dbpass, $dbname);
-
-if ($conn->connect_error) {
-    echo json_encode(["success" => false, "message" => "Database connection failed: " . $conn->connect_error]);
-    exit;
-}
-
+$conn = get_mysqli_connection();
 // Get JSON input
 $data = get_safe_json_input();
 $email = $data["email"] ?? "";

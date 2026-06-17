@@ -1,87 +1,34 @@
 <?php
+require_once __DIR__ . '/../../config.php';
+
+$loginPage = app_url('frontend_en_test/frontend/login.php');
+$dashboardPage = app_url('backend/dashboard');
+$resetPasswordPage = app_url('frontend_en_test/frontend/reset_password');
+
 ob_start();
 session_start();
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// Handle Login POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // 数据库连接信息
-    $host = 'localhost';
-    $dbname = 'u690174784_kunzz';
-    $dbuser = 'u690174784_kunzz';
-    $dbpass = 'Kunzz1688';
+    require_once __DIR__ . '/../../backend/auth.php';
 
-    // 创建连接
-    $conn = new mysqli($host, $dbuser, $dbpass, $dbname);
-    if ($conn->connect_error) {
-        die("连接失败: " . $conn->connect_error);
-    }
-
-    // 获取提交数据
-    $email = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
-    $remember = isset($_POST['remember']); 
-
-    // 查询用户
-    $sql = "SELECT * FROM users WHERE email = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows === 1) {
-        $user = $result->fetch_assoc();
-
-        if (password_verify($password, $user['password'])) {
-            // ✅ 登录成功，设置 Session
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['position'] = $user['position'];
-            $_SESSION['account_type'] = $user['account_type']; 
-            $_SESSION['branch'] = strtoupper($user['branch'] ?? ''); // ⭐ 添加这行 - 关键！
-            $_SESSION['last_activity'] = time(); 
-
-            // 检查是否为首次登录
-            if ($user['is_first_login'] == 1) {
-                // 首次登录，跳转到密码重置页面
-                header("Location: reset_password.html");
-                exit();
-            }
-
-            if ($remember) {
-                // ✅ 勾选了"记住我"，设置 cookie（30天）
-                $expire = time() + (86400 * 30);
-                setcookie('user_id', $user['id'], $expire, "/");
-                setcookie('username', $user['username'], $expire, "/");
-                setcookie('position', $user['position'], $expire, "/");
-                setcookie('account_type', $user['account_type'], $expire, "/"); 
-                setcookie('branch', strtoupper($user['branch'] ?? ''), $expire, "/"); // ⭐ 添加这行
-                setcookie('remember_token', '1', $expire, "/");
-            } else {
-                // ❌ 没勾选记住我，清除残留 cookie
-                setcookie('user_id', '', time() - 3600, "/");
-                setcookie('username', '', time() - 3600, "/");
-                setcookie('position', '', time() - 3600, "/");
-                setcookie('account_type', '', time() - 3600, "/"); 
-                setcookie('branch', '', time() - 3600, "/"); // ⭐ 添加这行
-                setcookie('remember_token', '', time() - 3600, "/");
-            }
-
-            header("Location: ../backend/dashboard.php");
-            exit();
-
-        } else {
-            // Redirect to self with error
-            header("Location: login.php?error=invalid_password");
-            exit();
-        }
-
-    } else {
-        // Redirect to self with error
-        header("Location: login.php?error=account_not_found");
+    try {
+        $conn = get_mysqli_connection();
+    } catch (RuntimeException $e) {
+        header('Location: login.php?error=db_connection');
         exit();
     }
+
+    process_web_login(
+        $conn,
+        $_POST['username'] ?? '',
+        $_POST['password'] ?? '',
+        isset($_POST['remember']),
+        $loginPage,
+        $dashboardPage,
+        $resetPasswordPage
+    );
 }
 // Render Page (GET)
 ?>

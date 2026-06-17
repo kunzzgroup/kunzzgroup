@@ -1,3 +1,6 @@
+<?php
+require_once __DIR__ . '/config.php';
+?>
 
 <?php
 session_start();
@@ -6,16 +9,7 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-$host = 'localhost';
-$dbname = 'u690174784_kunzz';
-$dbuser = 'u690174784_kunzz';
-$dbpass = 'Kunzz1688';
-
-$conn = new mysqli($host, $dbuser, $dbpass, $dbname);
-if ($conn->connect_error) {
-    die("连接失败: " . $conn->connect_error);
-}
-
+$conn = get_mysqli_connection();
 $user_id = $_SESSION['user_id'];
 $error = '';
 $success = '';

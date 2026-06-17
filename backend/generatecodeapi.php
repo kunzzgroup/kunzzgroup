@@ -25,16 +25,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit(0);
 }
 
-// 数据库配置
-$host = 'localhost';
-$dbname = 'u690174784_kunzz';
-$username = 'u690174784_kunzz';
-$password = 'Kunzz1688';
-
 try {
     // 创建PDO连接
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo = get_pdo_connection();
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
     // 设置时区为马来西亚时间 (UTC+8)

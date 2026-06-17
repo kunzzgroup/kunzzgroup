@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/config.php';
 session_start();
 
 // 超时时间（秒）
@@ -55,15 +56,8 @@ $avatarLetter = strtoupper($username[0]);
 // 添加权限检查 - 检查用户注册码
 $canViewAnalytics = true; // 默认可以查看
 if (isset($_SESSION['user_id'])) {
-    $host = 'localhost';
-    $dbname = 'u690174784_kunzz';
-    $dbuser = 'u690174784_kunzz';
-    $dbpass = 'Kunzz1688';
-    
     try {
-        $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
+        $pdo = get_pdo_connection();
         $restrictedCodes = []; // 限制访问的注册码
         $userId = $_SESSION['user_id'];
         

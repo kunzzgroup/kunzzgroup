@@ -10,3 +10,6 @@
 # OS
 .DS_Store
 Thumbs.db
+
+# Local environment overrides (copy from config.local.php.example)
+config.local.php

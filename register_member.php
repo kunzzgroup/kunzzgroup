@@ -1,19 +1,10 @@
 <?php
+require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/backend/xss_protect.php';
 ob_start();
 header("Content-Type: application/json");
 
-$host = 'localhost';
-$dbname = 'u690174784_kunzz';
-$dbuser = 'u690174784_kunzz';
-$dbpass = 'Kunzz1688';
-
-$conn = new mysqli($host, $dbuser, $dbpass, $dbname);
-if ($conn->connect_error) {
-    echo json_encode(["success" => false, "message" => "数据库连接失败：" . $conn->connect_error]);
-    exit;
-}
-
+$conn = get_mysqli_connection();
 // 获取 JSON 数据
 $data = get_safe_json_input();
 

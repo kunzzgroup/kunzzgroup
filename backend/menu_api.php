@@ -1,4 +1,5 @@
-﻿<?php
+<?php
+require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/permission_guard.php';
 require_once __DIR__ . '/heic_convert.php';
 requirePermissionApi('visual');
@@ -25,40 +26,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // ============================================================
 //  DATABASE CONFIG
 // ============================================================
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'u690174784_kunzz');
-define('DB_USER', 'u690174784_kunzz');
-define('DB_PASS', 'Kunzz1688');
-
 // Image upload directory (relative to this file)
 define('UPLOAD_BASE', __DIR__ . '/uploads/');
 // Web-accessible absolute path for cross-domain
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-$host = $_SERVER['HTTP_HOST'];
+$httpHost = $_SERVER['HTTP_HOST'];
 $base_dir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-define('UPLOAD_URL_BASE', $protocol . $host . $base_dir . '/uploads/');
+define('UPLOAD_URL_BASE', $protocol . $httpHost . $base_dir . '/uploads/');
 
 // ============================================================
 //  DB CONNECTION
 // ============================================================
 function getDB(): PDO {
-    static $pdo = null;
-    if ($pdo === null) {
+    static $db = null;
+    if ($db === null) {
         try {
-            $pdo = new PDO(
-                "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
-                DB_USER, DB_PASS,
-                [
-                    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::ATTR_EMULATE_PREPARES   => false,
-                ]
-            );
+            $db = get_pdo_connection();
+            $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
         } catch (PDOException $e) {
             respond(false, 'Database connection failed: ' . $e->getMessage(), null, 500);
         }
     }
-    return $pdo;
+    return $db;
 }
 
 // ============================================================
