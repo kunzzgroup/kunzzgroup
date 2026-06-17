@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <link rel="icon" type="image/png" href="images/images/logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登入 - KUNZZ HOLDINGS</title>
+    <link rel="stylesheet" href="tokyo.css" />
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <section class="register-section">
+    <div class="register-form">
+      <h2>创建新账户</h2>
+      <form id="register-form">
+        <input type="text" name="username" placeholder="用户名" pattern="[A-Za-z]{2,}" title="用户名只能包含英文字母，且至少两个字符" required />
+        <input type="email" name="email" placeholder="请输入您的 Gmail" required pattern="[a-zA-Z0-9._%+-]+@gmail\.com$" title="请输入以 @gmail.com 结尾的邮箱地址" />
+        <div class="password-container">
+          <input type="password" id="password" name="password" placeholder="密码" required
+            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])(?!.*[\u4e00-\u9fa5]).{8,}$"
+            title="密码至少包含一个大写字母、一个小写字母、一个数字和一个特殊符号，且不少于8个字符，且不能包含中文字符">
+          <img src="images/images/眼睛.png" class="eye-icon" id="toggle-password" alt="显示密码">
+        </div>
+        <div class="password-container">
+          <input type="password" id="confirm_password" name="confirm_password" placeholder="确认密码" required
+            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])(?!.*[\u4e00-\u9fa5]).{8,}$"
+            title="密码至少包含一个大写字母、一个小写字母、一个数字和一个特殊符号，且不少于8个字符，且不能包含中文字符">
+          <img src="images/images/眼睛.png" class="eye-icon" id="toggle-confirm" alt="显示密码">
+        </div>
+        <button type="submit">发送验证码</button>
+      </form>
+
+      <div id="code-container" style="display:none; margin-top: 20px;">
+        <input type="text" id="verification_code" placeholder="输入验证码" maxlength="6" pattern="\d{6}" inputmode="numeric" required>
+        <button type="button" id="verify-button">验证并注册</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="app.js"></script>
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // 密码显示切换
+    const togglePassword = document.getElementById("toggle-password");
+    const password = document.getElementById("password");
+    const toggleConfirmPassword = document.getElementById("toggle-confirm");
+    const confirmPassword = document.getElementById("confirm_password");
+    let visiblePassword = false;
+    let visibleConfirmPassword = false;
+
+    togglePassword.addEventListener("click", function () {
+      visiblePassword = !visiblePassword;
+      password.type = visiblePassword ? "text" : "password";
+    });
+
+    toggleConfirmPassword.addEventListener("click", function () {
+      visibleConfirmPassword = !visibleConfirmPassword;
+      confirmPassword.type = visibleConfirmPassword ? "text" : "password";
+    });
+
+    const form = document.getElementById("register-form");
+    const codeContainer = document.getElementById("code-container");
+    const verifyBtn = document.getElementById("verify-button");
+    const codeInput = document.getElementById("verification_code");
+    let formData = null;
+
+    // ⚠️ 禁止用户名、密码、确认密码和邮箱输入中文字符
+    const usernameInput = form.username;
+    const emailInput = form.email;
+    [usernameInput, emailInput, password, confirmPassword].forEach(input => {
+      input.addEventListener("input", function () {
+        this.value = this.value.replace(/[\u4e00-\u9fa5]/g, '');
+      });
+    });
+
+    // ⚠️ 限制验证码只能输入 6 位数字
+    codeInput.setAttribute("maxlength", "6");
+    codeInput.setAttribute("pattern", "\\d{6}");
+    codeInput.setAttribute("title", "请输入 6 位数字验证码");
+
+    // 提交表单：发送验证码前检查密码一致性
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const email = form.email.value;
+      const username = form.username.value;
+      const password = form.password.value;
+      const confirmPassword = form.confirm_password.value;
+
+      // ⚠️ 检查密码和确认密码是否一致
+      if (password !== confirmPassword) {
+        alert("两次输入的密码不一致，请检查！");
+        return;
+      }
+
+      // 保存数据用于之后注册使用
+      formData = { username, email, password, confirm_password: confirmPassword };
+
+      // 向后端发送验证码请求
+      fetch("tokyosend_verification.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            alert("验证码已发送，请查收！");
+            codeContainer.style.display = "block"; // 显示验证码输入框
+          } else {
+            alert("验证码发送失败：" + data.message);
+          }
+        })
+        .catch(err => {
+          console.error("错误:", err);
+          alert("发生网络错误！请稍后再试。");
+        });
+    });
+
+    // 验证验证码并注册
+    verifyBtn.addEventListener("click", function () {
+      const email = form.email.value;
+      const code = codeInput.value.trim();
+
+      // ⚠️ 简单检查验证码格式
+      if (!/^\d{6}$/.test(code)) {
+        alert("请输入 6 位数字验证码！");
+        return;
+      }
+
+      // 验证验证码
+      fetch("tokyoverify_code.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email, code: code })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            alert("验证码正确，正在注册...");
+
+            // 发送注册请求
+            fetch("tokyoregister.php", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(formData)
+            })
+              .then(res => res.json())
+              .then(data => {
+                if (data.success) {
+                  alert("注册成功！");
+                  window.location.href = "tokyologin.html"; // 跳转登录页
+                } else {
+                  alert("注册失败：" + data.message);
+                }
+              })
+              .catch(err => {
+                console.error("错误:", err);
+                alert("注册失败，请稍后重试！");
+              });
+          } else {
+            alert("验证码错误或已过期！");
+          }
+        })
+        .catch(err => {
+          console.error("错误:", err);
+          alert("发生网络错误，请稍后再试！");
+        });
+    });
+  });
+</script>
+
+</body>
+</html>

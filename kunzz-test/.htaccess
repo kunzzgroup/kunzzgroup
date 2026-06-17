@@ -1,0 +1,75 @@
+    RewriteEngine On
+
+    # ===== 终极浏览器缓存杀手 (Ultimate Cache Buster) =====
+    FileETag None
+    <IfModule mod_headers.c>
+        Header unset ETag
+        Header always set Cache-Control "max-age=0, no-cache, no-store, must-revalidate, proxy-revalidate"
+        Header always set Pragma "no-cache"
+        Header always set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+    </IfModule>
+
+    <IfModule mod_expires.c>
+        ExpiresActive On
+        ExpiresDefault "access plus 0 seconds"
+    </IfModule>
+
+    # ===== API & Backend 不 rewrite =====
+    RewriteRule ^api/get_jobs_api\.php$ get_jobs_api.php [L,QSA]
+    RewriteRule ^api/timeline_api\.php$ api/timeline_api.php [L,QSA]
+    RewriteRule ^api/comphotos_api\.php$ api/comphotos_api.php [L,QSA]
+    RewriteRule ^backend/ - [L]
+    RewriteRule ^frontend/ - [L]
+    RewriteRule ^(costapi|stockapi|kpiapi|check_permissions)\.php$ - [L]
+
+    # ===== React Landing Page (live site) =====
+    RewriteRule ^media/(.+)$ serve_media.php [L,QSA]
+    RewriteRule ^assets/(.*)$ Kunzz-Landing-Page/dist/assets/$1 [L]
+
+    RewriteCond %{DOCUMENT_ROOT}/Kunzz-Landing-Page/dist/images/$1 -f
+    RewriteRule ^images/(.+)$ Kunzz-Landing-Page/dist/images/$1 [L]
+
+    RewriteCond %{DOCUMENT_ROOT}/images/images/$1 -f
+    RewriteRule ^images/(.+)$ images/images/$1 [L]
+
+    RewriteRule ^$ Kunzz-Landing-Page/dist/index.html [L]
+    RewriteRule ^about/?$ Kunzz-Landing-Page/dist/index.html [L]
+    RewriteRule ^joinus/?$ Kunzz-Landing-Page/dist/index.html [L]
+    RewriteRule ^Home_en/?$ Kunzz-Landing-Page/dist/index.html [L]
+    RewriteRule ^about_en/?$ Kunzz-Landing-Page/dist/index.html [L]
+    RewriteRule ^join_en/?$ Kunzz-Landing-Page/dist/index.html [L]
+    RewriteRule ^About_en/?$ /about_en [R=301,L]
+    RewriteRule ^Join_en/?$ /join_en [R=301,L]
+
+    RewriteCond %{DOCUMENT_ROOT}/Kunzz-Landing-Page/dist/$1 -f
+    RewriteRule ^(favicon\.svg|icons\.svg)$ Kunzz-Landing-Page/dist/$1 [L]
+
+    # ===== 手机版 rewrite =====
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(j1|j2|j3)$ $1.php [L]
+
+    # 检查是否存在同名的 .php 文件，如果是，则重写为 .php (支持无后缀访问 j1/j1stockeditmobile)
+    RewriteCond %{REQUEST_FILENAME}.php -f
+    RewriteRule ^(.+?)/?$ $1.php [L,QSA]
+
+    # ===== 不影响真实文件/目录 =====
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# ===== URL 优化 (URL Optimization) =====
+# 1. 移除 .php 后缀 (Remove .php extension)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^([^\.]+)$ $1.php [NC,L]
+
+# 2. 菜单路径优化 (Menu path optimization)
+# 允许访问 /menu/grand 或 /menu/sushi
+RewriteRule ^menu/(grand|sushi)/?$ tokyo-japanese-cuisine/menu.php#$1 [NE,L,R]
+RewriteRule ^menu/?$ tokyo-japanese-cuisine/menu.php [L]
+
+# ===== 转发到 frontend =====
+RewriteRule ^(.*)$ frontend/$1 [L]

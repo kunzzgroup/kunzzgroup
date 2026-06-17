@@ -1,0 +1,129 @@
+﻿// js/stock_recycle.js
+
+let deletedData = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadDeletedData();
+    
+    // 搜索功能
+    document.getElementById('recycle-search')?.addEventListener('input', (e) => {
+        renderDeletedTable(e.target.value);
+    });
+});
+
+async function loadDeletedData() {
+    try {
+        const response = await fetch('stockeditapi.php?action=deleted');
+        const result = await response.json();
+        if (result.success) {
+            deletedData = result.data;
+            renderDeletedTable();
+        } else {
+            showAlert('加载失败: ' + result.message, 'error');
+        }
+    } catch (error) {
+        showAlert('加载时发生错误', 'error');
+    }
+}
+
+function renderDeletedTable(filter = '') {
+    const tbody = document.getElementById('recycle-tbody');
+    if (!tbody) return;
+
+    const filtered = deletedData.filter(item => {
+        const searchStr = `${item.product_name} ${item.receiver} ${item.system} ${item.deleted_by}`.toLowerCase();
+        return searchStr.includes(filter.toLowerCase());
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 40px;">${filter ? '没有找到匹配的记录' : '回收站为空'}</td></tr>`;
+        return;
+    }
+
+    // 将UTC时间转换为本地时间显示
+    function toLocalTime(utcStr) {
+        if (!utcStr) return '';
+        // 服务器存储的是UTC时间，需要转换为本地时间
+        const utcDate = new Date(utcStr + ' UTC');
+        if (isNaN(utcDate.getTime())) return utcStr;
+        const y = utcDate.getFullYear();
+        const m = String(utcDate.getMonth() + 1).padStart(2, '0');
+        const d = String(utcDate.getDate()).padStart(2, '0');
+        const h = String(utcDate.getHours()).padStart(2, '0');
+        const min = String(utcDate.getMinutes()).padStart(2, '0');
+        const s = String(utcDate.getSeconds()).padStart(2, '0');
+        return `${y}-${m}-${d} ${h}:${min}:${s}`;
+    }
+
+    tbody.innerHTML = filtered.map(item => `
+        <tr>
+            <td>${toLocalTime(item.deleted_at)}</td>
+            <td>${item.deleted_by || 'Unknown'}</td>
+            <td><span class="badge system-${item.system}">${item.system.toUpperCase()}</span></td>
+            <td>${item.date}</td>
+            <td>${item.product_name}</td>
+            <td>
+                ${item.in_quantity > 0 ? `<span style="color: #10b981;">入: ${item.in_quantity}</span>` : ''}
+                ${item.out_quantity > 0 ? `<span style="color: #ef4444;">出: ${item.out_quantity}</span>` : ''}
+            </td>
+            <td>${item.specification}</td>
+            <td>${item.receiver}</td>
+            <td>
+                <div class="action-btns">
+                    <button class="restore-btn" onclick="restoreRecord(${item.id}, '${item.system}')">
+                        <i class="fas fa-undo"></i> 恢复
+                    </button>
+                    <button class="perm-delete-btn" onclick="permanentDelete(${item.id}, '${item.system}')">
+                        <i class="fas fa-trash-alt"></i> 彻底删除
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+async function restoreRecord(id, system) {
+    if (!confirm('确定要恢复此记录吗？')) return;
+
+    try {
+        const response = await fetch('stockeditapi.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                action: 'restore', 
+                ids: [id],
+                system: system
+            })
+        });
+        const result = await response.json();
+        if (result.success) {
+            showAlert('记录已成功恢复', 'success');
+            loadDeletedData();
+        } else {
+            showAlert('恢复失败: ' + result.message, 'error');
+        }
+    } catch (error) {
+        showAlert('恢复时发生错误', 'error');
+    }
+}
+
+async function permanentDelete(id, system) {
+    if (!confirm('警告：彻底删除后数据将无法恢复！确定要继续吗？')) return;
+
+    try {
+        const response = await fetch(`stockeditapi.php?action=permanent&ids=${id}&system=${system}`, {
+            method: 'DELETE'
+        });
+        const result = await response.json();
+        if (result.success) {
+            showAlert('记录已彻底删除', 'success');
+            loadDeletedData();
+        } else {
+            showAlert('删除失败: ' + result.message, 'error');
+        }
+    } catch (error) {
+        showAlert('删除时发生错误', 'error');
+    }
+}
+
+

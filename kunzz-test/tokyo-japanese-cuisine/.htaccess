@@ -1,0 +1,24 @@
+RewriteEngine On
+
+# ===== 缓存控制 =====
+FileETag None
+<IfModule mod_headers.c>
+    Header unset ETag
+    Header always set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+    Header always set Pragma "no-cache"
+    Header always set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+</IfModule>
+
+# ===== 直接放行：真实存在的文件或目录 =====
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# ===== 移除 .html 后缀（优化 URL）=====
+# 如果请求没有扩展名，且对应的 .html 文件存在，则重写
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^([^.]+)/?$ $1.html [L,QSA]
+
+# ===== 放行 backend / image 路径 =====
+RewriteRule ^backend/ - [L]
+RewriteRule ^image/ - [L]

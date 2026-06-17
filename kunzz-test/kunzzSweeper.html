@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINEFIELD - Defusal Operation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 0, 0, 0.15),
+                    rgba(0, 0, 0, 0.15) 1px,
+                    transparent 1px,
+                    transparent 2px
+                );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            background: #1a1a1a;
+            border: 2px solid #333;
+            padding: 30px;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.2), inset 0 0 20px rgba(0, 0, 0, 0.5);
+            max-width: 95vw;
+            position: relative;
+            z-index: 2;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ff0000;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+            font-weight: normal;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            padding: 10px 20px;
+            border: 2px solid #333;
+            background: #000;
+            color: #666;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+
+        .mode-btn:hover {
+            border-color: #666;
+            color: #999;
+        }
+
+        .mode-btn.active {
+            border-color: #00ff00;
+            color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+
+        .difficulty-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-btn {
+            padding: 12px 24px;
+            border: 2px solid #333;
+            background: #000;
+            color: #666;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+
+        .difficulty-btn:hover {
+            border-color: #666;
+            color: #999;
+        }
+
+        .difficulty-btn.active {
+            border-color: #ff0000;
+            color: #ff0000;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 20px;
+            flex-wrap: wrap;
+            border: 1px solid #333;
+            padding: 15px;
+            background: #0d0d0d;
+        }
+
+        .info-box {
+            background: #000;
+            padding: 12px 20px;
+            border: 1px solid #333;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .info-label {
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .mines-count {
+            color: #ff3333;
+            font-size: 24px;
+            text-shadow: 0 0 5px rgba(255, 51, 51, 0.5);
+        }
+
+        .timer {
+            color: #ff9933;
+            font-size: 24px;
+            text-shadow: 0 0 5px rgba(255, 153, 51, 0.5);
+        }
+
+        .timer.trial-mode {
+            color: #00ff00;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+        }
+
+        .timer.trial-warning {
+            color: #ffaa00;
+            text-shadow: 0 0 5px rgba(255, 170, 0, 0.5);
+            animation: timerPulse 1s infinite;
+        }
+
+        .timer.trial-critical {
+            color: #ff0000;
+            text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+            animation: timerPulse 0.5s infinite;
+        }
+
+        @keyframes timerPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .new-game-btn {
+            padding: 12px 24px;
+            background: #000;
+            color: #999;
+            border: 2px solid #333;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+
+        .new-game-btn:hover {
+            border-color: #ff0000;
+            color: #ff0000;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+        }
+
+        .hint-btn {
+            padding: 12px 24px;
+            background: #000;
+            color: #999;
+            border: 2px solid #333;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+            position: relative;
+        }
+
+        .hint-btn:hover:not(:disabled) {
+            border-color: #ffaa00;
+            color: #ffaa00;
+            box-shadow: 0 0 10px rgba(255, 170, 0, 0.3);
+        }
+
+        .hint-btn:disabled {
+            border-color: #222;
+            color: #444;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .hint-counter {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ffaa00;
+            color: #000;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            border: 2px solid #000;
+        }
+
+        .action-toggle-btn {
+            padding: 12px 24px;
+            background: #000;
+            color: #999;
+            border: 2px solid #333;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+
+        .action-toggle-btn:hover {
+            border-color: #00ffff;
+            color: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .action-toggle-btn.flag-mode {
+            border-color: #ff0000;
+            color: #ff0000;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+        }
+
+        .game-status {
+            text-align: center;
+            padding: 15px;
+            border: 2px solid;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: none;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .game-status.show {
+            display: block;
+        }
+
+        .game-status.won {
+            background: #001a00;
+            color: #00ff00;
+            border-color: #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            animation: pulse 1s infinite;
+        }
+
+        .game-status.lost {
+            background: #1a0000;
+            color: #ff0000;
+            border-color: #ff0000;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+            animation: shake 0.5s;
+        }
+
+        .game-status.timeout {
+            background: #1a1a00;
+            color: #ffaa00;
+            border-color: #ffaa00;
+            box-shadow: 0 0 20px rgba(255, 170, 0, 0.5);
+            animation: shake 0.5s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .board-container {
+            display: inline-block;
+            background: #000;
+            padding: 10px;
+            border: 2px solid #333;
+            overflow: auto;
+            max-width: 100%;
+            max-height: 70vh;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+
+        .board {
+            display: grid;
+            gap: 1px;
+            user-select: none;
+        }
+
+        .cell {
+            width: 35px;
+            height: 35px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s;
+            font-family: 'Courier New', monospace;
+            position: relative;
+        }
+
+        .cell::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            z-index: 0;
+        }
+
+        .cell > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cell:hover:not(.revealed):not(.flagged) {
+            background: #2a2a2a;
+            border-color: #444;
+        }
+
+        .cell.revealed {
+            background: #0a0a0a;
+            border-color: #1a1a1a;
+            cursor: default;
+        }
+
+        .cell.revealed::before {
+            display: none;
+        }
+
+        .cell.mine {
+            background: #330000;
+            border-color: #660000;
+            animation: explode 0.3s;
+        }
+
+        @keyframes explode {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); background: #ff0000; }
+            100% { transform: scale(1); }
+        }
+
+        .cell.flagged {
+            background: #1a0000;
+            border-color: #ff0000;
+            box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+        }
+
+        .cell.num-1 { color: #4a9eff; text-shadow: 0 0 3px #4a9eff; }
+        .cell.num-2 { color: #4aff4a; text-shadow: 0 0 3px #4aff4a; }
+        .cell.num-3 { color: #ff4a4a; text-shadow: 0 0 3px #ff4a4a; }
+        .cell.num-4 { color: #ff4aff; text-shadow: 0 0 3px #ff4aff; }
+        .cell.num-5 { color: #ffaa4a; text-shadow: 0 0 3px #ffaa4a; }
+        .cell.num-6 { color: #4affaa; text-shadow: 0 0 3px #4affaa; }
+        .cell.num-7 { color: #aaaaaa; text-shadow: 0 0 3px #aaaaaa; }
+        .cell.num-8 { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
+
+        .hint-flash {
+            animation: hintPulse 1s;
+        }
+
+        @keyframes hintPulse {
+            0%, 100% { 
+                background: #1a1a1a;
+                box-shadow: none;
+            }
+            50% { 
+                background: #ffaa00;
+                box-shadow: 0 0 20px rgba(255, 170, 0, 0.8);
+                transform: scale(1.1);
+            }
+        }
+
+        .instructions {
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+                letter-spacing: 3px;
+            }
+
+            .cell {
+                width: 30px;
+                height: 30px;
+                font-size: 14px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MINEFIELD</h1>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" onclick="setMode('classic')">Classic Mode</button>
+            <button class="mode-btn" onclick="setMode('trial')">Time Trial Mode</button>
+        </div>
+        
+        <div class="difficulty-selector">
+            <button class="difficulty-btn active" onclick="setDifficulty('easy')">Easy</button>
+            <button class="difficulty-btn" onclick="setDifficulty('medium')">Medium</button>
+            <button class="difficulty-btn" onclick="setDifficulty('hard')">Hard</button>
+            <button class="difficulty-btn" onclick="setDifficulty('hell')">Hell</button>
+        </div>
+
+        <div class="game-info">
+            <div class="info-box">
+                <div>
+                    <div class="info-label">Flags</div>
+                    <span class="mines-count" id="mineCount">0</span>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="new-game-btn" onclick="initGame()">RESET</button>
+                <button class="action-toggle-btn" id="actionToggleBtn" onclick="toggleActionMode()">
+                    REVEAL MODE
+                </button>
+                <button class="hint-btn" id="hintBtn" onclick="useHint()">
+                    HINT
+                    <span class="hint-counter" id="hintCounter">2</span>
+                </button>
+            </div>
+            <div class="info-box">
+                <div>
+                    <div class="info-label" id="timerLabel">Time</div>
+                    <span class="timer" id="timer">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-status" id="gameStatus"></div>
+
+        <div class="board-container">
+            <div class="board" id="board"></div>
+        </div>
+
+        <div class="instructions">
+            Left click: reveal/flag (toggle mode) | Right click: flag
+        </div>
+    </div>
+
+    <script>
+        const difficulties = {
+            easy: { rows: 9, cols: 9, mines: 10 },
+            medium: { rows: 13, cols: 13, mines: 25 },
+            hard: { rows: 16, cols: 16, mines: 50 },
+            hell: { rows: 20, cols: 20, mines: 99 }
+        };
+
+        // Time limits for trial mode (in seconds)
+        const trialTimeLimits = {
+            easy: 180,      // 3 minutes
+            medium: 300,    // 5 minutes
+            hard: 480,      // 8 minutes
+            hell: 600       // 10 minutes
+        };
+
+        let currentDifficulty = 'easy';
+        let currentMode = 'classic';
+        let board = [];
+        let revealed = [];
+        let flagged = [];
+        let gameOver = false;
+        let won = false;
+        let firstClick = true;
+        let timer = 0;
+        let timerInterval = null;
+        let hintsRemaining = 2;
+        let timeLimit = 0;
+        let actionMode = 'reveal'; // 'reveal' or 'flag'
+
+        function setMode(mode) {
+            currentMode = mode;
+            
+            // Update active button
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            initGame();
+        }
+
+        function setDifficulty(difficulty) {
+            currentDifficulty = difficulty;
+            
+            // Update active button
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            initGame();
+        }
+
+        function initGame() {
+            const config = difficulties[currentDifficulty];
+            const boardElement = document.getElementById('board');
+            const statusElement = document.getElementById('gameStatus');
+            const timerElement = document.getElementById('timer');
+            const timerLabel = document.getElementById('timerLabel');
+            
+            // Reset game state
+            board = [];
+            revealed = [];
+            flagged = [];
+            gameOver = false;
+            won = false;
+            firstClick = true;
+            hintsRemaining = 2;
+            updateHintButton();
+            
+            // Reset action mode to reveal
+            actionMode = 'reveal';
+            const toggleBtn = document.getElementById('actionToggleBtn');
+            toggleBtn.textContent = 'REVEAL MODE';
+            toggleBtn.classList.remove('flag-mode');
+            
+            // Clear timer
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
+            // Set timer based on mode
+            if (currentMode === 'trial') {
+                timeLimit = trialTimeLimits[currentDifficulty];
+                timer = timeLimit;
+                timerElement.textContent = timer;
+                timerElement.className = 'timer trial-mode';
+                timerLabel.textContent = 'Time Left';
+            } else {
+                timer = 0;
+                timerElement.textContent = '0';
+                timerElement.className = 'timer';
+                timerLabel.textContent = 'Time';
+            }
+            
+            // Update mine count
+            document.getElementById('mineCount').textContent = '0';
+            
+            // Hide status
+            statusElement.classList.remove('show', 'won', 'lost', 'timeout');
+            
+            // Set grid template
+            boardElement.style.gridTemplateColumns = `repeat(${config.cols}, 35px)`;
+            boardElement.innerHTML = '';
+            
+            // Initialize arrays
+            for (let i = 0; i < config.rows; i++) {
+                board[i] = [];
+                revealed[i] = [];
+                flagged[i] = [];
+                for (let j = 0; j < config.cols; j++) {
+                    board[i][j] = 0;
+                    revealed[i][j] = false;
+                    flagged[i][j] = false;
+                }
+            }
+            
+            // Create cells
+            for (let i = 0; i < config.rows; i++) {
+                for (let j = 0; j < config.cols; j++) {
+                    const cell = document.createElement('button');
+                    cell.className = 'cell';
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    
+                    cell.addEventListener('click', () => handleCellClick(i, j));
+                    cell.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        handleRightClick(i, j);
+                    });
+                    
+                    boardElement.appendChild(cell);
+                }
+            }
+        }
+
+        function generateMines(excludeRow, excludeCol) {
+            const config = difficulties[currentDifficulty];
+            let minesPlaced = 0;
+            
+            while (minesPlaced < config.mines) {
+                const row = Math.floor(Math.random() * config.rows);
+                const col = Math.floor(Math.random() * config.cols);
+                
+                // Don't place mine on first clicked cell or adjacent cells
+                if (Math.abs(row - excludeRow) <= 1 && Math.abs(col - excludeCol) <= 1) {
+                    continue;
+                }
+                
+                if (board[row][col] !== 'M') {
+                    board[row][col] = 'M';
+                    minesPlaced++;
+                    
+                    // Update adjacent cells
+                    for (let i = -1; i <= 1; i++) {
+                        for (let j = -1; j <= 1; j++) {
+                            const newRow = row + i;
+                            const newCol = col + j;
+                            if (isValidCell(newRow, newCol) && board[newRow][newCol] !== 'M') {
+                                board[newRow][newCol]++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function isValidCell(row, col) {
+            const config = difficulties[currentDifficulty];
+            return row >= 0 && row < config.rows && col >= 0 && col < config.cols;
+        }
+
+        function handleCellClick(row, col) {
+            if (gameOver || won || revealed[row][col]) return;
+            
+            // If in flag mode, place/remove flag on left click
+            if (actionMode === 'flag') {
+                if (flagged[row][col]) {
+                    flagged[row][col] = false;
+                } else {
+                    flagged[row][col] = true;
+                }
+                updateCell(row, col);
+                updateMineCount();
+                return;
+            }
+            
+            // Reveal mode (default)
+            if (flagged[row][col]) return;
+            
+            if (firstClick) {
+                generateMines(row, col);
+                firstClick = false;
+                startTimer();
+            }
+            
+            if (board[row][col] === 'M') {
+                revealCell(row, col);
+                endGame(false);
+                return;
+            }
+            
+            revealCells(row, col);
+            checkWin();
+        }
+
+        function handleRightClick(row, col) {
+            if (gameOver || won || revealed[row][col]) return;
+            
+            flagged[row][col] = !flagged[row][col];
+            updateCell(row, col);
+            updateMineCount();
+        }
+
+        function revealCells(row, col) {
+            if (!isValidCell(row, col) || revealed[row][col] || flagged[row][col]) return;
+            
+            revealCell(row, col);
+            
+            if (board[row][col] === 0) {
+                for (let i = -1; i <= 1; i++) {
+                    for (let j = -1; j <= 1; j++) {
+                        revealCells(row + i, col + j);
+                    }
+                }
+            }
+        }
+
+        function revealCell(row, col) {
+            revealed[row][col] = true;
+            updateCell(row, col);
+        }
+
+        function updateCell(row, col) {
+            const config = difficulties[currentDifficulty];
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            
+            cell.className = 'cell';
+            
+            if (revealed[row][col]) {
+                cell.classList.add('revealed');
+                const value = board[row][col];
+                
+                if (value === 'M') {
+                    cell.classList.add('mine');
+                    cell.textContent = 'X';
+                } else if (value > 0) {
+                    cell.classList.add(`num-${value}`);
+                    cell.textContent = value;
+                } else {
+                    cell.textContent = '';
+                }
+            } else if (flagged[row][col]) {
+                cell.classList.add('flagged');
+                cell.textContent = '!';
+            } else {
+                cell.textContent = '';
+            }
+        }
+
+        function updateMineCount() {
+            const config = difficulties[currentDifficulty];
+            let flagCount = 0;
+            
+            for (let i = 0; i < config.rows; i++) {
+                for (let j = 0; j < config.cols; j++) {
+                    if (flagged[i][j]) flagCount++;
+                }
+            }
+            
+            document.getElementById('mineCount').textContent = flagCount;
+        }
+
+        function checkWin() {
+            const config = difficulties[currentDifficulty];
+            let revealedCount = 0;
+            
+            for (let i = 0; i < config.rows; i++) {
+                for (let j = 0; j < config.cols; j++) {
+                    if (revealed[i][j] && board[i][j] !== 'M') {
+                        revealedCount++;
+                    }
+                }
+            }
+            
+            if (revealedCount === config.rows * config.cols - config.mines) {
+                endGame(true);
+            }
+        }
+
+        function endGame(isWon, isTimeout = false) {
+            gameOver = !isWon;
+            won = isWon;
+            
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            const statusElement = document.getElementById('gameStatus');
+            statusElement.classList.add('show');
+            
+            if (isWon) {
+                statusElement.classList.add('won');
+                if (currentMode === 'trial') {
+                    const timeUsed = timeLimit - timer;
+                    statusElement.textContent = 'FIELD CLEARED - TIME: ' + timeUsed + 's';
+                } else {
+                    statusElement.textContent = 'FIELD CLEARED - TIME: ' + timer + 's';
+                }
+            } else if (isTimeout) {
+                statusElement.classList.add('timeout');
+                statusElement.textContent = 'TIME EXPIRED';
+                revealAllMines();
+            } else {
+                statusElement.classList.add('lost');
+                statusElement.textContent = 'DETONATION DETECTED';
+                revealAllMines();
+            }
+        }
+
+        function revealAllMines() {
+            const config = difficulties[currentDifficulty];
+            for (let i = 0; i < config.rows; i++) {
+                for (let j = 0; j < config.cols; j++) {
+                    if (board[i][j] === 'M') {
+                        revealed[i][j] = true;
+                        updateCell(i, j);
+                    }
+                }
+            }
+        }
+
+        function startTimer() {
+            const timerElement = document.getElementById('timer');
+            
+            if (currentMode === 'trial') {
+                // Countdown timer for trial mode
+                timerInterval = setInterval(() => {
+                    timer--;
+                    timerElement.textContent = timer;
+                    
+                    // Update timer color based on remaining time
+                    const percentRemaining = (timer / timeLimit) * 100;
+                    
+                    if (percentRemaining <= 10) {
+                        timerElement.className = 'timer trial-critical';
+                    } else if (percentRemaining <= 30) {
+                        timerElement.className = 'timer trial-warning';
+                    } else {
+                        timerElement.className = 'timer trial-mode';
+                    }
+                    
+                    // Time's up
+                    if (timer <= 0) {
+                        endGame(false, true);
+                    }
+                }, 1000);
+            } else {
+                // Count up timer for classic mode
+                timerInterval = setInterval(() => {
+                    timer++;
+                    timerElement.textContent = timer;
+                }, 1000);
+            }
+        }
+
+        function useHint() {
+            if (hintsRemaining <= 0 || gameOver || won || firstClick) return;
+            
+            const config = difficulties[currentDifficulty];
+            const safeCells = [];
+            
+            // Find all safe, unrevealed, unflagged cells
+            for (let i = 0; i < config.rows; i++) {
+                for (let j = 0; j < config.cols; j++) {
+                    if (!revealed[i][j] && !flagged[i][j] && board[i][j] !== 'M') {
+                        safeCells.push([i, j]);
+                    }
+                }
+            }
+            
+            if (safeCells.length === 0) return;
+            
+            // Pick a random safe cell
+            const randomIndex = Math.floor(Math.random() * safeCells.length);
+            const [row, col] = safeCells[randomIndex];
+            
+            // Visual feedback
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            cell.classList.add('hint-flash');
+            
+            setTimeout(() => {
+                cell.classList.remove('hint-flash');
+                // Reveal the cell
+                revealCells(row, col);
+                checkWin();
+            }, 1000);
+            
+            // Decrease hint count
+            hintsRemaining--;
+            updateHintButton();
+        }
+
+        function updateHintButton() {
+            const hintBtn = document.getElementById('hintBtn');
+            const hintCounter = document.getElementById('hintCounter');
+            
+            hintCounter.textContent = hintsRemaining;
+            
+            if (hintsRemaining <= 0) {
+                hintBtn.disabled = true;
+            } else {
+                hintBtn.disabled = false;
+            }
+        }
+
+        function toggleActionMode() {
+            const toggleBtn = document.getElementById('actionToggleBtn');
+            
+            if (actionMode === 'reveal') {
+                actionMode = 'flag';
+                toggleBtn.textContent = 'FLAG MODE';
+                toggleBtn.classList.add('flag-mode');
+            } else {
+                actionMode = 'reveal';
+                toggleBtn.textContent = 'REVEAL MODE';
+                toggleBtn.classList.remove('flag-mode');
+            }
+        }
+
+        // Initialize game on load
+        initGame();
+
+        // Keyboard shortcut: F key to toggle action mode
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'f' || e.key === 'F') {
+                toggleActionMode();
+            }
+        });
+    </script>
+</body>
+</html>

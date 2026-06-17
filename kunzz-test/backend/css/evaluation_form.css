@@ -1,0 +1,792 @@
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #faf7f2;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: clamp(16px, 1.25vw, 24px) 24px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: clamp(10px, 1.56vw, 30px);
+            position: relative;
+        }
+
+        .header .controls {
+            display: flex;
+            align-items: center;
+            gap: 0px;
+        }
+
+        .toggle-standards-selector {
+            position: relative;
+        }
+
+        .selector-button {
+            background-color: #f99e00;
+            color: white;
+            font-weight: 500;
+            padding: clamp(6px, 0.52vw, 10px) clamp(16px, 1.04vw, 20px);
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: clamp(10px, 0.73vw, 14px);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            min-width: clamp(120px, 10vw, 150px);
+            justify-content: space-between;
+        }
+
+        .selector-button:hover {
+            background-color: #f98500ff;
+            border-radius: 8px;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(88, 62, 4, 0.2);
+        }
+
+        .selector-dropdown {
+            position: absolute;
+            top: 96%;
+            right: 0;
+            background: white;
+            border: 2px solid #000000ff;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(88, 62, 4, 0.2);
+            min-width: 100%;
+            z-index: 1000;
+            display: none;
+            margin-top: 4px;
+        }
+
+        .selector-dropdown.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: clamp(6px, 0.42vw, 8px) clamp(10px, 0.83vw, 16px);
+            cursor: pointer;
+            border-bottom: 1px solid #e5e7eb;
+            transition: all 0.2s;
+            color: #000000ff;
+            font-size: clamp(8px, 0.74vw, 14px);
+            font-weight: 500;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8f5eb;
+            border-radius: 8px;
+        }
+
+        .dropdown-item.active {
+            background-color: #f99e00;
+            color: white;
+            border-radius: 4px;
+        }
+
+        .header h1 {
+            color: #000000ff;
+            font-size: clamp(20px, 2.6vw, 50px);
+            margin: 0;
+            text-align: left;
+            position: relative;
+            padding-bottom: 16px;
+            width: 100%;
+        }
+
+        .header h1::after {
+            content: "";
+            display: block;
+            height: 3px;
+            width: 100%;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            background: linear-gradient(90deg, rgba(245, 190, 133, 0) 0%, rgba(0, 0, 0, 1) 25%, rgba(0, 0, 0, 1) 75%, rgba(245, 190, 133, 0) 100%);
+        }
+
+        .header .controls {
+            position: relative;
+            z-index: 10;
+        }
+
+        .back-button {
+            background-color: #6b7280;
+            color: white;
+            font-weight: 500;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            text-decoration: none;
+            position: absolute;
+            top: 135px;
+            right: 0;
+        }
+
+        .back-button:hover {
+            background-color: #4b5563;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(107, 114, 128, 0.2);
+        }
+
+        .content-wrapper {
+            flex: 1;
+            display: flex;
+            gap: 20px;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 280px;
+            flex-shrink: 0;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+
+        /* 考核标准模式下隐藏左侧筛选区 */
+        .sidebar.standards-hidden {
+            display: none;
+        }
+
+        .main-content {
+            flex: 1;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+        }
+
+        .form-section label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-section input,
+        .form-section select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-section input:focus,
+        .form-section select:focus {
+            outline: none;
+            border-color: #bf7f3b;
+        }
+
+        .btn-primary {
+            background-color: #bf7f3b;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background-color: #e2a56b;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 190, 133, 0.45);
+        }
+
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+
+        .evaluation-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            table-layout: fixed;
+            font-size: 15px;
+        }
+
+        .evaluation-table thead {
+            background: #bf7f3b;
+            color: white;
+        }
+
+        .evaluation-table th {
+            padding: 18px 12px;
+            text-align: center;
+            font-weight: 600;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            word-wrap: break-word;
+            font-size: 15px;
+        }
+
+        .evaluation-table th:first-child {
+            min-width: 200px;
+            width: 200px;
+            text-align: left;
+            padding-left: 18px;
+        }
+
+        .evaluation-table td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #e5e7eb;
+            border-right: 1px solid #e5e7eb;
+            text-align: center;
+            word-wrap: break-word;
+            font-size: 14px;
+        }
+
+        .evaluation-table td:first-child {
+            text-align: left;
+            padding-left: 18px;
+            font-weight: 500;
+        }
+
+        .evaluation-table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .employee-name {
+            font-weight: 500;
+            color: #333;
+            font-size: 15px;
+        }
+
+        .score-input {
+            width: 100%;
+            padding: 12px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 15px;
+            min-height: 40px;
+            box-sizing: border-box;
+        }
+
+        .score-input:focus {
+            outline: none;
+            border-color: #bf7f3b;
+        }
+
+        .evaluation-table th small {
+            display: block;
+            font-size: 15px;
+            margin-top: 5px;
+            font-weight: 600;
+            opacity: 1;
+        }
+
+        .form-header {
+            background: #bf7f3b;
+            color: white;
+            padding: 20px;
+            border-radius: 12px 12px 0 0;
+            margin: -30px -30px 30px -30px;
+        }
+
+        .form-header h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .form-info {
+            display: flex;
+            gap: 30px;
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        .form-list {
+            margin-top: 20px;
+        }
+
+        .form-item {
+            padding: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .form-item:hover {
+            border-color: #bf7f3b;
+            background-color: #fff5f0;
+        }
+
+        .form-item.active {
+            border-color: #bf7f3b;
+            background-color: #fff5f0;
+        }
+
+        .form-item-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .form-item-meta {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .message.error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+
+        .add-employee-btn {
+            margin-top: 15px;
+            padding: 8px 16px;
+            background-color: #10b981;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .add-employee-btn:hover {
+            background-color: #059669;
+        }
+
+        .save-form-btn {
+            transition: all 0.2s;
+        }
+
+        .save-form-btn:hover {
+            background-color: #2563eb !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .print-btn:hover {
+            background-color: #059669 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .delete-btn {
+            padding: 6px 12px;
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .delete-btn:hover {
+            background-color: #dc2626;
+        }
+
+        .print-btn {
+            margin-top: 20px;
+            padding: 15px 30px;
+            background-color: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .print-btn:hover {
+            background-color: #059669;
+        }
+
+        /* PDF内容区域样式 */
+        #pdf-content {
+            display: none;
+            background: white;
+            padding: 40px 50px;
+            width: 1300px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+
+        #pdf-content .form-header {
+            margin: 0 0 25px 0;
+            border-radius: 0;
+            padding: 25px;
+        }
+
+        #pdf-content .form-header h2 {
+            font-size: 44px;
+            margin-bottom: 18px;
+            font-weight: 700;
+        }
+
+        #pdf-content .form-info {
+            font-size: 18px;
+            gap: 50px;
+            font-weight: 500;
+        }
+
+        #pdf-content .evaluation-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 16px;
+        }
+
+        #pdf-content .evaluation-table th {
+            border: 1px solid #000;
+            padding: 18px 12px;
+            text-align: center;
+            font-weight: 600;
+            background: #bf7f3b;
+            color: white;
+            min-width: 140px;
+            font-size: 16px;
+        }
+
+        #pdf-content .evaluation-table th:first-child {
+            min-width: 220px;
+            text-align: left;
+            padding-left: 18px;
+        }
+
+        #pdf-content .evaluation-table td {
+            border: 1px solid #000;
+            padding: 18px 12px;
+            text-align: center;
+            min-height: 50px;
+            min-width: 140px;
+            font-size: 15px;
+        }
+
+        #pdf-content .evaluation-table td.employee-name {
+            text-align: left;
+            padding-left: 18px;
+            font-weight: 500;
+            min-width: 220px;
+            font-size: 16px;
+        }
+
+        #pdf-content .evaluation-table thead {
+            background: #bf7f3b;
+            color: white;
+        }
+
+        #pdf-content .evaluation-table tbody tr {
+            height: 60px;
+        }
+
+        #pdf-content .evaluation-table small {
+            display: block;
+            font-size: 16px;
+            margin-top: 5px;
+            font-weight: 600;
+            opacity: 1;
+        }
+
+        /* 打印样式 */
+        @media print {
+            body {
+                background: white;
+            }
+
+            .sidebar,
+            .back-button,
+            .save-form-btn,
+            .print-btn,
+            .header h1::after,
+            #message {
+                display: none !important;
+            }
+
+            .container {
+                max-width: 100%;
+                padding: 0;
+                height: auto;
+            }
+
+            .header {
+                margin-bottom: 20px;
+            }
+
+            .header h1 {
+                font-size: 28px;
+                margin-bottom: 10px;
+            }
+
+            .main-content {
+                box-shadow: none;
+                padding: 20px;
+                overflow: visible;
+                max-height: none;
+            }
+
+            .content-wrapper {
+                display: block;
+            }
+
+            .evaluation-table {
+                page-break-inside: auto;
+            }
+
+            .evaluation-table tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+
+            .evaluation-table thead {
+                display: table-header-group;
+            }
+
+            .evaluation-table tfoot {
+                display: table-footer-group;
+            }
+
+            .score-input {
+                border: 1px solid #000;
+                background: transparent;
+                padding: 8px;
+                min-height: 30px;
+            }
+
+            .form-header {
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .form-header h2 {
+                font-size: 32px;
+            }
+
+            /* 确保表格完整显示 */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            th,
+            td {
+                border: 1px solid #333;
+                padding: 10px;
+            }
+
+            /* 避免分页打断表格行 */
+            tr {
+                page-break-inside: avoid;
+            }
+        }
+
+        /* 考核标准编辑区 */
+        .standards-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .standards-toolbar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .standards-toolbar .left {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .standards-tabs {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .standards-tab {
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .standards-tab.active {
+            border-color: #111827;
+            background: #111827;
+            color: #fff;
+        }
+
+        .standards-page {
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .standards-page-title {
+            background: #bf7f3b;
+            color: #fff;
+            padding: 18px 16px;
+            font-size: 32px;
+            font-weight: 800;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .standards-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .standards-table th,
+        .standards-table td {
+            border: 1px solid #111;
+            padding: 14px;
+            vertical-align: top;
+        }
+
+        .standards-score {
+            width: 70px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 18px;
+        }
+
+        .standards-textarea {
+            width: 100%;
+            min-height: 86px;
+            border: none;
+            outline: none;
+            resize: vertical;
+            font-size: 14px;
+            line-height: 1.5;
+            font-family: inherit;
+        }
+
+        /* 标准PDF容器（隐藏，仅用于导出） */
+        #standards-pdf {
+            display: none;
+            width: 1300px;
+            background: #fff;
+            padding: 40px 50px;
+            box-sizing: border-box;
+        }
+
+        #standards-pdf .standards-page-title {
+            background: #bf7f3b;
+            color: #fff;
+            padding: 22px 16px;
+            font-size: 36px;
+            font-weight: 800;
+            text-align: center;
+            letter-spacing: 1.5px;
+            margin-bottom: 0;
+        }
+
+        #standards-pdf .standards-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 16px;
+        }
+
+        #standards-pdf .standards-table th {
+            background: #bf7f3b;
+            color: #fff;
+            padding: 16px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        #standards-pdf .standards-table td {
+            border: 1px solid #000;
+            padding: 18px;
+            vertical-align: top;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        #standards-pdf .standards-score {
+            width: 80px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 20px;
+        }
+
+        .standards-pdf-page {
+            page-break-after: always;
+            margin-bottom: 20px;
+        }
+
+        .standards-pdf-page:last-child {
+            page-break-after: auto;
+        }

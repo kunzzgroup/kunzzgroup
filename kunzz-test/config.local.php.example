@@ -1,0 +1,14 @@
+<?php
+/**
+ * Copy this file to config.local.php and adjust for your machine.
+ * config.local.php is not committed to git.
+ *
+ * Steps for localhost with your real account:
+ * 1. Start Apache + MySQL in XAMPP
+ * 2. In phpMyAdmin, import your production SQL dump as database u690174784_kunzz
+ * 3. Log in at http://localhost/kunzzgroup-1/frontend/login.html
+ */
+$host = 'localhost';
+$dbname = 'u690174784_kunzz';
+$dbuser = 'root';
+$dbpass = '';

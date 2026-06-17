@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>404 - 页面未找到</title>
+    <meta name="description" content="你访问的页面不存在或已被移动。" />
+    <style>
+      :root {
+        --bg0: #070a12;
+        --bg1: #0b1630;
+        --card: rgba(255, 255, 255, 0.08);
+        --card2: rgba(255, 255, 255, 0.06);
+        --stroke: rgba(255, 255, 255, 0.16);
+        --text: rgba(255, 255, 255, 0.92);
+        --muted: rgba(255, 255, 255, 0.70);
+        --shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+        --r: 20px;
+        --ring: 0 0 0 3px rgba(120, 170, 255, 0.35);
+        --a: #7aa8ff;
+        --b: #7cf0c7;
+        --c: #ff78c8;
+      }
+
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg0: #f7f9ff;
+          --bg1: #eaf1ff;
+          --card: rgba(255, 255, 255, 0.88);
+          --card2: rgba(255, 255, 255, 0.70);
+          --stroke: rgba(15, 25, 50, 0.14);
+          --text: rgba(10, 14, 28, 0.92);
+          --muted: rgba(10, 14, 28, 0.65);
+          --shadow: 0 20px 70px rgba(25, 40, 80, 0.18);
+          --ring: 0 0 0 3px rgba(40, 110, 255, 0.22);
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        background:
+          radial-gradient(1200px 600px at 20% 10%, rgba(122, 168, 255, 0.35), transparent 60%),
+          radial-gradient(900px 500px at 85% 20%, rgba(255, 120, 200, 0.26), transparent 60%),
+          radial-gradient(1100px 650px at 65% 95%, rgba(124, 240, 199, 0.20), transparent 60%),
+          linear-gradient(180deg, var(--bg0), var(--bg1));
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+          Arial, "Noto Sans", "Liberation Sans", sans-serif;
+        line-height: 1.55;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .skip {
+        position: absolute;
+        left: 12px;
+        top: 10px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.55);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-140%);
+        transition: transform 180ms ease;
+        z-index: 10;
+      }
+      .skip:focus {
+        transform: translateY(0);
+        outline: none;
+        box-shadow: var(--ring);
+      }
+
+      .wrap {
+        min-height: 100%;
+        display: grid;
+        place-items: center;
+        padding: 28px 18px;
+      }
+
+      .card {
+        width: min(980px, 100%);
+        border-radius: var(--r);
+        background: linear-gradient(180deg, var(--card), var(--card2));
+        border: 1px solid var(--stroke);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        position: relative;
+        backdrop-filter: blur(10px);
+      }
+
+      .top {
+        position: relative;
+        height: 180px;
+        overflow: hidden;
+        border-bottom: 1px solid var(--stroke);
+      }
+
+      .glow {
+        position: absolute;
+        inset: -40%;
+        background:
+          radial-gradient(circle at 20% 30%, rgba(122, 168, 255, 0.8), transparent 40%),
+          radial-gradient(circle at 80% 35%, rgba(255, 120, 200, 0.6), transparent 45%),
+          radial-gradient(circle at 55% 85%, rgba(124, 240, 199, 0.55), transparent 45%);
+        filter: blur(24px);
+        opacity: 0.75;
+        transform: translateZ(0);
+        animation: float 8s ease-in-out infinite;
+      }
+
+      .grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(to right, rgba(255, 255, 255, 0.10) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(255, 255, 255, 0.10) 1px, transparent 1px);
+        background-size: 34px 34px;
+        opacity: 0.18;
+        mask-image: radial-gradient(circle at 50% 40%, black 40%, transparent 72%);
+      }
+
+      .badge {
+        position: absolute;
+        left: 22px;
+        top: 18px;
+        padding: 10px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--stroke);
+        background: rgba(0, 0, 0, 0.22);
+        backdrop-filter: blur(8px);
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-indent: 0.14em;
+        font-size: 14px;
+      }
+
+      .content {
+        padding: 26px 22px 22px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(24px, 3.2vw, 36px);
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      p {
+        margin: 0;
+        max-width: 60ch;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 11px 14px;
+        border-radius: 14px;
+        border: 1px solid var(--stroke);
+        background: rgba(255, 255, 255, 0.06);
+        text-decoration: none;
+        font-weight: 650;
+        letter-spacing: 0.01em;
+        transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+        user-select: none;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+        background: rgba(255, 255, 255, 0.10);
+        border-color: rgba(255, 255, 255, 0.22);
+      }
+
+      .btn:focus {
+        outline: none;
+        box-shadow: var(--ring);
+      }
+
+      .btn.primary {
+        border-color: rgba(122, 168, 255, 0.55);
+        background: linear-gradient(135deg, rgba(122, 168, 255, 0.32), rgba(124, 240, 199, 0.18));
+      }
+
+      .btn.primary:hover {
+        background: linear-gradient(135deg, rgba(122, 168, 255, 0.40), rgba(124, 240, 199, 0.22));
+      }
+
+      .tips {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid var(--stroke);
+      }
+
+      .tip {
+        display: grid;
+        grid-template-columns: 10px 1fr;
+        gap: 10px;
+        padding: 12px 12px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 99px;
+        margin-top: 4px;
+        background: radial-gradient(circle at 30% 30%, var(--b), var(--a));
+        box-shadow: 0 0 0 4px rgba(122, 168, 255, 0.12);
+      }
+
+      .tip-title {
+        font-weight: 720;
+        margin-bottom: 2px;
+      }
+
+      .tip-text {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .foot {
+        width: min(980px, 100%);
+        margin-top: 14px;
+        padding: 10px 6px;
+        text-align: center;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+        50% {
+          transform: translate3d(0, -10px, 0) scale(1.02);
+        }
+      }
+
+      @media (max-width: 640px) {
+        .top {
+          height: 150px;
+        }
+        .content {
+          padding: 22px 16px 18px;
+        }
+        .tips {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation: none !important;
+          transition: none !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip" href="#content">跳到主要内容</a>
+
+    <main id="content" class="wrap" role="main" aria-labelledby="title">
+      <section class="card" aria-describedby="desc">
+        <div class="top">
+          <div class="badge" aria-hidden="true">404</div>
+          <div class="glow" aria-hidden="true"></div>
+          <div class="grid" aria-hidden="true"></div>
+        </div>
+
+        <div class="content">
+          <h1 id="title">页面未找到</h1>
+          <p id="desc" class="muted">
+            你访问的链接可能已失效、被移动，或你输入的地址有误。
+          </p>
+
+          <div class="actions" role="group" aria-label="页面操作">
+            <a class="btn primary" href="/">返回首页</a>
+            <a class="btn" href="../index.php">首页（index.php）</a>
+          </div>
+
+          <div class="tips" aria-label="建议">
+            <div class="tip">
+              <div class="dot" aria-hidden="true"></div>
+              <div>
+                <div class="tip-title">检查地址</div>
+                <div class="tip-text">确认路径、大小写与参数是否正确。</div>
+              </div>
+            </div>
+            <div class="tip">
+              <div class="dot" aria-hidden="true"></div>
+              <div>
+                <div class="tip-title">回到入口</div>
+                <div class="tip-text">从首页重新进入你要找的页面。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="foot" aria-label="页脚">
+        <span class="muted">如果你认为这是一个错误，请联系管理员。</span>
+      </footer>
+    </main>
+  </body>
+</html>
+
+

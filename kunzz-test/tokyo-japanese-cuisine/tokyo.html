@@ -1,0 +1,3692 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="image/tokyologo.png">
+  <title>TOKYO JAPANESE CUISINE | 东京日式料理</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=DM+Serif+Display&family=Noto+Sans+SC:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    /* ============================================================
+       DESIGN TOKENS
+    ============================================================ */
+    :root {
+      --font-serif: 'DM Serif Display', serif;
+      --font-sans: 'Noto Sans SC', sans-serif;
+      --color-primary: #a68a64;
+      --color-primary-dark: #8b7353;
+      --color-text: #33322f;
+      --color-text-light: #5d5a54;
+      --color-bg: #f5f2ed;
+      --color-bg-alt: #ebe7e0;
+      --color-border: #E5E5E5;
+      --color-line: rgba(255, 255, 255, 0.5);
+
+      --card-w: 340px;
+      --card-h: 480px;
+      --gap: 40px;
+
+      /* Spacing scale */
+      --sp-xs: 8px;
+      --sp-sm: 16px;
+      --sp-md: 24px;
+      --sp-lg: 40px;
+      --sp-xl: 64px;
+      --sp-2xl: 100px;
+
+      /* Nav height reference */
+      --nav-h: 72px;
+      --nav-top: 24px;
+    }
+
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      color: var(--color-text);
+      background-color: var(--color-bg);
+      line-height: 1.6;
+      overflow: hidden;
+      /* Desktop: swiper controls scroll */
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    /* ============================================================
+       SCROLL ANIMATIONS
+    ============================================================ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal.fade-left {
+      transform: translateX(-30px);
+    }
+
+    .reveal.fade-right {
+      transform: translateX(30px);
+    }
+
+    .reveal.scale-up {
+      transform: scale(0.95);
+    }
+
+    .reveal.active.fade-left,
+    .reveal.active.fade-right {
+      transform: translateX(0);
+    }
+
+    .reveal.active.scale-up {
+      transform: scale(1);
+    }
+
+    .delay-100 {
+      transition-delay: 0.1s;
+    }
+
+    .delay-200 {
+      transition-delay: 0.2s;
+    }
+
+    .delay-300 {
+      transition-delay: 0.3s;
+    }
+
+    .delay-400 {
+      transition-delay: 0.4s;
+    }
+
+    /* ============================================================
+       SWIPER
+    ============================================================ */
+    .swiper {
+      width: 100%;
+      height: 100vh;
+      background-color: #2c1a0e;
+    }
+
+    .swiper-slide {
+      height: 100vh;
+      box-sizing: border-box;
+      display: flex !important;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+
+
+    /* ============================================================
+       NAVIGATION
+    ============================================================ */
+    #nav {
+      position: fixed;
+      top: var(--nav-top);
+      left: 50%;
+      transform: translateX(-50%);
+      width: 95%;
+      max-width: 1300px;
+      z-index: 1000;
+      background-color: #ffffffc9;
+      border-radius: 9999px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      /* transition covers both normal hover AND the slide-away */
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+        top 0.3s ease;
+      height: var(--nav-h);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+    }
+
+    /* Applied by JS on slideChange when leaving slide 0 on desktop */
+    #nav.nav-pushed {
+      transform: translateX(-50%) translateY(calc(-100% - var(--nav-top) - 8px));
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .nav-container {
+      width: 100%;
+      padding: 0 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .haidilao-logo-bg {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: 2px solid var(--color-primary);
+      padding: 2px;
+      flex-shrink: 0;
+    }
+
+    .nav-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .nav-text-group {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .nav-text-group .primary {
+      color: var(--color-text-light);
+      font-family: var(--font-sans);
+      font-size: clamp(13px, 1.5vw, 18px);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+
+    .nav-text-group .secondary {
+      color: var(--color-text-light);
+      font-family: var(--font-sans);
+      font-size: clamp(10px, 1vw, 12px);
+      font-weight: 500;
+      line-height: 1.1;
+    }
+
+    /* Desktop nav links */
+    .nav-links {
+      display: none;
+      align-items: center;
+      gap: clamp(20px, 3vw, 40px);
+    }
+
+    @media (min-width: 1024px) {
+      .nav-links {
+        display: flex;
+      }
+    }
+
+    .nav-links a {
+      color: var(--color-text);
+      font-size: 15px;
+      font-weight: 600;
+      transition: color 0.2s ease;
+      position: relative;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--color-primary);
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -4px;
+      left: 0;
+      background-color: var(--color-primary);
+      transition: width 0.3s;
+    }
+
+    .nav-links a:hover::after,
+    .nav-links a.active::after {
+      width: 100%;
+    }
+
+    /* Dropdown */
+    .nav-dropdown {
+      position: relative;
+    }
+
+    .nav-dropdown-trigger {
+      color: var(--color-text);
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      transition: color 0.2s;
+    }
+
+    .nav-dropdown:hover .nav-dropdown-trigger,
+    .nav-dropdown-trigger.active {
+      color: var(--color-primary);
+    }
+
+    .nav-dropdown-arrow {
+      font-size: 10px;
+      display: inline-block;
+      transition: transform 0.25s;
+    }
+
+    .nav-dropdown:hover .nav-dropdown-arrow {
+      transform: rotate(180deg);
+    }
+
+    .nav-dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding-top: 28px;
+      background: transparent;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease;
+    }
+
+    .nav-dropdown:hover .nav-dropdown-menu {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .nav-dropdown-card {
+      background: #faf8f5;
+      border-radius: 14px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 154px;
+    }
+
+    .nav-dropdown-card .nav-dropdown-item {
+      display: block;
+      padding: 10px 18px;
+      border-radius: 10px;
+      color: var(--color-text);
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background-color 0.18s, color 0.18s;
+    }
+
+    .nav-dropdown-card .nav-dropdown-item::after {
+      display: none;
+    }
+
+    .nav-dropdown-card .nav-dropdown-item:hover {
+      background: var(--color-primary);
+      color: white;
+    }
+
+    /* Nav actions */
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: clamp(8px, 2vw, 24px);
+    }
+
+    /* CTA Buttons in nav — show/hide at breakpoints */
+    .nav-btn {
+      padding: 8px 20px;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .nav-btn-contact {
+      display: none;
+    }
+
+    .nav-btn-menu {
+      display: none;
+    }
+
+    @media (min-width: 768px) {
+      .nav-btn-contact {
+        display: inline-block;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .nav-btn-menu {
+        display: inline-block;
+      }
+    }
+
+    /* Hamburger */
+    .nav-hamburger {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background-color: var(--color-primary);
+      border: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      padding: 0;
+      box-shadow: 0 4px 10px rgba(166, 138, 100, 0.3);
+      flex-shrink: 0;
+    }
+
+    .nav-hamburger:hover {
+      background-color: #8c7353;
+      transform: translateY(-2px);
+    }
+
+    .nav-hamburger span {
+      width: 18px;
+      height: 2px;
+      background-color: var(--color-line);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    /* Hide hamburger on large desktop */
+    @media (min-width: 1024px) {
+      .nav-hamburger {
+        display: none;
+      }
+    }
+
+    /* ============================================================
+       BUTTONS
+    ============================================================ */
+    .btn-primary {
+      padding: 12px 32px;
+      border-radius: 9999px;
+      background-color: var(--color-primary);
+      color: white;
+      font-weight: 600;
+      border: 2px solid var(--color-primary);
+      display: inline-block;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 4px 10px rgba(166, 138, 100, 0.3);
+      font-family: var(--font-sans);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--color-primary-dark);
+      border-color: var(--color-primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(166, 138, 100, 0.4);
+    }
+
+    .btn-secondary {
+      padding: 12px 32px;
+      border-radius: 9999px;
+      border: 2px solid var(--color-border);
+      color: white;
+      font-weight: 600;
+      display: inline-block;
+      transition: all 0.3s ease;
+      background-color: transparent;
+      cursor: pointer;
+      font-family: var(--font-sans);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      background-color: rgba(166, 138, 100, 0.05);
+      transform: translateY(-2px);
+    }
+
+    .btn-primary.spring-btn,
+    .btn-secondary.spring-btn {
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.3s, color 0.3s;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .btn-primary.spring-btn:hover,
+    .btn-secondary.spring-btn:hover {
+      transform: scale(1.05);
+    }
+
+    .btn-primary.spring-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: skewX(-25deg);
+      transition: width 0.4s ease;
+      z-index: -1;
+    }
+
+    .btn-primary.spring-btn:hover::before {
+      width: 150%;
+    }
+
+    .btn-primary:active,
+    .btn-secondary:active {
+      transform: scale(0.96);
+      box-shadow: none !important;
+    }
+
+    /* ============================================================
+       HERO SECTION
+    ============================================================ */
+    #hero {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background-color: #333;
+    }
+
+    .hero-slider {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .hero-slide {
+      flex: 0 0 100%;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg,
+          rgba(0, 0, 0, 0.45) 0%,
+          rgba(0, 0, 0, 0.25) 40%,
+          rgba(0, 0, 0, 0.6) 100%);
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    /* Bokeh */
+    .hero-bokeh {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .hero-bokeh span {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: rgba(201, 162, 39, 0.4);
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(201, 162, 39, 0.4);
+      animation: move-particle 15s linear infinite;
+    }
+
+    .hero-bokeh span:nth-child(1) {
+      top: 20%;
+      left: 20%;
+      animation-duration: 12s;
+    }
+
+    .hero-bokeh span:nth-child(2) {
+      top: 50%;
+      left: 80%;
+      animation-duration: 18s;
+    }
+
+    .hero-bokeh span:nth-child(3) {
+      top: 80%;
+      left: 40%;
+      animation-duration: 15s;
+    }
+
+    .hero-bokeh span:nth-child(4) {
+      top: 10%;
+      left: 60%;
+      animation-duration: 20s;
+    }
+
+    .hero-bokeh span:nth-child(5) {
+      top: 70%;
+      left: 10%;
+      animation-duration: 14s;
+    }
+
+    @keyframes move-particle {
+      0% {
+        transform: translateY(0) translateX(0) scale(1);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 1;
+      }
+
+      90% {
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(-100px) translateX(50px) scale(0);
+        opacity: 0;
+      }
+    }
+
+    /* Hero content */
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: left;
+      padding: 0 5%;
+      max-width: 1300px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: calc(var(--nav-h) + var(--nav-top) + 20px);
+    }
+
+    .hero-logo {
+      width: clamp(72px, 12vw, 112px);
+      height: clamp(72px, 12vw, 112px);
+      margin: 0 0 clamp(16px, 3vw, 24px) 0;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid white;
+    }
+
+    .hero-logo.floating-logo {
+      animation: float-logo 6s ease-in-out infinite;
+    }
+
+    .hero-logo.pulse-glow {
+      animation: float-logo 6s ease-in-out infinite, pulse-glow 3s ease-in-out infinite;
+    }
+
+    @keyframes float-logo {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-15px);
+      }
+    }
+
+    @keyframes pulse-glow {
+
+      0%,
+      100% {
+        filter: drop-shadow(0 0 10px rgba(201, 162, 39, 0.3));
+      }
+
+      50% {
+        filter: drop-shadow(0 0 25px rgba(201, 162, 39, 0.8));
+      }
+    }
+
+    .hero-title {
+      font-family: var(--font-serif);
+      font-size: clamp(28px, 6vw, 72px);
+      line-height: 1.15;
+      color: white;
+      margin-bottom: clamp(10px, 2vw, 16px);
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .hero-title .letter-reveal {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: reveal-letter 0.6s cubic-bezier(0.5, 0, 0, 1) forwards;
+      animation-delay: var(--d);
+      min-width: 0.3em;
+    }
+
+    @keyframes reveal-letter {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero-subtitle {
+      color: rgba(255, 255, 255, 0.95);
+      font-size: clamp(15px, 2.5vw, 20px);
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .hero-subtitle.shimmer-text {
+      background: linear-gradient(90deg, #fff 0%, #c9a227 50%, #fff 100%);
+      background-size: 200% auto;
+      color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+      animation: shimmer 3s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes shimmer {
+      to {
+        background-position: 200% center;
+      }
+    }
+
+    .hero-tagline {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: clamp(13px, 2vw, 18px);
+      margin-bottom: clamp(24px, 4vw, 40px);
+    }
+
+    .hero-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: clamp(12px, 3vw, 24px);
+    }
+
+    /* Mobile: smaller hero buttons */
+    @media (max-width: 480px) {
+
+      .hero-buttons .btn-primary,
+      .hero-buttons .btn-secondary {
+        padding: 10px 24px;
+        font-size: 13px;
+      }
+    }
+
+    /* Scroll indicator */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0.8;
+    }
+
+    .arrow-scroll span {
+      display: block;
+      width: 10px;
+      height: 10px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.6);
+      border-right: 2px solid rgba(255, 255, 255, 0.6);
+      transform: rotate(45deg);
+      animation: array-scroll 2s infinite;
+      margin: -4px 0;
+    }
+
+    .arrow-scroll span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .arrow-scroll span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes array-scroll {
+      0% {
+        opacity: 0;
+        transform: rotate(45deg) translate(-5px, -5px);
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+        transform: rotate(45deg) translate(5px, 5px);
+      }
+    }
+
+    /* ============================================================
+       SECTION 2: ZEN ABOUT
+    ============================================================ */
+    .zen-about {
+      background-color: #f2d6b4;
+      background-image:
+        linear-gradient(110deg, rgba(246, 244, 241, 0.9) 0%, rgba(246, 244, 241, 0.68) 46%, rgba(242, 214, 180, 0.2) 100%),
+        url("image/about-culture-bg-1920.jpg");
+      background-image:
+        linear-gradient(110deg, rgba(246, 244, 241, 0.9) 0%, rgba(246, 244, 241, 0.68) 46%, rgba(242, 214, 180, 0.2) 100%),
+        image-set(
+          url("image/about-culture-bg-1920.jpg") 1x,
+          url("image/about-culture-bg-4k.jpg") 2x
+        );
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: cover;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .zen-about::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      background: linear-gradient(180deg,
+          rgba(245, 240, 232, 0.55) 0%,
+          rgba(245, 240, 232, 0.28) 42%,
+          rgba(245, 240, 232, 0.08) 100%);
+    }
+
+    .section-decoration {
+      position: absolute;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .section-decoration.left {
+      top: 15%;
+      left: -20px;
+      width: clamp(80px, 10vw, 160px);
+    }
+
+    .section-decoration.right {
+      top: 65%;
+      right: -20px;
+      transform: scaleX(-1);
+      width: clamp(80px, 10vw, 160px);
+    }
+
+    @media (min-width: 768px) {
+      .section-decoration.left {
+        left: 2%;
+      }
+
+      .section-decoration.right {
+        right: 2%;
+      }
+    }
+
+    .zen-container {
+      max-width: 1400px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: clamp(32px, 5vw, 80px);
+      width: 90%;
+      padding: clamp(32px, 5vw, 80px) clamp(24px, 4vw, 60px);
+      border-radius: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.82) 0%, rgb(255 255 255 / 85%) 52%, rgb(255 255 255 / 65%) 100%);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      position: relative;
+      z-index: 2;
+    }
+
+    .zen-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .zen-label {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 14px;
+      letter-spacing: 4px;
+      color: #b86b5b;
+      margin-bottom: clamp(20px, 3vw, 40px);
+    }
+
+    .zen-line {
+      width: 60px;
+      height: 1px;
+      background: #b86b5b;
+      flex-shrink: 0;
+    }
+
+    .zen-title {
+      font-family: var(--font-serif);
+      font-size: clamp(36px, 6vw, 90px);
+      font-weight: 400;
+      line-height: 1.1;
+      color: #2b2b2b;
+      margin: 0;
+    }
+
+    .zen-italic {
+      font-style: italic;
+      font-weight: 300;
+      color: #8a8a8a;
+    }
+
+    .zen-desc {
+      font-family: var(--font-sans);
+      margin-top: clamp(20px, 3vw, 40px);
+      max-width: 500px;
+      font-size: clamp(14px, 1.5vw, 18px);
+      line-height: 1.8;
+      color: #5a5a5a;
+    }
+
+    .zen-images {
+      flex: 1;
+      position: relative;
+      min-width: 0;
+    }
+
+    .zen-img {
+      border-radius: 16px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s ease;
+      display: block;
+    }
+
+    .zen-img-top {
+      width: 100%;
+      height: clamp(280px, 40vh, 500px);
+      object-fit: cover;
+    }
+
+    .zen-img-bottom {
+      width: 65%;
+      position: absolute;
+      bottom: clamp(-60px, -10vw, -80px);
+      left: clamp(-40px, -6vw, -60px);
+    }
+
+    /* Animation */
+    .zen-title span,
+    .zen-desc,
+    .zen-img {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 1s ease;
+    }
+
+    .zen-title span.zen-active,
+    .zen-desc.zen-active,
+    .zen-img.zen-active,
+    .zen-active {
+      opacity: 1 !important;
+      transform: translateY(0);
+    }
+
+    .zen-img-bottom.zen-active {
+      animation: float 6s ease-in-out infinite 1s;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-15px);
+      }
+
+      100% {
+        transform: translateY(0px);
+      }
+    }
+
+    /* Tablet: stack */
+    @media (max-width: 900px) {
+      .zen-container {
+        flex-direction: column;
+        gap: 32px;
+        padding: clamp(24px, 4vw, 48px);
+        width: 90%;
+        overflow: visible;
+        padding-bottom: clamp(24px, 4vw, 48px);
+      }
+
+      .zen-images {
+        width: 100%;
+        padding-bottom: 0;
+      }
+
+      .zen-img-bottom {
+        display: none !important;
+      }
+
+      .zen-img-top {
+        height: clamp(300px, 40vh, 400px);
+      }
+    }
+
+    /* Mobile: more compact */
+    @media (max-width: 480px) {
+      .zen-about {
+        height: auto;
+        min-height: 100vh;
+        padding: 20px 0;
+      }
+
+      .zen-container {
+        width: 92%;
+        padding: 24px 20px;
+        border-radius: 16px;
+      }
+
+      .zen-title {
+        font-size: 32px;
+      }
+
+      .zen-desc {
+        font-size: 14px;
+      }
+
+      .zen-img-top {
+        height: 220px;
+      }
+    }
+
+    /* ============================================================
+       SECTION 3: CULTURE CAROUSEL
+    ============================================================ */
+    .culture-carousel-section {
+      padding: clamp(40px, 6vw, 80px) 0 clamp(40px, 6vw, 80px);
+      text-align: center;
+      background: var(--color-bg);
+      overflow: hidden;
+      display: flex !important;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      position: relative;
+    }
+
+    .culture-carousel-section .cc-slide-title,
+    .culture-carousel-section .cc-carousel-outer,
+    .culture-carousel-section .cc-description,
+    .culture-carousel-section .cc-dots {
+      position: relative;
+      z-index: 2;
+    }
+
+    .salmon-mascot-peek {
+      position: absolute;
+      top: 57%;
+      width: clamp(230px, 22vw, 320px);
+      height: clamp(230px, 22vw, 320px);
+      z-index: 3;
+      pointer-events: none;
+      opacity: 1;
+      filter: drop-shadow(0 24px 34px rgba(84, 60, 34, 0.2));
+    }
+
+    .salmon-mascot-peek.left {
+      left: clamp(-58px, -3vw, -24px);
+      transform: translateY(-50%) rotate(4deg);
+      transform-origin: 15% 55%;
+    }
+
+    .salmon-mascot-peek.right {
+      right: clamp(-58px, -3vw, -24px);
+      transform: translateY(-50%) rotate(-4deg);
+      transform-origin: 85% 55%;
+    }
+
+    .salmon-mascot-frame {
+      position: relative;
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      background-image: url("image/salmon-mascot.svg");
+      background-repeat: no-repeat;
+      background-size: auto 100%;
+      background-position-y: center;
+      animation: salmonPeekFloat 5.4s ease-in-out infinite;
+    }
+
+    .salmon-mascot-peek.left .salmon-mascot-frame {
+      background-position-x: right;
+    }
+
+    .salmon-mascot-peek.right .salmon-mascot-frame {
+      background-position-x: left;
+    }
+
+    @keyframes salmonPeekFloat {
+      0%,
+      100% {
+        transform: translate3d(0, 0, 0) rotate(0deg);
+      }
+
+      50% {
+        transform: translate3d(-10px, -12px, 0) rotate(2.5deg);
+      }
+    }
+
+    .cc-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 4.5px;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      margin-bottom: 22px;
+    }
+
+    .cc-eyebrow::before,
+    .cc-eyebrow::after {
+      content: "";
+      width: 30px;
+      height: 1px;
+      background: var(--color-primary);
+      display: block;
+    }
+
+    .cc-main-title {
+      font-family: var(--font-serif);
+      font-size: clamp(32px, 5vw, 62px);
+      font-weight: 300;
+      color: var(--color-text);
+      letter-spacing: -0.5px;
+      line-height: 1;
+      padding: 0 16px;
+    }
+
+    .cc-main-title em {
+      font-style: normal;
+      color: var(--color-primary);
+    }
+
+    .cc-rule {
+      width: 1px;
+      height: 36px;
+      background: linear-gradient(to bottom, var(--color-primary), transparent);
+      margin: 24px auto 0;
+    }
+
+    .cc-slide-title {
+      font-family: var(--font-serif);
+      font-size: clamp(20px, 3vw, 42px);
+      font-weight: 300;
+      color: var(--color-text);
+      margin: clamp(40px, 6vw, 90px) auto 0;
+      letter-spacing: 0.5px;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      min-height: 52px;
+      padding: 0 16px;
+    }
+
+    .cc-slide-title.fading {
+      opacity: 0;
+      transform: translateY(5px);
+    }
+
+    /* Carousel layout */
+    .cc-carousel-outer {
+      position: relative;
+      width: calc(var(--card-w) * 3 + var(--gap) * 2);
+      margin: clamp(24px, 4vw, 40px) auto 0;
+      user-select: none;
+      max-width: calc(100vw - 80px);
+    }
+
+    .cc-viewport {
+      overflow: hidden;
+      margin: 0 -28px;
+    }
+
+    .cc-track {
+      position: relative;
+      cursor: grab;
+    }
+
+    .cc-track.grabbing {
+      cursor: grabbing;
+    }
+
+    .cc-card {
+      position: absolute;
+      width: var(--card-w);
+      height: var(--card-h);
+      border-radius: 20px;
+      overflow: hidden;
+      transform: translate3d(0, 0, 0);
+      will-change: transform, opacity, filter;
+      cursor: pointer;
+    }
+
+    .cc-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+
+    .cc-card-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: linear-gradient(to top,
+          rgba(10, 9, 7, .82) 0%,
+          rgba(10, 9, 7, .4) 50%,
+          rgba(10, 9, 7, .2) 100%);
+      transition: opacity 0.42s ease;
+    }
+
+    .cc-card.active .cc-card-overlay {
+      background: linear-gradient(to top, rgba(10, 9, 7, .4) 0%, transparent 70%);
+      opacity: 0.35;
+    }
+
+    .cc-card-num {
+      position: absolute;
+      bottom: 24px;
+      left: 24px;
+      z-index: 2;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: rgba(255, 255, 255, 0.45);
+      font-family: var(--font-sans);
+    }
+
+    /* Nav buttons */
+    .cc-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      padding: 0;
+      transition: transform 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .cc-nav::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 1px solid rgba(166, 138, 100, 0.28);
+      background: rgba(245, 242, 237, 0.98);
+      transition: border-color .3s, background .3s, box-shadow .3s;
+    }
+
+    .cc-nav:hover::before {
+      border-color: var(--color-primary);
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 4px 18px rgba(166, 138, 100, 0.2);
+    }
+
+    .cc-nav svg {
+      position: relative;
+      z-index: 1;
+      width: 14px;
+      height: 14px;
+      stroke: var(--color-primary);
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      transition: transform 0.22s ease;
+    }
+
+    .cc-nav:hover {
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .cc-nav.left:hover svg {
+      transform: translateX(-2px);
+    }
+
+    .cc-nav.right:hover svg {
+      transform: translateX(2px);
+    }
+
+    .cc-nav.left {
+      left: -80px;
+    }
+
+    .cc-nav.right {
+      right: -80px;
+    }
+
+    /* Description */
+    .cc-description {
+      max-width: min(800px, 90vw);
+      margin: clamp(24px, 4vw, 44px) auto 0;
+      font-size: clamp(14px, 1.8vw, 18px);
+      line-height: 1.85;
+      color: var(--color-text-light);
+      font-weight: 300;
+      letter-spacing: .2px;
+      transition: opacity .25s ease, transform .25s ease;
+      min-height: 54px;
+      padding: 0 16px;
+    }
+
+    .cc-description.fading {
+      opacity: 0;
+      transform: translateY(5px);
+    }
+
+    /* Dots */
+    .cc-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: clamp(24px, 4vw, 40px);
+    }
+
+    .cc-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      border: none;
+      padding: 0;
+      background: rgba(166, 138, 100, .25);
+      transition: background .3s, transform .3s;
+      cursor: pointer;
+    }
+
+    .cc-dot.active {
+      background: var(--color-primary);
+      transform: scale(1.4);
+    }
+
+    /* Responsive carousel */
+    @media (max-width: 1300px) {
+
+      /* Hide side navigation on tablet/laptop, touch/trackpad swipe is natural */
+      .cc-nav {
+        display: none !important;
+      }
+
+      .salmon-mascot-peek {
+        top: 64%;
+        width: 200px;
+        height: 200px;
+        opacity: 0.92;
+      }
+
+      .salmon-mascot-peek.left {
+        left: -52px;
+      }
+
+      .salmon-mascot-peek.right {
+        right: -52px;
+      }
+    }
+
+    @media (max-width: 940px) {
+      :root {
+        --card-w: 220px;
+        --card-h: 310px;
+      }
+    }
+
+    @media (max-width: 767px),
+    (max-height: 500px) {
+      :root {
+        --card-w: 230px;
+        --card-h: 330px;
+        --gap: 20px;
+      }
+
+      /* Fix centering on mobile */
+      .cc-carousel-outer {
+        max-width: 100vw !important;
+        width: 100vw !important;
+      }
+
+      .cc-viewport {
+        margin: 0 !important;
+        overflow: visible !important;
+      }
+
+      .cc-track {
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      /* Hide side navigation on mobile, swipe is natural */
+      .cc-nav {
+        display: none !important;
+      }
+
+      .cc-slide-title {
+        font-size: clamp(22px, 5vw, 26px);
+        margin-top: 32px;
+      }
+
+      .cc-description {
+        font-size: 13.5px;
+        line-height: 1.7;
+        margin-top: 16px;
+        padding: 0 20px;
+      }
+
+      .culture-carousel-section {
+        height: auto;
+        min-height: 100vh;
+        padding: 50px 0 60px;
+      }
+
+      .salmon-mascot-peek {
+        top: auto;
+        bottom: 72px;
+        width: 150px;
+        height: 150px;
+        opacity: 0.48;
+      }
+
+      .salmon-mascot-peek.left {
+        left: -42px;
+        transform: rotate(5deg);
+      }
+
+      .salmon-mascot-peek.right {
+        right: -42px;
+        transform: rotate(-5deg);
+      }
+    }
+
+    @media (max-width: 400px) {
+      :root {
+        --card-w: 130px;
+        --card-h: 190px;
+        --gap: 12px;
+      }
+    }
+
+    /* ============================================================
+       SECTION 4: FEATURED
+    ============================================================ */
+    #featured {
+      background-color: var(--color-bg-alt);
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Hidden on desktop — shown only in mobile media query */
+    .featured-mobile {
+      display: none;
+    }
+
+    .featured-container {
+      max-width: 1400px;
+      width: 90%;
+      margin: 0 auto;
+      text-align: center;
+      padding-top: clamp(60px, 8vw, 100px);
+    }
+
+    #featured h2 {
+      font-family: var(--font-serif);
+      font-size: clamp(28px, 5vw, 40px);
+      color: var(--color-primary);
+      text-align: center;
+      margin-bottom: clamp(24px, 4vw, 48px);
+      margin-top: 0;
+    }
+
+    .featured-cards-wrapper {
+      display: flex;
+      flex-direction: row;
+      gap: clamp(16px, 3vw, 32px);
+      justify-content: center;
+      position: relative;
+      padding: clamp(24px, 4vw, 60px);
+    }
+
+    /* Corner decorations */
+    .featured-cards-wrapper::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(201, 162, 39, 0.4);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .featured-cards-wrapper::before {
+      content: "";
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      width: clamp(40px, 6vw, 80px);
+      height: clamp(40px, 6vw, 80px);
+      border-top: 2px solid #c9a227;
+      border-left: 2px solid #c9a227;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .featured-corner-br {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: clamp(40px, 6vw, 80px);
+      height: clamp(40px, 6vw, 80px);
+      border-bottom: 2px solid #c9a227;
+      border-right: 2px solid #c9a227;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .featured-card {
+      flex: 1;
+      max-width: clamp(180px, 30vw, 380px);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+      background: white;
+      border: 1px solid #c9a227;
+      text-decoration: none;
+      display: block;
+    }
+
+    .featured-card:hover {
+      transform: translateY(-8px);
+    }
+
+    .featured-card-image-wrapper {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      aspect-ratio: 3/4;
+    }
+
+    .featured-card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+      object-position: center;
+    }
+
+    .featured-card:hover .featured-card-img {
+      transform: scale(1.05);
+    }
+
+    .featured-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(44, 24, 16, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .featured-card:hover .featured-card-overlay {
+      opacity: 1;
+    }
+
+    .featured-card-btn {
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      padding: clamp(8px, 1.5vw, 12px) clamp(16px, 3vw, 32px);
+      border-radius: 9999px;
+      background-color: var(--color-primary);
+      color: white;
+      font-weight: 600;
+      border: 2px solid var(--color-primary);
+      display: inline-block;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 4px 10px rgba(166, 138, 100, 0.3);
+      font-family: inherit;
+      font-size: clamp(11px, 1.5vw, 14px);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transform: translateY(10px);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.3s, color 0.3s;
+    }
+
+    .featured-card:hover .featured-card-btn {
+      transform: translateY(0);
+    }
+
+    .featured-card-info {
+      display: none;
+    }
+
+    /* Stack vertically on small phones */
+    @media (max-width: 480px) {
+      .featured-cards-wrapper {
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .featured-card {
+        max-width: 280px;
+        width: 100%;
+      }
+
+      .featured-card-image-wrapper {
+        aspect-ratio: 4/3;
+      }
+    }
+
+    /* ============================================================
+       SECTION 5: LOCATION
+    ============================================================ */
+    #location {
+      background:
+        linear-gradient(rgba(245, 240, 232, 0.72), rgba(245, 240, 232, 0.72)),
+        url('image/location-bg.png') no-repeat center center / cover;
+      position: relative;
+      overflow: hidden;
+      height: 100vh;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .location-container {
+      max-width: 1280px;
+      width: 90%;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    #location h2 {
+      font-family: var(--font-serif);
+      font-size: clamp(24px, 4vw, 36px);
+      color: var(--color-text);
+      text-align: center;
+      margin-bottom: clamp(24px, 4vw, 48px);
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .location-divider {
+      display: inline-block;
+      width: 32px;
+      height: 1px;
+      background-color: rgba(201, 162, 39, 0.6);
+      flex-shrink: 0;
+    }
+
+    .location-cards {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: clamp(20px, 3vw, 32px);
+    }
+
+    @media (min-width: 640px) {
+      .location-cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .location-card {
+      background-color: white;
+      border-radius: 24px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .location-card-map {
+      aspect-ratio: 16/9;
+      background-color: #d1d5db;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .location-card-map iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .location-card-info {
+      padding: clamp(16px, 2vw, 24px);
+    }
+
+    .location-card h3 {
+      font-family: var(--font-serif);
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--color-text);
+      margin-bottom: 8px;
+      margin-top: 0;
+    }
+
+    .location-card p {
+      color: #4b5563;
+      font-size: clamp(12px, 1.5vw, 14px);
+      margin-bottom: 8px;
+      margin-top: 0;
+    }
+
+    .location-card-info a {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px dotted rgba(75, 85, 99, 0.5);
+      transition: all 0.2s ease;
+    }
+
+    .location-card-info a:hover {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+    }
+
+    /* On small screens: reduce map aspect ratio to save vertical space */
+    @media (max-width: 480px) {
+      .location-card-map {
+        aspect-ratio: 4/3;
+      }
+
+      #location {
+        height: auto;
+        min-height: 100vh;
+        padding: 20px 0;
+        align-items: flex-start;
+        padding-top: calc(var(--nav-h) + var(--nav-top) + 20px);
+      }
+    }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    .footer-section {
+      background-color: #2c1a0e;
+      color: #f5ebe0;
+      padding: clamp(40px, 6vw, 60px) 20px 0;
+      height: auto !important;
+      min-height: 0 !important;
+      flex-shrink: 0;
+      justify-content: flex-start !important;
+    }
+
+    .footer-container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .footer-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1.5fr 1.5fr;
+      gap: clamp(20px, 3vw, 40px);
+      padding-bottom: clamp(24px, 4vw, 40px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    @media (max-width: 900px) {
+      .footer-content {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .footer-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .footer-brand .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .footer-logo-name {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #c9a96e;
+    }
+
+    .footer-logo-sub {
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: #a0785a;
+    }
+
+    .footer-tagline {
+      font-size: 13px;
+      color: #b8967a;
+      line-height: 1.7;
+    }
+
+    .footer-links h4,
+    .footer-contact h4,
+    .footer-hours h4 {
+      font-size: 13px;
+      letter-spacing: 2px;
+      color: #c9a96e;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+
+    .footer-links ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .footer-links ul li {
+      margin-bottom: 10px;
+    }
+
+    .footer-links ul li a {
+      color: #b8967a;
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.2s;
+    }
+
+    .footer-links ul li a:hover {
+      color: #f5ebe0;
+    }
+
+    .footer-contact p,
+    .footer-hours p {
+      font-size: 13px;
+      color: #b8967a;
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+
+    .footer-contact a {
+      color: #b8967a;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-contact a:hover {
+      color: #f5ebe0;
+    }
+
+    .footer-bottom {
+      text-align: center;
+      padding: 20px 0;
+      font-size: 12px;
+      color: #7a5c45;
+      letter-spacing: 1px;
+    }
+
+    /* ============================================================
+       SWIPER PAGINATION (Bamboo Icons)
+    ============================================================ */
+    .swiper-pagination {
+      position: absolute;
+      left: 0% !important;
+      right: auto !important;
+      top: 50% !important;
+      transform: translateY(-50%) !important;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      z-index: 50 !important;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    .swiper-pagination-bullet {
+      width: 45px !important;
+      height: 45px !important;
+      background: url('image/bamboo-icon.png') no-repeat center center !important;
+      background-size: contain !important;
+      background-color: transparent !important;
+      border-radius: 0 !important;
+      opacity: 0.65 !important;
+      box-shadow: none !important;
+      margin: 0 !important;
+      transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important;
+      cursor: pointer;
+      filter: brightness(0) saturate(100%) invert(80%) sepia(20%) saturate(600%) hue-rotate(345deg) brightness(95%) contrast(85%) !important;
+    }
+
+    .swiper-pagination-bullet:hover {
+      opacity: 0.8 !important;
+      transform: scale(1.15) !important;
+    }
+
+    .swiper-pagination-bullet-active {
+      opacity: 1 !important;
+      transform: scale(1.3) !important;
+      filter: brightness(0) saturate(100%) invert(80%) sepia(20%) saturate(600%) hue-rotate(345deg) brightness(50%) contrast(110%) drop-shadow(0 0 10px rgba(201, 169, 110, 0.9)) !important;
+    }
+
+    /* ============================================================
+       MOBILE SIDEBAR MENU
+    ============================================================ */
+    .mobile-sidebar-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.4s ease;
+      z-index: 10000;
+      display: none;
+    }
+
+    .mobile-sidebar-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .mobile-sidebar {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 280px;
+      height: 100vh;
+      background-color: var(--color-bg);
+      box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+      transition: right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      z-index: 10002;
+      display: none;
+      flex-direction: column;
+      padding: 40px 30px;
+    }
+
+    .mobile-sidebar.active {
+      right: 0;
+    }
+
+    .mobile-sidebar-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 2.5rem;
+      color: var(--color-text);
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s ease;
+    }
+
+    .mobile-sidebar-close:hover {
+      transform: rotate(90deg) scale(0.9);
+      color: var(--color-primary);
+    }
+
+    .mobile-sidebar-content {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 50px;
+    }
+
+    .sidebar-link {
+      font-family: var(--font-sans);
+      font-size: 1.3rem;
+      font-weight: 500;
+      color: var(--color-text);
+      text-decoration: none;
+      display: block;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(166, 138, 100, 0.15);
+      transition: color 0.3s ease, padding-left 0.3s ease;
+    }
+
+    .sidebar-link:hover {
+      color: var(--color-primary);
+      padding-left: 10px;
+    }
+
+    /* Hamburger button — shown when nav-links are hidden */
+    #mobile-menu-btn {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      width: 40px;
+      height: 40px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      z-index: 1000;
+      flex-shrink: 0;
+    }
+
+    #mobile-menu-btn span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--color-primary);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    /* Show hamburger & sidebar below 1024px */
+    @media (max-width: 1023px) {
+      #mobile-menu-btn {
+        display: flex;
+      }
+
+      .mobile-sidebar-overlay {
+        display: block;
+      }
+
+      .mobile-sidebar {
+        display: flex;
+      }
+    }
+
+    /* ============================================================
+       SAKURA ANIMATION
+    ============================================================ */
+    .sakura-container {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      overflow: hidden;
+    }
+
+    .sakura {
+      position: absolute;
+      top: -10%;
+      opacity: 0.8;
+      animation-name: fall, sway;
+      animation-timing-function: linear, ease-in-out;
+      animation-iteration-count: 1, infinite;
+      animation-fill-mode: forwards;
+    }
+
+    @keyframes fall {
+      0% {
+        top: -10%;
+        transform: rotate(0deg);
+      }
+
+      100% {
+        top: 100%;
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes sway {
+      0% {
+        transform: translateX(0px) rotate(0deg);
+      }
+
+      50% {
+        transform: translateX(50px) rotate(180deg);
+      }
+
+      100% {
+        transform: translateX(0px) rotate(360deg);
+      }
+    }
+
+    /* ============================================================
+       MAP FALLBACK
+    ============================================================ */
+    .map-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+      color: #4b5563;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .map-fallback i {
+      font-size: 3rem;
+      margin-bottom: 12px;
+      color: var(--color-primary);
+      opacity: 0.6;
+    }
+
+    .btn-view-map {
+      margin-top: 15px;
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: var(--color-primary);
+      color: white !important;
+      text-decoration: none;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .btn-view-map:hover {
+      background-color: var(--color-primary-dark);
+      transform: translateY(-2px);
+    }
+
+    /* ============================================================
+       ZOOM MODAL
+    ============================================================ */
+    .zoom-modal {
+      display: flex;
+      position: fixed;
+      z-index: 9999;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.9);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .zoom-modal.hidden {
+      display: none;
+    }
+
+    .zoom-modal-content {
+      position: relative;
+      max-width: 90vw;
+      max-height: 90vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .zoom-modal-image {
+      max-width: 100vw;
+      max-height: 90vh;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 5px 30px rgba(0, 0, 0, 0.5);
+      animation: zoomIn 0.3s ease forwards;
+    }
+
+    @keyframes zoomIn {
+      from {
+        transform: scale(0.9);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .zoom-modal-close {
+      position: absolute;
+      top: -48px;
+      right: 0;
+      color: #fff;
+      font-size: 48px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+
+    .zoom-modal-close:hover {
+      color: rgba(251, 191, 36, 1);
+    }
+
+    @media (max-width: 768px) {
+      .zoom-modal-close {
+        top: 16px;
+        right: 16px;
+        font-size: 32px;
+      }
+    }
+
+    /* ============================================================
+       MOBILE OVERRIDES  (≤ 767px OR height ≤ 500px)
+       - Disable swiper, allow native scroll
+    ============================================================ */
+    @media (max-width: 767px),
+    (max-height: 500px) {
+
+      /* Allow native scroll — overflow-x hidden prevents horizontal drag */
+      html,
+      body {
+        overflow: visible !important;
+        overflow-x: hidden !important;
+        height: auto !important;
+        position: static !important;
+        max-width: 100vw !important;
+      }
+
+      /* Reset swiper — 禁用 swiper 滑动，让各 section 变回普通块元素 */
+      .swiper {
+        height: auto !important;
+        overflow: visible !important;
+        touch-action: auto !important;
+      }
+
+      .swiper-wrapper {
+        height: auto !important;
+        display: block !important;
+        transform: none !important;
+        overflow: visible !important;
+        touch-action: auto !important;
+      }
+
+      .swiper-slide {
+        height: auto !important;
+        min-height: auto;
+        display: block !important;
+        position: relative !important;
+        overflow: visible !important;
+        touch-action: auto !important;
+      }
+
+      /* Hide bamboo pagination */
+      .swiper-pagination {
+        display: none !important;
+      }
+
+      /* Each section fills viewport or content */
+      #hero {
+        height: calc(100svh - 56px);
+        min-height: calc(100svh - 56px);
+      }
+
+      .hero-content {
+        padding-top: clamp(100px, 25vh, 180px);
+        align-items: center;
+        text-align: center;
+        justify-content: flex-start;
+      }
+
+      .hero-buttons {
+        justify-content: center;
+        margin-top: 8px;
+      }
+
+      /* nav is sticky, no longer fixed-offset needed */
+      .zen-about {
+        height: auto;
+        min-height: 100svh;
+        padding: 60px 0 60px;
+      }
+
+      .culture-carousel-section {
+        height: auto;
+        min-height: 100svh;
+        padding: 60px 0;
+      }
+
+      #featured {
+        height: auto;
+        min-height: 100svh;
+        padding: 60px 0;
+      }
+
+      #location {
+        height: auto;
+        min-height: auto;
+        padding: 60px 0 60px;
+      }
+
+      .footer-section {
+        height: auto !important;
+      }
+
+      /* Featured: hide desktop cards, show mobile tab selector */
+      .featured-container {
+        padding-top: 0;
+      }
+
+      .featured-cards-wrapper {
+        display: none !important;
+      }
+
+      /* ── Mobile tab selector ── */
+      .featured-mobile {
+        display: block !important;
+        max-width: 360px;
+        margin: 0 auto;
+      }
+
+      .featured-mobile-tabs {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .featured-mobile-tab {
+        background: none;
+        border: none;
+        font-family: var(--font-sans);
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--color-text-light);
+        cursor: pointer;
+        padding: 8px 20px;
+        border-radius: 9999px;
+        transition: all 0.25s ease;
+        letter-spacing: 0.03em;
+      }
+
+      .featured-mobile-tab.active {
+        background-color: var(--color-primary);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(166, 138, 100, 0.35);
+      }
+
+      .featured-mobile-divider {
+        color: #d4cfc6;
+        font-size: 18px;
+        user-select: none;
+      }
+
+      .featured-mobile-card {
+        display: block;
+        text-decoration: none;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(201, 162, 39, 0.3);
+      }
+
+      .featured-mobile-img-wrap {
+        width: 100%;
+        aspect-ratio: 3/4;
+        overflow: hidden;
+      }
+
+      .featured-mobile-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: opacity 0.3s ease;
+      }
+
+
+
+      /* Location: single column always */
+      .location-cards {
+        grid-template-columns: 1fr;
+      }
+
+      .location-container {
+        padding: 0 16px;
+      }
+
+      /* Nav: fixed on mobile — auto-hide on scroll */
+      #nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        max-width: 100%;
+        height: 56px;
+        border-radius: 0;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+        background-color: #fffffff5;
+        transform: translateY(0) translateX(0);
+        z-index: 1000;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* push nav up off-screen */
+      #nav.nav-mobile-hidden {
+        transform: translateY(-100%) !important;
+      }
+
+      /* nav-pushed must never hide the nav on mobile */
+      #nav.nav-pushed {
+        transform: translateY(0) translateX(0) !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+
+      /* compensate for fixed nav height */
+      body {
+        padding-top: 56px;
+      }
+
+      /* Hide contact and menu buttons from top nav on mobile */
+      .nav-btn-contact,
+      .nav-btn-menu {
+        display: none !important;
+      }
+
+      /* Zen about: no floating second image on mobile */
+      .zen-img-bottom {
+        display: none;
+      }
+
+      /* Footer */
+      .footer-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ============================================================
+       TABLET OVERRIDES (768px – 1023px)
+    ============================================================ */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      /* Swiper enabled — sections stay 100vh */
+
+      /* Nav: show contact btn, hide menu btn */
+      .nav-btn-contact {
+        display: inline-block;
+      }
+
+      .nav-btn-menu {
+        display: none;
+      }
+
+      /* Zen about: stack on tablet */
+      .zen-container {
+        flex-direction: column;
+        gap: 32px;
+      }
+
+      .zen-images {
+        width: 100%;
+      }
+
+      .zen-img-bottom {
+        position: relative;
+        bottom: auto;
+        left: auto;
+        width: 55%;
+        margin-top: 16px;
+      }
+
+      /* Featured: side by side */
+      .featured-cards-wrapper {
+        flex-direction: row;
+      }
+
+      .featured-card {
+        max-width: 300px;
+      }
+
+      /* Location: 2 cols */
+      .location-cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      /* Footer */
+      .footer-content {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      /* Culture carousel */
+      :root {
+        --card-w: 200px;
+        --card-h: 290px;
+        --gap: 24px;
+      }
+    }
+
+    /* ============================================================
+       13-INCH LAPTOP  (1280px – 1366px)
+       典型：MacBook Air 13", 1280×800 / 1366×768 Windows laptop
+       Swiper 启用，viewport 较窄，需要收紧间距和字号
+    ============================================================ */
+    @media (min-width: 1024px) and (max-width: 1366px) {
+
+      /* Nav: 收窄 gap，避免链接被挤压 */
+      .nav-links {
+        gap: 24px;
+      }
+
+      .nav-links a,
+      .nav-dropdown-trigger {
+        font-size: 13.5px;
+      }
+
+      .nav-btn {
+        padding: 7px 16px;
+        font-size: 13px;
+      }
+
+      /* Hero: 13寸屏字体稍小 */
+      .hero-title {
+        font-size: clamp(36px, 4.5vw, 52px);
+      }
+
+      .hero-subtitle {
+        font-size: 16px;
+      }
+
+      .hero-tagline {
+        font-size: 14px;
+      }
+
+      .hero-logo {
+        width: 88px;
+        height: 88px;
+      }
+
+      /* About: 两栏保留，但收窄 padding，图片高度调低 */
+      .zen-container {
+        gap: 40px;
+        padding: 36px 40px;
+        width: 88%;
+      }
+
+      .zen-title {
+        font-size: clamp(36px, 4vw, 60px);
+      }
+
+      .zen-desc {
+        font-size: 14px;
+      }
+
+      .zen-img-top {
+        height: 340px;
+      }
+
+      .zen-img-bottom {
+        width: 60%;
+        bottom: -50px;
+        left: -40px;
+      }
+
+      /* Culture carousel: 卡片缩小一档 */
+      :root {
+        --card-w: 260px;
+        --card-h: 370px;
+        --gap: 28px;
+      }
+
+      .cc-slide-title {
+        font-size: 28px;
+        margin-top: 48px;
+      }
+
+      .cc-description {
+        font-size: 14px;
+      }
+
+      .culture-carousel-section {
+        padding: 40px 0 60px;
+      }
+
+      /* Featured: 卡片高度由 aspect-ratio 控制，收窄 max-width */
+      .featured-container {
+        padding-top: 48px;
+      }
+
+      #featured h2 {
+        font-size: 32px;
+        margin-bottom: 28px;
+      }
+
+      .featured-card {
+        max-width: 260px;
+      }
+
+      .featured-cards-wrapper {
+        padding: 32px 40px;
+        gap: 24px;
+      }
+
+      /* Location: 地图稍矮 */
+      .location-card-map {
+        aspect-ratio: 16/8;
+      }
+
+      #location h2 {
+        font-size: 28px;
+        margin-bottom: 28px;
+      }
+
+      .location-container {
+        width: 88%;
+      }
+
+      /* Footer */
+      .footer-content {
+        gap: 24px;
+      }
+    }
+
+    /* ============================================================
+       15-INCH LAPTOP  (1367px – 1600px)
+       典型：MacBook Pro 15"/16"，1440×900 / 1536×864 Windows
+       空间稍大，但仍需适度收紧避免过于稀疏
+    ============================================================ */
+    @media (min-width: 1367px) and (max-width: 1600px) {
+
+      /* Nav: 间距适中 */
+      .nav-links {
+        gap: 32px;
+      }
+
+      .nav-links a,
+      .nav-dropdown-trigger {
+        font-size: 14.5px;
+      }
+
+      /* Hero */
+      .hero-title {
+        font-size: clamp(46px, 5vw, 64px);
+      }
+
+      .hero-subtitle {
+        font-size: 18px;
+      }
+
+      .hero-logo {
+        width: 96px;
+        height: 96px;
+      }
+
+      /* About */
+      .zen-container {
+        gap: 56px;
+        padding: 44px 56px;
+        width: 88%;
+      }
+
+      .zen-title {
+        font-size: clamp(52px, 5.5vw, 76px);
+      }
+
+      .zen-img-top {
+        height: 400px;
+      }
+
+      .zen-img-bottom {
+        width: 62%;
+        bottom: -64px;
+        left: -50px;
+      }
+
+      /* Culture carousel */
+      :root {
+        --card-w: 300px;
+        --card-h: 425px;
+        --gap: 36px;
+      }
+
+      .cc-slide-title {
+        font-size: 34px;
+        margin-top: 64px;
+      }
+
+      .cc-description {
+        font-size: 16px;
+      }
+
+      /* Featured */
+      .featured-container {
+        padding-top: 64px;
+      }
+
+      #featured h2 {
+        font-size: 36px;
+      }
+
+      .featured-card {
+        max-width: 320px;
+      }
+
+      .featured-cards-wrapper {
+        padding: 44px 56px;
+        gap: 28px;
+      }
+
+      /* Location */
+      #location h2 {
+        font-size: 32px;
+      }
+
+      .location-container {
+        width: 88%;
+      }
+    }
+
+    /* ============================================================
+       LARGE DESKTOP (≥ 1601px)
+    ============================================================ */
+    @media (min-width: 1601px) {
+      .zen-title {
+        font-size: 90px;
+      }
+
+      #featured h2 {
+        font-size: 40px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── NAVIGATION ── -->
+  <nav id="nav">
+    <div class="nav-container">
+      <a href="#hero" class="nav-logo-link">
+        <div class="haidilao-logo-bg">
+          <img src="image/tokyologo.png" alt="Tokyo" class="nav-logo">
+        </div>
+        <div class="nav-text-group">
+          <span class="nav-text primary">TOKYO JAPANESE</span>
+          <span class="nav-text secondary">CUISINE</span>
+        </div>
+      </a>
+
+      <div class="nav-links">
+        <a href="https://kunzzgroup.com/frontend/index">首页</a>
+        <a href="#about-culture">关于我们</a>
+        <a href="#mission-vision">文化+服务</a>
+        <div class="nav-dropdown">
+          <a href="#featured" class="nav-dropdown-trigger">
+            特色推荐 <span class="nav-dropdown-arrow">▾</span>
+          </a>
+          <div class="nav-dropdown-menu">
+            <div class="nav-dropdown-card">
+              <a href="menu#sushi" class="nav-dropdown-item">Sushi Menu</a>
+              <a href="menu#grand" class="nav-dropdown-item">Grand Menu</a>
+            </div>
+          </div>
+        </div>
+        <a href="#location">我们在这</a>
+      </div>
+
+      <div class="nav-actions">
+        <a href="#location" class="btn-primary nav-btn nav-btn-contact"
+          style="background-color:#a68a64;border-color:#a68a64;box-shadow:0 4px 10px rgba(166,138,100,0.3);">联系我们</a>
+        <a href="#featured" class="btn-secondary nav-btn nav-btn-menu"
+          style="color:#33322f;border-color:#33322f;">查看菜单</a>
+        <button id="mobile-menu-btn" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Sidebar -->
+  <div class="mobile-sidebar-overlay" id="mobile-sidebar-overlay"></div>
+  <aside class="mobile-sidebar" id="mobile-sidebar">
+    <button class="mobile-sidebar-close" id="mobile-sidebar-close" aria-label="Close menu">×</button>
+    <div class="mobile-sidebar-content">
+      <a href="https://kunzzgroup.com/frontend/index" class="sidebar-link">首页</a>
+      <a href="#about-culture" class="sidebar-link">关于我们</a>
+      <a href="#mission-vision" class="sidebar-link">文化+服务</a>
+      <a href="menu" class="sidebar-link">查看菜单</a>
+      <a href="#location" class="sidebar-link">我们在这</a>
+      <a href="#location" class="sidebar-link">联系我们</a>
+    </div>
+  </aside>
+
+  <!-- ── SWIPER WRAPPER ── -->
+  <div class="swiper mySwiper">
+    <div class="swiper-wrapper">
+
+      <!-- SLIDE 1: Hero -->
+      <section id="hero" data-hash="hero" class="swiper-slide">
+        <div class="hero-bokeh">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="hero-slider" id="hero-slider">
+          <div class="hero-slide active" id="hero-bg-container" style="background-image:url('image/sushi-dish-asian-restaurant.jpg');
+                   height:100%;width:100%;background-size:cover;background-position:center;
+                   position:relative;overflow:hidden;">
+          </div>
+        </div>
+        <div class="hero-overlay"></div>
+
+        <div class="hero-content">
+          <img src="image/tokyologo.png" alt="Tokyo Japanese Cuisine" class="hero-logo floating-logo pulse-glow" />
+          <h1 class="hero-title">
+            <span style="white-space:nowrap;">
+              <span class="letter-reveal" style="--d:0.05s">T</span><span class="letter-reveal"
+                style="--d:0.1s">o</span><span class="letter-reveal" style="--d:0.15s">k</span><span
+                class="letter-reveal" style="--d:0.2s">y</span><span class="letter-reveal" style="--d:0.25s">o</span>
+            </span>
+            <span class="letter-reveal" style="--d:0.3s">&nbsp;</span>
+            <span style="white-space:nowrap;">
+              <span class="letter-reveal" style="--d:0.35s">J</span><span class="letter-reveal"
+                style="--d:0.4s">a</span><span class="letter-reveal" style="--d:0.45s">p</span><span
+                class="letter-reveal" style="--d:0.5s">a</span><span class="letter-reveal"
+                style="--d:0.55s">n</span><span class="letter-reveal" style="--d:0.6s">e</span><span
+                class="letter-reveal" style="--d:0.65s">s</span><span class="letter-reveal" style="--d:0.7s">e</span>
+            </span>
+            <span class="letter-reveal" style="--d:0.75s">&nbsp;</span>
+            <span style="white-space:nowrap;">
+              <span class="letter-reveal" style="--d:0.8s">C</span><span class="letter-reveal"
+                style="--d:0.85s">u</span><span class="letter-reveal" style="--d:0.9s">i</span><span
+                class="letter-reveal" style="--d:0.95s">s</span><span class="letter-reveal"
+                style="--d:1.0s">i</span><span class="letter-reveal" style="--d:1.05s">n</span><span
+                class="letter-reveal" style="--d:1.1s">e</span>
+            </span>
+          </h1>
+          <p class="hero-subtitle shimmer-text">精致美食·品越服务</p>
+          <p class="hero-tagline reveal delay-300">成就世界级日料品牌</p>
+          <div class="hero-buttons reveal delay-400">
+            <a href="#location" class="btn-primary spring-btn">联系我们</a>
+            <a href="#about-culture" class="btn-secondary spring-btn">了解更多</a>
+          </div>
+        </div>
+
+        <div class="scroll-indicator">
+          <div class="arrow-scroll">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 2: About -->
+      <section id="about-culture" data-hash="about-culture" class="zen-about swiper-slide">
+        <div class="zen-container">
+          <div class="zen-text">
+            <div class="zen-label">
+              <span class="zen-line"></span>
+              <span>ABOUT US</span>
+            </div>
+            <h2 class="zen-title">
+              <span id="tokyo-about-title">关于我们</span>
+            </h2>
+            <p class="zen-desc" id="tokyo-about-desc">
+              我们是一家致力于提供精致料理与品越服务的日式料理餐厅。
+              以极致的匠心打造美食。严选当季新鲜食材,融合传统与创意,呈现日本料理美。
+              餐厅环境清雅舒适,充满日式格调。宾客在此不仅能品味精妙料理,更能感受到细致入微的服务与文化魅力。
+              我们立志将每一次用餐变成难忘的美食之旅, 以品越的服务和精致的料理成为世界级日料品牌。
+            </p>
+            <a href="#location" class="btn-primary spring-btn"
+              style="margin-top:clamp(24px,4vw,50px);text-decoration:none;width:fit-content;display:inline-block;">联系我们</a>
+          </div>
+
+          <div class="zen-images">
+            <img id="tokyo-about-img1" src="image/tokyologo.png" class="zen-img zen-img-top"
+              style="object-fit:cover;border-radius:16px;">
+            <img id="tokyo-about-img2" src="image/sushi-dish-asian-restaurant.jpg" class="zen-img zen-img-bottom">
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 3: Culture Carousel -->
+      <section id="mission-vision" data-hash="mission-vision" class="culture-carousel-section swiper-slide">
+        <div class="salmon-mascot-peek left" aria-hidden="true">
+          <span class="salmon-mascot-frame"></span>
+        </div>
+        <div class="salmon-mascot-peek right" aria-hidden="true">
+          <span class="salmon-mascot-frame"></span>
+        </div>
+
+        <h3 class="cc-slide-title" id="cc-title"></h3>
+
+        <div class="cc-carousel-outer">
+          <button class="cc-nav left" id="cc-prev" aria-label="Previous">
+            <svg viewBox="0 0 14 14">
+              <polyline points="9,2 4,7 9,12" />
+            </svg>
+          </button>
+          <div class="cc-viewport">
+            <div class="cc-track" id="cc-track">
+              <div class="cc-card" data-title="使命 Mission"
+                data-desc="以极致的匠心和热情为每一位顾客呈现最正宗的日式料理体验我们致力于将传统日本饮食文化与现代创新完美融合"
+                style="background:linear-gradient(135deg,#2d5a27,#1a3a16)">
+                <img id="tokyo-culture-img1" src="image/使命.jpeg" alt="Mission">
+                <div class="cc-card-overlay"></div>
+                <span class="cc-card-num">01</span>
+              </div>
+              <div class="cc-card" data-title="愿景 Vision"
+                data-desc="成为世界级的日料品牌让更多人感受到日本料理的精致与美好我们希望通过品越的服务和品质成为顾客心中最值得信赖的日式餐厅"
+                style="background:linear-gradient(135deg,#3d4a2d,#232e1a)">
+                <img id="tokyo-culture-img2" src="image/愿景.jpeg" alt="Vision">
+                <div class="cc-card-overlay"></div>
+                <span class="cc-card-num">02</span>
+              </div>
+              <div class="cc-card" data-title="价值观 Values" data-desc="专注品质追求完美尊重传统勇于创新我们相信细节决定成败每一个环节都精益求精为顾客创造难忘的用餐体验"
+                style="background:linear-gradient(135deg,#4a3d1a,#2e2610)">
+                <img id="tokyo-culture-img3" src="image/价值观.jpeg" alt="Values">
+                <div class="cc-card-overlay"></div>
+                <span class="cc-card-num">03</span>
+              </div>
+              <div class="cc-card" data-title="人品 Character"
+                data-desc="诚信为本匠心独运服务至上我们以最真诚的态度对待每一位顾客用心制作每一道料理让顾客感受到家一般的温暖和关怀"
+                style="background:linear-gradient(135deg,#1a2d4a,#101e2e)">
+                <img id="tokyo-culture-img4" src="image/人品.jpeg" alt="Character">
+                <div class="cc-card-overlay"></div>
+                <span class="cc-card-num">04</span>
+              </div>
+            </div>
+          </div>
+          <button class="cc-nav right" id="cc-next" aria-label="Next">
+            <svg viewBox="0 0 14 14">
+              <polyline points="5,2 10,7 5,12" />
+            </svg>
+          </button>
+        </div>
+
+        <p class="cc-description" id="cc-desc"></p>
+        <div class="cc-dots" id="cc-dots"></div>
+      </section>
+
+      <!-- SLIDE 4: Featured -->
+      <section id="featured" data-hash="featured" class="swiper-slide">
+        <svg class="section-decoration left" viewBox="0 0 80 40" fill="none" stroke="#c9a227" stroke-width="1.5"
+          xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 20 Q30 8 50 20 T90 20" opacity="0.6" />
+          <path d="M5 25 Q25 12 45 25 T85 25" opacity="0.3" />
+        </svg>
+        <svg class="section-decoration right" viewBox="0 0 80 40" fill="none" stroke="#c9a227" stroke-width="1.5"
+          xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 20 Q30 8 50 20 T90 20" opacity="0.6" />
+          <path d="M5 25 Q25 12 45 25 T85 25" opacity="0.3" />
+        </svg>
+        <div class="featured-container">
+          <h2>特色推荐</h2>
+
+          <!-- Mobile-only tab selector -->
+          <div class="featured-mobile" id="featured-mobile">
+            <div class="featured-mobile-tabs">
+              <button class="featured-mobile-tab active" data-menu="sushi">Sushi</button>
+              <span class="featured-mobile-divider">|</span>
+              <button class="featured-mobile-tab" data-menu="grand">Grand</button>
+            </div>
+            <a href="menu#sushi" class="featured-mobile-card" id="featured-mobile-link">
+              <div class="featured-mobile-img-wrap">
+                <img src="image/menu1.png" alt="Sushi Menu" id="featured-mobile-img" class="featured-mobile-img">
+              </div>
+            </a>
+          </div>
+
+          <!-- Desktop cards (hidden on mobile) -->
+          <div class="featured-cards-wrapper">
+            <span class="featured-corner-br"></span>
+            <a href="menu#sushi" class="featured-card reveal scale-up delay-100" id="tokyo-featured-card1">
+              <div class="featured-card-image-wrapper">
+                <img src="image/menu1.png" alt="Sushi & Sashimi" class="featured-card-img" id="tokyo-featured-img1">
+                <div class="featured-card-overlay">
+                  <span class="featured-card-btn">View Sushi Menu</span>
+                </div>
+              </div>
+              <div class="featured-card-info">
+                <h3 id="tokyo-featured-title1">Sushi &amp; Sashimi Menu</h3>
+                <p id="tokyo-featured-desc1">Fresh catch from Tokyo Bay</p>
+              </div>
+            </a>
+            <a href="menu#grand" class="featured-card reveal scale-up delay-200" id="tokyo-featured-card2">
+              <div class="featured-card-image-wrapper">
+                <img src="image/menu2.png" alt="Grand Menu" class="featured-card-img" id="tokyo-featured-img2">
+                <div class="featured-card-overlay">
+                  <span class="featured-card-btn">View Grand Menu</span>
+                </div>
+              </div>
+              <div class="featured-card-info">
+                <h3 id="tokyo-featured-title2">Grand Menu</h3>
+                <p id="tokyo-featured-desc2">Authentic Hot Dishes &amp; Sets</p>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 5: Location -->
+      <section id="location" data-hash="location" class="swiper-slide">
+        <svg class="section-decoration left" viewBox="0 0 80 40" fill="none" stroke="#c9a227" stroke-width="1"
+          xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 20 Q30 8 50 20 T90 20" opacity="0.8" />
+          <path d="M5 25 Q25 12 45 25 T85 25" opacity="0.5" />
+        </svg>
+        <svg class="section-decoration right" viewBox="0 0 80 40" fill="none" stroke="#c9a227" stroke-width="1"
+          xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 20 Q30 8 50 20 T90 20" opacity="0.8" />
+          <path d="M5 25 Q25 12 45 25 T85 25" opacity="0.5" />
+        </svg>
+        <div class="location-container">
+          <h2 id="tokyo-location-title">
+            <span class="location-divider"></span>
+            我们在这
+            <span class="location-divider"></span>
+          </h2>
+          <div class="location-cards" id="tokyo-location-cards">
+            <div class="location-card reveal fade-left delay-100">
+              <div class="location-card-map">
+                <iframe title="总店地图"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.4475276450275!2d103.77369647567853!3d1.501963561066547!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31da6dd0d05beaa3%3A0x5617d385f1f81e11!2sTokyo%20Japanese%20Cuisine%20%40%20Mid%20Valley%20Southkey%20(NORTH%20COURT)%20JB!5e0!3m2!1sen!2smy!4v1762160658810!5m2!1sen!2smy"
+                  allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+              </div>
+              <div class="location-card-info">
+                <h3>总店</h3>
+                <p>地址：<a
+                    href="https://www.google.com/maps/search/?api=1&query=T-042+Level+3,+Mid+Valley,+The+Mall,+Southkey,+81100+Johor+Bahru"
+                    target="_blank" rel="noopener noreferrer">T-042 Level 3, Mid Valley, The Mall, Southkey, 81100 Johor
+                    Bahru</a></p>
+                <p>电话：<a href="tel:+60197108090">+60 19-710 8090</a></p>
+              </div>
+            </div>
+            <div class="location-card reveal fade-right delay-200">
+              <div class="location-card-map">
+                <iframe title="分店地图"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31907.468559496578!2d103.73373499468003!3d1.50959129373446!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31da73d12ff16aa9%3A0x45bb0865198b1bc3!2sTokyo%20Japanese%20Cuisine%20%40%20Paradigm%20Mall%20JB!5e0!3m2!1sen!2smy!4v1762160553896!5m2!1sen!2smy"
+                  allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+              </div>
+              <div class="location-card-info">
+                <h3>分店</h3>
+                <p>地址：<a
+                    href="https://www.google.com/maps/search/?api=1&query=Lot+UG-25,+Upper+Ground+Floor,+Paradigm+Mall,+Johor+Bahru"
+                    target="_blank" rel="noopener noreferrer">Lot UG-25, Upper Ground Floor, Paradigm Mall, Lbh Skudai,
+                    81200 Johor Bahru</a></p>
+                <p>电话：<a href="tel:+60187738090">+60 18-773 8090</a></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 6: Footer -->
+      <section id="footer" data-hash="footer" class="footer-section swiper-slide">
+        <div class="footer-container">
+          <div class="footer-content">
+            <div class="footer-brand">
+              <div class="footer-logo">
+                <img src="image/tokyologo.png" alt="Tokyo Japanese Cuisine"
+                  style="height:40px;border-radius:50%;border:2px solid #c9a96e;">
+                <div>
+                  <div class="footer-logo-name">TOKYO JAPANESE</div>
+                  <div class="footer-logo-sub">CUISINE</div>
+                </div>
+              </div>
+              <p class="footer-tagline">正宗日式料理，匠心传递每一道风味</p>
+            </div>
+            <div class="footer-links">
+              <h4>快速导航</h4>
+              <ul>
+                <li><a href="https://kunzzgroup.com/frontend/index">首页</a></li>
+                <li><a href="#about-culture">关于我们</a></li>
+                <li><a href="#mission-vision">文化+服务</a></li>
+                <li><a href="#featured">特色推荐</a></li>
+                <li><a href="#location">我们在这</a></li>
+              </ul>
+            </div>
+            <div class="footer-contact">
+              <h4>联系我们</h4>
+              <p>📍 总店：Mid Valley Southkey, JB</p>
+              <p>📞 <a href="tel:+60197108090">+60 19-710 8090</a></p>
+              <p>📍 分店：Paradigm Mall, JB</p>
+              <p>📞 <a href="tel:+60187738090">+60 18-773 8090</a></p>
+            </div>
+            <div class="footer-hours">
+              <h4>营业时间</h4>
+              <p>周一 – 周五：11:00 – 22:00</p>
+              <p>周六 – 周日：10:00 – 22:30</p>
+              <p>节假日照常营业</p>
+            </div>
+          </div>
+          <div class="footer-bottom">
+            <p>🌸 © 2026 Tokyo Japanese Cuisine. All Rights Reserved.</p>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /.swiper-wrapper -->
+    <div class="swiper-pagination"></div>
+  </div><!-- /.swiper -->
+
+  <!-- Zoom Modal -->
+  <div id="zoom-modal" class="zoom-modal hidden">
+    <div class="zoom-modal-content">
+      <button class="zoom-modal-close" aria-label="Close">&times;</button>
+      <img id="zoom-modal-image" class="zoom-modal-image" src="" alt="Zoomed">
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+      /* ─── Scroll-reveal ─── */
+      const revealObserver = new IntersectionObserver((entries, obs) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) { e.target.classList.add('active'); obs.unobserve(e.target); }
+        });
+      }, { threshold: 0.1 });
+      document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+      /* ─── Zen animations ─── */
+      const zenObserver = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('zen-active'); });
+      }, { threshold: 0.2 });
+      document.querySelectorAll('.zen-title span, .zen-desc, .zen-img').forEach(el => zenObserver.observe(el));
+
+      /* ─── Sakura ─── */
+      if (!document.body.classList.contains('haidilao-menu-body')) {
+        const sc = document.createElement('div');
+        sc.className = 'sakura-container';
+        document.body.appendChild(sc);
+        const petals = ['image/petal1.png', 'image/petal2.png', 'image/petal3.png',
+          'image/petal4.png', 'image/petal5.png', 'image/petal6.png',
+          'image/petal7.png', 'image/petal8.png'];
+        function createSakura() {
+          if (sc.childElementCount > 20) return;
+          const s = document.createElement('img');
+          s.src = petals[Math.floor(Math.random() * petals.length)];
+          s.className = 'sakura';
+          s.style.left = Math.random() * 100 + 'vw';
+          const dur = Math.random() * 3 + 6;
+          const delay = Math.random() * 2;
+          s.style.animationDuration = dur + 's';
+          s.style.animationDelay = delay + 's';
+          const size = Math.random() * 15 + 10;
+          s.style.width = size + 'px';
+          s.style.height = size + 'px';
+          sc.appendChild(s);
+          setTimeout(() => s.remove(), (dur + delay) * 1000);
+        }
+        setInterval(createSakura, 800);
+      }
+
+      /* ─── Mobile Sidebar ─── */
+      const menuBtn = document.getElementById('mobile-menu-btn');
+      const sidebar = document.getElementById('mobile-sidebar');
+      const overlay = document.getElementById('mobile-sidebar-overlay');
+      const closeBtn = document.getElementById('mobile-sidebar-close');
+
+      function openSidebar() { sidebar.classList.add('active'); overlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
+      function closeSidebar() { sidebar.classList.remove('active'); overlay.classList.remove('active'); document.body.style.overflow = ''; }
+
+      if (menuBtn) menuBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (overlay) overlay.addEventListener('click', closeSidebar);
+      document.querySelectorAll('.sidebar-link').forEach(l => l.addEventListener('click', closeSidebar));
+
+      /* ─── Zoom Modal ─── */
+      const zoomModal = document.getElementById('zoom-modal');
+      const zoomImg = document.getElementById('zoom-modal-image');
+      const zoomClose = document.querySelector('.zoom-modal-close');
+
+      document.querySelectorAll('.sushi-menu-item img, .haidilao-card .img-wrap img').forEach(img => {
+        img.style.cursor = 'pointer';
+        img.addEventListener('click', () => {
+          zoomImg.src = img.src;
+          zoomModal.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+        });
+      });
+
+      if (zoomClose) zoomClose.addEventListener('click', () => { zoomModal.classList.add('hidden'); document.body.style.overflow = ''; });
+      if (zoomModal) zoomModal.addEventListener('click', e => { if (e.target === zoomModal) { zoomModal.classList.add('hidden'); document.body.style.overflow = ''; } });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape' && zoomModal && !zoomModal.classList.contains('hidden')) { zoomModal.classList.add('hidden'); document.body.style.overflow = ''; } });
+
+      /* ─── Dynamic media fetch ─── */
+      fetch('https://kunzzgroup.com/backend/get_media_config.php')
+        .then(r => r.json())
+        .then(data => {
+          if (!data) return;
+          const base = 'https://kunzzgroup.com/';
+          const fix = u => base + (u.startsWith('../') ? u.slice(3) : u);
+
+          if (data.tokyo_background) {
+            const bg = data.tokyo_background;
+            const c = document.getElementById('hero-bg-container');
+            if (bg.type === 'video') {
+              c.innerHTML = `<video autoplay loop muted playsinline style="position:absolute;width:100%;height:100%;object-fit:cover;top:0;left:0"><source src="${fix(bg.file)}" type="video/mp4"></video>`;
+              c.style.backgroundImage = 'none';
+            } else if (bg.type === 'image') {
+              c.style.backgroundImage = `url('${fix(bg.file)}')`;
+            }
+          }
+
+          if (data.tokyo_about_text) {
+            const t = document.getElementById('tokyo-about-title');
+            const d = document.getElementById('tokyo-about-desc');
+            if (t && data.tokyo_about_text.title) t.textContent = data.tokyo_about_text.title;
+            if (d && data.tokyo_about_text.desc) d.innerHTML = data.tokyo_about_text.desc.replace(/\n/g, '<br>');
+          }
+
+          ['tokyo_about_image1', 'tokyo_about_image2'].forEach((k, i) => {
+            if (data[k]) { const el = document.getElementById(`tokyo-about-img${i + 1}`); if (el) el.src = fix(data[k].file); }
+          });
+
+          [['tokyo-culture-img1', 'tokyo_mission'], ['tokyo-culture-img2', 'tokyo_vision'],
+          ['tokyo-culture-img3', 'tokyo_values'], ['tokyo-culture-img4', 'tokyo_character']].forEach(([id, key]) => {
+            if (data[key]) { const el = document.getElementById(id); if (el) el.src = fix(data[key].file); }
+          });
+
+          for (let i = 1; i <= 2; i++) {
+            const k = `tokyo_featured_${i}`;
+            if (data[k]) {
+              const img = document.getElementById(`tokyo-featured-img${i}`);
+              const title = document.getElementById(`tokyo-featured-title${i}`);
+              const desc = document.getElementById(`tokyo-featured-desc${i}`);
+              if (img && data[k].file) img.src = fix(data[k].file);
+              if (title && data[k].title) title.textContent = data[k].title;
+              if (desc && data[k].desc) desc.textContent = data[k].desc;
+            }
+          }
+
+          if (data.locations) {
+            const locs = data.locations;
+            const titleEl = document.getElementById('tokyo-location-title');
+            const cardsEl = document.getElementById('tokyo-location-cards');
+            if (titleEl && locs.section_title) {
+              titleEl.innerHTML = `<span class="location-divider"></span>${locs.section_title}<span class="location-divider"></span>`;
+            }
+            if (cardsEl) {
+              cardsEl.innerHTML = '';
+              Object.entries(locs)
+                .filter(([k, v]) => typeof v === 'object' && v !== null && k !== 'section_title')
+                .sort((a, b) => (a[1].order || 999) - (b[1].order || 999))
+                .forEach(([, store], idx) => {
+                  const isEmbed = (store.map_url || '').includes('google.com/maps/embed');
+                  const card = document.createElement('div');
+                  card.className = `location-card reveal ${idx % 2 === 0 ? 'fade-left' : 'fade-right'} delay-${(idx + 1) * 100}`;
+                  card.innerHTML = `
+                  <div class="location-card-map">
+                    ${isEmbed
+                      ? `<iframe title="${store.label || ''}" src="${store.map_url}" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`
+                      : `<div class="map-fallback"><i class="fas fa-map-marked-alt"></i><p>无法显示地图预览</p><a href="${store.map_url}" target="_blank" class="btn-view-map">在 Google Maps 查看</a></div>`}
+                  </div>
+                  <div class="location-card-info">
+                    <h3>${store.label || ''}</h3>
+                    <p>地址：<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(store.address || '')}" target="_blank" rel="noopener noreferrer">${store.address || ''}</a></p>
+                    <p>电话：<a href="tel:${(store.phone || '').replace(/\s+/g, '')}">${store.phone || ''}</a></p>
+                  </div>`;
+                  cardsEl.appendChild(card);
+                  revealObserver.observe(card);
+                });
+            }
+          }
+        })
+        .catch(e => console.warn('Media config fetch failed:', e));
+
+      /* ─── Internal anchor scroll (Swiper-aware) ─── */
+      document.querySelectorAll('a[href^="#"]').forEach(link => {
+        link.addEventListener('click', function (e) {
+          const hash = this.getAttribute('href');
+          if (!hash || hash === '#') return;
+          const target = document.querySelector(hash);
+          if (!target) return;
+          e.preventDefault();
+          if (hash === '#footer' && typeof swiper !== 'undefined' && swiper.enabled) {
+            scrollToFooterEdge();
+            closeSidebar();
+            return;
+          }
+          if (target.classList.contains('swiper-slide')) {
+            const slides = Array.from(document.querySelectorAll('.swiper-slide'));
+            const idx = slides.indexOf(target);
+            if (idx !== -1 && typeof swiper !== 'undefined' && swiper.enabled) {
+              swiper.slideTo(idx);
+            } else {
+              target.scrollIntoView({ behavior: 'smooth' });
+            }
+          } else {
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
+          closeSidebar();
+        });
+      });
+
+      /* ─── Swiper Init ─── */
+      const nav = document.getElementById('nav');
+      let lastSlideIndex = 0;
+
+      function updateNav(index) {
+        const pag = document.querySelector('.swiper-pagination');
+        if (pag) {
+          pag.style.opacity = index === 0 ? '0' : '1';
+          pag.style.visibility = index === 0 ? 'hidden' : 'visible';
+        }
+
+        if (nav) {
+          if (window.innerWidth >= 1601) {
+            /* ── 大屏 (≥1601px)：永远显示，不受 slide 影响 ── */
+            nav.classList.remove('nav-pushed');
+
+          } else if (window.innerWidth > 767) {
+            /* ── Laptop + 13" (768–1366px)：往下滑隐藏，往回滑显示 ── */
+            const goingBack = index < lastSlideIndex;
+            (index === 0 || goingBack)
+              ? nav.classList.remove('nav-pushed')
+              : nav.classList.add('nav-pushed');
+
+          } else {
+            /* ── 小屏 (≤767px)：sticky 自然行为，JS 不介入 ── */
+            nav.classList.remove('nav-pushed');
+          }
+        }
+
+        /* Update active link states based on current slide */
+        const slides = document.querySelectorAll('.swiper-slide');
+        if (slides[index]) {
+          const slideHash = slides[index].getAttribute('data-hash') || slides[index].id;
+
+          // Desktop Links Update
+          document.querySelectorAll('.nav-links a').forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${slideHash}`) {
+              link.classList.add('active');
+            }
+          });
+
+          // Mobile Links Update
+          document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${slideHash}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+
+        lastSlideIndex = index;
+      }
+
+      function scrollToFooterEdge() {
+        swiper.update();
+        swiper.setTranslate(swiper.maxTranslate());
+        swiper.updateActiveIndex();
+        swiper.updateSlidesClasses();
+        updateNav(swiper.activeIndex);
+        history.replaceState(null, '', '#footer');
+      }
+
+      const swiper = new Swiper('.swiper', {
+        direction: 'vertical',
+        mousewheel: { enabled: true, releaseOnEdges: true },
+        speed: 800,
+        simulateTouch: false,
+        slidesPerView: 'auto',
+        spaceBetween: 0,
+        keyboard: { enabled: true },
+        observer: true,
+        observeParents: true,
+        hashNavigation: {
+          watchState: true,
+        },
+        pagination: {
+          el: '.swiper-pagination',
+          clickable: true,
+          type: 'bullets',
+        },
+        breakpoints: {
+          320: { enabled: false },
+          768: { enabled: true }
+        },
+        on: {
+          init() { updateNav(this.activeIndex); },
+          slideChange() { updateNav(this.activeIndex); }
+        }
+      });
+
+      function handleResize() {
+        if (window.innerWidth <= 767 || window.innerHeight <= 500) {
+          if (swiper.enabled) swiper.disable();
+          if (nav) nav.classList.remove('nav-pushed'); // sticky, never hide
+        } else {
+          if (!swiper.enabled) swiper.enable();
+          if (nav) nav.classList.remove('nav-mobile-hidden'); // clean up mobile hide
+          if (window.location.hash === '#footer') {
+            scrollToFooterEdge();
+          } else {
+            updateNav(swiper.activeIndex); // re-apply correct state for current breakpoint
+          }
+        }
+      }
+      window.addEventListener('resize', handleResize);
+      handleResize();
+
+      if (window.location.hash === '#footer' && swiper.enabled) {
+        requestAnimationFrame(() => {
+          scrollToFooterEdge();
+        });
+      }
+
+      /* ─── Mobile Scroll behavior for Nav ─── */
+      let lastScrollY = window.scrollY || 0;
+      const SCROLL_DEADZONE = 5; // ignore tiny bounces
+      window.addEventListener('scroll', () => {
+        if (window.innerWidth <= 767 || window.innerHeight <= 500) {
+          const currentScrollY = window.scrollY;
+
+          // At the very top — always show
+          if (currentScrollY <= 0) {
+            if (nav) nav.classList.remove('nav-mobile-hidden');
+            lastScrollY = currentScrollY;
+            return;
+          }
+
+          const delta = currentScrollY - lastScrollY;
+
+          // Scrolling down past threshold → hide
+          if (delta > SCROLL_DEADZONE && currentScrollY > 60) {
+            if (nav) nav.classList.add('nav-mobile-hidden');
+          }
+          // Scrolling up past threshold → show
+          else if (delta < -SCROLL_DEADZONE) {
+            if (nav) nav.classList.remove('nav-mobile-hidden');
+          }
+
+          lastScrollY = currentScrollY;
+        }
+      }, { passive: true });
+
+      /* ─── Culture Carousel ─── */
+      (function () {
+        const track = document.getElementById('cc-track');
+        if (!track) return;
+
+        const rawDivs = Array.from(track.querySelectorAll('.cc-card'));
+        const SLIDES = rawDivs.map(el => ({
+          title: el.getAttribute('data-title'),
+          desc: el.getAttribute('data-desc'),
+          html: el.innerHTML,
+          bg: el.style.background
+        }));
+        rawDivs.forEach(el => el.remove());
+
+        const N = SLIDES.length;
+        if (N === 0) return;
+        const mod = i => ((i % N) + N) % N;
+
+        const titleEl = document.getElementById('cc-title');
+        const descEl = document.getElementById('cc-desc');
+        const dotsEl = document.getElementById('cc-dots');
+        const outerEl = document.querySelector('.cc-carousel-outer');
+        const prevBtn = document.getElementById('cc-prev');
+        const nextBtn = document.getElementById('cc-next');
+
+        const cards = SLIDES.map(s => {
+          const el = document.createElement('div');
+          el.className = 'cc-card';
+          if (s.bg) el.style.background = s.bg;
+          el.innerHTML = s.html;
+          track.appendChild(el);
+          return el;
+        });
+
+        if (dotsEl) {
+          dotsEl.innerHTML = '';
+          SLIDES.forEach((_, i) => {
+            const d = document.createElement('button');
+            d.className = 'cc-dot';
+            d.addEventListener('click', () => go(i));
+            dotsEl.appendChild(d);
+          });
+        }
+        const dots = dotsEl ? Array.from(dotsEl.querySelectorAll('.cc-dot')) : [];
+
+        const SIDE_S = 0.82, SIDE_O = 0.45, SIDE_F = 0.82;
+        let CW, CH, GAP, STEP, TRACK_W;
+
+        function measure() {
+          CW = cards[0].offsetWidth || 340;
+          CH = cards[0].offsetHeight || 480;
+          const style = getComputedStyle(document.documentElement);
+          GAP = parseInt(style.getPropertyValue('--gap')) || 40;
+          STEP = CW + GAP;
+          TRACK_W = CW * 3 + GAP * 2;
+          track.style.width = TRACK_W + 'px';
+          track.style.height = CH + 'px';
+          if (outerEl) outerEl.style.width = TRACK_W + 'px';
+          cards.forEach(c => { c.style.width = CW + 'px'; c.style.height = CH + 'px'; c.style.top = '0'; });
+        }
+
+        function slotX(slot) { return (slot + 1) * STEP; }
+
+        const state = cards.map(() => ({ x: 0, scale: SIDE_S, opacity: 0, visible: false }));
+
+        function writeCard(i) {
+          const st = state[i];
+          if (!st.visible) { cards[i].style.opacity = '0'; cards[i].style.transform = `translate3d(-9999px,0,0)`; cards[i].style.pointerEvents = 'none'; cards[i].classList.remove('active'); return; }
+          cards[i].style.pointerEvents = 'auto';
+          cards[i].style.transform = `translate3d(${st.x}px,0,0) scale(${st.scale})`;
+          cards[i].style.opacity = String(st.opacity);
+          cards[i].style.filter = `brightness(${st.scale === 1 ? 1 : SIDE_F})`;
+          st.scale === 1 ? cards[i].classList.add('active') : cards[i].classList.remove('active');
+        }
+
+        const TRANSITION = 'transform .42s cubic-bezier(.25,.46,.45,.94), opacity .42s ease, filter .42s ease';
+        const enableT = i => { cards[i].style.transition = TRANSITION; };
+        const disableT = i => { cards[i].style.transition = 'none'; };
+
+        let cur = 0, animating = false;
+
+        function layout(instantly) {
+          const L = mod(cur - 1), C = cur, R = mod(cur + 1);
+          cards.forEach((_, i) => {
+            if (instantly) disableT(i);
+            if (i === L) state[i] = { x: slotX(-1), scale: SIDE_S, opacity: SIDE_O, visible: true };
+            else if (i === C) state[i] = { x: slotX(0), scale: 1, opacity: 1, visible: true };
+            else if (i === R) state[i] = { x: slotX(1), scale: SIDE_S, opacity: SIDE_O, visible: true };
+            else state[i] = { x: 0, scale: SIDE_S, opacity: 0, visible: false };
+            writeCard(i);
+          });
+        }
+
+        function syncDots(i) { dots.forEach((d, j) => d.classList.toggle('active', j === i)); }
+
+        let textTimer;
+        function syncText(i, instant) {
+          clearTimeout(textTimer);
+          const s = SLIDES[i];
+          if (!titleEl || !descEl) return;
+          if (instant) {
+            titleEl.textContent = s.title; descEl.textContent = s.desc;
+            titleEl.classList.remove('fading'); descEl.classList.remove('fading');
+          } else {
+            titleEl.classList.add('fading'); descEl.classList.add('fading');
+            textTimer = setTimeout(() => {
+              titleEl.textContent = s.title; descEl.textContent = s.desc;
+              titleEl.classList.remove('fading'); descEl.classList.remove('fading');
+            }, 180);
+          }
+        }
+
+        let autoTimer = null;
+        function startAuto() {
+          if (autoTimer) clearInterval(autoTimer);
+          autoTimer = setInterval(() => { if (!dragging && !animating) go(mod(cur + 1)); }, 5000);
+        }
+
+        function go(next) {
+          if (animating || next === cur) return;
+          animating = true; startAuto();
+          const prev = cur; cur = mod(next);
+          const fwd = mod(cur - prev), dir = fwd <= N / 2 ? 1 : -1;
+          const iC = cur, iNS = mod(cur + dir), iOC = prev, iOS = mod(prev - dir);
+          disableT(iC); disableT(iNS);
+          const offX = dir > 0 ? slotX(2) : slotX(-2);
+          state[iC] = { x: offX, scale: SIDE_S, opacity: SIDE_O, visible: true };
+          state[iNS] = { x: offX, scale: SIDE_S, opacity: SIDE_O, visible: true };
+          writeCard(iC); writeCard(iNS);
+          syncText(cur, false); syncDots(cur);
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            [iC, iOC, iNS, iOS].forEach(enableT);
+            state[iC] = { x: slotX(0), scale: 1, opacity: 1, visible: true };
+            state[iOC] = { x: slotX(-dir), scale: SIDE_S, opacity: SIDE_O, visible: true };
+            state[iNS] = { x: slotX(dir), scale: SIDE_S, opacity: SIDE_O, visible: true };
+            state[iOS] = { x: slotX(-dir * 2), scale: SIDE_S, opacity: 0, visible: true };
+            [iC, iOC, iNS, iOS].forEach(writeCard);
+            const done = () => { disableT(iOS); state[iOS].visible = false; writeCard(iOS); animating = false; };
+            cards[iC].addEventListener('transitionend', function h(e) { if (e.propertyName !== 'transform') return; cards[iC].removeEventListener('transitionend', h); done(); });
+            setTimeout(() => { if (animating) done(); }, 450);
+          }));
+        }
+
+        let dragging = false, ptrX = 0, dragBase = 0, lastDelta = 0, rafId = null, snapX = {};
+
+        function dragFrame() {
+          if (!dragging) return;
+          const delta = ptrX - dragBase; lastDelta = delta;
+          const pull = Math.abs(delta);
+          const d = pull > STEP ? Math.sign(delta) * (STEP + (pull - STEP) * 0.2) : delta;
+          [mod(cur - 1), cur, mod(cur + 1)].forEach(i => { if (snapX[i] === undefined) return; const isC = (i === cur); cards[i].style.transform = `translate3d(${snapX[i] + d}px,0,0) scale(${isC ? 1 : SIDE_S})`; });
+          rafId = requestAnimationFrame(dragFrame);
+        }
+
+        function onDown(e) {
+          if (animating) return; dragging = true; lastDelta = 0;
+          dragBase = e.clientX ?? e.touches[0].clientX; ptrX = dragBase;
+          snapX = {};
+          [mod(cur - 1), cur, mod(cur + 1)].forEach(i => { disableT(i); snapX[i] = state[i].x; });
+          track.classList.add('grabbing'); cancelAnimationFrame(rafId); rafId = requestAnimationFrame(dragFrame);
+          if (autoTimer) clearInterval(autoTimer);
+        }
+        function onMove(e) { if (!dragging) return; ptrX = e.clientX ?? (e.touches ? e.touches[0].clientX : 0); }
+        function onUp(e) {
+          if (!dragging) return; dragging = false; cancelAnimationFrame(rafId); track.classList.remove('grabbing');
+          [mod(cur - 1), cur, mod(cur + 1)].forEach(enableT);
+          if (Math.abs(lastDelta) < 5) { layout(false); startAuto(); return; }
+          const thresh = STEP * 0.18;
+          if (lastDelta < -thresh) go(mod(cur + 1));
+          else if (lastDelta > thresh) go(mod(cur - 1));
+          else { layout(false); startAuto(); }
+        }
+
+        track.addEventListener('mousedown', onDown);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onUp);
+        track.addEventListener('touchstart', onDown, { passive: true });
+        track.addEventListener('touchmove', e => { if (dragging) { e.preventDefault(); onMove(e); } }, { passive: false });
+        track.addEventListener('touchend', onUp);
+
+        if (prevBtn) prevBtn.addEventListener('click', () => { if (!animating) go(mod(cur - 1)); });
+        if (nextBtn) nextBtn.addEventListener('click', () => { if (!animating) go(mod(cur + 1)); });
+
+        document.addEventListener('keydown', e => {
+          if (e.key === 'ArrowRight' && !animating) go(mod(cur + 1));
+          if (e.key === 'ArrowLeft' && !animating) go(mod(cur - 1));
+        });
+
+        if (outerEl) {
+          outerEl.addEventListener('mouseenter', () => clearInterval(autoTimer));
+          outerEl.addEventListener('mouseleave', startAuto);
+        }
+
+        function init() { measure(); layout(true); syncDots(cur); syncText(cur, true); startAuto(); }
+        window.addEventListener('resize', () => { measure(); layout(true); });
+        setTimeout(init, 60);
+      })();
+
+      /* ─── Featured: mobile tab switching ─── */
+      (function () {
+        const tabs = document.querySelectorAll('.featured-mobile-tab');
+        const link = document.getElementById('featured-mobile-link');
+        const img = document.getElementById('featured-mobile-img');
+        if (!tabs.length || !link) return;
+
+        const menus = {
+          sushi: { href: 'menu#sushi', src: 'image/menu1.png', alt: 'Sushi Menu' },
+          grand: { href: 'menu#grand', src: 'image/menu2.png', alt: 'Grand Menu' }
+        };
+
+        tabs.forEach(tab => {
+          tab.addEventListener('click', () => {
+            const data = menus[tab.dataset.menu];
+            if (!data) return;
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            img.style.opacity = '0';
+            setTimeout(() => {
+              link.href = data.href;
+              img.src = data.src;
+              img.alt = data.alt;
+              img.style.opacity = '1';
+            }, 200);
+          });
+        });
+      })();
+
+    }); // DOMContentLoaded
+  </script>
+</body>
+
+</html>
