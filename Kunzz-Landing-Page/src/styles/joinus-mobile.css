@@ -473,10 +473,10 @@
     flex-basis: auto !important;
     flex-grow: 0 !important;
     width: 100%;
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: min(34vh, 200px);
-    aspect-ratio: 16 / 10;
+    height: clamp(240px, 46vh, 340px) !important;
+    min-height: clamp(220px, 42vh, 300px) !important;
+    max-height: none !important;
+    aspect-ratio: unset;
     overflow: hidden;
     background: #eee;
   }
@@ -505,7 +505,9 @@
   }
 
   .contact-info-bottom .contact-title {
-    font-size: clamp(1.1rem, 4vw, 1.35rem);
+    text-align: center;
+    margin:5px 0 5px;
+    font-size: clamp(1.5rem, 3.2vw, 1.15rem);
   }
 
   .contact-info-bottom .contact-subtitle {
@@ -584,10 +586,9 @@
 
   /* ── Feedback-only slide 表单字段（scoped under join-slide-card-center） ── */
   .join-slide-card-center .feedback-title {
-    font-size: clamp(0.95rem, 3.2vw, 1.15rem);
-    font-family: 'Source Sans Pro', sans-serif;
+    font-size: clamp(1.5rem, 3.2vw, 1.15rem);
     text-align: center;
-    margin: 0 0 3px;
+    margin: 5px 0 5px;
   }
 
   .join-slide-card-center .feedback-subtitle {
@@ -940,6 +941,7 @@
   }
 
   .join-slide-card-center .contact-map-embed {
-    max-height: min(30vh, 180px);
+    height: clamp(220px, 42vh, 300px) !important;
+    min-height: clamp(200px, 38vh, 260px) !important;
   }
 }

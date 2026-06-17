@@ -16,7 +16,11 @@ const COPY = {
     prev: '上一项',
     next: '下一项',
     formatMonth: (month) => `${month}月`,
-    formatYearBadge: (year, month) => `${year}年${month ? ` · ${month}月` : ''}`,
+    formatYearBadge: (year, month) => {
+      const y = String(year ?? '').trim();
+      if (!y) return '';
+      return `${y}年${month ? ` · ${month}月` : ''}`;
+    },
     formatImageAlt: (year) => `${year}年发展`,
   },
   en: {
@@ -28,9 +32,11 @@ const COPY = {
     next: 'Next',
     formatMonth: (month) => MONTH_NAMES_EN[month - 1] || `Month ${month}`,
     formatYearBadge: (year, month) => {
-      if (!month) return String(year);
+      const y = String(year ?? '').trim();
+      if (!y) return '';
+      if (!month) return y;
       const monthLabel = MONTH_NAMES_EN[month - 1] || `Month ${month}`;
-      return `${year} · ${monthLabel}`;
+      return `${y} · ${monthLabel}`;
     },
     formatImageAlt: (year) => `Development in ${year}`,
   },
@@ -283,8 +289,10 @@ export default function AboutTimeline({ lang = 'zh' }) {
         <div className="timeline-content-container">
           <div className="timeline-cards-wrapper">
             {items.map((item, index) => {
-              const year = String(item.year ?? '');
+              const year = String(item.year ?? '').trim();
               const month = Number(item.month) || 0;
+              const badgeMonth = isMobile ? 0 : month;
+              const badgeText = year ? copy.formatYearBadge(year, badgeMonth) : '';
               return (
                 <div
                   key={`content-${year}-${month}-${index}`}
@@ -300,9 +308,9 @@ export default function AboutTimeline({ lang = 'zh' }) {
                       ) : null}
                     </div>
                     <div className="timeline-text">
-                      <div className="year-badge">
-                        {copy.formatYearBadge(year, isMobile ? 0 : month)}
-                      </div>
+                      {badgeText ? (
+                        <div className="year-badge">{badgeText}</div>
+                      ) : null}
                       <h3>{item.title}</h3>
                       {item.description1 ? <p>{item.description1}</p> : null}
                       {item.description2 ? <p>{item.description2}</p> : null}
