@@ -471,11 +471,9 @@ body::-webkit-scrollbar {
 
 .job-section {
     padding: clamp(3.75rem, 8vw, 6.25rem) clamp(1rem, 3vw, 2rem);
-    background:
-        linear-gradient(180deg, rgba(255, 248, 242, 0.92) 0%, rgba(255, 255, 255, 0.88) 100%),
-        url('/images/背景3.webp') no-repeat center center/cover;
+    background: url('/images/背景3.webp') no-repeat center center/cover;
     backdrop-filter: blur(clamp(1.25rem, 2vw, 1.25rem));
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    box-shadow: 0 clamp(1.25rem, 2vw, 1.25rem) clamp(3.75rem, 6vw, 3.75rem) rgba(0, 0, 0, 0.1);
     min-height: 100vh;
     width: 100%;
     display: flex;
@@ -498,7 +496,7 @@ body::-webkit-scrollbar {
     text-align: center;
     font-size: clamp(2.2500rem, 3.7946vw - 0.1786rem, 4.3750rem);
     font-weight: 700;
-    margin: clamp(0rem, 2vw, 2.5rem) auto 0.35rem;
+    margin: clamp(0rem, 2vw, 2.5rem) auto clamp(0.5rem, 2vw, 2.5rem);
     background: linear-gradient(135deg, #ff5c00 0%, #ff8a3d 55%, #ff5c00 100%);
     background-size: 200% auto;
     -webkit-background-clip: text;
@@ -507,25 +505,6 @@ body::-webkit-scrollbar {
     text-shadow: none;
     filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.18));
     letter-spacing: 0.02em;
-}
-
-.job-table-subtitle {
-    margin: 0 auto 0.25rem;
-    max-width: 34rem;
-    font-size: clamp(0.875rem, 1.35vw, 1.125rem);
-    line-height: 1.55;
-    color: rgba(68, 68, 68, 0.88);
-    font-weight: 500;
-}
-
-.job-table-container::after {
-    content: '';
-    display: block;
-    width: 72px;
-    height: 4px;
-    margin: 14px auto 0;
-    border-radius: 999px;
-    background: linear-gradient(90deg, #ff5c00, #ffb07a);
 }
 
 @keyframes gradientShift {
@@ -1952,10 +1931,10 @@ form select:focus {
 
 .feedback-title {
     font-family: 'Source Sans Pro', sans-serif;
-    font-size: clamp(17px, 1.3vw, 24px);
+    font-size: clamp(.95rem, 3.2vw, 1.15rem);
     font-weight: 800;
     color: #1a1a1a;
-    margin: 0 0 clamp(2px, 0.2vw, 4px) 0;
+    margin: clamp(4px, .4vw, 8px) 0 0;
     line-height: 1.2;
 }
 
