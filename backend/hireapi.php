@@ -11,6 +11,8 @@
  * 响应格式：{"code": 200|400|500, "msg": "...", "data": ...}
  */
 
+require_once __DIR__ . '/../config.php';
+
 // ─── 时区统一设置（马来西亚 UTC+8） ─────────────────────────────────────────
 date_default_timezone_set('Asia/Kuala_Lumpur');
 

@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/backend/xss_protect.php';
 header("Content-Type: application/json");
 session_start();
