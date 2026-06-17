@@ -14,6 +14,10 @@ export default defineConfig({
         target: 'http://localhost/kunzzgroup-main',
         changeOrigin: true,
       },
+      '/frontend': {
+        target: 'http://localhost/kunzzgroup-main',
+        changeOrigin: true,
+      },
     },
   },
 });

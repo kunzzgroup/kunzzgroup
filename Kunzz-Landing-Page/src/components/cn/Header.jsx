@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../contexts/LanguageContext.jsx';
-import { LOGIN_URL } from '../../config.js';
+import { getLoginUrl } from '../../config.js';
 import {
   getAboutPath,
   getHomePath,
@@ -199,7 +199,7 @@ export default function Header({ activeSlide = 0, onSlideTo, totalSlides = 4 }) 
               登入
             </button>
             <div className={`header-login-dropdown-menu${loginOpen ? ' show' : ''}`}>
-              <a href={LOGIN_URL} className="header-login-dropdown-item">
+              <a href={getLoginUrl()} className="header-login-dropdown-item">
                 员工登入
               </a>
             </div>

@@ -104,7 +104,7 @@ function getLanguageSwitchUrl($targetLang) {
                 <button type="button" class="header-login-btn" id="loginBtn" aria-expanded="false"
                     aria-controls="loginDropdownMenu">LOGIN</button>
                 <div class="header-login-dropdown-menu" id="loginDropdownMenu">
-                    <a href="/frontend_en/login.html" class="header-login-dropdown-item">Staff Login</a>
+                    <a href="<?php echo htmlspecialchars(app_url('frontend_en/login.html')); ?>" class="header-login-dropdown-item">Staff Login</a>
                 </div>
             </div>
 

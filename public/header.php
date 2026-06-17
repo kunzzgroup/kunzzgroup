@@ -109,7 +109,7 @@ function getLanguageSwitchUrl($targetLang)
                 <button type="button" class="header-login-btn" id="loginBtn" aria-expanded="false"
                     aria-controls="loginDropdownMenu">登入</button>
                 <div class="header-login-dropdown-menu" id="loginDropdownMenu">
-                    <a href="/frontend/login.html" class="header-login-dropdown-item">员工登入</a>
+                    <a href="<?php echo htmlspecialchars(app_url('frontend/login.html')); ?>" class="header-login-dropdown-item">员工登入</a>
                 </div>
             </div>
 
