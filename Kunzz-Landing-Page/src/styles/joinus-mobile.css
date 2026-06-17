@@ -932,8 +932,9 @@
   }
 
   .jobs-company-tab {
+    height: 36px;
     padding: 7px 4px;
-    font-size: 10px;
+    font-size: 12px;
   }
 
   .comphoto-title {
@@ -942,8 +943,8 @@
   }
 
   .join-slide-card-center .contact-map-embed {
-    height: clamp(190px, 34vh, 240px) !important;
-    max-height: clamp(190px, 34vh, 240px) !important;
+    height: clamp(230px, 42vh, 290px) !important;
+    max-height: clamp(200px, 230px, 400px) !important;
   }
 
   .join-slide-card-center .contact-map-embed iframe {

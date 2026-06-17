@@ -95,7 +95,7 @@ export function FeedbackForm({ formId, compact = false, hideSubmit = false }) {
         <textarea
           id={`${formId}-message`}
           name="message"
-          rows={compact ? 2 : 4}
+          rows={compact ? 3 : 4}
           placeholder="Please enter your feedback or suggestion..."
           required
         />
