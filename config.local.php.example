@@ -6,11 +6,11 @@
  * Steps for localhost with your real account:
  * 1. Start Apache + MySQL in XAMPP
  * 2. In phpMyAdmin, import your production SQL dump as database u690174784_kunzz
- * 3. Log in at http://localhost/kunzzgroup-1/frontend/login.html
+ * 3. Log in at http://localhost/kunzzgroup-main/frontend/login.html
  * 4. Copy scripts/htdocs.local.htaccess to C:\xampp\htdocs\.htaccess (fixes /backend CSS on localhost)
  */
 $host = '127.0.0.1';
 $dbname = 'kunzz';
 $dbuser = 'root';
 $dbpass = '';
-$appBasePath = 'kunzzgroup-1';
+$appBasePath = 'kunzzgroup-main';

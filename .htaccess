@@ -30,10 +30,10 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^images/images/(.+)$ https://kunzzgroup.com/images/images/$1 [R=302,L]
 
-    RewriteCond %{DOCUMENT_ROOT}/kunzzgroup-1/Kunzz-Landing-Page/dist/images/$1 -f
+    RewriteCond %{DOCUMENT_ROOT}/kunzzgroup-main/Kunzz-Landing-Page/dist/images/$1 -f
     RewriteRule ^images/(.+)$ Kunzz-Landing-Page/dist/images/$1 [L]
 
-    RewriteCond %{DOCUMENT_ROOT}/kunzzgroup-1/images/images/$1 -f
+    RewriteCond %{DOCUMENT_ROOT}/kunzzgroup-main/images/images/$1 -f
     RewriteRule ^images/(.+)$ images/images/$1 [L]
 
     RewriteRule ^$ Kunzz-Landing-Page/dist/index.html [L]

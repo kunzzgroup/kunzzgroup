@@ -12,12 +12,12 @@ export default defineConfig({
         secure: true,
       },
       '/api': {
-        target: 'http://localhost/kunzzgroup-1',
+        target: 'http://localhost/kunzzgroup-main',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
       '/frontend': {
-        target: 'http://localhost/kunzzgroup-1',
+        target: 'http://localhost/kunzzgroup-main',
         changeOrigin: true,
       },
     },
