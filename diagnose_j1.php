@@ -1,13 +1,7 @@
 <?php
-$host = 'localhost';
-$dbname = 'u690174784_kunzz';
-$dbuser = 'u690174784_kunzz';
-$dbpass = 'Kunzz1688';
-
+require_once __DIR__ . '/config.php';
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
+    $pdo = get_pdo_connection();
     $stmt = $pdo->query("SELECT * FROM j1stockedit_data LIMIT 5");
     $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
     

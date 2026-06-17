@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../config.php';
 /**
  * ═══════════════════════════════════════════
  *  权限守卫 (Permission Guard)
@@ -42,14 +43,7 @@ function _loadUserPermissions() {
     if (empty($_SESSION['user_id'])) return $cached;
 
     try {
-        $host = 'localhost';
-        $dbname = 'u690174784_kunzz';
-        $dbuser = 'u690174784_kunzz';
-        $dbpass = 'Kunzz1688';
-
-        $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
+        $pdo = get_pdo_connection();
         $userId = intval($_SESSION['user_id']);
 
         // 读取 sidebar 权限

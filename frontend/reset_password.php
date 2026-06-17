@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../config.php';
 if (!headers_sent()) {
     header("Cache-Control: max-age=0, no-cache, no-store, must-revalidate, proxy-revalidate");
     header("Pragma: no-cache");
@@ -19,15 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header("Content-Type: application/json");
 
-    // 1. 数据库连接配置
-    $host = 'localhost';
-    $dbname = 'u690174784_kunzz';
-    $dbuser = 'u690174784_kunzz';
-    $dbpass = 'Kunzz1688';
-
     // 2. 建立数据库连接
-    $conn = new mysqli($host, $dbuser, $dbpass, $dbname);
-
+    $conn = get_mysqli_connection();
     // 检查连接是否成功
     if ($conn->connect_error) {
         echo json_encode(["success" => false, "message" => "数据库连接失败: " . $conn->connect_error]);

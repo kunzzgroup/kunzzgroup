@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../config.php';
 /**
  * check_permissions.php
  * 返回当前登录用户在"货品种类"(stock_inventory)页面的
@@ -17,18 +18,11 @@ if (empty($_SESSION['user_id'])) {
     exit;
 }
 
-$host   = 'localhost';
-$dbname = 'u690174784_kunzz';
-$dbuser = 'u690174784_kunzz';
-$dbpass = 'Kunzz1688';
-
 $canApply   = false;
 $canApprove = false;
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
+    $pdo = get_pdo_connection();
     $userId = intval($_SESSION['user_id']);
 
     // ── 第一优先：user_page_permissions 新表 ──────────────────────

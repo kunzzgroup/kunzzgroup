@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../config.php';
 /**
  * resume.php — 安全简历查看端点
  * 用法：/backend/resume.php?id={application_id}
@@ -31,16 +32,8 @@ if (!$hasSession && !$tokenOk) {
     exit('403 Forbidden: Login required or invalid token.');
 }
 
-// ── 数据库查询 ───────────────────────────────────────────────────────────────
-$host   = 'localhost';
-$dbname = 'u690174784_kunzz';
-$dbuser = 'u690174784_kunzz';
-$dbpass = 'Kunzz1688';
-
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
+    $pdo = get_pdo_connection();
     $stmt = $pdo->prepare("SELECT resume_file_url FROM job_applications WHERE id = ?");
     $stmt->execute([$id]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);

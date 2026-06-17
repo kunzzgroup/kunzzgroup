@@ -1,88 +1,34 @@
 <?php
-// 如果不是 POST 请求，跳转到登录表单页
+require_once __DIR__ . '/../../config.php';
+
+$loginPage = app_url('j1/frontend/login.html');
+$dashboardPage = app_url('backend/dashboard');
+$resetPasswordPage = app_url('j1/frontend/reset_password');
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header("Location: login.html");
+    header('Location: ' . $loginPage);
     exit();
 }
 
-require_once __DIR__ . '/../../backend/xss_protect.php';
+require_once __DIR__ . '/../../backend/auth.php';
 ob_start();
 session_start();
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// 数据库连接信息
-$host = 'localhost';
-$dbname = 'u690174784_kunzz';
-$dbuser = 'u690174784_kunzz';
-$dbpass = 'Kunzz1688';
-
-// 创建连接
-$conn = new mysqli($host, $dbuser, $dbpass, $dbname);
-if ($conn->connect_error) {
-    die("连接失败: " . $conn->connect_error);
+try {
+    $conn = get_mysqli_connection();
+} catch (RuntimeException $e) {
+    error_log('Login connection failed: ' . $e->getMessage());
+    redirect_with_login_alert('无法连接数据库，请确认 XAMPP MySQL 已启动并已导入用户数据', $loginPage);
 }
 
-// 获取提交数据
-$email = $_POST['username'] ?? '';
-$password = $_POST['password'] ?? '';
-$remember = isset($_POST['remember']); // true/false
-
-// 查询用户
-$sql = "SELECT * FROM users WHERE email = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $email);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows === 1) {
-    $user = $result->fetch_assoc();
-
-    if (verify_secure_password($password, $user['password'])) {
-        // ✅ 登录成功，设置 Session
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['username'] = $user['username'];
-        $_SESSION['position'] = $user['position'];
-        $_SESSION['account_type'] = $user['account_type']; // ⭐ 添加这行 - 关键！
-        $_SESSION['branch'] = strtoupper($user['branch'] ?? ''); // ⭐ 添加这行 - 关键！
-        $_SESSION['last_activity'] = time(); // ➤ 当前登录时间（用于 1 分钟自动登出）
-
-        // 检查是否为首次登录
-        if ($user['is_first_login'] == 1) {
-            // 首次登录，跳转到密码重置页面
-            header("Location: reset_password.html");
-            exit();
-        }
-
-        if ($remember) {
-            // ✅ 勾选了"记住我"，设置 cookie（30天）
-            $expire = time() + (86400 * 30);
-            setcookie('user_id', $user['id'], $expire, "/");
-            setcookie('username', $user['username'], $expire, "/");
-            setcookie('position', $user['position'], $expire, "/");
-            setcookie('account_type', $user['account_type'], $expire, "/"); // ⭐ 添加这行
-            setcookie('branch', strtoupper($user['branch'] ?? ''), $expire, "/"); // ⭐ 添加这行
-            setcookie('remember_token', '1', $expire, "/");
-        } else {
-            // ❌ 没勾选记住我，清除残留 cookie
-            setcookie('user_id', '', time() - 3600, "/");
-            setcookie('username', '', time() - 3600, "/");
-            setcookie('position', '', time() - 3600, "/");
-            setcookie('account_type', '', time() - 3600, "/"); // ⭐ 添加这行
-            setcookie('branch', '', time() - 3600, "/"); // ⭐ 添加这行
-            setcookie('remember_token', '', time() - 3600, "/");
-        }
-
-        header("Location: ../backend/dashboard.php");
-        exit();
-
-    } else {
-        echo "<script>alert('密码错误'); window.location.href='login.html';</script>";
-        exit();
-    }
-
-} else {
-    echo "<script>alert('该账号不存在'); window.location.href='login.html';</script>";
-    exit();
-}
-?>
+process_web_login(
+    $conn,
+    $_POST['username'] ?? '',
+    $_POST['password'] ?? '',
+    isset($_POST['remember']),
+    $loginPage,
+    $dashboardPage,
+    $resetPasswordPage
+);

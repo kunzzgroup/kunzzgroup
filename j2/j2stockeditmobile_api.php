@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../config.php';
 ob_start();
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
@@ -49,15 +50,8 @@ if (!in_array('KH', $user_branches) && !in_array('J2', $user_branches)) {
     exit;
 }
 
-// 数据库配置（与 j1 同一库，使用 j2 表）
-$host = 'localhost';
-$dbname = 'u690174784_kunzz';
-$dbuser = 'u690174784_kunzz';
-$dbpass = 'Kunzz1688';
-
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo = get_pdo_connection();
     // 确保所需数据表存在（静默失败以避免无权限导致500）
     try { ensureTables($pdo); } catch (Throwable $ignore) {}
 } catch (PDOException $e) {

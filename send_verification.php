@@ -18,18 +18,7 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-// 检查邮箱是否在数据库中
-$host = 'localhost';
-$dbname = 'u690174784_kunzz';
-$dbuser = 'u690174784_kunzz';
-$dbpass = 'Kunzz1688';
-
-$conn = new mysqli($host, $dbuser, $dbpass, $dbname);
-if ($conn->connect_error) {
-    echo json_encode(["success" => false, "message" => "数据库连接失败: " . $conn->connect_error]);
-    exit;
-}
-
+$conn = get_mysqli_connection();
 $stmt = $conn->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
 if ($stmt) {
     $stmt->bind_param("s", $email);

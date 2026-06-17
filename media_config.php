@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/config.php';
 // updated for subdomain storage
 /**
  * 获取子域名媒体存储配置
@@ -1175,18 +1176,10 @@ function getJobsConfig() {
  * @return string 职位卡片HTML
  */
 function getJobsHtml($language = 'zh') {
-    // 数据库配置
-    $host = 'localhost';
-    $dbname = 'u690174784_kunzz';
-    $dbuser = 'u690174784_kunzz';
-    $dbpass = 'Kunzz1688';
-    
     $html = '';
     
     try {
-        $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
+        $pdo = get_pdo_connection();
         // 根据语言获取职位
         $stmt = $pdo->prepare("SELECT * FROM job_positions WHERE language = ? ORDER BY publish_date DESC, id DESC");
         $stmt->execute([$language]);

@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/permission_guard.php';
 requirePermissionApi('hr', 'staff_management');
 
@@ -36,16 +37,8 @@ if (!isset($_SESSION['user_id'])) {
 ini_set('display_errors', 0);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 
-// 数据库配置
-$host = 'localhost';
-$dbname = 'u690174784_kunzz';
-$dbuser = 'u690174784_kunzz';
-$dbpass = 'Kunzz1688';
-
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $dbuser, $dbpass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
+    $pdo = get_pdo_connection();
     // 确保表存在
     $pdo->exec("CREATE TABLE IF NOT EXISTS `qna_responses` (
       `id` INT(11) NOT NULL AUTO_INCREMENT,

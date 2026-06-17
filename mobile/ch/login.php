@@ -1,10 +1,11 @@
 <?php
+require_once __DIR__ . '/../../config.php';
 if (!headers_sent()) {
     header("Cache-Control: max-age=0, no-cache, no-store, must-revalidate, proxy-revalidate");
     header("Pragma: no-cache");
     header("Expires: Wed, 11 Jan 1984 05:00:00 GMT");
 }
-require_once __DIR__ . '/../../backend/xss_protect.php';
+require_once __DIR__ . '/../../backend/auth.php';
 ob_start();
 // ★ Edge 修复：PHPSESSID 也需要 SameSite，否则 Edge 会静默拦截
 session_set_cookie_params([
@@ -19,31 +20,15 @@ error_reporting(E_ALL);
 
 // ===================
 
-// 数据库连接信息
-$host = 'localhost';
-$dbname = 'u690174784_kunzz';
-$dbuser = 'u690174784_kunzz';
-$dbpass = 'Kunzz1688';
-
 // 创建连接
-$conn = new mysqli($host, $dbuser, $dbpass, $dbname);
-if ($conn->connect_error) {
-    die("连接失败: " . $conn->connect_error);
-}
-
+$conn = get_mysqli_connection();
 // ================= 登录处理 =================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
-    $remember = isset($_POST['remember']);
+    $user = find_user_by_login_identifier($conn, $_POST['username'] ?? '');
 
-    $stmt = $conn->prepare("SELECT * FROM users WHERE email=?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows === 1) {
-        $user = $result->fetch_assoc();
+    if ($user) {
+        $password = $_POST['password'] ?? '';
+        $remember = isset($_POST['remember']);
 
         if (verify_secure_password($password, $user['password'])) {
             // ✅ 保存 session
