@@ -2897,47 +2897,52 @@ function resetFilters() {
     loadStockData();
 }
 
-// 保存新创建的行
+// 保存新创建的行（从 DOM 移除，避免 renderStockTable 与 restoreNewRows 重复追加）
 function saveNewRows() {
-    return Array.from(document.querySelectorAll('.new-row')).map(row => ({
-        element: row.cloneNode(true),
-        parent: row.parentNode
-    }));
+    return Array.from(document.querySelectorAll('#stock-tbody .new-row'))
+        .filter(row => getNewRowSystem(row) === currentStockType)
+        .map(row => {
+            const saved = { element: row, parent: row.parentNode };
+            row.remove();
+            return saved;
+        });
 }
 
 // 恢复新创建的行
 function restoreNewRows(newRows) {
-    if (newRows && newRows.length > 0) {
-        setTimeout(() => {
-            const tbody = document.getElementById('stock-tbody');
-            newRows.forEach(({ element }, index) => {
-                // 添加淡入动画
-                element.style.opacity = '0';
-                element.style.transform = 'translateY(-10px)';
-                element.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    if (!newRows || newRows.length === 0) return;
 
-                tbody.appendChild(element);
+    setTimeout(() => {
+        const tbody = document.getElementById('stock-tbody');
+        if (!tbody) return;
 
-                // 延迟显示，创建错落有致的效果
+        newRows.forEach(({ element }, index) => {
+            if (!element || element.isConnected) return;
+
+            // 添加淡入动画
+            element.style.opacity = '0';
+            element.style.transform = 'translateY(-10px)';
+            element.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+
+            tbody.appendChild(element);
+
+            // 延迟显示，创建错落有致的效果
+            setTimeout(() => {
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0)';
+
+                // 动画完成后清理样式
                 setTimeout(() => {
-                    element.style.opacity = '1';
-                    element.style.transform = 'translateY(0)';
+                    element.style.transition = '';
+                    element.style.transform = '';
+                }, 300);
+            }, index * 30);
+        });
 
-                    // 动画完成后清理样式
-                    setTimeout(() => {
-                        element.style.transition = '';
-                        element.style.transform = '';
-                    }, 300);
-                }, index * 30); // 每行延迟30ms，减少等待时间
-            });
-
-            // 重新绑定 combobox 事件
-            bindComboboxEvents();
-
-            // 更新批量保存按钮的可见性
-            updateBatchSaveButtonVisibility();
-        }, 50); // 减少初始延迟
-    }
+        bindComboboxEvents();
+        updateBatchSaveButtonVisibility();
+        syncPendingNewRowsCache(currentStockType);
+    }, 50);
 }
 
 // 保存所有正在编辑的行的输入值
@@ -3598,8 +3603,8 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
     setTimeout(() => {
         bindComboboxEvents();
 
-        // 自动聚焦到货品名称输入框
-        const productInput = document.getElementById('new-product_name-input');
+        // 自动聚焦到当前行的货品名称输入框
+        const productInput = document.getElementById(`${rowId}-product_name-input`);
         if (productInput) {
             productInput.focus();
         }
@@ -4371,12 +4376,15 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
             syncPendingNewRowsCache(getNewRowSystem(row));
 
             if (!skipTableRefresh) {
-                // 保存其他新增行
-                const otherNewRows = Array.from(document.querySelectorAll('.new-row'));
-                const savedRows = otherNewRows.map(r => ({
-                    element: r.cloneNode(true),
-                    data: extractRowData(r)
-                }));
+                // 保存其他新增行（先从 DOM 移除，避免与 renderStockTable 重复）
+                const savedRows = Array.from(document.querySelectorAll('#stock-tbody .new-row'))
+                    .filter(r => getNewRowSystem(r) === currentStockType)
+                    .map(r => ({
+                        element: r,
+                        data: extractRowData(r)
+                    }));
+                savedRows.forEach(({ element }) => element.remove());
+                syncPendingNewRowsCache(currentStockType);
 
                 // 保存后以服务器和当前日期筛选为准，并滚动到刚保存的记录（新记录在列表末尾）
                 const savedRecordId = result.data && result.data.id;
@@ -4386,22 +4394,20 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
                 setTimeout(() => {
                     const tbody = document.getElementById('stock-tbody');
                     savedRows.forEach(({ element, data }) => {
+                        if (!element || element.isConnected) return;
                         tbody.appendChild(element);
-
-                        // 恢复行数据（特别是select元素的选中状态）
                         if (data) {
                             restoreRowData(element, data);
                         }
                     });
                     bindComboboxEvents();
 
-                    // 恢复未保存行后切换为完整渲染
                     if (savedRows.length > 0) {
                         renderStockTable(true);
                     }
 
-                    // 更新批量保存按钮的可见性
                     updateBatchSaveButtonVisibility();
+                    syncPendingNewRowsCache(currentStockType);
                 }, 100);
 
                 // 更新统计
@@ -5195,22 +5201,9 @@ function refreshData() {
 
 // 刷新数据但保留新增行
 function refreshDataKeepNewRows() {
-    // 保存所有新增行
-    const newRows = Array.from(document.querySelectorAll('.new-row')).map(row => ({
-        element: row.cloneNode(true),
-        parent: row.parentNode
-    }));
-
-    // 重新搜索数据（保持搜索状态）
+    const newRows = saveNewRows();
     searchData().then(() => {
-        // 恢复新增行到表格底部
-        const tbody = document.getElementById('stock-tbody');
-        newRows.forEach(({ element }) => {
-            tbody.appendChild(element);
-        });
-
-        // 重新绑定事件
-        setTimeout(bindComboboxEvents, 0);
+        restoreNewRows(newRows);
     });
 }
 
