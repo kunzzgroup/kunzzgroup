@@ -19,8 +19,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 超时时间（秒）
-define('SESSION_TIMEOUT', 60);
+// 超时时间（秒）— parent page may define this first (e.g. dashboard uses 300)
+if (!defined('SESSION_TIMEOUT')) {
+    define('SESSION_TIMEOUT', 60);
+}
 
 // 如果 session 存在，检查是否过期
 if (isset($_SESSION['user_id'])) {
