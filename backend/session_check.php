@@ -8,6 +8,9 @@ if (!headers_sent()) {
 <?php
 // 包含全局防 XSS 脚本 (包括安全响应头设置与输入过滤)
 require_once __DIR__ . '/xss_protect.php';
+require_once __DIR__ . '/../config.php';
+
+$loginPage = app_url('frontend/login.html');
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -38,7 +41,7 @@ if (isset($_SESSION['user_id'])) {
         setcookie('remember_token', '', time() - 60, "/");
 
         // 跳转登录页
-        header("Location: /frontend/login.html");
+        header('Location: ' . $loginPage);
         exit();
     }
 
@@ -60,7 +63,7 @@ if (isset($_SESSION['user_id'])) {
     $_SESSION['last_activity'] = time();
 } else {
     // 没有 session，也没有有效 cookie
-    header("Location: /frontend/login.html");
+    header('Location: ' . $loginPage);
     exit();
 }
 

@@ -12,3 +12,4 @@ $host = '127.0.0.1';
 $dbname = 'kunzz';
 $dbuser = 'root';
 $dbpass = '';
+$appBasePath = 'kunzzgroup-1';

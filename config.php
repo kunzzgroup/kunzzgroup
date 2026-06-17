@@ -22,12 +22,26 @@ if (!function_exists('app_url')) {
         static $basePath = null;
 
         if ($basePath === null) {
-            $docRoot = rtrim(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT'] ?? ''), '/');
-            $projectRoot = rtrim(str_replace('\\', '/', realpath(__DIR__) ?: __DIR__), '/');
-            $basePath = '';
+            global $appBasePath;
 
-            if ($docRoot !== '' && str_starts_with($projectRoot, $docRoot)) {
-                $basePath = rtrim(substr($projectRoot, strlen($docRoot)), '/');
+            if (!empty($appBasePath)) {
+                $basePath = '/' . trim((string) $appBasePath, '/');
+            } else {
+                $docRoot = rtrim(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT'] ?? ''), '/');
+                $projectRoot = rtrim(str_replace('\\', '/', realpath(__DIR__) ?: __DIR__), '/');
+                $basePath = '';
+
+                if ($docRoot !== '' && str_starts_with($projectRoot, $docRoot)) {
+                    $basePath = rtrim(substr($projectRoot, strlen($docRoot)), '/');
+                } elseif ($docRoot !== '' && !empty($_SERVER['SCRIPT_NAME'])) {
+                    $script = str_replace('\\', '/', (string) $_SERVER['SCRIPT_NAME']);
+                    if (preg_match('#^/([^/]+)/#', $script, $matches)) {
+                        $candidate = '/' . $matches[1];
+                        if (is_file($docRoot . $candidate . '/config.php')) {
+                            $basePath = $candidate;
+                        }
+                    }
+                }
             }
         }
 
