@@ -32,7 +32,7 @@ $display_name = isset($system_names[$system]) ? $system_names[$system] : '中央
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-    <link rel="stylesheet" href="/backend/css/stocklistall.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="<?php echo app_url('backend/css/stocklistall.css'); ?>?v=<?php echo time(); ?>">
 </head>
 <body>
     <?php include 'sidebar.php'; ?>

@@ -1,0 +1,6 @@
+# Copy to C:\xampp\htdocs\.htaccess for XAMPP local dev (project in kunzzgroup-1 subfolder).
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^backend/(.*)$ kunzzgroup-1/backend/$1 [L]
+    RewriteRule ^images/(.*)$ kunzzgroup-1/images/$1 [L]
+</IfModule>

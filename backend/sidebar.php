@@ -399,7 +399,7 @@ if (!$canSeeBrand) {
         <?php if ($canSeeBrand): ?>
             <div class="informationmenu-section">
                 <div class="informationmenu-section-title" data-target="brand-items">
-                    <img src="../images/images/网页照片上传.svg?v=<?php echo time(); ?>" alt="" class="section-icon">
+                    <img src="<?php echo static_url('images/images/网页照片上传.svg'); ?>?v=<?php echo time(); ?>" alt="" class="section-icon">
                     集团架构
                     <span class="section-arrow">⮞</span>
                 </div>
@@ -508,7 +508,7 @@ endif; ?>
         <?php if ($canSeeAnalytics): ?>
             <div class="informationmenu-section">
                 <div class="informationmenu-section-title" data-target="analytics-items">
-                    <img src="../images/images/运营分析与报表.svg?v=<?php echo time(); ?>" alt="" class="section-icon">
+                    <img src="<?php echo static_url('images/images/运营分析与报表.svg'); ?>?v=<?php echo time(); ?>" alt="" class="section-icon">
                     营收数据
                     <span class="section-arrow">⮞</span>
                 </div>
@@ -537,7 +537,7 @@ endif; ?>
         <?php if ($canSeeHR): ?>
             <div class="informationmenu-section">
                 <div class="informationmenu-section-title" data-target="hr-items">
-                    <img src="../images/images/人事与资源管理.svg?v=<?php echo time(); ?>" alt="" class="section-icon">
+                    <img src="<?php echo static_url('images/images/人事与资源管理.svg'); ?>?v=<?php echo time(); ?>" alt="" class="section-icon">
                     人事管理
                 </div>
                 <div class="dropdown-menu-items" id="hr-items">
@@ -593,7 +593,7 @@ endif; ?>
         <?php if ($canSeeResource): ?>
             <div class="informationmenu-section">
                 <div class="informationmenu-section-title" data-target="resource-items">
-                    <img src="../images/images/资源库管理.svg?v=<?php echo time(); ?>" alt="" class="section-icon">
+                    <img src="<?php echo static_url('images/images/资源库管理.svg'); ?>?v=<?php echo time(); ?>" alt="" class="section-icon">
                     资源总库
                     <span class="section-arrow">⮞</span>
                 </div>
@@ -631,7 +631,7 @@ endif; ?>
         <?php if ($canSeeVisual): ?>
             <div class="informationmenu-section">
                 <div class="informationmenu-section-title" data-target="photoupload-items">
-                    <img src="../images/images/网页照片上传.svg?v=<?php echo time(); ?>" alt="" class="section-icon">
+                    <img src="<?php echo static_url('images/images/网页照片上传.svg'); ?>?v=<?php echo time(); ?>" alt="" class="section-icon">
                     视觉管理
                     <span class="section-arrow">⮞</span>
                 </div>

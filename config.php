@@ -62,6 +62,26 @@ if (!function_exists('is_production_host')) {
     }
 }
 
+if (!function_exists('static_url')) {
+    /** Asset URL; on localhost falls back to production when file is missing locally. */
+    function static_url(string $path = ''): string
+    {
+        $path = ltrim($path, '/');
+        $url = app_url($path);
+
+        if (is_production_host() || $path === '') {
+            return $url;
+        }
+
+        $localFile = __DIR__ . '/' . str_replace('/', DIRECTORY_SEPARATOR, $path);
+        if (!is_file($localFile)) {
+            return 'https://kunzzgroup.com/' . $path;
+        }
+
+        return $url;
+    }
+}
+
 if (!function_exists('get_mysqli_connection')) {
     function get_mysqli_connection(): mysqli
     {
