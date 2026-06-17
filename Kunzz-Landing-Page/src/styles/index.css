@@ -1146,6 +1146,7 @@ body::-webkit-scrollbar {
 
 @media (max-width: 960px) {
     .comprofile-section {
+        padding-top: clamp(20px, 40px, 60px);
         width: 100%;
         max-width: 100%;
         flex-wrap: wrap;
