@@ -12,7 +12,7 @@ if (!$isProduction && file_exists(__DIR__ . '/config.local.php')) {
     $dbpass = 'Kunzz1688';
 } else {
     // Local: use the same database name as production (import dump in phpMyAdmin).
-    $dbname = 'u690174784_kunzz';
+    $dbname = 'kunzz';
     $dbuser = 'root';
     $dbpass = '';
 }
