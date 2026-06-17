@@ -9,7 +9,9 @@ if (!headers_sent()) {
 // 包含全局防 XSS 脚本 (包括安全响应头设置与输入过滤)
 require_once __DIR__ . '/xss_protect.php';
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // 超时时间（秒） - 增加到 1 小时以避免频繁退出
 define('SESSION_TIMEOUT', 3600);
