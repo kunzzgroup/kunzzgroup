@@ -795,7 +795,8 @@ body::-webkit-scrollbar {
 .timeline-text .year-badge {
   display: inline-block;
   background: linear-gradient(135deg, #ff6b35, #f7931e);
-  color: white;
+  color: #ffffff;
+  -webkit-text-fill-color: #ffffff;
   padding: clamp(5px, 0.45vw, 8px) clamp(10px, 0.9vw, 16px);
   border-radius: 20px;
   font-weight: 700;
@@ -803,6 +804,9 @@ body::-webkit-scrollbar {
   margin-bottom: 4px;
   box-shadow: 0 4px 12px rgba(255, 107, 53, 0.25);
   letter-spacing: 0.5px;
+  line-height: 1.3;
+  opacity: 1;
+  visibility: visible;
 }
 
 /* ===== Timeline Month Sidebar ===== */
@@ -1849,6 +1853,11 @@ img.image-3d-rotate:hover,
     font-size: clamp(0.78rem, 2.9vw, 0.9rem) !important;
     display: inline-block !important;
     visibility: visible !important;
+    opacity: 1 !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    background: linear-gradient(135deg, #ff6b35, #f7931e) !important;
+    margin-bottom: 8px !important;
   }
 
   .timeline-cards-wrapper {
