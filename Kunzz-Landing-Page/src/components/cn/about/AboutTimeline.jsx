@@ -19,7 +19,8 @@ const COPY = {
     formatYearBadge: (year, month) => {
       const y = String(year ?? '').trim();
       if (!y) return '';
-      return `${y}年${month ? ` · ${month}月` : ''}`;
+      if (!month) return `${y}年`;
+      return `${y} · ${month}月`;
     },
     formatImageAlt: (year) => `${year}年发展`,
   },
@@ -54,8 +55,8 @@ function resolveTimelineYear(item, index, years) {
   return '';
 }
 
-function formatTimelineYearBadge(copy, year, month, isMobile) {
-  const badgeMonth = isMobile ? 0 : month;
+function formatTimelineYearBadge(copy, year, month) {
+  const badgeMonth = month > 0 ? month : 0;
   const label = copy.formatYearBadge(year, badgeMonth);
   if (label) return label;
   return year;
@@ -310,7 +311,7 @@ export default function AboutTimeline({ lang = 'zh' }) {
             {items.map((item, index) => {
               const year = resolveTimelineYear(item, index, years);
               const month = Number(item.month) || 0;
-              const badgeLabel = year ? formatTimelineYearBadge(copy, year, month, isMobile) : '';
+              const badgeLabel = year ? formatTimelineYearBadge(copy, year, month) : '';
               return (
                 <div
                   key={`content-${year}-${month}-${index}`}
