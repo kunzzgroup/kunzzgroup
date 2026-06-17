@@ -3525,15 +3525,20 @@ function scrollToNewRows() {
     });
 }
 
-// 聚焦最后一行新增记录的货品输入框（会触发下拉选择栏）
+// 聚焦 combobox 输入框但不自动展开下拉（用于创建新行后的自动聚焦）
+function focusComboboxWithoutDropdown(input) {
+    if (!input || input.disabled || input.classList.contains('disabled')) return;
+    input._suppressDropdownOnFocus = true;
+    input.focus({ preventScroll: true });
+}
+
+// 聚焦最后一行新增记录的货品输入框（不自动展开下拉）
 function focusLastNewRowProduct() {
     const newRow = document.querySelector('#stock-tbody .new-row:last-of-type');
     if (!newRow) return;
 
     const productInput = newRow.querySelector('.combobox-input[data-type="product"]');
-    if (!productInput || productInput.disabled) return;
-
-    productInput.focus({ preventScroll: true });
+    focusComboboxWithoutDropdown(productInput);
 }
 
 // 创建多行后统一聚焦（等表格渲染与滚动完成）
@@ -3625,9 +3630,7 @@ function addNewRowWithDate(selectedDate, remarkValue = '', options = {}) {
 
         if (autoFocus) {
             const productInput = document.getElementById(`${rowId}-product_name-input`);
-            if (productInput) {
-                productInput.focus({ preventScroll: true });
-            }
+            focusComboboxWithoutDropdown(productInput);
         }
 
         updateBatchSaveButtonVisibility();
@@ -6111,7 +6114,13 @@ function bindComboboxEvents() {
         // 只有在没有绑定过的情况下才绑定事件
         if (!input._eventsbound) {
             // 创建事件处理器
-            const focusHandler = () => showComboboxDropdown(input);
+            const focusHandler = () => {
+                if (input._suppressDropdownOnFocus) {
+                    input._suppressDropdownOnFocus = false;
+                    return;
+                }
+                showComboboxDropdown(input);
+            };
             const inputHandler = () => filterComboboxOptions(input);
             const keydownHandler = (e) => {
                 // 允许输入英文、数字、空格和常用符号
