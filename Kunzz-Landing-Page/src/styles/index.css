@@ -1118,7 +1118,7 @@ body::-webkit-scrollbar {
     }
 
     .culture-card {
-        height: clamp(110px, 38vw, 160px);
+        height: clamp(110px, 34.5vw, 160px);
     }
 }
 
