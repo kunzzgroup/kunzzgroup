@@ -75,6 +75,7 @@
 
   .vertical-swiper-shell:has(.join-swiper) .swiper-slide.swiper-slide--joinus-contact-only,
   .vertical-swiper-shell:has(.join-swiper) .swiper-slide.swiper-slide--joinus-feedback-only {
+    --join-slide-bottom: 0px;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
@@ -468,7 +469,7 @@
     width: 100%;
     max-width: 100%;
     height: clamp(210px, 36vh, 270px) !important;
-    min-height: unset !important;
+    min-height: 280px !important;
     max-height: clamp(210px, 36vh, 270px) !important;
     aspect-ratio: unset;
     overflow: hidden !important;
