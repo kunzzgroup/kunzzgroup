@@ -735,7 +735,7 @@ body::-webkit-scrollbar {
 
 .culture-button {
     background-color: white;
-    width: clamp(60px, 5.73vw, 117px);
+    width: clamp(60px, 6.83vw, 140px);
     height: clamp(14px, 1.56vw, 30px);
     padding: clamp(4px, 0.7vw, 8px) clamp(12px, 1.4vw, 18px);
     display: flex; /* ✅ 改成 flex */
