@@ -32,7 +32,7 @@ export default function AboutValues() {
         </h2>
         <p className="values-description values-scale-fade delay-4">
           Our core values run through every effort and every collaboration within our team. 
-          They uniteus in culture, keep us grounded in challenges, and maintain our original
+          They unite us in culture, keep us grounded in challenges, and maintain our original
           intention throughout our growth.
         </p>
       </AnimateOnScroll>

@@ -9,8 +9,6 @@ if (!headers_sent()) {
 }
 ?>
 <?php
-session_start();
-
 // 超时时间（秒）
 define('SESSION_TIMEOUT', 300); // 未勾选「记住我」时 5 分钟无活动则登出
 

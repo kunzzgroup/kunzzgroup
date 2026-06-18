@@ -57,11 +57,11 @@ export default function HomeHero() {
         </h1>
         <div className="decor-line scale-fade-in" />
         <p className="scale-fade-in">
-          We build comfortable atmospheres with attention to detail, nurturing passion and focus within a positive culture.
+          We build a comfortable atmospheres with details and nourish every passion and dedication in a positive culture.
           <br />
           We believe that efficiency comes from trust and innovation comes from freedom. A team with warmth,
           <br />
-          can create sustained value and steadily forward in the direction of industry benchmarks.
+          can create sustained value and move steadily forward in the direction of the industry benchmarks.
         </p>
       </div>
     </section>

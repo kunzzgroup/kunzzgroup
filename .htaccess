@@ -30,10 +30,19 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^images/images/(.+)$ https://kunzzgroup.com/images/images/$1 [R=302,L]
 
-    RewriteCond %{DOCUMENT_ROOT}/kunzzgroup-main/Kunzz-Landing-Page/dist/images/$1 -f
+    # React dist images (production: DOCUMENT_ROOT = site root)
+    RewriteCond %{DOCUMENT_ROOT}/Kunzz-Landing-Page/dist/images/$1 -f
     RewriteRule ^images/(.+)$ Kunzz-Landing-Page/dist/images/$1 [L]
 
-    RewriteCond %{DOCUMENT_ROOT}/kunzzgroup-main/images/images/$1 -f
+    # React dist images (local XAMPP: site under htdocs/kunzzgroup/)
+    RewriteCond %{DOCUMENT_ROOT}/kunzzgroup/Kunzz-Landing-Page/dist/images/$1 -f
+    RewriteRule ^images/(.+)$ Kunzz-Landing-Page/dist/images/$1 [L]
+
+    # Legacy images folder
+    RewriteCond %{DOCUMENT_ROOT}/images/images/$1 -f
+    RewriteRule ^images/(.+)$ images/images/$1 [L]
+
+    RewriteCond %{DOCUMENT_ROOT}/kunzzgroup/images/images/$1 -f
     RewriteRule ^images/(.+)$ images/images/$1 [L]
 
     RewriteRule ^$ Kunzz-Landing-Page/dist/index.html [L]

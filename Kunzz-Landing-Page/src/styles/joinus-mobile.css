@@ -75,6 +75,7 @@
 
   .vertical-swiper-shell:has(.join-swiper) .swiper-slide.swiper-slide--joinus-contact-only,
   .vertical-swiper-shell:has(.join-swiper) .swiper-slide.swiper-slide--joinus-feedback-only {
+    --join-slide-bottom: 0px;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
@@ -166,6 +167,7 @@
 
   /* ── Benefits-only slide ── */
   .benefits-wrapper--full-slide {
+    --join-slide-bottom: 26px;
     background: url('/images/背景3.webp') no-repeat center center/cover;
     display: flex;
     flex-direction: column;
@@ -220,13 +222,13 @@
 
   .benefits-wrapper--full-slide .benefit-item img,
   .benefits-wrapper .benefit-item img {
-    width: clamp(36px, 12vw, 56px);
+    width: clamp(80px, 12vw, 56px);
     margin-bottom: 6px;
   }
 
   .benefits-wrapper--full-slide .benefit-item p,
   .benefits-wrapper .benefit-item p {
-    font-size: clamp(10px, 3vw, 13px);
+    font-size: clamp(13px, 3vw, 23px);
     line-height: 1.3;
     margin-bottom: 0;
   }
@@ -468,7 +470,7 @@
     width: 100%;
     max-width: 100%;
     height: clamp(210px, 36vh, 270px) !important;
-    min-height: unset !important;
+    min-height: 280px !important;
     max-height: clamp(210px, 36vh, 270px) !important;
     aspect-ratio: unset;
     overflow: hidden !important;
