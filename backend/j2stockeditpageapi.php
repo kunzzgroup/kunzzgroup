@@ -856,6 +856,41 @@ function handlePut()
     }
 
     try {
+        $pdo->beginTransaction();
+
+        $existingStmt = $pdo->prepare("SELECT * FROM j2stockedit_data WHERE id = ? AND deleted_at IS NULL");
+        $existingStmt->execute([$data['id']]);
+        $originalRecord = $existingStmt->fetch(PDO::FETCH_ASSOC);
+        if (!$originalRecord) {
+            $pdo->rollBack();
+            sendResponse(false, "记录不存在");
+        }
+
+        // 出库时校验库存（与新增一致；编辑时加回本条记录原出库量）
+        if ($outQty > 0) {
+            $stockSql = "SELECT 
+                            (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) - 
+                            COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) as available_stock
+                        FROM j2stockedit_data 
+                        WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) 
+                        AND CAST(price AS DECIMAL(15,6)) = CAST(? AS DECIMAL(15,6)) AND deleted_at IS NULL";
+            $stockStmt = $pdo->prepare($stockSql);
+            $stockStmt->execute([$data['product_name'], $data['product_name'], $data['price'] ?? 0]);
+            $stockRow = $stockStmt->fetch(PDO::FETCH_ASSOC);
+            $availableStock = floatval($stockRow['available_stock'] ?? 0);
+
+            $sameProduct = trim($originalRecord['product_name'] ?? '') === trim($data['product_name'] ?? '');
+            $samePrice = abs(floatval($originalRecord['price'] ?? 0) - floatval($data['price'] ?? 0)) < 0.000001;
+            if ($sameProduct && $samePrice) {
+                $availableStock += floatval($originalRecord['out_quantity'] ?? 0);
+            }
+
+            if ($outQty > $availableStock) {
+                $pdo->rollBack();
+                sendResponse(false, "产品 [{$data['product_name']}] (价格 RM" . ($data['price'] ?? 0) . ") 库存不足！可用库存: {$availableStock}，请求出库: {$outQty}");
+            }
+        }
+
         // 将 Drinks 转换为 Service Line
         $type = $data['type'] ?? null;
         if ($type === 'Drinks' || strtolower($type) === 'drinks') {
@@ -870,7 +905,7 @@ function handlePut()
 
         $stmt = $pdo->prepare($sql);
 
-        $result = $stmt->execute([
+        $stmt->execute([
             $data['date'],
             $data['time'],
             $data['product_name'],
@@ -886,26 +921,17 @@ function handlePut()
             $data['id']
         ]);
 
-        // 检查记录是否存在
-        $checkStmt = $pdo->prepare("SELECT * FROM j2stockedit_data WHERE id = ? AND deleted_at IS NULL");
-        $checkStmt->execute([$data['id']]);
-        $existingRecord = $checkStmt->fetch(PDO::FETCH_ASSOC);
+        $stmt = $pdo->prepare("SELECT * FROM j2stockedit_data WHERE id = ? AND deleted_at IS NULL");
+        $stmt->execute([$data['id']]);
+        $updatedRecord = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($existingRecord) {
-            // 记录存在，获取更新后的记录
-            $stmt = $pdo->prepare("SELECT * FROM j2stockedit_data WHERE id = ? AND deleted_at IS NULL");
-            $stmt->execute([$data['id']]);
-            $updatedRecord = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            // 将 created_by 从 username 解析为 nickname（与 GET list 保持一致）
+        if ($updatedRecord) {
             $resolved = resolveCreatedByNicknames($pdo, [$updatedRecord]);
             $updatedRecord = $resolved[0];
 
-            // 当前 system=j2页面，收货单位始终是 j2
-            $targetSystem = 'j2'; // 强制锁定
+            $targetSystem = 'j2';
 
             if (strtolower($targetSystem) === 'central') {
-                // 更新对应的stockinout_data记录 - 通过匹配字段找到对应记录
                 $centralUpdateSql = "UPDATE stockinout_data 
                                     SET date = ?, time = ?, product_name = ?, 
                                         in_quantity = ?, out_quantity = ?, 
@@ -918,39 +944,39 @@ function handlePut()
                     $data['date'],
                     $data['time'],
                     $data['product_name'],
-                    floatval($data['out_quantity'] ?? 0), // J1的出库数量作为Central的入库数量
-                    0, // Central的出库数量设为0
+                    floatval($data['out_quantity'] ?? 0),
+                    0,
                     $data['specification'] ?? null,
                     floatval($data['price'] ?? 0),
                     $data['code_number'] ?? null,
                     $data['remark'] ?? null,
                     $data['receiver'] ?? null,
-                    $existingRecord['product_name'], // WHERE 条件
-                    $existingRecord['date'], // WHERE 条件  
-                    $existingRecord['receiver'] // WHERE 条件
+                    $originalRecord['product_name'],
+                    $originalRecord['date'],
+                    $originalRecord['receiver']
                 ]);
 
                 if ($centralResult && $centralStmt->rowCount() > 0) {
                     error_log("已同步更新Central表记录");
-                }
-                else {
+                } else {
                     error_log("未找到对应的Central表记录进行更新");
                 }
-
-                error_log("已同步更新Central表记录");
-            }
-            elseif ($targetSystem === 'j2') {
+            } elseif ($targetSystem === 'j2') {
                 error_log("J2记录更新：仅更新J2编辑表");
             }
 
+            $pdo->commit();
             sendResponse(true, "进出库记录更新成功", $updatedRecord);
         }
-        else {
-            sendResponse(false, "记录不存在");
-        }
+
+        $pdo->rollBack();
+        sendResponse(false, "记录不存在");
 
     }
     catch (PDOException $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
         sendResponse(false, "更新记录失败：" . $e->getMessage());
     }
 }
