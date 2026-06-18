@@ -2,12 +2,12 @@ import { useJoinSlideAnimation } from '../../../hooks/useJoinSlideAnimation.js';
 import { mediaUrl } from '../../../utils/media.js';
 
 const benefits = [
-  { icon: '/images/带薪假期.webp', label: 'Annual Leave' },
-  { icon: '/images/旅游奖励.webp', label: 'Travel Incentive' },
-  { icon: '/images/汽车奖励.webp', label: 'Car Allowance' },
-  { icon: '/images/房子奖励.webp', label: 'Housing Allowance' },
-  { icon: '/images/年度绩效奖励.webp', label: 'Annual Bonus' },
-  { icon: '/images/专业培训与学习机会.webp', label: 'Training & Learning' },
+  { icon: '/images/带薪假期.webp', label: 'Annual Leave', alt:'Annual Leave' },
+  { icon: '/images/旅游奖励.webp', label: 'Travel Incentive', alt:'Travel Incentive' },
+  { icon: '/images/汽车奖励.webp', label: 'Car Allowance', alt:'Car Allowance'},
+  { icon: '/images/房子奖励.webp', label: 'Housing Allowance', alt:'Housing Allowance' },
+  { icon: '/images/年度绩效奖励.webp', label: 'Annual Bonus', alt:'Annual Bonus'},
+  { icon: '/images/专业培训与学习机会.webp', label: 'Training & Learning', alt:'Traning & Learning'},
 ];
 
 function BenefitsGrid() {
