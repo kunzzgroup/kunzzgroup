@@ -208,23 +208,23 @@ window.addEventListener('keydown', function (e) {
         }
     }
 
-    // A4. 新增一行 (Ctrl+A)
+    // A4. 新增一行 (Ctrl+A) — 表格内可连续按，不抢焦点
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.code === 'KeyA' || e.key === 'a' || e.key === 'A')) {
         const activeElement = document.activeElement;
-        const isInput = activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.isContentEditable);
-        if (!isInput) {
+        const inBlockedArea = isShortcutBlockedInput(activeElement);
+        const inStockTable = !!activeElement?.closest('#stock-tbody');
+        const isInput = activeElement && (
+            activeElement.tagName === 'INPUT' ||
+            activeElement.tagName === 'TEXTAREA' ||
+            activeElement.tagName === 'SELECT' ||
+            activeElement.isContentEditable
+        );
+
+        if (!inBlockedArea && (!isInput || inStockTable)) {
             e.preventDefault();
-            console.log('StockEdit Shortcut: CTRL+A triggered (Add New Row)');
-            const now = new Date();
-            const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-            if (typeof addNewRowWithDate === 'function') {
-                addNewRowWithDate(today, '');
-                setTimeout(() => {
-                    const tableContainer = document.querySelector('.table-scroll-container');
-                    if (tableContainer) {
-                        tableContainer.scrollTop = tableContainer.scrollHeight;
-                    }
-                }, 100);
+            e.stopPropagation();
+            if (typeof appendNewStockRow === 'function') {
+                appendNewStockRow({ focus: false, scrollToLast: true });
             }
             return;
         }
@@ -2897,47 +2897,52 @@ function resetFilters() {
     loadStockData();
 }
 
-// 保存新创建的行
+// 保存新创建的行（从 DOM 移除，避免 renderStockTable 与 restoreNewRows 重复追加）
 function saveNewRows() {
-    return Array.from(document.querySelectorAll('.new-row')).map(row => ({
-        element: row.cloneNode(true),
-        parent: row.parentNode
-    }));
+    return Array.from(document.querySelectorAll('#stock-tbody .new-row'))
+        .filter(row => getNewRowSystem(row) === currentStockType)
+        .map(row => {
+            const saved = { element: row, parent: row.parentNode };
+            row.remove();
+            return saved;
+        });
 }
 
 // 恢复新创建的行
 function restoreNewRows(newRows) {
-    if (newRows && newRows.length > 0) {
-        setTimeout(() => {
-            const tbody = document.getElementById('stock-tbody');
-            newRows.forEach(({ element }, index) => {
-                // 添加淡入动画
-                element.style.opacity = '0';
-                element.style.transform = 'translateY(-10px)';
-                element.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    if (!newRows || newRows.length === 0) return;
 
-                tbody.appendChild(element);
+    setTimeout(() => {
+        const tbody = document.getElementById('stock-tbody');
+        if (!tbody) return;
 
-                // 延迟显示，创建错落有致的效果
+        newRows.forEach(({ element }, index) => {
+            if (!element || element.isConnected) return;
+
+            // 添加淡入动画
+            element.style.opacity = '0';
+            element.style.transform = 'translateY(-10px)';
+            element.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+
+            tbody.appendChild(element);
+
+            // 延迟显示，创建错落有致的效果
+            setTimeout(() => {
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0)';
+
+                // 动画完成后清理样式
                 setTimeout(() => {
-                    element.style.opacity = '1';
-                    element.style.transform = 'translateY(0)';
+                    element.style.transition = '';
+                    element.style.transform = '';
+                }, 300);
+            }, index * 30);
+        });
 
-                    // 动画完成后清理样式
-                    setTimeout(() => {
-                        element.style.transition = '';
-                        element.style.transform = '';
-                    }, 300);
-                }, index * 30); // 每行延迟30ms，减少等待时间
-            });
-
-            // 重新绑定 combobox 事件
-            bindComboboxEvents();
-
-            // 更新批量保存按钮的可见性
-            updateBatchSaveButtonVisibility();
-        }, 50); // 减少初始延迟
-    }
+        bindComboboxEvents();
+        updateBatchSaveButtonVisibility();
+        syncPendingNewRowsCache(currentStockType);
+    }, 50);
 }
 
 // 保存所有正在编辑的行的输入值
@@ -3494,22 +3499,26 @@ function createMultipleRows() {
 
     // 创建指定数量的行
     for (let i = 0; i < rowsCount; i++) {
-        addNewRowWithDate(selectedDate, remarkValue);
+        addNewRowWithDate(selectedDate, remarkValue, { autoFocus: false });
     }
 
     syncPendingNewRowsCache(currentStockType);
 
     // 有未保存行时切换为完整渲染，避免虚拟滚动与新增行冲突
     renderStockTable(true);
-    scrollToNewRows();
+    scrollToNewRows(true);
+    focusNewRowProductAfterRender({ focus: rowsCount === 1 });
 
     showAlert(`成功创建 ${rowsCount} 行记录`, 'success');
 }
 
-function scrollToNewRows() {
+function scrollToNewRows(scrollToFirst = false) {
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-            const newRow = document.querySelector('#stock-tbody .new-row:last-of-type');
+            const selector = scrollToFirst
+                ? '#stock-tbody .new-row:first-of-type'
+                : '#stock-tbody .new-row:last-of-type';
+            const newRow = document.querySelector(selector);
             if (newRow) {
                 newRow.scrollIntoView({ block: 'nearest', behavior: 'auto' });
                 return;
@@ -3522,8 +3531,61 @@ function scrollToNewRows() {
     });
 }
 
+// 弹窗/表单内保留 Ctrl+A 全选，不触发新增行
+function isShortcutBlockedInput(element) {
+    if (!element) return false;
+    if (element.closest('#date-rows-modal.show')) return true;
+    if (element.closest('#add-form.show')) return true;
+    if (element.closest('#export-modal')?.style.display === 'block') return true;
+    return false;
+}
+
+// 快速追加一行（Ctrl+A / 程序化调用）
+function appendNewStockRow({ focus = false, scrollToLast = false, scrollToFirst = false } = {}) {
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    addNewRowWithDate(today, '', { autoFocus: false });
+    syncPendingNewRowsCache(currentStockType);
+    renderStockTable(true);
+    scrollToNewRows(scrollToLast ? false : scrollToFirst);
+    if (focus) {
+        focusNewRowProductAfterRender({ focus: true });
+    } else {
+        updateBatchSaveButtonVisibility();
+    }
+}
+
+// 聚焦 combobox 输入框但不自动展开下拉（用于创建新行后的自动聚焦）
+function focusComboboxWithoutDropdown(input) {
+    if (!input || input.disabled || input.classList.contains('disabled')) return;
+    input._suppressDropdownOnFocus = true;
+    input.focus({ preventScroll: true });
+}
+
+// 聚焦第一行新增记录的货品输入框（不自动展开下拉）
+function focusFirstNewRowProduct() {
+    const newRow = document.querySelector('#stock-tbody .new-row:first-of-type');
+    if (!newRow) return;
+
+    const productInput = newRow.querySelector('.combobox-input[data-type="product"]');
+    focusComboboxWithoutDropdown(productInput);
+}
+
+// 创建新行后统一处理聚焦（仅单行创建时聚焦第一行）
+function focusNewRowProductAfterRender({ focus = true } = {}) {
+    if (!focus) return;
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            bindComboboxEvents();
+            focusFirstNewRowProduct();
+        });
+    });
+}
+
 // 添加新行到表格（带指定日期）
-function addNewRowWithDate(selectedDate, remarkValue = '') {
+function addNewRowWithDate(selectedDate, remarkValue = '', options = {}) {
+    const { autoFocus = true } = options;
     const tbody = document.getElementById('stock-tbody');
     const row = document.createElement('tr');
     row.className = 'new-row';
@@ -3598,25 +3660,18 @@ function addNewRowWithDate(selectedDate, remarkValue = '') {
     setTimeout(() => {
         bindComboboxEvents();
 
-        // 自动聚焦到货品名称输入框
-        const productInput = document.getElementById('new-product_name-input');
-        if (productInput) {
-            productInput.focus();
+        if (autoFocus) {
+            const productInput = document.getElementById(`${rowId}-product_name-input`);
+            focusComboboxWithoutDropdown(productInput);
         }
 
-        // 更新批量保存按钮的可见性
         updateBatchSaveButtonVisibility();
     }, 100);
 }
 
 // 添加新行到表格（使用今天的日期）
 function addNewRow() {
-    // 使用本地时间，避免UTC时差导致日期偏移
-    const now = new Date();
-    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    addNewRowWithDate(today);
-    renderStockTable(true);
-    scrollToNewRows();
+    appendNewStockRow({ focus: true, scrollToFirst: true });
 }
 
 // 自动填充supplier到receiver字段（只在有进货数量时）
@@ -4371,12 +4426,15 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
             syncPendingNewRowsCache(getNewRowSystem(row));
 
             if (!skipTableRefresh) {
-                // 保存其他新增行
-                const otherNewRows = Array.from(document.querySelectorAll('.new-row'));
-                const savedRows = otherNewRows.map(r => ({
-                    element: r.cloneNode(true),
-                    data: extractRowData(r)
-                }));
+                // 保存其他新增行（先从 DOM 移除，避免与 renderStockTable 重复）
+                const savedRows = Array.from(document.querySelectorAll('#stock-tbody .new-row'))
+                    .filter(r => getNewRowSystem(r) === currentStockType)
+                    .map(r => ({
+                        element: r,
+                        data: extractRowData(r)
+                    }));
+                savedRows.forEach(({ element }) => element.remove());
+                syncPendingNewRowsCache(currentStockType);
 
                 // 保存后以服务器和当前日期筛选为准，并滚动到刚保存的记录（新记录在列表末尾）
                 const savedRecordId = result.data && result.data.id;
@@ -4386,22 +4444,20 @@ async function saveNewRowRecord(buttonElement, skipTableRefresh = false) {
                 setTimeout(() => {
                     const tbody = document.getElementById('stock-tbody');
                     savedRows.forEach(({ element, data }) => {
+                        if (!element || element.isConnected) return;
                         tbody.appendChild(element);
-
-                        // 恢复行数据（特别是select元素的选中状态）
                         if (data) {
                             restoreRowData(element, data);
                         }
                     });
                     bindComboboxEvents();
 
-                    // 恢复未保存行后切换为完整渲染
                     if (savedRows.length > 0) {
                         renderStockTable(true);
                     }
 
-                    // 更新批量保存按钮的可见性
                     updateBatchSaveButtonVisibility();
+                    syncPendingNewRowsCache(currentStockType);
                 }, 100);
 
                 // 更新统计
@@ -5195,22 +5251,9 @@ function refreshData() {
 
 // 刷新数据但保留新增行
 function refreshDataKeepNewRows() {
-    // 保存所有新增行
-    const newRows = Array.from(document.querySelectorAll('.new-row')).map(row => ({
-        element: row.cloneNode(true),
-        parent: row.parentNode
-    }));
-
-    // 重新搜索数据（保持搜索状态）
+    const newRows = saveNewRows();
     searchData().then(() => {
-        // 恢复新增行到表格底部
-        const tbody = document.getElementById('stock-tbody');
-        newRows.forEach(({ element }) => {
-            tbody.appendChild(element);
-        });
-
-        // 重新绑定事件
-        setTimeout(bindComboboxEvents, 0);
+        restoreNewRows(newRows);
     });
 }
 
@@ -6097,7 +6140,13 @@ function bindComboboxEvents() {
         // 只有在没有绑定过的情况下才绑定事件
         if (!input._eventsbound) {
             // 创建事件处理器
-            const focusHandler = () => showComboboxDropdown(input);
+            const focusHandler = () => {
+                if (input._suppressDropdownOnFocus) {
+                    input._suppressDropdownOnFocus = false;
+                    return;
+                }
+                showComboboxDropdown(input);
+            };
             const inputHandler = () => filterComboboxOptions(input);
             const keydownHandler = (e) => {
                 // 允许输入英文、数字、空格和常用符号
