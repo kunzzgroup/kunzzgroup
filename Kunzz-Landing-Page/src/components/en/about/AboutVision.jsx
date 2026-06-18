@@ -4,7 +4,7 @@ export default function AboutVision() {
   return (
     <section id="vision" className="vision">
       <AnimateOnScroll className="vision-content vision-slide-down">
-        <h1>Our Beliefs and Vision</h1>
+        <h1>Our Beliefs & Direction</h1>
         <p>
           We believe every great achievement begins with a clear belief.
           <br />

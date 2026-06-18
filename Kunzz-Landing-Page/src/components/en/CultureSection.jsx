@@ -10,7 +10,7 @@ const cultures = [
   {
     title: 'Efficient',
     icon: '/images/高效执行 (1).webp',
-    desc: ['Say it, do it. Respond fast', 'Result-Driven & Action-Oriented'],
+    desc: ['Say it, do it. Respond fast,', 'Result-Driven & Action-Oriented'],
   },
   {
     title: 'Flexible',
