@@ -343,76 +343,6 @@ function saveToJ2EditTable($pdo, $data, $mainRecordId = null)
     }
 }
 
-/**
- * 中央出库必须明确指定目标系统（禁止空值默认落到 J1）
- *
- * @throws Exception
- */
-function resolveCentralOutboundTarget($targetSystem, $rowLabel = '')
-{
-    $target = strtolower(trim((string) ($targetSystem ?? '')));
-    $prefix = $rowLabel !== '' ? "{$rowLabel}：" : '';
-
-    if ($target === '') {
-        throw new Exception("{$prefix}出库时必须选择目标系统（J1、J2、J3 或 Central）");
-    }
-    if (!in_array($target, ['j1', 'j2', 'j3', 'central'], true)) {
-        throw new Exception("{$prefix}目标系统无效：{$targetSystem}");
-    }
-
-    return $target;
-}
-
-/**
- * 将中央出库同步到分店进出货表；失败时抛出异常供事务回滚
- *
- * @throws Exception
- */
-function syncCentralOutboundToBranch($pdo, $targetSystem, $data, $mainRecordId, $rowLabel = '')
-{
-    $target = resolveCentralOutboundTarget($targetSystem, $rowLabel);
-    $prefix = $rowLabel !== '' ? "{$rowLabel}：" : '';
-
-    if ($target === 'central') {
-        return $target;
-    }
-
-    if ($target === 'j1') {
-        $branchId = saveToJ1Table($pdo, $data, $mainRecordId);
-        if (!$branchId) {
-            throw new Exception("{$prefix}保存到J1表失败");
-        }
-        $editId = saveToJ1EditTable($pdo, $data, $mainRecordId);
-        if (!$editId) {
-            throw new Exception("{$prefix}保存到J1Edit表失败");
-        }
-        return $target;
-    }
-
-    if ($target === 'j2') {
-        $branchId = saveToJ2Table($pdo, $data, $mainRecordId);
-        if (!$branchId) {
-            throw new Exception("{$prefix}保存到J2表失败");
-        }
-        $editId = saveToJ2EditTable($pdo, $data, $mainRecordId);
-        if (!$editId) {
-            throw new Exception("{$prefix}保存到J2Edit表失败");
-        }
-        return $target;
-    }
-
-    $branchId = saveToJ3Table($pdo, $data, $mainRecordId);
-    if (!$branchId) {
-        throw new Exception("{$prefix}保存到J3表失败");
-    }
-    $editId = saveToJ3EditTable($pdo, $data, $mainRecordId);
-    if (!$editId) {
-        throw new Exception("{$prefix}保存到J3Edit表失败");
-    }
-
-    return $target;
-}
-
 function saveToJ3Table($pdo, $data, $mainRecordId = null)
 {
     try {
@@ -1614,13 +1544,61 @@ function handlePost()
 
         // 检查是否为出库记录（出库数量大于0）
         $outQuantity = floatval($data['out_quantity'] ?? 0);
-        $targetSystem = null;
+        // 位置1：POST 请求处理中的出库逻辑 (大约第180行附近)
         if ($outQuantity > 0) {
-            $targetSystem = syncCentralOutboundToBranch($pdo, $data['target_system'] ?? null, $data, $newId);
-            if ($targetSystem === 'central') {
+            $targetSystem = $data['target_system'] ?? 'j1'; // 默认j1
+
+            if ($targetSystem === 'j1') {
+                // 保存到J1表
+                $j1Id = saveToJ1Table($pdo, $data, $newId);
+                if (!$j1Id) {
+                    $pdo->rollBack();
+                    sendResponse(false, "保存到J1表失败，操作已回滚");
+                }
+
+                // 同时保存到J1Edit表
+                $j1EditId = saveToJ1EditTable($pdo, $data, $newId);
+                if (!$j1EditId) {
+                    $pdo->rollBack();
+                    sendResponse(false, "保存到J1Edit表失败，操作已回滚");
+                }
+
+                error_log("出库记录已保存到J1表，J1记录ID: " . $j1Id . "，J1Edit记录ID: " . $j1EditId);
+            } elseif ($targetSystem === 'j2') {
+                // 保存到J2表
+                $j2Id = saveToJ2Table($pdo, $data, $newId);
+                if (!$j2Id) {
+                    $pdo->rollBack();
+                    sendResponse(false, "保存到J2表失败，操作已回滚");
+                }
+
+                // 同时保存到J2Edit表
+                $j2EditId = saveToJ2EditTable($pdo, $data, $newId);
+                if (!$j2EditId) {
+                    $pdo->rollBack();
+                    sendResponse(false, "保存到J2Edit表失败，操作已回滚");
+                }
+
+                error_log("出库记录已保存到J2表，J2记录ID: " . $j2Id . "，J2Edit记录ID: " . $j2EditId);
+            } elseif ($targetSystem === 'j3') {
+                // 保存到J3表
+                $j3Id = saveToJ3Table($pdo, $data, $newId);
+                if (!$j3Id) {
+                    $pdo->rollBack();
+                    sendResponse(false, "保存到J3表失败，操作已回滚");
+                }
+
+                // 同时保存到J3Edit表
+                $j3EditId = saveToJ3EditTable($pdo, $data, $newId);
+                if (!$j3EditId) {
+                    $pdo->rollBack();
+                    sendResponse(false, "保存到J3Edit表失败，操作已回滚");
+                }
+
+                error_log("出库记录已保存到J3表，J3记录ID: " . $j3Id . "，J3Edit记录ID: " . $j3EditId);
+            } elseif ($targetSystem === 'central') {
+                // Central 选项：不保存到其他表，只保存在主表
                 error_log("出库记录仅保存在主表 (Central)");
-            } else {
-                error_log("出库记录已同步到分店表，目标系统: {$targetSystem}，主记录ID: {$newId}");
             }
         }
 
@@ -1816,10 +1794,23 @@ function handleBatchSave()
             $newId = $pdo->lastInsertId();
             $successCount++;
 
-            // 处理出库记录同步到子系统逻辑（失败则整批回滚）
+            // 处理出库记录同步到子系统逻辑
             $outQty = floatval($row['out_quantity'] ?? 0);
             if ($outQty > 0) {
-                syncCentralOutboundToBranch($pdo, $row['target_system'] ?? null, $row, $newId, "第 {$rowNum} 行");
+                $targetSystem = $row['target_system'] ?? 'j1';
+                // 使用单行数据进行同步
+                $syncData = $row;
+
+                if ($targetSystem === 'j1') {
+                    saveToJ1Table($pdo, $syncData, $newId);
+                    saveToJ1EditTable($pdo, $syncData, $newId);
+                } elseif ($targetSystem === 'j2') {
+                    saveToJ2Table($pdo, $syncData, $newId);
+                    saveToJ2EditTable($pdo, $syncData, $newId);
+                } elseif ($targetSystem === 'j3') {
+                    saveToJ3Table($pdo, $syncData, $newId);
+                    saveToJ3EditTable($pdo, $syncData, $newId);
+                }
             }
         }
 
