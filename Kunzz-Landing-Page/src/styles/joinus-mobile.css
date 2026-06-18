@@ -167,6 +167,7 @@
 
   /* ── Benefits-only slide ── */
   .benefits-wrapper--full-slide {
+    --join-slide-bottom: 26px;
     background: url('/images/背景3.webp') no-repeat center center/cover;
     display: flex;
     flex-direction: column;
@@ -221,13 +222,13 @@
 
   .benefits-wrapper--full-slide .benefit-item img,
   .benefits-wrapper .benefit-item img {
-    width: clamp(36px, 12vw, 56px);
+    width: clamp(80px, 12vw, 56px);
     margin-bottom: 6px;
   }
 
   .benefits-wrapper--full-slide .benefit-item p,
   .benefits-wrapper .benefit-item p {
-    font-size: clamp(10px, 3vw, 13px);
+    font-size: clamp(13px, 3vw, 23px);
     line-height: 1.3;
     margin-bottom: 0;
   }
