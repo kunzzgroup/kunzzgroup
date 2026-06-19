@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/permission_guard.php';
 require_once __DIR__ . '/heic_convert.php';
 requirePermission('visual');
@@ -14,7 +14,7 @@ session_start();
 
 // 检查是否已登录（根据你的登录系统调整）
 if (!isset($_SESSION['user_id'])) {
-    header("Location: /frontend/login.html");
+    header('Location: ' . app_url('frontend/login.html'));
     exit();
 }
 
@@ -97,11 +97,11 @@ if (file_exists('../media_config.json')) {
     <?php include 'sidebar.php'; ?>
     <div class="container">
         <div class="header">
-            <h1>首页媒体管理</h1>
+        <h1>首页媒体管理</h1>
         </div>
         
         <div class="breadcrumb">
-            <a href="dashboard.php">仪表板</a> > 
+        <a href="dashboard.php">仪表板</a> > 
             <a href="media_manager.php">媒体管理</a> > 
             <span>首页媒体</span>
         </div>
@@ -121,12 +121,12 @@ if (file_exists('../media_config.json')) {
                     <input type="hidden" name="media_type" value="home_background">
                     
                     <div class="form-group">
-                        <label>上传背景视频/图片</label>
-                        <div class="file-input" onclick="document.getElementById('home-page1-file').click()">
+                    <label>上传背景视频/图片</label>
+                    <div class="file-input" onclick="document.getElementById('home-page1-file').click()">
                             <input type="file" id="home-page1-file" name="media_file" accept="video/*,image/*">
                             <div class="file-input-text">
-                                点击选择文件或拖拽到此处<br>
-                                <small>支持 MP4, WebM, MOV, AVI, JPG, PNG, WebP 格式（HEIC 自动转换）(1920x1080)</small>
+                            点击选择文件或拖拽到此处<br>
+                            <small>支持 MP4, WebM, MOV, AVI, JPG, PNG, WebP 格式（HEIC 自动转换）(1920x1080)</small>
                             </div>
                         </div>
                         

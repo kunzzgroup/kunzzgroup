@@ -7,8 +7,11 @@ Header set Expires "0"
 RewriteEngine On
 
 # -----------------------------
-# 0. Redirect login.html to /frontend/login (safety net)
+# 0. Redirect login.html to frontend login (respect subdirectory deploy)
 # -----------------------------
+RewriteCond %{DOCUMENT_ROOT}/kunzzgroup/frontend/login.php -f
+RewriteRule ^login\.html$ /kunzzgroup/frontend/login [L,R=301]
+
 RewriteRule ^login\.html$ /frontend/login [L,R=301]
 
 # -----------------------------

@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../config.php';
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -19,7 +20,7 @@ if (isset($_SESSION['user_id'])) {
     ) {
         session_unset();
         session_destroy();
-        header('Location: /frontend/login.html');
+        header('Location: ' . app_url('frontend/login.html'));
         exit;
     }
     $_SESSION['last_activity'] = time();
@@ -31,7 +32,7 @@ if (isset($_SESSION['user_id'])) {
     $_SESSION['last_activity'] = time();
 } else {
     // 未登录 → 跳转登录页，登录后返回 hire
-    header('Location: /frontend/login.html?redirect=hire');
+    header('Location: ' . app_url('frontend/login.html') . '?redirect=hire');
     exit;
 }
 ?>

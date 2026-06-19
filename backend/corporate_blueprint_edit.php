@@ -13,7 +13,7 @@ session_start();
 
 // 检查是否已登录
 if (!isset($_SESSION['user_id'])) {
-    header("Location: /frontend/login.html");
+    header('Location: ' . app_url('frontend/login.html'));
     exit();
 }
 

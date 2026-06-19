@@ -20,13 +20,23 @@ function joinPath(base, path) {
 
 /** Base URL for PHP pages not yet migrated to React. */
 export function getPhpBase() {
+  if (typeof window !== 'undefined') {
+    const deployBase = getDeployBasePath();
+    if (deployBase) {
+      return `${deployBase}/frontend`;
+    }
+    if (import.meta.env.DEV) {
+      return 'http://localhost/kunzzgroup/frontend';
+    }
+  }
   if (import.meta.env.VITE_PHP_BASE) return import.meta.env.VITE_PHP_BASE;
-  if (import.meta.env.DEV) return 'http://localhost/kunzzgroup/frontend';
-  const deployBase = getDeployBasePath();
-  return deployBase ? `${deployBase}/frontend` : '/frontend';
+  return '/frontend';
 }
 
 export function getLoginUrl() {
+  if (typeof window !== 'undefined') {
+    return joinPath(getPhpBase(), 'login.html');
+  }
   if (import.meta.env.VITE_LOGIN_URL) return import.meta.env.VITE_LOGIN_URL;
   return joinPath(getPhpBase(), 'login.html');
 }

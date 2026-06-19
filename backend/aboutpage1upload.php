@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/permission_guard.php';
 require_once __DIR__ . '/heic_convert.php';
 requirePermission('visual');
@@ -14,7 +14,7 @@ session_start();
 
 // 检查是否已登录（根据你的登录系统调整）
 if (!isset($_SESSION['user_id'])) {
-    header("Location: /frontend/login.html");
+    header('Location: ' . app_url('frontend/login.html'));
     exit();
 }
 
@@ -131,15 +131,15 @@ if (file_exists('../media_config.json')) {
                         <div class="file-input" onclick="document.getElementById('about-page1-file').click()">
                             <input type="file" id="about-page1-file" name="media_file" accept="video/*,image/*">
                             <div class="file-input-text">
-                                点击选择文件或拖拽到此处<br>
-                                <small>支持 MP4, WebM, MOV, AVI, JPG, PNG, WebP 格式（HEIC 自动转换）(1920x600)</small>
+                            点击选择文件或拖拽到此处<br>
+                            <small>支持 MP4, WebM, MOV, AVI, JPG, PNG, WebP 格式（HEIC 自动转换）(1920x600)</small>
                             </div>
                         </div>
                         
                         <?php if (isset($config['about_background'])): ?>
                             <div class="current-file">
-                                <strong>当前文件:</strong> <?php echo basename($config['about_background']['file']); ?><br>
-                                <small>类型: <?php echo $config['about_background']['type']; ?> | 更新时间: <?php echo $config['about_background']['updated']; ?></small>
+                            <strong>当前文件:</strong> <?php echo basename($config['about_background']['file']); ?><br>
+                            <small>类型: <?php echo $config['about_background']['type']; ?> | 更新时间: <?php echo $config['about_background']['updated']; ?></small>
                                 
                                 <div class="preview-container">
                                     <?php if ($config['about_background']['type'] === 'video'): ?>

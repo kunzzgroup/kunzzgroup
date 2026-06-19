@@ -24,7 +24,7 @@ if (isset($_SESSION['user_id'])) {
         setcookie('username', '', time() - 60, "/");
         setcookie('position', '', time() - 60, "/");
         setcookie('remember_token', '', time() - 60, "/");
-        header("Location: /frontend/login.html");
+        header('Location: ' . app_url('frontend/login.html'));
         exit();
     }
     $_SESSION['last_activity'] = time();
@@ -40,7 +40,7 @@ if (isset($_SESSION['user_id'])) {
     $_SESSION['account_type'] = isset($_COOKIE['account_type']) ? $_COOKIE['account_type'] : null;
     $_SESSION['last_activity'] = time();
 } else {
-    header("Location: /frontend/login.html");
+    header('Location: ' . app_url('frontend/login.html'));
     exit();
 }
 ?>

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once __DIR__ . '/permission_guard.php';
 require_once __DIR__ . '/heic_convert.php';
 requirePermission('visual');
@@ -14,7 +14,7 @@ session_start();
 
 // 检查是否已登录
 if (!isset($_SESSION['user_id'])) {
-    header("Location: /frontend/login.html");
+    header('Location: ' . app_url('frontend/login.html'));
     exit();
 }
 
@@ -188,7 +188,7 @@ if (file_exists($configFile)) {
                             <input type="file" id="tokyo-img2-file" name="tokyo_about_image2" accept="image/*">
                             <div class="file-input-text">
                                 点击选择文件或拖拽到此处<br>
-                                <small>推荐尺寸: 800x1000 (或大图比例)</small>
+                            <small>推荐尺寸: 800x1000 (或大图比例)</small>
                             </div>
                         </div>
                         
