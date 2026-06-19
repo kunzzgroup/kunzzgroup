@@ -1816,7 +1816,7 @@ form select:focus {
 }
 
 .contact-info-bottom .contact-title {
-    font-size: clamp(20px, 1.6vw, 28px);
+    font-size: clamp(.95rem, 3.2vw, 1.15rem);
     margin-top: 2px;
 }
 
