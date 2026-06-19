@@ -194,7 +194,7 @@
 
   .benefits-wrapper--full-slide h2,
   .benefits-wrapper h2 {
-    font-size: clamp(18px, 5vw, 28px);
+    font-size: clamp(18px, 105vw, 41.3px);
     width: 100%;
     max-width: 420px;
     margin: 0 auto 12px;

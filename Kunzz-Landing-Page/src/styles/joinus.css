@@ -152,10 +152,12 @@ body::-webkit-scrollbar {
 }
 
 .benefits-wrapper h2 {
-    font-size: clamp(1.88rem, 2.08vw, 2.5rem);
+    font-size: clamp(3.38rem, 2.08vw, 2.5rem);
     margin-top: 8px;
     color: #333;
-    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
+    text-shadow:   1px 1px 0 rgba(255,255,255,.8),
+    2px 2px 0 rgba(0,0,0,.08),
+    4px 4px 10px rgba(0,0,0,.12);;
     font-weight: bold;
 }
 
