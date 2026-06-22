@@ -9,15 +9,22 @@ export default function ReportTypeSelector() {
 
   useEffect(() => {
     const handleClick = (event) => {
-      if (!rootRef.current?.contains(event.target)) setOpen(false);
+      if (!rootRef.current?.contains(event.target)) {
+        setOpen(false);
+      }
     };
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
   }, []);
 
+  const toggleDropdown = (event) => {
+    event.stopPropagation();
+    setOpen((value) => !value);
+  };
+
   return (
-    <div className="report-type-selector" ref={rootRef} onClick={() => setOpen((value) => !value)}>
-      <button type="button" className="report-type-btn">
+    <div className="report-type-selector" ref={rootRef}>
+      <button type="button" className="report-type-btn" onClick={toggleDropdown}>
         <i className="fas fa-chart-bar" />
         KPI 报表
         <i className="fas fa-chevron-down" />

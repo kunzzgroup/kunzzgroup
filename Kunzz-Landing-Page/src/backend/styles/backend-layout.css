@@ -1,3 +1,17 @@
+/* Landing-page index.css locks scroll for the swiper; backend pages must scroll normally. */
+html.backend-page,
+body.backend-page,
+#root.backend-page {
+  height: auto;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+#root.backend-page {
+  overflow: visible;
+}
+
 .calendar-day.empty {
   visibility: hidden;
 }

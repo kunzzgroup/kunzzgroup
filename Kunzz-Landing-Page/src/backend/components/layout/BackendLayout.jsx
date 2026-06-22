@@ -4,9 +4,23 @@ import { getBackendBase } from '../../../config.js';
 import PhpSidebar from './PhpSidebar.jsx';
 import '../../styles/backend-layout.css';
 
+function setBackendScrollMode(enabled) {
+  const root = document.getElementById('root');
+  const targets = [document.documentElement, document.body, root].filter(Boolean);
+
+  targets.forEach((node) => {
+    if (enabled) {
+      node.classList.add('backend-page');
+    } else {
+      node.classList.remove('backend-page');
+    }
+  });
+}
+
 export default function BackendLayout({ children, className = '' }) {
   useEffect(() => {
     document.body.classList.add('has-sidebar');
+    setBackendScrollMode(true);
 
     const backendBase = getBackendBase();
     const version = Date.now();
@@ -27,6 +41,7 @@ export default function BackendLayout({ children, className = '' }) {
 
     return () => {
       document.body.classList.remove('has-sidebar');
+      setBackendScrollMode(false);
       document.getElementById('backend-kpi-css')?.remove();
     };
   }, []);
