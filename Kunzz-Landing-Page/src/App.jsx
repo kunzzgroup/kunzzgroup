@@ -9,6 +9,7 @@ import JoinPage from './pages/JoinPage.jsx';
 import HomePage_en from './pages/HomePage_en.jsx';
 import AboutPage_en from './pages/AboutPage_en.jsx'
 import JoinPage_en from './pages/JoinPage_en.jsx';
+import CostDashboardPage from './backend/pages/CostDashboardPage.jsx';
 import KpiDashboardPage from './backend/pages/KpiDashboardPage.jsx';
 
 function AppRoutes() {
@@ -25,6 +26,7 @@ function AppRoutes() {
         <Route path="/About_en" element={<Navigate to="/about_en" replace />} />
         <Route path="/Join_en" element={<Navigate to="/join_en" replace />} />
         <Route path="/backend/kpi-v2" element={<KpiDashboardPage />} />
+        <Route path="/backend/cost-v2" element={<CostDashboardPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

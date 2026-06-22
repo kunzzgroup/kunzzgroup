@@ -26,7 +26,13 @@ export default defineConfig(({ mode }) => {
         '/backend': {
           target: 'http://localhost/kunzzgroup',
           changeOrigin: true,
-          bypass: (req) => (req.url?.startsWith('/backend/kpi-v2') ? '/index.html' : undefined),
+          bypass: (req) => {
+            const url = req.url || '';
+            if (url.startsWith('/backend/kpi-v2') || url.startsWith('/backend/cost-v2')) {
+              return '/index.html';
+            }
+            return undefined;
+          },
         },
         '/kunzzgroup/backend': {
           target: 'http://localhost',

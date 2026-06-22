@@ -17,19 +17,27 @@ function setBackendScrollMode(enabled) {
   });
 }
 
-export default function BackendLayout({ children, className = '' }) {
+export default function BackendLayout({
+  children,
+  className = '',
+  stylesheet = 'kpi.css',
+  bodyClassName = '',
+}) {
   useEffect(() => {
     document.body.classList.add('has-sidebar');
+    if (bodyClassName) {
+      document.body.classList.add(bodyClassName);
+    }
     setBackendScrollMode(true);
 
     const backendBase = getBackendBase();
     const version = Date.now();
 
-    const kpiStylesheet = document.createElement('link');
-    kpiStylesheet.rel = 'stylesheet';
-    kpiStylesheet.href = `${backendBase}/css/kpi.css?v=${version}`;
-    kpiStylesheet.id = 'backend-kpi-css';
-    document.head.appendChild(kpiStylesheet);
+    const pageStylesheet = document.createElement('link');
+    pageStylesheet.rel = 'stylesheet';
+    pageStylesheet.href = `${backendBase}/css/${stylesheet}?v=${version}`;
+    pageStylesheet.id = 'backend-page-css';
+    document.head.appendChild(pageStylesheet);
 
     const icons = document.createElement('link');
     icons.rel = 'stylesheet';
@@ -41,10 +49,13 @@ export default function BackendLayout({ children, className = '' }) {
 
     return () => {
       document.body.classList.remove('has-sidebar');
+      if (bodyClassName) {
+        document.body.classList.remove(bodyClassName);
+      }
       setBackendScrollMode(false);
-      document.getElementById('backend-kpi-css')?.remove();
+      document.getElementById('backend-page-css')?.remove();
     };
-  }, []);
+  }, [stylesheet, bodyClassName]);
 
   return (
     <>

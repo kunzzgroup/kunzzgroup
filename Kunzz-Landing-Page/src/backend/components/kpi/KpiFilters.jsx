@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { QUICK_RANGES } from '../../config/kpiConfig.js';
 import DateRangePicker from './DateRangePicker.jsx';
 import MonthPicker from './MonthPicker.jsx';
-import ReportTypeSelector from './ReportTypeSelector.jsx';
+import ReportTypeSelector from '../shared/ReportTypeSelector.jsx';
 import RestaurantSelector from './RestaurantSelector.jsx';
 
 export default function KpiFilters({
@@ -70,7 +70,7 @@ export default function KpiFilters({
             </div>
           </div>
 
-          <ReportTypeSelector />
+          <ReportTypeSelector active="kpi" />
 
           <RestaurantSelector label={restaurantLabel} onSelect={onRestaurantSelect} />
         </div>
