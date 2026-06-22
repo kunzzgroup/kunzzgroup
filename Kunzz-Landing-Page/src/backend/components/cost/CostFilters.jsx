@@ -53,7 +53,7 @@ export default function CostFilters({
                 onClick={() => setQuickOpen((v) => !v)}
               >
                 <i className="fas fa-calendar-alt" />
-                <span id="quick-select-text">时段</span>
+                <span id="quick-select-text">选择时间段</span>
                 <i className="fas fa-chevron-down" />
               </button>
               {quickOpen && (
