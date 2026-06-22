@@ -18,6 +18,8 @@
     RewriteRule ^api/get_jobs_api\.php$ get_jobs_api.php [L,QSA]
     RewriteRule ^api/timeline_api\.php$ api/timeline_api.php [L,QSA]
     RewriteRule ^api/comphotos_api\.php$ api/comphotos_api.php [L,QSA]
+    # React backend pages (parallel routes for migration comparison)
+    RewriteRule ^backend/kpi-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
     RewriteRule ^backend/ - [L]
     RewriteRule ^frontend/ - [L]
     RewriteRule ^(costapi|stockapi|kpiapi|check_permissions)\.php$ - [L]

@@ -1,0 +1,19 @@
+.calendar-day.empty {
+  visibility: hidden;
+}
+
+.calendar-day.in-range {
+  background: #fff7ed;
+}
+
+.calendar-day.selected {
+  background: #ff8c00;
+  color: #fff;
+}
+
+.calendar-day {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  min-height: 32px;
+}

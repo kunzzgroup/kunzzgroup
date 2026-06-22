@@ -1,11 +1,12 @@
 /** React routes served at site root (not a deploy folder name). */
-const ROOT_ROUTES = new Set(['Home_en', 'about', 'joinus']);
+const ROOT_ROUTES = new Set(['Home_en', 'about', 'joinus', 'about_en', 'join_en']);
 
 /** e.g. /kunzzgroup when the app is served from a subdirectory on Apache. */
-function getDeployBasePath() {
+export function getDeployBasePath() {
   if (typeof window === 'undefined') return '';
   const segments = window.location.pathname.split('/').filter(Boolean);
   if (segments.length === 0 || ROOT_ROUTES.has(segments[0])) return '';
+  if (segments[0] === 'backend') return '';
   return `/${segments[0]}`;
 }
 
@@ -49,3 +50,18 @@ export const LOGIN_URL = getLoginUrl();
 
 export const EN_SITE_URL =
   import.meta.env.VITE_EN_SITE_URL || '/Home_en';
+
+/** Base URL for PHP backend pages and assets (e.g. /kunzzgroup/backend). */
+export function getBackendBase() {
+  if (typeof window !== 'undefined') {
+    const deployBase = getDeployBasePath();
+    return deployBase ? `${deployBase}/backend` : '/backend';
+  }
+  if (import.meta.env.VITE_BACKEND_BASE) return import.meta.env.VITE_BACKEND_BASE;
+  return '/backend';
+}
+
+/** Full URL to a backend PHP API script. */
+export function getBackendApiUrl(scriptName) {
+  return joinPath(getBackendBase(), scriptName);
+}

@@ -6,6 +6,9 @@ Header set Expires "0"
 
 RewriteEngine On
 
+# React migration route (parallel to legacy PHP pages)
+RewriteRule ^kpi-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
+
 # -----------------------------
 # 0. Redirect login.html to frontend login (respect subdirectory deploy)
 # -----------------------------
