@@ -234,7 +234,9 @@ export function prepareComparisonSeries(allRestaurantsData, dateRange, dataType)
           const item = aggregated[restaurant].find((row) => row.date === monthKey);
           return item ? getChartValue(item, dataType) : 0;
         }),
+        rowMeta: months.map((monthKey) => aggregated[restaurant].find((row) => row.date === monthKey) || null),
       })),
+      isComparison: true,
     };
   }
 
@@ -248,7 +250,9 @@ export function prepareComparisonSeries(allRestaurantsData, dateRange, dataType)
         const item = converted[restaurant].find((row) => row.date === date);
         return item ? getChartValue(item, dataType) : 0;
       }),
+      rowMeta: dates.map((date) => converted[restaurant].find((row) => row.date === date) || null),
     })),
+    isComparison: true,
   };
 }
 
@@ -261,4 +265,46 @@ export function formatCurrency(value) {
 
 export function formatNumber(value) {
   return (value || 0).toLocaleString();
+}
+
+export function formatKpiAxisValue(dataType, value) {
+  switch (dataType) {
+    case 'netSales':
+      return `RM ${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    case 'tables':
+      return `${value}桌`;
+    case 'returningRate':
+      return `${Number(value).toFixed(2)}%`;
+    case 'diners':
+      return `${value}人`;
+    default:
+      return String(value);
+  }
+}
+
+export function formatKpiTooltipLabel(dataType, context, chartSeries) {
+  const value = context.parsed.y;
+  const label = context.dataset.label || '';
+
+  switch (dataType) {
+    case 'netSales':
+      return `${label}: RM ${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    case 'tables':
+      return `${label}: ${value}桌`;
+    case 'diners':
+      return `${label}: ${value}人`;
+    case 'returningRate': {
+      const rowMeta = context.dataset.rowMeta?.[context.dataIndex];
+      if (rowMeta) {
+        const percentage = Number(value).toFixed(2);
+        if (chartSeries?.isComparison) {
+          return `${label}: ${rowMeta.returningCustomers} (${percentage}%)`;
+        }
+        return `常客：${rowMeta.returningCustomers} (${percentage}%)`;
+      }
+      return `${label}: ${Number(value).toFixed(2)}%`;
+    }
+    default:
+      return `${label}: ${value}`;
+  }
 }

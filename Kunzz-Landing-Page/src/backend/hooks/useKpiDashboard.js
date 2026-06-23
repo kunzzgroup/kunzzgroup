@@ -93,8 +93,10 @@ export function useKpiDashboard() {
                 return item.netSales;
             }
           }),
+          rowMeta: aggregated,
         },
       ],
+      isComparison: false,
     };
   }, [restaurant, filteredData, dateRange, chartDataType, allRestaurantsData]);
 

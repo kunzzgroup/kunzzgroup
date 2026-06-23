@@ -9,17 +9,17 @@ function getCardValue(cardId, summary, hasRestaurant) {
 
   switch (cardId) {
     case 'totalSales':
-      return formatCurrency(summary.totalSales);
+      return `RM ${formatCurrency(summary.totalSales)}`;
     case 'netSales':
-      return formatCurrency(summary.netSales);
+      return `RM ${formatCurrency(summary.netSales)}`;
     case 'totalTables':
-      return formatNumber(summary.totalTables);
+      return `${formatNumber(summary.totalTables)}桌`;
     case 'totalDiners':
-      return formatNumber(summary.totalDiners);
+      return `${formatNumber(summary.totalDiners)}人`;
     case 'returningRate':
       return `${formatCurrency(summary.returningRate)}%`;
     case 'avgPerDiner':
-      return formatCurrency(summary.avgPerDiner);
+      return `RM ${formatCurrency(summary.avgPerDiner)}`;
     default:
       return PLACEHOLDER;
   }

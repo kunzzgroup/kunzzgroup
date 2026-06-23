@@ -11,6 +11,7 @@ import {
 import { Line } from 'react-chartjs-2';
 
 import { CHART_DATA_TYPES, RESTAURANT_COLORS } from '../../config/kpiConfig.js';
+import { formatKpiAxisValue, formatKpiTooltipLabel } from '../../utils/kpiCalculations.js';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend, Filler);
 
@@ -20,7 +21,7 @@ const DATASET_LABELS = {
   j3: { netSales: 'J3 净销售额', tables: 'J3 桌子数量', returningRate: 'J3 常客', diners: 'J3 人数' },
 };
 
-function buildDataset(restaurant, data, dataType, isMulti) {
+function buildDataset(restaurant, data, dataType, isMulti, rowMeta) {
   const colors = RESTAURANT_COLORS[restaurant] || RESTAURANT_COLORS.j1;
   const label = isMulti
     ? DATASET_LABELS[restaurant]?.[dataType] || restaurant.toUpperCase()
@@ -29,6 +30,7 @@ function buildDataset(restaurant, data, dataType, isMulti) {
   return {
     label,
     data,
+    rowMeta,
     borderColor: colors.primary,
     backgroundColor: colors.fill,
     fill: true,
@@ -56,8 +58,8 @@ export default function KpiChart({
 
   const chartData = {
     labels: chartSeries.labels,
-    datasets: chartSeries.datasets.map(({ restaurant, data }) =>
-      buildDataset(restaurant, data, chartDataType, isMulti),
+    datasets: chartSeries.datasets.map(({ restaurant, data, rowMeta }) =>
+      buildDataset(restaurant, data, chartDataType, isMulti, rowMeta),
     ),
   };
 
@@ -73,10 +75,21 @@ export default function KpiChart({
     },
     plugins: {
       legend: { display: isMulti },
-      tooltip: { mode: 'index', intersect: false },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+        callbacks: {
+          label: (context) => formatKpiTooltipLabel(chartDataType, context, chartSeries),
+        },
+      },
     },
     scales: {
-      y: { beginAtZero: true },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (value) => formatKpiAxisValue(chartDataType, value),
+        },
+      },
     },
   };
 
