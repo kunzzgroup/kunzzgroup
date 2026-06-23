@@ -22,6 +22,7 @@ export default function BackendLayout({
   className = '',
   stylesheet = 'kpi.css',
   bodyClassName = '',
+  extraStylesheets = [],
 }) {
   useEffect(() => {
     document.body.classList.add('has-sidebar');
@@ -33,11 +34,14 @@ export default function BackendLayout({
     const backendBase = getBackendBase();
     const version = Date.now();
 
-    const pageStylesheet = document.createElement('link');
-    pageStylesheet.rel = 'stylesheet';
-    pageStylesheet.href = `${backendBase}/css/${stylesheet}?v=${version}`;
-    pageStylesheet.id = 'backend-page-css';
-    document.head.appendChild(pageStylesheet);
+    const stylesheets = [stylesheet, ...extraStylesheets];
+    stylesheets.forEach((file, index) => {
+      const pageStylesheet = document.createElement('link');
+      pageStylesheet.rel = 'stylesheet';
+      pageStylesheet.href = `${backendBase}/css/${file}?v=${version}`;
+      pageStylesheet.id = `backend-page-css-${index}`;
+      document.head.appendChild(pageStylesheet);
+    });
 
     const icons = document.createElement('link');
     icons.rel = 'stylesheet';
@@ -53,9 +57,11 @@ export default function BackendLayout({
         document.body.classList.remove(bodyClassName);
       }
       setBackendScrollMode(false);
-      document.getElementById('backend-page-css')?.remove();
+      stylesheets.forEach((_, index) => {
+        document.getElementById(`backend-page-css-${index}`)?.remove();
+      });
     };
-  }, [stylesheet, bodyClassName]);
+  }, [stylesheet, bodyClassName, extraStylesheets.join(',')]);
 
   return (
     <>

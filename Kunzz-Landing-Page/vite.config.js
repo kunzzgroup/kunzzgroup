@@ -28,7 +28,11 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           bypass: (req) => {
             const url = req.url || '';
-            if (url.startsWith('/backend/kpi-v2') || url.startsWith('/backend/cost-v2')) {
+            if (
+              url.startsWith('/backend/kpi-v2') ||
+              url.startsWith('/backend/cost-v2') ||
+              url.startsWith('/backend/kpiedit-v2')
+            ) {
               return '/index.html';
             }
             return undefined;
