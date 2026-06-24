@@ -88,7 +88,8 @@ export async function saveCostRecord(record, isUpdate) {
 
 export async function saveCostRecordWithFallback(record, getExistingByDate) {
   if (record.id) {
-    return saveCostRecord(record, true);
+    const result = await saveCostRecord(record, true);
+    return { result, existing: null };
   }
 
   let result = await saveCostRecord(record, false);
