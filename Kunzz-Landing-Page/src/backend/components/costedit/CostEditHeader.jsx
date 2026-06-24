@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { getBackendBase } from '../../../config.js';
-import { REPORT_LABELS } from '../../config/kpiEditConfig.js';
+import { REPORT_LABELS } from '../../config/costEditConfig.js';
 
-export default function KpiEditHeader({ config, restaurant, onRestaurantChange }) {
+export default function CostEditHeader({ config, restaurant, onRestaurantChange }) {
   const [reportOpen, setReportOpen] = useState(false);
   const [numberOpen, setNumberOpen] = useState(false);
   const rootRef = useRef(null);
@@ -28,14 +28,14 @@ export default function KpiEditHeader({ config, restaurant, onRestaurantChange }
   return (
     <div className="header">
       <div>
-        <h1>TOKYO JAPANESE CUISINE 数据后台</h1>
+        <h1>TOKYO JAPANESE CUISINE 成本后台</h1>
       </div>
       <div className="controls" ref={rootRef}>
         {config.reportDropdownEnabled ? (
           <div className="report-type-selector">
             <button type="button" className="report-type-btn" onClick={() => setReportOpen((v) => !v)}>
-              <i className="fas fa-chart-bar" />
-              {REPORT_LABELS.kpi}
+              <i className="fas fa-chart-pie" />
+              {REPORT_LABELS.cost}
               <i className="fas fa-chevron-down" />
             </button>
             {reportOpen && (
@@ -56,8 +56,8 @@ export default function KpiEditHeader({ config, restaurant, onRestaurantChange }
         ) : (
           <div className="report-type-selector report-type-selector--disabled">
             <button type="button" className="report-type-btn" style={{ cursor: 'default' }}>
-              <i className="fas fa-chart-bar" />
-              {REPORT_LABELS.kpi}
+              <i className="fas fa-chart-pie" />
+              {REPORT_LABELS.cost}
             </button>
           </div>
         )}
