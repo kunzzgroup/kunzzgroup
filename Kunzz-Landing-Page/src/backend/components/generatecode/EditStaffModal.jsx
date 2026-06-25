@@ -106,6 +106,7 @@ export default function EditStaffModal({ staff, open, saving, onClose, onSave, o
 
   return (
     <div
+      id="editUserModal"
       className="modal"
       style={{ display: 'block' }}
       onClick={(event) => {
@@ -116,14 +117,14 @@ export default function EditStaffModal({ staff, open, saving, onClose, onSave, o
         <div className="modal-header" style={{ color: '#f59e0b' }}>
           <i className="fas fa-user-edit" /> 编辑职员信息
         </div>
-        <div className="modal-body">
+        <div className="modal-body" style={{ textAlign: 'left' }}>
           <form id="editUserForm" onSubmit={handleSubmit}>
             <div className="form-section">
               <div className="form-section-header">基本信息</div>
               <div className="form-section-content">
                 <div className="form-row-2col">
                   <div className="form-group">
-                    <label htmlFor="edit_username">英文姓名 *</label>
+                    <label htmlFor="edit_username">英文姓名</label>
                     <input
                       id="edit_username"
                       required
@@ -155,7 +156,7 @@ export default function EditStaffModal({ staff, open, saving, onClose, onSave, o
                     />
                   </div>
                   <div className="form-group">
-                    <label htmlFor="edit_email">邮箱 *</label>
+                    <label htmlFor="edit_email">邮箱</label>
                     <input
                       id="edit_email"
                       type="email"
@@ -345,7 +346,7 @@ export default function EditStaffModal({ staff, open, saving, onClose, onSave, o
                 </div>
                 <div className="form-row-2col">
                   <div className="form-group">
-                    <label htmlFor="edit_account_type">账号类型 *</label>
+                    <label htmlFor="edit_account_type">账号类型</label>
                     <select
                       id="edit_account_type"
                       required
