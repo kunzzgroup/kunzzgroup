@@ -169,7 +169,7 @@ export function staffToEditForm(staff) {
 
 export function editFormToPayload(form) {
   return {
-    user_id: form.user_id,
+    id: form.user_id,
     username: form.username.trim(),
     username_cn: form.username_cn.trim(),
     nickname: form.nickname.trim(),
