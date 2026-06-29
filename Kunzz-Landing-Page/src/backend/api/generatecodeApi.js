@@ -71,6 +71,13 @@ export async function saveUserPermissions(payload) {
   });
 }
 
+export async function addStaffUser(payload) {
+  return apiCall(API_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'add_user', ...payload }),
+  });
+}
+
 export async function refreshSession() {
   const response = await fetch(`${getBackendBase()}/session_refresh_api.php`, {
     credentials: 'include',

@@ -192,6 +192,74 @@ export function editFormToPayload(form) {
   };
 }
 
+export function createEmptyAddEmployeeForm() {
+  return {
+    username: '',
+    username_cn: '',
+    nickname: '',
+    email: '',
+    ic_number: '',
+    phone_number: '',
+    gender: '',
+    nationality: '',
+    race: '',
+    home_address: '',
+    emergency_contact_name: '',
+    emergency_phone_number: '',
+    bank_account_holder_en: '',
+    bank_account: '',
+    bank_name: '',
+    account_type: '',
+    position: '',
+    branch: [],
+  };
+}
+
+export function validateAddEmployeeForm(form) {
+  const fieldErrors = {};
+
+  if (!form.username?.trim() || form.username.trim().split(/\s+/).filter(Boolean).length < 2) {
+    fieldErrors.username = true;
+  }
+  if (!form.email?.trim()) {
+    fieldErrors.email = true;
+  } else if (!validateStaffField('email', form.email.trim())) {
+    fieldErrors.email = true;
+  }
+  if (!form.account_type) {
+    fieldErrors.account_type = true;
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    return { valid: false, fieldErrors, message: '请填写所有必填项（*）' };
+  }
+
+  return { valid: true, fieldErrors, message: null };
+}
+
+export function addFormToPayload(form) {
+  return {
+    username: form.username.trim(),
+    username_cn: form.username_cn.trim(),
+    nickname: form.nickname.trim(),
+    email: form.email.trim(),
+    ic_number: form.ic_number.trim(),
+    phone_number: form.phone_number.trim(),
+    gender: form.gender,
+    nationality: form.nationality,
+    race: form.race,
+    home_address: form.home_address.trim(),
+    emergency_contact_name: form.emergency_contact_name.trim(),
+    emergency_phone_number: form.emergency_phone_number.trim(),
+    bank_account_holder_en: form.bank_account_holder_en.trim(),
+    bank_account: form.bank_account.trim(),
+    bank_name: form.bank_name,
+    account_type: form.account_type,
+    position: form.position,
+    branch: (form.branch || []).join(','),
+  };
+}
+
 export function getBranchMultiSelectLabel(selectedBranches) {
   if (!selectedBranches?.length) {
     return { text: '请选择区域运营单位', muted: true };

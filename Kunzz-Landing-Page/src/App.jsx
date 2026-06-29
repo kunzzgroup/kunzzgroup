@@ -9,6 +9,7 @@ import JoinPage from './pages/JoinPage.jsx';
 import HomePage_en from './pages/HomePage_en.jsx';
 import AboutPage_en from './pages/AboutPage_en.jsx'
 import JoinPage_en from './pages/JoinPage_en.jsx';
+import AddEmployeePage from './backend/pages/AddEmployeePage.jsx';
 import CostEditPage from './backend/pages/CostEditPage.jsx';
 import GenerateCodePage from './backend/pages/GenerateCodePage.jsx';
 import KpiEditPage from './backend/pages/KpiEditPage.jsx';
@@ -33,6 +34,7 @@ function AppRoutes() {
         <Route path="/backend/kpiedit-v2" element={<KpiEditPage />} />
         <Route path="/backend/costedit-v2" element={<CostEditPage />} />
         <Route path="/backend/generatecode-v2" element={<GenerateCodePage />} />
+        <Route path="/backend/add-employee-v2" element={<AddEmployeePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

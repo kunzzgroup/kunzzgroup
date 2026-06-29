@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   ACCOUNT_TYPE_OPTIONS,
   BANK_OPTIONS,
-  BRANCH_OPTIONS,
   NATIONALITY_OPTIONS,
   POSITIONS_BY_ACCOUNT_TYPE,
   RACE_OPTIONS,
@@ -11,59 +10,10 @@ import {
 import {
   editFormToPayload,
   formatFieldInput,
-  getBranchMultiSelectLabel,
   staffToEditForm,
   validateEditForm,
 } from '../../utils/generatecodeCalculations.js';
-
-function BranchMultiSelect({ selected, onChange }) {
-  const [open, setOpen] = useState(false);
-  const wrapRef = useRef(null);
-  const label = getBranchMultiSelectLabel(selected);
-
-  useEffect(() => {
-    const handleClick = (event) => {
-      if (wrapRef.current && !wrapRef.current.contains(event.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('click', handleClick);
-    return () => document.removeEventListener('click', handleClick);
-  }, []);
-
-  const toggleBranch = (value) => {
-    if (selected.includes(value)) {
-      onChange(selected.filter((item) => item !== value));
-    } else {
-      onChange([...selected, value]);
-    }
-  };
-
-  return (
-    <div className="custom-multi-select" ref={wrapRef}>
-      <div className="select-header" onClick={() => setOpen((prev) => !prev)}>
-        <span className="selected-text" style={{ color: label.muted ? '#999' : '#111827' }}>
-          {label.text}
-        </span>
-        <i className="fas fa-chevron-down" />
-      </div>
-      {open ? (
-        <div className="select-options">
-          {BRANCH_OPTIONS.map((option) => (
-            <label className="checkbox-item" key={option.value}>
-              <input
-                type="checkbox"
-                checked={selected.includes(option.value)}
-                onChange={() => toggleBranch(option.value)}
-              />{' '}
-              {option.label}
-            </label>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
+import BranchMultiSelect from './BranchMultiSelect.jsx';
 
 export default function EditStaffModal({ staff, open, saving, onClose, onSave, onError }) {
   const [form, setForm] = useState(null);

@@ -24,6 +24,7 @@
     RewriteRule ^backend/kpiedit-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
     RewriteRule ^backend/costedit-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
     RewriteRule ^backend/generatecode-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
+    RewriteRule ^backend/add-employee-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
     RewriteRule ^backend/ - [L]
     RewriteRule ^frontend/ - [L]
     RewriteRule ^(costapi|stockapi|kpiapi|check_permissions)\.php$ - [L]

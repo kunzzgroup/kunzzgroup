@@ -15,7 +15,7 @@ export default function GenerateCodeToolbar({
       <form id="generateForm" onSubmit={(event) => event.preventDefault()}>
         <div className="form-row" style={{ justifyContent: 'space-between', alignItems: 'end' }}>
           <div className="form-group" style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', gap: 12 }}>
-            <a href={`${backendBase}/add_employee.php`} className="btn-generate">
+            <a href={`${backendBase}/add-employee-v2`} className="btn-generate">
               <i className="fas fa-user-plus" /> 添加新职员
             </a>
             <button type="button" className="btn-generate" onClick={onOpenDownload}>

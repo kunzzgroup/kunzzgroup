@@ -12,6 +12,7 @@ RewriteRule ^cost-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
 RewriteRule ^kpiedit-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
 RewriteRule ^costedit-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
 RewriteRule ^generatecode-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
+RewriteRule ^add-employee-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
 
 # -----------------------------
 # 0. Redirect login.html to frontend login (respect subdirectory deploy)
