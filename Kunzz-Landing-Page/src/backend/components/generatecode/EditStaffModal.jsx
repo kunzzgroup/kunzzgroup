@@ -291,7 +291,11 @@ export default function EditStaffModal({ staff, open, saving, onClose, onSave, o
                 <div className="form-row-2col">
                   <div className="form-group">
                     <label>所属公司</label>
-                    <BranchMultiSelect selected={form.branch} onChange={(branch) => updateField('branch', branch)} />
+                    <BranchMultiSelect
+                      id="edit-branch-select"
+                      selected={form.branch}
+                      onChange={(branch) => updateField('branch', branch)}
+                    />
                   </div>
                 </div>
                 <div className="form-row-2col">
