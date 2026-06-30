@@ -57,7 +57,7 @@ export function useStockListAll() {
   const [exporting, setExporting] = useState(false);
 
   const [permissionsReady, setPermissionsReady] = useState(false);
-  const loadingRef = useRef(false);
+  const loadRequestIdRef = useRef(0);
 
   const showToast = useCallback((message, type = 'info') => {
     setToast({ message, type });
@@ -85,15 +85,18 @@ export function useStockListAll() {
   }, []);
 
   const loadSystemData = useCallback(async (targetSystem) => {
-    if (loadingRef.current) return;
-    loadingRef.current = true;
+    const requestId = loadRequestIdRef.current + 1;
+    loadRequestIdRef.current = requestId;
     setLoading(true);
 
     try {
       const settings = await fetchLowStockSettings();
+      if (requestId !== loadRequestIdRef.current) return;
       setLowStockSettings(settings);
 
       const data = await fetchStockSummary(targetSystem);
+      if (requestId !== loadRequestIdRef.current) return;
+
       setSummaryData(data);
       setStockData(data.summary || []);
 
@@ -101,10 +104,14 @@ export function useStockListAll() {
         await loadSupplyTotals();
       }
 
+      if (requestId !== loadRequestIdRef.current) return;
+
       if ((data.summary || []).length === 0) {
         showToast(`当前没有${targetSystem === 'central' ? '中央' : targetSystem.toUpperCase()}数据`, 'info');
       }
     } catch (error) {
+      if (requestId !== loadRequestIdRef.current) return;
+
       setStockData([]);
       setSummaryData(null);
       if (error.code === 'SESSION_EXPIRED') {
@@ -113,8 +120,9 @@ export function useStockListAll() {
         showToast(error.message || '加载数据失败', 'error');
       }
     } finally {
-      loadingRef.current = false;
-      setLoading(false);
+      if (requestId === loadRequestIdRef.current) {
+        setLoading(false);
+      }
     }
   }, [loadSupplyTotals, showToast]);
 
@@ -249,12 +257,16 @@ export function useStockListAll() {
   const switchSystem = useCallback((nextSystem) => {
     if (!VALID_SYSTEMS.includes(nextSystem)) return;
     if (allowedSystems.length > 0 && !allowedSystems.includes(nextSystem)) return;
+    if (nextSystem === system) return;
 
+    setStockData([]);
+    setSummaryData(null);
+    setLoading(true);
     setSystem(nextSystem);
     setSearchTerm('');
     setTypeFilters(createEmptyTypeFilters());
     setSearchParams({ system: nextSystem }, { replace: true });
-  }, [allowedSystems, setSearchParams]);
+  }, [allowedSystems, setSearchParams, system]);
 
   const switchView = useCallback((view) => {
     if (view === 'list') return;

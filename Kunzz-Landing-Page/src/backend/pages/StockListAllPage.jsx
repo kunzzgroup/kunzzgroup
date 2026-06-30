@@ -51,7 +51,7 @@ export default function StockListAllPage() {
 
   if (!config && loading && stockData.length === 0) {
     return (
-      <BackendLayout stylesheet="stocklistall.css">
+      <BackendLayout stylesheet="stocklistall.css" extraStylesheets={['smartSearch.css']}>
         <div className="container">
           <p style={{ padding: 24 }}>正在加载...</p>
         </div>
@@ -60,7 +60,7 @@ export default function StockListAllPage() {
   }
 
   return (
-    <BackendLayout stylesheet="stocklistall.css">
+    <BackendLayout stylesheet="stocklistall.css" extraStylesheets={['smartSearch.css']}>
       <div className="container">
         <StockListHeader
           system={system}

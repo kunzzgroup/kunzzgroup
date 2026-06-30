@@ -2,6 +2,7 @@ import {
   SEARCH_PLACEHOLDER,
   TYPE_FILTER_OPTIONS,
 } from '../../config/stockListConstants.js';
+import SmartSearchWrapper from '../common/SmartSearchWrapper.jsx';
 
 const TYPE_LABEL_IDS = {
   'Service Line': 'service-line',
@@ -116,17 +117,13 @@ export default function StockSummaryBar({
 
       <div className="header-right-section">
         <div className="header-search">
-          <div className="smartSearchWrapper">
-            <i className="fas fa-search smartSearch-icon" />
-            <input
-              type="text"
-              id={`${system}-unified-filter`}
-              className="smartSearch-input"
-              placeholder={SEARCH_PLACEHOLDER[system]}
-              value={searchTerm}
-              onChange={(e) => onSearchChange(e.target.value)}
-            />
-          </div>
+          <SmartSearchWrapper
+            key={system}
+            id={`${system}-unified-filter`}
+            placeholder={SEARCH_PLACEHOLDER[system]}
+            value={searchTerm}
+            onChange={onSearchChange}
+          />
         </div>
 
         <button
