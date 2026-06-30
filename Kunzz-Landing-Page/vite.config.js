@@ -34,7 +34,8 @@ export default defineConfig(({ mode }) => {
               url.startsWith('/backend/kpiedit-v2') ||
               url.startsWith('/backend/costedit-v2') ||
               url.startsWith('/backend/generatecode-v2') ||
-              url.startsWith('/backend/add-employee-v2')
+              url.startsWith('/backend/add-employee-v2') ||
+              url.startsWith('/backend/stocklistall-v2')
             ) {
               return '/index.html';
             }
