@@ -22,6 +22,30 @@ const STOCK_VIEW_OPTIONS = [
     { value: 'product', label: '货品种类' },
     { value: 'sot', label: '货品异常' }
 ];
+
+function isStockReactV2Page() {
+    return /stockeditall-v2|stocklistall-v2/.test(window.location.pathname || '');
+}
+
+function getStockViewPage(view) {
+    const v2 = isStockReactV2Page();
+    const pages = {
+        list: v2 ? 'stocklistall-v2' : 'stocklistall',
+        records: v2 ? 'stockeditall-v2' : 'stockeditall',
+        remark: 'stockremark',
+        product: 'stockproductname',
+        sot: 'stocksot'
+    };
+    return pages[view] || pages.list;
+}
+
+function buildStockPageUrl(page, query) {
+    const root = window.__KUNZZ_BACKEND_BASE__ || '';
+    if (root) {
+        return `${root}/${page}${query || ''}`;
+    }
+    return `${page}${query || ''}`;
+}
 let cachedStockAllowedSystems = new Set();
 let cachedStockAllowedViews = new Set();
 
@@ -1191,6 +1215,10 @@ async function initApp() {
 
 // 设置实时搜索
 function setupRealTimeSearch() {
+    if (isStockReactV2Page()) {
+        return;
+    }
+
     const searchInput = document.getElementById('unified-filter');
 
     // 防抖处理，避免频繁搜索
@@ -1348,9 +1376,9 @@ function switchStock(stockType, event = null) {
     reloadStockSystemData();
 
     // 更新 URL 参数以保持持久性
-    const newParams = new URLSearchParams(window.location.search);
-    newParams.set('system', stockType);
-    window.history.replaceState(null, "", "?" + newParams.toString());
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set('system', stockType);
+    window.history.replaceState(null, '', newUrl.toString());
 }
 
 function rebuildStockSystemDropdown(allowedSet) {
@@ -1426,17 +1454,17 @@ async function applyPagePermissions() {
         if (allowedViews.size > 0 && !allowedViews.has('records')) {
             const viewOrder = ['records', 'remark', 'product', 'sot', 'list'];
             const viewRedirectMap = {
-                list: 'stocklistall.php',
-                records: 'stockeditall.php',
-                remark: 'stockremark.php',
-                product: 'stockproductname.php',
-                sot: 'stocksot.php'
+                list: getStockViewPage('list'),
+                records: getStockViewPage('records'),
+                remark: getStockViewPage('remark'),
+                product: getStockViewPage('product'),
+                sot: getStockViewPage('sot')
             };
             const viewToOpen = viewOrder.find(view => allowedViews.has(view));
             if (viewToOpen) {
-                const base = viewRedirectMap[viewToOpen] || 'stocklistall.php';
+                const base = viewRedirectMap[viewToOpen] || getStockViewPage('list');
                 const param = currentStockType ? `?system=${currentStockType}` : '';
-                window.location.href = `${base}${param}`;
+                window.location.href = buildStockPageUrl(base, param);
                 return true;
             }
         }
@@ -1549,13 +1577,13 @@ function switchView(viewType) {
     const systemParam = `?system=${currentSystem}`;
 
     if (viewType === 'list') {
-        window.location.href = `stocklistall${systemParam}`;
+        window.location.href = buildStockPageUrl(getStockViewPage('list'), systemParam);
     } else if (viewType === 'remark') {
-        window.location.href = `stockremark?system=central`;
+        window.location.href = buildStockPageUrl(getStockViewPage('remark'), '?system=central');
     } else if (viewType === 'product') {
-        window.location.href = `stockproductname?system=overview`;
+        window.location.href = buildStockPageUrl(getStockViewPage('product'), '?system=overview');
     } else if (viewType === 'sot') {
-        window.location.href = `stocksot?system=central`;
+        window.location.href = buildStockPageUrl(getStockViewPage('sot'), '?system=central');
     } else {
         // 保持在当前页面（库存记录）
         hideViewDropdown();
@@ -5348,8 +5376,6 @@ function exportData() {
 // 添加关闭所有通知的函数（可选）
 
 // 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', initApp);
-
 // 添加快速选择下拉菜单的关闭逻辑
 document.addEventListener('click', function (e) {
     // 关闭快速选择下拉菜单
@@ -8740,5 +8766,72 @@ async function batchSaveNewRows() {
     } finally {
         batchSaveBtn.innerHTML = originalText;
         batchSaveBtn.disabled = false;
+    }
+}
+
+let stockEditAppBooted = false;
+
+function setupCreatedUserHover() {
+    const hoverBox = document.getElementById('userHoverBox');
+    if (!hoverBox || hoverBox.dataset.wired === '1') return;
+    hoverBox.dataset.wired = '1';
+
+    document.addEventListener('mouseover', function (e) {
+        if (e.target.classList.contains('created-user')) {
+            const user = e.target.getAttribute('data-user') || '-';
+            const time = e.target.getAttribute('data-time') || '-';
+            hoverBox.innerHTML = '<div style="font-weight:600;">' + user + '</div>'
+                + '<div style="margin-top:4px;color:#666;">操作时间：' + time + '</div>';
+            hoverBox.style.display = 'block';
+        }
+    });
+    document.addEventListener('mousemove', function (e) {
+        if (hoverBox.style.display === 'block') {
+            hoverBox.style.top = (e.pageY - hoverBox.offsetHeight - 12) + 'px';
+            hoverBox.style.left = (e.pageX - hoverBox.offsetWidth - 12) + 'px';
+        }
+    });
+    document.addEventListener('mouseout', function (e) {
+        if (e.target.classList.contains('created-user')) {
+            hoverBox.style.display = 'none';
+        }
+    });
+}
+
+async function bootStockEditAll() {
+    setupCreatedUserHover();
+    if (stockEditAppBooted) {
+        if (typeof window.reinitStockEditAll === 'function') {
+            await window.reinitStockEditAll();
+        }
+        return;
+    }
+    stockEditAppBooted = true;
+    await initApp();
+}
+
+window.reinitStockEditAll = async function reinitStockEditAll() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const requested = urlParams.get('system');
+    const valid = new Set(STOCK_SYSTEM_OPTIONS.map(function (opt) { return opt.value; }));
+
+    if (requested && valid.has(requested) && requested !== currentStockType) {
+        stashPendingNewRowsForSystem(currentStockType);
+        currentStockType = requested;
+        applyStockSystemUI(currentStockType);
+    }
+
+    restorePendingNewRowsForSystem(currentStockType);
+    await reloadStockSystemData();
+};
+
+window.bootStockEditAll = bootStockEditAll;
+window.searchData = searchData;
+
+if (!isStockReactV2Page()) {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bootStockEditAll);
+    } else if (document.getElementById('stock-tbody')) {
+        bootStockEditAll();
     }
 }

@@ -44,7 +44,8 @@ export const TYPE_FILTER_OPTIONS = {
 export const CENTRAL_SUPPLY_SYSTEMS = ['j1', 'j2', 'j3'];
 
 export const VIEW_REDIRECT_MAP = {
-  records: 'stockeditall',
+  records: 'stockeditall-v2',
+  list: 'stocklistall-v2',
   remark: 'stockremark',
   product: 'stockproductname',
   sot: 'stocksot',
