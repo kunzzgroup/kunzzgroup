@@ -17,6 +17,7 @@ import CostDashboardPage from './backend/pages/CostDashboardPage.jsx';
 import KpiDashboardPage from './backend/pages/KpiDashboardPage.jsx';
 import StockListAllPage from './backend/pages/StockListAllPage.jsx';
 import StockEditAllPage from './backend/pages/StockEditAllPage.jsx';
+import StockRemarkPage from './backend/pages/StockRemarkPage.jsx';
 
 function AppRoutes() {
   return (
@@ -39,6 +40,7 @@ function AppRoutes() {
         <Route path="/backend/add-employee-v2" element={<AddEmployeePage />} />
         <Route path="/backend/stocklistall-v2" element={<StockListAllPage />} />
         <Route path="/backend/stockeditall-v2" element={<StockEditAllPage />} />
+        <Route path="/backend/stockremark-v2" element={<StockRemarkPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
