@@ -29,6 +29,7 @@
     RewriteRule ^backend/stockeditall-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
     RewriteRule ^backend/stockremark-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
     RewriteRule ^backend/stockproductname-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
+    RewriteRule ^backend/stocksot-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
     RewriteRule ^backend/ - [L]
     RewriteRule ^frontend/ - [L]
     RewriteRule ^(costapi|stockapi|kpiapi|check_permissions)\.php$ - [L]

@@ -749,10 +749,20 @@
         }
 
         .header-search {
-            flex: 1;
+            flex: none;
             display: flex;
             align-items: center;
             gap: clamp(6px, 0.63vw, 12px);
+        }
+
+        .header-search .smartSearchWrapper {
+            width: 40px;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .header-search .smartSearchWrapper.expanded {
+            width: 250px;
         }
 
         .unified-search-input {

@@ -24,7 +24,7 @@ const STOCK_VIEW_OPTIONS = [
 ];
 
 function isStockReactV2Page() {
-    return /stockeditall-v2|stocklistall-v2|stockremark-v2|stockproductname-v2/.test(window.location.pathname || '');
+    return /stockeditall-v2|stocklistall-v2|stockremark-v2|stockproductname-v2|stocksot-v2/.test(window.location.pathname || '');
 }
 
 function getStockViewPage(view) {
@@ -34,7 +34,7 @@ function getStockViewPage(view) {
         records: v2 ? 'stockeditall-v2' : 'stockeditall',
         remark: v2 ? 'stockremark-v2' : 'stockremark',
         product: v2 ? 'stockproductname-v2' : 'stockproductname',
-        sot: 'stocksot'
+        sot: v2 ? 'stocksot-v2' : 'stocksot'
     };
     return pages[view] || pages.list;
 }

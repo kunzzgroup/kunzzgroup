@@ -48,7 +48,7 @@ export const VIEW_REDIRECT_MAP = {
   list: 'stocklistall-v2',
   remark: 'stockremark-v2',
   product: 'stockproductname-v2',
-  sot: 'stocksot',
+  sot: 'stocksot-v2',
 };
 
 export const STOCK_COLUMN_LABEL = {
