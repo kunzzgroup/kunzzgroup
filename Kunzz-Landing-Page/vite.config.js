@@ -37,7 +37,8 @@ export default defineConfig(({ mode }) => {
               url.startsWith('/backend/add-employee-v2') ||
               url.startsWith('/backend/stocklistall-v2') ||
               url.startsWith('/backend/stockeditall-v2') ||
-              url.startsWith('/backend/stockremark-v2')
+              url.startsWith('/backend/stockremark-v2') ||
+              url.startsWith('/backend/stockproductname-v2')
             ) {
               return '/index.html';
             }

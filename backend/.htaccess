@@ -16,6 +16,7 @@ RewriteRule ^add-employee-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
 RewriteRule ^stocklistall-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
 RewriteRule ^stockeditall-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
 RewriteRule ^stockremark-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
+RewriteRule ^stockproductname-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
 
 # -----------------------------
 # 0. Redirect login.html to frontend login (respect subdirectory deploy)

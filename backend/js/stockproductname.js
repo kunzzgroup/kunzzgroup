@@ -1,8 +1,76 @@
 ﻿
-const CURRENT_USER_APPLICANT = document.body?.dataset?.user || null;
+function getApplicantName() {
+    const ctx = document.getElementById('stockproductname-context');
+    if (ctx?.dataset?.user) {
+        return ctx.dataset.user;
+    }
+    return document.body?.dataset?.user || '';
+}
+
+let CURRENT_USER_APPLICANT = getApplicantName();
 
 if (!CURRENT_USER_APPLICANT) {
     console.warn("User applicant not found on body data-user attribute.");
+}
+
+function initApplicantContext() {
+    CURRENT_USER_APPLICANT = getApplicantName();
+}
+
+let stockProductNameBooted = false;
+
+function isStockReactV2Page() {
+    return /stockproductname-v2|stockremark-v2|stockeditall-v2|stocklistall-v2/.test(window.location.pathname || '');
+}
+
+function getStockViewPage(view) {
+    const v2 = isStockReactV2Page();
+    const pages = {
+        list: v2 ? 'stocklistall-v2' : 'stocklistall',
+        records: v2 ? 'stockeditall-v2' : 'stockeditall',
+        remark: v2 ? 'stockremark-v2' : 'stockremark',
+        product: v2 ? 'stockproductname-v2' : 'stockproductname',
+        sot: 'stocksot'
+    };
+    return pages[view] || pages.list;
+}
+
+function buildStockPageUrl(page, query) {
+    const root = window.__KUNZZ_BACKEND_BASE__ || '';
+    if (root) {
+        return `${root}/${page}${query || ''}`;
+    }
+    return `${page}${query || ''}`;
+}
+
+function syncSystemFromUrl() {
+    const urlSystem = new URLSearchParams(window.location.search).get('system');
+    if (urlSystem && _validSystems.has(urlSystem)) {
+        currentSystem = urlSystem;
+    }
+
+    const systemNames = {
+        overview: '总览',
+        central: '中央',
+        j1: 'J1',
+        j2: 'J2',
+        j3: 'J3'
+    };
+
+    const currentSystemEl = document.getElementById('current-system');
+    if (currentSystemEl) {
+        currentSystemEl.textContent = systemNames[currentSystem] || currentSystem;
+    }
+
+    const titleSuffix = currentSystem === 'overview' ? '' : ` - ${systemNames[currentSystem] || currentSystem}`;
+    const titleEl = document.querySelector('.header h1');
+    if (titleEl) {
+        titleEl.textContent = `库存货品管理后台${titleSuffix}`;
+    }
+
+    document.querySelectorAll('#system-selector-dropdown .dropdown-item').forEach((item) => {
+        item.classList.toggle('active', item.dataset.systemValue === currentSystem);
+    });
 }
 
 
@@ -215,18 +283,10 @@ async function applyPagePermissions() {
 
         if (allowedViews.size > 0 && !allowedViews.has('product')) {
             const viewOrder = ['product', 'records', 'remark', 'sot', 'list'];
-            const viewRedirectMap = {
-                list: 'stocklistall.php',
-                records: 'stockeditall.php',
-                remark: 'stockremark.php',
-                product: 'stockproductname.php',
-                sot: 'stocksot.php'
-            };
             const viewToOpen = viewOrder.find(view => allowedViews.has(view));
             if (viewToOpen) {
-                const base = viewRedirectMap[viewToOpen] || 'stocklistall.php';
                 const param = currentSystem && currentSystem !== 'overview' ? `?system=${currentSystem}` : '';
-                window.location.href = `${base}${param}`;
+                window.location.href = buildStockPageUrl(getStockViewPage(viewToOpen), param);
                 return true;
             }
         }
@@ -274,22 +334,19 @@ function toggleViewSelector() {
 }
 
 function switchView(viewType) {
-    const systemParam = `?system=${currentSystem || 'overview'}`;
-    
+    const systemParam = currentSystem && currentSystem !== 'overview'
+        ? `?system=${currentSystem}`
+        : '';
+
     if (viewType === 'list') {
-        // 跳转到总库存页面
-        window.location.href = `stocklistall${systemParam}`;
+        window.location.href = buildStockPageUrl(getStockViewPage('list'), systemParam);
     } else if (viewType === 'records') {
-        // 跳转到进出货页面
-        window.location.href = `stockeditall${systemParam}`;
+        window.location.href = buildStockPageUrl(getStockViewPage('records'), systemParam);
     } else if (viewType === 'remark') {
-        // 跳转到货品备注页面
-        window.location.href = `stockremark?system=central`;
+        window.location.href = buildStockPageUrl(getStockViewPage('remark'), '?system=central');
     } else if (viewType === 'sot') {
-        // 跳转到货品异常页面
-        window.location.href = `stocksot?system=central`;
+        window.location.href = buildStockPageUrl(getStockViewPage('sot'), '?system=central');
     } else {
-        // 保持在当前页面（货品种类）
         hideViewDropdown();
     }
 }
@@ -407,7 +464,9 @@ function goBack() {
 }
 
 // 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', initApp);
+if (!isStockReactV2Page()) {
+    document.addEventListener('DOMContentLoaded', initApp);
+}
 
 // 回到顶部功能
 function scrollToTop() {
@@ -540,6 +599,10 @@ async function loadStockData() {
 
 // 实时搜索功能
 function initRealTimeSearch() {
+    if (isStockReactV2Page()) {
+        return;
+    }
+
     const productSearchInput = document.getElementById('product-search-filter');
 
     // 防抖函数
@@ -1437,10 +1500,7 @@ document.addEventListener('click', function (event) {
     }
 });
 
-// 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', initApp);
-
-// 批准记录
+// duplicate init removed — boot handled by bootStockProductName on v2
 async function approveRecord(rowId) {
     if (!userCanApprove) {
         showAlert('您没有权限执行此操作', 'error');
@@ -1859,3 +1919,28 @@ function updateRowIdComplete(row, oldId, newId) {
 
     console.log(`行ID更新完成: ${oldId} -> ${newId}`);
 }
+
+async function bootStockProductName() {
+    initApplicantContext();
+    syncSystemFromUrl();
+
+    if (stockProductNameBooted) {
+        if (typeof window.reinitStockProductName === 'function') {
+            await window.reinitStockProductName();
+        }
+        return;
+    }
+
+    stockProductNameBooted = true;
+    await initApp();
+}
+
+window.reinitStockProductName = async function reinitStockProductName() {
+    initApplicantContext();
+    syncSystemFromUrl();
+    await initPermissions();
+    await loadStockData();
+};
+
+window.bootStockProductName = bootStockProductName;
+window.refreshStockProductData = loadStockData;

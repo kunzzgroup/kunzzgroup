@@ -140,24 +140,28 @@
    ========================================================= */
 
 .header-right-section,
-.header-right-group {
+.header-right-group,
+.filter-bar {
     transition: gap 0.3s ease;
 }
 
 .header-right-section:has(.smartSearchWrapper.expanded),
-.header-right-group:has(.smartSearchWrapper.expanded) {
-    gap: clamp(4px, 0.5vw, 10px);           /* Squish gap to save even more space */
+.header-right-group:has(.smartSearchWrapper.expanded),
+.filter-bar:has(.smartSearchWrapper.expanded) {
+    gap: clamp(4px, 0.5vw, 10px);
 }
 
 .header-right-section:has(.smartSearchWrapper.expanded) .btn,
-.header-right-group:has(.smartSearchWrapper.expanded) .btn {
+.header-right-group:has(.smartSearchWrapper.expanded) .btn,
+.filter-bar:has(.smartSearchWrapper.expanded) .btn {
     font-size: 0;                           /* Hide text */
     padding: clamp(4px, 0.4vw, 8px) clamp(8px, 0.8vw, 12px); 
     white-space: nowrap;
 }
 
 .header-right-section:has(.smartSearchWrapper.expanded) .btn i,
-.header-right-group:has(.smartSearchWrapper.expanded) .btn i {
+.header-right-group:has(.smartSearchWrapper.expanded) .btn i,
+.filter-bar:has(.smartSearchWrapper.expanded) .btn i {
     font-size: 14px;                        /* Keep FA icon normal size */
     margin: 0;                              /* Remove extra spacing next to text */
 }

@@ -47,7 +47,7 @@ export const VIEW_REDIRECT_MAP = {
   records: 'stockeditall-v2',
   list: 'stocklistall-v2',
   remark: 'stockremark-v2',
-  product: 'stockproductname',
+  product: 'stockproductname-v2',
   sot: 'stocksot',
 };
 

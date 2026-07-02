@@ -1,0 +1,118 @@
+<?php
+$system = isset($system) ? $system : 'central';
+$system_names = [
+    'overview' => '总览',
+    'central' => '中央',
+    'j1' => 'J1',
+    'j2' => 'J2',
+    'j3' => 'J3',
+];
+$display_name = isset($system_names[$system]) ? $system_names[$system] : '总览';
+$title_suffix = $system === 'overview' ? '' : ' - ' . $display_name;
+?>
+<div id="stockproductname-context" data-user="<?php echo htmlspecialchars($currentApplicant ?? '', ENT_QUOTES, 'UTF-8'); ?>" hidden></div>
+
+<div class="container">
+    <div class="header">
+        <div>
+            <h1>库存货品管理后台<?php echo htmlspecialchars($title_suffix, ENT_QUOTES, 'UTF-8'); ?></h1>
+        </div>
+        <div class="controls">
+            <div class="view-selector">
+                <button class="selector-button" onclick="toggleViewSelector()">
+                    <span id="current-view">货品种类</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="selector-dropdown" id="view-selector-dropdown">
+                    <div class="dropdown-item" onclick="switchView('list')">总库存</div>
+                    <div class="dropdown-item" onclick="switchView('records')">进出货</div>
+                    <div class="dropdown-item" onclick="switchView('remark')">货品备注</div>
+                    <div class="dropdown-item active" onclick="switchView('product')">货品种类</div>
+                    <div class="dropdown-item" onclick="switchView('sot')">货品异常</div>
+                </div>
+            </div>
+            <div class="system-selector">
+                <button class="selector-button" onclick="toggleSystemSelector()">
+                    <span id="current-system"><?php echo htmlspecialchars($display_name, ENT_QUOTES, 'UTF-8'); ?></span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="selector-dropdown" id="system-selector-dropdown">
+                    <div class="dropdown-item<?php echo $system === 'overview' ? ' active' : ''; ?>" data-system-value="overview" onclick="switchSystem('overview')">总览</div>
+                    <div class="dropdown-item<?php echo $system === 'central' ? ' active' : ''; ?>" data-system-value="central" onclick="switchSystem('central')">中央</div>
+                    <div class="dropdown-item<?php echo $system === 'j1' ? ' active' : ''; ?>" data-system-value="j1" onclick="switchSystem('j1')">J1</div>
+                    <div class="dropdown-item<?php echo $system === 'j2' ? ' active' : ''; ?>" data-system-value="j2" onclick="switchSystem('j2')">J2</div>
+                    <div class="dropdown-item<?php echo $system === 'j3' ? ' active' : ''; ?>" data-system-value="j3" onclick="switchSystem('j3')">J3</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="alert-container"></div>
+
+    <div class="filter-bar">
+        <div class="filter-group">
+            <div class="filter-item filter-item-search">
+                <label>搜索货品</label>
+                <div class="smartSearchWrapper">
+                    <i class="fas fa-search smartSearch-icon"></i>
+                    <input type="text" class="smartSearch-input" id="product-search-filter" placeholder="输入关键字搜索...">
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-group">
+            <button class="btn btn-success" onclick="addNewRow()">
+                <i class="fas fa-plus"></i>
+                添加新记录
+            </button>
+            <button class="btn btn-primary" onclick="saveAllData()">
+                <i class="fas fa-save"></i>
+                保存所有数据
+            </button>
+
+            <div class="stats-info" id="stock-stats">
+                <div class="stat-item">
+                    <i class="fas fa-boxes"></i>
+                    <span>总记录数: <span class="stat-value" id="total-records">0</span></span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>已批准: <span class="stat-value" id="approved-count">0</span></span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-clock"></i>
+                    <span>待批准: <span class="stat-value" id="pending-count">0</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="excel-container">
+        <div class="table-scroll-container">
+            <table class="excel-table" id="excel-table">
+                <thead>
+                    <tr>
+                        <th style="min-width: 60px;">序号</th>
+                        <th style="min-width: 120px;">货品编号</th>
+                        <th style="min-width: 200px;">货品名字</th>
+                        <th style="min-width: 150px;">规格</th>
+                        <th style="min-width: 120px;">货品类型</th>
+                        <th style="min-width: 150px;">供应商</th>
+                        <th style="min-width: 120px;">申请人</th>
+                        <th style="min-width: 100px;">系统分配</th>
+                        <th style="min-width: 120px;">冰箱分类</th>
+                        <th style="min-width: 120px;">批准状态</th>
+                        <th style="min-width: 100px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="excel-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<button class="back-to-top" id="back-to-top-btn" onclick="scrollToTop()" title="回到顶部">
+    <i class="fas fa-chevron-up"></i>
+</button>
