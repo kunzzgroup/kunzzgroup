@@ -7,6 +7,36 @@ function isDishwareReactV2Page() {
     return /dishware_stock-v2/.test(window.location.pathname || '');
 }
 
+function resolveDishwareInitialTab(options = {}) {
+    if (options.tab && ['stock', 'j1', 'j2', 'j3', 'transfer'].includes(options.tab)) {
+        return options.tab;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    if (tabParam && ['stock', 'j1', 'j2', 'j3', 'transfer'].includes(tabParam)) {
+        return tabParam;
+    }
+
+    return 'stock';
+}
+
+function getDishwarePagePathname() {
+    if (isDishwareReactV2Page()) {
+        const pathMatch = window.location.pathname.match(/^(.*\/dishware_stock-v2)\/?$/i);
+        if (pathMatch) {
+            return pathMatch[1];
+        }
+    }
+
+    const pathMatch = window.location.pathname.match(/^(.*\/dishware_stock)\/?$/i);
+    if (pathMatch) {
+        return pathMatch[1];
+    }
+
+    return window.location.pathname;
+}
+
 // 应用状态
 let stockData = [];
 let filteredData = [];
@@ -160,13 +190,8 @@ function sortByCodeNumber(data) {
 }
 
 // 初始化应用
-async function initApp(contentRoot) {
-    // 读取 URL 参数以确定初始页面
-    const urlParams = new URLSearchParams(window.location.search);
-    const tabParam = urlParams.get('tab');
-    if (tabParam && ['stock', 'j1', 'j2', 'j3', 'transfer'].includes(tabParam)) {
-        currentPage = tabParam;
-    }
+async function initApp(contentRoot, options = {}) {
+    currentPage = resolveDishwareInitialTab(options);
 
     await loadRestaurants(); // 先加载餐厅店面列表
 
@@ -939,10 +964,10 @@ function toggleViewSelector() {
 // 页面切换函数
 function switchPage(pageType, isInit = false) {
     if (!isInit && pageType !== currentPage) {
-        // 更新 URL 参数
         const urlParams = new URLSearchParams(window.location.search);
         urlParams.set('tab', pageType === 'j2' || pageType === 'j3' ? 'j1' : pageType);
-        const newUrl = window.location.pathname + '?' + urlParams.toString();
+        const query = urlParams.toString();
+        const newUrl = getDishwarePagePathname() + (query ? `?${query}` : '');
         window.history.pushState({ tab: pageType }, '', newUrl);
     }
 
@@ -6773,31 +6798,34 @@ function finalizeDishwareStockDom(root) {
     }
 }
 
-async function bootDishwareStock(contentRoot) {
+async function bootDishwareStock(contentRoot, options = {}) {
     if (dishwareStockBooted) {
         if (typeof window.reinitDishwareStock === 'function') {
-            await window.reinitDishwareStock(contentRoot);
+            await window.reinitDishwareStock(contentRoot, options);
         }
         return;
     }
 
     dishwareStockBooted = true;
-    await initApp(contentRoot);
+    await initApp(contentRoot, options);
 }
 
-window.reinitDishwareStock = async function reinitDishwareStock(contentRoot) {
+window.reinitDishwareStock = async function reinitDishwareStock(contentRoot, options = {}) {
     const root = contentRoot || document.querySelector('[data-dishware-content-root]') || document;
+    const nextPage = resolveDishwareInitialTab(options);
 
     await loadRestaurants();
 
-    if (currentPage === 'stock') {
+    if (nextPage !== currentPage) {
+        switchPage(nextPage, true);
+    } else if (nextPage === 'stock') {
         await loadStockData();
-    } else if (currentPage === 'transfer') {
+    } else if (nextPage === 'transfer') {
         if (typeof loadAllTransferRecords === 'function') {
             await loadAllTransferRecords();
         }
     } else if (typeof loadBreakRecords === 'function') {
-        await loadBreakRecords(currentPage);
+        await loadBreakRecords(nextPage);
     }
 
     finalizeDishwareStockDom(root);
@@ -6805,6 +6833,8 @@ window.reinitDishwareStock = async function reinitDishwareStock(contentRoot) {
 };
 
 window.bootDishwareStock = bootDishwareStock;
+window.switchPage = switchPage;
+window.toggleViewSelector = toggleViewSelector;
 window.handleAddDishwareHeaderClick = handleAddDishwareHeaderClick;
 window.openAddModal = openAddModal;
 window.openRestaurantModal = openRestaurantModal;

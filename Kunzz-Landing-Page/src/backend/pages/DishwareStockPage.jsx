@@ -1,21 +1,36 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import BackendLayout from '../components/layout/BackendLayout.jsx';
 import { getBackendBase } from '../../config.js';
 import {
   fetchDishwareStockFragment,
+  normalizeDishwareTab,
   useDishwareStockLegacyBoot,
 } from '../hooks/useDishwareStockLegacyBoot.js';
 import { mountLegacySmartSearch, unmountLegacySmartSearch } from '../utils/mountLegacySmartSearch.jsx';
 
+const SEARCH_PLACEHOLDERS = {
+  stock: '搜索碗碟名称、编号或分类...',
+  j1: '搜索破损记录...',
+  j2: '搜索破损记录...',
+  j3: '搜索破损记录...',
+  transfer: '搜索转卖记录...',
+};
+
 export default function DishwareStockPage() {
+  const [searchParams] = useSearchParams();
+  const tab = normalizeDishwareTab(searchParams.get('tab'));
   const [markup, setMarkup] = useState('');
   const [markupError, setMarkupError] = useState(null);
   const [markupReady, setMarkupReady] = useState(false);
   const [searchReady, setSearchReady] = useState(false);
   const contentRef = useRef(null);
   const mountedMarkupRef = useRef('');
-  const { loading: bootLoading, ready: bootReady, error: bootError } = useDishwareStockLegacyBoot(markupReady);
+  const { loading: bootLoading, ready: bootReady, error: bootError } = useDishwareStockLegacyBoot(
+    markupReady,
+    tab,
+  );
 
   useEffect(() => {
     const backendBase = getBackendBase();
@@ -97,7 +112,7 @@ export default function DishwareStockPage() {
 
     mountLegacySmartSearch(host, {
       id: 'unified-filter',
-      placeholder: '搜索碗碟名称、编号或分类...',
+      placeholder: SEARCH_PLACEHOLDERS[tab] || SEARCH_PLACEHOLDERS.stock,
       onChange: (value) => {
         if (typeof window.refreshDishwareSearch === 'function') {
           window.refreshDishwareSearch(value);
@@ -115,7 +130,7 @@ export default function DishwareStockPage() {
       unmountLegacySmartSearch(host);
       setSearchReady(false);
     };
-  }, [markup, bootReady]);
+  }, [markup, bootReady, tab]);
 
   useEffect(() => {
     return () => {

@@ -2,6 +2,15 @@ import { useEffect, useRef, useState } from 'react';
 
 import { getBackendBase } from '../../config.js';
 
+export const DISHWARE_STOCK_TABS = ['stock', 'j1', 'j2', 'j3', 'transfer'];
+
+export function normalizeDishwareTab(tab) {
+  if (tab && DISHWARE_STOCK_TABS.includes(tab)) {
+    return tab;
+  }
+  return 'stock';
+}
+
 function loadScript(src, id) {
   const existing = document.getElementById(id);
   if (existing) {
@@ -22,11 +31,12 @@ function loadScript(src, id) {
   });
 }
 
-export function useDishwareStockLegacyBoot(markupReady) {
+export function useDishwareStockLegacyBoot(markupReady, tab = 'stock') {
   const [loading, setLoading] = useState(true);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState(null);
   const bootedRef = useRef(false);
+  const initialTab = normalizeDishwareTab(tab);
 
   useEffect(() => {
     if (!markupReady) {
@@ -54,14 +64,18 @@ export function useDishwareStockLegacyBoot(markupReady) {
         if (cancelled) return;
 
         const contentRoot = document.querySelector('[data-dishware-content-root]');
+        const bootOptions = { tab: initialTab };
 
-        if (typeof window.bootDishwareStock === 'function') {
-          await window.bootDishwareStock(contentRoot);
+        if (bootedRef.current && typeof window.reinitDishwareStock === 'function') {
+          await window.reinitDishwareStock(contentRoot, bootOptions);
+        } else if (typeof window.bootDishwareStock === 'function') {
+          await window.bootDishwareStock(contentRoot, bootOptions);
+          bootedRef.current = true;
         } else if (typeof window.reinitDishwareStock === 'function') {
-          await window.reinitDishwareStock(contentRoot);
+          await window.reinitDishwareStock(contentRoot, bootOptions);
+          bootedRef.current = true;
         }
 
-        bootedRef.current = true;
         if (!cancelled) {
           setReady(true);
         }
@@ -83,7 +97,7 @@ export function useDishwareStockLegacyBoot(markupReady) {
       cancelled = true;
       setReady(false);
     };
-  }, [markupReady]);
+  }, [markupReady, initialTab]);
 
   return { loading, ready, error };
 }
