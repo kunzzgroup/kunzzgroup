@@ -609,7 +609,7 @@
             </div>
             <div class="modal-body">
                 <div style="margin-bottom: 20px;">
-                    <button class="btn btn-success" onclick="openAddRestaurantModal()">
+                    <button class="btn btn-success" data-action="add-restaurant" onclick="openAddRestaurantModal()">
                         <i class="fas fa-plus"></i>
                         添加餐厅店面
                     </button>

@@ -1331,10 +1331,7 @@ async function loadAllBreakRecords() {
         window.jRestaurantsForBreak = jRestaurants;
 
         // 渲染合并页面
-        renderMergedBreakRecordsPage();
-        // 应用餐厅过滤
-        filterBreakRecordsByRestaurant();
-        updateStats();
+        applyBreakSearchAndRender();
     } catch (error) {
         console.error('加载破损记录时发生错误:', error);
         showAlert('加载破损记录失败: ' + error.message, 'error');
@@ -1463,7 +1460,7 @@ async function refreshSingleRestaurantBreakRecords(shopType, excludeRecordId = n
 }
 
 // 渲染合并的破损记录页面
-function renderMergedBreakRecordsPage() {
+function renderMergedBreakRecordsPage(overrideSearchTerm) {
     // 更新所有可能的容器
     const containers = [
         document.getElementById('break-records-container'),
@@ -1507,10 +1504,14 @@ function renderMergedBreakRecordsPage() {
     }
 
     let html = '';
+    const searchTerm = getDishwareSearchTerm(overrideSearchTerm).trim();
 
     jRestaurants.forEach(restaurant => {
         const shopType = restaurant.name.toLowerCase();
-        const records = breakRecordsData[shopType] || [];
+        let records = breakRecordsData[shopType] || [];
+        if (searchTerm) {
+            records = records.filter((record) => breakRecordMatchesSearch(record, searchTerm));
+        }
         const allSingles = getAllSingleDishwareForBreak();
         const totalBreakAmount = records.reduce((sum, record) => {
             const ch = record.chargeable_quantity != null ? record.chargeable_quantity : (record.break_quantity || 0);
@@ -4018,6 +4019,16 @@ function filterBreakRecordsByRestaurant() {
     });
 }
 
+// 破损记录页面：按搜索关键词过滤并重新渲染
+function applyBreakSearchAndRender(overrideSearchTerm) {
+    if (currentPage !== 'j1' && currentPage !== 'j2' && currentPage !== 'j3') {
+        return;
+    }
+    renderMergedBreakRecordsPage(overrideSearchTerm);
+    filterBreakRecordsByRestaurant();
+    updateStats();
+}
+
 // 转卖页面：按搜索关键词过滤并重新渲染
 function applyTransferSearchAndRender() {
     if (currentPage !== 'transfer') return;
@@ -4450,6 +4461,10 @@ function runDishwareSearch(overrideSearchTerm) {
         applyTransferSearchAndRender();
         return;
     }
+    if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') {
+        applyBreakSearchAndRender(overrideSearchTerm);
+        return;
+    }
     searchData(overrideSearchTerm);
 }
 
@@ -4490,6 +4505,24 @@ function dishwareItemMatchesSearch(item, searchTerm) {
     }
 
     return false;
+}
+
+function breakRecordMatchesSearch(record, searchTerm) {
+    if (!searchTerm) {
+        return true;
+    }
+
+    const fields = [
+        record.product_name || '',
+        record.code_number || '',
+        record.category || '',
+        String(record.break_quantity ?? ''),
+        String(record.chargeable_quantity ?? ''),
+        String(record.unit_price ?? ''),
+        String(record.total_price ?? '')
+    ];
+
+    return fields.join(' ').toLowerCase().includes(searchTerm);
 }
 
 function searchData(overrideSearchTerm) {
@@ -4544,6 +4577,18 @@ function resetFilters() {
     const categorySelect = document.getElementById('category-filter');
     if (searchInput) searchInput.value = '';
     if (categorySelect) categorySelect.value = '';
+
+    if (currentPage === 'transfer') {
+        transferRestaurantFilter = '';
+        applyTransferSearchAndRender();
+        return;
+    }
+
+    if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') {
+        breakRestaurantFilter = '';
+        applyBreakSearchAndRender('');
+        return;
+    }
 
     // 保持按编号排序
     filteredData = sortByCodeNumber(stockData);
@@ -4622,10 +4667,29 @@ function updateStats() {
         displayedRecords = setsData.length;
         totalRecords = setsData.length;
     } else if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') {
-        // 破损记录页面使用破损记录数据
-        const records = breakRecordsData[currentPage] || [];
-        displayedRecords = records.length;
-        totalRecords = records.length;
+        const searchTerm = getDishwareSearchTerm();
+        const jRestaurants = window.jRestaurantsForBreak || restaurants.filter(r => {
+            const lowerName = r.name.toLowerCase();
+            return lowerName.startsWith('j')
+                && lowerName !== '中央'
+                && lowerName !== '文化楼';
+        });
+        let displayed = 0;
+        let total = 0;
+
+        jRestaurants.forEach((restaurant) => {
+            const shopType = restaurant.name.toLowerCase();
+            const records = breakRecordsData[shopType] || [];
+            total += records.length;
+            if (searchTerm) {
+                displayed += records.filter((record) => breakRecordMatchesSearch(record, searchTerm)).length;
+            } else {
+                displayed += records.length;
+            }
+        });
+
+        displayedRecords = displayed;
+        totalRecords = total;
     } else {
         // 默认情况
         displayedRecords = 0;
@@ -5994,6 +6058,7 @@ function closeModal() {
             if (modal) {
                 modal.style.display = 'none';
                 modal.classList.remove('is-open');
+                modal.style.zIndex = '';
                 console.log(`模态框 ${modalId} 已隐藏`);
             } else {
                 console.warn(`找不到模态框: ${modalId}`);
@@ -6025,22 +6090,38 @@ function ensureDishwareModalOnBody(modalId) {
     return modal;
 }
 
-function showDishwareModal(modalId) {
+function showDishwareModal(modalId, options = {}) {
+    const keepOthersOpen = Boolean(options.keepOthersOpen);
     const modal = ensureDishwareModalOnBody(modalId);
     if (!modal) {
         return null;
     }
 
-    document.querySelectorAll('.modal.is-open').forEach((openModal) => {
-        if (openModal !== modal) {
-            openModal.classList.remove('is-open');
-            openModal.style.display = 'none';
-        }
-    });
+    if (!keepOthersOpen) {
+        document.querySelectorAll('.modal.is-open').forEach((openModal) => {
+            if (openModal !== modal) {
+                openModal.classList.remove('is-open');
+                openModal.style.display = 'none';
+                openModal.style.zIndex = '';
+            }
+        });
+    }
 
     modal.style.display = 'block';
     modal.classList.add('is-open');
+    modal.style.zIndex = keepOthersOpen ? '21000' : '';
     return modal;
+}
+
+function closeAddRestaurantModal() {
+    const addModal = document.getElementById('addRestaurantModal');
+    if (!addModal) {
+        return;
+    }
+
+    addModal.style.display = 'none';
+    addModal.classList.remove('is-open');
+    addModal.style.zIndex = '';
 }
 
 function openAddModal() {
@@ -6534,7 +6615,7 @@ function setupRestaurantFormSubmit() {
 
             if (result.success) {
                 showAlert(restaurantId ? '更新餐厅店面成功' : '添加餐厅店面成功', 'success');
-                closeRestaurantModal();
+                closeAddRestaurantModal();
                 await loadRestaurants();
                 loadRestaurantsList();
                 if (currentPage === 'stock') {
@@ -6564,6 +6645,10 @@ function setupModalCloseButtons(root) {
         }
         button.dataset.modalCloseBound = '1';
         button.addEventListener('click', function () {
+            if (button.closest('#restaurantModal') || button.closest('#addRestaurantModal')) {
+                closeRestaurantModal();
+                return;
+            }
             closeModal();
         });
     });
@@ -6575,6 +6660,10 @@ function setupModalCloseButtons(root) {
         if (button.textContent.includes('取消')) {
             button.dataset.modalCloseBound = '1';
             button.addEventListener('click', function () {
+                if (button.closest('#restaurantModal') || button.closest('#addRestaurantModal')) {
+                    closeRestaurantModal();
+                    return;
+                }
                 closeModal();
             });
         }
@@ -6583,7 +6672,37 @@ function setupModalCloseButtons(root) {
 
 let dishwareHeaderDelegationWired = false;
 let dishwareFormDelegationWired = false;
+let restaurantTableDelegationWired = false;
 let dishwareModalMarkupCache = '';
+
+function bindRestaurantTableActions() {
+    if (restaurantTableDelegationWired) {
+        return;
+    }
+
+    restaurantTableDelegationWired = true;
+    document.addEventListener('click', function (event) {
+        const editBtn = event.target.closest('#restaurants-tbody .edit-btn[data-restaurant-id]');
+        if (editBtn) {
+            event.preventDefault();
+            editRestaurant(Number(editBtn.dataset.restaurantId));
+            return;
+        }
+
+        const deleteBtn = event.target.closest('#restaurants-tbody .delete-btn[data-restaurant-id]');
+        if (deleteBtn) {
+            event.preventDefault();
+            deleteRestaurant(Number(deleteBtn.dataset.restaurantId));
+            return;
+        }
+
+        const addBtn = event.target.closest('#restaurantModal button[data-action="add-restaurant"]');
+        if (addBtn) {
+            event.preventDefault();
+            openAddRestaurantModal();
+        }
+    }, true);
+}
 
 function cacheDishwareModalMarkup(root) {
     const scope = root || document;
@@ -6789,6 +6908,7 @@ function finalizeDishwareStockDom(root) {
     setupEventListeners(root);
     bindDishwareHeaderButtons(root);
     bindDishwareFormHandlers();
+    bindRestaurantTableActions();
     setupModalCloseButtons(root);
     setupRestaurantFormSubmit();
     wireDishwareSearchInput(root);
@@ -6838,6 +6958,10 @@ window.toggleViewSelector = toggleViewSelector;
 window.handleAddDishwareHeaderClick = handleAddDishwareHeaderClick;
 window.openAddModal = openAddModal;
 window.openRestaurantModal = openRestaurantModal;
+window.openAddRestaurantModal = openAddRestaurantModal;
+window.closeRestaurantModal = closeRestaurantModal;
+window.editRestaurant = editRestaurant;
+window.deleteRestaurant = deleteRestaurant;
 window.refreshDishwareSearch = runDishwareSearch;
 window.finalizeDishwareStockDom = finalizeDishwareStockDom;
 window.cleanupDishwareModalsFromBody = cleanupDishwareModalsFromBody;
@@ -7454,15 +7578,20 @@ function openRestaurantModal() {
 function closeRestaurantModal() {
     const modal = document.getElementById('restaurantModal');
     const addModal = document.getElementById('addRestaurantModal');
+    const addOpen = addModal && (addModal.classList.contains('is-open') || addModal.style.display === 'block');
+    const listOpen = modal && (modal.classList.contains('is-open') || modal.style.display === 'block');
+
+    if (addOpen && listOpen) {
+        closeAddRestaurantModal();
+        return;
+    }
+
+    closeAddRestaurantModal();
     if (modal) {
         modal.style.display = 'none';
-        console.log('餐厅店面管理模态框已关闭');
+        modal.classList.remove('is-open');
+        modal.style.zIndex = '';
     }
-    if (addModal) {
-        addModal.style.display = 'none';
-        console.log('添加餐厅店面模态框已关闭');
-    }
-    // 也调用通用的 closeModal 以确保所有模态框都被关闭
     closeModal();
 }
 
@@ -7479,10 +7608,10 @@ async function loadRestaurantsList() {
                                     <td>${index + 1}</td>
                                     <td>${restaurant.name}</td>
                                     <td>
-                                        <button class="action-btn edit-btn" onclick="editRestaurant(${restaurant.id})" title="编辑">
+                                        <button type="button" class="action-btn edit-btn" data-restaurant-id="${restaurant.id}" title="编辑">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        <button class="action-btn delete-btn" onclick="deleteRestaurant(${restaurant.id})" title="删除">
+                                        <button type="button" class="action-btn delete-btn" data-restaurant-id="${restaurant.id}" title="删除">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </td>
@@ -7503,22 +7632,27 @@ async function loadRestaurantsList() {
 
 // 打开添加/编辑餐厅店面模态框
 function openAddRestaurantModal(restaurantId = null) {
-    const modal = document.getElementById('addRestaurantModal');
     const form = document.getElementById('restaurant-form');
     const title = document.getElementById('restaurant-modal-title');
 
-    if (modal && form) {
-        if (restaurantId) {
-            // 编辑模式
-            if (title) title.textContent = '编辑餐厅店面';
-            loadRestaurantData(restaurantId);
-        } else {
-            // 添加模式
-            if (title) title.textContent = '添加餐厅店面';
-            form.reset();
-            document.getElementById('restaurant-id').value = '';
-        }
-        modal.style.display = 'block';
+    if (!form) {
+        return;
+    }
+
+    if (restaurantId) {
+        if (title) title.textContent = '编辑餐厅店面';
+        loadRestaurantData(restaurantId);
+    } else {
+        if (title) title.textContent = '添加餐厅店面';
+        form.reset();
+        document.getElementById('restaurant-id').value = '';
+    }
+
+    const modal = showDishwareModal('addRestaurantModal', { keepOthersOpen: true });
+    if (modal) {
+        window.requestAnimationFrame(() => {
+            document.getElementById('restaurant-name')?.focus();
+        });
     }
 }
 
