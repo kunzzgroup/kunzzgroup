@@ -88,7 +88,23 @@ body {
     flex-wrap: wrap;
 }
 
-/* ─── Search Input ──────────────────────────────────── */
+.header-search {
+    flex: none;
+    display: flex;
+    align-items: center;
+}
+
+.header-search .smartSearchWrapper {
+    width: 40px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.header-search .smartSearchWrapper.expanded {
+    width: 250px;
+}
+
+/* ─── Search Input (legacy) ──────────────────────────────────── */
 .search-wrapper {
     position: relative;
     display: flex;

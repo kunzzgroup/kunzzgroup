@@ -294,7 +294,7 @@ export function useStockListAll() {
   }, [system]);
 
   const goToMinimumSettings = useCallback(() => {
-    window.location.href = `${getBackendBase()}/stockminimum.php?system=${system}`;
+    window.location.href = `${getBackendBase()}/stockminimum-v2?system=${system}`;
   }, [system]);
 
   const openExport = useCallback(() => {

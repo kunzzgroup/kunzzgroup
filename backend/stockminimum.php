@@ -3,50 +3,20 @@ require_once __DIR__ . '/permission_guard.php';
 requirePermission('resource', 'stock_inventory');
 
 if (!headers_sent()) {
-    header("Cache-Control: max-age=0, no-cache, no-store, must-revalidate, proxy-revalidate");
-    header("Pragma: no-cache");
-    header("Expires: Wed, 11 Jan 1984 05:00:00 GMT");
+    header('Cache-Control: max-age=0, no-cache, no-store, must-revalidate, proxy-revalidate');
+    header('Pragma: no-cache');
+    header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
 }
-?>
-<?php
+
+require_once __DIR__ . '/session_check.php';
+
 $system = isset($_GET['system']) ? $_GET['system'] : 'central';
-$valid_systems = ['central', 'j1', 'j2', 'j3'];
-if (!in_array($system, $valid_systems)) $system = 'central';
+require_once __DIR__ . '/partials/stockminimum_context.php';
 
-// 权限检查：如果用户没有该系统权限，跳转到最优先的授权系统
-if (!hasStockSystemPermission($system)) {
-    // 找到用户有权限的第一个系统
-    $fallback = null;
-    foreach ($valid_systems as $s) {
-        if (hasStockSystemPermission($s)) {
-            $fallback = $s;
-            break;
-        }
-    }
-    if ($fallback) {
-        header('Location: stockminimum.php?system=' . $fallback);
-        exit;
-    } else {
-        // 全部系统都无权限
-        requirePermission('resource', '__none__'); // 触发 403
-    }
+if (isset($_GET['system']) && $_GET['system'] !== $system) {
+    header('Location: stockminimum.php?system=' . urlencode($system));
+    exit;
 }
-
-// 构建当前用户可访问的系统列表
-$allowed_systems = [];
-foreach ($valid_systems as $s) {
-    if (hasStockSystemPermission($s)) {
-        $allowed_systems[] = $s;
-    }
-}
-
-$system_names = [
-    'central' => '中央',
-    'j1' => 'J1',
-    'j2' => 'J2',
-    'j3' => 'J3'
-];
-$display_name = $system_names[$system];
 ?>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -56,94 +26,17 @@ $display_name = $system_names[$system];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>最低库存设置 - 库存管理系统</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="/backend/css/toast.css">
-    <link rel="stylesheet" href="/backend/css/stockminimum.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/toast.css">
+    <link rel="stylesheet" href="css/smartSearch.css">
+    <link rel="stylesheet" href="css/stockminimum.css?v=<?php echo time(); ?>">
 </head>
 <body>
-    <div class="container">
-
-        <!-- Header -->
-        <div class="header">
-            <div class="header-left">
-                <h1 id="page-title">最低库存设置 — <?php echo $display_name; ?></h1>
-            </div>
-            <div class="header-right-group">
-                <button class="btn btn-secondary" onclick="goBack()">
-                    <i class="fas fa-arrow-left"></i> 返回库存管理
-                </button>
-            </div>
-        </div>
-
-        <!-- Controls Bar: Tabs + Search + Batch Save -->
-        <div class="controls-bar">
-            <div class="system-tabs">
-                <?php if (in_array('central', $allowed_systems)): ?>
-                <button class="tab-btn <?php echo $system === 'central' ? 'active' : ''; ?>" data-system="central" onclick="switchSystem('central')">
-                    <i class="fas fa-warehouse"></i> 中央
-                </button>
-                <?php endif; ?>
-                <?php if (in_array('j1', $allowed_systems)): ?>
-                <button class="tab-btn <?php echo $system === 'j1' ? 'active' : ''; ?>" data-system="j1" onclick="switchSystem('j1')">
-                    <i class="fas fa-store"></i> J1
-                </button>
-                <?php endif; ?>
-                <?php if (in_array('j2', $allowed_systems)): ?>
-                <button class="tab-btn <?php echo $system === 'j2' ? 'active' : ''; ?>" data-system="j2" onclick="switchSystem('j2')">
-                    <i class="fas fa-store"></i> J2
-                </button>
-                <?php endif; ?>
-                <?php if (in_array('j3', $allowed_systems)): ?>
-                <button class="tab-btn <?php echo $system === 'j3' ? 'active' : ''; ?>" data-system="j3" onclick="switchSystem('j3')">
-                    <i class="fas fa-store"></i> J3
-                </button>
-                <?php endif; ?>
-            </div>
-            <div class="controls-right">
-                <div class="search-wrapper">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="unified-filter" class="search-input" placeholder="搜索货品名称或编号...">
-                </div>
-                <button class="btn btn-warning" onclick="saveAllSettings()" id="saveAllBtn">
-                    <i class="fas fa-save"></i> 批量保存
-                </button>
-            </div>
-        </div>
-
-        <!-- Table Container -->
-        <div class="table-container">
-            <div class="table-header">
-                <h3 id="table-title">最低库存设置 — <?php echo $display_name; ?></h3>
-                <div id="table-stats">
-                    显示 <span id="displayed-count">0</span> 个货品
-                </div>
-            </div>
-
-            <div class="table-scroll-container">
-                <table class="settings-table" id="settings-table">
-                    <thead>
-                        <tr>
-                            <th>序号</th>
-                            <th>货品编号</th>
-                            <th>货品名称</th>
-                            <th>规格</th>
-                            <th>最低库存数量</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="settings-tbody">
-                        <!-- Dynamic content -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <script src="/backend/js/toast.js"></script>
+    <?php include __DIR__ . '/partials/stockminimum_content.php'; ?>
     <script>
-        const INITIAL_SYSTEM = '<?php echo $system; ?>';
-        // 传递当前用户允许的系统列表到 JS，防止前端绕过权限
+        const INITIAL_SYSTEM = <?php echo json_encode($system); ?>;
         const ALLOWED_SYSTEMS = <?php echo json_encode($allowed_systems); ?>;
     </script>
+    <script src="js/toast.js"></script>
     <script src="js/stockminimum.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

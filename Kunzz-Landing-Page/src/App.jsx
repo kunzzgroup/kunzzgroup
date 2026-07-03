@@ -20,6 +20,7 @@ import StockEditAllPage from './backend/pages/StockEditAllPage.jsx';
 import StockRemarkPage from './backend/pages/StockRemarkPage.jsx';
 import StockProductNamePage from './backend/pages/StockProductNamePage.jsx';
 import StockSotPage from './backend/pages/StockSotPage.jsx';
+import StockMinimumPage from './backend/pages/StockMinimumPage.jsx';
 
 function AppRoutes() {
   return (
@@ -45,6 +46,7 @@ function AppRoutes() {
         <Route path="/backend/stockremark-v2" element={<StockRemarkPage />} />
         <Route path="/backend/stockproductname-v2" element={<StockProductNamePage />} />
         <Route path="/backend/stocksot-v2" element={<StockSotPage />} />
+        <Route path="/backend/stockminimum-v2" element={<StockMinimumPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
