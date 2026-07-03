@@ -1,11 +1,17 @@
 
 // API 配置
 const API_BASE_URL = 'dishware_api.php';
+let dishwareStockBooted = false;
+
+function isDishwareReactV2Page() {
+    return /dishware_stock-v2/.test(window.location.pathname || '');
+}
 
 // 应用状态
 let stockData = [];
 let filteredData = [];
 let isLoading = false;
+let isSubmittingAdd = false;
 let currentEditId = null;
 let totalQuantity = 0;
 let selectedPhoto = null;
@@ -154,7 +160,7 @@ function sortByCodeNumber(data) {
 }
 
 // 初始化应用
-async function initApp() {
+async function initApp(contentRoot) {
     // 读取 URL 参数以确定初始页面
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam = urlParams.get('tab');
@@ -163,21 +169,15 @@ async function initApp() {
     }
 
     await loadRestaurants(); // 先加载餐厅店面列表
-    
-    // 如果初始页面不是总库存，不需要在这里加载全部库存数据
-    if (currentPage === 'stock') {
-        loadStockData();
-    }
-    
-    setupEventListeners();
+
     setupRealTimeSearch();
     setupPageSwitcher();
     setupSetFormSubmit();
 
-    // 根据初始页面执行相应的展示逻辑
     if (currentPage === 'stock') {
         updatePageHeader(currentPage);
-        switchStockView(stockViewType);
+        applyStockViewUi(stockViewType);
+        await loadStockData();
     } else {
         switchPage(currentPage, true);
     }
@@ -198,19 +198,7 @@ async function initApp() {
         }
     });
 
-    // 测试模态框关闭功能
-    console.log('应用初始化完成，测试模态框功能...');
-    setTimeout(() => {
-        const closeButtons = document.querySelectorAll('.close');
-        console.log('找到关闭按钮数量:', closeButtons.length);
-        closeButtons.forEach((btn, index) => {
-            console.log(`关闭按钮 ${index}:`, btn);
-            btn.addEventListener('click', function () {
-                console.log('关闭按钮被点击');
-                closeModal();
-            });
-        });
-    }, 1000);
+    finalizeDishwareStockDom(contentRoot);
 }
 
 // 加载餐厅店面列表
@@ -942,7 +930,10 @@ function setupPageSwitcher() {
 
 // 切换页面选择器下拉菜单
 function toggleViewSelector() {
-    document.getElementById('view-selector-dropdown').classList.toggle('show');
+    const dropdown = document.getElementById('view-selector-dropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('show');
+    }
 }
 
 // 页面切换函数
@@ -1019,7 +1010,10 @@ function switchPage(pageType, isInit = false) {
     updateStats();
 
     // 隐藏下拉菜单
-    document.getElementById('view-selector-dropdown').classList.remove('show');
+    const viewDropdown = document.getElementById('view-selector-dropdown');
+    if (viewDropdown) {
+        viewDropdown.classList.remove('show');
+    }
 }
 
 // 更新页面头部
@@ -1086,7 +1080,7 @@ function updatePageHeader(pageType) {
 }
 
 // 切换总库存页面的视图（碗碟/套装）
-function switchStockView(viewType) {
+function applyStockViewUi(viewType) {
     stockViewType = viewType;
 
     const dishwareView = document.getElementById('dishware-view');
@@ -1105,8 +1099,6 @@ function switchStockView(viewType) {
             setsViewBtn.style.background = 'white';
             setsViewBtn.style.color = '#333';
         }
-        // 加载碗碟数据
-        loadStockData();
     } else if (viewType === 'sets') {
         if (dishwareView) dishwareView.style.display = 'none';
         if (setsView) setsView.style.display = '';
@@ -1118,11 +1110,20 @@ function switchStockView(viewType) {
             setsViewBtn.style.background = '#f99e00';
             setsViewBtn.style.color = 'white';
         }
-        // 加载套装数据
-        loadSetsData();
     }
 
     updateStockAddButton();
+}
+
+function switchStockView(viewType) {
+    applyStockViewUi(viewType);
+
+    if (viewType === 'dishware') {
+        loadStockData();
+    } else if (viewType === 'sets') {
+        loadSetsData();
+    }
+
     updateStats();
 }
 
@@ -1163,13 +1164,13 @@ function updateStockAddButton() {
 
     if (stockViewType === 'dishware') {
         addButton.innerHTML = '<i class="fas fa-plus"></i> 添加碗碟';
-        addButton.onclick = () => openAddModal();
         addButton.style.display = 'inline-flex';
     } else {
         addButton.innerHTML = '<i class="fas fa-plus"></i> 添加套装';
-        addButton.onclick = () => openSetModal();
         addButton.style.display = 'inline-flex';
     }
+
+    bindAddDishwareButton(addButton);
 }
 
 // 加载页面数据
@@ -3500,15 +3501,19 @@ function setupSetRowHoverEffect() {
 
 
 // 设置事件监听器
-function setupEventListeners() {
+function setupEventListeners(root) {
+    const scope = root || document;
+
     // 套装行hover效果处理
     setupSetRowHoverEffect();
 
     // 添加表单照片上传
-    const addPhotoInput = document.getElementById('add-photo');
-    const addPhotoUploadArea = document.querySelector('#addModal .photo-upload-area');
+    const addPhotoInput = scope.querySelector('#add-photo') || document.getElementById('add-photo');
+    const addPhotoUploadArea = scope.querySelector('#addModal .photo-upload-area')
+        || document.querySelector('#addModal .photo-upload-area');
 
-    if (addPhotoInput && addPhotoUploadArea) {
+    if (addPhotoInput && addPhotoUploadArea && addPhotoInput.dataset.dishwarePhotoBound !== '1') {
+        addPhotoInput.dataset.dishwarePhotoBound = '1';
         addPhotoInput.addEventListener('change', handleAddPhotoSelect);
 
         // 拖拽上传
@@ -3518,10 +3523,12 @@ function setupEventListeners() {
     }
 
     // 编辑表单照片上传
-    const editPhotoInput = document.getElementById('edit-photo');
-    const editPhotoUploadArea = document.querySelector('#editModal .photo-upload-area');
+    const editPhotoInput = scope.querySelector('#edit-photo') || document.getElementById('edit-photo');
+    const editPhotoUploadArea = scope.querySelector('#editModal .photo-upload-area')
+        || document.querySelector('#editModal .photo-upload-area');
 
-    if (editPhotoInput && editPhotoUploadArea) {
+    if (editPhotoInput && editPhotoUploadArea && editPhotoInput.dataset.dishwarePhotoBound !== '1') {
+        editPhotoInput.dataset.dishwarePhotoBound = '1';
         editPhotoInput.addEventListener('change', handleEditPhotoSelect);
 
         // 拖拽上传
@@ -3531,18 +3538,21 @@ function setupEventListeners() {
     }
 
     // 表单提交
-    const addForm = document.getElementById('add-form');
+    const addForm = scope.querySelector('#add-form') || document.getElementById('add-form');
     if (addForm) {
-        addForm.addEventListener('submit', handleAddFormSubmit);
+        addForm.removeAttribute('action');
+        addForm.dataset.dishwareSubmitBound = '1';
     }
 
-    const editForm = document.getElementById('edit-form');
-    if (editForm) {
+    const editForm = scope.querySelector('#edit-form') || document.getElementById('edit-form');
+    if (editForm && editForm.dataset.dishwareSubmitBound !== '1') {
+        editForm.dataset.dishwareSubmitBound = '1';
         editForm.addEventListener('submit', handleEditFormSubmit);
     }
 
-    const damageForm = document.getElementById('damage-form');
-    if (damageForm) {
+    const damageForm = scope.querySelector('#damage-form') || document.getElementById('damage-form');
+    if (damageForm && damageForm.dataset.dishwareSubmitBound !== '1') {
+        damageForm.dataset.dishwareSubmitBound = '1';
         damageForm.addEventListener('submit', handleDamageFormSubmit);
     }
 }
@@ -4038,24 +4048,7 @@ function filterTransferRecordsByRestaurant() {
 
 // 设置实时搜索
 function setupRealTimeSearch() {
-    const searchInput = document.getElementById('unified-filter');
     const categorySelect = document.getElementById('category-filter');
-
-    // 防抖处理，避免频繁搜索
-    let debounceTimer;
-
-    if (searchInput) {
-        searchInput.addEventListener('input', function () {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                if (currentPage === 'transfer') {
-                    applyTransferSearchAndRender();
-                    return;
-                }
-                searchData();
-            }, 300);
-        });
-    }
 
     if (categorySelect) {
         // 移除所有可能的事件监听器
@@ -4076,6 +4069,27 @@ function setupRealTimeSearch() {
 
 
 
+function resolveDishwareApiUrl(endpoint) {
+    const configuredBase = window.__KUNZZ_BACKEND_BASE__
+        || (document.querySelector('base')?.href || '').replace(/\/$/, '');
+    const path = `${API_BASE_URL}${endpoint || ''}`;
+
+    if (/^https?:\/\//i.test(path)) {
+        return path;
+    }
+
+    if (configuredBase) {
+        return `${configuredBase}/${path.replace(/^\//, '')}`;
+    }
+
+    const pathMatch = window.location.pathname.match(/^(.*\/backend)(?:\/|$)/i);
+    if (pathMatch) {
+        return `${pathMatch[1]}/${path.replace(/^\//, '')}`;
+    }
+
+    return path;
+}
+
 // API 调用函数
 async function apiCall(endpoint, options = {}) {
     try {
@@ -4090,8 +4104,9 @@ async function apiCall(endpoint, options = {}) {
             delete headers['Content-Type'];
         }
 
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        const response = await fetch(resolveDishwareApiUrl(endpoint), {
             ...options,
+            credentials: 'include',
             headers: headers
         });
 
@@ -4405,9 +4420,56 @@ function getStockDataForDisplay(base) {
 }
 
 // 搜索数据
-function searchData() {
-    const searchTerm = document.getElementById('unified-filter').value.toLowerCase();
-    const categoryFilter = document.getElementById('category-filter').value;
+function runDishwareSearch(overrideSearchTerm) {
+    if (currentPage === 'transfer') {
+        applyTransferSearchAndRender();
+        return;
+    }
+    searchData(overrideSearchTerm);
+}
+
+window.refreshDishwareSearch = runDishwareSearch;
+
+function getDishwareSearchTerm(overrideSearchTerm) {
+    if (overrideSearchTerm !== undefined && overrideSearchTerm !== null) {
+        return String(overrideSearchTerm).toLowerCase();
+    }
+    return (document.getElementById('unified-filter')?.value || '').toLowerCase();
+}
+
+function dishwareItemMatchesSearch(item, searchTerm) {
+    if (!searchTerm) {
+        return true;
+    }
+
+    const fields = [
+        item.product_name || '',
+        item.code_number || '',
+        item.category || '',
+        item.size || '',
+        item.set_name || '',
+        item.set_code || ''
+    ];
+
+    if (fields.join(' ').toLowerCase().includes(searchTerm)) {
+        return true;
+    }
+
+    if (item.items && Array.isArray(item.items)) {
+        return item.items.some((setItem) => [
+            setItem.product_name || '',
+            setItem.code_number || '',
+            setItem.category || '',
+            setItem.size || ''
+        ].join(' ').toLowerCase().includes(searchTerm));
+    }
+
+    return false;
+}
+
+function searchData(overrideSearchTerm) {
+    const searchTerm = getDishwareSearchTerm(overrideSearchTerm);
+    const categoryFilter = document.getElementById('category-filter')?.value || '';
 
     // 如果没有搜索关键词和分类过滤，使用全部数据
     if (!searchTerm && !categoryFilter) {
@@ -4419,14 +4481,7 @@ function searchData() {
     }
 
     filteredData = stockData.filter(item => {
-        const searchText = [
-            item.product_name || '',
-            item.code_number || '',
-            item.category || '',
-            item.size || ''
-        ].join(' ').toLowerCase();
-
-        const matchesSearch = searchText.includes(searchTerm);
+        const matchesSearch = dishwareItemMatchesSearch(item, searchTerm);
 
         // 对于套装，需要检查套装中的items是否有匹配的分类
         let matchesCategory = true;
@@ -4460,8 +4515,10 @@ function searchData() {
 
 // 重置搜索过滤器
 function resetFilters() {
-    document.getElementById('unified-filter').value = '';
-    document.getElementById('category-filter').value = '';
+    const searchInput = document.getElementById('unified-filter');
+    const categorySelect = document.getElementById('category-filter');
+    if (searchInput) searchInput.value = '';
+    if (categorySelect) categorySelect.value = '';
 
     // 保持按编号排序
     filteredData = sortByCodeNumber(stockData);
@@ -4474,11 +4531,11 @@ function resetFilters() {
 // 设置加载状态
 function setLoadingState(loading) {
     const tbody = document.getElementById('stock-tbody');
-    const tableContainer = document.querySelector('.table-container');
+    const tableContainer = document.querySelector('#single-table-container.table-container')
+        || document.querySelector('.table-container');
 
     if (loading) {
-        // 保持表格高度稳定，避免跳动
-        const currentHeight = tbody.offsetHeight;
+        const currentHeight = tbody ? tbody.offsetHeight : 200;
 
         // 创建一个覆盖整个表格容器的加载状态
         const loadingOverlay = document.createElement('div');
@@ -4509,12 +4566,13 @@ function setLoadingState(loading) {
             tableContainer.appendChild(loadingOverlay);
         }
 
-        // 清空表格内容但保持结构
-        tbody.innerHTML = `
+        if (tbody) {
+            tbody.innerHTML = `
                     <tr>
                         <td colspan="14" style="padding: 0; height: ${Math.max(currentHeight, 200)}px; visibility: hidden;"></td>
                     </tr>
                 `;
+        }
     } else {
         // 移除加载覆盖层
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -4802,7 +4860,7 @@ function renderStockTable() {
 }
 
 // 按分类分组渲染库存表格
-function renderStockTableByCategory() {
+function renderStockTableByCategory(dataSource) {
     const categoriesContainer = document.getElementById('categories-container');
     const singleTableContainer = document.getElementById('single-table-container');
 
@@ -4812,8 +4870,11 @@ function renderStockTableByCategory() {
     categoriesContainer.classList.add('show');
     if (singleTableContainer) singleTableContainer.style.display = 'none';
 
-    const dataToShow = getStockDataForDisplay(stockData);
+    const sourceData = dataSource || stockData;
+    const dataToShow = getStockDataForDisplay(sourceData);
     if (!dataToShow || dataToShow.length === 0) {
+        if (singleTableContainer) singleTableContainer.style.display = 'none';
+        categoriesContainer.classList.add('show');
         categoriesContainer.innerHTML = `
                     <div class="category-section">
                         <div class="category-header">
@@ -5907,6 +5968,7 @@ function closeModal() {
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.style.display = 'none';
+                modal.classList.remove('is-open');
                 console.log(`模态框 ${modalId} 已隐藏`);
             } else {
                 console.warn(`找不到模态框: ${modalId}`);
@@ -5921,7 +5983,7 @@ function closeModal() {
         // 清理套装相关变量
         window.currentSetId = null;
         window.currentSetMembers = [];
-        resetAddForm();
+        resetAddFormSafe();
         resetEditForm();
         console.log('模态框关闭完成');
     } catch (error) {
@@ -5930,13 +5992,52 @@ function closeModal() {
 }
 
 // 打开添加碗碟模态框
+function ensureDishwareModalOnBody(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal && modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+    }
+    return modal;
+}
+
+function showDishwareModal(modalId) {
+    const modal = ensureDishwareModalOnBody(modalId);
+    if (!modal) {
+        return null;
+    }
+
+    document.querySelectorAll('.modal.is-open').forEach((openModal) => {
+        if (openModal !== modal) {
+            openModal.classList.remove('is-open');
+            openModal.style.display = 'none';
+        }
+    });
+
+    modal.style.display = 'block';
+    modal.classList.add('is-open');
+    return modal;
+}
+
 function openAddModal() {
-    document.getElementById('addModal').style.display = 'block';
+    ensureDishwareModalsExist(document.querySelector('[data-dishware-content-root]'));
+    const modal = showDishwareModal('addModal');
+    if (!modal) {
+        console.warn('找不到 addModal 模态框');
+        showAlert('无法打开添加窗口，请刷新页面后重试', 'error');
+        return;
+    }
+    resetAddFormSafe();
+    window.requestAnimationFrame(() => {
+        document.getElementById('add-product-name')?.focus();
+    });
 }
 
 // 重置添加表单
-function resetAddForm() {
-    document.getElementById('add-form').reset();
+function resetAddFormSafe() {
+    const form = document.getElementById('add-form');
+    if (!form) return;
+
+    form.reset();
     selectedPhoto = null;
     const preview = document.getElementById('add-photo-preview');
     const uploadArea = preview?.closest('.photo-upload-area');
@@ -5950,6 +6051,10 @@ function resetAddForm() {
         if (text) text.style.display = '';
         if (hint) hint.style.display = '';
     }
+}
+
+function resetAddForm() {
+    resetAddFormSafe();
 }
 
 
@@ -5980,26 +6085,55 @@ function resetEditForm() {
 
 // 处理添加表单提交
 async function handleAddFormSubmit(event) {
-    event.preventDefault();
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
 
-    if (isLoading) return;
+    if (isSubmittingAdd) {
+        return;
+    }
+
+    const form = document.getElementById('add-form');
+    if (!form) {
+        console.warn('找不到 add-form 表单');
+        showAlert('无法保存：找不到添加表单', 'error');
+        return;
+    }
 
     const formData = new FormData();
-    const form = event.target;
+    const productName = form.product_name?.value?.trim() || '';
+    const category = form.category?.value || '';
+    const codeNumber = (form.code_number?.value || '').trim();
+    const size = form.size?.value || '';
+    const unitPrice = form.unit_price?.value || '';
+
+    if (!productName) {
+        showAlert('请输入碗碟名称', 'error');
+        form.product_name?.focus();
+        return;
+    }
+
+    if (!category) {
+        showAlert('请选择分类', 'error');
+        form.category?.focus();
+        return;
+    }
 
     // 添加表单数据
     formData.append('action', 'add');
-    formData.append('product_name', form.product_name.value);
+    formData.append('product_name', productName);
 
-    // 自动组合完整的产品编号
-    const category = form.category.value;
-    const codeNumber = form.code_number.value;
-    const fullCodeNumber = category && codeNumber ? category + codeNumber : codeNumber;
+    // 自动组合完整的产品编号（若已含分类前缀则不再重复拼接）
+    let fullCodeNumber = codeNumber;
+    if (codeNumber && category && !codeNumber.toUpperCase().startsWith(category.toUpperCase())) {
+        fullCodeNumber = category + codeNumber;
+    }
     formData.append('code_number', fullCodeNumber);
 
-    formData.append('category', form.category.value);
-    formData.append('size', form.size.value);
-    formData.append('unit_price', form.unit_price.value);
+    formData.append('category', category);
+    formData.append('size', size);
+    formData.append('unit_price', unitPrice);
 
     // 如果有照片，先上传照片
     if (selectedPhoto) {
@@ -6008,8 +6142,9 @@ async function handleAddFormSubmit(event) {
             photoFormData.append('action', 'upload_photo');
             photoFormData.append('photo', selectedPhoto);
 
-            const photoResponse = await fetch(API_BASE_URL, {
+            const photoResponse = await fetch(resolveDishwareApiUrl(''), {
                 method: 'POST',
+                credentials: 'include',
                 body: photoFormData
             });
 
@@ -6029,32 +6164,36 @@ async function handleAddFormSubmit(event) {
 
     // 提交碗碟信息
     try {
-        isLoading = true;
+        isSubmittingAdd = true;
         setAddLoadingState(true);
 
-        const response = await fetch(API_BASE_URL, {
+        const response = await fetch(resolveDishwareApiUrl(''), {
             method: 'POST',
+            credentials: 'include',
             body: formData
         });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || `HTTP ${response.status}`);
+        }
 
         const result = await response.json();
 
         if (result.success) {
             showAlert('碗碟信息保存成功！', 'success');
             closeModal();
-            // 平滑重新加载数据，不显示加载状态
-            setTimeout(() => {
-                loadStockData(true, false);
-            }, 200);
+            await loadStockData(true, false);
+            runDishwareSearch();
         } else {
-            showAlert('保存失败：' + result.message, 'error');
+            showAlert('保存失败：' + (result.message || '未知错误'), 'error');
         }
 
     } catch (error) {
         console.error('添加碗碟时发生错误:', error);
         showAlert('添加碗碟失败: ' + error.message, 'error');
     } finally {
-        isLoading = false;
+        isSubmittingAdd = false;
         setAddLoadingState(false);
     }
 }
@@ -6062,6 +6201,7 @@ async function handleAddFormSubmit(event) {
 // 设置添加表单加载状态
 function setAddLoadingState(loading) {
     const button = document.getElementById('add-submit-btn');
+    if (!button) return;
 
     if (loading) {
         button.disabled = true;
@@ -6333,8 +6473,357 @@ function exportData() {
 
 // 添加关闭所有通知的函数（可选）
 
-// 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', initApp);
+function setupRestaurantFormSubmit() {
+    const restaurantForm = document.getElementById('restaurant-form');
+    if (!restaurantForm || restaurantForm.dataset.submitBound === '1') {
+        return;
+    }
+
+    restaurantForm.dataset.submitBound = '1';
+    restaurantForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const restaurantId = document.getElementById('restaurant-id').value;
+        const name = document.getElementById('restaurant-name').value.trim();
+
+        if (!name) {
+            showAlert('请输入餐厅店面名称', 'error');
+            return;
+        }
+
+        try {
+            const action = restaurantId ? 'update_restaurant' : 'add_restaurant';
+            const data = {
+                action: action,
+                name: name
+            };
+
+            if (restaurantId) {
+                data.id = restaurantId;
+            }
+
+            const result = await apiCall('', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            if (result.success) {
+                showAlert(restaurantId ? '更新餐厅店面成功' : '添加餐厅店面成功', 'success');
+                closeRestaurantModal();
+                await loadRestaurants();
+                loadRestaurantsList();
+                if (currentPage === 'stock') {
+                    loadStockData();
+                } else if (currentPage === 'stock' && stockViewType === 'sets') {
+                    loadSetsData();
+                } else if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') {
+                    loadAllBreakRecords();
+                }
+                updateTableHeaders();
+            } else {
+                showAlert((restaurantId ? '更新' : '添加') + '餐厅店面失败: ' + (result.message || '未知错误'), 'error');
+            }
+        } catch (error) {
+            console.error('保存餐厅店面时发生错误:', error);
+            showAlert((restaurantId ? '更新' : '添加') + '餐厅店面失败: ' + error.message, 'error');
+        }
+    });
+}
+
+function setupModalCloseButtons(root) {
+    const scope = root || document;
+
+    scope.querySelectorAll('.close').forEach((button) => {
+        if (button.dataset.modalCloseBound === '1') {
+            return;
+        }
+        button.dataset.modalCloseBound = '1';
+        button.addEventListener('click', function () {
+            closeModal();
+        });
+    });
+
+    scope.querySelectorAll('.btn-secondary').forEach((button) => {
+        if (button.dataset.modalCloseBound === '1') {
+            return;
+        }
+        if (button.textContent.includes('取消')) {
+            button.dataset.modalCloseBound = '1';
+            button.addEventListener('click', function () {
+                closeModal();
+            });
+        }
+    });
+}
+
+let dishwareHeaderDelegationWired = false;
+let dishwareFormDelegationWired = false;
+let dishwareModalMarkupCache = '';
+
+function cacheDishwareModalMarkup(root) {
+    const scope = root || document;
+    const modals = scope.querySelectorAll('.modal');
+    if (!modals.length) {
+        return;
+    }
+
+    const holder = document.createElement('div');
+    modals.forEach((modal) => {
+        holder.appendChild(modal.cloneNode(true));
+    });
+    dishwareModalMarkupCache = holder.innerHTML;
+}
+
+function ensureDishwareModalsExist(root) {
+    const requiredModalIds = ['addModal', 'editModal', 'restaurantModal'];
+    const missingModal = requiredModalIds.some((id) => !document.getElementById(id));
+    if (!missingModal) {
+        return;
+    }
+
+    if (!dishwareModalMarkupCache) {
+        cacheDishwareModalMarkup(root);
+    }
+
+    if (!dishwareModalMarkupCache) {
+        console.warn('碗碟模态框缺失且无法从缓存恢复');
+        return;
+    }
+
+    const holder = document.createElement('div');
+    holder.innerHTML = dishwareModalMarkupCache;
+    while (holder.firstChild) {
+        document.body.appendChild(holder.firstChild);
+    }
+}
+
+function bindDishwareFormHandlers() {
+    if (dishwareFormDelegationWired) {
+        return;
+    }
+
+    dishwareFormDelegationWired = true;
+    document.addEventListener('submit', function (event) {
+        const form = event.target;
+        if (!form || form.id !== 'add-form') {
+            return;
+        }
+        handleAddFormSubmit(event);
+    }, true);
+
+    document.addEventListener('click', function (event) {
+        const submitBtn = event.target.closest('#add-submit-btn');
+        if (!submitBtn) {
+            return;
+        }
+
+        const form = submitBtn.closest('#add-form');
+        if (!form) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (typeof form.requestSubmit === 'function') {
+            form.requestSubmit(submitBtn);
+        } else {
+            handleAddFormSubmit(event);
+        }
+    });
+}
+
+function mountDishwareModalsToBody(root) {
+    ensureDishwareModalsExist(root);
+
+    const scope = root || document;
+    const freshModals = Array.from(scope.querySelectorAll('.modal'));
+    if (!freshModals.length) {
+        document.querySelectorAll('body > .modal').forEach((modal) => {
+            if (modal.parentElement !== document.body) {
+                document.body.appendChild(modal);
+            }
+        });
+        return;
+    }
+
+    freshModals.forEach((modal) => {
+        if (modal.id) {
+            document.querySelectorAll('.modal').forEach((node) => {
+                if (node.id === modal.id && node !== modal) {
+                    node.remove();
+                }
+            });
+        }
+
+        if (modal.parentElement !== document.body) {
+            document.body.appendChild(modal);
+        }
+    });
+
+    if (!dishwareModalMarkupCache) {
+        cacheDishwareModalMarkup(document);
+    }
+}
+
+function cleanupDishwareModalsFromBody() {
+    document.querySelectorAll('body > .modal').forEach((modal) => {
+        modal.classList.remove('is-open');
+        modal.style.display = 'none';
+    });
+}
+
+function handleAddDishwareHeaderClick(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    if (stockViewType === 'sets') {
+        openSetModal();
+        return;
+    }
+
+    openAddModal();
+}
+
+function bindAddDishwareButton(addButton) {
+    if (!addButton) {
+        return;
+    }
+
+    addButton.type = 'button';
+
+    if (addButton.dataset.dishwareAddBound === '1') {
+        return;
+    }
+
+    addButton.dataset.dishwareAddBound = '1';
+    addButton.addEventListener('click', handleAddDishwareHeaderClick);
+}
+
+function bindDishwareHeaderButtons(root) {
+    const scope = root || document;
+    const addButton = scope.querySelector('#add-dishware-btn') || document.getElementById('add-dishware-btn');
+    bindAddDishwareButton(addButton);
+
+    if (dishwareHeaderDelegationWired) {
+        return;
+    }
+
+    dishwareHeaderDelegationWired = true;
+    document.addEventListener('click', function (event) {
+        const addBtn = event.target.closest('#add-dishware-btn');
+        if (!addBtn) {
+            return;
+        }
+
+        const pageRoot = document.querySelector('[data-dishware-content-root]');
+        if (pageRoot && !pageRoot.contains(addBtn)) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+        handleAddDishwareHeaderClick();
+    }, true);
+}
+
+function wireDishwareSearchInput(root) {
+    if (isDishwareReactV2Page()) {
+        return;
+    }
+
+    const scope = root || document;
+    const searchInput = scope.querySelector('#unified-filter') || document.getElementById('unified-filter');
+    if (!searchInput || searchInput.dataset.dishwareSearchBound === '1') {
+        return;
+    }
+
+    searchInput.dataset.dishwareSearchBound = '1';
+
+    if (typeof initSmartSearch === 'function') {
+        initSmartSearch('unified-filter', function () {
+            runDishwareSearch();
+        }, 300);
+        return;
+    }
+
+    let debounceTimer;
+    searchInput.addEventListener('input', function () {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function () {
+            runDishwareSearch();
+        }, 300);
+    });
+}
+
+function finalizeDishwareStockDom(root) {
+    cacheDishwareModalMarkup(root);
+    mountDishwareModalsToBody(root);
+    setupEventListeners(root);
+    bindDishwareHeaderButtons(root);
+    bindDishwareFormHandlers();
+    setupModalCloseButtons(root);
+    setupRestaurantFormSubmit();
+    wireDishwareSearchInput(root);
+
+    if (typeof window.wireSmartSearchWrappers === 'function' && !isDishwareReactV2Page()) {
+        window.wireSmartSearchWrappers(root || document);
+    }
+}
+
+async function bootDishwareStock(contentRoot) {
+    if (dishwareStockBooted) {
+        if (typeof window.reinitDishwareStock === 'function') {
+            await window.reinitDishwareStock(contentRoot);
+        }
+        return;
+    }
+
+    dishwareStockBooted = true;
+    await initApp(contentRoot);
+}
+
+window.reinitDishwareStock = async function reinitDishwareStock(contentRoot) {
+    const root = contentRoot || document.querySelector('[data-dishware-content-root]') || document;
+
+    await loadRestaurants();
+
+    if (currentPage === 'stock') {
+        await loadStockData();
+    } else if (currentPage === 'transfer') {
+        if (typeof loadAllTransferRecords === 'function') {
+            await loadAllTransferRecords();
+        }
+    } else if (typeof loadBreakRecords === 'function') {
+        await loadBreakRecords(currentPage);
+    }
+
+    finalizeDishwareStockDom(root);
+    runDishwareSearch();
+};
+
+window.bootDishwareStock = bootDishwareStock;
+window.handleAddDishwareHeaderClick = handleAddDishwareHeaderClick;
+window.openAddModal = openAddModal;
+window.openRestaurantModal = openRestaurantModal;
+window.refreshDishwareSearch = runDishwareSearch;
+window.finalizeDishwareStockDom = finalizeDishwareStockDom;
+window.cleanupDishwareModalsFromBody = cleanupDishwareModalsFromBody;
+window.handleAddFormSubmit = handleAddFormSubmit;
+
+if (!isDishwareReactV2Page()) {
+    function startLegacyDishwareStock() {
+        initApp();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startLegacyDishwareStock);
+    } else {
+        startLegacyDishwareStock();
+    }
+}
 
 // 键盘快捷键支持
 document.addEventListener('keydown', function (e) {
@@ -6370,44 +6859,18 @@ document.addEventListener('keydown', function (e) {
 
 // 点击外部关闭下拉菜单和模态框
 document.addEventListener('click', function (event) {
-    const editModal = document.getElementById('editModal');
-    const addModal = document.getElementById('addModal');
-    const damageModal = document.getElementById('damageModal');
-    const setModal = document.getElementById('setModal');
-    const restaurantModal = document.getElementById('restaurantModal');
-    const addRestaurantModal = document.getElementById('addRestaurantModal');
-
-    // 处理模态框关闭
-    if (event.target == editModal || event.target == addModal || event.target == damageModal || event.target == setModal || event.target == restaurantModal || event.target == addRestaurantModal) {
+    if (event.target.classList && event.target.classList.contains('modal')) {
         closeModal();
     }
 
     // 处理下拉菜单关闭
-    if (!event.target.closest('.view-selector')) {
-        document.getElementById('view-selector-dropdown').classList.remove('show');
+    const viewDropdown = document.getElementById('view-selector-dropdown');
+    if (viewDropdown && !event.target.closest('.view-selector')) {
+        viewDropdown.classList.remove('show');
     }
 });
 
-// 确保所有模态框关闭按钮都能正常工作
-document.addEventListener('DOMContentLoaded', function () {
-    // 为所有关闭按钮添加点击事件
-    const closeButtons = document.querySelectorAll('.close');
-    closeButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            closeModal();
-        });
-    });
-
-    // 为所有取消按钮添加点击事件
-    const cancelButtons = document.querySelectorAll('.btn-secondary');
-    cancelButtons.forEach(button => {
-        if (button.textContent.includes('取消')) {
-            button.addEventListener('click', function () {
-                closeModal();
-            });
-        }
-    });
-});
+// 确保所有模态框关闭按钮都能正常工作（legacy 页面由 initApp 调用 finalizeDishwareStockDom）
 
 // 套装管理相关函数
 let setsData = [];
@@ -6571,9 +7034,14 @@ async function loadSetDetails(setId) {
 
 // 打开套装模态框
 function openSetModal(setId = null) {
-    const modal = document.getElementById('setModal');
+    const modal = showDishwareModal('setModal');
     const title = document.getElementById('set-modal-title');
     const form = document.getElementById('set-form');
+
+    if (!modal || !form) {
+        console.warn('找不到 setModal 或 set-form');
+        return;
+    }
 
     // 重置表单
     form.reset();
@@ -6589,7 +7057,6 @@ function openSetModal(setId = null) {
     // 重新绑定表单提交事件
     setupSetFormSubmit();
 
-    modal.style.display = 'block';
     console.log('套装模态框已打开');
 }
 
@@ -6947,9 +7414,8 @@ async function handleSetFormSubmit(event) {
 
 // 打开餐厅店面管理模态框
 function openRestaurantModal() {
-    const modal = document.getElementById('restaurantModal');
+    const modal = showDishwareModal('restaurantModal');
     if (modal) {
-        modal.style.display = 'block';
         loadRestaurantsList();
     }
 }
@@ -7091,63 +7557,7 @@ async function deleteRestaurant(restaurantId) {
     }
 }
 
-// 餐厅店面表单提交
-document.addEventListener('DOMContentLoaded', function () {
-    const restaurantForm = document.getElementById('restaurant-form');
-    if (restaurantForm) {
-        restaurantForm.addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const restaurantId = document.getElementById('restaurant-id').value;
-            const name = document.getElementById('restaurant-name').value.trim();
-
-            if (!name) {
-                showAlert('请输入餐厅店面名称', 'error');
-                return;
-            }
-
-            try {
-                const action = restaurantId ? 'update_restaurant' : 'add_restaurant';
-                const data = {
-                    action: action,
-                    name: name
-                };
-
-                if (restaurantId) {
-                    data.id = restaurantId;
-                }
-
-                const result = await apiCall('', {
-                    method: 'POST',
-                    body: JSON.stringify(data)
-                });
-
-                if (result.success) {
-                    showAlert(restaurantId ? '更新餐厅店面成功' : '添加餐厅店面成功', 'success');
-                    closeRestaurantModal();
-                    await loadRestaurants(); // 重新加载餐厅店面列表
-                    loadRestaurantsList(); // 刷新管理界面
-                    // 重新加载库存数据以更新表格
-                    if (currentPage === 'stock') {
-                        loadStockData();
-                    } else if (currentPage === 'stock' && stockViewType === 'sets') {
-                        loadSetsData();
-                    } else if (currentPage === 'j1' || currentPage === 'j2' || currentPage === 'j3') {
-                        // 如果在破损页面，刷新破损记录页面
-                        loadAllBreakRecords();
-                    }
-                    // 更新表头（确保餐厅列顺序正确）
-                    updateTableHeaders();
-                } else {
-                    showAlert((restaurantId ? '更新' : '添加') + '餐厅店面失败: ' + (result.message || '未知错误'), 'error');
-                }
-            } catch (error) {
-                console.error('保存餐厅店面时发生错误:', error);
-                showAlert((restaurantId ? '更新' : '添加') + '餐厅店面失败: ' + error.message, 'error');
-            }
-        });
-    }
-});
+// 餐厅店面表单提交由 setupRestaurantFormSubmit() 在 finalizeDishwareStockDom() 中绑定
 
 // ==================== 碗碟转卖功能 ====================
 
