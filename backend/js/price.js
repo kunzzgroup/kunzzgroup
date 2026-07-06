@@ -26,10 +26,14 @@ function resolvePriceApiUrl(path) {
 
 function buildPricePageUrl(page) {
     const root = window.__KUNZZ_BACKEND_BASE__ || '';
-    if (root) {
-        return `${root}/${page}`;
+    let target = page;
+    if (isPriceReactV2Page() && page === 'supply') {
+        target = 'supply-v2';
     }
-    return page;
+    if (root) {
+        return `${root}/${target}`;
+    }
+    return target;
 }
 
 // 所有类型的固定数据（按定义的顺序排列）

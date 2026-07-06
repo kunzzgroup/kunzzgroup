@@ -42,7 +42,8 @@ export default defineConfig(({ mode }) => {
               url.startsWith('/backend/stocksot-v2') ||
               url.startsWith('/backend/stockminimum-v2') ||
               url.startsWith('/backend/dishware_stock-v2') ||
-              url.startsWith('/backend/price-v2')
+              url.startsWith('/backend/price-v2') ||
+              url.startsWith('/backend/supply-v2')
             ) {
               return '/index.html';
             }
