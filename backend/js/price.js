@@ -4,6 +4,33 @@ let restaurants = [];
 let currentRestaurant = 'overview';
 let priceData = [];
 let editingRestaurantId = null;
+let priceBooted = false;
+
+function isPriceReactV2Page() {
+    return /price-v2/.test(window.location.pathname || '');
+}
+
+function resolvePriceApiUrl(path) {
+    const root = window.__KUNZZ_BACKEND_BASE__ || '';
+    let query = path || '';
+    if (query.startsWith('price_api.php')) {
+        query = query.slice('price_api.php'.length);
+    } else if (query && !query.startsWith('?')) {
+        query = `?${query}`;
+    }
+    if (root) {
+        return `${root}/price_api.php${query}`;
+    }
+    return `price_api.php${query}`;
+}
+
+function buildPricePageUrl(page) {
+    const root = window.__KUNZZ_BACKEND_BASE__ || '';
+    if (root) {
+        return `${root}/${page}`;
+    }
+    return page;
+}
 
 // 所有类型的固定数据（按定义的顺序排列）
 const allTypes = [
@@ -15,19 +42,40 @@ const allTypes = [
 ];
 
 // 页面加载时初始化
-document.addEventListener('DOMContentLoaded', function () {
-    // 默认总览模式，隐藏新增记录按钮和批量删除按钮
-    document.getElementById('add-record-btn').style.display = 'none';
-    document.getElementById('batch-delete-btn').style.display = 'none';
-    // 初始化类型过滤选择框
+function initApp() {
+    const addRecordBtn = document.getElementById('add-record-btn');
+    const batchDeleteBtn = document.getElementById('batch-delete-btn');
+    if (addRecordBtn) addRecordBtn.style.display = 'none';
+    if (batchDeleteBtn) batchDeleteBtn.style.display = 'none';
     updateTypeOptions('', 'type-filter');
+    wirePriceSearchFilters();
     loadRestaurants();
-});
+}
+
+function wirePriceSearchFilters() {
+    const searchInput = document.getElementById('search-input');
+    if (searchInput && searchInput.dataset.priceSearchBound !== '1') {
+        searchInput.dataset.priceSearchBound = '1';
+        if (!isPriceReactV2Page() && typeof initSmartSearch === 'function') {
+            initSmartSearch('search-input', loadPriceData, 300);
+        } else if (!isPriceReactV2Page()) {
+            searchInput.addEventListener('input', loadPriceData);
+        }
+    }
+
+    const typeFilter = document.getElementById('type-filter');
+    if (typeFilter && typeFilter.dataset.priceFilterBound !== '1') {
+        typeFilter.dataset.priceFilterBound = '1';
+        typeFilter.addEventListener('change', loadPriceData);
+    }
+}
+
+window.refreshPriceSearch = loadPriceData;
 
 // 加载餐厅列表
 async function loadRestaurants() {
     try {
-        const response = await fetch('price_api.php?action=restaurants');
+        const response = await fetch(resolvePriceApiUrl('?action=restaurants'));
 
         // 检查响应状态
         if (!response.ok) {
@@ -79,7 +127,7 @@ async function loadPriceData() {
         const search = document.getElementById('search-input')?.value || '';
         const type = document.getElementById('type-filter')?.value || '';
 
-        let url = 'price_api.php?action=list';
+        let url = resolvePriceApiUrl('?action=list');
         if (search) url += '&search=' + encodeURIComponent(search);
         if (type) url += '&type=' + encodeURIComponent(type);
 
@@ -322,7 +370,7 @@ async function saveFoodRecord() {
     try {
         // 为每个有价格的餐厅创建记录
         const promises = prices.map(priceData => {
-            return fetch('price_api.php?action=food', {
+            return fetch(resolvePriceApiUrl('?action=food'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -1072,7 +1120,7 @@ async function batchSaveNewRows() {
     }
 
     try {
-        const response = await fetch('price_api.php?action=batch-save', {
+        const response = await fetch(resolvePriceApiUrl('?action=batch-save'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -1150,8 +1198,8 @@ async function saveRestaurant() {
     try {
         const isEdit = !!editingRestaurantId;
         const url = isEdit
-            ? `price_api.php?action=restaurant&id=${editingRestaurantId}`
-            : 'price_api.php?action=restaurant';
+            ? resolvePriceApiUrl(`?action=restaurant&id=${editingRestaurantId}`)
+            : resolvePriceApiUrl('?action=restaurant');
         const method = isEdit ? 'PUT' : 'POST';
 
         const response = await fetch(url, {
@@ -1194,7 +1242,7 @@ async function deleteRestaurant(id) {
     }
 
     try {
-        const response = await fetch(`price_api.php?action=restaurant&id=${id}`, {
+        const response = await fetch(resolvePriceApiUrl(`?action=restaurant&id=${id}`), {
             method: 'DELETE'
         });
 
@@ -1328,7 +1376,7 @@ async function saveEditRow(row, recordId, originalItem) {
     try {
         // 如果存在旧记录，先删除
         if (recordId) {
-            const deleteResponse = await fetch(`price_api.php?action=food&id=${recordId}`, {
+            const deleteResponse = await fetch(resolvePriceApiUrl(`?action=food&id=${recordId}`), {
                 method: 'DELETE'
             });
             const deleteResult = await deleteResponse.json();
@@ -1340,7 +1388,7 @@ async function saveEditRow(row, recordId, originalItem) {
         }
 
         // 创建新记录（可能类型已改变）
-        const createResponse = await fetch('price_api.php?action=food', {
+        const createResponse = await fetch(resolvePriceApiUrl('?action=food'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -1464,7 +1512,7 @@ async function deleteRowByIndex(originalIndex) {
     }
 
     try {
-        const response = await fetch(`price_api.php?action=food&id=${recordId}`, {
+        const response = await fetch(resolvePriceApiUrl(`?action=food&id=${recordId}`), {
             method: 'DELETE'
         });
 
@@ -1563,7 +1611,7 @@ async function confirmBatchDelete() {
     try {
         // 批量删除
         const promises = recordIds.map(id =>
-            fetch(`price_api.php?action=food&id=${id}`, {
+            fetch(resolvePriceApiUrl(`?action=food&id=${id}`), {
                 method: 'DELETE'
             })
         );
@@ -1618,15 +1666,42 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
-// 搜索和过滤事件
-document.getElementById('search-input')?.addEventListener('input', function () {
-    loadPriceData();
-});
+async function bootPrice() {
+    if (priceBooted) {
+        if (typeof window.reinitPrice === 'function') {
+            await window.reinitPrice();
+        }
+        return;
+    }
 
-// 类型过滤变化事件
-document.getElementById('type-filter')?.addEventListener('change', function () {
-    loadPriceData();
-});
+    priceBooted = true;
+    initApp();
+}
+
+window.reinitPrice = async function reinitPrice() {
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    const typeFilter = document.getElementById('type-filter');
+    if (typeFilter) {
+        typeFilter.value = '';
+    }
+    currentRestaurant = 'overview';
+    editingRestaurantId = null;
+    wirePriceSearchFilters();
+    await loadRestaurants();
+};
+
+window.bootPrice = bootPrice;
+
+if (!isPriceReactV2Page()) {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+        initApp();
+    }
+}
 
 // 切换对比模式选择器下拉菜单
 function toggleComparisonModeSelector() {
@@ -1658,7 +1733,7 @@ function switchComparisonMode(mode) {
 
     // 如果选择批发商对比，直接跳转到 supplier.php
     if (mode === 'supplier') {
-        window.location.href = 'supply';
+        window.location.href = buildPricePageUrl('supply');
         return;
     }
 }
