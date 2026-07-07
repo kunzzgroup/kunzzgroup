@@ -24,6 +24,7 @@ import StockMinimumPage from './backend/pages/StockMinimumPage.jsx';
 import DishwareStockPage from './backend/pages/DishwareStockPage.jsx';
 import PricePage from './backend/pages/PricePage.jsx';
 import SupplyPage from './backend/pages/SupplyPage.jsx';
+import BgMusicUploadPage from './backend/pages/BgMusicUploadPage.jsx';
 
 function AppRoutes() {
   return (
@@ -53,6 +54,7 @@ function AppRoutes() {
         <Route path="/backend/dishware_stock-v2" element={<DishwareStockPage />} />
         <Route path="/backend/price-v2" element={<PricePage />} />
         <Route path="/backend/supply-v2" element={<SupplyPage />} />
+        <Route path="/backend/bgmusicupload-v2" element={<BgMusicUploadPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

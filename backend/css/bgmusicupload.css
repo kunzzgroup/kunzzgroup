@@ -209,6 +209,10 @@
            margin-top: clamp(0px, 1.04vw, 20px);
        }
 
+       .delete-form {
+           margin-top: clamp(8px, 0.83vw, 16px);
+       }
+
        .alert {
            padding: 15px;
            border-radius: 8px;
