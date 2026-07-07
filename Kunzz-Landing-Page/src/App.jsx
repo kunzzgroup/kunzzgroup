@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import LanguageSync from './components/LanguageSync.jsx';
+import BackgroundMusic from './components/BackgroundMusic.jsx';
 import { getDeployBasePath } from './config.js';
 import { LanguageProvider } from './contexts/LanguageContext.jsx';
 import AboutPage from './pages/AboutPage.jsx';
@@ -31,6 +32,7 @@ function AppRoutes() {
   return (
     <>
       <LanguageSync />
+      <BackgroundMusic />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />

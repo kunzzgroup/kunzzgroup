@@ -102,7 +102,7 @@ function bgmusicupload_handlePost(&$success, &$error) {
 
         $newFileName = 'music.' . $fileExtension;
         $targetPath = $uploadDir . $newFileName;
-        $webPath = '../audio/audio/' . $newFileName;
+        $webPath = 'audio/audio/' . $newFileName;
 
         if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
             $error = '文件移动失败！请检查目录权限。';
@@ -164,8 +164,12 @@ function bgmusicupload_resolveAudioSrc($webPath) {
         return '';
     }
 
-    if (strpos($webPath, '../') === 0) {
+    if (strpos($webPath, 'http') === 0 || $webPath[0] === '/') {
         return $webPath;
+    }
+
+    if (strpos($webPath, '../') !== 0) {
+        return '../' . $webPath;
     }
 
     return $webPath;

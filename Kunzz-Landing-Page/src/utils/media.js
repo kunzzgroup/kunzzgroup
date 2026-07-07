@@ -5,3 +5,8 @@ export function mediaUrl(type) {
   const base = getDeployBasePath();
   return `${base}/media/${type}`;
 }
+
+/** CMS-managed background music served by serve_media.php */
+export function musicUrl() {
+  return mediaUrl('background_music');
+}

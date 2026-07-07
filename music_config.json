@@ -1,6 +1,6 @@
 {
     "background_music": {
-        "file": "..\/audio\/audio\/music.mp3",
+        "file": "audio\/audio\/music.mp3",
         "type": "audio",
         "format": "mp3",
         "updated": "2026-07-07 03:11:10",

@@ -1275,7 +1275,7 @@ function getJobsHtml($language = 'zh') {
  * @return array 音乐信息
  */
 function getBgMusicConfig() {
-    $configFile = 'music_config.json';
+    $configFile = __DIR__ . '/music_config.json';
     $defaultConfig = [
         'file' => 'audio/audio/music.mp3',
         'type' => 'audio',
@@ -1284,8 +1284,22 @@ function getBgMusicConfig() {
     
     if (file_exists($configFile)) {
         $config = json_decode(file_get_contents($configFile), true);
-        if ($config && isset($config['background_music']) && file_exists($config['background_music']['file'])) {
-            return $config['background_music'];
+        if ($config && isset($config['background_music'])) {
+            $storedPath = $config['background_music']['file'] ?? '';
+            $candidates = [];
+            if ($storedPath !== '') {
+                if ($storedPath[0] === '/') {
+                    $candidates[] = $storedPath;
+                } else {
+                    $candidates[] = __DIR__ . '/' . $storedPath;
+                    $candidates[] = __DIR__ . '/' . preg_replace('#^\.\./#', '', $storedPath);
+                }
+            }
+            foreach ($candidates as $candidate) {
+                if (file_exists($candidate)) {
+                    return $config['background_music'];
+                }
+            }
         }
     }
     
