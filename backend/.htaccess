@@ -23,6 +23,7 @@ RewriteRule ^dishware_stock-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
 RewriteRule ^price-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
 RewriteRule ^supply-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
 RewriteRule ^bgmusicupload-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
+RewriteRule ^homepage1upload-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
 
 # -----------------------------
 # 0. Redirect login.html to frontend login (respect subdirectory deploy)

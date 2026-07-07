@@ -25,6 +25,7 @@ import DishwareStockPage from './backend/pages/DishwareStockPage.jsx';
 import PricePage from './backend/pages/PricePage.jsx';
 import SupplyPage from './backend/pages/SupplyPage.jsx';
 import BgMusicUploadPage from './backend/pages/BgMusicUploadPage.jsx';
+import Homepage1UploadPage from './backend/pages/Homepage1UploadPage.jsx';
 
 function AppRoutes() {
   return (
@@ -55,6 +56,7 @@ function AppRoutes() {
         <Route path="/backend/price-v2" element={<PricePage />} />
         <Route path="/backend/supply-v2" element={<SupplyPage />} />
         <Route path="/backend/bgmusicupload-v2" element={<BgMusicUploadPage />} />
+        <Route path="/backend/homepage1upload-v2" element={<Homepage1UploadPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

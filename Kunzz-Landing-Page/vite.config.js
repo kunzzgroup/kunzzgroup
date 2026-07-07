@@ -10,9 +10,12 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         '/media': {
-          target: 'https://kunzzgroup.com',
+          target: 'http://localhost/kunzzgroup',
           changeOrigin: true,
-          secure: true,
+        },
+        '/kunzzgroup/media': {
+          target: 'http://localhost',
+          changeOrigin: true,
         },
         '/api': {
           target: 'http://localhost/kunzzgroup',
@@ -44,7 +47,8 @@ export default defineConfig(({ mode }) => {
               url.startsWith('/backend/dishware_stock-v2') ||
               url.startsWith('/backend/price-v2') ||
               url.startsWith('/backend/supply-v2') ||
-              url.startsWith('/backend/bgmusicupload-v2')
+              url.startsWith('/backend/bgmusicupload-v2') ||
+              url.startsWith('/backend/homepage1upload-v2')
             ) {
               return '/index.html';
             }
