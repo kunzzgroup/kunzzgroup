@@ -107,7 +107,8 @@ body::-webkit-scrollbar {
   color: white;
 }
 
-.aboutus-banner .background-image {
+.aboutus-banner .background-image,
+.aboutus-banner .background-video {
   position: absolute;
   inset: 0;
   width: 100%;

@@ -3,5 +3,10 @@
         "file": "video\/video\/home_background.mp4",
         "type": "video",
         "updated": "2026-07-07 09:04:13"
+    },
+    "about_background": {
+        "file": "images\/images\/about_background.mp4",
+        "type": "video",
+        "updated": "2026-07-08 03:49:10"
     }
 }

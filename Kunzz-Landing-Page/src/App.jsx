@@ -27,6 +27,7 @@ import PricePage from './backend/pages/PricePage.jsx';
 import SupplyPage from './backend/pages/SupplyPage.jsx';
 import BgMusicUploadPage from './backend/pages/BgMusicUploadPage.jsx';
 import Homepage1UploadPage from './backend/pages/Homepage1UploadPage.jsx';
+import Aboutpage1UploadPage from './backend/pages/Aboutpage1UploadPage.jsx';
 
 function AppRoutes() {
   return (
@@ -59,6 +60,7 @@ function AppRoutes() {
         <Route path="/backend/supply-v2" element={<SupplyPage />} />
         <Route path="/backend/bgmusicupload-v2" element={<BgMusicUploadPage />} />
         <Route path="/backend/homepage1upload-v2" element={<Homepage1UploadPage />} />
+        <Route path="/backend/aboutpage1upload-v2" element={<Aboutpage1UploadPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
