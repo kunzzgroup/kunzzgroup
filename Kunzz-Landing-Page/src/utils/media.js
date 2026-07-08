@@ -10,3 +10,17 @@ export function mediaUrl(type) {
 export function musicUrl() {
   return mediaUrl('background_music');
 }
+
+/** Resolve CMS/API relative asset paths for subdirectory deploys. */
+export function resolveAssetUrl(url) {
+  if (!url) return '';
+  if (/^https?:\/\//i.test(url)) return url;
+
+  const base = getDeployBasePath();
+  const queryIndex = url.indexOf('?');
+  const pathPart = queryIndex >= 0 ? url.slice(0, queryIndex) : url;
+  const query = queryIndex >= 0 ? url.slice(queryIndex) : '';
+  let path = pathPart.replace(/^(\.\.\/)+/, '').replace(/^\.\//, '');
+  if (!path.startsWith('/')) path = `/${path}`;
+  return `${base}${path}${query}`;
+}

@@ -66,7 +66,7 @@ export default function BackendLayout({
   return (
     <>
       <PhpSidebar />
-      <div className={className}>{children}</div>
+      <div className={`backend-main-shell ${className}`.trim()}>{children}</div>
     </>
   );
 }

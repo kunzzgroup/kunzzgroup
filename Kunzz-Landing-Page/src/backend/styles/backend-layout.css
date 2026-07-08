@@ -10,6 +10,32 @@ body.backend-page,
 
 #root.backend-page {
   overflow: visible;
+  display: block;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+body.has-sidebar #root.backend-page > .backend-main-shell {
+  display: block;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+body.has-sidebar .backend-php-content {
+  display: block;
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+body.has-sidebar .backend-php-content > .container {
+  width: 100%;
+  max-width: 1800px;
+  margin-left: 0;
+  margin-right: 0;
+  box-sizing: border-box;
 }
 
 .calendar-day.empty {

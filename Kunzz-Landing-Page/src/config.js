@@ -65,3 +65,8 @@ export function getBackendBase() {
 export function getBackendApiUrl(scriptName) {
   return joinPath(getBackendBase(), scriptName);
 }
+
+/** Full URL to a site-root PHP API script (e.g. /kunzzgroup/api/timeline_api.php). */
+export function getApiUrl(scriptPath) {
+  return joinPath(getDeployBasePath(), scriptPath);
+}
