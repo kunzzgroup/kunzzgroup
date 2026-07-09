@@ -147,7 +147,7 @@ export default function Header({ activeSlide = 0, onSlideTo, totalSlides = 4 }) 
               About Us
             </Link>
           </div>
-          <div
+          {/* <div
             className={`header-nav-item header-nav-dropdown${brandsOpen ? ' is-open' : ''}`}
           >
             <span
@@ -177,7 +177,8 @@ export default function Header({ activeSlide = 0, onSlideTo, totalSlides = 4 }) 
                 Tokyo Izakaya Cuisine
               </a>
             </div>
-          </div>
+          </div> */}
+          
           <div className="header-nav-item">
             <Link to={joinPath} onClick={closeMobile}>
               Join Us

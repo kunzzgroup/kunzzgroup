@@ -91,7 +91,7 @@ export default function Footer({ onSlideTo, page = 'home_en' }) {
           </ul>
         </div>
 
-        <div className="footer-section">
+        {/* <div className="footer-section">
           <h4>Brands</h4>
           <ul>
             <li>
@@ -101,7 +101,7 @@ export default function Footer({ onSlideTo, page = 'home_en' }) {
               </a>
             </li>
           </ul>
-        </div>
+        </div> */}
 
         <div className="footer-section">
           <h4>
