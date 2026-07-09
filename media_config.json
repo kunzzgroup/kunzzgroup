@@ -13,5 +13,10 @@
         "file": "images\/images\/joinus_background.png",
         "type": "image",
         "updated": "2026-07-09 03:49:47"
+    },
+    "comphoto_1": {
+        "file": "..\/images\/images\/1.png",
+        "type": "image",
+        "updated": "2026-07-09 15:11:21"
     }
 }

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
-const PHOTOS_API = '/api/comphotos_api.php';
+import { getApiUrl } from '../config.js';
+import { resolveAssetUrl } from '../utils/media.js';
 const NAVBAR_HEIGHT = 80;
 const PHOTO_MARGIN = 10;
 
@@ -113,11 +114,11 @@ export function useComphotoBounce(containerRef, onPhotoClick) {
   useEffect(() => {
     let cancelled = false;
 
-    fetch(PHOTOS_API)
+    fetch(getApiUrl('api/comphotos_api.php'))
       .then((res) => res.json())
       .then((data) => {
         if (!cancelled && data.success) {
-          setPhotos(data.photos || []);
+          setPhotos((data.photos || []).map((url) => resolveAssetUrl(url)));
         }
       })
       .catch(() => {

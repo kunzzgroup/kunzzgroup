@@ -231,6 +231,31 @@ function getMediaHtml($mediaType, $attributes = []) {
  * 获取公司照片数组
  * @return array 照片路径数组
  */
+function resolveComphotoDiskPath($storedPath) {
+    if (!$storedPath) {
+        return '';
+    }
+
+    if ($storedPath[0] === '/' || preg_match('#^[A-Za-z]:[\\\\/]#', $storedPath)) {
+        return $storedPath;
+    }
+
+    $root = __DIR__;
+    $candidates = [
+        $storedPath,
+        $root . '/' . ltrim(str_replace('../', '', $storedPath), '/'),
+        $root . '/images/images/' . basename($storedPath),
+    ];
+
+    foreach ($candidates as $path) {
+        if ($path && file_exists($path)) {
+            return $path;
+        }
+    }
+
+    return $candidates[1] ?? $storedPath;
+}
+
 function getCompanyPhotos() {
     // 子域名配置
     $subdomainMediaUrl = 'https://media.kunzzgroup.com/comphotos/';
@@ -274,25 +299,27 @@ function getCompanyPhotos() {
                     $photoUrl = '';
                     $timestamp = time();
 
-                    // 优先检查子域名路径
-                    $subdomainFilePath = $subdomainPhysicalPath . basename($config[$key]['file']);
-                    if (file_exists($subdomainFilePath)) {
+                    $storedPath = $config[$key]['file'] ?? '';
+                    $localDiskPath = resolveComphotoDiskPath($storedPath);
+                    $subdomainFilePath = $subdomainPhysicalPath . basename($storedPath);
+
+                    if ($subdomainFilePath && file_exists($subdomainFilePath)) {
                         $fileExists = true;
                         $timestamp = filemtime($subdomainFilePath);
-                        
+
                         if (isset($config[$key]['url'])) {
                             $photoUrl = $config[$key]['url'];
                         } else {
-                            $photoUrl = $subdomainMediaUrl . basename($config[$key]['file']);
+                            $photoUrl = $subdomainMediaUrl . basename($storedPath);
                         }
-                    } elseif (file_exists($config[$key]['file'])) {
+                    } elseif ($localDiskPath && file_exists($localDiskPath)) {
                         $fileExists = true;
-                        $timestamp = filemtime($config[$key]['file']);
-                        
+                        $timestamp = filemtime($localDiskPath);
+
                         if (isset($config[$key]['url'])) {
                             $photoUrl = $config[$key]['url'];
                         } else {
-                            $photoUrl = $config[$key]['file'];
+                            $photoUrl = 'images/images/' . basename($storedPath);
                         }
                     }
 
