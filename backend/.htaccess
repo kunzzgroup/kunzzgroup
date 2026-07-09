@@ -26,6 +26,7 @@ RewriteRule ^bgmusicupload-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
 RewriteRule ^homepage1upload-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
 RewriteRule ^aboutpage1upload-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
 RewriteRule ^aboutpage4upload-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
+RewriteRule ^joinpage1upload-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
 
 # -----------------------------
 # 0. Redirect login.html to frontend login (respect subdirectory deploy)

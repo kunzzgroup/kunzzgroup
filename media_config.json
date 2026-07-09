@@ -8,5 +8,10 @@
         "file": "images\/images\/about_background.mp4",
         "type": "video",
         "updated": "2026-07-08 03:49:10"
+    },
+    "joinus_background": {
+        "file": "images\/images\/joinus_background.png",
+        "type": "image",
+        "updated": "2026-07-09 03:49:47"
     }
 }
