@@ -29,6 +29,7 @@ RewriteRule ^aboutpage4upload-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
 RewriteRule ^joinpage1upload-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
 RewriteRule ^joinpage2upload-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
 RewriteRule ^joinpage3upload-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
+RewriteRule ^corporate_blueprint-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
 
 # -----------------------------
 # 0. Redirect login.html to frontend login (respect subdirectory deploy)

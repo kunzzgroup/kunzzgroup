@@ -32,6 +32,7 @@ import Aboutpage4UploadPage from './backend/pages/Aboutpage4UploadPage.jsx';
 import Joinpage1UploadPage from './backend/pages/Joinpage1UploadPage.jsx';
 import Joinpage2UploadPage from './backend/pages/Joinpage2UploadPage.jsx';
 import Joinpage3UploadPage from './backend/pages/Joinpage3UploadPage.jsx';
+import CorporateBlueprintPage from './backend/pages/CorporateBlueprintPage.jsx';
 
 function AppRoutes() {
   return (
@@ -69,6 +70,7 @@ function AppRoutes() {
         <Route path="/backend/joinpage1upload-v2" element={<Joinpage1UploadPage />} />
         <Route path="/backend/joinpage2upload-v2" element={<Joinpage2UploadPage />} />
         <Route path="/backend/joinpage3upload-v2" element={<Joinpage3UploadPage />} />
+        <Route path="/backend/corporate_blueprint-v2" element={<CorporateBlueprintPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

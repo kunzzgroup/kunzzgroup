@@ -53,7 +53,8 @@ export default defineConfig(({ mode }) => {
               url.startsWith('/backend/aboutpage4upload-v2') ||
               url.startsWith('/backend/joinpage1upload-v2') ||
               url.startsWith('/backend/joinpage2upload-v2') ||
-              url.startsWith('/backend/joinpage3upload-v2')
+              url.startsWith('/backend/joinpage3upload-v2') ||
+              url.startsWith('/backend/corporate_blueprint-v2')
             ) {
               return '/index.html';
             }
