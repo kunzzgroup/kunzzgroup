@@ -9,11 +9,7 @@ if (!headers_sent()) {
 }
 ?>
 <?php
-session_start();
 ob_start();
-
-// 设置字符编码
-header('Content-Type: text/html; charset=UTF-8');
 
 // 加载JSON数据 - 文件在backend目录中
 $jsonFile = __DIR__ . '/corporate_strategy.json';
@@ -39,7 +35,7 @@ if (file_exists($jsonFile)) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/orgchart@2.1.9/dist/css/jquery.orgchart.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/orgchart@2.1.9/dist/js/jquery.orgchart.min.js"></script>
-    <link rel="stylesheet" href="/backend/css/corporate_blueprint.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/corporate_blueprint.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
@@ -679,7 +675,7 @@ if (file_exists($jsonFile)) {
                 const orgData = <?php echo !empty($orgChartData) ? json_encode($orgChartData, JSON_UNESCAPED_UNICODE) : 'null'; ?>;
                 const internalOrgData = <?php echo !empty($internalOrgChartData) ? json_encode($internalOrgChartData, JSON_UNESCAPED_UNICODE) : 'null'; ?>;
                 </script>
-                <script src="/backend/js/corporate_blueprint.js?v=<?php echo time(); ?>"></script>
+                <script src="js/corporate_blueprint.js?v=<?php echo time(); ?>"></script>
 
             <?php else: ?>
                 <!-- 如果没有JSON数据，显示错误信息 -->

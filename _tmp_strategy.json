@@ -1,0 +1,117 @@
+﻿{
+    "companyOverview": {
+        "companyName": "KUNZZ HOLDINGS SDN BHD",
+        "planTitle": "Corporate Strategic Plan",
+        "strategyStartYear": 2024,
+        "strategyEndYear": 2029,
+        "ultimateGoal": "µêÉΣ╕║ΦíîΣ╕ÜΘóåσàêτÜäτ╗╝σÉêµÇºµÄºΦéíΘ¢åσ¢ó"
+    },
+    "timeline": [
+        {
+            "year": 2024,
+            "goal": "σ╗║τ½ïµá╕σ┐âτ«íτÉåΣ╜ôτ│╗Σ╕Äσôüτëîσƒ║τíÇ"
+        },
+        {
+            "year": 2025,
+            "goal": "σ╕éσ£║µë⌐σ╝áΣ╕Äµò░σ¡ùσîûΦ╜¼σ₧ïσÉ»σè¿"
+        },
+        {
+            "year": 2026,
+            "goal": "σ«₧τÄ░Σ╕ÜσèíσñÜσàâσîûΣ╕Äσî║σƒƒΘóåσàê"
+        },
+        {
+            "year": 2027,
+            "goal": "µ╖▒σîûµèÇµ£»σê¢µû░Σ╕ÄµòêτÄçΣ╝ÿσîû"
+        },
+        {
+            "year": 2028,
+            "goal": "σôüτëîσ¢╜ΘÖàσîûΣ╕ÄΦ╡äµ£¼σ╕éσ£║Φ┐ÉΣ╜£"
+        }
+    ],
+    "corporateCore": {
+        "mission": "ΘÇÜΦ┐çµîüτ╗¡σê¢µû░∩╝îΣ╕║σ«óµê╖σÆîσæÿσ╖Ñσê¢ΘÇáσìôΦ╢èΣ╗╖σÇ╝",
+        "vision": "µêÉΣ╕║σà¿τÉâΣ┐íΦ╡ûτÜäσê¢µû░σ╝òΘóåΦÇà",
+        "culture": ["Φ»ÜΣ┐í", "σìÅΣ╜£", "σê¢µû░", "Φ┤úΣ╗╗"],
+        "values": ["σ«óµê╖Φç│Σ╕è", "µòêτÄçΘ⌐▒σè¿", "τ╗ôµ₧£σ»╝σÉæ", "Φ┐╜µ▒éσìôΦ╢è"]
+    },
+    "cultureExplanation": [
+        {
+            "key": "Φ»ÜΣ┐í",
+            "description": "ΦÇüσ«₧σüÜΣ║ï∩╝îτ£ƒΦ»Üσ╛àΣ║║",
+            "scoring": [
+                {"point": 1, "description": "τ╗Åσ╕╕Σ╕ìσ«êµë┐Φ»║"},
+                {"point": 2, "description": "σü╢µ£ëσñ▒Σ┐íΦíîΣ╕║"},
+                {"point": 3, "description": "σƒ║µ£¼Φâ╜σñƒσ▒ÑΦíîµë┐Φ»║"},
+                {"point": 4, "description": "σºïτ╗êΣ┐¥µîüΦ»Üσ«₧ΘÇÅµÿÄ"},
+                {"point": 5, "description": "Σ╜£Σ╕║Φ»ÜΣ┐íΦí¿τÄç∩╝îσ╜▒σôìΣ╗ûΣ║║"}
+            ]
+        }
+    ],
+    "valuesExplanation": [
+        {
+            "key": "σ«óµê╖Φç│Σ╕è",
+            "description": "Σ╗ÑΦºúσå│σ«óµê╖Θù«ΘóÿΣ╕║ΘªûΦªüΣ╗╗σèí",
+            "scoring": [
+                {"point": 1, "description": "Σ╕ìµÄ¿Φä▒Φ┤úΣ╗╗∩╝îΣ╕╗σè¿σôìσ║ö"},
+                {"point": 2, "description": "Φâ╜Φ»åσê½µ╜£σ£¿Θ£Çµ▒é"},
+                {"point": 3, "description": "Φâ╜ΦÄ╖σ╛ùσ«óµê╖Θ½ÿσ║ªΦ╡₧Φ¬ë"}
+            ]
+        }
+    ],
+    "organizationStructure": {
+        "ceo": {
+            "name": "Kunzz",
+            "title": "CEO"
+        },
+        "pa": {
+            "name": "Assistant",
+            "title": "PA"
+        },
+        "cLevel": [
+            {
+                "name": "John Doe",
+                "title": "CTO",
+                "reportsTo": "CEO",
+                "fullTitle": "Chief Technology Officer",
+                "subordinates": [
+                    {
+                        "title": "VP of Engineering",
+                        "name": "Jane Smith"
+                    }
+                ]
+            }
+        ]
+    },
+    "internalOrganization": {
+        "departments": [
+            {
+                "name": "Technology",
+                "positions": [
+                    {
+                        "title": "CTO",
+                        "name": "John Doe"
+                    },
+                    {
+                        "title": "VP Engineering",
+                        "name": "Jane Smith"
+                    }
+                ]
+            }
+        ]
+    },
+    "strategicObjectives": {
+        "2024": [
+            {
+                "department": "Technology",
+                "strategy": "σ╗║τ½ïΘ½ÿµòêΣ╕öµ£ëσÉ╕σ╝òσè¢τÜäΣ║║µëìτ«íτÉåΣ╜ôτ│╗",
+                "dashboardMetrics": [
+                    "System Uptime (%)",
+                    "Implementation Timeline Adherence (%)"
+                ],
+                "pic": "Paris",
+                "startDate": "2024-01-01",
+                "endDate": "2024-12-31"
+            }
+        ]
+    }
+}
