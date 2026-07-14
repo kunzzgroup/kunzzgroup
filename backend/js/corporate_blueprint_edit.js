@@ -1,3 +1,15 @@
+function isCorporateBlueprintEditReactV2Page() {
+    return /corporate_blueprint_edit-v2/.test(window.location.pathname || '');
+}
+
+function getIndexVar(name) {
+    return window[name] ?? 0;
+}
+
+function setIndexVar(name, value) {
+    window[name] = value;
+}
+
 // 表单提交处理
 function handleFormSubmit(event) {
     console.log('表单提交事件触发');
@@ -25,18 +37,47 @@ function handleFormSubmit(event) {
 }
 
 // 页面加载时检查
-document.addEventListener('DOMContentLoaded', function () {
-    console.log('页面加载完成');
+function bootCorporateBlueprintEdit() {
+    console.log('企业蓝图编辑页面初始化');
     const form = document.getElementById('corporate-form');
     if (form) {
         console.log('表单元素找到');
-        form.addEventListener('submit', function (e) {
+        form.addEventListener('submit', function () {
             console.log('表单提交监听器触发');
         });
     } else {
         console.error('未找到表单元素');
     }
-});
+}
+
+window.bootCorporateBlueprintEdit = bootCorporateBlueprintEdit;
+window.reinitCorporateBlueprintEdit = bootCorporateBlueprintEdit;
+window.handleFormSubmit = handleFormSubmit;
+window.switchTab = switchTab;
+window.addCLevel = addCLevel;
+window.removeCLevel = removeCLevel;
+window.addDepartment = addDepartment;
+window.removeDepartment = removeDepartment;
+window.addPosition = addPosition;
+window.removePosition = removePosition;
+window.addTimeline = addTimeline;
+window.removeTimeline = removeTimeline;
+window.addCulture = addCulture;
+window.removeCulture = removeCulture;
+window.addValue = addValue;
+window.removeValue = removeValue;
+window.addCultureExplanation = addCultureExplanation;
+window.removeCultureExplanation = removeCultureExplanation;
+window.addValuesExplanation = addValuesExplanation;
+window.removeValuesExplanation = removeValuesExplanation;
+window.addYear = addYear;
+window.removeYear = removeYear;
+window.addObjective = addObjective;
+window.removeObjective = removeObjective;
+
+if (!isCorporateBlueprintEditReactV2Page()) {
+    document.addEventListener('DOMContentLoaded', bootCorporateBlueprintEdit);
+}
 
 // 标签切换函数
 function switchTab(tabName, btnElement) {
@@ -67,6 +108,7 @@ function switchTab(tabName, btnElement) {
 
 function addCLevel() {
     const container = document.getElementById('clevel-container');
+    const clevelIndex = getIndexVar('clevelIndex');
     const html = `
         <div class="clevel-item">
             <div class="form-row">
@@ -91,7 +133,7 @@ function addCLevel() {
         </div>
     `;
     container.insertAdjacentHTML('beforeend', html);
-    clevelIndex++;
+    setIndexVar('clevelIndex', getIndexVar('clevelIndex') + 1);
 }
 
 function removeCLevel(btn) {
@@ -102,6 +144,7 @@ function removeCLevel(btn) {
 
 function addDepartment() {
     const container = document.getElementById('departments-container');
+    const deptIndex = getIndexVar('deptIndex');
     const html = `
         <div class="department-item">
             <div class="form-group">
@@ -127,7 +170,7 @@ function addDepartment() {
         </div>
     `;
     container.insertAdjacentHTML('beforeend', html);
-    deptIndex++;
+    setIndexVar('deptIndex', getIndexVar('deptIndex') + 1);
 }
 
 function removeDepartment(btn) {
@@ -168,6 +211,7 @@ function removePosition(btn) {
 // Timeline functions
 function addTimeline() {
     const container = document.getElementById('timeline-container');
+    const timelineIndex = getIndexVar('timelineIndex');
     const html = `
         <div class="timeline-item">
             <div class="form-group" style="margin-bottom: 0;">
@@ -182,7 +226,7 @@ function addTimeline() {
         </div>
     `;
     container.insertAdjacentHTML('beforeend', html);
-    timelineIndex++;
+    setIndexVar('timelineIndex', timelineIndex + 1);
 }
 
 function removeTimeline(btn) {
@@ -194,6 +238,7 @@ function removeTimeline(btn) {
 // Culture functions
 function addCulture() {
     const container = document.getElementById('culture-container');
+    const cultureIndex = getIndexVar('cultureIndex');
     const html = `
         <div class="culture-item">
             <div class="form-group" style="margin-bottom: 0;">
@@ -204,7 +249,7 @@ function addCulture() {
         </div>
     `;
     container.insertAdjacentHTML('beforeend', html);
-    cultureIndex++;
+    setIndexVar('cultureIndex', cultureIndex + 1);
 }
 
 function removeCulture(btn) {
@@ -216,6 +261,7 @@ function removeCulture(btn) {
 // Values functions
 function addValue() {
     const container = document.getElementById('values-container');
+    const valuesIndex = getIndexVar('valuesIndex');
     const html = `
         <div class="values-item">
             <div class="form-group" style="margin-bottom: 0;">
@@ -226,7 +272,7 @@ function addValue() {
         </div>
     `;
     container.insertAdjacentHTML('beforeend', html);
-    valuesIndex++;
+    setIndexVar('valuesIndex', valuesIndex + 1);
 }
 
 function removeValue(btn) {
@@ -238,6 +284,7 @@ function removeValue(btn) {
 // Culture Explanation functions
 function addCultureExplanation() {
     const container = document.getElementById('culture-explanation-container');
+    const cultureExplanationIndex = getIndexVar('cultureExplanationIndex');
     let scoringHtml = '';
     for (let i = 1; i <= 5; i++) {
         scoringHtml += `
@@ -266,7 +313,7 @@ function addCultureExplanation() {
         </div>
     `;
     container.insertAdjacentHTML('beforeend', html);
-    cultureExplanationIndex++;
+    setIndexVar('cultureExplanationIndex', cultureExplanationIndex + 1);
 }
 
 function removeCultureExplanation(btn) {
@@ -278,6 +325,7 @@ function removeCultureExplanation(btn) {
 // Values Explanation functions
 function addValuesExplanation() {
     const container = document.getElementById('values-explanation-container');
+    const valuesExplanationIndex = getIndexVar('valuesExplanationIndex');
     let scoringHtml = '';
     for (let i = 1; i <= 5; i++) {
         scoringHtml += `
@@ -306,7 +354,7 @@ function addValuesExplanation() {
         </div>
     `;
     container.insertAdjacentHTML('beforeend', html);
-    valuesExplanationIndex++;
+    setIndexVar('valuesExplanationIndex', valuesExplanationIndex + 1);
 }
 
 function removeValuesExplanation(btn) {
