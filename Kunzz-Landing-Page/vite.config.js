@@ -57,7 +57,8 @@ export default defineConfig(({ mode }) => {
               url.startsWith('/backend/corporate_blueprint-v2') ||
               url.startsWith('/backend/corporate_blueprint_edit-v2') ||
               url.startsWith('/backend/qna-v2') ||
-              url.startsWith('/backend/evaluation_form-v2')
+              url.startsWith('/backend/evaluation_form-v2') ||
+              url.startsWith('/backend/hire-v2')
             ) {
               return '/index.html';
             }

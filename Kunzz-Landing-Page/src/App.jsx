@@ -36,6 +36,7 @@ import CorporateBlueprintPage from './backend/pages/CorporateBlueprintPage.jsx';
 import CorporateBlueprintEditPage from './backend/pages/CorporateBlueprintEditPage.jsx';
 import QnaPage from './backend/pages/QnaPage.jsx';
 import EvaluationFormPage from './backend/pages/EvaluationFormPage.jsx';
+import HirePage from './backend/pages/HirePage.jsx';
 
 function AppRoutes() {
   return (
@@ -77,6 +78,7 @@ function AppRoutes() {
         <Route path="/backend/corporate_blueprint_edit-v2" element={<CorporateBlueprintEditPage />} />
         <Route path="/backend/qna-v2" element={<QnaPage />} />
         <Route path="/backend/evaluation_form-v2" element={<EvaluationFormPage />} />
+        <Route path="/backend/hire-v2" element={<HirePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

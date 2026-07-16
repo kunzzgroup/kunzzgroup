@@ -16,11 +16,15 @@ body.backend-page,
   box-sizing: border-box;
 }
 
-body.has-sidebar #root.backend-page > .backend-main-shell {
+body.has-sidebar .backend-main-shell {
   display: block;
   width: 100%;
   max-width: none;
   box-sizing: border-box;
+}
+
+body.has-sidebar .backend-main-shell.hire-page-shell {
+  padding-top: 0;
 }
 
 body.has-sidebar .backend-php-content {
