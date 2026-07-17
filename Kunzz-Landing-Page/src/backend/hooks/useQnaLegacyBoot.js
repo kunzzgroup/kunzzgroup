@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { getBackendBase } from '../../config.js';
+import { fetchBackendFragment } from '../utils/fetchBackendFragment.js';
 
 function loadScript(src, id) {
   const existing = document.getElementById(id);
@@ -83,14 +84,5 @@ export function useQnaLegacyBoot(markupReady, contentRef) {
 
 export async function fetchQnaFragment() {
   const backendBase = getBackendBase();
-  const response = await fetch(`${backendBase}/qna_fragment.php`, {
-    credentials: 'include',
-    cache: 'no-store',
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
-
-  return response.text();
+  return fetchBackendFragment(`${backendBase}/qna_fragment.php`);
 }

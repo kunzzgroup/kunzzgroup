@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/fragment_helpers.php';
 /**
  * ═══════════════════════════════════════════
  *  权限守卫 (Permission Guard)
@@ -224,6 +225,13 @@ function requireStockViewApi($view) {
  * 输出 403 页面并 exit
  */
 function _denyAccess() {
+    if (kunzz_is_backend_fragment_request()) {
+        if (empty($_SESSION['user_id'])) {
+            kunzz_send_fragment_unauthorized();
+        }
+        kunzz_send_fragment_forbidden();
+    }
+
     http_response_code(403);
     $username = $_SESSION['username'] ?? '未知用户';
     echo '<!DOCTYPE html>

@@ -1,5 +1,8 @@
 <?php
 
+require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/fragment_helpers.php';
+
 define('SESSION_TIMEOUT_HIRE', 60);
 
 function hire_getBackendWebBase() {
@@ -24,8 +27,7 @@ function hire_requireAuthenticatedSession() {
         ) {
             session_unset();
             session_destroy();
-            header('Location: ' . app_url('frontend/login.html'));
-            exit;
+            kunzz_send_fragment_unauthorized();
         }
         $_SESSION['last_activity'] = time();
         return;
@@ -39,8 +41,7 @@ function hire_requireAuthenticatedSession() {
         return;
     }
 
-    header('Location: ' . app_url('frontend/login.html') . '?redirect=hire');
-    exit;
+    kunzz_send_fragment_unauthorized();
 }
 
 function hire_prepareViewData() {

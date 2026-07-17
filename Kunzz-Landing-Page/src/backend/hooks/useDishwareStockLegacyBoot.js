@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { getBackendBase } from '../../config.js';
+import { fetchBackendFragment } from '../utils/fetchBackendFragment.js';
 
 export const DISHWARE_STOCK_TABS = ['stock', 'j1', 'j2', 'j3', 'transfer'];
 
@@ -104,14 +105,5 @@ export function useDishwareStockLegacyBoot(markupReady, tab = 'stock') {
 
 export async function fetchDishwareStockFragment() {
   const backendBase = getBackendBase();
-  const response = await fetch(`${backendBase}/dishware_stock_fragment.php`, {
-    credentials: 'include',
-    cache: 'no-store',
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
-
-  return response.text();
+  return fetchBackendFragment(`${backendBase}/dishware_stock_fragment.php`);
 }

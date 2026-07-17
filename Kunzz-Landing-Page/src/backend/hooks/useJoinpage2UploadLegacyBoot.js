@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { getBackendBase } from '../../config.js';
+import { fetchBackendFragment } from '../utils/fetchBackendFragment.js';
 
 function loadScript(src, id) {
   const existing = document.getElementById(id);
@@ -77,14 +78,5 @@ export async function fetchJoinpage2UploadFragment(queryString = '') {
   const query = queryString
     ? (queryString.startsWith('?') ? queryString : `?${queryString}`)
     : '';
-  const response = await fetch(`${backendBase}/joinpage2upload_fragment.php${query}`, {
-    credentials: 'include',
-    cache: 'no-store',
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
-
-  return response.text();
+  return fetchBackendFragment(`${backendBase}/joinpage2upload_fragment.php${query}`);
 }

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { getBackendBase } from '../../config.js';
+import { fetchBackendFragment } from '../utils/fetchBackendFragment.js';
 
 function loadScript(src, id) {
   const existing = document.getElementById(id);
@@ -78,14 +79,5 @@ export function useStockSotLegacyBoot(markupReady) {
 export async function fetchStockSotFragment(system) {
   const backendBase = getBackendBase();
   const query = system ? `?system=${encodeURIComponent(system)}` : '';
-  const response = await fetch(`${backendBase}/stocksot_fragment.php${query}`, {
-    credentials: 'include',
-    cache: 'no-store',
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
-
-  return response.text();
+  return fetchBackendFragment(`${backendBase}/stocksot_fragment.php${query}`);
 }

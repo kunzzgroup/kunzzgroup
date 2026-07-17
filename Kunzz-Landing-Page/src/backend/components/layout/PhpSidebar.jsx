@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { getBackendBase } from '../../../config.js';
+import { fetchBackendFragment } from '../../utils/fetchBackendFragment.js';
 
 function loadScript(src, id) {
   if (document.getElementById(id)) return Promise.resolve();
@@ -21,8 +22,7 @@ export default function PhpSidebar() {
   useEffect(() => {
     const backendBase = getBackendBase();
 
-    fetch(`${backendBase}/sidebar_fragment.php`, { credentials: 'include' })
-      .then((response) => response.text())
+    fetchBackendFragment(`${backendBase}/sidebar_fragment.php`)
       .then(setHtml)
       .catch(() => setHtml(''));
 
