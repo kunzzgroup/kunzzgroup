@@ -293,6 +293,47 @@ async function redirectToAllowedStockPage(event) {
 const sidebarToggle = document.getElementById('sidebarToggle');
 const sidebarMenu = document.querySelector('.informationmenu'); // 改名避免冲突
 
+// 侧边栏图标悬停提示
+const sidebarTooltipDescriptions = {
+    brand: '集团架构 — 品牌与企业蓝图',
+    analytics: '营收数据 — KPI 报表与上传',
+    hr: '人事管理 — 职员、招聘与考核',
+    resource: '资源总库 — 库存、碗碟与价格',
+    photoupload: '视觉管理 — 网页素材与菜单',
+};
+
+function initSidebarTooltips() {
+    document.querySelectorAll('.informationmenu-section-title').forEach((title) => {
+        if (title.dataset.tooltip) return;
+
+        const targetId = title.getAttribute('data-target') || '';
+        const sectionKey = targetId.replace(/-items$/, '');
+        if (sidebarTooltipDescriptions[sectionKey]) {
+            title.dataset.tooltip = sidebarTooltipDescriptions[sectionKey];
+            title.setAttribute('aria-label', sidebarTooltipDescriptions[sectionKey]);
+            return;
+        }
+
+        const clone = title.cloneNode(true);
+        clone.querySelectorAll('.section-icon, .section-arrow').forEach((el) => el.remove());
+        const label = clone.textContent.replace(/\s+/g, ' ').trim();
+        if (label) {
+            title.dataset.tooltip = label;
+            title.setAttribute('aria-label', label);
+        }
+    });
+
+    updateSidebarToggleTooltip();
+}
+
+function updateSidebarToggleTooltip() {
+    if (!sidebarToggle) return;
+    const isCollapsed = sidebarMenu?.classList.contains('collapsed');
+    const label = isCollapsed ? '展开侧边栏' : '收起侧边栏';
+    sidebarToggle.dataset.tooltip = label;
+    sidebarToggle.setAttribute('aria-label', label);
+}
+
 sidebarToggle?.addEventListener('click', function (e) {
     e.stopPropagation(); // 防止事件冒泡
 
@@ -316,6 +357,8 @@ sidebarToggle?.addEventListener('click', function (e) {
     sidebarToggle.classList.toggle('collapsed');
     document.body.classList.toggle('sidebar-collapsed');
 
+    updateSidebarToggleTooltip();
+
     // 保存侧边栏状态到localStorage
     const isCollapsed = sidebarMenu.classList.contains('collapsed');
     localStorage.setItem('sidebarCollapsed', isCollapsed);
@@ -326,9 +369,9 @@ sidebarToggle?.addEventListener('click', function (e) {
     }
 });
 
-// 页面加载完成后启用过渡动画
-document.addEventListener('DOMContentLoaded', function () {
-    // 立即检查是否需要应用collapsed状态（从localStorage读取）
+function bootSidebarUi() {
+    initSidebarTooltips();
+
     const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
     if (isCollapsed) {
         document.body.classList.add('sidebar-collapsed');
@@ -336,8 +379,15 @@ document.addEventListener('DOMContentLoaded', function () {
         sidebarToggle?.classList.add('collapsed');
     }
 
-    // 页面加载后短暂延迟再启用过渡效果
+    updateSidebarToggleTooltip();
+
     setTimeout(function () {
         document.body.classList.add('sidebar-transition');
     }, 100);
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootSidebarUi);
+} else {
+    bootSidebarUi();
+}

@@ -388,7 +388,7 @@ if (!$canSeeBrand) {
             </div>
         </div>
 
-        <div class="sidebar-menu-hamburger" id="sidebarToggle">
+        <div class="sidebar-menu-hamburger" id="sidebarToggle" data-tooltip="收起侧边栏" aria-label="收起侧边栏">
             <span></span>
             <span></span>
             <span></span>

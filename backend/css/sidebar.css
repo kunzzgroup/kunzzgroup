@@ -119,6 +119,69 @@
     align-items: center;
     justify-content: space-between;
     transition: all 0.3s ease;
+    position: relative;
+}
+
+/* Sidebar icon / toolbar hover tooltips */
+[data-tooltip] {
+    position: relative;
+}
+
+[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1f2937;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: clamp(11px, 0.78vw, 13px);
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    line-height: 1.35;
+    white-space: nowrap;
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 6000;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+    transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
+}
+
+[data-tooltip]::before {
+    content: "";
+    position: absolute;
+    left: calc(100% + 4px);
+    top: 50%;
+    transform: translateY(-50%);
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-right: 6px solid #1f2937;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 6000;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+.informationmenu.collapsed [data-tooltip]:hover::after,
+.informationmenu.collapsed [data-tooltip]:hover::before,
+.informationmenu:not(.collapsed) .informationmenu-section-title:has(.section-icon:hover)::after,
+.informationmenu:not(.collapsed) .informationmenu-section-title:has(.section-icon:hover)::before,
+.sidebar-menu-hamburger[data-tooltip]:hover::after,
+.sidebar-menu-hamburger[data-tooltip]:hover::before {
+    opacity: 1;
+    visibility: visible;
+}
+
+.informationmenu.collapsed .informationmenu-content {
+    overflow: visible;
 }
 
 .informationmenu-section-title:hover:not(.active) {
