@@ -1,7 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/fragment_helpers.php';
+require_once __DIR__ . '/../fragment_helpers.php';
 
 define('SESSION_TIMEOUT_HIRE', 60);
 
