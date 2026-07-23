@@ -10,10 +10,8 @@
     width: 40px;                     /* collapsed width */
     height: 38px;
     flex-shrink: 0;
-    display: inline-flex;
-    flex-direction: row;
+    display: flex;
     align-items: center;
-    box-sizing: border-box;
     background: #ffffff;
     border: 1px solid #d1d5db;
     border-radius: 20px;
@@ -57,41 +55,29 @@
     line-height: 1;
 }
 
-.smartSearch-icon i {
-    display: block;
-    line-height: 1;
-    pointer-events: none;
-}
-
 .smartSearchWrapper.expanded .smartSearch-icon {
     color: #ff7b00;
 }
 
-/* ── Input — collapsed via width, stays in flex row ─────── */
+/* ── Input — hidden until expanded ──────────────────────── */
 .smartSearch-input {
-    flex: 1 1 0;
+    flex: 1;
     border: none;
     outline: none;
     background: transparent;
     font-size: clamp(11px, 0.74vw, 14px);
     color: #111827;
     padding: 0;
+    padding-right: 12px;
     min-width: 0;
-    max-width: 0;
-    opacity: 0;
     font-family: inherit;
-    line-height: normal;
-    height: auto;
-    align-self: center;
-    overflow: hidden;
-    pointer-events: none;
+    line-height: 1.4;
+    height: 100%;
+    display: none;
 }
 
 .smartSearchWrapper.expanded .smartSearch-input {
-    max-width: 100%;
-    opacity: 1;
-    padding-right: 12px;
-    pointer-events: auto;
+    display: block;
 }
 
 .smartSearch-input::placeholder {
@@ -139,29 +125,21 @@
    ~160px of true physical space. NO OVERLAPS. NO SQUISHING!
    ========================================================= */
 
-.header-right-section,
-.header-right-group,
-.filter-bar {
+.header-right-section {
     transition: gap 0.3s ease;
 }
 
-.header-right-section:has(.smartSearchWrapper.expanded),
-.header-right-group:has(.smartSearchWrapper.expanded),
-.filter-bar:has(.smartSearchWrapper.expanded) {
-    gap: clamp(4px, 0.5vw, 10px);
+.header-right-section:has(.smartSearchWrapper.expanded) {
+    gap: clamp(4px, 0.5vw, 10px);           /* Squish gap to save even more space */
 }
 
-.header-right-section:has(.smartSearchWrapper.expanded) .btn,
-.header-right-group:has(.smartSearchWrapper.expanded) .btn,
-.filter-bar:has(.smartSearchWrapper.expanded) .btn {
+.header-right-section:has(.smartSearchWrapper.expanded) .btn {
     font-size: 0;                           /* Hide text */
     padding: clamp(4px, 0.4vw, 8px) clamp(8px, 0.8vw, 12px); 
     white-space: nowrap;
 }
 
-.header-right-section:has(.smartSearchWrapper.expanded) .btn i,
-.header-right-group:has(.smartSearchWrapper.expanded) .btn i,
-.filter-bar:has(.smartSearchWrapper.expanded) .btn i {
+.header-right-section:has(.smartSearchWrapper.expanded) .btn i {
     font-size: 14px;                        /* Keep FA icon normal size */
     margin: 0;                              /* Remove extra spacing next to text */
 }

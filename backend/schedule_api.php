@@ -12,9 +12,7 @@ if (!headers_sent()) {
 <?php
 require_once __DIR__ . '/xss_protect.php';
 // 员工排班系统API
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+session_start();
 header('Content-Type: application/json');
 
 try {

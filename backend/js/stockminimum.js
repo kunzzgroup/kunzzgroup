@@ -1,10 +1,9 @@
 // ─── 全局状态 ────────────────────────────────────────────────────────────────
 let currentSystem = (typeof INITIAL_SYSTEM !== 'undefined') ? INITIAL_SYSTEM : 'central';
-let allProducts = [];
-let filteredProducts = [];
+let allProducts = [];        // 当前系统的货品完整列表
+let filteredProducts = [];   // 搜索过滤后的列表
 let pendingChanges = new Set();
 let isLoading = false;
-let stockMinimumBooted = false;
 
 const SYSTEM_NAMES = {
     central: '中央',
@@ -12,37 +11,6 @@ const SYSTEM_NAMES = {
     j2: 'J2',
     j3: 'J3'
 };
-
-function isStockReactV2Page() {
-    return /stockminimum-v2|stocksot-v2|stockproductname-v2|stockremark-v2|stockeditall-v2|stocklistall-v2/.test(window.location.pathname || '');
-}
-
-function buildStockPageUrl(page, query) {
-    const root = window.__KUNZZ_BACKEND_BASE__ || '';
-    if (root) {
-        return `${root}/${page}${query || ''}`;
-    }
-    return `${page}${query || ''}`;
-}
-
-function initMinimumContext() {
-    const ctx = document.getElementById('stockminimum-context');
-    if (!ctx) {
-        return;
-    }
-
-    if (ctx.dataset.system) {
-        currentSystem = ctx.dataset.system;
-    }
-
-    if (ctx.dataset.allowedSystems) {
-        try {
-            window.ALLOWED_SYSTEMS = JSON.parse(ctx.dataset.allowedSystems);
-        } catch (error) {
-            console.warn('Failed to parse allowed systems', error);
-        }
-    }
-}
 
 // ─── 初始化 ──────────────────────────────────────────────────────────────────────────────────────────────
 function initApp() {
@@ -207,37 +175,26 @@ function escapeHtml(str) {
 }
 
 // ─── 实时搜索 ─────────────────────────────────────────────────────────────────────────────────────────────
-function applyMinimumFilter() {
-    const input = document.getElementById('unified-filter');
-    const term = (input?.value || '').toLowerCase().trim();
-
-    if (!term) {
-        filteredProducts = [...allProducts];
-    } else {
-        filteredProducts = allProducts.filter(p =>
-            (p.product_name && p.product_name.toLowerCase().includes(term)) ||
-            (p.product_code && p.product_code !== '-' && p.product_code.toLowerCase().includes(term))
-        );
-    }
-
-    renderSettingsTable();
-}
-
 function setupRealTimeSearch() {
-    if (isStockReactV2Page()) {
-        return;
-    }
-
     const input = document.getElementById('unified-filter');
     if (!input) return;
     let debounceTimer;
     input.addEventListener('input', function () {
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(applyMinimumFilter, 200);
+        debounceTimer = setTimeout(() => {
+            const term = this.value.toLowerCase().trim();
+            if (!term) {
+                filteredProducts = [...allProducts];
+            } else {
+                filteredProducts = allProducts.filter(p =>
+                    (p.product_name && p.product_name.toLowerCase().includes(term)) ||
+                    (p.product_code && p.product_code !== '-' && p.product_code.toLowerCase().includes(term))
+                );
+            }
+            renderSettingsTable();
+        }, 200);
     });
 }
-
-window.searchStockMinimum = applyMinimumFilter;
 
 // ─── 更新显示计数 ─────────────────────────────────────────────────────────────
 function updateDisplayedCount() {
@@ -351,8 +308,7 @@ function goBack() {
     if (pendingChanges.size > 0) {
         if (!confirm('有未保存的更改，离开将丢失这些更改。确定要离开吗？')) return;
     }
-    const page = isStockReactV2Page() ? 'stocklistall-v2' : 'stocklistall';
-    window.location.href = buildStockPageUrl(page, `?system=${currentSystem}`);
+    window.location.href = `stocklistall?system=${currentSystem}`;
 }
 
 // ─── 键盘快捷键 ───────────────────────────────────────────────────────────────
@@ -371,34 +327,5 @@ window.addEventListener('beforeunload', function (e) {
     }
 });
 
-async function bootStockMinimum() {
-    initMinimumContext();
-
-    if (stockMinimumBooted) {
-        if (typeof window.reinitStockMinimum === 'function') {
-            await window.reinitStockMinimum();
-        }
-        return;
-    }
-
-    stockMinimumBooted = true;
-    initApp();
-}
-
-window.reinitStockMinimum = async function reinitStockMinimum() {
-    initMinimumContext();
-    pendingChanges.clear();
-
-    const filterInput = document.getElementById('unified-filter');
-    if (filterInput) {
-        filterInput.value = '';
-    }
-
-    await loadProductsAndSettings(currentSystem);
-};
-
-window.bootStockMinimum = bootStockMinimum;
-
-if (!isStockReactV2Page()) {
-    document.addEventListener('DOMContentLoaded', initApp);
-}
+// ─── 启动 ────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', initApp);

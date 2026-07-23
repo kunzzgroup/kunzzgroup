@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import CmsBannerBackground from '../../CmsBannerBackground.jsx';
+import { mediaUrl } from '../../../utils/media.js';
 
 export default function AboutIntro() {
   const bannerRef = useRef(null);
@@ -37,7 +37,11 @@ export default function AboutIntro() {
   return (
     <section className="aboutus-section">
       <div ref={bannerRef} className="aboutus-banner">
-        <CmsBannerBackground mediaType="about_background" />
+        <img
+          src={mediaUrl('about_background')}
+          alt=""
+          className="background-image"
+        />
         <div className="aboutus-content">
           <h1>About Us</h1>
           <p>Discover the origins and growth journey of Kunzz Holdings</p>

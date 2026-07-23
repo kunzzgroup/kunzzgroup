@@ -1,18 +1,6 @@
-# XAMPP local dev when the project lives in htdocs/kunzzgroup/
-#
-# Option A (recommended): recreate junctions after moving/renaming the project folder:
-#   rmdir C:\xampp\htdocs\frontend
-#   rmdir C:\xampp\htdocs\backend
-#   rmdir C:\xampp\htdocs\assets
-#   mklink /J C:\xampp\htdocs\frontend C:\xampp\htdocs\kunzzgroup\frontend
-#   mklink /J C:\xampp\htdocs\backend C:\xampp\htdocs\kunzzgroup\backend
-#   mklink /J C:\xampp\htdocs\assets C:\xampp\htdocs\kunzzgroup\Kunzz-Landing-Page\dist\assets
-#
-# Option B: copy this file to C:\xampp\htdocs\.htaccess (rewrite fallback)
+# Copy to C:\xampp\htdocs\.htaccess for XAMPP local dev (project in kunzzgroup subfolder).
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteRule ^backend/(.*)$ kunzzgroup/backend/$1 [L]
-    RewriteRule ^frontend/(.*)$ kunzzgroup/frontend/$1 [L]
-    RewriteRule ^assets/(.*)$ kunzzgroup/Kunzz-Landing-Page/dist/assets/$1 [L]
     RewriteRule ^images/(.*)$ kunzzgroup/images/$1 [L]
 </IfModule>

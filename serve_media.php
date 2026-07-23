@@ -8,27 +8,14 @@ if (!is_string($path) || !preg_match('#/media/([^/.]+)#', $path, $matches)) {
 }
 
 $mediaType = $matches[1];
-
-if ($mediaType === 'background_music') {
-    $configFile = __DIR__ . '/music_config.json';
-    $filePath = '';
-    if (file_exists($configFile)) {
-        $config = json_decode(file_get_contents($configFile), true);
-        $filePath = $config['background_music']['file'] ?? '';
-    }
-    if ($filePath === '') {
-        $filePath = 'audio/audio/music.mp3';
-    }
-} else {
-    $allowedTypes = ['home_background', 'about_background', 'joinus_background'];
-    if (!in_array($mediaType, $allowedTypes, true)) {
-        http_response_code(404);
-        exit;
-    }
-
-    $media = getMediaConfig($mediaType);
-    $filePath = $media['file'] ?? '';
+$allowedTypes = ['home_background', 'about_background', 'joinus_background'];
+if (!in_array($mediaType, $allowedTypes, true)) {
+    http_response_code(404);
+    exit;
 }
+
+$media = getMediaConfig($mediaType);
+$filePath = $media['file'] ?? '';
 
 if ($filePath === '' || strpos($filePath, 'http') === 0) {
     http_response_code(404);
@@ -66,10 +53,6 @@ $mimeTypes = [
     'jpeg' => 'image/jpeg',
     'png' => 'image/png',
     'webp' => 'image/webp',
-    'mp3' => 'audio/mpeg',
-    'wav' => 'audio/wav',
-    'ogg' => 'audio/ogg',
-    'm4a' => 'audio/mp4',
 ];
 
 header('Content-Type: ' . ($mimeTypes[$extension] ?? 'application/octet-stream'));

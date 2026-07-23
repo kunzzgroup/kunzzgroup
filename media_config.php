@@ -231,31 +231,6 @@ function getMediaHtml($mediaType, $attributes = []) {
  * 获取公司照片数组
  * @return array 照片路径数组
  */
-function resolveComphotoDiskPath($storedPath) {
-    if (!$storedPath) {
-        return '';
-    }
-
-    if ($storedPath[0] === '/' || preg_match('#^[A-Za-z]:[\\\\/]#', $storedPath)) {
-        return $storedPath;
-    }
-
-    $root = __DIR__;
-    $candidates = [
-        $storedPath,
-        $root . '/' . ltrim(str_replace('../', '', $storedPath), '/'),
-        $root . '/images/images/' . basename($storedPath),
-    ];
-
-    foreach ($candidates as $path) {
-        if ($path && file_exists($path)) {
-            return $path;
-        }
-    }
-
-    return $candidates[1] ?? $storedPath;
-}
-
 function getCompanyPhotos() {
     // 子域名配置
     $subdomainMediaUrl = 'https://media.kunzzgroup.com/comphotos/';
@@ -299,27 +274,25 @@ function getCompanyPhotos() {
                     $photoUrl = '';
                     $timestamp = time();
 
-                    $storedPath = $config[$key]['file'] ?? '';
-                    $localDiskPath = resolveComphotoDiskPath($storedPath);
-                    $subdomainFilePath = $subdomainPhysicalPath . basename($storedPath);
-
-                    if ($subdomainFilePath && file_exists($subdomainFilePath)) {
+                    // 优先检查子域名路径
+                    $subdomainFilePath = $subdomainPhysicalPath . basename($config[$key]['file']);
+                    if (file_exists($subdomainFilePath)) {
                         $fileExists = true;
                         $timestamp = filemtime($subdomainFilePath);
-
+                        
                         if (isset($config[$key]['url'])) {
                             $photoUrl = $config[$key]['url'];
                         } else {
-                            $photoUrl = $subdomainMediaUrl . basename($storedPath);
+                            $photoUrl = $subdomainMediaUrl . basename($config[$key]['file']);
                         }
-                    } elseif ($localDiskPath && file_exists($localDiskPath)) {
+                    } elseif (file_exists($config[$key]['file'])) {
                         $fileExists = true;
-                        $timestamp = filemtime($localDiskPath);
-
+                        $timestamp = filemtime($config[$key]['file']);
+                        
                         if (isset($config[$key]['url'])) {
                             $photoUrl = $config[$key]['url'];
                         } else {
-                            $photoUrl = 'images/images/' . basename($storedPath);
+                            $photoUrl = $config[$key]['file'];
                         }
                     }
 
@@ -1302,7 +1275,7 @@ function getJobsHtml($language = 'zh') {
  * @return array 音乐信息
  */
 function getBgMusicConfig() {
-    $configFile = __DIR__ . '/music_config.json';
+    $configFile = 'music_config.json';
     $defaultConfig = [
         'file' => 'audio/audio/music.mp3',
         'type' => 'audio',
@@ -1311,22 +1284,8 @@ function getBgMusicConfig() {
     
     if (file_exists($configFile)) {
         $config = json_decode(file_get_contents($configFile), true);
-        if ($config && isset($config['background_music'])) {
-            $storedPath = $config['background_music']['file'] ?? '';
-            $candidates = [];
-            if ($storedPath !== '') {
-                if ($storedPath[0] === '/') {
-                    $candidates[] = $storedPath;
-                } else {
-                    $candidates[] = __DIR__ . '/' . $storedPath;
-                    $candidates[] = __DIR__ . '/' . preg_replace('#^\.\./#', '', $storedPath);
-                }
-            }
-            foreach ($candidates as $candidate) {
-                if (file_exists($candidate)) {
-                    return $config['background_music'];
-                }
-            }
+        if ($config && isset($config['background_music']) && file_exists($config['background_music']['file'])) {
+            return $config['background_music'];
         }
     }
     

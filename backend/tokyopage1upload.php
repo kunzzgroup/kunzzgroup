@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once __DIR__ . '/permission_guard.php';
 require_once __DIR__ . '/heic_convert.php';
 requirePermission('visual');
@@ -14,7 +14,7 @@ session_start();
 
 // 检查是否已登录（根据你的登录系统调整）
 if (!isset($_SESSION['user_id'])) {
-    header('Location: ' . app_url('frontend/login.html'));
+    header("Location: /frontend/login.html");
     exit();
 }
 

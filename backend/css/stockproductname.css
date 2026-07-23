@@ -721,16 +721,6 @@ body {
     color: #000000ff;
 }
 
-.filter-item-search .smartSearchWrapper {
-    width: 40px;
-    flex-shrink: 0;
-    cursor: pointer;
-}
-
-.filter-item-search .smartSearchWrapper.expanded {
-    width: 250px;
-}
-
 .filter-input {
     padding: clamp(4px, 0.42vw, 8px) clamp(6px, 0.63vw, 12px);
     border: 1px solid #d1d5db;

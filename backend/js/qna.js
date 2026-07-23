@@ -1,51 +1,19 @@
 ﻿
-function isQnaReactV2Page() {
-    return /\/qna-v2(?:\/|$|\?)/.test(window.location.pathname || '');
-}
-
-function getQnaBackendBase() {
-    if (window.__KUNZZ_BACKEND_BASE__) {
-        return String(window.__KUNZZ_BACKEND_BASE__).replace(/\/$/, '');
-    }
-
-    const path = window.location.pathname || '';
-    const match = path.match(/^(.*?\/backend)(?:\/|$)/);
-    if (match) {
-        return match[1];
-    }
-
-    return '/backend';
-}
-
-function getSiteRootBase() {
-    const backendBase = getQnaBackendBase();
-    if (backendBase.endsWith('/backend')) {
-        return backendBase.slice(0, -'/backend'.length);
-    }
-    return backendBase;
-}
-
-function getFormPdfUrl(filename) {
-    const root = getSiteRootBase();
-    return `${root}/form/${filename}`.replace(/([^:]\/)\/+/g, '$1');
-}
-
-function getFontUrl(filename) {
-    const root = getSiteRootBase();
-    return `${root}/fonts/${filename}`.replace(/([^:]\/)\/+/g, '$1');
-}
-
-function getQnaApiUrl() {
-    return `${getQnaBackendBase()}/qnaapi.php`;
-}
-
-function getQnaUser() {
-    return window.__QNA_USER__ || { username: 'User', position: 'User' };
-}
+// 从PHP获取用户名和职位
+const currentUsername = '<?php echo isset($username) ? addslashes($username) : "User"; ?>';
+const currentPosition = '<?php echo isset($position) && !empty($position) ? addslashes($position) : "User"; ?>';
 
 let userResponse = null;
 let isSubmitted = false;
 
+// 页面加载时检查是否已提交
+document.addEventListener('DOMContentLoaded', async function () {
+    await loadUserResponse();
+    // 根据模式显示/隐藏按钮
+    updateButtonVisibility();
+});
+
+// 更新按钮显示状态
 function updateButtonVisibility() {
     const resetBtn = document.getElementById('resetBtn');
     const submitBtn = document.getElementById('submitBtn');
@@ -62,12 +30,12 @@ function updateButtonVisibility() {
     }
 }
 
+// 加载用户的问卷回答
 async function loadUserResponse() {
     try {
-        const res = await fetch(getQnaApiUrl(), {
+        const res = await fetch('qnaapi.php', {
             method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
         });
         const data = await res.json();
 
@@ -77,30 +45,30 @@ async function loadUserResponse() {
             switchToViewMode();
             populateViewMode(data.data);
         } else {
+            // 未提交，保持编辑模式
             isSubmitted = false;
         }
     } catch (error) {
         console.error('加载问卷失败:', error);
-        if (typeof showAlert === 'function') {
-            showAlert('加载问卷失败，请刷新页面重试', 'error');
-        }
+        showAlert('加载问卷失败，请刷新页面重试', 'error');
     }
 }
 
+// 切换到查看模式
 function switchToViewMode() {
     document.body.classList.add('mode-view');
-    const form = document.getElementById('qnaForm');
-    if (form) form.style.display = 'none';
+    document.getElementById('qnaForm').style.display = 'none';
     updateButtonVisibility();
 }
 
+// 填充查看模式的数据
 function populateViewMode(data) {
     for (let i = 1; i <= 10; i++) {
         const answer = data[`question${i}`] || '';
         const viewElement = document.getElementById(`view-question${i}`);
         if (viewElement) {
             if (answer.trim()) {
-                viewElement.textContent = answer;
+                viewElement.innerHTML = answer;
                 viewElement.classList.remove('empty-answer');
             } else {
                 viewElement.innerHTML = '<span class="empty-answer">未填写</span>';
@@ -109,116 +77,65 @@ function populateViewMode(data) {
     }
 }
 
-async function handleQnaFormSubmit(event) {
-    event.preventDefault();
+// 表单提交
+document.getElementById('qnaForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
 
     if (isSubmitted) {
-        if (typeof showAlert === 'function') {
-            showAlert('您已经提交过问卷，每个用户只能提交一次', 'error');
-        }
+        showAlert('您已经提交过问卷，每个用户只能提交一次', 'error');
         return;
     }
 
     const submitBtn = document.getElementById('submitBtn');
-    const originalText = submitBtn ? submitBtn.innerHTML : '';
-    if (submitBtn) {
-        submitBtn.innerHTML = '<div class="loading"></div> 提交中...';
-        submitBtn.disabled = true;
-    }
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<div class="loading"></div> 提交中...';
+    submitBtn.disabled = true;
 
     try {
-        const formData = new FormData(event.target);
+        const formData = new FormData(this);
         const data = {};
         for (let i = 1; i <= 10; i++) {
             data[`question${i}`] = formData.get(`question${i}`) || '';
         }
 
-        const res = await fetch(getQnaApiUrl(), {
+        const res = await fetch('qnaapi.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(data),
+            body: JSON.stringify(data)
         });
 
         const result = await res.json();
 
         if (result.success) {
-            if (typeof showAlert === 'function') {
-                showAlert('问卷提交成功！', 'success');
-            }
+            showAlert('问卷提交成功！', 'success');
             isSubmitted = true;
             await loadUserResponse();
             updateButtonVisibility();
         } else {
-            if (typeof showAlert === 'function') {
-                showAlert(result.message || '提交失败，请重试', 'error');
-            }
-            if (submitBtn) {
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-            }
-        }
-    } catch (error) {
-        console.error('提交失败:', error);
-        if (typeof showAlert === 'function') {
-            showAlert('网络错误，请稍后重试', 'error');
-        }
-        if (submitBtn) {
+            showAlert(result.message || '提交失败，请重试', 'error');
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
         }
+    } catch (error) {
+        console.error('提交失败:', error);
+        showAlert('网络错误，请稍后重试', 'error');
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
     }
-}
+});
 
+// 重置表单
 function resetForm() {
     if (confirm('确定要清空所有回答吗？')) {
-        const form = document.getElementById('qnaForm');
-        if (form) form.reset();
+        document.getElementById('qnaForm').reset();
     }
 }
 
-function loadScriptOnce(src, id) {
-    const existing = document.getElementById(id);
-    if (existing?.src === src) {
-        return Promise.resolve();
-    }
-    if (existing) {
-        existing.remove();
-    }
-
-    return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.id = id;
-        script.src = src;
-        script.async = true;
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error(`Failed to load ${src}`));
-        document.body.appendChild(script);
-    });
-}
-
-async function ensurePdfLibraries() {
-    const backendBase = getQnaBackendBase();
-
-    if (typeof window.PDFLib === 'undefined') {
-        await loadScriptOnce(
-            'https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js',
-            'qna-pdf-lib',
-        );
-    }
-
-    if (typeof window.fontkit === 'undefined') {
-        try {
-            await loadScriptOnce(`${backendBase}/get_fontkit.php`, 'qna-fontkit');
-        } catch (error) {
-            console.warn('fontkit 加载失败，将尝试继续生成 PDF:', error);
-        }
-    }
-}
-
+// 打印问卷模板（直接下载）
 async function printTemplate() {
     try {
-        const response = await fetch(getFormPdfUrl('surveyform.pdf'));
+        const templatePath = '../form/surveyform.pdf';
+        const response = await fetch(templatePath);
 
         if (!response.ok) {
             throw new Error('无法加载PDF模板');
@@ -235,41 +152,42 @@ async function printTemplate() {
         URL.revokeObjectURL(url);
     } catch (error) {
         console.error('下载PDF模板失败:', error);
-        if (typeof showAlert === 'function') {
-            showAlert('下载PDF模板失败：' + error.message, 'error');
-        }
+        showAlert('下载PDF模板失败：' + error.message, 'error');
     }
 }
 
+
+// 生成PDF
 async function generatePDF() {
     if (!userResponse) {
-        if (typeof showAlert === 'function') {
-            showAlert('没有可打印的问卷数据', 'error');
-        }
+        showAlert('没有可打印的问卷数据', 'error');
         return;
     }
 
-    const { username: currentUsername, position: currentPosition } = getQnaUser();
-
     try {
-        await ensurePdfLibraries();
+        showAlert('正在生成PDF，请稍候...', 'success');
 
-        if (typeof showAlert === 'function') {
-            showAlert('正在生成PDF，请稍候...', 'success');
-        }
+        // 检查PDF模板是否存在
+        const templatePath = '../form/survey.pdf';
 
-        const templateResponse = await fetch(getFormPdfUrl('survey.pdf'));
+        // 使用fetch加载PDF模板
+        const templateResponse = await fetch(templatePath);
         if (!templateResponse.ok) {
-            throw new Error('无法加载PDF模板，请确保 form/survey.pdf 文件存在');
+            throw new Error('无法加载PDF模板，请确保form/survey.pdf文件存在');
         }
 
         const templateBytes = await templateResponse.arrayBuffer();
-        const { PDFDocument, rgb } = PDFLib;
+        const { PDFDocument, rgb, StandardFonts } = PDFLib;
 
+        // 加载 PDF 文档（必须先创建实例）
         const pdfDoc = await PDFDocument.load(templateBytes);
 
+        // 查找 fontkit 实例
         let fontkitInstance = null;
+
+        // @pdf-lib/fontkit 通常导出为 window.fontkit
         if (typeof window.fontkit !== 'undefined') {
+            // 检查是否是 UMD 模块导出
             if (window.fontkit.default) {
                 fontkitInstance = window.fontkit.default;
             } else if (window.fontkit.fontkit) {
@@ -277,19 +195,24 @@ async function generatePDF() {
             } else {
                 fontkitInstance = window.fontkit;
             }
+            console.log('找到 fontkit 实例');
         } else {
+            // 尝试其他可能的变量名
             const possibleNames = ['FontKit', 'pdfLibFontkit', 'PDFLibFontkit'];
             for (const name of possibleNames) {
                 if (typeof window[name] !== 'undefined') {
                     fontkitInstance = window[name];
+                    console.log(`找到 fontkit，使用变量名: ${name}`);
                     break;
                 }
             }
         }
 
+        // 在实例上注册 fontkit（必须在 embedFont 之前）
         if (fontkitInstance) {
             if (typeof pdfDoc.registerFontkit === 'function') {
                 pdfDoc.registerFontkit(fontkitInstance);
+                console.log('fontkit 已成功注册到 PDFDocument 实例');
             } else {
                 throw new Error('pdfDoc.registerFontkit 不是函数。请检查 pdf-lib 版本是否正确。');
             }
@@ -297,11 +220,14 @@ async function generatePDF() {
             throw new Error('fontkit 未加载。请确保 fonts/fontkit.umd.min.js 文件存在并已正确加载。');
         }
 
+        // 获取第一页
         const page = pdfDoc.getPage(0);
         const { width, height } = page.getSize();
+        console.log(`PDF尺寸: 宽度=${width.toFixed(2)}pt, 高度=${height.toFixed(2)}pt`);
 
-        const regularFontResponse = await fetch(getFontUrl('NotoSansSC-Regular.ttf'));
-        const boldFontResponse = await fetch(getFontUrl('NotoSansSC-Bold.ttf'));
+        // 加载本地中文字体文件
+        const regularFontResponse = await fetch('../fonts/NotoSansSC-Regular.ttf');
+        const boldFontResponse = await fetch('../fonts/NotoSansSC-Bold.ttf');
 
         if (!regularFontResponse.ok || !boldFontResponse.ok) {
             throw new Error('无法加载中文字体文件，请确保 fonts 文件夹中有 NotoSansSC-Regular.ttf 和 NotoSansSC-Bold.ttf');
@@ -310,18 +236,34 @@ async function generatePDF() {
         const regularFontBytes = await regularFontResponse.arrayBuffer();
         const boldFontBytes = await boldFontResponse.arrayBuffer();
 
-        const font = await pdfDoc.embedFont(regularFontBytes);
-        const boldFont = await pdfDoc.embedFont(boldFontBytes);
+        // 尝试嵌入中文字体
+        let font, boldFont;
+        try {
+            font = await pdfDoc.embedFont(regularFontBytes);
+            boldFont = await pdfDoc.embedFont(boldFontBytes);
+            console.log('成功加载并嵌入中文字体，将直接以文字形式打印中文');
+        } catch (e) {
+            console.error('嵌入字体失败:', e);
+            if (e.message && e.message.includes('fontkit')) {
+                throw new Error('嵌入字体需要 fontkit，但注册失败。请检查 fontkit 是否正确加载。错误: ' + e.message);
+            } else {
+                throw new Error('嵌入字体失败: ' + e.message);
+            }
+        }
 
+        // 设置字体大小和颜色
         const fontSize = 12;
         const headerFontSize = 12;
         const textColor = rgb(0, 0, 0);
         const lineHeight = 14;
-        const leftMargin = 25;
+        const leftMargin = 25;  // 减小这个值可以让答案往左移（当前：80，原值：100）
         const rightMargin = 100;
         const maxWidth = width - leftMargin - rightMargin;
+        const topMargin = 100;
 
+        // 在页面顶部中间绘制用户名和职位
         const userInfoText = `${currentUsername} (${currentPosition})`;
+        // 计算文本宽度并居中
         const textWidth = boldFont.widthOfTextAtSize(userInfoText, headerFontSize);
         const centerX = (width - textWidth) / 2;
 
@@ -333,6 +275,9 @@ async function generatePDF() {
             color: textColor,
         });
 
+        // 每个问题的“绝对起始Y坐标”配置（完全类似 invoice：固定坐标）
+        // 这里建议先用一组大概的初始值，之后你只改这些数字就能调位置
+        // 例：1: height - 200 表示第1题起点Y为 height-200。
         const answerPositions = {
             1: height - 105,
             2: height - 181,
@@ -346,6 +291,7 @@ async function generatePDF() {
             10: height - 815,
         };
 
+        // 问题列表
         const questions = [
             { num: 1, text: userResponse.question1 || '' },
             { num: 2, text: userResponse.question2 || '' },
@@ -356,21 +302,33 @@ async function generatePDF() {
             { num: 7, text: userResponse.question7 || '' },
             { num: 8, text: userResponse.question8 || '' },
             { num: 9, text: userResponse.question9 || '' },
-            { num: 10, text: userResponse.question10 || '' },
+            { num: 10, text: userResponse.question10 || '' }
         ];
 
-        const currentPage = page;
+        // 在PDF上填写答案（完全按绝对坐标绘制，每题互不影响）
+        let currentPage = page; // 当前使用的页面
 
         for (let i = 0; i < questions.length; i++) {
             const q = questions[i];
             if (!q.text || !q.text.trim()) continue;
 
+            // 该题的起始Y坐标（必须在 answerPositions 里配置）
             const startY = answerPositions[q.num];
-            if (typeof startY !== 'number') continue;
+            if (typeof startY !== 'number') {
+                // 如果没有配置位置，就跳过这题，避免画到奇怪的位置
+                console.warn(`answerPositions 中未配置第 ${q.num} 题的位置，已跳过该题`);
+                continue;
+            }
 
+            // 处理长文本换行
             const lines = wrapText(q.text, maxWidth, fontSize, font);
-            const yBase = startY;
 
+            let yBase = startY;
+            // 固定位置模式：不进行自动换页检查，直接使用用户指定的位置
+            // （如果用户设置的位置会导致内容超出页面，由用户自己负责调整位置）
+
+            // 绘制答案文本（每行，不显示问题编号）
+            // 固定位置模式：直接按用户指定的位置绘制，不进行换页检查
             for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
                 const line = lines[lineIndex];
                 const yPos = yBase - (lineIndex * lineHeight);
@@ -378,51 +336,56 @@ async function generatePDF() {
                     x: leftMargin,
                     y: yPos,
                     size: fontSize,
-                    font,
+                    font: font,
                     color: textColor,
                 });
             }
         }
 
+        // 保存PDF
         const pdfBytes = await pdfDoc.save();
         const blob = new Blob([pdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        const now = new Date();
-        const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        // 使用本地时间，避免UTC时差导致日期偏移
+        const _now = new Date();
+        const dateStr = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`;
         link.download = `surveyform_${dateStr}.pdf`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
 
-        if (typeof showAlert === 'function') {
-            showAlert('PDF生成成功！', 'success');
-        }
+        showAlert('PDF生成成功！', 'success');
     } catch (error) {
         console.error('生成PDF失败:', error);
-        if (typeof showAlert === 'function') {
-            showAlert('生成PDF失败：' + error.message, 'error');
-        }
+        showAlert('生成PDF失败：' + error.message, 'error');
     }
 }
 
+// 文本换行辅助函数（改进版，按字符处理中文）
 function wrapText(text, maxWidth, fontSize, font) {
     if (!text) return [];
 
+    // 简化处理：按字符分割，每行约60个字符（可根据实际调整）
     const charsPerLine = 60;
     const lines = [];
     let currentLine = '';
 
+    // 按字符处理，支持中文
     for (let i = 0; i < text.length; i++) {
         const char = text[i];
         currentLine += char;
 
+        // 如果遇到换行符，直接换行
         if (char === '\n') {
             lines.push(currentLine.trim());
             currentLine = '';
-        } else if (currentLine.length >= charsPerLine) {
+        }
+        // 如果当前行长度达到限制，换行
+        else if (currentLine.length >= charsPerLine) {
+            // 尝试在空格或标点处换行
             let breakPoint = currentLine.length;
             for (let j = currentLine.length - 1; j >= currentLine.length - 20 && j >= 0; j--) {
                 const c = currentLine[j];
@@ -442,57 +405,4 @@ function wrapText(text, maxWidth, fontSize, font) {
     }
 
     return lines.length > 0 ? lines : [''];
-}
-
-function bindPrintButton() {
-    const button = document.querySelector('[data-qna-root] .btn-print-template');
-    if (!button || button.dataset.qnaPrintBound === '1') {
-        return;
-    }
-
-    button.dataset.qnaPrintBound = '1';
-    button.addEventListener('click', (event) => {
-        event.preventDefault();
-        printTemplate();
-    });
-}
-
-function bindQnaForm() {
-    const form = document.getElementById('qnaForm');
-    if (!form || form.dataset.qnaBound === '1') {
-        return;
-    }
-
-    form.dataset.qnaBound = '1';
-    form.addEventListener('submit', handleQnaFormSubmit);
-}
-
-async function bootQna() {
-    userResponse = null;
-    isSubmitted = false;
-    document.body.classList.remove('mode-view');
-
-    const form = document.getElementById('qnaForm');
-    if (form) {
-        form.style.display = '';
-    }
-
-    bindQnaForm();
-    bindPrintButton();
-    await loadUserResponse();
-    updateButtonVisibility();
-}
-
-window.bootQna = bootQna;
-window.reinitQna = bootQna;
-window.printTemplate = printTemplate;
-window.generatePDF = generatePDF;
-window.resetForm = resetForm;
-
-if (!isQnaReactV2Page()) {
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', bootQna);
-    } else {
-        bootQna();
-    }
 }

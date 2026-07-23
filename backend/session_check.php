@@ -9,7 +9,6 @@ if (!headers_sent()) {
 // 包含全局防 XSS 脚本 (包括安全响应头设置与输入过滤)
 require_once __DIR__ . '/xss_protect.php';
 require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/fragment_helpers.php';
 
 $loginPage = app_url('frontend/login.html');
 
@@ -42,7 +41,8 @@ if (isset($_SESSION['user_id'])) {
         setcookie('remember_token', '', time() - 60, "/");
 
         // 跳转登录页
-        kunzz_send_fragment_unauthorized();
+        header('Location: ' . $loginPage);
+        exit();
     }
 
     // 更新活动时间戳
@@ -63,7 +63,8 @@ if (isset($_SESSION['user_id'])) {
     $_SESSION['last_activity'] = time();
 } else {
     // 没有 session，也没有有效 cookie
-    kunzz_send_fragment_unauthorized();
+    header('Location: ' . $loginPage);
+    exit();
 }
 
 // 设置用户信息变量

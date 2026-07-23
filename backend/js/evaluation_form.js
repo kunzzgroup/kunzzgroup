@@ -1,86 +1,4 @@
 
-function isEvaluationFormReactV2Page() {
-    return /\/evaluation_form-v2(?:\/|$|\?)/.test(window.location.pathname || '');
-}
-
-function getEvaluationFormBackendBase() {
-    if (window.__KUNZZ_BACKEND_BASE__) {
-        return String(window.__KUNZZ_BACKEND_BASE__).replace(/\/$/, '');
-    }
-
-    const path = window.location.pathname || '';
-    const match = path.match(/^(.*?\/backend)(?:\/|$)/);
-    if (match) {
-        return match[1];
-    }
-
-    return '/backend';
-}
-
-function getEvaluationFormApiUrl(query = '') {
-    return `${getEvaluationFormBackendBase()}/evaluation_form_api.php${query}`;
-}
-
-function getScheduleApiUrl(query = '') {
-    return `${getEvaluationFormBackendBase()}/schedule_api.php${query}`;
-}
-
-async function parseApiResponse(response) {
-    const text = await response.text();
-    try {
-        return JSON.parse(text);
-    } catch (error) {
-        const jsonStart = text.indexOf('{');
-        if (jsonStart >= 0) {
-            return JSON.parse(text.slice(jsonStart));
-        }
-        throw error;
-    }
-}
-
-function fetchEvaluationFormApi(url, options = {}) {
-    return fetch(url, {
-        credentials: 'include',
-        ...options,
-    });
-}
-
-function loadScriptOnce(src, id) {
-    const existing = document.getElementById(id);
-    if (existing?.src === src) {
-        return Promise.resolve();
-    }
-    if (existing) {
-        existing.remove();
-    }
-
-    return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.id = id;
-        script.src = src;
-        script.async = true;
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error(`Failed to load ${src}`));
-        document.body.appendChild(script);
-    });
-}
-
-async function ensurePdfExportLibraries() {
-    if (typeof window.jspdf === 'undefined') {
-        await loadScriptOnce(
-            'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
-            'evaluation-form-jspdf',
-        );
-    }
-
-    if (typeof window.html2canvas === 'undefined') {
-        await loadScriptOnce(
-            'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
-            'evaluation-form-html2canvas',
-        );
-    }
-}
-
 let currentFormId = null;
 let currentDepartment = '';
 let employees = [];
@@ -95,60 +13,23 @@ const standards = {
 };
 
 // 部门变化时加载员工和指标
-function bindEvaluationFormEvents() {
-    const departmentSelect = document.getElementById('department');
-    if (departmentSelect && departmentSelect.dataset.evaluationBound !== '1') {
-        departmentSelect.dataset.evaluationBound = '1';
-        departmentSelect.addEventListener('change', function () {
-            const dept = this.value;
-            if (dept) {
-                currentDepartment = dept;
-                loadEmployees(dept);
-                loadCriteria(dept);
-            }
-        });
+document.getElementById('department').addEventListener('change', function () {
+    const dept = this.value;
+    if (dept) {
+        currentDepartment = dept;
+        loadEmployees(dept);
+        loadCriteria(dept);
     }
-
-    if (!document.body.dataset.evaluationGlobalBound) {
-        document.body.dataset.evaluationGlobalBound = '1';
-
-        document.addEventListener('click', function (event) {
-            const selector = document.querySelector('[data-evaluation-form-root] .toggle-standards-selector');
-            if (selector && !selector.contains(event.target)) {
-                closeDropdown();
-            }
-        });
-
-        document.addEventListener('input', function (e) {
-            if (e.target.classList.contains('standards-textarea')) {
-                const dept = e.target.getAttribute('data-dept');
-                const co = parseInt(e.target.getAttribute('data-criteria-order'), 10);
-                const sc = parseInt(e.target.getAttribute('data-score'), 10);
-                if (!dept || !co || !sc) return;
-                if (!standards[dept]) standards[dept] = {};
-                if (!standards[dept][co]) standards[dept][co] = {};
-                standards[dept][co][sc] = e.target.value;
-            }
-
-            if (e.target.classList.contains('score-input')) {
-                updatePDFContent();
-            }
-        });
-    }
-}
+});
 
 // 加载员工列表
 async function loadEmployees(department) {
     try {
         const restaurant = document.getElementById('restaurant').value;
-        const response = await fetchEvaluationFormApi(
-            getEvaluationFormApiUrl(`?action=get_employees&work_area=${encodeURIComponent(department)}&restaurant=${encodeURIComponent(restaurant)}`),
-        );
-        const result = await parseApiResponse(response);
+        const response = await fetch(`../backend/schedule_api.php?action=get_employees&work_area=${department}&restaurant=${restaurant}`);
+        const result = await response.json();
         if (result.success) {
-            employees = (result.data || []).filter(emp => emp.is_active === 1 || emp.is_active === '1');
-        } else {
-            showMessage(result.message || '加载员工列表失败', 'error');
+            employees = result.data.filter(emp => emp.is_active === 1 || emp.is_active === '1');
         }
     } catch (error) {
         console.error('加载员工失败:', error);
@@ -159,10 +40,8 @@ async function loadEmployees(department) {
 // 加载考核指标
 async function loadCriteria(department) {
     try {
-        const response = await fetchEvaluationFormApi(
-            getEvaluationFormApiUrl(`?action=get_criteria&department=${encodeURIComponent(department)}`),
-        );
-        const result = await parseApiResponse(response);
+        const response = await fetch(`evaluation_form_api.php?action=get_criteria&department=${department}`);
+        const result = await response.json();
         if (result.success) {
             criteria = result.data;
         }
@@ -274,7 +153,13 @@ function closeDropdown() {
     }
 }
 
-// 点击外部关闭下拉菜单 — handled in bindEvaluationFormEvents()
+// 点击外部关闭下拉菜单
+document.addEventListener('click', function (event) {
+    const selector = document.querySelector('.toggle-standards-selector');
+    if (selector && !selector.contains(event.target)) {
+        closeDropdown();
+    }
+});
 
 async function showStandardsEditor() {
     // 拉取三个部门的指标 + 标准
@@ -282,9 +167,9 @@ async function showStandardsEditor() {
         showMessage('正在加载考核标准...', 'success');
 
         const [c1, c2, c3] = await Promise.all([
-            fetch(getEvaluationFormApiUrl('?action=get_criteria&department=service_line')).then(r => r.json()),
-            fetch(getEvaluationFormApiUrl('?action=get_criteria&department=sushi_bar')).then(r => r.json()),
-            fetch(getEvaluationFormApiUrl('?action=get_criteria&department=kitchen')).then(r => r.json())
+            fetch(`evaluation_form_api.php?action=get_criteria&department=service_line`).then(r => r.json()),
+            fetch(`evaluation_form_api.php?action=get_criteria&department=sushi_bar`).then(r => r.json()),
+            fetch(`evaluation_form_api.php?action=get_criteria&department=kitchen`).then(r => r.json())
         ]);
 
         const criteriaByDept = {
@@ -293,7 +178,7 @@ async function showStandardsEditor() {
             kitchen: c3.success ? c3.data : []
         };
 
-        const sres = await fetch(getEvaluationFormApiUrl('?action=get_standards')).then(r => r.json());
+        const sres = await fetch(`evaluation_form_api.php?action=get_standards`).then(r => r.json());
         const rows = sres.success ? (sres.data || []) : [];
 
         // 初始化结构
@@ -404,7 +289,17 @@ function switchStandardsDept(dept) {
     renderStandardsUI(dept, _criteriaByDeptCache);
 }
 
-// textarea输入同步到standards对象 — handled in bindEvaluationFormEvents()
+// textarea输入同步到standards对象
+document.addEventListener('input', function (e) {
+    if (!e.target.classList.contains('standards-textarea')) return;
+    const dept = e.target.getAttribute('data-dept');
+    const co = parseInt(e.target.getAttribute('data-criteria-order'));
+    const sc = parseInt(e.target.getAttribute('data-score'));
+    if (!dept || !co || !sc) return;
+    if (!standards[dept]) standards[dept] = {};
+    if (!standards[dept][co]) standards[dept][co] = {};
+    standards[dept][co][sc] = e.target.value;
+});
 
 async function saveStandards() {
     try {
@@ -422,7 +317,7 @@ async function saveStandards() {
             }
         });
 
-        const res = await fetch(getEvaluationFormApiUrl(), {
+        const res = await fetch('evaluation_form_api.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'save_standards', items })
@@ -441,8 +336,6 @@ async function saveStandards() {
 
 async function exportStandardsPDF() {
     try {
-        await ensurePdfExportLibraries();
-
         // 获取当前激活的部门
         const activeDept = _currentActiveDept || 'service_line';
         const deptLabels = {
@@ -459,7 +352,7 @@ async function exportStandardsPDF() {
         if (!pdfContainer) return;
 
         // 获取当前部门的指标名称
-        const response = await fetch(getEvaluationFormApiUrl(`?action=get_criteria&department=${activeDept}`));
+        const response = await fetch(`evaluation_form_api.php?action=get_criteria&department=${activeDept}`);
         const result = await response.json();
         const criteriaList = result.success ? result.data : [];
 
@@ -720,7 +613,7 @@ async function saveForm() {
     });
 
     try {
-        const response = await fetch(getEvaluationFormApiUrl(), {
+        const response = await fetch('evaluation_form_api.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -807,17 +700,15 @@ function updatePDFContent() {
     });
 }
 
-// 监听输入框变化，实时更新PDF内容 — handled in bindEvaluationFormEvents()
+// 监听输入框变化，实时更新PDF内容
+document.addEventListener('input', function (e) {
+    if (e.target.classList.contains('score-input')) {
+        updatePDFContent();
+    }
+});
 
 // 下载PDF
 async function downloadPDF() {
-    try {
-        await ensurePdfExportLibraries();
-    } catch (error) {
-        showMessage('PDF 库加载失败: ' + error.message, 'error');
-        return;
-    }
-
     const pdfContent = document.getElementById('pdf-content');
     if (!pdfContent) {
         showMessage('找不到表单内容', 'error');
@@ -916,29 +807,5 @@ async function downloadPDF() {
     } finally {
         // 恢复原始显示状态
         pdfContent.style.display = originalDisplay;
-    }
-}
-
-function bootEvaluationForm() {
-    bindEvaluationFormEvents();
-}
-
-window.bootEvaluationForm = bootEvaluationForm;
-window.reinitEvaluationForm = bootEvaluationForm;
-window.toggleStandardsDropdown = toggleStandardsDropdown;
-window.switchToFormMode = switchToFormMode;
-window.switchToStandardsMode = switchToStandardsMode;
-window.createNewForm = createNewForm;
-window.switchStandardsDept = switchStandardsDept;
-window.saveStandards = saveStandards;
-window.exportStandardsPDF = exportStandardsPDF;
-window.saveForm = saveForm;
-window.downloadPDF = downloadPDF;
-
-if (!isEvaluationFormReactV2Page()) {
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', bootEvaluationForm);
-    } else {
-        bootEvaluationForm();
     }
 }

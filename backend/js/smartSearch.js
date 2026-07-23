@@ -89,32 +89,63 @@ function updateClearButton(inputEl) {
     }
 }
 
-var smartSearchDocumentClickWired = false;
+/* ── Auto-init: DOMContentLoaded ───────────────────────────── */
+(function () {
+    document.addEventListener('DOMContentLoaded', function () {
 
-function wireSmartSearchWrappers(root) {
-    var scope = root || document;
-    var wrappers = scope.querySelectorAll('.smartSearchWrapper');
+        var wrappers = document.querySelectorAll('.smartSearchWrapper');
 
-    wrappers.forEach(function (wrapper) {
-        if (wrapper.dataset.smartSearchWired === '1') {
-            return;
-        }
-        wrapper.dataset.smartSearchWired = '1';
+        /* 2. expand / collapse behavior */
+        wrappers.forEach(function (wrapper) {
+            var input = wrapper.querySelector('.smartSearch-input');
 
-        var input = wrapper.querySelector('.smartSearch-input');
+            wrapper.addEventListener('click', function (e) {
+                if (!wrapper.dataset.expanded) {
+                    e.stopPropagation();
+                    expandSmartSearch(wrapper);
+                }
+            });
 
-        wrapper.addEventListener('click', function (e) {
-            if (!wrapper.dataset.expanded) {
-                e.stopPropagation();
-                expandSmartSearch(wrapper);
+            if (input) {
+                input.addEventListener('input', function () {
+                    updateClearButton(input);
+                });
             }
         });
 
-        if (input) {
-            input.addEventListener('input', function () {
-                updateClearButton(input);
+        /* Click outside any expanded wrapper → collapse it */
+        document.addEventListener('click', function (e) {
+            wrappers.forEach(function (wrapper) {
+                if (wrapper.dataset.expanded && !wrapper.contains(e.target)) {
+                    collapseSmartSearch(wrapper);
+                }
             });
+        });
+
+        /* 3. auto-wire data-table inputs */
+        var autoInputs = document.querySelectorAll('.smartSearch-input[data-table]');
+        autoInputs.forEach(function (input) {
+            var tableId = input.getAttribute('data-table');
+            var colsAttr = input.getAttribute('data-cols');
+            var cols = colsAttr
+                ? colsAttr.split(',').map(function (c) { return parseInt(c.trim(), 10); })
+                : null;
+
+            if (input.id) {
+                initSmartSearch(input.id, function (val) {
+                    filterTable(tableId, val, cols);
+                }, 250);
+            }
+        });
+
+        /* 4. wire unwired clear buttons */
+        var allInputs = document.querySelectorAll('.smartSearch-input');
+        allInputs.forEach(function (input) {
             updateClearButton(input);
+
+            var wrapper = input.closest ? input.closest('.smartSearchWrapper')
+                                        : input.parentElement.parentElement;
+            if (!wrapper) return;
 
             var clearBtn = wrapper.querySelector('.smartSearch-clear');
             if (clearBtn && !clearBtn._smartSearchWired) {
@@ -127,52 +158,7 @@ function wireSmartSearchWrappers(root) {
                     input.focus();
                 });
             }
-        }
-    });
-
-    if (!smartSearchDocumentClickWired) {
-        smartSearchDocumentClickWired = true;
-        document.addEventListener('click', function (e) {
-            document.querySelectorAll('.smartSearchWrapper').forEach(function (wrapper) {
-                if (wrapper.dataset.expanded && !wrapper.contains(e.target)) {
-                    collapseSmartSearch(wrapper);
-                }
-            });
         });
-    }
-}
-
-function wireSmartSearchTableFilters(root) {
-    var scope = root || document;
-    var autoInputs = scope.querySelectorAll('.smartSearch-input[data-table]');
-
-    autoInputs.forEach(function (input) {
-        if (input.dataset.smartSearchTableWired === '1') {
-            return;
-        }
-        input.dataset.smartSearchTableWired = '1';
-
-        var tableId = input.getAttribute('data-table');
-        var colsAttr = input.getAttribute('data-cols');
-        var cols = colsAttr
-            ? colsAttr.split(',').map(function (c) { return parseInt(c.trim(), 10); })
-            : null;
-
-        if (input.id) {
-            initSmartSearch(input.id, function (val) {
-                filterTable(tableId, val, cols);
-            }, 250);
-        }
-    });
-}
-
-window.wireSmartSearchWrappers = wireSmartSearchWrappers;
-
-/* ── Auto-init: DOMContentLoaded ───────────────────────────── */
-(function () {
-    document.addEventListener('DOMContentLoaded', function () {
-        wireSmartSearchWrappers(document);
-        wireSmartSearchTableFilters(document);
     });
 })();
 

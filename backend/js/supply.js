@@ -4,37 +4,6 @@ let supplies = [];
 let currentSupply = 'overview';
 let priceData = [];
 let editingSupplyId = null;
-let supplyBooted = false;
-
-function isSupplyReactV2Page() {
-    return /supply-v2/.test(window.location.pathname || '');
-}
-
-function resolveSupplyApiUrl(path) {
-    const root = window.__KUNZZ_BACKEND_BASE__ || '';
-    let query = path || '';
-    if (query.startsWith('supply_api.php')) {
-        query = query.slice('supply_api.php'.length);
-    } else if (query && !query.startsWith('?')) {
-        query = `?${query}`;
-    }
-    if (root) {
-        return `${root}/supply_api.php${query}`;
-    }
-    return `supply_api.php${query}`;
-}
-
-function buildSupplyPageUrl(page) {
-    const root = window.__KUNZZ_BACKEND_BASE__ || '';
-    let target = page;
-    if (isSupplyReactV2Page() && page === 'price') {
-        target = 'price-v2';
-    }
-    if (root) {
-        return `${root}/${target}`;
-    }
-    return target;
-}
 
 // 所有类型的固定数据（按定义的顺序排列）
 const allTypes = [
@@ -54,40 +23,19 @@ const allTypes = [
 ];
 
 // 页面加载时初始化
-function initApp() {
-    const addRecordBtn = document.getElementById('add-record-btn');
-    const batchDeleteBtn = document.getElementById('batch-delete-btn');
-    if (addRecordBtn) addRecordBtn.style.display = 'none';
-    if (batchDeleteBtn) batchDeleteBtn.style.display = 'none';
+document.addEventListener('DOMContentLoaded', function () {
+    // 默认总览模式，隐藏新增记录按钮和批量删除按钮
+    document.getElementById('add-record-btn').style.display = 'none';
+    document.getElementById('batch-delete-btn').style.display = 'none';
+    // 初始化类型过滤选择框
     updateTypeOptions('', 'type-filter');
-    wireSupplySearchFilters();
     loadSupplies();
-}
-
-function wireSupplySearchFilters() {
-    const searchInput = document.getElementById('search-input');
-    if (searchInput && searchInput.dataset.supplySearchBound !== '1') {
-        searchInput.dataset.supplySearchBound = '1';
-        if (!isSupplyReactV2Page() && typeof initSmartSearch === 'function') {
-            initSmartSearch('search-input', loadPriceData, 300);
-        } else if (!isSupplyReactV2Page()) {
-            searchInput.addEventListener('input', loadPriceData);
-        }
-    }
-
-    const typeFilter = document.getElementById('type-filter');
-    if (typeFilter && typeFilter.dataset.supplyFilterBound !== '1') {
-        typeFilter.dataset.supplyFilterBound = '1';
-        typeFilter.addEventListener('change', loadPriceData);
-    }
-}
-
-window.refreshSupplySearch = loadPriceData;
+});
 
 // 加载供应商列表
 async function loadSupplies() {
     try {
-        const response = await fetch(resolveSupplyApiUrl('?action=supplies'));
+        const response = await fetch('supply_api.php?action=supplies');
 
         // 检查响应状态
         if (!response.ok) {
@@ -139,7 +87,7 @@ async function loadPriceData() {
         const search = document.getElementById('search-input')?.value || '';
         const type = document.getElementById('type-filter')?.value || '';
 
-        let url = resolveSupplyApiUrl('?action=list');
+        let url = 'supply_api.php?action=list';
         if (search) url += '&search=' + encodeURIComponent(search);
         if (type) url += '&type=' + encodeURIComponent(type);
 
@@ -372,7 +320,7 @@ async function saveMaterialRecord() {
     try {
         // 为每个有价格的供应商创建记录
         const promises = prices.map(priceData => {
-            return fetch(resolveSupplyApiUrl('?action=material'), {
+            return fetch('supply_api.php?action=material', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -1108,7 +1056,7 @@ async function batchSaveNewRows() {
     }
 
     try {
-        const response = await fetch(resolveSupplyApiUrl('?action=batch-save'), {
+        const response = await fetch('supply_api.php?action=batch-save', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -1178,8 +1126,8 @@ async function saveSupply() {
     try {
         const isEdit = !!editingSupplyId;
         const url = isEdit
-            ? resolveSupplyApiUrl(`?action=supply&id=${editingSupplyId}`)
-            : resolveSupplyApiUrl('?action=supply');
+            ? `supply_api.php?action=supply&id=${editingSupplyId}`
+            : 'supply_api.php?action=supply';
         const method = isEdit ? 'PUT' : 'POST';
 
         const response = await fetch(url, {
@@ -1221,7 +1169,7 @@ async function deleteSupply(id) {
     }
 
     try {
-        const response = await fetch(resolveSupplyApiUrl(`?action=supply&id=${id}`), {
+        const response = await fetch(`supply_api.php?action=supply&id=${id}`, {
             method: 'DELETE'
         });
 
@@ -1355,7 +1303,7 @@ async function saveEditRow(row, recordId, originalItem) {
     try {
         // 如果存在旧记录，先删除
         if (recordId) {
-            const deleteResponse = await fetch(resolveSupplyApiUrl(`?action=material&id=${recordId}`), {
+            const deleteResponse = await fetch(`supply_api.php?action=material&id=${recordId}`, {
                 method: 'DELETE'
             });
             const deleteResult = await deleteResponse.json();
@@ -1367,7 +1315,7 @@ async function saveEditRow(row, recordId, originalItem) {
         }
 
         // 创建新记录（可能类型已改变）
-        const createResponse = await fetch(resolveSupplyApiUrl('?action=material'), {
+        const createResponse = await fetch('supply_api.php?action=material', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -1491,7 +1439,7 @@ async function deleteRowByIndex(originalIndex) {
     }
 
     try {
-        const response = await fetch(resolveSupplyApiUrl(`?action=material&id=${recordId}`), {
+        const response = await fetch(`supply_api.php?action=material&id=${recordId}`, {
             method: 'DELETE'
         });
 
@@ -1590,7 +1538,7 @@ async function confirmBatchDelete() {
     try {
         // 批量删除
         const promises = recordIds.map(id =>
-            fetch(resolveSupplyApiUrl(`?action=material&id=${id}`), {
+            fetch(`supply_api.php?action=material&id=${id}`, {
                 method: 'DELETE'
             })
         );
@@ -1645,42 +1593,15 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
-async function bootSupply() {
-    if (supplyBooted) {
-        if (typeof window.reinitSupply === 'function') {
-            await window.reinitSupply();
-        }
-        return;
-    }
+// 搜索和过滤事件
+document.getElementById('search-input')?.addEventListener('input', function () {
+    loadPriceData();
+});
 
-    supplyBooted = true;
-    initApp();
-}
-
-window.reinitSupply = async function reinitSupply() {
-    const searchInput = document.getElementById('search-input');
-    if (searchInput) {
-        searchInput.value = '';
-    }
-    const typeFilter = document.getElementById('type-filter');
-    if (typeFilter) {
-        typeFilter.value = '';
-    }
-    currentSupply = 'overview';
-    editingSupplyId = null;
-    wireSupplySearchFilters();
-    await loadSupplies();
-};
-
-window.bootSupply = bootSupply;
-
-if (!isSupplyReactV2Page()) {
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initApp);
-    } else {
-        initApp();
-    }
-}
+// 类型过滤变化事件
+document.getElementById('type-filter')?.addEventListener('change', function () {
+    loadPriceData();
+});
 
 // 切换对比模式选择器下拉菜单
 function toggleComparisonModeSelector() {
@@ -1712,7 +1633,7 @@ function switchComparisonMode(mode) {
 
     // 如果选择餐厅对比，直接跳转到 price.php
     if (mode === 'restaurant') {
-        window.location.href = buildSupplyPageUrl('price');
+        window.location.href = 'price';
         return;
     }
 }

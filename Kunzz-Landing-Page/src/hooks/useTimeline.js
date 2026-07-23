@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getApiUrl } from '../config.js';
-import { resolveAssetUrl } from '../utils/media.js';
+
+const API_URL = '/api/timeline_api.php';
 
 export function useTimeline(lang = 'zh') {
   const [items, setItems] = useState([]);
@@ -10,20 +10,14 @@ export function useTimeline(lang = 'zh') {
   useEffect(() => {
     let cancelled = false;
 
-    fetch(`${getApiUrl('api/timeline_api.php')}?lang=${lang}`)
+    fetch(`${API_URL}?lang=${lang}`)
       .then((res) => {
         if (!res.ok) throw new Error(`Timeline API error: ${res.status}`);
         return res.json();
       })
       .then((data) => {
         if (cancelled) return;
-        const rawItems = Array.isArray(data.items) ? data.items : [];
-        setItems(
-          rawItems.map((item) => ({
-            ...item,
-            image_url: resolveAssetUrl(item.image_url || item.image),
-          })),
-        );
+        setItems(Array.isArray(data.items) ? data.items : []);
         setLoading(false);
       })
       .catch((err) => {

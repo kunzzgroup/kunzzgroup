@@ -2203,8 +2203,9 @@
 
  .header-right-group {
      display: flex;
-     align-items: center;
-     gap: clamp(8px, 1.04vw, 20px);
+     align-items: flex-end;
+     /* 改为 flex-end，让元素底部对齐 */
+     gap: clamp(2px, 0.32vw, 8px);
      margin-left: auto;
  }
 
@@ -2218,17 +2219,21 @@
 
  .header-search {
      flex: none;
+     /* 不拉伸，让 smartSearchWrapper 保持折叠宽度 */
      display: flex;
      align-items: center;
      gap: clamp(6px, 0.63vw, 12px);
  }
 
+ /* 在 header-search 内，wrapper 不能被 flex 撑到全宽 */
  .header-search .smartSearchWrapper {
      width: 40px;
+     /* 折叠态：仅图标 */
      flex-shrink: 0;
      cursor: pointer;
  }
 
+ /* 展开时恢复正常宽度 */
  .header-search .smartSearchWrapper.expanded {
      width: 250px;
  }

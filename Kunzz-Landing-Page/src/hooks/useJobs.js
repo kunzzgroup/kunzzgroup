@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { getApiUrl } from '../config.js';
+const API_URL = '/api/get_jobs_api.php';
 
 const COMPANY_ORDER = ['KUNZZ HOLDINGS', 'TOKYO JAPANESE CUISINE', 'TOKYO IZAKAYA'];
 
@@ -15,15 +15,15 @@ export function useJobs(lang = 'zh') {
   useEffect(() => {
     let cancelled = false;
 
-    fetch(`${getApiUrl('api/get_jobs_api.php')}?lang=${lang}`)
+    fetch(`${API_URL}?lang=${lang}`)
       .then((res) => {
         if (!res.ok) throw new Error(`Jobs API error: ${res.status}`);
         return res.json();
       })
       .then((data) => {
         if (cancelled) return;
-        if (data.success) {
-          setCompanies(data.companies && typeof data.companies === 'object' ? data.companies : {});
+        if (data.success && data.companies) {
+          setCompanies(data.companies);
         } else {
           throw new Error(data.error || 'Failed to load jobs');
         }
@@ -42,7 +42,6 @@ export function useJobs(lang = 'zh') {
 
   const jobsMap = useMemo(() => {
     const map = {};
-    if (!companies || typeof companies !== 'object') return map;
     Object.values(companies).forEach((company) => {
       company.jobs?.forEach((job) => {
         map[job.id] = { ...job, company: company.name };

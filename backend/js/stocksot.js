@@ -1,7 +1,7 @@
 ﻿
 const API_BASE_URL = 'stocksotapi.php';
 const PRODUCT_API_URL = 'stockapi.php';
-const PRICE_API_URL = 'stockeditapi.php';
+const PRICE_API_URL = 'stockeditapi.php';  // 价格API使用stockeditapi
 const STOCK_VIEW_OPTIONS = [
     { value: 'list', label: '总库存' },
     { value: 'records', label: '进出货' },
@@ -10,44 +10,6 @@ const STOCK_VIEW_OPTIONS = [
     { value: 'sot', label: '货品异常' }
 ];
 let cachedSotAllowedViews = new Set();
-let stockSotBooted = false;
-
-function isStockReactV2Page() {
-    return /stocksot-v2|stockproductname-v2|stockremark-v2|stockeditall-v2|stocklistall-v2/.test(window.location.pathname || '');
-}
-
-function getStockViewPage(view) {
-    const v2 = isStockReactV2Page();
-    const pages = {
-        list: v2 ? 'stocklistall-v2' : 'stocklistall',
-        records: v2 ? 'stockeditall-v2' : 'stockeditall',
-        remark: v2 ? 'stockremark-v2' : 'stockremark',
-        product: v2 ? 'stockproductname-v2' : 'stockproductname',
-        sot: v2 ? 'stocksot-v2' : 'stocksot'
-    };
-    return pages[view] || pages.list;
-}
-
-function buildStockPageUrl(page, query) {
-    const root = window.__KUNZZ_BACKEND_BASE__ || '';
-    if (root) {
-        return `${root}/${page}${query || ''}`;
-    }
-    return `${page}${query || ''}`;
-}
-
-function updateSystemDisplay() {
-    const systemNames = {
-        central: '中央',
-        j1: 'J1',
-        j2: 'J2',
-        j3: 'J3'
-    };
-    const displayElement = document.getElementById('current-stock-type');
-    if (displayElement && systemNames[currentSystem]) {
-        displayElement.textContent = systemNames[currentSystem];
-    }
-}
 
 // 应用状态
 let stockData = [];
@@ -133,10 +95,17 @@ async function applyPagePermissions() {
         rebuildSotViewDropdown(allowedViews);
         if (allowedViews.size > 0 && !allowedViews.has('sot')) {
             const viewOrder = ['sot', 'records', 'product', 'remark', 'list'];
+            const viewRedirectMap = {
+                list: 'stocklistall.php',
+                records: 'stockeditall.php',
+                remark: 'stockremark.php',
+                product: 'stockproductname.php',
+                sot: 'stocksot.php'
+            };
             const viewToOpen = viewOrder.find(view => allowedViews.has(view));
             if (viewToOpen) {
-                const param = currentSystem ? `?system=${currentSystem}` : '';
-                window.location.href = buildStockPageUrl(getStockViewPage(viewToOpen), param);
+                const base = viewRedirectMap[viewToOpen] || 'stocklistall.php';
+                window.location.href = base;
             }
         }
     } catch (e) {
@@ -607,49 +576,31 @@ function switchView(viewType) {
     const systemParam = `?system=${currentSystem}`;
 
     if (viewType === 'list') {
-        window.location.href = buildStockPageUrl(getStockViewPage('list'), systemParam);
+        window.location.href = `stocklistall${systemParam}`;
     } else if (viewType === 'records') {
-        window.location.href = buildStockPageUrl(getStockViewPage('records'), systemParam);
+        window.location.href = `stockeditall${systemParam}`;
     } else if (viewType === 'remark') {
-        window.location.href = buildStockPageUrl(getStockViewPage('remark'), systemParam);
+        window.location.href = `stockremark${systemParam}`;
     } else if (viewType === 'product') {
-        window.location.href = buildStockPageUrl(getStockViewPage('product'), systemParam);
+        window.location.href = `stockproductname${systemParam}`;
     } else {
         hideViewDropdown();
     }
 }
 
-// 页面加载完成后初始化
-async function bootStockSot() {
-    updateSystemDisplay();
-
-    if (stockSotBooted) {
-        if (typeof window.reinitStockSot === 'function') {
-            await window.reinitStockSot();
-        }
-        return;
+// 在 DOMContentLoaded 后更新系统显示
+document.addEventListener('DOMContentLoaded', () => {
+    const systemNames = {
+        'central': '中央',
+        'j1': 'J1',
+        'j2': 'J2',
+        'j3': 'J3'
+    };
+    const displayElement = document.getElementById('current-stock-type');
+    if (displayElement && systemNames[currentSystem]) {
+        displayElement.textContent = systemNames[currentSystem];
     }
-
-    stockSotBooted = true;
-    await initApp();
-}
-
-window.reinitStockSot = async function reinitStockSot() {
-    updateSystemDisplay();
-    await loadProductList();
-    await loadStockData();
-    updateTotalAnomalyValue();
-};
-
-window.bootStockSot = bootStockSot;
-window.refreshStockSotData = loadStockData;
-
-if (!isStockReactV2Page()) {
-    document.addEventListener('DOMContentLoaded', () => {
-        updateSystemDisplay();
-        initApp();
-    });
-}
+});
 
 function hideViewDropdown() {
     const dropdown = document.getElementById('view-selector-dropdown');
@@ -783,10 +734,6 @@ async function loadStockData() {
 
 // 实时搜索功能
 function initRealTimeSearch() {
-    if (isStockReactV2Page()) {
-        return;
-    }
-
     const productSearchInput = document.getElementById('product-search-filter');
 
     function debounce(func, delay) {
@@ -2243,3 +2190,5 @@ async function confirmBatchDelete() {
     }
 }
 
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', initApp);

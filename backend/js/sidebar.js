@@ -39,16 +39,35 @@ document.querySelectorAll('.informationmenu-section-title').forEach(title => {
         const targetId = this.getAttribute('data-target');
         const targetDropdown = document.getElementById(targetId);
 
-        // 收起状态：显示 flyout，不展开整栏
+        // 检查侧边栏是否处于收起状态
         if (sidebarMenu.classList.contains('collapsed')) {
             e.preventDefault();
             e.stopPropagation();
 
-            if (activeFlyoutTitle === this && collapsedFlyoutEl?.classList.contains('is-visible')) {
-                closeCollapsedFlyout();
-            } else {
-                openCollapsedFlyout(this);
-            }
+            // 展开侧边栏
+            sidebarMenu.classList.remove('collapsed');
+            sidebarToggle.classList.remove('collapsed');
+            // ⭐ 添加这行：移除 body 的 sidebar-collapsed 类
+            document.body.classList.remove('sidebar-collapsed');
+
+            // 同时展开点击的选项
+            // 关闭其他section的下拉菜单
+            document.querySelectorAll('.dropdown-menu-items').forEach(dropdown => {
+                if (dropdown.id !== targetId) {
+                    dropdown.classList.remove('show');
+                }
+            });
+
+            // 移除其他section title的active状态
+            document.querySelectorAll('.informationmenu-section-title').forEach(t => {
+                if (t !== this) {
+                    t.classList.remove('active');
+                }
+            });
+
+            // 激活当前section
+            this.classList.add('active');
+            targetDropdown?.classList.add('show');
 
             return false;
         }
@@ -274,51 +293,8 @@ async function redirectToAllowedStockPage(event) {
 const sidebarToggle = document.getElementById('sidebarToggle');
 const sidebarMenu = document.querySelector('.informationmenu'); // 改名避免冲突
 
-// 侧边栏图标悬停提示
-const sidebarTooltipDescriptions = {
-    brand: '集团架构 — 品牌与企业蓝图',
-    analytics: '营收数据 — KPI 报表与上传',
-    hr: '人事管理 — 职员、招聘与考核',
-    resource: '资源总库 — 库存、碗碟与价格',
-    photoupload: '视觉管理 — 网页素材与菜单',
-};
-
-function initSidebarTooltips() {
-    document.querySelectorAll('.informationmenu-section-title').forEach((title) => {
-        if (title.dataset.tooltip) return;
-
-        const targetId = title.getAttribute('data-target') || '';
-        const sectionKey = targetId.replace(/-items$/, '');
-        if (sidebarTooltipDescriptions[sectionKey]) {
-            title.dataset.tooltip = sidebarTooltipDescriptions[sectionKey];
-            title.setAttribute('aria-label', sidebarTooltipDescriptions[sectionKey]);
-            return;
-        }
-
-        const clone = title.cloneNode(true);
-        clone.querySelectorAll('.section-icon, .section-arrow').forEach((el) => el.remove());
-        const label = clone.textContent.replace(/\s+/g, ' ').trim();
-        if (label) {
-            title.dataset.tooltip = label;
-            title.setAttribute('aria-label', label);
-        }
-    });
-
-    updateSidebarToggleTooltip();
-}
-
-function updateSidebarToggleTooltip() {
-    if (!sidebarToggle) return;
-    const isCollapsed = sidebarMenu?.classList.contains('collapsed');
-    const label = isCollapsed ? '展开侧边栏' : '收起侧边栏';
-    sidebarToggle.dataset.tooltip = label;
-    sidebarToggle.setAttribute('aria-label', label);
-}
-
 sidebarToggle?.addEventListener('click', function (e) {
     e.stopPropagation(); // 防止事件冒泡
-
-    closeCollapsedFlyout();
 
     // 如果正在收起侧边栏，清除所有激活状态
     if (!sidebarMenu.classList.contains('collapsed')) {
@@ -340,8 +316,6 @@ sidebarToggle?.addEventListener('click', function (e) {
     sidebarToggle.classList.toggle('collapsed');
     document.body.classList.toggle('sidebar-collapsed');
 
-    updateSidebarToggleTooltip();
-
     // 保存侧边栏状态到localStorage
     const isCollapsed = sidebarMenu.classList.contains('collapsed');
     localStorage.setItem('sidebarCollapsed', isCollapsed);
@@ -352,232 +326,9 @@ sidebarToggle?.addEventListener('click', function (e) {
     }
 });
 
-let collapsedFlyoutEl = null;
-let flyoutCloseTimer = null;
-let activeFlyoutTitle = null;
-
-function getSectionLabel(titleEl) {
-    const clone = titleEl.cloneNode(true);
-    clone.querySelectorAll('.section-icon, .section-arrow').forEach((el) => el.remove());
-    return clone.textContent.replace(/\s+/g, ' ').trim();
-}
-
-function getLinkLabel(el) {
-    const clone = el.cloneNode(true);
-    clone.querySelectorAll('.informationmenu-arrow, .expand-arrow').forEach((node) => node.remove());
-    return clone.textContent.replace(/[›→·]/g, '').replace(/\s+/g, ' ').trim();
-}
-
-function collectFlyoutLinks(dropdownEl) {
-    const items = [];
-    if (!dropdownEl) return items;
-
-    dropdownEl.querySelectorAll(':scope > .menu-item-wrapper').forEach((wrapper) => {
-        const mainLink = wrapper.querySelector(':scope > a.informationmenu-item');
-        const submenu = wrapper.querySelector(':scope > .submenu');
-        if (!mainLink) return;
-
-        const href = mainLink.getAttribute('href');
-        const onclick = mainLink.getAttribute('onclick');
-        const isRealLink = href && href !== '#' && !href.startsWith('javascript:');
-
-        if (isRealLink && !submenu) {
-            items.push({
-                type: 'link',
-                label: getLinkLabel(mainLink),
-                href,
-                onclick,
-                html: mainLink.innerHTML,
-            });
-            return;
-        }
-
-        if (submenu) {
-            const groupTitle = submenu.querySelector('.submenu-title')?.textContent.trim();
-            if (groupTitle) {
-                items.push({ type: 'heading', label: groupTitle });
-            }
-
-            submenu.querySelectorAll('.submenu-content > .submenu-item:not(.expandable)').forEach((link) => {
-                const linkHref = link.getAttribute('href');
-                if (linkHref && linkHref !== '#') {
-                    items.push({ type: 'link', label: getLinkLabel(link), href: linkHref });
-                }
-            });
-
-            submenu.querySelectorAll('.submenu-item.expandable').forEach((exp) => {
-                const targetId = exp.getAttribute('data-target');
-                items.push({ type: 'subheading', label: getLinkLabel(exp) });
-                if (targetId) {
-                    document.getElementById(targetId)?.querySelectorAll('.sub-option').forEach((opt) => {
-                        const optHref = opt.getAttribute('href');
-                        if (optHref && optHref !== '#') {
-                            items.push({
-                                type: 'link',
-                                label: getLinkLabel(opt),
-                                href: optHref,
-                                indent: true,
-                            });
-                        }
-                    });
-                }
-            });
-        }
-    });
-
-    return items;
-}
-
-function ensureCollapsedFlyout() {
-    if (collapsedFlyoutEl) return collapsedFlyoutEl;
-
-    collapsedFlyoutEl = document.createElement('div');
-    collapsedFlyoutEl.id = 'sidebarCollapsedFlyout';
-    collapsedFlyoutEl.className = 'sidebar-collapsed-flyout';
-    collapsedFlyoutEl.hidden = true;
-    collapsedFlyoutEl.innerHTML =
-        '<div class="sidebar-collapsed-flyout__title"></div>' +
-        '<div class="sidebar-collapsed-flyout__items"></div>';
-
-    collapsedFlyoutEl.addEventListener('mouseenter', cancelFlyoutClose);
-    collapsedFlyoutEl.addEventListener('mouseleave', scheduleFlyoutClose);
-    document.body.appendChild(collapsedFlyoutEl);
-
-    return collapsedFlyoutEl;
-}
-
-function positionCollapsedFlyout(titleEl) {
-    if (!collapsedFlyoutEl || !titleEl) return;
-
-    const rect = titleEl.getBoundingClientRect();
-    collapsedFlyoutEl.style.left = `${rect.right + 8}px`;
-    collapsedFlyoutEl.style.top = `${rect.top}px`;
-
-    requestAnimationFrame(() => {
-        const flyoutRect = collapsedFlyoutEl.getBoundingClientRect();
-        if (flyoutRect.bottom > window.innerHeight - 8) {
-            collapsedFlyoutEl.style.top = `${Math.max(8, window.innerHeight - flyoutRect.height - 8)}px`;
-        }
-    });
-}
-
-function openCollapsedFlyout(titleEl) {
-    if (!sidebarMenu?.classList.contains('collapsed')) return;
-
-    const targetId = titleEl.getAttribute('data-target');
-    const dropdown = document.getElementById(targetId);
-    const links = collectFlyoutLinks(dropdown);
-    if (links.length === 0) return;
-
-    const flyout = ensureCollapsedFlyout();
-    const titleText = getSectionLabel(titleEl);
-
-    document.querySelectorAll('.informationmenu-section-title.flyout-active').forEach((title) => {
-        title.classList.remove('flyout-active');
-    });
-    titleEl.classList.add('flyout-active');
-    activeFlyoutTitle = titleEl;
-
-    flyout.querySelector('.sidebar-collapsed-flyout__title').textContent = titleText;
-
-    const itemsEl = flyout.querySelector('.sidebar-collapsed-flyout__items');
-    itemsEl.innerHTML = '';
-
-    links.forEach((item) => {
-        if (item.type === 'heading' || item.type === 'subheading') {
-            const heading = document.createElement('div');
-            heading.className =
-                item.type === 'heading'
-                    ? 'sidebar-collapsed-flyout__heading'
-                    : 'sidebar-collapsed-flyout__subheading';
-            heading.textContent = item.label;
-            itemsEl.appendChild(heading);
-            return;
-        }
-
-        const link = document.createElement('a');
-        link.className = 'sidebar-collapsed-flyout__link';
-        if (item.indent) link.classList.add('is-indented');
-        link.href = item.href;
-        if (item.html) {
-            link.innerHTML = item.html;
-        } else {
-            link.textContent = item.label;
-        }
-        if (item.onclick) {
-            link.setAttribute('onclick', item.onclick);
-        }
-        itemsEl.appendChild(link);
-    });
-
-    flyout.hidden = false;
-    flyout.classList.add('is-visible');
-    positionCollapsedFlyout(titleEl);
-}
-
-function closeCollapsedFlyout() {
-    cancelFlyoutClose();
-    if (!collapsedFlyoutEl) return;
-
-    collapsedFlyoutEl.hidden = true;
-    collapsedFlyoutEl.classList.remove('is-visible');
-    document.querySelectorAll('.informationmenu-section-title.flyout-active').forEach((title) => {
-        title.classList.remove('flyout-active');
-    });
-    activeFlyoutTitle = null;
-}
-
-function cancelFlyoutClose() {
-    if (flyoutCloseTimer) {
-        clearTimeout(flyoutCloseTimer);
-        flyoutCloseTimer = null;
-    }
-}
-
-function scheduleFlyoutClose() {
-    cancelFlyoutClose();
-    flyoutCloseTimer = setTimeout(closeCollapsedFlyout, 160);
-}
-
-function initCollapsedFlyout() {
-    if (initCollapsedFlyout.initialized) return;
-    initCollapsedFlyout.initialized = true;
-
-    document.querySelectorAll('.informationmenu-section-title').forEach((title) => {
-        title.addEventListener('mouseenter', function () {
-            if (!sidebarMenu?.classList.contains('collapsed')) return;
-            cancelFlyoutClose();
-            openCollapsedFlyout(this);
-        });
-
-        title.addEventListener('mouseleave', function () {
-            if (!sidebarMenu?.classList.contains('collapsed')) return;
-            scheduleFlyoutClose();
-        });
-    });
-
-    document.addEventListener('click', function (e) {
-        if (!sidebarMenu?.classList.contains('collapsed')) return;
-        if (collapsedFlyoutEl?.contains(e.target)) return;
-        if (e.target.closest('.informationmenu-section-title')) return;
-        closeCollapsedFlyout();
-    });
-
-    window.addEventListener('resize', function () {
-        if (activeFlyoutTitle && collapsedFlyoutEl?.classList.contains('is-visible')) {
-            positionCollapsedFlyout(activeFlyoutTitle);
-        }
-    });
-
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') closeCollapsedFlyout();
-    });
-}
-
-function bootSidebarUi() {
-    initSidebarTooltips();
-    initCollapsedFlyout();
-
+// 页面加载完成后启用过渡动画
+document.addEventListener('DOMContentLoaded', function () {
+    // 立即检查是否需要应用collapsed状态（从localStorage读取）
     const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
     if (isCollapsed) {
         document.body.classList.add('sidebar-collapsed');
@@ -585,15 +336,8 @@ function bootSidebarUi() {
         sidebarToggle?.classList.add('collapsed');
     }
 
-    updateSidebarToggleTooltip();
-
+    // 页面加载后短暂延迟再启用过渡效果
     setTimeout(function () {
         document.body.classList.add('sidebar-transition');
     }, 100);
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bootSidebarUi);
-} else {
-    bootSidebarUi();
-}
+});

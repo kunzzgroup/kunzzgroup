@@ -6,15 +6,9 @@ Header set Expires "0"
 
 RewriteEngine On
 
-# React backend v2 pages (parallel to legacy PHP pages)
-RewriteRule ^[A-Za-z0-9_-]+-v2/?$ ../Kunzz-Landing-Page/dist/index.html [L]
-
 # -----------------------------
-# 0. Redirect login.html to frontend login (respect subdirectory deploy)
+# 0. Redirect login.html to /frontend/login (safety net)
 # -----------------------------
-RewriteCond %{DOCUMENT_ROOT}/kunzzgroup/frontend/login.php -f
-RewriteRule ^login\.html$ /kunzzgroup/frontend/login [L,R=301]
-
 RewriteRule ^login\.html$ /frontend/login [L,R=301]
 
 # -----------------------------

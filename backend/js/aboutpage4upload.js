@@ -1,217 +1,165 @@
-﻿function isAboutpage4ReactV2Page() {
-    return /aboutpage4upload-v2/.test(window.location.pathname || '');
-}
-
-function getAboutpage4Context() {
-    const root = document.querySelector('[data-aboutpage4-content-root]');
-    const lang = root?.dataset?.lang || 'zh';
-
-    return {
-        root,
-        isEnglish: lang === 'en',
-        actionUrl: root?.dataset?.actionUrl || 'aboutpage4upload.php',
-        returnTo: isAboutpage4ReactV2Page() ? 'v2' : '',
-        lang,
-    };
-}
-
+﻿// 年份切换功能
 function showYear(year) {
-    document.querySelectorAll('.timeline-content').forEach((content) => {
+    // 隐藏所有内容
+    document.querySelectorAll('.timeline-content').forEach(content => {
         content.classList.remove('active');
     });
 
-    document.querySelectorAll('.year-tab').forEach((tab) => {
+    // 移除所有标签的active状态
+    document.querySelectorAll('.year-tab').forEach(tab => {
         tab.classList.remove('active');
     });
 
-    const targetContent = document.getElementById(`content-${year}`);
+    // 显示选中年份的内容
+    const targetContent = document.getElementById('content-' + year);
     if (targetContent) {
         targetContent.classList.add('active');
     }
 
-    if (typeof event !== 'undefined' && event?.target) {
+    // 激活选中的标签
+    if (event && event.target) {
         event.target.classList.add('active');
     }
 }
 
+// 新增记录模态框
 function showAddRecordModal() {
-    const modal = document.getElementById('addRecordModal');
-    if (modal) {
-        modal.style.display = 'flex';
-    }
+    document.getElementById('addRecordModal').style.display = 'flex';
 }
 
 function hideAddRecordModal() {
-    const modal = document.getElementById('addRecordModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
+    document.getElementById('addRecordModal').style.display = 'none';
 }
 
+// 确认删除记录
+// 依赖全局变量 isEnglish，由模板文件定义
 function confirmDeleteRecord(recordId) {
-    const ctx = getAboutpage4Context();
-    const message = ctx.isEnglish
-        ? 'Are you sure you want to delete this record? This action cannot be undone!'
-        : '确定要删除这个记录吗？此操作不可撤销！';
+    const message = (typeof isEnglish !== 'undefined' && isEnglish) ?
+        `Are you sure you want to delete this record? This action cannot be undone!` :
+        `确定要删除这个记录吗？此操作不可撤销！`;
 
-    if (!confirm(message)) {
-        return;
+    if (confirm(message)) {
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.innerHTML = `
+            <input type="hidden" name="delete_record" value="1">
+            <input type="hidden" name="record_id" value="${recordId}">
+        `;
+        document.body.appendChild(form);
+        form.submit();
     }
-
-    const form = document.createElement('form');
-    form.method = 'post';
-    form.action = ctx.actionUrl;
-    form.innerHTML = `
-        <input type="hidden" name="delete_record" value="1">
-        <input type="hidden" name="record_id" value="${recordId}">
-        <input type="hidden" name="return_to" value="${ctx.returnTo}">
-        <input type="hidden" name="lang" value="${ctx.lang}">
-    `;
-    document.body.appendChild(form);
-    form.submit();
 }
 
+// 点击模态框外部关闭
+document.addEventListener('click', function (e) {
+    const modal = document.getElementById('addRecordModal');
+    if (e.target === modal) {
+        hideAddRecordModal();
+    }
+});
+
+// 照片上传成功后刷新图片显示
 function refreshImageDisplayByRecord(recordId) {
     const imageElement = document.querySelector(`.entry-container[data-record-id="${recordId}"] .preview-image`);
     if (imageElement) {
         const currentSrc = imageElement.src;
-        imageElement.src = `${currentSrc.split('?')[0]}?v=${Date.now()}`;
+        // 只有当src不包含时间戳参数或者为了刷新需要加新的时间戳
+        const newSrc = currentSrc.split('?')[0] + '?v=' + Date.now();
+        imageElement.src = newSrc;
     }
 }
 
-function resetForm(year) {
-    const ctx = getAboutpage4Context();
-    const form = document.querySelector(`#content-${year} .content-form form`);
-    if (!form) {
-        return;
-    }
+// 监听照片上传表单提交
+document.querySelectorAll('form[enctype="multipart/form-data"]').forEach(form => {
+    form.addEventListener('submit', function (e) {
+        const recordInput = this.querySelector('input[name="record_id"]');
+        if (recordInput) {
+            const recordId = recordInput.value;
+            // 延迟刷新，等待服务器处理完成
+            setTimeout(() => {
+                refreshImageDisplayByRecord(recordId);
+            }, 1000);
+        }
+    });
+});
 
-    const message = ctx.isEnglish
-        ? 'Are you sure you want to reset the form? All unsaved changes will be lost.'
-        : '确定要重置表单吗？所有未保存的更改将丢失。';
+// 重置表单
+function resetForm(year) {
+    const form = document.querySelector(`#content-${year} .content-form form`);
+    if (!form) return;
+
+    const message = (typeof isEnglish !== 'undefined' && isEnglish) ?
+        'Are you sure you want to reset the form? All unsaved changes will be lost.' :
+        '确定要重置表单吗？所有未保存的更改将丢失。';
 
     if (confirm(message)) {
         form.reset();
     }
 }
 
-function initAboutpage4Upload() {
-    const ctx = getAboutpage4Context();
-    const { root, isEnglish } = ctx;
+// 文件拖拽和选择功能
+document.querySelectorAll('.file-input').forEach(input => {
+    input.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        input.style.borderColor = '#e54a00';
+        input.style.background = '#fff5f0';
+    });
 
-    if (!root || root.dataset.aboutpage4Bound === '1') {
-        return;
-    }
+    input.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        input.style.borderColor = '#FF5C00';
+        input.style.background = '#fff9f5';
+    });
 
-    root.dataset.aboutpage4Bound = '1';
+    input.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const files = e.dataTransfer.files;
+        const fileInput = input.querySelector('input[type="file"]');
+        fileInput.files = files;
 
-    root.addEventListener('click', (e) => {
-        const modal = document.getElementById('addRecordModal');
-        if (e.target === modal) {
-            hideAddRecordModal();
+        input.style.borderColor = '#FF5C00';
+        input.style.background = '#fff9f5';
+
+        if (files.length > 0) {
+            const textDiv = input.querySelector('.file-input-text');
+            const isEng = (typeof isEnglish !== 'undefined' && isEnglish);
+            textDiv.innerHTML = isEng ? `Selected: ${files[0].name}` : `已选择: ${files[0].name}`;
         }
     });
+});
 
-    root.querySelectorAll('form[enctype="multipart/form-data"]').forEach((form) => {
-        form.addEventListener('submit', function () {
-            const recordInput = this.querySelector('input[name="record_id"]');
-            if (recordInput) {
-                const recordId = recordInput.value;
-                setTimeout(() => {
-                    refreshImageDisplayByRecord(recordId);
-                }, 1000);
+document.querySelectorAll('input[type="file"]').forEach(input => {
+    input.addEventListener('change', function () {
+        const textDiv = this.parentElement.querySelector('.file-input-text');
+        if (this.files.length > 0) {
+            const isEng = (typeof isEnglish !== 'undefined' && isEnglish);
+            textDiv.innerHTML = isEng ? `Selected: ${this.files[0].name}` : `已选择: ${this.files[0].name}`;
+        }
+    });
+});
+
+// 表单验证
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function (e) {
+        // 如果是multipart表单且没有选择文件，可能不需要拦截（因为可能有默认行为或仅仅是尝试上传）
+        // 这里主要针对必填字段
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.style.borderColor = '#dc3545';
+            } else {
+                field.style.borderColor = '#e9ecef';
             }
         });
-    });
 
-    root.querySelectorAll('.file-input').forEach((input) => {
-        input.addEventListener('dragover', (e) => {
+        if (!isValid) {
             e.preventDefault();
-            input.style.borderColor = '#e54a00';
-            input.style.background = '#fff5f0';
-        });
-
-        input.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            input.style.borderColor = '#FF5C00';
-            input.style.background = '#fff9f5';
-        });
-
-        input.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const files = e.dataTransfer.files;
-            const fileInput = input.querySelector('input[type="file"]');
-            if (!fileInput) {
-                return;
-            }
-
-            fileInput.files = files;
-            input.style.borderColor = '#FF5C00';
-            input.style.background = '#fff9f5';
-
-            if (files.length > 0) {
-                const textDiv = input.querySelector('.file-input-text');
-                if (textDiv) {
-                    textDiv.innerHTML = isEnglish ? `Selected: ${files[0].name}` : `已选择: ${files[0].name}`;
-                }
-            }
-        });
+            const message = (typeof isEnglish !== 'undefined' && isEnglish) ?
+                'Please fill in all required fields' : '请填写所有必填字段';
+            showToast(message, 'error');
+        }
     });
-
-    root.querySelectorAll('input[type="file"]').forEach((input) => {
-        input.addEventListener('change', function () {
-            const textDiv = this.parentElement?.querySelector('.file-input-text');
-            if (textDiv && this.files.length > 0) {
-                textDiv.innerHTML = isEnglish ? `Selected: ${this.files[0].name}` : `已选择: ${this.files[0].name}`;
-            }
-        });
-    });
-
-    root.querySelectorAll('form').forEach((form) => {
-        form.addEventListener('submit', function (e) {
-            const requiredFields = form.querySelectorAll('[required]');
-            let isValid = true;
-
-            requiredFields.forEach((field) => {
-                if (!field.value.trim()) {
-                    isValid = false;
-                    field.style.borderColor = '#dc3545';
-                } else {
-                    field.style.borderColor = '#e9ecef';
-                }
-            });
-
-            if (!isValid) {
-                e.preventDefault();
-                const message = isEnglish ? 'Please fill in all required fields' : '请填写所有必填字段';
-                if (typeof showToast === 'function') {
-                    showToast(message, 'error');
-                }
-            }
-        });
-    });
-}
-
-function bootAboutpage4Upload() {
-    const root = document.querySelector('[data-aboutpage4-content-root]');
-    if (root) {
-        delete root.dataset.aboutpage4Bound;
-    }
-    initAboutpage4Upload();
-}
-
-window.showYear = showYear;
-window.showAddRecordModal = showAddRecordModal;
-window.hideAddRecordModal = hideAddRecordModal;
-window.confirmDeleteRecord = confirmDeleteRecord;
-window.resetForm = resetForm;
-window.bootAboutpage4Upload = bootAboutpage4Upload;
-window.reinitAboutpage4Upload = bootAboutpage4Upload;
-
-if (!isAboutpage4ReactV2Page()) {
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initAboutpage4Upload);
-    } else {
-        initAboutpage4Upload();
-    }
-}
+});

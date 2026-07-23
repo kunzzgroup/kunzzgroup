@@ -87,10 +87,6 @@ switch ($action) {
         getCriteria($pdo);
         break;
 
-    case 'get_employees':
-        getEmployees($pdo);
-        break;
-
     case 'get_standards':
         getStandards($pdo);
         break;
@@ -513,36 +509,5 @@ function saveStandards($pdo) {
             $pdo->rollBack();
         }
         sendResponse(false, "保存考核标准失败：" . $e->getMessage());
-    }
-}
-
-function getEmployees($pdo) {
-    if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-        sendResponse(false, '无效的请求方法');
-    }
-
-    $workArea = $_GET['work_area'] ?? null;
-    $restaurant = $_GET['restaurant'] ?? null;
-
-    $sql = 'SELECT * FROM schedule_employees WHERE 1=1';
-    $params = [];
-
-    if ($restaurant) {
-        $sql .= ' AND restaurant = :restaurant';
-        $params['restaurant'] = $restaurant;
-    }
-    if ($workArea) {
-        $sql .= ' AND work_area = :work_area';
-        $params['work_area'] = $workArea;
-    }
-
-    $sql .= ' ORDER BY work_area, name';
-
-    try {
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
-        sendResponse(true, '获取成功', $stmt->fetchAll(PDO::FETCH_ASSOC));
-    } catch (PDOException $e) {
-        sendResponse(false, '获取员工列表失败：' . $e->getMessage());
     }
 }

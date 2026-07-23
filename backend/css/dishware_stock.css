@@ -1476,17 +1476,12 @@ tr[data-type="set"]:not(:first-child) {
 .modal {
     display: none;
     position: fixed;
-    z-index: 12000;
+    z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-}
-
-.modal.is-open {
-    display: block !important;
-    z-index: 20000;
 }
 
 .modal-content {

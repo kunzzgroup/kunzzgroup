@@ -1,31 +1,25 @@
 
-// Expects strategiesData, orgData, internalOrgData from inline PHP script.
+// 1. Strategies Data Handling
+// Expects 'strategiesData' to be defined globally
 
-function isCorporateBlueprintReactV2Page() {
-    return /corporate_blueprint-v2/.test(window.location.pathname || '');
-}
-
-function getFormattedStrategiesData() {
-    const raw = window.strategiesData || [];
-    return raw.map((obj, index) => ({
-        deptName: 'S' + (index + 1) + '-' + (obj.department || ''),
-        deptDisplay: obj.department || '',
-        strategy: obj.strategy || '',
-        department: obj.department || '',
-        pic: obj.pic || '',
-        startDate: obj.startDate || '',
-        endDate: obj.endDate || '',
-        dashboardMetrics: obj.dashboardMetrics || [],
-        year: obj.year || '',
-    }));
-}
-
-const initializedCharts = {};
+// 转换数据格式以匹配原有结构
+const formattedStrategiesData = (typeof strategiesData !== 'undefined' ? strategiesData : []).map((obj, index) => ({
+    deptName: 'S' + (index + 1) + '-' + (obj.department || ''),
+    deptDisplay: obj.department || '',
+    strategy: obj.strategy || '',
+    department: obj.department || '',
+    pic: obj.pic || '',
+    startDate: obj.startDate || '',
+    endDate: obj.endDate || '',
+    dashboardMetrics: obj.dashboardMetrics || [],
+    year: obj.year || ''
+}));
 
 function selectStrategy(index) {
-    const strategy = getFormattedStrategiesData()[index];
+    const strategy = formattedStrategiesData[index];
     if (!strategy) return;
 
+    // 更新卡片状态
     document.querySelectorAll('.strategy-card').forEach((card, i) => {
         if (i === index) {
             card.classList.add('active');
@@ -38,59 +32,64 @@ function selectStrategy(index) {
         }
     });
 
+    // 更新详细视图
     const detailsEl = document.getElementById('strategicDetails');
-    if (!detailsEl) return;
+    if (detailsEl) {
+        detailsEl.classList.add('hidden');
 
-    detailsEl.classList.add('hidden');
+        setTimeout(() => {
+            // 更新内容
+            const titleEl = document.getElementById('detailsTitle');
+            if (titleEl) titleEl.textContent = strategy.strategy;
 
-    setTimeout(() => {
-        const titleEl = document.getElementById('detailsTitle');
-        if (titleEl) titleEl.textContent = strategy.strategy;
+            const badgeEl = document.getElementById('detailsBadge');
+            if (badgeEl) badgeEl.textContent = strategy.deptDisplay || strategy.deptName || 'Selected Pillar';
 
-        const badgeEl = document.getElementById('detailsBadge');
-        if (badgeEl) badgeEl.textContent = strategy.deptDisplay || strategy.deptName || 'Selected Pillar';
+            const picEl = document.getElementById('picName');
+            if (picEl) picEl.textContent = strategy.pic || '—';
 
-        const picEl = document.getElementById('picName');
-        if (picEl) picEl.textContent = strategy.pic || '—';
+            // 格式化日期
+            const formatDate = (dateStr) => {
+                if (!dateStr) return '—';
+                try {
+                    const date = new Date(dateStr);
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                } catch (e) {
+                    return dateStr;
+                }
+            };
 
-        const formatDate = (dateStr) => {
-            if (!dateStr) return '—';
-            try {
-                const date = new Date(dateStr);
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
-            } catch (e) {
-                return dateStr;
+            const startEl = document.getElementById('startDate');
+            if (startEl) startEl.textContent = formatDate(strategy.startDate);
+
+            const endEl = document.getElementById('endDate');
+            if (endEl) endEl.textContent = formatDate(strategy.endDate);
+
+            // 更新指标
+            const metricsList = document.getElementById('measureList');
+            if (metricsList) {
+                if (strategy.dashboardMetrics && strategy.dashboardMetrics.length > 0) {
+                    metricsList.innerHTML = strategy.dashboardMetrics.map(metric =>
+                        `<li class="measure-list-item">
+                            <div class="measure-dot"></div>
+                            <span class="measure-text">${metric}</span>
+                        </li>`
+                    ).join('');
+                } else {
+                    metricsList.innerHTML = '<li class="measure-list-item"><span class="measure-text">暂无指标</span></li>';
+                }
             }
-        };
 
-        const startEl = document.getElementById('startDate');
-        if (startEl) startEl.textContent = formatDate(strategy.startDate);
-
-        const endEl = document.getElementById('endDate');
-        if (endEl) endEl.textContent = formatDate(strategy.endDate);
-
-        const metricsList = document.getElementById('measureList');
-        if (metricsList) {
-            if (strategy.dashboardMetrics && strategy.dashboardMetrics.length > 0) {
-                metricsList.innerHTML = strategy.dashboardMetrics.map((metric) =>
-                    `<li class="measure-list-item">
-                        <div class="measure-dot"></div>
-                        <span class="measure-text">${metric}</span>
-                    </li>`
-                ).join('');
-            } else {
-                metricsList.innerHTML = '<li class="measure-list-item"><span class="measure-text">暂无指标</span></li>';
-            }
-        }
-
-        detailsEl.classList.remove('hidden');
-    }, 300);
+            detailsEl.classList.remove('hidden');
+        }, 300);
+    }
 }
 
-function initStrategyCards() {
+// 初始化动画
+document.addEventListener('DOMContentLoaded', function () {
     const cards = document.querySelectorAll('.strategy-card');
     cards.forEach((card, index) => {
         card.style.opacity = '0';
@@ -102,31 +101,36 @@ function initStrategyCards() {
         }, 300 + (index * 100));
     });
 
+    // 更新策略总数
     const countEl = document.getElementById('strategicListCount');
     if (countEl) {
-        countEl.textContent = getFormattedStrategiesData().length.toString();
+        countEl.textContent = formattedStrategiesData.length.toString();
     }
-}
+});
 
-function initTimelineAnimation() {
+// 时间线动画控制器
+document.addEventListener('DOMContentLoaded', function () {
     const timelineWrapper = document.querySelector('.timeline-wrapper');
     if (!timelineWrapper) return;
 
+    // 创建 IntersectionObserver 观察时间线容器
     const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
+        entries.forEach(entry => {
             if (entry.isIntersecting) {
+                // 触发时间线动画
                 animateTimeline(entry.target);
                 observer.unobserve(entry.target);
             }
         });
     }, {
         threshold: 0.3,
-        rootMargin: '0px 0px -100px 0px',
+        rootMargin: '0px 0px -100px 0px'
     });
 
     observer.observe(timelineWrapper);
 
     function animateTimeline(container) {
+        // 1. 先绘制路径
         const routePath = container.querySelector('.map-route-path');
         if (routePath) {
             setTimeout(() => {
@@ -134,15 +138,18 @@ function initTimelineAnimation() {
             }, 200);
         }
 
+        // 2. 逐个显示里程碑（按路径顺序）
         const milestones = container.querySelectorAll('.map-milestone');
         milestones.forEach((milestone, index) => {
             setTimeout(() => {
                 milestone.classList.add('animate-in');
-            }, 1000 + (index * 200));
+            }, 1000 + (index * 200)); // 路径动画后开始显示里程碑
         });
     }
 
-    document.querySelectorAll('.map-milestone').forEach((milestone) => {
+    // 添加里程碑悬停时的路径高亮效果
+    const milestones = document.querySelectorAll('.map-milestone');
+    milestones.forEach(milestone => {
         milestone.addEventListener('mouseenter', function () {
             this.style.zIndex = '20';
         });
@@ -150,68 +157,86 @@ function initTimelineAnimation() {
             this.style.zIndex = '10';
         });
     });
-}
 
-function initMainOrgChart() {
-    const orgData = window.orgData;
-    if (!orgData || typeof window.jQuery === 'undefined') {
+});
+
+// 2. Organization Chart Handling
+// Expects 'orgData' to be defined globally
+$(document).ready(function () {
+    if (typeof orgData === 'undefined' || !orgData) {
+        // console.warn('组织架构数据为空或未定义');
+        // Do not overwrite html if not needed, or maybe hide container
+        if ($('#orgchart-container').length > 0 && typeof orgData === 'undefined') {
+            // Only show error if we expected data but didn't get it (and the container exists)
+            // If orgData is null because PHP passed null, that is handled
+        }
         return;
     }
 
-    const $container = window.jQuery('#orgchart-container');
-    if ($container.length === 0) return;
+    console.log('组织架构数据:', orgData);
 
-    $container.empty().orgchart({
-        data: orgData,
-        nodeContent: 'title',
-        nodeId: 'id',
-        pan: false,
-        zoom: false,
-        toggleSiblingsResp: true,
-        createNode($node, data) {
+    // 初始化组织架构图 - OrgChart.js 使用树形结构
+    $('#orgchart-container').orgchart({
+        'data': orgData,
+        'nodeContent': 'title',
+        'nodeId': 'id',
+        'pan': false,
+        'zoom': false,
+        'toggleSiblingsResp': true,
+        'createNode': function ($node, data) {
+            // 自定义节点样式
             const level = data.level || '';
             $node.addClass('level-' + level);
+
+            // 自定义节点内容 - 显示职位和名字
             const title = data.title || '—';
             const name = data.name || '—';
+
             $node.html(
                 '<div class="orgchart-node-title">' + title + '</div>' +
                 '<div class="orgchart-node-content">' + name + '</div>'
             );
         },
-        draggable: false,
-        direction: 't2b',
+        'draggable': false,
+        'direction': 't2b'
     });
 
-    setTimeout(() => {
-        const orgchartEl = $container.find('.orgchart');
+    // 居中显示组织架构图
+    setTimeout(function () {
+        const orgchartEl = $('#orgchart-container .orgchart');
         if (orgchartEl.length) {
-            const containerWidth = $container.width();
+            const containerWidth = $('#orgchart-container').width();
             const chartWidth = orgchartEl.outerWidth();
             if (chartWidth < containerWidth) {
-                orgchartEl.css('margin-left', ((containerWidth - chartWidth) / 2) + 'px');
+                const offsetLeft = (containerWidth - chartWidth) / 2;
+                orgchartEl.css('margin-left', offsetLeft + 'px');
             }
         }
     }, 100);
-}
+});
 
+// 3. Internal Organization Chart Handling
+// Expects 'internalOrgData' to be defined globally
+const initializedCharts = {}; // 记录已初始化的图表
+
+// 切换部门函数
 function switchInternalDept(deptIndex) {
-    if (typeof window.jQuery === 'undefined') return;
-
-    const $ = window.jQuery;
+    // 更新按钮状态
     $('.internal-dept-btn').removeClass('active');
     $('.internal-dept-btn[data-dept-index="' + deptIndex + '"]').addClass('active');
+
+    // 更新图表显示
     $('.internal-dept-chart-wrapper').removeClass('active');
     $('.internal-dept-chart-wrapper[data-dept-index="' + deptIndex + '"]').addClass('active');
 
-    if (window.internalOrgData && window.internalOrgData[deptIndex] && !initializedCharts[deptIndex]) {
-        initializeDeptChart(deptIndex, window.internalOrgData[deptIndex]);
+    // 如果该部门的图表还未初始化，则初始化它
+    if (typeof internalOrgData !== 'undefined' && internalOrgData[deptIndex] && !initializedCharts[deptIndex]) {
+        initializeDeptChart(deptIndex, internalOrgData[deptIndex]);
     }
 }
 
+// 初始化部门组织架构图
 function initializeDeptChart(index, deptTree) {
-    if (typeof window.jQuery === 'undefined') return;
-
-    const $ = window.jQuery;
     const containerId = '#internal-dept-chart-' + index;
     const $container = $(containerId);
 
@@ -220,108 +245,116 @@ function initializeDeptChart(index, deptTree) {
         return;
     }
 
-    $container.empty().orgchart({
-        data: deptTree,
-        nodeContent: 'title',
-        nodeId: 'id',
-        pan: false,
-        zoom: false,
-        toggleSiblingsResp: true,
-        createNode($node, data) {
+    // 初始化该部门的组织架构图
+    $container.orgchart({
+        'data': deptTree,
+        'nodeContent': 'title',
+        'nodeId': 'id',
+        'pan': false,
+        'zoom': false,
+        'toggleSiblingsResp': true,
+        'createNode': function ($node, data) {
+            // 自定义节点样式
             const level = data.level || '';
             $node.addClass('level-' + level);
+
+            // 自定义节点内容 - 显示职位和名字
             const title = data.title || '—';
             const name = data.name || '—';
+
             $node.html(
                 '<div class="orgchart-node-title">' + title + '</div>' +
                 '<div class="orgchart-node-content">' + name + '</div>'
             );
         },
-        draggable: false,
-        direction: 't2b',
+        'draggable': false,
+        'direction': 't2b'
     });
 
+    // 标记为已初始化
     initializedCharts[index] = true;
 
-    setTimeout(() => {
+    // 居中显示该部门的组织架构图
+    setTimeout(function () {
         const orgchartEl = $container.find('.orgchart');
         if (orgchartEl.length) {
             const containerWidth = $container.width();
             const chartWidth = orgchartEl.outerWidth();
             if (chartWidth < containerWidth) {
-                orgchartEl.css('margin-left', ((containerWidth - chartWidth) / 2) + 'px');
+                const offsetLeft = (containerWidth - chartWidth) / 2;
+                orgchartEl.css('margin-left', offsetLeft + 'px');
             }
         }
     }, 100);
 }
 
-function initInternalOrgCharts() {
-    const internalOrgData = window.internalOrgData;
-    if (!internalOrgData || internalOrgData.length === 0) {
+$(document).ready(function () {
+    if (typeof internalOrgData === 'undefined' || !internalOrgData || internalOrgData.length === 0) {
+        // console.error('内部组织架构数据为空');
+        if ($('#internal-orgchart-container').length > 0 && typeof internalOrgData !== 'undefined') {
+            $('#internal-orgchart-container').html('<p style="text-align: center; color: #6b7280; padding: 40px;">无法加载内部组织架构数据</p>');
+        }
         return;
     }
 
-    Object.keys(initializedCharts).forEach((key) => {
-        delete initializedCharts[key];
-    });
+    console.log('内部组织架构数据:', internalOrgData);
 
-    initializeDeptChart(0, internalOrgData[0]);
-}
+    // 初始化第一个部门的组织架构图
+    if (internalOrgData.length > 0) {
+        initializeDeptChart(0, internalOrgData[0]);
+    }
+});
 
-function initOrgCharts() {
-    initMainOrgChart();
-    initInternalOrgCharts();
-}
 
 function alignScoringSections() {
-    document.querySelectorAll('.culture-explanation-grid').forEach((grid) => {
+    // 处理所有 culture-explanation-grid
+    document.querySelectorAll('.culture-explanation-grid').forEach(function (grid) {
         const cards = grid.querySelectorAll('.culture-explanation-card');
         if (cards.length === 0) return;
 
-        cards.forEach((card) => {
+        // 重置所有内容区域的高度，以便重新计算
+        cards.forEach(function (card) {
             const content = card.querySelector('.culture-explanation-content');
-            if (content) content.style.minHeight = 'auto';
-        });
-
-        void grid.offsetHeight;
-
-        let maxHeight = 0;
-        cards.forEach((card) => {
-            const content = card.querySelector('.culture-explanation-content');
-            if (content && content.offsetHeight > maxHeight) {
-                maxHeight = content.offsetHeight;
+            if (content) {
+                content.style.minHeight = 'auto';
             }
         });
 
-        cards.forEach((card) => {
+        // 强制重排以获取实际高度
+        void grid.offsetHeight;
+
+        // 找出所有解说内容区域的最大高度
+        let maxHeight = 0;
+        cards.forEach(function (card) {
             const content = card.querySelector('.culture-explanation-content');
-            if (content) content.style.minHeight = maxHeight + 'px';
+            if (content) {
+                const height = content.offsetHeight;
+                if (height > maxHeight) {
+                    maxHeight = height;
+                }
+            }
+        });
+
+        // 设置所有解说内容区域的最小高度为最大高度
+        cards.forEach(function (card) {
+            const content = card.querySelector('.culture-explanation-content');
+            if (content) {
+                content.style.minHeight = maxHeight + 'px';
+            }
         });
     });
 }
 
-function bootCorporateBlueprint() {
-    initStrategyCards();
-    initTimelineAnimation();
-    initOrgCharts();
+// 页面加载完成后执行
+document.addEventListener('DOMContentLoaded', function () {
     alignScoringSections();
-}
-
-window.bootCorporateBlueprint = bootCorporateBlueprint;
-window.reinitCorporateBlueprint = bootCorporateBlueprint;
-window.selectStrategy = selectStrategy;
-window.switchInternalDept = switchInternalDept;
-
-let resizeTimer;
-window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(alignScoringSections, 250);
 });
 
-if (!isCorporateBlueprintReactV2Page()) {
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', bootCorporateBlueprint);
-    } else {
-        bootCorporateBlueprint();
-    }
-}
+// 窗口大小改变时重新对齐
+let resizeTimer;
+window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+        alignScoringSections();
+    }, 250);
+});
