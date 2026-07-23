@@ -119,10 +119,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
                         $config = json_decode(file_get_contents($configFile), true) ?: [];
                     }
 
-                    $publicPath = 'images/images/' . $newFileName;
                     $config['comphoto_' . $photoNumber] = [
-                        'file' => $publicPath,
-                        'url' => '/' . $publicPath,
+                        'file' => $targetPath, // 物理路径，用于后端验证
                         'type' => 'image',
                         'updated' => date('Y-m-d H:i:s')
                     ];
@@ -132,10 +130,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
                     // 如果是 AJAX 请求，返回 JSON
                     if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
                         header('Content-Type: application/json; charset=utf-8');
+                        // 生成显示 URL
+                        // Use the same URL logic as the PHP display: prefer config url, else use relative file path
+                   $cfgNow = json_decode(file_get_contents($configFile), true) ?: [];
+                   $displayUrlAjax = isset($cfgNow['comphoto_' . $photoNumber]['url'])
+                       ? $cfgNow['comphoto_' . $photoNumber]['url']
+                       : $targetPath;
                         echo json_encode([
                             'ok'      => true,
                             'msg'     => "照片 #{$photoNumber} 上传成功！",
-                            'url'     => '/' . $publicPath,
+                            'url'     => $displayUrlAjax,
                             'updated' => date('Y-m-d H:i:s'),
                             'photo'   => $photoNumber
                         ]);

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAnimateOnScroll } from '../../hooks/useAnimateOnScroll.js';
 import { mediaUrl } from '../../utils/media.js';
 
-function HeroBackground() {
+function HeroBackground({ videoType = 'video/mp4' }) {
   const [videoFailed, setVideoFailed] = useState(false);
 
   if (videoFailed) {
@@ -25,8 +25,7 @@ function HeroBackground() {
       preload="metadata"
       onError={() => setVideoFailed(true)}
     >
-      {/* MIME 由 /media/home_background 的 Content-Type 决定，兼容 webm/mp4 */}
-      <source src={mediaUrl('home_background')} />
+      <source src={mediaUrl('home_background')} type={videoType} />
     </video>
   );
 }
@@ -47,7 +46,7 @@ export default function HomeHero() {
 
   return (
     <section className={`home${loaded ? ' gradient-loaded' : ''}`}>
-      <HeroBackground />
+      <HeroBackground videoType="video/mp4" />
 
       <div
         ref={animRef}
