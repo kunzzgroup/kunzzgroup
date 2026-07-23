@@ -197,22 +197,31 @@ endif; ?>
 endif; ?>
 
             <?php
-// 统计已上传的照片（检查本地和子域名路径）
-$uploadedCount = 0;
-$subdomainPhysicalPath = '/home/u857194726/domains/media.kunzzgroup.com/public_html/comphotos/';
+$projectRoot = dirname(__DIR__);
+$resolveComphotoPath = static function (array $entry) use ($projectRoot): ?string {
+    $file = (string)($entry['file'] ?? '');
+    if ($file === '') {
+        return null;
+    }
+    $normalized = ltrim(preg_replace('#^(\.\./)+#', '', str_replace('\\', '/', $file)), '/');
+    $candidates = [
+        $file,
+        $projectRoot . '/' . $normalized,
+        __DIR__ . '/' . $file,
+    ];
+    foreach ($candidates as $candidate) {
+        if (is_file($candidate)) {
+            return $candidate;
+        }
+    }
+    return null;
+};
 
+$uploadedCount = 0;
 for ($i = 1; $i <= 30; $i++) {
     $photoKey = 'comphoto_' . $i;
-    if (isset($config[$photoKey])) {
-        // 优先检查子域名路径
-        $subdomainPath = $subdomainPhysicalPath . basename($config[$photoKey]['file']);
-        if (file_exists($subdomainPath)) {
-            $uploadedCount++;
-        }
-        elseif (file_exists($config[$photoKey]['file'])) {
-            // 检查本地文件
-            $uploadedCount++;
-        }
+    if (isset($config[$photoKey]) && $resolveComphotoPath($config[$photoKey])) {
+        $uploadedCount++;
     }
 }
 ?>
@@ -240,34 +249,21 @@ for ($i = 1; $i <= 30; $i++) {
                         </div>
                         
                         <?php
-    // 检查文件是否存在（优先检查子域名路径）
     $photoKey = 'comphoto_' . $i;
-    $fileExists = false;
+    $resolvedPath = isset($config[$photoKey]) ? $resolveComphotoPath($config[$photoKey]) : null;
+    $fileExists = $resolvedPath !== null;
     $displayUrl = '';
-    $subdomainPhysicalPath = '/home/u857194726/domains/media.kunzzgroup.com/public_html/comphotos/';
-
-    if (isset($config[$photoKey])) {
-        // 优先检查子域名路径
-        $subdomainPath = $subdomainPhysicalPath . basename($config[$photoKey]['file']);
-        if (file_exists($subdomainPath)) {
-            $fileExists = true;
-        }
-        elseif (file_exists($config[$photoKey]['file'])) {
-            $fileExists = true;
-        }
-
-        // 使用子域名URL显示图片
-        if ($fileExists && isset($config[$photoKey]['url'])) {
+    if ($fileExists) {
+        if (!empty($config[$photoKey]['url'])) {
             $displayUrl = $config[$photoKey]['url'];
-        }
-        elseif ($fileExists) {
-            $displayUrl = $config[$photoKey]['file'];
+        } else {
+            $displayUrl = '/' . ltrim(str_replace('\\', '/', substr(realpath($resolvedPath), strlen(realpath($projectRoot)))), '/');
         }
     }
 
     if ($fileExists && $displayUrl): ?>
                             <div class="current-image">
-                                <img src="<?php echo $displayUrl; ?>?v=<?php echo time(); ?>" alt="照片 <?php echo $i; ?>">
+                                <img src="<?php echo htmlspecialchars($displayUrl); ?>?v=<?php echo time(); ?>" alt="照片 <?php echo $i; ?>">
                                 <form method="post" class="delete-form">
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="photo_number" value="<?php echo $i; ?>">
@@ -275,11 +271,7 @@ for ($i = 1; $i <= 30; $i++) {
                                 </form>
                                 <div class="image-info">
                                     <strong>已上传</strong><br>
-                                    <small>更新: <?php echo $config[$photoKey]['updated']; ?></small>
-                                    <?php if (isset($config[$photoKey]['url'])): ?>
-                                        <br><small>URL: <?php echo htmlspecialchars($config[$photoKey]['url']); ?></small>
-                                    <?php
-        endif; ?>
+                                    <small>更新: <?php echo htmlspecialchars($config[$photoKey]['updated'] ?? ''); ?></small>
                                 </div>
                             </div>
                         <?php
@@ -297,7 +289,7 @@ for ($i = 1; $i <= 30; $i++) {
                             </div>
                             
                             <button type="submit" class="upload-btn">
-                                <?php echo isset($config['comphoto_' . $i]) ? '更新照片' : '上传照片'; ?>
+                                <?php echo $fileExists ? '更新照片' : '上传照片'; ?>
                             </button>
                         </form>
                     </div>
