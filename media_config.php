@@ -108,11 +108,12 @@ function getSubdomainMediaConfig() {
  * @return array 媒体信息
  */
 function getMediaConfig($mediaType) {
-    // 尝试多个可能的配置文件路径
+    // Prefer project-root absolute path so /media/* works regardless of CWD
     $possiblePaths = [
-        'media_config.json',  // 根目录
-        '../media_config.json',  // 从 frontend 目录访问根目录
-        '../../media_config.json'  // 从其他子目录访问根目录
+        __DIR__ . '/media_config.json',
+        'media_config.json',
+        '../media_config.json',
+        '../../media_config.json',
     ];
     
     $configFile = null;
@@ -228,19 +229,59 @@ function getMediaHtml($mediaType, $attributes = []) {
 
 
 /**
- * 获取公司照片数组
- * @return array 照片路径数组
+ * Resolve a media path to an existing local file under the project root.
+ */
+function resolve_local_media_file(string $filePath): ?string
+{
+    $root = __DIR__;
+    $normalized = str_replace('\\', '/', $filePath);
+    $normalized = ltrim(preg_replace('#^(\.\./)+#', '', $normalized), '/');
+
+    $candidates = [
+        $filePath,
+        $root . '/' . $normalized,
+        $root . '/' . ltrim($filePath, '/'),
+    ];
+
+    foreach ($candidates as $candidate) {
+        $real = realpath($candidate);
+        if ($real && is_file($real)) {
+            return $real;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Convert a local absolute file path into a site-root URL.
+ */
+function local_media_web_url(string $absolutePath): string
+{
+    $root = realpath(__DIR__);
+    $real = realpath($absolutePath);
+    if (!$root || !$real || !str_starts_with($real, $root)) {
+        return '/' . ltrim(str_replace('\\', '/', $absolutePath), '/');
+    }
+
+    $relative = str_replace('\\', '/', substr($real, strlen($root)));
+    return '/' . ltrim($relative, '/');
+}
+
+/**
+ * 获取公司照片数组（后台「我们的足迹」）
+ * @return array 照片 URL 数组
  */
 function getCompanyPhotos() {
-    // 子域名配置
+    $root = __DIR__;
     $subdomainMediaUrl = 'https://media.kunzzgroup.com/comphotos/';
     $subdomainPhysicalPath = '/home/u857194726/domains/media.kunzzgroup.com/public_html/comphotos/';
 
-    // 尝试多个可能的配置文件路径
     $possiblePaths = [
-        'media_config.json',  // 根目录
-        '../media_config.json',  // 从 frontend 目录访问根目录
-        '../../media_config.json'  // 从其他子目录访问根目录
+        $root . '/media_config.json',
+        'media_config.json',
+        '../media_config.json',
+        '../../media_config.json',
     ];
 
     $configFile = null;
@@ -252,108 +293,109 @@ function getCompanyPhotos() {
     }
 
     $photos = [];
+    $seen = [];
 
-    // 调试信息
-    error_log("getCompanyPhotos: 开始执行，当前目录: " . getcwd());
-    error_log("getCompanyPhotos: 尝试的路径: " . implode(', ', $possiblePaths));
-    error_log("getCompanyPhotos: 找到的配置文件: " . ($configFile ?: '无'));
-    error_log("getCompanyPhotos: 子域名物理路径: " . $subdomainPhysicalPath); // updated for subdomain storage
-    error_log("getCompanyPhotos: 子域名URL: " . $subdomainMediaUrl); // updated for subdomain storage
+    $addPhoto = function (string $absolutePath, ?string $preferredUrl = null) use (&$photos, &$seen) {
+        $real = realpath($absolutePath);
+        if (!$real || !is_file($real) || isset($seen[$real])) {
+            return;
+        }
+        $seen[$real] = true;
+
+        $url = $preferredUrl;
+        if (!$url || str_contains($url, 'media.kunzzgroup.com')) {
+            $url = local_media_web_url($real);
+        }
+
+        $photos[] = $url . '?v=' . filemtime($real);
+    };
 
     if ($configFile) {
         $config = json_decode(file_get_contents($configFile), true);
-        if ($config) {
-            error_log("getCompanyPhotos: JSON 解析成功，配置键数量: " . count($config));
-
-            // 只获取实际存在的照片，不添加占位图
+        if (is_array($config)) {
             for ($i = 1; $i <= 30; $i++) {
                 $key = 'comphoto_' . $i;
-                if (isset($config[$key])) {
-                    // 检查文件是否存在（优先检查子域名路径）
-                    $fileExists = false;
-                    $photoUrl = '';
-                    $timestamp = time();
+                if (!isset($config[$key])) {
+                    continue;
+                }
 
-                    // 优先检查子域名路径
-                    $subdomainFilePath = $subdomainPhysicalPath . basename($config[$key]['file']);
-                    if (file_exists($subdomainFilePath)) {
-                        $fileExists = true;
-                        $timestamp = filemtime($subdomainFilePath);
-                        
-                        if (isset($config[$key]['url'])) {
-                            $photoUrl = $config[$key]['url'];
-                        } else {
-                            $photoUrl = $subdomainMediaUrl . basename($config[$key]['file']);
-                        }
-                    } elseif (file_exists($config[$key]['file'])) {
-                        $fileExists = true;
-                        $timestamp = filemtime($config[$key]['file']);
-                        
-                        if (isset($config[$key]['url'])) {
-                            $photoUrl = $config[$key]['url'];
-                        } else {
-                            $photoUrl = $config[$key]['file'];
-                        }
-                    }
+                $entry = $config[$key];
+                $file = (string)($entry['file'] ?? '');
+                $url = isset($entry['url']) ? (string)$entry['url'] : null;
 
-                    if ($fileExists) {
-                        $photoUrl .= '?v=' . $timestamp;
-                        $photos[] = $photoUrl;
-                        error_log("getCompanyPhotos: 添加照片 $key: $photoUrl");
+                // 1) config path / legacy ../ path
+                $resolved = $file !== '' ? resolve_local_media_file($file) : null;
+
+                // 2) numbered file under images/images or comphoto/comphoto
+                if (!$resolved) {
+                    foreach (['webp', 'png', 'jpg', 'jpeg'] as $ext) {
+                        foreach ([
+                            $root . '/images/images/' . $i . '.' . $ext,
+                            $root . '/comphoto/comphoto/' . $i . '.' . $ext,
+                        ] as $candidate) {
+                            if (is_file($candidate)) {
+                                $resolved = $candidate;
+                                break 2;
+                            }
+                        }
                     }
                 }
-                // 注意：这里不再添加占位图
+
+                // 3) old Hostinger subdomain physical path (if still mounted)
+                if (!$resolved && $file !== '') {
+                    $subdomainFile = $subdomainPhysicalPath . basename($file);
+                    if (is_file($subdomainFile)) {
+                        $resolved = $subdomainFile;
+                        if (!$url) {
+                            $url = $subdomainMediaUrl . basename($file);
+                        }
+                    }
+                }
+
+                if ($resolved) {
+                    $addPhoto($resolved, $url);
+                }
             }
-        } else {
-            error_log("getCompanyPhotos: JSON 解析失败: " . json_last_error_msg());
         }
-    } else {
-        error_log("getCompanyPhotos: 所有配置文件路径都不存在");
     }
 
-    // updated for subdomain storage
-    // 如果从配置文件没有找到照片，尝试直接从子域名目录扫描
-    if (count($photos) == 0) {
-        error_log("getCompanyPhotos: 从配置文件未找到照片，尝试直接扫描目录");
-
-        // 优先尝试子域名物理路径，然后是本地路径
-        $comphotoPaths = [
-            $subdomainPhysicalPath,     // 子域名物理路径
-            'comphoto/comphoto/',       // 根目录
-            '../comphoto/comphoto/',    // 从frontend目录
-            '../../comphoto/comphoto/', // 从其他子目录
-            './comphoto/comphoto/'      // 当前目录
+    // Fallback: scan local numbered photos even without config entries
+    if (count($photos) === 0) {
+        $scanDirs = [
+            $root . '/images/images/',
+            $root . '/comphoto/comphoto/',
+            $subdomainPhysicalPath,
         ];
 
-        foreach ($comphotoPaths as $comphotoDir) {
-            if (is_dir($comphotoDir)) {
-                $files = glob($comphotoDir . '*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}', GLOB_BRACE);
-                if ($files) {
-                    error_log("getCompanyPhotos: 在目录 $comphotoDir 找到 " . count($files) . " 个图片文件");
-
-                    // 按文件名排序
-                    sort($files);
-
-                    foreach ($files as $file) {
-                        // 如果是从子域名物理路径扫描出来的，使用子域名URL
-                        if ($comphotoDir === $subdomainPhysicalPath) {
-                            $photoUrl = $subdomainMediaUrl . basename($file) . '?v=' . filemtime($file);
-                        } else {
-                            // 否则直接使用本地扫描到的相对路径
-                            $photoUrl = $file . '?v=' . filemtime($file);
-                        }
-                        $photos[] = $photoUrl;
-                        error_log("getCompanyPhotos: 直接添加照片: $photoUrl");
-                    }
-                    break; // 找到文件后退出循环
+        foreach ($scanDirs as $dir) {
+            if (!is_dir($dir)) {
+                continue;
+            }
+            $files = glob($dir . '*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}', GLOB_BRACE) ?: [];
+            // Prefer numeric filenames used by backend upload (1.png, 2.webp, ...)
+            usort($files, function ($a, $b) {
+                return strnatcasecmp(basename($a), basename($b));
+            });
+            foreach ($files as $file) {
+                $base = pathinfo($file, PATHINFO_FILENAME);
+                if (!ctype_digit((string)$base)) {
+                    continue;
                 }
+                $url = str_starts_with($dir, $subdomainPhysicalPath)
+                    ? $subdomainMediaUrl . basename($file)
+                    : null;
+                $addPhoto($file, $url);
+            }
+            if (count($photos) > 0) {
+                break;
             }
         }
     }
 
-    error_log("getCompanyPhotos: 返回照片数量: " . count($photos));
+    if (count($photos) > 30) {
+        $photos = array_slice($photos, 0, 30);
+    }
 
-    // 如果没有找到任何照片，返回空数组
     return $photos;
 }
 

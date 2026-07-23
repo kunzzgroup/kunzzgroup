@@ -1,0 +1,28 @@
+{
+    "tokyo_background": {
+        "file": "images/images/tokyo_background.jpg",
+        "type": "image",
+        "updated": "2025-09-08 02:37:40"
+    },
+    "comphoto_1": {
+        "file": "images/images/1.png",
+        "url": "/images/images/1.png",
+        "type": "image",
+        "updated": "2025-10-21 07:45:52"
+    },
+    "home_background": {
+        "file": "video/video/home_background.webm",
+        "type": "video",
+        "updated": "2025-09-17 04:25:45"
+    },
+    "about_background": {
+        "file": "images/images/about_background.jpg",
+        "type": "image",
+        "updated": "2025-10-30 06:49:08"
+    },
+    "joinus_background": {
+        "file": "images/images/joinus_background.jpg",
+        "type": "image",
+        "updated": "2025-10-30 02:20:35"
+    }
+}
