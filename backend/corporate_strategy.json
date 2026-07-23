@@ -2,9 +2,9 @@
     "companyOverview": {
         "companyName": "KUNZZ HOLDINGS SDN BHD",
         "planTitle": "Corporate Strategic Plan",
-        "strategyStartYear": 2027,
+        "strategyStartYear": 2025,
         "strategyEndYear": 2029,
-        "ultimateGoal": "Establish 10+ successful subsidiaries across multiple industries\r\nhahahahhaa"
+        "ultimateGoal": "Establish 10+ successful subsidiaries across multiple industries"
     },
     "timeline": [
         {
@@ -26,10 +26,6 @@
         {
             "year": 2028,
             "goal": "创建10间子公司"
-        },
-        {
-            "year": 2029,
-            "goal": "zhuangouyibaiwan"
         }
     ],
     "corporateCore": {
@@ -182,7 +178,7 @@
     "strategicObjectives": {
         "2024": [
             {
-                "department": "nixihuanjiuhao",
+                "department": "nihaowohaodajiahao",
                 "strategy": "Establish robust IT infrastructure and implement core business systems",
                 "dashboardMetrics": [
                     "System Uptime (%)",
