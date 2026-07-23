@@ -18,20 +18,8 @@
     RewriteRule ^api/get_jobs_api\.php$ get_jobs_api.php [L,QSA]
     RewriteRule ^api/timeline_api\.php$ api/timeline_api.php [L,QSA]
     RewriteRule ^api/comphotos_api\.php$ api/comphotos_api.php [L,QSA]
-    # React backend pages (parallel routes for migration comparison)
-    RewriteRule ^backend/kpi-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
-    RewriteRule ^backend/cost-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
-    RewriteRule ^backend/kpiedit-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
-    RewriteRule ^backend/costedit-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
-    RewriteRule ^backend/generatecode-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
-    RewriteRule ^backend/add-employee-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
-    RewriteRule ^backend/stocklistall-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
-    RewriteRule ^backend/stockeditall-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
-    RewriteRule ^backend/stockremark-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
-    RewriteRule ^backend/stockproductname-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
-    RewriteRule ^backend/stocksot-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
-    RewriteRule ^backend/stockminimum-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
-    RewriteRule ^backend/dishware_stock-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
+    # React backend v2 pages (serve SPA shell; React Router handles the route)
+    RewriteRule ^backend/[A-Za-z0-9_-]+-v2/?$ Kunzz-Landing-Page/dist/index.html [L]
     RewriteRule ^backend/ - [L]
     RewriteRule ^frontend/ - [L]
     RewriteRule ^(costapi|stockapi|kpiapi|check_permissions)\.php$ - [L]
@@ -39,6 +27,8 @@
     # ===== React Landing Page (live site) =====
     RewriteRule ^media/(.+)$ serve_media.php [L,QSA]
     RewriteRule ^assets/(.*)$ Kunzz-Landing-Page/dist/assets/$1 [L]
+    # Local XAMPP subdirectory when dist was built with VITE_BASE=/kunzzgroup/
+    RewriteRule ^kunzzgroup/assets/(.*)$ Kunzz-Landing-Page/dist/assets/$1 [L]
 
     RewriteCond %{HTTP_HOST} ^localhost(:\d+)?$ [NC]
     RewriteCond %{REQUEST_FILENAME} !-f
