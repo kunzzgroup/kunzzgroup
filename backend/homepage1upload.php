@@ -20,53 +20,50 @@ if (!isset($_SESSION['user_id'])) {
 
 // 处理文件上传
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media_file'])) {
-    // 根据文件类型决定上传目录
     $allowedVideo = ['mp4', 'webm', 'mov', 'avi'];
     $allowedImage = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'];
-    $isVideo = in_array($fileExtension, $allowedVideo);
+    $configFile = '../media_config.json';
+
+    $file = $_FILES['media_file'];
+    $mediaType = $_POST['media_type'] ?? 'home_background';
+    $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $isVideo = in_array($fileExtension, $allowedVideo, true);
     $uploadDir = $isVideo ? '../video/video/' : '../images/images/';
-    $configFile = '../media_config.json';  // 根目录 media_config.json（前端读取的）
-    
-    // 确保上传目录存在
+    $publicPathPrefix = $isVideo ? 'video/video/' : 'images/images/';
+
     if (!file_exists($uploadDir)) {
         mkdir($uploadDir, 0777, true);
     }
-    
-    $file = $_FILES['media_file'];
-    $mediaType = $_POST['media_type'];
-    $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    
+
     $allowedTypes = array_merge($allowedVideo, $allowedImage);
-    
-    if (in_array($fileExtension, $allowedTypes)) {
-        // 生成新文件名
+
+    if (in_array($fileExtension, $allowedTypes, true)) {
         $newFileName = $mediaType . '.' . $fileExtension;
         $targetPath = $uploadDir . $newFileName;
-        
+
         if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-            // HEIC/HEIF 自动转换为 JPG
             $converted = convertHeicToJpg($targetPath, $fileExtension);
             if ($converted['converted']) {
                 $targetPath = $converted['path'];
                 $newFileName = $converted['filename'];
                 $fileExtension = 'jpg';
+                $isVideo = false;
+                $publicPathPrefix = 'images/images/';
             }
 
-            // 更新配置文件
             $config = [];
             if (file_exists($configFile)) {
                 $config = json_decode(file_get_contents($configFile), true) ?: [];
             }
-            
-            $webPath = $uploadDir . $newFileName;
-            
+
+            // serve_media.php 期望站点根相对路径（不要带 ../）
             $config[$mediaType] = [
-                'file' => $webPath,
+                'file' => $publicPathPrefix . $newFileName,
                 'type' => $isVideo ? 'video' : 'image',
                 'updated' => date('Y-m-d H:i:s')
             ];
-            
-            file_put_contents($configFile, json_encode($config, JSON_PRETTY_PRINT));
+
+            file_put_contents($configFile, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
             $success = "文件上传成功！";
         } else {
             $error = "文件上传失败！";
@@ -136,12 +133,21 @@ if (file_exists('../media_config.json')) {
                                 <small>类型: <?php echo $config['home_background']['type']; ?> | 更新时间: <?php echo $config['home_background']['updated']; ?></small>
                                 
                                 <div class="preview-container">
+                                    <?php
+                                    $previewFile = $config['home_background']['file'];
+                                    // 配置存根相对路径；后台预览走 /media/ 或补上 ../
+                                    $previewSrc = ($config['home_background']['type'] === 'video')
+                                        ? '/media/home_background?v=' . urlencode($config['home_background']['updated'] ?? time())
+                                        : (str_starts_with($previewFile, '../') || str_starts_with($previewFile, '/')
+                                            ? $previewFile
+                                            : '../' . ltrim($previewFile, '/'));
+                                    ?>
                                     <?php if ($config['home_background']['type'] === 'video'): ?>
                                         <video class="preview-video" controls>
-                                            <source src="<?php echo $config['home_background']['file']; ?>" type="video/mp4">
+                                            <source src="<?php echo htmlspecialchars($previewSrc); ?>">
                                         </video>
                                     <?php else: ?>
-                                        <img class="preview-image" src="<?php echo $config['home_background']['file']; ?>" alt="当前背景">
+                                        <img class="preview-image" src="<?php echo htmlspecialchars($previewSrc); ?>" alt="当前背景">
                                     <?php endif; ?>
                                 </div>
                             </div>
