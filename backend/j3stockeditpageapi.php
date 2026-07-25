@@ -1023,6 +1023,13 @@ function handleDelete()
                 continue; // 如果记录不存在或已删除，跳过
             }
 
+            require_once __DIR__ . '/stock_inventory_guard.php';
+            $guard = assertDeleteInWouldNotGoNegative($pdo, 'j3stockedit_data', $recordToDelete);
+            if (!$guard['ok']) {
+                $pdo->rollBack();
+                sendResponse(false, $guard['message']);
+            }
+
             // 执行软删除主表记录
             $stmt = $pdo->prepare("UPDATE j3stockedit_data SET deleted_at = NOW(), deleted_by = ? WHERE id = ?");
             $result = $stmt->execute([$username, $currentId]);
@@ -1051,19 +1058,14 @@ function handleDelete()
                     }
                 }
 
-                // 如果是Central记录，同步软删除stockinout_data表记录
+                // 退回中央：仅按 main_record_id 精确删除
                 $targetSystem = $recordToDelete['target_system'] ?? 'j3';
-                if (strtolower($targetSystem) === 'central') {
-                    $centralDeleteSql = "UPDATE stockinout_data SET deleted_at = NOW(), deleted_by = ? 
-                                        WHERE product_name = ? AND date = ? AND receiver = ? AND target_system = 'central' AND deleted_at IS NULL
-                                        ORDER BY created_at DESC LIMIT 1";
-                    $centralDelStmt = $pdo->prepare($centralDeleteSql);
-                    $centralDelStmt->execute([
-                        $username,
-                        $recordToDelete['product_name'],
-                        $recordToDelete['date'],
-                        $recordToDelete['receiver']
-                    ]);
+                if (strtolower((string)$targetSystem) === 'central' && !empty($recordToDelete['main_record_id'])) {
+                    $centralDelStmt = $pdo->prepare(
+                        "UPDATE stockinout_data SET deleted_at = NOW(), deleted_by = ? 
+                         WHERE id = ? AND target_system = 'central' AND deleted_at IS NULL"
+                    );
+                    $centralDelStmt->execute([$username, $recordToDelete['main_record_id']]);
                 }
             }
         }
@@ -1187,7 +1189,7 @@ function handleBatchSave()
             $newId = $pdo->lastInsertId();
             $successCount++;
 
-            // 如果 target_system 是 Central，则同步保存
+            // 如果 target_system 是 Central，则同步保存，并把中央 ID 写回 main_record_id
             $targetSystem = $row['target_system'] ?? 'j3';
             if (strtolower($targetSystem) === 'central') {
                 $centralStmt->execute([
@@ -1204,6 +1206,11 @@ function handleBatchSave()
                     'central',
                     $createdBy
                 ]);
+                $centralId = $pdo->lastInsertId();
+                if ($centralId) {
+                    $pdo->prepare("UPDATE j3stockedit_data SET main_record_id = ?, target_system = 'Central' WHERE id = ?")
+                        ->execute([$centralId, $newId]);
+                }
             }
         }
 

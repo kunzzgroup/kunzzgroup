@@ -1,0 +1,16 @@
+{
+  "name": "kunzzgroup",
+  "version": "1.0.0",
+  "private": true,
+  "description": "KUNZZ HOLDINGS web app",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:report": "playwright show-report",
+    "test:stock": "playwright test e2e/stock"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.0"
+  }
+}

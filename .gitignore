@@ -1,6 +1,16 @@
 # Composer dependencies
 /vendor/
 
+# Node / Playwright
+/node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+.env
+.env.*
+!.env.example
+
 # IDE
 .idea/
 .vscode/
@@ -13,3 +23,7 @@ Thumbs.db
 
 # Local environment overrides (copy from config.local.php.example)
 config.local.php
+
+# Local deploy helpers
+_deploy_p0/
+deploy_p0_ftp.py

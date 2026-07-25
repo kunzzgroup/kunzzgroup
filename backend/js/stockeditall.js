@@ -5111,7 +5111,23 @@ async function approveRecord(id) {
 
 // 删除记录
 async function deleteRecord(id) {
-    if (!confirm('确定要删除此记录吗？记录将移至回收站。')) return;
+    const record = (typeof stockData !== 'undefined' && Array.isArray(stockData))
+        ? stockData.find(r => String(r.id) === String(id))
+        : null;
+    const inQty = record ? parseFloat(record.in_quantity || 0) : 0;
+    const outQty = record ? parseFloat(record.out_quantity || 0) : 0;
+
+    let msg = '确定要删除此记录吗？记录将移至回收站。';
+    if (inQty > 0) {
+        msg = `⚠️ 这是一笔【入库 ${inQty}】记录。\n删除后总库存会减少，可能导致倒扣。\n\n确定移至回收站？`;
+        if (!confirm(msg)) return;
+        if (!confirm('再次确认：删除入库可能导致库存倒扣，仍要继续？')) return;
+    } else {
+        if (outQty > 0) {
+            msg = `确定删除【出库 ${outQty}】记录？将移至回收站。`;
+        }
+        if (!confirm(msg)) return;
+    }
 
     try {
         const result = await apiCall(`?id=${id}`, {

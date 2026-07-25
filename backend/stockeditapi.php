@@ -4,6 +4,7 @@ date_default_timezone_set('Asia/Kuala_Lumpur');
 
 require_once __DIR__ . '/permission_guard.php';
 requirePermissionApi('resource', 'stock_inventory');
+require_once __DIR__ . '/stock_inventory_guard.php';
 
 require_once __DIR__ . '/xss_protect.php';
 ob_start();
@@ -256,10 +257,10 @@ function saveToJ1EditTable($pdo, $data, $mainRecordId = null)
             }
         }
 
-        // 保存到 j1stockedit_data 表 - 出库记录转为入库记录
+        // 保存到 j1stockedit_data 表 - 出库记录转为入库记录（挂 main_record_id 便于精确级联删除）
         $sql = "INSERT INTO j1stockedit_data 
-                (date, time, code_number, product_name, in_quantity, out_quantity, specification, price, receiver, remark, target_system, type) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                (date, time, code_number, product_name, in_quantity, out_quantity, specification, price, receiver, remark, target_system, type, main_record_id) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $pdo->prepare($sql);
 
@@ -279,7 +280,8 @@ function saveToJ1EditTable($pdo, $data, $mainRecordId = null)
             $data['receiver'],
             $data['remark'] ?? null,
             'j1', // 设置为j1
-            $category // 使用从stock_data获取的category
+            $category, // 使用从stock_data获取的category
+            $mainRecordId
         ]);
 
         return $pdo->lastInsertId();
@@ -310,10 +312,10 @@ function saveToJ2EditTable($pdo, $data, $mainRecordId = null)
             }
         }
 
-        // 保存到 j2stockedit_data 表 - 出库记录转为入库记录
+        // 保存到 j2stockedit_data 表 - 出库记录转为入库记录（挂 main_record_id）
         $sql = "INSERT INTO j2stockedit_data 
-                (date, time, code_number, product_name, in_quantity, out_quantity, specification, price, receiver, remark, target_system, type) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                (date, time, code_number, product_name, in_quantity, out_quantity, specification, price, receiver, remark, target_system, type, main_record_id) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $pdo->prepare($sql);
 
@@ -333,7 +335,8 @@ function saveToJ2EditTable($pdo, $data, $mainRecordId = null)
             $data['receiver'],
             $data['remark'] ?? null,
             'j2', // 设置为j2
-            $category // 使用从stock_data获取的category
+            $category, // 使用从stock_data获取的category
+            $mainRecordId
         ]);
 
         return $pdo->lastInsertId();
@@ -421,10 +424,10 @@ function saveToJ3EditTable($pdo, $data, $mainRecordId = null)
             }
         }
 
-        // 保存到 j3stockedit_data 表 - 出库记录转为入库记录
+        // 保存到 j3stockedit_data 表 - 出库记录转为入库记录（挂 main_record_id）
         $sql = "INSERT INTO j3stockedit_data 
-                (date, time, code_number, product_name, in_quantity, out_quantity, specification, price, receiver, remark, target_system, type) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                (date, time, code_number, product_name, in_quantity, out_quantity, specification, price, receiver, remark, target_system, type, main_record_id) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $pdo->prepare($sql);
 
@@ -444,7 +447,8 @@ function saveToJ3EditTable($pdo, $data, $mainRecordId = null)
             $data['receiver'],
             $data['remark'] ?? null,
             'j3', // 设置为j3
-            $category // 使用从stock_data获取的category
+            $category, // 使用从stock_data获取的category
+            $mainRecordId
         ]);
 
         return $pdo->lastInsertId();
@@ -2719,6 +2723,13 @@ function handleDelete()
                 continue;
             }
 
+            // 删除入库前校验：避免总库存倒扣
+            $guard = assertDeleteInWouldNotGoNegative($pdo, 'stockinout_data', $recordToDelete);
+            if (!$guard['ok']) {
+                $pdo->rollBack();
+                sendResponse(false, $guard['message']);
+            }
+
             // 执行软删除主表记录
             $stmt = $pdo->prepare("UPDATE stockinout_data SET deleted_at = NOW(), deleted_by = ? WHERE id = ?");
             $result = $stmt->execute([$username, $currentId]);
@@ -2733,10 +2744,14 @@ function handleDelete()
                         $pdo->prepare("UPDATE j1stockinout_data SET deleted_at = NOW(), deleted_by = ? WHERE main_record_id = ? AND deleted_at IS NULL")
                             ->execute([$username, $currentId]);
 
-                        // 软删除J1stockedit_data表记录
-                        $pdo->prepare("UPDATE j1stockedit_data SET deleted_at = NOW(), deleted_by = ? 
-                                       WHERE date = ? AND time = ? AND product_name = ? AND (receiver = ? OR receiver = 'Mobile' OR receiver = 'mobile') AND target_system = 'j1' AND deleted_at IS NULL")
-                            ->execute([$username, $recordToDelete['date'], $recordToDelete['time'], $recordToDelete['product_name'], $recordToDelete['receiver']]);
+                        // 优先按 main_record_id 精确软删 edit；旧数据无关联时回退到精确字段匹配（不含 Mobile 模糊）
+                        $editDel = $pdo->prepare("UPDATE j1stockedit_data SET deleted_at = NOW(), deleted_by = ? WHERE main_record_id = ? AND deleted_at IS NULL");
+                        $editDel->execute([$username, $currentId]);
+                        if ($editDel->rowCount() === 0) {
+                            $pdo->prepare("UPDATE j1stockedit_data SET deleted_at = NOW(), deleted_by = ? 
+                                           WHERE date = ? AND time = ? AND product_name = ? AND receiver = ? AND in_quantity = ? AND target_system = 'j1' AND deleted_at IS NULL")
+                                ->execute([$username, $recordToDelete['date'], $recordToDelete['time'], $recordToDelete['product_name'], $recordToDelete['receiver'], floatval($recordToDelete['out_quantity'] ?? 0)]);
+                        }
 
                         // 软删除J1stockeditmobile_data表记录
                         $pdo->prepare("UPDATE j1stockeditmobile_data SET deleted_at = NOW(), deleted_by = ? 
@@ -2745,32 +2760,34 @@ function handleDelete()
 
                         updateStocklistTotal($pdo, 'j1', $recordToDelete['product_name'], $recordToDelete['code_number'], floatval($recordToDelete['in_quantity'] ?? 0), floatval($recordToDelete['out_quantity'] ?? 0), $recordToDelete['specification'] ?? null);
                     } elseif ($targetSystem === 'j2') {
-                        // 软删除J2stockinout_data表记录
                         $pdo->prepare("UPDATE j2stockinout_data SET deleted_at = NOW(), deleted_by = ? WHERE main_record_id = ? AND deleted_at IS NULL")
                             ->execute([$username, $currentId]);
 
-                        // 软删除J2stockedit_data表记录
-                        $pdo->prepare("UPDATE j2stockedit_data SET deleted_at = NOW(), deleted_by = ? 
-                                       WHERE date = ? AND time = ? AND product_name = ? AND (receiver = ? OR receiver = 'Mobile' OR receiver = 'mobile') AND target_system = 'j2' AND deleted_at IS NULL")
-                            ->execute([$username, $recordToDelete['date'], $recordToDelete['time'], $recordToDelete['product_name'], $recordToDelete['receiver']]);
+                        $editDel = $pdo->prepare("UPDATE j2stockedit_data SET deleted_at = NOW(), deleted_by = ? WHERE main_record_id = ? AND deleted_at IS NULL");
+                        $editDel->execute([$username, $currentId]);
+                        if ($editDel->rowCount() === 0) {
+                            $pdo->prepare("UPDATE j2stockedit_data SET deleted_at = NOW(), deleted_by = ? 
+                                           WHERE date = ? AND time = ? AND product_name = ? AND receiver = ? AND in_quantity = ? AND target_system = 'j2' AND deleted_at IS NULL")
+                                ->execute([$username, $recordToDelete['date'], $recordToDelete['time'], $recordToDelete['product_name'], $recordToDelete['receiver'], floatval($recordToDelete['out_quantity'] ?? 0)]);
+                        }
 
-                        // 软删除J2stockeditmobile_data表记录
                         $pdo->prepare("UPDATE j2stockeditmobile_data SET deleted_at = NOW(), deleted_by = ? 
                                        WHERE date = ? AND time = ? AND product_name = ? AND receiver = ? AND deleted_at IS NULL")
                             ->execute([$username, $recordToDelete['date'], $recordToDelete['time'], $recordToDelete['product_name'], $recordToDelete['receiver']]);
 
                         updateStocklistTotal($pdo, 'j2', $recordToDelete['product_name'], $recordToDelete['code_number'], floatval($recordToDelete['in_quantity'] ?? 0), floatval($recordToDelete['out_quantity'] ?? 0), $recordToDelete['specification'] ?? null);
                     } elseif ($targetSystem === 'j3') {
-                        // 软删除J3stockinout_data表记录
                         $pdo->prepare("UPDATE j3stockinout_data SET deleted_at = NOW(), deleted_by = ? WHERE main_record_id = ? AND deleted_at IS NULL")
                             ->execute([$username, $currentId]);
 
-                        // 软删除J3stockedit_data表记录
-                        $pdo->prepare("UPDATE j3stockedit_data SET deleted_at = NOW(), deleted_by = ? 
-                                       WHERE date = ? AND time = ? AND product_name = ? AND (receiver = ? OR receiver = 'Mobile' OR receiver = 'mobile') AND target_system = 'j3' AND deleted_at IS NULL")
-                            ->execute([$username, $recordToDelete['date'], $recordToDelete['time'], $recordToDelete['product_name'], $recordToDelete['receiver']]);
+                        $editDel = $pdo->prepare("UPDATE j3stockedit_data SET deleted_at = NOW(), deleted_by = ? WHERE main_record_id = ? AND deleted_at IS NULL");
+                        $editDel->execute([$username, $currentId]);
+                        if ($editDel->rowCount() === 0) {
+                            $pdo->prepare("UPDATE j3stockedit_data SET deleted_at = NOW(), deleted_by = ? 
+                                           WHERE date = ? AND time = ? AND product_name = ? AND receiver = ? AND in_quantity = ? AND target_system = 'j3' AND deleted_at IS NULL")
+                                ->execute([$username, $recordToDelete['date'], $recordToDelete['time'], $recordToDelete['product_name'], $recordToDelete['receiver'], floatval($recordToDelete['out_quantity'] ?? 0)]);
+                        }
 
-                        // 软删除J3stockeditmobile_data表记录
                         $pdo->prepare("UPDATE j3stockeditmobile_data SET deleted_at = NOW(), deleted_by = ? 
                                        WHERE date = ? AND time = ? AND product_name = ? AND receiver = ? AND deleted_at IS NULL")
                             ->execute([$username, $recordToDelete['date'], $recordToDelete['time'], $recordToDelete['product_name'], $recordToDelete['receiver']]);
