@@ -1,7 +1,29 @@
 <?php
 /**
  * 库存删除防护：删除入库后若该品名+单价会倒扣，则拒绝。
+ *
+ * 可用库存口径与总库存一致：显示单价 ROUND(price, 2)，而不是数据库 raw 精度。
  */
+
+function stock_sql_product_name_eq(): string
+{
+    return "REPLACE(product_name, '&amp;', '&') = REPLACE(?, '&amp;', '&')";
+}
+
+function stock_sql_price_display_eq(): string
+{
+    return 'ROUND(price, 2) = ROUND(?, 2)';
+}
+
+function stock_sql_price_display_expr(): string
+{
+    return 'ROUND(price, 2)';
+}
+
+function stock_display_price_key($price): string
+{
+    return number_format(round(floatval($price), 2), 2, '.', '');
+}
 
 /**
  * @param PDO $pdo
@@ -27,10 +49,10 @@ function assertDeleteInWouldNotGoNegative(PDO $pdo, string $editTable, array $re
                  COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) AS stock
             FROM {$editTable}
             WHERE deleted_at IS NULL
-              AND (product_name = ? OR product_name = REPLACE(?, '&amp;', '&'))
-              AND CAST(price AS DECIMAL(15,6)) = CAST(? AS DECIMAL(15,6))";
+              AND " . stock_sql_product_name_eq() . "
+              AND " . stock_sql_price_display_eq();
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([$product, $product, $price]);
+    $stmt->execute([$product, $price]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     $current = floatval($row['stock'] ?? 0);
     $projected = $current - $inQty;

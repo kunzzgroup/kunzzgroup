@@ -809,10 +809,10 @@ function handleGet()
                         (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) - 
                         COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) as available_stock
                     FROM stockinout_data 
-                    WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND deleted_at IS NULL";
+                    WHERE " . stock_sql_product_name_eq() . " AND deleted_at IS NULL";
 
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([$productName, $productName]);
+            $stmt->execute([$productName]);
             $stockData = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($stockData) {
@@ -852,10 +852,12 @@ function handleGet()
                         (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) - 
                         COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) as available_stock
                     FROM stockinout_data 
-                    WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND price = ? AND deleted_at IS NULL";
+                    WHERE " . stock_sql_product_name_eq() . "
+                      AND " . stock_sql_price_display_eq() . "
+                      AND deleted_at IS NULL";
 
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([$productName, $productName, $price]);
+            $stmt->execute([$productName, $price]);
             $stockData = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($stockData) {
@@ -894,20 +896,20 @@ function handleGet()
             try {
                 // 获取该产品所有不同价格的库存情况（包括价格为0的记录）
                 $sql = "SELECT 
-                            price,
+                            " . stock_sql_price_display_expr() . " as price,
                             COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) as total_in,
                             COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0) as total_out,
                             (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) - 
                             COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) as available_stock
                         FROM stockinout_data 
-                        WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) AND deleted_at IS NULL";
-                $params = [$productName, $productName];
+                        WHERE " . stock_sql_product_name_eq() . " AND deleted_at IS NULL";
+                $params = [$productName];
                 if (!empty($codeNumber)) {
                     $sql .= " AND code_number = ?";
                     $params[] = $codeNumber;
                 }
                 $sql .= "
-                        GROUP BY price
+                        GROUP BY " . stock_sql_price_display_expr() . "
                         HAVING available_stock > 0
                         ORDER BY price DESC";
 
@@ -919,8 +921,7 @@ function handleGet()
                 $result = [];
                 foreach ($priceStockData as $row) {
                     $availableStock = floatval($row['available_stock']);
-                    // 保留原始价格精度，不进行格式化
-                    $price = $row['price'];
+                    $price = stock_display_price_key($row['price']);
 
                     $result[] = [
                         'price' => $price,
@@ -1195,9 +1196,9 @@ function handleGet()
             }
 
             try {
-                $baseWhere = "(product_name = ? OR product_name = REPLACE(?, '&amp;', '&'))
+                $baseWhere = stock_sql_product_name_eq() . "
                               AND deleted_at IS NULL";
-                $baseParams = [$productName, $productName];
+                $baseParams = [$productName];
 
                 if (!empty($codeNumber)) {
                     $baseWhere .= " AND code_number = ?";
@@ -1206,12 +1207,12 @@ function handleGet()
 
                 // Phase 1: 按价格分组的可用库存（与价格下拉框一致）
                 $sql1 = "SELECT
-                            price,
+                            " . stock_sql_price_display_expr() . " AS price,
                             (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) -
                              COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) AS available_stock
                          FROM stockinout_data
                          WHERE $baseWhere
-                         GROUP BY price
+                         GROUP BY " . stock_sql_price_display_expr() . "
                          HAVING available_stock > 0
                          ORDER BY price DESC";
 
@@ -1220,7 +1221,7 @@ function handleGet()
                 $priceBatches = [];
                 foreach ($stmt1->fetchAll(PDO::FETCH_ASSOC) as $row) {
                     $priceBatches[] = [
-                        'price'           => $row['price'],
+                        'price'           => stock_display_price_key($row['price']),
                         'available_stock' => round(floatval($row['available_stock']), 3)
                     ];
                 }
@@ -1462,11 +1463,11 @@ function handlePost()
                             (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) - 
                             COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) as available_stock
                         FROM stockinout_data 
-                        WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) 
-                        AND CAST(price AS DECIMAL(15,6)) = CAST(? AS DECIMAL(15,6)) AND deleted_at IS NULL
+                        WHERE " . stock_sql_product_name_eq() . "
+                        AND " . stock_sql_price_display_eq() . " AND deleted_at IS NULL
                         AND (target_system IS NULL OR target_system != 'SOT')";
             $stockStmt = $pdo->prepare($stockSql);
-            $stockStmt->execute([$data['product_name'], $data['product_name'], $data['price']]);
+            $stockStmt->execute([$data['product_name'], $data['price']]);
             $stockRow = $stockStmt->fetch(PDO::FETCH_ASSOC);
             $availableStock = floatval($stockRow['available_stock'] ?? 0);
 
@@ -1673,7 +1674,7 @@ function handleBatchSave()
         foreach ($rows as $row) {
             $outQty = floatval($row['out_quantity'] ?? 0);
             if ($outQty > 0) {
-                $key = ($row['product_name'] ?? '') . '||' . ($row['price'] ?? 0);
+                $key = ($row['product_name'] ?? '') . '||' . stock_display_price_key($row['price'] ?? 0);
                 if (!isset($outSummary[$key])) {
                     $outSummary[$key] = [
                         'product_name' => $row['product_name'],
@@ -1691,11 +1692,11 @@ function handleBatchSave()
                             (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) - 
                             COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) as available_stock
                         FROM stockinout_data 
-                        WHERE (product_name = ? OR product_name = REPLACE(?, '&amp;', '&')) 
-                        AND CAST(price AS DECIMAL(15,6)) = CAST(? AS DECIMAL(15,6)) AND deleted_at IS NULL
+                        WHERE " . stock_sql_product_name_eq() . "
+                        AND " . stock_sql_price_display_eq() . " AND deleted_at IS NULL
                         AND (target_system IS NULL OR target_system != 'SOT')";
             $stockStmt = $pdo->prepare($stockSql);
-            $stockStmt->execute([$item['product_name'], $item['product_name'], $item['price']]);
+            $stockStmt->execute([$item['product_name'], $item['price']]);
             $stockRow = $stockStmt->fetch(PDO::FETCH_ASSOC);
             $availableStock = floatval($stockRow['available_stock'] ?? 0);
 

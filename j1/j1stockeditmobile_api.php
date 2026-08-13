@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../backend/stock_inventory_guard.php';
 ob_start();
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
@@ -400,7 +401,7 @@ function handleGet() {
             try {
                 // 优先使用 code_number 过滤（更可靠，避免 product_name 格式差异导致匹配失败）
                 $selectCols = "SELECT 
-                            COALESCE(price, 0) as price,
+                            " . stock_sql_price_display_expr() . " as price,
                             specification,
                             type,
                             SUM(in_quantity) as total_in,
@@ -425,7 +426,7 @@ function handleGet() {
                     $sql .= " AND (specification IS NULL OR specification = '')";
                 }
 
-                $sql .= " GROUP BY COALESCE(price,0), specification ORDER BY price DESC";
+                $sql .= " GROUP BY " . stock_sql_price_display_expr() . ", specification ORDER BY price DESC";
                 
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
@@ -433,7 +434,7 @@ function handleGet() {
                 
                 $result = [];
                 foreach ($priceStockData as $row) {
-                    $price = floatval($row['price'] ?? 0);
+                    $price = floatval(stock_display_price_key($row['price'] ?? 0));
                     $availableStock = floatval($row['available_stock'] ?? 0);
                     
                     // 只返回有库存的价格（包括负数，因为负数表示已经超扣了）
@@ -695,7 +696,7 @@ function handleDelete() {
  */
 function resolveInboundSpecForPrice($pdo, $tableName, $productName, $codeNumber, $price) {
     $codeFilter = '';
-    $params = [$productName, $productName, $price];
+    $params = [$productName, $price];
     if ($codeNumber !== null && $codeNumber !== '') {
         $codeFilter = ' AND code_number = ?';
         $params[] = $codeNumber;
@@ -704,8 +705,8 @@ function resolveInboundSpecForPrice($pdo, $tableName, $productName, $codeNumber,
     $sql = "SELECT specification,
                    (SUM(in_quantity) - SUM(out_quantity)) AS available
             FROM {$tableName}
-            WHERE (product_name = ? OR TRIM(REPLACE(product_name, '&amp;', '&')) = TRIM(REPLACE(?, '&amp;', '&')))
-            AND CAST(COALESCE(price, 0) AS DECIMAL(15,6)) = CAST(? AS DECIMAL(15,6))
+            WHERE " . stock_sql_product_name_eq() . "
+            AND " . stock_sql_price_display_eq() . "
             AND deleted_at IS NULL
             {$codeFilter}
             GROUP BY specification
@@ -735,7 +736,7 @@ function validateBatchOutboundPriceTiers($pdo, $tableName, $rows) {
         }
 
         $price = floatval($row['price']);
-        $key = ($row['product_name'] ?? '') . '||' . ($row['code_number'] ?? '') . '||' . $price;
+        $key = ($row['product_name'] ?? '') . '||' . ($row['code_number'] ?? '') . '||' . stock_display_price_key($price);
         if (!isset($outSummary[$key])) {
             $outSummary[$key] = [
                 'product_name' => $row['product_name'],
@@ -749,7 +750,7 @@ function validateBatchOutboundPriceTiers($pdo, $tableName, $rows) {
 
     foreach ($outSummary as $item) {
         $codeFilter = '';
-        $params = [$item['product_name'], $item['product_name'], $item['price']];
+        $params = [$item['product_name'], $item['price']];
         if ($item['code_number'] !== null && $item['code_number'] !== '') {
             $codeFilter = ' AND code_number = ?';
             $params[] = $item['code_number'];
@@ -759,8 +760,8 @@ function validateBatchOutboundPriceTiers($pdo, $tableName, $rows) {
                         (COALESCE(SUM(CASE WHEN in_quantity > 0 THEN in_quantity ELSE 0 END), 0) -
                          COALESCE(SUM(CASE WHEN out_quantity > 0 THEN out_quantity ELSE 0 END), 0)) AS available_stock
                      FROM {$tableName}
-                     WHERE (product_name = ? OR TRIM(REPLACE(product_name, '&amp;', '&')) = TRIM(REPLACE(?, '&amp;', '&')))
-                     AND CAST(COALESCE(price, 0) AS DECIMAL(15,6)) = CAST(? AS DECIMAL(15,6))
+                     WHERE " . stock_sql_product_name_eq() . "
+                     AND " . stock_sql_price_display_eq() . "
                      AND deleted_at IS NULL
                      {$codeFilter}";
 
@@ -893,13 +894,14 @@ function syncToJ1StockEditData($pdo, $data, $operation = 'insert') {
             $tierParams[] = $specIn;
         }
 
-        $tierSql = "SELECT specification, COALESCE(price, 0) as price, type,
+        $tierSql = "SELECT specification, " . stock_sql_price_display_expr() . " as price, type,
                            (SUM(in_quantity) - SUM(out_quantity)) AS available
                     FROM j1stockedit_data
-                    WHERE product_name = ?
+                    WHERE " . stock_sql_product_name_eq() . "
+                    AND deleted_at IS NULL
                     {$codeFilter}
                     {$specFilter}
-                    GROUP BY COALESCE(price,0), specification
+                    GROUP BY " . stock_sql_price_display_expr() . ", specification
                     HAVING available > 0
                     ORDER BY price DESC
                     FOR UPDATE";

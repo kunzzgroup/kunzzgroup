@@ -1,4 +1,14 @@
 ﻿
+
+function isSameDisplayPrice(a, b) {
+    const na = parseFloat(a);
+    const nb = parseFloat(b);
+    if (!Number.isFinite(na) || !Number.isFinite(nb)) {
+        return String(a ?? '') === String(b ?? '');
+    }
+    return na.toFixed(2) === nb.toFixed(2);
+}
+
 // API 配置
 let API_BASE_URL = 'stockeditapi.php';
 let currentStockType = 'j3';
@@ -4077,7 +4087,7 @@ async function loadProductPrices(productName, selectElementId, currentPrice = ''
             result.data.forEach(item => {
                 const price = item.price;
                 const availableStock = item.available_stock;
-                const selected = price == currentPrice ? 'selected' : '';
+                const selected = isSameDisplayPrice(price, currentPrice) ? 'selected' : '';
                 // 显示所有价格选项，不管库存是否足够
                 const stockInfo = `(库存: ${availableStock})`;
                 options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
@@ -4146,7 +4156,7 @@ async function loadNewRowProductPricesWithStock(productName, selectElementId, cu
             result.data.forEach(item => {
                 const price = item.price;
                 const availableStock = item.available_stock;
-                const selected = price == currentPrice ? 'selected' : '';
+                const selected = isSameDisplayPrice(price, currentPrice) ? 'selected' : '';
 
                 // 只显示库存足够的价格选项
                 if (availableStock >= requiredQty) {
@@ -4216,10 +4226,10 @@ async function loadProductPricesWithStock(productName, selectElementId, currentP
             result.data.forEach(item => {
                 const price = item.price;
                 const availableStock = item.available_stock;
-                const selected = price == currentPrice ? 'selected' : '';
+                const selected = isSameDisplayPrice(price, currentPrice) ? 'selected' : '';
 
                 // 只显示库存足够的价格选项，但当前价格即使库存不足也要显示（已选中的选项）
-                if (availableStock >= requiredQty || price == currentPrice) {
+                if (availableStock >= requiredQty || isSameDisplayPrice(price, currentPrice)) {
                     const stockInfo = availableStock >= requiredQty ? `(库存: ${availableStock})` : `(库存不足: ${availableStock})`;
                     options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
                 }
@@ -4508,7 +4518,7 @@ async function loadNewRowProductPrices(productName, selectElementId, currentPric
             result.data.forEach(item => {
                 const price = item.price;
                 const availableStock = item.available_stock;
-                const selected = price == currentPrice ? 'selected' : '';
+                const selected = isSameDisplayPrice(price, currentPrice) ? 'selected' : '';
                 // 显示所有价格选项，不管库存是否足够
                 const stockInfo = `(库存: ${availableStock})`;
                 options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;

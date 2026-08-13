@@ -8,6 +8,15 @@ function decodeHtml(html) {
     return txt.value;
 }
 
+function isSameDisplayPrice(a, b) {
+    const na = parseFloat(a);
+    const nb = parseFloat(b);
+    if (!Number.isFinite(na) || !Number.isFinite(nb)) {
+        return String(a ?? '') === String(b ?? '');
+    }
+    return na.toFixed(2) === nb.toFixed(2);
+}
+
 // API 配置
 const STOCK_SYSTEM_OPTIONS = [
     { value: 'central', label: '中央' },
@@ -6354,7 +6363,7 @@ async function loadProductPrices(productName, selectElementId, currentPrice = ''
             result.data.forEach(item => {
                 const price = item.price;
                 const availableStock = item.available_stock;
-                const selected = price == currentPrice ? 'selected' : '';
+                const selected = isSameDisplayPrice(price, currentPrice) ? 'selected' : '';
                 const stockInfo = `(库存: ${availableStock})`;
                 options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(3)} ${stockInfo}</option>`;
             });
@@ -6430,7 +6439,7 @@ async function loadNewRowProductPricesWithStock(productName, selectElementId, cu
             result.data.forEach(item => {
                 const price = item.price;
                 const availableStock = item.available_stock;
-                const selected = price == currentPrice ? 'selected' : '';
+                const selected = isSameDisplayPrice(price, currentPrice) ? 'selected' : '';
 
                 if (availableStock >= requiredQty) {
                     const stockInfo = requiredQty > 0 && availableStock < requiredQty
@@ -6609,18 +6618,18 @@ async function loadProductPricesWithStock(productName, selectElementId, currentP
                 let availableStock = item.available_stock;
 
                 // 给当前正在编辑的价格加上原来的出库数量，相当于暂不扣减（仅当价格匹配时）
-                if (price == currentPrice) {
+                if (isSameDisplayPrice(price, currentPrice)) {
                     availableStock = parseFloat(availableStock) + parseFloat(oldQtyForCurrentPrice);
                 }
 
                 // 仅当 currentPrice 非空且匹配时才标记为 selected
-                const selected = (currentPrice !== '' && currentPrice !== null && currentPrice !== undefined && price == currentPrice) ? 'selected' : '';
+                const selected = (currentPrice !== '' && currentPrice !== null && currentPrice !== undefined && isSameDisplayPrice(price, currentPrice)) ? 'selected' : '';
 
                 // 只显示库存足够的价格选项，但当前价格即使库存不足也要显示（已选中的选项）
-                if (availableStock >= requiredQty || (currentPrice !== '' && price == currentPrice)) {
+                if (availableStock >= requiredQty || (currentPrice !== '' && isSameDisplayPrice(price, currentPrice))) {
                     const stockInfo = availableStock >= requiredQty ? `(库存: ${availableStock})` : `(库存不足: ${availableStock})`;
                     options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
-                    if (currentPrice !== '' && price == currentPrice) currentPriceIncluded = true;
+                    if (currentPrice !== '' && isSameDisplayPrice(price, currentPrice)) currentPriceIncluded = true;
                 }
             });
 
@@ -6978,7 +6987,7 @@ async function loadNewRowProductPrices(productName, selectElementId, currentPric
             result.data.forEach(item => {
                 const price = item.price;
                 const availableStock = item.available_stock;
-                const selected = price == currentPrice ? 'selected' : '';
+                const selected = isSameDisplayPrice(price, currentPrice) ? 'selected' : '';
                 // 显示所有价格选项，不管库存是否足够
                 const stockInfo = `(库存: ${availableStock})`;
                 options += `<option value="${price}" ${selected}>${parseFloat(price).toFixed(5)} ${stockInfo}</option>`;
@@ -8687,7 +8696,7 @@ async function batchSaveNewRows() {
         for (const row of rowsData) {
             const outQty = parseFloat(row.out_quantity) || 0;
             if (outQty > 0) {
-                const key = (row.product_name || '') + '||' + (row.price || 0);
+                const key = (row.product_name || '') + '||' + (Number.parseFloat(row.price || 0).toFixed(2));
                 if (!outSummary[key]) {
                     outSummary[key] = {
                         product_name: row.product_name,
