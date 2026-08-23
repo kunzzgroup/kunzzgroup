@@ -755,22 +755,14 @@ function searchData(system) {
     applyFilters(system);
 }
 
-// 渲染“数据库原始单价”悬浮提示（仅当原始价格与显示价格有差异时）
+// 渲染价格：无差异时直接显示 formatted price；有差异时价格下方悬浮显示原始单价
 function renderPriceRawTip(item) {
-    if (!item || !item.has_price_diff) return '';
+    if (!item || !item.has_price_diff) return item.formatted_price;
     const raw = parseFloat(item.price_raw);
-    if (isNaN(raw)) return '';
+    if (isNaN(raw)) return item.formatted_price;
     // 最多保留 6 位小数，去掉多余的尾零
     const rawStr = String(parseFloat(raw.toFixed(6)));
-    return `
-        <span class="raw-price-tip" tabindex="0" aria-label="数据库原始单价">
-            <span class="raw-price-icon">i</span>
-            <span class="raw-price-card">
-                <span class="raw-price-card-title">数据库原始单价</span>
-                <span class="raw-price-card-value">RM ${rawStr}</span>
-                <span class="raw-price-card-note">显示价 ${item.formatted_price} 为四舍五入，金额按显示价计算</span>
-            </span>
-        </span>`;
+    return `<span class="raw-price-hover">${item.formatted_price}<span class="raw-price-pop">RM ${rawStr}</span></span>`;
 }
 
 // 搜索价格分析数据
@@ -1021,8 +1013,7 @@ function renderStockTable(system) {
                         <td class="price-cell">
                             <div class="currency-display">
                                 <span class="currency-symbol">RM</span>
-                                <span class="currency-amount">${item.formatted_price}</span>
-                                ${renderPriceRawTip(item)}
+                                <span class="currency-amount">${renderPriceRawTip(item)}</span>
                             </div>
                         </td>
                         <td class="price-cell">

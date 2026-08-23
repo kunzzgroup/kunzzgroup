@@ -562,90 +562,52 @@ header('Expires: 0');
             flex-direction: column;
             justify-content: center; /* 垂直居中内容 */
         }
-        /* ─── 原始单价悬浮提示 ─── */
-        .raw-price-tip {
+                /* 原始单价悬浮提示：价格下方悬浮显示数据库原始单价 */
+        .raw-price-hover {
             position: relative;
-            display: inline-flex;
-            align-items: center;
-            margin-left: 6px;
-            cursor: help;
-            outline: none;
-            z-index: 10;
+            display: inline-block;
+            cursor: default;
+            text-decoration: underline dotted rgba(249, 158, 0, 0.55);
+            text-underline-offset: 3px;
         }
-        .raw-price-icon {
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #f99e00, #d97e00);
-            color: #fff;
-            font-style: normal;
-            font-weight: 800;
-            font-size: 10px;
-            line-height: 1;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 1px 3px rgba(217, 126, 0, 0.45);
-            transition: transform 0.15s ease;
-        }
-        .raw-price-tip:hover .raw-price-icon {
-            transform: scale(1.15);
-        }
-        .raw-price-card {
+
+        .raw-price-hover .raw-price-pop {
             position: absolute;
-            bottom: calc(100% + 10px);
+            bottom: calc(100% + 8px);
             left: 50%;
             transform: translate(-50%, 6px);
-            background: linear-gradient(160deg, #2e2313, #1d160b);
-            color: #f5ecd8;
-            padding: 10px 14px;
-            border-radius: 12px;
-            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(249, 158, 0, 0.35);
+            background: #241b0d;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 8px;
             font-size: 12px;
-            line-height: 1.5;
+            font-weight: 600;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(249, 158, 0, 0.3);
             white-space: nowrap;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+            transition: opacity 0.15s ease, transform 0.15s ease;
             z-index: 100;
             pointer-events: none;
-            text-align: left;
+            font-style: normal;
         }
-        .raw-price-card::after {
+
+        .raw-price-hover .raw-price-pop::after {
             content: '';
             position: absolute;
             top: 100%;
             left: 50%;
             transform: translateX(-50%);
-            border: 7px solid transparent;
-            border-top-color: #2e2313;
+            border: 6px solid transparent;
+            border-top-color: #241b0d;
         }
-        .raw-price-tip:hover .raw-price-card,
-        .raw-price-tip:focus .raw-price-card {
+
+        .raw-price-hover:hover .raw-price-pop {
             opacity: 1;
             visibility: visible;
             transform: translate(-50%, 0);
         }
-        .raw-price-card-title {
-            display: block;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: #f99e00;
-            margin-bottom: 2px;
-        }
-        .raw-price-card-value {
-            display: block;
-            font-size: 15px;
-            font-weight: 700;
-            color: #fff;
-        }
-        .raw-price-card-note {
-            display: block;
-            font-size: 10px;
-            color: #c9b98f;
-            margin-top: 2px;
-        }
+    </style>
     </style>
 </head>
 <body>
@@ -904,21 +866,13 @@ header('Expires: 0');
             document.getElementById('total-records').textContent = totalRecords;
         }
 
-        // 渲染“数据库原始单价”悬浮提示（仅当原始价格与显示价格有差异时）
+        // 渲染价格：无差异时直接显示 formatted price；有差异时价格下方悬浮显示原始单价
         function renderPriceRawTip(item) {
-            if (!item || !item.has_price_diff) return '';
+            if (!item || !item.has_price_diff) return item.formatted_price;
             const raw = parseFloat(item.price_raw);
-            if (isNaN(raw)) return '';
+            if (isNaN(raw)) return item.formatted_price;
             const rawStr = String(parseFloat(raw.toFixed(6)));
-            return `
-                <span class="raw-price-tip" tabindex="0" aria-label="数据库原始单价">
-                    <span class="raw-price-icon">i</span>
-                    <span class="raw-price-card">
-                        <span class="raw-price-card-title">数据库原始单价</span>
-                        <span class="raw-price-card-value">RM ${rawStr}</span>
-                        <span class="raw-price-card-note">显示价 ${item.formatted_price} 为四舍五入，金额按显示价计算</span>
-                    </span>
-                </span>`;
+            return `<span class="raw-price-hover">${item.formatted_price}<span class="raw-price-pop">RM ${rawStr}</span></span>`;
         }
 
         // 渲染库存表格
@@ -961,8 +915,7 @@ header('Expires: 0');
                         <td class="price-cell">
                             <div class="currency-display">
                                 <span class="currency-symbol">RM</span>
-                                <span class="currency-amount">${item.formatted_price}</span>
-                                ${renderPriceRawTip(item)}
+                                <span class="currency-amount">${renderPriceRawTip(item)}</span>
                             </div>
                         </td>
                         <td class="price-cell">
