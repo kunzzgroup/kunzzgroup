@@ -36,6 +36,8 @@ let cachedStockAllowedViews = new Set();
 
 let API_BASE_URL = 'stockeditapi.php';
 let currentStockType = 'central';
+// 批量保存时按产品名缓存备注码查询结果（仅 Central 使用），避免重复请求
+const remarkCodesCache = new Map();
 const urlParams = new URLSearchParams(window.location.search);
 const requestedStockType = urlParams.get('system');
 const validStockTypes = new Set(STOCK_SYSTEM_OPTIONS.map(opt => opt.value));
@@ -8665,8 +8667,14 @@ async function batchSaveNewRows() {
             }
 
             const isOutgoing = data.out_quantity > 0;
-            if (isOutgoing) {
-                const inStockCodes = await fetchProductRemarkCodes(data.product_name);
+            if (isOutgoing && currentStockType === 'central') {
+                // 仅 Central 系统有备注码校验接口；J1/J2/J3 后端无此接口，跳过可减少无用请求。
+                // 同一产品只查询一次，避免重复请求。
+                let inStockCodes = remarkCodesCache.get(data.product_name);
+                if (inStockCodes === undefined) {
+                    inStockCodes = await fetchProductRemarkCodes(data.product_name);
+                    remarkCodesCache.set(data.product_name, inStockCodes);
+                }
                 if (inStockCodes.length > 0) {
                     if (!data.remark_number) {
                         throw new Error(`货品 [${data.product_name}] 有备注编码在库，出货时请填写备注编号`);
@@ -8691,45 +8699,7 @@ async function batchSaveNewRows() {
     batchSaveBtn.disabled = true;
 
     try {
-        // ========== 前端库存预校验 ==========
-        const outSummary = {};
-        for (const row of rowsData) {
-            const outQty = parseFloat(row.out_quantity) || 0;
-            if (outQty > 0) {
-                const key = (row.product_name || '') + '||' + (Number.parseFloat(row.price || 0).toFixed(2));
-                if (!outSummary[key]) {
-                    outSummary[key] = {
-                        product_name: row.product_name,
-                        price: row.price || 0,
-                        total_out: 0
-                    };
-                }
-                outSummary[key].total_out += outQty;
-            }
-        }
-
-        // 检查每个产品+价格组合的库存
-        for (const key of Object.keys(outSummary)) {
-            const item = outSummary[key];
-            try {
-                const stockResp = await fetch(`${API_BASE_URL}?action=product_stock_by_price&product_name=${encodeURIComponent(item.product_name)}&price=${encodeURIComponent(item.price)}`);
-                const stockResult = await stockResp.json();
-                if (stockResult.success && stockResult.data) {
-                    const availableStock = parseFloat(stockResult.data.available_stock) || 0;
-                    if (item.total_out > availableStock) {
-                        throw new Error(`产品 [${item.product_name}] (价格 RM${item.price}) 库存不足！可用库存: ${availableStock}，请求出库: ${item.total_out}`);
-                    }
-                }
-            } catch (stockErr) {
-                if (stockErr.message.includes('库存不足')) {
-                    throw stockErr;
-                }
-                // 如果库存查询失败，交给后端校验
-                console.warn('前端库存预检查失败，将由后端校验:', stockErr);
-            }
-        }
-        // ========== 前端库存预校验结束 ==========
-
+        // 库存校验已由后端 handleBatchSave 在事务内完成，前端不再逐个查询，避免触发服务器连接数限制
         batchSaveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
 
         const payload = {

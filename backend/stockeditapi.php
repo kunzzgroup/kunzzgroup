@@ -23,12 +23,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-try {
-    $pdo = get_pdo_connection();
-} catch (PDOException $e) {
+// 连接失败时自动重试（应对共享主机偶发的连接数/进程数限制）
+$pdo = null;
+$lastDbError = null;
+for ($dbAttempt = 1; $dbAttempt <= 3; $dbAttempt++) {
+    try {
+        $pdo = get_pdo_connection();
+        break;
+    }
+    catch (PDOException $e) {
+        $lastDbError = $e;
+        if ($dbAttempt < 3) {
+            usleep(300000 * $dbAttempt);
+        }
+    }
+}
+if (!$pdo) {
     ob_end_clean();
     http_response_code(500);
-    echo json_encode(["success" => false, "message" => "数据库连接失败：" . $e->getMessage(), "error_details" => $e->getMessage()]);
+    echo json_encode(["success" => false, "message" => "数据库连接失败：" . $lastDbError->getMessage(), "error_details" => $lastDbError->getMessage()]);
     exit;
 }
 
@@ -1944,27 +1957,27 @@ function handlePut()
                     $j1DelStmt = $pdo->prepare($j1DeleteSql);
                     $j1DelStmt->execute([$data['id']]);
 
-                    $j1EditDeleteSql = "DELETE FROM j1stockedit_data WHERE product_name = ? AND receiver = ? AND target_system = 'j1'";
+                    $j1EditDeleteSql = "DELETE FROM j1stockedit_data WHERE main_record_id = ? AND target_system = 'j1'";
                     $j1EditDelStmt = $pdo->prepare($j1EditDeleteSql);
-                    $j1EditDelStmt->execute([$originalRecord['product_name'], $originalRecord['receiver']]);
+                    $j1EditDelStmt->execute([$data['id']]);
                     error_log("已清理原货品在J1表中的记录");
                 } elseif ($originalTargetSystem === 'j2') {
                     $j2DeleteSql = "DELETE FROM j2stockinout_data WHERE main_record_id = ?";
                     $j2DelStmt = $pdo->prepare($j2DeleteSql);
                     $j2DelStmt->execute([$data['id']]);
 
-                    $j2EditDeleteSql = "DELETE FROM j2stockedit_data WHERE product_name = ? AND receiver = ? AND target_system = 'j2'";
+                    $j2EditDeleteSql = "DELETE FROM j2stockedit_data WHERE main_record_id = ? AND target_system = 'j2'";
                     $j2EditDelStmt = $pdo->prepare($j2EditDeleteSql);
-                    $j2EditDelStmt->execute([$originalRecord['product_name'], $originalRecord['receiver']]);
+                    $j2EditDelStmt->execute([$data['id']]);
                     error_log("已清理原货品在J2表中的记录");
                 } elseif ($originalTargetSystem === 'j3') {
                     $j3DeleteSql = "DELETE FROM j3stockinout_data WHERE main_record_id = ?";
                     $j3DelStmt = $pdo->prepare($j3DeleteSql);
                     $j3DelStmt->execute([$data['id']]);
 
-                    $j3EditDeleteSql = "DELETE FROM j3stockedit_data WHERE product_name = ? AND receiver = ? AND target_system = 'j3'";
+                    $j3EditDeleteSql = "DELETE FROM j3stockedit_data WHERE main_record_id = ? AND target_system = 'j3'";
                     $j3EditDelStmt = $pdo->prepare($j3EditDeleteSql);
-                    $j3EditDelStmt->execute([$originalRecord['product_name'], $originalRecord['receiver']]);
+                    $j3EditDelStmt->execute([$data['id']]);
                     error_log("已清理原货品在J3表中的记录");
                 }
             }
@@ -2012,9 +2025,9 @@ function handlePut()
                     $j1DelStmt->execute([$data['id']]);
 
                     // 删除J1Edit表中的记录
-                    $j1EditDeleteSql = "DELETE FROM j1stockedit_data WHERE product_name = ? AND receiver = ? AND target_system = 'j1'";
+                    $j1EditDeleteSql = "DELETE FROM j1stockedit_data WHERE main_record_id = ? AND target_system = 'j1'";
                     $j1EditDelStmt = $pdo->prepare($j1EditDeleteSql);
-                    $j1EditDelStmt->execute([$originalRecord['product_name'], $originalRecord['receiver']]);
+                    $j1EditDelStmt->execute([$data['id']]);
 
                     error_log("已清理J1表和J1Edit表中的旧记录");
                 } elseif ($originalTargetSystem === 'j2') {
@@ -2024,9 +2037,9 @@ function handlePut()
                     $j2DelStmt->execute([$data['id']]);
 
                     // 删除J2Edit表中的记录
-                    $j2EditDeleteSql = "DELETE FROM j2stockedit_data WHERE product_name = ? AND receiver = ? AND target_system = 'j2'";
+                    $j2EditDeleteSql = "DELETE FROM j2stockedit_data WHERE main_record_id = ? AND target_system = 'j2'";
                     $j2EditDelStmt = $pdo->prepare($j2EditDeleteSql);
-                    $j2EditDelStmt->execute([$originalRecord['product_name'], $originalRecord['receiver']]);
+                    $j2EditDelStmt->execute([$data['id']]);
 
                     error_log("已清理J2表和J2Edit表中的旧记录");
                 } elseif ($originalTargetSystem === 'j3') {
@@ -2036,9 +2049,9 @@ function handlePut()
                     $j3DelStmt->execute([$data['id']]);
 
                     // 删除J3Edit表中的记录
-                    $j3EditDeleteSql = "DELETE FROM j3stockedit_data WHERE product_name = ? AND receiver = ? AND target_system = 'j3'";
+                    $j3EditDeleteSql = "DELETE FROM j3stockedit_data WHERE main_record_id = ? AND target_system = 'j3'";
                     $j3EditDelStmt = $pdo->prepare($j3EditDeleteSql);
-                    $j3EditDelStmt->execute([$originalRecord['product_name'], $originalRecord['receiver']]);
+                    $j3EditDelStmt->execute([$data['id']]);
 
                     error_log("已清理J3表和J3Edit表中的旧记录");
                 }
@@ -2526,25 +2539,25 @@ function handlePut()
                     $j1DelStmt = $pdo->prepare($j1DeleteSql);
                     $j1DelStmt->execute([$data['id']]);
 
-                    $j1EditDeleteSql = "DELETE FROM j1stockedit_data WHERE product_name = ? AND receiver = ? AND target_system = 'j1'";
+                    $j1EditDeleteSql = "DELETE FROM j1stockedit_data WHERE main_record_id = ? AND target_system = 'j1'";
                     $j1EditDelStmt = $pdo->prepare($j1EditDeleteSql);
-                    $j1EditDelStmt->execute([$originalRecord['product_name'], $originalRecord['receiver']]);
+                    $j1EditDelStmt->execute([$data['id']]);
                 } elseif ($originalTargetSystem === 'j2') {
                     $j2DeleteSql = "DELETE FROM j2stockinout_data WHERE main_record_id = ?";
                     $j2DelStmt = $pdo->prepare($j2DeleteSql);
                     $j2DelStmt->execute([$data['id']]);
 
-                    $j2EditDeleteSql = "DELETE FROM j2stockedit_data WHERE product_name = ? AND receiver = ? AND target_system = 'j2'";
+                    $j2EditDeleteSql = "DELETE FROM j2stockedit_data WHERE main_record_id = ? AND target_system = 'j2'";
                     $j2EditDelStmt = $pdo->prepare($j2EditDeleteSql);
-                    $j2EditDelStmt->execute([$originalRecord['product_name'], $originalRecord['receiver']]);
+                    $j2EditDelStmt->execute([$data['id']]);
                 } elseif ($originalTargetSystem === 'j3') {
                     $j3DeleteSql = "DELETE FROM j3stockinout_data WHERE main_record_id = ?";
                     $j3DelStmt = $pdo->prepare($j3DeleteSql);
                     $j3DelStmt->execute([$data['id']]);
 
-                    $j3EditDeleteSql = "DELETE FROM j3stockedit_data WHERE product_name = ? AND receiver = ? AND target_system = 'j3'";
+                    $j3EditDeleteSql = "DELETE FROM j3stockedit_data WHERE main_record_id = ? AND target_system = 'j3'";
                     $j3EditDelStmt = $pdo->prepare($j3EditDeleteSql);
-                    $j3EditDelStmt->execute([$originalRecord['product_name'], $originalRecord['receiver']]);
+                    $j3EditDelStmt->execute([$data['id']]);
                 }
 
                 error_log("Central记录更新：仅更新主表，已清理J1/J2/J3表记录");

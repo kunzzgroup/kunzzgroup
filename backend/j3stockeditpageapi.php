@@ -30,13 +30,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 ini_set('display_errors', 0);
 error_reporting(0);
 
-try {
-    $pdo = get_pdo_connection();
+// 连接失败时自动重试（应对共享主机偶发的连接数/进程数限制）
+$pdo = null;
+$lastDbError = null;
+for ($dbAttempt = 1; $dbAttempt <= 3; $dbAttempt++) {
+    try {
+        $pdo = get_pdo_connection();
+        break;
+    }
+    catch (PDOException $e) {
+        $lastDbError = $e;
+        if ($dbAttempt < 3) {
+            usleep(300000 * $dbAttempt);
+        }
+    }
 }
-catch (PDOException $e) {
+if (!$pdo) {
     ob_end_clean();
     http_response_code(500);
-    echo json_encode(["success" => false, "message" => "数据库连接失败：" . $e->getMessage(), "error_details" => $e->getMessage()]);
+    echo json_encode(["success" => false, "message" => "数据库连接失败：" . $lastDbError->getMessage(), "error_details" => $lastDbError->getMessage()]);
     exit;
 }
 
