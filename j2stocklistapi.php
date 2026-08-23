@@ -71,7 +71,7 @@ function getJ2StockSummary() {
             $key = $productName . '|' . $codeNumber . '|' . $specification . '|' . $formattedPrice;
 
             $currentStock = floatval($row['current_stock']);
-            $rowTotalPrice = $currentStock * $price;
+            $rowTotalPrice = $currentStock * $formattedPrice;
 
             if (!isset($merged[$key])) {
                 $merged[$key] = [
