@@ -562,90 +562,6 @@ header('Expires: 0');
             flex-direction: column;
             justify-content: center; /* 垂直居中内容 */
         }
-        /* ─── 原始单价悬浮提示 ─── */
-        .raw-price-tip {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            margin-left: 6px;
-            cursor: help;
-            outline: none;
-            z-index: 10;
-        }
-        .raw-price-icon {
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #f99e00, #d97e00);
-            color: #fff;
-            font-style: normal;
-            font-weight: 800;
-            font-size: 10px;
-            line-height: 1;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 1px 3px rgba(217, 126, 0, 0.45);
-            transition: transform 0.15s ease;
-        }
-        .raw-price-tip:hover .raw-price-icon {
-            transform: scale(1.15);
-        }
-        .raw-price-card {
-            position: absolute;
-            bottom: calc(100% + 10px);
-            left: 50%;
-            transform: translate(-50%, 6px);
-            background: linear-gradient(160deg, #2e2313, #1d160b);
-            color: #f5ecd8;
-            padding: 10px 14px;
-            border-radius: 12px;
-            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(249, 158, 0, 0.35);
-            font-size: 12px;
-            line-height: 1.5;
-            white-space: nowrap;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
-            z-index: 100;
-            pointer-events: none;
-            text-align: left;
-        }
-        .raw-price-card::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 7px solid transparent;
-            border-top-color: #2e2313;
-        }
-        .raw-price-tip:hover .raw-price-card,
-        .raw-price-tip:focus .raw-price-card {
-            opacity: 1;
-            visibility: visible;
-            transform: translate(-50%, 0);
-        }
-        .raw-price-card-title {
-            display: block;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: #f99e00;
-            margin-bottom: 2px;
-        }
-        .raw-price-card-value {
-            display: block;
-            font-size: 15px;
-            font-weight: 700;
-            color: #fff;
-        }
-        .raw-price-card-note {
-            display: block;
-            font-size: 10px;
-            color: #c9b98f;
-            margin-top: 2px;
-        }
     </style>
 </head>
 <body>
@@ -904,23 +820,6 @@ header('Expires: 0');
             document.getElementById('total-records').textContent = totalRecords;
         }
 
-        // 渲染“数据库原始单价”悬浮提示（仅当原始价格与显示价格有差异时）
-        function renderPriceRawTip(item) {
-            if (!item || !item.has_price_diff) return '';
-            const raw = parseFloat(item.price_raw);
-            if (isNaN(raw)) return '';
-            const rawStr = String(parseFloat(raw.toFixed(6)));
-            return `
-                <span class="raw-price-tip" tabindex="0" aria-label="数据库原始单价">
-                    <span class="raw-price-icon">i</span>
-                    <span class="raw-price-card">
-                        <span class="raw-price-card-title">数据库原始单价</span>
-                        <span class="raw-price-card-value">RM ${rawStr}</span>
-                        <span class="raw-price-card-note">显示价 ${item.formatted_price} 为四舍五入，金额按显示价计算</span>
-                    </span>
-                </span>`;
-        }
-
         // 渲染库存表格
         function renderStockTable() {
             const tbody = document.getElementById('stock-tbody');
@@ -962,7 +861,6 @@ header('Expires: 0');
                             <div class="currency-display">
                                 <span class="currency-symbol">RM</span>
                                 <span class="currency-amount">${item.formatted_price}</span>
-                                ${renderPriceRawTip(item)}
                             </div>
                         </td>
                         <td class="price-cell">
