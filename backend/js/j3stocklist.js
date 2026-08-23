@@ -268,6 +268,23 @@ function updateStats(system) {
     document.getElementById(`${system}-total-records`).textContent = totalRecords;
 }
 
+// 渲染“数据库原始单价”悬浮提示（仅当原始价格与显示价格有差异时）
+function renderPriceRawTip(item) {
+    if (!item || !item.has_price_diff) return '';
+    const raw = parseFloat(item.price_raw);
+    if (isNaN(raw)) return '';
+    const rawStr = String(parseFloat(raw.toFixed(6)));
+    return `
+        <span class="raw-price-tip" tabindex="0" aria-label="数据库原始单价">
+            <span class="raw-price-icon">i</span>
+            <span class="raw-price-card">
+                <span class="raw-price-card-title">数据库原始单价</span>
+                <span class="raw-price-card-value">RM ${rawStr}</span>
+                <span class="raw-price-card-note">显示价 ${item.formatted_price} 为四舍五入，金额按显示价计算</span>
+            </span>
+        </span>`;
+}
+
 // 替换现有的 renderStockTable 函数（仅 J3）
 function renderStockTable(system) {
     const tbody = document.getElementById(`${system}-stock-tbody`);
@@ -311,6 +328,7 @@ function renderStockTable(system) {
                             <div class="currency-display">
                                 <span class="currency-symbol">RM</span>
                                 <span class="currency-amount">${item.formatted_price}</span>
+                                ${renderPriceRawTip(item)}
                             </div>
                         </td>
                         <td class="price-cell">
