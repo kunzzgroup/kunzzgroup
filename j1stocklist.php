@@ -562,7 +562,7 @@ header('Expires: 0');
             flex-direction: column;
             justify-content: center; /* 垂直居中内容 */
         }
-                /* 原始单价悬浮提示：价格下方悬浮显示数据库原始单价 */
+                        /* 原始单价悬浮提示：价格下方虚线提示可悬浮，卡片 fixed 定位到 body（JS 控制） */
         .raw-price-hover {
             position: relative;
             display: inline-block;
@@ -571,11 +571,9 @@ header('Expires: 0');
             text-underline-offset: 3px;
         }
 
-        .raw-price-hover .raw-price-pop {
-            position: absolute;
-            bottom: calc(100% + 8px);
-            left: 50%;
-            transform: translate(-50%, 6px);
+        .raw-price-pop-fixed {
+            position: fixed;
+            z-index: 99999;
             background: #241b0d;
             color: #fff;
             padding: 6px 12px;
@@ -584,29 +582,11 @@ header('Expires: 0');
             font-weight: 600;
             box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(249, 158, 0, 0.3);
             white-space: nowrap;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.15s ease, transform 0.15s ease;
-            z-index: 100;
             pointer-events: none;
             font-style: normal;
+            display: none;
         }
 
-        .raw-price-hover .raw-price-pop::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 6px solid transparent;
-            border-top-color: #241b0d;
-        }
-
-        .raw-price-hover:hover .raw-price-pop {
-            opacity: 1;
-            visibility: visible;
-            transform: translate(-50%, 0);
-        }
     </style>
     </style>
 </head>
@@ -866,14 +846,50 @@ header('Expires: 0');
             document.getElementById('total-records').textContent = totalRecords;
         }
 
-        // 渲染价格：无差异时直接显示 formatted price；有差异时价格下方悬浮显示原始单价
+        // 渲染价格：无差异时直接显示 formatted price；有差异时标记悬浮（fixed 定位由全局事件处理）
         function renderPriceRawTip(item) {
             if (!item || !item.has_price_diff) return item.formatted_price;
             const raw = parseFloat(item.price_raw);
             if (isNaN(raw)) return item.formatted_price;
             const rawStr = String(parseFloat(raw.toFixed(6)));
-            return `<span class="raw-price-hover">${item.formatted_price}<span class="raw-price-pop">RM ${rawStr}</span></span>`;
+            return `<span class="raw-price-hover" data-raw-price="${rawStr}">${item.formatted_price}</span>`;
         }
+
+        // 悬浮提示：fixed 定位到 body，避免被表格滚动容器 overflow 裁剪或与表头 z-index 冲突
+        (function initRawPriceTooltip() {
+            document.addEventListener('mouseover', function (e) {
+                const el = e.target && e.target.closest ? e.target.closest('.raw-price-hover') : null;
+                if (!el) return;
+                const raw = el.getAttribute('data-raw-price');
+                if (!raw) return;
+                let tip = document.getElementById('raw-price-tooltip');
+                if (!tip) {
+                    tip = document.createElement('div');
+                    tip.id = 'raw-price-tooltip';
+                    tip.className = 'raw-price-pop-fixed';
+                    document.body.appendChild(tip);
+                }
+                tip.textContent = 'RM ' + raw;
+                tip.style.display = 'block';
+                const r = el.getBoundingClientRect();
+                const tipW = tip.offsetWidth;
+                const tipH = tip.offsetHeight;
+                let left = r.left + r.width / 2 - tipW / 2;
+                left = Math.max(4, Math.min(left, window.innerWidth - tipW - 4));
+                tip.style.left = left + 'px';
+                if (r.top - tipH - 8 >= 0) {
+                    tip.style.top = (r.top - tipH - 8) + 'px';
+                } else {
+                    tip.style.top = (r.bottom + 8) + 'px';
+                }
+            });
+            document.addEventListener('mouseout', function (e) {
+                if (e.target && e.target.closest && e.target.closest('.raw-price-hover')) {
+                    const tip = document.getElementById('raw-price-tooltip');
+                    if (tip) tip.style.display = 'none';
+                }
+            });
+        })();
 
         // 渲染库存表格
         function renderStockTable() {

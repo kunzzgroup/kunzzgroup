@@ -3245,7 +3245,7 @@ function buildStockRowHtml(record) {
                 </tr>`;
 }
 
-// 渲染价格：显示 2 位小数，若数据库原始单价有差异则悬浮显示原始价
+// 渲染价格：显示 2 位小数，若数据库原始单价有差异则标记悬浮（fixed 定位由全局事件处理）
 function renderPriceRawTip(record) {
     const raw = parseFloat(record.price_raw ?? record.price);
     if (isNaN(raw)) return formatCurrency(record.price || 0);
@@ -3253,8 +3253,44 @@ function renderPriceRawTip(record) {
     const rounded = Math.round(raw * 100) / 100;
     if (Math.abs(raw - rounded) < 0.0001) return dispStr;
     const rawStr = String(parseFloat(raw.toFixed(6)));
-    return `<span class="raw-price-hover">${dispStr}<span class="raw-price-pop">RM ${rawStr}</span></span>`;
+    return `<span class="raw-price-hover" data-raw-price="${rawStr}">${dispStr}</span>`;
 }
+
+// 悬浮提示：fixed 定位到 body，避免被表格滚动容器 overflow 裁剪或与表头 z-index 冲突
+(function initRawPriceTooltip() {
+    document.addEventListener('mouseover', function (e) {
+        const el = e.target && e.target.closest ? e.target.closest('.raw-price-hover') : null;
+        if (!el) return;
+        const raw = el.getAttribute('data-raw-price');
+        if (!raw) return;
+        let tip = document.getElementById('raw-price-tooltip');
+        if (!tip) {
+            tip = document.createElement('div');
+            tip.id = 'raw-price-tooltip';
+            tip.className = 'raw-price-pop-fixed';
+            document.body.appendChild(tip);
+        }
+        tip.textContent = 'RM ' + raw;
+        tip.style.display = 'block';
+        const r = el.getBoundingClientRect();
+        const tipW = tip.offsetWidth;
+        const tipH = tip.offsetHeight;
+        let left = r.left + r.width / 2 - tipW / 2;
+        left = Math.max(4, Math.min(left, window.innerWidth - tipW - 4));
+        tip.style.left = left + 'px';
+        if (r.top - tipH - 8 >= 0) {
+            tip.style.top = (r.top - tipH - 8) + 'px';
+        } else {
+            tip.style.top = (r.bottom + 8) + 'px';
+        }
+    });
+    document.addEventListener('mouseout', function (e) {
+        if (e.target && e.target.closest && e.target.closest('.raw-price-hover')) {
+            const tip = document.getElementById('raw-price-tooltip');
+            if (tip) tip.style.display = 'none';
+        }
+    });
+})();
 
 function renderStockTable(preserveScroll) {
     const tbody = document.getElementById('stock-tbody');
