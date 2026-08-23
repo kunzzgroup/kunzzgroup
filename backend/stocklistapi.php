@@ -124,6 +124,7 @@ function getStockSummary($system = 'central', $startDate = null, $endDate = null
                     'price' => floatval($formattedPrice),
                     'stock' => 0,
                     'total_price' => 0,
+                    'raw_prices' => [],
                     'type' => ''
                 ];
                 if ($isBranch) {
@@ -135,6 +136,7 @@ function getStockSummary($system = 'central', $startDate = null, $endDate = null
             }
             $merged[$key]['stock'] += $currentStock;
             $merged[$key]['total_price'] += $rowTotalPrice;
+            $merged[$key]['raw_prices'][] = $price;
         }
 
         uasort($merged, function ($a, $b) {
@@ -167,6 +169,16 @@ function getStockSummary($system = 'central', $startDate = null, $endDate = null
             $totalPrice = $v['total_price'];
             $totalValue += $totalPrice;
 
+            // 判断是否存在数据库原始单价与显示价不一致（用于前端悬浮提示）
+            $priceRaw = $v['raw_prices'][0] ?? $price;
+            $hasPriceDiff = false;
+            foreach (array_unique($v['raw_prices']) as $rp) {
+                if (abs($rp - $price) > 0.0001) {
+                    $hasPriceDiff = true;
+                    break;
+                }
+            }
+
             $item = [
                 'no' => $counter++,
                 'product_name' => $v['product_name'],
@@ -177,7 +189,9 @@ function getStockSummary($system = 'central', $startDate = null, $endDate = null
                 'total_price' => $totalPrice,
                 'formatted_stock' => number_format($currentStock, $stockDecimals),
                 'formatted_price' => $v['formatted_price'],
-                'formatted_total_price' => number_format($totalPrice, 2)
+                'formatted_total_price' => number_format($totalPrice, 2),
+                'price_raw' => $priceRaw,
+                'has_price_diff' => $hasPriceDiff
             ];
 
             if ($isBranch) {
