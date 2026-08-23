@@ -3171,7 +3171,7 @@ function buildStockRowHtml(record) {
                 `<div class="currency-display"><span class="currency-symbol">RM</span><select class="table-select price-select" id="price-select-${record.id}" onchange="updateField(${record.id}, 'price', this.value)" data-product-name="${record.product_name}" data-current-price="${record.price_raw ?? record.price}"><option value="">请选择价格</option>${(record.price_raw ?? record.price) !== '' && (record.price_raw ?? record.price) !== null ? `<option value="${record.price_raw ?? record.price}" selected>${parseFloat(record.price_raw ?? record.price).toFixed(3)}</option>` : ''}</select></div>` :
                 `<div class="currency-display"><span class="currency-symbol">RM</span><input type="number" class="currency-input-edit" value="${parseFloat(record.price_raw ?? (record.price || 0)) === 0 ? '' : formatCurrencyEdit(record.price_raw ?? record.price)}" min="0" step="0.00001" placeholder="0.00" onchange="updateField(${record.id}, 'price', this.value)"></div>`
             ) :
-            `<div class="currency-display"><span class="currency-symbol">RM</span><span class="currency-amount">${formatCurrency(record.price)}</span></div>`
+            `<div class="currency-display"><span class="currency-symbol">RM</span><span class="currency-amount">${renderPriceRawTip(record)}</span></div>`
         }
                     </td>
                     <td class="calculated-cell ${total < 0 ? 'negative-value negative-parentheses' : ''}">
@@ -3243,6 +3243,17 @@ function buildStockRowHtml(record) {
                         </span>
                     </td>
                 </tr>`;
+}
+
+// 渲染价格：显示 2 位小数，若数据库原始单价有差异则悬浮显示原始价
+function renderPriceRawTip(record) {
+    const raw = parseFloat(record.price_raw ?? record.price);
+    if (isNaN(raw)) return formatCurrency(record.price || 0);
+    const dispStr = formatCurrency(record.price || raw);
+    const rounded = Math.round(raw * 100) / 100;
+    if (Math.abs(raw - rounded) < 0.0001) return dispStr;
+    const rawStr = String(parseFloat(raw.toFixed(6)));
+    return `<span class="raw-price-hover">${dispStr}<span class="raw-price-pop">RM ${rawStr}</span></span>`;
 }
 
 function renderStockTable(preserveScroll) {

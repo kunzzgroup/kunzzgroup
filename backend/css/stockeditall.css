@@ -2300,3 +2300,48 @@
      -moz-appearance: textfield !important;
      appearance: textfield !important;
  }
+/* 原始单价悬浮提示：价格下方悬浮显示数据库原始单价 */
+.raw-price-hover {
+    position: relative;
+    display: inline-block;
+    cursor: default;
+    text-decoration: underline dotted rgba(249, 158, 0, 0.55);
+    text-underline-offset: 3px;
+}
+
+.raw-price-hover .raw-price-pop {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translate(-50%, 6px);
+    background: #241b0d;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(249, 158, 0, 0.3);
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    z-index: 100;
+    pointer-events: none;
+    font-style: normal;
+}
+
+.raw-price-hover .raw-price-pop::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #241b0d;
+}
+
+.raw-price-hover:hover .raw-price-pop {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+}

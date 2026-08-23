@@ -1802,6 +1802,17 @@ function restoreEditingRowsInputValues(editingValues) {
     }, 150); // 给表格渲染和价格选项加载更多时间
 }
 
+// 渲染价格：显示 2 位小数，若数据库原始单价有差异则悬浮显示原始价
+function renderPriceRawTip(record) {
+    const raw = parseFloat(record.price_raw ?? record.price);
+    if (isNaN(raw)) return formatCurrency(record.price || 0);
+    const dispStr = formatCurrency(record.price || raw);
+    const rounded = Math.round(raw * 100) / 100;
+    if (Math.abs(raw - rounded) < 0.0001) return dispStr;
+    const rawStr = String(parseFloat(raw.toFixed(6)));
+    return `<span class="raw-price-hover">${dispStr}<span class="raw-price-pop">RM ${rawStr}</span></span>`;
+}
+
 // 渲染库存表格
 function renderStockTable() {
     const tbody = document.getElementById('stock-tbody');
@@ -1898,7 +1909,7 @@ function renderStockTable() {
                 ) :
                 `<div class="currency-display">
                                 <span class="currency-symbol">RM</span>
-                                <span class="currency-amount">${formatCurrency(record.price)}</span>
+                                <span class="currency-amount">${renderPriceRawTip(record)}</span>
                             </div>`
             }
                     </td>
