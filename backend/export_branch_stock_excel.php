@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/permission_guard.php';
 requirePermission('resource', 'stock_inventory');
@@ -8,9 +10,6 @@ if (!headers_sent()) {
     header("Pragma: no-cache");
     header("Expires: Wed, 11 Jan 1984 05:00:00 GMT");
 }
-?>
-<?php
-declare(strict_types=1);
 
 // 设置内存和执行时间，以防数据量大
 ini_set('memory_limit', '512M');
