@@ -109,7 +109,7 @@ function getJ1StockSummary($startDate = null, $endDate = null) {
             $key = $productName . '|' . $codeNumber . '|' . $specification . '|' . $formattedPrice;
 
             $currentStock = floatval($row['current_stock']);
-            $rowTotalPrice = $currentStock * $price;
+            $rowTotalPrice = round($currentStock * $formattedPrice, 2);
 
             if (!isset($merged[$key])) {
                 $type = $row['type'] ?? '';
